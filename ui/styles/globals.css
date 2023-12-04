@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  /* Applied styles for common HTML tags */
+  h1 {
+    @apply text-base-content text-4xl py-5 font-bold lg:text-6xl;
+  }
+  h2 {
+    @apply text-base-content text-3xl pt-4 pb-3 m-0 font-medium lg:text-4xl;
+  }
+  h3 {
+    @apply text-base-content text-2xl pt-3 pb-2 m-0 font-medium lg:text-3xl;
+  }
+  h4 {
+    @apply text-base-content text-xl pt-2 pb-1 m-0 font-medium lg:text-2xl;
+  }
+  h5 {
+    @apply text-base-content text-lg py-1 m-0 font-medium lg:text-xl;
+  }
+  h6 {
+    @apply text-base-content text-base py-0 m-0 font-medium lg:text-lg;
+  }
+  p {
+    @apply text-base-content my-1 py-2 text-base leading-6;
+  }
+  .btn {
+    @apply normal-case;
+  }
+
+  /* Dropdowns */
+  .navdrop {
+    max-height: 80vh;
+  }
+
+  /* Keep spacing after headings between p and non-p consistent */
+  h1 + p,
+  h2 + p,
+  h3 + p,
+  h4 + p,
+  h5 + p,
+  h6 + p {
+    padding-top: 0;
+    margin-top: 0;
+  }
+}
+
 :root {
 }
 
@@ -9,4 +53,26 @@
   :root {
   }
 }
+
+/* Override DaisyUI button text color */
+.btn-info {
+  color: var(--btn-info-content);
+}
+.btn-success {
+  color: var(--btn-success-content);
+}
+.btn-warning {
+  color: var(--btn-warning-content);
+}
+.btn-error {
+  color: var(--btn-error-content);
+}
+
+/*
+ * Smooth scrolling
+ */
+html {
+  scroll-behavior: smooth;
+}
+
 
