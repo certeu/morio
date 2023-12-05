@@ -1,30 +1,31 @@
 // Components
-import Link from 'next/link'
+import { WebLink } from 'components/link.mjs'
+import { MorioLogo } from 'components/logos/morio.mjs'
+
+const spacer = <span className="px-3 text-neutral-content">|</span>
 
 export const Footer = () => (
   <footer className="bg-neutral">
     <div className="w-full sm:w-auto flex flex-col gap-2 items-center justify-center pt-12">
-      morio
-      <div className="mt-4">
-        morIO
-      </div>
-      <p className="text-neutral-content text-normal leading-5 text-center -mt-2 opacity-70 font-normal">
-        morio slogan
+      <MorioLogo className="h-16 text-secondary"/>
+      <p className="text-neutral-content leading-5 text-center -mt-2 font-thin opacity-70">
+        Connect{spacer}Stream{spacer}Observe
       </p>
     </div>
 
-    <div className="w-full max-w-xl text-center py-8 m-auto">
-      <ul className="text-neutral-content list inline font-medium text-center">
-          <li className="block lg:inline">
-            <Link href="/" className="p-3 underline decoration-2 hover:decoration-4">
-              morio link
-            </Link>
-          </li>
-      </ul>
-    </div>
-
-    <div className="w-full sm:w-auto flex flex-row flex-wrap gap-6 lg:gap-8 items-center justify-center px-8 py-14">
-      more io
+    <div className="w-full max-w-xl text-center pt-12 m-auto">
+      <p className="leading-5 text-center">
+        <a href="https://github.com/certeu/morio/" className="p-3 underline decoration-2 hover:decoration-4 text-secondary">
+          About CERT-EU
+        </a>
+        {spacer}
+        <a href="https://github.com/certeu/morio/" className="p-3 underline decoration-2 hover:decoration-4 text-secondary">
+          About MORIO
+        </a>
+      </p>
+      <p className="leading-5 text-center text-neutral-content mt-12 text-sm">
+        &copy; CERT-EU
+      </p>
     </div>
 
   </footer>

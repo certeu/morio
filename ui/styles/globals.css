@@ -2,25 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+}
+
+[data-theme='dark'] {
+  :root {
+  }
+}
+
 @layer components {
   /* Applied styles for common HTML tags */
   h1 {
     @apply text-base-content text-4xl py-5 font-bold lg:text-6xl;
   }
   h2 {
-    @apply text-base-content text-3xl pt-4 pb-3 m-0 font-medium lg:text-4xl;
+    @apply text-3xl pt-4 pb-3 m-0 font-medium lg:text-4xl;
   }
   h3 {
-    @apply text-base-content text-2xl pt-3 pb-2 m-0 font-medium lg:text-3xl;
+    @apply text-2xl pt-3 pb-2 m-0 font-medium lg:text-3xl;
   }
   h4 {
-    @apply text-base-content text-xl pt-2 pb-1 m-0 font-medium lg:text-2xl;
+    @apply text-xl pt-2 pb-1 m-0 font-medium lg:text-2xl;
   }
   h5 {
-    @apply text-base-content text-lg py-1 m-0 font-medium lg:text-xl;
+    @apply text-lg py-1 m-0 font-medium lg:text-xl;
   }
   h6 {
-    @apply text-base-content text-base py-0 m-0 font-medium lg:text-lg;
+    @apply text-base py-0 m-0 font-medium lg:text-lg;
   }
   p {
     @apply text-base-content my-1 py-2 text-base leading-6;
@@ -46,14 +54,6 @@
   }
 }
 
-:root {
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-  }
-}
-
 /* Override DaisyUI button text color */
 .btn-info {
   color: var(--btn-info-content);
@@ -68,6 +68,18 @@
   color: var(--btn-error-content);
 }
 
+/* Make title color stand out */
+h2, h3, h4, h5, h6 {
+  color: var(--morio-heading);
+}
+/* Link color per theme */
+a {
+  color: var(--morio-link);
+}
+a.dark {
+  color: var(--morio-accent1);
+}
+
 /*
  * Smooth scrolling
  */
@@ -75,4 +87,19 @@ html {
   scroll-behavior: smooth;
 }
 
+.animate-bounce-right {
+  animation: bounceright 1s 3;
+}
+
+@keyframes bounceright {
+  0%,
+  100% {
+    transform: translateX(-12.5%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateX(12.5%);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
 

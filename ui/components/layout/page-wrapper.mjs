@@ -61,11 +61,11 @@ export const PageWrapper = ({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <LoadingStatus />
-      <div className="flex flex-col justify-between min-h-screen bg-base-100 w-full">
-        {header && <Header {...{ theme, toggleTheme }} />}
-        <main>
+      <div className="flex flex-col justify-between bg-neutral w-full">
+        {header && <Header {...{ theme, toggleTheme, page }} />}
+        <main className={`bg-base-100 grow ${header ? 'mt-12' : ''}`}>
           {Layout
-            ? <Layout {...{ title }}>{children}</Layout>
+            ? <Layout {...{ title, page }}>{children}</Layout>
             : children
           }
         </main>

@@ -8,15 +8,14 @@ export const iconSize = 'h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12'
 export const NavButton = ({
   href,
   label,
-  color,
   children,
   onClick = false,
   extraClasses = '',
   active = false,
 }) => {
   const className =
-    'border-0 px-1 lg:px-3 xl:px-4 text-base py-3 md:py-4 text-center flex flex-col items-center 2xl:w-36 ' +
-    `hover:bg-${color} text-${color} hover:text-neutral grow xl:grow-0 relative ${extraClasses} ${
+    'dark border-0 px-1 lg:px-3 xl:px-4 text-base py-3 md:py-4 text-center flex flex-col items-center 2xl:w-36 ' +
+    `hover:bg-accent hover:text-accent-content grow xl:grow-0 relative capitalize ${extraClasses} ${
       active ? 'font-heavy' : ''
     }`
 
@@ -31,45 +30,34 @@ export const NavButton = ({
   )
 }
 
-export const NavSpacer = () => (
-  <div className="hidden xl:block text-base lg:text-4xl font-thin opacity-30 px-0.5 lg:px-2">|</div>
-)
-
 export const Header = ({
   theme,  // Name of the current theme (light or dark)
   toggleTheme, // Method to change the theme
 }) => (
   <header
     className={`
-    fixed bottom-0 left-0 md:relative
+    fixed top-0 left-0
     bg-neutral drop-shadow-xl w-full
-    border-t border-solid border-base-300 z-20
+    border-2 border-t-0 border-l-0 border-r-0 border-solid border-accent z-20
   `}
   >
-    <div className="m-auto md:px-8">
+    <div className="m-auto p-2 lg:py-0 md:px-8">
       <div className="p-0 flex flex-row gap-2 justify-between text-neutral-content items-center">
-        {/* Non-mobile content */}
-        <div className="hidden lg:flex lg:px-2 flex-row items-center justify-between xl:justify-center w-full">
-          <NavButton
+        <div className="flex lg:px-2 flex-row items-center justify-between w-full max-w-7xl mx-auto">
+          <Link
             href="/"
             label="Home"
+            className="text-secondary hover:text-accent py-0"
           >
-            <MorioLogo className="h-16 text-secondary"/>
+            <MorioLogo className="h-8" noLine/>
+          </Link>
+          <div className="grow pl-4">
+          <NavButton href="/typography" label="Guides" extraClasses="hidden lg:flex">
+            typography
           </NavButton>
-          <NavSpacer />
-          <NavButton href="/guides" label="Guides" extraClasses="hidden lg:flex">
-            alt
-          </NavButton>
-          <NavSpacer />
+          </div>
           <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
             {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
-          </NavButton>
-        </div>
-
-        {/* Mobile content */}
-        <div className="flex lg:hidden flex-row items-center justify-between w-full">
-          <NavButton href="/guides" label="Guides" extraClasses="hidden lg:flex">
-            mobile
           </NavButton>
         </div>
       </div>

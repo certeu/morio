@@ -108,6 +108,19 @@ export const theme = {
   // Text color on the error button
   '--btn-error-content': colors.neutral[50],
 
+  /*
+   * Title color
+   */
+  '--morio-heading': c.mid,
+  '--morio-link': c.accent2,
+  '--morio-primary': c.mid,
+  '--morio-light': '#8ecae6',
+  '--morio-mid': '#219ebc',
+  '--morio-dark': '#023047',
+  '--morio-accent1': '#ffb703',
+  '--morio-accent2': '#fb8500',
+  '--morio-bg': '#fff',
+
   /* CODE HIGHLIGHTING COLORS
    *
    * These are variables to style highlighted code blocks.

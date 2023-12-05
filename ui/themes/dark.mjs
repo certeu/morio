@@ -47,6 +47,15 @@ export const theme = {
   '--btn-warning-content': colors.neutral[900],
   '--btn-error-content': colors.neutral[900],
 
+  '--morio-heading': c.light,
+  '--morio-link': c.accent1,
+  '--morio-light': '#8ecae6',
+  '--morio-mid': '#219ebc',
+  '--morio-dark': '#023047',
+  '--morio-accent1': '#ffb703',
+  '--morio-accent2': '#fb8500',
+  '--morio-bg': '#001d2d',
+
   '--code-background-color': '#111',
   '--code-background-highlight-color': '#191919',
   '--code-border-color': colors.neutral['800'],

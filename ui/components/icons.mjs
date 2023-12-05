@@ -45,7 +45,25 @@ export const ChatIcon = (props) => (
 )
 
 /*
- * DarkThemeIcon - Looks like the moon
+ * ConfigurationIcon - Looks like the moon
+ */
+export const ConfigurationIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+  </IconWrapper>
+)
+
+/*
+ * ComponentIcon - Looks like a jigsaw puzzle piece
+ */
+export const ComponentIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M14.25 6.087c0-.355.186-.676.401-.959.221-.29.349-.634.349-1.003 0-1.036-1.007-1.875-2.25-1.875s-2.25.84-2.25 1.875c0 .369.128.713.349 1.003.215.283.401.604.401.959v0a.64.64 0 01-.657.643 48.39 48.39 0 01-4.163-.3c.186 1.613.293 3.25.315 4.907a.656.656 0 01-.658.663v0c-.355 0-.676-.186-.959-.401a1.647 1.647 0 00-1.003-.349c-1.036 0-1.875 1.007-1.875 2.25s.84 2.25 1.875 2.25c.369 0 .713-.128 1.003-.349.283-.215.604-.401.959-.401v0c.31 0 .555.26.532.57a48.039 48.039 0 01-.642 5.056c1.518.19 3.058.309 4.616.354a.64.64 0 00.657-.643v0c0-.355-.186-.676-.401-.959a1.647 1.647 0 01-.349-1.003c0-1.035 1.008-1.875 2.25-1.875 1.243 0 2.25.84 2.25 1.875 0 .369-.128.713-.349 1.003-.215.283-.4.604-.4.959v0c0 .333.277.599.61.58a48.1 48.1 0 005.427-.63 48.05 48.05 0 00.582-4.717.532.532 0 00-.533-.57v0c-.355 0-.676.186-.959.401-.29.221-.634.349-1.003.349-1.035 0-1.875-1.007-1.875-2.25s.84-2.25 1.875-2.25c.37 0 .713.128 1.003.349.283.215.604.401.96.401v0a.656.656 0 00.658-.663 48.422 48.422 0 00-.37-5.36c-1.886.342-3.81.574-5.766.689a.578.578 0 01-.61-.58v0z" />
+  </IconWrapper>
+)
+
+/*
+ * DarkThemeIcon - Looks like a mixing panel with sliders
  */
 export const DarkThemeIcon = (props) => (
   <IconWrapper {...props}>
@@ -68,6 +86,15 @@ export const FixmeIcon = (props) => (
 export const LightThemeIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+  </IconWrapper>
+)
+
+/*
+ * LeftIcon - Looks like a left-pointing chevron
+ */
+export const LeftIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M15 19l-7-7 7-7" />
   </IconWrapper>
 )
 
@@ -122,6 +149,25 @@ export const NoteIcon = (props) => (
 export const OkIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M4.5 12.75l6 6 9-13.5" />
+  </IconWrapper>
+)
+
+/*
+ * RightIcon - Looks like a chevron pointing right
+ */
+export const RightIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M9 5l7 7-7 7" />
+  </IconWrapper>
+)
+
+/*
+ * RightIcon - Looks like a chevron pointing right
+ */
+export const StatusIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M 4.9580501,20.694732 A 9.9588146,9.9588156 45 0 1 4.9523103,6.6165865 9.9588146,9.9588156 45 0 1 19.030446,6.5993628 9.9588146,9.9588156 45 0 1 19.059151,20.67748 Z" />
+    <path d="m 13.346899,14.905658 c 0.185287,0.691503 -0.22474,1.402361 -0.916092,1.588212 -0.691356,0.185836 -1.402539,-0.223628 -1.588938,-0.914833 -0.186401,-0.691204 0.222481,-1.402721 0.913533,-1.589686 l 4.660195,-6.2056598 z" />
   </IconWrapper>
 )
 

@@ -7,18 +7,9 @@ export const LayoutWrapper = ({
   footer = true,
   slug,
 }) => (
-  <div
-    className={`
-  flex flex-col justify-between
-  min-h-screen
-  bg-base-100
-  `}
-  >
+  <div className="flex flex-col justify-between min-h-screen bg-base-100">
     {header && <Header slug={slug} />}
-    <main
-      className={`grow transition-margin duration-300 ease-in-out
-      }`}
-    >
+    <mainclassName="grow transition-margin duration-300 ease-in-out">
       {children}
     </main>
     {footer && <Footer />}

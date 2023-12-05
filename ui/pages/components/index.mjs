@@ -1,6 +1,6 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 
-const HomePage = (props) => {
+const ComponentsPage = (props) => {
   return (
     <PageWrapper {...props}>
       <p>This is a work-in-progress</p>
@@ -8,11 +8,11 @@ const HomePage = (props) => {
   )
 }
 
-export default HomePage
+export default ComponentsPage
 
 export const getStaticProps = () => ({
   props: {
-    title: "Welcome to morio",
-    page: ['']
+    title: "Components",
+    page: ['components']
   }
 })
