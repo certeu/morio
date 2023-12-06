@@ -1,0 +1,29 @@
+{
+  "name": "@morio/api",
+  "version": "0.1.0",
+  "description": "MORIO REST API",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rimraf dist",
+    "dev": "nodemon src/index.mjs",
+    "prettier": "npx prettier --write 'src/*.mjs' 'tests/*.mjs'",
+    "test": "npx mocha tests/index.mjs"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "joi": "^17.11.0",
+    "joi-to-swagger": "^6.2.0",
+    "js-yaml": "^4.1.0",
+    "lodash.get": "^4.4.2",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "chai-http": "^4.4.0",
+    "mocha": "^10.2.0",
+    "nodemon": "^3.0.2"
+  }
+}
