@@ -70,7 +70,15 @@ export const responseSchema = {
       public: Joi.string(),
       private: Joi.string(),
     })
-  }
+  },
+  status: Joi.object({
+    name: Joi.string(),
+    about: Joi.string(),
+    version: Joi.string(),
+    uptime: Joi.string(),
+    uptime_seconds: Joi.number(),
+    setup: Joi.bool()
+  })
 }
 
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })

@@ -1,12 +1,12 @@
 /*
  * Import the Setup controller
  */
-import { SetupController } from '../controllers/setup.mjs'
+import { Controller } from '../controllers/setup.mjs'
 
 /*
  * Instantiate the controller
  */
-const Setup = new SetupController()
+const Setup = new Controller()
 
 /**
  * This method adds the setup routes

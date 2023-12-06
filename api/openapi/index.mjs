@@ -1,5 +1,6 @@
 import pkg from '../package.json' assert { type: 'json' }
 import { paths as setup } from './setup.mjs'
+import { paths as status } from './status.mjs'
 
 const description = `
 ## What am I looking at?  🤔
@@ -33,6 +34,10 @@ export const openapi = {
     {
       name: 'Setup',
       description: 'Initial setup of a MORIO instance or cluster'
+    },
+    {
+      name: 'Status',
+      description: 'Monitor a MORIO instance or cluster'
     }
   ],
 
@@ -40,5 +45,6 @@ export const openapi = {
   },
   paths: {
     ...setup,
+    ...status,
   },
 }

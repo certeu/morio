@@ -39,6 +39,7 @@ console.log()
       version: pkg.version,
       setup: false,
       setup_token: 'mst.'+randomString(32),
+      start_time: Date.now(),
     }
   }
 }

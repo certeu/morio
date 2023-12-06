@@ -69,8 +69,8 @@ app.get('/', async (req, res) => res.send({
   about: config.about,
   version: config.version,
   setup: config.setup,
-  status: "/api/status",
-  docs: "/api/docs",
+  status: "/status",
+  docs: "/docs",
 }))
 
 /*

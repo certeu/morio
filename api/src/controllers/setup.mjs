@@ -10,7 +10,7 @@ import { generateJwtKey, generateKeyPair, randomString } from '../lib/crypto.mjs
  *
  * @returns {object} Controller - The setup controller object
  */
-export function SetupController() {
+export function Controller() {
 }
 
 
@@ -23,7 +23,7 @@ export function SetupController() {
  * @param {object} res - The response object from Express
  * @param {object} tools - An object holding various tools & config
  */
-SetupController.prototype.setup = async (req, res, tools) => {
+Controller.prototype.setup = async (req, res, tools) => {
 
   /*
    * Validate MORIO needs to be setup
@@ -49,7 +49,7 @@ SetupController.prototype.setup = async (req, res, tools) => {
  * @param {object} res - The response object from Express
  * @param {object} tools - An object holding various tools & config
  */
-SetupController.prototype.getJwtKey = async (req, res, tools) => {
+Controller.prototype.getJwtKey = async (req, res, tools) => {
 
   /*
    * Validate MORIO needs to be setup
@@ -88,7 +88,7 @@ SetupController.prototype.getJwtKey = async (req, res, tools) => {
  * @param {object} res - The response object from Express
  * @param {object} tools - An object holding various tools & config
  */
-SetupController.prototype.getPassword = async (req, res, tools) => {
+Controller.prototype.getPassword = async (req, res, tools) => {
 
   /*
    * Validate MORIO needs to be setup
@@ -122,7 +122,7 @@ SetupController.prototype.getPassword = async (req, res, tools) => {
  * @param {object} res - The response object from Express
  * @param {object} tools - An object holding various tools & config
  */
-SetupController.prototype.getKeyPair = async (req, res, tools) => {
+Controller.prototype.getKeyPair = async (req, res, tools) => {
 
   /*
    * Validate MORIO needs to be setup

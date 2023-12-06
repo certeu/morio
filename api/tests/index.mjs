@@ -1,7 +1,9 @@
 import { setup } from './shared.mjs'
 import { tests as setupTests } from './setup.mjs'
+import { tests as statusTests } from './status.mjs'
 
 const runTests = async (props) => {
+  await statusTests(props)
   await setupTests(props)
 }
 
