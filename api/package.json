@@ -18,12 +18,14 @@
     "lodash.get": "^4.4.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "pino": "^8.16.2",
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-http": "^4.4.0",
     "mocha": "^10.2.0",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "pino-pretty": "^10.2.3"
   }
 }

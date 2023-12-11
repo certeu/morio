@@ -15,15 +15,15 @@ import yaml from 'js-yaml'
  */
 export const readFile = async (
   filePath, // The (relative) path to the file
-  onError, // String to log on error
+  onError, // Method to run on error
 ) => {
   let content, file
   try {
     file = path.resolve(filePath)
     content = await fs.promises.readFile(file, 'utf-8')
   } catch (err) {
-    if (onError) console.log(onError)
-    else console.log('Failed to read file:', file, err)
+    if (onError) onError()
+    else log.warn(err, `Failed to read file: ${file}`, err)
 
     return false
   }
@@ -41,14 +41,14 @@ export const readFile = async (
  */
 export const readYamlFile = async (
   filePath, // The (relative) path to the file
-  onError, // String to log on error
+  onError, // Method to run on error
 ) => {
   let content
   try {
     content = await readFile(filePath, onError)
     content = yaml.load(content)
   } catch (err) {
-    console.log('Failed to read/parse YAMLfile:', filePath, err)
+    log.warn(err, `Failed to read/parse YAMLfile: ${filePath}`)
 
     return false
   }
@@ -73,7 +73,7 @@ export const writeFile = async (
     file = path.resolve(filePath)
     result = await fs.promises.writeFile(file, data)
   } catch (err) {
-    console.log('Failed to write file:', file, err)
+    log.warn(err, `Failed to write file: ${file}`)
 
     return false
   }

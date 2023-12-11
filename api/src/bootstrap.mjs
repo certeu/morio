@@ -1,6 +1,7 @@
 import pkg from '../package.json' assert { type: 'json' }
 import { randomString } from './lib/crypto.mjs'
 import { readYamlFile } from './lib/fs.mjs'
+import { logger } from './lib/logger.mjs'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -8,18 +9,13 @@ import { readYamlFile } from './lib/fs.mjs'
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
 export const bootstrapConfiguration = async () => {
+
   /*
-   * What's man without his brand?
+   * First of all, setup the logger so we can log
    */
-console.log()
-console.log()
-console.log(`                🤓`)
-console.log(`  _ __  ___ _ _ _ __   `)
-console.log(` | '  \\/ _ \\ '_| / _ \\  `)
-console.log(` |_|_|_\\___/_| |_\\___/  `)
-console.log(`           by CERT-EU   `)
-console.log()
-console.log()
+  const log_level = process.env.MORIO_LOG_LEVEL || 'debug'
+  const log = logger(log_level)
+  log.debug('Logger ready')
 
   /*
    * Has MORIO been setup?
@@ -27,19 +23,22 @@ console.log()
    */
   const localConfig = await readYamlFile(
     'config/shared/morio.yaml',
-    '🟠  No local MORIO configuration found'
+    () => log.info('No local morio configuration found')
   )
 
   if (!localConfig) {
-    console.log('🔵  MORIO is not set up (yet) - Starting API with an ephemeral configuration to allow setup')
+    log.info('Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup')
 
     return {
-      name: pkg.name,
-      about: pkg.description,
-      version: pkg.version,
-      setup: false,
-      setup_token: 'mst.'+randomString(32),
-      start_time: Date.now(),
+      config: {
+        about: pkg.description,
+        name: pkg.name,
+        setup: false,
+        setup_token: 'mst.'+randomString(32),
+        start_time: Date.now(),
+        version: pkg.version,
+      },
+      log
     }
   }
 }
