@@ -19,7 +19,7 @@ const c = {
   dark: '#023047',
   accent1: '#ffb703',
   accent2: '#fb8500',
-  bg: '#fff',
+  bg: '#ffffff',
 }
 
 /*
@@ -56,7 +56,6 @@ export const theme = {
   'base-300': colors.neutral['300'],
   // base-content: The default text color for a page
   'base-content': colors.neutral['700'],
-
   // primary: The main brand color and color of the primary button
   primary: c.mid,
   // primary-content: The text color on a primary button

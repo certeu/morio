@@ -12,6 +12,7 @@ const c = {
   accent1: '#ffb703',
   accent2: '#fb8500',
   bg: '#001d2d',
+  white: '#ffffff',
 }
 
 export const theme = {
