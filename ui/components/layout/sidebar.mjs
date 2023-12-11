@@ -85,6 +85,7 @@ export const Sidebar = ({ page }) => {
           </NavButton>
           {Object.keys(links).map(link => (
             <NavButton
+              key={link}
               href={`/${link}`}
               label={links[link]}
               active={page[0] === link}
