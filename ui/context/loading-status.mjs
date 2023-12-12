@@ -14,6 +14,14 @@ const timeout = 2
 
 /*
  * A React component to display the loading status
+ *
+ * You call it with an array with the folllowing elements:
+ * 0: set to true to display loading status
+ * 1: The message to display
+ * 2: Set to true to let the loading status auto-fade
+ * 3: Set to true for success, false for error.
+ *
+ * Example: setLoadingStatus([true, 'It worked', true, true])
  */
 const LoadingStatus = ({ loadingStatus }) => {
 
@@ -36,7 +44,7 @@ const LoadingStatus = ({ loadingStatus }) => {
 
   if (!loadingStatus[0]) return null
 
-  let color = 'secondary'
+  let color = 'info'
   let icon = <Spinner />
   if (loadingStatus[2]) {
     color = loadingStatus[3] ? 'success' : 'error'
@@ -48,11 +56,11 @@ const LoadingStatus = ({ loadingStatus }) => {
   }
 
   return (
-    <div className="fixed top-0 md:top-28 left-0 w-full z-30 md:px-4 md:mx-auto">
+    <div className="fixed bottom-0 md:bottom-4 left-0 w-full z-30 md:px-4 md:mx-auto">
       <div
         className={`w-full md:max-w-2xl m-auto bg-${color} flex flex-row items-center gap-4 p-4 px-4 ${fade}
-        transition-opacity delay-[${timeout * 1000 - 400}ms] duration-300
-        md:rounded-lg shadow text-secondary-content text-lg lg:text-xl font-medium md:bg-opacity-90`}
+        transition-opacity delay-[${timeout * 1000 - 400}ms] duration-300 text-${color}-content
+        md:rounded-lg shadow text-lg lg:text-xl font-medium md:bg-opacity-90`}
       >
         <span className="shrink-0">{icon}</span>
         {loadingStatus[1]}

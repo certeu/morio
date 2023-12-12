@@ -52,8 +52,8 @@ export const Header = ({
             <MorioLogo className="h-8" noLine/>
           </Link>
           <div className="grow pl-4">
-          <NavButton href="/typography" label="Guides" extraClasses="hidden lg:flex">
-            typography
+          <NavButton href="/support" label="Support" extraClasses="hidden lg:flex">
+            support
           </NavButton>
           </div>
           <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">

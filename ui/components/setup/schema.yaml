@@ -1,0 +1,49 @@
+# First thing to do is figure out how many nodes we should deploy
+# init is a special key that serves as the entry point to the configuration wizard
+init:
+  # Typically the key is used as configKey, but in this case, it's specified explicitly
+  # because the 'init' key has a special purpose.
+  # This configKey value (or the key for other blocks) determines where the data will be
+  # stored in the configuration (in this case under morio.node_count)
+  configKey: morio.node_count
+  next: morio.nodes
+  type: list
+  label: Stand-Alone vs Clustered
+  about: |
+    Morio supports both __stand-alone__ and __clustered__ deployments.
+
+    A stand-alone deployment is a good way to get started as there are less moving parts and its configuration is simpler.
+
+    For high availability — or to process a large amount of data — choose a clustered setup with 3 or more nodes.
+  input:
+    - val: 1
+      label: Stand-alone Morio instance
+      about: Choose this to deploy a single Morio instance. Suitable for smnall to medium sized deployments, and a good choice to start with. You can always grow your setup later.
+    - val: 3
+      label: Morio cluster with 3 nodes
+      about: Choose this to deploy a Morio cluster with 3 nodes. Suitable when high availibility is required, or the amount of data to process is too great for a single node.
+    - val: 
+        type: select
+        values: [5,7,9,11,13,15]
+        labels: 
+          - 5 nodes
+          - 7 nodes
+          - 9 nodes
+          - 11 nodes
+          - 13 nodes
+          - 15 nodes
+        label: Cluster nodes
+        about: Choose the amount of nodes in the Morio cluster
+      label: Morio cluster with more than 3 nodes
+      about: Choose this to deploy a Morio cluster with higher number of nodes. Suitable when scaling horizontally is required to increase capacity.
+
+# Next thing we need is the names of the nodes
+morio.nodes:
+  type: strings
+  count: 'config:morio.node_count'
+  label: Morio node names
+  labels: "Node {{ INDEX_PLUS_ONE }}"
+  labelsTR: "Enter the fully qualified domain name of node {{ INDEX_PLUS_ONE }}"
+  about: Each Morio nodes needs a name that will resolve in DNS (an FQDN)
+  placeholder: host.my.domain.com
+  next: MORIO_VALIDATE_CONFIG

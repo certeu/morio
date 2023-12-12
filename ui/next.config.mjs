@@ -24,6 +24,14 @@ const nextConfig = {
     config.resolve.alias.pages = path.resolve(`./pages`)
 
     /*
+     * Add support for YAML imports
+     */
+    config.module.rules.push({
+      test: /\.ya?ml$/,
+      use: 'yaml-loader'
+    })
+
+    /*
      * We need to return the webpack config here
      */
     return config

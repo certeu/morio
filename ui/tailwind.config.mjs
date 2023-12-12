@@ -15,6 +15,7 @@ const tailwindConfig = {
     './pages/**/*.mjs',
     './components/**.mjs',
     './components/**/*.mjs',
+    './context/**.mjs',
     './tailwind-force.html',
   ],
   daisyui: {

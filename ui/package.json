@@ -9,10 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "highlight.js": "^11.9.0",
+    "is-valid-hostname": "^1.0.2",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
+    "lodash.unset": "^4.5.2",
+    "mustache": "^4.2.0",
     "next": "14.0.3",
     "postcss-for": "^2.1.1",
     "react": "^18",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18",
+    "react-markdown": "^9.0.1",
     "use-local-storage-state": "^19.1.0"
   },
   "devDependencies": {
@@ -21,6 +29,7 @@
     "eslint": "^8",
     "eslint-config-next": "14.0.3",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "yaml-loader": "^0.8.0"
   }
 }

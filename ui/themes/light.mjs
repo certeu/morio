@@ -89,22 +89,26 @@ export const theme = {
   // and should work with the default text color
   info: colors.sky['600'],
   // Text color on the info button
+  'info-content': colors.neutral[50],
   '--btn-info-content': colors.neutral[50],
   // success: Used rarely, but if it is it's in notifications indicating success
   // Typically some shade of green
   success: colors.green['600'],
   // Text color on the success button
+  'success-content': colors.neutral[50],
   '--btn-success-content': colors.neutral[50],
   // warning: We don't do warnings, but this is used for the tabs under code blocks
   // and a couple of other UI elements.
   warning: colors.orange['500'],
   // Text color on the warning button
+  'warning-content': colors.neutral[50],
   '--btn-warning-content': colors.neutral[50],
   // error: Used rarely, but if it is it's in notifications indicating success
   // or the danger button
   // Typically some shade of red
   error: colors.red['600'],
   // Text color on the error button
+  'error-content': colors.neutral[50],
   '--btn-error-content': colors.neutral[50],
 
   /*
