@@ -1,6 +1,6 @@
 import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
-import { settings } from '../src/settings.mjs'
+import { fromEnv } from '../src/lib/env.mjs'
 
 const shared = {
   tags: [ 'Setup' ]
@@ -170,23 +170,22 @@ export const paths = {
         </p>
         <p>The generated key pair will have the following properties:</p>
         <ul>
-          <li>Length: <b>${settings.key_pair.length}</b></li>
-          <li>Algorithm: <b>${settings.key_pair.alg.toUpperCase()}</b></li>
+          <li>Length: <b>${fromEnv('MORIO_CRYPTO_KEY_LEN')}</b></li>
+          <li>Algorithm: <b>${fromEnv('MORIO_CRYPTO_KEY_ALG').toUpperCase()}</b></li>
           <li>Public key:
             <ul>
-              <li>Type: <b>${settings.key_pair.public.type.toUpperCase()}</b></li>
-              <li>Format: <b>${settings.key_pair.public.format.toUpperCase()}</b></li>
+              <li>Type: <b>${fromEnv('MORIO_CRYPTO_PUB_KEY_TYPE').toUpperCase()}</b></li>
+              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PUB_KEY_FORMAT').toUpperCase()}</b></li>
             </ul>
           </li>
           <li>Private key:
             <ul>
-              <li>Type: <b>${settings.key_pair.private.type.toUpperCase()}</b></li>
-              <li>Format: <b>${settings.key_pair.private.format.toUpperCase()}</b></li>
-              <li>Cipher: <b>${settings.key_pair.private.cipher.toUpperCase()}</b></li>
+              <li>Type: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_TYPE').toUpperCase()}</b></li>
+              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_FORMAT').toUpperCase()}</b></li>
+              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_CIPHER').toUpperCase()}</b></li>
             </ul>
           </li>
         </ul>
-        <p>For compatibility reasons, you cannot change these settings.</p>
       `,
       ...request(`Post <code>passphrase</code> to encrypt the private key.
         <br>

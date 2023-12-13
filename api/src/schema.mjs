@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { settings } from './settings.mjs'
+import { fromEnv } from './lib/env.mjs'
 
 const shared = {
   setup: {
@@ -18,9 +18,9 @@ export const requestSchema = {
   setup: {
     morio: Joi.object({
       nodes: Joi.array()
-        .items(Joi.string().min(1).max(128))
-        .min(settings.nodes.min)
-        .max(settings.nodes.max)
+        .items(Joi.string())
+        .min(fromEnv('MORIO_NODES_MIN'))
+        .max(fromEnv('MORIO_NODES_MAX'))
         .unique()
         .required()
     }),
@@ -33,9 +33,9 @@ export const requestSchema = {
        * Bytes controls the length of the generated password
        */
       bytes: Joi.number()
-        .min(settings.passphrase.min)
-        .max(settings.passphrase.max)
-        .default(settings.passphrase.dflt)
+        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
+        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
+        .default(fromEnv('MORIO_CRYPTO_SECRET_DFLT'))
       ,
     }),
     keypair: Joi.object({
@@ -44,10 +44,15 @@ export const requestSchema = {
        * Passphrase is used to encrypt the private key
        */
       passphrase: Joi.string()
-        .min(settings.passphrase.min)
-        .max(settings.passphrase.max)
+        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
+        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
         .required()
       ,
+    })
+  },
+  validate: {
+    configuration: Joi.object({
+      config: Joi.object()
     })
   }
 }
@@ -81,5 +86,15 @@ export const responseSchema = {
   })
 }
 
+/*
+ * This describes the schema of error responses
+ */
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
+
+/*
+ * This describes the schema of the morio configuration
+ */
+export const morioSchema = Joi.object({
+  node_count: Joi.number().integer().positive().min(1).max(15)
+})
 

@@ -6,6 +6,11 @@ import path from 'path'
 import yaml from 'js-yaml'
 
 /**
+ * The morio root folder
+ */
+export const root = path.resolve(path.basename(import.meta.url), '..', '..')
+
+/**
  * Reads a file from disk
  *
  * @param {string} (relative) path to the file to read
@@ -19,15 +24,13 @@ export const readFile = async (
 ) => {
   let content, file
   try {
-    file = path.resolve(filePath)
+    file = path.resolve(root, filePath)
     content = await fs.promises.readFile(file, 'utf-8')
   } catch (err) {
-    if (onError) onError()
-    else log.warn(err, `Failed to read file: ${file}`, err)
+    if (onError) onError(err)
 
     return false
   }
-
   return content
 }
 
@@ -48,7 +51,7 @@ export const readYamlFile = async (
     content = await readFile(filePath, onError)
     content = yaml.load(content)
   } catch (err) {
-    log.warn(err, `Failed to read/parse YAMLfile: ${filePath}`)
+    if (onError) onError(err)
 
     return false
   }
@@ -70,7 +73,7 @@ export const writeFile = async (
 ) => {
   let result, file
   try {
-    file = path.resolve(filePath)
+    file = path.resolve(root, filePath)
     result = await fs.promises.writeFile(file, data)
   } catch (err) {
     log.warn(err, `Failed to write file: ${file}`)

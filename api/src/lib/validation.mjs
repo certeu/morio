@@ -33,6 +33,33 @@ export const validate = async (targetPath, input) => {
 }
 
 /**
+ * Validates MORIO configuration
+ *
+ * This will not catch all problems, but it should at least catch some common
+ * configuration issues, in particular for people writing their own config.
+ *
+ * @param {object} newConfig - The configuration to validate
+ * @param {object} currentConfig - The current running config
+ * @retrun {object} report - An object detailing the results of the validation
+ */
+export const validateConfiguration = async (newConfig, currentConfig) => {
+  const report = {
+    valid: true,
+    deloyable: true,
+    errors: [],
+    warnings: [],
+  }
+
+  /*
+   * node_count should be an odd integer
+   */
+
+
+
+  return report
+}
+
+/**
  * Helper method to validate the setup_token
  *
  * @param {string} token - The token to validate
@@ -48,4 +75,6 @@ export const setupTokenValid = (token, config) => (config.setup_token && token =
  * @return {bool|function} result - True of MORIO is not setup, a method that will return the error if it does not
  */
 export const setupPossible = (config) => (typeof config.setup_token !== 'undefined')
+
+
 

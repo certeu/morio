@@ -2,6 +2,7 @@ import pkg from '../package.json' assert { type: 'json' }
 import { randomString } from './lib/crypto.mjs'
 import { readYamlFile } from './lib/fs.mjs'
 import { logger } from './lib/logger.mjs'
+import { fromEnv } from './lib/env.mjs'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -11,11 +12,10 @@ import { logger } from './lib/logger.mjs'
 export const bootstrapConfiguration = async () => {
 
   /*
-   * First of all, setup the logger so we can log
+   * First setup the logger, so we can log
    */
-  const log_level = process.env.MORIO_LOG_LEVEL || 'debug'
+  const log_level = fromEnv('MORIO_LOG_LEVEL')
   const log = logger(log_level)
-  log.debug('Logger ready')
 
   /*
    * Has MORIO been setup?
@@ -23,22 +23,33 @@ export const bootstrapConfiguration = async () => {
    */
   const localConfig = await readYamlFile(
     'config/shared/morio.yaml',
-    () => log.info('No local morio configuration found')
+    (err) => log.info(err, 'No local morio configuration found')
   )
 
-  if (!localConfig) {
-    log.info('Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup')
+  if (!localConfig) log.info(
+    'Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup'
+  )
 
-    return {
-      config: {
-        about: pkg.description,
-        name: pkg.name,
-        setup: false,
-        setup_token: 'mst.'+randomString(32),
-        start_time: Date.now(),
-        version: pkg.version,
-      },
-      log
-    }
+  /*
+   * Let's also load the defaults, they are used in various places
+   */
+  const configDefaults = await readYamlFile(
+    'config/shared/morio-defaults.yaml',
+    (err) => log.warn(err, 'No local morio defaults file found')
+  )
+
+  if (configDefaults) log.debug('Loaded morio defaults file')
+
+  return {
+    config: {
+      about: pkg.description,
+      name: pkg.name,
+      setup: false,
+      setup_token: 'mst.'+randomString(32),
+      start_time: Date.now(),
+      version: pkg.version,
+    },
+    defaults: configDefaults,
+    log,
   }
 }

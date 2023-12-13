@@ -1,0 +1,29 @@
+#
+# This file holds Morio defaults
+# Typically, these can be overwritten by setting an environment variable
+# with the same name as used here
+#
+
+# Crypto: Everything related to encryption/hashing/secrets
+MORIO_CRYPTO_SECRET_MIN: 8 # Minimum secret length (in bytes)
+MORIO_CRYPTO_SECRET_MAX: 64 # Maximum secret length (in bytes)
+MORIO_CRYPTO_SECRET_DFLT: 16 # Default secret length (in bytes)
+MORIO_CRYPTO_KEY_LEN: 4096 # Key length
+MORIO_CRYPTO_KEY_ALG: rsa # Key algorithm
+MORIO_CRYPTO_PUB_KEY_TYPE: spki # Public key type
+MORIO_CRYPTO_PUB_KEY_FORMAT: pem # Public key format
+MORIO_CRYPTO_PRIV_KEY_TYPE: pkcs8 # Private key type
+MORIO_CRYPTO_PRIV_KEY_FORMAT: pem # Private key format
+MORIO_CRYPTO_PRIV_KEY_CIPHER: aes-256-cbc # Private key cipher
+
+# Log : Everything related to logs
+MORIO_LOG_LEVEL: debug # Log level 
+
+# Nodes: Everything related to node count (in clusters)
+MORIO_NODES_MIN: 1 # Minimum number of Morio nodes
+MORIO_NODES_MAX: 15 # Maximum number of Morio nodes
+MORIO_NODES_VALID: [1,3,5,7,9,11,13,15] # These are amounts of nodes we support
+
+# Port: Everything related to port numbers
+MORIO_PORT_API: 3000 # Run api on this port
+MORIO_PORT_UI: 3010 # Run ui on this port

@@ -1,5 +1,5 @@
 import { randomBytes, generateKeyPairSync } from 'crypto'
-import { settings } from '../settings.mjs'
+import { fromEnv } from './env.mjs'
 
 /**
  * Generates a random string
@@ -25,12 +25,17 @@ export const generateJwtKey = () => randomString(64)
  * @return {object} - An object with `publicKey` and `privateKey` properties
  */
 export const generateKeyPair = (passphrase) => generateKeyPairSync(
-  settings.key_pair.alg,
+  fromEnv('MORIO_CRYPTO_KEY_ALG'),
   {
-    modulusLength: settings.key_pair.length,
-    publicKeyEncoding: settings.key_pair.public,
+    modulusLength: fromEnv('MORIO_CRYPTO_KEY_LEN'),
+    publicKeyEncoding: {
+      type: fromEnv('MORIO_CRYPTO_PUB_KEY_TYPE'),
+      format: fromEnv('MORIO_CRYPTO_PUB_KEY_FORMAT'),
+    },
     privateKeyEncoding: {
-      ...settings.key_pair.private,
+      type: fromEnv('MORIO_CRYPTO_PRIV_KEY_TYPE'),
+      format: fromEnv('MORIO_CRYPTO_PRIV_KEY_FORMAT'),
+      cipher: fromEnv('MORIO_CRYPTO_PRIV_KEY_CIPHER'),
       passphrase: passphrase.toString(),
     },
   }
