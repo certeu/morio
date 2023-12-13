@@ -1,11 +1,8 @@
 // Dependencies
 import express from 'express'
-import passport from 'passport'
 import { fromEnv } from '@morio/lib/env'
 // Routes
 import { routes } from './routes/index.mjs'
-// Middleware
-import { loadPassportMiddleware } from './middleware.mjs'
 // Bootstrap configuration
 import { bootstrapConfiguration } from './bootstrap.mjs'
 // Swagger
@@ -17,10 +14,7 @@ import { openapi } from '../openapi/index.mjs'
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = {
-  passport, // The passport authentication middleware
-  ...(await bootstrapConfiguration())
-}
+const tools = await bootstrapConfiguration()
 
 /*
  * Instantiate the Express app
@@ -41,13 +35,6 @@ app.use(express.json({ limit: '1mb' }))
 tools.log.debug('Adding openapi documentation endpoints')
 const docs = swaggerUi.setup(openapi)
 app.use('/docs', swaggerUi.serve, docs)
-
-
-/*
- * Load the Passport middleware
- */
-tools.log.debug('Loading passport middleware')
-loadPassportMiddleware(passport, tools)
 
 /*
  * Load the API routes
@@ -73,8 +60,8 @@ app.get('/', async (req, res) => res.send({
 /*
  * Start listening for requests
  */
-app.listen(fromEnv('MORIO_PORT_API'), (err) => {
+app.listen(fromEnv('MORIO_PORT_SAM'), (err) => {
   if (err) log.error(err, 'An error occured')
-  tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_PORT_API')}`)
+  tools.log.info(`Morio sam ready - listening on http://localhost:${fromEnv('MORIO_PORT_SAM')}`)
 })
 

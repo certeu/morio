@@ -1,7 +1,7 @@
 {
-  "name": "@morio/api",
+  "name": "@morio/sam",
   "version": "0.1.0",
-  "description": "Morio Management API (API)",
+  "description": "Morio System Actions Manager (SAM)",
   "private": true,
   "scripts": {
     "build": "node build.mjs",
@@ -11,7 +11,7 @@
     "test": "npx mocha tests/index.mjs"
   },
   "imports": {
-    "#lib/*": "./src/lib/*.mjs"
+    "#lib/*": "../api/src/lib/*.mjs"
   },
   "dependencies": {
     "express": "^4.18.2",

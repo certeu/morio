@@ -1,4 +1,5 @@
-import { requestSchema as schema } from '../schema.mjs'
+import { requestSchema as schema, morioSchema  } from '../schema.mjs'
+import { resolveHost, testUrl } from '@morio/lib/network'
 import get from 'lodash.get'
 
 /*
@@ -39,22 +40,85 @@ export const validate = async (targetPath, input) => {
  * configuration issues, in particular for people writing their own config.
  *
  * @param {object} newConfig - The configuration to validate
- * @param {object} currentConfig - The current running config
+ * @param {object} tools - The various tools and current config from the controller
  * @retrun {object} report - An object detailing the results of the validation
  */
-export const validateConfiguration = async (newConfig, currentConfig) => {
+export const validateConfiguration = async (newConfig, tools) => {
+
+  /*
+   * Set up the report skeleton that we will return
+   */
   const report = {
-    valid: true,
-    deloyable: true,
+    valid: false,
+    deployable: false,
     errors: [],
     warnings: [],
+    info: [],
   }
 
   /*
-   * node_count should be an odd integer
+   * We define this here to keep things DRY
    */
+  const abort = () => report.warnings.push(`Validation was terminated before completion due to errors`)
 
+  /*
+   * Validate config against the config schema
+   */
+  let config
+  try {
+    config = await morioSchema.validateAsync(newConfig)
+  }
+  catch (err) {
+    /*
+     * Validate failed, bail out here
+     */
+    report.errors.push(`Configuration did not pass schema validation`)
+    for (const msg of err.details) report.errors.push(msg.message)
+    abort()
 
+    return report
+  }
+
+  /*
+   * Schema validation successful
+   */
+  report.info.push('Configuration passed schema validation')
+
+  /*
+   * Verify node name resolution
+   */
+  for (const node of config.morio.nodes) {
+    const [result, data] = await resolveHost(node)
+    if (result) report.info.push(`Node ${node} resolves to: ${data.join()}`)
+    else {
+      report.errors.push(data)
+      abort()
+
+      return report
+    }
+  }
+
+  /*
+   * Try contacting nodes over HTTPS, ignore certificate
+   */
+  for (const node of config.morio.nodes) {
+    const [result, data] = await testUrl(`https://${node}/`, { ignoreCertificate: true })
+    if (result) report.info.push(data, `Node ${node} is reachable over HTTPS`)
+    else {
+      report.info.push(data)
+      report.errors.push(`Unable to reach https://${node}/`)
+      abort()
+
+      return report
+    }
+  }
+
+  /*
+   * Looks good
+   */
+  report.valid = true
+  report.deployable = true
+  report.validated_config = config
 
   return report
 }
@@ -75,6 +139,3 @@ export const setupTokenValid = (token, config) => (config.setup_token && token =
  * @return {bool|function} result - True of MORIO is not setup, a method that will return the error if it does not
  */
 export const setupPossible = (config) => (typeof config.setup_token !== 'undefined')
-
-
-

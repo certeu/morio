@@ -1,10 +1,10 @@
 import pkg from '../package.json' assert { type: 'json' }
-import { paths as setup } from './setup.mjs'
+import { paths as action } from './action.mjs'
 import { paths as status } from './status.mjs'
 
 const description = `
 ## What am I looking at?  🤔
-This is reference documentation of the morio API.
+This is reference documentation for the Morio SAM REST API.
 It is auto-generated from this API's OpenAPI v3 specification.
 
 To learn more about morio, visit [the GitHub repository](https://github.com/certeu/morio/).
@@ -13,7 +13,7 @@ To learn more about morio, visit [the GitHub repository](https://github.com/cert
 export const openapi = {
   openapi: '3.0.3',
   info: {
-    title: 'Morio API',
+    title: 'Morio SAM',
     description,
     termsOfService: 'FIXME: Do we need terms of service?',
     contact: {
@@ -32,8 +32,8 @@ export const openapi = {
   },
   tags: [
     {
-      name: 'Setup',
-      description: 'Initial setup of a MORIO instance or cluster'
+      name: 'Action',
+      description: 'Trigger system actions'
     },
     {
       name: 'Status',
@@ -44,7 +44,7 @@ export const openapi = {
   components: {
   },
   paths: {
-    ...setup,
+    ...action,
     ...status,
   },
 }

@@ -1,4 +1,4 @@
-import { setupPossible } from '../lib/validation.mjs'
+import { timeSince } from '@morio/lib/time'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -6,48 +6,6 @@ import { setupPossible } from '../lib/validation.mjs'
  * @returns {object} Controller - The status controller object
  */
 export function Controller() {
-}
-
-const timeSince = (timestamp) => {
-  let uptime
-  /*
-   * Calculate time delta as a number of seconds
-   */
-  const delta = (Date.now() - timestamp) / 1000
-
-  /*
-   * Report in seconds if it is below 120 seconds
-   */
-  if (delta < 120) uptime = `${Math.floor(delta*10)/10} seconds`
-
-  /*
-   * Report in minutes + seconds if it is below 10 minutes
-   */
-  else if (delta < 600) {
-    const minutes = Math.floor(delta/60)
-    const seconds = Math.floor(delta-(60*minutes))
-    uptime = `${minutes} minutes and ${seconds} seconds`
-  }
-
-  /*
-   * Report in minutes if it is below 120 minutes
-   */
-  else if (delta < 120 * 60) {
-    const minutes = Math.floor(delta/60)
-    const seconds = Math.floor(delta-(60*minutes))
-    uptime = `${Math.floor(delta/60)} minutes`
-  }
-
-  /*
-   * Report in hours + minutes if it is below 6 hours
-   */
-  else if (delta < 6 * 60 * 60) {
-    const hours = Math.floor(delta/3600)
-    const minutes = Math.floor((delta-(3600*hours) / 60))
-    uptime = `${hours} hours and ${minutes} minutes`
-  }
-
-  return { uptime, uptime_seconds: delta }
 }
 
 /**
@@ -61,10 +19,7 @@ const timeSince = (timestamp) => {
  */
 Controller.prototype.status = async (req, res, tools) => {
 
-  /*
-   * Check whether MORIO needs to be setup
-   */
-  const setup = !setupPossible(tools.config)
+  const { time_since, seconds_since } = timeSince(tools.config.start_time)
 
   /*
    * Return this in any case
@@ -73,15 +28,16 @@ Controller.prototype.status = async (req, res, tools) => {
     name: tools.config.name,
     about: tools.config.about,
     version: tools.config.version,
-    ...timeSince(tools.config.start_time),
-    setup,
+    uptime: time_since,
+    uptime_seconds: seconds_since,
+    setup: tools.config.setup,
   }
 
 
   /*
    * If MORIO is not setup, return limited info
    */
-  if (!setup) return res.send(base)
+  if (!tools.config.setup) return res.send(base)
 
   return res.send({
     ...base,

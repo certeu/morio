@@ -1,0 +1,31 @@
+{
+  "name": "morio",
+  "version": "0.1.0",
+  "description": "Connect, Stream, Observe, Respond",
+  "main": "index.js",
+  "scripts": {
+    "morio:init": "npm install && npm install --global husky && husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/certeu/morio.git"
+  },
+  "author": "Joost De Cock <joost@joost.at>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/certeu/morio/issues"
+  },
+  "homepage": "https://github.com/certeu/morio#readme",
+  "dev-dependencies": {
+    "husky": "^8.0.3"
+  },
+  "workspaces": [
+    "api",
+    "lib",
+    "sam"
+  ],
+  "devDependencies": {
+    "husky": "^8.0.0"
+  }
+}

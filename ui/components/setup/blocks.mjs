@@ -3,12 +3,12 @@ import get from 'lodash.get'
 import { validators } from './validators.mjs'
 // Hooks
 import { useState } from 'react'
+import { useTemplate } from 'hooks/use-template.mjs'
 // Components
 import { ListInput, StringInput } from 'components/inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import Markdown from 'react-markdown'
 import { PageLink } from 'components/link.mjs'
-import mustache from 'mustache'
 
 /*
  * A wrapper component for all configuration blocks
@@ -42,13 +42,15 @@ export const ListBlock = (props) => {
     config, // Current configuration
     configKey, // Path to the configuration key we are updating
     input, // Input configuration provided by the configuration schema
-    label=false, // Labal provided by the configuration schema
+    label=false, // Label provided by the configuration schema
+    title=false, // Title provided by the configuration schema
     update,
   } = props
 
   return (
     <>
-      {label ? <h2>{label}</h2> : null}
+      {title ? <h2>{title}</h2> : null}
+      {(!title && label) ? <h2>{label}</h2> : null}
       {about ? <Markdown>{about}</Markdown> : null}
       <ListInput
         {...props}
@@ -67,14 +69,19 @@ export const ListBlock = (props) => {
  */
 export const StringsBlock = (props) => {
   /*
+   * Load templating engine
+   */
+  const template = useTemplate({ CONFIG: props.config })
+
+  /*
    * Resolve the count value
    */
-  const count = resolveCount(props.count, props.config)
+  const count = Number(template(props.count))
 
   /*
    * Keep array in local state and update the config as one block
    */
-  const [list, setList] = useState([...Array(count).map(val => '')])
+  const [list, setList] = useState(get(props.config, props.configKey, [...Array(count).map(val => '')]))
 
   /*
    * Helper method to update one array instance
@@ -108,6 +115,9 @@ export const StringsBlock = (props) => {
         update={(val) => localUpdate(0, val)}
         valid={validators[configKey]}
         current={list[0]}
+        about={false}
+        noTitle
+        label={template(props.labels, { INDEX: 0, INDEX_PLUS_ONE: 1 })}
       />
     </>
   )
@@ -124,9 +134,7 @@ export const StringsBlock = (props) => {
          * Since count is dynamic, the configuration schema
          * can use this dynamic * value to format the labels
          */
-        const template = input => input
-          ? mustache.render(input, { INDEX: i, INDEX_PLUS_ONE: i+1 })
-          : ''
+        const templateData = { INDEX: i, INDEX_PLUS_ONE: i+1 }
 
         return (
           <StringBlock
@@ -134,10 +142,10 @@ export const StringsBlock = (props) => {
             key={i}
             about={false}
             noTitle
-            label={template(props.labels)}
-            labelTR={template(props.labelsTR)}
-            labelBL={template(props.labelsBL)}
-            labelBR={template(props.labelsBR)}
+            label={template(props.labels, templateData)}
+            labelTR={template(props.labelsTR, templateData)}
+            labelBL={template(props.labelsBL, templateData)}
+            labelBR={template(props.labelsBR, templateData)}
             update={(val) => localUpdate(i, val)}
             valid={validators[configKey]}
             current={val}
@@ -174,31 +182,9 @@ export const StringBlock = (props) => {
         {...props}
         list={input}
         placeholder={placeholder}
+        valid={validators[configKey]}
       />
     </>
   )
 }
 
-/*
- * Helper method to resolve a count value
- *
- * @param {number|string} count - The count value in the configuration schema
- * @param {object} config - The current configuration
- */
-function resolveCount (count, config) {
-  /*
-   * If it's a simple number, that's easy
-   */
-  if (typeof count === 'number') return count
-
-  /*
-   * If it starts with 'config:' lookup the value in the config
-   */
-  if (count.slice(0,7) === 'config:') return get(config, count.slice(7).trim())
-
-  /*
-   * This means we cannot figure it out, so return false
-   * and let the component handle it.
-   */
-  return false
-}

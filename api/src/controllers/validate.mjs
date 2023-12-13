@@ -1,5 +1,5 @@
-import { validate, validateConfiguration } from '../lib/validation.mjs'
-import { schemaViolation } from '../lib/response.mjs'
+import { validate, validateConfiguration } from '#lib/validation'
+import { schemaViolation } from '#lib/response'
 
 /**
  * This validation controller handles various validation tasks
@@ -35,7 +35,7 @@ Controller.prototype.configuration = async (req, res, tools) => {
    * Run the config validateion helper, which takes proposed and current
    * config and returns a report object
    */
-  const report = await validateConfiguration(valid.config, tools.config)
+  const report = await validateConfiguration(valid.config, tools)
 
 
   return res.send(report).end()

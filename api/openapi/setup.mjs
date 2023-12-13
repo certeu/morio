@@ -1,6 +1,6 @@
 import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
-import { fromEnv } from '../src/lib/env.mjs'
+import { fromEnv } from '@morio/lib/env'
 
 const shared = {
   tags: [ 'Setup' ]

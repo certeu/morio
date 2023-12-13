@@ -1,5 +1,5 @@
 import jwt from 'passport-jwt'
-import { generateJwtKey } from './lib/crypto.mjs'
+import { generateJwtKey } from '@morio/lib/crypto'
 
 /*
  * There is (currently) no Express middleware in use.

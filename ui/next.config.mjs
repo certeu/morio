@@ -22,6 +22,7 @@ const nextConfig = {
     config.resolve.alias.hooks = path.resolve(`./hooks`)
     config.resolve.alias.components = path.resolve(`./components`)
     config.resolve.alias.pages = path.resolve(`./pages`)
+    config.resolve.alias.config = path.resolve(`../config`)
 
     /*
      * Add support for YAML imports

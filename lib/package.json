@@ -1,7 +1,7 @@
 {
-  "name": "@morio/api",
+  "name": "@morio/lib",
   "version": "0.1.0",
-  "description": "Morio Management API (API)",
+  "description": "Morio System Actions Manager (SAM)",
   "private": true,
   "scripts": {
     "build": "node build.mjs",
@@ -9,9 +9,6 @@
     "dev": "nodemon src/index.mjs",
     "prettier": "npx prettier --write 'src/*.mjs' 'tests/*.mjs'",
     "test": "npx mocha tests/index.mjs"
-  },
-  "imports": {
-    "#lib/*": "./src/lib/*.mjs"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -44,5 +41,15 @@
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },
-  "homepage": "https://github.com/certeu/morio#readme"
+  "homepage": "https://github.com/certeu/morio#readme",
+  "exports": {
+    ".": "./src/index.js",
+    "./config": "./src/config.mjs",
+    "./crypto": "./src/crypto.mjs",
+    "./env": "./src/env.mjs",
+    "./fs": "./src/fs.mjs",
+    "./logger": "./src/logger.mjs",
+    "./network": "./src/network.mjs",
+    "./time": "./src/time.mjs"
+  }
 }
