@@ -22,7 +22,7 @@ export const openapi = {
     },
     license: {
       name: 'FIXME: What license?',
-      url: 'https://cert.europa.eu'
+      url: 'https://cert.europa.eu',
     },
     version: pkg.version,
   },
@@ -33,16 +33,15 @@ export const openapi = {
   tags: [
     {
       name: 'Action',
-      description: 'Trigger system actions'
+      description: 'Trigger system actions',
     },
     {
       name: 'Status',
-      description: 'Monitor a MORIO instance or cluster'
-    }
+      description: 'Monitor a MORIO instance or cluster',
+    },
   ],
 
-  components: {
-  },
+  components: {},
   paths: {
     ...action,
     ...status,

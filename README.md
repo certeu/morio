@@ -1,4 +1,5 @@
 # morio
+
 This is an incubator/lab to test-drive some new ideas for log collection.
 
 ## What's with the name?
@@ -36,4 +37,3 @@ Morio is an API-first project. Everything should go via the API. The `api` folde
 
 So the web interface we are building to manage morio connects to the API.
 But if people don't want to use the web interface and talk to the API directly, that's fine too.
-

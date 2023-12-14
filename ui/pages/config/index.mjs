@@ -12,7 +12,7 @@ export default HomePage
 
 export const getStaticProps = () => ({
   props: {
-    title: "Configuration",
-    page: ['config']
-  }
+    title: 'Configuration',
+    page: ['config'],
+  },
 })

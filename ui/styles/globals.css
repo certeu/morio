@@ -52,26 +52,42 @@
     padding-top: 0;
     margin-top: 0;
   }
+
+  /* mdx styles */
+  .md a:not(.btn),
+  .mdx a:not(.btn) {
+    @apply underline decoration-2 text-secondary;
+  }
+  .md a:hover,
+  .mdx a:hover {
+    @apply decoration-4;
+  }
+  .mdx ul {
+    @apply pl-0 lg:pl-4  list-disc list-inside text-base-content;
+  }
+  .mdx ol ul,
+  .mdx ul ul {
+    @apply pl-2 lg:pl-4  list-disc list-inside text-base-content;
+  }
+  .mdx ol {
+    @apply pl-0 lg:pl-4 list-decimal list-inside text-base-content;
+  }
+  .mdx ul ol,
+  .mdx ol ol {
+    @apply pl-2 lg:pl-4 list-decimal list-inside text-base-content;
+  }
+  .mdx code {
+    @apply bg-neutral-content px-2 rounded text-neutral font-mono font-bold;
+  }
+  .mdx pre code {
+    @apply bg-inherit;
+  }
+  .mdx p:first-child {
+    padding-top: 0;
+    margin-top: 0;
+  }
 }
 
-/* Override DaisyUI button text color */
-.btn-info {
-  color: var(--btn-info-content);
-}
-.btn-success {
-  color: var(--btn-success-content);
-}
-.btn-warning {
-  color: var(--btn-warning-content);
-}
-.btn-error {
-  color: var(--btn-error-content);
-}
-
-/* Make title color stand out */
-h2, h3, h4, h5, h6 {
-  color: var(--morio-heading);
-}
 /* Link color per theme */
 a {
   color: var(--morio-link);
@@ -102,4 +118,3 @@ html {
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
   }
 }
-

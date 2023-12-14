@@ -12,7 +12,7 @@ export default StatusPage
 
 export const getStaticProps = () => ({
   props: {
-    title: "Status",
-    page: ['status']
-  }
+    title: 'Status',
+    page: ['status'],
+  },
 })

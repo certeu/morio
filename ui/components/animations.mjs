@@ -24,7 +24,7 @@ export const LogoSpinner = ({ className = 'w-full max-w-full max-h-full animate-
     xmlns="http://www.w3.org/2000/svg"
     fill="none"
     viewBox="0 0 24 24"
-    style={{ animation: 'spin 3s linear infinite'}}
+    style={{ animation: 'spin 3s linear infinite' }}
   >
     <path cx="12" cy="12" d={logoPath} fill="currentColor" strokeWidth="0" />
   </svg>

@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react'
 // Components
 import { Tabs, Tab } from 'components/tabs.mjs'
+import { Markdown } from 'components/markdown.mjs'
 
 /*
  * Helper component to display a tab heading
@@ -32,7 +33,6 @@ export const FormControl = ({
   labelBR = false, // Optional bottom-right label
   forId = false, // ID of the for element we are wrapping
 }) => {
-
   const topLabelChildren = (
     <>
       {label ? <span className="label-text-alt font-bold -mb-1">{label}</span> : <span></span>}
@@ -139,7 +139,7 @@ export const NumberInput = ({
   min = 220,
   step = 1,
 }) => (
-  <FormControl {...{ label, labelBL, labelBR, docs }} forId={id}>
+  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
     <input
       id={id}
       type="number"
@@ -199,7 +199,6 @@ export const MfaInput = ({
       valid={(val) => val.length > 4}
       {...{ update, current, id }}
       placeholder={t('susi:mfaCode')}
-      docs={false}
     />
   )
 }
@@ -213,7 +212,6 @@ export const PasswordInput = ({
   valid, // Method that should return whether the value is valid or not
   current, // The current value
   placeholder = '¯\\_(ツ)_/¯', // The placeholder text
-  docs = false, // Docs to load, if any
   id = '', // An id to tie the input to the label
   onKeyDown = false, // Optionall capture certain keys (like enter)
 }) => {
@@ -225,7 +223,6 @@ export const PasswordInput = ({
   return (
     <FormControl
       label={label}
-      docs={docs}
       forId={id}
       labelBR={
         <button
@@ -261,12 +258,11 @@ export const EmailInput = ({
   current, // The current value
   original, // The original value
   placeholder, // The placeholder text
-  docs = false, // Docs to load, if any
   id = '', // An id to tie the input to the label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
 }) => (
-  <FormControl {...{ label, docs, labelBL, labelBR }} forId={id}>
+  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
     <input
       id={id}
       type="email"
@@ -288,42 +284,56 @@ export const ListInput = ({
   label, // The label
   list, // The list of items to present { val, label, about }
   current, // The (value of the) current item
-  docs = false, // Docs to load, if any
 }) => (
-  <FormControl label={label} docs={docs}>
-    {list.map((item, i) => (typeof item.val === 'object' && item.val.type === 'select')
-      ? (
-        <FakeButtonFrame key={i} active={item.val.values.includes(current)}>
-          <div className="w-full flex flex-col gap-2">
-            <div className="w-full text-lg leading-5">{item.label}</div>
-            {item.about ? (
-              <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                {item.about}
+  <FormControl label={label}>
+    {list.map((item, i) => {
+      const entry =
+        typeof item.val === 'object' && item.val.type === 'select' ? (
+          <FakeButtonFrame key={i} active={item.val.values.includes(current)}>
+            <div className="w-full flex flex-col gap-2">
+              <div className="w-full text-lg leading-5">{item.label}</div>
+              {item.about ? (
+                <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
+                  <Markdown>{item.about}</Markdown>
+                </div>
+              ) : null}
+              <div className="flex flex-row gap-1 flex-wrap items-center justify-around">
+                {item.val.labels.map((lbl, i) => (
+                  <button
+                    key={i}
+                    className={`btn btn-sm ${
+                      current === item.val.values[i] ? 'btn-primary' : 'btn-secondary'
+                    }`}
+                    onClick={() => update(item.val.values[i])}
+                  >
+                    {lbl}
+                  </button>
+                ))}
               </div>
-            ) : null}
-            <div className="flex flex-row gap-2 flex-wrap items-center justify-start">
-            {item.val.labels.map((lbl, i) => (
-              <button key={i}
-                className={`btn btn-sm ${current === item.val.values[i] ? 'btn-primary' : 'btn-secondary'}`}
-                onClick={() => update(item.val.values[i])}
-              >{lbl}</button>
-            ))}
             </div>
-          </div>
-        </FakeButtonFrame>
+          </FakeButtonFrame>
+        ) : (
+          <ButtonFrame key={i} active={item.val === current} onClick={() => update(item.val)}>
+            <div className="w-full flex flex-col gap-2">
+              <div className="w-full text-lg leading-5">{item.label}</div>
+              {item.about ? (
+                <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
+                  <Markdown>{item.about}</Markdown>
+                </div>
+              ) : null}
+            </div>
+          </ButtonFrame>
+        )
+
+      return item.hide ? (
+        <details key={i} className="py-2">
+          <summary className="pl-4 hover:cursor-pointer text-sm text-primary">{item.hide}</summary>
+          {entry}
+        </details>
       ) : (
-        <ButtonFrame key={i} active={item.val === current} onClick={() => update(item.val)}>
-          <div className="w-full flex flex-col gap-2">
-            <div className="w-full text-lg leading-5">{item.label}</div>
-            {item.about ? (
-              <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
-                {item.about}
-              </div>
-            ) : null}
-          </div>
-        </ButtonFrame>
+        entry
       )
-    )}
+    })}
   </FormControl>
 )
 
@@ -335,12 +345,11 @@ export const MarkdownInput = ({
   current, // The current value (markdown)
   update, // The onChange handler
   placeholder, // The placeholder content
-  docs = false, // Docs to load, if any
   id = '', // An id to tie the input to the label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
 }) => (
-  <FormControl {...{ label, labelBL, labelBR, docs }} forId={id}>
+  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
     <Tabs tabs={['edit', 'preview']}>
       <Tab key="edit">
         <div className="flex flex-row items-center mt-4">
@@ -356,7 +365,7 @@ export const MarkdownInput = ({
       </Tab>
       <Tab key="preview">
         <div className="flex flex-row items-center mt-4">
-          <Mdx md={current} />
+          <Markdown>{current}</Markdown>
         </div>
       </Tab>
     </Tabs>

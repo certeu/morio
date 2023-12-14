@@ -31,4 +31,3 @@ export const CopyToClipboard = ({ content }) => {
     </Copy>
   )
 }
-

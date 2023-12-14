@@ -9,9 +9,7 @@ import { schemaViolation } from '#lib/response'
  *
  * @returns {object} Controller - The validation controller object
  */
-export function Controller() {
-}
-
+export function Controller() {}
 
 /**
  * Validate a MORIO configuration
@@ -24,7 +22,6 @@ export function Controller() {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.configuration = async (req, res, tools) => {
-
   /*
    * Validate request against schema
    */
@@ -36,7 +33,6 @@ Controller.prototype.configuration = async (req, res, tools) => {
    * config and returns a report object
    */
   const report = await validateConfiguration(valid.config, tools)
-
 
   return res.send(report).end()
 }

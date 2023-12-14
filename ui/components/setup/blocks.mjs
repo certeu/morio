@@ -38,25 +38,21 @@ export const Block = (props) => {
  */
 export const ListBlock = (props) => {
   const {
-    about=false, // About provided by the configuration schema
+    about = false, // About provided by the configuration schema
     config, // Current configuration
     configKey, // Path to the configuration key we are updating
     input, // Input configuration provided by the configuration schema
-    label=false, // Label provided by the configuration schema
-    title=false, // Title provided by the configuration schema
+    label = false, // Label provided by the configuration schema
+    title = false, // Title provided by the configuration schema
     update,
   } = props
 
   return (
     <>
       {title ? <h2>{title}</h2> : null}
-      {(!title && label) ? <h2>{label}</h2> : null}
+      {!title && label ? <h2>{label}</h2> : null}
       {about ? <Markdown>{about}</Markdown> : null}
-      <ListInput
-        {...props}
-        list={input}
-        current={get(config, configKey)}
-      />
+      <ListInput {...props} list={input} current={get(config, configKey)} />
     </>
   )
 }
@@ -81,7 +77,9 @@ export const StringsBlock = (props) => {
   /*
    * Keep array in local state and update the config as one block
    */
-  const [list, setList] = useState(get(props.config, props.configKey, [...Array(count).map(val => '')]))
+  const [list, setList] = useState(
+    get(props.config, props.configKey, [...Array(count).map((val) => '')])
+  )
 
   /*
    * Helper method to update one array instance
@@ -97,30 +95,31 @@ export const StringsBlock = (props) => {
    * Deconstruct the props we use, and detail what they are about
    */
   const {
-    about=false, // About provided by the configuration schema
+    about = false, // About provided by the configuration schema
     config, // Current configuration
-    label=false, // Labale provided by the configuration schema
+    label = false, // Labale provided by the configuration schema
     configKey, // Path to the configuration key we are updating
   } = props
 
   /*
    * If count is 1 or false, return a single StringBlock
    */
-  if (!count || count < 2) return (
-    <>
-      {props.label ? <h2>{props.label}</h2> : null}
-      {props.about ? <Markdown>{props.about}</Markdown> : null}
-      <StringBlock
-        {...props}
-        update={(val) => localUpdate(0, val)}
-        valid={validators[configKey]}
-        current={list[0]}
-        about={false}
-        noTitle
-        label={template(props.labels, { INDEX: 0, INDEX_PLUS_ONE: 1 })}
-      />
-    </>
-  )
+  if (!count || count < 2)
+    return (
+      <>
+        {props.label ? <h2>{props.label}</h2> : null}
+        {props.about ? <Markdown>{props.about}</Markdown> : null}
+        <StringBlock
+          {...props}
+          update={(val) => localUpdate(0, val)}
+          valid={validators[configKey]}
+          current={list[0]}
+          about={false}
+          noTitle
+          label={template(props.labels, { INDEX: 0, INDEX_PLUS_ONE: 1 })}
+        />
+      </>
+    )
 
   /*
    * Return count times StringBlock
@@ -129,12 +128,13 @@ export const StringsBlock = (props) => {
     <>
       {props.label ? <h2>{props.label}</h2> : null}
       {props.about ? <Markdown>{props.about}</Markdown> : null}
-      {list.map((val, i) => {
+
+      {[...Array(count)].map((val, i) => {
         /*
          * Since count is dynamic, the configuration schema
          * can use this dynamic * value to format the labels
          */
-        const templateData = { INDEX: i, INDEX_PLUS_ONE: i+1 }
+        const templateData = { INDEX: i, INDEX_PLUS_ONE: i + 1 }
 
         return (
           <StringBlock
@@ -148,7 +148,7 @@ export const StringsBlock = (props) => {
             labelBR={template(props.labelsBR, templateData)}
             update={(val) => localUpdate(i, val)}
             valid={validators[configKey]}
-            current={val}
+            current={list[i]}
           />
         )
       })}
@@ -164,19 +164,20 @@ export const StringsBlock = (props) => {
  */
 export const StringBlock = (props) => {
   const {
-    about=false, // About provided by the configuration schema
+    about = false, // About provided by the configuration schema
     config, // Current configuration
-    input=[], // input provided by the the configuration schema
-    label=false, // Labale provided by the configuration schema
-    noTitle=false, // You can use this to suppress the title
+    input = [], // input provided by the the configuration schema
+    label = false, // Labale provided by the configuration schema
+    noTitle = false, // You can use this to suppress the title
     configKey, // Path to the configuration key we are updating
-    placeholder=false, // Placeholder provided by the configuration schema
+    placeholder = false, // Placeholder provided by the configuration schema
   } = props
 
   return (
     <>
       {label && !noTitle ? <h2>{label}</h2> : null}
       {about ? <Markdown>{about}</Markdown> : null}
+      {configKey}
       <StringInput
         current={get(config, configKey)}
         {...props}
@@ -187,4 +188,3 @@ export const StringBlock = (props) => {
     </>
   )
 }
-

@@ -11,7 +11,7 @@ It it, in others words, not a user-facing Morio service but rather an internal s
 In a stand-alone setup, it is the API that talks to SAM directly.
 In a clustered setup, the API will talk to DEAN who will distribute the action to all cluster members, with the help of ETCD.
 
-> *Note that none of this is implemented at this point, but this is the initial idea*
+> _Note that none of this is implemented at this point, but this is the initial idea_
 
 ## Local development
 

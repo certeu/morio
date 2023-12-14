@@ -44,13 +44,9 @@ export const theme = {
   error: colors.red['400'],
 
   'info-content': colors.neutral[900],
-  '--btn-info-content': colors.neutral[900],
   'success-content': colors.neutral[900],
-  '--btn-success-content': colors.neutral[900],
   'warning-content': colors.neutral[900],
-  '--btn-warning-content': colors.neutral[900],
   'error-content': colors.neutral[900],
-  '--btn-error-content': colors.neutral[900],
 
   '--morio-heading': c.light,
   '--morio-link': c.accent1,

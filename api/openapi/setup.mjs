@@ -3,19 +3,19 @@ import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
 import { fromEnv } from '@morio/lib/env'
 
 const shared = {
-  tags: [ 'Setup' ]
+  tags: ['Setup'],
 }
 
-const request = (description, key, examples=false, example=false) => {
+const request = (description, key, examples = false, example = false) => {
   const data = {
     requestBody: {
       description,
       content: {
         'application/json': {
           schema: j2s(requestSchema.setup[key]).swagger,
-        }
-      }
-    }
+        },
+      },
+    },
   }
   if (examples) data.requestBody.content['application/json'].examples = examples
   else if (example) data.requestBody.content['application/json'].example = example
@@ -23,17 +23,17 @@ const request = (description, key, examples=false, example=false) => {
   return data
 }
 
-const response = (description, schema, example={}) => ({
+const response = (description, schema, example = {}) => ({
   description,
   content: {
     'application/json': {
       schema: j2s(schema).swagger,
       example,
-    }
-  }
+    },
+  },
 })
 
-const setup_token = "mst.735bf58352dfb40d9ecfb829af230a1274a4a8f1583b93a3a0c1d58ed767682a"
+const setup_token = 'mst.735bf58352dfb40d9ecfb829af230a1274a4a8f1583b93a3a0c1d58ed767682a'
 
 export const paths = {
   '/setup/morio': {
@@ -53,7 +53,7 @@ export const paths = {
         'morio',
         {
           'MORIO Stand-alone Instance': {
-            value: { nodes: ['morio.cert.europa.eu'] }
+            value: { nodes: ['morio.cert.europa.eu'] },
           },
           'MORIO Cluster': {
             value: {
@@ -63,28 +63,19 @@ export const paths = {
                 'morio-cluster-node3.cert.europa.eu',
                 'morio-cluster-node4.cert.europa.eu',
                 'morio-cluster-node5.cert.europa.eu',
-              ]
-            }
-          }
-        }),
+              ],
+            },
+          },
+        }
+      ),
       responses: {
-        200: response(
-          'Setup initiated successfully',
-          responseSchema.setup.morio,
-          { setup_token }
-        ),
-        400: response(
-          'Data validation error',
-          errorsSchema,
-          { errors: [ `"nodes" is required` ] }
-        ),
-        401: response(
-          'Setup is not currently possible',
-          errorsSchema,
-          { errors: [ "The current MORIO state does not allow initiating setup" ] }
-        ),
-      }
-    }
+        200: response('Setup initiated successfully', responseSchema.setup.morio, { setup_token }),
+        400: response('Data validation error', errorsSchema, { errors: [`"nodes" is required`] }),
+        401: response('Setup is not currently possible', errorsSchema, {
+          errors: ['The current MORIO state does not allow initiating setup'],
+        }),
+      },
+    },
   },
   '/setup/jwtkey': {
     post: {
@@ -92,30 +83,22 @@ export const paths = {
       summary: `Generates a random key to sign JWTs`,
       description: `This generates a random (and ephemeral) key that can be used to sign JSON Web Tokens (JWT).
         <br> It is used by the setup process, but if needed, you can also use this endpoint if you provide a valid <code>setup_token</code>.`,
-      ...request(
-        'Post the <code>setup_token</code> to unlock this endpoint.',
-        'jwtkey',
-        false,
-        { setup_token }
-      ),
+      ...request('Post the <code>setup_token</code> to unlock this endpoint.', 'jwtkey', false, {
+        setup_token,
+      }),
       responses: {
-        200: response(
-          'JWT key generated successfully',
-          responseSchema.setup.jwtkey,
-          { jwt_key: "b57782b663300315c47c687ea898638f87512216c5efc92c94c2562984a040b3d8d221711e7816b6825a1197e3cbadaa95bc1b65c09dbed8d5d07536ed799012" }
-        ),
-        400: response(
-          'Data validation error',
-          errorsSchema,
-          { errors: [ `"setup_token" is required` ] }
-        ),
-        401: response(
-          'Setup is not currently possible',
-          errorsSchema,
-          { errors: [ "The current MORIO state does not allow initiating setup" ] }
-        ),
-      }
-    }
+        200: response('JWT key generated successfully', responseSchema.setup.jwtkey, {
+          jwt_key:
+            'b57782b663300315c47c687ea898638f87512216c5efc92c94c2562984a040b3d8d221711e7816b6825a1197e3cbadaa95bc1b65c09dbed8d5d07536ed799012',
+        }),
+        400: response('Data validation error', errorsSchema, {
+          errors: [`"setup_token" is required`],
+        }),
+        401: response('Setup is not currently possible', errorsSchema, {
+          errors: ['The current MORIO state does not allow initiating setup'],
+        }),
+      },
+    },
   },
   '/setup/password': {
     post: {
@@ -124,38 +107,33 @@ export const paths = {
       description: `This generates a random (and ephemeral) password.
         <br>
         It is used by the setup process, but if needed, you can also use this endpoint if you provide a valid <code>setup_token</code>.`,
-      ...request(`Post <code>bytes</code> to control the length (in bytes, where 1 byte = 2 characters)
+      ...request(
+        `Post <code>bytes</code> to control the length (in bytes, where 1 byte = 2 characters)
         <br>
         Post the <code>setup_token</code> to unlock this endpoint.
         `,
         'password',
         {
           'Default length': {
-            value: { setup_token }
+            value: { setup_token },
           },
           'Custom length': {
-            value: { setup_token, bytes: 64 }
-          }
+            value: { setup_token, bytes: 64 },
+          },
         }
       ),
       responses: {
-        200: response(
-          'Password generated successfully',
-          responseSchema.setup.jwtkey,
-          { password: "e9c4c68a14dcae192679d91900d6ae60" }
-        ),
-        400: response(
-          'Data validation error',
-          errorsSchema,
-          { errors: [ `"setup_token" is required` ] }
-        ),
-        401: response(
-          'Setup is not currently possible',
-          errorsSchema,
-          { errors: [ "The current MORIO state does not allow initiating setup" ] }
-        ),
-      }
-    }
+        200: response('Password generated successfully', responseSchema.setup.jwtkey, {
+          password: 'e9c4c68a14dcae192679d91900d6ae60',
+        }),
+        400: response('Data validation error', errorsSchema, {
+          errors: [`"setup_token" is required`],
+        }),
+        401: response('Setup is not currently possible', errorsSchema, {
+          errors: ['The current MORIO state does not allow initiating setup'],
+        }),
+      },
+    },
   },
   '/setup/keypair': {
     post: {
@@ -187,7 +165,8 @@ export const paths = {
           </li>
         </ul>
       `,
-      ...request(`Post <code>passphrase</code> to encrypt the private key.
+      ...request(
+        `Post <code>passphrase</code> to encrypt the private key.
         <br>
         Post the <code>setup_token</code> to unlock this endpoint.
         `,
@@ -195,16 +174,13 @@ export const paths = {
         false,
         {
           setup_token,
-          passphrase: "e9c4c68a14dcae192679d91900d6ae60"
+          passphrase: 'e9c4c68a14dcae192679d91900d6ae60',
         }
-     ),
+      ),
       responses: {
-        200: response(
-          'Password generated successfully',
-          responseSchema.setup.keypair,
-          {
-            key_pair: {
-              public: `-----BEGIN PUBLIC KEY-----
+        200: response('Password generated successfully', responseSchema.setup.keypair, {
+          key_pair: {
+            public: `-----BEGIN PUBLIC KEY-----
 MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAkCO0ZenvTD8KyrlZlBPD
 W4dV8Av3hB1Gyn5XcyI14KGGbAHlvMq8yY50fanA8gxCTkPbzRL5FKAHwOrs++bR
 65VMi9JE1C2X/HL2jwC8hCmeAz5LYFm9bs650UKfwAbRXML0HMrohbEeC3YKNo4/
@@ -218,7 +194,7 @@ xHvQEvYuJJ4YTQFdxkxV5DIfuE4+PYW3+YxlulRtagJYzWzO9YbD5XUZFmXwdRvk
 wKGte6ce363BTubSQoAfGPxZkVjrYrMXnae78w303AUwwFO71V809oAsjcJQDhDa
 VysV/OY7Ehr5u/2XbpmzzEcCAwEAAQ==
 -----END PUBLIC KEY-----`,
-              private: `
+            private: `
 -----BEGIN ENCRYPTED PRIVATE KEY-----
 MIIJrTBXBgkqhkiG9w0BBQ0wSjApBgkqhkiG9w0BBQwwHAQIE4s45loW+JwCAggA
 MAwGCCqGSIb3DQIJBQAwHQYJYIZIAWUDBAEqBBA9DY5X4SW4TezwQKz8YZqiBIIJ
@@ -273,21 +249,15 @@ yGj9AzMn7GahKmw3qZhAJXVP4uzTSEDNAY6LGw0HydcPCGgfxjpXE63vodMMgkts
 Ztynn3fZaXcO0HFMXKLIfWQr11QNmfbY5JATBSYNb/60D56pEtU47ZlE0MOWC3dJ
 WvAZbYgOAQMfpXI2Mi5Wbm0IuSVLTqQL9Dyz1aoj8zki
 -----END ENCRYPTED PRIVATE KEY-----`,
-            }
-          }
-        ),
-        400: response(
-          'Data validation error',
-          errorsSchema,
-          { errors: [ `"setup_token" is required` ] }
-        ),
-        401: response(
-          'Setup is not currently possible',
-          errorsSchema,
-          { errors: [ "The current MORIO state does not allow initiating setup" ] }
-        ),
-      }
-    }
+          },
+        }),
+        400: response('Data validation error', errorsSchema, {
+          errors: [`"setup_token" is required`],
+        }),
+        401: response('Setup is not currently possible', errorsSchema, {
+          errors: ['The current MORIO state does not allow initiating setup'],
+        }),
+      },
+    },
   },
 }
-

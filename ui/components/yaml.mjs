@@ -10,4 +10,3 @@ export const Yaml = (props) => {
 
   return <Highlight language="yaml" raw={hljs.highlight(code, { language: 'yaml' }).value} />
 }
-

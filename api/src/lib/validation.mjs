@@ -1,4 +1,4 @@
-import { requestSchema as schema, morioSchema  } from '../schema.mjs'
+import { requestSchema as schema, morioSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '@morio/lib/network'
 import get from 'lodash.get'
 
@@ -25,8 +25,7 @@ export const validate = async (targetPath, input) => {
   let valid
   try {
     valid = await target.validateAsync(input)
-  }
-  catch (err) {
+  } catch (err) {
     return [false, err]
   }
 
@@ -44,7 +43,6 @@ export const validate = async (targetPath, input) => {
  * @retrun {object} report - An object detailing the results of the validation
  */
 export const validateConfiguration = async (newConfig, tools) => {
-
   /*
    * Set up the report skeleton that we will return
    */
@@ -59,7 +57,8 @@ export const validateConfiguration = async (newConfig, tools) => {
   /*
    * We define this here to keep things DRY
    */
-  const abort = () => report.warnings.push(`Validation was terminated before completion due to errors`)
+  const abort = () =>
+    report.warnings.push(`Validation was terminated before completion due to errors`)
 
   /*
    * Validate config against the config schema
@@ -67,8 +66,7 @@ export const validateConfiguration = async (newConfig, tools) => {
   let config
   try {
     config = await morioSchema.validateAsync(newConfig)
-  }
-  catch (err) {
+  } catch (err) {
     /*
      * Validate failed, bail out here
      */
@@ -130,7 +128,7 @@ export const validateConfiguration = async (newConfig, tools) => {
  * @param {object} config - The configuration object
  * @return {bool|function} result - True of the token matches, a method that will return the error if it does not
  */
-export const setupTokenValid = (token, config) => (config.setup_token && token === config.setup_token)
+export const setupTokenValid = (token, config) => config.setup_token && token === config.setup_token
 
 /**
  * Helper method to verify MORIO has not been setup yet
@@ -138,4 +136,4 @@ export const setupTokenValid = (token, config) => (config.setup_token && token =
  * @param {object} config - The configuration object
  * @return {bool|function} result - True of MORIO is not setup, a method that will return the error if it does not
  */
-export const setupPossible = (config) => (typeof config.setup_token !== 'undefined')
+export const setupPossible = (config) => typeof config.setup_token !== 'undefined'

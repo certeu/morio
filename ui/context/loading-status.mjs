@@ -24,7 +24,6 @@ const timeout = 2
  * Example: setLoadingStatus([true, 'It worked', true, true])
  */
 const LoadingStatus = ({ loadingStatus }) => {
-
   const [fade, setFade] = useState('opacity-100')
   const [timer, setTimer] = useState(false)
 

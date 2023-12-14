@@ -12,7 +12,8 @@ import { useContext } from 'react'
 const p = (
   <p>
     This paragraph is here to show the vertical spacing between headings and paragraphs. In
-    addition, let&apos;s <WebLink href="#">make it a bit longer</WebLink> so we can see the line height as the text wraps.
+    addition, let&apos;s <WebLink href="#">make it a bit longer</WebLink> so we can see the line
+    height as the text wraps.
   </p>
 )
 
@@ -38,7 +39,9 @@ const TypographyPage = (props) => {
   return (
     <PageWrapper {...props}>
       <div className="text-primary mdx max-w-prose text-base-content max-w-prose text-base xl:pl-4">
-        <p>This temporary hom page shows an overview of different elements and how they are styled.</p>
+        <p>
+          This temporary hom page shows an overview of different elements and how they are styled.
+        </p>
         <p>It&apos;s a good starting point for theme development.</p>
         <h2>Headings (this is h2)</h2>
         {p} {p}
@@ -145,7 +148,7 @@ export default TypographyPage
 
 export const getStaticProps = () => ({
   props: {
-    title: "Typography",
-    page: ['typography']
-  }
+    title: 'Typography',
+    page: ['typography'],
+  },
 })

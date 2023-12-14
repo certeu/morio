@@ -10,6 +10,5 @@ export const setup = async () => ({
   store: {},
   config: {
     api: 'http://localhost:3000',
-  }
+  },
 })
-

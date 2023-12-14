@@ -48,14 +48,16 @@ for (const type in routes) {
  * Handle the root route
  */
 tools.log.debug(`Loading root route`)
-app.get('/', async (req, res) => res.send({
-  name: tools.config.name,
-  about: tools.config.about,
-  version: tools.config.version,
-  setup: tools.config.setup,
-  status: "/status",
-  docs: "/docs",
-}))
+app.get('/', async (req, res) =>
+  res.send({
+    name: tools.config.name,
+    about: tools.config.about,
+    version: tools.config.version,
+    setup: tools.config.setup,
+    status: '/status',
+    docs: '/docs',
+  })
+)
 
 /*
  * Start listening for requests
@@ -64,4 +66,3 @@ app.listen(fromEnv('MORIO_PORT_SAM'), (err) => {
   if (err) log.error(err, 'An error occured')
   tools.log.info(`Morio sam ready - listening on http://localhost:${fromEnv('MORIO_PORT_SAM')}`)
 })
-

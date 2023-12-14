@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "morio:init": "npm install && npm install --global husky && husky install",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prettier": "prettier -w ."
   },
   "repository": {
     "type": "git",
@@ -17,15 +18,14 @@
     "url": "https://github.com/certeu/morio/issues"
   },
   "homepage": "https://github.com/certeu/morio#readme",
-  "dev-dependencies": {
-    "husky": "^8.0.3"
-  },
   "workspaces": [
     "api",
     "lib",
     "sam"
   ],
   "devDependencies": {
-    "husky": "^8.0.0"
+    "eslint-config-prettier": "^9.1.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.2.0"
   }
 }

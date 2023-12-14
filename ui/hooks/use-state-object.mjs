@@ -35,7 +35,7 @@ export const useStateObject = (dflt = {}) => {
   const [obj, setObj] = useState(dflt)
 
   const update = (path, val) => {
-    const newObj = {...obj}
+    const newObj = { ...obj }
     objUpdate(newObj, path, val)
     setObj(newObj)
 
@@ -44,4 +44,3 @@ export const useStateObject = (dflt = {}) => {
 
   return [obj, update]
 }
-

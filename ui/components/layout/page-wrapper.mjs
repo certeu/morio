@@ -21,7 +21,6 @@ export const PageWrapper = ({
   page = [''],
   title = 'morio',
 }) => {
-
   /*
    * Create slug from page array
    */
@@ -64,10 +63,7 @@ export const PageWrapper = ({
       <div className="flex flex-col justify-between bg-neutral w-full">
         {header && <Header {...{ theme, toggleTheme, page }} />}
         <main className={`bg-base-100 grow ${header ? 'mt-12' : ''}`}>
-          {Layout
-            ? <Layout {...{ title, page }}>{children}</Layout>
-            : children
-          }
+          {Layout ? <Layout {...{ title, page }}>{children}</Layout> : children}
         </main>
         {footer && <Footer />}
       </div>

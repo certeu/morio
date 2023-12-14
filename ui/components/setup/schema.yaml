@@ -8,19 +8,30 @@ init:
   configKey: morio.node_count
   next: morio.nodes
   type: list
-  title: Stand-Alone vs Clustered
+  title: Node vs Cluster
   input:
     - val: 1
-      label: Morio stand-alone
-      about: Choose this to deploy a single Morio instance. Suitable for smnall to medium sized deployments, and a good choice to start with. You can always grow your setup later.
+      label: Morio Node
+      about: |
+        - Setup a standalone Morio node
+        - Recommended for small deployments
+        - Provides a simpler setup with less moving parts
     - val: 3
-      label: Morio cluster
-      about: Choose this to deploy a Morio cluster with 3 nodes. Suitable when high availibility is required, or the amount of data to process is too great for a single node.
-    - val: 
-        hide: Need a larger setup?
+      label: Morio Cluster
+      about: |
+        - Setup a 3-node Morio cluster
+        - Recommended for larger deployments
+        - Provides high availibility and horizontal scaling
+    - label: Larger Morio cluster sizes
+      about: |
+        - Setup a larger Morio cluster
+        - Recommended for increased throughput
+        - Size matters, but bigger is not always better
+      hide: Show larger Morio cluster sizes
+      val:
         type: select
-        values: [5,7,9,11,13,15]
-        labels: 
+        values: [5, 7, 9, 11, 13, 15]
+        labels:
           - 5 nodes
           - 7 nodes
           - 9 nodes
@@ -29,43 +40,39 @@ init:
           - 15 nodes
         label: Cluster nodes
         about: Choose the amount of nodes in the Morio cluster
-      label: Larger Morio cluster sizes
-      about: Choose this to deploy a Morio cluster with higher number of nodes. Suitable when scaling horizontally is required to increase capacity.
 
 # Next thing we need is the names of the nodes
 morio.nodes:
   type: strings
   count: '{{ CONFIG.morio.node_count }}'
-  label: Morio node names
-  labels: "Node {{ INDEX_PLUS_ONE }}"
-  labelsTR: "Enter the fully qualified domain name of node {{ INDEX_PLUS_ONE }}"
+  label: Nodes
+  labels: 'Node {{ INDEX_PLUS_ONE }}'
+  labelsTR: 'Enter the fully qualified domain name of node {{ INDEX_PLUS_ONE }}'
   about: Each Morio nodes needs a name that will resolve in DNS (an FQDN)
   placeholder: host.my.domain.com
-  next: morio.name
+  next: morio.display_name
 
 # We also like a display name to refer to Morio as a whole
 # Allowing for something more user-friendly, or differentating between different environments
-morio.name:
+morio.display_name:
   type: string
-  label: Morio display name
+  label: Display Name
   about: A human-friendly name to refer to this Morio setup
   placeholder: Morio Production
-  next: 
-    if: 
+  next:
+    if:
       val: '{{ CONFIG.morio.node_count }}'
       as: number
     is: 1
     then: MORIO_VALIDATE_CONFIG
-    else: morio.rrdns
+    else: morio.cluster_name
 
-# For clusters, we also suggest/want/need a round-robin DNS address 
-morio.rrdns:
+# For clusters, we also suggest/want/need a round-robin DNS address
+morio.cluster_name:
   type: string
-  label: Morio Cluster DNS name
+  label: Cluster Name
   about: |
     A round-robin DNS record for the entire Morio cluster. 
     This should resolve the the IP addresses of all cluster nodes.
   placeholder: cluster.my.domain.com
   next: MORIO_VALIDATE_CONFIG
-
-

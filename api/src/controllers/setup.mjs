@@ -10,9 +10,7 @@ import { generateJwtKey, generateKeyPair, randomString } from '@morio/lib/crypto
  *
  * @returns {object} Controller - The setup controller object
  */
-export function Controller() {
-}
-
+export function Controller() {}
 
 /**
  * Setup MORIO
@@ -24,7 +22,6 @@ export function Controller() {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.setup = async (req, res, tools) => {
-
   /*
    * Validate MORIO needs to be setup
    */
@@ -39,7 +36,6 @@ Controller.prototype.setup = async (req, res, tools) => {
   return res.send({ setup_token: tools.config.setup_token }).end()
 }
 
-
 /**
  * Provides a random JWT key
  *
@@ -50,7 +46,6 @@ Controller.prototype.setup = async (req, res, tools) => {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.getJwtKey = async (req, res, tools) => {
-
   /*
    * Validate MORIO needs to be setup
    */
@@ -78,7 +73,6 @@ Controller.prototype.getJwtKey = async (req, res, tools) => {
   return res.send({ jwt_key: tools.config.jwt_key })
 }
 
-
 /**
  * Provides a random password/passphrase
  *
@@ -89,7 +83,6 @@ Controller.prototype.getJwtKey = async (req, res, tools) => {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.getPassword = async (req, res, tools) => {
-
   /*
    * Validate MORIO needs to be setup
    */
@@ -112,7 +105,6 @@ Controller.prototype.getPassword = async (req, res, tools) => {
   return res.send({ password: randomString(valid.bytes) })
 }
 
-
 /**
  * Provides a random key pair
  *
@@ -123,7 +115,6 @@ Controller.prototype.getPassword = async (req, res, tools) => {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.getKeyPair = async (req, res, tools) => {
-
   /*
    * Validate MORIO needs to be setup
    */
@@ -151,8 +142,7 @@ Controller.prototype.getKeyPair = async (req, res, tools) => {
   return res.send({
     key_pair: {
       public: publicKey,
-      private: privateKey
-    }
+      private: privateKey,
+    },
   })
 }
-

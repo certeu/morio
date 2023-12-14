@@ -1,11 +1,10 @@
 export const tests = async ({ chai, expect, config, store }) => {
-
   describe(`MORIO setup tests`, () => {
     it(`Should not initiate the MORIO setup if we do not send data`, (done) => {
       chai
         .request(config.api)
         .post('/setup/morio')
-        .send({ })
+        .send({})
         .end((err, res) => {
           expect(res.status).to.equal(400)
           expect(res.type).to.equal('application/json')
@@ -36,7 +35,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .request(config.api)
         .post('/setup/morio')
         .send({
-          nodes: [ 'morio.cert.europa.eu' ]
+          nodes: ['morio.cert.europa.eu'],
         })
         .end((err, res) => {
           expect(res.status).to.equal(200)
@@ -68,7 +67,7 @@ export const tests = async ({ chai, expect, config, store }) => {
       chai
         .request(config.api)
         .post('/setup/jwtkey')
-        .send({ })
+        .send({})
         .end((err, res) => {
           expect(res.status).to.equal(401)
           expect(res.type).to.equal('application/json')
@@ -102,7 +101,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .post('/setup/password')
         .send({
           setup_token: store.setup_token,
-          bytes: 7
+          bytes: 7,
         })
         .end((err, res) => {
           expect(res.status).to.equal(400)
@@ -119,7 +118,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .post('/setup/password')
         .send({
           setup_token: store.setup_token,
-          bytes: 65
+          bytes: 65,
         })
         .end((err, res) => {
           expect(res.status).to.equal(400)
@@ -136,7 +135,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .post('/setup/password')
         .send({
           setup_token: store.setup_token,
-          bytes: 64
+          bytes: 64,
         })
         .end((err, res) => {
           expect(res.status).to.equal(200)
@@ -154,7 +153,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .post('/setup/password')
         .send({
           setup_token: store.setup_token,
-          bytes: 8
+          bytes: 8,
         })
         .end((err, res) => {
           expect(res.status).to.equal(200)
@@ -170,7 +169,7 @@ export const tests = async ({ chai, expect, config, store }) => {
       chai
         .request(config.api)
         .post('/setup/password')
-        .send({ })
+        .send({})
         .end((err, res) => {
           expect(res.status).to.equal(401)
           expect(res.type).to.equal('application/json')
@@ -186,7 +185,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .post('/setup/keypair')
         .send({
           setup_token: store.setup_token,
-          passphrase: store.passphrase
+          passphrase: store.passphrase,
         })
         .end((err, res) => {
           expect(res.status).to.equal(200)
@@ -214,6 +213,5 @@ export const tests = async ({ chai, expect, config, store }) => {
           done()
         })
     })
-
   })
 }

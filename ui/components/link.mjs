@@ -1,7 +1,6 @@
 import Link from 'next/link'
 
-const linkClasses =
-  'underline decoration-2 hover:decoration-4'
+const linkClasses = 'underline decoration-2 hover:decoration-4'
 
 const AnchorLink = ({ id, txt = false, children }) => (
   <a href={`#${id}`} className={linkClasses} title={txt ? txt : ''}>

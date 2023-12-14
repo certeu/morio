@@ -16,7 +16,6 @@ import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { OkIcon, WarningIcon } from 'components/icons.mjs'
 
-
 export const ConfigurationWizard = () => {
   /*
    * React state
@@ -57,14 +56,23 @@ export const ConfigurationWizard = () => {
    * If no validator is available for the configuration key the block is
    * updating, return an error because that's not right
    */
-  if (typeof validators[configKey] !== 'function') return (
-    <Popout error>
-      <h5>No validator is available for this configuration path</h5>
-      <p>This block controls the <code>{configKey}</code> configuration key, but no validator is available for this key.</p>
-      <p>This can lead to invalid configuration entries, so out of caution we will not proceed.</p>
-      <p>As this is an unexpected error, we recommend to <PageLink href="/support">report this through support</PageLink></p>
-    </Popout>
-  )
+  if (typeof validators[configKey] !== 'function')
+    return (
+      <Popout error>
+        <h5>No validator is available for this configuration path</h5>
+        <p>
+          This block controls the <code>{configKey}</code> configuration key, but no validator is
+          available for this key.
+        </p>
+        <p>
+          This can lead to invalid configuration entries, so out of caution we will not proceed.
+        </p>
+        <p>
+          As this is an unexpected error, we recommend to{' '}
+          <PageLink href="/support">report this through support</PageLink>
+        </p>
+      </Popout>
+    )
 
   /*
    * Helper method to load the next configuration block into the wizard
@@ -84,13 +92,12 @@ export const ConfigurationWizard = () => {
     if (!blocks.includes(key)) blocks.push(key)
     setBlockIndex(blocks.indexOf(key))
     setNext(resolveNext(key, config, template))
-    setValid(false)
   }
 
   /*
    * Helper method to update the configuration if and only if validation passes
    */
-  const updateWhenValid = (val) => {
+  const updateWhenValid = (val, key = false) => {
     /*
      * Run the validator
      */
@@ -115,8 +122,9 @@ export const ConfigurationWizard = () => {
    */
   const validateConfiguration = async () => {
     setLoadingStatus([true, 'Contacting Morio API'])
-    const [ result, statusCode ] = await api.validateConfiguration(config)
-    if (result && statusCode === 200) setLoadingStatus([true, 'Configuration validated', true, true])
+    const [result, statusCode] = await api.validateConfiguration(config)
+    if (result && statusCode === 200)
+      setLoadingStatus([true, 'Configuration validated', true, true])
     else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
     setValidationReport(result)
     setNext('MORIO_POST_VALIDATION')
@@ -142,13 +150,17 @@ export const ConfigurationWizard = () => {
                 className="btn btn-primary w-full mt-4"
                 disabled={!valid || !next}
                 onClick={validateConfiguration}
-              >Validate Configuration</button>
+              >
+                Validate Configuration
+              </button>
             ) : (
               <button
                 className="btn btn-primary w-full mt-4"
                 disabled={!valid || !next}
                 onClick={nextBlock}
-              >Continue</button>
+              >
+                Continue
+              </button>
             )}
           </>
         )}
@@ -156,21 +168,27 @@ export const ConfigurationWizard = () => {
           <>
             <h4 className="mt-12">Configuration Blocks</h4>
             <ul className="list list-inside list-disc">
-              {blocks.map(key => (
+              {blocks.map((key) => (
                 <li key={key}>
                   <button
-                    className={`btn btn-sm ${blocks.indexOf(key) === blockIndex ? 'btn-ghost' : 'btn-link'}`}
+                    className={`btn btn-sm ${
+                      blocks.indexOf(key) === blockIndex ? 'btn-ghost' : 'btn-link'
+                    }`}
                     onClick={() => loadBlock(key)}
                   >
-                    {schema[key].label}
+                    {schema[key].title || schema[key].label}
                   </button>
                 </li>
               ))}
             </ul>
           </>
         )}
-        <h4 className="mt-12">Configuration Preview</h4>
-        <Yaml js={config} />
+        {config.morio?.node_count && (
+          <>
+            <h4 className="mt-12">Configuration Preview</h4>
+            <Yaml js={config} />
+          </>
+        )}
       </div>
     </>
   )
@@ -183,8 +201,12 @@ export const ConfigurationWizard = () => {
  * @return {functino} component - The React component
  */
 const ConfigReport = ({ report }) => (
-  <>
-    <Box color={report.valid  ? 'success' : 'error'}>
+  <div
+    className={`border-solid border-2 border-y-0 border-r-0  border-${
+      report.valid ? 'success' : 'error'
+    } pl-4 ml-2 py-2`}
+  >
+    <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon /> : <WarningIcon />}
         <h6 className="text-inherit">
@@ -194,7 +216,7 @@ const ConfigReport = ({ report }) => (
         </h6>
       </div>
     </Box>
-    <Box color={report.valid  ? 'success' : 'error'}>
+    <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon /> : <WarningIcon />}
         <h6 className="text-inherit">
@@ -204,25 +226,31 @@ const ConfigReport = ({ report }) => (
         </h6>
       </div>
     </Box>
-    {['errors', 'warnings', 'info'].map(type => report[type].length > 0 ? (
-      <div key={type}>
-        <h3>Validation {type}</h3>
-        <Messages list={report[type]} />
-      </div>
-    ) : null )}
-  </>
+    {['errors', 'warnings', 'info'].map((type) =>
+      report[type].length > 0 ? (
+        <div key={type} className="mt-3">
+          <h6 className="capitalize">{type}</h6>
+          <Messages list={report[type]} />
+        </div>
+      ) : null
+    )}
+  </div>
 )
 const Messages = ({ list }) => (
-  <ul className="list list-disc list-inside pl-4">
-    {list.map((msg, i) => <li key={i}>{msg}</li>)}
+  <ul className="list list-disc list-inside pl-2">
+    {list.map((msg, i) => (
+      <li key={i}>{msg}</li>
+    ))}
   </ul>
 )
 
 /**
  * Little helper component to display a box in the report
  */
-const Box = ({ color, children}) => (
-  <div className={`bg-${color} text-${color}=content rounded-lg p-4 w-full bg-opacity-80 shadow mb-2`}>
+const Box = ({ color, children }) => (
+  <div
+    className={`bg-${color} text-${color}-content rounded-lg p-4 w-full bg-opacity-80 shadow mb-2`}
+  >
     {children}
   </div>
 )
@@ -235,7 +263,7 @@ const Box = ({ color, children}) => (
  * @param {function} template - The template method
  * @return {string} next - The resolve next value
  */
-function resolveNext(next, config, template)  {
+function resolveNext(next, config, template) {
   if (typeof next !== 'object') return next
 
   if (next.if) {
@@ -246,7 +274,7 @@ function resolveNext(next, config, template)  {
     /*
      * Now check it against the condition
      */
-    if (check === next.if.is) return template(next.then, { CONFIG: config })
+    if (check === next.is) return template(next.then, { CONFIG: config })
     else return template(next.else, { CONFIG: config })
   }
 
@@ -256,13 +284,12 @@ function resolveNext(next, config, template)  {
 function resolveValue(input, config, template) {
   let val = input
   if (typeof input === 'object') {
-    val = template(input.val, { CONFIG: config})
+    val = template(input.val, { CONFIG: config })
     if (['number', 'string'].includes(input.as)) {
       if (input.as === 'number') val = Number(val)
       if (input.as === 'string') val = String(val)
     }
-  }
-  else val = template(input, { CONFIG: config })
+  } else val = template(input, { CONFIG: config })
 
   return val
 }

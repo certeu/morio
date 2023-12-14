@@ -2,19 +2,19 @@ import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
 
 const shared = {
-  tags: [ 'Status' ]
+  tags: ['Status'],
 }
 
-const request = (description, key, examples=false, example=false) => {
+const request = (description, key, examples = false, example = false) => {
   const data = {
     requestBody: {
       description,
       content: {
         'application/json': {
           schema: j2s(requestSchema.setup[key]).swagger,
-        }
-      }
-    }
+        },
+      },
+    },
   }
   if (examples) data.requestBody.content['application/json'].examples = examples
   else if (example) data.requestBody.content['application/json'].example = example
@@ -22,14 +22,14 @@ const request = (description, key, examples=false, example=false) => {
   return data
 }
 
-const response = (description, schema, example={}) => ({
+const response = (description, schema, example = {}) => ({
   description,
   content: {
     'application/json': {
       schema: j2s(schema).swagger,
       example,
-    }
-  }
+    },
+  },
 })
 
 export const paths = {
@@ -47,25 +47,24 @@ export const paths = {
               examples: {
                 'Before setup': {
                   value: {
-                    name: "@morio/api",
-                    about:"MORIO REST API",
-                    version:"0.1.0",
-                    uptime: "30.7 seconds",
+                    name: '@morio/api',
+                    about: 'MORIO REST API',
+                    version: '0.1.0',
+                    uptime: '30.7 seconds',
                     uptime_seconds: 30.761,
-                    setup:false
+                    setup: false,
                   },
                 },
                 'After setup': {
                   value: {
-                    fixme: 'Not implemented yet'
-                  }
+                    fixme: 'Not implemented yet',
+                  },
                 },
-              }
-            }
-          }
-        }
-      }
-    }
+              },
+            },
+          },
+        },
+      },
+    },
   },
 }
-

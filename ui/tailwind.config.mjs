@@ -26,9 +26,7 @@ const tailwindConfig = {
     logs: true,
     rtl: false,
   },
-  plugins: [
-    daisyui,
-  ],
+  plugins: [daisyui],
 }
 
 export default tailwindConfig

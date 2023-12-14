@@ -12,7 +12,7 @@ export default ComponentsPage
 
 export const getStaticProps = () => ({
   props: {
-    title: "Components",
-    page: ['components']
-  }
+    title: 'Components',
+    page: ['components'],
+  },
 })

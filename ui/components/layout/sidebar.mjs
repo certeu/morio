@@ -31,9 +31,7 @@ export const NavButton = ({
   extraClasses = 'lg:hover:bg-secondary lg:hover:text-secondary-content',
 }) => {
   const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
-    active
-      ? 'bg-secondary text-secondary-content font-bold'
-      : 'bg-neutral text-neutral-content'
+    active ? 'bg-secondary text-secondary-content font-bold' : 'bg-neutral text-neutral-content'
   }`
   const span = <span className="block grow text-left">{label}</span>
 
@@ -55,7 +53,8 @@ export const Sidebar = ({ page }) => {
   const iconSize = 'h-6 w-6 grow-0'
 
   return (
-    <div className={`w-64 min-h-screen pt-4
+    <div
+      className={`w-64 min-h-screen pt-4
       bg-neutral
       shrink-0 grow-0 self-stretch
       transition-all drop-shadow-xl
@@ -80,17 +79,15 @@ export const Sidebar = ({ page }) => {
                 stroke={4}
               />
             ) : (
-              <LeftIcon className={`${iconSize} animate-bounce-right animate[bounceleft_1s_3]`} stroke={4} />
+              <LeftIcon
+                className={`${iconSize} animate-bounce-right animate[bounceleft_1s_3]`}
+                stroke={4}
+              />
             )}
           </NavButton>
-          {Object.keys(links).map(link => (
-            <NavButton
-              key={link}
-              href={`/${link}`}
-              label={links[link]}
-              active={page[0] === link}
-            >
-            {icons[link]}
+          {Object.keys(links).map((link) => (
+            <NavButton key={link} href={`/${link}`} label={links[link]} active={page[0] === link}>
+              {icons[link]}
             </NavButton>
           ))}
         </div>

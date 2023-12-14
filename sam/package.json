@@ -8,7 +8,8 @@
     "clean": "rimraf dist",
     "dev": "nodemon src/index.mjs",
     "prettier": "npx prettier --write 'src/*.mjs' 'tests/*.mjs'",
-    "test": "npx mocha tests/index.mjs"
+    "test": "npx mocha tests/index.mjs",
+    "prettier": "prettier -w ."
   },
   "imports": {
     "#lib/*": "../api/src/lib/*.mjs"

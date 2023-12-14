@@ -18,4 +18,3 @@ export const DefaultLayout = ({ title, page, children = [] }) => (
     </div>
   </div>
 )
-

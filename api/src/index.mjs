@@ -19,7 +19,7 @@ import { openapi } from '../openapi/index.mjs'
  */
 const tools = {
   passport, // The passport authentication middleware
-  ...(await bootstrapConfiguration())
+  ...(await bootstrapConfiguration()),
 }
 
 /*
@@ -42,7 +42,6 @@ tools.log.debug('Adding openapi documentation endpoints')
 const docs = swaggerUi.setup(openapi)
 app.use('/docs', swaggerUi.serve, docs)
 
-
 /*
  * Load the Passport middleware
  */
@@ -61,14 +60,16 @@ for (const type in routes) {
  * Handle the root route
  */
 tools.log.debug(`Loading root route`)
-app.get('/', async (req, res) => res.send({
-  name: tools.config.name,
-  about: tools.config.about,
-  version: tools.config.version,
-  setup: tools.config.setup,
-  status: "/status",
-  docs: "/docs",
-}))
+app.get('/', async (req, res) =>
+  res.send({
+    name: tools.config.name,
+    about: tools.config.about,
+    version: tools.config.version,
+    setup: tools.config.setup,
+    status: '/status',
+    docs: '/docs',
+  })
+)
 
 /*
  * Start listening for requests
@@ -77,4 +78,3 @@ app.listen(fromEnv('MORIO_PORT_API'), (err) => {
   if (err) log.error(err, 'An error occured')
   tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_PORT_API')}`)
 })
-

@@ -20,12 +20,12 @@ export const Highlight = (props) => {
   }
 
   const preProps = {
-    className: `language-${language} hljs text-base lg:text-lg whitespace-break-spaces overflow-scroll pr-4`,
+    className: `language-${language} hljs text-base lg:text-lg whitespace-break-spaces overflow-auto px-4 py-2`,
   }
   if (props.raw) preProps.dangerouslySetInnerHTML = { __html: props.raw }
 
   return (
-    <div className="hljs my-4">
+    <div className="hljs my-4 bg-neutral rounded-lg py-1 text-neutral-content">
       <div
         className={`
         flex flex-row justify-between items-center
@@ -35,10 +35,9 @@ export const Highlight = (props) => {
       `}
       >
         <span>{names[language] ? names[language] : language}</span>
-        {status ? <HttpStatusCode status={status} /> : <CopyToClipboard content={props.children} />}
+        <CopyToClipboard content={props.children} />
       </div>
       <pre {...preProps}>{props.children}</pre>
     </div>
   )
 }
-
