@@ -1,0 +1,35 @@
+{
+  "name": "@morio/schema",
+  "version": "0.1.0",
+  "description": "Morio schema",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rimraf dist",
+    "dev": "nodemon src/index.mjs",
+    "prettier": "prettier -w .",
+    "test": "npx mocha tests/index.mjs"
+  },
+  "imports": {
+    "#lib/*": "./src/lib/*.mjs"
+  },
+  "dependencies": {
+    "joi": "^17.11.0"
+  },
+  "devDependencies": {},
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/certeu/morio.git"
+  },
+  "author": "Joost De Cock <joost@joost.at>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/certeu/morio/issues"
+  },
+  "homepage": "https://github.com/certeu/morio#readme",
+  "exports": {
+    ".": "./src/index.js",
+    "./config": "./src/config.mjs"
+  }
+}

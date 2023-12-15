@@ -39,23 +39,23 @@ export const paths = {
   '/setup/morio': {
     post: {
       ...shared,
-      summary: `Starts the initial setup of a MORIO instance or cluster`,
-      description: `Starts the process of setting up a MORIO instance or cluster.
+      summary: `Starts the initial setup of a Morio instance or cluster`,
+      description: `Starts the process of setting up a Morio instance or cluster.
         <br>
-        Can only be accessed when MORIO has not yet been setup.
+        Can only be accessed when Morio has not yet been setup.
         <br>
         The <code>setup_token</code> that is returned is required to access the other setup endpoints.
         <br/>
         Only restarting the API will change the <code>setup_token</code>.
       `,
       ...request(
-        'Post an array of hostnames to setup MORIO.<br>A single hostname for a stand-alone instance, or an odd number of nodes for a cluster setup',
+        'Post an array of hostnames to setup Morio.<br>A single hostname for a stand-alone instance, or an odd number of nodes for a cluster setup',
         'morio',
         {
-          'MORIO Stand-alone Instance': {
+          'Morio Stand-alone Instance': {
             value: { nodes: ['morio.cert.europa.eu'] },
           },
-          'MORIO Cluster': {
+          'Morio Cluster': {
             value: {
               nodes: [
                 'morio-cluster-node1.cert.europa.eu',
@@ -72,7 +72,7 @@ export const paths = {
         200: response('Setup initiated successfully', responseSchema.setup.morio, { setup_token }),
         400: response('Data validation error', errorsSchema, { errors: [`"nodes" is required`] }),
         401: response('Setup is not currently possible', errorsSchema, {
-          errors: ['The current MORIO state does not allow initiating setup'],
+          errors: ['The current Morio state does not allow initiating setup'],
         }),
       },
     },
@@ -95,7 +95,7 @@ export const paths = {
           errors: [`"setup_token" is required`],
         }),
         401: response('Setup is not currently possible', errorsSchema, {
-          errors: ['The current MORIO state does not allow initiating setup'],
+          errors: ['The current Morio state does not allow initiating setup'],
         }),
       },
     },
@@ -130,7 +130,7 @@ export const paths = {
           errors: [`"setup_token" is required`],
         }),
         401: response('Setup is not currently possible', errorsSchema, {
-          errors: ['The current MORIO state does not allow initiating setup'],
+          errors: ['The current Morio state does not allow initiating setup'],
         }),
       },
     },
@@ -255,7 +255,7 @@ WvAZbYgOAQMfpXI2Mi5Wbm0IuSVLTqQL9Dyz1aoj8zki
           errors: [`"setup_token" is required`],
         }),
         401: response('Setup is not currently possible', errorsSchema, {
-          errors: ['The current MORIO state does not allow initiating setup'],
+          errors: ['The current Morio state does not allow initiating setup'],
         }),
       },
     },

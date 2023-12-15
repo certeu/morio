@@ -23,7 +23,7 @@ export const setupNotPossible = (res) =>
   res
     .status(401)
     .send({
-      errors: ['The current MORIO state does not allow initiating setup'],
+      errors: ['The current Morio state does not allow initiating setup'],
     })
     .end()
 

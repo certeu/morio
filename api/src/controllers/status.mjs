@@ -1,7 +1,7 @@
 import { timeSince } from '@morio/lib/time'
 
 /**
- * This status controller handles the MORIO status endpoint
+ * This status controller handles the Morio status endpoint
  *
  * @returns {object} Controller - The status controller object
  */
@@ -32,7 +32,7 @@ Controller.prototype.status = async (req, res, tools) => {
   }
 
   /*
-   * If MORIO is not setup, return limited info
+   * If Morio is not setup, return limited info
    */
   if (!tools.config.setup) return res.send(base)
 

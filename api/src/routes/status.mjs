@@ -17,7 +17,7 @@ export function routes(tools) {
   const { app } = tools
 
   /*
-   * Hit this route to get the MORIO status
+   * Hit this route to get the Morio status
    */
   app.get('/status', (req, res) => Status.status(req, res, tools))
 }

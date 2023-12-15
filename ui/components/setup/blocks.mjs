@@ -1,6 +1,6 @@
 // Dependencies
 import get from 'lodash.get'
-import { validators } from './validators.mjs'
+import { validate } from 'lib/utils.mjs'
 // Hooks
 import { useState } from 'react'
 import { useTemplate } from 'hooks/use-template.mjs'
@@ -49,8 +49,8 @@ export const ListBlock = (props) => {
 
   return (
     <>
-      {title ? <h2>{title}</h2> : null}
-      {!title && label ? <h2>{label}</h2> : null}
+      {title ? <h3>{title}</h3> : null}
+      {!title && label ? <h3>{label}</h3> : null}
       {about ? <Markdown>{about}</Markdown> : null}
       <ListInput {...props} list={input} current={get(config, configKey)} />
     </>
@@ -107,12 +107,12 @@ export const StringsBlock = (props) => {
   if (!count || count < 2)
     return (
       <>
-        {props.label ? <h2>{props.label}</h2> : null}
+        {props.label ? <h3>{props.label}</h3> : null}
         {props.about ? <Markdown>{props.about}</Markdown> : null}
         <StringBlock
           {...props}
           update={(val) => localUpdate(0, val)}
-          valid={validators[configKey]}
+          valid={validate(configKey, list[0])}
           current={list[0]}
           about={false}
           noTitle
@@ -126,7 +126,7 @@ export const StringsBlock = (props) => {
    */
   return (
     <>
-      {props.label ? <h2>{props.label}</h2> : null}
+      {props.label ? <h3>{props.label}</h3> : null}
       {props.about ? <Markdown>{props.about}</Markdown> : null}
 
       {[...Array(count)].map((val, i) => {
@@ -147,7 +147,7 @@ export const StringsBlock = (props) => {
             labelBL={template(props.labelsBL, templateData)}
             labelBR={template(props.labelsBR, templateData)}
             update={(val) => localUpdate(i, val)}
-            valid={validators[configKey]}
+            valid={(val) => validate(configKey, val)}
             current={list[i]}
           />
         )
@@ -175,15 +175,15 @@ export const StringBlock = (props) => {
 
   return (
     <>
-      {label && !noTitle ? <h2>{label}</h2> : null}
+      {label && !noTitle ? <h3>{label}</h3> : null}
       {about ? <Markdown>{about}</Markdown> : null}
-      {configKey}
       <StringInput
+        key={configKey}
         current={get(config, configKey)}
         {...props}
         list={input}
         placeholder={placeholder}
-        valid={validators[configKey]}
+        valid={(val) => validate(configKey, val)}
       />
     </>
   )

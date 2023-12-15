@@ -1,6 +1,6 @@
 export const tests = async ({ chai, expect, config, store }) => {
-  describe(`MORIO setup tests`, () => {
-    it(`Should not initiate the MORIO setup if we do not send data`, (done) => {
+  describe(`Morio setup tests`, () => {
+    it(`Should not initiate the Morio setup if we do not send data`, (done) => {
       chai
         .request(config.api)
         .post('/setup/morio')
@@ -14,7 +14,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         })
     })
 
-    it(`Should not initiate the MORIO setup if we send unexpected data`, (done) => {
+    it(`Should not initiate the Morio setup if we send unexpected data`, (done) => {
       chai
         .request(config.api)
         .post('/setup/morio')
@@ -30,7 +30,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         })
     })
 
-    it(`Should initiate the MORIO setup`, (done) => {
+    it(`Should initiate the Morio setup`, (done) => {
       chai
         .request(config.api)
         .post('/setup/morio')

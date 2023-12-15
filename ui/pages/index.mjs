@@ -9,10 +9,10 @@ const HomePage = (props) => {
   if (config.setup === false)
     return (
       <PageWrapper {...props} layout={SplashLayout}>
-        <div className="text-center">
-          <h1>Welcome to Morio</h1>
+        <div className="max-w-xl m-auto py-12">
+          <h1 className="text-center">Welcome to Morio</h1>
           <Popout note compact>
-            <strong>Morio is uninitialized. Please provide a configuration.</strong>
+            <strong>Morio requires an initial configuration</strong>
           </Popout>
           <div className="grid gap-2 mb-2 mt-4">
             <Link className="btn btn-primary btn-lg" href="/setup/wizard">
@@ -30,35 +30,35 @@ const HomePage = (props) => {
           <Link className="btn btn-ghost w-full mt-2" href="/setup/api">
             Use the API
           </Link>
+          <Popout tip>
+            <h5 className="text-base-content">Note sure what to pick?</h5>
+            <div className="text-sm">
+              <div className="pb-2">
+                <strong>Use the configuration wizard</strong>
+                <div className="text-sm -mt-1 italic">unless you have a specific reason not to</div>
+              </div>
+              <div className="pb-2">
+                <strong>Upload a configuration file</strong>
+                <div className="text-sm -mt-1 italic">
+                  if you received a morio configuration file from a trusted source
+                </div>
+              </div>
+              <div className="pb-2">
+                <strong>Download a configuration file</strong>
+                <br />
+                <div className="text-sm -mt-1 italic">
+                  if you received a link to a morio configuration file from a trusted source
+                </div>
+              </div>
+              <div className="pb-2">
+                <strong>Use the API</strong>
+                <div className="text-sm -mt-1 italic">
+                  if you want to automate the deployment of this morio instance
+                </div>
+              </div>
+            </div>
+          </Popout>
         </div>
-        <Popout tip>
-          <h5 className="text-base-content">Note sure what to pick?</h5>
-          <div className="text-sm">
-            <div className="pb-2">
-              <strong>Use the configuration wizard</strong>
-              <div className="text-sm -mt-1 italic">unless you have a specific reason not to</div>
-            </div>
-            <div className="pb-2">
-              <strong>Upload a configuration file</strong>
-              <div className="text-sm -mt-1 italic">
-                if you received a morio configuration file from a trusted source
-              </div>
-            </div>
-            <div className="pb-2">
-              <strong>Download a configuration file</strong>
-              <br />
-              <div className="text-sm -mt-1 italic">
-                if you received a link to a morio configuration file from a trusted source
-              </div>
-            </div>
-            <div className="pb-2">
-              <strong>Use the API</strong>
-              <div className="text-sm -mt-1 italic">
-                if you want to automate the deployment of this morio instance
-              </div>
-            </div>
-          </div>
-        </Popout>
       </PageWrapper>
     )
 

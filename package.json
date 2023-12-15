@@ -21,7 +21,9 @@
   "workspaces": [
     "api",
     "lib",
-    "sam"
+    "sam",
+    "schema",
+    "defaults"
   ],
   "devDependencies": {
     "eslint-config-prettier": "^9.1.0",

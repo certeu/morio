@@ -33,7 +33,7 @@ export const validate = async (targetPath, input) => {
 }
 
 /**
- * Validates MORIO configuration
+ * Validates Morio configuration
  *
  * This will not catch all problems, but it should at least catch some common
  * configuration issues, in particular for people writing their own config.
@@ -70,7 +70,7 @@ export const validateConfiguration = async (newConfig, tools) => {
     /*
      * Validate failed, bail out here
      */
-    report.errors.push(`Configuration did not pass schema validation`)
+    report.info.push(`Configuration did not pass schema validation`)
     for (const msg of err.details) report.errors.push(msg.message)
     abort()
 
@@ -83,31 +83,60 @@ export const validateConfiguration = async (newConfig, tools) => {
   report.info.push('Configuration passed schema validation')
 
   /*
-   * Verify node name resolution
+   * Verify nodes
    */
+  let i = 0
   for (const node of config.morio.nodes) {
-    const [result, data] = await resolveHost(node)
-    if (result) report.info.push(`Node ${node} resolves to: ${data.join()}`)
+    i++
+    report.info.push(`Validating node ${i}: ${node}`)
+    /*
+     * Verify node name resolution
+     */
+    const [resolved, ipsOrError] = await resolveHost(node)
+    if (resolved) report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
     else {
-      report.errors.push(data)
+      report.info.push(`Validation failed for node ${i}`)
+      report.errors.push(ipsOrError)
       abort()
 
       return report
     }
-  }
 
-  /*
-   * Try contacting nodes over HTTPS, ignore certificate
-   */
-  for (const node of config.morio.nodes) {
-    const [result, data] = await testUrl(`https://${node}/`, { ignoreCertificate: true })
-    if (result) report.info.push(data, `Node ${node} is reachable over HTTPS`)
+    /*
+     * Try contacting nodes over HTTPS, ignore certificate
+     */
+    const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' })
+    if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
     else {
-      report.info.push(data)
-      report.errors.push(`Unable to reach https://${node}/`)
+      report.info.push(`Validation failed for node ${i}`)
+      report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
       abort()
 
       return report
+    }
+
+    /*
+     * Does the node run Morio and is it not setup?
+     */
+    const runsMorio = await testUrl(`https://${node}/api/status`, { returnAs: 'json' })
+    if (runsMorio) {
+      // FIXME: Handle api return data
+      report.info.push(`Node ${i} runs Morio and is ready for setup`)
+    } else {
+      report.info.push(`Node ${i} does not run Morio`)
+      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
+      report.errors.push(`All nodes need to run Morio, but node ${i} does not`)
+      abort()
+    }
+
+    /*
+     * Try contacting nodes over HTTPS, also validate certificate
+     */
+    const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
+    if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
+    else {
+      report.info.push(`Certificate validation failed for node ${i}`)
+      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
     }
   }
 
@@ -131,9 +160,9 @@ export const validateConfiguration = async (newConfig, tools) => {
 export const setupTokenValid = (token, config) => config.setup_token && token === config.setup_token
 
 /**
- * Helper method to verify MORIO has not been setup yet
+ * Helper method to verify Morio has not been setup yet
  *
  * @param {object} config - The configuration object
- * @return {bool|function} result - True of MORIO is not setup, a method that will return the error if it does not
+ * @return {bool|function} result - True of Morio is not setup, a method that will return the error if it does not
  */
 export const setupPossible = (config) => typeof config.setup_token !== 'undefined'

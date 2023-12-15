@@ -1,11 +1,9 @@
 # First thing to do is figure out how many nodes we should deploy
-# init is a special key that serves as the entry point to the configuration wizard
-init:
+morio.node_count:
   # Typically the key is used as configKey, but in this case, it's specified explicitly
   # because the 'init' key has a special purpose.
   # This configKey value (or the key for other blocks) determines where the data will be
   # stored in the configuration (in this case under morio.node_count)
-  configKey: morio.node_count
   next: morio.nodes
   type: list
   title: Node vs Cluster
@@ -64,7 +62,7 @@ morio.display_name:
       val: '{{ CONFIG.morio.node_count }}'
       as: number
     is: 1
-    then: MORIO_VALIDATE_CONFIG
+    then: validate
     else: morio.cluster_name
 
 # For clusters, we also suggest/want/need a round-robin DNS address
@@ -75,4 +73,15 @@ morio.cluster_name:
     A round-robin DNS record for the entire Morio cluster. 
     This should resolve the the IP addresses of all cluster nodes.
   placeholder: cluster.my.domain.com
-  next: MORIO_VALIDATE_CONFIG
+  next: validate
+
+# This is not a real block, but a way to tell the UI it should show validation here
+validate:
+  next: validate
+  label: Validate configuration
+  about: |
+    You have completed the steps required for this configuration.
+    You should now submit your configuration to the Morio API for validation.
+
+    No changes will be made to your Morio setup at this time.
+    Instead, the configuration you created will be validated and tested to detect any potential issues.

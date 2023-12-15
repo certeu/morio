@@ -91,23 +91,3 @@ export const responseSchema = {
  * This describes the schema of error responses
  */
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
-
-/*
- * This describes the schema of the morio configuration
- */
-export const morioSchema = Joi.object({
-  morio: Joi.object({
-    display_name: Joi.string().required().min(2).max(255),
-    node_count: Joi.number()
-      .required()
-      .valid(...fromEnv('MORIO_NODES_VALID')),
-    nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
-    cluster_name: Joi.string()
-      .hostname()
-      .when('node_count', {
-        is: Joi.number().max(1),
-        then: Joi.forbidden(),
-        otherwise: Joi.required(),
-      }),
-  }),
-})

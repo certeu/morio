@@ -3,9 +3,9 @@ import { schemaViolation, setupTokenInvalid, setupNotPossible } from '../lib/res
 import { generateJwtKey, generateKeyPair, randomString } from '@morio/lib/crypto'
 
 /**
- * This setup controller handles the MORIO setup
+ * This setup controller handles the Morio setup
  *
- * It will be the only functionality that is available while MORIO is not set up (yet).
+ * It will be the only functionality that is available while Morio is not set up (yet).
  * Once set up, this functionality will no longer be accessible.
  *
  * @returns {object} Controller - The setup controller object
@@ -13,9 +13,9 @@ import { generateJwtKey, generateKeyPair, randomString } from '@morio/lib/crypto
 export function Controller() {}
 
 /**
- * Setup MORIO
+ * Setup Morio
  *
- * This starts the setup of MORIO, unless it's already been setup.
+ * This starts the setup of Morio, unless it's already been setup.
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -23,7 +23,7 @@ export function Controller() {}
  */
 Controller.prototype.setup = async (req, res, tools) => {
   /*
-   * Validate MORIO needs to be setup
+   * Validate Morio needs to be setup
    */
   if (!setupPossible(tools.config)) return setupNotPossible(res)
 
@@ -47,7 +47,7 @@ Controller.prototype.setup = async (req, res, tools) => {
  */
 Controller.prototype.getJwtKey = async (req, res, tools) => {
   /*
-   * Validate MORIO needs to be setup
+   * Validate Morio needs to be setup
    */
   if (!setupPossible(tools.config)) return setupNotPossible(res)
 
@@ -84,7 +84,7 @@ Controller.prototype.getJwtKey = async (req, res, tools) => {
  */
 Controller.prototype.getPassword = async (req, res, tools) => {
   /*
-   * Validate MORIO needs to be setup
+   * Validate Morio needs to be setup
    */
   if (!setupPossible(tools.config)) return setupNotPossible(res)
 
@@ -116,7 +116,7 @@ Controller.prototype.getPassword = async (req, res, tools) => {
  */
 Controller.prototype.getKeyPair = async (req, res, tools) => {
   /*
-   * Validate MORIO needs to be setup
+   * Validate Morio needs to be setup
    */
   if (!setupPossible(tools.config)) return setupNotPossible(res)
 

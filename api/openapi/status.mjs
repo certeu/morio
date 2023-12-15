@@ -36,8 +36,8 @@ export const paths = {
   '/status': {
     get: {
       ...shared,
-      summary: `Returns the MORIO status`,
-      description: `Returns information about how MORIO is doing. Useful for monitoring.`,
+      summary: `Returns the Morio status`,
+      description: `Returns information about how Morio is doing. Useful for monitoring.`,
       responses: {
         200: {
           description: 'Setup initiated successfully',
@@ -48,7 +48,7 @@ export const paths = {
                 'Before setup': {
                   value: {
                     name: '@morio/api',
-                    about: 'MORIO REST API',
+                    about: 'Morio REST API',
                     version: '0.1.0',
                     uptime: '30.7 seconds',
                     uptime_seconds: 30.761,

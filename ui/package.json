@@ -12,6 +12,8 @@
   "dependencies": {
     "highlight.js": "^11.9.0",
     "is-valid-hostname": "^1.0.2",
+    "jotai": "^2.6.0",
+    "jotai-location": "^0.5.2",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",

@@ -1,13 +1,16 @@
 // Dependencies
-import schema from './schema.yaml'
-import { validators } from './validators.mjs'
+import wizard from 'config/ui/config-wizard.yaml'
+import { template, validate } from 'lib/utils.mjs'
+import get from 'lodash.get'
+import { atomWithHash } from 'jotai-location'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useEffect, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
-import { useTemplate } from 'hooks/use-template.mjs'
+import { useView } from 'hooks/use-view.mjs'
+import { useAtom } from 'jotai'
 // Components
 import Markdown from 'react-markdown'
 import { Block } from './blocks.mjs'
@@ -16,183 +19,10 @@ import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { OkIcon, WarningIcon } from 'components/icons.mjs'
 
-export const ConfigurationWizard = () => {
-  /*
-   * React state
-   */
-  const [config, update] = useStateObject()
-  const [blocks, setBlocks] = useState(['init'])
-  const [blockIndex, setBlockIndex] = useState(0)
-  const [next, setNext] = useState(false)
-  const [valid, setValid] = useState(false)
-  const [validationReport, setValidationReport] = useState(false)
-
-  /*
-   * Hooks
-   */
-  const template = useTemplate(config)
-
-  /*
-   * API client
-   */
-  const { api } = useApi()
-
-  /*
-   * Loading context
-   */
-  const { setLoadingStatus, loading, LoadingProgress } = useContext(LoadingStatusContext)
-
-  /*
-   * Store the name of this block so in a more intuitive name
-   */
-  const blockName = blocks[blockIndex]
-
-  /*
-   * The configuration key is the blockName unless it's specified explicitly
-   */
-  const configKey = schema[blockName]?.configKey || blockName
-
-  /*
-   * If no validator is available for the configuration key the block is
-   * updating, return an error because that's not right
-   */
-  if (typeof validators[configKey] !== 'function')
-    return (
-      <Popout error>
-        <h5>No validator is available for this configuration path</h5>
-        <p>
-          This block controls the <code>{configKey}</code> configuration key, but no validator is
-          available for this key.
-        </p>
-        <p>
-          This can lead to invalid configuration entries, so out of caution we will not proceed.
-        </p>
-        <p>
-          As this is an unexpected error, we recommend to{' '}
-          <PageLink href="/support">report this through support</PageLink>
-        </p>
-      </Popout>
-    )
-
-  /*
-   * Helper method to load the next configuration block into the wizard
-   */
-  const nextBlock = () => {
-    const newBlocks = [...blocks]
-    if (!blocks.includes(next)) blocks.push(next)
-    setBlockIndex(blocks.indexOf(next))
-    setValid(false)
-  }
-
-  /*
-   * Helper method to load the next configuration block into the wizard
-   */
-  const loadBlock = (key) => {
-    const newBlocks = [...blocks]
-    if (!blocks.includes(key)) blocks.push(key)
-    setBlockIndex(blocks.indexOf(key))
-    setNext(resolveNext(key, config, template))
-  }
-
-  /*
-   * Helper method to update the configuration if and only if validation passes
-   */
-  const updateWhenValid = (val, key = false) => {
-    /*
-     * Run the validator
-     */
-    const [valid, next] = validators[configKey](val, config)
-    if (valid) {
-      /*
-       * Looks good, update the configuration and set the next block
-       */
-      update(configKey, val)
-      setValid(valid)
-      setNext(resolveNext(next, config, template))
-    } else {
-      /*
-       * Validation failed. Do not update configuration, and set valid to false.
-       */
-      setValid(false)
-    }
-  }
-
-  /*
-   * Helper method to validate the configuration
-   */
-  const validateConfiguration = async () => {
-    setLoadingStatus([true, 'Contacting Morio API'])
-    const [result, statusCode] = await api.validateConfiguration(config)
-    if (result && statusCode === 200)
-      setLoadingStatus([true, 'Configuration validated', true, true])
-    else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
-    setValidationReport(result)
-    setNext('MORIO_POST_VALIDATION')
-  }
-
-  return (
-    <>
-      <div className="text-left">
-        {next === 'MORIO_POST_VALIDATION' ? (
-          <>
-            <h2>Configuration Validation</h2>
-            <ConfigReport report={validationReport} />
-          </>
-        ) : (
-          <>
-            <Block
-              update={updateWhenValid}
-              {...schema[blockName]}
-              {...{ config, setValid, setNext, configKey }}
-            />
-            {next === 'MORIO_VALIDATE_CONFIG' ? (
-              <button
-                className="btn btn-primary w-full mt-4"
-                disabled={!valid || !next}
-                onClick={validateConfiguration}
-              >
-                Validate Configuration
-              </button>
-            ) : (
-              <button
-                className="btn btn-primary w-full mt-4"
-                disabled={!valid || !next}
-                onClick={nextBlock}
-              >
-                Continue
-              </button>
-            )}
-          </>
-        )}
-        {blocks.length > 1 && (
-          <>
-            <h4 className="mt-12">Configuration Blocks</h4>
-            <ul className="list list-inside list-disc">
-              {blocks.map((key) => (
-                <li key={key}>
-                  <button
-                    className={`btn btn-sm ${
-                      blocks.indexOf(key) === blockIndex ? 'btn-ghost' : 'btn-link'
-                    }`}
-                    onClick={() => loadBlock(key)}
-                  >
-                    {schema[key].title || schema[key].label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-        {config.morio?.node_count && (
-          <>
-            <h4 className="mt-12">Configuration Preview</h4>
-            <Yaml js={config} />
-          </>
-        )}
-      </div>
-    </>
-  )
-}
+/*
+ * When no view is present, this is the default
+ */
+const START_VIEW = 'morio.node_count'
 
 /**
  * A React component to display a configuration report
@@ -201,29 +31,25 @@ export const ConfigurationWizard = () => {
  * @return {functino} component - The React component
  */
 const ConfigReport = ({ report }) => (
-  <div
-    className={`border-solid border-2 border-y-0 border-r-0  border-${
-      report.valid ? 'success' : 'error'
-    } pl-4 ml-2 py-2`}
-  >
+  <div className="py-2">
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon /> : <WarningIcon />}
-        <h6 className="text-inherit">
+        <div className="text-inherit">
           This configuration
           {report.valid ? <span> is </span> : <b className="px-1 underline">is NOT</b>}
           valid
-        </h6>
+        </div>
       </div>
     </Box>
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon /> : <WarningIcon />}
-        <h6 className="text-inherit">
+        <div className="text-inherit">
           This configuration
           {report.valid ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
           be deployed
-        </h6>
+        </div>
       </div>
     </Box>
     {['errors', 'warnings', 'info'].map((type) =>
@@ -236,6 +62,10 @@ const ConfigReport = ({ report }) => (
     )}
   </div>
 )
+
+/**
+ * A React compnent to display messages from a configuration report
+ */
 const Messages = ({ list }) => (
   <ul className="list list-disc list-inside pl-2">
     {list.map((msg, i) => (
@@ -255,17 +85,28 @@ const Box = ({ color, children }) => (
   </div>
 )
 
-/*
- * A helper function to resolve the next value
+/**
+ * A helper function to resolve the next view from the wizard config
  *
- * @param {string|number|object} next - The next key in the schema
+ * @param {string|number|object} next - The next key in the wizard config
  * @param {object} config - The configuration from React state
- * @param {function} template - The template method
  * @return {string} next - The resolve next value
  */
-function resolveNext(next, config, template) {
-  if (typeof next !== 'object') return next
+const resolveNextView = (view, config) => {
+  /*
+   * First we need to figure out what's next
+   */
+  const next = wizard[view].next
 
+  /*
+   * If it's a string, we don't need to do anything else
+   */
+  if (typeof next === 'string') return next
+
+  /*
+   * If it's an object with an if property,
+   * we need a bit more work to know what view is next
+   */
   if (next.if) {
     /*
      * First resolve the value to check
@@ -281,7 +122,10 @@ function resolveNext(next, config, template) {
   return false
 }
 
-function resolveValue(input, config, template) {
+/**
+ * A helper method to resolve a value from the wizard config through templating
+ */
+const resolveValue = (input, config, template) => {
   let val = input
   if (typeof input === 'object') {
     val = template(input.val, { CONFIG: config })
@@ -292,4 +136,180 @@ function resolveValue(input, config, template) {
   } else val = template(input, { CONFIG: config })
 
   return val
+}
+
+/**
+ * Keeps track of the view in the URL hash
+ */
+const viewInHash = atomWithHash('view', START_VIEW)
+
+/**
+ * This is the React component for the configuration wizard itself
+ */
+export const ConfigurationWizard = () => {
+  /*
+   * React state
+   */
+  const [config, update] = useStateObject() // Holds the config this wizard builds
+  const [views, setViews] = useState([START_VIEW]) // A list of all views/config blocks we've seen
+  const [valid, setValid] = useState(false) // Whether or not the current input is valid
+  const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
+  const [view, setView] = useAtom(viewInHash) // Holds the current view
+  const [preview, setPreview] = useState(false) // Whether or not to show the config preview
+
+  /*
+   * API client
+   */
+  const { api } = useApi()
+
+  /*
+   * Loading context
+   */
+  const { setLoadingStatus, loading, LoadingProgress } = useContext(LoadingStatusContext)
+
+  /*
+   * Helper method to load a block into the wizard
+   */
+  const loadView = (key = false) => {
+    /*
+     * If nothing is passed (or the click event) we load the next view
+     */
+    if (!key || typeof key === 'object') key = next
+
+    /*
+     * If this is a new view, add it to the list
+     */
+    const newViews = [...views]
+    if (!views.includes(key)) views.push(key)
+
+    /*
+     * Now set the view, update valid, and invalidate the report
+     */
+    setView(key)
+    setValid(validate(key, get(config, key), config))
+    setValidationReport(false)
+  }
+
+  /*
+   * Helper method to update the configuration and set valid status
+   */
+  const updateConfig = (val, key = false) => {
+    /*
+     * Always update config
+     */
+    update(view, val)
+
+    /*
+     * But also run validate
+     */
+    const valid = validate(view, val, config)
+    setValid(valid)
+  }
+
+  /*
+   * Helper method to validate the configuration
+   */
+  const validateConfiguration = async () => {
+    setLoadingStatus([true, 'Contacting Morio API'])
+    const [result, statusCode] = await api.validateConfiguration(config)
+    if (result && statusCode === 200)
+      setLoadingStatus([true, 'Configuration validated', true, true])
+    else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
+    setValidationReport(result)
+  }
+
+  /*
+   * Helper method to figure out what view will be next
+   */
+  const whatsNext = () => resolveNextView(view, config)
+
+  /*
+   * Keep track of what will be the next view to load
+   */
+  const next = whatsNext()
+
+  return (
+    <div className="flex flex-wrap flex-row gap-8 justify-center">
+      <div className="w-52">
+        <ul className="list list-inside list-disc mt-8">
+          {views.map((key) => (
+            <li key={key}>
+              <button
+                className={`btn btn-sm px-1 ${key === view ? 'btn-ghost' : 'btn-link'}`}
+                onClick={() => loadView(key)}
+              >
+                {wizard[key].title || wizard[key].label}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="w-full max-w-xl">
+        {view === 'validate' ? (
+          <>
+            <h3>{wizard.validate.label}</h3>
+            {validationReport ? (
+              <ConfigReport report={validationReport} />
+            ) : (
+              <Markdown>{wizard.validate.about}</Markdown>
+            )}
+            <button
+              className="btn btn-primary w-full mt-4"
+              disabled={!valid || !next}
+              onClick={validateConfiguration}
+            >
+              Validate Configuration
+            </button>
+          </>
+        ) : (
+          <>
+            <Block
+              update={updateConfig}
+              configKey={view}
+              {...wizard[view]}
+              {...{ config, setValid }}
+            />
+            <button
+              className="btn btn-primary w-full mt-4"
+              disabled={valid.error}
+              onClick={loadView}
+            >
+              Continue
+            </button>
+            {valid?.error && (
+              <ul className="list-inside text-sm text-error ml-2 mt-2">
+                {valid.error.details.map((err, i) => (
+                  <li key={i}>{err.message}</li>
+                ))}
+              </ul>
+            )}
+            {!preview && (
+              <p className="text-center">
+                <button
+                  onClick={() => setPreview(!preview)}
+                  className="btn btn-ghost font-normal text-primary"
+                >
+                  Show configuration preview
+                </button>
+              </p>
+            )}
+          </>
+        )}
+      </div>
+      {preview && (
+        <div className="w-full max-w-lg">
+          <h3>Configuration Preview</h3>
+          <Yaml js={config} />
+          <p className="text-center">
+            <button
+              onClick={() => setPreview(!preview)}
+              className="btn btn-ghost font-normal text-primary"
+            >
+              Hide configuration preview
+            </button>
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }

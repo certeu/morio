@@ -12,7 +12,7 @@ import { schemaViolation } from '#lib/response'
 export function Controller() {}
 
 /**
- * Validate a MORIO configuration
+ * Validate a Morio configuration
  *
  * This allows people to validate a configuration prior to applying it.
  * Which should hopefully avoid at least some mistakes.

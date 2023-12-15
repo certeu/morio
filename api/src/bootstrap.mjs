@@ -16,7 +16,7 @@ export const bootstrapConfiguration = async () => {
   const log = logger(fromEnv('MORIO_LOG_LEVEL_API'), pkg.name)
 
   /*
-   * Has MORIO been setup?
+   * Has Morio been setup?
    * If so, we should have a local config on disk. Let's load it.
    */
   const localConfig = await readYamlFile('config/shared/morio.yaml', (err) =>

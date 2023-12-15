@@ -1,6 +1,7 @@
 import pkg from '../package.json' assert { type: 'json' }
 import { paths as setup } from './setup.mjs'
 import { paths as status } from './status.mjs'
+import { paths as validate } from './validate.mjs'
 
 const description = `
 ## What am I looking at?  🤔
@@ -27,17 +28,21 @@ export const openapi = {
     version: pkg.version,
   },
   externalDocs: {
-    description: 'MORIO documentation on GitHub',
+    description: 'Morio documentation on GitHub',
     url: 'https://gihub.com/certeu/morio/',
   },
   tags: [
     {
       name: 'Setup',
-      description: 'Initial setup of a MORIO instance or cluster',
+      description: 'Initial setup of a Morio instance or cluster',
     },
     {
       name: 'Status',
-      description: 'Monitor a MORIO instance or cluster',
+      description: 'Monitor a Morio instance or cluster',
+    },
+    {
+      name: 'Validate',
+      description: 'Validate Morio configurations',
     },
   ],
 
@@ -45,5 +50,6 @@ export const openapi = {
   paths: {
     ...setup,
     ...status,
+    ...validate,
   },
 }
