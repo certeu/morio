@@ -1,13 +1,11 @@
-# Morio lib
+# Morio schema
 
-This folder holds shared functionality for various NodeJS based packages.  
-We refer to it as **lib** for short.
+This folder holds the schema for various types of data and configuration in Morio.  
+We refer to it as **schema** for short.
 
-These files are typically abstracted here to keep the code DRY.  
-
-Note that they use various NodeJS APIs that are not available in the browser.
-Typically things like local filesystem access, and so on.
-So you should not use this in any browser-based on (like ui).
+It holds files the describe the configuration and data processed by various
+Morio components. By centralizing this schema definition, we want to make it
+easier for people to find their way in this monorepo.
 
 ## Getting Started
 

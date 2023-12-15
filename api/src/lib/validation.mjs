@@ -86,6 +86,7 @@ export const validateConfiguration = async (newConfig, tools) => {
    * Verify nodes
    */
   let i = 0
+  const ips = []
   for (const node of config.morio.nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
@@ -93,7 +94,10 @@ export const validateConfiguration = async (newConfig, tools) => {
      * Verify node name resolution
      */
     const [resolved, ipsOrError] = await resolveHost(node)
-    if (resolved) report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
+    if (resolved) {
+      report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
+      ips.push(...ipsOrError)
+    }
     else {
       report.info.push(`Validation failed for node ${i}`)
       report.errors.push(ipsOrError)
@@ -116,8 +120,17 @@ export const validateConfiguration = async (newConfig, tools) => {
     }
 
     /*
-     * Does the node run Morio and is it not setup?
+     * Try contacting nodes over HTTPS, also validate certificate
      */
+    const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
+    if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
+    else {
+      report.info.push(`Certificate validation failed for node ${i}`)
+      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
+    }
+
+    /*
+     * Does the node run Morio and is it not setup?
     const runsMorio = await testUrl(`https://${node}/api/status`, { returnAs: 'json' })
     if (runsMorio) {
       // FIXME: Handle api return data
@@ -128,16 +141,17 @@ export const validateConfiguration = async (newConfig, tools) => {
       report.errors.push(`All nodes need to run Morio, but node ${i} does not`)
       abort()
     }
-
-    /*
-     * Try contacting nodes over HTTPS, also validate certificate
      */
-    const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
-    if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
-    else {
-      report.info.push(`Certificate validation failed for node ${i}`)
-      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
-    }
+  }
+
+  /*
+   * If some of the nodes resolve to the same IP, that is probably going to be a problem
+   */
+  if (ips.length !== [...new Set([...ips])].length) {
+    report.errors.push('Different nodes share a common IP address')
+    abort()
+
+    return report
   }
 
   /*

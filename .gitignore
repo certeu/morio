@@ -15,6 +15,7 @@ ui/out/
 
 # production
 ui/build
+dist
 
 # misc
 .DS_Store
