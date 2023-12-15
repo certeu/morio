@@ -1,7 +1,7 @@
 import mustache from 'mustache'
 import isValidHostname from 'is-valid-hostname'
 import { config as configSchema } from '@morio/schema/config'
-import defaults from 'config/shared/morio-defaults.yaml'
+import defaults from '@morio/defaults'
 
 /**
  * Wrapper around mustache's render method to render templated strings

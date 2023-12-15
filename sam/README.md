@@ -1,6 +1,6 @@
 # Morio sam
 
-This is the Morio System Actions Manager, or **sam** for short.   
+This is the Morio System Actions Manager, or **sam** for short.  
 It is a REST API built with [Express](https://expressjs.com/).
 
 ## Getting Started
@@ -31,4 +31,3 @@ Then pipe the output of the development server into pino-pretty:
 ```
 npm run dev | pino-pretty
 ```
-

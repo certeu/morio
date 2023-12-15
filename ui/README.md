@@ -1,6 +1,6 @@
 # Morio ui
 
-This is the Morio front end or **ui** for short.   
+This is the Morio front end or **ui** for short.  
 It is a static site built with [Next.js](https://nextjs.org/).
 
 ## Getting Started
@@ -16,4 +16,3 @@ npm run dev
 ```
 
 Open [http://localhost:3010](http://localhost:3010) with your browser to see the result.
-

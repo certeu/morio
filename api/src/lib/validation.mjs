@@ -97,8 +97,7 @@ export const validateConfiguration = async (newConfig, tools) => {
     if (resolved) {
       report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
       ips.push(...ipsOrError)
-    }
-    else {
+    } else {
       report.info.push(`Validation failed for node ${i}`)
       report.errors.push(ipsOrError)
       abort()

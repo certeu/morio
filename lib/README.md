@@ -3,7 +3,7 @@
 This folder holds shared functionality for various NodeJS based packages.  
 We refer to it as **lib** for short.
 
-These files are typically abstracted here to keep the code DRY.  
+These files are typically abstracted here to keep the code DRY.
 
 Note that they use various NodeJS APIs that are not available in the browser.
 Typically things like local filesystem access, and so on.
@@ -19,4 +19,3 @@ through the user of npm workspaces, and the exports defined in package.json.
 
 Note that you do not need to build these files, they will be imported from
 source in development, not from a built artifact.
-

@@ -8,7 +8,6 @@ export const MORIO_BUILD_MINIFY = true
  */
 export const MORIO_BUILD_VERBOSE = false
 
-
 /*
  * Combined named export
  */
