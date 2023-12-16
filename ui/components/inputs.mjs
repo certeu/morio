@@ -1,8 +1,11 @@
 // Hooks
-import { useState, useCallback } from 'react'
+import { useContext, useState, useCallback } from 'react'
+// Context
+import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Components
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { Markdown } from 'components/markdown.mjs'
+import { useDropzone } from 'react-dropzone'
 
 /*
  * Helper component to display a tab heading
@@ -184,99 +187,6 @@ export const StringInput = ({
 )
 
 /*
- * Input for MFA code
- */
-export const MfaInput = ({
-  update, // onChange handler
-  current, // The current value
-  id = 'mfa', // An id to tie the input to the label
-}) => {
-  const { t } = useTranslation(['susi'])
-
-  return (
-    <StringInput
-      label={t('susi:mfaCode')}
-      valid={(val) => val.length > 4}
-      {...{ update, current, id }}
-      placeholder={t('susi:mfaCode')}
-    />
-  )
-}
-
-/*
- * Input for passwords
- */
-export const PasswordInput = ({
-  label, // Label to use
-  update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
-  current, // The current value
-  placeholder = '¯\\_(ツ)_/¯', // The placeholder text
-  id = '', // An id to tie the input to the label
-  onKeyDown = false, // Optionall capture certain keys (like enter)
-}) => {
-  const { t } = useTranslation(['account'])
-  const [reveal, setReveal] = useState(false)
-
-  const extraProps = onKeyDown ? { onKeyDown } : {}
-
-  return (
-    <FormControl
-      label={label}
-      forId={id}
-      labelBR={
-        <button
-          className="btn btn-primary btn-ghost btn-xs -mt-2"
-          onClick={() => setReveal(!reveal)}
-        >
-          {reveal ? t('hidePassword') : t('revealPassword')}
-        </button>
-      }
-    >
-      <input
-        id={id}
-        type={reveal ? 'text' : 'password'}
-        placeholder={placeholder}
-        value={current}
-        onChange={(evt) => update(evt.target.value)}
-        className={`input w-full input-bordered ${
-          valid(current) ? 'input-success' : 'input-error'
-        }`}
-        {...extraProps}
-      />
-    </FormControl>
-  )
-}
-
-/*
- * Input for email addresses
- */
-export const EmailInput = ({
-  label, // Label to use
-  update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
-  current, // The current value
-  original, // The original value
-  placeholder, // The placeholder text
-  id = '', // An id to tie the input to the label
-  labelBL = false, // Bottom-Left label
-  labelBR = false, // Bottom-Right label
-}) => (
-  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
-    <input
-      id={id}
-      type="email"
-      placeholder={placeholder}
-      value={current}
-      onChange={(evt) => update(evt.target.value)}
-      className={`input w-full input-bordered ${
-        current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
-      }`}
-    />
-  </FormControl>
-)
-
-/*
  * Input for a list of things to pick from
  */
 export const ListInput = ({
@@ -338,36 +248,71 @@ export const ListInput = ({
 )
 
 /*
- * Input for markdown content
+ * Input for a (configuration) file
  */
-export const MarkdownInput = ({
+export const FileInput = ({
   label, // The label
-  current, // The current value (markdown)
   update, // The onChange handler
-  placeholder, // The placeholder content
+  current, // The current value
+  original, // The original value
   id = '', // An id to tie the input to the label
-  labelBL = false, // Bottom-Left label
-  labelBR = false, // Bottom-Right label
-}) => (
-  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
-    <Tabs tabs={['edit', 'preview']}>
-      <Tab key="edit">
-        <div className="flex flex-row items-center mt-4">
-          <textarea
-            id={id}
-            rows="5"
-            className="textarea textarea-bordered textarea-lg w-full"
-            value={current}
-            placeholder={placeholder}
-            onChange={(evt) => update(evt.target.value)}
-          />
+  dropzoneConfig = {}, // Configuration for react-dropzone
+}) => {
+  /*
+   * Loading context
+   */
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  /*
+   * Ondrop handler
+   */
+  const onDrop = useCallback(
+    (acceptedFiles) => {
+      const reader = new FileReader()
+      reader.onload = async () => update(reader.result)
+      acceptedFiles.forEach((file) => reader.readAsDataURL(file))
+    },
+    [current]
+  )
+
+  /*
+   * Dropzone hook
+   */
+  const { getRootProps, getInputProps } = useDropzone({ onDrop, ...dropzoneConfig })
+
+  /*
+   * If we have a current file, return this
+   */
+  if (current)
+    return (
+      <FormControl label={label}>
+        <div className="bg-base-100 w-full h-36 mb-2 mx-auto flex flex-col items-center text-center justify-center">
+          <button
+            className="btn btn-neutral btn-circle opacity-50 hover:opacity-100"
+            onClick={() => update(original)}
+          >
+            <ResetIcon />
+          </button>
         </div>
-      </Tab>
-      <Tab key="preview">
-        <div className="flex flex-row items-center mt-4">
-          <Markdown>{current}</Markdown>
-        </div>
-      </Tab>
-    </Tabs>
-  </FormControl>
-)
+      </FormControl>
+    )
+
+  /*
+   * Return upload form
+   */
+  return (
+    <FormControl label={label} forId={id}>
+      <div
+        {...getRootProps()}
+        className={`
+        flex rounded-lg w-full flex-col items-center justify-center
+        sm:p-6 sm:border-4 sm:border-secondary sm:border-dashed
+      `}
+      >
+        <input {...getInputProps()} />
+        <p className="hidden lg:block p-0 m-0">Drag and drop your file here</p>
+        <button className={`btn btn-secondary btn-outline mt-4 px-8`}>Browse...</button>
+      </div>
+    </FormControl>
+  )
+}

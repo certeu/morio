@@ -1,12 +1,12 @@
 // Dependencies
 import wizard from 'config/ui/config-wizard.yaml'
-import { template, validate } from 'lib/utils.mjs'
+import { template, validate, validateConfiguration } from 'lib/utils.mjs'
 import get from 'lodash.get'
 import { atomWithHash } from 'jotai-location'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useContext } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useView } from 'hooks/use-view.mjs'
@@ -17,73 +17,12 @@ import { Block } from './blocks.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
-import { OkIcon, WarningIcon } from 'components/icons.mjs'
+import { ConfigReport } from './report.mjs'
 
 /*
  * When no view is present, this is the default
  */
 const START_VIEW = 'morio.node_count'
-
-/**
- * A React component to display a configuration report
- *
- * @param {object} report - The report object returns from the API
- * @return {functino} component - The React component
- */
-const ConfigReport = ({ report }) => (
-  <div className="py-2">
-    <Box color={report.valid ? 'success' : 'error'}>
-      <div className="flex flex-row gap-4 items-center w-full">
-        {report.valid ? <OkIcon /> : <WarningIcon />}
-        <div className="text-inherit">
-          This configuration
-          {report.valid ? <span> is </span> : <b className="px-1 underline">is NOT</b>}
-          valid
-        </div>
-      </div>
-    </Box>
-    <Box color={report.valid ? 'success' : 'error'}>
-      <div className="flex flex-row gap-4 items-center w-full">
-        {report.valid ? <OkIcon /> : <WarningIcon />}
-        <div className="text-inherit">
-          This configuration
-          {report.valid ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
-          be deployed
-        </div>
-      </div>
-    </Box>
-    {['errors', 'warnings', 'info'].map((type) =>
-      report[type].length > 0 ? (
-        <div key={type} className="mt-3">
-          <h6 className="capitalize">{type}</h6>
-          <Messages list={report[type]} />
-        </div>
-      ) : null
-    )}
-  </div>
-)
-
-/**
- * A React compnent to display messages from a configuration report
- */
-const Messages = ({ list }) => (
-  <ul className="list list-disc list-inside pl-2">
-    {list.map((msg, i) => (
-      <li key={i}>{msg}</li>
-    ))}
-  </ul>
-)
-
-/**
- * Little helper component to display a box in the report
- */
-const Box = ({ color, children }) => (
-  <div
-    className={`bg-${color} text-${color}-content rounded-lg p-4 w-full bg-opacity-80 shadow mb-2`}
-  >
-    {children}
-  </div>
-)
 
 /**
  * A helper function to resolve the next view from the wizard config
@@ -146,16 +85,26 @@ const viewInHash = atomWithHash('view', START_VIEW)
 /**
  * This is the React component for the configuration wizard itself
  */
-export const ConfigurationWizard = () => {
+export const ConfigurationWizard = ({
+  preloadConfig = {}, // Configuration to preload
+  preloadView = false, // View to preload
+}) => {
   /*
    * React state
    */
-  const [config, update] = useStateObject() // Holds the config this wizard builds
+  const [config, update] = useStateObject(preloadConfig) // Holds the config this wizard builds
   const [views, setViews] = useState([START_VIEW]) // A list of all views/config blocks we've seen
   const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, setView] = useAtom(viewInHash) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
+
+  /*
+   * Effect for preloading the view
+   */
+  useEffect(() => {
+    if (preloadView && preloadView !== view) setView(preloadView)
+  }, [preloadView])
 
   /*
    * API client
@@ -207,18 +156,6 @@ export const ConfigurationWizard = () => {
   }
 
   /*
-   * Helper method to validate the configuration
-   */
-  const validateConfiguration = async () => {
-    setLoadingStatus([true, 'Contacting Morio API'])
-    const [result, statusCode] = await api.validateConfiguration(config)
-    if (result && statusCode === 200)
-      setLoadingStatus([true, 'Configuration validated', true, true])
-    else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
-    setValidationReport(result)
-  }
-
-  /*
    * Helper method to figure out what view will be next
    */
   const whatsNext = () => resolveNextView(view, config)
@@ -232,7 +169,7 @@ export const ConfigurationWizard = () => {
     <div className="flex flex-wrap flex-row gap-8 justify-center">
       <div className="w-52">
         <ul className="list list-inside list-disc mt-8">
-          {views.map((key) => (
+          {Object.keys(wizard).map((key) => (
             <li key={key}>
               <button
                 className={`btn btn-sm px-1 ${key === view ? 'btn-ghost' : 'btn-link'}`}
@@ -255,8 +192,9 @@ export const ConfigurationWizard = () => {
             )}
             <button
               className="btn btn-primary w-full mt-4"
-              disabled={!valid || !next}
-              onClick={validateConfiguration}
+              onClick={async () =>
+                setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
+              }
             >
               Validate Configuration
             </button>

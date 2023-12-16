@@ -80,7 +80,6 @@ validate:
   next: validate
   label: Validate configuration
   about: |
-    You have completed the steps required for this configuration.
     You should now submit your configuration to the Morio API for validation.
 
     No changes will be made to your Morio setup at this time.
