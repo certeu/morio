@@ -10,15 +10,14 @@ const HomePage = (props) => {
     return (
       <PageWrapper {...props} layout={Layout}>
         <h1 className="text-center">Welcome to Morio</h1>
-        <Popout note compact>
-          <strong>Morio requires an initial configuration</strong>
-        </Popout>
-        <div className="grid gap-2 mb-2 mt-4">
+        <h3 className="text-center">Morio requires an initial configuration file</h3>
+
+        <div className="grid gap-2 mb-4 mt-4">
           <Link className="btn btn-primary btn-lg" href="/setup/wizard">
             Use the configuration wizard
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-4">
           <Link className="btn btn-primary btn-outline" href="/setup/upload">
             Upload a configuration file
           </Link>
@@ -26,37 +25,9 @@ const HomePage = (props) => {
             Download a configuration file
           </Link>
         </div>
-        <Link className="btn btn-ghost w-full mt-2" href="/setup/api">
+        <Link className="btn btn-ghost w-full mt-4" href="/setup/api">
           Use the API
         </Link>
-        <Popout tip>
-          <h5 className="text-base-content">Note sure what to pick?</h5>
-          <div className="text-sm">
-            <div className="pb-2">
-              <strong>Use the configuration wizard</strong>
-              <div className="text-sm -mt-1 italic">unless you have a specific reason not to</div>
-            </div>
-            <div className="pb-2">
-              <strong>Upload a configuration file</strong>
-              <div className="text-sm -mt-1 italic">
-                if you received a morio configuration file from a trusted source
-              </div>
-            </div>
-            <div className="pb-2">
-              <strong>Download a configuration file</strong>
-              <br />
-              <div className="text-sm -mt-1 italic">
-                if you received a link to a morio configuration file from a trusted source
-              </div>
-            </div>
-            <div className="pb-2">
-              <strong>Use the API</strong>
-              <div className="text-sm -mt-1 italic">
-                if you want to automate the deployment of this morio instance
-              </div>
-            </div>
-          </div>
-        </Popout>
       </PageWrapper>
     )
 
