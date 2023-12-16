@@ -14,8 +14,8 @@ export const NavButton = ({
   active = false,
 }) => {
   const className =
-    'dark border-0 px-1 lg:px-3 xl:px-4 text-base py-3 md:py-4 text-center flex flex-col items-center 2xl:w-36 ' +
-    `hover:bg-accent hover:text-accent-content grow xl:grow-0 relative capitalize ${extraClasses} ${
+    'dark border-0 px-1 lg:px-3 xl:px-4 text-base py-3 md:py-4 text-center items-center ' +
+    `hover:bg-accent hover:text-accent-content grow-0 relative capitalize ${extraClasses} ${
       active ? 'font-heavy' : ''
     }`
 
@@ -47,7 +47,7 @@ export const Header = ({
           <Link href="/" label="Home" className="text-secondary hover:text-accent py-0">
             <MorioLogo className="h-8" noLine />
           </Link>
-          <div className="grow pl-4">
+          <div className="grow pl-4 justify-start flex flex-row">
             <NavButton href="/support" label="Support" extraClasses="hidden lg:flex">
               support
             </NavButton>
