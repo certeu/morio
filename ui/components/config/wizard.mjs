@@ -1,8 +1,7 @@
 // Dependencies
-import wizard from 'config/ui/config-wizard.yaml'
+import { views, keys, resolveNextView, resolveViewValue, viewInHash, getView } from './views.mjs'
 import { template, validate, validateConfiguration } from 'lib/utils.mjs'
 import get from 'lodash.get'
-import { atomWithHash } from 'jotai-location'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
@@ -13,74 +12,41 @@ import { useView } from 'hooks/use-view.mjs'
 import { useAtom } from 'jotai'
 // Components
 import Markdown from 'react-markdown'
-import { Block } from './blocks.mjs'
+import { Block } from './blocks/index.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport } from './report.mjs'
 
-/*
- * When no view is present, this is the default
- */
-const START_VIEW = 'morio.node_count'
-
 /**
- * A helper function to resolve the next view from the wizard config
- *
- * @param {string|number|object} next - The next key in the wizard config
- * @param {object} config - The configuration from React state
- * @return {string} next - The resolve next value
+ * This React component renders the side menu with a list of various config views
  */
-const resolveNextView = (view, config) => {
-  /*
-   * First we need to figure out what's next
-   */
-  const next = wizard[view].next
-
-  /*
-   * If it's a string, we don't need to do anything else
-   */
-  if (typeof next === 'string') return next
-
-  /*
-   * If it's an object with an if property,
-   * we need a bit more work to know what view is next
-   */
-  if (next.if) {
-    /*
-     * First resolve the value to check
-     */
-    const check = resolveValue(next.if, config, template)
-    /*
-     * Now check it against the condition
-     */
-    if (check === next.is) return template(next.then, { CONFIG: config })
-    else return template(next.else, { CONFIG: config })
-  }
-
-  return false
-}
-
-/**
- * A helper method to resolve a value from the wizard config through templating
- */
-const resolveValue = (input, config, template) => {
-  let val = input
-  if (typeof input === 'object') {
-    val = template(input.val, { CONFIG: config })
-    if (['number', 'string'].includes(input.as)) {
-      if (input.as === 'number') val = Number(val)
-      if (input.as === 'string') val = String(val)
-    }
-  } else val = template(input, { CONFIG: config })
-
-  return val
-}
-
-/**
- * Keeps track of the view in the URL hash
- */
-const viewInHash = atomWithHash('view', START_VIEW)
+export const ConfigNavigation = ({
+  view, // The current view
+  nav = views, // Views for which to render a navigation structure
+  loadView, // Method to load a view
+}) => (
+  <ul className="list list-inside list-disc ml-4">
+    {Object.entries(nav)
+      .filter(([key, entry]) => typeof entry.hide === 'undefined')
+      .map(([key, entry]) => (
+        <li key={entry.id}>
+          {entry.children ? (
+            <button onClick={() => loadView(entry.id)}>
+              <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
+                {entry.title ? entry.title : entry.label}
+              </span>
+            </button>
+          ) : (
+            <button onClick={() => loadView(entry.id)}>
+              {entry.title ? entry.title : entry.label}
+            </button>
+          )}
+          {entry.children && <ConfigNavigation {...{ view, loadView }} nav={entry.children} />}
+        </li>
+      ))}
+  </ul>
+)
 
 /**
  * This is the React component for the configuration wizard itself
@@ -88,12 +54,12 @@ const viewInHash = atomWithHash('view', START_VIEW)
 export const ConfigurationWizard = ({
   preloadConfig = {}, // Configuration to preload
   preloadView = false, // View to preload
+  initialSetup = false, // Run in initial setup mode where only the core config is shown
 }) => {
   /*
    * React state
    */
   const [config, update] = useStateObject(preloadConfig) // Holds the config this wizard builds
-  const [views, setViews] = useState([START_VIEW]) // A list of all views/config blocks we've seen
   const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, setView] = useAtom(viewInHash) // Holds the current view
@@ -123,13 +89,7 @@ export const ConfigurationWizard = ({
     /*
      * If nothing is passed (or the click event) we load the next view
      */
-    if (!key || typeof key === 'object') key = next
-
-    /*
-     * If this is a new view, add it to the list
-     */
-    const newViews = [...views]
-    if (!views.includes(key)) views.push(key)
+    if (!key || typeof key === 'object') key = resolveNextView(view, config)
 
     /*
      * Now set the view, update valid, and invalidate the report
@@ -165,30 +125,37 @@ export const ConfigurationWizard = ({
    */
   const next = whatsNext()
 
+  /*
+   * Extract view from the views config
+   */
+  const viewConfig = getView(view)
+
   return (
     <div className="flex flex-wrap flex-row gap-8 justify-center">
       <div className="w-52">
-        <ul className="list list-inside list-disc mt-8">
-          {Object.keys(wizard).map((key) => (
-            <li key={key}>
-              <button
-                className={`btn btn-sm px-1 ${key === view ? 'btn-ghost' : 'btn-link'}`}
-                onClick={() => loadView(key)}
-              >
-                {wizard[key].title || wizard[key].label}
-              </button>
-            </li>
-          ))}
-        </ul>
+        {
+          <ConfigNavigation
+            loadView={loadView}
+            nav={initialSetup ? [views.morio] : Object.values(views)}
+          />
+        }
       </div>
       <div className="w-full max-w-xl">
         {view === 'validate' ? (
           <>
-            <h3>{wizard.validate.label}</h3>
+            <h3>Validate Configuration</h3>
             {validationReport ? (
               <ConfigReport report={validationReport} />
             ) : (
-              <Markdown>{wizard.validate.about}</Markdown>
+              <>
+                <p>You should now submit your configuration to the Morio API for validation.</p>
+                <p>
+                  No changes will be made to your Morio setup at this time.
+                  <br />
+                  Instead, the configuration you created will be validated and tested to detect any
+                  potential issues.
+                </p>
+              </>
             )}
             <button
               className="btn btn-primary w-full mt-4"
@@ -201,19 +168,16 @@ export const ConfigurationWizard = ({
           </>
         ) : (
           <>
-            <Block
-              update={updateConfig}
-              configKey={view}
-              {...wizard[view]}
-              {...{ config, setValid }}
-            />
-            <button
-              className="btn btn-primary w-full mt-4"
-              disabled={valid.error}
-              onClick={loadView}
-            >
-              Continue
-            </button>
+            <Block update={updateConfig} {...{ config, viewConfig, setValid }} />
+            {next && (
+              <button
+                className="btn btn-primary w-full mt-4"
+                disabled={valid.error}
+                onClick={loadView}
+              >
+                Continue
+              </button>
+            )}
             {valid?.error && (
               <ul className="list-inside text-sm text-error ml-2 mt-2">
                 {valid.error.details.map((err, i) => (
