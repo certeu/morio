@@ -28,20 +28,19 @@ export const ConfigNavigation = ({
 }) => (
   <ul className="list list-inside list-disc ml-4">
     {Object.entries(nav)
-      .filter(([key, entry]) => typeof entry.hide === 'undefined')
+      .filter(([key, entry]) => entry !== null && typeof entry?.hide === 'undefined')
       .map(([key, entry]) => (
         <li key={entry.id}>
-          {entry.children ? (
-            <button onClick={() => loadView(entry.id)}>
-              <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
-                {entry.title ? entry.title : entry.label}
-              </span>
-            </button>
-          ) : (
-            <button onClick={() => loadView(entry.id)}>
+          <button
+            className={`btn ${
+              entry.id === view ? 'btn-ghost' : 'btn-link no-underline hover:underline'
+            } px-0 btn-sm`}
+            onClick={() => loadView(entry.id)}
+          >
+            <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
               {entry.title ? entry.title : entry.label}
-            </button>
-          )}
+            </span>
+          </button>
           {entry.children && <ConfigNavigation {...{ view, loadView }} nav={entry.children} />}
         </li>
       ))}
@@ -133,8 +132,10 @@ export const ConfigurationWizard = ({
   return (
     <div className="flex flex-wrap flex-row gap-8 justify-center">
       <div className="w-52">
+        <h3>Sections</h3>
         {
           <ConfigNavigation
+            view={view}
             loadView={loadView}
             nav={initialSetup ? [views.morio] : Object.values(views)}
           />

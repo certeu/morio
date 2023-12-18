@@ -1,0 +1,8 @@
+# This holds the configuration wizard view settings for the Logstash specific config
+# We call it connect but it's logstash under the hood
+about: Logstash about
+configId: components
+title: Components
+type: info
+children:
+  ca: null

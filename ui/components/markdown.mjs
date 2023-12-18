@@ -1,7 +1,7 @@
 import MarkdownHandler from 'react-markdown'
 
-export const Markdown = ({ children }) => (
-  <div className="mdx">
+export const Markdown = ({ children, className = 'mdx' }) => (
+  <div className={className}>
     <MarkdownHandler>{children}</MarkdownHandler>
   </div>
 )

@@ -5,6 +5,9 @@ import get from 'lodash.get'
 // View confgurations
 import morio from 'config/ui/wizard-views/morio.yaml'
 import connect from 'config/ui/wizard-views/logstash.yaml'
+import components from 'config/ui/wizard-views/components.yaml'
+// Component views
+import ca from 'config/ui/wizard-views/ca.yaml'
 
 /*
  * Helper object with all imported view configurations
@@ -12,6 +15,12 @@ import connect from 'config/ui/wizard-views/logstash.yaml'
 const allViews = {
   morio,
   connect,
+  components: {
+    ...components,
+    children: {
+      ca,
+    },
+  },
 }
 
 /*
@@ -19,14 +28,12 @@ const allViews = {
  */
 export const views = {}
 export const keys = {}
-for (const key in allViews) {
-  keys[key] = key
-  for (const [id, section] of Object.entries(allViews[key])) {
-    views[id] = { id: key, ...section }
-    for (const cid in section.children) {
-      keys[`${key}.${cid}`] = `${key}.children.${cid}`
-      views[id].children[cid].id = `${key}.${cid}`
-    }
+for (const [id, section] of Object.entries(allViews)) {
+  keys[id] = id
+  views[id] = { id, ...section }
+  for (const cid in section.children) {
+    keys[`${id}.${cid}`] = `${id}.children.${cid}`
+    if (views[id].children[cid]) views[id].children[cid].id = `${id}.${cid}`
   }
 }
 
