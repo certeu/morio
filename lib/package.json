@@ -25,6 +25,7 @@
     "./fs": "./src/fs.mjs",
     "./logger": "./src/logger.mjs",
     "./network": "./src/network.mjs",
-    "./time": "./src/time.mjs"
+    "./time": "./src/time.mjs",
+    "./utils": "./src/utils.mjs"
   }
 }

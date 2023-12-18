@@ -1,4 +1,5 @@
 import pkg from '../package.json' assert { type: 'json' }
+import { defaults } from '@morio/defaults'
 import { randomString } from '@morio/lib/crypto'
 import { readYamlFile } from '@morio/lib/fs'
 import { logger } from '@morio/lib/logger'
@@ -28,15 +29,6 @@ export const bootstrapConfiguration = async () => {
       'Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup'
     )
 
-  /*
-   * Let's also load the defaults, they are used in various places
-   */
-  const configDefaults = await readYamlFile('config/shared/morio-defaults.yaml', (err) =>
-    log.warn(err, 'No local morio defaults file found')
-  )
-
-  if (configDefaults) log.debug('Loaded morio defaults file')
-
   return {
     config: {
       about: pkg.description,
@@ -46,7 +38,7 @@ export const bootstrapConfiguration = async () => {
       start_time: Date.now(),
       version: pkg.version,
     },
-    defaults: configDefaults,
+    defaults,
     log,
   }
 }
