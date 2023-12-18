@@ -74,7 +74,7 @@ app.get('/', async (req, res) =>
 /*
  * Start listening for requests
  */
-app.listen(fromEnv('MORIO_PORT_API'), (err) => {
+app.listen(fromEnv('MORIO_API_PORT'), (err) => {
   if (err) log.error(err, 'An error occured')
-  tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_PORT_API')}`)
+  tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_API_PORT')}`)
 })

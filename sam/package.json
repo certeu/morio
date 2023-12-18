@@ -7,14 +7,14 @@
     "build": "node build.mjs",
     "clean": "rimraf dist",
     "dev": "nodemon src/index.mjs",
-    "prettier": "npx prettier --write 'src/*.mjs' 'tests/*.mjs'",
-    "test": "npx mocha tests/index.mjs",
-    "prettier": "prettier -w ."
+    "prettier": "prettier -w .",
+    "test": "npx mocha tests/index.mjs"
   },
   "imports": {
     "#lib/*": "../api/src/lib/*.mjs"
   },
   "dependencies": {
+    "dockerode": "^4.0.0",
     "express": "^4.18.2",
     "joi": "^17.11.0",
     "joi-to-swagger": "^6.2.0",

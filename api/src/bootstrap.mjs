@@ -13,7 +13,7 @@ export const bootstrapConfiguration = async () => {
   /*
    * First setup the logger, so we can log
    */
-  const log = logger(fromEnv('MORIO_LOG_LEVEL_API'), pkg.name)
+  const log = logger(fromEnv('MORIO_API_LOG_LEVEL'), pkg.name)
 
   /*
    * Has Morio been setup?

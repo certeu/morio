@@ -19,8 +19,8 @@ export const requestSchema = {
     morio: Joi.object({
       nodes: Joi.array()
         .items(Joi.string())
-        .min(fromEnv('MORIO_NODES_MIN'))
-        .max(fromEnv('MORIO_NODES_MAX'))
+        .min(fromEnv('MORIO_CONFIG_NODES_MIN'))
+        .max(fromEnv('MORIO_CONFIG_NODES_MAX'))
         .unique()
         .required(),
     }),

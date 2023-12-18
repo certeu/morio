@@ -11,7 +11,7 @@ export const display_name = Joi.string().required().min(2).max(255)
  */
 export const node_count = Joi.number()
   .required()
-  .valid(...fromEnv('MORIO_NODES_VALID'))
+  .valid(...fromEnv('MORIO_CONFIG_DEPLOYMENT_SIZES'))
 
 /*
  * morio.nodes
@@ -34,7 +34,7 @@ export const morio = Joi.object({
   display_name: Joi.string().required().min(2).max(255),
   node_count: Joi.number()
     .required()
-    .valid(...fromEnv('MORIO_NODES_VALID')),
+    .valid(...fromEnv('MORIO_CONFIG_DEPLOYMENT_SIZES')),
   nodes: Joi.array()
     .required()
     .unique()
