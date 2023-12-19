@@ -27,16 +27,7 @@ endpoints and their descriptions:
 
 ### Docker
 
-- **GET** `/docker/list/containers` : Lists (running) Docker containers
-- **GET** `/docker/list/all-containers` : Lists all Docker containers
-- **GET** `/docker/list/images`: Lists Docker images
-- **GET** `/docker/list/networks`: Lists Docker networks
-- **GET** `/docker/info`: Lists Docker info
-- **GET** `/docker/version`: Lists Docker version
-
 ### Status
-
-- **GET** `/status`: Returns SAM status
 
 ## Pretty logs
 

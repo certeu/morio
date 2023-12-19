@@ -1,0 +1,42 @@
+{
+  "Hostname": "",
+  "Domainname": "",
+  "User": "",
+  "AttachStdin": false,
+  "AttachStdout": true,
+  "AttachStderr": true,
+  "Tty": false,
+  "OpenStdin": false,
+  "StdinOnce": false,
+  "Env": ["FOO=bar", "BAZ=quux"],
+  "Cmd": ["date"],
+  "Entrypoint": "",
+  "Image": "debian:12-slim",
+  "Labels": {
+    "com.example.vendor": "Acme",
+    "com.example.license": "GPL",
+    "com.example.version": "1.0"
+  },
+  "Volumes": {
+    "/volumes/data": {}
+  },
+  "WorkingDir": "",
+  "NetworkDisabled": false,
+  "MacAddress": "12:34:56:78:9a:bc",
+  "StopSignal": "SIGTERM",
+  "StopTimeout": 10,
+  "HostConfig": {},
+  "NetworkingConfig": {
+    "EndpointsConfig": {
+      "isolated_nw": {
+        "IPAMConfig": {
+          "IPv4Address": "172.20.30.33",
+          "IPv6Address": "2001:db8:abcd::3033",
+          "LinkLocalIPs": ["169.254.34.68", "fe80::3468"]
+        },
+        "Links": ["container_1", "container_2"],
+        "Aliases": ["server_x", "server_y"]
+      }
+    }
+  }
+}

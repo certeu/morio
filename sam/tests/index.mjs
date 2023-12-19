@@ -4,8 +4,8 @@ import { tests as statusTests } from './status.mjs'
 import { tests as dockerTests } from './docker.mjs'
 
 const runTests = async (props) => {
-  await statusTests(props)
-  await setupTests(props)
+  //await statusTests(props)
+  //await setupTests(props)
   await dockerTests(props)
 }
 

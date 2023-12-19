@@ -1,15 +1,23 @@
 import Joi from 'joi'
 import { fromEnv } from '@morio/lib/env'
 
-const shared = {}
-
 /*
  * This describes the schema of request objects
  */
 export const requestSchema = {
-  morio: {
-    configuration: Joi.object({
-      config: Joi.object(),
+  docker: {
+    pull: Joi.object({
+      tag: Joi.string().required(),
+    }),
+    getCommand: Joi.object({
+      cmd: Joi.string()
+        .required()
+        .valid(...fromEnv('MORIO_SAM_DOCKER_GET_COMMANDS')),
+    }),
+    postCommand: Joi.object({
+      cmd: Joi.string()
+        .required()
+        .valid(...fromEnv('MORIO_SAM_DOCKER_POST_COMMANDS')),
     }),
   },
 }

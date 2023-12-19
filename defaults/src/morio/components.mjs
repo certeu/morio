@@ -23,6 +23,34 @@ export const MORIO_API_PORT = 3000
 export const MORIO_SAM_DOCKER_SOCKET = '/var/run/docker.sock'
 
 /*
+ * The list of Docker commands accepted in a GET request
+ */
+export const MORIO_SAM_DOCKER_GET_COMMANDS = [
+  'containers', // list running containers
+  'all-containers', // list all containers
+  'running-containers', // list running containers (alias for containers)
+  'images', // list images
+  'services', // list services
+  'nodes', // list nodes
+  'tasks', // list tasks
+  'secrets', // list secrets
+  'configs', // list configs
+  'plugins', // list plugins
+  'volumes', // list volumes
+  'networks', // list networks
+  'info', // show Docker info
+  'version', // show Docker version
+  'df', // show Docker df
+]
+
+/*
+ * The list of Docker commands accepted in a POST request
+ */
+export const MORIO_SAM_DOCKER_POST_COMMANDS = [
+  'container', // Create a container
+]
+
+/*
  * SAM log level
  * One of: trace, debug, info, warn, error, fatal, silent
  */
@@ -56,6 +84,8 @@ export const defaults = {
   MORIO_API_PORT,
   // SAM
   MORIO_SAM_DOCKER_SOCKET,
+  MORIO_SAM_DOCKER_GET_COMMANDS,
+  MORIO_SAM_DOCKER_POST_COMMANDS,
   MORIO_SAM_LOG_LEVEL,
   MORIO_SAM_PORT,
   // UI
