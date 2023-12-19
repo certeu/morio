@@ -16,7 +16,7 @@ const c = {
 }
 
 export const theme = {
-  fontFamily: 'system-ui, sans-serif',
+  fontFamily: `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, system-ui, sans-serif`,
 
   'base-100': c.bg,
   'base-200': colors.neutral['700'],

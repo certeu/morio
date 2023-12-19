@@ -17,6 +17,8 @@ import { PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport } from './report.mjs'
+import { NavButton, iconSize } from 'components/layout/sidebar.mjs'
+import { LeftIcon, RightIcon } from 'components/icons.mjs'
 
 /**
  * This React component renders the side menu with a list of various config views
@@ -54,6 +56,7 @@ export const ConfigurationWizard = ({
   preloadConfig = {}, // Configuration to preload
   preloadView = false, // View to preload
   initialSetup = false, // Run in initial setup mode where only the core config is shown
+  splash = false, // Whether to load the 'splash'  view where the rest of the UI is hidden
 }) => {
   /*
    * React state
@@ -63,6 +66,7 @@ export const ConfigurationWizard = ({
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, setView] = useAtom(viewInHash) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
+  const [dense, setDense] = useState(false)
 
   /*
    * Effect for preloading the view
@@ -130,18 +134,50 @@ export const ConfigurationWizard = ({
   const viewConfig = getView(view)
 
   return (
-    <div className="flex flex-wrap flex-row gap-8 justify-center">
-      <div className="w-52">
-        <h3>Sections</h3>
-        {
-          <ConfigNavigation
-            view={view}
-            loadView={loadView}
-            nav={initialSetup ? [views.morio] : Object.values(views)}
-          />
+    <div
+      className={
+        splash
+          ? 'flex flex-wrap flex-row gap-8 justify-center'
+          : 'flex flex-row-reverse gap-8 justify-between'
+      }
+    >
+      <div
+        className={
+          splash
+            ? 'w-52'
+            : `w-64 border-l border-2 border-y-0 border-r-0 shrink-0 pt-12 min-h-screen border-secondary bg-base-300 bg-opacity-40 transition-all ${
+                dense ? '-mr-64' : '-mr-0'
+              }`
         }
+      >
+        {splash ? (
+          <h3>Sections</h3>
+        ) : (
+          <>
+            <button
+              className={`w-full flex items-center justify-between py-2 uppercase text-primary ${
+                dense
+                  ? 'flex-row -ml-10 rounded-full bg-accent text-accent-content px-2'
+                  : 'flex-row-reverse hover:bg-accent hover:text-accent-content px-4'
+              }`}
+              onClick={() => setDense(!dense)}
+            >
+              {dense ? (
+                <LeftIcon className={iconSize} stroke={4} />
+              ) : (
+                <RightIcon className={iconSize} stroke={4} />
+              )}
+              <span>Views</span>
+            </button>
+          </>
+        )}
+        <ConfigNavigation
+          view={view}
+          loadView={loadView}
+          nav={initialSetup ? [views.morio] : Object.values(views)}
+        />
       </div>
-      <div className="w-full max-w-xl">
+      <div className={splash ? 'w-full max-w-xl' : 'w-full mx-auto max-w-2xl p-8'}>
         {view === 'validate' ? (
           <>
             <h3>Validate Configuration</h3>
@@ -200,7 +236,7 @@ export const ConfigurationWizard = ({
         )}
       </div>
       {preview && (
-        <div className="w-full max-w-lg">
+        <div className={splash ? 'w-full max-w-lg' : 'w-full max-w-xl p-8'}>
           <h3>Configuration Preview</h3>
           <Yaml js={config} />
           <p className="text-center">

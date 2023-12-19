@@ -4,11 +4,8 @@ import { ConfigurationWizard } from 'components/config/wizard.mjs'
 
 const ConfigPage = (props) => {
   return (
-    <PageWrapper {...props} layout={SplashLayout}>
-      <div className="py-12 px-4">
-        <h1 className="text-center">{props.title}</h1>
-        <ConfigurationWizard preloadView="morio" />
-      </div>
+    <PageWrapper {...props}>
+      <ConfigurationWizard preloadView="morio" splash={false} />
     </PageWrapper>
   )
 }

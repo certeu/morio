@@ -35,7 +35,7 @@ export const theme = {
    *
    * You can get more font stacks here: https://modernfontstacks.com/
    */
-  fontFamily: 'system-ui, sans-serif',
+  fontFamily: `Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, system-ui, sans-serif`,
 
   /* COLORS
    *

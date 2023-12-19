@@ -48,6 +48,12 @@ export const Header = ({
             <MorioLogo className="h-8" noLine />
           </Link>
           <div className="grow pl-4 justify-start flex flex-row">
+            <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
+              configuration
+            </NavButton>
+            <NavButton href="/components" label="Components" extraClasses="hidden lg:flex">
+              components
+            </NavButton>
             <NavButton href="/support" label="Support" extraClasses="hidden lg:flex">
               support
             </NavButton>

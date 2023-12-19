@@ -7,7 +7,7 @@ const ConfigWizardPage = (props) => {
     <PageWrapper {...props} layout={SplashLayout}>
       <div className="py-12 px-4">
         <h1 className="text-center">Configure Morio</h1>
-        <ConfigurationWizard initialSetup preloadView="morio.node_count" />
+        <ConfigurationWizard initialSetup preloadView="morio.node_count" splash />
       </div>
     </PageWrapper>
   )
