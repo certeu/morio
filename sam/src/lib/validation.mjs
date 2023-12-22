@@ -20,7 +20,8 @@ import get from 'lodash.get'
  * @return {object} valid - The result of the Joi validation
  */
 export const validate = async (targetPath, input) => {
-  const target = get(schema, targetPath)
+  const target = get(schema, targetPath, false)
+  if (target === false) throw `Validation schema path does not exist: ${targetPath}`
   let valid
   try {
     valid = await target.validateAsync(input)

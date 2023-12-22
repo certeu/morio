@@ -7,6 +7,15 @@ import defaults from '@morio/defaults'
 import Joi from 'joi'
 
 /**
+ * A method to capitalize a string (first character only)
+ *
+ * @param {string} input - the input string
+ * @return {string} Input - The output string
+ */
+export const capitalize = (string) =>
+  typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : ''
+
+/**
  * A method to validate an input string is a uri
  *
  * @param {string} uri - The input uri to validate
@@ -60,6 +69,64 @@ export const download = async (
   }
 
   return result
+}
+
+/*
+ * Formats bytes into a more readable representation
+ *
+ * @params {number} bytes = The value to format
+ * @params {string} suffix = A suffic to add (can be /s for example)
+ * @params {bool} asArray = Set this to true to not return a string but an array with value and units
+ * @return {string|array} result - The formatted result
+ */
+export const formatBytes = (bytes, suffix = '', asArray = false) => {
+  if (bytes) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.min(
+      parseInt(Math.floor(Math.log(bytes) / Math.log(1024)).toString(), 10),
+      sizes.length - 1
+    )
+    return asArray
+      ? [`${(bytes / 1024 ** i).toFixed(i ? 1 : 0)}`, `${sizes[i]}${suffix}`]
+      : `${(bytes / 1024 ** i).toFixed(i ? 1 : 0)}${sizes[i]}${suffix}`
+  }
+
+  return asArray ? [0, 'Bytes' + suffix] : '0'
+}
+
+/*
+ * Formats a Docker container name as returned by the API
+ *
+ * Essentially slices of the leading /
+ *
+ * @params {string} name = The original name (/test)
+ * @return {string} newName - The formatted name (test)
+ */
+export const formatContainerName = (name) =>
+  name && name.slice(0, 1) === '/' ? name.slice(1) : name
+
+/*
+ * Formats a number
+ *
+ * @params {number} nun = The original number
+ * @params {string} suffix = Any suffix to add
+ * @return {string} newNumber - The formatted number
+ */
+export const formatNumber = (num, suffix = '') => {
+  if (num === null || typeof num === 'undefined') return num
+  if (typeof num.value !== 'undefined') num = num.value
+  // Small values don't get formatted
+  if (num < 1) return num
+  if (num) {
+    const sizes = ['', 'K', 'M', 'B']
+    const i = Math.min(
+      parseInt(Math.floor(Math.log(num) / Math.log(1000)).toString(), 10),
+      sizes.length - 1
+    )
+    return `${(num / 1000 ** i).toFixed(i ? 1 : 0)}${sizes[i]}${suffix}`
+  }
+
+  return '0'
 }
 
 /**

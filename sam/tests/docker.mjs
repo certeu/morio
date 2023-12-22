@@ -1,24 +1,5 @@
-import containerCreateBody from './bodies/container-create.json' assert { type: 'json' }
-
 export const tests = async ({ chai, expect, config, store }) => {
-  /*
-  describe(`[SAM] Docker POST tests`, () => {
-    it(`Should pull a docker image`, (done) => {
-      chai
-        .request(config.api)
-        .post('/docker/pull')
-        .send({ tag: 'debian:12-slim' })
-        .end((err, res) => {
-          expect(res.status).to.equal(200)
-          expect(res.type).to.equal('application/x-ndjson')
-          expect(res.charset).to.equal('utf-8')
-          done()
-        })
-    }).timeout(5000)
-  })
-  */
-
-  describe(`[SAM] Docker GET tests`, () => {
+  describe(`[SAM] Docker tests`, () => {
     it(`Should show docker info`, (done) => {
       chai
         .request(config.api)
@@ -93,6 +74,7 @@ export const tests = async ({ chai, expect, config, store }) => {
           expect(res.type).to.equal('application/json')
           expect(res.charset).to.equal('utf-8')
           expect(Array.isArray(res.body)).to.equal(true)
+          store.container = res.body[0]
           done()
         })
     })

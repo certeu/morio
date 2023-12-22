@@ -19,7 +19,7 @@ export const PageWrapper = ({
   header = true,
   layout = DefaultLayout,
   page = [''],
-  title = 'morio',
+  title = false,
 }) => {
   /*
    * Create slug from page array
@@ -56,7 +56,7 @@ export const PageWrapper = ({
       key={currentTheme} // This forces the data-theme update
     >
       <Head>
-        <title>{title}</title>
+        <title>{title ? `Morio: ${title}` : 'Morio'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
       <LoadingStatus />

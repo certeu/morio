@@ -24,6 +24,8 @@ export const Highlight = (props) => {
   }
   if (props.raw) preProps.dangerouslySetInnerHTML = { __html: props.raw }
 
+  const content = props.js ? JSON.stringify(props.js, null, 2) : props.children
+
   return (
     <div className="hljs my-4 bg-neutral rounded-lg py-1 text-neutral-content">
       <div
@@ -35,9 +37,9 @@ export const Highlight = (props) => {
       `}
       >
         <span>{names[language] ? names[language] : language}</span>
-        <CopyToClipboard content={props.children} />
+        <CopyToClipboard content={content} />
       </div>
-      <pre {...preProps}>{props.children}</pre>
+      <pre {...preProps}>{content}</pre>
     </div>
   )
 }

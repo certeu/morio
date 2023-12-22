@@ -58,6 +58,95 @@ MorioClient.prototype.validateConfiguration = async function (config) {
 }
 
 /**
+ * Verifies a configuration
+ *
+ * This endpoint does not require authentication
+ * @param {object} config - The configuration object to validate
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.dockerGetContainer = async function (id) {
+  return await this.call(`${morioConfig.api}/docker/containers/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Changes a container state
+ *
+ * @param {string} id - The Docker Container ID
+ * @param {string} cmd - The change state command (start, stop, pause, unpause, restart, kill)
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.changeContainerState = async function (id, cmd) {
+  return await this.call(
+    `${morioConfig.api}/docker/containers/${id}/${cmd}`,
+    { method: 'PUT' },
+    true
+  )
+}
+
+/**
+ * Starts a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.startContainer = async function (id) {
+  return await this.changeContainerState(id, 'start')
+}
+
+/**
+ * Stops a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.stopContainer = async function (id) {
+  return await this.changeContainerState(id, 'stop')
+}
+
+/**
+ * Restarts a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.restartContainer = async function (id) {
+  return await this.changeContainerState(id, 'restart')
+}
+
+/**
+ * Pauses a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.pauseContainer = async function (id) {
+  return await this.changeContainerState(id, 'pause')
+}
+
+/**
+ * Unpauses a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.unpauseContainer = async function (id) {
+  return await this.changeContainerState(id, 'unpause')
+}
+
+/**
+ * Kills a Docker container
+ *
+ * @param {string} id - The Docker Container ID
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.killContainer = async function (id) {
+  return await this.changeContainerState(id, 'kill')
+}
+
+/**
  * The useApi React hook
  */
 export function useApi() {

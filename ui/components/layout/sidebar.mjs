@@ -1,56 +1,8 @@
 // Hooks
 import { useState } from 'react'
 // Components
-import {
-  RightIcon,
-  LeftIcon,
-  ConfigurationIcon,
-  ComponentIcon,
-  StatusIcon,
-} from 'components/icons.mjs'
-import { Link } from 'components/link'
-
-const icons = {
-  components: <ComponentIcon />,
-  config: <ConfigurationIcon />,
-  status: <StatusIcon />,
-}
-
-const links = {
-  components: 'Components',
-  config: 'Configuration',
-  status: 'Status',
-}
-
-export const NavButton = ({
-  href,
-  label,
-  children,
-  onClick = false,
-  active = false,
-  extraClasses = 'lg:hover:bg-secondary lg:hover:text-secondary-content',
-}) => {
-  const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
-    active
-      ? 'bg-secondary text-secondary-content font-bold'
-      : 'bg-neutral text-neutral-content font-medium'
-  }`
-  const span = <span className="block grow text-left">{label}</span>
-
-  return onClick ? (
-    <button {...{ onClick, className }} title={label}>
-      {span}
-      {children}
-    </button>
-  ) : (
-    <Link {...{ href, className }} title={label}>
-      {span}
-      {children}
-    </Link>
-  )
-}
-
-export const iconSize = 'h-6 w-6 grow-0'
+import { RightIcon, LeftIcon } from 'components/icons.mjs'
+import { MainMenu, iconProps } from 'components/navigation/main-menu.mjs'
 
 export const Sidebar = ({ page }) => {
   const [dense, setDense] = useState(false)
@@ -71,22 +23,21 @@ export const Sidebar = ({ page }) => {
       `}
       >
         <div className="flex flex-col items-center w-full">
-          <NavButton
+          <button
             onClick={() => setDense(!dense)}
             label="Navigation"
-            extraClasses="uppercase font-think text-sm flex text-secondary bg-neutral hover:bg-accent hover:text-accent-content"
+            className="flex flex-row justify-between uppercase font-think text-sm text-secondary bg-neutral hover:bg-accent hover:text-accent-content w-full px-4 py-2 items-center"
           >
-            {dense ? (
-              <RightIcon className={iconSize} stroke={4} />
-            ) : (
-              <LeftIcon className={iconSize} stroke={4} />
-            )}
-          </NavButton>
-          {Object.keys(links).map((link) => (
-            <NavButton key={link} href={`/${link}`} label={links[link]} active={page[0] === link}>
-              {icons[link]}
-            </NavButton>
-          ))}
+            Navigation
+            <div className="w-12 -mr-4 text-center flex items-center justify-center">
+              {dense ? (
+                <RightIcon className={iconProps.className} stroke={4} />
+              ) : (
+                <LeftIcon className={iconProps.className} stroke={4} />
+              )}
+            </div>
+          </button>
+          <MainMenu current={page} dense={dense} />
         </div>
       </aside>
     </div>

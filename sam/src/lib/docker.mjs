@@ -26,6 +26,29 @@ export const runDockerApiCommand = async (cmd, options = {}) => {
 }
 
 /**
+ * This helper method runs an async command against the container API
+ *
+ * @param {string} id - The container id
+ * @param {string} cmd - A instance method to run
+ * @param {object} options - Options to pass to the Docker API
+ * @return {array} return - An array with a boolean indicating success or
+ * failure, and the command return value
+ */
+export const runContainerApiCommand = async (id, cmd, options = {}) => {
+  const [ready, container] = await runDockerApiCommand('getContainer', id)
+  if (!ready) return [false, false]
+
+  let result
+  try {
+    result = await container[cmd](options)
+  } catch (err) {
+    return [false, err]
+  }
+
+  return [true, result]
+}
+
+/**
  * This helper method runs an async docker command that mimics the CLI
  *
  * The main difference here is how the method is called.

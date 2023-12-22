@@ -6,6 +6,8 @@ import { fromEnv } from '@morio/lib/env'
 import { routes } from './routes/index.mjs'
 // Middleware
 import { loadPassportMiddleware } from './middleware.mjs'
+// SAM client
+import { samClient } from './lib/sam.mjs'
 // Bootstrap configuration
 import { bootstrapConfiguration } from './bootstrap.mjs'
 // Swagger
@@ -28,6 +30,11 @@ const tools = {
 tools.log.debug('Starting express app')
 const app = express()
 tools.app = app
+
+/*
+ * Add SAM client
+ */
+tools.sam = samClient(tools)
 
 /*
  * Add support for JSON with a limit to the request body

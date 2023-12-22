@@ -2,6 +2,11 @@ import Joi from 'joi'
 import { fromEnv } from '@morio/lib/env'
 
 /*
+ * Some shared schema objects
+ */
+const containerRead = Joi.object({ id: Joi.string().required() })
+
+/*
  * This describes the schema of request objects
  */
 export const requestSchema = {
@@ -9,16 +14,17 @@ export const requestSchema = {
     pull: Joi.object({
       tag: Joi.string().required(),
     }),
-    getCommand: Joi.object({
-      cmd: Joi.string()
-        .required()
-        .valid(...fromEnv('MORIO_SAM_DOCKER_GET_COMMANDS')),
-    }),
-    postCommand: Joi.object({
-      cmd: Joi.string()
-        .required()
-        .valid(...fromEnv('MORIO_SAM_DOCKER_POST_COMMANDS')),
-    }),
+    container: {
+      inspect: Joi.object({
+        id: Joi.string().required(),
+      }),
+      logs: Joi.object({
+        id: Joi.string().required(),
+      }),
+      stats: Joi.object({
+        id: Joi.string().required(),
+      }),
+    },
   },
 }
 

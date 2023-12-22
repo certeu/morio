@@ -1,6 +1,12 @@
-import { docker, runDockerApiCommand, runDockerCliCommand } from '../lib/docker.mjs'
+import {
+  docker,
+  runDockerApiCommand,
+  runContainerApiCommand,
+  runDockerCliCommand,
+} from '../lib/docker.mjs'
 import { validate } from '../lib/validation.mjs'
 import { schemaViolation, dockerError } from '../lib/response.mjs'
+import { asPojo } from '@morio/lib/utils'
 
 /**
  * This docker controller handles low-level docker tasks
@@ -10,98 +16,166 @@ import { schemaViolation, dockerError } from '../lib/response.mjs'
 export function Controller() {}
 
 /**
- * Docker API GET commands
+ * Gets data Docker an returns it
  *
- * This just passes through the command to the Docker API
+ * This handles the following commands on the docker object:
+ *   - listContainers
+ *   - listImages
+ *   - listServices
+ *   - listNodes
+ *   - listTasts
+ *   - listSecrets
+ *   - listConfigs
+ *   - listPlugins
+ *   - listVolumes
+ *   - listNetworks
+ *   - info
+ *   - version
+ *   - df
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
- * @param {object} options - Any command options
+ * @param {object} options - Any options to pass to the command
  */
-Controller.prototype.dockerGetCmd = async (req, res, cmd, options = {}) => {
+Controller.prototype.getDockerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
   /*
-   * Map API path to Docker command
+   * Run the Docker command, with options if there are any
    */
-  const commands = {
-    containers: 'listContainers',
-    'running-containers': 'listContainers',
-    'all-containers': 'listContainers',
-    images: 'listImages',
-    services: 'listServices',
-    nodes: 'listNodes',
-    tasks: 'listTasks',
-    secrets: 'listSecrets',
-    configs: 'listConfigs',
-    plugins: 'listPlugins',
-    volumes: 'listVolumes',
-    networks: 'listNetworks',
-    info: 'info',
-    version: 'version',
-    df: 'df',
-  }
+  const [success, result] = await runDockerApiCommand(cmd, options)
 
   /*
-   * Ensure it's a valid command for this type of request
+   * Return result
    */
-  if (typeof commands[req.params.cmd] === 'undefined') return res.status(404).send()
-
-  /*
-   * Validate request against schema
-   * Since we're only validating the command, the above covers the same
-   * However, the above handles all commands, whereas the schema checks
-   * the list of commands allowed vs a value that can be set in an
-   * environment variable, allowing people to furhter lock this down.
-   */
-  const [valid, err] = await validate('docker.getCommand', req.params)
-  if (!valid) return schemaViolation(err, res)
-
-  const [success, result] = await runDockerApiCommand(commands[valid.cmd], options)
-
   return success ? res.send(result) : dockerError(result, res)
 }
 
 /**
- * Docker API POST commands
+ * Gets data from a Docker container an returns it
  *
- * This just passes through the command to the Docker API
- * using the request body as the command options.
- * Validation of the request body is left to the Docker client.
- *
- * It handles all commands that operate on the root Docker object
- * and that do something that require a POST
+ * This handles the following commands on a Container object:
+ *   - inspect
+ *   - logs (non-streaming)
+ *   - stats (non-streaming)
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
- * @param {object} options - Any command options
  */
-Controller.prototype.dockerPostCmd = async (req, res, cmd) => {
-  /*
-   * Map API path to Docker command
-   */
-  const commands = {
-    container: 'createContainer',
-  }
-
-  /*
-   * Ensure it's a valid command for this type of request
-   */
-  if (typeof commands[req.params.cmd] === 'undefined') return res.status(404).send()
-
+Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect') => {
   /*
    * Validate request against schema
-   * Since we're only validating the command, the above covers the same
-   * However, the above handles all commands, whereas the schema checks
-   * the list of commands allowed vs a value that can be set in an
-   * environment variable, allowing people to furhter lock this down.
    */
-  const [valid, err] = await validate('docker.postCommand', req.params)
+  const [valid, err] = await validate(`docker.container.${cmd}`, req.params)
   if (!valid) return schemaViolation(err, res)
 
-  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body)
+  /*
+   * Now run the container API command
+   */
+  const [success, result] = await runContainerApiCommand(valid.id, cmd)
 
+  /*
+   * Return result
+   */
   return success ? res.send(result) : dockerError(result, res)
+}
+
+/**
+ * Changes the state of a running container
+ *
+ * This handles the following commands on a Container object:
+ *   - start
+ *   - stop
+ *   - pause
+ *   - unpause
+ *   - restart
+ *   - kill
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {string} cmd - The command to run (method on the docker client)
+ */
+Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`docker.container.inspect`, req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  /*
+   * Now run the container API command
+   */
+  const [success, result] = await runContainerApiCommand(valid.id, cmd, options)
+
+  /*
+   * Return result
+   */
+  return success ? res.send(result) : dockerError(result, res)
+}
+
+/**
+ * Creates a Docker resource
+ *
+ * This handles the following commands on the docker object:
+ *   -  createContainer
+ *   -  createSecret
+ *   -  createConfig
+ *   -  createPlugin
+ *   -  createVolume
+ *   -  createService
+ *   -  createNetwork
+ *   -  createImage
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.createResource = async (req, res, tools, cmd) => {
+  /*
+   * Run the Docker command, with options if there are any
+   */
+  const [success, result] = await runDockerApiCommand(cmd, req.body)
+
+  /*
+   * Return result
+   */
+  return success ? res.status(201).send(asPojo(result)) : dockerError(result, res)
+}
+
+/**
+ * Updates a container resource
+ *
+ * This handles the following commands on the docker object:
+ *   -  kill
+ *   -  pause
+ *   -  restart
+ *   -  start
+ *   -  stop
+ *   -  unpause
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`docker.container.inspect`, req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  /*
+   * Run the container command
+   */
+  const [success, result] = await runContainerApiCommand(valid.id, cmd)
+
+  /*
+   * Return result
+   */
+  return success ? res.status(204).send() : dockerError(result, res)
 }
 
 /**
@@ -162,4 +236,47 @@ Controller.prototype.pull = async (req, res) => {
   // }).catch(err => {
   //   console.log('in catch', err)
   // })
+}
+
+/**
+ * Docker API POST commands
+ *
+ * This just passes through the command to the Docker API
+ * using the request body as the command options.
+ * Validation of the request body is left to the Docker client.
+ *
+ * It handles all commands that operate on the root Docker object
+ * and that do something that require a POST
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} cmd - The command to run (method on the docker client)
+ * @param {object} options - Any command options
+ */
+Controller.prototype.dockerPostCmd = async (req, res, cmd) => {
+  /*
+   * Map API path to Docker command
+   */
+  const commands = {
+    container: 'createContainer',
+  }
+
+  /*
+   * Ensure it's a valid command for this type of request
+   */
+  if (typeof commands[req.params.cmd] === 'undefined') return res.status(404).send()
+
+  /*
+   * Validate request against schema
+   * Since we're only validating the command, the above covers the same
+   * However, the above handles all commands, whereas the schema checks
+   * the list of commands allowed vs a value that can be set in an
+   * environment variable, allowing people to furhter lock this down.
+   */
+  const [valid, err] = await validate('docker.postCommand', req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body)
+
+  return success ? res.send(result) : dockerError(result, res)
 }

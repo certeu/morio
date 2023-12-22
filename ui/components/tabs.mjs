@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useContext } from 'react'
 
 export const Tabs = ({ tabs = '', active = 0, children }) => {
   // Keep active tab in state
@@ -6,7 +6,6 @@ export const Tabs = ({ tabs = '', active = 0, children }) => {
 
   /*
    * Parse tab list
-   * Comma-seperated tabs passed as a string are how it works in MDX
    */
   const tablist = Array.isArray(tabs) ? tabs : tabs.split(',').map((tab) => tab.trim())
 
@@ -19,20 +18,20 @@ export const Tabs = ({ tabs = '', active = 0, children }) => {
 
   return (
     <div className="my-4">
-      <div className="tabs">
-        {tablist.map((title, tabId) => {
-          const btnClasses = `text-lg font-bold capitalize tab h-auto tab-bordered grow py-2 ${
-            activeTab === tabId ? 'tab-active' : ''
-          }`
-
-          return (
-            <button key={tabId} className={btnClasses} onClick={() => setActiveTab(tabId)}>
-              {title}
-            </button>
-          )
-        })}
+      <div className="tabs tabs-bordered" role="tablist">
+        {tablist.map((title, tabId) => (
+          <button
+            key={tabId}
+            className={`text-lg font-bold capitalize tab h-auto tab-bordered grow py-2 ${
+              activeTab === tabId ? 'tab-active' : ''
+            }`}
+            onClick={() => setActiveTab(tabId)}
+          >
+            {title}
+          </button>
+        ))}
       </div>
-      <div>{childrenWithTabSetter}</div>
+      <div className="p-4">{childrenWithTabSetter}</div>
     </div>
   )
 }

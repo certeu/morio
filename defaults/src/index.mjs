@@ -1,7 +1,7 @@
-import { morio } from './morio/index.mjs'
+import { defaults as morio } from './morio.mjs'
 
 const defaults = {
   ...morio,
 }
 
-export { morio, defaults }
+export { defaults }

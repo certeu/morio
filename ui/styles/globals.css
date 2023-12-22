@@ -86,6 +86,9 @@
     padding-top: 0;
     margin-top: 0;
   }
+  code {
+    @apply bg-base-300 border border-base-300 px-1.5 py-0.5 bg-opacity-30 rounded;
+  }
 }
 
 /* Link color per theme */
