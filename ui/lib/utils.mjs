@@ -129,6 +129,11 @@ export const formatNumber = (num, suffix = '') => {
   return '0'
 }
 
+/*
+ * Common icon size for navigation items
+ */
+export const iconSize = 'h-8 w-8'
+
 /**
  * Wrapper around mustache's render method to render templated strings
  *

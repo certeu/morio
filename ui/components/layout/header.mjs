@@ -2,8 +2,7 @@
 import Link from 'next/link'
 import { MenuIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { MorioLogo } from 'components/logos/morio.mjs'
-
-export const iconSize = 'h-8 w-8 md:h-10 md:w-10 lg:h-12 lg:w-12'
+import { iconSize } from 'lib/utils.mjs'
 
 export const NavButton = ({
   href,

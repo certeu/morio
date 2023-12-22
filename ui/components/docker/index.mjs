@@ -21,7 +21,8 @@ import {
   WarningIcon,
 } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
-import { Tabs, Tab } from 'components/tabs.mjs'
+import { TimeAgoBrief } from 'components/time-ago.mjs'
+import TimeAgo from 'react-timeago'
 
 /*
  * This is a wrapper component that will take care of loading
@@ -32,21 +33,21 @@ import { Tabs, Tab } from 'components/tabs.mjs'
  * @param {function} Component - The React component to display the data
  * @param {function} filter - A method to filter the results
  * @param {object} displayProps - Props to pass to the display component}
- * @param {function} getData - A method you can pass in to get the data back when it's loaded
+ * @param {function} callback - A method you can pass in to get the data back when it's loaded
  */
 const DockerWrapper = ({
   endpoint,
   Component,
   filter = false,
   displayProps = {},
-  getData = false,
+  callback = false,
+  reload = 0,
 }) => {
   /*
    * State for holding data returned from the API
    */
   const [data, setData] = useState(false)
-  const [reload, setReload] = useState(0)
-  const [reloaded, setReloaded] = useState(0)
+  const [reloaded, setReloaded] = useState(reload)
 
   /*
    * API client
@@ -60,7 +61,7 @@ const DockerWrapper = ({
     const run = async () => {
       const result = await api.call(`${morioConfig.api}/${endpoint}`)
       if (result[1] === 200) setData(filter ? filter(result[0]) : result[0])
-      if (typeof getData === 'function') getData(filter ? filter(result[0]) : result[0])
+      if (typeof callback === 'function') callback(filter ? filter(result[0]) : result[0])
       setReloaded(reload)
     }
     if (!data || reload !== reloaded) run()
@@ -314,11 +315,11 @@ const DisplayDockerContainers = ({ data }) => {
 /*
  * Docker container component
  */
-export const DockerContainer = ({ id, getData = false }) => (
+export const DockerContainer = (props) => (
   <DockerWrapper
-    endpoint={`docker/containers/${id}`}
+    endpoint={`docker/containers/${props.id}`}
     Component={DisplayDockerContainer}
-    getData={getData}
+    {...props}
   />
 )
 
@@ -333,110 +334,48 @@ export const DisplayDockerContainer = ({ data, methods }) => {
    */
   const { api } = useApi()
 
-  const changeState = async (cmd) => {
-    const commands = ['start', 'pause', 'unpause', 'stop', 'restart', 'kill']
-
-    /*
-     * Only process valid commands
-     */
-    if (!commands.includes(cmd)) return
-
-    /*
-     * Run API command
-     */
-    let result
-    try {
-      result = await api[`${cmd}Container`](data.Id)
-      if (methods.forceReload) methods.forceReload()
-    } catch (err) {
-      console.log(err)
-      return
-    }
+  const statusIcon = {
+    running: <PlayIcon className="text-success w-12 h-12" fill stroke={0} />,
+    paused: <PauseIcon className="text-warning w-12 h-12 animate-pulse" stroke={4} />,
+    exited: <StopIcon className="text-error w-12 h-12 rounded-full" fill stroke={0} />,
   }
+
+  /*
+   * Split image into namespace, name, and tag
+   */
+  const image = data.Config.Image.split(':')
+  image.push(...image[0].split('/'))
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row flex-wrap gap-4">
+      <div className="flex flex-row flexwrap gap-4">
         <StatsWrapper data={data}>
           <div className="stat place-items-center">
             <div className="stat-title">Status</div>
-            <div className="stat-value capitalize">{data.State.Status}</div>
+            <div className="stat-value capitalize">{statusIcon[data.State.Status]}</div>
+            <div className="stat-desc">{data.State.Status}</div>
+          </div>
+        </StatsWrapper>
+        <StatsWrapper data={data}>
+          <div className="stat place-items-center">
+            <div className="stat-title">Last Started</div>
+            <div className="stat-value capitalize">
+              <TimeAgoBrief date={data.State.StartedAt} />
+            </div>
+            <div className="stat-desc">
+              <TimeAgo date={data.State.StartedAt} />
+            </div>
           </div>
         </StatsWrapper>
         <StatsWrapper data={data}>
           <div className="stat place-items-center">
             <div className="stat-title">Image</div>
-            <div className="stat-value capitalize">{data.Config.Image}</div>
+            <div className="stat-value">{image[0]}</div>
+            <div className="stat-desc">{image[1]}</div>
           </div>
         </StatsWrapper>
       </div>
       <DockerContainerStats id={data.Id} displayProps={{ state: data.State.Status }} />
-      <Tabs tabs="Change Status, Troubleshoot, Expert mode">
-        {[
-          <Tab key="status">
-            <div className="flex flex-row flex-wrap gap-2">
-              <button
-                onClick={() => changeState('start')}
-                className="flex flex-row gap-2 btn btn-success"
-                disabled={['running', 'paused'].includes(data.State.Status)}
-              >
-                <PlayIcon fill stroke={0} /> Start Container
-              </button>
-              <button
-                onClick={() => changeState(data.State.Status === 'paused' ? 'unpause' : 'pause')}
-                className={`flex flex-row gap-2 btn ${
-                  data.State.Status === 'paused' ? 'btn-success' : 'btn-warning'
-                }`}
-                disabled={!['running', 'paused'].includes(data.State.Status)}
-              >
-                <PauseIcon
-                  stroke={4}
-                  className={data.State.Status === 'paused' ? 'w-6 h-6 animate-pulse' : 'w-6 h-6'}
-                />
-                {data.State.Status === 'running' ? 'Pause' : 'Unpause'} Container
-              </button>
-              <button
-                onClick={() => changeState('stop')}
-                className="flex flex-row gap-2 btn btn-error"
-                disabled={data.State.Status !== 'running'}
-              >
-                <StopIcon fill stroke={0} /> Stop Container
-              </button>
-              <button
-                onClick={() => changeState('restart')}
-                className="flex flex-row gap-2 btn btn-info"
-                disabled={data.State.Status !== 'running'}
-              >
-                <RestartIcon stroke={3} /> Restart Container
-              </button>
-            </div>
-          </Tab>,
-          <Tab key="troubleshoot">
-            <div className="flex flex-row flex-wrap gap-2">
-              <button className="flex flex-row gap-2 btn btn-secondary">
-                <PlayIcon fill stroke={0} /> Show Logs
-              </button>
-              <button className="flex flex-row gap-2 btn btn-secondary">
-                <PlayIcon fill stroke={0} /> Show Stats
-              </button>
-              <button className="flex flex-row gap-2 btn btn-secondary">
-                <PlayIcon fill stroke={0} /> Show Top Processes
-              </button>
-            </div>
-          </Tab>,
-          <Tab key="export">
-            <div className="flex flex-row flex-wrap gap-2">
-              <button
-                onClick={() => changeState('kill')}
-                className="flex flex-row gap-2 btn btn-neutral hover:btn-error"
-                disabled={data.State.Status !== 'running'}
-              >
-                <WarningIcon stroke={2.5} /> Kill Container
-              </button>
-            </div>
-          </Tab>,
-        ]}
-      </Tabs>
     </div>
   )
 }
@@ -478,8 +417,10 @@ export const DisplayDockerContainerStats = ({ data, state, methods }) => {
   const [memMaxBytes, memMaxUnit] = running
     ? formatBytes(data.memory_stats.limit, '', true)
     : ['X', '']
-  const [txBytes, txUnit] = running ? formatBytes(data.networks.eth0.tx_bytes, '', true) : ['X', '']
-  const [rxBytes, rxUnit] = running ? formatBytes(data.networks.eth0.rx_bytes, '', true) : ['X', '']
+  const [txBytes, txUnit] =
+    running && data?.networks?.eth0 ? formatBytes(data.networks.eth0.tx_bytes, '', true) : ['X', '']
+  const [rxBytes, rxUnit] =
+    running && data?.networks?.eth0 ? formatBytes(data.networks.eth0.rx_bytes, '', true) : ['X', '']
 
   return (
     <>
@@ -567,6 +508,121 @@ export const DisplayDockerContainerStats = ({ data, state, methods }) => {
           </div>
         </StatsWrapper>
       </div>
+    </>
+  )
+}
+
+const changeContainerState = async (api, id, cmd, methods = {}) => {
+  const commands = ['start', 'pause', 'unpause', 'stop', 'restart', 'kill']
+
+  /*
+   * Only process valid commands
+   */
+  if (!commands.includes(cmd)) return
+
+  /*
+   * Run API command
+   */
+  let result
+  try {
+    result = await api[`${cmd}Container`](id)
+    if (methods.forceReload) methods.forceReload()
+  } catch (err) {
+    console.log(err)
+    return
+  }
+}
+
+/*
+ * Docker container state actions component
+ */
+export const ContainerStateActions = ({ data, methods }) => {
+  const { api } = useApi()
+
+  return (
+    <>
+      <button
+        onClick={() => changeContainerState(api, data.Id, 'start', methods)}
+        className="flex flex-row gap-2 btn btn-success justify-between"
+        disabled={['running', 'paused'].includes(data.State.Status)}
+      >
+        <PlayIcon fill stroke={0} /> Start Container
+      </button>
+      <button
+        onClick={() =>
+          changeContainerState(
+            api,
+            data.Id,
+            data.State.Status === 'paused' ? 'unpause' : 'pause',
+            methods
+          )
+        }
+        className={`flex flex-row gap-2 btn btn-outline justify-between ${
+          data.State.Status === 'paused' ? 'btn-success' : 'btn-warning'
+        }`}
+        disabled={!['running', 'paused'].includes(data.State.Status)}
+      >
+        <PauseIcon
+          stroke={4}
+          className={data.State.Status === 'paused' ? 'w-6 h-6 animate-pulse' : 'w-6 h-6'}
+        />
+        {data.State.Status === 'running' ? 'Pause' : 'Unpause'} Container
+      </button>
+      <button
+        onClick={() => changeContainerState(api, data.Id, 'stop', methods)}
+        className="flex flex-row gap-2 btn btn-error btn-outline justify-between"
+        disabled={data.State.Status !== 'running'}
+      >
+        <StopIcon fill stroke={0} /> Stop Container
+      </button>
+      <button
+        onClick={() => changeContainerState(api, data.Id, 'restart', methods)}
+        className="flex flex-row gap-2 btn btn-info btn-outline justify-between"
+        disabled={data.State.Status !== 'running'}
+      >
+        <RestartIcon stroke={3} /> Restart Container
+      </button>
+    </>
+  )
+}
+
+/*
+ * Docker container troubleshoot actions component
+ */
+export const ContainerTroubleshootActions = ({ data, methods }) => {
+  const { api } = useApi()
+  const btn = {
+    className: 'flex flex-row gap-2 btn btn-info btn-outline justify-between',
+    disabled: data.State.Status !== 'running',
+  }
+  const icon = <PlayIcon fill stroke={0} />
+  const stream = <RestartIcon stroke={3} />
+
+  return (
+    <>
+      <button {...btn}>{icon} Show Logs</button>
+      <button {...btn}>{icon} Show Stats</button>
+      <button {...btn}>{icon} Show Top Processes</button>
+      <button {...btn}>{stream} Stream Logs</button>
+    </>
+  )
+}
+
+/*
+ * Docker container troubleshoot actions component
+ */
+export const ContainerExpertActions = ({ data, methods }) => {
+  const { api } = useApi()
+  const btn = {
+    className: 'flex flex-row gap-2 btn btn-neutral hover:btn-error justify-between',
+    disabled: data.State.Status !== 'running',
+  }
+
+  return (
+    <>
+      <button {...btn} onClick={() => changeContainerState(api, data.Id, 'kill', methods)}>
+        <WarningIcon stroke={2.5} /> Kill Container
+      </button>
     </>
   )
 }

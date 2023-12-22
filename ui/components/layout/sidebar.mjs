@@ -16,12 +16,7 @@ export const Sidebar = ({ page }) => {
       border-l-0 border-t-0 border-b-0 border-2 border-secondary
       ${dense ? '-ml-52' : 'ml-0'}`}
     >
-      <aside
-        className={`
-        sticky top-4 lg:top-24
-        group
-      `}
-      >
+      <aside className="sticky top-4 lg:top-24">
         <div className="flex flex-col items-center w-full">
           <button
             onClick={() => setDense(!dense)}

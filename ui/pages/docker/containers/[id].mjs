@@ -5,33 +5,64 @@ import { useState } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContainerIcon } from 'components/icons.mjs'
-import { DockerContainer } from 'components/docker/index.mjs'
+import {
+  DockerContainer,
+  ContainerStateActions,
+  ContainerTroubleshootActions,
+  ContainerExpertActions,
+} from 'components/docker/index.mjs'
 import { ContentWrapper } from 'pages/docker/index.mjs'
 import { Spinner } from 'components/animations.mjs'
+import { MainSideView } from 'components/layout/main-side-view.mjs'
 
 const ContainerPage = ({ page, id }) => {
   /*
-   * State for holding the name which will be set via
-   * the getData call from the DockerContainer component
+   * React state
    */
   const [name, setName] = useState(false)
+  const [data, setData] = useState(false)
+  const [reload, setReload] = useState(0)
 
   /*
-   * getData is a way to pull the API data from the component
+   * Method that will force a reload
    */
-  const getData = (data) => setName(formatContainerName(data.Name))
+  const forceReload = () => setReload(reload + 1)
+
+  /*
+   * Props for the side components
+   */
+  const sideProps = {
+    data,
+    methods: { callback: setData, forceReload },
+  }
+
+  /*
+   * Side component
+   */
+  const side = data ? (
+    <>
+      <div className="flex flex-col gap-2 w-full items-stretch p-4">
+        <h5>Change Status</h5>
+        <ContainerStateActions {...sideProps} />
+        <h5 className="mt-4">Troubleshoot</h5>
+        <ContainerTroubleshootActions {...sideProps} />
+        <h5 className="mt-4">Expert Mode</h5>
+        <ContainerExpertActions {...sideProps} />
+      </div>
+    </>
+  ) : null
 
   return (
     <PageWrapper page={page}>
-      <ContentWrapper
+      <MainSideView
+        side={side}
+        sideTitle="Container actions"
         page={page}
-        Icon={name ? ContainerIcon : <Spinner className="w-16 h-16 animate-spin" />}
-        title={name ? name : 'One moment please...'}
+        Icon={data.Name ? ContainerIcon : <Spinner className="w-16 h-16 animate-spin" />}
+        title={data ? formatContainerName(data.Name) : 'One moment please...'}
       >
-        <div className="max-w-4xl">
-          <DockerContainer {...{ id, getData }} />
-        </div>
-      </ContentWrapper>
+        <DockerContainer {...{ id, callback: setData, reload }} />
+      </MainSideView>
     </PageWrapper>
   )
 }
