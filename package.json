@@ -4,9 +4,13 @@
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
-    "morio:init": "npm install && npm install --global husky && husky install",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prettier": "prettier -w ."
+    "build": "npm run build:api",
+    "build:api": "./scripts/build-container.sh api",
+    "dev": "docker-compose -f compose/dev.yaml up",
+    "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
+    "prebuild": "node scripts/prebuild.mjs",
+    "prettier": "npx prettier --write .",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -20,9 +24,9 @@
   "homepage": "https://github.com/certeu/morio#readme",
   "workspaces": [
     "api",
-    "lib",
     "sam",
     "schema",
+    "shared",
     "defaults"
   ],
   "devDependencies": {

@@ -1,7 +1,7 @@
 /*
  * Import the Validation controller
  */
-import { Controller } from '../controllers/validate.mjs'
+import { Controller } from '#controllers/validate'
 
 /*
  * Instantiate the controller

@@ -8,7 +8,7 @@ import yaml from 'js-yaml'
 /**
  * The morio root folder
  */
-export const root = path.resolve(path.basename(import.meta.url), '..', '..')
+export const root = path.resolve(path.basename(import.meta.url), '..')
 
 /**
  * Reads a file from disk
@@ -83,3 +83,13 @@ export const writeFile = async (
 
   return true
 }
+
+/**
+ * Writes a YAML file to disk
+ *
+ * @param {string} filePath - (relative) path to the file to write
+ * @param {string} data - the data to write to disk as a Javascript object
+ *
+ * @return {bool} true of success, false in case of trouble
+ */
+export const writeYamlFile = async (filePath, data) => await writeFile(filePath, yaml.dump(data))

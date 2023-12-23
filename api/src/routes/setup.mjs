@@ -1,7 +1,7 @@
 /*
  * Import the Setup controller
  */
-import { Controller } from '../controllers/setup.mjs'
+import { Controller } from '#controllers/setup'
 
 /*
  * Instantiate the controller

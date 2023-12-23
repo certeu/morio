@@ -1,4 +1,4 @@
-import { docker } from '../lib/docker.mjs'
+import { docker } from '#lib/docker'
 
 /**
  * This actions controller handles actions

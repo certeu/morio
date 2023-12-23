@@ -1,9 +1,9 @@
-import { capitalize } from '@morio/lib/utils'
+import { capitalize } from '#shared/utils'
 
 /*
  * Import the docker controller
  */
-import { Controller } from '../controllers/docker.mjs'
+import { Controller } from '#controllers/docker'
 
 /*
  * Instantiate the controller

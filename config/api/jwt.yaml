@@ -1,3 +1,0 @@
-secretOrKey: encryptionKey,
-issuer: api,
-expiresIn: process.env.BACKEND_JWT_EXPIRY || '7d',

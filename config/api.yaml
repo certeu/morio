@@ -1,0 +1,5 @@
+container:
+  image: morio/api
+  container_name: api
+  networks:
+    default: null

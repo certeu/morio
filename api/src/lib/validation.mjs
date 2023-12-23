@@ -1,5 +1,5 @@
 import { requestSchema as schema, morioSchema } from '../schema.mjs'
-import { resolveHost, testUrl } from '@morio/lib/network'
+import { resolveHost, testUrl } from '#shared/network'
 import get from 'lodash.get'
 
 /*

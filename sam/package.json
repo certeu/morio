@@ -26,7 +26,11 @@
     "pino-pretty": "^10.2.3"
   },
   "imports": {
-    "#lib/*": "./src/lib/*.mjs"
+    "#controllers/*": "./src/controllers/*.mjs",
+    "#defaults": "./defaults/index.mjs",
+    "#lib/*": "./src/lib/*.mjs",
+    "#routes/*": "./src/routes/*.mjs",
+    "#shared/*": "./shared/*.mjs"
   },
   "main": "index.js",
   "directories": {

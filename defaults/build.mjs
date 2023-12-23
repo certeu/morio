@@ -1,4 +1,4 @@
-import { build } from '@morio/lib/build'
+import { build } from '../shared/src/build.mjs'
 import pkg from './package.json' assert { type: 'json' }
 
 /*

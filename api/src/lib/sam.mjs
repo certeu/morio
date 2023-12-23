@@ -1,5 +1,5 @@
-import { defaults } from '@morio/defaults'
-import { fromEnv } from '@morio/lib/env'
+import { defaults } from '#defaults'
+import { fromEnv } from '#shared/env'
 
 /*
  * The SAM API url

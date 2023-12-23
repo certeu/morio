@@ -1,7 +1,7 @@
 /*
  * Import the actions controller
  */
-import { Controller } from '../controllers/actions.mjs'
+import { Controller } from '#controllers/actions'
 
 /*
  * Instantiate the controller

@@ -1,7 +1,7 @@
 {
-  "name": "@morio/lib",
+  "name": "@morio/shared",
   "version": "0.1.0",
-  "description": "Morio Library Methods for NodeJS (lib)",
+  "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
   "scripts": {
     "prettier": "npx prettier --write 'src/*.mjs'"
@@ -16,6 +16,9 @@
     "url": "https://github.com/certeu/morio/issues"
   },
   "homepage": "https://github.com/certeu/morio#readme",
+  "imports": {
+    "#defaults": "./src/defaults/index.mjs"
+  },
   "exports": {
     ".": "./src/index.js",
     "./*": "./src/*.mjs",

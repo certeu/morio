@@ -1,13 +1,13 @@
 // Dependencies
 import express from 'express'
 import passport from 'passport'
-import { fromEnv } from '@morio/lib/env'
+import { fromEnv } from '#shared/env'
 // Routes
-import { routes } from './routes/index.mjs'
+import { routes } from '#routes/index'
 // Middleware
 import { loadPassportMiddleware } from './middleware.mjs'
 // SAM client
-import { samClient } from './lib/sam.mjs'
+import { samClient } from '#lib/sam'
 // Bootstrap configuration
 import { bootstrapConfiguration } from './bootstrap.mjs'
 // Swagger

@@ -1,9 +1,9 @@
 import pkg from '../package.json' assert { type: 'json' }
-import { defaults } from '@morio/defaults'
-import { randomString } from '@morio/lib/crypto'
-import { readYamlFile } from '@morio/lib/fs'
-import { logger } from '@morio/lib/logger'
-import { fromEnv } from '@morio/lib/env'
+import { defaults } from '#defaults'
+import { randomString } from '#shared/crypto'
+import { readYamlFile } from '#shared/fs'
+import { logger } from '#shared/logger'
+import { fromEnv } from '#shared/env'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -21,7 +21,7 @@ export const bootstrapConfiguration = async () => {
    * If so, we should have a local config on disk. Let's load it.
    */
   const localConfig = await readYamlFile('config/shared/morio.yaml', (err) =>
-    log.info(err, 'No local morio configuration found')
+    log.info('No Morio configuration file found')
   )
 
   if (!localConfig)

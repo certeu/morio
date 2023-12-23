@@ -37,7 +37,9 @@ export const esbuildOptions = (pkg, customOptions = {}) => ({
   external: [],
   metafile: fromEnv('MORIO_ESBUILD_VERBOSE', 'bool'),
   minify: fromEnv('MORIO_ESBUILD_MINIFY', 'bool'),
-  sourcemap: true,
+  platform: 'node',
+  target: ['node20'],
+  sourcemap: false,
   ...customOptions,
 })
 
@@ -49,7 +51,7 @@ export const esbuildOptions = (pkg, customOptions = {}) => ({
  * @param {object} pkg - An object that is the package.json import
  * @param {object} customOptions - An object holding Esbuild options to override the defaults
  */
-export const build = async (pkg, customOptions) => {
+export const build = async (pkg, customOptions = {}) => {
   const result = await esbuild
     .build(esbuildOptions(pkg, customOptions))
     .catch(() => process.exit(1))

@@ -1,7 +1,7 @@
 /*
  * Import the Status controller
  */
-import { Controller } from '../controllers/status.mjs'
+import { Controller } from '#controllers/status'
 
 /*
  * Instantiate the controller

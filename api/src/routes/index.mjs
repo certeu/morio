@@ -1,7 +1,7 @@
-import { routes as sam } from './sam.mjs'
-import { routes as setup } from './setup.mjs'
-import { routes as status } from './status.mjs'
-import { routes as validate } from './validate.mjs'
+import { routes as sam } from '#routes/sam'
+import { routes as setup } from '#routes/setup'
+import { routes as status } from '#routes/status'
+import { routes as validate } from '#routes/validate'
 
 export const routes = {
   sam,

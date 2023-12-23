@@ -1,6 +1,6 @@
-import dns from 'node:dns'
-import https from 'node:https'
-import { fromEnv } from '@morio/lib/env'
+import dns from 'dns'
+import https from 'https'
+import { fromEnv } from './env.mjs'
 
 const dnsOptions = {
   family: 4, // Don't use IPv6

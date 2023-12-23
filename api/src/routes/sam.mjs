@@ -1,7 +1,7 @@
 /*
  * Import the Sam controller
  */
-import { Controller } from '../controllers/sam.mjs'
+import { Controller } from '#controllers/sam'
 
 /*
  * Instantiate the controller

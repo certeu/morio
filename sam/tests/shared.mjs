@@ -1,6 +1,6 @@
 import chai from 'chai'
 import http from 'chai-http'
-import { fromEnv } from '@morio/lib/env'
+import { fromEnv } from '#shared/env'
 
 const expect = chai.expect
 chai.use(http)

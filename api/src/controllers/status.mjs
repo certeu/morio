@@ -1,4 +1,4 @@
-import { timeSince } from '@morio/lib/time'
+import { timeSince } from '#shared/time'
 
 /**
  * This status controller handles the Morio status endpoint

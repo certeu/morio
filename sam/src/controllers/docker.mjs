@@ -3,10 +3,10 @@ import {
   runDockerApiCommand,
   runContainerApiCommand,
   runDockerCliCommand,
-} from '../lib/docker.mjs'
-import { validate } from '../lib/validation.mjs'
-import { schemaViolation, dockerError } from '../lib/response.mjs'
-import { asPojo } from '@morio/lib/utils'
+} from '#lib/docker'
+import { validate } from '#lib/validation'
+import { schemaViolation, dockerError } from '#lib/response'
+import { asPojo } from '#shared/utils'
 
 /**
  * This docker controller handles low-level docker tasks

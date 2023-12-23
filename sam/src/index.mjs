@@ -1,8 +1,8 @@
 // Dependencies
 import express from 'express'
-import { fromEnv } from '@morio/lib/env'
+import { fromEnv } from '#shared/env'
 // Routes
-import { routes } from './routes/index.mjs'
+import { routes } from '#routes/index'
 // Bootstrap configuration
 import { bootstrapConfiguration } from './bootstrap.mjs'
 

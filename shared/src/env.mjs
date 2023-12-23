@@ -1,4 +1,4 @@
-import { defaults } from '@morio/defaults'
+import { defaults } from '#defaults'
 
 /**
  * Helper method to merge environment and defaults

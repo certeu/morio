@@ -5,14 +5,18 @@
   "private": true,
   "scripts": {
     "build": "node build.mjs",
+    "vbuild": "MORIO_ESBUILD_VERBOSE=1 node build.mjs",
     "clean": "rimraf dist",
     "dev": "nodemon src/index.mjs",
     "prettier": "npx prettier --write 'src/*.mjs' 'tests/*.mjs'",
-    "test": "npx mocha tests/index.mjs",
-    "prettier": "prettier -w ."
+    "test": "npx mocha tests/index.mjs"
   },
   "imports": {
-    "#lib/*": "./src/lib/*.mjs"
+    "#controllers/*": "./src/controllers/*.mjs",
+    "#defaults": "./defaults/index.mjs",
+    "#lib/*": "./src/lib/*.mjs",
+    "#routes/*": "./src/routes/*.mjs",
+    "#shared/*": "./shared/*.mjs"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -28,6 +32,7 @@
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-http": "^4.4.0",
+    "esbuild": "^0.19.9",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.2",
     "pino-pretty": "^10.2.3"

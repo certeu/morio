@@ -1,5 +1,5 @@
 import Joi from 'joi'
-import { fromEnv } from '@morio/lib/env'
+import { fromEnv } from '#shared/env'
 
 const shared = {
   setup: {

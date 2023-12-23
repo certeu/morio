@@ -1,4 +1,4 @@
-import { fromEnv } from '@morio/lib/env'
+import { fromEnv } from '#shared/env'
 import Docker from 'dockerode'
 
 /**

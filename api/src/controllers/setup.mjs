@@ -1,6 +1,6 @@
-import { validate, setupTokenValid, setupPossible } from '../lib/validation.mjs'
-import { schemaViolation, setupTokenInvalid, setupNotPossible } from '../lib/response.mjs'
-import { generateJwtKey, generateKeyPair, randomString } from '@morio/lib/crypto'
+import { validate, setupTokenValid, setupPossible } from '#lib/validation'
+import { schemaViolation, setupTokenInvalid, setupNotPossible } from '#lib/response'
+import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 
 /**
  * This setup controller handles the Morio setup
