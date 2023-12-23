@@ -1,0 +1,5 @@
+container:
+  image: morio/sam
+  container_name: sam
+  networks:
+    default: null

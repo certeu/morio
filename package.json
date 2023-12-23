@@ -4,8 +4,9 @@
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:api",
+    "build": "npm run build:api && npm run build:sam",
     "build:api": "./scripts/build-container.sh api",
+    "build:sam": "./scripts/build-container.sh sam",
     "dev": "docker-compose -f compose/dev.yaml up",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "prebuild": "node scripts/prebuild.mjs",

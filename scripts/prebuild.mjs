@@ -7,6 +7,7 @@ import pkg from '../package.json' assert { type: 'json' }
 const config = {
   api: await readYamlFile('config/api.yaml', console.log),
   compose: await readYamlFile('config/compose.yaml', console.log),
+  sam: await readYamlFile('config/sam.yaml', console.log),
   traefik: await readYamlFile('config/traefik.yaml', console.log),
 }
 
@@ -21,27 +22,15 @@ await writeYamlFile('compose/dev.yaml', {
       ...config.api.container,
       image: `${config.api.container.image}:${pkg.version}`,
     },
+    sam: {
+      ...config.sam.container,
+      image: `${config.sam.container.image}:${pkg.version}`,
+    },
     traefik: config.traefik.container,
   },
   networks: {
     default: {
       name: 'morio_net',
-    },
-  },
-})
-
-/*
- * Generate build compose file
- */
-await writeYamlFile('compose/build.yaml', {
-  version: config.compose.version,
-  name: pkg.name,
-  services: {
-    api: {
-      image: `morio/api:${pkg.version}`,
-      build: {
-        context: './api',
-      },
     },
   },
 })

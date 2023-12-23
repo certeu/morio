@@ -6,6 +6,11 @@ services:
     container_name: api
     networks:
       default: null
+  sam:
+    image: morio/sam:0.1.0
+    container_name: sam
+    networks:
+      default: null
   traefik:
     image: traefik:2.10.7
     container_name: traefik
