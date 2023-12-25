@@ -3,11 +3,11 @@ import { template } from 'lib/utils.mjs'
 import { atomWithHash } from 'jotai-location'
 import get from 'lodash.get'
 // View confgurations
-import morio from 'config/ui/wizard-views/morio.yaml'
-import connect from 'config/ui/wizard-views/logstash.yaml'
-import components from 'config/ui/wizard-views/components.yaml'
+import morio from 'config/config-wizard/morio.yaml'
+import connect from 'config/config-wizard/logstash.yaml'
+import components from 'config/config-wizard/components.yaml'
 // Component views
-import ca from 'config/ui/wizard-views/ca.yaml'
+import ca from 'config/config-wizard/ca.yaml'
 
 /*
  * Helper object with all imported view configurations

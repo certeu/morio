@@ -44,7 +44,11 @@ const icons = {
  * This object represents the navigation structure
  */
 const links = {
-  components: {},
+  components: {
+    subs: {
+      traefik: {},
+    },
+  },
   config: {},
   docker: {
     subs: {

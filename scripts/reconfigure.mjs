@@ -3,6 +3,12 @@ import pkg from '../package.json' assert { type: 'json' }
 import { defaults } from '@morio/defaults'
 import mustache from 'mustache'
 import yaml from 'js-yaml'
+import path from 'path'
+
+/**
+ * Add the morio root folder to defaults
+ */
+defaults.MORIO_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
 
 /*
  * Helper method to resolve a configuration file

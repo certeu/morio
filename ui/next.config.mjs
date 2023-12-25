@@ -23,7 +23,10 @@ const nextConfig = {
     config.resolve.alias.components = path.resolve(`./components`)
     config.resolve.alias.pages = path.resolve(`./pages`)
     config.resolve.alias.config = path.resolve(`../config`)
+    config.resolve.alias.context = path.resolve(`./context`)
     config.resolve.alias.lib = path.resolve(`./lib`)
+    config.resolve.alias.defaults = path.resolve(`./context`)
+    config.resolve.alias.shared = path.resolve(`./shared`)
 
     /*
      * Add support for YAML imports

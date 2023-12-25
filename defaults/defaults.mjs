@@ -1,5 +1,3 @@
-import { root } from '#shared/fs'
-
 export const defaults = {
   /*
    * Table of contents:
@@ -86,11 +84,6 @@ export const defaults = {
    * Private key cipher for assymetric crypto
    */
   MORIO_CRYPTO_PRIV_KEY_CIPHER: 'aes-256-cbc',
-
-  /*
-   * Location of the Morio repository - Used in dev
-   */
-  MORIO_REPO_ROOT: root,
 
   ///////////////////////////////////////////////////////////////////////////////
   //  API
