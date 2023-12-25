@@ -15,13 +15,14 @@ const Setup = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
+  const PREFIX = tools.defaults.MORIO_API_PREFIX
 
   /*
    * Hit this route to start the Morio setup
    *
    * Only accessible while Morio has not been set up
    */
-  app.post('/setup/morio', (req, res) => Setup.setup(req, res, tools))
+  app.post(`${PREFIX}/setup/morio`, (req, res) => Setup.setup(req, res, tools))
 
   /*
    * Generates a random key for signing JWTs
@@ -29,7 +30,7 @@ export function routes(tools) {
    * This is a utility method to facilitate setup.
    * Only accessible while Morio is not setup (yet).
    */
-  app.post('/setup/jwtkey', (req, res) => Setup.getJwtKey(req, res, tools))
+  app.post(`${PREFIX}/setup/jwtkey`, (req, res) => Setup.getJwtKey(req, res, tools))
 
   /*
    * Generates a random password
@@ -37,7 +38,7 @@ export function routes(tools) {
    * This is a utility method to facilitate setup.
    * Only accessible while Morio is not setup (yet).
    */
-  app.post('/setup/password', (req, res) => Setup.getPassword(req, res, tools))
+  app.post(`${PREFIX}/setup/password`, (req, res) => Setup.getPassword(req, res, tools))
 
   /*
    * Generates a random key pair for encryption
@@ -45,5 +46,5 @@ export function routes(tools) {
    * This is a utility method to facilitate setup.
    * Only accessible while Morio is not setup (yet).
    */
-  app.post('/setup/keypair', (req, res) => Setup.getKeyPair(req, res, tools))
+  app.post(`${PREFIX}/setup/keypair`, (req, res) => Setup.getKeyPair(req, res, tools))
 }

@@ -7,9 +7,12 @@
     "build": "npm run build:api && npm run build:sam",
     "build:api": "./scripts/build-container.sh api",
     "build:sam": "./scripts/build-container.sh sam",
+    "predev": "npm run reconfigure",
     "dev": "docker-compose -f compose/dev.yaml up",
+    "dev:down": "docker-compose -f compose/dev.yaml down",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
-    "prebuild": "node scripts/prebuild.mjs",
+    "reconfigure": "node scripts/reconfigure.mjs",
+    "prebuild": "npm run reconfigure",
     "prettier": "npx prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -34,6 +37,7 @@
     "esbuild": "^0.19.9",
     "eslint-config-prettier": "^9.1.0",
     "husky": "^8.0.0",
-    "lint-staged": "^15.2.0"
+    "lint-staged": "^15.2.0",
+    "mustache": "^4.2.0"
   }
 }

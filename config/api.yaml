@@ -1,5 +1,24 @@
 container:
+  # Run the image with an explicit version
   image: morio/api
+  # Name it api
   container_name: api
+  # Use the default network
   networks:
     default: null
+  # Configure Traefik with container labels
+  labels:
+    # Tell traefik to watch this container
+    - traefik.enable=true
+    # Attach to the morio_net network
+    - traefik.docker.network=morio_net
+    # Match requests going to the API prefix (triple curly braces are required here)
+    - traefik.http.routers.api.rule=PathPrefix(`{{{ MORIO_API_PREFIX }}}`)
+    # Forward to api service
+    - traefik.http.routers.api.service=api
+    # Only match requests on the https endpoint
+    - traefik.http.routers.api.entrypoints=https
+    # Forward to port on container
+    - 'traefik.http.services.api.loadbalancer.server.port={{ MORIO_API_PORT }}'
+    # Enable TLS
+    - traefik.http.routers.api.tls=true

@@ -9,8 +9,7 @@ COPY package* ./
 RUN npm install pm2
 RUN npm ci
 
-## Build app
-COPY build.mjs build.mjs
+## Copy app
 COPY src src
 COPY shared shared
 COPY defaults defaults

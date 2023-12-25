@@ -15,9 +15,10 @@ const Status = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
+  const PREFIX = tools.defaults.MORIO_API_PREFIX
 
   /*
    * Hit this route to get the Morio status
    */
-  app.get('/status', (req, res) => Status.status(req, res, tools))
+  app.get(`${PREFIX}/status`, (req, res) => Status.status(req, res, tools))
 }

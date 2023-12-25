@@ -2,14 +2,68 @@ container:
   image: 'traefik:2.10.7'
   container_name: traefik
   command:
+    # Export management on port 8080. If 'insecure' raises eyebrows, note that:
+    #   - We are not exposing port 8080 on the host (we will configure access via HTTPS)
+    #   - The Traefik API is read-only, you can't use it to change anything
     - '--api.insecure=true'
-    - '--providers.docker'
+    # Use Docker as provider
+    - '--providers.docker=true'
+    # Only export containers when we explicitly configure it
     - '--providers.docker.exposedbydefault=false'
-    - '--entrypoints.web.address=:80'
+    # Create HTTP entrypoint (only to redirect to HTTPS)
+    - '--entrypoints.http.address=:80'
+    # Always redirect all HTTP requests to HTTPS
+    - '--entrypoints.http.http.redirections.entrypoint.to=https'
+    - '--entrypoints.http.http.redirections.entrypoint.scheme=https'
+    - '--entrypoints.http.http.redirections.entrypoint.permanent=true'
+    #  Create HTTPS entrypoint
+    - '--entrypoints.https.address=:443'
+    # Set the log level
+    - '--log.level={{ MORIO_TRAEFIK_LOG_LEVEL }}'
+    # Set the log destination
+    - '--log.filePath={{ MORIO_TRAEFIK_LOG_FILEPATH }}'
+    # Set the log format
+    - '--log.format={{ MORIO_TRAEFIK_LOG_FORMAT }}'
+  labels:
+    # Tell traefik to watch itself (so meta)
+    - traefik.enable=true
+    # Attach to the morio_net network
+    - traefik.docker.network=morio_net
+    #
+    # 1) Access to dashboard
+    #
+    # Replace /traefik prefix when forwarding requests
+    - traefik.http.middlewares.replaceTraefik.replacePathRegex.regex=^/traefik/(.*)
+    - traefik.http.middlewares.replaceTraefik.replacePathRegex.replacement=/$$1
+    - traefik.http.routers.traefik.middlewares=replaceTraefik
+    # Match requests going to /traefik
+    - traefik.http.routers.traefik.rule=PathPrefix(`/traefik`)
+    # Forward to traefik service
+    - traefik.http.routers.traefik.service=traefik
+    # Only match requests on the https endpoint
+    - traefik.http.routers.traefik.entrypoints=https
+    # Forward to container port 8080
+    - traefik.http.services.traefik.loadbalancer.server.port=8080
+    # Enable TLS
+    - traefik.http.routers.traefik.tls=true
+    #
+    # 1) Access to API (required for dashboard to work)
+    #
+    # Match requests going to /api
+    - traefik.http.routers.traefikApi.rule=PathPrefix(`/api`)
+    # Forward to traefik service
+    - traefik.http.routers.traefikApi.service=traefikApi
+    # Only match requests on the https endpoint
+    - traefik.http.routers.traefikApi.entrypoints=https
+    # Forward to container port 8080
+    - traefik.http.services.traefikApi.loadbalancer.server.port=8080
+    # Enable TLS
+    - traefik.http.routers.traefikApi.tls=true
   networks:
     default: null
   ports:
     - 80:80
-    - 8080:8080
+    - 443:443
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
+    - '{{{ MORIO_REPO_ROOT }}}/logs/:/var/log/morio/'

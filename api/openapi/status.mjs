@@ -1,5 +1,8 @@
 import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
+import { fromEnv } from '#shared/env'
+
+const PREFIX = fromEnv('MORIO_API_PREFIX')
 
 const shared = {
   tags: ['Status'],
@@ -32,8 +35,18 @@ const response = (description, schema, example = {}) => ({
   },
 })
 
+/*
+ * You cannot use a template string as an object key in Javascript.
+ * That's because object keys are always coersed into a string. But a template literal
+ * can't be coersed as it need to be evaluated first.
+ * Arrays however can always be coerced to a string, and a single element array when
+ * coersed to a string will just give us that one element.
+ *
+ * So it's a little hack to ensure we can use dynamic keys and use the prefix
+ * that is configured.
+ */
 export const paths = {
-  '/status': {
+  [`${PREFIX}/status`]: {
     get: {
       ...shared,
       summary: `Returns the Morio status`,

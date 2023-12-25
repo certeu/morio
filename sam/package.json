@@ -27,7 +27,7 @@
   },
   "imports": {
     "#controllers/*": "./src/controllers/*.mjs",
-    "#defaults": "./defaults/index.mjs",
+    "#defaults": "./defaults/defaults.mjs",
     "#lib/*": "./src/lib/*.mjs",
     "#routes/*": "./src/routes/*.mjs",
     "#shared/*": "./shared/*.mjs"

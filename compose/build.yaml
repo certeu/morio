@@ -1,7 +1,0 @@
-version: '3.3'
-name: morio
-services:
-  api:
-    image: morio/api:0.1.0
-    build:
-      context: ./api

@@ -2,6 +2,8 @@ import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
 import { fromEnv } from '#shared/env'
 
+const PREFIX = fromEnv('MORIO_API_PREFIX')
+
 const shared = {
   tags: ['Setup'],
 }
@@ -35,8 +37,18 @@ const response = (description, schema, example = {}) => ({
 
 const setup_token = 'mst.735bf58352dfb40d9ecfb829af230a1274a4a8f1583b93a3a0c1d58ed767682a'
 
+/*
+ * You cannot use a template string as an object key in Javascript.
+ * That's because object keys are always coersed into a string. But a template literal
+ * can't be coersed as it need to be evaluated first.
+ * Arrays however can always be coerced to a string, and a single element array when
+ * coersed to a string will just give us that one element.
+ *
+ * So it's a little hack to ensure we can use dynamic keys and use the prefix
+ * that is configured.
+ */
 export const paths = {
-  '/setup/morio': {
+  [`${PREFIX}/setup/morio`]: {
     post: {
       ...shared,
       summary: `Starts the initial setup of a Morio instance or cluster`,
@@ -77,7 +89,7 @@ export const paths = {
       },
     },
   },
-  '/setup/jwtkey': {
+  [`${PREFIX}/setup/jwtkey`]: {
     post: {
       ...shared,
       summary: `Generates a random key to sign JWTs`,
@@ -100,7 +112,7 @@ export const paths = {
       },
     },
   },
-  '/setup/password': {
+  [`${PREFIX}/setup/password`]: {
     post: {
       ...shared,
       summary: `Generates a random password`,
@@ -135,7 +147,7 @@ export const paths = {
       },
     },
   },
-  '/setup/keypair': {
+  [`${PREFIX}/setup/keypair`]: {
     post: {
       ...shared,
       summary: `Generates a random key pair`,

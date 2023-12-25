@@ -10,7 +10,7 @@
     "prettier": "prettier -w .",
     "test": "npx mocha tests/index.mjs"
   },
-  "main": "./src/index.mjs",
+  "main": "./defaults.mjs",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
@@ -19,6 +19,9 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
+  },
+  "imports": {
+    "#shared/*": "./shared/*.mjs"
   },
   "homepage": "https://github.com/certeu/morio#readme",
   "devDependencies": {

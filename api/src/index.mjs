@@ -47,7 +47,7 @@ app.use(express.json({ limit: '1mb' }))
  */
 tools.log.debug('Adding openapi documentation endpoints')
 const docs = swaggerUi.setup(openapi)
-app.use('/docs', swaggerUi.serve, docs)
+app.use('/apis/morio/docs', swaggerUi.serve, docs)
 
 /*
  * Load the Passport middleware
@@ -73,8 +73,16 @@ app.get('/', async (req, res) =>
     about: tools.config.about,
     version: tools.config.version,
     setup: tools.config.setup,
-    status: '/status',
-    docs: '/docs',
+    status: '/apis/morio/status',
+    docs: '/apis/morio/docs',
+  })
+)
+app.get('/apis/morio/*', async (req, res) =>
+  res.set('Content-Type', 'application/json').status(404).send({
+    url: req.url,
+    method: req.method,
+    originalUrl: req.originalUrl,
+    prefix: tools.defaults.MORIO_API_PREFIX,
   })
 )
 

@@ -1,6 +1,19 @@
+import { root } from '#shared/fs'
+
 export const defaults = {
+  /*
+   * Table of contents:
+   *   - MORIO
+   *     - CONFIG
+   *     - CRYPTO
+   *   - API
+   *   - SAM
+   *   - TRAEFIK
+   *   - UI
+   */
+
   ///////////////////////////////////////////////////////////////////////////////
-  //  MORIO CONFIG
+  //  MORIO
   ///////////////////////////////////////////////////////////////////////////////
 
   /*
@@ -17,10 +30,6 @@ export const defaults = {
    * Deployment sizes we support
    */
   MORIO_CONFIG_DEPLOYMENT_SIZES: [1, 3, 5, 7, 9, 11, 13, 15],
-
-  ///////////////////////////////////////////////////////////////////////////////
-  //  CRYPTO
-  ///////////////////////////////////////////////////////////////////////////////
 
   /*
    * Minimum secret length (in bytes)
@@ -78,23 +87,19 @@ export const defaults = {
    */
   MORIO_CRYPTO_PRIV_KEY_CIPHER: 'aes-256-cbc',
 
-  ///////////////////////////////////////////////////////////////////////////////
-  //  ESBUILD
-  ///////////////////////////////////////////////////////////////////////////////
-
   /*
-   * Whether to minify when Esbuild builds
+   * Location of the Morio repository - Used in dev
    */
-  MORIO_ESBUILD_MINIFY: true,
-
-  /*
-   * Whether to be verbose when Esbuild builds
-   */
-  MORIO_ESBUILD_VERBOSE: false,
+  MORIO_REPO_ROOT: root,
 
   ///////////////////////////////////////////////////////////////////////////////
   //  API
   ///////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * API prefix (since the API is behind Traefik)
+   */
+  MORIO_API_PREFIX: '/apis/morio',
 
   /*
    * API log level
@@ -160,6 +165,25 @@ export const defaults = {
    * TCP port SAM should listen on
    */
   MORIO_SAM_PORT: 3020,
+
+  ///////////////////////////////////////////////////////////////////////////////
+  //  TRAEFIK
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Log level for Traefik
+   */
+  MORIO_TRAEFIK_LOG_LEVEL: 'DEBUG',
+
+  /*
+   * Log filepath for Traefik (path used inside the container)
+   */
+  MORIO_TRAEFIK_LOG_FILEPATH: '/var/log/morio/traefik.log',
+
+  /*
+   * Log format for Traefik
+   */
+  MORIO_TRAEFIK_LOG_FORMAT: 'json',
 
   ///////////////////////////////////////////////////////////////////////////////
   //  UI
