@@ -18,6 +18,8 @@ container:
   # Use the default network
   networks:
     default: null
+  # Run an init inside the container to forward signales (and avoid PID 1)
+  init: true
   # Configuration via environment variables
   environment:
     # Listen on port as set in defaults

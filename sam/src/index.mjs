@@ -1,6 +1,7 @@
 // Dependencies
 import express from 'express'
 import { fromEnv } from '#shared/env'
+import { wrapExpress } from '#shared/utils'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
@@ -46,7 +47,10 @@ app.get('/*', async (req, res) =>
 /*
  * Start listening for requests
  */
-app.listen(fromEnv('MORIO_SAM_PORT'), (err) => {
-  if (err) log.error(err, 'An error occured')
-  tools.log.info(`Morio sam ready - listening on http://0.0.0.0:${fromEnv('MORIO_SAM_PORT')}`)
-})
+wrapExpress(
+  tools.log,
+  app.listen(fromEnv('MORIO_SAM_PORT'), (err) => {
+    if (err) log.error(err, 'An error occured')
+    tools.log.info(`Morio sam ready - listening on http://0.0.0.0:${fromEnv('MORIO_SAM_PORT')}`)
+  })
+)

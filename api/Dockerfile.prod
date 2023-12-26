@@ -1,5 +1,5 @@
 ## Stage 1: Build in NodeJS v20 (builder)
-FROM node:20-alpine as builder
+FROM node:20-slim as builder
 
 ## Make this folder our working directory
 WORKDIR /morio/api
@@ -14,7 +14,7 @@ RUN npm ci
 RUN npm run build
 
 ## Stage 2: Run in NodeJS v20 (runner)
-FROM node:20-alpine as runner
+FROM node:20-slim as runner
 
 ## Make this folder our working directory
 WORKDIR /morio/api
@@ -27,7 +27,8 @@ RUN npm install pm2
 
 ## Add a morio user to run the NodeJS code
 RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
-  && adduser --system --uid ${UID:-2112} ${USER:-morio}
+  && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio} \
+  && chown -R morio:morio /morio/api
 
 ## Copy built artifact from builder
 COPY --from=builder /morio/api/dist/index.mjs ./dist/index.mjs

@@ -1,4 +1,4 @@
-import { readFile, writeYamlFile } from '@morio/shared/fs'
+import { readFile, writeYamlFile, writeFile } from '@morio/shared/fs'
 import pkg from '../package.json' assert { type: 'json' }
 import { defaults } from '@morio/defaults'
 import mustache from 'mustache'
@@ -96,3 +96,71 @@ await writeYamlFile('compose/prod.yaml', {
     },
   },
 })
+
+/*
+ * Generate run files for development
+ */
+const volumesAsCmd = (vols1 = [], vols2 = []) =>
+  [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
+const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
+  --network=morio-net \\
+  ${config[name].container.init ? '--init' : ''} \\
+${volumesAsCmd(config[name].targets?.development?.volumes, config[name].container?.volumes)} \\
+  ${config[name].targets?.development?.image || config[name].container.image}:${pkg.version}
+`
+
+for (const name of ['api', 'sam', 'ui'])
+  await writeFile(
+    `${name}/run-container.sh`,
+    `#!/bin/bash
+
+#
+# This file is auto-generated
+#
+# Any changes you make here will be lost next time 'npm run reconfigured' runs.
+# To make changes, see: scripts/reconfigure.mjs
+#
+
+docker network create morio-net
+docker stop ${name}
+docker rm ${name}
+
+if [ -z "$1" ];
+then
+  echo ""
+  echo "No request to attach to container. Starting in daemonized mode."
+  echo "To attach, pass attach to this script: run-container.sh attach "
+  echo ""
+  docker run -d ${cliOptions(name)}
+else
+  docker run --rm -it ${cliOptions(name)}
+fi
+`
+  )
+
+/*
+container:
+  # Name it api
+  container_name: api
+  # Use the default network
+  networks:
+    default: null
+  # Run an init inside the container to forward signales (and avoid PID 1)
+  init: true
+  # Configure Traefik with container labels
+  labels:
+    # Tell traefik to watch this container
+    - traefik.enable=true
+    # Attach to the morio_net network
+    - traefik.docker.network=morio_net
+    # Match requests going to the API prefix (triple curly braces are required here)
+    - traefik.http.routers.api.rule=PathPrefix(`{{{ MORIO_API_PREFIX }}}`)
+    # Forward to api service
+    - traefik.http.routers.api.service=api
+    # Only match requests on the https endpoint
+    - traefik.http.routers.api.entrypoints=https
+    # Forward to port on container
+    - 'traefik.http.services.api.loadbalancer.server.port={{ MORIO_API_PORT }}'
+    # Enable TLS
+    - traefik.http.routers.api.tls=true
+*/

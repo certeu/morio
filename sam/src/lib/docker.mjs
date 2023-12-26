@@ -19,6 +19,7 @@ export const runDockerApiCommand = async (cmd, options = {}) => {
   try {
     result = await docker[cmd](options)
   } catch (err) {
+    console.log(err)
     return [false, err]
   }
 

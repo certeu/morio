@@ -5,10 +5,12 @@ import { useState } from 'react'
 // Components
 import {
   ComponentIcon,
+  CodeIcon,
   ConfigurationIcon,
   ContainerIcon,
   ContainerImageIcon,
   LayersIcon,
+  MorioIcon,
   ServersIcon,
   StatusIcon,
   StorageIcon,
@@ -27,11 +29,13 @@ export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
  * Object to map icons to page
  */
 const icons = {
+  APIs: CodeIcon,
   components: ComponentIcon,
   config: ConfigurationIcon,
   docker: Docker,
   containers: ContainerIcon,
   images: ContainerImageIcon,
+  morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
   services: LayersIcon,
@@ -44,6 +48,11 @@ const icons = {
  * This object represents the navigation structure
  */
 const links = {
+  APIs: {
+    subs: {
+      morio: {},
+    },
+  },
   components: {
     subs: {
       traefik: {},
@@ -151,7 +160,11 @@ export const NavButton = ({
  * @return {string} href - The href attribute to link to this page
  */
 const getHref = (page, parents = [], slug = false) =>
-  slug ? `/${slug}` : parents.length > 0 ? `/${parents.join('/')}/${page}` : `/${page}`
+  slug
+    ? `/${slug.toLowerCase()}`
+    : parents.length > 0
+      ? `/${parents.join('/')}/${page}`.toLowerCase()
+      : `/${page}`.toLowerCase()
 
 /**
  * Helper method to retrieve the title/label

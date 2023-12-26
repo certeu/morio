@@ -1,8 +1,11 @@
 ## Stage 1: Build in NodeJS v20 (builder)
-FROM node:20-alpine as builder
+FROM node:20-slim as builder
 
 ## Make this folder our working directory
 WORKDIR /morio/sam
+
+## Install build toolchange for native bindings
+RUN apt-get update && apt-get install -y python3 make g++
 
 ## Copy in source and config
 COPY . .
@@ -10,11 +13,14 @@ COPY . .
 ## Install dependencies
 RUN npm ci
 
+## Install/Build the depdendencies that have native bindings
+RUN npm install ssh2 cpu-features
+
 ## Build backend into a self-contained application
 RUN npm run build
 
 ## Stage 2: Run in NodeJS v20 (runner)
-FROM node:20-alpine as runner
+FROM node:20-slim as runner
 
 ## Make this folder our working directory
 WORKDIR /morio/sam
@@ -22,16 +28,16 @@ WORKDIR /morio/sam
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production
 
-## Install the pm2 process manager for NodeJS
-RUN npm install pm2
-
-## Add a morio user to run the NodeJS code
-RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
-  && adduser --system --uid ${UID:-2112} ${USER:-morio}
-
-## Copy built artifact from builder
+## Copy build artifact from builder
 COPY --from=builder /morio/sam/dist/index.mjs ./dist/index.mjs
 
-## Drop privleges and run NodeJS code via pm2
-USER ${USER:-morio}
-CMD ["./node_modules/.bin/pm2-runtime",  "./dist/index.mjs"]
+# Copy dependencies that were kept out of the bundle
+COPY --from=builder /morio/sam/node_modules/ssh2 ./node_modules/ssh2
+COPY --from=builder /morio/sam/node_modules/asn1 ./node_modules/asn1
+COPY --from=builder /morio/sam/node_modules/bcrypt-pbkdf ./node_modules/bcrypt-pbkdf
+COPY --from=builder /morio/sam/node_modules/tweetnacl ./node_modules/tweetnacl
+COPY --from=builder /morio/sam/node_modules/safer-buffer ./node_modules/safer-buffer
+COPY --from=builder /morio/sam/node_modules/cpu-features ./node_modules/cpu-features
+
+## Now run NodeJS code
+CMD ["node", "./dist/index.mjs"]

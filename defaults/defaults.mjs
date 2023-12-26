@@ -103,6 +103,11 @@ export const defaults = {
   /*
    * API prefix (since the API is behind Traefik)
    */
+  MORIO_API_HOST: 'api',
+
+  /*
+   * API prefix (since the API is behind Traefik)
+   */
   MORIO_API_PREFIX: '/apis/morio',
 
   /*
@@ -157,7 +162,7 @@ export const defaults = {
    * SAM host - Should resolve inside containers
    * One of: trace, debug, info, warn, error, fatal, silent
    */
-  MORIO_SAM_HOST: 'localhost',
+  MORIO_SAM_HOST: 'sam',
 
   /*
    * SAM log level

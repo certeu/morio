@@ -20,10 +20,8 @@ build(pkg, {
   },
 
   /*
-   * These are dependencies using .node files which won't work out of the box.
-   * We can work around it with a plugin, but this code is a nested dependency that
-   * we do not actually use. So let's just drop it.
-   * See: https://github.com/evanw/esbuild/issues/1051#issuecomment-806325487
+   * These dependencies cannot be bundled because of native bindings.
+   * We need to be instal them inside the container image or things will break.
    */
   external: ['cpu-features', 'ssh2'],
 })

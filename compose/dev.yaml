@@ -5,6 +5,7 @@ services:
     container_name: api
     networks:
       default: null
+    init: true
     labels:
       - traefik.enable=true
       - traefik.docker.network=morio_net
@@ -20,14 +21,16 @@ services:
     container_name: sam
     networks:
       default: null
+    init: true
     environment:
       MORIO_SAM_DOCKER_SOCKET: /var/run/docker.sock
-      MORIO_SAM_HOST: localhost
+      MORIO_SAM_HOST: sam
       MORIO_SAM_LOG_LEVEL: debug
       MORIO_SAM_PORT: '3020'
     image: morio/sam-dev:0.1.0
     volumes:
       - /home/joost/git/morio:/morio
+      - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - traefik.enable=true
       - traefik.docker.network=morio_net
@@ -42,6 +45,7 @@ services:
     container_name: ui
     networks:
       default: null
+    init: true
     environment:
       PORT: '3010'
       HOSTNAME: 0.0.0.0
