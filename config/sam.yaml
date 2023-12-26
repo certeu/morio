@@ -1,5 +1,44 @@
+# Target-specific configuration
+targets:
+  production:
+    # The image to run in production
+    # The specific tag will be added by the reconfigure script
+    image: morio/sam
+    # Note that this container is not exposed via Traefik in production
+  development:
+    # The image to run in development
+    # The specific tag will be added by the reconfigure script
+    image: morio/sam-dev
+    volumes:
+      - '{{{ MORIO_REPO_ROOT }}}:/morio'
+    labels:
+      # Tell traefik to watch this container
+      - traefik.enable=true
+      # Attach to the morio_net network
+      - traefik.docker.network=morio_net
+      # Match requests going to the SAM prefix (triple curly braces are required here)
+      - traefik.http.routers.sam.rule=PathPrefix(`/apis/sam`)
+      # Strip the prefix prior to forwarding
+      - traefik.http.middlewares.samStripPrefix.stripprefix.prefixes=/apis/sam
+      # Attach middleware to strip prefix
+      - traefik.http.routers.sam.middlewares=samStripPrefix
+      # Forward to sam service
+      - traefik.http.routers.sam.service=sam
+      # Only match requests on the https endpoint
+      - traefik.http.routers.sam.entrypoints=https
+      # Forward to port on container
+      - 'traefik.http.services.sam.loadbalancer.server.port={{ MORIO_SAM_PORT }}'
+      # Enable TLS
+      - traefik.http.routers.sam.tls=true
+
 container:
-  image: morio/sam
+  # Name it sam
   container_name: sam
+  # Use the default network
   networks:
     default: null
+  environment:
+    MORIO_SAM_DOCKER_SOCKET: '{{{ MORIO_SAM_DOCKER_SOCKET }}}'
+    MORIO_SAM_HOST: '{{{ MORIO_SAM_HOST }}}'
+    MORIO_SAM_LOG_LEVEL: '{{{ MORIO_SAM_LOG_LEVEL }}}'
+    MORIO_SAM_PORT: '{{{ MORIO_SAM_PORT }}}'

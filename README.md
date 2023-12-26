@@ -37,3 +37,46 @@ Morio is an API-first project. Everything should go via the API. The `api` folde
 
 So the web interface we are building to manage morio connects to the API.
 But if people don't want to use the web interface and talk to the API directly, that's fine too.
+
+### SAM
+
+SAM (System Actions Manager) is responsible for taking actions on the system level (the host OS).
+Typically, this mean talking to the Docker Daemon, getting the list of running containers,
+restarting containers and so on.
+
+Access to SAM is not exposed to users. Instead, it will be called internally by the API
+over the internal Docker network.
+
+### Traefik
+
+Traefik is an edge router and is used as reverse proxy inside Morio.
+It watches the Docker socket and will configure itself based on labels set on Docker containers.
+
+## Getting started
+
+First clone this repository:
+
+```
+git clone git@github.com:certeu/morio.git
+```
+
+Then, enter the newly created `morio` folder and run the kickstart script:
+
+```
+cd morio
+npm run kickstart
+```
+
+This will setup dependencies, and get your repository in a state that is ready to go.
+
+To start the development environment, you first need to build the various container images:
+
+```
+npm run build
+```
+
+Then you can run:
+
+```
+npm run dev
+```

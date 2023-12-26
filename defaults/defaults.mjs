@@ -4,6 +4,7 @@ export const defaults = {
    *   - MORIO
    *     - CONFIG
    *     - CRYPTO
+   *     - ESBUILD
    *   - API
    *   - SAM
    *   - TRAEFIK
@@ -84,6 +85,16 @@ export const defaults = {
    * Private key cipher for assymetric crypto
    */
   MORIO_CRYPTO_PRIV_KEY_CIPHER: 'aes-256-cbc',
+
+  /*
+   * Whether or not to minify builds
+   */
+  MORIO_ESBUILD_MINIFY: true,
+
+  /*
+   * Whether or not to output verbose build info
+   */
+  MORIO_ESBUILD_VERBOSE: true,
 
   ///////////////////////////////////////////////////////////////////////////////
   //  API

@@ -44,11 +44,13 @@ await writeYamlFile('compose/dev.yaml', {
   services: {
     api: {
       ...config.api.container,
-      image: `${config.api.container.image}:${pkg.version}`,
+      ...config.api.targets.development,
+      image: `${config.api.targets.development.image}:${pkg.version}`,
     },
     sam: {
       ...config.sam.container,
-      image: `${config.sam.container.image}:${pkg.version}`,
+      ...config.sam.targets.development,
+      image: `${config.sam.targets.development.image}:${pkg.version}`,
     },
     ui: {
       ...config.ui.container,
@@ -73,11 +75,13 @@ await writeYamlFile('compose/prod.yaml', {
   services: {
     api: {
       ...config.api.container,
-      image: `${config.api.container.image}:${pkg.version}`,
+      ...config.ui.targets.production,
+      image: `${config.api.targets.production.image}:${pkg.version}`,
     },
     sam: {
       ...config.sam.container,
-      image: `${config.sam.container.image}:${pkg.version}`,
+      ...config.sam.targets.production,
+      image: `${config.sam.targets.production.image}:${pkg.version}`,
     },
     ui: {
       ...config.ui.container,

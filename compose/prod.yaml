@@ -2,7 +2,6 @@ version: '3.3'
 name: morio
 services:
   api:
-    image: morio/api:0.1.0
     container_name: api
     networks:
       default: null
@@ -14,11 +13,17 @@ services:
       - traefik.http.routers.api.entrypoints=https
       - traefik.http.services.api.loadbalancer.server.port=3000
       - traefik.http.routers.api.tls=true
+    image: morio/api:0.1.0
   sam:
-    image: morio/sam:0.1.0
     container_name: sam
     networks:
       default: null
+    environment:
+      MORIO_SAM_DOCKER_SOCKET: /var/run/docker.sock
+      MORIO_SAM_HOST: localhost
+      MORIO_SAM_LOG_LEVEL: debug
+      MORIO_SAM_PORT: '3020'
+    image: morio/sam:0.1.0
   ui:
     container_name: ui
     networks:

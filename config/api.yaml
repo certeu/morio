@@ -1,6 +1,17 @@
+# Target-specific configuration
+targets:
+  production:
+    # The image to run in production
+    # The specific tag will be added by the reconfigure script
+    image: morio/api
+  development:
+    # The image to run in development
+    # The specific tag will be added by the reconfigure script
+    image: morio/api-dev
+    volumes:
+      - '{{{ MORIO_REPO_ROOT }}}:/morio'
+
 container:
-  # Run the image with an explicit version
-  image: morio/api
   # Name it api
   container_name: api
   # Use the default network

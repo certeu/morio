@@ -34,10 +34,19 @@ for (const type in routes) {
   routes[type](tools)
 }
 
+app.get('/*', async (req, res) =>
+  res.set('Content-Type', 'application/json').status(404).send({
+    url: req.url,
+    method: req.method,
+    originalUrl: req.originalUrl,
+    prefix: tools.defaults.MORIO_SAM_PREFIX,
+  })
+)
+
 /*
  * Start listening for requests
  */
 app.listen(fromEnv('MORIO_SAM_PORT'), (err) => {
   if (err) log.error(err, 'An error occured')
-  tools.log.info(`Morio sam ready - listening on http://localhost:${fromEnv('MORIO_SAM_PORT')}`)
+  tools.log.info(`Morio sam ready - listening on http://0.0.0.0:${fromEnv('MORIO_SAM_PORT')}`)
 })

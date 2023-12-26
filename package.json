@@ -4,7 +4,7 @@
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:api && npm run build:sam",
+    "build": "npm run build:api && npm run build:sam && npm run build:ui",
     "build:api": "./scripts/build-container.sh api",
     "build:sam": "./scripts/build-container.sh sam",
     "build:ui": "./scripts/build-container.sh ui",

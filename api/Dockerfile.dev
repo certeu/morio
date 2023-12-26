@@ -1,0 +1,14 @@
+## Run in NodeJS v20
+FROM node:20-alpine
+
+# Make this folder our working directory
+WORKDIR /morio/api
+
+## Add a morio user to run the NodeJS code
+RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} && \
+  adduser --system --uid ${UID:-2112} --gecos "Morio User" ${USER:-morio} && \
+  adduser ${USER:-morio} ${USER:-morio}
+
+## Drop privleges and run NodeJS code via pm2
+USER ${USER:-morio}
+CMD ["npm", "run", "dev"]
