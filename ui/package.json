@@ -13,6 +13,7 @@
     "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
     "highlight.js": "^11.9.0",
     "is-valid-hostname": "^1.0.2",
+    "joi": "^17.11.0",
     "jotai": "^2.6.0",
     "jotai-location": "^0.5.2",
     "lodash.get": "^4.4.2",
@@ -31,7 +32,8 @@
     "use-local-storage-state": "^19.1.0"
   },
   "imports": {
-    "#defaults/*": "./defaults/*.mjs",
+    "#defaults": "./defaults/defaults.mjs",
+    "#schema/*": "./schema/*.mjs",
     "#shared/*": "./shared/*.mjs"
   },
   "lint-staged": {

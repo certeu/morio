@@ -6,6 +6,6 @@ container:
   ports: []
   volumes:
     - 'MORIO_ROOT/data/ca:/home/step'
-  env:
+  environment:
     DOCKER_STEPCA_INIT_NAME: MORIO_DISPLAY_NAME
     DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,engn-vm2.cert.europa.eu,ca.cert.europa.eu'

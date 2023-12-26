@@ -1,0 +1,42 @@
+# Stage 1: Base image
+FROM node:18-alpine as base
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY . .
+RUN npm install pm2
+RUN npm ci
+ENV NEXT_TELEMETRY_DISABLED 1
+# Need to re-create this as a symlink or node resolution will break
+RUN cd /app/node_modules/.bin && rm next && ln -s ../next/dist/bin/next && cd -
+RUN npm run build
+
+## Stage 2: Production app
+FROM base as runner
+
+## Set workdir
+WORKDIR /app
+
+## Set environment variables
+ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
+## Add a user to run the app
+## Add a user to run the app
+RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
+  && adduser --system --uid ${UID:-2112} ${USER:-morio} \
+  && chown -R ${USER:-morio} /app
+
+## Copy built node modules and binaries without including the toolchain
+COPY --from=builder /app/public ./public
+
+## Setup folder for next cache
+RUN mkdir .next
+COPY --from=builder --chown=morio:morio /app/.next/standalone ./
+COPY --from=builder --chown=morio:morio /app/.next/static ./.next/static
+
+# Need to re-create this as a symlink or node resolution will break
+RUN cd /app/node_modules/.bin && rm next && ln -s ../next/dist/bin/next && cd -
+
+## Drop privleges and run app
+USER ${USER:-morio}
+CMD ["./node_modules/.bin/pm2-runtime",  "./.next/standalone/server.js"]

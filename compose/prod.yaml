@@ -34,9 +34,7 @@ services:
       - traefik.http.routers.ui.entrypoints=https
       - traefik.http.services.ui.loadbalancer.server.port=3010
       - traefik.http.routers.ui.tls=true
-    image: morio/ui-dev:0.1.0
-    volumes:
-      - /home/joost/git/morio:/morio
+    image: morio/ui:0.1.0
   traefik:
     image: traefik:2.10.7
     container_name: traefik

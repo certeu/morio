@@ -14,19 +14,18 @@ import path from 'path'
 const nextConfig = {
   pageExtensions: ['mjs'],
   reactStrictMode: true,
+  output: 'standalone',
   webpack: (config, options) => {
     /*
      * Webpack aliases to simplify import paths
      */
-    config.resolve.alias.ui = path.resolve('./')
-    config.resolve.alias.hooks = path.resolve(`./hooks`)
     config.resolve.alias.components = path.resolve(`./components`)
-    config.resolve.alias.pages = path.resolve(`./pages`)
-    config.resolve.alias.config = path.resolve(`../config`)
+    config.resolve.alias.config = path.resolve(`./config`)
     config.resolve.alias.context = path.resolve(`./context`)
+    config.resolve.alias.hooks = path.resolve(`./hooks`)
     config.resolve.alias.lib = path.resolve(`./lib`)
-    config.resolve.alias.defaults = path.resolve(`./context`)
-    config.resolve.alias.shared = path.resolve(`./shared`)
+    config.resolve.alias.pages = path.resolve(`./pages`)
+    config.resolve.alias.ui = path.resolve('./')
 
     /*
      * Add support for YAML imports

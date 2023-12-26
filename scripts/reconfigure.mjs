@@ -32,7 +32,8 @@ const resolveConfig = async (configFile) => {
  * Resolve the configuration
  */
 const config = {}
-for (const type of ['api', 'compose', 'sam', 'traefik']) config[type] = await resolveConfig(type)
+for (const type of ['api', 'compose', 'sam', 'traefik', 'ui'])
+  config[type] = await resolveConfig(type)
 
 /*
  * Generate compose file for development
@@ -41,13 +42,47 @@ await writeYamlFile('compose/dev.yaml', {
   version: config.compose.version,
   name: pkg.name,
   services: {
-    morio_api: {
+    api: {
       ...config.api.container,
       image: `${config.api.container.image}:${pkg.version}`,
     },
-    morio_sam: {
+    sam: {
       ...config.sam.container,
       image: `${config.sam.container.image}:${pkg.version}`,
+    },
+    ui: {
+      ...config.ui.container,
+      ...config.ui.targets.development,
+      image: `${config.ui.targets.development.image}:${pkg.version}`,
+    },
+    traefik: config.traefik.container,
+  },
+  networks: {
+    default: {
+      name: 'morio_net',
+    },
+  },
+})
+
+/*
+ * Generate compose file for production
+ */
+await writeYamlFile('compose/prod.yaml', {
+  version: config.compose.version,
+  name: pkg.name,
+  services: {
+    api: {
+      ...config.api.container,
+      image: `${config.api.container.image}:${pkg.version}`,
+    },
+    sam: {
+      ...config.sam.container,
+      image: `${config.sam.container.image}:${pkg.version}`,
+    },
+    ui: {
+      ...config.ui.container,
+      ...config.ui.targets.production,
+      image: `${config.ui.targets.production.image}:${pkg.version}`,
     },
     traefik: config.traefik.container,
   },

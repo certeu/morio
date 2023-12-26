@@ -188,6 +188,11 @@ export const defaults = {
   MORIO_UI_PORT: 3010,
 
   /*
+   * UI prefix (since the UI is behind Traefik)
+   */
+  MORIO_UI_PREFIX: '/',
+
+  /*
    * Timeout URL check after this many milliseconds
    */
   MORIO_UI_TIMEOUT_URL_CHECK: 1500,

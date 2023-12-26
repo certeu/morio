@@ -1,6 +1,6 @@
 // Dependencies
 import { views, keys, resolveNextView, resolveViewValue, viewInHash, getView } from './views.mjs'
-import { template, validate, validateConfiguration } from 'lib/utils.mjs'
+import { template, validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -17,7 +17,7 @@ import { PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport } from './report.mjs'
-import { NavButton, iconSize } from 'components/layout/sidebar.mjs'
+import { NavButton } from 'components/layout/sidebar.mjs'
 import { LeftIcon, RightIcon } from 'components/icons.mjs'
 
 /**

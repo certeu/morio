@@ -1,0 +1,10 @@
+FROM node:18-alpine
+RUN apk add --no-cache libc6-compat
+WORKDIR /morio/ui
+## Add a user to run the app
+RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} && \
+  adduser --system --uid ${UID:-2112} --gecos "Morio User" ${USER:-morio} && \
+  adduser ${USER:-morio} ${USER:-morio}
+## Drop privleges and run app
+USER ${USER:-morio}
+CMD ["npm", "run", "dev"]
