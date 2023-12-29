@@ -76,6 +76,13 @@ const links = {
 const Null = () => null
 
 /**
+ * Helper method to determine whether a page is active, as in on the path to
+ * the current page.
+ *
+ */
+const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length) === href
+
+/**
  * This is a component to render a navigation button, which is an entry in the menu
  *
  * @param {object} subs - Any additional children (sub-pages) to render
@@ -103,10 +110,13 @@ export const NavButton = ({
    */
   const href = getHref(target, parents)
   const title = getTitle(target)
-  const active = href === `/` + current
+  const active = isActive(href, current)
+  const here = `/${current.join('/')}` === href
   const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
     active
-      ? 'bg-secondary text-secondary-content font-bold'
+      ? here
+        ? 'bg-secondary font-bold text-secondary-content'
+        : 'bg-secondary text-neutral-content bg-opacity-20 font-bold'
       : `bg-neutral text-neutral-content ${level > 0 ? 'font-thin text-sm italic' : 'font-medium'}`
   }`
   const span = (
