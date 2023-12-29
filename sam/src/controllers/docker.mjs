@@ -3,6 +3,7 @@ import {
   runDockerApiCommand,
   runContainerApiCommand,
   runContainerImageApiCommand,
+  runNetworkApiCommand,
   runDockerCliCommand,
 } from '#lib/docker'
 import { validate } from '#lib/validation'
@@ -84,40 +85,6 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect')
 }
 
 /**
- * Changes the state of a running container
- *
- * This handles the following commands on a Container object:
- *   - start
- *   - stop
- *   - pause
- *   - unpause
- *   - restart
- *   - kill
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
- * @param {string} cmd - The command to run (method on the docker client)
- */
-Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => {
-  /*
-   * Validate request against schema
-   */
-  const [valid, err] = await validate(`docker.image.inspect`, req.params)
-  if (!valid) return schemaViolation(err, res)
-
-  /*
-   * Now run the container image API command
-   */
-  const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
-
-  /*
-   * Return result
-   */
-  return success ? res.send(result) : dockerError(result, res)
-}
-
-/**
  * Creates a Docker resource
  *
  * This handles the following commands on the docker object:
@@ -191,17 +158,46 @@ Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
  * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getContainerImageData = async (req, res, tools, cmd = 'inspect') => {
+Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.image.${cmd}`, req.params)
+  const [valid, err] = await validate(`docker.image.inspect`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
    * Now run the container image API command
    */
   const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
+
+  /*
+   * Return result
+   */
+  return success ? res.send(result) : dockerError(result, res)
+}
+
+/**
+ * Gets data from a Docker network and returns it
+ *
+ * This handles the following commands on a Container image object:
+ *   - inspect
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {string} cmd - The command to run (method on the docker client)
+ */
+Controller.prototype.getNetworkData = async (req, res, tools, cmd = 'inspect') => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`docker.network.${cmd}`, req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  /*
+   * Now run the docker network API command
+   */
+  const [success, result] = await runNetworkApiCommand(valid.id, cmd)
 
   /*
    * Return result

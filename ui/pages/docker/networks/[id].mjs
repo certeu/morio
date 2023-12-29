@@ -4,13 +4,12 @@ import { formatContainerName } from 'lib/utils.mjs'
 import { useState } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
-import { ContainerImageIcon } from 'components/icons.mjs'
-import { DockerImage, DockerImageHistory } from 'components/docker/index.mjs'
+import { WifiIcon } from 'components/icons.mjs'
+import { DockerNetwork } from 'components/docker/index.mjs'
 import { ContentWrapper } from 'pages/docker/index.mjs'
 import { Spinner } from 'components/animations.mjs'
-import { MainSideView } from 'components/layout/main-side-view.mjs'
 
-const ContainerImagePage = (props) => {
+const DockerNetworkPage = (props) => {
   /*
    * React state
    */
@@ -25,25 +24,20 @@ const ContainerImagePage = (props) => {
 
   return (
     <PageWrapper page={props.page}>
-      <ContentWrapper
-        {...props}
-        Icon={ContainerImageIcon}
-        title={data ? formatContainerName(data.RepoTags[0]) : 'One moment please...'}
-      >
+      <ContentWrapper {...props} Icon={WifiIcon} title={data ? data.Name : 'One moment please...'}>
         <div className="max-w-4xl">
-          <DockerImage {...{ id: props.id, callback: setData, reload }} />
-          <DockerImageHistory id={props.id} />
+          <DockerNetwork {...{ id: props.id, callback: setData, reload }} />
         </div>
       </ContentWrapper>
     </PageWrapper>
   )
 }
 
-export default ContainerImagePage
+export default DockerNetworkPage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    page: ['docker', 'images', params.id],
+    page: ['docker', 'networks', params.id],
     id: params.id,
   },
 })

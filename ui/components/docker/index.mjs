@@ -762,7 +762,7 @@ export const DisplayDockerImage = ({ data, methods }) => {
    * Split image into namespace, name, and tag
    */
   const image = []
-  if (data.RepoTags.length > 0) {
+  if (data?.RepoTags && data.RepoTags.length > 0) {
     image.push(...data.RepoTags[0].split(':'))
     image.push(...image[0].split('/'))
   } else image.push(data.Id.slice(7, 13))
@@ -810,3 +810,108 @@ export const DisplayDockerImageHistory = ({ data }) => (
     ))}
   </div>
 )
+
+/*
+ * Docker networks component
+ */
+export const DockerNetworks = () => (
+  <DockerWrapper endpoint="docker/networks" Component={DisplayDockerNetworks} />
+)
+
+/*
+ * Docker display networks component
+ */
+const DisplayDockerNetworks = ({ data }) => {
+  /*
+   * Modal context
+   */
+  const { setModal, clearModal, modalContent } = useContext(ModalContext)
+
+  /*
+   * Don't bother if data holds an error
+   */
+  if (isError(data)) return <StatsError err={data} title="Docker Networks" />
+
+  /*
+   * If there's no containers, let the user know because if not they might
+   * assume things are broken when no data shows up
+   */
+  if (data.length === 0) return <p className="italic opacity-70 pl-4">No networks to show</p>
+
+  /*
+   * Return table or containers
+   */
+  return (
+    <div className="w-full max-w-full overflow-x-auto">
+      <table className="tabled-fixed w-full max-w-4xl">
+        <thead>
+          <tr>
+            <th className="w-64 text-left pl-4">Name</th>
+            <th className="w-64 text-left pl-4">Created</th>
+            <th className="w-64 text-left pl-4">Subnet</th>
+            <th className="w-64 text-left pl-4">ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((network) => (
+            <tr key={network.Id} className="hover:bg-secondary hover:bg-opacity-30">
+              <td className="px-4">
+                <PageLink href={`/docker/networks/${network.Id}`}>{network.Name}</PageLink>
+              </td>
+              <td className="px-4">
+                <TimeAgo date={new Date(network.Created)} />
+              </td>
+              <td className="px-4 py-2">
+                {network.IPAM?.Config?.[0]?.Subnet ? network.IPAM?.Config?.[0]?.Subnet : '-'}
+              </td>
+              <td className="px-4 py-2">
+                <code className="hover:bg-secondary">{network.Id.slice(7, 13)}</code>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/*
+ * Docker network component
+ */
+export const DockerNetwork = (props) => (
+  <DockerWrapper
+    endpoint={`docker/networks/${props.id}`}
+    Component={DisplayDockerNetwork}
+    {...props}
+  />
+)
+
+/*
+ * Docker display network component
+ */
+export const DisplayDockerNetwork = ({ data, methods }) => {
+  const { setModal, clearModal, modalContent } = useContext(ModalContext)
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-row flexwrap gap-4">
+        <StatsWrapper data={data}>
+          <div className="stat place-items-center">
+            <div className="stat-title">Network</div>
+            <div className="stat-value">{data.Name}</div>
+            <div className="stat-desc"></div>
+          </div>
+        </StatsWrapper>
+        <StatsWrapper data={data}>
+          <div className="stat place-items-center">
+            <div className="stat-title">Subnet</div>
+            <div className="stat-value capitalize">
+              {data.IPAM?.Config?.[0]?.Subnet ? data.IPAM?.Config?.[0]?.Subnet : '-'}
+            </div>
+            <div className="stat-desc"></div>
+          </div>
+        </StatsWrapper>
+      </div>
+    </div>
+  )
+}

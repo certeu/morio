@@ -64,7 +64,7 @@ Controller.prototype.createDockerResource = async (req, res, tools, path) => {
 }
 
 /**
- * Gets image data from Sam
+ * Gets docker image data from Sam
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -74,6 +74,22 @@ Controller.prototype.createDockerResource = async (req, res, tools, path) => {
 Controller.prototype.getDockerImageData = async (req, res, tools, path = false) => {
   const [status, result] = await tools.sam.get(
     `/docker/images/${req.params.id}${path ? '/' + path : ''}`
+  )
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Gets Docker network data from Sam
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {string} path - The sam api path
+ */
+Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false) => {
+  const [status, result] = await tools.sam.get(
+    `/docker/networks/${req.params.id}${path ? '/' + path : ''}`
   )
 
   return res.status(status).send(result)

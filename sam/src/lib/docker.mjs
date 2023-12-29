@@ -50,6 +50,28 @@ export const runContainerApiCommand = async (id, cmd, options = {}) => {
 }
 
 /**
+ * This helper method runs an async command against the docker network API
+ *
+ * @param {string} id - The container image id
+ * @param {string} cmd - A instance method to run
+ * @return {array} return - An array with a boolean indicating success or
+ * failure, and the command return value
+ */
+export const runNetworkApiCommand = async (id, cmd) => {
+  const [ready, network] = await runDockerApiCommand('getNetwork', id)
+  if (!ready) return [false, false]
+
+  let result
+  try {
+    result = await network[cmd]()
+  } catch (err) {
+    return [false, err]
+  }
+
+  return [true, result]
+}
+
+/**
  * This helper method runs an async command against the container image API
  *
  * @param {string} id - The container image id

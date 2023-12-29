@@ -35,6 +35,11 @@ export function routes(tools) {
   app.get(`/docker/images/:id/history`, (req, res) => Docker.getImageData(req, res, tools, 'history'))
 
   /*
+   * API routes to get data from a specific docker network
+   */
+  app.get(`/docker/networks/:id`, (req, res) => Docker.getNetworkData(req, res, tools))
+
+  /*
    * API routes to make changes to a specific container
    */
   app.put(`/docker/containers/:id/kill`,    (req, res) => Docker.updateContainer(req, res, tools, 'kill'))

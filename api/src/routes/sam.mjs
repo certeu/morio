@@ -34,6 +34,11 @@ export function routes(tools) {
   app.get(`${PREFIX}/docker/images/:id/history`, (req, res) => Sam.getDockerImageData(req, res, tools, 'history'))
 
   /*
+   * API routes to get data from a specific network
+   */
+  app.get(`${PREFIX}/docker/networks/:id`, (req, res) => Sam.getDockerNetworkData(req, res, tools))
+
+  /*
    * API routes to make changes to a specific container
    */
   app.put(`${PREFIX}/docker/containers/:id/kill`,    (req, res) => Sam.updateContainer(req, res, tools, 'kill'))

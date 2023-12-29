@@ -30,6 +30,11 @@ export const requestSchema = {
         id: Joi.string().required(),
       }),
     },
+    network: {
+      inspect: Joi.object({
+        id: Joi.string().required(),
+      }),
+    },
   },
 }
 
