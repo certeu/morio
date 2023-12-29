@@ -1,4 +1,5 @@
 import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
+import { isError } from 'lib/utils.mjs'
 
 const names = {
   js: 'Javascript',
@@ -24,7 +25,11 @@ export const Highlight = (props) => {
   }
   if (props.raw) preProps.dangerouslySetInnerHTML = { __html: props.raw }
 
-  const content = props.js ? JSON.stringify(props.js, null, 2) : props.children
+  const content = props.js
+    ? isError(props.js)
+      ? JSON.stringify('' + props.js, null, 2)
+      : JSON.stringify(props.js, null, 2)
+    : props.children
 
   return (
     <div className="hljs my-4 bg-neutral rounded-lg py-1 text-neutral-content">

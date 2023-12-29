@@ -1,7 +1,7 @@
 // Dependencies
 import morioConfig from 'ui/morio.json' assert { type: 'json' }
 import { linkClasses } from 'components/link.mjs'
-import { formatBytes, formatContainerName, formatNumber } from 'lib/utils.mjs'
+import { isError, formatBytes, formatContainerName, formatNumber } from 'lib/utils.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 // Hooks
@@ -60,8 +60,11 @@ const DockerWrapper = ({
   useEffect(() => {
     const run = async () => {
       const result = await api.call(`${morioConfig.api}/${endpoint}`)
-      if (result[1] === 200) setData(filter ? filter(result[0]) : result[0])
-      if (typeof callback === 'function') callback(filter ? filter(result[0]) : result[0])
+      if (isError(result[0])) setData(result[0])
+      else {
+        if (result[1] === 200) setData(filter ? filter(result[0]) : result[0])
+        if (typeof callback === 'function') callback(filter ? filter(result[0]) : result[0])
+      }
       setReloaded(reload)
     }
     if (!data || reload !== reloaded) run()
@@ -75,6 +78,13 @@ const DockerWrapper = ({
   return data ? <Component data={data} {...displayProps} methods={{ forceReload }} /> : <Spinner />
 }
 
+/**
+ * This is a wrapper component for a DaisyUI stats component that will display some
+ * data, and makes all data available by wrapping this in a button that sets the modal context.
+ *
+ * @param {object} data - The data to show in the modal window onClick (as JSON)
+ * @param {function} children - The children react component(s)
+ */
 const StatsWrapper = ({ data, children }) => {
   const { setModal, clearModal, modalContent } = useContext(ModalContext)
 
@@ -94,6 +104,28 @@ const StatsWrapper = ({ data, children }) => {
   )
 }
 
+/**
+ * This is a wrapper component for stats when the data fetching returned an error.
+ *
+ * It's essentially a helper to handle errors gracefully.
+ *
+ * @param {string} title - The title for the stat
+ * @param {ojbject} err - The error object (the message will be shown)
+ */
+const StatsError = ({ title = 'Error', err }) => (
+  <StatsWrapper data={err}>
+    <div className="stat place-items-center">
+      <div className="stat-title">{title}</div>
+      <div className="stat-value">
+        <WarningIcon className="w-16 h-16 text-error" />
+      </div>
+      <div className="stat-desc">
+        {err.message.length > 17 ? <span>{err.message.slice(0, 17)}&hellip;</span> : err.message}
+      </div>
+    </div>
+  </StatsWrapper>
+)
+
 /*
  * Docker df component
  */
@@ -105,7 +137,9 @@ export const DockerDf = () => <DockerWrapper endpoint="docker/df" Component={Dis
 const DisplayDockerDf = ({ data }) => {
   const [memBytes, memUnit] = formatBytes(data.LayersSize, '', true)
 
-  return (
+  return isError(data) ? (
+    <StatsError err={data} title="Docker Version" />
+  ) : (
     <StatsWrapper data={data}>
       <div className="stat place-items-center">
         <div className="stat-title">Layers Storage</div>
@@ -124,12 +158,18 @@ export const DockerInfo = () => (
 )
 
 /*
- * Docker version display component
+ * Docker info display component
  */
 const DisplayDockerInfo = ({ data }) => {
   const [memBytes, memUnit] = formatBytes(data.MemTotal, '', true)
 
-  return (
+  return isError(data) ? (
+    <>
+      <StatsError err={data} title="Containers" />
+      <StatsError err={data} title="Memory" />
+      <StatsError err={data} title="Cores" />
+    </>
+  ) : (
     <>
       <StatsWrapper data={data}>
         <div className="stat place-items-center">
@@ -169,15 +209,18 @@ export const DockerVersion = () => (
 /*
  * Docker version display component
  */
-const DisplayDockerVersion = ({ data }) => (
-  <StatsWrapper data={data}>
-    <div className="stat place-items-center">
-      <div className="stat-title">Docker Version</div>
-      <div className="stat-value">{data.Version}</div>
-      <div className="stat-desc">{data.Platform.Name}</div>
-    </div>
-  </StatsWrapper>
-)
+const DisplayDockerVersion = ({ data }) =>
+  isError(data) ? (
+    <StatsError err={data} title="Docker Version" />
+  ) : (
+    <StatsWrapper data={data}>
+      <div className="stat place-items-center">
+        <div className="stat-title">Docker Version</div>
+        <div className="stat-value">{data.Version}</div>
+        <div className="stat-desc">{data.Platform.Name}</div>
+      </div>
+    </StatsWrapper>
+  )
 
 /*
  * Docker (running) containers component
@@ -189,16 +232,19 @@ export const DockerRunningContainers = () => (
 /*
  * Docker display running containers component
  */
-const DisplayDockerRunningContainers = ({ data }) => (
-  <>
-    <h3 className="flex flex-row gap-2 items-center">
-      <PlayIcon />
-      <span>Running Containers</span>
-      <span className="opacity-70">({data.length})</span>
-    </h3>
-    <DisplayDockerContainers data={data} />
-  </>
-)
+const DisplayDockerRunningContainers = ({ data }) =>
+  isError(data) ? (
+    <StatsError err={data} title="Running Containers" />
+  ) : (
+    <>
+      <h3 className="flex flex-row gap-2 items-center">
+        <PlayIcon />
+        <span>Running Containers</span>
+        <span className="opacity-70">({data.length})</span>
+      </h3>
+      <DisplayDockerContainers data={data} />
+    </>
+  )
 
 /*
  * Docker (all) containers component
@@ -210,16 +256,19 @@ export const DockerAllContainers = () => (
 /*
  * Docker display all containers component
  */
-const DisplayDockerAllContainers = ({ data }) => (
-  <>
-    <h3 className="flex flex-row gap-2 items-center">
-      <ContainerIcon />
-      <span>All Containers</span>
-      <span className="opacity-70">({data.length})</span>
-    </h3>
-    <DisplayDockerContainers data={data} />
-  </>
-)
+const DisplayDockerAllContainers = ({ data }) =>
+  isError(data) ? (
+    <StatsError err={data} title="All  Containers" />
+  ) : (
+    <>
+      <h3 className="flex flex-row gap-2 items-center">
+        <ContainerIcon />
+        <span>All Containers</span>
+        <span className="opacity-70">({data.length})</span>
+      </h3>
+      <DisplayDockerContainers data={data} />
+    </>
+  )
 
 /*
  * Docker (some) containers component
@@ -235,16 +284,19 @@ export const DockerSomeContainers = ({ filter, displayProps }) => (
 /*
  * Docker display some containers component
  */
-const DisplayDockerSomeContainers = ({ data, title = 'Some containers' }) => (
-  <>
-    <h3 className="flex flex-row gap-2 items-center">
-      <ContainerIcon />
-      <span>{title}</span>
-      <span className="opacity-70">({data.length})</span>
-    </h3>
-    <DisplayDockerContainers data={data} />
-  </>
-)
+const DisplayDockerSomeContainers = ({ data, title = 'Some containers' }) =>
+  isError(data) ? (
+    <StatsError err={data} title={title} />
+  ) : (
+    <>
+      <h3 className="flex flex-row gap-2 items-center">
+        <ContainerIcon />
+        <span>{title}</span>
+        <span className="opacity-70">({data.length})</span>
+      </h3>
+      <DisplayDockerContainers data={data} />
+    </>
+  )
 
 /*
  * Docker display containers component

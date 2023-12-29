@@ -28,7 +28,7 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
   try {
     response = await fetch(url, data)
   } catch (err) {
-    console.log(err)
+    return [err, false]
   }
   let result = false
   if (response) {
@@ -39,7 +39,7 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
     }
   }
 
-  return [result, response.status]
+  return [result, response?.status]
 }
 
 /**

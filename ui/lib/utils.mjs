@@ -16,6 +16,14 @@ export const capitalize = (string) =>
   typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : ''
 
 /**
+ * A helper method to verify that something is an error
+ *
+ * @param {mixed} input - The 'something' to check
+ * @return {bool} result - Either true or false
+ */
+export const isError = (input) => input instanceof Error
+
+/**
  * A method to validate an input string is a uri
  *
  * @param {string} uri - The input uri to validate
