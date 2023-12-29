@@ -29,6 +29,12 @@ export function routes(tools) {
   app.get(`/docker/containers/:id/stream/stats`, (req, res) => Docker.getContainerData(req, res, tools, 'stats', { stream: true }))
 
   /*
+   * API routes to get data from a specific container image
+   */
+  app.get(`/docker/images/:id`, (req, res) => Docker.getImageData(req, res, tools))
+  app.get(`/docker/images/:id/history`, (req, res) => Docker.getImageData(req, res, tools, 'history'))
+
+  /*
    * API routes to make changes to a specific container
    */
   app.put(`/docker/containers/:id/kill`,    (req, res) => Docker.updateContainer(req, res, tools, 'kill'))

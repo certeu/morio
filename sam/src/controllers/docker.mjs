@@ -2,6 +2,7 @@ import {
   docker,
   runDockerApiCommand,
   runContainerApiCommand,
+  runContainerImageApiCommand,
   runDockerCliCommand,
 } from '#lib/docker'
 import { validate } from '#lib/validation'
@@ -98,17 +99,17 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect')
  * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
+Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.container.inspect`, req.params)
+  const [valid, err] = await validate(`docker.image.inspect`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
-   * Now run the container API command
+   * Now run the container image API command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd, options)
+  const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
 
   /*
    * Return result
@@ -176,6 +177,36 @@ Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
    * Return result
    */
   return success ? res.status(204).send() : dockerError(result, res)
+}
+
+/**
+ * Gets data from a Docker container image and returns it
+ *
+ * This handles the following commands on a Container image object:
+ *   - inspect
+ *   - history
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {string} cmd - The command to run (method on the docker client)
+ */
+Controller.prototype.getContainerImageData = async (req, res, tools, cmd = 'inspect') => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`docker.image.${cmd}`, req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  /*
+   * Now run the container image API command
+   */
+  const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
+
+  /*
+   * Return result
+   */
+  return success ? res.send(result) : dockerError(result, res)
 }
 
 /**

@@ -25,6 +25,11 @@ export const requestSchema = {
         id: Joi.string().required(),
       }),
     },
+    image: {
+      inspect: Joi.object({
+        id: Joi.string().required(),
+      }),
+    },
   },
 }
 

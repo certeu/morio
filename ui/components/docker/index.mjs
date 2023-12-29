@@ -317,50 +317,50 @@ const DisplayDockerContainers = ({ data }) => {
    * Return table or containers
    */
   return (
-    <table className="tabled-fixed w-full max-w-4xl">
-      <thead>
-        <tr>
-          <th className="w-[20%] text-left pl-4">Name</th>
-          <th className="w-[15%] text-left pl-4">State</th>
-          <th className="w-[30%] text-left pl-4">Status</th>
-          <th className="w-[25%] text-left pl-4">Image</th>
-          <th className="w-[10%] text-left pl-4">ID</th>
-        </tr>
-      </thead>
-      <tbody>
-        {data.map((container) => (
-          <tr key={container.Id} className="hover:bg-secondary hover:bg-opacity-30">
-            <td className="px-4">
-              <PageLink href={`/docker/containers/${container.Id}`}>
-                {formatContainerName(container.Names[0])}
-              </PageLink>
-            </td>
-            <td className="px-4 capitalize">{container.State}</td>
-            <td className="px-4 py-2">{container.Status}</td>
-            <td className="px-4 py-2">
-              {container.Image.slice(0, 7) === 'sha256:' ? (
-                <code className="hover:bg-secondary">{container.Image.slice(7, 13)}</code>
-              ) : (
-                container.Image
-              )}
-            </td>
-            <td className="px-4 py-2">
-              <button
-                onClick={() =>
-                  setModal(
-                    <ModalWrapper>
-                      <Highlight language="json" js={container} />
-                    </ModalWrapper>
-                  )
-                }
-              >
-                <code className="hover:bg-secondary">{container.Id.slice(0, 6)}</code>
-              </button>
-            </td>
+    <div className="w-full max-w-full overflow-x-auto">
+      <table className="tabled-fixed w-full max-w-4xl">
+        <thead>
+          <tr>
+            <th className="w-64 text-left pl-4">Name</th>
+            <th className="w-64 text-left pl-4">State</th>
+            <th className="w-64 text-left pl-4">Image</th>
+            <th className="w-64 text-left pl-4">ID</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {data.map((container) => (
+            <tr key={container.Id} className="hover:bg-secondary hover:bg-opacity-30">
+              <td className="px-4">
+                <PageLink href={`/docker/containers/${container.Id}`}>
+                  {formatContainerName(container.Names[0])}
+                </PageLink>
+              </td>
+              <td className="px-4 capitalize">{container.State}</td>
+              <td className="px-4 py-2">
+                {container.Image.slice(0, 7) === 'sha256:' ? (
+                  <code className="hover:bg-secondary">{container.Image.slice(7, 13)}</code>
+                ) : (
+                  container.Image
+                )}
+              </td>
+              <td className="px-4 py-2">
+                <button
+                  onClick={() =>
+                    setModal(
+                      <ModalWrapper>
+                        <Highlight language="json" js={container} />
+                      </ModalWrapper>
+                    )
+                  }
+                >
+                  <code className="hover:bg-secondary">{container.Id.slice(0, 6)}</code>
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -678,3 +678,135 @@ export const ContainerExpertActions = ({ data, methods }) => {
     </>
   )
 }
+
+/*
+ * Docker images component
+ */
+export const DockerImages = () => (
+  <DockerWrapper endpoint="docker/images" Component={DisplayDockerImages} />
+)
+
+/*
+ * Docker display images component
+ */
+const DisplayDockerImages = ({ data }) => {
+  /*
+   * Modal context
+   */
+  const { setModal, clearModal, modalContent } = useContext(ModalContext)
+
+  /*
+   * Don't bother if data holds an error
+   */
+  if (isError(data)) return <StatsError err={data} title="Docker Images" />
+
+  /*
+   * If there's no containers, let the user know because if not they might
+   * assume things are broken when no data shows up
+   */
+  if (data.length === 0) return <p className="italic opacity-70 pl-4">No images to show</p>
+
+  /*
+   * Return table or containers
+   */
+  return (
+    <div className="w-full max-w-full overflow-x-auto">
+      <table className="tabled-fixed w-full max-w-4xl">
+        <thead>
+          <tr>
+            <th className="w-64 text-left pl-4">Image</th>
+            <th className="w-64 text-left pl-4">Created</th>
+            <th className="w-64 text-left pl-4">Size</th>
+            <th className="w-64 text-left pl-4">ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((image) => (
+            <tr key={image.Id} className="hover:bg-secondary hover:bg-opacity-30">
+              <td className="px-4">
+                <PageLink href={`/docker/images/${image.Id.slice(7)}`}>
+                  {image.RepoTags.length > 0
+                    ? formatContainerName(image.RepoTags[0])
+                    : image.Id.slice(7, 13)}
+                </PageLink>
+              </td>
+              <td className="px-4">
+                <TimeAgo date={new Date(image.Created * 1000)} />
+              </td>
+              <td className="px-4 py-2">{formatBytes(image.Size)}</td>
+              <td className="px-4 py-2">
+                <code className="hover:bg-secondary">{image.Id.slice(7, 13)}</code>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/*
+ * Docker image component
+ */
+export const DockerImage = (props) => (
+  <DockerWrapper endpoint={`docker/images/${props.id}`} Component={DisplayDockerImage} {...props} />
+)
+
+/*
+ * Docker display image component
+ */
+export const DisplayDockerImage = ({ data, methods }) => {
+  const { setModal, clearModal, modalContent } = useContext(ModalContext)
+
+  /*
+   * Split image into namespace, name, and tag
+   */
+  const image = []
+  if (data.RepoTags.length > 0) {
+    image.push(...data.RepoTags[0].split(':'))
+    image.push(...image[0].split('/'))
+  } else image.push(data.Id.slice(7, 13))
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-row flexwrap gap-4">
+        <StatsWrapper data={data}>
+          <div className="stat place-items-center">
+            <div className="stat-title">Image</div>
+            <div className="stat-value">{image[0]}</div>
+            <div className="stat-desc">{image[1]}</div>
+          </div>
+        </StatsWrapper>
+        <StatsWrapper data={data}>
+          <div className="stat place-items-center">
+            <div className="stat-title">Size</div>
+            <div className="stat-value capitalize">{formatBytes(data.Size)}</div>
+            <div className="stat-desc"></div>
+          </div>
+        </StatsWrapper>
+      </div>
+    </div>
+  )
+}
+
+/*
+ * Docker image history component
+ */
+export const DockerImageHistory = (props) => (
+  <DockerWrapper
+    endpoint={`docker/images/${props.id}/history`}
+    Component={DisplayDockerImageHistory}
+    {...props}
+  />
+)
+
+/*
+ * Docker display image history component
+ */
+export const DisplayDockerImageHistory = ({ data }) => (
+  <div className="w-full max-w-full overflow-x-scroll flex flex-col gap-1 mt-4">
+    {data.toReversed().map((line, i) => (
+      <code key={i}>{line.CreatedBy}</code>
+    ))}
+  </div>
+)
