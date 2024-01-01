@@ -65,5 +65,21 @@ export const tests = async ({ chai, expect, config, store }) => {
           done()
         })
     })
+
+    it(`Should return all Docker images`, (done) => {
+      chai
+        .request(config.api)
+        .get('/docker/images')
+        .end((err, res) => {
+          expect(res.status).to.equal(200)
+          expect(res.type).to.equal('application/json')
+          expect(res.charset).to.equal('utf-8')
+          expect(Array.isArray(res.body)).to.equal(true)
+          store.image = res.body[0]
+          done()
+        })
+    })
+
+
   })
 }
