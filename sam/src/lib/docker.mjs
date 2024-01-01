@@ -1,5 +1,12 @@
 import { fromEnv } from '#shared/env'
 import Docker from 'dockerode'
+import { logger } from '#shared/logger'
+import pkg from '../../package.json' assert { type: 'json' }
+
+/*
+ * Set up a logger instance, so we can log
+ */
+const log = logger(fromEnv('MORIO_LOG_LEVEL_SAM'), pkg.name)
 
 /**
  * This is the docker client as provided by dockerode
@@ -19,7 +26,8 @@ export const runDockerApiCommand = async (cmd, options = {}) => {
   try {
     result = await docker[cmd](options)
   } catch (err) {
-    console.log(err)
+    if (err instanceof Error) log.warn(err.message)
+    else log.warn(err)
     return [false, err]
   }
 
@@ -43,7 +51,13 @@ export const runContainerApiCommand = async (id, cmd, options = {}) => {
   try {
     result = await container[cmd](options)
   } catch (err) {
-    return [false, err]
+    if (err instanceof Error) {
+      log.warn(err.message)
+      return [false, err.message]
+    } else {
+      log.warn(err)
+      return [false, err]
+    }
   }
 
   return [true, result]
