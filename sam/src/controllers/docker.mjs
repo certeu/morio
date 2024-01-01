@@ -65,8 +65,9 @@ Controller.prototype.getDockerData = async (req, res, tools, cmd = 'inspect', op
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
+ * @param {object} options - Options to pass to the container API
  */
-Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect') => {
+Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
   /*
    * Validate request against schema
    */
@@ -76,7 +77,7 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect')
   /*
    * Now run the container API command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd)
+  const [success, result] = await runContainerApiCommand(valid.id, cmd, options)
 
   /*
    * Return result
