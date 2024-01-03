@@ -80,3 +80,111 @@ Then you can run:
 ```
 npm run dev
 ```
+
+## Development environment setup
+
+Here are some notes on what it takes to setup Morio. This is for a Debian based system.
+
+### Install depedencies
+
+To develop Morio, we'll need docker and git.
+We'll also add vim as our editor, and curl which we'll use to test things:
+
+```sh
+sudo apt-get install git docker.io vim curl
+```
+
+We will also need NodeJS. I recommend using nvm to install it: https://github.com/nvm-sh/nvm
+
+We will be using NodeJS 20, specifically the LTS release known as iron. So install it:
+
+```
+nvm install lts/iron
+```
+
+### Clone repository
+
+Via SSH:
+
+```
+git clone git@github.com:joostdecock/dotfiles.git
+```
+
+Or via HTTPS:
+
+```
+git clone https://github.com/joostdecock/dotfiles.git
+```
+
+### Run kickstart
+
+Enter the root of the repository and run:
+
+```
+npm run kickstart
+```
+
+This will install all (node) dependencies, and setup some repository specific things.
+
+### Rights to the docker socket
+
+To run the development environment, we'll be starting containers. This requires access to the docker socket.
+Typically, you can grant yourself access by adding your user to the `docker` group:
+
+```
+sudo usermod -aG docker $USER
+```
+
+You will need to log out and back in for this change to take effect.
+Alternatively, `newgrp docker` will work too.
+
+### Install docker-compose
+
+You need to make sure you have version 2 of docker-compose on your system.
+Debian 12 ships with version 1, so grab the latest binary from https://github.com/docker/compose/releases/latest
+
+Make sure to make it executable, and move it into your PATH. Something like this:
+
+```sh
+curl -L  https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o docker-compose
+chmod +x docker-compose
+sudo mv docker-compose /usr/local/bin/
+```
+
+Now if you run:
+
+```sh
+docker-compose -v
+```
+
+It should look something like this:
+
+```
+Docker Compose version v2.23.
+```
+
+### Build the containers
+
+The development environment will start (the development version of) a couple of containers.
+Before we can do that, we need to build them:
+
+```
+npm run build
+```
+
+### Permissions
+
+```
+sudo addgroup --gid 2112 morio
+sudo adduser --gid 2112 --uid 2112 --disabled-login morio
+sudo chgrp -R morio .
+chmod -R 775 ui/.next/
+```
+
+### Start the development environment
+
+In the repository root run:
+
+```
+npm run dev
+```
