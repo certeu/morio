@@ -27,6 +27,22 @@ import { ConfigReport } from './report.mjs'
 import { NavButton } from 'components/layout/sidebar.mjs'
 import { LeftIcon, RightIcon } from 'components/icons.mjs'
 
+const includeNav = (entry, config) => {
+  if (typeof entry.hide === 'undefined') return true
+  if (entry.hide === null) return true
+  if (typeof entry.hide === 'object') {
+    /*
+     * If next holds an object with an if property, resolve the condition
+     */
+    if (entry.hide.if && entry.hide.if.val) {
+      const result = entry.hide.is === resolveViewValue(entry.hide.if, config)
+      return entry.hide.is === resolveViewValue(entry.hide.if, config) ? false : true
+    }
+  }
+
+  return false
+}
+
 /**
  * This React component renders the side menu with a list of various config views
  */
@@ -34,10 +50,11 @@ export const ConfigNavigation = ({
   view, // The current view
   nav = views, // Views for which to render a navigation structure
   loadView, // Method to load a view
+  config, // The current configuration
 }) => (
   <ul className="list list-inside list-disc ml-4">
     {Object.entries(nav)
-      .filter(([key, entry]) => entry !== null && typeof entry?.hide === 'undefined')
+      .filter(([key, entry]) => includeNav(entry, config))
       .map(([key, entry]) => (
         <li key={entry.id}>
           <button
@@ -50,7 +67,9 @@ export const ConfigNavigation = ({
               {entry.title ? entry.title : entry.label}
             </span>
           </button>
-          {entry.children && <ConfigNavigation {...{ view, loadView }} nav={entry.children} />}
+          {entry.children && (
+            <ConfigNavigation {...{ view, loadView, config }} nav={entry.children} />
+          )}
         </li>
       ))}
   </ul>
@@ -221,6 +240,7 @@ export const ConfigurationWizard = ({
           view={configPath}
           loadView={loadView}
           nav={initialSetup ? [views.morio] : Object.values(views)}
+          config={config}
         />
       </div>
       <div className={splash ? 'w-full max-w-xl' : 'w-full mx-auto max-w-2xl p-8'}>

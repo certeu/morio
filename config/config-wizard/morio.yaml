@@ -84,3 +84,9 @@ children:
       This should resolve the the IP addresses of all cluster nodes.
     placeholder: cluster.my.domain.com
     next: validate
+    hide:
+      if:
+        val: '{{ CONFIG.morio.node_count }}'
+        as: number
+      is: 1
+
