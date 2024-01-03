@@ -76,7 +76,8 @@ export const viewAsConfigPath = (view, prefix) =>
  *
  * Eg: Turns `${prefix}/morio/node_count` into morio.node_count
  */
-const configPathAsView = (path, prefix) => prefix + '/' + path.split('.').join('/')
+const configPathAsView = (path, prefix) =>
+  path ? prefix + '/' + path.split('.').join('/') : prefix
 
 /**
  * This is the React component for the configuration wizard itself
@@ -97,6 +98,11 @@ export const ConfigurationWizard = ({
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
   const [dense, setDense] = useState(false)
+
+  /*
+   * Figure out the current configPath from the view
+   */
+  const configPath = viewAsConfigPath(view.pathname, prefix)
 
   /*
    * Handler method for view state updates
@@ -132,7 +138,7 @@ export const ConfigurationWizard = ({
     /*
      * If nothing is passed (or the click event) we load the next view
      */
-    if (!key || typeof key === 'object') key = resolveNextView(view, config)
+    if (!key || typeof key === 'object') key = resolveNextView(configPath, config)
 
     /*
      * Now set the view, update valid, and invalidate the report
@@ -149,7 +155,7 @@ export const ConfigurationWizard = ({
     /*
      * Always update config
      */
-    update(viewAsConfigPath(view.pathname, prefix), val)
+    update(configPath, val)
 
     /*
      * But also run validate
@@ -161,7 +167,7 @@ export const ConfigurationWizard = ({
   /*
    * Helper method to figure out what view will be next
    */
-  const whatsNext = () => resolveNextView(view, config)
+  const whatsNext = () => resolveNextView(configPath, config)
 
   /*
    * Keep track of what will be the next view to load
@@ -171,7 +177,7 @@ export const ConfigurationWizard = ({
   /*
    * Extract view from the views config
    */
-  const viewConfig = getView(viewAsConfigPath(view.pathname, prefix))
+  const viewConfig = getView(configPath)
 
   return (
     <div
@@ -212,13 +218,13 @@ export const ConfigurationWizard = ({
           </>
         )}
         <ConfigNavigation
-          view={viewAsConfigPath(view.pathname, prefix)}
+          view={configPath}
           loadView={loadView}
           nav={initialSetup ? [views.morio] : Object.values(views)}
         />
       </div>
       <div className={splash ? 'w-full max-w-xl' : 'w-full mx-auto max-w-2xl p-8'}>
-        {view === 'validate' ? (
+        {view.pathname === `${prefix}/validate` ? (
           <>
             <h3>Validate Configuration</h3>
             {validationReport ? (
@@ -245,7 +251,7 @@ export const ConfigurationWizard = ({
           </>
         ) : (
           <>
-            <Block update={updateConfig} {...{ config, viewConfig, setValid }} />
+            <Block update={updateConfig} {...{ config, viewConfig, setValid, configPath }} />
             {next && (
               <button
                 className="btn btn-primary w-full mt-4"
