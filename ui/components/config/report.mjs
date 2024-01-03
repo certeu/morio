@@ -11,7 +11,7 @@ export const ConfigReport = ({ report }) => (
   <div className="py-2">
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
-        {report.valid ? <OkIcon /> : <WarningIcon />}
+        {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
         <div className="text-inherit">
           This configuration
           {report.valid ? <span> is </span> : <b className="px-1 underline">is NOT</b>}
@@ -21,7 +21,7 @@ export const ConfigReport = ({ report }) => (
     </Box>
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
-        {report.valid ? <OkIcon /> : <WarningIcon />}
+        {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
         <div className="text-inherit">
           This configuration
           {report.valid ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
