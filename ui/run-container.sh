@@ -20,14 +20,14 @@ then
   docker run -d   --name=ui \
   --network=morio-net \
   --init \
-  -v /home/joost/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio  \
   morio/ui-dev:0.1.0
 
 else
   docker run --rm -it   --name=ui \
   --network=morio-net \
   --init \
-  -v /home/joost/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio  \
   morio/ui-dev:0.1.0
 
 fi

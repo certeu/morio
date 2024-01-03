@@ -16,7 +16,7 @@ services:
       - traefik.http.routers.api.tls=true
     image: morio/api-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
   sam:
     container_name: sam
     networks:
@@ -29,7 +29,7 @@ services:
       MORIO_SAM_PORT: '3020'
     image: morio/sam-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
       - traefik.enable=true
@@ -59,7 +59,7 @@ services:
       - traefik.http.routers.ui.tls=true
     image: morio/ui-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
   traefik:
     image: traefik:2.10.7
     container_name: traefik
@@ -100,7 +100,7 @@ services:
       - '443:443'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/joost/git/morio/logs/:/var/log/morio/
+      - /home/jdecock/git/morio/logs/:/var/log/morio/
 networks:
   default:
     name: morio_net

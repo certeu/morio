@@ -20,14 +20,14 @@ then
   docker run -d   --name=sam \
   --network=morio-net \
   --init \
-  -v /Users/joost/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
   morio/sam-dev:0.1.0
 
 else
   docker run --rm -it   --name=sam \
   --network=morio-net \
   --init \
-  -v /Users/joost/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
   morio/sam-dev:0.1.0
 
 fi

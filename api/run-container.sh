@@ -20,14 +20,14 @@ then
   docker run -d   --name=api \
   --network=morio-net \
   --init \
-  -v /Users/joost/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio  \
   morio/api-dev:0.1.0
 
 else
   docker run --rm -it   --name=api \
   --network=morio-net \
   --init \
-  -v /Users/joost/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio  \
   morio/api-dev:0.1.0
 
 fi
