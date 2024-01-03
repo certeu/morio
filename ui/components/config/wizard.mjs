@@ -1,5 +1,12 @@
 // Dependencies
-import { views, keys, resolveNextView, resolveViewValue, viewInHash, getView } from './views.mjs'
+import {
+  views,
+  keys,
+  resolveNextView,
+  resolveViewValue,
+  viewInLocation,
+  getView,
+} from './views.mjs'
 import { template, validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context
@@ -50,6 +57,26 @@ export const ConfigNavigation = ({
 )
 
 /**
+ * A helper method to turn a wizard url into a config path
+ *
+ * Eg: Turns morio.node_count into `${prefix}/morio/node_count`
+ *
+ * @param {string} url
+ */
+const viewAsConfigPath = (view, prefix) =>
+  view
+    .slice(prefix.length + 1)
+    .split('/')
+    .join('.')
+
+/**
+ * A helper method to turn a config key a wizard url
+ *
+ * Eg: Turns `${prefix}/morio/node_count` into morio.node_count
+ */
+const configPathAsView = (path, prefix) => prefix + '/' + path.split('.').join('/')
+
+/**
  * This is the React component for the configuration wizard itself
  */
 export const ConfigurationWizard = ({
@@ -57,6 +84,7 @@ export const ConfigurationWizard = ({
   preloadView = false, // View to preload
   initialSetup = false, // Run in initial setup mode where only the core config is shown
   splash = false, // Whether to load the 'splash'  view where the rest of the UI is hidden
+  prefix = '', // Prefix to use for the keeping the view state in the URL
 }) => {
   /*
    * React state
@@ -64,9 +92,19 @@ export const ConfigurationWizard = ({
   const [config, update] = useStateObject(preloadConfig) // Holds the config this wizard builds
   const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
-  const [view, setView] = useAtom(viewInHash) // Holds the current view
+  const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
   const [dense, setDense] = useState(false)
+
+  /*
+   * Handler method for view state updates
+   */
+  const setView = (configPath) => {
+    _setView((prev) => ({
+      ...prev,
+      pathname: configPathAsView(configPath, prefix),
+    }))
+  }
 
   /*
    * Effect for preloading the view
@@ -131,7 +169,7 @@ export const ConfigurationWizard = ({
   /*
    * Extract view from the views config
    */
-  const viewConfig = getView(view)
+  const viewConfig = getView(viewAsConfigPath(view.pathname, prefix))
 
   return (
     <div
@@ -172,7 +210,7 @@ export const ConfigurationWizard = ({
           </>
         )}
         <ConfigNavigation
-          view={view}
+          view={viewAsConfigPath(view.pathname, prefix)}
           loadView={loadView}
           nav={initialSetup ? [views.morio] : Object.values(views)}
         />

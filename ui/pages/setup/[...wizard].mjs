@@ -7,7 +7,12 @@ const ConfigWizardPage = (props) => {
     <PageWrapper {...props} layout={SplashLayout}>
       <div className="py-12 px-4">
         <h1 className="text-center">Configure Morio</h1>
-        <ConfigurationWizard initialSetup preloadView="morio.node_count" splash />
+        <ConfigurationWizard
+          initialSetup
+          preloadView="morio/node_count"
+          splash
+          prefix="/setup/wizard"
+        />
       </div>
     </PageWrapper>
   )
@@ -20,4 +25,9 @@ export const getStaticProps = () => ({
     title: 'Morio Configuration Wizard',
     page: ['setup', 'wizard'],
   },
+})
+
+export const getStaticPaths = () => ({
+  paths: [],
+  fallback: 'blocking',
 })
