@@ -149,7 +149,7 @@ export const ConfigurationWizard = ({
     /*
      * Always update config
      */
-    update(view, val)
+    update(viewAsConfigPath(view.pathname, prefix), val)
 
     /*
      * But also run validate
