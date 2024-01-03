@@ -63,11 +63,13 @@ export const ConfigNavigation = ({
  *
  * @param {string} url
  */
-const viewAsConfigPath = (view, prefix) =>
+export const viewAsConfigPath = (view, prefix) =>
   view
-    .slice(prefix.length + 1)
-    .split('/')
-    .join('.')
+    ? view
+        .slice(prefix.length + 1)
+        .split('/')
+        .join('.')
+    : prefix
 
 /**
  * A helper method to turn a config key a wizard url
