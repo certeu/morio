@@ -184,6 +184,11 @@ export const ConfigurationWizard = ({
   }
 
   /*
+   * Helper method to deploy the configuration
+   */
+  const deploy = async () => {}
+
+  /*
    * Helper method to figure out what view will be next
    */
   const whatsNext = () => resolveNextView(configPath, config)
@@ -248,7 +253,14 @@ export const ConfigurationWizard = ({
           <>
             <h3>Validate Configuration</h3>
             {validationReport ? (
-              <ConfigReport report={validationReport} />
+              <>
+                <ConfigReport report={validationReport} />
+                {validationReport.valid ? (
+                  <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
+                    Deploy Configuration
+                  </button>
+                ) : null}
+              </>
             ) : (
               <>
                 <p>You should now submit your configuration to the Morio API for validation.</p>
@@ -258,16 +270,16 @@ export const ConfigurationWizard = ({
                   Instead, the configuration you created will be validated and tested to detect any
                   potential issues.
                 </p>
+                <button
+                  className="btn btn-primary w-full mt-4"
+                  onClick={async () =>
+                    setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
+                  }
+                >
+                  Validate Configuration
+                </button>
               </>
             )}
-            <button
-              className="btn btn-primary w-full mt-4"
-              onClick={async () =>
-                setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
-              }
-            >
-              Validate Configuration
-            </button>
           </>
         ) : (
           <>
