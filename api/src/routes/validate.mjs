@@ -15,9 +15,10 @@ const Validate = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
+  const PREFIX = tools.defaults.MORIO_API_PREFIX
 
   /*
    * Validates a Morio configuration
    */
-  app.post('/validate/config', (req, res) => Validate.configuration(req, res, tools))
+  app.post(`${PREFIX}/validate/config`, (req, res) => Validate.configuration(req, res, tools))
 }
