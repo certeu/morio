@@ -34,7 +34,6 @@ export const Block = (props) => {
 
   return (
     <Popout warning>
-      <pre>{JSON.stringify(props, null, 2)}</pre>
       <p>
         fixme: Invalid block type (<code>{props.viewConfig?.type}</code>)
       </p>
