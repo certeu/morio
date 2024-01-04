@@ -1,9 +1,9 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
+import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Link, PageLink } from 'components/link.mjs'
 import { WifiIcon } from 'components/icons.mjs'
 import { DockerNetworks } from 'components/docker/index.mjs'
-import { ContentWrapper } from 'pages/docker/index.mjs'
 
 /*
  * The React component for the page itself

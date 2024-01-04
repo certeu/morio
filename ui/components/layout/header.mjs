@@ -47,19 +47,30 @@ export const Header = ({
             <MorioLogo className="h-8" noLine />
           </Link>
           <div className="grow pl-4 justify-start flex flex-row">
-            <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
-              configuration
+            <NavButton href="/apis" label="Configuration" extraClasses="hidden lg:flex">
+              APIs
             </NavButton>
             <NavButton href="/components" label="Components" extraClasses="hidden lg:flex">
               components
             </NavButton>
+            <NavButton href="/config" label="Components" extraClasses="hidden lg:flex">
+              Config
+            </NavButton>
+            <NavButton href="/docker" label="Components" extraClasses="hidden lg:flex">
+              Docker
+            </NavButton>
+            <NavButton href="/status" label="Components" extraClasses="hidden lg:flex">
+              Status
+            </NavButton>
+          </div>
+          <div className="flex flex-row">
             <NavButton href="/support" label="Support" extraClasses="hidden lg:flex">
               support
             </NavButton>
+            <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
+              {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
+            </NavButton>
           </div>
-          <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
-            {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
-          </NavButton>
         </div>
       </div>
     </div>

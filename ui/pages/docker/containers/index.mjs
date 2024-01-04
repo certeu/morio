@@ -1,26 +1,9 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
+import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Link, PageLink } from 'components/link.mjs'
 import { ContainerIcon } from 'components/icons.mjs'
 import { DockerRunningContainers, DockerSomeContainers } from 'components/docker/index.mjs'
-import { ContentWrapper } from 'pages/docker/index.mjs'
-
-/*
- * React component to display a navigation card
- */
-const Card = ({ title, desc, href, Icon = null }) => (
-  <Link
-    className="w-72 border px-4 pb-4 rounded shadow hover:bg-secondary hover:bg-opacity-20 flex flex-col"
-    href={href}
-    title={title}
-  >
-    <h3 className="capitalize text-base-content flex flex-row gap-2 items-center justify-between">
-      {title}
-      <Icon className="w-8 h-8 shrink-0 grow-0" />
-    </h3>
-    <p className="grow">{desc}</p>
-  </Link>
-)
 
 /**
  * Helper method to filter out running containers

@@ -4,6 +4,7 @@ import { formatContainerName } from 'lib/utils.mjs'
 import { useState } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
+import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ContainerIcon } from 'components/icons.mjs'
 import {
   DockerContainer,
@@ -11,7 +12,6 @@ import {
   ContainerTroubleshootActions,
   ContainerExpertActions,
 } from 'components/docker/index.mjs'
-import { ContentWrapper } from 'pages/docker/index.mjs'
 import { Spinner } from 'components/animations.mjs'
 import { MainSideView } from 'components/layout/main-side-view.mjs'
 

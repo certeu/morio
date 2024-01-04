@@ -1,9 +1,18 @@
+// Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
+import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
+import { PageLink } from 'components/link.mjs'
+import { StatusIcon } from 'components/icons.mjs'
+import { Popout } from 'components/popout.mjs'
 
 const StatusPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <p>This is a work-in-progress</p>
+      <ContentWrapper {...props} Icon={StatusIcon} title={props.title}>
+        <div className="flex flex-row flex-wrap gap-4 items-center justify-between items-stretch max-w-4xl">
+          <Popout fixme>This is a work in progress</Popout>
+        </div>
+      </ContentWrapper>
     </PageWrapper>
   )
 }
