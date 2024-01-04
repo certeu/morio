@@ -21,7 +21,7 @@ container:
     # Set the log level
     - '--log.level={{ MORIO_TRAEFIK_LOG_LEVEL }}'
     # Set the log destination
-    - '--log.filePath={{ MORIO_TRAEFIK_LOG_FILEPATH }}'
+    - '--log.filePath={{{ MORIO_TRAEFIK_LOG_FILEPATH }}}'
     # Set the log format
     - '--log.format={{ MORIO_TRAEFIK_LOG_FORMAT }}'
   labels:
