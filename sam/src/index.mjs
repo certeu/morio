@@ -2,6 +2,8 @@
 import express from 'express'
 import { fromEnv } from '#shared/env'
 import { wrapExpress } from '#shared/utils'
+// Morio  client
+import { morioClient } from '#lib/morio'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
@@ -13,6 +15,11 @@ import { bootstrapConfiguration } from './bootstrap.mjs'
  * We do this first as it contains the logger (as tools.log)
  */
 const tools = await bootstrapConfiguration()
+
+/*
+ * Add Morio client
+ */
+tools.morio = morioClient
 
 /*
  * Instantiate the Express app
@@ -50,7 +57,7 @@ app.get('/*', async (req, res) =>
 wrapExpress(
   tools.log,
   app.listen(fromEnv('MORIO_SAM_PORT'), (err) => {
-    if (err) log.error(err, 'An error occured')
+    if (err) tools.log.error(err, 'An error occured')
     tools.log.info(`Morio sam ready - listening on http://0.0.0.0:${fromEnv('MORIO_SAM_PORT')}`)
   })
 )

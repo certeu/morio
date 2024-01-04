@@ -1,7 +1,7 @@
 import pkg from '../package.json' assert { type: 'json' }
 import { defaults } from '#defaults'
 import { randomString } from '#shared/crypto'
-import { readYamlFile } from '#shared/fs'
+import { readYamlFile, readBsonFile, readDirectory } from '#shared/fs'
 import { logger } from '#shared/logger'
 import { fromEnv } from '#shared/env'
 
@@ -17,28 +17,67 @@ export const bootstrapConfiguration = async () => {
   const log = logger(fromEnv('MORIO_LOG_LEVEL_SAM'), pkg.name)
 
   /*
-   * Has MORIO been setup?
-   * If so, we should have a local config on disk. Let's load it.
+   * Find out what configuration exists on disk
    */
-  const localConfig = await readYamlFile('config/shared/morio.yaml', (err) =>
-    log.info(err, 'No local morio configuration found')
-  )
+  const timestamps = ((await readDirectory(fromEnv('MORIO_SAM_CONFIG_FOLDER'))) || [])
+    .filter(file => new RegExp('morio.[0-9]+.yaml').test(file))
+    .map(file => file.split('.')[1])
+    .sort()
 
-  if (!localConfig)
+  /*
+   * Compile a list of configurations
+   */
+  const configs = {}
+  let i = 0
+  const dir = fromEnv('MORIO_SAM_CONFIG_FOLDER')
+  let current = false
+  for (const timestamp of timestamps) {
+    const config = await readYamlFile(`${dir}/morio.${timestamp}.yaml`)
+    configs[timestamp] = {
+      comment: config.comment || 'No message provided',
+      current: false,
+    }
+    if (i === 0) {
+      current = timestamp
+      const keys = await readBsonFile(`${dir}/.${timestamp}.keys`)
+      configs.current = { config, keys }
+      configs[timestamp].current = true
+    }
+  }
+
+  /*
+   * Has MORIO been setup?
+   * If so, we should have a current config
+   */
+  if (configs.current) {
+    log.info('Configuration file loaded')
+    if (configs.current.config.morio.nodes.length > 1) {
+      log.info(`This Morio instance is part of a ${configs.current.config.morio.nodes.length}-node cluster`)
+    } else {
+      log.info(`This Morio instance is a solitary node`)
+      log.info(`We are ${configs.current.config.morio.nodes[0]} (${configs.current.config.morio.display_name})`)
+    }
+  } else {
     log.info(
-      'Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup'
+      'Morio is not depoyed (yet) - Starting API with an ephemeral configuration to allow setup'
     )
+  }
 
-  return {
-    config: {
-      about: pkg.description,
-      name: pkg.name,
-      setup: false,
-      setup_token: 'mst.' + randomString(32),
-      start_time: Date.now(),
-      version: pkg.version,
-    },
+  const data = {
+    configs,
+    running_config: current,
+    about: pkg.description,
+    name: pkg.name,
+    start_time: Date.now(),
+    version: pkg.version,
     defaults,
     log,
   }
+  if (configs.current) {
+    data.config = configs.current.config
+    data.keys = configs.current.keys
+    delete data.configs.current
+  }
+
+  return data
 }

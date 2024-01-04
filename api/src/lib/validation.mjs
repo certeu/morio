@@ -123,7 +123,7 @@ export const validateConfiguration = async (newConfig) => {
     const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
     if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
     else {
-      report.info.push(`Certificate validation failed for node ${i} (not a blocking factor)`)
+      report.info.push(`Certificate validation failed for node ${i}`)
       report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
     }
 

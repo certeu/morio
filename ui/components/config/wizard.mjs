@@ -328,7 +328,7 @@ export const ConfigurationWizard = ({
             </>
           )}
           {preview && (
-            <div className="w-full">
+            <div className="w-full mt-8">
               <h3>Configuration Preview</h3>
               <Yaml js={config} />
               <p className="text-center">

@@ -30,5 +30,8 @@
     "./network": "./src/network.mjs",
     "./time": "./src/time.mjs",
     "./utils": "./src/utils.mjs"
+  },
+  "dependencies": {
+    "bson": "^6.2.0"
   }
 }

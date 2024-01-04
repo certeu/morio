@@ -82,7 +82,7 @@ MorioClient.prototype.deploy = async function (config) {
   return await this.call(`${morioConfig.api}/deploy`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ config }),
+    body: JSON.stringify(config),
   })
 }
 

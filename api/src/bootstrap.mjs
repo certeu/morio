@@ -1,9 +1,7 @@
 import pkg from '../package.json' assert { type: 'json' }
-import { defaults } from '#defaults'
-import { randomString } from '#shared/crypto'
-import { readYamlFile } from '#shared/fs'
-import { logger } from '#shared/logger'
 import { fromEnv } from '#shared/env'
+import { logger } from '#shared/logger'
+import { samClient } from '#lib/sam'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -17,28 +15,40 @@ export const bootstrapConfiguration = async () => {
   const log = logger(fromEnv('MORIO_API_LOG_LEVEL'), pkg.name)
 
   /*
-   * Has Morio been setup?
-   * If so, we should have a local config on disk. Let's load it.
+   * Attempt to load the config from SAM
    */
-  const localConfig = await readYamlFile('config/shared/morio.yaml', (err) =>
-    log.info('No Morio configuration file found')
-  )
+  let config = await samClient.get('/configs/current')
+  if (config[0] === 200) {
+    config = config[1]
+    log.info('Loaded Morio config from SAM')
+  } else {
+    config = {}
+    log.warn('Failed to load Morio config from SAM')
+  }
 
-  if (!localConfig)
-    log.info(
-      'Morio is not set up (yet) - Starting API with an ephemeral configuration to allow setup'
-    )
+  /*
+   * Load the defaults from SAM
+   */
+  let defaults = await samClient.get('/defaults')
+  if (defaults[0] === 200) {
+    defaults = defaults[1]
+    log.info('Loaded Morio defaults from SAM')
+  } else {
+    defaults = {}
+    log.warn('Failed to load Morio defaults from SAM')
+  }
 
   return {
-    config: {
+    info: {
       about: pkg.description,
       name: pkg.name,
-      setup: false,
-      setup_token: 'mst.' + randomString(32),
       start_time: Date.now(),
       version: pkg.version,
     },
-    defaults,
+    config: config[0] === 200 ? config[1] : {},
+    defaults: defaults[0] === 200 ? defaults[1] : {},
     log,
+    prefix: defaults.MORIO_API_PREFIX,
+    sam: samClient,
   }
 }

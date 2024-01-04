@@ -126,6 +126,11 @@ export const defaults = {
   ///////////////////////////////////////////////////////////////////////////////
 
   /*
+   * Location of the configuration folder inside the container
+   */
+  MORIO_SAM_CONFIG_FOLDER: '/morio/config',
+
+  /*
    * Location of the Docker socket
    */
   MORIO_SAM_DOCKER_SOCKET: '/var/run/docker.sock',
@@ -160,7 +165,6 @@ export const defaults = {
 
   /*
    * SAM host - Should resolve inside containers
-   * One of: trace, debug, info, warn, error, fatal, silent
    */
   MORIO_SAM_HOST: 'sam',
 
