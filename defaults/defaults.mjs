@@ -108,7 +108,7 @@ export const defaults = {
   /*
    * API prefix (since the API is behind Traefik)
    */
-  MORIO_API_PREFIX: '/apis/morio',
+  MORIO_API_PREFIX: '/api/morio',
 
   /*
    * API log level

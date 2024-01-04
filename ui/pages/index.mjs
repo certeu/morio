@@ -10,7 +10,7 @@ const HomePage = (props) => {
     return (
       <PageWrapper {...props} layout={Layout}>
         <h1 className="text-center">Welcome to Morio</h1>
-        <h3 className="text-center">Morio requires an initial configuration file</h3>
+        <h3 className="text-center">Morio requires a configuration file</h3>
 
         <div className="grid gap-2 mb-4 mt-4">
           <Link className="btn btn-primary btn-lg" href="/setup/wizard">

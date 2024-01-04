@@ -1,5 +1,12 @@
 // Dependencies
-import { views, keys, resolveNextView, resolveViewValue, viewInHash, getView } from './views.mjs'
+import {
+  views,
+  keys,
+  resolveNextView,
+  resolveViewValue,
+  viewInLocation,
+  getView,
+} from './views.mjs'
 import { template, validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context
@@ -20,6 +27,22 @@ import { ConfigReport } from './report.mjs'
 import { NavButton } from 'components/layout/sidebar.mjs'
 import { LeftIcon, RightIcon } from 'components/icons.mjs'
 
+const includeNav = (entry, config) => {
+  if (typeof entry.hide === 'undefined') return true
+  if (entry.hide === null) return true
+  if (typeof entry.hide === 'object') {
+    /*
+     * If next holds an object with an if property, resolve the condition
+     */
+    if (entry.hide.if && entry.hide.if.val) {
+      const result = entry.hide.is === resolveViewValue(entry.hide.if, config)
+      return entry.hide.is === resolveViewValue(entry.hide.if, config) ? false : true
+    }
+  }
+
+  return false
+}
+
 /**
  * This React component renders the side menu with a list of various config views
  */
@@ -27,10 +50,11 @@ export const ConfigNavigation = ({
   view, // The current view
   nav = views, // Views for which to render a navigation structure
   loadView, // Method to load a view
+  config, // The current configuration
 }) => (
   <ul className="list list-inside list-disc ml-4">
     {Object.entries(nav)
-      .filter(([key, entry]) => entry !== null && typeof entry?.hide === 'undefined')
+      .filter(([key, entry]) => includeNav(entry, config))
       .map(([key, entry]) => (
         <li key={entry.id}>
           <button
@@ -43,11 +67,36 @@ export const ConfigNavigation = ({
               {entry.title ? entry.title : entry.label}
             </span>
           </button>
-          {entry.children && <ConfigNavigation {...{ view, loadView }} nav={entry.children} />}
+          {entry.children && (
+            <ConfigNavigation {...{ view, loadView, config }} nav={entry.children} />
+          )}
         </li>
       ))}
   </ul>
 )
+
+/**
+ * A helper method to turn a wizard url into a config path
+ *
+ * Eg: Turns morio.node_count into `${prefix}/morio/node_count`
+ *
+ * @param {string} url
+ */
+export const viewAsConfigPath = (view, prefix) =>
+  view
+    ? view
+        .slice(prefix.length + 1)
+        .split('/')
+        .join('.')
+    : prefix
+
+/**
+ * A helper method to turn a config key a wizard url
+ *
+ * Eg: Turns `${prefix}/morio/node_count` into morio.node_count
+ */
+const configPathAsView = (path, prefix) =>
+  path ? prefix + '/' + path.split('.').join('/') : prefix
 
 /**
  * This is the React component for the configuration wizard itself
@@ -57,6 +106,7 @@ export const ConfigurationWizard = ({
   preloadView = false, // View to preload
   initialSetup = false, // Run in initial setup mode where only the core config is shown
   splash = false, // Whether to load the 'splash'  view where the rest of the UI is hidden
+  prefix = '', // Prefix to use for the keeping the view state in the URL
 }) => {
   /*
    * React state
@@ -64,9 +114,24 @@ export const ConfigurationWizard = ({
   const [config, update] = useStateObject(preloadConfig) // Holds the config this wizard builds
   const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
-  const [view, setView] = useAtom(viewInHash) // Holds the current view
+  const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
   const [dense, setDense] = useState(false)
+
+  /*
+   * Figure out the current configPath from the view
+   */
+  const configPath = viewAsConfigPath(view.pathname, prefix)
+
+  /*
+   * Handler method for view state updates
+   */
+  const setView = (configPath) => {
+    _setView((prev) => ({
+      ...prev,
+      pathname: configPathAsView(configPath, prefix),
+    }))
+  }
 
   /*
    * Effect for preloading the view
@@ -92,7 +157,7 @@ export const ConfigurationWizard = ({
     /*
      * If nothing is passed (or the click event) we load the next view
      */
-    if (!key || typeof key === 'object') key = resolveNextView(view, config)
+    if (!key || typeof key === 'object') key = resolveNextView(configPath, config)
 
     /*
      * Now set the view, update valid, and invalidate the report
@@ -109,7 +174,7 @@ export const ConfigurationWizard = ({
     /*
      * Always update config
      */
-    update(view, val)
+    update(configPath, val)
 
     /*
      * But also run validate
@@ -119,9 +184,14 @@ export const ConfigurationWizard = ({
   }
 
   /*
+   * Helper method to deploy the configuration
+   */
+  const deploy = async () => {}
+
+  /*
    * Helper method to figure out what view will be next
    */
-  const whatsNext = () => resolveNextView(view, config)
+  const whatsNext = () => resolveNextView(configPath, config)
 
   /*
    * Keep track of what will be the next view to load
@@ -131,7 +201,7 @@ export const ConfigurationWizard = ({
   /*
    * Extract view from the views config
    */
-  const viewConfig = getView(view)
+  const viewConfig = getView(configPath)
 
   return (
     <div
@@ -172,17 +242,25 @@ export const ConfigurationWizard = ({
           </>
         )}
         <ConfigNavigation
-          view={view}
+          view={configPath}
           loadView={loadView}
           nav={initialSetup ? [views.morio] : Object.values(views)}
+          config={config}
         />
       </div>
       <div className={splash ? 'w-full max-w-xl' : 'w-full mx-auto max-w-2xl p-8'}>
-        {view === 'validate' ? (
+        {view.pathname === `${prefix}/validate` ? (
           <>
             <h3>Validate Configuration</h3>
             {validationReport ? (
-              <ConfigReport report={validationReport} />
+              <>
+                <ConfigReport report={validationReport} />
+                {validationReport.valid ? (
+                  <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
+                    Deploy Configuration
+                  </button>
+                ) : null}
+              </>
             ) : (
               <>
                 <p>You should now submit your configuration to the Morio API for validation.</p>
@@ -192,20 +270,20 @@ export const ConfigurationWizard = ({
                   Instead, the configuration you created will be validated and tested to detect any
                   potential issues.
                 </p>
+                <button
+                  className="btn btn-primary w-full mt-4"
+                  onClick={async () =>
+                    setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
+                  }
+                >
+                  Validate Configuration
+                </button>
               </>
             )}
-            <button
-              className="btn btn-primary w-full mt-4"
-              onClick={async () =>
-                setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
-              }
-            >
-              Validate Configuration
-            </button>
           </>
         ) : (
           <>
-            <Block update={updateConfig} {...{ config, viewConfig, setValid }} />
+            <Block update={updateConfig} {...{ config, viewConfig, setValid, configPath }} />
             {next && (
               <button
                 className="btn btn-primary w-full mt-4"

@@ -5,7 +5,7 @@ import { useState } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
-import { FileInput } from 'components/inputs.mjs'
+import { StringInput } from 'components/inputs.mjs'
 import { ConfigurationWizard } from 'components/config/wizard.mjs'
 
 const ConfigUploadPage = (props) => {
@@ -47,13 +47,14 @@ const ConfigUploadPage = (props) => {
       ) : (
         <div className="py-12 px-4 max-w-xl m-auto">
           <h1 className="text-center">{props.title}</h1>
-          <input
+          <StringInput
+            label="URL of the configuration file (YAML or JSON)"
             id="config"
             type="uri"
             className="input input-secondary w-full input-bordered"
             placeholder="Paste your URI here"
             value={uri}
-            onChange={(evt) => setUri(evt.target.value)}
+            update={(val) => setUri(val)}
           />
           <button
             className="btn btn-primary w-full mt-4"

@@ -47,7 +47,7 @@ export const ListBlock = (props) => {
       {viewConfig.title ? <h3>{viewConfig.title}</h3> : null}
       {!viewConfig.title && viewConfig.label ? <h3>{viewConfig.label}</h3> : null}
       {viewConfig.about ? <Markdown>{viewConfig.about}</Markdown> : null}
-      <ListInput {...props} list={viewConfig.input} current={get(config, viewConfig.configId)} />
+      <ListInput {...props} list={viewConfig.input} current={get(config, viewConfig.id)} />
     </>
   )
 }
@@ -68,7 +68,7 @@ export const StringsBlock = (props) => {
    * Keep array in local state and update the config as one block
    */
   const [list, setList] = useState(
-    get(props.config, props.viewConfig.configId, [...Array(count).map((val) => '')])
+    get(props.config, props.viewConfig.id, [...Array(count).map((val) => '')])
   )
 
   /*
@@ -95,7 +95,7 @@ export const StringsBlock = (props) => {
   const {
     about = false, // About provided by the configuration schema
     label = false, // Labale provided by the configuration schema
-    configId, // Path to the configuration key we are updating
+    id, // Path to the configuration key we are updating
   } = viewConfig
 
   /*
@@ -103,15 +103,17 @@ export const StringsBlock = (props) => {
    */
   if (!count || count < 2)
     return (
-      <StringBlock
-        {...props}
-        update={(val) => localUpdate(0, val)}
-        valid={validate(configId, list[0])}
-        current={list[0]}
-        about={false}
-        noTitle
-        label={template(viewConfig.labels, { INDEX: 0, INDEX_PLUS_ONE: 1, CONFIG: props.config })}
-      />
+      <>
+        <StringBlock
+          {...props}
+          update={(val) => localUpdate(0, val)}
+          valid={validate(id, list[0])}
+          current={list[0]}
+          about={false}
+          noTitle
+          label={template(viewConfig.labels, { INDEX: 0, INDEX_PLUS_ONE: 1, CONFIG: props.config })}
+        />
+      </>
     )
 
   /*
@@ -140,7 +142,7 @@ export const StringsBlock = (props) => {
             labelBL={template(viewConfig.labelsBL, templateData)}
             labelBR={template(viewConfig.labelsBR, templateData)}
             update={(val) => localUpdate(i, val)}
-            valid={(val) => validate(configId, val)}
+            valid={(val) => validate(id, val)}
             current={list[i]}
           />
         )
@@ -165,7 +167,7 @@ export const StringBlock = (props) => {
     input = [], // input provided by the the configuration schema
     label = false, // Labale provided by the configuration schema
     noTitle = false, // You can use this to suppress the title
-    configId, // Path to the configuration key we are updating
+    id, // Path to the configuration key we are updating
     placeholder = false, // Placeholder provided by the configuration schema
   } = viewConfig
 
@@ -174,12 +176,12 @@ export const StringBlock = (props) => {
       {label && !noTitle ? <h3>{label}</h3> : null}
       {about ? <Markdown>{about}</Markdown> : null}
       <StringInput
-        key={configId}
-        current={get(config, configId)}
+        key={id}
+        current={get(config, id)}
         {...props}
         list={input}
         placeholder={placeholder}
-        valid={(val) => validate(configId, val)}
+        valid={(val) => validate(id, val)}
       />
     </>
   )

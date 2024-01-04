@@ -50,7 +50,7 @@ container:
     # 1) Access to API (required for dashboard to work)
     #
     # Match requests going to /api
-    - traefik.http.routers.traefikApi.rule=PathPrefix(`/api`)
+    - traefik.http.routers.traefikApi.rule=PathPrefix(`/api/`)
     # Forward to traefik service
     - traefik.http.routers.traefikApi.service=traefikApi
     # Only match requests on the https endpoint

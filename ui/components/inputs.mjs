@@ -6,6 +6,7 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
+import { OkIcon } from 'components/icons.mjs'
 
 /*
  * Helper component to display a tab heading
@@ -86,7 +87,7 @@ export const ButtonFrame = ({
 }) => (
   <button
     className={`
-    btn btn-ghost btn-secondary
+    btn btn-ghost btn-secondary relative
     w-full ${dense ? 'mt-1 py-0 btn-sm' : 'mt-2 py-4 h-auto content-start'}
     border-2 border-secondary text-left bg-opacity-20
     ${accordion ? 'hover:bg-transparent' : 'hover:bg-secondary hover:bg-opacity-10'}
@@ -97,6 +98,7 @@ export const ButtonFrame = ({
     onClick={onClick}
   >
     {children}
+    {active ? <OkIcon className="text-success w-8 h-8 absolute top-2 right-2" stroke={4} /> : null}
   </button>
 )
 
@@ -111,7 +113,7 @@ export const FakeButtonFrame = ({
 }) => (
   <div
     className={`
-    btn btn-ghost btn-secondary
+    btn btn-ghost btn-secondary relative
     w-full ${dense ? 'mt-1 py-0 btn-sm' : 'mt-2 py-4 h-auto content-start'}
     border-2 border-secondary text-left bg-opacity-20
     ${accordion ? 'hover:bg-transparent' : 'hover:bg-secondary hover:bg-opacity-10'}
@@ -121,6 +123,7 @@ export const FakeButtonFrame = ({
     `}
   >
     {children}
+    {active ? <OkIcon className="text-success w-8 h-8 absolute top-2 right-2" stroke={4} /> : null}
   </div>
 )
 

@@ -43,7 +43,7 @@ const BlockItem = ({ title, about, id, desc = false }) => (
 )
 
 export const LogstashInputs = ({ config, viewConfig, update }) => {
-  const current = get(config, viewConfig.configId, false)
+  const current = get(config, viewConfig.id, false)
   return (
     <>
       <h3>{viewConfig.title ? viewConfig.title : viewConfig.label}</h3>
@@ -74,7 +74,7 @@ export const LogstashInput = ({}) => {
 }
 
 export const LogstashOutputs = ({ config, viewConfig, update }) => {
-  const current = get(config, viewConfig.configId, false)
+  const current = get(config, viewConfig.id, false)
   return (
     <>
       <h3>{viewConfig.title ? viewConfig.title : viewConfig.label}</h3>

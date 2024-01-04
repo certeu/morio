@@ -1,6 +1,6 @@
 // Dependencies
 import { template } from 'lib/utils.mjs'
-import { atomWithHash } from 'jotai-location'
+import { atomWithLocation } from 'jotai-location'
 import get from 'lodash.get'
 // View confgurations
 import morio from 'config/config-wizard/morio.yaml'
@@ -88,6 +88,6 @@ export const resolveViewValue = (input, config) => {
 export const getView = (id) => get(views, keys[id])
 
 /**
- * Keeps track of the view in the URL hash
+ * Keeps track of the view in the URL location
  */
-export const viewInHash = atomWithHash('view', 'morio.cluster')
+export const viewInLocation = atomWithLocation()

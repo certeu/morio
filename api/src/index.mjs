@@ -25,6 +25,11 @@ const tools = {
 }
 
 /*
+ * Store the API prefix for easy access
+ */
+tools.prefix = tools.defaults.MORIO_API_PREFIX
+
+/*
  * Instantiate the Express app
  */
 tools.log.debug('Starting express app')
@@ -47,7 +52,7 @@ app.use(express.json({ limit: '1mb' }))
  */
 tools.log.debug('Adding openapi documentation endpoints')
 const docs = swaggerUi.setup(openapi)
-app.use('/apis/morio/docs', swaggerUi.serve, docs)
+app.use(`${tools.prefix}/docs`, swaggerUi.serve, docs)
 
 /*
  * Load the Passport middleware
@@ -73,11 +78,11 @@ app.get('/', async (req, res) =>
     about: tools.config.about,
     version: tools.config.version,
     setup: tools.config.setup,
-    status: '/apis/morio/status',
-    docs: '/apis/morio/docs',
+    status: `${tools.prefix}/status`,
+    docs: `${tools.prefix}/docs`,
   })
 )
-app.get('/apis/morio/*', async (req, res) =>
+app.get(`${tools.prefix}/*`, async (req, res) =>
   res.set('Content-Type', 'application/json').status(404).send({
     url: req.url,
     method: req.method,
@@ -90,6 +95,6 @@ app.get('/apis/morio/*', async (req, res) =>
  * Start listening for requests
  */
 app.listen(fromEnv('MORIO_API_PORT'), (err) => {
-  if (err) log.error(err, 'An error occured')
+  if (err) tools.log.error(err, 'An error occured')
   tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_API_PORT')}`)
 })

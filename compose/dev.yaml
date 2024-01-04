@@ -9,14 +9,14 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=morio_net
-      - traefik.http.routers.api.rule=PathPrefix(`/apis/morio`)
+      - traefik.http.routers.api.rule=PathPrefix(`/api/morio`)
       - traefik.http.routers.api.service=api
       - traefik.http.routers.api.entrypoints=https
       - traefik.http.services.api.loadbalancer.server.port=3000
       - traefik.http.routers.api.tls=true
     image: morio/api-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
   sam:
     container_name: sam
     networks:
@@ -29,18 +29,10 @@ services:
       MORIO_SAM_PORT: '3020'
     image: morio/sam-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - traefik.enable=true
-      - traefik.docker.network=morio_net
-      - traefik.http.routers.sam.rule=PathPrefix(`/apis/sam`)
-      - traefik.http.middlewares.samStripPrefix.stripprefix.prefixes=/apis/sam
-      - traefik.http.routers.sam.middlewares=samStripPrefix
-      - traefik.http.routers.sam.service=sam
-      - traefik.http.routers.sam.entrypoints=https
-      - traefik.http.services.sam.loadbalancer.server.port=3020
-      - traefik.http.routers.sam.tls=true
+      - morio.sam
   ui:
     container_name: ui
     networks:
@@ -59,7 +51,7 @@ services:
       - traefik.http.routers.ui.tls=true
     image: morio/ui-dev:0.1.0
     volumes:
-      - /home/joost/git/morio:/morio
+      - /home/jdecock/git/morio:/morio
   traefik:
     image: traefik:2.10.7
     container_name: traefik
@@ -88,7 +80,7 @@ services:
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefikApi.rule=PathPrefix(`/api`)
+      - traefik.http.routers.traefikApi.rule=PathPrefix(`/api/`)
       - traefik.http.routers.traefikApi.service=traefikApi
       - traefik.http.routers.traefikApi.entrypoints=https
       - traefik.http.services.traefikApi.loadbalancer.server.port=8080
@@ -100,7 +92,7 @@ services:
       - '443:443'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - /home/joost/git/morio/logs/:/var/log/morio/
+      - /home/jdecock/git/morio/logs/:/var/log/morio/
 networks:
   default:
     name: morio_net
