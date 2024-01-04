@@ -12,7 +12,7 @@ const DynamicConfigurationWizard = dynamic(
 
 const ConfigWizardPage = (props) => {
   return (
-    <PageWrapper {...props} layout={SplashLayout}>
+    <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
       <div className="py-12 px-4">
         <h1 className="text-center">{props.title}</h1>
         <DynamicConfigurationWizard

@@ -189,7 +189,9 @@ export const ConfigurationWizard = ({
   /*
    * Helper method to deploy the configuration
    */
-  const deploy = async () => {}
+  const deploy = async () => {
+    const result = await api.deploy(config)
+  }
 
   /*
    * Helper method to figure out what view will be next
@@ -210,7 +212,7 @@ export const ConfigurationWizard = ({
     <div
       className={
         splash
-          ? 'flex flex-wrap flex-row gap-8 justify-center'
+          ? 'flex flex-wrap flex-row gap-8 justify-center min-h-screen'
           : 'flex flex-row-reverse gap-8 justify-between'
       }
     >

@@ -72,6 +72,21 @@ MorioClient.prototype.dockerGetContainer = async function (id) {
 }
 
 /**
+ * Deploys a configuration
+ *
+ * This endpoint does not require authentication
+ * @param {object} config - The configuration to deploy
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.deploy = async function (config) {
+  return await this.call(`${morioConfig.api}/deploy`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ config }),
+  })
+}
+
+/**
  * Changes a container state
  *
  * @param {string} id - The Docker Container ID
