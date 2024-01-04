@@ -68,7 +68,6 @@ export function routes(tools) {
   app.get(`${PREFIX}/docker/df`,                 (req, res) => Sam.getDockerData(req, res, tools, 'df'))
   app.get(`${PREFIX}/docker/all-containers`,     (req, res) => Sam.getDockerData(req, res, tools, 'all-containers'))
   app.get(`${PREFIX}/docker/images`,             (req, res) => Sam.getDockerData(req, res, tools, 'images'))
-  app.get(`${PREFIX}/docker/info`,               (req, res) => Sam.getDockerData(req, res, tools, 'info'))
   app.get(`${PREFIX}/docker/networks`,           (req, res) => Sam.getDockerData(req, res, tools, 'networks'))
   app.get(`${PREFIX}/docker/nodes`,              (req, res) => Sam.getDockerData(req, res, tools, 'nodes'))
   app.get(`${PREFIX}/docker/plugins`,            (req, res) => Sam.getDockerData(req, res, tools, 'plugins'))

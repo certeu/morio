@@ -1,0 +1,2164 @@
+{
+  "LayersSize": 767651314,
+  "Images": [
+    {
+      "Containers": 1,
+      "Created": 1703862248,
+      "Id": "sha256:4907777b2115366d1ee7880e370802619de2928a62c0ccc81786a0092e14706e",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": ["morio/ui-dev:0.1.0", "morio/ui-dev:latest"],
+      "SharedSize": 222574032,
+      "Size": 222578583,
+      "VirtualSize": 222578583
+    },
+    {
+      "Containers": 1,
+      "Created": 1703857925,
+      "Id": "sha256:a11b81cf4411a6d4175a57787b1f72d35d6382ec3bc0a41de782b15e9ee03541",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": ["morio/sam:0.1.0", "morio/sam:latest"],
+      "SharedSize": 222574032,
+      "Size": 226404682,
+      "VirtualSize": 226404682
+    },
+    {
+      "Containers": 0,
+      "Created": 1703857808,
+      "Id": "sha256:fd985fe3d0525e6f16646a1b66c5f4e71d37cbf1da23de6a5b5096b00d0bd55b",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": ["morio/api:0.1.0", "morio/api:latest"],
+      "SharedSize": 222574032,
+      "Size": 281101005,
+      "VirtualSize": 281101005
+    },
+    {
+      "Containers": 0,
+      "Created": 1703857617,
+      "Id": "sha256:8f7b177532b00782dffc23991f79d567c7c92effa56ced72923c6dcacdb1227d",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": null,
+      "SharedSize": 222574032,
+      "Size": 556173283,
+      "VirtualSize": 556173283
+    },
+    {
+      "Containers": 1,
+      "Created": 1703857594,
+      "Id": "sha256:f4547794243bf1a4d0a96db59cceb86192085fcd44887fc3fc7744968450e1ae",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": ["morio/sam-dev:0.1.0", "morio/sam-dev:latest"],
+      "SharedSize": 222574032,
+      "Size": 222574032,
+      "VirtualSize": 222574032
+    },
+    {
+      "Containers": 1,
+      "Created": 1703857593,
+      "Id": "sha256:3ddebc4b0ca140ac5939bd641e824c381ea18dd26332b55b33bd66df260bfa75",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": null,
+      "RepoTags": ["morio/api-dev:0.1.0", "morio/api-dev:latest"],
+      "SharedSize": 222574032,
+      "Size": 222578583,
+      "VirtualSize": 222578583
+    },
+    {
+      "Containers": 1,
+      "Created": 1701892484,
+      "Id": "sha256:cb72c2dc074ab16d1bd1a1a657d7c8baeb8265740f81fcbab3a1a0559255e922",
+      "Labels": {
+        "org.opencontainers.image.description": "A modern reverse-proxy",
+        "org.opencontainers.image.documentation": "https://docs.traefik.io",
+        "org.opencontainers.image.source": "https://github.com/traefik/traefik",
+        "org.opencontainers.image.title": "Traefik",
+        "org.opencontainers.image.url": "https://traefik.io",
+        "org.opencontainers.image.vendor": "Traefik Labs",
+        "org.opencontainers.image.version": "v2.10.7"
+      },
+      "ParentId": "",
+      "RepoDigests": [
+        "traefik@sha256:c5181ddf303f1ccfd4bd6d1d9c4867b0500efb6089a0f9ccb16612438f6e934f"
+      ],
+      "RepoTags": ["traefik:2.10.7"],
+      "SharedSize": 0,
+      "Size": 148871466,
+      "VirtualSize": 148871466
+    },
+    {
+      "Containers": 23,
+      "Created": 1405753352,
+      "Id": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Labels": null,
+      "ParentId": "",
+      "RepoDigests": [
+        "google/pause@sha256:e8fc56926ac3d5705772f13befbaee3aa2fc6e9c52faee3d96b26612cd77556c"
+      ],
+      "RepoTags": ["google/pause:latest"],
+      "SharedSize": 0,
+      "Size": 239840,
+      "VirtualSize": 239840
+    }
+  ],
+  "Containers": [
+    {
+      "Id": "c3f6bc6b53284ecae59e65a09707e84e92a304596b2c7f8696f58817ed8213da",
+      "Names": ["/lucid_yonath"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704111184,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 39 seconds ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "10562eee69b9306fcc5c1614eb3942744f484771ae0c4750d3f21883d3e26d6c",
+      "Names": ["/affectionate_fermi"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704111071,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "0416a77aa8decd6eca10f68d8a6166c048f7dc16fd34d6691489011793d0bcad",
+      "Names": ["/great_ramanujan"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704111054,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "bfff9101ee36ddd51b9603e9ea9ba8e6e6212c550584d69aec783aa78c8d0e8c",
+      "Names": ["/fervent_williamson"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704110829,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 6 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "cff1da9b2bd214af06465a6c1a53fc641fdef1be279e41e98b35630ad90dda45",
+      "Names": ["/nice_hellman"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704110322,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 15 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "a5e64eb974dedd3053aba9f6267dc83275e6b9a17bac65200681f310da585c97",
+      "Names": ["/loving_sinoussi"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704110305,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 15 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "b8fd6854f3d57def8688f56bbe1d21864c006ccb6ee9d449705e849f95ba70d4",
+      "Names": ["/reverent_chaum"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109846,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 22 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "62ce2086ac31c3e94acb4818bb8bbd4447d717521835fe551ccf94994c5c8c3f",
+      "Names": ["/sharp_kepler"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109822,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 23 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "4d5dabda68f6b73d87b3b20bbd5ad63f6f13091476d5aa0b955a443656bc8009",
+      "Names": ["/nifty_albattani"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109743,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 24 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "bfe8c32e0437aaee32030a02b5f2d98c49393c4775095eef89a500c05cee9da3",
+      "Names": ["/sweet_goldwasser"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109353,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 31 minutes ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "97ac6404f31ebc8be0632b679963218b0dfb1ce2722f35a573839b2643a28b33",
+      "Names": ["/dazzling_mirzakhani"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109336,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 31 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "e323c8ddacb7bb458e330fdd949c9563bce91378629baf78448bd3a3fc6e4ee8",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.12",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:0c",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "215fcfde208a6b8a6fc93fd5bd953dc29a45c5134331d861739b98d5e4f9442a",
+      "Names": ["/adoring_babbage"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109130,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 34 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "907bf76f38e9e689b11cf66a0a997497e8a5acc121bf885f138a763021c525f6",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.11",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:0b",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "f29a355ce3799ceb85c8c03e494ecc5591dc6de3bd3e5bd88636b9be3c859652",
+      "Names": ["/tender_mcclintock"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704109033,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 36 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "dc9d35ab103b7240eefab5e05730eed2205ecfff31dcb350dd053fa77d2b39bd",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.10",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:0a",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "c4acef18687d7ac5a2d3d5c70bc499f8a5dffe24bfba0170fc81af1b2d76f86d",
+      "Names": ["/boring_chatelet"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108964,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 37 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "4f9631ace22167fa3bf52b21c4dea9daac7e09828f5445c1fd95aa0757e4e076",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.9",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:09",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "a9c82500c4b096f70ac6ce5a34daf349d9f4eb13fa68578258a50b0a1d77c24f",
+      "Names": ["/brave_bassi"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108947,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 37 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "184c1a1b25f3edbc0940410d8e76a49c3c070c698d2e4e2d71f0f143fea514b1",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.8",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:08",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "8cf463ab566771ea8373e15e54c602171e4719533f223d14c6fce3c2a86ab417",
+      "Names": ["/trusting_mayer"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108891,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 38 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "961d6422c27c1f9a5c3832e04a2dc268ef95b473e8640d74bd8e66822dcc6163",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.7",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:07",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "1b1fc14d941c17ea0481cc4ff51b4939097114af6d5a1d7dbd9f6ed713d2bcb0",
+      "Names": ["/musing_jones"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108714,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 41 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "1dc796d47fb2526321e93f7a73c424379feec3c0b43cf2b7d297c61a8ad54953",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.6",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:06",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "b4205b2261e3ddd37c4a815f7068d3c2196a69afcb1e61dea024a6de6d2834f3",
+      "Names": ["/friendly_faraday"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108704,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 42 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "61dce2883c305be9a54fb6fa39162c24547d74a6abb7dd861be6259f650a83bb",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.5",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:05",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "03bc148eba3ae1421d5a72a8d348f345d59734f0871b0c689343f9df4af65c6c",
+      "Names": ["/loving_bassi"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108674,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 42 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "87ac2463871cffc13d84cbfed06448ffe557d188a7c41d5ddc54ea0e095a0588",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.4",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:04",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "60a59d5d04a8599880dd738ce0e7680f150c37283b0b0ddaa4db3f45c5714fe6",
+      "Names": ["/festive_boyd"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108570,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 44 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "4be680d8da18d084d66035ce1cf93fd8a74bf0f09e27703af6a27b4e2c00d240",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.3",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:03",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "a7da7915ef929d6da2c703c3d3072ed72077780991f6a2694fd54eda354f13e6",
+      "Names": ["/exciting_swartz"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1704108506,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "running",
+      "Status": "Up 45 minutes",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "3f58b58577f076fb882d421f561df40b8181377b4090e34b84fdf3002744a586",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.2",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "02:42:ac:11:00:02",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "39feeb9d677c34048bd340e8edbff6d0542d8a70de080885a059b65779b80e50",
+      "Names": ["/elastic_noether"],
+      "Image": "morio/sam",
+      "ImageID": "sha256:a11b81cf4411a6d4175a57787b1f72d35d6382ec3bc0a41de782b15e9ee03541",
+      "Command": "docker-entrypoint.sh node ./dist/index.mjs",
+      "Created": 1703865031,
+      "Ports": [],
+      "SizeRootFs": 226404682,
+      "Labels": {},
+      "State": "exited",
+      "Status": "Exited (130) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "fc05f37c3690d7f3de7369899ef71e5339a4373944690de439f874ac0680491d",
+      "Names": ["/laughing_ride"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1703863756,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "c03015aafa7089dc0ac80bcd565ee86ef4c1745b9c43a6ea4c95babdc6de2ded",
+      "Names": ["/hopeful_lederberg"],
+      "Image": "google/pause:latest",
+      "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+      "Command": "/pause",
+      "Created": 1703863644,
+      "Ports": [],
+      "SizeRootFs": 239840,
+      "Labels": {
+        "eu.certeu.morio.test": "yes"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "default"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": []
+    },
+    {
+      "Id": "0563c721aed476ab800f09c63abebfca73543bb605b06b36aeb2d1322011aa41",
+      "Names": ["/traefik"],
+      "Image": "traefik:2.10.7",
+      "ImageID": "sha256:cb72c2dc074ab16d1bd1a1a657d7c8baeb8265740f81fcbab3a1a0559255e922",
+      "Command": "/entrypoint.sh --api.insecure=true --providers.docker=true --providers.docker.exposedbydefault=false --entrypoints.http.address=:80 --entrypoints.http.http.redirections.entrypoint.to=https --entrypoints.http.http.redirections.entrypoint.scheme=https --entrypoints.http.http.redirections.entrypoint.permanent=true --entrypoints.https.address=:443 --log.level=DEBUG --log.filePath=/var/log/morio/traefik.log --log.format=json",
+      "Created": 1703862986,
+      "Ports": [],
+      "SizeRootFs": 148871466,
+      "Labels": {
+        "com.docker.compose.config-hash": "b7ecb608cdc9f96d864a01904085c6ec3b5ec1868588dab8b73dce893b377e72",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:cb72c2dc074ab16d1bd1a1a657d7c8baeb8265740f81fcbab3a1a0559255e922",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "morio",
+        "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+        "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+        "com.docker.compose.service": "traefik",
+        "com.docker.compose.version": "2.19.1",
+        "desktop.docker.io/binds/0/Source": "/var/run/docker.sock",
+        "desktop.docker.io/binds/0/SourceKind": "dockerSocketProxied",
+        "desktop.docker.io/binds/0/Target": "/var/run/docker.sock",
+        "desktop.docker.io/binds/1/Source": "/Users/joost/git/morio/logs/",
+        "desktop.docker.io/binds/1/SourceKind": "hostFile",
+        "desktop.docker.io/binds/1/Target": "/var/log/morio",
+        "org.opencontainers.image.description": "A modern reverse-proxy",
+        "org.opencontainers.image.documentation": "https://docs.traefik.io",
+        "org.opencontainers.image.source": "https://github.com/traefik/traefik",
+        "org.opencontainers.image.title": "Traefik",
+        "org.opencontainers.image.url": "https://traefik.io",
+        "org.opencontainers.image.vendor": "Traefik Labs",
+        "org.opencontainers.image.version": "v2.10.7",
+        "traefik.docker.network": "morio_net",
+        "traefik.enable": "true",
+        "traefik.http.middlewares.replaceTraefik.replacePathRegex.regex": "^/traefik/(.*)",
+        "traefik.http.middlewares.replaceTraefik.replacePathRegex.replacement": "/$1",
+        "traefik.http.routers.traefik.entrypoints": "https",
+        "traefik.http.routers.traefik.middlewares": "replaceTraefik",
+        "traefik.http.routers.traefik.rule": "PathPrefix(`/traefik`)",
+        "traefik.http.routers.traefik.service": "traefik",
+        "traefik.http.routers.traefik.tls": "true",
+        "traefik.http.routers.traefikApi.entrypoints": "https",
+        "traefik.http.routers.traefikApi.rule": "PathPrefix(`/api`)",
+        "traefik.http.routers.traefikApi.service": "traefikApi",
+        "traefik.http.routers.traefikApi.tls": "true",
+        "traefik.http.services.traefik.loadbalancer.server.port": "8080",
+        "traefik.http.services.traefikApi.loadbalancer.server.port": "8080"
+      },
+      "State": "exited",
+      "Status": "Exited (0) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "morio_net"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "morio_net": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/host_mnt/Users/joost/git/morio/logs",
+          "Destination": "/var/log/morio",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/run/host-services/docker.proxy.sock",
+          "Destination": "/var/run/docker.sock",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ]
+    },
+    {
+      "Id": "7e2eb1c5f6b8ba0bf504c6ea29bf71d63d556a0fc82a6032a880804531696a68",
+      "Names": ["/sam"],
+      "Image": "morio/sam-dev:0.1.0",
+      "ImageID": "sha256:f4547794243bf1a4d0a96db59cceb86192085fcd44887fc3fc7744968450e1ae",
+      "Command": "docker-entrypoint.sh npm run dev",
+      "Created": 1703862986,
+      "Ports": [],
+      "SizeRw": 2198958,
+      "SizeRootFs": 224772990,
+      "Labels": {
+        "com.docker.compose.config-hash": "203273a27f386eb8d2bac82c1c5d6d5096adf2df2000d5ccb8fa141bd73b5283",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:f4547794243bf1a4d0a96db59cceb86192085fcd44887fc3fc7744968450e1ae",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "morio",
+        "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+        "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+        "com.docker.compose.service": "sam",
+        "com.docker.compose.version": "2.19.1",
+        "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+        "desktop.docker.io/binds/0/SourceKind": "hostFile",
+        "desktop.docker.io/binds/0/Target": "/morio",
+        "desktop.docker.io/binds/1/Source": "/var/run/docker.sock",
+        "desktop.docker.io/binds/1/SourceKind": "dockerSocketProxied",
+        "desktop.docker.io/binds/1/Target": "/var/run/docker.sock",
+        "traefik.docker.network": "morio_net",
+        "traefik.enable": "true",
+        "traefik.http.middlewares.samStripPrefix.stripprefix.prefixes": "/apis/sam",
+        "traefik.http.routers.sam.entrypoints": "https",
+        "traefik.http.routers.sam.middlewares": "samStripPrefix",
+        "traefik.http.routers.sam.rule": "PathPrefix(`/apis/sam`)",
+        "traefik.http.routers.sam.service": "sam",
+        "traefik.http.routers.sam.tls": "true",
+        "traefik.http.services.sam.loadbalancer.server.port": "3020"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "morio_net"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "morio_net": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/host_mnt/Users/joost/git/morio",
+          "Destination": "/morio",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        },
+        {
+          "Type": "bind",
+          "Source": "/run/host-services/docker.proxy.sock",
+          "Destination": "/var/run/docker.sock",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ]
+    },
+    {
+      "Id": "e4eb76936fe2671c46525b680f2b93a5299db789ae084efe28fad3ad9882005b",
+      "Names": ["/ui"],
+      "Image": "morio/ui-dev:0.1.0",
+      "ImageID": "sha256:4907777b2115366d1ee7880e370802619de2928a62c0ccc81786a0092e14706e",
+      "Command": "docker-entrypoint.sh npm run dev",
+      "Created": 1703862986,
+      "Ports": [],
+      "SizeRw": 2200870,
+      "SizeRootFs": 224779453,
+      "Labels": {
+        "com.docker.compose.config-hash": "f5152d2d09852be54903ddf5541f55ec3055b74b489b6fc91c6fba31decf14e7",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:4907777b2115366d1ee7880e370802619de2928a62c0ccc81786a0092e14706e",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "morio",
+        "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+        "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+        "com.docker.compose.service": "ui",
+        "com.docker.compose.version": "2.19.1",
+        "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+        "desktop.docker.io/binds/0/SourceKind": "hostFile",
+        "desktop.docker.io/binds/0/Target": "/morio",
+        "traefik.docker.network": "morio_net",
+        "traefik.enable": "true",
+        "traefik.http.routers.ui.entrypoints": "https",
+        "traefik.http.routers.ui.rule": "PathPrefix(`/`)",
+        "traefik.http.routers.ui.service": "ui",
+        "traefik.http.routers.ui.tls": "true",
+        "traefik.http.services.ui.loadbalancer.server.port": "3010"
+      },
+      "State": "exited",
+      "Status": "Exited (0) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "morio_net"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "morio_net": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/host_mnt/Users/joost/git/morio",
+          "Destination": "/morio",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ]
+    },
+    {
+      "Id": "4b635636c2a3c99027604cf210771c5d1e96b77f7bd8d1e0f8b791f6d81f8523",
+      "Names": ["/api"],
+      "Image": "morio/api-dev:0.1.0",
+      "ImageID": "sha256:3ddebc4b0ca140ac5939bd641e824c381ea18dd26332b55b33bd66df260bfa75",
+      "Command": "docker-entrypoint.sh npm run dev",
+      "Created": 1703862986,
+      "Ports": [],
+      "SizeRw": 2198974,
+      "SizeRootFs": 224777557,
+      "Labels": {
+        "com.docker.compose.config-hash": "ad556bfcd39eebe35141e0a56cc299029cb3575c8c34a72b01e641d7b476ffb6",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:3ddebc4b0ca140ac5939bd641e824c381ea18dd26332b55b33bd66df260bfa75",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "morio",
+        "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+        "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+        "com.docker.compose.service": "api",
+        "com.docker.compose.version": "2.19.1",
+        "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+        "desktop.docker.io/binds/0/SourceKind": "hostFile",
+        "desktop.docker.io/binds/0/Target": "/morio",
+        "traefik.docker.network": "morio_net",
+        "traefik.enable": "true",
+        "traefik.http.routers.api.entrypoints": "https",
+        "traefik.http.routers.api.rule": "PathPrefix(`/apis/morio`)",
+        "traefik.http.routers.api.service": "api",
+        "traefik.http.routers.api.tls": "true",
+        "traefik.http.services.api.loadbalancer.server.port": "3000"
+      },
+      "State": "exited",
+      "Status": "Exited (137) 2 days ago",
+      "HostConfig": {
+        "NetworkMode": "morio_net"
+      },
+      "NetworkSettings": {
+        "Networks": {
+          "morio_net": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "DriverOpts": null
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "/host_mnt/Users/joost/git/morio",
+          "Destination": "/morio",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": "rprivate"
+        }
+      ]
+    }
+  ],
+  "Volumes": [
+    {
+      "CreatedAt": "2023-11-24T09:24:13Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/ba9bbed08d4a7db2e987409feb0407bd3c7fb4a8327ce2ef31f97ecccdb6b345/_data",
+      "Name": "ba9bbed08d4a7db2e987409feb0407bd3c7fb4a8327ce2ef31f97ecccdb6b345",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-24T09:20:16Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/8bc6ef3968ba2f93191380b530fd6855c07bfb926b124f4556f9ab820b42a979/_data",
+      "Name": "8bc6ef3968ba2f93191380b530fd6855c07bfb926b124f4556f9ab820b42a979",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-24T09:39:16Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/ed57f1e6fc1fd22174be1af3d6a05c2e19a41f8dec11459abd7213c403e9643a/_data",
+      "Name": "ed57f1e6fc1fd22174be1af3d6a05c2e19a41f8dec11459abd7213c403e9643a",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-23T15:40:05Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/0bac8003a08b262fac7a86e0ba487e993c6f44ef53191cc31da48f1459f1bed3/_data",
+      "Name": "0bac8003a08b262fac7a86e0ba487e993c6f44ef53191cc31da48f1459f1bed3",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-24T09:23:42Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/baf1c57cd62d9358d08de47c5a9426904a0f472d445e7cfb0d22f5cca1e3b065/_data",
+      "Name": "baf1c57cd62d9358d08de47c5a9426904a0f472d445e7cfb0d22f5cca1e3b065",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-23T15:42:29Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/f8fe939ed67aa589bc5fcabb7d6c5288b325756be7affc8a24d90f5339a2c8bd/_data",
+      "Name": "f8fe939ed67aa589bc5fcabb7d6c5288b325756be7affc8a24d90f5339a2c8bd",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-23T15:43:00Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/40393fb28b66929dd2068e0e57ffa9a31da25190b760186585c65020b56a67ed/_data",
+      "Name": "40393fb28b66929dd2068e0e57ffa9a31da25190b760186585c65020b56a67ed",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-24T09:45:51Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/809a8f17343a433ffe039ad9a84b54abd6a8989acc3996a07c96cc19a5c78e5e/_data",
+      "Name": "809a8f17343a433ffe039ad9a84b54abd6a8989acc3996a07c96cc19a5c78e5e",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2023-11-24T09:24:24Z",
+      "Driver": "local",
+      "Labels": {
+        "com.docker.volume.anonymous": ""
+      },
+      "Mountpoint": "/var/lib/docker/volumes/ba97c0c8df8a69eea4ae3311e3f106ebc2e5cd401f7fc79e2d2796df85d25283/_data",
+      "Name": "ba97c0c8df8a69eea4ae3311e3f106ebc2e5cd401f7fc79e2d2796df85d25283",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    },
+    {
+      "CreatedAt": "2022-12-14T10:47:42Z",
+      "Driver": "local",
+      "Labels": null,
+      "Mountpoint": "/var/lib/docker/volumes/ca-chain.crt/_data",
+      "Name": "ca-chain.crt",
+      "Options": null,
+      "Scope": "local",
+      "UsageData": {
+        "RefCount": 0,
+        "Size": 0
+      }
+    }
+  ],
+  "BuildCache": [
+    {
+      "ID": "c67jtf5pnez0duw7fy6lyy20e",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/67eit6udy6np9ixrnzao90569",
+      "InUse": false,
+      "Shared": false,
+      "Size": 327680,
+      "CreatedAt": "2023-12-29T13:50:09.128991292Z",
+      "LastUsedAt": "2023-12-29T13:50:09.150049334Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "r5vw17tycti0lrw5fp7nstdz0",
+      " Parents": ["14i068z2krqbylztmoehw7kqp"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm install @next/swc-linux-arm64-gnu @next/swc-linux-arm64-musl",
+      "InUse": false,
+      "Shared": true,
+      "Size": 333594700,
+      "CreatedAt": "2023-12-29T13:46:56.899008842Z",
+      "LastUsedAt": "2023-12-29T13:46:57.738727884Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "z3q7stqzhxqsxu05is08fem4p",
+      " Parents": ["kp079ivmzgzrryjhxxoce19zl"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm install pm2",
+      "InUse": false,
+      "Shared": true,
+      "Size": 35657521,
+      "CreatedAt": "2023-12-29T13:50:04.659051971Z",
+      "LastUsedAt": "2023-12-29T13:50:08.686219792Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "i6egc6ao2n90tt9zfw8o7xip0",
+      " Parents": ["5quok7movfu922ye41mengj77"],
+      "Type": "regular",
+      "Description": "pulled from docker.io/library/node:20-slim@sha256:5c714c3e90f66a2cbfa266b90a4d7adcd63453cd730aa2d13cba84b260bea2e6",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.08736897Z",
+      "LastUsedAt": "2023-12-29T13:46:57.741341343Z",
+      "UsageCount": 3
+    },
+    {
+      "ID": "b2y7o02ajie2zee64mz7tcrwt",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 380890060,
+      "CreatedAt": "2023-12-29T13:48:42.836575919Z",
+      "LastUsedAt": "2023-12-29T13:49:26.561753967Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "rlc07ug6h4m7x3dkweo66cjao",
+      " Parents": ["lizps4ww789206jxnc6vp4n40"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c apt-get update && apt-get install -y python3 make g++",
+      "InUse": false,
+      "Shared": false,
+      "Size": 319264689,
+      "CreatedAt": "2023-12-29T13:51:49.845754381Z",
+      "LastUsedAt": "2023-12-29T13:52:05.182967888Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "lizps4ww789206jxnc6vp4n40",
+      " Parents": ["i6egc6ao2n90tt9zfw8o7xip0"],
+      "Type": "regular",
+      "Description": "[2/2] WORKDIR /morio/sam",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:34.485397263Z",
+      "LastUsedAt": "2023-12-29T15:03:55.832423508Z",
+      "UsageCount": 4
+    },
+    {
+      "ID": "wul1rutjd4rr80ouwo4o48og1",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/nmoejbqv1caq51qfp1p5md2os",
+      "InUse": false,
+      "Shared": false,
+      "Size": 364349440,
+      "CreatedAt": "2023-12-29T13:46:34.925369929Z",
+      "LastUsedAt": "2023-12-29T13:46:57.740999093Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "75tph4fbsvrrwxgp5qi42kcec",
+      " Parents": ["r5vw17tycti0lrw5fp7nstdz0"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c addgroup --system --gid ${GID:-2112} ${USER:-morio}   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos \"Morio User\" --home=/home/morio ${USER:-morio}",
+      "InUse": false,
+      "Shared": true,
+      "Size": 4551,
+      "CreatedAt": "2023-12-29T13:46:57.229046426Z",
+      "LastUsedAt": "2023-12-29T13:46:57.739277301Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "m3ne6ow1oa8ffb5d2zqdkx91p",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/wg42t3q62hn5ccpxfx4guh4d6",
+      "InUse": false,
+      "Shared": false,
+      "Size": 397875200,
+      "CreatedAt": "2023-12-29T13:48:34.286972554Z",
+      "LastUsedAt": "2023-12-29T13:49:26.559863717Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "mjpcyvzgan5mgfhcmzbqpwl5a",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 269049,
+      "CreatedAt": "2023-12-29T13:46:34.038267054Z",
+      "LastUsedAt": "2023-12-29T13:46:34.533295221Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "udq820wyp4xyz0e5lh6qfb5aa",
+      " Parents": ["mpset3d8r31lssqdxc06mxtom"],
+      "Type": "regular",
+      "Description": "[runner 4/9] COPY --from=builder /morio/sam/node_modules/ssh2 ./node_modules/ssh2",
+      "InUse": false,
+      "Shared": true,
+      "Size": 1393024,
+      "CreatedAt": "2023-12-29T13:52:05.049308346Z",
+      "LastUsedAt": "2023-12-29T13:52:05.186189263Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "kp079ivmzgzrryjhxxoce19zl",
+      " Parents": ["i6egc6ao2n90tt9zfw8o7xip0"],
+      "Type": "regular",
+      "Description": "[2/3] WORKDIR /morio/api",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.28687072Z",
+      "LastUsedAt": "2023-12-29T13:50:08.690551125Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "0ki3m4zpncqik5e43sm7i41of",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 269049,
+      "CreatedAt": "2023-12-29T13:48:33.407467762Z",
+      "LastUsedAt": "2023-12-29T13:52:05.192604013Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "lyes4vkdymbh4gpmbct3oxoj5",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 389238427,
+      "CreatedAt": "2023-12-29T13:52:15.60327817Z",
+      "LastUsedAt": "2023-12-29T13:56:00.058329302Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "q0i67juf65l02rrvryda1jfl6",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 362700,
+      "CreatedAt": "2023-12-29T13:45:55.595239842Z",
+      "LastUsedAt": "2023-12-29T13:45:55.882723842Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "z48qcqhakw5p4p4aygbh2hyck",
+      " Parents": ["nny4bvl6adceihvltj4id5pfc"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm ci",
+      "InUse": false,
+      "Shared": false,
+      "Size": 92961976,
+      "CreatedAt": "2023-12-29T13:51:58.10876276Z",
+      "LastUsedAt": "2023-12-29T13:52:05.185787263Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "b17h7wok9zn2tpvrubdmuye28",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/tmt4zatz596b6e447d1mud1r3",
+      "InUse": false,
+      "Shared": false,
+      "Size": 327680,
+      "CreatedAt": "2023-12-29T15:03:55.180863674Z",
+      "LastUsedAt": "2023-12-29T15:03:55.830509925Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "2jv9sk3m1je98f22e0z79fhon",
+      " Parents": ["udq820wyp4xyz0e5lh6qfb5aa"],
+      "Type": "regular",
+      "Description": "[runner 5/9] COPY --from=builder /morio/sam/node_modules/asn1 ./node_modules/asn1",
+      "InUse": false,
+      "Shared": true,
+      "Size": 19757,
+      "CreatedAt": "2023-12-29T13:52:05.061006971Z",
+      "LastUsedAt": "2023-12-29T13:52:05.18780193Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "omp1cefz4z7myit9e2dskple7",
+      " Parents": ["msj5qvnr4won1frgk6v32bnl0"],
+      "Type": "regular",
+      "Description": "pulled from docker.io/library/node:20-slim@sha256:5c714c3e90f66a2cbfa266b90a4d7adcd63453cd730aa2d13cba84b260bea2e6",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.079638887Z",
+      "LastUsedAt": "2023-12-29T13:46:33.083823345Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "nny4bvl6adceihvltj4id5pfc",
+      " Parents": ["rlc07ug6h4m7x3dkweo66cjao"],
+      "Type": "regular",
+      "Description": "[builder 4/7] COPY . .",
+      "InUse": false,
+      "Shared": false,
+      "Size": 269049,
+      "CreatedAt": "2023-12-29T13:51:49.925943672Z",
+      "LastUsedAt": "2023-12-29T13:52:05.184123846Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "z14yrx163xr1ndquu2iuqffam",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 362700,
+      "CreatedAt": "2023-12-29T13:48:31.523683553Z",
+      "LastUsedAt": "2023-12-29T13:57:19.739535755Z",
+      "UsageCount": 4
+    },
+    {
+      "ID": "sqvl9cvqf3k8misiwbuz4prnr",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 347342370,
+      "CreatedAt": "2023-12-29T13:46:45.587652795Z",
+      "LastUsedAt": "2023-12-29T13:46:57.740281009Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "5iqas1m7cgcyrvtacjj56sn3j",
+      " Parents": ["9dk17e17r6ifcgr7exji9rn45"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm ci",
+      "InUse": false,
+      "Shared": false,
+      "Size": 52746077,
+      "CreatedAt": "2023-12-29T13:49:54.699299383Z",
+      "LastUsedAt": "2023-12-29T13:50:08.689154125Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "uou631gy0t3uqqd8jipv9hvnq",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/zq0ttimvoy1m90216z1xt7dga",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:45:55.566539592Z",
+      "LastUsedAt": "2023-12-29T13:45:55.878046467Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "uv9h6nm7e3jz77r6n784fuc1g",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/jnjl9my56zvx1j9v88vyndmz0",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:49:44.230063586Z",
+      "LastUsedAt": "2023-12-29T13:49:44.282049211Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "qkmwuebjcfo9728kivbr9w1kh",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/x6uzg10x6vmp3esll91unpzoy",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:48:31.493950261Z",
+      "LastUsedAt": "2023-12-29T13:57:19.736793422Z",
+      "UsageCount": 5
+    },
+    {
+      "ID": "jfu8dkbse1ccweoa42wzbyuqk",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/7vcdeq9d359bgq9yvxi17lkbw",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T15:03:50.669823047Z",
+      "LastUsedAt": "2023-12-29T15:03:54.760428632Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "kqidq1u4lq50ycbezyaub5kjh",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/u1p11jn0kymbmgj0ggpfyxn6n",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:56:49.28319963Z",
+      "LastUsedAt": "2023-12-29T13:56:49.297240505Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "1djf09e1m1vtw4abr9t70fmi4",
+      " Parents": ["14i068z2krqbylztmoehw7kqp"],
+      "Type": "regular",
+      "Description": "[builder 3/6] COPY . .",
+      "InUse": false,
+      "Shared": false,
+      "Size": 389238427,
+      "CreatedAt": "2023-12-29T13:52:20.740944673Z",
+      "LastUsedAt": "2023-12-29T13:56:00.061251177Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "rwl8wcnvlomuloixkplqnmbcd",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/k9c0q9towogjfiwkvvr8rknrj",
+      "InUse": false,
+      "Shared": false,
+      "Size": 419399680,
+      "CreatedAt": "2023-12-29T15:03:56.262470467Z",
+      "LastUsedAt": "2023-12-29T15:04:08.294786333Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "sqycukwlqpt0q4h6szdset8fj",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/igajnlf6mg3b54s526vf2r1jw",
+      "InUse": false,
+      "Shared": false,
+      "Size": 327680,
+      "CreatedAt": "2023-12-29T13:48:33.388630929Z",
+      "LastUsedAt": "2023-12-29T13:52:05.198470888Z",
+      "UsageCount": 3
+    },
+    {
+      "ID": "yarwngut0pflnyyaygq5o0vm4",
+      " Parents": ["ngsrb81udw0jbi7est0tniqb6"],
+      "Type": "regular",
+      "Description": "[runner 8/9] COPY --from=builder /morio/sam/node_modules/safer-buffer ./node_modules/safer-buffer",
+      "InUse": false,
+      "Shared": true,
+      "Size": 42299,
+      "CreatedAt": "2023-12-29T13:52:05.096103138Z",
+      "LastUsedAt": "2023-12-29T13:52:05.194380138Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "aq06t3us4fn0df15kgwu77vq2",
+      " Parents": ["5iqas1m7cgcyrvtacjj56sn3j"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm run build",
+      "InUse": false,
+      "Shared": false,
+      "Size": 1303869,
+      "CreatedAt": "2023-12-29T13:49:54.726910841Z",
+      "LastUsedAt": "2023-12-29T13:50:08.690028625Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "ngsrb81udw0jbi7est0tniqb6",
+      " Parents": ["sxt2h6xnhvr0poohsahnyyr8s"],
+      "Type": "regular",
+      "Description": "[runner 7/9] COPY --from=builder /morio/sam/node_modules/tweetnacl ./node_modules/tweetnacl",
+      "InUse": false,
+      "Shared": true,
+      "Size": 174046,
+      "CreatedAt": "2023-12-29T13:52:05.083836805Z",
+      "LastUsedAt": "2023-12-29T13:52:05.183350763Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "1fkgzucway0swnw0uilu6k1cc",
+      " Parents": ["14i068z2krqbylztmoehw7kqp"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c addgroup --system --gid ${GID:-2112} ${USER:-morio}   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos \"Morio User\" --home=/home/morio ${USER:-morio}",
+      "InUse": false,
+      "Shared": false,
+      "Size": 4551,
+      "CreatedAt": "2023-12-29T13:48:45.453810379Z",
+      "LastUsedAt": "2023-12-29T13:56:00.060714177Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "n2lmj3jgykto7jujtxyx52ipa",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 363487,
+      "CreatedAt": "2023-12-29T15:03:50.705174964Z",
+      "LastUsedAt": "2023-12-29T15:03:54.758513132Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "mpset3d8r31lssqdxc06mxtom",
+      " Parents": ["lizps4ww789206jxnc6vp4n40"],
+      "Type": "regular",
+      "Description": "[runner 3/9] COPY --from=builder /morio/sam/dist/index.mjs ./dist/index.mjs",
+      "InUse": false,
+      "Shared": true,
+      "Size": 1340924,
+      "CreatedAt": "2023-12-29T13:52:05.015272804Z",
+      "LastUsedAt": "2023-12-29T13:52:05.196997138Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "bq7e5sgmd14ucvqzjb73rbib6",
+      " Parents": ["8y3edgomr2n1qbcb62p4z6zhw"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm run build",
+      "InUse": false,
+      "Shared": false,
+      "Size": 1342543,
+      "CreatedAt": "2023-12-29T13:52:04.435496346Z",
+      "LastUsedAt": "2023-12-29T13:52:05.181871055Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "sxt2h6xnhvr0poohsahnyyr8s",
+      " Parents": ["2jv9sk3m1je98f22e0z79fhon"],
+      "Type": "regular",
+      "Description": "[runner 6/9] COPY --from=builder /morio/sam/node_modules/bcrypt-pbkdf ./node_modules/bcrypt-pbkdf",
+      "InUse": false,
+      "Shared": true,
+      "Size": 28994,
+      "CreatedAt": "2023-12-29T13:52:05.07057343Z",
+      "LastUsedAt": "2023-12-29T13:52:05.198891846Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "9dk17e17r6ifcgr7exji9rn45",
+      " Parents": ["kp079ivmzgzrryjhxxoce19zl"],
+      "Type": "regular",
+      "Description": "[builder 3/5] COPY . .",
+      "InUse": false,
+      "Shared": false,
+      "Size": 362700,
+      "CreatedAt": "2023-12-29T13:49:45.451004087Z",
+      "LastUsedAt": "2023-12-29T13:50:08.686592875Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "jqi1xgr01cudz7sidmgexfjvv",
+      " Parents": ["14i068z2krqbylztmoehw7kqp"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c addgroup --system --gid ${GID:-2112} ${USER:-morio}   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos \"Morio User\" --home=/home/morio ${USER:-morio}",
+      "InUse": false,
+      "Shared": true,
+      "Size": 4551,
+      "CreatedAt": "2023-12-29T15:04:08.211255125Z",
+      "LastUsedAt": "2023-12-29T15:04:08.295291541Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "msj5qvnr4won1frgk6v32bnl0",
+      "Type": "regular",
+      "Description": "pulled from docker.io/library/node:20-slim@sha256:5c714c3e90f66a2cbfa266b90a4d7adcd63453cd730aa2d13cba84b260bea2e6",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.07736547Z",
+      "LastUsedAt": "2023-12-29T13:46:33.080253554Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "pxu8zwckp3ck6sfwr30ausc2v",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 362700,
+      "CreatedAt": "2023-12-29T13:46:24.160140133Z",
+      "LastUsedAt": "2023-12-29T13:46:33.562851554Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "h6l7gpsv1fgpupdfalq6c5reg",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/6y79hsn8q2k8f4gnx40ns15z3",
+      "InUse": false,
+      "Shared": false,
+      "Size": 406231040,
+      "CreatedAt": "2023-12-29T13:52:05.660847638Z",
+      "LastUsedAt": "2023-12-29T13:56:00.05698826Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "l4b5uu5b1hmvrjqdzua1lkrhp",
+      " Parents": ["kp079ivmzgzrryjhxxoce19zl"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c addgroup --system --gid ${GID:-2112} ${USER:-morio}   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos \"Morio User\" --home=/home/morio ${USER:-morio}",
+      "InUse": false,
+      "Shared": true,
+      "Size": 4551,
+      "CreatedAt": "2023-12-29T13:46:33.511832595Z",
+      "LastUsedAt": "2023-12-29T15:03:54.755184591Z",
+      "UsageCount": 3
+    },
+    {
+      "ID": "l0md7ta6ci25l0evg0905bx4t",
+      " Parents": ["omp1cefz4z7myit9e2dskple7"],
+      "Type": "regular",
+      "Description": "pulled from docker.io/library/node:20-slim@sha256:5c714c3e90f66a2cbfa266b90a4d7adcd63453cd730aa2d13cba84b260bea2e6",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.08157247Z",
+      "LastUsedAt": "2023-12-29T13:46:33.08588372Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "p92u1ulj0qlrn3ergq3pu8kxe",
+      " Parents": ["14i068z2krqbylztmoehw7kqp"],
+      "Type": "regular",
+      "Description": "[builder 3/6] COPY . .",
+      "InUse": false,
+      "Shared": false,
+      "Size": 380890060,
+      "CreatedAt": "2023-12-29T13:48:47.911077796Z",
+      "LastUsedAt": "2023-12-29T13:49:26.560314509Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "8y3edgomr2n1qbcb62p4z6zhw",
+      " Parents": ["z48qcqhakw5p4p4aygbh2hyck"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c npm install ssh2 cpu-features",
+      "InUse": false,
+      "Shared": false,
+      "Size": 1990232,
+      "CreatedAt": "2023-12-29T13:52:04.421897471Z",
+      "LastUsedAt": "2023-12-29T13:52:05.182551305Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "14i068z2krqbylztmoehw7kqp",
+      " Parents": ["i6egc6ao2n90tt9zfw8o7xip0"],
+      "Type": "regular",
+      "Description": "[2/4] WORKDIR /morio/ui",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:48.51698863Z",
+      "LastUsedAt": "2023-12-29T15:04:08.299665208Z",
+      "UsageCount": 4
+    },
+    {
+      "ID": "ig96jgtg8zj4pvle8xhhqips6",
+      " Parents": ["xsph2h3pvi4endfvzp63nwzzo"],
+      "Type": "regular",
+      "Description": "[runner 5/5] COPY --from=builder /morio/api/dist/index.mjs ./dist/index.mjs",
+      "InUse": false,
+      "Shared": true,
+      "Size": 1302250,
+      "CreatedAt": "2023-12-29T13:50:08.304370542Z",
+      "LastUsedAt": "2023-12-29T13:50:08.687459834Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "xsph2h3pvi4endfvzp63nwzzo",
+      " Parents": ["z3q7stqzhxqsxu05is08fem4p"],
+      "Type": "regular",
+      "Description": "mount / from exec /bin/sh -c addgroup --system --gid ${GID:-2112} ${USER:-morio}   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos \"Morio User\" --home=/home/morio ${USER:-morio}   && chown -R morio:morio /morio/api",
+      "InUse": false,
+      "Shared": true,
+      "Size": 21567202,
+      "CreatedAt": "2023-12-29T13:50:08.285137667Z",
+      "LastUsedAt": "2023-12-29T13:50:08.686995459Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "5quok7movfu922ye41mengj77",
+      " Parents": ["l0md7ta6ci25l0evg0905bx4t"],
+      "Type": "regular",
+      "Description": "pulled from docker.io/library/node:20-slim@sha256:5c714c3e90f66a2cbfa266b90a4d7adcd63453cd730aa2d13cba84b260bea2e6",
+      "InUse": false,
+      "Shared": true,
+      "Size": 0,
+      "CreatedAt": "2023-12-29T13:46:33.085261262Z",
+      "LastUsedAt": "2023-12-29T13:46:33.088083179Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "ar4fybsxl1bdnrmtivcirk19i",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 402202870,
+      "CreatedAt": "2023-12-29T15:04:05.140265721Z",
+      "LastUsedAt": "2023-12-29T15:04:08.299191125Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "xbw9861zb4gdyp15fscmrmjsd",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/3q1o3jxuo6yto5gbvpk4wdpv3",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:46:24.141326883Z",
+      "LastUsedAt": "2023-12-29T13:46:33.561553637Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "xjtg1bdmc4ej42c1f4c2ksoir",
+      "Type": "regular",
+      "Description": "copy /context /",
+      "InUse": false,
+      "Shared": false,
+      "Size": 270929,
+      "CreatedAt": "2023-12-29T15:03:55.200451299Z",
+      "LastUsedAt": "2023-12-29T15:03:55.8317523Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "fr70hds5as3ts6pi365p0zopg",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/xgcqnmvs8xyk8isgknyxxf2o7",
+      "InUse": false,
+      "Shared": false,
+      "Size": 430080,
+      "CreatedAt": "2023-12-29T13:56:02.016517428Z",
+      "LastUsedAt": "2023-12-29T13:56:02.042642803Z",
+      "UsageCount": 1
+    },
+    {
+      "ID": "l78ygjtzmsizjgx2t3p2ko0a6",
+      "Type": "regular",
+      "Description": "http url http://buildkit-session/t5f4ptkp1en3qe66ejm1oj2ov",
+      "InUse": false,
+      "Shared": false,
+      "Size": 327680,
+      "CreatedAt": "2023-12-29T13:46:34.013611971Z",
+      "LastUsedAt": "2023-12-29T13:46:34.535607013Z",
+      "UsageCount": 2
+    },
+    {
+      "ID": "p6gsi2g4x1hzow4084cwvyjry",
+      " Parents": ["yarwngut0pflnyyaygq5o0vm4"],
+      "Type": "regular",
+      "Description": "[runner 9/9] COPY --from=builder /morio/sam/node_modules/cpu-features ./node_modules/cpu-features",
+      "InUse": false,
+      "Shared": true,
+      "Size": 831606,
+      "CreatedAt": "2023-12-29T13:52:05.12092518Z",
+      "LastUsedAt": "2023-12-29T13:52:05.19524943Z",
+      "UsageCount": 1
+    }
+  ]
+}

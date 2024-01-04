@@ -2,6 +2,7 @@ import pkg from '../package.json' assert { type: 'json' }
 import { paths as setup } from './setup.mjs'
 import { paths as status } from './status.mjs'
 import { paths as validate } from './validate.mjs'
+import { paths as docker } from './docker.mjs'
 
 const description = `
 ## What am I looking at?  🤔
@@ -33,6 +34,10 @@ export const openapi = {
   },
   tags: [
     {
+      name: 'Docker',
+      description: 'Retrieve data from the Docker daemon about the Docker instance itself',
+    },
+    {
       name: 'Setup',
       description: 'Initial setup of a Morio instance or cluster',
     },
@@ -48,6 +53,7 @@ export const openapi = {
 
   components: {},
   paths: {
+    ...docker,
     ...setup,
     ...status,
     ...validate,

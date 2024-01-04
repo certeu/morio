@@ -71,6 +71,7 @@ export const tests = async ({ chai, expect, config, store }) => {
         .request(config.api)
         .get('/docker/images')
         .end((err, res) => {
+          console.log(JSON.stringify(res.body, null, 2))
           expect(res.status).to.equal(200)
           expect(res.type).to.equal('application/json')
           expect(res.charset).to.equal('utf-8')
@@ -79,7 +80,5 @@ export const tests = async ({ chai, expect, config, store }) => {
           done()
         })
     })
-
-
   })
 }

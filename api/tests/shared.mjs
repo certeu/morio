@@ -13,4 +13,3 @@ export const setup = async () => ({
     api: `http://localhost:${fromEnv('MORIO_API_PORT')}${fromEnv('MORIO_API_PREFIX')}`,
   },
 })
-

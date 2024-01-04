@@ -1,0 +1,1113 @@
+[
+  {
+    "Id": "0416a77aa8decd6eca10f68d8a6166c048f7dc16fd34d6691489011793d0bcad",
+    "Names": ["/great_ramanujan"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704111054,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 15 seconds ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "bfff9101ee36ddd51b9603e9ea9ba8e6e6212c550584d69aec783aa78c8d0e8c",
+    "Names": ["/fervent_williamson"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704110829,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 4 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "cff1da9b2bd214af06465a6c1a53fc641fdef1be279e41e98b35630ad90dda45",
+    "Names": ["/nice_hellman"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704110322,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 12 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "a5e64eb974dedd3053aba9f6267dc83275e6b9a17bac65200681f310da585c97",
+    "Names": ["/loving_sinoussi"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704110305,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 12 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "b8fd6854f3d57def8688f56bbe1d21864c006ccb6ee9d449705e849f95ba70d4",
+    "Names": ["/reverent_chaum"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109846,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 20 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "62ce2086ac31c3e94acb4818bb8bbd4447d717521835fe551ccf94994c5c8c3f",
+    "Names": ["/sharp_kepler"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109822,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 20 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "4d5dabda68f6b73d87b3b20bbd5ad63f6f13091476d5aa0b955a443656bc8009",
+    "Names": ["/nifty_albattani"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109743,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 22 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "bfe8c32e0437aaee32030a02b5f2d98c49393c4775095eef89a500c05cee9da3",
+    "Names": ["/sweet_goldwasser"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109353,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 28 minutes ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "97ac6404f31ebc8be0632b679963218b0dfb1ce2722f35a573839b2643a28b33",
+    "Names": ["/dazzling_mirzakhani"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109336,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 28 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "e323c8ddacb7bb458e330fdd949c9563bce91378629baf78448bd3a3fc6e4ee8",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.12",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:0c",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "215fcfde208a6b8a6fc93fd5bd953dc29a45c5134331d861739b98d5e4f9442a",
+    "Names": ["/adoring_babbage"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109130,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 32 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "907bf76f38e9e689b11cf66a0a997497e8a5acc121bf885f138a763021c525f6",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.11",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:0b",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "f29a355ce3799ceb85c8c03e494ecc5591dc6de3bd3e5bd88636b9be3c859652",
+    "Names": ["/tender_mcclintock"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704109033,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 33 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "dc9d35ab103b7240eefab5e05730eed2205ecfff31dcb350dd053fa77d2b39bd",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.10",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:0a",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "c4acef18687d7ac5a2d3d5c70bc499f8a5dffe24bfba0170fc81af1b2d76f86d",
+    "Names": ["/boring_chatelet"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108964,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 35 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "4f9631ace22167fa3bf52b21c4dea9daac7e09828f5445c1fd95aa0757e4e076",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.9",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:09",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "a9c82500c4b096f70ac6ce5a34daf349d9f4eb13fa68578258a50b0a1d77c24f",
+    "Names": ["/brave_bassi"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108947,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 35 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "184c1a1b25f3edbc0940410d8e76a49c3c070c698d2e4e2d71f0f143fea514b1",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.8",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:08",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "8cf463ab566771ea8373e15e54c602171e4719533f223d14c6fce3c2a86ab417",
+    "Names": ["/trusting_mayer"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108891,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 36 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "961d6422c27c1f9a5c3832e04a2dc268ef95b473e8640d74bd8e66822dcc6163",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.7",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:07",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "1b1fc14d941c17ea0481cc4ff51b4939097114af6d5a1d7dbd9f6ed713d2bcb0",
+    "Names": ["/musing_jones"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108714,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 39 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "1dc796d47fb2526321e93f7a73c424379feec3c0b43cf2b7d297c61a8ad54953",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.6",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:06",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "b4205b2261e3ddd37c4a815f7068d3c2196a69afcb1e61dea024a6de6d2834f3",
+    "Names": ["/friendly_faraday"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108704,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 39 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "61dce2883c305be9a54fb6fa39162c24547d74a6abb7dd861be6259f650a83bb",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.5",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:05",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "03bc148eba3ae1421d5a72a8d348f345d59734f0871b0c689343f9df4af65c6c",
+    "Names": ["/loving_bassi"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108674,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 39 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "87ac2463871cffc13d84cbfed06448ffe557d188a7c41d5ddc54ea0e095a0588",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.4",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:04",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "60a59d5d04a8599880dd738ce0e7680f150c37283b0b0ddaa4db3f45c5714fe6",
+    "Names": ["/festive_boyd"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108570,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 41 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "4be680d8da18d084d66035ce1cf93fd8a74bf0f09e27703af6a27b4e2c00d240",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.3",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:03",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "a7da7915ef929d6da2c703c3d3072ed72077780991f6a2694fd54eda354f13e6",
+    "Names": ["/exciting_swartz"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1704108506,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "running",
+    "Status": "Up 42 minutes",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "3f58b58577f076fb882d421f561df40b8181377b4090e34b84fdf3002744a586",
+          "Gateway": "172.17.0.1",
+          "IPAddress": "172.17.0.2",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "02:42:ac:11:00:02",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "39feeb9d677c34048bd340e8edbff6d0542d8a70de080885a059b65779b80e50",
+    "Names": ["/elastic_noether"],
+    "Image": "morio/sam",
+    "ImageID": "sha256:a11b81cf4411a6d4175a57787b1f72d35d6382ec3bc0a41de782b15e9ee03541",
+    "Command": "docker-entrypoint.sh node ./dist/index.mjs",
+    "Created": 1703865031,
+    "Ports": [],
+    "Labels": {},
+    "State": "exited",
+    "Status": "Exited (130) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "fc05f37c3690d7f3de7369899ef71e5339a4373944690de439f874ac0680491d",
+    "Names": ["/laughing_ride"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1703863756,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "c03015aafa7089dc0ac80bcd565ee86ef4c1745b9c43a6ea4c95babdc6de2ded",
+    "Names": ["/hopeful_lederberg"],
+    "Image": "google/pause:latest",
+    "ImageID": "sha256:f9d5de0795395db6c50cb1ac82ebed1bd8eb3eefcebb1aa724e01239594e937b",
+    "Command": "/pause",
+    "Created": 1703863644,
+    "Ports": [],
+    "Labels": {
+      "eu.certeu.morio.test": "yes"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "default"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "bridge": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "1a5091b4455b06b972bd367a12fae6f276a77a23eff740971959f63a25c0a026",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": []
+  },
+  {
+    "Id": "0563c721aed476ab800f09c63abebfca73543bb605b06b36aeb2d1322011aa41",
+    "Names": ["/traefik"],
+    "Image": "traefik:2.10.7",
+    "ImageID": "sha256:cb72c2dc074ab16d1bd1a1a657d7c8baeb8265740f81fcbab3a1a0559255e922",
+    "Command": "/entrypoint.sh --api.insecure=true --providers.docker=true --providers.docker.exposedbydefault=false --entrypoints.http.address=:80 --entrypoints.http.http.redirections.entrypoint.to=https --entrypoints.http.http.redirections.entrypoint.scheme=https --entrypoints.http.http.redirections.entrypoint.permanent=true --entrypoints.https.address=:443 --log.level=DEBUG --log.filePath=/var/log/morio/traefik.log --log.format=json",
+    "Created": 1703862986,
+    "Ports": [],
+    "Labels": {
+      "com.docker.compose.config-hash": "b7ecb608cdc9f96d864a01904085c6ec3b5ec1868588dab8b73dce893b377e72",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:cb72c2dc074ab16d1bd1a1a657d7c8baeb8265740f81fcbab3a1a0559255e922",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "morio",
+      "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+      "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+      "com.docker.compose.service": "traefik",
+      "com.docker.compose.version": "2.19.1",
+      "desktop.docker.io/binds/0/Source": "/var/run/docker.sock",
+      "desktop.docker.io/binds/0/SourceKind": "dockerSocketProxied",
+      "desktop.docker.io/binds/0/Target": "/var/run/docker.sock",
+      "desktop.docker.io/binds/1/Source": "/Users/joost/git/morio/logs/",
+      "desktop.docker.io/binds/1/SourceKind": "hostFile",
+      "desktop.docker.io/binds/1/Target": "/var/log/morio",
+      "org.opencontainers.image.description": "A modern reverse-proxy",
+      "org.opencontainers.image.documentation": "https://docs.traefik.io",
+      "org.opencontainers.image.source": "https://github.com/traefik/traefik",
+      "org.opencontainers.image.title": "Traefik",
+      "org.opencontainers.image.url": "https://traefik.io",
+      "org.opencontainers.image.vendor": "Traefik Labs",
+      "org.opencontainers.image.version": "v2.10.7",
+      "traefik.docker.network": "morio_net",
+      "traefik.enable": "true",
+      "traefik.http.middlewares.replaceTraefik.replacePathRegex.regex": "^/traefik/(.*)",
+      "traefik.http.middlewares.replaceTraefik.replacePathRegex.replacement": "/$1",
+      "traefik.http.routers.traefik.entrypoints": "https",
+      "traefik.http.routers.traefik.middlewares": "replaceTraefik",
+      "traefik.http.routers.traefik.rule": "PathPrefix(`/traefik`)",
+      "traefik.http.routers.traefik.service": "traefik",
+      "traefik.http.routers.traefik.tls": "true",
+      "traefik.http.routers.traefikApi.entrypoints": "https",
+      "traefik.http.routers.traefikApi.rule": "PathPrefix(`/api`)",
+      "traefik.http.routers.traefikApi.service": "traefikApi",
+      "traefik.http.routers.traefikApi.tls": "true",
+      "traefik.http.services.traefik.loadbalancer.server.port": "8080",
+      "traefik.http.services.traefikApi.loadbalancer.server.port": "8080"
+    },
+    "State": "exited",
+    "Status": "Exited (0) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "morio_net"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "morio_net": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/host_mnt/Users/joost/git/morio/logs",
+        "Destination": "/var/log/morio",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/run/host-services/docker.proxy.sock",
+        "Destination": "/var/run/docker.sock",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "Id": "7e2eb1c5f6b8ba0bf504c6ea29bf71d63d556a0fc82a6032a880804531696a68",
+    "Names": ["/sam"],
+    "Image": "morio/sam-dev:0.1.0",
+    "ImageID": "sha256:f4547794243bf1a4d0a96db59cceb86192085fcd44887fc3fc7744968450e1ae",
+    "Command": "docker-entrypoint.sh npm run dev",
+    "Created": 1703862986,
+    "Ports": [],
+    "Labels": {
+      "com.docker.compose.config-hash": "203273a27f386eb8d2bac82c1c5d6d5096adf2df2000d5ccb8fa141bd73b5283",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:f4547794243bf1a4d0a96db59cceb86192085fcd44887fc3fc7744968450e1ae",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "morio",
+      "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+      "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+      "com.docker.compose.service": "sam",
+      "com.docker.compose.version": "2.19.1",
+      "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+      "desktop.docker.io/binds/0/SourceKind": "hostFile",
+      "desktop.docker.io/binds/0/Target": "/morio",
+      "desktop.docker.io/binds/1/Source": "/var/run/docker.sock",
+      "desktop.docker.io/binds/1/SourceKind": "dockerSocketProxied",
+      "desktop.docker.io/binds/1/Target": "/var/run/docker.sock",
+      "traefik.docker.network": "morio_net",
+      "traefik.enable": "true",
+      "traefik.http.middlewares.samStripPrefix.stripprefix.prefixes": "/apis/sam",
+      "traefik.http.routers.sam.entrypoints": "https",
+      "traefik.http.routers.sam.middlewares": "samStripPrefix",
+      "traefik.http.routers.sam.rule": "PathPrefix(`/apis/sam`)",
+      "traefik.http.routers.sam.service": "sam",
+      "traefik.http.routers.sam.tls": "true",
+      "traefik.http.services.sam.loadbalancer.server.port": "3020"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "morio_net"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "morio_net": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/host_mnt/Users/joost/git/morio",
+        "Destination": "/morio",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "bind",
+        "Source": "/run/host-services/docker.proxy.sock",
+        "Destination": "/var/run/docker.sock",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "Id": "e4eb76936fe2671c46525b680f2b93a5299db789ae084efe28fad3ad9882005b",
+    "Names": ["/ui"],
+    "Image": "morio/ui-dev:0.1.0",
+    "ImageID": "sha256:4907777b2115366d1ee7880e370802619de2928a62c0ccc81786a0092e14706e",
+    "Command": "docker-entrypoint.sh npm run dev",
+    "Created": 1703862986,
+    "Ports": [],
+    "Labels": {
+      "com.docker.compose.config-hash": "f5152d2d09852be54903ddf5541f55ec3055b74b489b6fc91c6fba31decf14e7",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:4907777b2115366d1ee7880e370802619de2928a62c0ccc81786a0092e14706e",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "morio",
+      "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+      "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+      "com.docker.compose.service": "ui",
+      "com.docker.compose.version": "2.19.1",
+      "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+      "desktop.docker.io/binds/0/SourceKind": "hostFile",
+      "desktop.docker.io/binds/0/Target": "/morio",
+      "traefik.docker.network": "morio_net",
+      "traefik.enable": "true",
+      "traefik.http.routers.ui.entrypoints": "https",
+      "traefik.http.routers.ui.rule": "PathPrefix(`/`)",
+      "traefik.http.routers.ui.service": "ui",
+      "traefik.http.routers.ui.tls": "true",
+      "traefik.http.services.ui.loadbalancer.server.port": "3010"
+    },
+    "State": "exited",
+    "Status": "Exited (0) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "morio_net"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "morio_net": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/host_mnt/Users/joost/git/morio",
+        "Destination": "/morio",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  },
+  {
+    "Id": "4b635636c2a3c99027604cf210771c5d1e96b77f7bd8d1e0f8b791f6d81f8523",
+    "Names": ["/api"],
+    "Image": "morio/api-dev:0.1.0",
+    "ImageID": "sha256:3ddebc4b0ca140ac5939bd641e824c381ea18dd26332b55b33bd66df260bfa75",
+    "Command": "docker-entrypoint.sh npm run dev",
+    "Created": 1703862986,
+    "Ports": [],
+    "Labels": {
+      "com.docker.compose.config-hash": "ad556bfcd39eebe35141e0a56cc299029cb3575c8c34a72b01e641d7b476ffb6",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:3ddebc4b0ca140ac5939bd641e824c381ea18dd26332b55b33bd66df260bfa75",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "morio",
+      "com.docker.compose.project.config_files": "/Users/joost/git/morio/compose/dev.yaml",
+      "com.docker.compose.project.working_dir": "/Users/joost/git/morio/compose",
+      "com.docker.compose.service": "api",
+      "com.docker.compose.version": "2.19.1",
+      "desktop.docker.io/binds/0/Source": "/Users/joost/git/morio",
+      "desktop.docker.io/binds/0/SourceKind": "hostFile",
+      "desktop.docker.io/binds/0/Target": "/morio",
+      "traefik.docker.network": "morio_net",
+      "traefik.enable": "true",
+      "traefik.http.routers.api.entrypoints": "https",
+      "traefik.http.routers.api.rule": "PathPrefix(`/apis/morio`)",
+      "traefik.http.routers.api.service": "api",
+      "traefik.http.routers.api.tls": "true",
+      "traefik.http.services.api.loadbalancer.server.port": "3000"
+    },
+    "State": "exited",
+    "Status": "Exited (137) 2 days ago",
+    "HostConfig": {
+      "NetworkMode": "morio_net"
+    },
+    "NetworkSettings": {
+      "Networks": {
+        "morio_net": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "NetworkID": "6ceef31e3ac4d4be4f1f304d219337eb6437d13a191d5586356e4c877a19e12f",
+          "EndpointID": "",
+          "Gateway": "",
+          "IPAddress": "",
+          "IPPrefixLen": 0,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "MacAddress": "",
+          "DriverOpts": null
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "/host_mnt/Users/joost/git/morio",
+        "Destination": "/morio",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": "rprivate"
+      }
+    ]
+  }
+]
