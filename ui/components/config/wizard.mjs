@@ -18,6 +18,7 @@ import { useApi } from 'hooks/use-api.mjs'
 import { useView } from 'hooks/use-view.mjs'
 import { useAtom } from 'jotai'
 // Components
+import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import Markdown from 'react-markdown'
 import { Block } from './blocks/index.mjs'
 import { PageLink } from 'components/link.mjs'
@@ -25,7 +26,7 @@ import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport } from './report.mjs'
 import { NavButton } from 'components/layout/sidebar.mjs'
-import { LeftIcon, RightIcon } from 'components/icons.mjs'
+import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
 
 const includeNav = (entry, config) => {
   if (typeof entry.hide === 'undefined') return true
@@ -107,6 +108,8 @@ export const ConfigurationWizard = ({
   initialSetup = false, // Run in initial setup mode where only the core config is shown
   splash = false, // Whether to load the 'splash'  view where the rest of the UI is hidden
   prefix = '', // Prefix to use for the keeping the view state in the URL
+  page = [], // page from the page props
+  title = 'Configuration', // title from the page props
 }) => {
   /*
    * React state
@@ -248,85 +251,96 @@ export const ConfigurationWizard = ({
           config={config}
         />
       </div>
-      <div className={splash ? 'w-full max-w-xl' : 'w-full mx-auto max-w-2xl p-8'}>
-        {view.pathname === `${prefix}/validate` ? (
-          <>
-            <h3>Validate Configuration</h3>
-            {validationReport ? (
-              <>
-                <ConfigReport report={validationReport} />
-                {validationReport.valid ? (
-                  <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
-                    Deploy Configuration
+      <div className={splash ? 'w-full max-w-xl' : 'w-full p-8 pr-0 max-w-4xl'}>
+        {splash ? null : <Breadcrumbs page={[...page, ...configPath.split('.')]} />}
+        <div className="w-full">
+          {splash ? null : (
+            <h1 className="capitalize flex max-w-4xl justify-between">
+              {title}
+              <ConfigurationIcon className="w-16 h-16" />
+            </h1>
+          )}
+          {view.pathname === `${prefix}/validate` ? (
+            <>
+              <h3>Validate Configuration</h3>
+              {validationReport ? (
+                <>
+                  <ConfigReport report={validationReport} />
+                  {validationReport.valid ? (
+                    <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
+                      Deploy Configuration
+                    </button>
+                  ) : null}
+                </>
+              ) : (
+                <>
+                  <p>You should now submit your configuration to the Morio API for validation.</p>
+                  <p>
+                    No changes will be made to your Morio setup at this time.
+                    <br />
+                    Instead, the configuration you created will be validated and tested to detect
+                    any potential issues.
+                  </p>
+                  <button
+                    className="btn btn-primary w-full mt-4"
+                    onClick={async () =>
+                      setValidationReport(
+                        await validateConfiguration(api, config, setLoadingStatus)
+                      )
+                    }
+                  >
+                    Validate Configuration
                   </button>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <p>You should now submit your configuration to the Morio API for validation.</p>
-                <p>
-                  No changes will be made to your Morio setup at this time.
-                  <br />
-                  Instead, the configuration you created will be validated and tested to detect any
-                  potential issues.
-                </p>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Block update={updateConfig} {...{ config, viewConfig, setValid, configPath }} />
+              {next && (
                 <button
                   className="btn btn-primary w-full mt-4"
-                  onClick={async () =>
-                    setValidationReport(await validateConfiguration(api, config, setLoadingStatus))
-                  }
+                  disabled={valid.error}
+                  onClick={loadView}
                 >
-                  Validate Configuration
+                  Continue
                 </button>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <Block update={updateConfig} {...{ config, viewConfig, setValid, configPath }} />
-            {next && (
-              <button
-                className="btn btn-primary w-full mt-4"
-                disabled={valid.error}
-                onClick={loadView}
-              >
-                Continue
-              </button>
-            )}
-            {valid?.error && (
-              <ul className="list-inside text-sm text-error ml-2 mt-2">
-                {valid.error.details.map((err, i) => (
-                  <li key={i}>{err.message}</li>
-                ))}
-              </ul>
-            )}
-            {!preview && (
+              )}
+              {valid?.error && (
+                <ul className="list-inside text-sm text-error ml-2 mt-2">
+                  {valid.error.details.map((err, i) => (
+                    <li key={i}>{err.message}</li>
+                  ))}
+                </ul>
+              )}
+              {!preview && (
+                <p className="text-center">
+                  <button
+                    onClick={() => setPreview(!preview)}
+                    className="btn btn-ghost font-normal text-primary"
+                  >
+                    Show configuration preview
+                  </button>
+                </p>
+              )}
+            </>
+          )}
+          {preview && (
+            <div className="w-full">
+              <h3>Configuration Preview</h3>
+              <Yaml js={config} />
               <p className="text-center">
                 <button
                   onClick={() => setPreview(!preview)}
                   className="btn btn-ghost font-normal text-primary"
                 >
-                  Show configuration preview
+                  Hide configuration preview
                 </button>
               </p>
-            )}
-          </>
-        )}
-      </div>
-      {preview && (
-        <div className={splash ? 'w-full max-w-lg' : 'w-full max-w-xl p-8'}>
-          <h3>Configuration Preview</h3>
-          <Yaml js={config} />
-          <p className="text-center">
-            <button
-              onClick={() => setPreview(!preview)}
-              className="btn btn-ghost font-normal text-primary"
-            >
-              Hide configuration preview
-            </button>
-          </p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

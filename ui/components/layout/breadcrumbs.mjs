@@ -11,16 +11,20 @@ export const Breadcrumbs = ({ page }) => {
           <MorioIcon className="w-4 h-4" stroke={1} />
         </PageLink>
       </li>
-      {page.map((crumb) => {
+      {page.map((crumb, i) => {
         path.push(crumb)
         return [
           <li className="inline" key={crumb + '-'}>
             /
           </li>,
           <li className="inline" key={crumb}>
-            <PageLink href={`/${path.join('/')}`}>
-              <span className="capitalize">{crumb}</span>
-            </PageLink>
+            {i + 1 === page.length ? (
+              <span className="">{crumb}</span>
+            ) : (
+              <PageLink href={`/${path.join('/')}`}>
+                <span className="">{crumb}</span>
+              </PageLink>
+            )}
           </li>,
         ]
       })}

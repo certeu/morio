@@ -16,7 +16,12 @@ const DynamicConfigurationWizard = dynamic(
 const ConfigPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <DynamicConfigurationWizard preloadView={props.view} splash={false} prefix={prefix} />
+      <DynamicConfigurationWizard
+        preloadView={props.view}
+        splash={false}
+        prefix={prefix}
+        page={props.page}
+      />
     </PageWrapper>
   )
 }

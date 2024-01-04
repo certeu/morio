@@ -5,7 +5,12 @@ import { ConfigurationWizard } from 'components/config/wizard.mjs'
 const ConfigPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <ConfigurationWizard preloadView="morio/node_count" splash={false} prefix="/config" />
+      <ConfigurationWizard
+        preloadView="morio/node_count"
+        splash={false}
+        prefix="/config"
+        page={props.page}
+      />
     </PageWrapper>
   )
 }
