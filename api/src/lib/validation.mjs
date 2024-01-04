@@ -39,10 +39,9 @@ export const validate = async (targetPath, input) => {
  * configuration issues, in particular for people writing their own config.
  *
  * @param {object} newConfig - The configuration to validate
- * @param {object} tools - The various tools and current config from the controller
  * @retrun {object} report - An object detailing the results of the validation
  */
-export const validateConfiguration = async (newConfig, tools) => {
+export const validateConfiguration = async (newConfig) => {
   /*
    * Set up the report skeleton that we will return
    */
@@ -124,7 +123,7 @@ export const validateConfiguration = async (newConfig, tools) => {
     const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
     if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
     else {
-      report.info.push(`Certificate validation failed for node ${i}`)
+      report.info.push(`Certificate validation failed for node ${i} (not a blocking factor)`)
       report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
     }
 

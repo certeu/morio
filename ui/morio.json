@@ -1,4 +1,4 @@
 {
   "setup": false,
-  "api": "/apis/morio"
+  "api": "/api/morio"
 }

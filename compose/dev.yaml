@@ -9,7 +9,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=morio_net
-      - traefik.http.routers.api.rule=PathPrefix(`/apis/morio`)
+      - traefik.http.routers.api.rule=PathPrefix(`/api/morio`)
       - traefik.http.routers.api.service=api
       - traefik.http.routers.api.entrypoints=https
       - traefik.http.services.api.loadbalancer.server.port=3000
@@ -32,15 +32,7 @@ services:
       - /home/jdecock/git/morio:/morio
       - /var/run/docker.sock:/var/run/docker.sock
     labels:
-      - traefik.enable=true
-      - traefik.docker.network=morio_net
-      - traefik.http.routers.sam.rule=PathPrefix(`/apis/sam`)
-      - traefik.http.middlewares.samStripPrefix.stripprefix.prefixes=/apis/sam
-      - traefik.http.routers.sam.middlewares=samStripPrefix
-      - traefik.http.routers.sam.service=sam
-      - traefik.http.routers.sam.entrypoints=https
-      - traefik.http.services.sam.loadbalancer.server.port=3020
-      - traefik.http.routers.sam.tls=true
+      - morio.sam
   ui:
     container_name: ui
     networks:
@@ -88,7 +80,7 @@ services:
       - traefik.http.routers.traefik.entrypoints=https
       - traefik.http.services.traefik.loadbalancer.server.port=8080
       - traefik.http.routers.traefik.tls=true
-      - traefik.http.routers.traefikApi.rule=PathPrefix(`/api`)
+      - traefik.http.routers.traefikApi.rule=PathPrefix(`/api/`)
       - traefik.http.routers.traefikApi.service=traefikApi
       - traefik.http.routers.traefikApi.entrypoints=https
       - traefik.http.services.traefikApi.loadbalancer.server.port=8080

@@ -4,7 +4,7 @@ const MorioApiPage = (props) => {
   return (
     <PageWrapper {...props}>
       <iframe
-        src="https://localhost/apis/morio/docs/"
+        src="/api/morio/docs/"
         width="100%"
         height="100%"
         style={{ overflow: 'hidden', height: '100vh', width: '100%' }}
