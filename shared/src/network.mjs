@@ -58,8 +58,6 @@ export const testUrl = async (url, customOptions = {}) => {
   let agent = false
   if (options.ignoreCertificate && url.trim().toLowerCase().slice(0, 8) === 'https://') {
     options.httpsAgent = new https.Agent({ rejectUnauthorized: false })
-  } else {
-    console.log('NOT IGNOIREING', options, `)${url.trim().toLowerCase().slice(0,8)}(`)
   }
 
   /*
@@ -70,7 +68,6 @@ export const testUrl = async (url, customOptions = {}) => {
   try {
     result = await axios(url, options)
   } catch (err) {
-    console.log(err)
     return false
   }
 
