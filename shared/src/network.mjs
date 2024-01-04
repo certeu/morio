@@ -1,5 +1,6 @@
 import dns from 'dns'
 import https from 'https'
+import axios from 'axios'
 import { fromEnv } from './env.mjs'
 
 const dnsOptions = {
@@ -44,8 +45,9 @@ export const testUrl = async (url, customOptions = {}) => {
   const options = {
     method: 'GET',
     headers: {},
-    body: undefined,
+    data: undefined,
     ignoreCertificate: false,
+    timeout: 3000,
     returnAs: false,
     ...customOptions,
   }
@@ -54,43 +56,30 @@ export const testUrl = async (url, customOptions = {}) => {
    * If we need to ignore the certificate, this takes some more work
    */
   let agent = false
-  if (options.ignoreCertificate && url.trim().toLowerCase().slice(0, 9) === 'https://') {
-    agent = new https.Agent({ rejectUnauthorized: false })
+  if (options.ignoreCertificate && url.trim().toLowerCase().slice(0, 8) === 'https://') {
+    options.httpsAgent = new https.Agent({ rejectUnauthorized: false })
+  } else {
+    console.log('NOT IGNOIREING', options, `)${url.trim().toLowerCase().slice(0,8)}(`)
   }
 
   /*
-   * Set up the options for the request
+   * Run the request through Axios as NodeJS's built-in fetch does not allow
+   * one to ignore the certificate
    */
-  const fetchOptions = { ...options }
-  delete fetchOptions.ignoreCertificate
-  delete fetchOptions.returnAs
-
-  /*
-   * Default fetch timeout would take too long.
-   * It's a simple request, and if it can't work in a few seconds, what chance
-   * do we have to run a cluster like this. So let's set 3 seconds and abort.
-   */
-  const proChoice = new AbortController()
-  const timeoutValue = fromEnv('MORIO_UI_TIMEOUT_URL_CHECK')
-  const timeout = setTimeout(() => proChoice.abort(), timeoutValue)
   let result
   try {
-    result = await fetch(url, { ...fetchOptions, signal: proChoice.signal })
+    result = await axios(url, options)
   } catch (err) {
-    if (err.message && err.message.indexOf('aborted')) {
-      return [false, `Timeout (${timeoutValue}ms) while checking URL: ${url}`]
-    } else {
-      clearTimeout(timeout)
-      return [false, `Failed to check URL: ${host}`]
-    }
+    console.log(err)
+    return false
   }
-  clearTimeout(timeout)
 
   if (options.returnAs === 'status') return result.status
-  if (options.returnAs === 'body') return result.body
-  if (options.returnAs === 'text') return await result.text()
-  if (options.returnAs === 'json') return await result.json()
+  if (options.returnAs === 'body') return result.data
+  if (options.returnAs === 'text') return await result.data
+  if (options.returnAs === 'json') return await result.data
   if (options.returnAs === 'check') return ![4, 5].includes(String(result.status).slice(0, 1))
 
   return result
 }
+
