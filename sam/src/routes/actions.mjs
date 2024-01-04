@@ -8,6 +8,7 @@ import { Controller } from '#controllers/actions'
  */
 const Actions = new Controller()
 
+// prettier-ignore
 /**
  * This method adds the action routes
  *
@@ -17,7 +18,7 @@ export function routes(tools) {
   const { app } = tools
 
   /*
-   * FIXME
+   * Deploy a new configuration
    */
-  app.get('/actions/test', (req, res) => Actions.test(req, res, tools))
+  app.get('/actions/deploy', (req, res) => Actions.deploy(req, res, tools))
 }

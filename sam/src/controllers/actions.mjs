@@ -1,5 +1,3 @@
-import { docker } from '#lib/docker'
-
 /**
  * This actions controller handles actions
  *
@@ -8,16 +6,15 @@ import { docker } from '#lib/docker'
 export function Controller() {}
 
 /**
- * Test: FIXME
+ * Deploy a new configuration
  *
- * This is a test (for now)
+ * This will write the new config to disk and restart Morio
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.test = async (req, res, tools) => {
+Controller.prototype.deploy = async (req, res) => {
   return res.send({
-    fixme: 'This is a test',
+    fixme: 'This is a deploy test',
   })
 }

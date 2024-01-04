@@ -1,3 +1,5 @@
+import { validateConfiguration } from '#lib/validate.mjs'
+
 /**
  * This sam controller provides access to Sam
  *
@@ -91,6 +93,26 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
   const [status, result] = await tools.sam.get(
     `/docker/networks/${req.params.id}${path ? '/' + path : ''}`
   )
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Deploys a new configuration
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {string} path - The sam api path
+ */
+Controller.prototype.deploy = async (req, res, tools) => {
+  /*
+   * Validate configuration
+   */
+  const report = await validateConfiguration(req.body)
+  console.log(report)
+
+  const [status, result] = await tools.sam.post(`/actions/deploy`, req.body)
 
   return res.status(status).send(result)
 }

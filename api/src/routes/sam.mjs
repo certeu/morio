@@ -78,4 +78,8 @@ export function routes(tools) {
   app.get(`${PREFIX}/docker/version`,            (req, res) => Sam.getDockerData(req, res, tools, 'version'))
   app.get(`${PREFIX}/docker/volumes`,            (req, res) => Sam.getDockerData(req, res, tools, 'volumes'))
 
+  /*
+   * API route for deploying a new configuration
+   */
+  app.post(`${PREFIX}/deploy`,            (req, res) => Sam.deploy(req, res, tools))
 }
