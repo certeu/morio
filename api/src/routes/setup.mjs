@@ -1,3 +1,4 @@
+import { fromEnv } from '#shared/env'
 /*
  * Import the Setup controller
  */
@@ -15,7 +16,7 @@ const Setup = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
-  const PREFIX = tools.defaults.MORIO_API_PREFIX
+  const PREFIX = fromEnv('MORIO_API_PREFIX')
 
   /*
    * Hit this route to start the Morio setup

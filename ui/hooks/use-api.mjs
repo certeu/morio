@@ -43,7 +43,7 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
 }
 
 /**
- * Verifies a configuration
+ * Validated a configuration
  *
  * This endpoint does not require authentication
  * @param {object} config - The configuration object to validate
@@ -58,7 +58,22 @@ MorioClient.prototype.validateConfiguration = async function (config) {
 }
 
 /**
- * Verifies a configuration
+ * Validates a Morio node
+ *
+ * This endpoint does not require authentication
+ * @param {object} config - The configuration object to validate
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.validateNode = async function (hostname) {
+  return await this.call(`${morioConfig.api}/validate/node`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ hostname }),
+  })
+}
+
+/**
+ * Gets data about a Docker container
  *
  * This endpoint does not require authentication
  * @param {object} config - The configuration object to validate

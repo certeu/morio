@@ -1,3 +1,4 @@
+import { fromEnv } from '#shared/env'
 /*
  * Import the Sam controller
  */
@@ -16,7 +17,7 @@ const Sam = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
-  const PREFIX = tools.defaults.MORIO_API_PREFIX
+  const PREFIX = fromEnv('MORIO_API_PREFIX')
 
   /*
    * API routes to get data from a specific container

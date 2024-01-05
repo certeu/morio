@@ -1,47 +1,53 @@
 - package-ecosystem: npm
   directory: "/"
-  schedule: *schedule
   assignees: *assignees
     - "joostdecock"
-  interval: "weekly"
   commit-message: *commit
-    prefix: "[dependencies]"
-    prefix-development: "[dev-dependencies]"
-  open-pull-requests-limit: &limit 25
+    prefix: "[deps]"
+    prefix-development: "[dev-devps]"
+  open-pull-requests-limit: *limit 25
+  schedule: *schedule
+    interval: "weekly"
+
 - package-ecosystem: npm
   directory: "/api"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
+
 - package-ecosystem: npm
   directory: "/defaults"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
+
 - package-ecosystem: npm
   directory: "/sam"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
+
 - package-ecosystem: npm
   directory: "/schema"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
+
 - package-ecosystem: npm
   directory: "/shared"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
+
 - package-ecosystem: npm
   directory: "/ui"
-  schedule: &schedule
   assignees: &assignees
   commit-message: &commit
-  open-pull-requests-limit: *limit
+  open-pull-requests-limit: &limit
+  schedule: &schedule
 

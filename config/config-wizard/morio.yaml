@@ -83,10 +83,32 @@ children:
       A round-robin DNS record for the entire Morio cluster. 
       This should resolve the the IP addresses of all cluster nodes.
     placeholder: cluster.my.domain.com
+    next: morio.leader_ip
+    hide:
+      if:
+        val: '{{ CONFIG.morio.node_count }}'
+        as: number
+      is: 1
+
+  # For clusters, we also suggest/want/need a round-robin DNS address
+  leader_ip:
+    type: string
+    label: Leader IP Address
+    about: |
+      In addition to the name, we need the IP address of the leader node (this node).
+    placeholder: 10.0.0.1
+    suggest:
+      macro: validateNode
+      label: Use this value?
+      about: |
+        We attempted to determine the IP address of a potential leader node.
+        If this is the correct IP, you can accept this suggestion.
+        Or, if you like you can enter an IP address manually.
     next: validate
     hide:
       if:
         val: '{{ CONFIG.morio.node_count }}'
         as: number
       is: 1
+
 

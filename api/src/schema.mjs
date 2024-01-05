@@ -52,6 +52,9 @@ export const requestSchema = {
     configuration: Joi.object({
       config: Joi.object(),
     }),
+    node: Joi.object({
+      hostname: Joi.string().hostname(),
+    }),
   },
 }
 

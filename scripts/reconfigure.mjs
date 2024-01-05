@@ -121,9 +121,9 @@ for (const name of ['api', 'sam', 'ui'])
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio-net
-docker stop ${name}
-docker rm ${name}
+docker network create morio-net 2> /dev/null
+docker stop ${name} 2> /dev/null
+docker rm ${name} 2> /dev/null
 
 if [ -z "$1" ];
 then

@@ -46,7 +46,6 @@ Controller.prototype.getConfigsList = async (req, res, tools) => res.send(tools.
  * @param {object} tools - Variety of tools include logger and config
  */
 Controller.prototype.deploy = async (req, res, tools) => {
-
   /*
    * Note that input validation is handled by the API
    * Here, we just do a basic check
@@ -70,9 +69,9 @@ Controller.prototype.deploy = async (req, res, tools) => {
     const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
     config.morio.key_pair = {
       public: publicKey,
-      private: privateKey
+      private: privateKey,
     }
-    config.comment = "Initial deployment"
+    config.comment = 'Initial deployment'
     keys = {
       jwt: generateJwtKey(),
       mrt: morioRootToken,
@@ -82,19 +81,23 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure we have a keypair
    */
-  if (!config.key_pair?.public || !config.key_pair.private) return res.status(400).send({ errors: ['Configuration lacks key pair'] })
+  if (!config.key_pair?.public || !config.key_pair.private)
+    return res.status(400).send({ errors: ['Configuration lacks key pair'] })
 
   /*
    * Now write the config to disk
    */
-  let result = await writeYamlFile(`${fromEnv('MORIO_SAM_CONFIG_FOLDER')}/morio.${time}.yaml`, config)
-  if (!result) return res.status(500).send({ errors: ['Failed to write configuration to disk' ] })
+  let result = await writeYamlFile(
+    `${fromEnv('MORIO_SAM_CONFIG_FOLDER')}/morio.${time}.yaml`,
+    config
+  )
+  if (!result) return res.status(500).send({ errors: ['Failed to write configuration to disk'] })
 
   /*
    * Also write the keys to disk
    */
   result = await writeBsonFile(`${fromEnv('MORIO_SAM_CONFIG_FOLDER')}/.${time}.keys`, keys)
-  if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk' ] })
+  if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*
    * Prepare data to return

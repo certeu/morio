@@ -42,6 +42,7 @@ export const bootstrapConfiguration = async () => {
     info: {
       about: pkg.description,
       name: pkg.name,
+      ping: Date.now(),
       start_time: Date.now(),
       version: pkg.version,
     },

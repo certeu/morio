@@ -7,9 +7,9 @@
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio-net
-docker stop sam
-docker rm sam
+docker network create morio-net 2> /dev/null
+docker stop sam 2> /dev/null
+docker rm sam 2> /dev/null
 
 if [ -z "$1" ];
 then

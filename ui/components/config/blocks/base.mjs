@@ -2,7 +2,8 @@
 import get from 'lodash.get'
 import { template, validate } from 'lib/utils.mjs'
 // Hooks
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { ListInput, StringInput } from 'components/inputs.mjs'
 import Markdown from 'react-markdown'
@@ -136,7 +137,7 @@ export const StringsBlock = (props) => {
             {...props}
             key={i}
             about={false}
-            noTitle
+            noTitle={true}
             label={template(viewConfig.labels, templateData)}
             labelTR={template(viewConfig.labelsTR, templateData)}
             labelBL={template(viewConfig.labelsBL, templateData)}
@@ -161,12 +162,12 @@ export const StringBlock = (props) => {
   const {
     config, // Current configuration
     viewConfig, // The view configuration
+    noTitle = false, // You can use this to suppress the title
   } = props
   const {
     about = false, // About provided by the configuration schema
     input = [], // input provided by the the configuration schema
     label = false, // Labale provided by the configuration schema
-    noTitle = false, // You can use this to suppress the title
     id, // Path to the configuration key we are updating
     placeholder = false, // Placeholder provided by the configuration schema
   } = viewConfig
@@ -174,7 +175,7 @@ export const StringBlock = (props) => {
   return (
     <>
       {label && !noTitle ? <h3>{label}</h3> : null}
-      {about ? <Markdown>{about}</Markdown> : null}
+      {about && !noTitle ? <Markdown>{about}</Markdown> : null}
       <StringInput
         key={id}
         current={get(config, id)}
@@ -183,6 +184,48 @@ export const StringBlock = (props) => {
         placeholder={placeholder}
         valid={(val) => validate(id, val)}
       />
+      {viewConfig.suggest ? <Suggestion {...props} /> : null}
     </>
   )
+}
+
+/*
+ * A component to handle suggestions
+ */
+export const Suggestion = (props) => {
+  const [data, setData] = useState(null)
+  const { api } = useApi()
+  const sconf = props.viewConfig.suggest
+
+  const macros = {
+    validateNode: {
+      call: () => api.validateNode(props.config?.morio?.nodes?.[0]),
+      render: ({ data }) =>
+        data.this_morio_node ? (
+          <div className="p-4 border-accent border-dashed border rounded-lg mt-4 bg-accent bg-opacity-20">
+            <h6>Suggested IP addresses</h6>
+            <p>Based on the hostname you entered, we estimate this is a good choice:</p>
+            <div className="flex flex-row flex-wrap gap-2 items-center">
+              {data.ips.map((ip) => (
+                <button className="btn btn-info btn-sm">{ip}</button>
+              ))}
+            </div>
+          </div>
+        ) : null,
+    },
+  }
+
+  useEffect(() => {
+    const runMacro = async () => {
+      if (sconf.macro && macros[sconf.macro]) {
+        const result = await macros[sconf.macro].call()
+        console.log(result[0])
+        if (result[1] === 200) setData(macros[sconf.macro].render({ data: result[0] }))
+      }
+    }
+    if (data === null) runMacro()
+    else console.log('data not null')
+  }, [props.viewConfig])
+
+  return data
 }

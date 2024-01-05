@@ -22,7 +22,7 @@ export const root = path.resolve(path.basename(import.meta.url), '..')
 export const readFile = async (
   filePath, // The (relative) path to the file
   onError, // Method to run on error
-  binary=false,
+  binary = false
 ) => {
   let content, file
   try {
@@ -129,7 +129,8 @@ export const writeYamlFile = async (filePath, data) => await writeFile(filePath,
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeBsonFile = async (filePath, data) => await writeFile(filePath, BSON.serialize(data))
+export const writeBsonFile = async (filePath, data) =>
+  await writeFile(filePath, BSON.serialize(data))
 
 /**
  * Reads the contents of a directory (non-recursive)

@@ -4,13 +4,14 @@ import { randomString } from '#shared/crypto'
 import { readYamlFile, readBsonFile, readDirectory } from '#shared/fs'
 import { logger } from '#shared/logger'
 import { fromEnv } from '#shared/env'
+import { runDockerApiCommand } from '#lib/docker'
 
 /**
- * Generates/Loads the configuration required to start the API
+ * Generates/Loads the configuration, starts Swarm and services
  *
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
-export const bootstrapConfiguration = async () => {
+export const bootstrapSam = async () => {
   /*
    * First setup the logger, so we can log
    */
@@ -20,8 +21,8 @@ export const bootstrapConfiguration = async () => {
    * Find out what configuration exists on disk
    */
   const timestamps = ((await readDirectory(fromEnv('MORIO_SAM_CONFIG_FOLDER'))) || [])
-    .filter(file => new RegExp('morio.[0-9]+.yaml').test(file))
-    .map(file => file.split('.')[1])
+    .filter((file) => new RegExp('morio.[0-9]+.yaml').test(file))
+    .map((file) => file.split('.')[1])
     .sort()
 
   /*
@@ -52,15 +53,26 @@ export const bootstrapConfiguration = async () => {
   if (configs.current) {
     log.info('Configuration file loaded')
     if (configs.current.config.morio.nodes.length > 1) {
-      log.info(`This Morio instance is part of a ${configs.current.config.morio.nodes.length}-node cluster`)
+      log.info(
+        `This Morio instance is part of a ${configs.current.config.morio.nodes.length}-node cluster`
+      )
     } else {
       log.info(`This Morio instance is a solitary node`)
-      log.info(`We are ${configs.current.config.morio.nodes[0]} (${configs.current.config.morio.display_name})`)
+      log.info(
+        `We are ${configs.current.config.morio.nodes[0]} (${configs.current.config.morio.display_name})`
+      )
     }
   } else {
     log.info(
       'Morio is not depoyed (yet) - Starting API with an ephemeral configuration to allow setup'
     )
+  }
+
+  /*
+   * Start containers
+   */
+  if (configs.current) {
+    await startSwarm(configs.current)
   }
 
   const data = {
@@ -80,4 +92,20 @@ export const bootstrapConfiguration = async () => {
   }
 
   return data
+}
+
+const startSwarm = async (config) => {
+  const [success, result] = await runDockerApiCommand('swarmInspect')
+  //if (!success) {
+  //  if (result.includes('node a swarm manager')) {
+  //    /*
+  //     * Initialize swarm
+  //     */
+  //  //const [success, result] = await runDockerApiCommand('swarmInit', {
+  //  //  ListenAddr: 'fixme'
+  //  //})
+  //    }
+  //}
+
+  console.log({ success, result })
 }

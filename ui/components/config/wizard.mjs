@@ -28,6 +28,8 @@ import { ConfigReport } from './report.mjs'
 import { NavButton } from 'components/layout/sidebar.mjs'
 import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
 
+const guessOwnIp = async () => {}
+
 const includeNav = (entry, config) => {
   if (typeof entry.hide === 'undefined') return true
   if (entry.hide === null) return true

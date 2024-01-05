@@ -7,14 +7,14 @@ import { morioClient } from '#lib/morio'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
-import { bootstrapConfiguration } from './bootstrap.mjs'
+import { bootstrapSam } from './bootstrap.mjs'
 
 /*
  * First of all, we bootstrap and create a centralized
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrapConfiguration()
+const tools = await bootstrapSam()
 
 /*
  * Add Morio client

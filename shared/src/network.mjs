@@ -113,7 +113,7 @@ export const get = async function (url, raw = false) {
     }
   }
 
-  return [response.status, body]
+  return [response?.status, body]
 }
 
 /*
@@ -172,8 +172,7 @@ export const put = async (url, data) => __postput('PUT', url, data)
  * @return {object] client - The API client
  */
 export const restClient = (api) => ({
-  get: async (url) => get(api+url),
-  post: async (url, data) => __postput('POST', api+url, data),
-  put: async (url, data) => __postput('PUT', api+url, data),
+  get: async (url) => get(api + url),
+  post: async (url, data) => __postput('POST', api + url, data),
+  put: async (url, data) => __postput('PUT', api + url, data),
 })
-

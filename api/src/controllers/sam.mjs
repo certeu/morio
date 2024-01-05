@@ -114,19 +114,20 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure config is valid
    */
-  if (!report.valid) return res.status(400).send({ errors: ["Config is not valid"], report })
+  if (!report.valid) return res.status(400).send({ errors: ['Config is not valid'], report })
 
   /*
    * Make sure config is deployable
    */
-  if (!report.deployable) return res.status(400).send({ errors: ["Config is not deployable"], report })
+  if (!report.deployable)
+    return res.status(400).send({ errors: ['Config is not deployable'], report })
 
   /*
    * Configuration is valid and deployable, pass it to SAM
    */
   const [status, result] = await tools.sam.post(`/config/deploy`, req.body)
 
-  console.log('about to return', {status, result })
+  console.log('about to return', { status, result })
 
   return res.status(status).send(result)
 }
