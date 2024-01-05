@@ -58,7 +58,6 @@ Controller.prototype.deploy = async (req, res, tools) => {
    */
   const time = Date.now()
 
-  console.log({ running: tools.running_config, keys: tools.keys })
   /*
    * If this is the initial deploy, there will be no key pair, so generate one.
    */

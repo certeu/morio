@@ -17,17 +17,19 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d   --name=sam \
+  docker run -d   --name=morio_sam \
   --network=morio-net \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -e MORIO_DEV=1 \
   morio/sam-dev:0.1.0
 
 else
-  docker run --rm -it   --name=sam \
+  docker run --rm -it   --name=morio_sam \
   --network=morio-net \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -e MORIO_DEV=1 \
   morio/sam-dev:0.1.0
 
 fi

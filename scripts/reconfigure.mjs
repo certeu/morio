@@ -102,10 +102,11 @@ await writeYamlFile('compose/prod.yaml', {
  */
 const volumesAsCmd = (vols1 = [], vols2 = []) =>
   [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
-const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
+const cliOptions = (name) => `  --name=morio_${config[name].container.container_name} \\
   --network=morio-net \\
   ${config[name].container.init ? '--init' : ''} \\
 ${volumesAsCmd(config[name].targets?.development?.volumes, config[name].container?.volumes)} \\
+  -e MORIO_DEV=1 \\
   ${config[name].targets?.development?.image || config[name].container.image}:${pkg.version}
 `
 

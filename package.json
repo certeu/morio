@@ -11,8 +11,7 @@
     "build:sam": "./scripts/build-container.sh sam",
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
-    "dev": "docker-compose -f compose/dev.yaml up",
-    "dev:down": "docker-compose -f compose/dev.yaml down",
+    "dev": "./sam/run-container.sh",
     "prod": "docker-compose -f compose/prod.yaml up",
     "prod:down": "docker-compose -f compose/prod.yaml down",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
@@ -45,6 +44,7 @@
     "eslint-plugin-react": "^7.33.2",
     "husky": "^8.0.0",
     "lint-staged": "^15.2.0",
-    "mustache": "^4.2.0"
+    "mustache": "^4.2.0",
+    "pino-pretty": "^10.3.1"
   }
 }

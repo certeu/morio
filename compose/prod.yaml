@@ -58,7 +58,7 @@ services:
       - '--entrypoints.http.http.redirections.entrypoint.permanent=true'
       - '--entrypoints.https.address=:443'
       - '--log.level=DEBUG'
-      - '--log.filePath=&#x2F;var&#x2F;log&#x2F;morio&#x2F;traefik.log'
+      - '--log.filePath=/var/log/morio/traefik.log'
       - '--log.format=json'
     labels:
       - traefik.enable=true

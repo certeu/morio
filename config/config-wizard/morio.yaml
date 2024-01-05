@@ -110,5 +110,3 @@ children:
         val: '{{ CONFIG.morio.node_count }}'
         as: number
       is: 1
-
-

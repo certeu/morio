@@ -18,16 +18,19 @@ export const docker = new Docker({ socketPath: fromEnv('MORIO_SAM_DOCKER_SOCKET'
  *
  * @param {string} cmd - A docker client method to run
  * @param {object} options - Options to pass to the Docker API
+ * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runDockerApiCommand = async (cmd, options = {}) => {
+export const runDockerApiCommand = async (cmd, options = {}, silent = false) => {
   let result
   try {
     result = await docker[cmd](options)
   } catch (err) {
-    if (err instanceof Error) log.warn(err.message)
-    else log.warn(err)
+    if (!silent) {
+      if (err instanceof Error) log.warn(err.message)
+      else log.warn(err)
+    }
     return [false, err]
   }
 
@@ -40,10 +43,11 @@ export const runDockerApiCommand = async (cmd, options = {}) => {
  * @param {string} id - The container id
  * @param {string} cmd - A instance method to run
  * @param {object} options - Options to pass to the Docker API
+ * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runContainerApiCommand = async (id, cmd, options = {}) => {
+export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return [false, false]
 
@@ -52,10 +56,10 @@ export const runContainerApiCommand = async (id, cmd, options = {}) => {
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
-      log.warn(err.message)
+      if (!silent) log.warn(err.message)
       return [false, err.message]
     } else {
-      log.warn(err)
+      if (!silent) log.warn(err)
       return [false, err]
     }
   }
