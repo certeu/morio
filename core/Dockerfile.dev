@@ -2,7 +2,7 @@
 FROM node:20-slim
 
 # Make this folder our working directory
-WORKDIR /morio/sam
+WORKDIR /morio/core
 
 ## Run NodeJS code via nodemon
 CMD ["npm", "run", "dev"]

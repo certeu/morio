@@ -32,14 +32,14 @@ const resolveConfig = async (configFile) => {
  * Resolve the configuration
  */
 const config = {}
-for (const type of ['api', 'sam', 'traefik', 'ui']) config[type] = await resolveConfig(type)
+for (const type of ['api', 'core', 'traefik', 'ui']) config[type] = await resolveConfig(type)
 
 /*
  * Generate run files for development
  */
 const volumesAsCmd = (vols1 = [], vols2 = []) =>
   [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
-const cliOptions = (name) => `  --name=morio_${config[name].container.container_name} \\
+const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
   --network=morio_net \\
   --network-alias ${name} \\
   ${config[name].container.init ? '--init' : ''} \\
@@ -48,7 +48,7 @@ ${volumesAsCmd(config[name].targets?.development?.volumes, config[name].containe
   ${config[name].targets?.development?.image || config[name].container.image}:${pkg.version}
 `
 
-for (const name of ['api', 'sam', 'ui'])
+for (const name of ['api', 'core', 'ui'])
   await writeFile(
     `${name}/run-container.sh`,
     `#!/bin/bash

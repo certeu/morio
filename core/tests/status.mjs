@@ -1,5 +1,5 @@
 export const tests = async ({ chai, expect, config, store }) => {
-  describe(`[SAM] Status tests`, () => {
+  describe(`[CORE] Status tests`, () => {
     it(`Should load the status endpoint`, (done) => {
       chai
         .request(config.api)

@@ -7,14 +7,14 @@ import { morioClient } from '#lib/morio'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
-import { bootstrapSam } from './bootstrap.mjs'
+import { bootstrapCore } from './bootstrap.mjs'
 
 /*
  * First of all, we bootstrap and create a centralized
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrapSam()
+const tools = await bootstrapCore()
 
 /*
  * Add Morio client
@@ -43,12 +43,15 @@ for (const type in routes) {
 }
 
 app.get('/*', async (req, res) =>
-  res.set('Content-Type', 'application/json').status(404).send({
-    url: req.url,
-    method: req.method,
-    originalUrl: req.originalUrl,
-    prefix: tools.defaults.MORIO_SAM_PREFIX,
-  })
+  res
+    .set('Content-Type', 'application/json')
+    .status(404)
+    .send({
+      url: req.url,
+      method: req.method,
+      originalUrl: req.originalUrl,
+      prefix: fromEnv('MORIO_CORE_PREFIX'),
+    })
 )
 
 /*
@@ -56,8 +59,8 @@ app.get('/*', async (req, res) =>
  */
 wrapExpress(
   tools.log,
-  app.listen(fromEnv('MORIO_SAM_PORT'), (err) => {
+  app.listen(fromEnv('MORIO_CORE_PORT'), (err) => {
     if (err) tools.log.error(err, 'An error occured')
-    tools.log.info(`Morio sam ready - listening on http://0.0.0.0:${fromEnv('MORIO_SAM_PORT')}`)
+    tools.log.info(`Morio Core ready - listening on http://0.0.0.0:${fromEnv('MORIO_CORE_PORT')}`)
   })
 )

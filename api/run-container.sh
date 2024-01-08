@@ -17,7 +17,7 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d   --name=morio_morio_api \
+  docker run -d   --name=morio_api \
   --network=morio_net \
   --network-alias api \
   --init \
@@ -26,7 +26,7 @@ then
   morio/api-dev:0.1.0
 
 else
-  docker run --rm -it   --name=morio_morio_api \
+  docker run --rm -it   --name=morio_api \
   --network=morio_net \
   --network-alias api \
   --init \

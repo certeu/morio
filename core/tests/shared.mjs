@@ -10,6 +10,6 @@ export const setup = async () => ({
   expect,
   store: {},
   config: {
-    api: `http://localhost:${fromEnv('MORIO_SAM_PORT')}`,
+    api: `http://localhost:${fromEnv('MORIO_CORE_PORT')}`,
   },
 })

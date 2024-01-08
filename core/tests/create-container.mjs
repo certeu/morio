@@ -1,7 +1,7 @@
 import containerCreateBody from './bodies/container-create.json' assert { type: 'json' }
 
 export const tests = async ({ chai, expect, config, store }) => {
-  describe(`[SAM] Docker test container setup`, () => {
+  describe(`[CORE] Docker test container setup`, () => {
     /*
      * First we need a container to run tests on, so let's start by creating one
      */

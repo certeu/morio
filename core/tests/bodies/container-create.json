@@ -1,5 +1,5 @@
 {
-  "Hostname": "morio_sam_test",
+  "Hostname": "morio_core_test",
   "Env": ["test=true", "morio=true"],
   "Image": "google/pause:latest",
   "Labels": {

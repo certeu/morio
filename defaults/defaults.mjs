@@ -8,7 +8,7 @@ export const defaults = {
    *     - CRYPTO
    *     - ESBUILD
    *   - API
-   *   - SAM
+   *   - CORE
    *   - TRAEFIK
    *   - UI
    */
@@ -129,23 +129,23 @@ export const defaults = {
   MORIO_API_PORT: 3000,
 
   ///////////////////////////////////////////////////////////////////////////////
-  //  SAM
+  //  CORE
   ///////////////////////////////////////////////////////////////////////////////
 
   /*
    * Location of the configuration folder inside the container
    */
-  MORIO_SAM_CONFIG_FOLDER: '/morio/config',
+  MORIO_CORE_CONFIG_FOLDER: '/morio/config',
 
   /*
    * Location of the Docker socket
    */
-  MORIO_SAM_DOCKER_SOCKET: '/var/run/docker.sock',
+  MORIO_CORE_DOCKER_SOCKET: '/var/run/docker.sock',
 
   /*
    * The list of Docker commands accepted in a GET request
    */
-  MORIO_SAM_DOCKER_GET_COMMANDS: [
+  MORIO_CORE_DOCKER_GET_COMMANDS: [
     'containers', // list running containers
     'all-containers', // list all containers
     'running-containers', // list running containers (alias for containers)
@@ -166,25 +166,25 @@ export const defaults = {
   /*
    * The list of Docker commands accepted in a POST request
    */
-  MORIO_SAM_DOCKER_POST_COMMANDS: [
+  MORIO_CORE_DOCKER_POST_COMMANDS: [
     'container', // Create a container
   ],
 
   /*
-   * SAM host - Should resolve inside containers
+   * CORE host - Should resolve inside containers
    */
-  MORIO_SAM_HOST: 'morio_sam',
+  MORIO_CORE_HOST: 'morio_core',
 
   /*
-   * SAM log level
+   * CORE log level
    * One of: trace, debug, info, warn, error, fatal, silent
    */
-  MORIO_SAM_LOG_LEVEL: 'debug',
+  MORIO_CORE_LOG_LEVEL: 'debug',
 
   /*
-   * TCP port SAM should listen on
+   * TCP port CORE should listen on
    */
-  MORIO_SAM_PORT: 3020,
+  MORIO_CORE_PORT: 3020,
 
   ///////////////////////////////////////////////////////////////////////////////
   //  TRAEFIK

@@ -1,6 +1,6 @@
-# Morio sam
+# Morio Core
 
-This is the Morio System Actions Manager, or **sam** for short.  
+This is the Morio Core component, or **core** for short.  
 It is a REST API built with [Express](https://expressjs.com/).
 
 ## Getting Started

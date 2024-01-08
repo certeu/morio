@@ -1,7 +1,7 @@
 {
-  "name": "@morio/sam",
+  "name": "@morio/core",
   "version": "0.1.0",
-  "description": "Morio System Actions Manager (SAM)",
+  "description": "Morio Core Component (CORE)",
   "private": true,
   "scripts": {
     "build": "node build.mjs",

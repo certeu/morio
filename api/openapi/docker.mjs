@@ -18,16 +18,6 @@ const responses = (example) => ({
     content: { 'application/json': { example } },
   },
 })
-/*
-  app.get(`${PREFIX}/docker/nodes`,              (req, res) => Sam.getDockerData(req, res, tools, 'nodes'))
-  app.get(`${PREFIX}/docker/plugins`,            (req, res) => Sam.getDockerData(req, res, tools, 'plugins'))
-  app.get(`${PREFIX}/docker/running-containers`, (req, res) => Sam.getDockerData(req, res, tools, 'containers'))
-  app.get(`${PREFIX}/docker/secrets`,            (req, res) => Sam.getDockerData(req, res, tools, 'secrets'))
-  app.get(`${PREFIX}/docker/services`,           (req, res) => Sam.getDockerData(req, res, tools, 'services'))
-  app.get(`${PREFIX}/docker/tasks`,              (req, res) => Sam.getDockerData(req, res, tools, 'tasks'))
-  app.get(`${PREFIX}/docker/version`,            (req, res) => Sam.getDockerData(req, res, tools, 'version'))
-  app.get(`${PREFIX}/docker/volumes`,            (req, res) => Sam.getDockerData(req, res, tools, 'volumes'))
-  */
 
 /*
  * You cannot use a template string as an object key in Javascript.

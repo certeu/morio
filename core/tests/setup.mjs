@@ -1,5 +1,5 @@
 export const tests = async ({ chai, expect, config, store }) => {
-  describe(`[SAM] Setup tests`, () => {
+  describe(`[CORE] Setup tests`, () => {
     it(`Should not initiate the MORIO setup if we do not send data`, (done) => {
       chai
         .request(config.api)

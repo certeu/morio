@@ -1,8 +1,8 @@
 import { setup } from './shared.mjs'
-import { tests as dockerTests } from './sam-docker.mjs'
-import { tests as createContainer } from './sam-create-container.mjs'
-import { tests as containerTests } from './sam-container.mjs'
-import { tests as containerStateTests } from './sam-container-state.mjs'
+import { tests as dockerTests } from './core-docker.mjs'
+import { tests as createContainer } from './core-create-container.mjs'
+import { tests as containerTests } from './core-container.mjs'
+import { tests as containerStateTests } from './core-container-state.mjs'
 import { tests as setupTests } from './setup.mjs'
 import { tests as statusTests } from './status.mjs'
 

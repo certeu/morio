@@ -5,14 +5,14 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build:dev",
-    "build:dev": "npm run build:api && npm run build:sam && npm run build:ui",
-    "build:prod": "npm run build:api prod && npm run build:sam prod && npm run build:ui prod",
+    "build:dev": "npm run build:api && npm run build:core && npm run build:ui",
+    "build:prod": "npm run build:api prod && npm run build:core prod && npm run build:ui prod",
     "build:api": "./scripts/build-container.sh api",
-    "build:sam": "./scripts/build-container.sh sam",
+    "build:core": "./scripts/build-container.sh core",
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
-    "dev": "npm run reconfigure && ./sam/run-container.sh",
-    "dev:clean": "docker stop morio_sam morio_api morio_ui morio_traefik && docker rm morio_sam morio_api morio_ui morio_traefik",
+    "dev": "npm run reconfigure && ./core/run-container.sh",
+    "dev:clean": "docker stop morio_core morio_api morio_ui morio_traefik && docker rm morio_core morio_api morio_ui morio_traefik",
     "prod": "docker-compose -f compose/prod.yaml up",
     "prod:down": "docker-compose -f compose/prod.yaml down",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
@@ -33,7 +33,7 @@
   "homepage": "https://github.com/certeu/morio#readme",
   "workspaces": [
     "api",
-    "sam",
+    "core",
     "schema",
     "shared",
     "defaults"

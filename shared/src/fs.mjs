@@ -91,19 +91,22 @@ export const readBsonFile = async (
  *
  * @param {string} filePath - (relative) path to the file to write
  * @param {string} data - the data to write to disk
+ * @param {functino} log - a logger instance (or false)
  *
  * @return {bool} true of success, false in case of trouble
  */
 export const writeFile = async (
   filePath, // The (relative) path to the file
-  data // The data to write to disk
+  data, // The data to write to disk
+  log = false
 ) => {
   let result, file
   try {
     file = path.resolve(root, filePath)
     result = await fs.promises.writeFile(file, data)
   } catch (err) {
-    log.warn(err, `Failed to write file: ${file}`)
+    if (log) log.warn(err, `Failed to write file: ${file}`)
+    else console.log(`Failed to write file: ${file}`)
 
     return false
   }

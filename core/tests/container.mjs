@@ -1,5 +1,5 @@
 export const tests = async ({ chai, expect, config, store }) => {
-  describe(`[SAM] Docker container tests`, () => {
+  describe(`[CORE] Docker container tests`, () => {
     it(`Should show inspect of a specific container`, (done) => {
       chai
         .request(config.api)

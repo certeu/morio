@@ -18,7 +18,7 @@
     "Labels": null,
     "ParentId": "",
     "RepoDigests": [],
-    "RepoTags": ["morio/sam:0.1.0", "morio/sam:latest"],
+    "RepoTags": ["morio/core:0.1.0", "morio/core:latest"],
     "SharedSize": -1,
     "Size": 226404682,
     "VirtualSize": 226404682
@@ -54,7 +54,7 @@
     "Labels": null,
     "ParentId": "",
     "RepoDigests": [],
-    "RepoTags": ["morio/sam-dev:0.1.0", "morio/sam-dev:latest"],
+    "RepoTags": ["morio/core-dev:0.1.0", "morio/core-dev:latest"],
     "SharedSize": -1,
     "Size": 222574032,
     "VirtualSize": 222574032

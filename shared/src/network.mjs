@@ -81,7 +81,7 @@ export const testUrl = async (url, customOptions = {}) => {
 }
 
 /*
- * General purpose method to call the SAM API with a GET request
+ * General purpose method to call the core API with a GET request
  *
  * @param {url} string - The URL to call
  * @param {data} string - The data to send
@@ -90,7 +90,7 @@ export const testUrl = async (url, customOptions = {}) => {
  */
 export const get = async function (url, raw = false) {
   /*
-   * Send the request to Sam
+   * Send the request to core
    */
   let response
   try {
@@ -117,7 +117,7 @@ export const get = async function (url, raw = false) {
 }
 
 /*
- * General purpose method to call the SAM API with a POST or PUT request
+ * General purpose method to call the core API with a POST or PUT request
  *
  * @param {url} string - The URL to call
  * @param {data} string - The data to send
@@ -138,7 +138,7 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
   }
 
   /*
-   * Now send request to Sam
+   * Now send request to core
    */
   let response
   try {

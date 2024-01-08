@@ -2,7 +2,7 @@
 FROM node:20-slim as builder
 
 ## Make this folder our working directory
-WORKDIR /morio/sam
+WORKDIR /morio/core
 
 ## Install build toolchange for native bindings
 RUN apt-get update && apt-get install -y python3 make g++
@@ -23,21 +23,21 @@ RUN npm run build
 FROM node:20-slim as runner
 
 ## Make this folder our working directory
-WORKDIR /morio/sam
+WORKDIR /morio/core
 
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production
 
 ## Copy build artifact from builder
-COPY --from=builder /morio/sam/dist/index.mjs ./dist/index.mjs
+COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 
 # Copy dependencies that were kept out of the bundle
-COPY --from=builder /morio/sam/node_modules/ssh2 ./node_modules/ssh2
-COPY --from=builder /morio/sam/node_modules/asn1 ./node_modules/asn1
-COPY --from=builder /morio/sam/node_modules/bcrypt-pbkdf ./node_modules/bcrypt-pbkdf
-COPY --from=builder /morio/sam/node_modules/tweetnacl ./node_modules/tweetnacl
-COPY --from=builder /morio/sam/node_modules/safer-buffer ./node_modules/safer-buffer
-COPY --from=builder /morio/sam/node_modules/cpu-features ./node_modules/cpu-features
+COPY --from=builder /morio/core/node_modules/ssh2 ./node_modules/ssh2
+COPY --from=builder /morio/core/node_modules/asn1 ./node_modules/asn1
+COPY --from=builder /morio/core/node_modules/bcrypt-pbkdf ./node_modules/bcrypt-pbkdf
+COPY --from=builder /morio/core/node_modules/tweetnacl ./node_modules/tweetnacl
+COPY --from=builder /morio/core/node_modules/safer-buffer ./node_modules/safer-buffer
+COPY --from=builder /morio/core/node_modules/cpu-features ./node_modules/cpu-features
 
 ## Now run NodeJS code
 CMD ["node", "./dist/index.mjs"]

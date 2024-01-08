@@ -6,12 +6,12 @@ import pkg from '../../package.json' assert { type: 'json' }
 /*
  * Set up a logger instance, so we can log
  */
-const log = logger(fromEnv('MORIO_LOG_LEVEL_SAM'), pkg.name)
+const log = logger(fromEnv('MORIO_CORE_LOG_LEVEL'), pkg.name)
 
 /**
  * This is the docker client as provided by dockerode
  */
-export const docker = new Docker({ socketPath: fromEnv('MORIO_SAM_DOCKER_SOCKET') })
+export const docker = new Docker({ socketPath: fromEnv('MORIO_CORE_DOCKER_SOCKET') })
 
 /**
  * This helper method runs an async docker command against the API

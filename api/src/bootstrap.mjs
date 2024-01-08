@@ -1,7 +1,7 @@
 import pkg from '../package.json' assert { type: 'json' }
 import { fromEnv } from '#shared/env'
 import { logger } from '#shared/logger'
-import { samClient } from '#lib/sam'
+import { coreClient } from '#lib/core'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -15,27 +15,27 @@ export const bootstrapConfiguration = async () => {
   const log = logger(fromEnv('MORIO_API_LOG_LEVEL'), pkg.name)
 
   /*
-   * Attempt to load the config from SAM
+   * Attempt to load the config from CORE
    */
-  let config = await samClient.get('/configs/current')
+  let config = await coreClient.get('/configs/current')
   if (config[0] === 200) {
     config = config[1]
-    log.info('Loaded Morio config from SAM')
+    log.info('Loaded Morio config from morio_core')
   } else {
     config = {}
-    log.warn('Failed to load Morio config from SAM')
+    log.warn('Failed to load Morio config from morio_core')
   }
 
   /*
-   * Load the defaults from SAM
+   * Load the defaults from core
    */
-  let defaults = await samClient.get('/defaults')
+  let defaults = await coreClient.get('/defaults')
   if (defaults[0] === 200) {
     defaults = defaults[1]
-    log.info('Loaded Morio defaults from SAM')
+    log.info('Loaded Morio defaults from morio_core')
   } else {
     defaults = {}
-    log.warn('Failed to load Morio defaults from SAM')
+    log.warn('Failed to load Morio defaults from morio_core')
   }
 
   return {
@@ -50,6 +50,6 @@ export const bootstrapConfiguration = async () => {
     defaults: defaults[0] === 200 ? defaults[1] : {},
     log,
     prefix: fromEnv('MORIO_API_PREFIX'),
-    sam: samClient,
+    core: coreClient,
   }
 }

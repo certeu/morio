@@ -1,0 +1,29 @@
+# Target-specific configuration
+targets:
+  production:
+    # The image to run in production
+    # The specific tag will be added by the reconfigure script
+    image: morio/core
+    # Note that this container is not exposed via Traefik in production
+    volumes:
+      - '{{{ MORIO_CORE_DOCKER_SOCKET }}}:{{{ MORIO_CORE_DOCKER_SOCKET }}}'
+  development:
+    # The image to run in development
+    # The specific tag will be added by the reconfigure script
+    image: morio/core-dev
+    volumes:
+      - '{{{ MORIO_REPO_ROOT }}}:/morio'
+      - '{{{ MORIO_CORE_DOCKER_SOCKET }}}:{{{ MORIO_CORE_DOCKER_SOCKET }}}'
+container:
+  # Name it morio_core
+  container_name: morio_core
+  # Use the default network
+  networks:
+    default: null
+  # Run an init inside the container to forward signales (and avoid PID 1)
+  init: true
+  environment:
+    MORIO_CORE_DOCKER_SOCKET: '{{{ MORIO_CORE_DOCKER_SOCKET }}}'
+    MORIO_CORE_HOST: '{{{ MORIO_CORE_HOST }}}'
+    MORIO_CORE_LOG_LEVEL: '{{{ MORIO_CORE_LOG_LEVEL }}}'
+    MORIO_CORE_PORT: '{{{ MORIO_CORE_PORT }}}'

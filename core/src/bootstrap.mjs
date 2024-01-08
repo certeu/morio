@@ -9,15 +9,15 @@ import { fromEnv } from '#shared/env'
 import { runDockerApiCommand, runContainerApiCommand } from '#lib/docker'
 
 /**
- * Generates/Loads the configuration, starts Swarm and services
+ * Generates/Loads the configuration, starts services
  *
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
-export const bootstrapSam = async () => {
+export const bootstrapCore = async () => {
   /*
    * First setup the logger, so we can log
    */
-  const log = logger(fromEnv('MORIO_SAM_LOG_LEVEL'), pkg.name)
+  const log = logger(fromEnv('MORIO_CORE_LOG_LEVEL'), pkg.name)
 
   /*
    * Figure out whether we're running in dev mode
@@ -204,13 +204,13 @@ const createService = async (name, log, dev = false) => {
 /**
  * Loads the available Morio configuration file(s) from disk
  *
- * These are typically configureation files that have been written to disk by SAM
+ * These are typically configureation files that have been written to disk by CORE
  */
 const loadConfigurations = async () => {
   /*
    * Find out what configuration exists on disk
    */
-  const timestamps = ((await readDirectory(fromEnv('MORIO_SAM_CONFIG_FOLDER'))) || [])
+  const timestamps = ((await readDirectory(fromEnv('MORIO_CORE_CONFIG_FOLDER'))) || [])
     .filter((file) => new RegExp('morio.[0-9]+.yaml').test(file))
     .map((file) => file.split('.')[1])
     .sort()
@@ -220,7 +220,7 @@ const loadConfigurations = async () => {
    */
   const configs = {}
   let i = 0
-  const dir = fromEnv('MORIO_SAM_CONFIG_FOLDER')
+  const dir = fromEnv('MORIO_CORE_CONFIG_FOLDER')
   let current = false
   for (const timestamp of timestamps) {
     const config = await readYamlFile(`${dir}/morio.${timestamp}.yaml`)
@@ -301,7 +301,7 @@ const createContainerOptions = (config, dev) => {
     NetworkConfig: {
       EndpointsConfig: {
         morio_net: {
-          Links: ['morio_sam', 'morio_traefik'],
+          Links: ['morio_core', 'morio_traefik'],
           Aliases: [name],
         },
       },
