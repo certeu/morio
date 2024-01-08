@@ -108,14 +108,14 @@ export const defaults = {
   ///////////////////////////////////////////////////////////////////////////////
 
   /*
-   * API prefix (since the API is behind Traefik)
+   * API host (should resolve on the internal docker network)
    */
   MORIO_API_HOST: 'morio_api',
 
   /*
    * API prefix (since the API is behind Traefik)
    */
-  MORIO_API_PREFIX: '/mapi/morio',
+  MORIO_API_PREFIX: '/morio/api',
 
   /*
    * API log level
