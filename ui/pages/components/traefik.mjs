@@ -4,7 +4,7 @@ const TraefikPage = (props) => {
   return (
     <PageWrapper {...props}>
       <iframe
-        src="/traefik/dashboard"
+        src="/dashboard/"
         width="100%"
         height="100%"
         style={{ overflow: 'hidden', height: '100vh', width: '100%' }}

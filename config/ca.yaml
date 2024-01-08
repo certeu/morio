@@ -2,7 +2,7 @@ container:
   image: smallstep/step-ca
   tag: 0.25.2
   name: ca
-  network: morio-net
+  network: morio_net
   ports: []
   volumes:
     - 'MORIO_ROOT/data/ca:/home/step'

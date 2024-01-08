@@ -1,4 +1,4 @@
-import { readFile, writeYamlFile, writeFile } from '@morio/shared/fs'
+import { readFile, writeFile } from '@morio/shared/fs'
 import pkg from '../package.json' assert { type: 'json' }
 import { defaults } from '@morio/defaults'
 import mustache from 'mustache'
@@ -32,70 +32,7 @@ const resolveConfig = async (configFile) => {
  * Resolve the configuration
  */
 const config = {}
-for (const type of ['api', 'compose', 'sam', 'traefik', 'ui'])
-  config[type] = await resolveConfig(type)
-
-/*
- * Generate compose file for development
- */
-await writeYamlFile('compose/dev.yaml', {
-  version: config.compose.version,
-  name: pkg.name,
-  services: {
-    api: {
-      ...config.api.container,
-      ...config.api.targets.development,
-      image: `${config.api.targets.development.image}:${pkg.version}`,
-    },
-    sam: {
-      ...config.sam.container,
-      ...config.sam.targets.development,
-      image: `${config.sam.targets.development.image}:${pkg.version}`,
-    },
-    ui: {
-      ...config.ui.container,
-      ...config.ui.targets.development,
-      image: `${config.ui.targets.development.image}:${pkg.version}`,
-    },
-    traefik: config.traefik.container,
-  },
-  networks: {
-    default: {
-      name: 'morio_net',
-    },
-  },
-})
-
-/*
- * Generate compose file for production
- */
-await writeYamlFile('compose/prod.yaml', {
-  version: config.compose.version,
-  name: pkg.name,
-  services: {
-    api: {
-      ...config.api.container,
-      ...config.ui.targets.production,
-      image: `${config.api.targets.production.image}:${pkg.version}`,
-    },
-    sam: {
-      ...config.sam.container,
-      ...config.sam.targets.production,
-      image: `${config.sam.targets.production.image}:${pkg.version}`,
-    },
-    ui: {
-      ...config.ui.container,
-      ...config.ui.targets.production,
-      image: `${config.ui.targets.production.image}:${pkg.version}`,
-    },
-    traefik: config.traefik.container,
-  },
-  networks: {
-    default: {
-      name: 'morio_net',
-    },
-  },
-})
+for (const type of ['api', 'sam', 'traefik', 'ui']) config[type] = await resolveConfig(type)
 
 /*
  * Generate run files for development
@@ -103,7 +40,8 @@ await writeYamlFile('compose/prod.yaml', {
 const volumesAsCmd = (vols1 = [], vols2 = []) =>
   [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
 const cliOptions = (name) => `  --name=morio_${config[name].container.container_name} \\
-  --network=morio-net \\
+  --network=morio_net \\
+  --network-alias ${name} \\
   ${config[name].container.init ? '--init' : ''} \\
 ${volumesAsCmd(config[name].targets?.development?.volumes, config[name].container?.volumes)} \\
   -e MORIO_DEV=1 \\
@@ -122,7 +60,7 @@ for (const name of ['api', 'sam', 'ui'])
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio-net 2> /dev/null
+docker network create morio_net 2> /dev/null
 docker stop ${name} 2> /dev/null
 docker rm ${name} 2> /dev/null
 
@@ -138,30 +76,3 @@ else
 fi
 `
   )
-
-/*
-container:
-  # Name it api
-  container_name: api
-  # Use the default network
-  networks:
-    default: null
-  # Run an init inside the container to forward signales (and avoid PID 1)
-  init: true
-  # Configure Traefik with container labels
-  labels:
-    # Tell traefik to watch this container
-    - traefik.enable=true
-    # Attach to the morio_net network
-    - traefik.docker.network=morio_net
-    # Match requests going to the API prefix (triple curly braces are required here)
-    - traefik.http.routers.api.rule=PathPrefix(`{{{ MORIO_API_PREFIX }}}`)
-    # Forward to api service
-    - traefik.http.routers.api.service=api
-    # Only match requests on the https endpoint
-    - traefik.http.routers.api.entrypoints=https
-    # Forward to port on container
-    - 'traefik.http.services.api.loadbalancer.server.port={{ MORIO_API_PORT }}'
-    # Enable TLS
-    - traefik.http.routers.api.tls=true
-*/

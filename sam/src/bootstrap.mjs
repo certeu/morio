@@ -79,6 +79,11 @@ const startMorioEphemeralNode = async (log, dev) => {
   log.info('Starting ephemeral Morio instance')
 
   /*
+   * Create Docker network
+   */
+  const network = await createNetwork(log, dev)
+
+  /*
    * Create ephemeral services
    */
   for (const service of ['traefik', 'api', 'ui']) {
@@ -117,10 +122,37 @@ const startService = async (containerId, name, log) => {
   return ok
 }
 
+const createNetwork = async (log, dev = false) => {
+  log.debug(`Creating Docker network: morio_net`)
+  const [success, result] = await runDockerApiCommand(
+    'createNetwork',
+    {
+      Name: 'morio_net',
+      CheckDuplicate: true,
+      EnableIPv6: false,
+    },
+    true
+  )
+  if (success) {
+    log.debug(`Network created: morio_net`)
+    return result.id
+  }
+
+  if (
+    result?.json?.message &&
+    result.json.message.includes('network with name morio_net already exists')
+  )
+    log.debug(`Network already exists: morio_net`)
+  else log.warn(result, `Failed to create network: morio_net`)
+
+  return false
+}
+
 const createService = async (name, log, dev = false) => {
   log.debug(`Creating service container: ${name}`)
   let id = false
   const config = await resolveServiceConfig(name, log)
+
   const [success, result] = await runDockerApiCommand(
     'createContainer',
     createContainerOptions(config, dev),
@@ -164,7 +196,7 @@ const createService = async (name, log, dev = false) => {
         `Container ${name} is already in use. Morio is in production, not removing existing container.`
       )
     }
-  }
+  } else log.warn(result, `Failed to create container: ${name}`)
 
   return false
 }
@@ -252,14 +284,28 @@ const createContainerOptions = (config, dev) => {
   /*
    * Basic options
    */
+  const name = config.container.container_name
+
   const opts = {
-    name: 'morio_' + config.container.container_name,
-    Hostname: config.container.container_name,
+    name,
+    HostConfig: {
+      NetworkMode: 'morio_net',
+      RestartPolicy: { Name: 'unless-stopped' },
+    },
+    Hostname: name,
     Image: config.container.image
       ? config.container.image
       : dev
         ? config.targets.development.image
         : config.targets.production.image,
+    NetworkConfig: {
+      EndpointsConfig: {
+        morio_net: {
+          Links: ['morio_sam', 'morio_traefik'],
+          Aliases: [name],
+        },
+      },
+    },
   }
 
   /*
@@ -267,27 +313,29 @@ const createContainerOptions = (config, dev) => {
    */
   if (config.container.ports) {
     const ports = {}
-    for (const port of config.container.ports) ports[`${port.split(':').pop()}/tcp`] = {}
+    const bindings = {}
+    for (const port of config.container.ports) {
+      ports[`${port.split(':').pop()}/tcp`] = {}
+      bindings[`${port.split(':').pop()}/tcp`] = [{ HostPort: port.split(':').shift() }]
+    }
     opts.ExposedPorts = ports
+    opts.HostConfig.PortBindings = bindings
   }
 
   /*
-   * Environement variables
+   * Environment variables
    */
   if (config.container.environment) {
     opts.Env = Object.entries(config.container.environment).map(([key, val]) => `${key}=${val}`)
   }
 
   /*
-   * Volumes
+   * Volumes (in Hostconfig)
    */
   const allVolumes = config.container?.volumes || []
   if (dev) allVolumes.push(...(config.targets?.development?.volumes || []))
   else allVolumes.push(...(config.targets?.production?.volumes || []))
-  if (allVolumes.length > 0) {
-    opts.Volumes = {}
-    for (const vol of allVolumes) opts.Volumes[vol] = {}
-  }
+  opts.HostConfig.Binds = allVolumes
 
   /*
    * Labels
@@ -299,6 +347,11 @@ const createContainerOptions = (config, dev) => {
       opts.Labels[key] = val
     }
   }
+
+  /*
+   * Command
+   */
+  if (config.container.command) opts.Cmd = config.container.command
 
   return opts
 }

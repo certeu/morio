@@ -1,3 +1,5 @@
+import path from 'path'
+
 export const defaults = {
   /*
    * Table of contents:
@@ -14,6 +16,11 @@ export const defaults = {
   ///////////////////////////////////////////////////////////////////////////////
   //  MORIO
   ///////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Morio repo root folder to defaults
+   */
+  MORIO_REPO_ROOT: path.resolve(path.basename(import.meta.url), '..', '..'),
 
   /*
    * Minimum number of Morio nodes in a deployment
@@ -103,12 +110,12 @@ export const defaults = {
   /*
    * API prefix (since the API is behind Traefik)
    */
-  MORIO_API_HOST: 'api',
+  MORIO_API_HOST: 'morio_api',
 
   /*
    * API prefix (since the API is behind Traefik)
    */
-  MORIO_API_PREFIX: '/api/morio',
+  MORIO_API_PREFIX: '/mapi/morio',
 
   /*
    * API log level
@@ -166,7 +173,7 @@ export const defaults = {
   /*
    * SAM host - Should resolve inside containers
    */
-  MORIO_SAM_HOST: 'sam',
+  MORIO_SAM_HOST: 'morio_sam',
 
   /*
    * SAM log level
@@ -187,6 +194,11 @@ export const defaults = {
    * Log level for Traefik
    */
   MORIO_TRAEFIK_LOG_LEVEL: 'DEBUG',
+
+  /*
+   * Access log filepath for Traefik (path used inside the container)
+   */
+  MORIO_TRAEFIK_ACCESSLOG_FILEPATH: '/var/log/morio/traefik-access.log',
 
   /*
    * Log filepath for Traefik (path used inside the container)

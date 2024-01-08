@@ -75,7 +75,7 @@ app.get(`${tools.prefix}/*`, async (req, res) =>
     url: req.url,
     method: req.method,
     originalUrl: req.originalUrl,
-    prefix: tools.defaults.MORIO_API_PREFIX,
+    prefix: tools.prefix,
   })
 )
 

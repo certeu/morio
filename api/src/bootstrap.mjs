@@ -49,7 +49,7 @@ export const bootstrapConfiguration = async () => {
     config: config[0] === 200 ? config[1] : {},
     defaults: defaults[0] === 200 ? defaults[1] : {},
     log,
-    prefix: defaults.MORIO_API_PREFIX,
+    prefix: fromEnv('MORIO_API_PREFIX'),
     sam: samClient,
   }
 }

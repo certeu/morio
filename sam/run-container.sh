@@ -7,7 +7,7 @@
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio-net 2> /dev/null
+docker network create morio_net 2> /dev/null
 docker stop sam 2> /dev/null
 docker rm sam 2> /dev/null
 
@@ -18,7 +18,8 @@ then
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
   docker run -d   --name=morio_sam \
-  --network=morio-net \
+  --network=morio_net \
+  --network-alias sam \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
   -e MORIO_DEV=1 \
@@ -26,7 +27,8 @@ then
 
 else
   docker run --rm -it   --name=morio_sam \
-  --network=morio-net \
+  --network=morio_net \
+  --network-alias sam \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
   -e MORIO_DEV=1 \
