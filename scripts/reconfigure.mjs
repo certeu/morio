@@ -40,6 +40,7 @@ for (const type of ['api', 'core', 'traefik', 'ui']) config[type] = await resolv
 const volumesAsCmd = (vols1 = [], vols2 = []) =>
   [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
 const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
+  --hostname=${config[name].container.container_name} \\
   --network=morio_net \\
   --network-alias ${name} \\
   ${config[name].container.init ? '--init' : ''} \\

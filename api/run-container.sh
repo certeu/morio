@@ -18,6 +18,7 @@ then
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
   docker run -d   --name=morio_api \
+  --hostname=morio_api \
   --network=morio_net \
   --network-alias api \
   --init \
@@ -27,6 +28,7 @@ then
 
 else
   docker run --rm -it   --name=morio_api \
+  --hostname=morio_api \
   --network=morio_net \
   --network-alias api \
   --init \
