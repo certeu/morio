@@ -1,11 +1,48 @@
 container:
   image: smallstep/step-ca
   tag: 0.25.2
-  name: ca
+  container_name: morio_ca
   network: morio_net
   ports: []
   volumes:
-    - 'MORIO_ROOT/data/ca:/home/step'
+    - '{{{ MORIO_REPO_ROOT }}}/data/ca:/home/step'
   environment:
-    DOCKER_STEPCA_INIT_NAME: MORIO_DISPLAY_NAME
-    DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,engn-vm2.cert.europa.eu,ca.cert.europa.eu'
+    DOCKER_STEPCA_INIT_NAME: '{{{ MORIO_CA_NAME }}}'
+    DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,{{{ MORIO_DNS_NAMES }}}'
+
+ca:
+  root: /home/step/certs/root_ca.crt
+  federatedRoots: null
+  crt: /home/step/certs/intermediate_ca.crt
+  key: /home/step/secrets/intermediate_ca_key
+  address: ":9000"
+  insecureAddress: ""
+  dnsNames:
+    - localhost
+    - morio_ca
+  logger:
+    format: json
+  db:
+    type: badgerv2
+    dataSource: /home/step/db
+  clr:
+    enabled: false
+  authority:
+    claims:
+      minTLSCertDuration: 5m
+      maxTLSCertDuration: 2y
+      defaultTLSCertDuration: 36d
+      disableRenewal: false
+      allowRenewalAfterExpiry: true
+    provisioners:
+      - type: JWK
+        name: admin
+        key: null
+        encryptedKey: null
+  tls:
+    cipherSuites:
+      - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+    minVersion: 1.2
+    maxVersion: 1.3
+    renegotiation: false

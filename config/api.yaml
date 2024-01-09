@@ -14,6 +14,8 @@ targets:
 container:
   # Name it api
   container_name: morio_api
+  # Tag will be injected
+  tag: '{{{ MORIO_VERSION }}}'
   # Use the default network
   networks:
     default: null

@@ -37,31 +37,6 @@ export const readFile = async (
 }
 
 /**
- * Reads a YAML file from disk and parses it
- *
- * @param {string} path - (relative) path to the file to read
- * @param {string} onError - a string to log on error rather than the default
- *
- * @return {string} File contents, or false in case of trouble
- */
-export const readYamlFile = async (
-  filePath, // The (relative) path to the file
-  onError // Method to run on error
-) => {
-  let content
-  try {
-    content = await readFile(filePath, onError)
-    content = yaml.load(content)
-  } catch (err) {
-    if (onError) onError(err)
-
-    return false
-  }
-
-  return content
-}
-
-/**
  * Reads a BSON file from disk and parses it
  *
  * @param {string} path - (relative) path to the file to read
@@ -77,6 +52,56 @@ export const readBsonFile = async (
   try {
     content = await readFile(filePath, onError, true)
     content = BSON.deserialize(content)
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+
+  return content
+}
+
+/**
+ * Reads a JSON file from disk and parses it
+ *
+ * @param {string} path - (relative) path to the file to read
+ * @param {string} onError - a string to log on error rather than the default
+ *
+ * @return {string} File contents, or false in case of trouble
+ */
+export const readJsonFile = async (
+  filePath, // The (relative) path to the file
+  onError // Method to run on error
+) => {
+  let content
+  try {
+    content = await readFile(filePath, onError, true)
+    content = JSON.parse(content)
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+
+  return content
+}
+
+/**
+ * Reads a YAML file from disk and parses it
+ *
+ * @param {string} path - (relative) path to the file to read
+ * @param {string} onError - a string to log on error rather than the default
+ *
+ * @return {string} File contents, or false in case of trouble
+ */
+export const readYamlFile = async (
+  filePath, // The (relative) path to the file
+  onError // Method to run on error
+) => {
+  let content
+  try {
+    content = await readFile(filePath, onError)
+    content = yaml.load(content)
   } catch (err) {
     if (onError) onError(err)
 

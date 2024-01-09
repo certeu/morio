@@ -3,7 +3,7 @@ import express from 'express'
 import { fromEnv } from '#shared/env'
 import { wrapExpress } from '#shared/utils'
 // Morio client & core bootstrap
-import { morioClient, bootstrapMorioCore } from '#lib/morio'
+import { morioClient, bootstrap } from '#lib/morio'
 // Routes
 import { routes } from '#routes/index'
 
@@ -12,7 +12,7 @@ import { routes } from '#routes/index'
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrapMorioCore()
+const tools = await bootstrap.core()
 
 /*
  * Add Morio client

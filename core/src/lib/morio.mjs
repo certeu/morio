@@ -1,45 +1,69 @@
-// eslint-disable-next-line
-import pkg from '../../package.json' assert { type: 'json' }
 import mustache from 'mustache'
 import yaml from 'js-yaml'
 import { defaults } from '@morio/defaults'
 import { fromEnv } from '#shared/env'
 import { logger } from '#shared/logger'
+import { pkg } from '#shared/pkg'
 import { restClient } from '#shared/network'
-import { randomString } from '#shared/crypto'
-import { readYamlFile, readFile, readBsonFile, readDirectory } from '#shared/fs'
-import { runDockerApiCommand, runContainerApiCommand, generateContainerConfig } from '#lib/docker'
+import { readYamlFile, readJsonFile, readFile, readBsonFile, readDirectory } from '#shared/fs'
+import {
+  docker,
+  runDockerApiCommand,
+  runContainerApiCommand,
+  generateContainerConfig,
+} from '#lib/docker'
 
-/**
- * Bootstraps core, only used on a cold start
- *
- * @return {bool} true when everything is ok, false if not (API won't start)
+/*
+ * Plain object with bootstrap mathods for those services that require them
  */
-export const bootstrapMorioCore = async () => {
+export const bootstrap = {
   /*
-   * First setup the tools object with the logger, so we can log
+   * We need to bootstrap the CA or it will generate a random root certificate
+   * and secret, and even output the secret in the logs.
+   * So instead, let's tell it what root certificate/keys/password it should use.
    */
-  const tools = {
-    log: logger(fromEnv('MORIO_CORE_LOG_LEVEL'), pkg.name),
-    // Add some info while we're at it
-    info: {
-      about: pkg.description,
-      name: pkg.name,
-      production: fromEnv('MORIO_DEV') ? false : true,
-      start_time: Date.now(),
-      version: pkg.version,
-    },
-  }
+  ca: async (tools) => {
+    /*
+     * We'll check if there's a CA config file on disk
+     * If so, we return early as there's nothing to be done
+     */
+    const bootstrapped = await readJsonFile('/morio/data/ca/config/ca.json')
+    if (bootstrapped && bootstrapped.root) return
 
+    /*
+     * No config, generate configuration, keys, serts, and secrets file
+     */
+    tools.log.warn('FIXME: Bootstrap morio_ca')
+  },
   /*
-   * Now start Morio
+   * This runs only when core is cold-started
    */
-  await startMorio(tools)
+  core: async () => {
+    /*
+     * First setup the tools object with the logger, so we can log
+     */
+    const tools = {
+      log: logger(fromEnv('MORIO_CORE_LOG_LEVEL'), pkg.name),
+      // Add some info while we're at it
+      info: {
+        about: pkg.description,
+        name: pkg.name,
+        production: fromEnv('MORIO_DEV') ? false : true,
+        start_time: Date.now(),
+        version: pkg.version,
+      },
+    }
 
-  /*
-   * Finally, return the tools object
-   */
-  return tools
+    /*
+     * Now start Morio
+     */
+    await startMorio(tools)
+
+    /*
+     * Finally, return the tools object
+     */
+    return tools
+  },
 }
 
 /**
@@ -77,19 +101,18 @@ const createMorioNetwork = async (tools) => {
 }
 
 /**
- * Creates (a container for) a morio service
+ * Creates a container for a morio service
  *
  * @param {string} name = Name of the service
+ * @param {object} containerConfig = The container config to pass to the Docker API
  * @param {object} tools = The tools object
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-export const createMorioService = async (name, tools) => {
+export const createMorioContainer = async (name, containerConfig, tools) => {
   tools.log.debug(`Creating container: ${name}`)
-  const config = await resolveServiceConfig(name, tools)
-
   const [success, result] = await runDockerApiCommand(
     'createContainer',
-    generateContainerConfig(config, tools),
+    containerConfig,
     tools,
     true
   )
@@ -115,7 +138,7 @@ export const createMorioService = async (name, tools) => {
         tools.log.debug(`Removed existing container: ${name}`)
         const [ok, created] = await runDockerApiCommand(
           'createContainer',
-          generateContainerConfig(config, tools),
+          containerConfig,
           tools,
           true
         )
@@ -128,6 +151,40 @@ export const createMorioService = async (name, tools) => {
   } else tools.log.warn(result, `Failed to create container: ${name}`)
 
   return false
+}
+
+/**
+ * Creates (a container for) a morio service
+ *
+ * @param {string} name = Name of the service
+ * @param {object} tools = The tools object
+ * @returm {object|bool} options - The id of the created container or false if no container could be created
+ */
+export const createMorioService = async (name, tools) => {
+  /*
+   * Generate container config to pass to the Docker API
+   */
+  const containerConfig = generateContainerConfig(await resolveServiceConfig(name, tools), tools)
+
+  /*
+   * It's unlikely, but possible that we need to pull this image first
+   */
+  const [ok, list] = await runDockerApiCommand('listImages', {}, tools)
+  if (!ok) tools.log.warn('Unable to load list of docker images')
+  if (list.filter((img) => img.RepoTags.includes(containerConfig.Image)).length < 1) {
+    tools.log.info(`Image ${containerConfig.Image} is not available locally. Attempting pull.`)
+
+    return new Promise((resolve) => {
+      docker.pull(containerConfig.Image, (err, stream) => {
+        docker.modem.followProgress(stream, onFinished)
+        async function onFinished() {
+          tools.log.debug(`Image pulled: ${containerConfig.Image}`)
+          const id = await createMorioContainer(name, containerConfig, tools)
+          resolve(id)
+        }
+      })
+    })
+  } else return await createMorioContainer(name, containerConfig, tools)
 }
 
 /**
@@ -150,7 +207,6 @@ export const loadConfigurations = async () => {
   const configs = {}
   let i = 0
   const dir = fromEnv('MORIO_CORE_CONFIG_FOLDER')
-  let current = false
   for (const timestamp of timestamps) {
     const config = await readYamlFile(`${dir}/morio.${timestamp}.yaml`)
     configs[timestamp] = {
@@ -159,7 +215,6 @@ export const loadConfigurations = async () => {
       comment: config.comment || 'No message provided',
     }
     if (i === 0) {
-      current = timestamp
       const keys = await readBsonFile(`${dir}/.${timestamp}.keys`)
       configs.current = { config, keys, timestamp }
       configs[timestamp].current = true
@@ -181,7 +236,7 @@ export const logStartedConfig = (tools) => {
   /*
    * Are we running in production?
    */
-  if (tools.info.production) log.debug('Morio is running in production mode')
+  if (tools.info.production) tools.log.debug('Morio is running in production mode')
   else tools.log.debug('Morio is running in development mode')
 
   /*
@@ -259,7 +314,7 @@ export const startMorio = async (tools) => {
   if (tools.config && tools.config.morio.node_count) {
     if (tools.config.morio.node_count === 1) await startMorioNode(tools)
     else if (tools.config.morio.node_count > 1) await startMorioCluster(tools)
-    else log.err('Unexepected node count - Morio will not start')
+    else tools.log.err('Unexepected node count - Morio will not start')
   } else await startMorioEphemeralNode(tools)
 
   return
@@ -271,7 +326,7 @@ export const startMorio = async (tools) => {
  * @param {object} tools = The tools object
  */
 const startMorioCluster = async (tools) => {
-  log.warn('FIXME: Implement cluster start')
+  tools.log.warn('FIXME: Implement cluster start')
 }
 
 /**
@@ -285,7 +340,7 @@ const startMorioEphemeralNode = async (tools) => {
   /*
    * Create Docker network
    */
-  const network = await createMorioNetwork(tools)
+  await createMorioNetwork(tools)
 
   /*
    * Create & start ephemeral services
@@ -307,14 +362,15 @@ const startMorioNode = async (tools) => {
   /*
    * Create Docker network
    */
-  const network = await createMorioNetwork(tools)
+  await createMorioNetwork(tools)
 
   /*
    * Create services
    * FIXME: we need to start a bunch more stuff here
    */
-  for (const service of ['traefik', 'api', 'ui']) {
+  for (const service of ['ca', 'traefik', 'api', 'ui']) {
     const container = await createMorioService(service, tools)
+    if (bootstrap[service]) await bootstrap[service](tools)
     await startMorioService(container, service, tools)
   }
 }

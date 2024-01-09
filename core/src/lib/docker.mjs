@@ -22,6 +22,7 @@ export const generateContainerConfig = (config, tools) => {
    * Basic options
    */
   const name = config.container.container_name
+  const tag = config.container.tag ? `:${config.container.tag}` : ''
 
   const opts = {
     name,
@@ -31,10 +32,10 @@ export const generateContainerConfig = (config, tools) => {
     },
     Hostname: name,
     Image: config.container.image
-      ? config.container.image
+      ? config.container.image + tag
       : tools.info.production
-        ? config.targets.production.image
-        : config.targets.development.image,
+        ? config.targets.production.image + tag
+        : config.targets.development.image + tag,
     NetworkConfig: {
       EndpointsConfig: {
         morio_net: {

@@ -3,6 +3,7 @@
 # dev side-effects
 config/morio.*.yaml
 config/.*.keys
+data/**
 
 # Logs
 logs

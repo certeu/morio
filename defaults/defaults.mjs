@@ -1,3 +1,4 @@
+import { pkg } from '#shared/pkg'
 import path from 'path'
 
 export const defaults = {
@@ -21,6 +22,11 @@ export const defaults = {
    * Morio repo root folder to defaults
    */
   MORIO_REPO_ROOT: path.resolve(path.basename(import.meta.url), '..', '..'),
+
+  /**
+   * Morio repo root folder to defaults
+   */
+  MORIO_VERSION: pkg.version,
 
   /*
    * Minimum number of Morio nodes in a deployment
@@ -129,6 +135,15 @@ export const defaults = {
   MORIO_API_PORT: 3000,
 
   ///////////////////////////////////////////////////////////////////////////////
+  //  CA
+  ///////////////////////////////////////////////////////////////////////////////
+
+  /*
+   * Name of the Morio CA
+   */
+  MORIO_CA_NAME: 'Morio Certificate Authority',
+
+  ///////////////////////////////////////////////////////////////////////////////
   //  CORE
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -198,12 +213,12 @@ export const defaults = {
   /*
    * Access log filepath for Traefik (path used inside the container)
    */
-  MORIO_TRAEFIK_ACCESSLOG_FILEPATH: '/var/log/morio/traefik-access.log',
+  MORIO_TRAEFIK_ACCESSLOG_FILEPATH: '/var/log/morio/morio_traefik.access.log',
 
   /*
    * Log filepath for Traefik (path used inside the container)
    */
-  MORIO_TRAEFIK_LOG_FILEPATH: '/var/log/morio/traefik.log',
+  MORIO_TRAEFIK_LOG_FILEPATH: '/var/log/morio/morio_traefik.log',
 
   /*
    * Log format for Traefik

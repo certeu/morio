@@ -1,53 +1,52 @@
 - package-ecosystem: npm
   directory: "/"
-  assignees: *assignees
-    - "joostdecock"
-  commit-message: *commit
+  assignees: &ass
+    - joostdecock
+  commit-message: &msg
     prefix: "[deps]"
     prefix-development: "[dev-devps]"
-  open-pull-requests-limit: *limit 25
-  schedule: *schedule
-    interval: "weekly"
+  open-pull-requests-limit: &limit 25
+  schedule.interval: &interval weekly
 
 - package-ecosystem: npm
   directory: "/api"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
 - package-ecosystem: npm
   directory: "/defaults"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
 - package-ecosystem: npm
   directory: "/sam"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
 - package-ecosystem: npm
   directory: "/schema"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
 - package-ecosystem: npm
   directory: "/shared"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
 - package-ecosystem: npm
   directory: "/ui"
-  assignees: &assignees
-  commit-message: &commit
-  open-pull-requests-limit: &limit
-  schedule: &schedule
+  assignees: *ass
+  commit-message: *msg
+  open-pull-requests-limit: *limit
+  schedule.interval: *interval
 
