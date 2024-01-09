@@ -13,6 +13,7 @@ const colors = {
   related: 'info',
   tldr: 'info',
   none: '',
+  important: 'error',
 }
 
 export const ns = ['popout']

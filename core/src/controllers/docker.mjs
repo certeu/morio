@@ -4,7 +4,6 @@ import {
   runContainerApiCommand,
   runContainerImageApiCommand,
   runNetworkApiCommand,
-  runDockerCliCommand,
 } from '#lib/docker'
 import { validate } from '#lib/validation'
 import { schemaViolation, dockerError } from '#lib/response'
@@ -45,7 +44,7 @@ Controller.prototype.getDockerData = async (req, res, tools, cmd = 'inspect', op
   /*
    * Run the Docker command, with options if there are any
    */
-  const [success, result] = await runDockerApiCommand(cmd, options)
+  const [success, result] = await runDockerApiCommand(cmd, options, tools)
 
   /*
    * Return result
@@ -77,7 +76,7 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect',
   /*
    * Now run the container API command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd, options)
+  const [success, result] = await runContainerApiCommand(valid.id, cmd, options, tools)
 
   /*
    * Return result
@@ -106,7 +105,7 @@ Controller.prototype.createResource = async (req, res, tools, cmd) => {
   /*
    * Run the Docker command, with options if there are any
    */
-  const [success, result] = await runDockerApiCommand(cmd, req.body)
+  const [success, result] = await runDockerApiCommand(cmd, req.body, tools)
 
   /*
    * Return result
@@ -139,7 +138,7 @@ Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
   /*
    * Run the container command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd)
+  const [success, result] = await runContainerApiCommand(valid.id, cmd, {}, tools)
 
   /*
    * Return result
@@ -169,7 +168,7 @@ Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => 
   /*
    * Now run the container image API command
    */
-  const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
+  const [success, result] = await runContainerImageApiCommand(valid.id, cmd, tools)
 
   /*
    * Return result
@@ -198,7 +197,7 @@ Controller.prototype.getNetworkData = async (req, res, tools, cmd = 'inspect') =
   /*
    * Now run the docker network API command
    */
-  const [success, result] = await runNetworkApiCommand(valid.id, cmd)
+  const [success, result] = await runNetworkApiCommand(valid.id, cmd, tools)
 
   /*
    * Return result
@@ -278,10 +277,9 @@ Controller.prototype.pull = async (req, res) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {string} cmd - The command to run (method on the docker client)
  * @param {object} options - Any command options
  */
-Controller.prototype.dockerPostCmd = async (req, res, cmd) => {
+Controller.prototype.dockerPostCmd = async (req, res, tools) => {
   /*
    * Map API path to Docker command
    */
@@ -304,7 +302,7 @@ Controller.prototype.dockerPostCmd = async (req, res, cmd) => {
   const [valid, err] = await validate('docker.postCommand', req.params)
   if (!valid) return schemaViolation(err, res)
 
-  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body)
+  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body, tools)
 
   return success ? res.send(result) : dockerError(result, res)
 }

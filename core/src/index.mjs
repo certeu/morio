@@ -2,19 +2,17 @@
 import express from 'express'
 import { fromEnv } from '#shared/env'
 import { wrapExpress } from '#shared/utils'
-// Morio  client
-import { morioClient } from '#lib/morio'
+// Morio client & core bootstrap
+import { morioClient, bootstrapMorioCore } from '#lib/morio'
 // Routes
 import { routes } from '#routes/index'
-// Bootstrap configuration
-import { bootstrapCore } from './bootstrap.mjs'
 
 /*
- * First of all, we bootstrap and create a centralized
+ * First of all, we bootstrap core which creates a centralized
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrapCore()
+const tools = await bootstrapMorioCore()
 
 /*
  * Add Morio client

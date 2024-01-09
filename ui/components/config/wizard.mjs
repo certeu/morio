@@ -24,9 +24,9 @@ import { Block } from './blocks/index.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
-import { ConfigReport } from './report.mjs'
+import { ConfigReport, DeploymentReport } from './report.mjs'
 import { NavButton } from 'components/layout/sidebar.mjs'
-import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
+import { LeftIcon, RightIcon, ConfigurationIcon, OkIcon } from 'components/icons.mjs'
 
 const guessOwnIp = async () => {}
 
@@ -122,6 +122,7 @@ export const ConfigurationWizard = ({
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
   const [dense, setDense] = useState(false)
+  const [deployResult, setDeployResult] = useState(false)
 
   /*
    * Figure out the current configPath from the view
@@ -192,7 +193,13 @@ export const ConfigurationWizard = ({
    * Helper method to deploy the configuration
    */
   const deploy = async () => {
-    const result = await api.deploy(config)
+    setLoadingStatus([true, 'Uploading configuration'])
+    const [data, status] = await api.deploy(config)
+    if (data.result !== "success" || status !== 200) return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
+    else {
+      setDeployResult(data)
+      setLoadingStatus([true, 'Deployment initialized', true, true])
+    }
   }
 
   /*
@@ -209,6 +216,12 @@ export const ConfigurationWizard = ({
    * Extract view from the views config
    */
   const viewConfig = getView(configPath)
+
+  if (deployResult) return (
+    <div className="w-fill min-h-screen max-w-2xl mx-auto">
+      <DeploymentReport result={deployResult} />
+    </div>
+  )
 
   return (
     <div

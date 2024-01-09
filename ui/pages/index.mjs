@@ -40,11 +40,8 @@ const HomePage = (props) => {
                 Download a configuration file
               </Link>
             </div>
-            <Popout warning>
-              <h5 className="flex flex-row gap-2 items-center justify-start">
-                <WarningIcon className="w-6 h-6 text-error" />
-                <span>This Morio instance is unconfigured</span>
-              </h5>
+            <Popout important>
+              <h5>Morio needs a configuration</h5>
               <span className="text-sm">
                 Use the configuration wizard, or provide a configuration file to get started.
               </span>

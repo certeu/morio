@@ -1,6 +1,7 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
 import { fromEnv } from '#shared/env'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
+import { startMorio } from '#lib/morio'
 
 /**
  * This config controller handles configuration routes
@@ -51,12 +52,16 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Here, we just do a basic check
    */
   const config = req.body
-  if (!config.morio) return res.status(400).send({ errors: ['Configuration is not valid'] })
+  if (!config.morio) {
+    tools.log.warn(`Ingoring request to deploy an invalid configuration`)
+    return res.status(400).send({ errors: ['Configuration is not valid'] })
+  } else tools.log.debug(`Processing request to deploy a new configuration`)
 
   /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
+  tools.log.debug(`New configuration will be tracked as: ${time}`)
 
   /*
    * If this is the initial deploy, there will be no key pair, so generate one.
@@ -64,6 +69,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   let keys
   if (tools.running_config) keys = tools.keys
   else {
+    tools.log.debug(`No prior configuration found, generating key pair`)
     const morioRootToken = 'mrt.' + (await randomString(32))
     const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
     config.morio.key_pair = {
@@ -80,12 +86,15 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure we have a keypair
    */
-  if (!config.key_pair?.public || !config.key_pair.private)
+  if (!config.morio.key_pair?.public || !config.morio.key_pair.private) {
+    tools.log.debug(`Configuration lacks key pair`)
     return res.status(400).send({ errors: ['Configuration lacks key pair'] })
+  }
 
   /*
    * Now write the config to disk
    */
+  tools.log.debug(`Writing configuration to morio.${time}.yaml`)
   let result = await writeYamlFile(
     `${fromEnv('MORIO_CORE_CONFIG_FOLDER')}/morio.${time}.yaml`,
     config
@@ -95,6 +104,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Also write the keys to disk
    */
+  tools.log.debug(`Writing key data to .${time}.keys`)
   result = await writeBsonFile(`${fromEnv('MORIO_CORE_CONFIG_FOLDER')}/.${time}.keys`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
@@ -112,6 +122,12 @@ Controller.prototype.deploy = async (req, res, tools) => {
     data.fresh_deploy = true
     data.root_token = keys.mrt
   }
+
+  /*
+   * Don't await deployment, just return
+   */
+  tools.log.info(`Starting Morio`)
+  startMorio(tools)
 
   return res.send(data)
 }

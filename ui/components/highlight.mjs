@@ -41,7 +41,7 @@ export const Highlight = (props) => {
         px-4 py-1 mb-2 lg:text-sm
       `}
       >
-        <span>{names[language] ? names[language] : language}</span>
+        <span>{names[language] ? names[language] : props.title ? props.title : language}</span>
         <CopyToClipboard content={content} />
       </div>
       <pre {...preProps}>{content}</pre>
