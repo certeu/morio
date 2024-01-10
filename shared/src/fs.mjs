@@ -12,6 +12,60 @@ import { BSON } from 'bson'
 export const root = path.resolve(path.basename(import.meta.url), '..')
 
 /**
+ * Chonges ownership of a file or folder
+ *
+ * Note that this wraps the chown system call which has no recusion
+ *
+ * @param {string} target - (relative) path to the file or folder
+ * @param {number} uid - User id
+ * @param {number} gid - Group id
+ * @param {funtion} onError - a method to call on error
+ *
+ * @return {string} File contents, or false in case of trouble
+ */
+export const chown = async (
+  target, // The (relative) path to the folder to create
+  uid, // The user ID
+  gid, // The group ID
+  onError, // Method to run on error
+) => {
+  let dir
+  try {
+    await fs.promises.chown(path.resolve(root, target), uid, gid)
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Creates a directory/folder
+ *
+ * @param {string} dirPath - (relative) path to the folder to create
+ * @param {funtion} onError - a method to call on error
+ *
+ * @return {string} File contents, or false in case of trouble
+ */
+export const mkdir = async (
+  dirPath, // The (relative) path to the folder to create
+  onError, // Method to run on error
+) => {
+  let dir
+  try {
+    dir = path.resolve(root, dirPath)
+    await fs.promises.mkdir(dir, { recursive: true })
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+  return true
+}
+
+/**
  * Reads a file from disk
  *
  * @param {string} (relative) path to the file to read
@@ -128,6 +182,7 @@ export const writeFile = async (
   let result, file
   try {
     file = path.resolve(root, filePath)
+    await fs.promises.mkdir(path.dirname(file), { recursive: true })
     result = await fs.promises.writeFile(file, data)
   } catch (err) {
     if (log) log.warn(err, `Failed to write file: ${file}`)

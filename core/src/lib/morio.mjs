@@ -2,10 +2,20 @@ import mustache from 'mustache'
 import yaml from 'js-yaml'
 import { defaults } from '@morio/defaults'
 import { fromEnv } from '#shared/env'
+import { generateCaRoot, keypairAsJwk } from '#shared/crypto'
 import { logger } from '#shared/logger'
 import { pkg } from '#shared/pkg'
 import { restClient } from '#shared/network'
-import { readYamlFile, readJsonFile, readFile, readBsonFile, readDirectory } from '#shared/fs'
+import {
+  readYamlFile,
+  readJsonFile,
+  readFile,
+  readBsonFile,
+  readDirectory,
+  writeFile,
+  chown,
+  mkdir,
+} from '#shared/fs'
 import {
   docker,
   runDockerApiCommand,
@@ -33,7 +43,56 @@ export const bootstrap = {
     /*
      * No config, generate configuration, keys, serts, and secrets file
      */
-    tools.log.warn('FIXME: Bootstrap morio_ca')
+    tools.log.debug('Generating inital CA config - This will take a while')
+
+    /*
+     * Generate keys and certificates
+     */
+    const data = await generateCaRoot()
+
+    /*
+     * Load CA config base
+     */
+    const template = (await readYamlFile('../config/ca.yaml', (err) => console.log(err))).ca
+    const config = {
+      ...template,
+      root: '/home/step/certs/root_ca.crt',
+      crt: '/home/step/certs/intermediate_ca.crt',
+      key: '/home/step/secrets/intermediate_ca.key',
+      dnsNames: [...template.dnsNames, 'test'],
+      authority: {
+        claims: template.authority.claims,
+        provisioners: [
+          {
+            type: 'JWK',
+            name: 'admin',
+            key: await keypairAsJwk(tools.config.morio.key_pair),
+          },
+        ],
+      },
+    }
+
+    /*
+     * Create data folder and change ownership to user running CA container (UID 1000)
+     */
+    await mkdir('/morio/data/ca')
+    await chown('/morio/data/ca', 1000, 1000)
+
+    /*
+     * Write certificates, keys, and configuration to disk, and let CA own them
+     */
+    for (const [target, content] of [
+      ['certs/root_ca.crt', data.root.certificate],
+      ['certs/intermediate_ca.crt', data.intermediate.certificate],
+      ['secrets/root_ca.key', data.root.keys.private],
+      ['secrets/intermediate_ca.key', data.intermediate.keys.private],
+      ['secrets/password', data.password],
+      ['config/ca.json', JSON.stringify(config, null, 2)],
+    ]) {
+      const file = `/morio/data/ca/${target}`
+      await writeFile(file, content, tools.log)
+      await chown(file, 1000, 1000, tools.log)
+    }
   },
   /*
    * This runs only when core is cold-started

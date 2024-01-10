@@ -139,9 +139,49 @@ export const defaults = {
   ///////////////////////////////////////////////////////////////////////////////
 
   /*
-   * Name of the Morio CA
+   * Common Name of the Morio Root CA
    */
-  MORIO_CA_NAME: 'Morio Certificate Authority',
+  MORIO_ROOT_CA_COMMON_NAME: 'Morio Certificate Authority',
+
+  /*
+   * Common Name of the Morio Intermediate CA
+   */
+  MORIO_INTERMEDIATE_CA_COMMON_NAME: 'Morio Intermediate Certificate Authority',
+
+  /*
+   * Country Name of the Morio CA
+   */
+  MORIO_CA_COUNTRY_NAME: 'BE',
+
+  /*
+   * State or Province of the Morio CA
+   */
+  MORIO_CA_ST: 'Brussels',
+
+  /*
+   * Locality name of the Morio CA
+   */
+  MORIO_CA_LOCALITY_NAME: 'Brussels',
+
+  /*
+   * Organization name of the Morio CA
+   */
+  MORIO_CA_ORGANIZATION_NAME: 'Morio',
+
+  /*
+   * OU of the Morio CA
+   */
+  MORIO_CA_OU: 'Morio',
+
+  /*
+   * Lifetime of the root CA certificate in years
+   */
+  MORIO_ROOT_CA_VALID_YEARS: 20,
+
+  /*
+   * Lifetime of the intermediate CA certificate in years
+   */
+  MORIO_INTERMEDIATE_CA_VALID_YEARS: 5,
 
   ///////////////////////////////////////////////////////////////////////////////
   //  CORE

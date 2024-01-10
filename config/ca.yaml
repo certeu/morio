@@ -7,8 +7,8 @@ container:
   volumes:
     - '{{{ MORIO_REPO_ROOT }}}/data/ca:/home/step'
   environment:
-    DOCKER_STEPCA_INIT_NAME: '{{{ MORIO_CA_NAME }}}'
-    DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,{{{ MORIO_DNS_NAMES }}}'
+    #DOCKER_STEPCA_INIT_NAME: '{{{ MORIO_CA_NAME }}}'
+    #DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,{{{ MORIO_DNS_NAMES }}}'
 
 ca:
   root: /home/step/certs/root_ca.crt
@@ -30,8 +30,8 @@ ca:
   authority:
     claims:
       minTLSCertDuration: 5m
-      maxTLSCertDuration: 2y
-      defaultTLSCertDuration: 36d
+      maxTLSCertDuration: 17544h
+      defaultTLSCertDuration: 750h
       disableRenewal: false
       allowRenewalAfterExpiry: true
     provisioners:
