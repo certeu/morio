@@ -169,11 +169,6 @@ export const defaults = {
   MORIO_CA_ORGANIZATION_NAME: 'Morio',
 
   /*
-   * OU of the Morio CA
-   */
-  MORIO_CA_OU: 'Morio',
-
-  /*
    * Lifetime of the root CA certificate in years
    */
   MORIO_ROOT_CA_VALID_YEARS: 20,

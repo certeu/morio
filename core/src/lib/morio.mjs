@@ -48,7 +48,7 @@ export const bootstrap = {
     /*
      * Generate keys and certificates
      */
-    const init = await generateCaRoot()
+    const init = await generateCaRoot(tools.config.morio.nodes, tools.config.morio.display_name)
 
     /*
      * Load Morio's CA config file
@@ -63,7 +63,7 @@ export const bootstrap = {
       root: '/home/step/certs/root_ca.crt',
       crt: '/home/step/certs/intermediate_ca.crt',
       key: '/home/step/secrets/intermediate_ca.key',
-      dnsNames: [...stepConfig.server.dnsNames, 'test'],
+      dnsNames: [...stepConfig.server.dnsNames, ...tools.config.morio.nodes],
       authority: {
         claims: stepConfig.server.authority.claims,
         provisioners: [

@@ -72,7 +72,7 @@ export function generateCaCertificate(subjectAttributes, issuerAttributes, years
 /**
  * Generates a key pair and CA root certificate
  */
-export function generateCaRoot(attributes, names=[]) {
+export function generateCaRoot(hostnames, name) {
   /*
    * Defaults for root and intermediate certificate subjects
    */
@@ -81,7 +81,7 @@ export function generateCaRoot(attributes, names=[]) {
     ST: fromEnv('MORIO_CA_ST'),
     localityName: fromEnv('MORIO_CA_LOCALITY_NAME'),
     organizationName: fromEnv('MORIO_CA_ORGANIZATION_NAME'),
-    OU: fromEnv('MORIO_CA_OU'),
+    OU: name,
   }
 
   /*
@@ -92,9 +92,9 @@ export function generateCaRoot(attributes, names=[]) {
   /*
    * Add names as SAN type 2 entries
    */
-  if (names.length > 0) extentions.push({
+  if (hostnames.length > 0) extentions.push({
     name: 'subjectAltName',
-    altNames: names.map(value => ({ type: 2, value })),
+    altNames: hostnames.map(value => ({ type: 2, value })),
   })
 
   /*
