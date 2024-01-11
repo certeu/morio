@@ -54,7 +54,7 @@ const formatCertificateSubject = (attr) => {
 /**
  * Generates a key pair and CA root certificate
  */
-export function generateCaCertificate(attributes, years=1, extentions) {
+export function generateCaCertificate(subjectAttributes, issuerAttributes, years=1, extentions) {
   const keys = forge.pki.rsa.generateKeyPair(fromEnv('MORIO_CRYPTO_KEY_LEN'))
   const cert = forge.pki.createCertificate()
   cert.publicKey = keys.publicKey
@@ -62,7 +62,8 @@ export function generateCaCertificate(attributes, years=1, extentions) {
   cert.validity.notBefore = new Date();
   cert.validity.notAfter = new Date();
   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + years)
-  cert.setSubject(formatCertificateSubject(attributes))
+  cert.setSubject(formatCertificateSubject(subjectAttributes))
+  cert.setIssuer(formatCertificateSubject(issuerAttributes))
   cert.setExtensions(extentions)
 
   return { cert, keys }
@@ -101,6 +102,7 @@ export function generateCaRoot(attributes, names=[]) {
    */
   const root = generateCaCertificate(
     { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
     Number(fromEnv('MORIO_ROOT_CA_VALID_YEARS')),
     extentions,
   )
@@ -110,6 +112,7 @@ export function generateCaRoot(attributes, names=[]) {
    */
   const intermediate = generateCaCertificate(
     { ...dflts, commonName: fromEnv('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
+    { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
     Number(fromEnv('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
     extentions,
   )
@@ -125,6 +128,12 @@ export function generateCaRoot(attributes, names=[]) {
    */
   const password = randomString(48)
 
+  /*
+   * Prepare the fingerprint which is a hex representation of the
+   * sha-256 hashed DER-encoded certificate
+   */
+  const fingerprint = forge.md.sha256.create()
+  fingerprint.update(forge.asn1.toDer(forge.pki.certificateToAsn1(root.cert)).getBytes())
 
   /*
    * Return root & intermediate certificates and keys in the proper format
@@ -136,6 +145,7 @@ export function generateCaRoot(attributes, names=[]) {
         public: forge.pki.publicKeyToPem(root.keys.publicKey),
         private: encryptPrivateKey(root.keys.privateKey, password),
       },
+      fingerprint: fingerprint.digest().toHex()
     },
     intermediate: {
       certificate: forge.pki.certificateToPem(intermediate.cert),

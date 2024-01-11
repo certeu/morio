@@ -3,7 +3,6 @@
  */
 import mustache from 'mustache'
 import { config as configSchema } from '#schema/config'
-import defaults from '#defaults'
 import Joi from 'joi'
 
 /**

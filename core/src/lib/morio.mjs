@@ -48,20 +48,24 @@ export const bootstrap = {
     /*
      * Generate keys and certificates
      */
-    const data = await generateCaRoot()
+    const init = await generateCaRoot()
 
     /*
-     * Load CA config base
+     * Load Morio's CA config file
      */
-    const template = (await readYamlFile('../config/ca.yaml', (err) => console.log(err))).ca
-    const config = {
-      ...template,
+    const stepConfig = await readYamlFile('../config/ca.yaml', (err) => console.log(err))
+
+    /*
+     * Construct step-ca (server) configuration
+     */
+    const stepServerConfig = {
+      ...stepConfig.server,
       root: '/home/step/certs/root_ca.crt',
       crt: '/home/step/certs/intermediate_ca.crt',
       key: '/home/step/secrets/intermediate_ca.key',
-      dnsNames: [...template.dnsNames, 'test'],
+      dnsNames: [...stepConfig.server.dnsNames, 'test'],
       authority: {
-        claims: template.authority.claims,
+        claims: stepConfig.server.authority.claims,
         provisioners: [
           {
             type: 'JWK',
@@ -71,6 +75,10 @@ export const bootstrap = {
         ],
       },
     }
+    /*
+     * Construct step (client) configuration
+     */
+    const stepClientConfig = { ...stepConfig.client, fingerprint: init.root.fingerprint }
 
     /*
      * Create data folder and change ownership to user running CA container (UID 1000)
@@ -82,12 +90,13 @@ export const bootstrap = {
      * Write certificates, keys, and configuration to disk, and let CA own them
      */
     for (const [target, content] of [
-      ['certs/root_ca.crt', data.root.certificate],
-      ['certs/intermediate_ca.crt', data.intermediate.certificate],
-      ['secrets/root_ca.key', data.root.keys.private],
-      ['secrets/intermediate_ca.key', data.intermediate.keys.private],
-      ['secrets/password', data.password],
-      ['config/ca.json', JSON.stringify(config, null, 2)],
+      ['certs/root_ca.crt', init.root.certificate],
+      ['certs/intermediate_ca.crt', init.intermediate.certificate],
+      ['secrets/root_ca.key', init.root.keys.private],
+      ['secrets/intermediate_ca.key', init.intermediate.keys.private],
+      ['secrets/password', init.password],
+      ['config/ca.json', JSON.stringify(stepServerConfig, null, 2)],
+      ['config/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
     ]) {
       const file = `/morio/data/ca/${target}`
       await writeFile(file, content, tools.log)
