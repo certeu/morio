@@ -2,11 +2,10 @@ import { useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { Spinner } from 'components/animations.mjs'
-import { Link, PageLink } from 'components/link.mjs'
+import { Link } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
-import { MorioIcon, WarningIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
+import { MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
 
 const Setup = ({ pageProps }) => {
@@ -69,10 +68,11 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
 
   useEffect(() => {
     const loadConfig = async () => {
-      const [content, status] = await api.getCurrentConfig()
+      const [content] = await api.getCurrentConfig()
       setConfig(content)
     }
     if (!config) loadConfig()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   if (config === null)
@@ -94,17 +94,13 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
   return children
 }
 
-const HomePage = (props) => {
-  const { api } = useApi()
-
-  return (
-    <NotUnlessSetup pageProps={props}>
-      <PageWrapper {...props}>
-        <ContentWrapper {...props} Icon={MorioIcon} title={props.title}></ContentWrapper>
-      </PageWrapper>
-    </NotUnlessSetup>
-  )
-}
+const HomePage = (props) => (
+  <NotUnlessSetup pageProps={props}>
+    <PageWrapper {...props}>
+      <ContentWrapper {...props} Icon={MorioIcon} title={props.title}></ContentWrapper>
+    </PageWrapper>
+  </NotUnlessSetup>
+)
 
 export default HomePage
 

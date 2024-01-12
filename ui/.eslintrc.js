@@ -3,7 +3,7 @@ module.exports = {
     browser: true,
     es2021: true,
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', "next/core-web-vitals" ],
+  extends: ['eslint:recommended', 'plugin:react/recommended', 'next/core-web-vitals'],
   overrides: [
     {
       env: {

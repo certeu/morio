@@ -65,19 +65,33 @@ export const DeploymentReport = ({ result }) => {
         <Popout important>
           <h5>Store the Morio Root Token in a safe place now</h5>
           <p>Below is the Morio Root Token for this deployment:</p>
-          <Highlight title='Root Token'>{result.root_token}</Highlight>
-          <p>You should use it as your initial login before configuring an authentication provider.</p>
+          <Highlight title="Root Token">{result.root_token}</Highlight>
+          <p>
+            You should use it as your initial login before configuring an authentication provider.
+          </p>
         </Popout>
-      ) : null }
+      ) : null}
       <h4>What now?</h4>
-      <p>Morio core will reconfigure this Morio deployment to run <button
-        className=""
-        onClick={() => setModal(
-          <ModalWrapper>
-            <Highlight language="json" js={result.config} />
-          </ModalWrapper>
-        )}>the new configuration</button>.</p>
-      <p>We suggest you <PageLink href="/">return to the home page</PageLink> and wait for the new configuration to be applied.</p>
+      <p>
+        Morio core will reconfigure this Morio deployment to run{' '}
+        <button
+          className=""
+          onClick={() =>
+            setModal(
+              <ModalWrapper>
+                <Highlight language="json" js={result.config} />
+              </ModalWrapper>
+            )
+          }
+        >
+          the new configuration
+        </button>
+        .
+      </p>
+      <p>
+        We suggest you <PageLink href="/">return to the home page</PageLink> and wait for the new
+        configuration to be applied.
+      </p>
     </>
   ) : (
     <>

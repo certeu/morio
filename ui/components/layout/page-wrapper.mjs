@@ -37,7 +37,7 @@ export const PageWrapper = ({
   const [currentTheme, setCurrentTheme] = useState()
   useEffect(() => {
     if (currentTheme !== theme) setCurrentTheme(theme)
-  }, [currentTheme, theme],)
+  }, [currentTheme, theme])
 
   /*
    * Make layout prop into a (uppercase) component

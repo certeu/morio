@@ -1,3 +1,5 @@
+// Dependencies
+import yaml from 'js-yaml'
 // Hooks
 import { useState } from 'react'
 // Components
@@ -10,20 +12,18 @@ const ConfigUploadPage = (props) => {
   /*
    * React state
    */
-  const [uploaded, setUploaded] = useState() // Holds the uploaded data
   const [config, setConfig] = useState() // Holds the uploaded data parsed into a config
-  const [validationReport, setValidationReport] = useState(false) // Holds the validation report
   const [error, setError] = useState(false)
 
   /*
    * Upload handler
    */
   const processUpload = (upload) => {
-    let type, b64, data
+    let data
     try {
-      ;[type, b64] = upload.split(',')
-      if (type.includes('json')) data = JSON.parse(atob(b64))
-      else data = yaml.parse(atob(b64))
+      const chunks = upload.split(',')
+      if (chunks[0].includes('json')) data = JSON.parse(atob(chunks[1]))
+      else data = yaml.parse(atob(chunks[1]))
     } catch (err) {
       setError(err)
     }

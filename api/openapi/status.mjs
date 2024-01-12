@@ -66,7 +66,7 @@ export const paths = {
               schema: j2s(responseSchema.status).swagger,
               examples: {
                 'Before setup': {
-                  value: {}
+                  value: {},
                 },
                 'After setup': {
                   value: {
@@ -93,7 +93,7 @@ export const paths = {
               schema: j2s(responseSchema.status).swagger,
               examples: {
                 'Before setup': {
-                  value: {}
+                  value: {},
                 },
                 'After setup': {
                   value: {

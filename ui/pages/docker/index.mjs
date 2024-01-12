@@ -1,17 +1,12 @@
-// Dependencies
-import { capitalize } from 'lib/utils.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
-import { Link, PageLink } from 'components/link.mjs'
 import { Card } from 'components/card.mjs'
 import {
   ContainerIcon,
   ContainerImageIcon,
   LayersIcon,
   ServersIcon,
-  StatusIcon,
   StorageIcon,
   TaskIcon,
   WifiIcon,

@@ -27,7 +27,7 @@ export const chown = async (
   target, // The (relative) path to the folder to create
   uid, // The user ID
   gid, // The group ID
-  onError, // Method to run on error
+  onError // Method to run on error
 ) => {
   let dir
   try {
@@ -51,7 +51,7 @@ export const chown = async (
  */
 export const mkdir = async (
   dirPath, // The (relative) path to the folder to create
-  onError, // Method to run on error
+  onError // Method to run on error
 ) => {
   let dir
   try {

@@ -1,7 +1,5 @@
 import dynamic from 'next/dynamic'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
-import { SplashLayout } from 'components/layout/splash.mjs'
-import { ConfigurationWizard, viewAsConfigPath } from 'components/config/wizard.mjs'
 
 const prefix = '/config'
 

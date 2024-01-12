@@ -44,7 +44,7 @@ export function randomString(bytes = 8) {
 const formatCertificateSubject = (attr) => {
   const result = []
   for (const [name, value] of Object.entries(attr)) {
-    if (['ST','OU'].includes(name)) result.push({ shortName: name, value })
+    if (['ST', 'OU'].includes(name)) result.push({ shortName: name, value })
     else result.push({ name, value })
   }
 
@@ -54,13 +54,13 @@ const formatCertificateSubject = (attr) => {
 /**
  * Generates a key pair and CA root certificate
  */
-export function generateCaCertificate(subjectAttributes, issuerAttributes, years=1, extentions) {
+export function generateCaCertificate(subjectAttributes, issuerAttributes, years = 1, extentions) {
   const keys = forge.pki.rsa.generateKeyPair(fromEnv('MORIO_CRYPTO_KEY_LEN'))
   const cert = forge.pki.createCertificate()
   cert.publicKey = keys.publicKey
   cert.serialNumber = '01'
-  cert.validity.notBefore = new Date();
-  cert.validity.notAfter = new Date();
+  cert.validity.notBefore = new Date()
+  cert.validity.notAfter = new Date()
   cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + years)
   cert.setSubject(formatCertificateSubject(subjectAttributes))
   cert.setIssuer(formatCertificateSubject(issuerAttributes))
@@ -92,10 +92,11 @@ export function generateCaRoot(hostnames, name) {
   /*
    * Add names as SAN type 2 entries
    */
-  if (hostnames.length > 0) extentions.push({
-    name: 'subjectAltName',
-    altNames: hostnames.map(value => ({ type: 2, value })),
-  })
+  if (hostnames.length > 0)
+    extentions.push({
+      name: 'subjectAltName',
+      altNames: hostnames.map((value) => ({ type: 2, value })),
+    })
 
   /*
    * Generate Root certificate
@@ -104,7 +105,7 @@ export function generateCaRoot(hostnames, name) {
     { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
     { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
     Number(fromEnv('MORIO_ROOT_CA_VALID_YEARS')),
-    extentions,
+    extentions
   )
 
   /*
@@ -114,7 +115,7 @@ export function generateCaRoot(hostnames, name) {
     { ...dflts, commonName: fromEnv('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
     { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
     Number(fromEnv('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
-    extentions,
+    extentions
   )
 
   /*
@@ -145,7 +146,7 @@ export function generateCaRoot(hostnames, name) {
         public: forge.pki.publicKeyToPem(root.keys.publicKey),
         private: encryptPrivateKey(root.keys.privateKey, password),
       },
-      fingerprint: fingerprint.digest().toHex()
+      fingerprint: fingerprint.digest().toHex(),
     },
     intermediate: {
       certificate: forge.pki.certificateToPem(intermediate.cert),
@@ -158,12 +159,13 @@ export function generateCaRoot(hostnames, name) {
   }
 }
 
-const encryptPrivateKey = (key, pwd) => forge.pki.encryptedPrivateKeyToPem(
-  forge.pki.encryptPrivateKeyInfo(
-    forge.pki.wrapRsaPrivateKey(forge.pki.privateKeyToAsn1(key)),
-    pwd
-  ),
-)
+const encryptPrivateKey = (key, pwd) =>
+  forge.pki.encryptedPrivateKeyToPem(
+    forge.pki.encryptPrivateKeyInfo(
+      forge.pki.wrapRsaPrivateKey(forge.pki.privateKeyToAsn1(key)),
+      pwd
+    )
+  )
 
 export const keypairAsJwk = async (pair, pwd) => {
   const keystore = jose.JWK.createKeyStore()
@@ -171,8 +173,6 @@ export const keypairAsJwk = async (pair, pwd) => {
 
   return jwk
 }
-
-
 
 const x509Extentions = {
   ca: [
@@ -183,7 +183,7 @@ const x509Extentions = {
       digitalSignature: true,
       nonRepudiation: true,
       keyEncipherment: true,
-      dataEncipherment: true
+      dataEncipherment: true,
     },
     {
       name: 'extKeyUsage',
@@ -191,7 +191,7 @@ const x509Extentions = {
       clientAuth: true,
       codeSigning: true,
       emailProtection: true,
-      timeStamping: true
+      timeStamping: true,
     },
     {
       name: 'nsCertType',
@@ -201,9 +201,8 @@ const x509Extentions = {
       objsign: true,
       sslCA: true,
       emailCA: true,
-      objCA: true
+      objCA: true,
     },
-    { name: 'subjectKeyIdentifier' }
-  ]
+    { name: 'subjectKeyIdentifier' },
+  ],
 }
-

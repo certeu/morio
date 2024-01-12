@@ -1,52 +1,51 @@
 - package-ecosystem: npm
-  directory: "/"
+  directory: '/'
   assignees: &ass
     - joostdecock
   commit-message: &msg
-    prefix: "[deps]"
-    prefix-development: "[dev-devps]"
+    prefix: '[deps]'
+    prefix-development: '[dev-devps]'
   open-pull-requests-limit: &limit 25
   schedule.interval: &interval weekly
 
 - package-ecosystem: npm
-  directory: "/api"
+  directory: '/api'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
 
 - package-ecosystem: npm
-  directory: "/defaults"
+  directory: '/defaults'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
 
 - package-ecosystem: npm
-  directory: "/sam"
+  directory: '/sam'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
 
 - package-ecosystem: npm
-  directory: "/schema"
+  directory: '/schema'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
 
 - package-ecosystem: npm
-  directory: "/shared"
+  directory: '/shared'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
 
 - package-ecosystem: npm
-  directory: "/ui"
+  directory: '/ui'
   assignees: *ass
   commit-message: *msg
   open-pull-requests-limit: *limit
   schedule.interval: *interval
-

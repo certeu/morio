@@ -206,7 +206,9 @@ export const Suggestion = (props) => {
             <p>Based on the hostname you entered, we estimate this is a good choice:</p>
             <div className="flex flex-row flex-wrap gap-2 items-center">
               {data.ips.map((ip) => (
-                <button key={ip} className="btn btn-info btn-sm">{ip}</button>
+                <button key={ip} className="btn btn-info btn-sm">
+                  {ip}
+                </button>
               ))}
             </div>
           </div>
@@ -222,6 +224,7 @@ export const Suggestion = (props) => {
       }
     }
     if (data === null) runMacro()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [props.viewConfig])
 
   return data

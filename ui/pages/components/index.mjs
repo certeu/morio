@@ -1,7 +1,6 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { PageLink } from 'components/link.mjs'
 import { ComponentIcon, CertificateIcon, MorioIcon, CodeIcon } from 'components/icons.mjs'
 import { Traefik } from 'components/brands.mjs'
 import { Card } from 'components/card.mjs'
@@ -11,7 +10,11 @@ import { Popout } from 'components/popout.mjs'
 const components = {
   ca: (
     <Card
-      title={<span>Certificate Authority <small className="italic text-sm">( SmallStep )</small></span>}
+      title={
+        <span>
+          Certificate Authority <small className="italic text-sm">( SmallStep )</small>
+        </span>
+      }
       href="/components/ca"
       desc="Morio's on-board certificate authority facilitates fully-automated provisioning of X509 certificates."
       width="w-full"
@@ -29,7 +32,11 @@ const components = {
   ),
   traefik: (
     <Card
-      title={<span>Load Balancer <small className="italic text-sm">( Traefik )</small></span>}
+      title={
+        <span>
+          Load Balancer <small className="italic text-sm">( Traefik )</small>
+        </span>
+      }
       href="/components/traefik"
       desc="Morio leverages Traefik for reverse proxying, load balancing, and TLS termination for microservices."
       width="w-full"
@@ -53,7 +60,7 @@ const components = {
       width="w-full"
       Icon={CodeIcon}
     />
-  )
+  ),
 }
 
 const ComponentsPage = (props) => {
@@ -72,15 +79,17 @@ const ComponentsPage = (props) => {
               </div>
             </Tab>
             <Tab key="Optional Components">
-              <p>Once set up, the following components are optional and can be added to Morio at your discretion:</p>
+              <p>
+                Once set up, the following components are optional and can be added to Morio at your
+                discretion:
+              </p>
               <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
                 {components.ui}
               </div>
             </Tab>
             <Tab key="Ephemeral Components">
               <p>
-                When Morio runs in <em>ephemeral mode</em>,
-                the following components will be active:
+                When Morio runs in <em>ephemeral mode</em>, the following components will be active:
               </p>
               <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
                 {components.traefik}
@@ -89,7 +98,8 @@ const ComponentsPage = (props) => {
                 {components.ui}
               </div>
               <Popout note compact>
-                A Morio instance runs in <em>Ephemeral mode</em> until you deploy an initial configuration
+                A Morio instance runs in <em>Ephemeral mode</em> until you deploy an initial
+                configuration
               </Popout>
             </Tab>
           </Tabs>

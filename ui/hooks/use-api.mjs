@@ -2,9 +2,8 @@
  * This is hardcoded for now
  */
 const morioConfig = {
-  api: '/ops/api'
+  api: '/ops/api',
 }
-
 
 /**
  * Constructor for the Morio API client

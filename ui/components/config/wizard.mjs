@@ -1,11 +1,5 @@
 // Dependencies
-import {
-  views,
-  resolveNextView,
-  resolveViewValue,
-  viewInLocation,
-  getView,
-} from './views.mjs'
+import { views, resolveNextView, resolveViewValue, viewInLocation, getView } from './views.mjs'
 import { validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context
@@ -48,8 +42,8 @@ export const ConfigNavigation = ({
 }) => (
   <ul className="list list-inside list-disc ml-4">
     {Object.values(nav)
-      .filter(entry => includeNav(entry, config))
-      .map(entry => (
+      .filter((entry) => includeNav(entry, config))
+      .map((entry) => (
         <li key={entry.id}>
           <button
             className={`btn ${
@@ -123,12 +117,15 @@ export const ConfigurationWizard = ({
   /*
    * Handler method for view state updates
    */
-  const setView = useCallback((configPath) => {
-    _setView((prev) => ({
-      ...prev,
-      pathname: configPathAsView(configPath, prefix),
-    }))
-  }, [_setView, prefix])
+  const setView = useCallback(
+    (configPath) => {
+      _setView((prev) => ({
+        ...prev,
+        pathname: configPathAsView(configPath, prefix),
+      }))
+    },
+    [_setView, prefix]
+  )
 
   /*
    * Effect for preloading the view

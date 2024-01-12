@@ -59,19 +59,19 @@ const links = {
   components: {
     subs: {
       api: {
-        title: 'Operator API'
+        title: 'Operator API',
       },
       ca: {
-        title: 'Certificate Authority'
+        title: 'Certificate Authority',
       },
       core: {
         title: 'Morio Core',
       },
       traefik: {
-        title: 'Load Balancer'
+        title: 'Load Balancer',
       },
       ui: {
-        title: 'Web Interface'
+        title: 'Web Interface',
       },
     },
   },
@@ -112,7 +112,7 @@ const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length
  */
 export const NavButton = ({
   subs,
-  title=false,
+  title = false,
   current,
   target,
   parents,
@@ -164,6 +164,7 @@ export const NavButton = ({
       {active && subs
         ? Object.entries(subs).map(([key, nav]) => (
             <NavButton
+              key={key}
               subs={nav.children}
               title={nav.title}
               target={key}
@@ -206,7 +207,14 @@ export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => 
   if (!navs) navs = links
   const list = []
   for (const [key, nav] of Object.entries(navs))
-    list.push(<NavButton title={nav.title} subs={nav.subs} target={key} {...{ current, key, parents, level }} />)
+    list.push(
+      <NavButton
+        title={nav.title}
+        subs={nav.subs}
+        target={key}
+        {...{ current, key, parents, level }}
+      />
+    )
 
   return list
 }

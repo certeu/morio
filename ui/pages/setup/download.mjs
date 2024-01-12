@@ -1,5 +1,6 @@
 // Dependencies
 import { isUri, download } from 'lib/utils.mjs'
+import yaml from 'js-yaml'
 // Hooks
 import { useState } from 'react'
 // Components
@@ -14,27 +15,25 @@ const ConfigUploadPage = (props) => {
    */
   const [uri, setUri] = useState() // Holds the uri input
   const [config, setConfig] = useState() // Holds the uploaded data parsed into a config
-  const [validationReport, setValidationReport] = useState(false) // Holds the validation report
-  const [error, setError] = useState(false)
 
   /*
    * Download handler
    */
-  const processDownload = async (upload) => {
-    let result, data
+  const processDownload = async () => {
+    let result
     try {
-      ;[result, data] = await download(uri)
+      result = await download(uri)
       // Could be JSON
-      data = JSON.parse(data)
+      result = JSON.parse(result[1])
     } catch (err) {
       try {
         // Could be YAML
-        data = yaml.read(data)
+        result = yaml.read(result[1])
       } catch (err) {
-        setError(err)
+        console.log(err)
       }
     }
-    setConfig(data)
+    setConfig(result)
   }
 
   return (

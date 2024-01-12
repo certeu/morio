@@ -3,7 +3,7 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { PageLink, WebLink } from 'components/link.mjs'
+import { WebLink } from 'components/link.mjs'
 import { CertificateIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -26,6 +26,7 @@ const CaPage = (props) => {
       if (configStatus === 200) setConfig(configContent)
     }
     if (!root) loadRoot()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   return (

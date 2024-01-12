@@ -1,5 +1,3 @@
-import { useState, useEffect } from 'react'
-import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
@@ -7,7 +5,6 @@ import { DesktopIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 
 const UiPage = (props) => {
-
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={DesktopIcon} title={props.title}>
@@ -19,8 +16,8 @@ const UiPage = (props) => {
           <Popout note>
             <h5>This is an optional component</h5>
             <p>
-              You can elect to run Morio in <em>headless</em> mode,
-              in which case the Morio Web Interface will be enabled.
+              You can elect to run Morio in <em>headless</em> mode, in which case the Morio Web
+              Interface will be enabled.
             </p>
           </Popout>
         </div>

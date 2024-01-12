@@ -3,7 +3,7 @@ container:
   tag: 0.25.2
   container_name: morio_ca
   network: morio_net
-  ports: 
+  ports:
     - 9000:9000
   volumes:
     - '{{{ MORIO_REPO_ROOT }}}/data/ca:/home/step'
@@ -34,8 +34,8 @@ server:
   federatedRoots: null
   crt: /home/step/certs/intermediate_ca.crt
   key: /home/step/secrets/intermediate_ca_key
-  address: ":9000"
-  insecureAddress: ""
+  address: ':9000'
+  insecureAddress: ''
   dnsNames:
     - localhost
     - morio_ca
@@ -61,7 +61,7 @@ server:
       - type: ACME
         name: acme
         forceCN: true
-        challenges: 
+        challenges:
           - http-01
           - dns-01
           - tls-alpn-01
