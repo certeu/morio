@@ -82,5 +82,10 @@ export function routes(tools) {
   /*
    * API route for deploying a new configuration
    */
-  app.post(`${PREFIX}/deploy`,            (req, res) => Core.deploy(req, res, tools))
+  app.post(`${PREFIX}/deploy`, (req, res) => Core.deploy(req, res, tools))
+
+  /*
+   * Hit this route to get the ca root certificate and fingerprint
+   */
+  app.get(`${PREFIX}/ca/root`, (req, res) => Core.getCaRoot(req, res, tools))
 }

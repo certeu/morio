@@ -9,24 +9,6 @@ import { useDropzone } from 'react-dropzone'
 import { OkIcon } from 'components/icons.mjs'
 
 /*
- * Helper component to display a tab heading
- */
-export const _Tab = ({
-  id, // The tab ID
-  label, // A label for the tab, if not set we'll use the ID
-  activeTab, // Which tab (id) is active
-  setActiveTab, // Method to set the active tab
-}) => (
-  <button
-    className={`text-lg font-bold capitalize tab tab-bordered grow
-    ${activeTab === id ? 'tab-active' : ''}`}
-    onClick={() => setActiveTab(id)}
-  >
-    {label ? label : id}
-  </button>
-)
-
-/*
  * Helper component to wrap a form control with a label
  */
 export const FormControl = ({

@@ -22,4 +22,9 @@ export function routes(tools) {
    * Hit this route to get the Morio status
    */
   app.get(`${PREFIX}/status`, (req, res) => Status.status(req, res, tools))
+
+  /*
+   * Hit this route to get the running config
+   */
+  app.get(`${PREFIX}/configs/current`, (req, res) => res.send(tools.config))
 }

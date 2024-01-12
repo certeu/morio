@@ -17,17 +17,17 @@ container:
     # Attach to the morio_net network
     - traefik.docker.network=morio_net
     # Match requests going to the CA root certificate
-    - traefik.http.routers.morio_ca.rule=PathPrefix(`/roots.pem`)
+    - traefik.http.routers.morio_ca.rule=PathPrefix(`/root` || `/acme` || `/well-known`)
     # Set priority to avoid rule conflicts
     - traefik.http.routers.morio_ca.priority=120
     # Forward to the CA api
     - traefik.http.routers.morio_ca.service=morio_ca
-    # Only match requests on the https endpoint
-    - traefik.http.routers.morio_ca.entrypoints=https
     # Forward to port on container
     - traefik.http.services.morio_ca.loadbalancer.server.port=9000
     # Enable TLS
     - traefik.http.routers.morio_ca.tls=true
+    # Enable backend TLS
+    - traefik.http.services.morio_ca.loadbalancer.server.scheme=https
 
 server:
   root: /home/step/certs/root_ca.crt
@@ -58,6 +58,13 @@ server:
         name: admin
         key: null
         encryptedKey: null
+      - type: ACME
+        name: acme
+        forceCN: true
+        challenges: 
+          - http-01
+          - dns-01
+          - tls-alpn-01
   tls:
     cipherSuites:
       - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256

@@ -28,6 +28,9 @@ container:
     - '--accesslog=true'
     # Set the access log destination
     - '--accesslog.filePath={{{ MORIO_TRAEFIK_ACCESS_LOG_FILEPATH }}}'
+    # Do not verify backend certificates, just encrypt
+    - '--serversTransport.insecureSkipVerify=true'
+
   labels:
     # Tell traefik to watch itself (so meta)
     - traefik.enable=true

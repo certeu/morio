@@ -66,6 +66,19 @@ Controller.prototype.createDockerResource = async (req, res, tools, path) => {
 }
 
 /**
+ * Gets CA root certificate and fingerprint from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.getCaRoot = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/ca/root`)
+
+  return res.status(status).send(result)
+}
+
+/**
  * Gets docker image data from core
  *
  * @param {object} req - The request object from Express

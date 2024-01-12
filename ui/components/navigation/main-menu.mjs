@@ -55,6 +55,7 @@ const links = {
   },
   components: {
     subs: {
+      ca: {},
       traefik: {},
     },
   },

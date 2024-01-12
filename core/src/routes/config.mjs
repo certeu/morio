@@ -33,6 +33,11 @@ export function routes(tools) {
   app.get('/configs/current', (req, res) => Config.getCurrentConfig(req, res, tools))
 
   /*
+   * Load the CA configuration
+   */
+  app.get('/configs/ca', (req, res) => Config.getCaConfig(req, res, tools))
+
+  /*
    * Load a confiration by timestamp
    */
   app.get('/configs/:timestamp', (req, res) => Config.getConfig(req, res, tools))

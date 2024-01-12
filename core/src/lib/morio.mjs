@@ -24,7 +24,7 @@ import {
 } from '#lib/docker'
 
 /*
- * Plain object with bootstrap mathods for those services that require them
+ * Plain object with bootstrap methods for those services that require them
  */
 export const bootstrap = {
   /*
@@ -34,11 +34,28 @@ export const bootstrap = {
    */
   ca: async (tools) => {
     /*
-     * We'll check if there's a CA config file on disk
-     * If so, we return early as there's nothing to be done
+     * We'll check if there's a defaults ca-cli config file on disk
+     * If so, the CA has already been initialized
      */
-    const bootstrapped = await readJsonFile('/morio/data/ca/config/ca.json')
-    if (bootstrapped && bootstrapped.root) return
+    const bootstrapped = await readJsonFile('/morio/data/ca/config/defaults.json')
+
+    /*
+     * Store fingerprint for easy access
+     */
+    tools.ca = { fingerprint: bootstrapped.fingerprint }
+
+    /*
+     * If the CA is initialized, return early
+     */
+    if (bootstrapped && bootstrapped.fingerprint) {
+      /*
+       * Load the root certficate, then return early
+       */
+      const root = await readFile('/morio/data/ca/certs/root_ca.crt')
+      tools.ca.certificate = root
+
+      return tools
+    }
 
     /*
      * No config, generate configuration, keys, serts, and secrets file
@@ -49,6 +66,14 @@ export const bootstrap = {
      * Generate keys and certificates
      */
     const init = await generateCaRoot(tools.config.morio.nodes, tools.config.morio.display_name)
+
+    /*
+     * Store root certificate and fingerprint in tools
+     */
+    tools.ca = {
+      fingerprint: init.root.fingerprint,
+      certificate: init.root.certificate
+    }
 
     /*
      * Load Morio's CA config file
@@ -327,6 +352,22 @@ export const logStartedConfig = (tools) => {
 }
 
 /**
+ * An object mapping objects to preconfigure services for those who need it
+ */
+const preconfigureService = {
+  traefik: (serviceConfig, tools) => {
+    console.log('about to preconfigure traefik', serviceConfig, tools.config)
+    //# Enable ACME certificate resolver (will only work after CA is initialized)
+    //- '--certificatesresolvers.morio_ca.acme.email=joost.decock@cert.europa.eu'
+    //- '--certificatesresolvers.morio_ca.acme.storage=acme.json'
+    //- '--certificatesresolvers.morio_ca.acme.httpchallenge.entrypoint=web'
+    //- '--certificatesresolvers.morio_ca.acme.caserver=https://morio_ca:9000/acme/acme/directory
+
+    return serviceConfig
+  }
+}
+
+/**
  * Client for the Morio API
  */
 export const morioClient = restClient(
@@ -345,10 +386,13 @@ export const morioClient = restClient(
  * @param {string} configFile - Basename of the config file. Eg: 'api' will load 'config/api.yaml'
  * @return {object} obj - The templated config
  */
-export const resolveServiceConfig = async (name, log) => {
-  const content = await readFile(`../config/${name}.yaml`, (err) => log.error(err))
+export const resolveServiceConfig = async (name, tools) => {
+  const content = await readFile(`../config/${name}.yaml`, (err) => tools.log.error(err))
+  const serviceConfig = yaml.load(mustache.render(content, defaults))
 
-  return yaml.load(mustache.render(content, defaults))
+  return preconfigureService[name]
+    ? preconfigureService[name](serviceConfig, tools)
+    : serviceConfig
 }
 
 /**

@@ -1,5 +1,5 @@
 import j2s from 'joi-to-swagger'
-import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
+import { responseSchema } from '../src/schema.mjs'
 import { fromEnv } from '#shared/env'
 
 const PREFIX = fromEnv('MORIO_API_PREFIX')
@@ -7,33 +7,6 @@ const PREFIX = fromEnv('MORIO_API_PREFIX')
 const shared = {
   tags: ['Status'],
 }
-
-const request = (description, key, examples = false, example = false) => {
-  const data = {
-    requestBody: {
-      description,
-      content: {
-        'application/json': {
-          schema: j2s(requestSchema.setup[key]).swagger,
-        },
-      },
-    },
-  }
-  if (examples) data.requestBody.content['application/json'].examples = examples
-  else if (example) data.requestBody.content['application/json'].example = example
-
-  return data
-}
-
-const response = (description, schema, example = {}) => ({
-  description,
-  content: {
-    'application/json': {
-      schema: j2s(schema).swagger,
-      example,
-    },
-  },
-})
 
 /*
  * You cannot use a template string as an object key in Javascript.
@@ -67,6 +40,60 @@ export const paths = {
                     uptime_seconds: 30.761,
                     setup: false,
                   },
+                },
+                'After setup': {
+                  value: {
+                    fixme: 'Not implemented yet',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  [`${PREFIX}/ca/root`]: {
+    get: {
+      ...shared,
+      summary: `Returns the CA root certificate and fingerprint`,
+      description: `Returns the current Morio configuration that is running.`,
+      responses: {
+        200: {
+          description: 'Configuration returned successfully',
+          content: {
+            'application/json': {
+              schema: j2s(responseSchema.status).swagger,
+              examples: {
+                'Before setup': {
+                  value: {}
+                },
+                'After setup': {
+                  value: {
+                    fixme: 'Not implemented yet',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  [`${PREFIX}/configs/current`]: {
+    get: {
+      ...shared,
+      summary: `Returns the current Morio configuration`,
+      description: `Returns the current Morio configuration that is running.`,
+      responses: {
+        200: {
+          description: 'Configuration returned successfully',
+          content: {
+            'application/json': {
+              schema: j2s(responseSchema.status).swagger,
+              examples: {
+                'Before setup': {
+                  value: {}
                 },
                 'After setup': {
                   value: {

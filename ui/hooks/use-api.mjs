@@ -1,4 +1,10 @@
-import morioConfig from 'ui/morio.json' assert { type: 'json' }
+/*
+ * This is hardcoded for now
+ */
+const morioConfig = {
+  api: '/morio/api'
+}
+
 
 /**
  * Constructor for the Morio API client
@@ -40,6 +46,24 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
   }
 
   return [result, response?.status]
+}
+
+/**
+ * Gets the crrent configuration
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getCurrentConfig = async function () {
+  return await this.call(`${morioConfig.api}/configs/current`)
+}
+
+/**
+ * Gets the CA root
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getCaRoot = async function () {
+  return await this.call(`${morioConfig.api}/ca/root`)
 }
 
 /**

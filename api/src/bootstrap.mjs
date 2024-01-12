@@ -46,7 +46,7 @@ export const bootstrapConfiguration = async () => {
       start_time: Date.now(),
       version: pkg.version,
     },
-    config: config[0] === 200 ? config[1] : {},
+    config,
     defaults: defaults[0] === 200 ? defaults[1] : {},
     log,
     prefix: fromEnv('MORIO_API_PREFIX'),

@@ -92,6 +92,17 @@ Controller.prototype.deploy = async (req, res, tools) => {
   }
 
   /*
+   * Make sure all services are present
+   */
+  if (!config.api) config.api = true
+  if (!config.ui && !config.morio.headless) config.ui = true
+  if (!config.traefik) config.traefik = {
+    container: {
+    }
+  }
+  if (tools.running_config && !config.ca) config.ca = true
+
+  /*
    * Now write the config to disk
    */
   tools.log.debug(`Writing configuration to morio.${time}.yaml`)

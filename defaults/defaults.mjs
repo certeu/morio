@@ -248,7 +248,7 @@ export const defaults = {
   /*
    * Access log filepath for Traefik (path used inside the container)
    */
-  MORIO_TRAEFIK_ACCESSLOG_FILEPATH: '/var/log/morio/morio_traefik.access.log',
+  MORIO_TRAEFIK_ACCESS_LOG_FILEPATH: '/var/log/morio/morio_traefik.access.log',
 
   /*
    * Log filepath for Traefik (path used inside the container)

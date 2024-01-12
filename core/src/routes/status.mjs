@@ -20,4 +20,9 @@ export function routes(tools) {
    * Hit this route to get the MORIO status
    */
   app.get('/status', (req, res) => Status.status(req, res, tools))
+
+  /*
+   * Hit this route to get the MORIO status
+   */
+  app.get('/ca/root', (req, res) => res.send(tools.ca))
 }
