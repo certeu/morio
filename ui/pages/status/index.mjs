@@ -1,7 +1,6 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { PageLink } from 'components/link.mjs'
 import { StatusIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 

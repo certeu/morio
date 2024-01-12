@@ -1,6 +1,6 @@
 # Morio api
 
-This is the Morio Management API, or **api** for short.  
+This is the Morio Operator API, or **api** for short.  
 It is a REST API built with [Express](https://expressjs.com/).
 
 ## Getting Started

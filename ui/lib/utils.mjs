@@ -63,7 +63,7 @@ export const download = async (
     result = await fetch(url, { method: 'GET', signal: proChoice.signal })
   } catch (err) {
     clearTimeout(timeout)
-    result = [false, `Failed to download URL: ${host}`]
+    result = [false, `Failed to download URL: ${url}`]
   }
   clearTimeout(timeout)
 

@@ -1,34 +1,26 @@
 // Dependencies
 import {
   views,
-  keys,
   resolveNextView,
   resolveViewValue,
   viewInLocation,
   getView,
 } from './views.mjs'
-import { template, validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
+import { validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect, useCallback } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
-import { useView } from 'hooks/use-view.mjs'
 import { useAtom } from 'jotai'
 // Components
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
-import Markdown from 'react-markdown'
 import { Block } from './blocks/index.mjs'
-import { PageLink } from 'components/link.mjs'
-import { Popout } from 'components/popout.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport, DeploymentReport } from './report.mjs'
-import { NavButton } from 'components/layout/sidebar.mjs'
-import { LeftIcon, RightIcon, ConfigurationIcon, OkIcon } from 'components/icons.mjs'
-
-const guessOwnIp = async () => {}
+import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
 
 const includeNav = (entry, config) => {
   if (typeof entry.hide === 'undefined') return true
@@ -38,7 +30,6 @@ const includeNav = (entry, config) => {
      * If next holds an object with an if property, resolve the condition
      */
     if (entry.hide.if && entry.hide.if.val) {
-      const result = entry.hide.is === resolveViewValue(entry.hide.if, config)
       return entry.hide.is === resolveViewValue(entry.hide.if, config) ? false : true
     }
   }
@@ -56,9 +47,9 @@ export const ConfigNavigation = ({
   config, // The current configuration
 }) => (
   <ul className="list list-inside list-disc ml-4">
-    {Object.entries(nav)
-      .filter(([key, entry]) => includeNav(entry, config))
-      .map(([key, entry]) => (
+    {Object.values(nav)
+      .filter(entry => includeNav(entry, config))
+      .map(entry => (
         <li key={entry.id}>
           <button
             className={`btn ${
@@ -132,19 +123,19 @@ export const ConfigurationWizard = ({
   /*
    * Handler method for view state updates
    */
-  const setView = (configPath) => {
+  const setView = useCallback((configPath) => {
     _setView((prev) => ({
       ...prev,
       pathname: configPathAsView(configPath, prefix),
     }))
-  }
+  }, [_setView, prefix])
 
   /*
    * Effect for preloading the view
    */
   useEffect(() => {
     if (preloadView && preloadView !== view) setView(preloadView)
-  }, [preloadView])
+  }, [preloadView, view, setView])
 
   /*
    * API client
@@ -154,7 +145,7 @@ export const ConfigurationWizard = ({
   /*
    * Loading context
    */
-  const { setLoadingStatus, loading, LoadingProgress } = useContext(LoadingStatusContext)
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   /*
    * Helper method to load a block into the wizard
@@ -176,7 +167,7 @@ export const ConfigurationWizard = ({
   /*
    * Helper method to update the configuration and set valid status
    */
-  const updateConfig = (val, key = false) => {
+  const updateConfig = (val) => {
     /*
      * Always update config
      */

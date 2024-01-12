@@ -51,7 +51,7 @@ export const ConfigReport = ({ report }) => (
  * A React compnent to display a deployment (request) report
  */
 export const DeploymentReport = ({ result }) => {
-  const { setModal, clearModal, modalContent } = useContext(ModalContext)
+  const { setModal } = useContext(ModalContext)
 
   return result.result === 'success' ? (
     <>

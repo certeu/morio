@@ -11,13 +11,10 @@ const names = {
 
 export const Highlight = (props) => {
   let language = 'txt'
-  let status = false
   if (props.language) language = props.language
   if (props.children?.props?.className) {
     language = props.children.props.className.split('-').pop()
-    if (language.indexOf('.') !== -1) {
-      ;[status, language] = language.split('.')
-    }
+    if (language.indexOf('.') !== -1) language = language.split('.')[0]
   }
 
   const preProps = {

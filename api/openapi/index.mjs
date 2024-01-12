@@ -5,7 +5,7 @@ import { paths as validate } from './validate.mjs'
 import { paths as docker } from './docker.mjs'
 
 const description = `
-## What am I looking at?  🤔
+## What am I looking at?
 This is reference documentation of the morio API.
 It is auto-generated from this API's OpenAPI v3 specification.
 
@@ -15,7 +15,7 @@ To learn more about morio, visit [the GitHub repository](https://github.com/cert
 export const openapi = {
   openapi: '3.0.3',
   info: {
-    title: 'Morio API',
+    title: 'Morio Operator API',
     description,
     termsOfService: 'FIXME: Do we need terms of service?',
     contact: {

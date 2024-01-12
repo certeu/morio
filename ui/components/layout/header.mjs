@@ -1,8 +1,7 @@
 // Components
 import Link from 'next/link'
-import { MenuIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
+import { LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { MorioLogo } from 'components/logos/morio.mjs'
-import { iconSize } from 'lib/utils.mjs'
 
 export const NavButton = ({
   href,
@@ -47,19 +46,16 @@ export const Header = ({
             <MorioLogo className="h-8" noLine />
           </Link>
           <div className="grow pl-4 justify-start flex flex-row">
-            <NavButton href="/apis" label="Configuration" extraClasses="hidden lg:flex">
-              APIs
-            </NavButton>
             <NavButton href="/components" label="Components" extraClasses="hidden lg:flex">
               components
             </NavButton>
-            <NavButton href="/config" label="Components" extraClasses="hidden lg:flex">
-              Config
+            <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
+              Configuration
             </NavButton>
-            <NavButton href="/docker" label="Components" extraClasses="hidden lg:flex">
+            <NavButton href="/docker" label="Docker" extraClasses="hidden lg:flex">
               Docker
             </NavButton>
-            <NavButton href="/status" label="Components" extraClasses="hidden lg:flex">
+            <NavButton href="/status" label="Status" extraClasses="hidden lg:flex">
               Status
             </NavButton>
           </div>

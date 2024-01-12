@@ -1,12 +1,9 @@
 // Hooks
-import { useContext, useState, useCallback } from 'react'
-// Context
-import { LoadingStatusContext } from 'context/loading-status.mjs'
+import { useCallback } from 'react'
 // Components
-import { Tabs, Tab } from 'components/tabs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon } from 'components/icons.mjs'
+import { OkIcon, ResetIcon } from 'components/icons.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -127,7 +124,7 @@ export const NumberInput = ({
   min = 220,
   step = 1,
 }) => (
-  <FormControl {...{ label, labelBL, labelBR }} forId={id}>
+  <FormControl {...{ label, labelBL, labelBR, labelTR }} forId={id}>
     <input
       id={id}
       type="number"
@@ -244,11 +241,6 @@ export const FileInput = ({
   dropzoneConfig = {}, // Configuration for react-dropzone
 }) => {
   /*
-   * Loading context
-   */
-  const { setLoadingStatus } = useContext(LoadingStatusContext)
-
-  /*
    * Ondrop handler
    */
   const onDrop = useCallback(
@@ -257,7 +249,7 @@ export const FileInput = ({
       reader.onload = async () => update(reader.result)
       acceptedFiles.forEach((file) => reader.readAsDataURL(file))
     },
-    [current]
+    [update]
   )
 
   /*

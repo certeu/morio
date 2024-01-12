@@ -6,7 +6,7 @@ export const Card = ({ title, desc, href, Icon = null, width = 'w-72' }) => (
     href={href}
     title={title}
   >
-    <h3 className="capitalize text-base-content flex flex-row gap-2 items-center justify-between">
+    <h3 className="capitalize text-base-content flex flex-row gap-2 items-center justify-between text-2xl">
       {title}
       <Icon className="w-8 h-8 shrink-0 grow-0" />
     </h3>

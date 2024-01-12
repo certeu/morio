@@ -78,7 +78,7 @@ export const bootstrap = {
     /*
      * Load Morio's CA config file
      */
-    const stepConfig = await readYamlFile('../config/ca.yaml', (err) => console.log(err))
+    const stepConfig = await readYamlFile('../config/ca.yaml', (err) => tools.log.warn(err))
 
     /*
      * Construct step-ca (server) configuration
@@ -356,7 +356,6 @@ export const logStartedConfig = (tools) => {
  */
 const preconfigureService = {
   traefik: (serviceConfig, tools) => {
-    console.log('about to preconfigure traefik', serviceConfig, tools.config)
     //# Enable ACME certificate resolver (will only work after CA is initialized)
     //- '--certificatesresolvers.morio_ca.acme.email=joost.decock@cert.europa.eu'
     //- '--certificatesresolvers.morio_ca.acme.storage=acme.json'

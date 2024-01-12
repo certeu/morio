@@ -2,7 +2,7 @@
  * This is hardcoded for now
  */
 const morioConfig = {
-  api: '/morio/api'
+  api: '/ops/api'
 }
 
 
@@ -200,11 +200,14 @@ MorioClient.prototype.killContainer = async function (id) {
   return await this.changeContainerState(id, 'kill')
 }
 
+/*
+ * Don't recreate the client on each call
+ */
+const api = new MorioClient()
+
 /**
  * The useApi React hook
  */
 export function useApi() {
-  return {
-    api: new MorioClient(),
-  }
+  return { api }
 }

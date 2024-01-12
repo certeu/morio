@@ -1,14 +1,14 @@
 // Dependencies
 import { capitalize } from 'lib/utils.mjs'
-// Hooks
-import { useState } from 'react'
 // Components
 import {
+  CertificateIcon,
   ComponentIcon,
   CodeIcon,
   ConfigurationIcon,
   ContainerIcon,
   ContainerImageIcon,
+  DesktopIcon,
   LayersIcon,
   MorioIcon,
   ServersIcon,
@@ -17,7 +17,7 @@ import {
   TaskIcon,
   WifiIcon,
 } from 'components/icons.mjs'
-import { Docker } from 'components/brands.mjs'
+import { Docker, Traefik } from 'components/brands.mjs'
 import { Link } from 'components/link'
 
 /*
@@ -29,7 +29,9 @@ export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
  * Object to map icons to page
  */
 const icons = {
-  APIs: CodeIcon,
+  api: CodeIcon,
+  ca: CertificateIcon,
+  core: MorioIcon,
   components: ComponentIcon,
   config: ConfigurationIcon,
   docker: Docker,
@@ -40,26 +42,42 @@ const icons = {
   nodes: ServersIcon,
   services: LayersIcon,
   tasks: TaskIcon,
+  traefik: Traefik,
+  ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
 }
 
 /*
+ * Object to match titles to a page
+ */
+
+/*
  * This object represents the navigation structure
  */
 const links = {
-  APIs: {
-    subs: {
-      morio: {},
-    },
-  },
   components: {
     subs: {
-      ca: {},
-      traefik: {},
+      api: {
+        title: 'Operator API'
+      },
+      ca: {
+        title: 'Certificate Authority'
+      },
+      core: {
+        title: 'Morio Core',
+      },
+      traefik: {
+        title: 'Load Balancer'
+      },
+      ui: {
+        title: 'Web Interface'
+      },
     },
   },
-  config: {},
+  config: {
+    title: 'Configuration',
+  },
   docker: {
     subs: {
       containers: {},
@@ -94,6 +112,7 @@ const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length
  */
 export const NavButton = ({
   subs,
+  title=false,
   current,
   target,
   parents,
@@ -102,15 +121,10 @@ export const NavButton = ({
   extraClasses = 'lg:hover:bg-secondary lg:hover:text-secondary-content',
 }) => {
   /*
-   * Allow sub pages to be toggles
-   */
-  const [open, setOpen] = useState(false)
-
-  /*
    * Pre-calculate some things we need
    */
   const href = getHref(target, parents)
-  const title = getTitle(target)
+  const linkTitle = title ? title : capitalize(target)
   const active = isActive(href, current)
   const here = `/${current.join('/')}` === href
   const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
@@ -122,7 +136,7 @@ export const NavButton = ({
   }`
   const span = (
     <span className="block grow text-left" style={{ paddingLeft: level * 8 + 'px' }}>
-      {title}
+      {linkTitle}
     </span>
   )
   const Icon = icons[target] || Null
@@ -151,6 +165,7 @@ export const NavButton = ({
         ? Object.entries(subs).map(([key, nav]) => (
             <NavButton
               subs={nav.children}
+              title={nav.title}
               target={key}
               level={level + 1}
               parents={[...parents, target]}
@@ -178,16 +193,6 @@ const getHref = (page, parents = [], slug = false) =>
       : `/${page}`.toLowerCase()
 
 /**
- * Helper method to retrieve the title/label
- *
- * @param {string} page - The page key in the nav object
- * @parent {string} slug - The page slug (alternative way to call this method)
- * @return {string} title - The title for this page
- */
-const getTitle = (page, slug = false) =>
-  slug ? capitalize(slug.split('/').pop()) : capitalize(page)
-
-/**
  * This is the MainMenu component that renders the main navigation menu
  *
  * It will call itself recursively when it encountes subs in the navs object
@@ -201,7 +206,7 @@ export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => 
   if (!navs) navs = links
   const list = []
   for (const [key, nav] of Object.entries(navs))
-    list.push(<NavButton subs={nav.subs} target={key} {...{ current, key, parents, level }} />)
+    list.push(<NavButton title={nav.title} subs={nav.subs} target={key} {...{ current, key, parents, level }} />)
 
   return list
 }

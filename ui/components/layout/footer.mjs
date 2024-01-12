@@ -1,5 +1,4 @@
 // Components
-import { WebLink } from 'components/link.mjs'
 import { MorioLogo } from 'components/logos/morio.mjs'
 
 const spacer = <span className="px-2 text-neutral-content font-bold">&middot;</span>

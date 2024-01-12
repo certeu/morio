@@ -5,7 +5,6 @@ const colors = {
   comment: 'secondary',
   note: 'primary',
   tip: 'accent',
-  error: 'error',
   warning: 'error',
   error: 'error',
   fixme: 'warning',

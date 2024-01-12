@@ -1,7 +1,7 @@
 {
   "name": "@morio/api",
   "version": "0.1.0",
-  "description": "Morio Management API (API)",
+  "description": "Morio Operator API (API)",
   "private": true,
   "scripts": {
     "build": "node build.mjs",

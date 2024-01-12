@@ -13,7 +13,7 @@ const ApisPage = (props) => {
           <Card
             title="Morio"
             href="/apis/morio"
-            desc="Morio's own management API allows you to configure your Morio instance or cluster."
+            desc="Morio's own operator API allows you to configure your Morio instance or cluster."
             width="w-1/2"
             Icon={MorioIcon}
           />

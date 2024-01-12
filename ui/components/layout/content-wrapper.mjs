@@ -1,6 +1,6 @@
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 
-export const ContentWrapper = ({ page, title, Icon, children = null, iconAsIs }) => (
+export const ContentWrapper = ({ page, title, Icon, children = null }) => (
   <div className="p-8 w-full">
     <Breadcrumbs page={page} />
     <div className="w-full">

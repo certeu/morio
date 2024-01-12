@@ -142,6 +142,15 @@ export const EmailIcon = (props) => (
 )
 
 /*
+ * DesktopIcon - Looks like a (mac) desktop
+ */
+export const DesktopIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M9 17.25v1.007a3 3 0 0 1-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0 1 15 18.257V17.25m6-12V15a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 15V5.25m18 0A2.25 2.25 0 0 0 18.75 3H5.25A2.25 2.25 0 0 0 3 5.25m18 0V12a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 12V5.25" />
+  </IconWrapper>
+)
+
+/*
  * FixmeIcon - Looks like the sun
  */
 export const FixmeIcon = (props) => (
@@ -255,6 +264,15 @@ export const PlayIcon = (props) => (
 export const PauseIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+  </IconWrapper>
+)
+
+/*
+ * ResetIcon - Looks like a circular back arrow
+ */
+export const ResetIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="m 2.447878,2.716835 v 4.38448 h 4.38448 M 3.1307,6.882055 c 1.771085,-3.0536 5.075566,-5.10727 8.859706,-5.10727 5.65253,0 10.234811,4.58228 10.234811,10.23481 0,5.65253 -4.582281,10.23481 -10.234811,10.23481 -5.440329,0 -9.889258,-4.24469 -10.215624,-9.60291" />
   </IconWrapper>
 )
 

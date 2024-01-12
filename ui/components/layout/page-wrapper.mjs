@@ -22,11 +22,6 @@ export const PageWrapper = ({
   title = false,
 }) => {
   /*
-   * Create slug from page array
-   */
-  const slug = page.join('/')
-
-  /*
    * Contexts that are provided to all pages
    * - Modal: Simple access to modal window
    * - Loading: Simple access to loading indicator
@@ -41,8 +36,8 @@ export const PageWrapper = ({
   const { theme, toggleTheme } = useTheme()
   const [currentTheme, setCurrentTheme] = useState()
   useEffect(() => {
-    setCurrentTheme(theme), [currentTheme, theme]
-  })
+    if (currentTheme !== theme) setCurrentTheme(theme)
+  }, [currentTheme, theme],)
 
   /*
    * Make layout prop into a (uppercase) component

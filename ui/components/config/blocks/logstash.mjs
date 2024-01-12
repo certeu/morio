@@ -9,7 +9,6 @@ import {
   SparklesIcon,
   TrashIcon,
 } from 'components/icons.mjs'
-import { Popout } from 'components/popout.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
@@ -42,7 +41,7 @@ const BlockItem = ({ title, about, id, desc = false }) => (
   </details>
 )
 
-export const LogstashInputs = ({ config, viewConfig, update }) => {
+export const LogstashInputs = ({ config, viewConfig }) => {
   const current = get(config, viewConfig.id, false)
   return (
     <>
@@ -69,11 +68,11 @@ export const LogstashInputs = ({ config, viewConfig, update }) => {
   )
 }
 
-export const LogstashInput = ({}) => {
+export const LogstashInput = () => {
   return <p>Logstash input here</p>
 }
 
-export const LogstashOutputs = ({ config, viewConfig, update }) => {
+export const LogstashOutputs = ({ config, viewConfig }) => {
   const current = get(config, viewConfig.id, false)
   return (
     <>
@@ -100,34 +99,34 @@ export const LogstashOutputs = ({ config, viewConfig, update }) => {
   )
 }
 
-export const LogstashOutput = ({}) => {
+export const LogstashOutput = () => {
   return <p>Logstash output here</p>
 }
 
-export const LogstashPipelines = ({}) => {
+export const LogstashPipelines = () => {
   return <p>Logstash pipelines here</p>
 }
 
-export const LogstashPipeline = ({}) => {
+export const LogstashPipeline = () => {
   return <p>Logstash pipeline here</p>
 }
 
-export const LogstashInputAzureEventHubs = ({}) => {
+export const LogstashInputAzureEventHubs = () => {
   return <p>Logstash Azure EventHubs input here</p>
 }
 
-export const LogstashInputAwsCloudwatch = ({}) => {
+export const LogstashInputAwsCloudwatch = () => {
   return <p>Logstash Azure EventHubs input here</p>
 }
 
-export const LogstashInputGenerator = ({}) => {
+export const LogstashInputGenerator = () => {
   return <p>Logstash Generator input here</p>
 }
 
-export const LogstashInputLocalMorio = ({}) => {
+export const LogstashInputLocalMorio = () => {
   return <p>Logstash Local Morio input here</p>
 }
 
-export const LogstashInputRemoteMorio = ({}) => {
+export const LogstashInputRemoteMorio = () => {
   return <p>Logstash Local Morio input here</p>
 }

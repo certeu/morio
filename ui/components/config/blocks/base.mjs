@@ -40,7 +40,6 @@ export const ListBlock = (props) => {
   const {
     config, // Current configuration
     viewConfig, // View configuration
-    update,
   } = props
 
   return (
@@ -69,7 +68,7 @@ export const StringsBlock = (props) => {
    * Keep array in local state and update the config as one block
    */
   const [list, setList] = useState(
-    get(props.config, props.viewConfig.id, [...Array(count).map((val) => '')])
+    get(props.config, props.viewConfig.id, [...Array(count).map(() => '')])
   )
 
   /*
@@ -207,7 +206,7 @@ export const Suggestion = (props) => {
             <p>Based on the hostname you entered, we estimate this is a good choice:</p>
             <div className="flex flex-row flex-wrap gap-2 items-center">
               {data.ips.map((ip) => (
-                <button className="btn btn-info btn-sm">{ip}</button>
+                <button key={ip} className="btn btn-info btn-sm">{ip}</button>
               ))}
             </div>
           </div>
@@ -219,12 +218,10 @@ export const Suggestion = (props) => {
     const runMacro = async () => {
       if (sconf.macro && macros[sconf.macro]) {
         const result = await macros[sconf.macro].call()
-        console.log(result[0])
         if (result[1] === 200) setData(macros[sconf.macro].render({ data: result[0] }))
       }
     }
     if (data === null) runMacro()
-    else console.log('data not null')
   }, [props.viewConfig])
 
   return data

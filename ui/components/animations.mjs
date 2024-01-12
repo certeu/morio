@@ -18,7 +18,7 @@ export const Spinner = ({ className = 'h-6 w-6 animate-spin' }) => (
   </svg>
 )
 
-export const LogoSpinner = ({ className = 'w-full max-w-full max-h-full animate-spin' }) => (
+export const LogoSpinner = () => (
   <svg
     className="w-full max-w-full max-h-full animate-spin"
     xmlns="http://www.w3.org/2000/svg"

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react'
+import React, { useState } from 'react'
 
 export const Tabs = ({ tabs = '', active = 0, children }) => {
   // Keep active tab in state
