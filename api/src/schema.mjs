@@ -16,7 +16,7 @@ const shared = {
  */
 export const requestSchema = {
   setup: {
-    morio: Joi.object({
+    core: Joi.object({
       nodes: Joi.array()
         .items(Joi.string())
         .min(fromEnv('MORIO_CONFIG_NODES_MIN'))
@@ -96,10 +96,10 @@ export const responseSchema = {
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
 
 /*
- * This describes the schema of the morio configuration
+ * This describes the schema of the core configuration
  */
-export const morioSchema = Joi.object({
-  morio: Joi.object({
+export const coreSchema = Joi.object({
+  core: Joi.object({
     display_name: Joi.string().required().min(2).max(255),
     node_count: Joi.number()
       .required()

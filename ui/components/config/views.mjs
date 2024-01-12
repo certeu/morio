@@ -3,7 +3,7 @@ import { template } from 'lib/utils.mjs'
 import { atomWithLocation } from 'jotai-location'
 import get from 'lodash.get'
 // View confgurations
-import morio from 'config/config-wizard/morio.yaml'
+import core from 'config/config-wizard/core.yaml'
 import connect from 'config/config-wizard/logstash.yaml'
 import components from 'config/config-wizard/components.yaml'
 // Component views
@@ -13,7 +13,7 @@ import ca from 'config/config-wizard/ca.yaml'
  * Helper object with all imported view configurations
  */
 const allViews = {
-  morio,
+  core,
   connect,
   components: {
     ...components,

@@ -73,21 +73,22 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
       setConfig(content)
     }
     if (!config) loadConfig()
-  },[])
+  }, [])
 
-  if (config === null) return (
-    <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
-      <div className="flex flex-col items-center justify-between h-screen bg-gradient-to-tr from-primary to-success">
-        <span> </span>
-        <div className="flex flex-col gap-2 text-center">
-          <h5 className="font-bold">MORIO</h5>
-          <MorioIcon className="w-20 h-20 animate-spin mx-auto" />
-          <span className="animate-pulse italic">loading configuration</span>
+  if (config === null)
+    return (
+      <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
+        <div className="flex flex-col items-center justify-between h-screen">
+          <span> </span>
+          <div className="flex flex-col gap-2 text-center">
+            <h5 className="font-bold">MORIO</h5>
+            <MorioIcon className="w-20 h-20 animate-spin mx-auto" />
+            <span className="animate-pulse italic">loading configuration</span>
+          </div>
+          <span> </span>
         </div>
-        <span> </span>
-      </div>
-    </PageWrapper>
-  )
+      </PageWrapper>
+    )
   if (config === false) return <Setup pageProps={pageProps} />
 
   return children
@@ -97,10 +98,9 @@ const HomePage = (props) => {
   const { api } = useApi()
 
   return (
-    <NotUnlessSetup pageProps={props }>
+    <NotUnlessSetup pageProps={props}>
       <PageWrapper {...props}>
-        <ContentWrapper {...props} Icon={MorioIcon} title={props.title}>
-        </ContentWrapper>
+        <ContentWrapper {...props} Icon={MorioIcon} title={props.title}></ContentWrapper>
       </PageWrapper>
     </NotUnlessSetup>
   )

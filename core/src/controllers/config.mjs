@@ -52,7 +52,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Here, we just do a basic check
    */
   const config = req.body
-  if (!config.morio) {
+  if (!config.core) {
     tools.log.warn(`Ingoring request to deploy an invalid configuration`)
     return res.status(400).send({ errors: ['Configuration is not valid'] })
   } else tools.log.debug(`Processing request to deploy a new configuration`)
@@ -72,7 +72,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
     tools.log.debug(`No prior configuration found, generating key pair`)
     const morioRootToken = 'mrt.' + (await randomString(32))
     const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
-    config.morio.key_pair = {
+    config.core.key_pair = {
       public: publicKey,
       private: privateKey,
     }
@@ -86,7 +86,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure we have a keypair
    */
-  if (!config.morio.key_pair?.public || !config.morio.key_pair.private) {
+  if (!config.core.key_pair?.public || !config.core.key_pair.private) {
     tools.log.debug(`Configuration lacks key pair`)
     return res.status(400).send({ errors: ['Configuration lacks key pair'] })
   }
@@ -95,11 +95,11 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Make sure all services are present
    */
   if (!config.api) config.api = true
-  if (!config.ui && !config.morio.headless) config.ui = true
-  if (!config.traefik) config.traefik = {
-    container: {
+  if (!config.ui && !config.core.headless) config.ui = true
+  if (!config.traefik)
+    config.traefik = {
+      container: {},
     }
-  }
   if (tools.running_config && !config.ca) config.ca = true
 
   /*

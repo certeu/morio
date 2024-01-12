@@ -81,7 +81,7 @@ export const ConfigNavigation = ({
 /**
  * A helper method to turn a wizard url into a config path
  *
- * Eg: Turns morio.node_count into `${prefix}/morio/node_count`
+ * Eg: Turns core.node_count into `${prefix}/core/node_count`
  *
  * @param {string} url
  */
@@ -96,7 +96,7 @@ export const viewAsConfigPath = (view, prefix) =>
 /**
  * A helper method to turn a config key a wizard url
  *
- * Eg: Turns `${prefix}/morio/node_count` into morio.node_count
+ * Eg: Turns `${prefix}/core/node_count` into core.node_count
  */
 const configPathAsView = (path, prefix) =>
   path ? prefix + '/' + path.split('.').join('/') : prefix
@@ -195,7 +195,8 @@ export const ConfigurationWizard = ({
   const deploy = async () => {
     setLoadingStatus([true, 'Uploading configuration'])
     const [data, status] = await api.deploy(config)
-    if (data.result !== "success" || status !== 200) return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
+    if (data.result !== 'success' || status !== 200)
+      return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
     else {
       setDeployResult(data)
       setLoadingStatus([true, 'Deployment initialized', true, true])
@@ -217,11 +218,12 @@ export const ConfigurationWizard = ({
    */
   const viewConfig = getView(configPath)
 
-  if (deployResult) return (
-    <div className="w-fill min-h-screen max-w-2xl mx-auto">
-      <DeploymentReport result={deployResult} />
-    </div>
-  )
+  if (deployResult)
+    return (
+      <div className="w-fill min-h-screen max-w-2xl mx-auto">
+        <DeploymentReport result={deployResult} />
+      </div>
+    )
 
   return (
     <div
@@ -264,7 +266,7 @@ export const ConfigurationWizard = ({
         <ConfigNavigation
           view={configPath}
           loadView={loadView}
-          nav={initialSetup ? [views.morio] : Object.values(views)}
+          nav={initialSetup ? [views.core] : Object.values(views)}
           config={config}
         />
       </div>

@@ -17,7 +17,7 @@ const ConfigWizardPage = (props) => {
         <h1 className="text-center">{props.title}</h1>
         <DynamicConfigurationWizard
           initialSetup
-          preloadView="morio/node_count"
+          preloadView="core/node_count"
           splash
           prefix="/setup/wizard"
         />

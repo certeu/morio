@@ -65,14 +65,14 @@ export const bootstrap = {
     /*
      * Generate keys and certificates
      */
-    const init = await generateCaRoot(tools.config.morio.nodes, tools.config.morio.display_name)
+    const init = await generateCaRoot(tools.config.core.nodes, tools.config.core.display_name)
 
     /*
      * Store root certificate and fingerprint in tools
      */
     tools.ca = {
       fingerprint: init.root.fingerprint,
-      certificate: init.root.certificate
+      certificate: init.root.certificate,
     }
 
     /*
@@ -88,14 +88,14 @@ export const bootstrap = {
       root: '/home/step/certs/root_ca.crt',
       crt: '/home/step/certs/intermediate_ca.crt',
       key: '/home/step/secrets/intermediate_ca.key',
-      dnsNames: [...stepConfig.server.dnsNames, ...tools.config.morio.nodes],
+      dnsNames: [...stepConfig.server.dnsNames, ...tools.config.core.nodes],
       authority: {
         claims: stepConfig.server.authority.claims,
         provisioners: [
           {
             type: 'JWK',
             name: 'admin',
-            key: await keypairAsJwk(tools.config.morio.key_pair),
+            key: await keypairAsJwk(tools.config.core.key_pair),
           },
         ],
       },
@@ -338,13 +338,13 @@ export const logStartedConfig = (tools) => {
    */
   if (tools.info.running_config) {
     tools.log.debug(`Running configuration ${tools.info.running_config}`)
-    if (tools.config.morio.nodes.length > 1) {
+    if (tools.config.core.nodes.length > 1) {
       tools.log.debug(
-        `This Morio instance is part of a ${tools.config.morio.nodes.length}-node cluster`
+        `This Morio instance is part of a ${tools.config.core.nodes.length}-node cluster`
       )
     } else {
       tools.log.debug(`This Morio instance is a solitary node`)
-      tools.log.debug(`We are ${tools.config.morio.nodes[0]} (${tools.config.morio.display_name})`)
+      tools.log.debug(`We are ${tools.config.core.nodes[0]} (${tools.config.core.display_name})`)
     }
   } else {
     tools.log.info('This Morio instance is not deployed yet')
@@ -364,7 +364,7 @@ const preconfigureService = {
     //- '--certificatesresolvers.morio_ca.acme.caserver=https://morio_ca:9000/acme/acme/directory
 
     return serviceConfig
-  }
+  },
 }
 
 /**
@@ -390,9 +390,7 @@ export const resolveServiceConfig = async (name, tools) => {
   const content = await readFile(`../config/${name}.yaml`, (err) => tools.log.error(err))
   const serviceConfig = yaml.load(mustache.render(content, defaults))
 
-  return preconfigureService[name]
-    ? preconfigureService[name](serviceConfig, tools)
-    : serviceConfig
+  return preconfigureService[name] ? preconfigureService[name](serviceConfig, tools) : serviceConfig
 }
 
 /**
@@ -423,9 +421,9 @@ export const startMorio = async (tools) => {
   /*
    * Start node/cluster/ephemeral setup
    */
-  if (tools.config && tools.config.morio.node_count) {
-    if (tools.config.morio.node_count === 1) await startMorioNode(tools)
-    else if (tools.config.morio.node_count > 1) await startMorioCluster(tools)
+  if (tools.config && tools.config.core.node_count) {
+    if (tools.config.core.node_count === 1) await startMorioNode(tools)
+    else if (tools.config.core.node_count > 1) await startMorioCluster(tools)
     else tools.log.err('Unexepected node count - Morio will not start')
   } else await startMorioEphemeralNode(tools)
 

@@ -12,9 +12,9 @@ children:
   node_count:
     # This configId value (or the key for other blocks) determines where the data will be
     # stored in the configuration (in this case under morio.node_count)
-    configId: morio.node_count
+    configId: core.node_count
     # Wizard view to go to next
-    next: morio.nodes
+    next: core.nodes
     type: list
     title: Node vs Cluster
     input:
@@ -52,13 +52,13 @@ children:
   # Next thing we need is the names of the nodes
   nodes:
     type: strings
-    count: '{{ CONFIG.morio.node_count }}'
+    count: '{{ CONFIG.core.node_count }}'
     label: Nodes
     labels: 'Node {{ INDEX_PLUS_ONE }}'
     labelsTR: 'Enter the fully qualified domain name of node {{ INDEX_PLUS_ONE }}'
     about: Each Morio nodes needs a name that will resolve in DNS (an FQDN)
     placeholder: host.my.domain.com
-    next: morio.display_name
+    next: core.display_name
 
   # We also like a display name to refer to Morio as a whole
   # Allowing for something more user-friendly, or differentating between different environments
@@ -69,11 +69,11 @@ children:
     placeholder: Morio Production
     next:
       if:
-        val: '{{ CONFIG.morio.node_count }}'
+        val: '{{ CONFIG.core.node_count }}'
         as: number
       is: 1
       then: validate
-      else: morio.cluster_name
+      else: core.cluster_name
 
   # For clusters, we also suggest/want/need a round-robin DNS address
   cluster_name:
@@ -83,10 +83,10 @@ children:
       A round-robin DNS record for the entire Morio cluster. 
       This should resolve the the IP addresses of all cluster nodes.
     placeholder: cluster.my.domain.com
-    next: morio.leader_ip
+    next: core.leader_ip
     hide:
       if:
-        val: '{{ CONFIG.morio.node_count }}'
+        val: '{{ CONFIG.core.node_count }}'
         as: number
       is: 1
 
@@ -107,6 +107,6 @@ children:
     next: validate
     hide:
       if:
-        val: '{{ CONFIG.morio.node_count }}'
+        val: '{{ CONFIG.core.node_count }}'
         as: number
       is: 1
