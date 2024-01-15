@@ -35,7 +35,7 @@ container:
     # Attach to the morio_net network
     - traefik.docker.network=morio_net
     # Match requests going to the UI prefix (triple curly braces are required here)
-    - traefik.http.routers.morio_ui.rule=PathPrefix(`{{{ MORIO_UI_PREFIX }}}`)
+    - traefik.http.routers.morio_ui.rule=(PathPrefix(`{{{ MORIO_UI_PREFIX }}}`))
     # Since UI matches / we should give it the lowest priority so other rules match first
     - traefik.http.routers.morio_ui.priority=1
     # Forward to ui service

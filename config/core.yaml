@@ -7,13 +7,19 @@ targets:
     # Note that this container is not exposed via Traefik in production
     volumes:
       - '{{{ MORIO_CORE_DOCKER_SOCKET }}}:{{{ MORIO_CORE_DOCKER_SOCKET }}}'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/config:/etc/morio'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/data:/morio/data'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/logs:/var/log/morio'
   development:
     # The image to run in development
     # The specific tag will be added by the reconfigure script
     image: morio/core-dev
     volumes:
-      - '{{{ MORIO_REPO_ROOT }}}:/morio'
       - '{{{ MORIO_CORE_DOCKER_SOCKET }}}:{{{ MORIO_CORE_DOCKER_SOCKET }}}'
+      - '{{{ MORIO_REPO_ROOT }}}:/morio'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/config:/etc/morio'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/data:/morio/data'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/logs:/var/log/morio'
 container:
   # Name it morio_core
   container_name: morio_core

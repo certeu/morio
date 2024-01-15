@@ -27,7 +27,11 @@ const TraefikPage = (props) => {
               <p className="max-w-prose">
                 The Traefik dashboard is available at the link below:
                 <br />
-                <a href="/dashboard/" target="_BLANK" className="btn btn-secondary mt-4">
+                <a
+                  href={`/dashboard/?cache_bust=${Date.now()}`}
+                  target="_BLANK"
+                  className="btn btn-secondary mt-4"
+                >
                   Open Traefik Dashboard
                 </a>
               </p>

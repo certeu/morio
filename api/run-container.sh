@@ -22,7 +22,7 @@ then
   --network=morio_net \
   --network-alias api \
   --init \
-  -v /home/jdecock/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config/shared:/etc/morio/shared  \
   -e MORIO_DEV=1 \
   morio/api-dev:0.1.0
 
@@ -32,7 +32,7 @@ else
   --network=morio_net \
   --network-alias api \
   --init \
-  -v /home/jdecock/git/morio:/morio  \
+  -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config/shared:/etc/morio/shared  \
   -e MORIO_DEV=1 \
   morio/api-dev:0.1.0
 

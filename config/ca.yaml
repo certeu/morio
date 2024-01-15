@@ -6,7 +6,10 @@ container:
   ports:
     - 9000:9000
   volumes:
-    - '{{{ MORIO_REPO_ROOT }}}/data/ca:/home/step'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/ca:/home/step/config'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/certs:/home/step/certs'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/db:/home/step/db'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/secrets:/home/step/secrets'
   environment:
     #DOCKER_STEPCA_INIT_NAME: '{{{ MORIO_CA_NAME }}}'
     #DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,{{{ MORIO_DNS_NAMES }}}'
@@ -17,7 +20,7 @@ container:
     # Attach to the morio_net network
     - traefik.docker.network=morio_net
     # Match requests going to the CA root certificate
-    - traefik.http.routers.morio_ca.rule=PathPrefix(`/root` || `/acme` || `/well-known`)
+    - traefik.http.routers.morio_ca.rule=(PathPrefix(`/root`, `/acme`, `/well-known`))
     # Set priority to avoid rule conflicts
     - traefik.http.routers.morio_ca.priority=120
     # Forward to the CA api
@@ -63,8 +66,8 @@ server:
         forceCN: true
         challenges:
           - http-01
-          - dns-01
-          - tls-alpn-01
+          #- dns-01
+          #- tls-alpn-01
   tls:
     cipherSuites:
       - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256

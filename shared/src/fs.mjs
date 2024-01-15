@@ -42,6 +42,25 @@ export const chown = async (
 }
 
 /**
+ * Copies a file
+ *
+ * @param {string} src - Source file
+ * @param {string} dst - Destination file
+ *
+ */
+export const cp = async (src, dst) => {
+  let result
+  try {
+    result = await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst))
+  } catch (err) {
+    console.log(err)
+    return false
+  }
+
+  return true
+}
+
+/**
  * Creates a directory/folder
  *
  * @param {string} dirPath - (relative) path to the folder to create

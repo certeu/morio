@@ -4,12 +4,15 @@ targets:
     # The image to run in production
     # The specific tag will be added by the reconfigure script
     image: morio/api
+    volumes:
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared:/etc/morio/shared'
   development:
     # The image to run in development
     # The specific tag will be added by the reconfigure script
     image: morio/api-dev
     volumes:
       - '{{{ MORIO_REPO_ROOT }}}:/morio'
+      - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared:/etc/morio/shared'
 
 container:
   # Name it api
@@ -28,7 +31,7 @@ container:
     # Attach to the morio_net network
     - traefik.docker.network=morio_net
     # Match requests going to the API prefix (triple curly braces are required here)
-    - traefik.http.routers.morio_api.rule=PathPrefix(`{{{ MORIO_API_PREFIX }}}`)
+    - traefik.http.routers.morio_api.rule=(PathPrefix(`{{{ MORIO_API_PREFIX }}}`))
     # Set priority to avoid rule conflicts
     - traefik.http.routers.morio_api.priority=100
     # Forward to api service

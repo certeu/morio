@@ -106,17 +106,14 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Now write the config to disk
    */
   tools.log.debug(`Writing configuration to morio.${time}.yaml`)
-  let result = await writeYamlFile(
-    `${fromEnv('MORIO_CORE_CONFIG_FOLDER')}/morio.${time}.yaml`,
-    config
-  )
+  let result = await writeYamlFile(`/etc/morio/morio.${time}.yaml`, config)
   if (!result) return res.status(500).send({ errors: ['Failed to write configuration to disk'] })
 
   /*
    * Also write the keys to disk
    */
   tools.log.debug(`Writing key data to .${time}.keys`)
-  result = await writeBsonFile(`${fromEnv('MORIO_CORE_CONFIG_FOLDER')}/.${time}.keys`, keys)
+  result = await writeBsonFile(`/etc/morio.${time}.keys`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*

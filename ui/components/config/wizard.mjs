@@ -124,14 +124,15 @@ export const ConfigurationWizard = ({
         pathname: configPathAsView(configPath, prefix),
       }))
     },
-    [_setView, prefix]
+    [prefix]
   )
 
   /*
    * Effect for preloading the view
    */
   useEffect(() => {
-    if (preloadView && preloadView !== view) setView(preloadView)
+    if (preloadView && typeof view === 'string' && preloadView !== view) setView(preloadView)
+    else if (view.pathname === '/setup/wizard') setView(preloadView)
   }, [preloadView, view, setView])
 
   /*

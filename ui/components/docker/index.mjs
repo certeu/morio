@@ -1,5 +1,4 @@
 // Dependencies
-import morioConfig from 'ui/morio.json' assert { type: 'json' }
 import { isError, formatBytes, formatContainerName } from 'lib/utils.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
@@ -57,7 +56,7 @@ const DockerWrapper = ({
    */
   useEffect(() => {
     const run = async () => {
-      const result = await api.call(`${morioConfig.api}/${endpoint}`)
+      const result = await api.call(`/ops/api/${endpoint}`)
       if (isError(result[0])) setData(result[0])
       else {
         if (result[1] === 200) setData(filter ? filter(result[0]) : result[0])
@@ -446,7 +445,7 @@ const dockerCpuUsage = (data) => {
 
 const Sleep = () => (
   <span className="opacity-50" role="image" alt="zzz">
-    😴
+    ÃÂ°ÃÂÃÂÃÂ´
   </span>
 )
 

@@ -13,9 +13,9 @@ container:
     # Create HTTP entrypoint (only to redirect to HTTPS)
     - '--entrypoints.http.address=:80'
     # Always redirect all HTTP requests to HTTPS
-    - '--entrypoints.http.http.redirections.entrypoint.to=https'
-    - '--entrypoints.http.http.redirections.entrypoint.scheme=https'
-    - '--entrypoints.http.http.redirections.entrypoint.permanent=true'
+    #- '--entrypoints.http.http.redirections.entrypoint.to=https'
+    #- '--entrypoints.http.http.redirections.entrypoint.scheme=https'
+    #- '--entrypoints.http.http.redirections.entrypoint.permanent=true'
     #  Create HTTPS entrypoint
     - '--entrypoints.https.address=:443'
     # Set the log level
@@ -30,6 +30,12 @@ container:
     - '--accesslog.filePath={{{ MORIO_TRAEFIK_ACCESS_LOG_FILEPATH }}}'
     # Do not verify backend certificates, just encrypt
     - '--serversTransport.insecureSkipVerify=true'
+    # Enable ACME certificate resolver (will only work after CA is initialized)
+    - '--certificatesresolvers.morio_ca.acme.storage=acme.json'
+    - '--certificatesresolvers.morio_ca.acme.caserver=https://morio_ca:9000/acme/acme/directory'
+    - '--certificatesresolvers.morio_ca.acme.httpchallenge.entrypoint=http'
+    # Point to root CA (will only work after CA is initialized)
+    - '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt'
 
   labels:
     # Tell traefik to watch itself (so meta)
@@ -53,4 +59,7 @@ container:
     - 443:443
   volumes:
     - /var/run/docker.sock:/var/run/docker.sock
-    - '{{{ MORIO_REPO_ROOT }}}/logs/:/var/log/morio/'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/logs:/var/log/morio/'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared:/etc/morio/shared'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/traefik/entrypoint.sh:/entrypoint.sh'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt'

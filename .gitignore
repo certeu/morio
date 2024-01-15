@@ -1,9 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dev side-effects
-config/morio.*.yaml
-config/.*.keys
-data/**
+hostfs/config/ca/*.json
+hostfs/logs/*
+hostfs/data/**
+hostfs/config/shared/root_ca.crt
+hostfs/config/morio.*.yaml
+hostfs/config/.*.keys
 
 # Logs
 logs

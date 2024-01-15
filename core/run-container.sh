@@ -22,7 +22,7 @@ then
   --network=morio_net \
   --network-alias core \
   --init \
-  -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio  \
   -e MORIO_DEV=1 \
   morio/core-dev:0.1.0
 
@@ -32,7 +32,7 @@ else
   --network=morio_net \
   --network-alias core \
   --init \
-  -v /home/jdecock/git/morio:/morio    -v /var/run/docker.sock:/var/run/docker.sock  \
+  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio  \
   -e MORIO_DEV=1 \
   morio/core-dev:0.1.0
 

@@ -7,6 +7,7 @@ import { logger } from '#shared/logger'
 import { pkg } from '#shared/pkg'
 import { restClient } from '#shared/network'
 import {
+  cp,
   readYamlFile,
   readJsonFile,
   readFile,
@@ -22,6 +23,7 @@ import {
   runContainerApiCommand,
   generateContainerConfig,
 } from '#lib/docker'
+import path from 'path'
 
 /*
  * Plain object with bootstrap methods for those services that require them
@@ -37,7 +39,7 @@ export const bootstrap = {
      * We'll check if there's a defaults ca-cli config file on disk
      * If so, the CA has already been initialized
      */
-    const bootstrapped = await readJsonFile('/morio/data/ca/config/defaults.json')
+    const bootstrapped = await readJsonFile('/etc/morio/ca/defaults.json')
 
     /*
      * Store fingerprint for easy access
@@ -51,7 +53,7 @@ export const bootstrap = {
       /*
        * Load the root certficate, then return early
        */
-      const root = await readFile('/morio/data/ca/certs/root_ca.crt')
+      const root = await readFile('/etc/morio/shared/root_ca.crt')
       tools.ca.certificate = root
 
       return tools
@@ -60,7 +62,7 @@ export const bootstrap = {
     /*
      * No config, generate configuration, keys, serts, and secrets file
      */
-    tools.log.debug('Generating inital CA config - This will take a while')
+    tools.log.debug('Generating inital CA config - This will take a couple of seconds')
 
     /*
      * Generate keys and certificates
@@ -89,17 +91,12 @@ export const bootstrap = {
       crt: '/home/step/certs/intermediate_ca.crt',
       key: '/home/step/secrets/intermediate_ca.key',
       dnsNames: [...stepConfig.server.dnsNames, ...tools.config.core.nodes],
-      authority: {
-        claims: stepConfig.server.authority.claims,
-        provisioners: [
-          {
-            type: 'JWK',
-            name: 'admin',
-            key: await keypairAsJwk(tools.config.core.key_pair),
-          },
-        ],
-      },
     }
+    /*
+     * Add key to jwk provisioner config
+     */
+    stepServerConfig.authority.provisioners[0].key = await keypairAsJwk(tools.config.core.key_pair)
+
     /*
      * Construct step (client) configuration
      */
@@ -115,18 +112,25 @@ export const bootstrap = {
      * Write certificates, keys, and configuration to disk, and let CA own them
      */
     for (const [target, content] of [
-      ['certs/root_ca.crt', init.root.certificate],
-      ['certs/intermediate_ca.crt', init.intermediate.certificate],
-      ['secrets/root_ca.key', init.root.keys.private],
-      ['secrets/intermediate_ca.key', init.intermediate.keys.private],
-      ['secrets/password', init.password],
-      ['config/ca.json', JSON.stringify(stepServerConfig, null, 2)],
-      ['config/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
+      ['/morio/data/ca/certs/root_ca.crt', init.root.certificate],
+      ['/morio/data/ca/certs/intermediate_ca.crt', init.intermediate.certificate],
+      ['/morio/data/ca/secrets/root_ca.key', init.root.keys.private],
+      ['/morio/data/ca/secrets/intermediate_ca.key', init.intermediate.keys.private],
+      ['/morio/data/ca/secrets/password', init.password],
+      ['/etc/morio/ca/ca.json', JSON.stringify(stepServerConfig, null, 2)],
+      ['/etc/morio/ca/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
     ]) {
-      const file = `/morio/data/ca/${target}`
-      await writeFile(file, content, tools.log)
-      await chown(file, 1000, 1000, tools.log)
+      // Chown the folder prior to writing, because it's typically volume-mapped
+      await chown(path.dirname(target), 1000, 1000, tools.log)
+      await writeFile(target, content, tools.log)
+      await chown(target, 1000, 1000, tools.log)
     }
+
+    /*
+     * Copy the CA root certificate to a shared config folder
+     * from where other containers will load it
+     */
+    await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
   },
   /*
    * This runs only when core is cold-started
@@ -289,7 +293,7 @@ export const loadConfigurations = async () => {
   /*
    * Find out what configuration exists on disk
    */
-  const timestamps = ((await readDirectory(fromEnv('MORIO_CORE_CONFIG_FOLDER'))) || [])
+  const timestamps = ((await readDirectory(`/etc/morio`)) || [])
     .filter((file) => new RegExp('morio.[0-9]+.yaml').test(file))
     .map((file) => file.split('.')[1])
     .sort()
@@ -299,16 +303,15 @@ export const loadConfigurations = async () => {
    */
   const configs = {}
   let i = 0
-  const dir = fromEnv('MORIO_CORE_CONFIG_FOLDER')
   for (const timestamp of timestamps) {
-    const config = await readYamlFile(`${dir}/morio.${timestamp}.yaml`)
+    const config = await readYamlFile(`/etc/morio/morio.${timestamp}.yaml`)
     configs[timestamp] = {
       timestamp,
       current: false,
       comment: config.comment || 'No message provided',
     }
     if (i === 0) {
-      const keys = await readBsonFile(`${dir}/.${timestamp}.keys`)
+      const keys = await readBsonFile(`/etc/morio/.${timestamp}.keys`)
       configs.current = { config, keys, timestamp }
       configs[timestamp].current = true
     }
@@ -336,7 +339,7 @@ export const logStartedConfig = (tools) => {
    * Has MORIO been setup?
    * If so, we should have a current config
    */
-  if (tools.info.running_config) {
+  if (tools.info.running_config && tools.info.ephemeral === false) {
     tools.log.debug(`Running configuration ${tools.info.running_config}`)
     if (tools.config.core.nodes.length > 1) {
       tools.log.debug(
@@ -351,19 +354,64 @@ export const logStartedConfig = (tools) => {
   }
 }
 
+const getTraefikRouters = (serviceConfig) => {
+  const routers = new Set()
+  for (const label of serviceConfig.container.labels) {
+    const chunks = label.split('.')
+    /*
+     * Note that we are only checking for HTTP routers (for now)
+     */
+    if (chunks[0] === 'traefik' && chunks[1] === 'http' && chunks[2] === 'routers')
+      routers.add(chunks[3])
+  }
+
+  return [...routers]
+}
+
+const addTraefikTlsConfiguration = (serviceConfig, tools) => {
+  /*
+   * Don't bother if we are running in ephemeral mode
+   */
+  if (tools.info.ephemeral) return serviceConfig
+
+  /*
+   * Add default cert to router
+   */
+  for (const router of getTraefikRouters(serviceConfig)) {
+    serviceConfig.container.labels.push(
+      `traefik.http.routers.${router}.tls.certresolver=morio_ca`,
+      `traefik.tls.stores.default.defaultgeneratedcert.resolver=morio_ca`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${tools.config.core.nodes[0]}`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${tools.config.core.nodes.join(', ')}`
+    )
+  }
+  /*
+   * Update rule with hostname(s)
+   * FIXME: This does not yet support clustering
+   */
+  for (const i in serviceConfig.container.labels) {
+    if (serviceConfig.container.labels[i].toLowerCase().indexOf('rule=(') !== -1) {
+      const chunks = serviceConfig.container.labels[i].split('rule=(')
+      serviceConfig.container.labels[i] =
+        chunks[0] +
+        'rule=(Host(' +
+        tools.config.core.nodes.map((node) => `\`${node}\``).join(',') +
+        ')) && (' +
+        chunks[1]
+    }
+  }
+
+  return serviceConfig
+}
+
 /**
  * An object mapping objects to preconfigure services for those who need it
  */
 const preconfigureService = {
-  traefik: (serviceConfig, tools) => {
-    //# Enable ACME certificate resolver (will only work after CA is initialized)
-    //- '--certificatesresolvers.morio_ca.acme.email=joost.decock@cert.europa.eu'
-    //- '--certificatesresolvers.morio_ca.acme.storage=acme.json'
-    //- '--certificatesresolvers.morio_ca.acme.httpchallenge.entrypoint=web'
-    //- '--certificatesresolvers.morio_ca.acme.caserver=https://morio_ca:9000/acme/acme/directory
-
-    return serviceConfig
-  },
+  api: addTraefikTlsConfiguration,
+  ca: addTraefikTlsConfiguration,
+  ui: addTraefikTlsConfiguration,
+  traefik: addTraefikTlsConfiguration,
 }
 
 /**
@@ -407,10 +455,14 @@ export const startMorio = async (tools) => {
    */
   if (tools.configs.current) {
     tools.info.running_config = tools.configs.current.timestamp
+    tools.info.ephemeral = false
     tools.config = tools.configs.current.config
     tools.keys = tools.configs.current.keys
     delete tools.configs.current
-  } else tools.info.running_config = false
+  } else {
+    tools.info.running_config = false
+    tools.info.ephemeral = true
+  }
 
   /*
    * Log info about the config we'll start
