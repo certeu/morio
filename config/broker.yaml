@@ -13,7 +13,7 @@ container:
     - '--advertise-kafka-addr internal://broker_{{ MORIO_NODE_NR }}:9092,external://{{{ MORIO_DEPLOYMENT_FQDN }}}:19092'
     - '--pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082'
     # Address the broker advertises to clients that connect to the HTTP Proxy.
-    - '--advertise-pandaproxy-addr internal://brokern_{{ MORIO_NODE_NR }}:8082,external://{{{ MORIO_DEPLOYMENT_FQDN }}}:18082'
+    - '--advertise-pandaproxy-addr internal://broker_{{ MORIO_NODE_NR }}:8082,external://{{{ MORIO_DEPLOYMENT_FQDN }}}:18082'
     - '--schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081'
     # Redpanda brokers use the RPC API to communicate with each other internally.
     - '--rpc-addr broker_{{ MORIO_NODE_NR }}:33145'
@@ -31,3 +31,12 @@ container:
     - 19644:19644
   volumes:
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/broker:/var/lib/redpanda/data'
+
+broker:
+  # Set the organisation to the Morio display name
+  organization: '{{ config.core.display_name }}'
+  # Set the cluster ID to the depoloyment FQDN
+  cluster_id: '{{ MORIO_DEPLOYMENT_FQDN }}'
+  redpanda:
+    # Set the node ID to the node number
+    node_id: '{{ MORIO_NODE_NR }}'

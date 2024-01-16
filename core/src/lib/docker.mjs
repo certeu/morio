@@ -36,13 +36,12 @@ export const generateContainerConfig = (config, tools) => {
       : tools.info.production
         ? config.targets.production.image + tag
         : config.targets.development.image + tag,
-    NetworkConfig: {
+    NetworkingConfig: {
       EndpointsConfig: {},
     },
   }
-  opts.NetworkConfig.EndpointsConfig[fromEnv('MORIO_NETWORK')] = {
-    Links: ['core', 'proxy'],
-    Aliases: [name],
+  opts.NetworkingConfig.EndpointsConfig[fromEnv('MORIO_NETWORK')] = {
+    Aliases: [ name, `${name}_${tools.config.core.node_nr}` ],
   }
 
   /*

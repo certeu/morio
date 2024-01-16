@@ -1,19 +1,32 @@
 container:
   image: 'docker.redpanda.com/redpandadata/console:v2.3.9'
   container_name: console
-  command: -c /app/console
+  command: "/app//console -config.filepath /etc/morio/console/config.yaml"
   entrypoint: /bin/sh
   environment:
-    CONFIG_FILEPATH: /etc/morio/broker/config.yaml
+    CONFIG_FILEPATH: /etc/morio/console/config.yaml
   networks:
     default: null
-  ports:
-    - 18081:18081
-    - 18082:18082
-    - 19082:19082
-    - 19644:19644
   volumes:
-    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/broker:/etc/morio/broker'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/console:/etc/morio/console'
+  # Configure Traefik with container labels
+  labels:
+    # Tell traefik to watch this container
+    - traefik.enable=true
+    # Attach to the morio docker network
+    - 'traefik.docker.network={{ MORIO_NETWORK }}'
+    # Match requests going to the console prefix (triple curly braces are required here)
+    - traefik.http.routers.console.rule=(PathPrefix(`/console`))
+    # Set priority to avoid rule conflicts
+    - traefik.http.routers.console.priority=120
+    # Forward to console service
+    - traefik.http.routers.console.service=console
+    # Only match requests on the https endpoint
+    - traefik.http.routers.console.entrypoints=https
+    # Forward to port on container
+    - 'traefik.http.services.console.loadbalancer.server.port=8080'
+    # Enable TLS
+    - traefik.http.routers.console.tls=true
 
 config:
   kafka:

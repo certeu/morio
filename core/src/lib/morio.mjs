@@ -14,6 +14,7 @@ import {
   readBsonFile,
   readDirectory,
   writeFile,
+  writeYamlFile,
   chown,
   mkdir,
 } from '#shared/fs'
@@ -131,6 +132,39 @@ export const bootstrap = {
      * from where other containers will load it
      */
     await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
+  },
+  /*
+   * Bootstrap RedPanda console
+   */
+  console: async (tools) => {
+    /*
+     * We'll check if there's a config file on disk
+     * If so, the console has already been initialized
+     */
+    const bootstrapped = await readJsonFile('/etc/morio/console/config.yaml')
+
+    /*
+     * If the CA is initialized, return early
+     */
+    if (bootstrapped && bootstrapped.redpanda) {
+      tools.log.debug('Console already initialized')
+      return
+    }
+
+    /*
+     * Load configration base
+     */
+    const base = await readYamlFile(`../config/console.yaml`)
+    /*
+     * Populate Kafka nodes, schema URLs, and RedPanda URLs
+     */
+    base.config.kafka.brokers = tools.config.core.nodes.map((n, i) => `broker_${i+1}:9092`)
+    base.config.kafka.schemaRegistry.urls = tools.config.core.nodes.map((n, i) => `http://broker_${i+1}:8081`)
+    base.config.redpanda.adminApi.urls = tools.config.core.nodes.map((n, i) => `http://broker_${i+1}:9644`)
+    /*
+     * Write configuration file
+     */
+    await writeYamlFile(`/etc/morio/console/config.yaml`, base.config)
   },
   /*
    * This runs only when core is cold-started
@@ -446,7 +480,7 @@ export const resolveServiceConfig = async (name, tools) => {
         ? tools.config.core.cluster_name
         : tools.config.core.nodes[0]
       : 'localhost',
-    MORIO_NODE_NR: 1, // FIXME: Add cluster support
+    MORIO_NODE_NR: tools.config.core.node_nr,
   }
   const serviceConfig = yaml.load(mustache.render(content, replacements))
 
@@ -534,6 +568,11 @@ const startMorioNode = async (tools) => {
   tools.log.info('Starting Morio node')
 
   /*
+   * Only one node makes this easy
+   */
+  tools.config.core.node_nr = 1
+
+  /*
    * Create Docker network
    */
   await createMorioNetwork(tools)
@@ -542,7 +581,7 @@ const startMorioNode = async (tools) => {
    * Create services
    * FIXME: we need to start a bunch more stuff here
    */
-  for (const service of ['ca', 'proxy', 'api', 'ui', 'broker']) {
+  for (const service of ['ca', 'proxy', 'api', 'ui', 'broker', 'console']) {
     const container = await createMorioService(service, tools)
     if (bootstrap[service]) await bootstrap[service](tools)
     await startMorioService(container, service, tools)
