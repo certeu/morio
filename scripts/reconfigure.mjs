@@ -32,7 +32,8 @@ const resolveConfig = async (configFile) => {
  * Resolve the configuration
  */
 const config = {}
-for (const type of ['api', 'core', 'traefik', 'ui']) config[type] = await resolveConfig(type)
+for (const type of ['api', 'core', 'proxy', 'ui', 'broker'])
+  config[type] = await resolveConfig(type)
 
 /*
  * Generate run files for development
@@ -41,7 +42,7 @@ const volumesAsCmd = (vols1 = [], vols2 = []) =>
   [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
 const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
   --hostname=${config[name].container.container_name} \\
-  --network=morio_net \\
+  --network=${defaults.MORIO_NETWORK} \\
   --network-alias ${name} \\
   ${config[name].container.init ? '--init' : ''} \\
 ${volumesAsCmd(config[name].targets?.development?.volumes, config[name].container?.volumes)} \\
@@ -61,7 +62,7 @@ for (const name of ['api', 'core', 'ui'])
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio_net 2> /dev/null
+docker network create ${defaults.MORIO_NETWORK} 2> /dev/null
 docker stop ${name} 2> /dev/null
 docker rm ${name} 2> /dev/null
 

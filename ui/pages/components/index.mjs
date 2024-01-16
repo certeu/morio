@@ -1,13 +1,41 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { ComponentIcon, CertificateIcon, MorioIcon, CodeIcon } from 'components/icons.mjs'
-import { Traefik } from 'components/brands.mjs'
+import {
+  CertificateIcon,
+  CodeIcon,
+  ComponentIcon,
+  DesktopIcon,
+  MorioIcon,
+} from 'components/icons.mjs'
+import { RedPanda, RedPandaConsole, Traefik } from 'components/brands.mjs'
 import { Card } from 'components/card.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { Popout } from 'components/popout.mjs'
 
 const components = {
+  api: (
+    <Card
+      title={<span>API</span>}
+      href="/components/api"
+      desc="As an API-first project, Morio can be fully deployed, configured, and managed through its API."
+      width="w-full"
+      Icon={CodeIcon}
+    />
+  ),
+  broker: (
+    <Card
+      title={
+        <span>
+          Broker <small className="italic text-sm">( RedPanda )</small>
+        </span>
+      }
+      href="/components/broker"
+      desc="Morio is a streaming data platform, and RedPanda provides those streaming capabilities."
+      width="w-full"
+      Icon={RedPanda}
+    />
+  ),
   ca: (
     <Card
       title={
@@ -21,44 +49,48 @@ const components = {
       Icon={CertificateIcon}
     />
   ),
+  console: (
+    <Card
+      title={
+        <span>
+          Console <small className="italic text-sm">( RedPanda Console )</small>
+        </span>
+      }
+      href="/components/broker"
+      desc="The console provides a live view into the heart of Morio's streaming data platform."
+      width="w-full"
+      Icon={RedPandaConsole}
+    />
+  ),
   core: (
     <Card
-      title={<span>Morio Core</span>}
+      title={<span>Core</span>}
       href="/components/core"
       desc="Morio Core provides orchestration and configuration services that all other Morio components rely on."
       width="w-full"
       Icon={MorioIcon}
     />
   ),
-  traefik: (
+  proxy: (
     <Card
       title={
         <span>
-          Load Balancer <small className="italic text-sm">( Traefik )</small>
+          Proxy <small className="italic text-sm">( Traefik )</small>
         </span>
       }
-      href="/components/traefik"
+      href="/components/proxy"
       desc="Morio leverages Traefik for reverse proxying, load balancing, and TLS termination for microservices."
       width="w-full"
       Icon={Traefik}
-    />
-  ),
-  api: (
-    <Card
-      title={<span>Operator API</span>}
-      href="/components/api"
-      desc="Morio is an API-first project and can be fully deployed, configured, and managed through its operator API."
-      width="w-full"
-      Icon={CodeIcon}
     />
   ),
   ui: (
     <Card
       title={<span>Web Interface</span>}
       href="/components/api"
-      desc="Morio is an API-first project and can be fully deployed, configured, and managed through its operator API."
+      desc="The Morio web interface puts a friendly face on the API and various components of a Morio deployment."
       width="w-full"
-      Icon={CodeIcon}
+      Icon={DesktopIcon}
     />
   ),
 }
@@ -72,10 +104,11 @@ const ComponentsPage = (props) => {
             <Tab key="Core Components">
               <p>Once set up, the following components are required for Morio to function:</p>
               <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
-                {components.ca}
-                {components.traefik}
-                {components.core}
                 {components.api}
+                {components.broker}
+                {components.ca}
+                {components.core}
+                {components.proxy}
               </div>
             </Tab>
             <Tab key="Optional Components">
@@ -84,6 +117,7 @@ const ComponentsPage = (props) => {
                 discretion:
               </p>
               <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
+                {components.console}
                 {components.ui}
               </div>
             </Tab>
@@ -92,9 +126,9 @@ const ComponentsPage = (props) => {
                 When Morio runs in <em>ephemeral mode</em>, the following components will be active:
               </p>
               <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
-                {components.traefik}
-                {components.core}
                 {components.api}
+                {components.core}
+                {components.proxy}
                 {components.ui}
               </div>
               <Popout note compact>

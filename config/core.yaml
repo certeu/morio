@@ -21,8 +21,8 @@ targets:
       - '{{{ MORIO_REPO_ROOT }}}/hostfs/data:/morio/data'
       - '{{{ MORIO_REPO_ROOT }}}/hostfs/logs:/var/log/morio'
 container:
-  # Name it morio_core
-  container_name: morio_core
+  # Name it core
+  container_name: core
   # Tag will be injected
   tag: '{{{ MORIO_VERSION }}}'
   # Use the default network

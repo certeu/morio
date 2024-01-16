@@ -20,10 +20,10 @@ export const bootstrapConfiguration = async () => {
   let config = await coreClient.get('/configs/current')
   if (config[0] === 200) {
     config = config[1]
-    log.info('Loaded Morio config from morio_core')
+    log.info('Loaded Morio config from core')
   } else {
     config = {}
-    log.warn('Failed to load Morio config from morio_core')
+    log.warn('Failed to load Morio config from core')
   }
 
   /*
@@ -32,10 +32,10 @@ export const bootstrapConfiguration = async () => {
   let defaults = await coreClient.get('/defaults')
   if (defaults[0] === 200) {
     defaults = defaults[1]
-    log.info('Loaded Morio defaults from morio_core')
+    log.info('Loaded Morio defaults from core')
   } else {
     defaults = {}
-    log.warn('Failed to load Morio defaults from morio_core')
+    log.warn('Failed to load Morio defaults from core')
   }
 
   return {

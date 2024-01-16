@@ -1,8 +1,8 @@
 container:
   image: smallstep/step-ca
   tag: 0.25.2
-  container_name: morio_ca
-  network: morio_net
+  container_name: ca
+  network: '{{ MORIO_NETWORK }}'
   ports:
     - 9000:9000
   volumes:
@@ -10,27 +10,24 @@ container:
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/certs:/home/step/certs'
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/db:/home/step/db'
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/data/ca/secrets:/home/step/secrets'
-  environment:
-    #DOCKER_STEPCA_INIT_NAME: '{{{ MORIO_CA_NAME }}}'
-    #DOCKER_STEPCA_INIT_DNS_NAMES: 'localhost,{{{ MORIO_DNS_NAMES }}}'
   # Configure Traefik with container labels
   labels:
     # Tell traefik to watch this container
     - traefik.enable=true
-    # Attach to the morio_net network
-    - traefik.docker.network=morio_net
+    # Attach to the morio docker network
+    - 'traefik.docker.network={{ MORIO_NETWORK }}'
     # Match requests going to the CA root certificate
-    - traefik.http.routers.morio_ca.rule=(PathPrefix(`/root`, `/acme`, `/well-known`))
+    - traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`, `/well-known`))
     # Set priority to avoid rule conflicts
-    - traefik.http.routers.morio_ca.priority=120
+    - traefik.http.routers.ca.priority=120
     # Forward to the CA api
-    - traefik.http.routers.morio_ca.service=morio_ca
+    - traefik.http.routers.ca.service=ca
     # Forward to port on container
-    - traefik.http.services.morio_ca.loadbalancer.server.port=9000
+    - traefik.http.services.ca.loadbalancer.server.port=9000
     # Enable TLS
-    - traefik.http.routers.morio_ca.tls=true
+    - traefik.http.routers.ca.tls=true
     # Enable backend TLS
-    - traefik.http.services.morio_ca.loadbalancer.server.scheme=https
+    - traefik.http.services.ca.loadbalancer.server.scheme=https
 
 server:
   root: /home/step/certs/root_ca.crt
@@ -41,7 +38,7 @@ server:
   insecureAddress: ''
   dnsNames:
     - localhost
-    - morio_ca
+    - ca
   logger:
     format: json
   db:

@@ -2,6 +2,10 @@
 
 This is an incubator/lab to test-drive some new ideas for log collection.
 
+## Reminders
+
+- We should (recommend to) deploy on XFS only (for RedPanda)
+
 ## What's with the name?
 
 Right from the start, we need a name. To create a repository for example, we

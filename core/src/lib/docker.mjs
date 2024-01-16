@@ -27,7 +27,7 @@ export const generateContainerConfig = (config, tools) => {
   const opts = {
     name,
     HostConfig: {
-      NetworkMode: 'morio_net',
+      NetworkMode: fromEnv('MORIO_NETWORK'),
       RestartPolicy: { Name: 'unless-stopped' },
     },
     Hostname: name,
@@ -37,13 +37,12 @@ export const generateContainerConfig = (config, tools) => {
         ? config.targets.production.image + tag
         : config.targets.development.image + tag,
     NetworkConfig: {
-      EndpointsConfig: {
-        morio_net: {
-          Links: ['morio_core', 'morio_traefik'],
-          Aliases: [name],
-        },
-      },
+      EndpointsConfig: {},
     },
+  }
+  opts.NetworkConfig.EndpointsConfig[fromEnv('MORIO_NETWORK')] = {
+    Links: ['core', 'proxy'],
+    Aliases: [name],
   }
 
   /*

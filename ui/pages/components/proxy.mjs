@@ -12,7 +12,7 @@ const TraefikPage = (props) => {
         <div className="max-w-4xl">
           <Tabs tabs="About, Dashboard">
             <Tab key="About">
-              <h2>About the Morio Load Balancer</h2>
+              <h2>About the Morio Proxy</h2>
               <p className="max-w-prose">
                 Morio utilizes <WebLink href="https://traefik.io/traefik/">Traefik</WebLink>, a
                 leading application proxy and load balancer, to front its various HTTP-based
@@ -47,7 +47,7 @@ export default TraefikPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Load Balancer',
-    page: ['components', 'traefik'],
+    title: 'Proxy',
+    page: ['components', 'proxy'],
   },
 })

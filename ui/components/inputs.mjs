@@ -146,7 +146,7 @@ export const StringInput = ({
   label, // Label to use
   update, // onChange handler
   valid, // Method that should return whether the value is valid or not
-  current='', // The current value
+  current = '', // The current value
   original, // The original value
   placeholder, // The placeholder text
   id = '', // An id to tie the input to the label

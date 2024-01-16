@@ -1,0 +1,28 @@
+container:
+  image: 'docker.redpanda.com/redpandadata/console:v2.3.9'
+  container_name: console
+  command: -c /app/console
+  entrypoint: /bin/sh
+  environment:
+    CONFIG_FILEPATH: /etc/morio/broker/config.yaml
+  networks:
+    default: null
+  ports:
+    - 18081:18081
+    - 18082:18082
+    - 19082:19082
+    - 19644:19644
+  volumes:
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/broker:/etc/morio/broker'
+
+config:
+  kafka:
+    # brokers & urls will be populated by core
+    brokers: []
+    schemaRegistry:
+      enabled: true
+      urls: []
+  redpanda:
+    adminApi:
+      enabled: true
+      urls: []

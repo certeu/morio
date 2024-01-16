@@ -17,7 +17,7 @@ import {
   TaskIcon,
   WifiIcon,
 } from 'components/icons.mjs'
-import { Docker, Traefik } from 'components/brands.mjs'
+import { Docker, RedPanda, RedPandaConsole, Traefik } from 'components/brands.mjs'
 import { Link } from 'components/link'
 
 /*
@@ -30,9 +30,11 @@ export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
  */
 const icons = {
   api: CodeIcon,
+  broker: RedPanda,
   ca: CertificateIcon,
   core: MorioIcon,
   components: ComponentIcon,
+  console: RedPandaConsole,
   config: ConfigurationIcon,
   docker: Docker,
   containers: ContainerIcon,
@@ -40,9 +42,9 @@ const icons = {
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
+  proxy: Traefik,
   services: LayersIcon,
   tasks: TaskIcon,
-  traefik: Traefik,
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
@@ -59,16 +61,22 @@ const links = {
   components: {
     subs: {
       api: {
-        title: 'Operator API',
+        title: 'API',
+      },
+      broker: {
+        title: 'Broker',
       },
       ca: {
         title: 'Certificate Authority',
       },
-      core: {
-        title: 'Morio Core',
+      console: {
+        title: 'Console',
       },
-      traefik: {
-        title: 'Load Balancer',
+      core: {
+        title: 'Core',
+      },
+      proxy: {
+        title: 'Proxy',
       },
       ui: {
         title: 'Web Interface',

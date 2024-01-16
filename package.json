@@ -12,7 +12,7 @@
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
     "dev": "npm run reconfigure && ./core/run-container.sh",
-    "dev:clean": "docker stop morio_core morio_api morio_ui morio_traefik morio_ca && docker rm morio_core morio_api morio_ui morio_traefik morio_ca",
+    "dev:clean": "docker rm -f core api ui proxy ca broker console",
     "prod": "docker-compose -f compose/prod.yaml up",
     "prod:down": "docker-compose -f compose/prod.yaml down",
     "saltnburn": "./scripts/salt-and-burn.sh",

@@ -1,6 +1,6 @@
 container:
   image: 'traefik:2.10.7'
-  container_name: morio_traefik
+  container_name: proxy
   command:
     - traefik
     # Enable the Traefik API (required for dashboard) and Dashboard
@@ -12,10 +12,6 @@ container:
     - '--providers.docker.exposedbydefault=false'
     # Create HTTP entrypoint (only to redirect to HTTPS)
     - '--entrypoints.http.address=:80'
-    # Always redirect all HTTP requests to HTTPS
-    #- '--entrypoints.http.http.redirections.entrypoint.to=https'
-    #- '--entrypoints.http.http.redirections.entrypoint.scheme=https'
-    #- '--entrypoints.http.http.redirections.entrypoint.permanent=true'
     #  Create HTTPS entrypoint
     - '--entrypoints.https.address=:443'
     # Set the log level
@@ -31,17 +27,17 @@ container:
     # Do not verify backend certificates, just encrypt
     - '--serversTransport.insecureSkipVerify=true'
     # Enable ACME certificate resolver (will only work after CA is initialized)
-    - '--certificatesresolvers.morio_ca.acme.storage=acme.json'
-    - '--certificatesresolvers.morio_ca.acme.caserver=https://morio_ca:9000/acme/acme/directory'
-    - '--certificatesresolvers.morio_ca.acme.httpchallenge.entrypoint=http'
+    - '--certificatesresolvers.ca.acme.storage=acme.json'
+    - '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory'
+    - '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http'
     # Point to root CA (will only work after CA is initialized)
     - '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt'
 
   labels:
     # Tell traefik to watch itself (so meta)
     - traefik.enable=true
-    # Attach to the morio_net network
-    - traefik.docker.network=morio_net
+    # Attach to the morio docker network
+    - 'traefik.docker.network={{ MORIO_NETWORK }}'
     # Match rule for Traefik's internal dashboard
     - 'traefik.http.routers.traefik_dashboard.rule=(PathPrefix(`/api/`) || PathPrefix(`/dashboard/`))'
     # Avoid rule conflicts by setting priority manually
@@ -62,4 +58,4 @@ container:
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/logs:/var/log/morio/'
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared:/etc/morio/shared'
     - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/traefik/entrypoint.sh:/entrypoint.sh'
-    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt'
+    - '{{{ MORIO_REPO_ROOT }}}/hostfs/config/shared/root_ca.crt:/usr/local/share/ca-certificates/root_ca.crt'

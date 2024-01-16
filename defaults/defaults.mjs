@@ -24,6 +24,11 @@ export const defaults = {
   MORIO_REPO_ROOT: path.resolve(path.basename(import.meta.url), '..', '..'),
 
   /**
+   * Morio (docker) network name
+   */
+  MORIO_NETWORK: 'morionet',
+
+  /**
    * Morio repo root folder to defaults
    */
   MORIO_VERSION: pkg.version,
@@ -116,7 +121,7 @@ export const defaults = {
   /*
    * API host (should resolve on the internal docker network)
    */
-  MORIO_API_HOST: 'morio_api',
+  MORIO_API_HOST: 'api',
 
   /*
    * API prefix (since the API is behind Traefik)
@@ -223,7 +228,7 @@ export const defaults = {
   /*
    * CORE host - Should resolve inside containers
    */
-  MORIO_CORE_HOST: 'morio_core',
+  MORIO_CORE_HOST: 'core',
 
   /*
    * CORE log level
@@ -248,12 +253,12 @@ export const defaults = {
   /*
    * Access log filepath for Traefik (path used inside the container)
    */
-  MORIO_TRAEFIK_ACCESS_LOG_FILEPATH: '/var/log/morio/morio_traefik.access.log',
+  MORIO_TRAEFIK_ACCESS_LOG_FILEPATH: '/var/log/morio/traefik.access.log',
 
   /*
    * Log filepath for Traefik (path used inside the container)
    */
-  MORIO_TRAEFIK_LOG_FILEPATH: '/var/log/morio/morio_traefik.log',
+  MORIO_TRAEFIK_LOG_FILEPATH: '/var/log/morio/traefik.log',
 
   /*
    * Log format for Traefik

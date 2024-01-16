@@ -7,7 +7,7 @@
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create morio_net 2> /dev/null
+docker network create morionet 2> /dev/null
 docker stop api 2> /dev/null
 docker rm api 2> /dev/null
 
@@ -17,9 +17,9 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d   --name=morio_api \
-  --hostname=morio_api \
-  --network=morio_net \
+  docker run -d   --name=api \
+  --hostname=api \
+  --network=morionet \
   --network-alias api \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config/shared:/etc/morio/shared  \
@@ -27,9 +27,9 @@ then
   morio/api-dev:0.1.0
 
 else
-  docker run --rm -it   --name=morio_api \
-  --hostname=morio_api \
-  --network=morio_net \
+  docker run --rm -it   --name=api \
+  --hostname=api \
+  --network=morionet \
   --network-alias api \
   --init \
   -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config/shared:/etc/morio/shared  \

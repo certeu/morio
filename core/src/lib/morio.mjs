@@ -164,13 +164,13 @@ export const bootstrap = {
 }
 
 /**
- * Creates the morio_net docker network
+ * Creates the morio docker network
  *
  * @param {object} tools = The tools object
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
 const createMorioNetwork = async (tools) => {
-  const name = 'morio_net'
+  const name = fromEnv('MORIO_NETWORK')
   tools.log.debug(`Creating Docker network: ${name}`)
   const [success, result] = await runDockerApiCommand(
     'createNetwork',
@@ -379,8 +379,8 @@ const addTraefikTlsConfiguration = (serviceConfig, tools) => {
    */
   for (const router of getTraefikRouters(serviceConfig)) {
     serviceConfig.container.labels.push(
-      `traefik.http.routers.${router}.tls.certresolver=morio_ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.resolver=morio_ca`,
+      `traefik.http.routers.${router}.tls.certresolver=ca`,
+      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${tools.config.core.nodes[0]}`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${tools.config.core.nodes.join(', ')}`
     )
@@ -435,7 +435,20 @@ export const morioClient = restClient(
  */
 export const resolveServiceConfig = async (name, tools) => {
   const content = await readFile(`../config/${name}.yaml`, (err) => tools.log.error(err))
-  const serviceConfig = yaml.load(mustache.render(content, defaults))
+
+  /*
+   * Additional run-time replacements that are supported placeholders in config
+   */
+  const replacements = {
+    ...defaults,
+    MORIO_DEPLOYMENT_FQDN: tools.config?.core
+      ? tools.config.core.nodes.length > 1
+        ? tools.config.core.cluster_name
+        : tools.config.core.nodes[0]
+      : 'localhost',
+    MORIO_NODE_NR: 1, // FIXME: Add cluster support
+  }
+  const serviceConfig = yaml.load(mustache.render(content, replacements))
 
   return preconfigureService[name] ? preconfigureService[name](serviceConfig, tools) : serviceConfig
 }
@@ -506,7 +519,7 @@ const startMorioEphemeralNode = async (tools) => {
   /*
    * Create & start ephemeral services
    */
-  for (const service of ['traefik', 'api', 'ui']) {
+  for (const service of ['proxy', 'api', 'ui']) {
     const container = await createMorioService(service, tools)
     await startMorioService(container, service, tools)
   }
@@ -529,7 +542,7 @@ const startMorioNode = async (tools) => {
    * Create services
    * FIXME: we need to start a bunch more stuff here
    */
-  for (const service of ['ca', 'traefik', 'api', 'ui']) {
+  for (const service of ['ca', 'proxy', 'api', 'ui', 'broker']) {
     const container = await createMorioService(service, tools)
     if (bootstrap[service]) await bootstrap[service](tools)
     await startMorioService(container, service, tools)
