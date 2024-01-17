@@ -214,6 +214,15 @@ export const MenuIcon = (props) => (
 )
 
 /*
+ * MinusIcon - Looks like a big -
+ */
+export const MinusIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M5 12h14" />
+  </IconWrapper>
+)
+
+/*
  * MorioIcon - Looks like a storm drain
  */
 export const MorioIcon = (props) => (
@@ -255,6 +264,15 @@ export const OkIcon = (props) => (
 export const PlayIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+  </IconWrapper>
+)
+
+/*
+ * PlusIcon - Looks like a big +
+ */
+export const PlusIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M12 4.5v15m7.5-7.5h-15" />
   </IconWrapper>
 )
 

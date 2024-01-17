@@ -17,7 +17,7 @@ const UiPage = (props) => {
             <h5>This is an optional component</h5>
             <p>
               You can elect to run Morio in <em>headless</em> mode, in which case the Morio Web
-              Interface will be enabled.
+              Interface will be disabled.
             </p>
           </Popout>
         </div>

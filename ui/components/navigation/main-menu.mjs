@@ -120,7 +120,7 @@ const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length
  */
 export const NavButton = ({
   subs,
-  title = false,
+  title = '',
   current,
   target,
   parents,
