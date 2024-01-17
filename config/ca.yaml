@@ -17,7 +17,7 @@ container:
     # Attach to the morio docker network
     - 'traefik.docker.network={{ MORIO_NETWORK }}'
     # Match requests going to the CA root certificate
-    - traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`, `/well-known`))
+    - traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`))
     # Set priority to avoid rule conflicts
     - traefik.http.routers.ca.priority=120
     # Forward to the CA api
