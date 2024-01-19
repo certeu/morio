@@ -1,8 +1,8 @@
 import j2s from 'joi-to-swagger'
 import { responseSchema } from '../src/schema.mjs'
-import { fromEnv } from '#shared/env'
+import { getPreset } from '#config'
 
-const PREFIX = fromEnv('MORIO_API_PREFIX')
+const PREFIX = getPreset('MORIO_API_PREFIX')
 
 const shared = {
   tags: ['Status'],

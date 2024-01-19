@@ -15,7 +15,7 @@ import colors from 'tailwindcss/colors'
 
 const c = {
   light: '#8ecae6',
-  mid: '#219ebc',
+  mid: '#1b88a2', //'#219ebc',
   dark: '#023047',
   accent1: '#ffb703',
   accent2: '#fb8500',
@@ -59,7 +59,7 @@ export const theme = {
   // primary: The main brand color and color of the primary button
   primary: c.mid,
   // primary-content: The text color on a primary button
-  'primary-content': c.dark,
+  'primary-content': c.bg, //c.dark,
 
   // secondary: The link color on default backgrounds (base-100)
   secondary: c.light,

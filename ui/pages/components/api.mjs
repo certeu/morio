@@ -10,12 +10,11 @@ const ApiPage = (props) => (
     <ContentWrapper {...props} Icon={CodeIcon} title={props.title}>
       <div className="max-w-prose">
         <p className="max-w-prose">
-          Morio provides a REST API to facilitate operational management of your Morio
-          deployments.
+          Morio provides a REST API to facilitate operational management of your Morio deployments.
         </p>
         <p className="max-w-prose">
-          It includes endpoints for initial setup and deployment of your Morio instances, as
-          well as endpoints to facilitate monitoring, observability, and devops workflows.
+          It includes endpoints for initial setup and deployment of your Morio instances, as well as
+          endpoints to facilitate monitoring, observability, and devops workflows.
         </p>
         <Popout related>
           <h4>API Documentation</h4>
@@ -28,7 +27,7 @@ const ApiPage = (props) => (
               Open API Documentation
             </a>
           </p>
-          </Popout>
+        </Popout>
       </div>
     </ContentWrapper>
   </PageWrapper>

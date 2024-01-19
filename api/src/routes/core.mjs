@@ -1,4 +1,3 @@
-import { fromEnv } from '#shared/env'
 /*
  * Import the Core controller
  */
@@ -17,7 +16,7 @@ const Core = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
-  const PREFIX = fromEnv('MORIO_API_PREFIX')
+  const PREFIX = tools.getPreset('MORIO_API_PREFIX')
 
   /*
    * API routes to get data from a specific container

@@ -1,5 +1,3 @@
-import { capitalize } from '#shared/utils'
-
 /*
  * Import the docker controller
  */

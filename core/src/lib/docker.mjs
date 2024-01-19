@@ -1,10 +1,97 @@
-import { fromEnv } from '#shared/env'
+import { getPreset } from '#config'
 import Docker from 'dockerode'
 
 /**
  * This is the docker client as provided by dockerode
  */
-export const docker = new Docker({ socketPath: fromEnv('MORIO_CORE_DOCKER_SOCKET') })
+export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') })
+
+/**
+ * Creates a container for a morio service
+ *
+ * @param {string} name = Name of the service
+ * @param {object} containerConfig = The container config to pass to the Docker API
+ * @param {object} tools = The tools object
+ * @returm {object|bool} options - The id of the created container or false if no container could be created
+ */
+export const createDockerContainer = async (name, containerConfig, tools) => {
+  tools.log.debug(`Creating container: ${name}`)
+  const [success, result] = await runDockerApiCommand(
+    'createContainer',
+    containerConfig,
+    tools,
+    true
+  )
+  if (success) {
+    tools.log.debug(`Service created: ${name}`)
+    return result.id
+  }
+
+  if (result?.json?.message && result.json.message.includes('is already in use by container')) {
+    if (!tools.info.production) {
+      /*
+       * Container already exists, but we're not running in production, so let's just recreate it
+       */
+      const rid = result.json.message.match(
+        new RegExp('is already in use by container "([^"]*)')
+      )[1]
+
+      /*
+       * Now remove it
+       */
+      const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true }, tools)
+      if (removed) {
+        tools.log.debug(`Removed existing container: ${name}`)
+        const [ok, created] = await runDockerApiCommand(
+          'createContainer',
+          containerConfig,
+          tools,
+          true
+        )
+        if (ok) {
+          tools.log.debug(`Service recreated: ${name}`)
+          return created.id
+        } else tools.log.warn(`Failed to recreate container ${name}`)
+      } else tools.log.warn(`Failed to remove container ${name} - Not creating new container`)
+    } else tools.log.debug(`Container ${name} is already present.`)
+  } else tools.log.warn(result, `Failed to create container: ${name}`)
+
+  return false
+}
+
+/**
+ * Creates a docker network
+ *
+ * @param {string} name - The name of the network
+ * @param {object} tools - The tools object
+ * @returm {object|bool} options - The id of the created network or false if no network could be created
+ */
+export const createDockerNetwork = async (name, tools) => {
+  tools.log.debug(`Creating Docker network: ${name}`)
+  const [success, result] = await runDockerApiCommand(
+    'createNetwork',
+    {
+      Name: name,
+      CheckDuplicate: true,
+      EnableIPv6: false,
+    },
+    tools,
+    true
+  )
+  if (success) {
+    tools.log.debug(`Network created: ${name}`)
+    return result.id
+  }
+
+  if (
+    result?.json?.message &&
+    result.json.message.includes(`network with name ${name} already exists`)
+  )
+    tools.log.debug(`Network already exists: ${name}`)
+  else tools.log.warn(result, `Failed to create network: ${name}`)
+
+  return false
+}
 
 /**
  * Helper method to create options object to create a Docker container
@@ -12,45 +99,40 @@ export const docker = new Docker({ socketPath: fromEnv('MORIO_CORE_DOCKER_SOCKET
  * This will take the service configuration and build an options
  * object to configure the container as listed in this file
  *
- * @param {object} config - The service configuration
- * @param {object} tools = The tools object
+ * @param {object} srvConf - The resolved service configuration
  * @param {object} tools - The tools object
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateContainerConfig = (config, tools) => {
+export const generateContainerConfig = (srvConf, tools) => {
   /*
    * Basic options
    */
-  const name = config.container.container_name
-  const tag = config.container.tag ? `:${config.container.tag}` : ''
-
+  const name = srvConf.container.container_name
+  const tag = srvConf.container.tag ? `:${srvConf.container.tag}` : ''
   const opts = {
     name,
     HostConfig: {
-      NetworkMode: fromEnv('MORIO_NETWORK'),
+      NetworkMode: getPreset('MORIO_NETWORK'),
       RestartPolicy: { Name: 'unless-stopped' },
+      Binds: srvConf.container.volumes,
     },
     Hostname: name,
-    Image: config.container.image
-      ? config.container.image + tag
-      : tools.info.production
-        ? config.targets.production.image + tag
-        : config.targets.development.image + tag,
+    Image: srvConf.container.image + tag,
     NetworkingConfig: {
       EndpointsConfig: {},
     },
   }
-  opts.NetworkingConfig.EndpointsConfig[fromEnv('MORIO_NETWORK')] = {
-    Aliases: [ name, `${name}_${tools.config.core.node_nr}` ],
+  opts.NetworkingConfig.EndpointsConfig[getPreset('MORIO_NETWORK')] = {
+    Aliases: [name, `${name}_${tools.config.core?.node_nr || 1}`],
   }
 
   /*
    * Exposed ports
    */
-  if (config.container.ports) {
+  if (srvConf.container.ports) {
     const ports = {}
     const bindings = {}
-    for (const port of config.container.ports) {
+    for (const port of srvConf.container.ports) {
       ports[`${port.split(':').pop()}/tcp`] = {}
       bindings[`${port.split(':').pop()}/tcp`] = [{ HostPort: port.split(':').shift() }]
     }
@@ -61,24 +143,16 @@ export const generateContainerConfig = (config, tools) => {
   /*
    * Environment variables
    */
-  if (config.container.environment) {
-    opts.Env = Object.entries(config.container.environment).map(([key, val]) => `${key}=${val}`)
+  if (srvConf.container.environment) {
+    opts.Env = Object.entries(srvConf.container.environment).map(([key, val]) => `${key}=${val}`)
   }
-
-  /*
-   * Volumes (in Hostconfig)
-   */
-  const allVolumes = config.container?.volumes || []
-  if (tools.info.production) allVolumes.push(...(config.targets?.production?.volumes || []))
-  else allVolumes.push(...(config.targets?.development?.volumes || []))
-  opts.HostConfig.Binds = allVolumes
 
   /*
    * Labels
    */
-  if (config.container.labels) {
+  if (srvConf.container.labels) {
     opts.Labels = {}
-    for (const label of config.container.labels) {
+    for (const label of srvConf.container.labels) {
       const [key, val] = label.split('=')
       opts.Labels[key] = val
     }
@@ -87,7 +161,7 @@ export const generateContainerConfig = (config, tools) => {
   /*
    * Command
    */
-  if (config.container.command) opts.Cmd = config.container.command
+  if (srvConf.container.command) opts.Cmd = srvConf.container.command
 
   return opts
 }

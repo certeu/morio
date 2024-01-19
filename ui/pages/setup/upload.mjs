@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { FileInput } from 'components/inputs.mjs'
-import { ConfigurationWizard } from 'components/config/wizard.mjs'
+import { ConfigurationWizard } from 'components/mconfig/wizard.mjs'
 
 const ConfigUploadPage = (props) => {
   /*

@@ -1,4 +1,3 @@
-import { fromEnv } from '#shared/env'
 /*
  * Import the Validation controller
  */
@@ -16,7 +15,7 @@ const Validate = new Controller()
  */
 export function routes(tools) {
   const { app } = tools
-  const PREFIX = fromEnv('MORIO_API_PREFIX')
+  const PREFIX = tools.getPreset('MORIO_API_PREFIX')
 
   /*
    * Validates a Morio configuration

@@ -1,4 +1,4 @@
-import { requestSchema as schema, coreSchema } from '../schema.mjs'
+import { requestSchema as schema, deploymentSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
@@ -34,7 +34,7 @@ export const validate = async (targetPath, input) => {
 }
 
 /**
- * Validates core configuration
+ * Validates deployment configuration
  *
  * This will not catch all problems, but it should at least catch some common
  * configuration issues, in particular for people writing their own config.
@@ -65,7 +65,7 @@ export const validateConfiguration = async (newConfig) => {
    */
   let config
   try {
-    config = await coreSchema.validateAsync(newConfig)
+    config = await deploymentSchema.validateAsync(newConfig)
   } catch (err) {
     /*
      * Validate failed, bail out here
@@ -87,7 +87,7 @@ export const validateConfiguration = async (newConfig) => {
    */
   let i = 0
   const ips = []
-  for (const node of config.core.nodes) {
+  for (const node of config.deployment.nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
     /*

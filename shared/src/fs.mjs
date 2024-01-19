@@ -29,7 +29,6 @@ export const chown = async (
   gid, // The group ID
   onError // Method to run on error
 ) => {
-  let dir
   try {
     await fs.promises.chown(path.resolve(root, target), uid, gid)
   } catch (err) {
@@ -49,11 +48,9 @@ export const chown = async (
  *
  */
 export const cp = async (src, dst) => {
-  let result
   try {
-    result = await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst))
+    await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst))
   } catch (err) {
-    console.log(err)
     return false
   }
 
@@ -198,11 +195,11 @@ export const writeFile = async (
   data, // The data to write to disk
   log = false
 ) => {
-  let result, file
+  let file
   try {
     file = path.resolve(root, filePath)
     await fs.promises.mkdir(path.dirname(file), { recursive: true })
-    result = await fs.promises.writeFile(file, data)
+    await fs.promises.writeFile(file, data)
   } catch (err) {
     if (log) log.warn(err, `Failed to write file: ${file}`)
     else console.log(`Failed to write file: ${file}`)
@@ -240,7 +237,7 @@ export const writeBsonFile = async (filePath, data) =>
  * @param {string} dirPath - (relative) path to the directory to read
  * @param {funtion} onError - a method to call on error
  */
-export const readDirectory = async (dirPath) => {
+export const readDirectory = async (dirPath, onError) => {
   let files
   try {
     const dir = path.resolve(root, dirPath)

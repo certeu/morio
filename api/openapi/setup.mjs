@@ -1,8 +1,8 @@
 import j2s from 'joi-to-swagger'
 import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
-import { fromEnv } from '#shared/env'
+import { getPreset } from '#config'
 
-const PREFIX = fromEnv('MORIO_API_PREFIX')
+const PREFIX = getPreset('MORIO_API_PREFIX')
 
 const shared = {
   tags: ['Setup'],
@@ -62,7 +62,7 @@ export const paths = {
       `,
       ...request(
         'Post an array of hostnames to setup Morio.<br>A single hostname for a stand-alone instance, or an odd number of nodes for a cluster setup',
-        'core',
+        'deployment',
         {
           'Morio Stand-alone Instance': {
             value: { nodes: ['morio.cert.europa.eu'] },
@@ -160,19 +160,19 @@ export const paths = {
         </p>
         <p>The generated key pair will have the following properties:</p>
         <ul>
-          <li>Length: <b>${fromEnv('MORIO_CRYPTO_KEY_LEN')}</b></li>
-          <li>Algorithm: <b>${fromEnv('MORIO_CRYPTO_KEY_ALG').toUpperCase()}</b></li>
+          <li>Length: <b>4096</b></li>
+          <li>Algorithm: <b>RSA</b></li>
           <li>Public key:
             <ul>
-              <li>Type: <b>${fromEnv('MORIO_CRYPTO_PUB_KEY_TYPE').toUpperCase()}</b></li>
-              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PUB_KEY_FORMAT').toUpperCase()}</b></li>
+              <li>Type: <b>SPKI</b></li>
+              <li>Format: <b>PEM</b></li>
             </ul>
           </li>
           <li>Private key:
             <ul>
-              <li>Type: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_TYPE').toUpperCase()}</b></li>
-              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_FORMAT').toUpperCase()}</b></li>
-              <li>Format: <b>${fromEnv('MORIO_CRYPTO_PRIV_KEY_CIPHER').toUpperCase()}</b></li>
+              <li>Type: <b>PKCS8</b></li>
+              <li>Format: <b>PEM</b></li>
+              <li>Format: <b>AES-245-CBC</b></li>
             </ul>
           </li>
         </ul>

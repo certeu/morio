@@ -1,9 +1,8 @@
 // Dependencies
 import express from 'express'
-import { fromEnv } from '#shared/env'
 import { wrapExpress } from '#shared/utils'
-// Morio client & core bootstrap
-import { morioClient, bootstrap } from '#lib/morio'
+// Bootstrap core method
+import { bootstrapCore } from '#lib/bootstrap'
 // Routes
 import { routes } from '#routes/index'
 
@@ -12,12 +11,7 @@ import { routes } from '#routes/index'
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrap.core()
-
-/*
- * Add Morio client
- */
-tools.morio = morioClient
+const tools = await bootstrapCore()
 
 /*
  * Instantiate the Express app
@@ -48,7 +42,7 @@ app.get('/*', async (req, res) =>
       url: req.url,
       method: req.method,
       originalUrl: req.originalUrl,
-      prefix: fromEnv('MORIO_CORE_PREFIX'),
+      prefix: tools.getPreset('MORIO_CORE_PREFIX'),
     })
 )
 
@@ -57,8 +51,10 @@ app.get('/*', async (req, res) =>
  */
 wrapExpress(
   tools.log,
-  app.listen(fromEnv('MORIO_CORE_PORT'), (err) => {
+  app.listen(tools.getPreset('MORIO_CORE_PORT'), (err) => {
     if (err) tools.log.error(err, 'An error occured')
-    tools.log.info(`Morio Core ready - listening on http://0.0.0.0:${fromEnv('MORIO_CORE_PORT')}`)
+    tools.log.info(
+      `Morio Core ready - listening on http://0.0.0.0:${tools.getPreset('MORIO_CORE_PORT')}`
+    )
   })
 )

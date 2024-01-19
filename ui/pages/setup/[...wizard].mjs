@@ -5,8 +5,8 @@ import { SplashLayout } from 'components/layout/splash.mjs'
 /*
  * Avoid hydration woes with a dynamic import and disabled SSR rendering
  */
-const DynamicConfigurationWizard = dynamic(
-  () => import('components/config/wizard.mjs').then((mod) => mod.ConfigurationWizard),
+const DynamicSetupWizard = dynamic(
+  () => import('components/mconfig/setup-wizard.mjs').then((mod) => mod.SetupWizard),
   { ssr: false }
 )
 
@@ -15,12 +15,7 @@ const ConfigWizardPage = (props) => {
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
       <div className="py-12 px-4">
         <h1 className="text-center">{props.title}</h1>
-        <DynamicConfigurationWizard
-          initialSetup
-          preloadView="core/node_count"
-          splash
-          prefix="/setup/wizard"
-        />
+        <DynamicSetupWizard />
       </div>
     </PageWrapper>
   )
@@ -30,7 +25,7 @@ export default ConfigWizardPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Morio Configuration Wizard',
+    title: 'Morio Setup Wizard',
     page: ['setup', 'wizard'],
   },
 })

@@ -140,7 +140,5 @@ Controller.prototype.deploy = async (req, res, tools) => {
    */
   const [status, result] = await tools.core.post(`/config/deploy`, req.body)
 
-  console.log('about to return', { status, result })
-
   return res.status(status).send(result)
 }

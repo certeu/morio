@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { fromEnv } from '@morio/lib/env'
 
 const shared = {
   setup: {
@@ -17,12 +16,7 @@ const shared = {
 export const requestSchema = {
   setup: {
     morio: Joi.object({
-      nodes: Joi.array()
-        .items(Joi.string())
-        .min(fromEnv('MORIO_CONFIG_NODES_MIN'))
-        .max(fromEnv('MORIO_CONFIG_NODES_MAX'))
-        .unique()
-        .required(),
+      nodes: Joi.array().items(Joi.string()).min(1).max(15).unique().required(),
     }),
     jwtkey: Joi.object({
       setup_token: shared.setup.setup_token,
@@ -32,20 +26,14 @@ export const requestSchema = {
       /*
        * Bytes controls the length of the generated password
        */
-      bytes: Joi.number()
-        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
-        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
-        .default(fromEnv('MORIO_CRYPTO_SECRET_DFLT')),
+      bytes: Joi.number().min(8).max(64).default(16),
     }),
     keypair: Joi.object({
       setup_token: shared.setup.setup_token,
       /*
        * Passphrase is used to encrypt the private key
        */
-      passphrase: Joi.string()
-        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
-        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
-        .required(),
+      passphrase: Joi.string().min(8).max(64).required(),
     }),
   },
   validate: {

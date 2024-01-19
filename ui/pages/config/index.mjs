@@ -1,5 +1,5 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
-import { ConfigurationWizard } from 'components/config/wizard.mjs'
+import { ConfigurationWizard } from 'components/mconfig/wizard.mjs'
 
 const ConfigPage = (props) => {
   return (

@@ -43,7 +43,7 @@ const LoadingStatus = ({ loadingStatus }) => {
 
   if (!loadingStatus[0]) return null
 
-  let color = 'info'
+  let color = 'accent'
   let icon = <Spinner />
   if (loadingStatus[2]) {
     color = loadingStatus[3] ? 'success' : 'error'

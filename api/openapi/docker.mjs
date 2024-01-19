@@ -1,15 +1,13 @@
-import j2s from 'joi-to-swagger'
-import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
-import { fromEnv } from '#shared/env'
+import { getPreset } from '#config'
 // Examples of responses
-import dockerAllContainersExample from './examples/docker-all-containers.json' assert { type: 'json' }
-import dockerRunningContainersExample from './examples/docker-running-containers.json' assert { type: 'json' }
-import dockerDfExample from './examples/docker-df.json' assert { type: 'json' }
-import dockerInfoExample from './examples/docker-info.json' assert { type: 'json' }
-import dockerImagesExample from './examples/docker-images.json' assert { type: 'json' }
-import dockerNetworksExample from './examples/docker-networks.json' assert { type: 'json' }
+import {
+  dockerAllContainersExample,
+  dockerRunningContainersExample,
+  dockerDfExample,
+  dockerInfoExample,
+} from './examples/json-loader.mjs'
 
-const PREFIX = fromEnv('MORIO_API_PREFIX')
+const PREFIX = getPreset('MORIO_API_PREFIX')
 const shared = { tags: ['Docker'] }
 
 const responses = (example) => ({

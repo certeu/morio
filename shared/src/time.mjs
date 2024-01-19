@@ -35,8 +35,6 @@ export const timeSince = (timestamp) => {
     /*
      * Report in minutes if it is below 120 minutes
      */
-    const minutes = Math.floor(seconds_since / 60)
-    const seconds = Math.floor(seconds_since - 60 * minutes)
     time_since = `${Math.floor(seconds_since / 60)} minutes`
   } else if (seconds_since < 6 * 60 * 60) {
     /*

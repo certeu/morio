@@ -1,6 +1,6 @@
 import Joi from 'joi'
-import { morio } from './config.morio.mjs'
+import { deployment } from './config.deployment.mjs'
 
 export const config = Joi.object({
-  morio,
+  deployment,
 })

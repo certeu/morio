@@ -23,7 +23,7 @@ export const wrapExpress = (log, server) => {
     log.info(`Received a ${signal} signal. Initiating shutdown.`)
     server.close(() => {
       log.info(`Shutdown finalized. Exiting.`)
-      process.exit(128 + value)
+      process.exit(128 + value) /* eslint-disable-line no-undef */
     })
   }
 
@@ -31,7 +31,7 @@ export const wrapExpress = (log, server) => {
    * Create a listener for the different signals we want to handle
    */
   Object.keys(signals).forEach((signal) => {
-    process.on(signal, () => shutdown(signal, signals[signal]))
+    process.on(signal, () => shutdown(signal, signals[signal])) /* eslint-disable-line no-undef */
   })
 
   return server

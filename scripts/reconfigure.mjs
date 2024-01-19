@@ -1,59 +1,54 @@
 import { readFile, writeFile } from '@morio/shared/fs'
+import { resolveServiceConfiguration, getPreset } from '@morio/config'
 import pkg from '../package.json' assert { type: 'json' }
-import { defaults } from '@morio/defaults'
 import mustache from 'mustache'
 import yaml from 'js-yaml'
 import path from 'path'
 
-/**
- * Add the morio root folder to defaults
+/*
+ * Once we're inside a container, there is no way we can figure this out
+ * So we pass it to core as an env var
  */
-defaults.MORIO_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
+const MORIO_HOSTOS_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
 
 /*
- * Helper method to resolve a configuration file
- *
- * This takes care of:
- *   - Loading the file from disk (a yaml file in the config folder
- *   - Replacing any environment variables from defaults in it
- *   - Parsing the result as YAML
- *   - Returning it as a JS object (pojo)
- *
- * @param {string} configFile - Basename of the config file. Eg: 'api' will load 'config/api.yaml'
- * @return {object} obj - The templated config
+ * Setup a getPreset instance that knows about our extra variable
  */
-const resolveConfig = async (configFile) => {
-  const content = await readFile(`config/${configFile}.yaml`, console.log)
+const localGetPreset = (key, opts) =>
+  getPreset(key, { ...opts, force: { MORIO_HOSTOS_REPO_ROOT, MORIO_DEV: 1 } })
 
-  return yaml.load(mustache.render(content, defaults))
-}
+/*
+ * Ensure this script is not used for production
+ */
+const localInProduction = () => false
 
 /*
  * Resolve the configuration
  */
-const config = {}
-for (const type of ['api', 'core', 'proxy', 'ui', 'broker'])
-  config[type] = await resolveConfig(type)
+const srvConf = await resolveServiceConfiguration('core', {
+  getPreset: localGetPreset,
+  inProduction: localInProduction,
+  config: {},
+})
 
 /*
  * Generate run files for development
  */
-const volumesAsCmd = (vols1 = [], vols2 = []) =>
-  [...vols1, ...vols2].map((vol) => `  -v ${vol} `).join(' ')
-const cliOptions = (name) => `  --name=${config[name].container.container_name} \\
-  --hostname=${config[name].container.container_name} \\
-  --network=${defaults.MORIO_NETWORK} \\
+const cliOptions = (name) => `  --name=${srvConf.container.container_name} \\
+  --hostname=${srvConf.container.container_name} \\
+  --network=${getPreset('MORIO_NETWORK')} \\
   --network-alias ${name} \\
-  ${config[name].container.init ? '--init' : ''} \\
-${volumesAsCmd(config[name].targets?.development?.volumes, config[name].container?.volumes)} \\
+  ${srvConf.container.init ? '--init' : ''} \\
+${(srvConf.container?.volumes || []).map((vol) => `  -v ${vol} `).join(' ')} \\
   -e MORIO_DEV=1 \\
-  ${config[name].targets?.development?.image || config[name].container.image}:${pkg.version}
+  -e MORIO_HOSTOS_REPO_ROOT=${MORIO_HOSTOS_REPO_ROOT} \\
+  -e MORIO_CORE_LOG_LEVEL=debug \\
+  ${srvConf.container.image}:${pkg.version}
 `
 
-for (const name of ['api', 'core', 'ui'])
-  await writeFile(
-    `${name}/run-container.sh`,
-    `#!/bin/bash
+await writeFile(
+  `core/run-container.sh`,
+  `#!/bin/bash
 
 #
 # This file is auto-generated
@@ -62,9 +57,9 @@ for (const name of ['api', 'core', 'ui'])
 # To make changes, see: scripts/reconfigure.mjs
 #
 
-docker network create ${defaults.MORIO_NETWORK} 2> /dev/null
-docker stop ${name} 2> /dev/null
-docker rm ${name} 2> /dev/null
+docker network create ${getPreset('MORIO_NETWORK')} 2> /dev/null
+docker stop core 2> /dev/null
+docker rm core 2> /dev/null
 
 if [ -z "$1" ];
 then
@@ -72,9 +67,9 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d ${cliOptions(name)}
+  docker run -d ${cliOptions('core')}
 else
-  docker run --rm -it ${cliOptions(name)}
+  docker run --rm -it ${cliOptions('core')}
 fi
 `
-  )
+)

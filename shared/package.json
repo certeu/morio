@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/certeu/morio#readme",
   "imports": {
-    "#defaults": "./defaults/defaults.mjs"
+    "#config": "./config/index.mjs"
   },
   "exports": {
     ".": "./src/index.js",

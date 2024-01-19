@@ -1,10 +1,4 @@
 import Joi from 'joi'
-import { fromEnv } from '#shared/env'
-
-/*
- * Some shared schema objects
- */
-const containerRead = Joi.object({ id: Joi.string().required() })
 
 /*
  * This describes the schema of request objects

@@ -1,5 +1,5 @@
 import esBuild from 'esbuild'
-import { fromEnv } from './env.mjs'
+import { getPreset } from '#config'
 
 /*
  * Re-export esbuild for easy imports
@@ -35,8 +35,8 @@ export const esbuildOptions = (pkg, customOptions = {}) => ({
   format: 'esm',
   outfile: 'dist/index.mjs',
   external: [],
-  metafile: fromEnv('MORIO_ESBUILD_VERBOSE', 'bool'),
-  minify: fromEnv('MORIO_ESBUILD_MINIFY', 'bool'),
+  metafile: getPreset('MORIO_ESBUILD_VERBOSE', { dflt: false, as: 'bool' }),
+  minify: getPreset('MORIO_ESBUILD_MINIFY', { dflt: true, as: 'bool' }),
   platform: 'node',
   target: ['node20'],
   sourcemap: false,
@@ -54,9 +54,9 @@ export const esbuildOptions = (pkg, customOptions = {}) => ({
 export const build = async (pkg, customOptions = {}) => {
   const result = await esbuild
     .build(esbuildOptions(pkg, customOptions))
-    .catch(() => process.exit(1))
+    .catch(() => process.exit(1)) /* eslint-disable-line no-undef */
 
-  if (fromEnv('MORIO_ESBUILD_VERBOSE')) {
+  if (getPreset('MORIO_ESBUILD_VERBOSE', { dflt: false, as: 'bool' })) {
     const info = await esbuild.analyzeMetafile(result.metafile)
     console.log(info)
   }

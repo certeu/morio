@@ -1,19 +1,65 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { Link } from 'components/link.mjs'
+import { Link, linkClasses, PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
-import { MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
+import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
+import { Highlight } from 'components/highlight.mjs'
+// Context
+import { ModalContext } from 'context/modal.mjs'
+
+const EphemeralInfo = () => (
+  <div className="min-h-92 max-w-prose">
+    <h2>
+      Morio&apos;s Ephemeral
+      <sup>
+        <a href="https://www.merriam-webster.com/dictionary/ephemeral" target="_BLANK">
+          *
+        </a>
+      </sup>{' '}
+      State
+    </h2>
+    <p>
+      Before a Morio node receives its initial configuration, it will run in an ephemeral state,
+      where it does nothing but eagerly await its initial setup.
+    </p>
+    <p>
+      To bring this node out of its ephemeral state, you need to configure it.
+      <br />
+      We recommend to <PageLink href="/setup/wizard">use the setup wizard</PageLink> to do so.
+    </p>
+    <Popout important>
+      <h5>
+        Beware of spawn camping
+        <sup>
+          <a
+            href="https://en.wikipedia.org/wiki/Camping_(video_games)#Spawn_camping"
+            target="_BLANK"
+          >
+            *
+          </a>
+        </sup>
+      </h5>
+      <p>
+        Ephemeral nodes <b>can be set up by anyone who connects to them</b>.
+        <br />
+        Firewall ephemeral Morio node(s) to prevent this.
+      </p>
+    </Popout>
+  </div>
+)
 
 const Setup = ({ pageProps }) => {
   const { theme, toggleTheme } = useTheme()
+  const { setModal } = useContext(ModalContext)
 
   return (
     <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
-      <div className="">
+      <div className="px-4">
         <div className="flex flex-col justify-center h-screen pb-24 mx-auto max-w-xl">
           <h1 className="flex flex-row gap-2 items-center justify-between">
             <MorioIcon className="w-12 h-12 text-primary" />
@@ -28,7 +74,7 @@ const Setup = ({ pageProps }) => {
           </h1>
           <div className="grid gap-2 mb-4 mt-4">
             <Link className="btn btn-primary btn-lg" href="/setup/wizard">
-              Use the configuration wizard
+              Use the Setup Wizard
             </Link>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -39,12 +85,6 @@ const Setup = ({ pageProps }) => {
               Download a configuration file
             </Link>
           </div>
-          <Popout important>
-            <h5>Morio needs a configuration</h5>
-            <span className="text-sm">
-              Use the configuration wizard, or provide a configuration file to get started.
-            </span>
-          </Popout>
           <p className="text-center mt-4 opacity-50 text-sm">
             <a
               href="https://cert.europa.eu/"
@@ -55,6 +95,24 @@ const Setup = ({ pageProps }) => {
               <span className="px-2">by</span>
               <b>CERT-EU</b>
             </a>
+          </p>
+          <p className="text-sm text-center mt-8">
+            <button
+              onClick={() =>
+                setModal(
+                  <ModalWrapper>
+                    <EphemeralInfo />
+                  </ModalWrapper>
+                )
+              }
+              className="btn btn-warning btn-outline"
+            >
+              <div className="flex flex-row gap-4 items-center">
+                <WarningIcon />
+                <span>Running in Ephemeral State</span>
+                <WarningIcon />
+              </div>
+            </button>
           </p>
         </div>
       </div>
@@ -89,7 +147,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
         </div>
       </PageWrapper>
     )
-  if (config === false) return <Setup pageProps={pageProps} />
+  if (typeof config.deployment === 'undefined') return <Setup pageProps={pageProps} />
 
   return children
 }
@@ -97,7 +155,11 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
 const HomePage = (props) => (
   <NotUnlessSetup pageProps={props}>
     <PageWrapper {...props}>
-      <ContentWrapper {...props} Icon={MorioIcon} title={props.title}></ContentWrapper>
+      <ContentWrapper {...props} Icon={MorioIcon} title={props.title}>
+        <Popout fixme compact>
+          This is a work in progress
+        </Popout>
+      </ContentWrapper>
     </PageWrapper>
   </NotUnlessSetup>
 )

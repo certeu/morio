@@ -3,16 +3,16 @@ import { CloseIcon } from 'components/icons.mjs'
 
 const colors = {
   comment: 'secondary',
-  note: 'primary',
-  tip: 'accent',
-  warning: 'error',
   error: 'error',
   fixme: 'warning',
+  important: 'success',
   link: 'secondary',
+  none: 'neutral',
+  note: 'primary',
   related: 'info',
+  tip: 'accent',
   tldr: 'info',
-  none: '',
-  important: 'error',
+  warning: 'error',
 }
 
 export const ns = ['popout']
@@ -36,20 +36,24 @@ export const Popout = (props) => {
     >
       <div
         className={`
-          border-y-4 sm:border-0 sm:border-l-4 px-4
+          border-y-4 sm:border-0 sm:border-l-4 px-4 py-2
           shadow text-base border-${color}
           flex flex-row items-center
         `}
       >
-        <div className={`font-bold uppercase text-${color}`}>
-          {props.title || (
-            <>
-              <span>{type}</span>
-              <span className="px-3">|</span>
-            </>
-          )}
+        {type === 'none' ? null : (
+          <div className={`font-bold uppercase text-${color}`}>
+            {props.title || (
+              <>
+                <span>{type}</span>
+                <span className="px-3">|</span>
+              </>
+            )}
+          </div>
+        )}
+        <div className="popout-content-compact">
+          {props.noP ? props.children : <p className="p-0 m-0">{props.children}</p>}
         </div>
-        <div className="popout-content">{props.noP ? props.children : <p>{props.children}</p>}</div>
       </div>
     </div>
   ) : (
@@ -63,19 +67,21 @@ export const Popout = (props) => {
         `}
       >
         <div className={`font-bold flex flex-row gap-1 items-end justify-between`}>
-          <div>
-            <span className={`font-bold uppercase text-${color}`}>
-              {type === 'tldr' ? 'TL;DR' : type}
-            </span>
-            <span className={`font-normal text-base text-${color}`}>
-              {type === 'comment' && (
-                <>
-                  {' '}
-                  by <b>{props.by}</b>
-                </>
-              )}
-            </span>
-          </div>
+          {type === 'none' ? null : (
+            <div>
+              <span className={`font-bold uppercase text-${color}`}>
+                {type === 'tldr' ? 'TL;DR' : type}
+              </span>
+              <span className={`font-normal text-base text-${color}`}>
+                {type === 'comment' && (
+                  <>
+                    {' '}
+                    by <b>{props.by}</b>
+                  </>
+                )}
+              </span>
+            </div>
+          )}
           {props.hideable && (
             <button onClick={() => setHide(true)} className="hover:text-secondary" title="Close">
               <CloseIcon />

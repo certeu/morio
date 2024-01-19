@@ -1,7 +1,6 @@
 // Dependencies
 import express from 'express'
 import passport from 'passport'
-import { fromEnv } from '#shared/env'
 // Routes
 import { routes } from '#routes/index'
 // Middleware
@@ -82,7 +81,9 @@ app.get(`${tools.prefix}/*`, async (req, res) =>
 /*
  * Start listening for requests
  */
-app.listen(fromEnv('MORIO_API_PORT'), (err) => {
+app.listen(tools.getPreset('MORIO_API_PORT'), (err) => {
   if (err) tools.log.error(err, 'An error occured')
-  tools.log.info(`Morio api ready - listening on http://localhost:${fromEnv('MORIO_API_PORT')}`)
+  tools.log.info(
+    `Morio api ready - listening on http://localhost:${tools.getPreset('MORIO_API_PORT')}`
+  )
 })

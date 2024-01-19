@@ -7,6 +7,7 @@
     "build": "node build.mjs",
     "clean": "rimraf dist",
     "dev": "nodemon src/index.mjs",
+    "lint": "eslint --fix 'src/**' 'config/**' 'shared/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
     "test": "npx mocha tests/index.mjs"
   },
@@ -27,8 +28,8 @@
     "pino-pretty": "^10.2.3"
   },
   "imports": {
+    "#config": "./config/index.mjs",
     "#controllers/*": "./src/controllers/*.mjs",
-    "#defaults": "./defaults/defaults.mjs",
     "#lib/*": "./src/lib/*.mjs",
     "#routes/*": "./src/routes/*.mjs",
     "#shared/*": "./shared/*.mjs"

@@ -173,8 +173,7 @@ export const validate = (key, value, context) => {
   try {
     result = configSchema.extract(key).label(key).validate(value, { context })
   } catch (err) {
-    // Not sure this needs handling
-    return result
+    return false
   }
 
   return result

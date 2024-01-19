@@ -1,5 +1,0 @@
-# This holds the configuration wizard view settings for step-ca
-about: Certificate Authority
-configId: ca
-title: Certificate Authority
-type: info

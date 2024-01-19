@@ -26,8 +26,6 @@ const timeSince = (timestamp) => {
     /*
      * Report in minutes if it is below 120 minutes
      */
-    const minutes = Math.floor(delta / 60)
-    const seconds = Math.floor(delta - 60 * minutes)
     uptime = `${Math.floor(delta / 60)} minutes`
   } else if (delta < 6 * 60 * 60) {
     /*

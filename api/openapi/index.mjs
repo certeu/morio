@@ -1,4 +1,4 @@
-import pkg from '../package.json' assert { type: 'json' }
+import { pkg } from '../src/json-loader.mjs'
 import { paths as setup } from './setup.mjs'
 import { paths as status } from './status.mjs'
 import { paths as validate } from './validate.mjs'

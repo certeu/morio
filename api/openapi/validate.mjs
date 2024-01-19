@@ -1,39 +1,12 @@
 import j2s from 'joi-to-swagger'
-import { requestSchema, responseSchema, errorsSchema } from '../src/schema.mjs'
-import { fromEnv } from '#shared/env'
+import { responseSchema } from '../src/schema.mjs'
+import { getPreset } from '#config'
 
-const PREFIX = fromEnv('MORIO_API_PREFIX')
+const PREFIX = getPreset('MORIO_API_PREFIX')
 
 const shared = {
   tags: ['Validate'],
 }
-
-const request = (description, key, examples = false, example = false) => {
-  const data = {
-    requestBody: {
-      description,
-      content: {
-        'application/json': {
-          schema: j2s(requestSchema.setup[key]).swagger,
-        },
-      },
-    },
-  }
-  if (examples) data.requestBody.content['application/json'].examples = examples
-  else if (example) data.requestBody.content['application/json'].example = example
-
-  return data
-}
-
-const response = (description, schema, example = {}) => ({
-  description,
-  content: {
-    'application/json': {
-      schema: j2s(schema).swagger,
-      example,
-    },
-  },
-})
 
 /*
  * You cannot use a template string as an object key in Javascript.

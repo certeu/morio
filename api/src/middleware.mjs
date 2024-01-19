@@ -1,11 +1,12 @@
 import jwt from 'passport-jwt'
 import { generateJwtKey } from '#shared/crypto'
+import { getPreset } from '#config'
 
 /*
  * There is (currently) no Express middleware in use.
  * However, we have this here to take the guesswork out of adding it later.
  */
-export const loadExpressMiddleware = (app) => {}
+export const loadExpressMiddleware = () => {}
 
 /*
  * We load the JWT middleware for passport (authentication)
@@ -19,7 +20,7 @@ export const loadPassportMiddleware = (passport, tools) => {
     : {
         secretOrKey: generateJwtKey(),
         issuer: 'https://mor.io/',
-        expiresIn: process.env.BACKEND_JWT_EXPIRY || '7d',
+        expiresIn: getPreset('MORIO_API_JWT_EXPIRY', '7d'),
       }
   if (tools.config?.jwt) {
     passport.use(

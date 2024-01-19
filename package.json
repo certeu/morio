@@ -11,7 +11,7 @@
     "build:core": "./scripts/build-container.sh core",
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
-    "dev": "npm run reconfigure && ./core/run-container.sh",
+    "dev": "./core/run-container.sh",
     "dev:clean": "docker rm -f core api ui proxy ca broker console",
     "prod": "docker-compose -f compose/prod.yaml up",
     "prod:down": "docker-compose -f compose/prod.yaml down",
@@ -37,7 +37,7 @@
     "core",
     "schema",
     "shared",
-    "defaults"
+    "config"
   ],
   "devDependencies": {
     "esbuild": "^0.19.9",
@@ -46,7 +46,6 @@
     "eslint-plugin-react": "^7.33.2",
     "husky": "^8.0.0",
     "lint-staged": "^15.2.0",
-    "mustache": "^4.2.0",
     "pino-pretty": "^10.3.1"
   }
 }

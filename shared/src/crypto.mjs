@@ -1,7 +1,7 @@
-import { randomBytes, generateKeyPairSync, KeyObject } from 'crypto'
+import { randomBytes, generateKeyPairSync } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
-import { fromEnv } from './env.mjs'
+import { getPreset } from '#config'
 
 /**
  * Generates a key to sign JSON web tokens
@@ -17,16 +17,16 @@ export const generateJwtKey = () => randomString(64)
  * @return {object} - An object with `publicKey` and `privateKey` properties
  */
 export const generateKeyPair = (passphrase) =>
-  generateKeyPairSync(fromEnv('MORIO_CRYPTO_KEY_ALG'), {
-    modulusLength: fromEnv('MORIO_CRYPTO_KEY_LEN'),
+  generateKeyPairSync('rsa', {
+    modulusLength: 4096,
     publicKeyEncoding: {
-      type: fromEnv('MORIO_CRYPTO_PUB_KEY_TYPE'),
-      format: fromEnv('MORIO_CRYPTO_PUB_KEY_FORMAT'),
+      type: 'spki',
+      format: 'pem',
     },
     privateKeyEncoding: {
-      type: fromEnv('MORIO_CRYPTO_PRIV_KEY_TYPE'),
-      format: fromEnv('MORIO_CRYPTO_PRIV_KEY_FORMAT'),
-      cipher: fromEnv('MORIO_CRYPTO_PRIV_KEY_CIPHER'),
+      type: 'pkcs8',
+      format: 'pem',
+      cipher: 'aes-256-cbc',
       passphrase: passphrase.toString(),
     },
   })
@@ -55,7 +55,7 @@ const formatCertificateSubject = (attr) => {
  * Generates a key pair and CA root certificate
  */
 export function generateCaCertificate(subjectAttributes, issuerAttributes, years = 1, extentions) {
-  const keys = forge.pki.rsa.generateKeyPair(fromEnv('MORIO_CRYPTO_KEY_LEN'))
+  const keys = forge.pki.rsa.generateKeyPair(4096)
   const cert = forge.pki.createCertificate()
   cert.publicKey = keys.publicKey
   cert.serialNumber = '01'
@@ -77,10 +77,10 @@ export function generateCaRoot(hostnames, name) {
    * Defaults for root and intermediate certificate subjects
    */
   const dflts = {
-    countryName: fromEnv('MORIO_CA_COUNTRY_NAME'),
-    ST: fromEnv('MORIO_CA_ST'),
-    localityName: fromEnv('MORIO_CA_LOCALITY_NAME'),
-    organizationName: fromEnv('MORIO_CA_ORGANIZATION_NAME'),
+    countryName: getPreset('MORIO_CA_COUNTRY_NAME'),
+    ST: getPreset('MORIO_CA_ST'),
+    localityName: getPreset('MORIO_CA_LOCALITY_NAME'),
+    organizationName: getPreset('MORIO_CA_ORGANIZATION_NAME'),
     OU: name,
   }
 
@@ -102,9 +102,9 @@ export function generateCaRoot(hostnames, name) {
    * Generate Root certificate
    */
   const root = generateCaCertificate(
-    { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
-    { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
-    Number(fromEnv('MORIO_ROOT_CA_VALID_YEARS')),
+    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    Number(getPreset('MORIO_ROOT_CA_VALID_YEARS')),
     extentions
   )
 
@@ -112,9 +112,9 @@ export function generateCaRoot(hostnames, name) {
    * Generate Intermediate certificate
    */
   const intermediate = generateCaCertificate(
-    { ...dflts, commonName: fromEnv('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
-    { ...dflts, commonName: fromEnv('MORIO_ROOT_CA_COMMON_NAME') },
-    Number(fromEnv('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
+    { ...dflts, commonName: getPreset('MORIO_INTERMEDIATE_CA_COMMON_NAME') },
+    { ...dflts, commonName: getPreset('MORIO_ROOT_CA_COMMON_NAME') },
+    Number(getPreset('MORIO_INTERMEDIATE_CA_VALID_YEARS')),
     extentions
   )
 
@@ -167,7 +167,7 @@ const encryptPrivateKey = (key, pwd) =>
     )
   )
 
-export const keypairAsJwk = async (pair, pwd) => {
+export const keypairAsJwk = async (pair) => {
   const keystore = jose.JWK.createKeyStore()
   const jwk = await keystore.add(pair.public, 'pem')
 

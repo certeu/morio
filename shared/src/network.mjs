@@ -1,7 +1,6 @@
 import dns from 'dns'
 import https from 'https'
 import axios from 'axios'
-import { fromEnv } from './env.mjs'
 
 const dnsOptions = {
   family: 4, // Don't use IPv6
@@ -55,7 +54,6 @@ export const testUrl = async (url, customOptions = {}) => {
   /*
    * If we need to ignore the certificate, this takes some more work
    */
-  let agent = false
   if (options.ignoreCertificate && url.trim().toLowerCase().slice(0, 8) === 'https://') {
     options.httpsAgent = new https.Agent({ rejectUnauthorized: false })
   }

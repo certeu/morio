@@ -1,5 +1,5 @@
-import pkg from '../package.json' assert { type: 'json' }
-import { fromEnv } from '#shared/env'
+import { pkg } from './json-loader.mjs'
+import { getPreset } from '#config'
 import { logger } from '#shared/logger'
 import { coreClient } from '#lib/core'
 
@@ -12,12 +12,13 @@ export const bootstrapConfiguration = async () => {
   /*
    * First setup the logger, so we can log
    */
-  const log = logger(fromEnv('MORIO_API_LOG_LEVEL'), pkg.name)
+  const log = logger(getPreset('MORIO_API_LOG_LEVEL'), pkg.name)
 
   /*
    * Attempt to load the config from CORE
    */
-  let config = await coreClient.get('/configs/current')
+  const core = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+  let config = await core.get('/configs/current')
   if (config[0] === 200) {
     config = config[1]
     log.info('Loaded Morio config from core')
@@ -26,19 +27,7 @@ export const bootstrapConfiguration = async () => {
     log.warn('Failed to load Morio config from core')
   }
 
-  /*
-   * Load the defaults from core
-   */
-  let defaults = await coreClient.get('/defaults')
-  if (defaults[0] === 200) {
-    defaults = defaults[1]
-    log.info('Loaded Morio defaults from core')
-  } else {
-    defaults = {}
-    log.warn('Failed to load Morio defaults from core')
-  }
-
-  return {
+  const tools = {
     info: {
       about: pkg.description,
       name: pkg.name,
@@ -47,9 +36,24 @@ export const bootstrapConfiguration = async () => {
       version: pkg.version,
     },
     config,
-    defaults: defaults[0] === 200 ? defaults[1] : {},
     log,
-    prefix: fromEnv('MORIO_API_PREFIX'),
-    core: coreClient,
+    prefix: getPreset('MORIO_API_PREFIX'),
+    core,
   }
+
+  /*
+   * Add a getPreset() wrapper that will output debug logs about how presets are resolved
+   * This is surprisingly helpful during debugging
+   */
+  tools.getPreset = (key, dflt, opts) => {
+    const result = getPreset(key, dflt, opts)
+    tools.log.debug(`Preset ${key} = ${result}`)
+
+    return result
+  }
+
+  /*
+   * Now return the tools object
+   */
+  return tools
 }

@@ -1,0 +1,28 @@
+{
+  "name": "@morio/config",
+  "version": "0.1.0",
+  "description": "Morio Configuration",
+  "private": true,
+  "scripts": {
+    "prettier": "npx prettier --write './*.mjs'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/certeu/morio.git"
+  },
+  "author": "Joost De Cock <joost@joost.at>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/certeu/morio/issues"
+  },
+  "homepage": "https://github.com/certeu/morio#readme",
+  "imports": {
+    "#shared/*": "./shared/*.mjs"
+  },
+  "main": "./index.mjs",
+  "dependencies": {
+    "bson": "^6.2.0",
+    "node-forge": "^1.3.1",
+    "node-jose": "^2.2.0"
+  }
+}

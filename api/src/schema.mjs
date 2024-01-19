@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { fromEnv } from '#shared/env'
 
 const shared = {
   setup: {
@@ -16,13 +15,8 @@ const shared = {
  */
 export const requestSchema = {
   setup: {
-    core: Joi.object({
-      nodes: Joi.array()
-        .items(Joi.string())
-        .min(fromEnv('MORIO_CONFIG_NODES_MIN'))
-        .max(fromEnv('MORIO_CONFIG_NODES_MAX'))
-        .unique()
-        .required(),
+    deployment: Joi.object({
+      nodes: Joi.array().items(Joi.string()).min(1).max(15).unique().required(),
     }),
     jwtkey: Joi.object({
       setup_token: shared.setup.setup_token,
@@ -32,20 +26,14 @@ export const requestSchema = {
       /*
        * Bytes controls the length of the generated password
        */
-      bytes: Joi.number()
-        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
-        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
-        .default(fromEnv('MORIO_CRYPTO_SECRET_DFLT')),
+      bytes: Joi.number().min(8).max(64).default(16),
     }),
     keypair: Joi.object({
       setup_token: shared.setup.setup_token,
       /*
        * Passphrase is used to encrypt the private key
        */
-      passphrase: Joi.string()
-        .min(fromEnv('MORIO_CRYPTO_SECRET_MIN'))
-        .max(fromEnv('MORIO_CRYPTO_SECRET_MAX'))
-        .required(),
+      passphrase: Joi.string().min(8).max(64).required(),
     }),
   },
   validate: {
@@ -96,14 +84,12 @@ export const responseSchema = {
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
 
 /*
- * This describes the schema of the core configuration
+ * This describes the schema of the deployment configuration
  */
-export const coreSchema = Joi.object({
-  core: Joi.object({
+export const deploymentSchema = Joi.object({
+  deployment: Joi.object({
     display_name: Joi.string().required().min(2).max(255),
-    node_count: Joi.number()
-      .required()
-      .valid(...fromEnv('MORIO_CONFIG_DEPLOYMENT_SIZES')),
+    node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
     nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
     cluster_name: Joi.string()
       .hostname()

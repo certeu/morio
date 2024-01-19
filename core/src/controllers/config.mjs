@@ -1,5 +1,4 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
-import { fromEnv } from '#shared/env'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { startMorio } from '#lib/morio'
 
@@ -11,13 +10,13 @@ import { startMorio } from '#lib/morio'
 export function Controller() {}
 
 /**
- * Loads the configuration defaults
+ * Loads the configuration presets
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getDefaults = async (req, res, tools) => res.send(tools.defaults)
+Controller.prototype.getPresets = async (req, res, tools) => res.send(tools.presets)
 
 /**
  * Loads the current (running) configuration
@@ -51,8 +50,8 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Note that input validation is handled by the API
    * Here, we just do a basic check
    */
-  const config = req.body
-  if (!config.core) {
+  const mConf = req.body
+  if (!mConf.deployment) {
     tools.log.warn(`Ingoring request to deploy an invalid configuration`)
     return res.status(400).send({ errors: ['Configuration is not valid'] })
   } else tools.log.debug(`Processing request to deploy a new configuration`)
@@ -61,7 +60,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
-  tools.log.debug(`New configuration will be tracked as: ${time}`)
+  tools.log.debug(`New mConf configuration will be tracked as: ${time}`)
 
   /*
    * If this is the initial deploy, there will be no key pair, so generate one.
@@ -72,11 +71,11 @@ Controller.prototype.deploy = async (req, res, tools) => {
     tools.log.debug(`No prior configuration found, generating key pair`)
     const morioRootToken = 'mrt.' + (await randomString(32))
     const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
-    config.core.key_pair = {
+    mConf.deployment.key_pair = {
       public: publicKey,
       private: privateKey,
     }
-    config.comment = 'Initial deployment'
+    mConf.comment = 'Initial deployment'
     keys = {
       jwt: generateJwtKey(),
       mrt: morioRootToken,
@@ -86,7 +85,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure we have a keypair
    */
-  if (!config.core.key_pair?.public || !config.core.key_pair.private) {
+  if (!mConf.deployment.key_pair?.public || !mConf.deployment.key_pair.private) {
     tools.log.debug(`Configuration lacks key pair`)
     return res.status(400).send({ errors: ['Configuration lacks key pair'] })
   }
@@ -94,20 +93,22 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Make sure all services are present
    */
-  if (!config.api) config.api = true
-  if (!config.ui && !config.core.headless) config.ui = true
-  if (!config.traefik)
-    config.traefik = {
-      container: {},
-    }
-  if (tools.running_config && !config.ca) config.ca = true
+  if (typeof mConf.core === 'undefined') mConf.core = {}
+  if (typeof mConf.deployment.optional_services === 'undefined')
+    mConf.deployment.optionalServices = {}
+  mConf.deployment.optionalServices.ui = mConf.flags
+    ? mConf.flags.includes['headless']
+      ? true
+      : false
+    : true
 
   /*
-   * Now write the config to disk
+   * Now write the mConf configuration to disk
    */
-  tools.log.debug(`Writing configuration to morio.${time}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/morio.${time}.yaml`, config)
-  if (!result) return res.status(500).send({ errors: ['Failed to write configuration to disk'] })
+  tools.log.debug(`Writing mConf configuration to morio.${time}.yaml`)
+  let result = await writeYamlFile(`/etc/morio/morio.${time}.yaml`, mConf)
+  if (!result)
+    return res.status(500).send({ errors: ['Failed to write mConf configuration to disk'] })
 
   /*
    * Also write the keys to disk
@@ -119,7 +120,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Prepare data to return
    */
-  const data = { result: 'success', config }
+  const data = { result: 'success', mConf }
 
   /*
    * The Morio Root Token is actually the passphrase used to encrypt the private key
