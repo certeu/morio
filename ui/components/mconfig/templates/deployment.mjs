@@ -89,7 +89,7 @@ export const deployment = (context) => {
       nodes: {
         type: 'strings',
         count: context.mConf?.deployment?.node_count || 1,
-        label: 'Nodes',
+        title: 'Nodes',
         labels: [...Array(context.mConf?.deployment?.node_count || 0)].map(
           (i, j) => `Node ${Number(j) + 1}`
         ),
@@ -107,18 +107,18 @@ export const deployment = (context) => {
        */
       display_name: {
         type: 'string',
-        label: 'Display Name',
+        title: 'Display Name',
         about: 'A human-friendly name to refer to this Morio setup',
         placeholder: 'Morio Production',
-        next: context.mConf?.deployment?.node_count === 1 ? 'validate' : 'deployment.cluster_name',
+        next: context.mConf?.deployment?.node_count === 1 ? 'validate' : 'deployment.fqdn',
       },
 
       /*
        * Cluster name
        */
-      cluster_name: {
+      fqdn: {
         type: 'string',
-        label: 'Cluster Name',
+        title: 'Cluster Name (FQDN)',
         about: `A round-robin DNS record for the entire Morio cluster.
 This should resolve to the IP addresses of all cluster nodes.`,
         placeholder: 'cluster.my.domain.com',
@@ -132,7 +132,7 @@ This should resolve to the IP addresses of all cluster nodes.`,
        */
       leader_ip: {
         type: 'string',
-        label: 'Leader IP Address',
+        title: 'Leader IP Address',
         about: `In addition to the name, we need the IP address of the leader node (this node).`,
         placeholder: '10.0.0.1',
         suggest: {

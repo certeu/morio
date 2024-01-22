@@ -42,5 +42,5 @@ export const useStateObject = (dflt = {}) => {
     return newObj
   }
 
-  return [obj, update]
+  return [obj, update, setObj]
 }

@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { FileInput } from 'components/inputs.mjs'
-import { ConfigurationWizard } from 'components/mconfig/wizard.mjs'
+import { SetupWizard } from 'components/mconfig/setup-wizard.mjs'
 
 const ConfigUploadPage = (props) => {
   /*
@@ -36,7 +36,7 @@ const ConfigUploadPage = (props) => {
       {config ? (
         <div className="py-12 px-4">
           <h1 className="text-center">Configure Morio</h1>
-          <ConfigurationWizard preloadConfig={config} preloadView="validate" />
+          <SetupWizard preloadConfig={config} preloadView="validate" />
         </div>
       ) : (
         <div className="py-12 px-4 max-w-xl m-auto">

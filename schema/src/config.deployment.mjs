@@ -28,9 +28,9 @@ export const nodes = Joi.array()
   .items(Joi.string().hostname())
 
 /*
- * deployment.cluster_name
+ * deployment.fqdn
  */
-export const cluster_name = Joi.string().hostname()
+export const fqdn = Joi.string().hostname()
 
 /*
  * deployment
@@ -45,11 +45,11 @@ export const deployment = Joi.object({
     .unique()
     .length(Joi.ref('$deployment.node_count'))
     .items(Joi.string().hostname()),
-  cluster_name: Joi.string()
+  fqdn: Joi.string()
     .hostname()
     .when('$deployment.node_count', {
       is: Joi.number().max(1),
-      then: Joi.forbidden(),
+      then: Joi.optional(),
       otherwise: Joi.required(),
     }),
 })
@@ -61,7 +61,7 @@ export const keys = {
   display_name,
   node_count,
   nodes,
-  cluster_name,
+  fqdn,
 }
 
 /*

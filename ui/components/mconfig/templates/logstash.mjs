@@ -7,7 +7,7 @@
  */
 export const logstash = (context) => ({
   about:
-    'Morio clients will push their data to Morio. But other systems More can not only aggregator for your data. Logstash about',
+    'This configuration allows you to connect this Morio to other Morio deployments, or other data processing or storgage systems.',
   title: 'Connect',
   type: 'info',
   children: {

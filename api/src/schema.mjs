@@ -91,12 +91,13 @@ export const deploymentSchema = Joi.object({
     display_name: Joi.string().required().min(2).max(255),
     node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
     nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
-    cluster_name: Joi.string()
+    fqdn: Joi.string()
       .hostname()
       .when('node_count', {
         is: Joi.number().max(1),
-        then: Joi.forbidden(),
+        then: Joi.optional(),
         otherwise: Joi.required(),
       }),
   }),
+  comment: Joi.string(),
 })

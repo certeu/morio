@@ -1,15 +1,10 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
-import { ConfigurationWizard } from 'components/mconfig/wizard.mjs'
+import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 
 const ConfigPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <ConfigurationWizard
-        preloadView="morio/node_count"
-        splash={false}
-        prefix="/config"
-        page={props.page}
-      />
+      <ContentWrapper {...props}></ContentWrapper>
     </PageWrapper>
   )
 }

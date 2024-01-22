@@ -9,6 +9,7 @@ import {
   ContainerIcon,
   ContainerImageIcon,
   DesktopIcon,
+  DocumentIcon,
   LayersIcon,
   MorioIcon,
   ServersIcon,
@@ -16,6 +17,7 @@ import {
   StorageIcon,
   TaskIcon,
   WifiIcon,
+  WrenchIcon,
 } from 'components/icons.mjs'
 import { Docker, RedPanda, RedPandaConsole, Traefik } from 'components/brands.mjs'
 import { Link } from 'components/link'
@@ -44,10 +46,12 @@ const icons = {
   nodes: ServersIcon,
   proxy: Traefik,
   services: LayersIcon,
+  show: DocumentIcon,
   tasks: TaskIcon,
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
+  wizard: WrenchIcon,
 }
 
 /*
@@ -85,6 +89,14 @@ const links = {
   },
   config: {
     title: 'Configuration',
+    subs: {
+      show: {
+        title: 'Display configuration',
+      },
+      wizard: {
+        title: 'Update configuration',
+      },
+    },
   },
   docker: {
     subs: {

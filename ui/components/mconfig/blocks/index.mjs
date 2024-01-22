@@ -1,8 +1,10 @@
 // Components
 import { Popout } from 'components/popout.mjs'
+import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
 import { InfoBlock, ListBlock, StringBlock, StringsBlock } from './base.mjs'
 import { LogstashInputs, LogstashOutputs, LogstashPipelines } from './logstash.mjs'
+import { ConfigNavigation } from '../config-wizard.mjs'
 
 /*
  * Map between type in wizard config and React component
@@ -26,7 +28,7 @@ const blocks = {
  * @return {function} Component - React component
  */
 export const Block = (props) => {
-  const viewConfig = props.template.children[props.section]
+  const viewConfig = props.template?.children?.[props.section]
   if (viewConfig && typeof blocks[viewConfig.type] === 'function') {
     const Component = viewConfig.locked ? viewConfig.locked : blocks[viewConfig.type]
 
@@ -38,6 +40,20 @@ export const Block = (props) => {
     ) : (
       <Component {...props} viewConfig={viewConfig} />
     )
+  } else {
+    if (props.template.title && props.template.children)
+      return (
+        <div className="max-w-prose">
+          <Markdown>{props.template.about}</Markdown>
+          <ConfigNavigation
+            view={props.configPath}
+            loadView={props.loadView}
+            nav={props.template.children}
+            mConf={props.mConf}
+            lead={[props.section]}
+          />
+        </div>
+      )
   }
 
   return (

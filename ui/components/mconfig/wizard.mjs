@@ -1,5 +1,5 @@
 // Dependencies
-import { views, resolveNextView, resolveViewValue, viewInLocation, getView } from './views.mjs'
+import { views, resolveNextView, resolveViewValue, viewInLocation, getView } from './utils.mjs'
 import { validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
 import get from 'lodash.get'
 // Context

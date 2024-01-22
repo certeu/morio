@@ -7,7 +7,7 @@ const prefix = '/config'
  * Avoid hydration woes with a dynamic import and disabled SSR rendering
  */
 const DynamicConfigurationWizard = dynamic(
-  () => import('components/config/wizard.mjs').then((mod) => mod.ConfigurationWizard),
+  () => import('components/mconfig/config-wizard.mjs').then((mod) => mod.ConfigWizard),
   { ssr: false }
 )
 

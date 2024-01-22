@@ -1,5 +1,11 @@
 import { resolveServiceConfiguration } from '#config'
-import { docker, createDockerContainer, runDockerApiCommand, runContainerApiCommand, generateContainerConfig } from '#lib/docker'
+import {
+  docker,
+  createDockerContainer,
+  runDockerApiCommand,
+  runContainerApiCommand,
+  generateContainerConfig,
+} from '#lib/docker'
 
 /**
  * Creates (a container for) a morio service
