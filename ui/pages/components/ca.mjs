@@ -6,7 +6,6 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { WebLink } from 'components/link.mjs'
 import { CertificateIcon, PlusIcon, MinusIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
-import { Highlight } from 'components/highlight.mjs'
 import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
 
 const loading = <p>Loading...</p>
@@ -14,15 +13,12 @@ const loading = <p>Loading...</p>
 const CaPage = (props) => {
   const { api } = useApi()
   const [root, setRoot] = useState(false)
-  const [config, setConfig] = useState(false)
 
   useEffect(() => {
     const loadRoot = async () => {
       const [rootContent, rootStatus] = await api.getCaRoot()
       if (rootStatus === 200) setRoot(rootContent)
       else setRoot(true)
-      const [configContent, configStatus] = await api.getCurrentConfig()
-      if (configStatus === 200) setConfig(configContent)
     }
     if (!root) loadRoot()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

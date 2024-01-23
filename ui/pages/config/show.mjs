@@ -55,7 +55,7 @@ const ConfigPage = (props) => {
                 </div>
                 <Tabs tabs={Object.keys(config.services)}>
                   {Object.keys(config.services).map((srv) => (
-                    <Tab tabId={srv}>
+                    <Tab tabId={srv} key={srv}>
                       <Highlight
                         js={config.services[srv]}
                         title={`${srv.toUpperCase()} Configuration`}

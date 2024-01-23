@@ -1,7 +1,7 @@
 // Dependencies
 import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
-import { validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
+import { validate, validateConfiguration } from 'lib/utils.mjs'
 // Templates
 import { templates } from './templates/index.mjs'
 // Context
@@ -12,12 +12,10 @@ import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useAtom } from 'jotai'
 // Components
-import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport, DeploymentReport } from './report.mjs'
-import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
-import { Popout } from 'components/popout.mjs'
+import { RightIcon } from 'components/icons.mjs'
 
 /**
  * This React component renders the side menu with a list of various config views
@@ -222,7 +220,6 @@ export const SetupWizard = ({
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
-  const [dense, setDense] = useState(false)
   const [deployResult, setDeployResult] = useState(false)
 
   /*

@@ -1,7 +1,7 @@
 // Dependencies
 import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
-import { validate, validateConfiguration, iconSize } from 'lib/utils.mjs'
+import { validate, validateConfiguration } from 'lib/utils.mjs'
 // Templates
 import { templates } from './templates/index.mjs'
 // Context
@@ -16,7 +16,7 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport, DeploymentReport } from './report.mjs'
-import { LeftIcon, RightIcon, ConfigurationIcon } from 'components/icons.mjs'
+import { RightIcon, ConfigurationIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/mconfig/diff.mjs'
 import yaml from 'yaml'
@@ -226,7 +226,6 @@ const startView = 'deployment/node_count'
  */
 export const ConfigWizard = ({
   prefix = '/config/wizard', // Prefix to use for the keeping the view state in the URL
-  page,
 }) => {
   /*
    * React state
@@ -237,7 +236,6 @@ export const ConfigWizard = ({
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
-  const [dense, setDense] = useState(false)
   const [deployResult, setDeployResult] = useState(false)
   const [revert, setRevert] = useState(0)
   const [showDelta, setShowDelta] = useState(false)
@@ -335,11 +333,6 @@ export const ConfigWizard = ({
       setLoadingStatus([true, 'Deployment initialized', true, true])
     }
   }
-
-  /*
-   * Helper method to figure out what view will be next
-   */
-  const whatsNext = () => resolveNextView(configPath, config)
 
   if (deployResult)
     return (

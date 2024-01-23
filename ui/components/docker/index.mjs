@@ -93,7 +93,7 @@ const StatsWrapper = ({ children }) => <div className="stats shadow row">{childr
  * @param {ojbject} err - The error object (the message will be shown)
  */
 const StatsError = ({ title = 'Error', err }) => (
-  <StatsWrapper data={err}>
+  <StatsWrapper>
     <div className="stat place-items-center">
       <div className="stat-title">{title}</div>
       <div className="stat-value">
@@ -120,7 +120,7 @@ const DisplayDockerDf = ({ data }) => {
   return isError(data) ? (
     <StatsError err={data} title="Docker Version" />
   ) : (
-    <StatsWrapper data={data}>
+    <StatsWrapper>
       <div className="stat place-items-center">
         <div className="stat-title">Layers Storage</div>
         <div className="stat-value">{memBytes}</div>
@@ -151,14 +151,14 @@ const DisplayDockerInfo = ({ data }) => {
     </>
   ) : (
     <>
-      <StatsWrapper data={data}>
+      <StatsWrapper>
         <div className="stat place-items-center">
           <div className="stat-title">Containers</div>
           <div className="stat-value">{data.ContainersRunning}</div>
           <div className="stat-desc">Running</div>
         </div>
       </StatsWrapper>
-      <StatsWrapper data={data}>
+      <StatsWrapper>
         <div className="stat place-items-center">
           <div className="stat-title">Memory</div>
           <div className="stat-value">
@@ -168,7 +168,7 @@ const DisplayDockerInfo = ({ data }) => {
           <div className="stat-desc">Total</div>
         </div>
       </StatsWrapper>
-      <StatsWrapper data={data}>
+      <StatsWrapper>
         <div className="stat place-items-center">
           <div className="stat-title">Cores</div>
           <div className="stat-value">{data.NCPU}</div>
@@ -193,7 +193,7 @@ const DisplayDockerVersion = ({ data }) =>
   isError(data) ? (
     <StatsError err={data} title="Docker Version" />
   ) : (
-    <StatsWrapper data={data}>
+    <StatsWrapper>
       <div className="stat place-items-center">
         <div className="stat-title">Docker Version</div>
         <div className="stat-value">{data.Version}</div>
@@ -376,14 +376,14 @@ export const DisplayDockerContainer = ({ data }) => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row flex-wrap gap-4">
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Status</div>
             <div className="stat-value capitalize">{statusIcon[data.State.Status]}</div>
             <div className="stat-desc">{data.State.Status}</div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Last Started</div>
             <div className="stat-value capitalize">
@@ -394,7 +394,7 @@ export const DisplayDockerContainer = ({ data }) => {
             </div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Image</div>
             <div className="stat-value">{image[0]}</div>
@@ -469,7 +469,7 @@ export const DisplayDockerContainerStats = ({ data, state }) => {
   return (
     <>
       <div className="flex flex-row flex-wrap gap-4">
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">CPU</div>
             <div className="stat-value capitalize">
@@ -485,7 +485,7 @@ export const DisplayDockerContainerStats = ({ data, state }) => {
             <div className="stat-desc">{running ? <span>&nbsp;</span> : 'not running'}</div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Memory Use</div>
             <div className="stat-value capitalize">
@@ -510,7 +510,7 @@ export const DisplayDockerContainerStats = ({ data, state }) => {
             </div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Network Egress</div>
             <div className="stat-value capitalize">
@@ -526,7 +526,7 @@ export const DisplayDockerContainerStats = ({ data, state }) => {
             <div className="stat-desc">{running ? <span>&nbsp;</span> : 'not running'}</div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Network Ingress</div>
             <div className="stat-value capitalize">
@@ -542,7 +542,7 @@ export const DisplayDockerContainerStats = ({ data, state }) => {
             <div className="stat-desc">{running ? <span>&nbsp;</span> : 'not running'}</div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Cores</div>
             <div className="stat-value capitalize">
@@ -788,7 +788,7 @@ export const DockerImageLayers = (props) => (
  */
 export const DisplayDockerImageLayers = ({ data }) => (
   <>
-    <Highlight language="docker" title="Dockerfile" js={data} title="Image Layers" />
+    <Highlight language="docker" js={data} title="Image Layers" />
   </>
 )
 
@@ -868,14 +868,14 @@ export const DockerNetwork = (props) => (
 export const DisplayDockerNetwork = ({ data }) => (
   <div className="flex flex-col gap-4">
     <div className="flex flex-row flex-wrap gap-4">
-      <StatsWrapper data={data}>
+      <StatsWrapper>
         <div className="stat place-items-center">
           <div className="stat-title">Network</div>
           <div className="stat-value">{data.Name}</div>
           <div className="stat-desc"></div>
         </div>
       </StatsWrapper>
-      <StatsWrapper data={data}>
+      <StatsWrapper>
         <div className="stat place-items-center">
           <div className="stat-title">Subnet</div>
           <div className="stat-value capitalize">

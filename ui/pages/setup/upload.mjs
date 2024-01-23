@@ -1,7 +1,7 @@
 // Dependencies
 import yaml from 'js-yaml'
 // Hooks
-import { useState } from 'react'
+import { useState, useContext } from 'react'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
@@ -10,6 +10,10 @@ import { SetupWizard } from 'components/mconfig/setup-wizard.mjs'
 import { Link } from 'components/link.mjs'
 import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
+import { EphemeralInfo } from 'pages/index.mjs'
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
+// Context
+import { ModalContext } from 'context/modal.mjs'
 
 const ConfigUploadPage = (props) => {
   /*
@@ -17,6 +21,8 @@ const ConfigUploadPage = (props) => {
    */
   const [config, setConfig] = useState() // Holds the uploaded data parsed into a config
   const [error, setError] = useState(false)
+
+  const { setModal } = useContext(ModalContext)
 
   const { theme, toggleTheme } = useTheme()
   /*

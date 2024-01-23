@@ -2,17 +2,16 @@ import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { Link, linkClasses, PageLink } from 'components/link.mjs'
+import { Link, PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { Highlight } from 'components/highlight.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 
-const EphemeralInfo = () => (
+export const EphemeralInfo = () => (
   <div className="min-h-92 max-w-prose">
     <h2>
       Morio&apos;s Ephemeral

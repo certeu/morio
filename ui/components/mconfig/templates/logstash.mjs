@@ -5,7 +5,7 @@
  * Logstash specific config.
  * We call it connect but it's logstash under the hood
  */
-export const logstash = (context) => ({
+export const logstash = () => ({
   about:
     'This configuration allows you to connect this Morio to other Morio deployments, or other data processing or storgage systems.',
   title: 'Connect',

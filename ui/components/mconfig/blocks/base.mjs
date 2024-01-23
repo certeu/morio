@@ -138,7 +138,7 @@ export const StringsBlock = (props) => {
           labelBL={viewConfig.labelsBL?.[i]}
           labelBR={viewConfig.labelsBR?.[i]}
           update={(val) => localUpdate(i, val)}
-          valid={(val) => validate(id, val, config)}
+          valid={(val) => validate(id, val, mConf)}
           current={list[i]}
         />
       ))}
