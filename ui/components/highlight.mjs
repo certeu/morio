@@ -1,5 +1,9 @@
 import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
 import { isError } from 'lib/utils.mjs'
+import yaml from 'yaml'
+import highlightModule from 'react-highlight'
+
+const HighlightComponent = highlightModule.default
 
 const names = {
   js: 'Javascript',
@@ -16,16 +20,19 @@ export const Highlight = (props) => {
     language = props.children.props.className.split('-').pop()
     if (language.indexOf('.') !== -1) language = language.split('.')[0]
   }
+  console.log(HighlightComponent)
 
   const preProps = {
-    className: `language-${language} hljs text-base lg:text-lg whitespace-break-spaces overflow-auto px-4 py-2`,
+    className: `${language} language-${language} hljs text-base whitespace-break-spaces overflow-auto px-4 py-2`,
   }
   if (props.raw) preProps.dangerouslySetInnerHTML = { __html: props.raw }
 
   const content = props.js
     ? isError(props.js)
       ? JSON.stringify('' + props.js, null, 2)
-      : JSON.stringify(props.js, null, 2)
+      : language === 'yaml'
+        ? yaml.stringify(props.js, null, 2)
+        : JSON.stringify(props.js, null, 2)
     : props.children
 
   return (
@@ -38,10 +45,10 @@ export const Highlight = (props) => {
         px-4 py-1 mb-2 lg:text-sm
       `}
       >
-        <span>{names[language] ? names[language] : props.title ? props.title : language}</span>
+        <span>{props.title ? props.title : names[language] ? names[language] : language}</span>
         <CopyToClipboard content={content} />
       </div>
-      <pre {...preProps}>{content}</pre>
+      <HighlightComponent {...preProps}>{content}</HighlightComponent>
     </div>
   )
 }

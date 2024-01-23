@@ -29,6 +29,7 @@
     "react-diff-viewer-continued": "^3.2.5",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
+    "react-highlight": "^0.15.0",
     "react-markdown": "^9.0.1",
     "react-timeago": "^7.2.0",
     "use-local-storage-state": "^19.1.0",

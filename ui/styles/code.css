@@ -21,6 +21,7 @@ div.hljs > pre {
   color: var(--code-color);
   padding: var(--code-inner-padding);
   font-family: var(--code-font-family);
+  overflow-x: scroll;
 }
 
 /*
@@ -52,6 +53,14 @@ div.hljs > pre > code section.strikeout-lines {
 }
 div.hljs > pre > code section > span.code-line-break:last-child {
   display: none;
+}
+
+/*
+ * Style for react highlight component
+ */
+code.hljs {
+  background: transparent;
+  border: none;
 }
 
 /*

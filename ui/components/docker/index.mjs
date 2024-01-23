@@ -20,6 +20,7 @@ import {
 import { PageLink } from 'components/link.mjs'
 import { TimeAgoBrief } from 'components/time-ago.mjs'
 import TimeAgo from 'react-timeago'
+import { Tab, Tabs } from 'components/tabs.mjs'
 
 /*
  * This is a wrapper component that will take care of loading
@@ -77,30 +78,11 @@ const DockerWrapper = ({
 }
 
 /**
- * This is a wrapper component for a DaisyUI stats component that will display some
- * data, and makes all data available by wrapping this in a button that sets the modal context.
+ * This is a wrapper component for a DaisyUI stats component
  *
- * @param {object} data - The data to show in the modal window onClick (as JSON)
  * @param {function} children - The children react component(s)
  */
-const StatsWrapper = ({ data, children }) => {
-  const { setModal } = useContext(ModalContext)
-
-  return (
-    <button
-      className="stats shadow hover:bg-secondary hover:bg-opacity-20 grow"
-      onClick={() =>
-        setModal(
-          <ModalWrapper>
-            <Highlight language="json" js={data} />
-          </ModalWrapper>
-        )
-      }
-    >
-      {children}
-    </button>
-  )
-}
+const StatsWrapper = ({ children }) => <div className="stats shadow row">{children}</div>
 
 /**
  * This is a wrapper component for stats when the data fetching returned an error.
@@ -377,6 +359,8 @@ export const DockerContainer = (props) => (
  * Docker display container component
  */
 export const DisplayDockerContainer = ({ data }) => {
+  const [stats, setStats] = useState(false)
+
   const statusIcon = {
     running: <PlayIcon className="text-success w-12 h-12" fill stroke={0} />,
     paused: <PauseIcon className="text-warning w-12 h-12 animate-pulse" stroke={4} />,
@@ -391,7 +375,7 @@ export const DisplayDockerContainer = ({ data }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row flexwrap gap-4">
+      <div className="flex flex-row flex-wrap gap-4">
         <StatsWrapper data={data}>
           <div className="stat place-items-center">
             <div className="stat-title">Status</div>
@@ -418,7 +402,20 @@ export const DisplayDockerContainer = ({ data }) => {
           </div>
         </StatsWrapper>
       </div>
+      <DockerWrapper
+        endpoint={`docker/containers/${data.Id}/stats`}
+        Component={() => null}
+        callback={stats ? undefined : setStats}
+      />
       <DockerContainerStats id={data.Id} displayProps={{ state: data.State.Status }} />
+      <Tabs tabs="Container Info, Container Stats">
+        <Tab tabId="Container Info">
+          <Highlight language="yaml" js={data} title="Container Info" />
+        </Tab>
+        <Tab tabId="Container Stats">
+          <Highlight language="yaml" js={stats} title="Container Stats" />
+        </Tab>
+      </Tabs>
     </div>
   )
 }
@@ -445,7 +442,7 @@ const dockerCpuUsage = (data) => {
 
 const Sleep = () => (
   <span className="opacity-50" role="image" alt="zzz">
-    ÃÂ°ÃÂÃÂÃÂ´
+    Zzzz
   </span>
 )
 
@@ -755,15 +752,15 @@ export const DisplayDockerImage = ({ data }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row flexwrap gap-4">
-        <StatsWrapper data={data}>
+      <div className="flex flex-row flex-wrap gap-4">
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Image</div>
             <div className="stat-value">{image[0]}</div>
             <div className="stat-desc">{image[1]}</div>
           </div>
         </StatsWrapper>
-        <StatsWrapper data={data}>
+        <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Size</div>
             <div className="stat-value capitalize">{formatBytes(data.Size)}</div>
@@ -778,10 +775,10 @@ export const DisplayDockerImage = ({ data }) => {
 /*
  * Docker image history component
  */
-export const DockerImageHistory = (props) => (
+export const DockerImageLayers = (props) => (
   <DockerWrapper
     endpoint={`docker/images/${props.id}/history`}
-    Component={DisplayDockerImageHistory}
+    Component={DisplayDockerImageLayers}
     {...props}
   />
 )
@@ -789,12 +786,10 @@ export const DockerImageHistory = (props) => (
 /*
  * Docker display image history component
  */
-export const DisplayDockerImageHistory = ({ data }) => (
-  <div className="w-full max-w-full overflow-x-scroll flex flex-col gap-1 mt-4">
-    {data.toReversed().map((line, i) => (
-      <code key={i}>{line.CreatedBy}</code>
-    ))}
-  </div>
+export const DisplayDockerImageLayers = ({ data }) => (
+  <>
+    <Highlight language="docker" title="Dockerfile" js={data} title="Image Layers" />
+  </>
 )
 
 /*
@@ -872,7 +867,7 @@ export const DockerNetwork = (props) => (
  */
 export const DisplayDockerNetwork = ({ data }) => (
   <div className="flex flex-col gap-4">
-    <div className="flex flex-row flexwrap gap-4">
+    <div className="flex flex-row flex-wrap gap-4">
       <StatsWrapper data={data}>
         <div className="stat place-items-center">
           <div className="stat-title">Network</div>
@@ -890,5 +885,6 @@ export const DisplayDockerNetwork = ({ data }) => (
         </div>
       </StatsWrapper>
     </div>
+    <Highlight language="yaml" js={data} title="Network Info" />
   </div>
 )
