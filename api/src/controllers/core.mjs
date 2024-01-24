@@ -79,6 +79,19 @@ Controller.prototype.getCaRoot = async (req, res, tools) => {
 }
 
 /**
+ * Creates a certificate (passed to core which gets it from the CA)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.createCertificate = async (req, res, tools) => {
+  const [status, result] = await tools.core.post(`/ca/certificate`, req.body)
+
+  return res.status(status).send(result)
+}
+
+/**
  * Gets docker image data from core
  *
  * @param {object} req - The request object from Express

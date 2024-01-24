@@ -87,4 +87,10 @@ export function routes(tools) {
    * Hit this route to get the ca root certificate and fingerprint
    */
   app.get(`${PREFIX}/ca/root`, (req, res) => Core.getCaRoot(req, res, tools))
+
+  /*
+   * Create a certificate
+   */
+  app.post(`${PREFIX}/ca/certificate`, (req, res) => Core.createCertificate(req, res, tools))
+
 }
