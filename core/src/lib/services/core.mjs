@@ -10,6 +10,7 @@ import {
   createDockerNetwork,
   runDockerApiCommand,
   runContainerApiCommand,
+  shouldContainerBeRecreated,
   generateContainerConfig,
 } from '#lib/docker'
 import { addTraefikTlsConfiguration } from './proxy.mjs'
@@ -114,13 +115,11 @@ export const bootstrap = {
  * @param {object} tools = The tools object
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-const createMorioService = async (name, tools) => {
+const createMorioServiceContainer = async (name, tools) => {
   /*
-   * Generate container config to pass to the Docker API
+   * Save us some typing
    */
-  const srvConf = resolveServiceConfig(name, tools)
-  tools.config.services[name] = srvConf
-  const cntConf = generateContainerConfig(srvConf, tools)
+  const cntConf = tools.config.containers[name]
 
   /*
    * It's unlikely, but possible that we need to pull this image first
@@ -252,9 +251,10 @@ export const startMorioService = async (containerId, name, tools) => {
  */
 export const startMorio = async (tools) => {
   /*
-   * Ensure we have a place to store resolved service configurations
+   * Ensure we have a place to store resolved service and container configurations
    */
   if (typeof tools.config.services === 'undefined') tools.config.services = {}
+  if (typeof tools.config.containers === 'undefined') tools.config.containers = {}
 
   /*
    * Start node/cluster/ephemeral setup
@@ -294,7 +294,12 @@ const startMorioEphemeralNode = async (tools) => {
    * Create & start ephemeral services
    */
   for (const service of ['proxy', 'api', 'ui']) {
-    const container = await createMorioService(service, tools)
+    /*
+     * Generate service & container config
+     */
+    tools.config.services[name] = resolveServiceConfig(name, tools)
+    tools.config.containers[name] = generateContainerConfig(tools.config.services[name], tools)
+    const container = await createMorioServiceContainer(service, tools)
     await startMorioService(container, service, tools)
   }
 }
@@ -337,17 +342,49 @@ const startMorioNode = async (tools) => {
    * FIXME: we need to start a bunch more stuff here
    */
   for (const service of ['ca', 'proxy', 'api', 'ui', 'broker', 'console']) {
+    /*
+     * Generate service & container config
+     */
+    tools.config.services[service] = resolveServiceConfig(service, tools)
+    tools.config.containers[service] = generateContainerConfig(
+      tools.config.services[service],
+      tools
+    )
+
+    /*
+     * Figure out whether or not we need to
+     * recreate the container/service
+     */
     let recreate = true
-    let container
     if (running[service]) {
-      // FIXME: Check if config has changed
-      recreate = false
-      tools.log.debug(`Service ${service} is still running, not recreating`)
+      recreate = shouldContainerBeRecreated(
+        tools.config.services[service],
+        tools.config.containers[service],
+        running[service],
+        tools
+      )
+      if (recreate)
+        tools.log.debug(`${service} container is running, configuration has changed: Recreating`)
+      else
+        tools.log.debug(
+          `${service} container is running, configuration has not changed: Not Recreating`
+        )
     }
 
-    if (recreate) container = await createMorioService(service, tools)
+    /*
+     * Recreate the container if needed
+     */
+    const container = recreate ? await createMorioServiceContainer(service, tools) : null
+
+    /*
+     * Run bootstrap code if needed
+     */
     if (bootstrap[service]) await bootstrap[service](tools, recreate)
-    if (recreate) await startMorioService(container, service, tools)
+
+    /*
+     * Restart the container if needed
+     */
+    if (recreate && container) await startMorioService(container, service, tools)
   }
 }
 

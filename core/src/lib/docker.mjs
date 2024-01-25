@@ -299,3 +299,33 @@ export const runNetworkApiCommand = async (id, cmd, tools) => {
 
   return [true, result]
 }
+
+/**
+ * Compares running vs generated container config
+ *
+ * This compares auto-generated service/container config
+ * with the info of a running container to figure out
+ * whether or not it should be recreated
+ * (because its config has changed)
+ *
+ * @param {object} srvConf - The auto-generated service configuration
+ * @param {object} cntConf - The auto-generated container configuration
+ * @param {object} runningConf - The currently running container info from Docker
+ * @param {object} tools - The tools object with the logger
+ * @return {bool} result - True of it needs to be recreated, false if not
+ *
+ */
+export const shouldContainerBeRecreated = (srvConf, cntConf, runningConf, tools) => {
+  /*
+   * Always recreate if the image is different
+   */
+  if (cntConf.Image !== runningConf.Image) {
+    tools.log.debug(`Container image changed from ${runningConf.Image} to ${cntConf.Image}`)
+    return true
+  }
+
+  /*
+   * If we make it to here, there is no need to recreate this container
+   */
+  return false
+}
