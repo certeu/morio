@@ -43,6 +43,22 @@ export const validate = (data) => {
   return result
 }
 
+/*
+ * A helper object to use as initial state
+ */
+const empty = () =>
+  JSON.parse(
+    JSON.stringify({
+      cn: '',
+      c: '',
+      st: '',
+      l: '',
+      o: '',
+      ou: '',
+      san: [''],
+    })
+  )
+
 /**
  * The actual component, in case we want to extract it for re-use later
  */
@@ -57,15 +73,7 @@ const CreateCertificate = () => {
   /*
    * This will hold the form state
    */
-  const [data, setData] = useState({
-    cn: '',
-    c: '',
-    st: '',
-    l: '',
-    o: '',
-    ou: '',
-    san: [''],
-  })
+  const [data, setData] = useState(empty())
 
   /*
    * We'll need the API
@@ -155,7 +163,7 @@ const CreateCertificate = () => {
       <h2 className="flex flex-row justify-between items-center">
         <span>Create a X.509 certificate</span>
         <div className="flex flex-row gap-2">
-          <button className="btn btn-primary btn-outline btn-sm" onClick={() => setData({})}>
+          <button className="btn btn-primary btn-outline btn-sm" onClick={() => setData(empty())}>
             Clear Fields
           </button>
           <button
