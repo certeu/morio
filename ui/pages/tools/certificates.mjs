@@ -113,8 +113,14 @@ const CreateCertificate = () => {
 
   /*
    * Validation result
+   * This will fail when generating wildcard certificates
+   * because *.domain.com is not a valid hostname.
+   * So we will replace * at the start with a letter just for validation
    */
-  const valid = validate(data)
+  const valid = validate({
+    ...data,
+    san: data.san.map((name) => (name[0] === '*' ? 'a' + name.slice(1) : name)),
+  })
 
   /*
    * Return result (if we have it)
@@ -248,13 +254,12 @@ const CreateCertificate = () => {
           </ul>
           <p>You need to address these validation errors before you can create a certificate.</p>
         </Popout>
-      ) : (
-        <p className="text-center">
-          <button onClick={createCertificate} className="btn btn-primary btn-lg">
-            Create Certificate
-          </button>
-        </p>
-      )}
+      ) : null}
+      <p className="text-center">
+        <button onClick={createCertificate} className="btn btn-primary btn-lg">
+          Create Certificate
+        </button>
+      </p>
     </>
   )
 }
