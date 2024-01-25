@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = (tools) => ({
       'redpanda',
       'start',
       // Kafka API ports
-      '--kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092',
+      //'--kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092',
       /*
        * Address the broker advertises to clients that connect to the Kafka API.
        * Use the internal addresses to connect to the Redpanda brokers'
@@ -38,14 +38,14 @@ export const resolveServiceConfiguration = (tools) => ({
        * Use the external addresses to connect to the Redpanda brokers'
        * from outside the Docker network.
        */
-      `--advertise-kafka-addr internal://broker_${tools.config?.core?.node_nr || 1}:9092,external://${tools.config.deployment.fqdn}:19092`,
-      '--pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082',
+      //`--advertise-kafka-addr internal://broker_${tools.config?.core?.node_nr || 1}:9092,external://${tools.config.deployment.fqdn}:19092`,
+      //'--pandaproxy-addr internal://0.0.0.0:8082,external://0.0.0.0:18082',
       // Address the broker advertises to clients that connect to the HTTP Proxy
-      `--advertise-pandaproxy-addr internal://broker_${tools.config.core?.node_nr || 1}:8082,external://${tools.config.deployment.fqdn}:18082`,
-      '--schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081',
+      //`--advertise-pandaproxy-addr internal://broker_${tools.config.core?.node_nr || 1}:8082,external://${tools.config.deployment.fqdn}:18082`,
+      //'--schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081',
       // Redpanda brokers use the RPC API to communicate with each other internally.
-      `--rpc-addr broker_${tools.config.core.node_nr}:33145`,
-      `--advertise-rpc-addr broker_${tools.config.core.node_nr}:33145`,
+      //`--rpc-addr broker_${tools.config.core.node_nr}:33145`,
+      //`--advertise-rpc-addr broker_${tools.config.core.node_nr}:33145`,
       ...(tools.inProduction()
         ? [
             // Mode dev-container uses well-known configuration properties for development in containers.
@@ -60,16 +60,192 @@ export const resolveServiceConfiguration = (tools) => ({
     ],
   },
   /*
-   * Broker configuration
+   * RedPanda configuration file
    */
   broker: {
-    // Set the organisation to the Morio display name
-    organization: tools.config?.core?.display_name || 'No Name Morio',
-    // Set the cluster ID to the deployment FQDN
-    cluster_id: tools.config?.deployment?.fqdn || 'No FQDN Morio',
+    /*
+     * RedPanda section
+     */
     redpanda: {
-      // Set the node ID to the node number
+      /*
+       * FIXME: add cluster support
+       */
+      seed_servers: [],
+
+      /*
+       * Flag to enable developer mode,
+       * which skips most of the checks performed at startup.
+       */
+      developer_mode: tools.info.production ? false : true,
+
+      /*
+       * Broker won't start without a data directory
+       */
+      data_directory: '/var/lib/redpanda/data',
+
+      /*
+       * Set the node ID to the node number
+       */
       node_id: tools.config?.core?.node_nr || 1,
+
+      /*
+       * The IP address and port for the admin server.
+       */
+      admin: [
+        {
+          address: '0.0.0.0',
+          port: 9644,
+        },
+      ],
+
+      /*
+       * The IP address and port for the internal RPC server.
+       */
+      rpc_server: {
+        address: `broker_${tools.config.core.node_nr}`,
+        port: 33145,
+      },
+
+      /*
+       * Address of RPC endpoint published to other cluster members.
+       */
+      advertised_rpc_api: {
+        address: `broker_${tools.config.core.node_nr}`,
+        port: '33145',
+      },
+
+      /*
+       * Kafka API addresses
+       */
+      kafka_api: [
+        {
+          address: `broker_${tools.config.core.node_nr}`,
+          port: 9092,
+          name: 'internal',
+        },
+        {
+          address: tools.config.core.names.external,
+          port: 19092,
+          name: 'external',
+        },
+      ],
+
+      /*
+       * Addresses of Kafka API published to clients.
+       */
+      advertised_kafka_api: [
+        {
+          address: `broker_${tools.config.core.node_nr}`,
+          port: 9092,
+          name: 'internal',
+        },
+        {
+          address: tools.config.core.names.external,
+          port: 19092,
+          name: 'external',
+        },
+      ],
+
+      /*
+       * Kafka API TLS
+       */
+      kafka_api_tls: [
+        {
+          name: 'internal',
+          enabled: false,
+        },
+        {
+          name: 'external',
+          enabled: true,
+          require_client_auth: true,
+          cert_file: '/etc/redpanda.d/tls-cert.pem',
+          key_file: '/etc/redpanda.d/tls-key.pem',
+          truststore_file: 'e/etc/redpanda.d/tls-ca.pem',
+        },
+      ],
+
+      /*
+       * PandaProxy section
+       */
+      pandaproxy: {
+        /*
+         * A list of address and port to listen for Kafka REST API requests.
+         * Note that we only listen internally, we'll proxy this via Traefik.
+         */
+        pandaproxy_api: [
+          {
+            address: `broker_${tools.config.core.node_nr}`,
+            port: 8082,
+            name: 'internal',
+          },
+        ],
+
+        /*
+         * A list of address and port of the REST API to publish to clients.
+         */
+        advertised_pandaproxy_api: [
+          {
+            address: tools.config.core.names.external,
+            name: 'external',
+            port: 443,
+          },
+        ],
+      },
+
+      /*
+       * Schema registry section
+       */
+      schema_registry: [
+        {
+          address: `broker_${tools.config.core.node_nr}`,
+          port: 8081,
+          name: 'internal',
+        },
+      ],
     },
+
+    /*
+     * Cluster properties
+     */
+
+    /*
+     * Organisation name helps identify this as a Morio system
+     */
+    organization: tools.config?.core?.display_name || 'Nameless Morio',
+
+    /*
+     * Cluster ID helps differentiate different Morio deployments
+     */
+    cluster_id: tools.config?.deployment?.fqdn || Date.now(),
+
+    /*
+     * Enable audit log
+     */
+    audit_enabled: true,
+
+    /*
+     * Enable SASL for Kafka connections
+     */
+    enabled_sasl: true,
+
+    /*
+     * Do not auto-create topics, be explicit
+     */
+    auto_create_topics_enabled: true,
+
+    /*
+     * Default replication for topics
+     */
+    default_topic_replications: tools.config.deployment.nodes.length < 4 ? 1 : 3,
+
+    /*
+     * These were auto-added, but might not be a good fit for production
+    fetch_reads_debounce_timeout: 10,
+    group_initial_rebalance_delay: 0,
+    group_topic_partitions: 3,
+    log_segment_size_min: 1,
+    storage_min_free_bytes: 10485760,
+    topic_partitions_per_shard: 1000,
+     */
   },
 })

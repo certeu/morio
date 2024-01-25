@@ -1,3 +1,5 @@
+import { createX509Certificate } from '#lib/services/core'
+
 /**
  * This ca controller handles Certificate Authority (ca) routes
  *
@@ -14,6 +16,9 @@ export function Controller() {}
  */
 Controller.prototype.createCertificate = async (req, res, tools) => {
   tools.log.debug('In createCertificate route in core')
+  const cert = await createX509Certificate(tools, req.body)
 
-  res.send({})
+  return cert
+    ? res.status(201).send(cert)
+    : res.status(500).send({ errors: ['Failed to generated X.509 certificate'] })
 }

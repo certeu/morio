@@ -142,7 +142,7 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
   try {
     response = await fetch(url, request)
   } catch (err) {
-    console.log(err)
+    console.log(err, response)
   }
 
   /*

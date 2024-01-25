@@ -1,6 +1,6 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
-import { startMorio } from '#lib/morio'
+import { startMorio } from '#lib/services/core'
 
 /**
  * This config controller handles configuration routes
@@ -79,6 +79,8 @@ Controller.prototype.deploy = async (req, res, tools) => {
     keys = {
       jwt: generateJwtKey(),
       mrt: morioRootToken,
+      public: publicKey,
+      private: privateKey,
     }
   }
 
@@ -114,7 +116,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Also write the keys to disk
    */
   tools.log.debug(`Writing key data to .${time}.keys`)
-  result = await writeBsonFile(`/etc/morio.${time}.keys`, keys)
+  result = await writeBsonFile(`/etc/morio/.${time}.keys`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*

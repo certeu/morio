@@ -199,6 +199,20 @@ MorioClient.prototype.killContainer = async function (id) {
   return await this.changeContainerState(id, 'kill')
 }
 
+/**
+ * Creates an X.509 certificate
+ *
+ * @param {object} data - The certificate data
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.createCertificate = async function (data) {
+  return await this.call(`${morioConfig.api}/ca/certificate`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ certificate: data }),
+  })
+}
+
 /*
  * Don't recreate the client on each call
  */

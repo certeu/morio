@@ -2,6 +2,93 @@ import { randomBytes, generateKeyPairSync } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
+import jwt from 'jsonwebtoken'
+
+/**
+ * Generate a certificate signing request (csr)
+ *
+ * @param {object} data - Data to encode in the CSR
+ * @return {object} jwt - The JSON web token
+ */
+export const generateCsr = async (data) => {
+  /*
+   * Generate a key pair
+   */
+  const keypair = forge.rsa.generateKeyPair(2048)
+  /*
+   * Initiate the CSR
+   */
+  const csr = forge.pki.createCertificationRequest()
+  /*
+   * Add public key
+   */
+  csr.publicKey = keypair.publicKey
+  /*
+   * Set subject (needs some reformatting)
+   */
+  csr.setSubject(
+    Object.keys(data)
+      .filter((key) => key !== 'san')
+      .map((key) => ({
+        shortName: key.toUpperCase(),
+        value: data[key],
+      }))
+  )
+
+  /*
+   * Add SANs
+   */
+  csr.setAttributes([
+    {
+      name: 'extensionRequest',
+      extensions: [
+        {
+          name: 'subjectAltName',
+          altNames: data.san.map((value) => ({ type: 2, value })),
+        },
+      ],
+    },
+  ])
+
+  /*
+   * Sign the CSR
+   */
+  csr.sign(keypair.privateKey)
+
+  /*
+   * Verify just to make sure
+   */
+  const verified = csr.verify()
+
+  return verified
+    ? {
+        csr: forge.pki.certificationRequestToPem(csr),
+        key: forge.pki.privateKeyToPem(keypair.privateKey),
+      }
+    : false
+}
+
+/**
+ * Generate a JSON web token
+ *
+ * @param {object} data - Data to encode in the token
+ * @return {object} jwt - The JSON web token
+ */
+export const generateJwt = ({ data, tools, options = {}, noDefaults = false, key = false }) => {
+  const dfltOptions = {
+    expiresIn: '4h',
+    notBefore: 0,
+    audience: 'admin',
+    subject: 'admin',
+    issuer: 'admin',
+  }
+
+  return jwt.sign(
+    data,
+    key ? key : tools.config.deployment.key_pair.private,
+    noDefaults ? options : { ...dfltOptions, ...options }
+  )
+}
 
 /**
  * Generates a key to sign JSON web tokens
@@ -13,10 +100,10 @@ export const generateJwtKey = () => randomString(64)
 /**
  * Generates a public/private key pair
  *
- * @param {string} passphrase - The passphrase to use to encrype the private key
+ * @param {string} passphrase - The passphrase to use to encrypt the private key
  * @return {object} - An object with `publicKey` and `privateKey` properties
  */
-export const generateKeyPair = (passphrase) =>
+export const generateKeyPair = async (passphrase) =>
   generateKeyPairSync('rsa', {
     modulusLength: 4096,
     publicKeyEncoding: {

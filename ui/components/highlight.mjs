@@ -20,7 +20,6 @@ export const Highlight = (props) => {
     language = props.children.props.className.split('-').pop()
     if (language.indexOf('.') !== -1) language = language.split('.')[0]
   }
-  console.log(HighlightComponent)
 
   const preProps = {
     className: `${language} language-${language} hljs text-base whitespace-break-spaces overflow-auto px-4 py-2`,

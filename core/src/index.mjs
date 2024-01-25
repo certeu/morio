@@ -2,7 +2,7 @@
 import express from 'express'
 import { wrapExpress } from '#shared/utils'
 // Bootstrap core method
-import { bootstrapCore } from '#lib/bootstrap'
+import { bootstrapCore } from './lib/services/core.mjs'
 // Routes
 import { routes } from '#routes/index'
 

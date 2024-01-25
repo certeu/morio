@@ -5,6 +5,7 @@ import {
   CertificateIcon,
   ComponentIcon,
   CodeIcon,
+  CogIcon,
   ConfigurationIcon,
   ContainerIcon,
   ContainerImageIcon,
@@ -34,6 +35,7 @@ const icons = {
   api: CodeIcon,
   broker: RedPanda,
   ca: CertificateIcon,
+  certificates: CertificateIcon,
   core: MorioIcon,
   components: ComponentIcon,
   console: RedPandaConsole,
@@ -48,6 +50,7 @@ const icons = {
   services: LayersIcon,
   show: DocumentIcon,
   tasks: TaskIcon,
+  tools: CogIcon,
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
@@ -110,6 +113,13 @@ const links = {
     },
   },
   status: {},
+  tools: {
+    subs: {
+      certificates: {
+        title: 'X.509 Certificates',
+      },
+    },
+  },
 }
 
 const Null = () => null

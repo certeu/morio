@@ -35,7 +35,7 @@ export const resolveServiceConfiguration = (tools) => ({
       // Attach to the morio docker network
       `traefik.docker.network=${tools.getPreset('MORIO_NETWORK')}`,
       // Match requests going to the CA root certificate
-      'traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`))',
+      'traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`, `/provisioners`))',
       // Set priority to avoid rule conflicts
       'traefik.http.routers.ca.priority=120',
       // Forward to the CA api
