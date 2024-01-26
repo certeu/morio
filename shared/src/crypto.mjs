@@ -164,10 +164,10 @@ export function generateCaRoot(hostnames, name) {
    * Defaults for root and intermediate certificate subjects
    */
   const dflts = {
-    countryName: getPreset('MORIO_CA_COUNTRY_NAME'),
-    ST: getPreset('MORIO_CA_ST'),
-    localityName: getPreset('MORIO_CA_LOCALITY_NAME'),
-    organizationName: getPreset('MORIO_CA_ORGANIZATION_NAME'),
+    countryName: getPreset('MORIO_X509_C'),
+    ST: getPreset('MORIO_X509_ST'),
+    localityName: getPreset('MORIO_X509_L'),
+    organizationName: getPreset('MORIO_X509_OU'),
     OU: name,
   }
 

@@ -20,7 +20,13 @@ export const resolveServiceConfiguration = (tools) => ({
     // Instead, attach to the morio network
     network: tools.getPreset('MORIO_NETWORK'),
     // Volumes
-    volumes: tools.inProduction() ? [] : [`${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`],
+    volumes: tools.inProduction()
+      ? [
+        `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+      ] : [
+        `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`,
+        `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+      ],
     // Run an init inside the container to forward signals and avoid PID 1
     init: true,
     // Environment

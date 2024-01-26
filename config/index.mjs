@@ -1,4 +1,4 @@
 import { resolveServiceConfiguration } from './services/index.mjs'
-import { presets, getPreset, inProduction } from './presets.mjs'
+import { presets, getPreset, inProduction, loadAllPresets } from './presets.mjs'
 
-export { presets, getPreset, inProduction, resolveServiceConfiguration }
+export { presets, getPreset, inProduction, loadAllPresets, resolveServiceConfiguration }

@@ -51,18 +51,6 @@ export const presets = {
   // Common Name of the Morio Intermediate CA
   MORIO_INTERMEDIATE_CA_COMMON_NAME: 'Morio Intermediate Certificate Authority',
 
-  // Country Name of the Morio CA
-  MORIO_CA_COUNTRY_NAME: 'BE',
-
-  // State or Province of the Morio CA
-  MORIO_CA_ST: 'Brussels',
-
-  // Locality name of the Morio CA
-  MORIO_CA_LOCALITY_NAME: 'Brussels',
-
-  // Organization name of the Morio CA
-  MORIO_CA_ORGANIZATION_NAME: 'Morio',
-
   // Lifetime of the root CA certificate in years
   MORIO_ROOT_CA_VALID_YEARS: 20,
 
@@ -123,6 +111,28 @@ export const presets = {
 
   // Timeout URL check after this many milliseconds
   MORIO_UI_TIMEOUT_URL_CHECK: 1500,
+
+  /*
+   * X509 presets
+   */
+
+  // The default CN (common name) attribute for X.509 certificates
+  MORIO_X509_CN: 'Morio',
+
+  // The default C (country) attribute for X.509 certificates
+  MORIO_X509_C: 'BE',
+
+  // The default ST (state/locality) attribute for X.509 certificates
+  MORIO_X509_ST: 'Brussels',
+
+  // The default L (location) attribute for X.509 certificates
+  MORIO_X509_L: 'Brussels',
+
+  // The default O (organization) attribute for X.509 certificates
+  MORIO_X509_O: 'CERT-EU',
+
+  // The default OU (organizational unit) attribute for X.509 certificates
+  MORIO_X509_O: 'Engineering Team',
 }
 
 /**
@@ -178,3 +188,15 @@ export const getPreset = (key, opts = {}) => {
  * Helper method to figure out whether or not we are running in production
  */
 export const inProduction = () => !getPreset('MORIO_DEV', { dflt: false, as: 'bool' })
+
+/**
+ * Helper method to load all presets as a single object
+ */
+export const loadAllPresets = () => {
+  const all = {}
+  for (const key of Object.keys(presets).sort()) all[key] = getPreset(key)
+
+
+
+  return all
+}

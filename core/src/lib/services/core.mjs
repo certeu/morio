@@ -1,9 +1,9 @@
 import { pkg } from '#shared/pkg'
 import { logger } from '#shared/logger'
 import { restClient } from '#shared/network'
-import { readYamlFile, readBsonFile, readDirectory } from '#shared/fs'
+import { readYamlFile, readBsonFile, readDirectory, writeYamlFile } from '#shared/fs'
 import { generateJwt, generateCsr, keypairAsJwk } from '#shared/crypto'
-import { getPreset, inProduction, resolveServiceConfiguration } from '#config'
+import { getPreset, inProduction, resolveServiceConfiguration, loadAllPresets } from '#config'
 import {
   docker,
   createDockerContainer,
@@ -85,6 +85,12 @@ export const bootstrapCore = async () => {
    * Log info about the config we'll start
    */
   logStartedConfig(tools)
+
+  /*
+   * Load all presets and write them to disk for other services to load
+   */
+  tools.presets = loadAllPresets()
+  await writeYamlFile('/etc/morio/shared/presets.yaml', tools.presets)
 
   /*
    * Now start Morio
@@ -356,7 +362,7 @@ const startMorioNode = async (tools) => {
      * recreate the container/service
      */
     let recreate = true
-    if (running[service]) {
+    if (service !== 'ui' && running[service]) {
       recreate = shouldContainerBeRecreated(
         tools.config.services[service],
         tools.config.containers[service],
@@ -448,6 +454,10 @@ export const createX509Certificate = async (tools, data) => {
   })
 
   /*
+   * Handle custom expiry
+   */
+
+  /*
    * Now ask the CA to sign the CSR
    */
   let result
@@ -457,6 +467,9 @@ export const createX509Certificate = async (tools, data) => {
       {
         csr: csr.csr,
         ott: jwt,
+        notAfter: data.notAfter
+          ? data.notAfter
+          : tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       },
       {
         httpsAgent: new https.Agent({ ca: tools.ca.certificate, keepAlive: false }),
