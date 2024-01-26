@@ -22,7 +22,7 @@ const ConfigPage = (props) => {
   const base = config ? JSON.parse(JSON.stringify(config)) : null
   if (base) {
     delete base.services
-    delete base.deployment.key_pair
+    if (base.deployment) delete base.deployment.key_pair
   }
 
   return (
@@ -53,16 +53,18 @@ const ConfigPage = (props) => {
                     </p>
                   </Popout>
                 </div>
-                <Tabs tabs={Object.keys(config.services)}>
-                  {Object.keys(config.services).map((srv) => (
-                    <Tab tabId={srv} key={srv}>
-                      <Highlight
-                        js={config.services[srv]}
-                        title={`${srv.toUpperCase()} Configuration`}
-                      />
-                    </Tab>
-                  ))}
-                </Tabs>
+                {config.services ? (
+                  <Tabs tabs={Object.keys(config.services)}>
+                    {Object.keys(config.services).map((srv) => (
+                      <Tab tabId={srv} key={srv}>
+                        <Highlight
+                          js={config.services[srv]}
+                          title={`${srv.toUpperCase()} Configuration`}
+                        />
+                      </Tab>
+                    ))}
+                  </Tabs>
+                ) : null}
               </Tab>
               <Tab tabId="Base">
                 <div className="max-w-prose m-auto">

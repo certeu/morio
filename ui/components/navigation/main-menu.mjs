@@ -3,6 +3,7 @@ import { capitalize } from 'lib/utils.mjs'
 // Components
 import {
   CertificateIcon,
+  CheckCircleIcon,
   ComponentIcon,
   CodeIcon,
   CogIcon,
@@ -46,6 +47,7 @@ const icons = {
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
+  presets: CheckCircleIcon,
   proxy: Traefik,
   services: LayersIcon,
   show: DocumentIcon,
@@ -94,10 +96,13 @@ const links = {
     title: 'Configuration',
     subs: {
       show: {
-        title: 'Display configuration',
+        title: 'Show Configuration',
+      },
+      presets: {
+        title: 'Show Presets',
       },
       wizard: {
-        title: 'Update configuration',
+        title: 'Update Configuration',
       },
     },
   },

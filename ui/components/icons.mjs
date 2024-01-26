@@ -61,6 +61,15 @@ export const ChatIcon = (props) => (
 )
 
 /*
+ * CheckCircleIcon - Looks like a check mark in a circle
+ */
+export const CheckCircleIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </IconWrapper>
+)
+
+/*
  * CloseIcon - Looks like X
  */
 export const CloseIcon = (props) => (
@@ -98,7 +107,7 @@ export const ComponentIcon = (props) => (
 )
 
 /*
- * ConfigurationIcon - Looks like the moon
+ * ConfigurationIcon - Looks like a mixing panel with sliders
  */
 export const ConfigurationIcon = (props) => (
   <IconWrapper {...props}>
@@ -134,7 +143,7 @@ export const CopyIcon = (props) => (
 )
 
 /*
- * DarkThemeIcon - Looks like a mixing panel with sliders
+ * DarkThemeIcon - Looks like a moon
  */
 export const DarkThemeIcon = (props) => (
   <IconWrapper {...props}>
