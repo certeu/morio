@@ -132,7 +132,7 @@ export const presets = {
   MORIO_X509_O: 'CERT-EU',
 
   // The default OU (organizational unit) attribute for X.509 certificates
-  MORIO_X509_O: 'Engineering Team',
+  MORIO_X509_OU: 'Engineering Team',
 }
 
 /**
