@@ -15,7 +15,6 @@ export function Controller() {}
  * @param {object} tools - Variety of tools include logger and config
  */
 Controller.prototype.createCertificate = async (req, res, tools) => {
-  tools.log.debug('In createCertificate route in core')
   const cert = await createX509Certificate(tools, req.body)
 
   return cert
