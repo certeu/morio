@@ -1,0 +1,46 @@
+- module: system
+  period: 30s
+  metricsets:
+    - cpu
+    - diskio
+    - load
+    - memory
+    - network
+    - service
+  service.state_filter: [ failed ]
+  processors:
+    - add_fields:
+        target: morio
+        fields:
+          module:
+            name: linux-system
+
+- module: system
+  period: 10m
+  metricsets:
+    - filesystem
+  processors:
+    - drop_event.when.regexp:
+        system.filesystem.mount_point: '^/(snap|sys|cgroup|proc|dev|etc|host|lib)($|/)'
+    - add_fields:
+        target: morio
+        fields:
+          module:
+            name: linux-system
+
+- module: system
+  period: 24h
+  metricsets:
+    - load
+    - memory
+  processors:
+    - add_host_metadata:
+        netinfo.enabled: true
+        cache.ttl: 60m
+    - add_fields:
+        target: morio
+        fields:
+          module:
+            name: linux-system
+          inventory:
+            update: true

@@ -1,0 +1,12 @@
+# /etc/systemd/system/morio-metrics.service
+[Unit]
+Description=Morio metrics collection service
+Documentation=https://github.com/certeu/morio
+
+[Service]
+ExecStart=/sbin/morio-metrics
+Restart=always
+SyslogIdentifier=morio-metrics
+
+[Install]
+WantedBy=default.target

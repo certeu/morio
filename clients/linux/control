@@ -1,0 +1,14 @@
+Package: morio-client
+Source: morio-client
+Version: 0.0.1
+Section: utils
+Priority: optional
+Architecture: amd64
+Essential: no
+Depends: auditbeat (>= 8.12), metricbeat (>= 8.12), auditbeat (>= 8.12)
+Installed-Size: 1024
+Maintainer: Joost De Cock <joost.decock@cert.europa.eu>
+Homepage: https://github.com/certeu/morio
+Description: Morio allows you to connect your systems, ingest their logs, metrics
+  and audit info, and do stream processing and analysis in real time.
+  This is the Morio client, which provides the agents to ingest your data into Morio.

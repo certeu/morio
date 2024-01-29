@@ -1,0 +1,12 @@
+# /etc/systemd/system/morio-logs.service
+[Unit]
+Description=Morio logs collection service
+Documentation=https://github.com/certeu/morio
+
+[Service]
+ExecStart=/sbin/morio-logs
+Restart=always
+SyslogIdentifier=morio-logs
+
+[Install]
+WantedBy=default.target

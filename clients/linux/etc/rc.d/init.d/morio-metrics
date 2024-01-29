@@ -1,0 +1,118 @@
+#!/bin/bash
+#
+# morio-metrics          Morio metricbeat shipper
+#
+# chkconfig: 2345 98 02
+# description: Starts and stops a single morio-metrics instance on this system
+#
+
+### BEGIN INIT INFO
+# Provides:          morio-metrics
+# Required-Start:    $local_fs $network $syslog
+# Required-Stop:     $local_fs $network $syslog
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 4 6
+# Short-Description: Ships metrics to Morio
+# Description:       Morio metrics shipper, based on Metricbeat
+### END INIT INFO
+
+
+
+PATH=/usr/bin:/sbin:/bin:/usr/sbin
+export PATH
+
+[ -f /etc/sysconfig/morio-metrics ] && . /etc/sysconfig/morio-metrics
+pidfile=${PIDFILE-/var/run/morio-metrics.pid}
+agent=${BEATS_AGENT-/usr/share/metricbeat/bin/metricbeat}
+args="-c /etc/morio-client/metrics/config.yml"
+test_args="-e test config"
+beat_user="${BEAT_USER:-root}"
+wrapper="/usr/share/metricbeat/bin/metricbeat-god"
+wrapperopts="-r / -n -p $pidfile"
+user_wrapper="su"
+user_wrapperopts="$beat_user -c"
+RETVAL=0
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+# Determine if we can use the -p option to daemon, killproc, and status.
+# RHEL < 5 can't.
+if status | grep -q -- '-p' 2>/dev/null; then
+    daemonopts="--pidfile $pidfile"
+    pidopts="-p $pidfile"
+fi
+
+if command -v runuser >/dev/null 2>&1; then
+    user_wrapper="runuser"
+fi
+
+[ "$beat_user" != "root" ] && wrapperopts="$wrapperopts -u $beat_user"
+
+test() {
+	$user_wrapper $user_wrapperopts "$agent $args $test_args"
+}
+
+start() {
+    echo -n $"Starting morio-metrics: "
+	test
+	if [ $? -ne 0 ]; then
+		echo
+		exit 1
+	fi
+    daemon $daemonopts $wrapper $wrapperopts -- $agent $args
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping morio-metrics: "
+    killproc $pidopts $wrapper
+    RETVAL=$?
+    echo
+    [ $RETVAL = 0 ] && rm -f ${pidfile}
+}
+
+restart() {
+	test
+	if [ $? -ne 0 ]; then
+		return 1
+	fi
+    stop
+    start
+}
+
+rh_status() {
+    status $pidopts $wrapper
+    RETVAL=$?
+    return $RETVAL
+}
+
+rh_status_q() {
+    rh_status >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        start
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+        restart
+    ;;
+    condrestart|try-restart)
+        rh_status_q || exit 0
+        restart
+    ;;
+    status)
+        rh_status
+    ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart}"
+        exit 1
+esac
+
+exit $RETVAL

@@ -1,0 +1,4 @@
+#!/bin/bash
+/usr/share/auditbeat/bin/auditbeat \
+  -c /etc/morio/audit/config.yml \
+  "$@"

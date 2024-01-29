@@ -1,0 +1,15 @@
+# Module: linux-morio-client
+# Description: A morio-client module to watch the morio-client. So meta.
+
+- module: system
+  period: 3m
+  metricsets:
+    - process
+  process.cgroups.enabled: false
+  processes: ['.*beat']
+  processors:
+    - add_fields:
+        target: morio
+        fields:
+          module:
+            name: linux-morio-client
