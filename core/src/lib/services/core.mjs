@@ -362,7 +362,7 @@ const startMorioNode = async (tools) => {
      * recreate the container/service
      */
     let recreate = true
-    if (service !== 'ui' && running[service]) {
+    if (!['console', 'broker'].includes(service) && running[service]) {
       recreate = shouldContainerBeRecreated(
         tools.config.services[service],
         tools.config.containers[service],
