@@ -41,6 +41,19 @@ export const presets = {
   // Broker log level
   MORIO_BROKER_LOG_LEVEL: 'warn',
 
+  // Broker topics to create at startup
+  MORIO_BROKER_TOPICS: [
+    '_redpanda.audit_log', // For RedPanda internal audit logging,
+    'alarms', // For alarms
+    'audit', // For audit info/logs (think auditbeat)
+    'checks', // For healthchecks
+    'events', // For events (typically generated from other sources)
+    'logs', // For logs
+    'metrics', // For metrics
+    'notifications', // For notifications
+    'traces', // For distributed tracing / spans
+  ],
+
   /*
    * CA presets
    */

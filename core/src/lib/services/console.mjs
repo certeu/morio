@@ -3,7 +3,7 @@ import { readJsonFile, writeYamlFile } from '#shared/fs'
 /*
  * Bootstrap RedPanda Console
  */
-export const bootstrap = async (tools, recreated) => {
+export const preStart = async (tools, recreated) => {
   /*
    * This does not need to run unless the service is recreated
    */

@@ -2,7 +2,7 @@
 import express from 'express'
 import { wrapExpress } from '#shared/utils'
 // Bootstrap core method
-import { bootstrapCore } from './lib/services/core.mjs'
+import { preStartCore } from './lib/services/core.mjs'
 // Routes
 import { routes } from '#routes/index'
 
@@ -11,7 +11,7 @@ import { routes } from '#routes/index'
  * object holding various tools that we will pass to the controllers
  * We do this first as it contains the logger (as tools.log)
  */
-const tools = await bootstrapCore()
+const tools = await preStartCore()
 
 /*
  * Instantiate the Express app

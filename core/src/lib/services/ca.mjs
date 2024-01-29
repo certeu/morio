@@ -7,7 +7,7 @@ import { cp, readJsonFile, readFile, writeFile, chown, mkdir } from '#shared/fs'
  * and secret, and even output the secret in the logs.
  * So instead, let's tell it what root certificate/keys/password it should use.
  */
-export const bootstrap = async (tools) => {
+export const preStart = async (tools) => {
   /*
    * We'll check if there's a default ca-cli config file on disk
    * If so, the CA has already been initialized

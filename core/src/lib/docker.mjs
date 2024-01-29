@@ -223,6 +223,34 @@ export const runContainerApiCommand = async (id, cmd, options = {}, tools, silen
 }
 
 /**
+ * This helper method runs an streamed exec command against the container API
+ *
+ * @param {string} id - The container id
+ * @param {array} Cmd - The command to run inside the container
+ * @param {functino} callback - Callback to run when the stream ends
+ * @param {object} tools = The tools object
+ */
+export const execContainerCommand = async (id, Cmd, callback, tools) => {
+  const [ready, container] = await runDockerApiCommand('getContainer', id, tools)
+  if (!ready) return false
+
+  /*
+   * Command output is provided as a NodeJS stream so this needs some work
+   */
+  container.exec({ Cmd, AttachStdin: true, AttachStdout: true }, function (err, exec) {
+    exec.start({ hijack: true, stdin: true }, function (err, stream) {
+      const allData = []
+      stream.on('data', (data) => {
+        allData.push(data.toString())
+      })
+      stream.on('end', (err) => {
+        if (!err) return callback(allData.join('\n'))
+      })
+    })
+  })
+}
+
+/**
  * This helper method runs an async command against the container image API
  *
  * @param {string} id - The container image id

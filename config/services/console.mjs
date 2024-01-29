@@ -14,13 +14,13 @@ export const resolveServiceConfiguration = (tools) => ({
     // Image to run
     image: 'docker.redpanda.com/redpandadata/console',
     // Image tag (version) to run
-    tag: 'v2.3.9',
+    tag: 'v2.4.0',
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
     network: tools.getPreset('MORIO_NETWORK'),
     // Command
-    command: '/app//console -config.filepath /etc/morio/console/config.yaml',
+    command: '/app/console -config.filepath /etc/morio/console/config.yaml',
     // Entrypoint
     entrypoint: '/bin/sh',
     environment: {
@@ -57,6 +57,7 @@ export const resolveServiceConfiguration = (tools) => ({
     kafka: {
       // brokers & urls will be populated by core
       brokers: [],
+      clientId: 'console',
       schemaRegistry: {
         enabled: true,
         urls: [],

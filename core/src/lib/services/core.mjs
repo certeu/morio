@@ -14,10 +14,10 @@ import {
   generateContainerConfig,
 } from '#lib/docker'
 import { addTraefikTlsConfiguration } from './proxy.mjs'
-// Bootstrap for other services
-import { bootstrap as bootstrapBroker } from './broker.mjs'
-import { bootstrap as bootstrapCa } from './ca.mjs'
-import { bootstrap as bootstrapConsole } from './console.mjs'
+// preStart for other services
+import { preStart as preStartBroker, postStart as postStartBroker } from './broker.mjs'
+import { preStart as preStartCa } from './ca.mjs'
+import { preStart as preStartConsole } from './console.mjs'
 import https from 'https'
 import axios from 'axios'
 import { createPrivateKey } from 'crypto'
@@ -32,7 +32,7 @@ export const morioClient = restClient(
 /*
  * This runs only when core is cold-started.
  */
-export const bootstrapCore = async () => {
+export const preStartCore = async () => {
   /*
    * First setup the tools object with the logger, so we can log
    */
@@ -104,14 +104,20 @@ export const bootstrapCore = async () => {
 }
 
 /*
- * Bootstrap as a plain object
- * with bootstrap methods for those services that require them
+ * Object holding lifecycle scripts
  */
-export const bootstrap = {
-  broker: bootstrapBroker,
-  ca: bootstrapCa,
-  console: bootstrapConsole,
-  core: bootstrapCore,
+export const lifecycle = {
+  start: {
+    pre: {
+      broker: preStartBroker,
+      ca: preStartCa,
+      console: preStartConsole,
+      core: preStartCore,
+    },
+    post: {
+      broker: postStartBroker,
+    },
+  },
 }
 
 /**
@@ -362,7 +368,9 @@ const startMorioNode = async (tools) => {
      * recreate the container/service
      */
     let recreate = true
-    if (!['console', 'broker'].includes(service) && running[service]) {
+    // FIXME: This empty array below is here to make it easy to debug services
+    // by adding them. This should be removed when things stabilize
+    if (![].includes(service) && running[service]) {
       recreate = shouldContainerBeRecreated(
         tools.config.services[service],
         tools.config.containers[service],
@@ -383,14 +391,19 @@ const startMorioNode = async (tools) => {
     const container = recreate ? await createMorioServiceContainer(service, tools) : null
 
     /*
-     * Run bootstrap code if needed
+     * Run preStart lifecycle code if needed
      */
-    if (bootstrap[service]) await bootstrap[service](tools, recreate)
+    if (lifecycle.start.pre[service]) await lifecycle.start.pre[service](tools, recreate)
 
     /*
      * Restart the container if needed
      */
     if (recreate && container) await startMorioService(container, service, tools)
+
+    /*
+     * Run postStart lifecycle code if needed (but don't wait for it)
+     */
+    if (lifecycle.start?.post?.[service]) await lifecycle.start.post[service](tools, recreate)
   }
 }
 
