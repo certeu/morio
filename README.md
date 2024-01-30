@@ -1,6 +1,10 @@
 # morio
 
-This is an incubator/lab to test-drive some new ideas for log collection.
+Morio is a vendor agnostic streaming data backbone for your observability needs.
+
+Deploy the Morio client (based on Elastic Beats) on your endpoints, and collect
+their data on one or more centralized Morio instances for analysis, further
+processing, downstream routing & filtering, or event-driven automation.
 
 ## Reminders
 
@@ -27,34 +31,47 @@ If we can make it easy (and affordable) to stream more data, we can get more val
 
 ## Components
 
-This is pre-alpha for now, but the following components have been created:
-
-### UI
-
-The idea is that we will end up with an appliance-like box that people can administer via a web interface.
-
-The `ui` folder holds that web interface. It will be a static-HTML website that does everything through the API.
+Morio is a collection of various components that are pre-configured to work together.
 
 ### API
 
-Morio is an API-first project. Everything should go via the API. The `api` folder holds that API.
+Morio is an API-first project. Everything you can configure in Morio can be configured through its management API. 
 
-So the web interface we are building to manage morio connects to the API.
-But if people don't want to use the web interface and talk to the API directly, that's fine too.
+The `api` folder holds that API.
 
-### SAM
+### Broker (RedPanda)
 
-SAM (System Actions Manager) is responsible for taking actions on the system level (the host OS).
-Typically, this mean talking to the Docker Daemon, getting the list of running containers,
-restarting containers and so on.
+The main ingestion of data in Morio is handled by RedPanda, which exposes a Kafka-compatible API.
 
-Access to SAM is not exposed to users. Instead, it will be called internally by the API
+### Certificate Authority (SmallStep CA)
+
+We require encryption, and thus need X.509 certificates. Morio provides its own
+Certificate Authority (CA) based on SmallStep.
+
+### Clients
+
+Morio provides a single client package for linux and windows. It's an umbrella package that bundles
+preconfigured instances of filebeat, metricbeat, as well as audibeat (linux only) and winlogbeat (windows only).
+
+### Core
+
+Morio core (for COnfig REsolution) is responsible for turning a high-level Morio configuration into 
+the detailed configuration required for the various components.
+
+It is also responsible for taking actions on the system level (the host OS), including starting and
+stopping the other components, by talking to the Docker daemon.
+
+Note that core is not exposed to users. Instead, it will be called internally by the API
 over the internal Docker network.
 
-### Traefik
+### Proxy (Traefik)
 
 Traefik is an edge router and is used as reverse proxy inside Morio.
-It watches the Docker socket and will configure itself based on labels set on Docker containers.
+
+### UI
+
+The Morio UI provides a web interface to interact with and configure Morio.
+The `ui` folder holds that web interface.
 
 ## Getting started
 
@@ -142,31 +159,6 @@ sudo usermod -aG docker $USER
 You will need to log out and back in for this change to take effect.
 Alternatively, `newgrp docker` will work too.
 
-### Install docker-compose
-
-You need to make sure you have version 2 of docker-compose on your system.
-Debian 12 ships with version 1, so grab the latest binary from https://github.com/docker/compose/releases/latest
-
-Make sure to make it executable, and move it into your PATH. Something like this:
-
-```sh
-curl -L  https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-linux-x86_64 -o docker-compose
-chmod +x docker-compose
-sudo mv docker-compose /usr/local/bin/
-```
-
-Now if you run:
-
-```sh
-docker-compose -v
-```
-
-It should look something like this:
-
-```
-Docker Compose version v2.23.
-```
-
 ### Build the containers
 
 The development environment will start (the development version of) a couple of containers.
@@ -178,12 +170,7 @@ npm run build
 
 ### Permissions
 
-```
-sudo addgroup --gid 2112 morio
-sudo adduser --gid 2112 --uid 2112 --disabled-login morio
-sudo chgrp -R morio .
-chmod -R 775 ui/.next/
-```
+FIXME: Detail permissions and UIDs here.
 
 ### Start the development environment
 
@@ -192,3 +179,22 @@ In the repository root run:
 ```
 npm run dev
 ```
+
+You probably want to keep an eye on the docker logs of core to see what's going on:
+
+```
+docker logs -f core
+```
+
+Or, to format the logs nicely, install pino-pretty:
+
+```
+npm i -G pino-pretty
+```
+
+Then pipe the logs into it, stripping some of the fields we don't care about:
+
+```
+docker logs -f core | pino-pretty -i time,hostname
+```
+
