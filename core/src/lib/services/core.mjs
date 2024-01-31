@@ -1,5 +1,4 @@
 import { pkg } from '#shared/pkg'
-import { logger } from '#shared/logger'
 import { restClient } from '#shared/network'
 import { readYamlFile, readBsonFile, readDirectory, writeYamlFile } from '#shared/fs'
 import { generateJwt, generateCsr, keypairAsJwk } from '#shared/crypto'
@@ -14,51 +13,55 @@ import {
   generateContainerConfig,
 } from '#lib/docker'
 import { addTraefikTlsConfiguration } from './proxy.mjs'
-// preStart for other services
-import { preStart as preStartBroker, postStart as postStartBroker } from './broker.mjs'
-import { preStart as preStartCa } from './ca.mjs'
-import { preStart as preStartConsole } from './console.mjs'
 import https from 'https'
 import axios from 'axios'
 import { createPrivateKey } from 'crypto'
+import { reconfigure } from '../../index.mjs'
+import { lifecycle } from '../lifecycle.mjs'
+
+
+/*
+ * Re-export this as it makes more sense to import this from here
+ */
+export const hotReload = reconfigure
 
 /**
  * Client for the Morio API
  */
-export const morioClient = restClient(
-  `http://${getPreset('MORIO_API_HOST')}:${getPreset('MORIO_API_PORT')}`
-)
 
 /*
  * This runs only when core is cold-started.
  */
-export const preStartCore = async () => {
+export const preStartCore = async (tools) => {
   /*
-   * First setup the tools object with the logger, so we can log
+   * First populate the tools object
    */
-  const tools = {
-    log: logger(getPreset('MORIO_CORE_LOG_LEVEL'), pkg.name),
-    // Add some info while we're at it
-    info: {
-      about: pkg.description,
-      name: pkg.name,
-      production: inProduction(),
-      start_time: Date.now(),
-      version: pkg.version,
-    },
-    inProduction,
+  if (!tools.info) tools.info = {
+    about: pkg.description,
+    name: pkg.name,
+    production: inProduction(),
+    start_time: Date.now(),
+    version: pkg.version,
   }
+  if (!tools.inProduction) tools.inProduction = inProduction
 
   /*
-   * Add a getPreset() wrapper that will output debug logs about how presets are resolved
+   * Add a getPreset() wrapper that will output trace logs about how presets are resolved
    * This is surprisingly helpful during debugging
    */
   tools.getPreset = (key, dflt, opts) => {
     const result = getPreset(key, dflt, opts)
-    tools.log.debug(`Preset ${key} = ${result}`)
+    tools.log.trace(`Preset ${key} = ${result}`)
 
     return result
   }
+
+  /*
+   * Add the API client
+   */
+  tools.apiClient = restClient(
+    `http://api:${tools.getPreset('MORIO_API_PORT')}`
+  )
 
   /*
    * Load configuration(s) from disk
@@ -96,28 +99,6 @@ export const preStartCore = async () => {
    * Now start Morio
    */
   await startMorio(tools)
-
-  /*
-   * Finally, return the tools object
-   */
-  return tools
-}
-
-/*
- * Object holding lifecycle scripts
- */
-export const lifecycle = {
-  start: {
-    pre: {
-      broker: preStartBroker,
-      ca: preStartCa,
-      console: preStartConsole,
-      core: preStartCore,
-    },
-    post: {
-      broker: postStartBroker,
-    },
-  },
 }
 
 /**
@@ -242,14 +223,111 @@ export const resolveServiceConfig = (name, tools) =>
     : resolveServiceConfiguration(name, tools)
 
 /**
- * Starts a morio service
+ * Ensures morio services are running
+ *
+ * @param {array} services = A list of services that should be running
+ * @param {object} tools = The tools object
+ */
+export const ensureMorioServices = async (services, tools) => {
+  /*
+   * Create Docker network
+   */
+  await createDockerNetwork(getPreset('MORIO_NETWORK'), tools)
+
+  /*
+   * Load list or running containers because if it's running
+   * and the config is not changed, we won't restart/recreate it
+   */
+  const running = {}
+  const [success, runningContainers] = await runDockerApiCommand('listContainers', {}, tools)
+  if (success)
+    for (const container of runningContainers)
+      running[container.Names[0].split('/').pop()] = container
+
+  /*
+   * Create services
+   */
+  for (const service of services) await ensureMorioService(service, running, tools)
+}
+
+/**
+ * Ensures a morio service is running (starts it when needed)
+ *
+ * @param {string} service = The service name
+ * @param {object} running = On object holding info on running containers and their config
+ * @param {object} tools = The tools object
+ * @return {bool} ok = Whether or not the service was started
+ */
+export const ensureMorioService = async (service, running, tools) => {
+  /*
+   * Generate service & container config
+   */
+  tools.config.services[service] = resolveServiceConfig(service, tools)
+  tools.config.containers[service] = generateContainerConfig(
+    tools.config.services[service],
+    tools
+  )
+
+  /*
+   * Figure out whether or not we need to
+   * recreate the container/service
+   */
+  let recreate = true
+  // FIXME: This empty array below is here to make it easy to debug services
+  // by adding them. This should be removed when things stabilize
+  if (![].includes(service) && running[service]) {
+    recreate = shouldContainerBeRecreated(
+      tools.config.services[service],
+      tools.config.containers[service],
+      running[service],
+      tools
+    )
+    if (recreate)
+      tools.log.debug(`${service} container is running, configuration has changed: Recreating`)
+    else
+      tools.log.debug(
+        `${service} container is running, configuration has not changed: Not Recreating`
+      )
+  } else tools.log.debug(`${service} container is not running: Creating`)
+
+  /*
+   * Run preCreate lifecycle code if needed
+   */
+  if (lifecycle.create.pre[service]) {
+    tools.log.debug(`${service}: Running preCreate lifecycle script`)
+    await lifecycle.create.pre[service](tools, recreate)
+  }
+
+  /*
+   * Recreate the container if needed
+   */
+  const container = recreate ? await createMorioServiceContainer(service, tools) : null
+
+  /*
+   * Run preStart lifecycle code if needed
+   */
+  if (lifecycle.start.pre[service]) await lifecycle.start.pre[service](tools, recreate)
+
+  /*
+   * Restart the container if needed
+   */
+  if (recreate && container) await startMorioServiceContainer(container, service, tools)
+
+  /*
+   * Run postStart lifecycle code if needed
+   */
+  if (lifecycle.start?.post?.[service]) await lifecycle.start.post[service](tools, recreate)
+}
+
+/**
+ * Starts a morio service container
  *
  * @param {string} containerId = The container ID
  * @param {string} name = The service name
  * @param {object} tools = The tools object
  * @return {bool} ok = Whether or not the service was started
  */
-export const startMorioService = async (containerId, name, tools) => {
+export const startMorioServiceContainer = async (containerId, name, tools) => {
   const [ok, started] = await runContainerApiCommand(containerId, 'start', {}, tools)
 
   if (ok) tools.log.info(`Service started: ${name}`)
@@ -296,24 +374,10 @@ const startMorioCluster = async (tools) => {
  */
 const startMorioEphemeralNode = async (tools) => {
   tools.log.info('Starting ephemeral Morio node')
-
-  /*
-   * Create Docker network
-   */
-  await createDockerNetwork(getPreset('MORIO_NETWORK'), tools)
-
   /*
    * Create & start ephemeral services
    */
-  for (const service of ['proxy', 'api', 'ui']) {
-    /*
-     * Generate service & container config
-     */
-    tools.config.services[name] = resolveServiceConfig(name, tools)
-    tools.config.containers[name] = generateContainerConfig(tools.config.services[name], tools)
-    const container = await createMorioServiceContainer(service, tools)
-    await startMorioService(container, service, tools)
-  }
+  await ensureMorioServices(['proxy', 'api', 'ui'], tools)
 }
 
 /**
@@ -328,83 +392,16 @@ const startMorioNode = async (tools) => {
    * Only one node makes this easy
    */
   tools.config.core.node_nr = 1
-  ;(tools.config.core.names = {
+  tools.config.core.names = {
     internal: 'core_1',
-    external: tools.config.deployment.nodes[0],
-  }),
-    (tools.config.deployment.fqdn = tools.config.deployment.nodes[0])
-
-  /*
-   * Create Docker network
-   */
-  await createDockerNetwork(getPreset('MORIO_NETWORK'), tools)
-
-  /*
-   * Load list or running containers because if it's running
-   * and the config is not changed, we won't restart/recreate it
-   */
-  const running = {}
-  const [success, runningContainers] = await runDockerApiCommand('listContainers', {}, tools)
-  if (success)
-    for (const container of runningContainers)
-      running[container.Names[0].split('/').pop()] = container
+    external: tools.config.deployment.nodes[0]
+  }
+  tools.config.deployment.fqdn = tools.config.deployment.nodes[0]
 
   /*
    * Create services
-   * FIXME: we need to start a bunch more stuff here
    */
-  for (const service of ['ca', 'proxy', 'api', 'ui', 'broker', 'console']) {
-    /*
-     * Generate service & container config
-     */
-    tools.config.services[service] = resolveServiceConfig(service, tools)
-    tools.config.containers[service] = generateContainerConfig(
-      tools.config.services[service],
-      tools
-    )
-
-    /*
-     * Figure out whether or not we need to
-     * recreate the container/service
-     */
-    let recreate = true
-    // FIXME: This empty array below is here to make it easy to debug services
-    // by adding them. This should be removed when things stabilize
-    if (![].includes(service) && running[service]) {
-      recreate = shouldContainerBeRecreated(
-        tools.config.services[service],
-        tools.config.containers[service],
-        running[service],
-        tools
-      )
-      if (recreate)
-        tools.log.debug(`${service} container is running, configuration has changed: Recreating`)
-      else
-        tools.log.debug(
-          `${service} container is running, configuration has not changed: Not Recreating`
-        )
-    }
-
-    /*
-     * Recreate the container if needed
-     */
-    const container = recreate ? await createMorioServiceContainer(service, tools) : null
-
-    /*
-     * Run preStart lifecycle code if needed
-     */
-    if (lifecycle.start.pre[service]) await lifecycle.start.pre[service](tools, recreate)
-
-    /*
-     * Restart the container if needed
-     */
-    if (recreate && container) await startMorioService(container, service, tools)
-
-    /*
-     * Run postStart lifecycle code if needed (but don't wait for it)
-     */
-    if (lifecycle.start?.post?.[service]) await lifecycle.start.post[service](tools, recreate)
-  }
+  await ensureMorioServices(['ca', 'proxy', 'api', 'ui', 'broker', 'console'], tools)
 }
 
 export const createX509Certificate = async (tools, data) => {
@@ -439,10 +436,10 @@ export const createX509Certificate = async (tools, data) => {
     data: {
       sans: data.certificate.san,
       sub: data.certificate.cn,
-      iat: Math.floor(Date.now() / 1000) - 30,
+      iat: Math.floor(Date.now() / 1000) - 1,
       iss: 'admin',
       aud: 'https://ca:9000/1.0/sign',
-      nbf: Math.floor(Date.now() / 1000) - 30,
+      nbf: Math.floor(Date.now() / 1000) - 1,
       exp: Number(Date.now()) + 300000,
     },
     tools,
@@ -489,7 +486,7 @@ export const createX509Certificate = async (tools, data) => {
       }
     )
   } catch (err) {
-    tools.debug.log('Failed to get certificate signed by CA')
+    tools.log.debug(err, 'Failed to get certificate signed by CA')
   }
 
   /*

@@ -7,7 +7,7 @@ import {
 } from '#lib/docker'
 import { validate } from '#lib/validation'
 import { schemaViolation, dockerError } from '#lib/response'
-import { asPojo } from '#shared/utils'
+import { cloneAsPojo } from '#shared/utils'
 
 /**
  * This docker controller handles low-level docker tasks
@@ -110,7 +110,7 @@ Controller.prototype.createResource = async (req, res, tools, cmd) => {
   /*
    * Return result
    */
-  return success ? res.status(201).send(asPojo(result)) : dockerError(result, res)
+  return success ? res.status(201).send(cloneAsPojo(result)) : dockerError(result, res)
 }
 
 /**

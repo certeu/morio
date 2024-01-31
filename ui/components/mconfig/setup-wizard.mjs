@@ -16,6 +16,7 @@ import { Block } from './blocks/index.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport, DeploymentReport } from './report.mjs'
 import { RightIcon } from 'components/icons.mjs'
+import { Spinner } from 'components/animations.mjs'
 
 /**
  * This React component renders the side menu with a list of various config views
@@ -221,6 +222,7 @@ export const SetupWizard = ({
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the config preview
   const [deployResult, setDeployResult] = useState(false)
+  const [deploymentOngoing, setDeploymentOngoing] = useState(false)
 
   /*
    * Figure out the current configPath from the view
@@ -288,7 +290,8 @@ export const SetupWizard = ({
    * Helper method to deploy the configuration
    */
   const deploy = async () => {
-    setLoadingStatus([true, 'Uploading configuration'])
+    setDeploymentOngoing(true)
+    setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
     const [data, status] = await api.deploy(mConf)
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
@@ -298,12 +301,25 @@ export const SetupWizard = ({
     }
   }
 
-  if (deployResult)
-    return (
-      <div className="w-fill min-h-screen max-w-2xl mx-auto">
-        <DeploymentReport result={deployResult} />
+  if (deploymentOngoing) return (
+    <div className="flex flex-wrap flex-row gap-8 justify-center min-h-screen">
+      <div className="w-full max-w-xl">
+        {deployResult
+          ? (
+            <>
+              <h3>Deploy accepted</h3>
+              <DeploymentReport result={deployResult} />
+            </>
+          ) : (
+            <>
+              <h3>Deploy requested</h3>
+              <p>Please wait while your configuration is being deployed.</p>
+              <Spinner />
+            </>
+          )}
       </div>
-    )
+    </div>
+  )
 
   /*
    * Load the template, section, and next
@@ -341,7 +357,6 @@ export const SetupWizard = ({
           setView,
         }
 
-  //<pre>{JSON.stringify(template.children, null ,2)}</pre>
   return (
     <div className="flex flex-wrap flex-row gap-8 justify-center min-h-screen">
       <div className="w-52">

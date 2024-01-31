@@ -1,6 +1,6 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
-import { startMorio } from '#lib/services/core'
+import { hotReload } from '#lib/services/core'
 
 /**
  * This config controller handles configuration routes
@@ -17,15 +17,6 @@ export function Controller() {}
  * @param {object} tools - Variety of tools include logger and config
  */
 Controller.prototype.getPresets = async (req, res, tools) => res.send(tools.presets)
-
-/**
- * Loads the current (running) configuration
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
- */
-Controller.prototype.getCurrentConfig = async (req, res, tools) => res.send(tools.config)
 
 /**
  * Loads the list of available configurations
@@ -138,7 +129,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Don't await deployment, just return
    */
   tools.log.info(`Starting Morio`)
-  startMorio(tools)
+  hotReload()
 
   return res.send(data)
 }

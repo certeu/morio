@@ -1,3 +1,5 @@
+import { streamContainerLogs } from '#lib/docker'
+
 /**
  * This status controller handles the MORIO status endpoint
  *
@@ -80,4 +82,26 @@ Controller.prototype.status = async (req, res, tools) => {
     ...base,
     fixme: 'Handle post-setup status',
   })
+}
+
+/**
+ * Stream service logs
+ *
+ * This will stream the service logs from its container
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - An object holding various tools & config
+ */
+Controller.prototype.streamServiceLogs = async (req, res, tools) => {
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+  res.setHeader('Transfer-Encoding', 'chunked')
+
+  return streamContainerLogs(
+    req.params.service,
+    (data) => res.write(data),
+    () => res.end(),
+    tools,
+  )
 }

@@ -19,14 +19,8 @@ then
   echo
   echo "Hope you know what you're doing"
   npm run dev:clean
-  sudo rm -f ${DIR}/hostfs/config/morio.*.yaml
-  sudo rm -f ${DIR}/hostfs/config/.*.keys
-  echo "" > ${DIR}/hostfs/config/shared/root_ca.crt
-  sudo rm -f ${DIR}/hostfs/config/ca/*.json
-  sudo rm -f ${DIR}/hostfs/data/ca/certs/*.crt
-  sudo rm -f ${DIR}/hostfs/data/ca/db/*
-  touch ${DIR}/hostfs/data/ca/db/.gitkeep
-  sudo rm -f ${DIR}/hostfs/data/ca/secrets/*
+  sudo rm -rf ${DIR}/hostfs/config/*
+  sudo rm -rf ${DIR}/hostfs/data/*
   touch ${DIR}/hostfs/data/ca/secrets/.gitkeep
 else
   echo

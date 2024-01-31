@@ -1,6 +1,7 @@
 import dns from 'dns'
 import https from 'https'
 import axios from 'axios'
+import { pipeline } from "node:stream/promises"
 
 const dnsOptions = {
   family: 4, // Don't use IPv6
@@ -94,7 +95,7 @@ export const get = async function (url, raw = false) {
   try {
     response = await fetch(url)
   } catch (err) {
-    console.log(err)
+    // Swallow error
   }
 
   /*
@@ -112,6 +113,39 @@ export const get = async function (url, raw = false) {
   }
 
   return [response?.status, body]
+}
+
+/*
+ * General purpose method to call the core API with a streaming GET request
+ *
+ * @param {url} string - The URL to call
+ * @return {object} res - The Express response object
+ */
+export const streamGet = async function (url, res) {
+  /*
+   * Send headers
+   */
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+  res.setHeader('Transfer-Encoding', 'chunked')
+
+  /*
+   * Send the request to core
+   */
+  let response
+  try {
+    response = await fetch(url)
+  } catch (err) {
+    console.log(err)
+  }
+
+  if (!response) {
+    console.log('Response is not ok', typeof response)
+  }
+
+  /*
+   * Try parsing the body as JSON, fallback to text
+   */
+  await pipeline(response.body, res)
 }
 
 /*
@@ -173,4 +207,5 @@ export const restClient = (api) => ({
   get: async (url) => get(api + url),
   post: async (url, data) => __postput('POST', api + url, data),
   put: async (url, data) => __postput('PUT', api + url, data),
+  streamGet: async (url, res) => streamGet(api + url, res),
 })

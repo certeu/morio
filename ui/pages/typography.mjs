@@ -42,7 +42,7 @@ const TypographyPage = (props) => {
       <ContentWrapper {...props}>
         <div className="text-primary mdx max-w-prose text-base-content max-w-prose text-base xl:pl-4">
           <p>
-            This temporary hom page shows an overview of different elements and how they are styled.
+            This temporary page shows an overview of different elements and how they are styled.
           </p>
           <p>It&apos;s a good starting point for theme development.</p>
           <h2>Headings (this is h2)</h2>

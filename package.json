@@ -12,7 +12,7 @@
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
     "dev": "./core/run-container.sh",
-    "dev:clean": "docker rm -f core api ui proxy ca broker console",
+    "dev:clean": "docker rm -fv core api ui proxy ca broker console",
     "prod": "docker-compose -f compose/prod.yaml up",
     "prod:down": "docker-compose -f compose/prod.yaml down",
     "saltnburn": "./scripts/salt-and-burn.sh",

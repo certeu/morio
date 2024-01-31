@@ -30,7 +30,7 @@ export function routes(tools) {
   /*
    * Load the current (running) configuration
    */
-  app.get('/configs/current', (req, res) => Config.getCurrentConfig(req, res, tools))
+  app.get('/configs/current', (req, res) => res.send(tools.config))
 
   /*
    * Load the CA configuration

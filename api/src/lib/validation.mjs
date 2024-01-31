@@ -57,8 +57,29 @@ export const validateConfiguration = async (newConfig) => {
   /*
    * We define this here to keep things DRY
    */
-  const abort = () =>
+  const abort = () => {
     report.warnings.push(`Validation was terminated before completion due to errors`)
+
+    return report
+  }
+
+  /*
+   * Nodes will check that there are as many as node_count
+   * But if the entire config is empty, this will pass validation
+   * So let's guard against that here
+   */
+  if (
+    !newConfig.deployment ||
+    !newConfig.deployment.node_count ||
+    !newConfig.deployment.nodes ||
+    !Array.isArray(newConfig.deployment.nodes) ||
+    newConfig.deployment.nodes.length !== newConfig.deployment.node_count
+  ) {
+    report.info.push(`Configuration is not valid`)
+    report.errors.push(`Node count and nodes do not match`)
+
+    return abort()
+  }
 
   /*
    * Validate config against the config schema
@@ -72,9 +93,8 @@ export const validateConfiguration = async (newConfig) => {
      */
     report.info.push(`Configuration did not pass schema validation`)
     for (const msg of err.details) report.errors.push(msg.message)
-    abort()
 
-    return report
+    return abort()
   }
 
   /*
@@ -100,9 +120,8 @@ export const validateConfiguration = async (newConfig) => {
     } else {
       report.info.push(`Validation failed for node ${i}`)
       report.errors.push(ipsOrError)
-      abort()
 
-      return report
+      return abort()
     }
 
     /*
@@ -113,9 +132,8 @@ export const validateConfiguration = async (newConfig) => {
     else {
       report.info.push(`Validation failed for node ${i}`)
       report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
-      abort()
 
-      return report
+      return abort()
     }
 
     /*
@@ -148,9 +166,8 @@ export const validateConfiguration = async (newConfig) => {
    */
   if (ips.length !== [...new Set([...ips])].length) {
     report.errors.push('Different nodes share a common IP address')
-    abort()
 
-    return report
+    return abort()
   }
 
   /*

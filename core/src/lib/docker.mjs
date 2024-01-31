@@ -244,9 +244,35 @@ export const execContainerCommand = async (id, Cmd, callback, tools) => {
         allData.push(data.toString())
       })
       stream.on('end', (err) => {
-        if (!err) return callback(allData.join('\n'))
+        if (!err && callback && typeof callback === 'function') return callback(allData.join('\n'))
       })
     })
+  })
+}
+
+/**
+ * This helper method streams a container's stdout
+ *
+ * @param {string} id - The container id
+ * @param {function} callback - Callback to run when the stream produces data
+ * @param {object} tools = The tools object
+ */
+export const streamContainerLogs = async (id, onData, onEnd, tools) => {
+  /*
+   * First get the internal container id
+   */
+  const [ready, container] = await runDockerApiCommand('getContainer', id, tools)
+  if (!ready) return false
+
+  /*
+   * Now start the stream
+   */
+  container.attach({ stream: true, stdout: true, stderr: true}, function (err, stream) {
+    stream.on('data', (data) => {
+      tools.log.debug(data.toString())
+      onData(data)
+    })
+    stream.on('end', () => onEnd())
   })
 }
 

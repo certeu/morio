@@ -1,10 +1,10 @@
 // Dependencies
 import express from 'express'
-import passport from 'passport'
+import { logger } from '#shared/logger'
+import { wrapExpress } from '#shared/utils'
+import { getPreset } from '#config'
 // Routes
 import { routes } from '#routes/index'
-// Middleware
-import { loadPassportMiddleware } from './middleware.mjs'
 // Bootstrap configuration
 import { bootstrapConfiguration } from './bootstrap.mjs'
 // Swagger
@@ -12,13 +12,10 @@ import swaggerUi from 'swagger-ui-express'
 import { openapi } from '../openapi/index.mjs'
 
 /*
- * First of all, we bootstrap and create a centralized
- * object holding various tools that we will pass to the controllers
- * We do this first as it contains the logger (as tools.log)
+ * Instantiate the tools object with logger
  */
 const tools = {
-  passport, // The passport authentication middleware
-  ...(await bootstrapConfiguration()),
+  log: logger(getPreset('MORIO_API_LOG_LEVEL'), 'api')
 }
 
 /*
@@ -26,64 +23,105 @@ const tools = {
  */
 tools.log.debug('Starting express app')
 const app = express()
-tools.app = app
 
 /*
  * Add support for JSON with a limit to the request body
  */
-tools.log.debug('Adding json support')
+tools.log.debug('Adding JSON support')
 app.use(express.json({ limit: '1mb' }))
 
 /*
- * Add the route for the Swagger (OpenAPI) docs
+ * (re)Configure the API
  */
-tools.log.debug('Adding openapi documentation endpoints')
-const docs = swaggerUi.setup(openapi)
-app.use(`${tools.prefix}/docs`, swaggerUi.serve, docs)
-
-/*
- * Load the Passport middleware
- */
-tools.log.debug('Loading passport middleware')
-loadPassportMiddleware(passport, tools)
-
-/*
- * Load the API routes
- */
-for (const type in routes) {
-  tools.log.debug(`Loading express routes: ${type}`)
-  routes[type](tools)
-}
-
-/*
- * Handle the root route
- */
-tools.log.debug(`Loading root route`)
-app.get('/', async (req, res) =>
-  res.send({
-    name: tools.config.name,
-    about: tools.config.about,
-    version: tools.config.version,
-    setup: tools.config.setup,
-    status: `${tools.prefix}/status`,
-    docs: `${tools.prefix}/docs`,
-  })
-)
-app.get(`${tools.prefix}/*`, async (req, res) =>
-  res.set('Content-Type', 'application/json').status(404).send({
-    url: req.url,
-    method: req.method,
-    originalUrl: req.originalUrl,
-    prefix: tools.prefix,
-  })
-)
+await reconfigure(tools)
 
 /*
  * Start listening for requests
  */
-app.listen(tools.getPreset('MORIO_API_PORT'), (err) => {
-  if (err) tools.log.error(err, 'An error occured')
-  tools.log.info(
-    `Morio api ready - listening on http://localhost:${tools.getPreset('MORIO_API_PORT')}`
+wrapExpress(
+  tools.log,
+  app.listen(getPreset('MORIO_API_PORT'), (err) => {
+    if (err) tools.log.error(err, 'An error occured')
+  })
+)
+
+/*
+ * This method allows the API to dynamically reload its
+ * own configuration
+ */
+export async function reconfigure() {
+
+  /*
+   * First of all, we bootstrap the API which will popular tools with what we need
+   */
+  await bootstrapConfiguration(tools)
+
+  /*
+   * Use the logger on the tools object from now on
+   */
+  tools.log.debug('Configuring the API')
+
+  /*
+   * Attach the app to our tools object
+   */
+  tools.app = app
+
+  /*
+   * Load the API routes
+   */
+  for (const type in routes) {
+    tools.log.debug(`Loading express routes: ${type}`)
+    routes[type](tools)
+  }
+
+  /*
+   * Add the route for the Swagger (OpenAPI) docs
+   */
+  tools.log.debug('Adding openapi documentation endpoints')
+  const docs = swaggerUi.setup(openapi)
+  app.use(`${tools.prefix}/docs`, swaggerUi.serve, docs)
+
+  /*
+   * Handle the root route
+   */
+  tools.log.debug(`Loading root route`)
+  app.get('/', async (req, res) =>
+    res.send({
+      name: tools.config.name,
+      about: tools.config.about,
+      version: tools.config.version,
+      setup: tools.config.setup,
+      status: `${tools.prefix}/status`,
+      docs: `${tools.prefix}/docs`,
+    })
   )
-})
+
+  /*
+   * Handle the reconfigure route
+   */
+  app.get(`${tools.prefix}/reconfigure`, async (req, res) => {
+    await reconfigure(tools)
+
+    return res.send({result: 'ok', info: tools.info })
+  })
+
+  /*
+   * Handle the wildcard route
+   */
+  app.get(`${tools.prefix}/*`, async (req, res) =>
+    res.set('Content-Type', 'application/json').status(404).send({
+      url: req.url,
+      method: req.method,
+      originalUrl: req.originalUrl,
+      prefix: tools.prefix,
+    })
+  )
+
+  /*
+   * Let the world know we are ready
+   */
+  tools.log.info(`Morio API ready - Configuration resolved`)
+
+  return tools
+}
+

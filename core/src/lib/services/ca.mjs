@@ -1,6 +1,8 @@
 import path from 'path'
 import { generateCaRoot, keypairAsJwk } from '#shared/crypto'
 import { cp, readJsonFile, readFile, writeFile, chown, mkdir } from '#shared/fs'
+import { attempt } from '#shared/utils'
+import { testUrl } from '#shared/network'
 
 /*
  * We need to bootstrap the CA or it will generate a random root certificate
@@ -66,6 +68,7 @@ export const preStart = async (tools) => {
     url: `https://ca_${tools.config.core.node_nr}:9000`,
     fingerprint: init.root.fingerprint,
     jwk,
+    certificate: init.root.certificate,
   }
 
   /*
@@ -93,10 +96,17 @@ export const preStart = async (tools) => {
   }
 
   /*
-   * Create data folder and change ownership to user running CA container (UID 1000)
+   * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
    */
+  const uid = tools.getPreset('MORIO_CA_UID')
   await mkdir('/morio/data/ca')
-  await chown('/morio/data/ca', 1000, 1000)
+  await chown('/morio/data/ca', uid, uid)
+  await mkdir('/etc/morio/ca')
+  await chown('/etc/morio/ca', uid, uid)
+  for (const sub of ['secrets', 'certs', 'keys', 'db']) {
+    await mkdir(`/morio/data/ca/${sub}`)
+    await chown(`/morio/data/ca/${sub}`, uid, uid)
+  }
 
   /*
    * Write certificates, keys, and configuration to disk, and let CA own them
@@ -111,9 +121,9 @@ export const preStart = async (tools) => {
     ['/etc/morio/ca/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
   ]) {
     // Chown the folder prior to writing, because it's typically volume-mapped
-    await chown(path.dirname(target), 1000, 1000, tools.log)
-    await writeFile(target, content, tools.log)
-    await chown(target, 1000, 1000, tools.log)
+    await chown(path.dirname(target), uid, uid)
+    await writeFile(target, content)
+    await chown(target, uid, uid)
   }
 
   /*
@@ -122,3 +132,46 @@ export const preStart = async (tools) => {
    */
   await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
 }
+
+
+/*
+ * We need to make sure the CA is up and running before we continue.
+ * If not, provisioning of certificates will fail.
+ */
+export const postStart = async (tools) => {
+  /*
+   * Make sure CA is up
+   */
+  const up = await attempt({
+    every: 2,
+    timeout: 60,
+    run: async () => await isCaUp(tools),
+    onFailedAttempt: (s) => tools.log.debug(`Waited ${s} seconds for CA, will continue waiting.`)
+  })
+  if (up) tools.log.debug(`CA is up.`)
+  else {
+    tools.log.warn(`CA did not come up before timeout. Moving on anyway.`)
+    return
+  }
+
+}
+
+/**
+ * Helper method to check whether the CA is up
+ *
+ * @param {object} tools - The tools object
+ * @return {bool} result - True if the CA is up, false if not
+ */
+const isCaUp = async (tools) => {
+  const result = await testUrl(
+    `https://ca_${tools.config.core.node_nr}:9000/health`,
+    {
+      ignoreCertificate: true,
+      returnAs: 'json',
+    }
+  )
+  if (result && result.status && result.status === 'ok') return true
+
+  return false
+}
+

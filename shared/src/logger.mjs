@@ -29,3 +29,4 @@ export const logger = (level = 'info', name) =>
     name,
     level: levels[level] ? levels[level] : 30,
   })
+

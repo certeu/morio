@@ -195,6 +195,6 @@ npm i -G pino-pretty
 Then pipe the logs into it, stripping some of the fields we don't care about:
 
 ```
-docker logs -f core | pino-pretty -i time,hostname
+docker logs -f core | pino-pretty --ignore pid,time,hostname
 ```
 

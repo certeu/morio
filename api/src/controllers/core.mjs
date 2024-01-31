@@ -155,3 +155,16 @@ Controller.prototype.deploy = async (req, res, tools) => {
 
   return res.status(status).send(result)
 }
+
+/**
+ * Stream service logs
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.streamServiceLogs = async (req, res, tools) => {
+  return await tools.core.streamGet(`/logs/${req.params.service}`, res)
+}
+
+

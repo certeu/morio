@@ -22,7 +22,12 @@ export function routes(tools) {
   app.get('/status', (req, res) => Status.status(req, res, tools))
 
   /*
-   * Hit this route to get the MORIO status
+   * Hit this route to get info on the CA root
    */
   app.get('/ca/root', (req, res) => res.send(tools.ca))
+
+  /*
+   * Hit this route to stream container logs for a given service
+   */
+  app.get('/logs/:service', (req, res) => Status.streamServiceLogs(req, res, tools))
 }

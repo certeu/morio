@@ -54,6 +54,9 @@ export const presets = {
     'traces', // For distributed tracing / spans
   ],
 
+  // Broker UID inside container
+  MORIO_BROKER_UID: 101,
+
   /*
    * CA presets
    */
@@ -79,11 +82,14 @@ export const presets = {
   // Default certificate lifetime
   MORIO_CA_CERTIFICATE_LIFETIME_DFLT: '750h',
 
+  // CA UID inside container
+  MORIO_CA_UID: 1000,
+
   /*
    * Console presets
    */
 
-  // Broker log level
+  // Console log level
   MORIO_CONSOLE_PREFIX: 'console',
 
   /*

@@ -78,10 +78,6 @@ export function routes(tools) {
   app.get(`/docker/version`,            (req, res) => Docker.getDockerData(req, res, tools, 'version'))
   app.get(`/docker/volumes`,            (req, res) => Docker.getDockerData(req, res, tools, 'listVolumes'))
 
-
-
-
-
   /*
    * API routes that behave like the Docker CLI
    */

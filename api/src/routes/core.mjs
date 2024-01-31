@@ -93,4 +93,8 @@ export function routes(tools) {
    */
   app.post(`${PREFIX}/ca/certificate`, (req, res) => Core.createCertificate(req, res, tools))
 
+  /*
+   * Stream service logs
+   */
+  app.get(`${PREFIX}/logs/:service`, (req, res) => Core.streamServiceLogs(req, res, tools))
 }

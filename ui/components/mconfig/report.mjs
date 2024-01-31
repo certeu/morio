@@ -89,8 +89,11 @@ export const DeploymentReport = ({ result }) => {
         .
       </p>
       <p>
-        We suggest you <PageLink href="/">return to the home page</PageLink> and wait for the new
-        configuration to be applied.
+        Give it some time until the logs stabilize and you see this line:
+      </p>
+      <pre>Morio Core ready - Configuration resolved</pre>
+      <p>
+        At that time, you should <PageLink href="/">return to the home page</PageLink>.
       </p>
     </>
   ) : (

@@ -1,45 +1,54 @@
 import { pkg } from './json-loader.mjs'
 import { getPreset } from '#config'
-import { logger } from '#shared/logger'
 import { coreClient } from '#lib/core'
+import { attempt } from '#shared/utils'
 
 /**
  * Generates/Loads the configuration required to start the API
  *
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
-export const bootstrapConfiguration = async () => {
+export const bootstrapConfiguration = async (tools) => {
   /*
-   * First setup the logger, so we can log
+   * Add info to tools
    */
-  const log = logger(getPreset('MORIO_API_LOG_LEVEL'), pkg.name)
+  if (!tools.info) tools.info = {
+    about: pkg.description,
+    name: pkg.name,
+    ping: Date.now(),
+    start_time: Date.now(),
+    version: pkg.version,
+  }
+
+  /*
+   * Add core client to tools
+   */
+  if (!tools.core) tools.core = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 
   /*
    * Attempt to load the config from CORE
    */
-  const core = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
-  let config = await core.get('/configs/current')
-  if (config[0] === 200) {
-    config = config[1]
-    log.info('Loaded Morio config from core')
-  } else {
-    config = {}
-    log.warn('Failed to load Morio config from core')
+  let config
+  const result = await attempt({
+    every: 2,
+    timeout: 60,
+    run: async () => await tools.core.get('/configs/current'),
+    onFailedAttempt: (s) => tools.log.debug(`Waited ${s} seconds for core, will continue waiting.`)
+  })
+  if (result && Array.isArray(result) && result[0] === 200 && result[1]) {
+    config = result[1]
+    tools.log.debug(`Loaded configuration from core.`)
   }
+  else {
+    tools.log.warn('Failed to load Morio config from core')
+  }
+  tools.config = config
 
-  const tools = {
-    info: {
-      about: pkg.description,
-      name: pkg.name,
-      ping: Date.now(),
-      start_time: Date.now(),
-      version: pkg.version,
-    },
-    config,
-    log,
-    prefix: getPreset('MORIO_API_PREFIX'),
-    core,
-  }
+  /*
+   * Add prefix to tools
+   */
+  tools.prefix = getPreset('MORIO_API_PREFIX'),
+
 
   /*
    * Add a getPreset() wrapper that will output debug logs about how presets are resolved
@@ -51,9 +60,4 @@ export const bootstrapConfiguration = async () => {
 
     return result
   }
-
-  /*
-   * Now return the tools object
-   */
-  return tools
 }

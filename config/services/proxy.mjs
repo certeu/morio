@@ -26,8 +26,8 @@ export const resolveServiceConfiguration = (tools) => ({
       `${tools.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio/`,
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/traefik/entrypoint.sh:/entrypoint.sh`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared/root_ca.crt:/usr/local/share/ca-certificates/root_ca.crt`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/proxy/entrypoint.sh:/entrypoint.sh`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
     ],
     // Command
     command: [
@@ -80,4 +80,27 @@ export const resolveServiceConfiguration = (tools) => ({
       'traefik.http.routers.traefik_dashboard.entrypoints=https',
     ],
   },
+  entrypoint: `#!/bin/sh
+set -e
+
+# Update certificates so you can volume-mount Morio's root CA
+# and things will 'just work' without having to build a custom image
+update-ca-certificates
+
+# first arg is \`-f\` or \`--some-option\`
+if [ "\${1#-}" != "$1" ]; then
+    set -- traefik "$@"
+fi
+
+# if our command is a valid Traefik subcommand, let's invoke it through Traefik instead
+# (this allows for "docker run traefik version", etc)
+if traefik "$1" --help >/dev/null 2>&1
+then
+    set -- traefik "$@"
+else
+    echo "= '$1' is not a Traefik command: assuming shell execution." 1>&2
+fi
+
+exec "$@"
+`,
 })

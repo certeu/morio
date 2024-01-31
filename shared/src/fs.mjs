@@ -33,6 +33,7 @@ export const chown = async (
     await fs.promises.chown(path.resolve(root, target), uid, gid)
   } catch (err) {
     if (onError) onError(err)
+    else console.log(err)
 
     return false
   }
@@ -193,13 +194,14 @@ export const readYamlFile = async (
 export const writeFile = async (
   filePath, // The (relative) path to the file
   data, // The data to write to disk
-  log = false
+  log = false,
+  mode = 0o666,
 ) => {
   let file
   try {
     file = path.resolve(root, filePath)
     await fs.promises.mkdir(path.dirname(file), { recursive: true })
-    await fs.promises.writeFile(file, data)
+    await fs.promises.writeFile(file, data, { mode })
   } catch (err) {
     if (log) log.warn(err, `Failed to write file: ${file}`)
     else console.log(`Failed to write file: ${file}`)
