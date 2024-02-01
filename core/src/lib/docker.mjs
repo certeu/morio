@@ -113,7 +113,6 @@ export const generateContainerConfig = (srvConf, tools) => {
     name,
     HostConfig: {
       NetworkMode: getPreset('MORIO_NETWORK'),
-      RestartPolicy: { Name: 'unless-stopped' },
       Binds: srvConf.container.volumes,
     },
     Hostname: name,
@@ -125,6 +124,12 @@ export const generateContainerConfig = (srvConf, tools) => {
   opts.NetworkingConfig.EndpointsConfig[getPreset('MORIO_NETWORK')] = {
     Aliases: [name, `${name}_${tools.config.core?.node_nr || 1}`],
   }
+
+  /*
+   * Restart policy
+   */
+  if (srvConf.container.ephemeral) opts.HostConfig.AutoRemove = true
+  else opts.HostConfig.RestartPolicy = { Name: 'unless-stopped' }
 
   /*
    * Exposed ports

@@ -24,8 +24,8 @@ export const FormControl = ({
   )
   const bottomLabelChildren = (
     <>
-      {labelBL ? <span className="label-text-alt">{labelBL}</span> : <span></span>}
-      {labelBR ? <span className="label-text-alt">{labelBR}</span> : null}
+      {labelBL ? <span className="label-text-alt -mt-1.5">{labelBL}</span> : <span></span>}
+      {labelBR ? <span className="label-text-alt -mt-1.5">{labelBR}</span> : null}
     </>
   )
 
@@ -162,6 +162,35 @@ export const StringInput = ({
       value={current}
       onChange={(evt) => update(evt.target.value)}
       className={`input w-full input-bordered ${
+        current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
+      }`}
+    />
+  </FormControl>
+)
+
+/*
+ * Input for text (longer than strings, textarea)
+ */
+export const TextInput = ({
+  label, // Label to use
+  update, // onChange handler
+  valid, // Method that should return whether the value is valid or not
+  current = '', // The current value
+  original, // The original value
+  placeholder, // The placeholder text
+  id = '', // An id to tie the input to the label
+  labelTR = false, // Top-right label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+}) => (
+  <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id}>
+    <textarea
+      id={id}
+      type="text"
+      placeholder={placeholder}
+      value={current}
+      onChange={(evt) => update(evt.target.value)}
+      className={`input w-full input-bordered h-36 ${
         current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
       }`}
     />

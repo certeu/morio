@@ -14,6 +14,7 @@
   },
   "imports": {
     "#config": "./config/index.mjs",
+    "#config/services/*": "./config/services/*.mjs",
     "#controllers/*": "./src/controllers/*.mjs",
     "#lib/*": "./src/lib/*.mjs",
     "#routes/*": "./src/routes/*.mjs",

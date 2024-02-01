@@ -1,3 +1,5 @@
+import { getPreset } from '#config'
+
 /*
  * Returns seconds since a given timestamp
  *
@@ -58,4 +60,19 @@ export const timeSince = (timestamp) => {
   }
 
   return { time_since, seconds_since }
+}
+
+export const versionEpoch = (epoch) => {
+  const d = new Date
+  d.setMonth(Number(epoch.slice(4,6)) - 1)
+  d.setDate(Number(epoch.slice(6,8)))
+  d.setYear(Number(epoch.slice(0,4)))
+  d.setHours(0, 0, 0)
+
+  return d
+}
+
+export const getRevision = () => {
+
+  return Math.floor((Date.now() - versionEpoch(getPreset('MORIO_VERSION_EPOCH')).valueOf()) / 60000)
 }

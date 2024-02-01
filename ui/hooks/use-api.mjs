@@ -66,6 +66,34 @@ MorioClient.prototype.getCaRoot = async function () {
 }
 
 /**
+ * Gets defaults for a package builder
+ *
+ * @param {string} type - The package type
+ * @return {object} - The defaults for this package
+ */
+MorioClient.prototype.getClientPackageDefaults = async function (type) {
+  return await this.call(`${morioConfig.api}/pkgs/clients/${type}/defaults`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Request the build of a client package
+ *
+ * @param {string} type - The package type
+ * @param {object} settings - The build settings
+ * @return {object} - The result
+ */
+MorioClient.prototype.buildClientPackage = async function (type, settings={}) {
+  return await this.call(`${morioConfig.api}/pkgs/clients/${type}/build`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(settings),
+  })
+}
+
+/**
  * Validated a configuration
  *
  * This endpoint does not require authentication

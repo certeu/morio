@@ -29,6 +29,7 @@
   },
   "imports": {
     "#config": "./config/index.mjs",
+    "#config/services/*": "./config/services/*.mjs",
     "#controllers/*": "./src/controllers/*.mjs",
     "#lib/services/*": "./src/lib/services/*.mjs",
     "#lib/*": "./src/lib/*.mjs",

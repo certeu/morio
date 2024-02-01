@@ -14,6 +14,7 @@ import {
   DocumentIcon,
   LayersIcon,
   MorioIcon,
+  PackageIcon,
   ServersIcon,
   StatusIcon,
   StorageIcon,
@@ -47,6 +48,7 @@ const icons = {
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
+  pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
   services: LayersIcon,
@@ -122,6 +124,9 @@ const links = {
     subs: {
       certificates: {
         title: 'X.509 Certificates',
+      },
+      pkgs: {
+        title: 'Client Packages'
       },
     },
   },

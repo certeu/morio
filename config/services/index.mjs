@@ -5,6 +5,7 @@ import { resolveServiceConfiguration as console } from './console.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
+import { resolveServiceConfiguration as dbuilder } from './dbuilder.mjs'
 
 const resolvers = {
   api,
@@ -12,6 +13,7 @@ const resolvers = {
   ca,
   console,
   core,
+  dbuilder,
   proxy,
   ui,
 }

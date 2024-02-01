@@ -97,4 +97,14 @@ export function routes(tools) {
    * Stream service logs
    */
   app.get(`${PREFIX}/logs/:service`, (req, res) => Core.streamServiceLogs(req, res, tools))
+
+  /*
+   * Get the defaults for generating a .deb client package
+   */
+  app.get(`${PREFIX}/pkgs/clients/deb/defaults`, (req, res) => Core.getClientPackageDefaults(req, res, tools, 'deb'))
+
+  /*
+   * Build a .deb client package
+   */
+  app.post(`${PREFIX}/pkgs/clients/deb/build`, (req, res) => Core.buildClientPackage(req, res, tools, 'deb'))
 }

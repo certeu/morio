@@ -26,6 +26,7 @@ export const resolveServiceConfiguration = (tools) => ({
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config:/etc/morio`,
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data:/morio/data`,
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio`,
+          `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients:/morio/clients`,
         ]
       : [
           `${tools.getPreset('MORIO_DOCKER_SOCKET')}:${tools.getPreset('MORIO_DOCKER_SOCKET')}`,
@@ -33,6 +34,7 @@ export const resolveServiceConfiguration = (tools) => ({
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config:/etc/morio`,
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data:/morio/data`,
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio`,
+          `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients:/morio/clients`,
         ],
     // Run an init inside the container to forward signals and avoid PID 1
     init: true,

@@ -296,6 +296,16 @@ export const OkIcon = (props) => (
 )
 
 /*
+ * PackageIcon - Looks like a cardboard box
+ */
+export const PackageIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+    <path d="m 7.6 14.2 l 0 -4  9 -5.25" />
+  </IconWrapper>
+)
+
+/*
  * PlayIcon - Looks like a right-pointing triangle
  */
 export const PlayIcon = (props) => (

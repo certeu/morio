@@ -401,7 +401,7 @@ const startMorioNode = async (tools) => {
   /*
    * Create services
    */
-  await ensureMorioServices(['ca', 'proxy', 'api', 'ui', 'broker', 'console'], tools)
+  await ensureMorioServices(['ca', 'proxy', 'api', 'ui', 'broker', 'console', 'dbuilder'], tools)
 }
 
 export const createX509Certificate = async (tools, data) => {

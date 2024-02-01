@@ -178,7 +178,7 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.cn}
           label="Common Name"
-          labelTR="Any name will do here"
+          labelBL="Any name will do here"
           valid={() => true}
           current={data.cn}
           update={(cn) => setData({ ...data, cn })}
@@ -187,7 +187,7 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.c}
           label="Country"
-          labelTR="A 2-letter language code"
+          labelBL="A 2-letter language code"
           valid={() => true}
           current={data.c}
           update={(c) => setData({ ...data, c })}
@@ -196,7 +196,7 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.st}
           label="State"
-          labelTR="A state, province, or region"
+          labelBL="A state, province, or region"
           valid={() => true}
           current={data.st}
           update={(st) => setData({ ...data, st })}
@@ -205,7 +205,7 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.l}
           label="Locality"
-          labelTR="A city or municipality"
+          labelBL="A city or municipality"
           valid={() => true}
           current={data.l}
           update={(l) => setData({ ...data, l })}
@@ -214,7 +214,7 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.o}
           label="Organisation"
-          labelTR="Name of your organisation"
+          labelBL="Name of your organisation"
           valid={() => true}
           current={data.o}
           update={(o) => setData({ ...data, o })}
@@ -223,23 +223,23 @@ const CreateCertificate = () => {
         <StringInput
           placeholder={prefill.ou}
           label="Organisational Unit"
-          labelTR="Name of your department"
+          labelBL="Name of your department"
           valid={() => true}
           current={data.ou}
           update={(ou) => setData({ ...data, ou })}
         />
       </div>
       {data.san.map((san, i) => (
-        <div className="flex flex-row gap-2 items-end" key={i}>
+        <div className="flex flex-row gap-2 items-start" key={i}>
           <StringInput
             placeholder="host.my.domain.eu"
             label={`Subject Alternative Name #${i}`}
-            labelTR="A FQDN to add to this certificate"
+            labelBL="A FQDN to add to this certificate"
             valid={() => true}
             current={data.san[i]}
             update={(val) => updateSan(val, i)}
           />
-          <button className="btn btn-error" onClick={() => removeSan(i)}>
+          <button className="btn btn-error btn-outline mt-9" onClick={() => removeSan(i)}>
             <TrashIcon />
           </button>
         </div>

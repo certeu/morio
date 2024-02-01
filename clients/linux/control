@@ -1,14 +1,19 @@
 Package: morio-client
 Source: morio-client
-Version: 0.0.1
+Version: 0.0.1-14
 Section: utils
 Priority: optional
 Architecture: amd64
 Essential: no
-Depends: auditbeat (>= 8.12), metricbeat (>= 8.12), auditbeat (>= 8.12)
 Installed-Size: 1024
-Maintainer: Joost De Cock <joost.decock@cert.europa.eu>
+Maintainer: CERT-EU <services@cert.europa.eu>
+Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
 Homepage: https://github.com/certeu/morio
-Description: Morio allows you to connect your systems, ingest their logs, metrics
-  and audit info, and do stream processing and analysis in real time.
-  This is the Morio client, which provides the agents to ingest your data into Morio.
+Description: The Morio client collects and ships observability data to a Morio instance.
+  Deploy this Morio client (based on Elastic Beats) on your endpoints,
+  and collect their data on one or more centralized Morio instances
+  for analysis, further processing, downstream routing & filtering,
+  or event-driven automation.
+Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
+Depends: auditbeat (>= 8.12), filebeat (>= 8.12), metricbeat (>= 8.12)
+Uploaders: Joost De Cock <joost.decock@cert.europa.eu>

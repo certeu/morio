@@ -18,6 +18,9 @@ export const presets = {
   // The current Morio version
   MORIO_VERSION: pkg.version,
 
+  // The epoch data of the current version
+  MORIO_VERSION_EPOCH: '20240201',
+
   /*
    * API presets
    */

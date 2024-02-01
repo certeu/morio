@@ -1,7 +1,7 @@
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { CertificateIcon, CogIcon } from 'components/icons.mjs'
+import { CertificateIcon, CogIcon, PackageIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
 const ToolsPage = (props) => {
@@ -16,6 +16,13 @@ const ToolsPage = (props) => {
               desc="Sign certificate signing requests, or generate certificates  with the internal Morio Certificate Authority."
               width="w-full"
               Icon={CertificateIcon}
+            />
+            <Card
+              title="Client Packages"
+              href="/tools/pkgs"
+              desc="Generate morio-client packages that are pre-configured to integration with this Morio deployment."
+              width="w-full"
+              Icon={PackageIcon}
             />
           </div>
         </div>

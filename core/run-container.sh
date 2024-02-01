@@ -22,7 +22,7 @@ then
   --network=morionet \
   --network-alias core \
   --init \
-  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio  \
+  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio    -v /home/jdecock/git/morio/clients:/morio/clients  \
   -e MORIO_DEV=1 \
   -e MORIO_HOSTOS_REPO_ROOT=/home/jdecock/git/morio \
   -e MORIO_CORE_LOG_LEVEL=debug \
@@ -34,7 +34,7 @@ else
   --network=morionet \
   --network-alias core \
   --init \
-  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio  \
+  -v /var/run/docker.sock:/var/run/docker.sock    -v /home/jdecock/git/morio:/morio    -v /home/jdecock/git/morio/hostfs/config:/etc/morio    -v /home/jdecock/git/morio/hostfs/data:/morio/data    -v /home/jdecock/git/morio/hostfs/logs:/var/log/morio    -v /home/jdecock/git/morio/clients:/morio/clients  \
   -e MORIO_DEV=1 \
   -e MORIO_HOSTOS_REPO_ROOT=/home/jdecock/git/morio \
   -e MORIO_CORE_LOG_LEVEL=debug \

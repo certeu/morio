@@ -167,4 +167,32 @@ Controller.prototype.streamServiceLogs = async (req, res, tools) => {
   return await tools.core.streamGet(`/logs/${req.params.service}`, res)
 }
 
+/**
+ * Loads defaults for client packages from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ */
+Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) => {
+  const [status, result] = await tools.core.get(`/pkgs/clients/deb/defaults`)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Submits a build request for a client package to core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ */
+Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
+  const [status, result] = await tools.core.post(`/pkgs/clients/deb/build`, req.body)
+
+  return res.status(status).send(result)
+}
+
 
