@@ -1,3 +1,415 @@
 #!/bin/bash
 
-echo "FIXME: Provide top-level wrapper script here"
+# morio - A cli interface to the morio client and beats agents
+
+# Set up variables
+MORIO_VERSION=0.1.0
+
+show_help() {
+    echo "Usage:"
+    echo "  morio [flags]"
+    echo "  morio [command]"
+    echo ""
+    echo "Available Commands:"
+    echo "  apt       Add the Elastic APT repository to the system (to install beats agents)"
+    echo "  audit     Invokes auditbeat agent"
+    echo "  logs      Invokes filebeat agent"
+    echo "  metrics   Invokes metricbeat agent"
+    echo "  restart   Restart morio beats agents"
+    echo "  start     Start morio beats agents"
+    echo "  status    Show status of the morio beats agents"
+    echo "  stop      Stop morio beats agents"
+    echo "  template  Template-out the morio beats agents configuration"
+    echo "  vars      Manage template variables for use in the morio beats agents configuration"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help       Display this help message"
+    echo "  -v, --version    Display version information"
+    echo "  -a, --action     Specify an action (e.g., morio -a some_action)"
+    echo "  -f, --file       Specify a file (e.g., morio -f filename)"
+    echo ""
+    echo "Use \"morio [command] --help\" for more information about a command."
+    exit 0
+}
+
+show_vars_help() {
+    echo "Usage:"
+    echo "  morio vars [flags]"
+    echo "  morio vars [commamd]"
+    echo ""
+    echo "Available Commands:"
+    echo "  ls      List the current morio vars"
+    echo "  set     Set the value of a morio variable"
+    echo "  edit    Opens an editor to edit a morio variable"
+    echo "  rm      Remove a morio variable"
+    echo "  dump    List the current morio vars and their values"
+    echo ""
+    echo "Flags:"
+    echo "  -h, --help       Display this help message"
+    echo ""
+    echo "Use \"morio vars [command] --help\" for more information about a vars command."
+    exit 0
+}
+
+show_vars_ls_help() {
+    echo "Desciption:"
+    echo "  List the variables set on this sytem to template the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio vars ls"
+    exit 0
+}
+
+show_vars_dump_help() {
+    echo "Desciption:"
+    echo "  List the variables and values set on this sytem to template the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio vars dump"
+    exit 0
+}
+
+show_vars_rm_help() {
+    echo "Desciption:"
+    echo "  Removes a variables set on this sytem to template the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio rm [variable]"
+    echo ""
+    echo "Examples:"
+    echo "  - Remove the variable PROXY_LOG_FILE:"
+    echo "    morio vars rm PROXY_LOG_FILE"
+    echo ""
+    echo "  - Remove the variable DEBUG:"
+    echo "    morio vars rm DEBUG"
+    exit 0
+}
+
+show_vars_set_help() {
+    echo "Desciption:"
+    echo "  Sets a variable to be used when templating the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio vars set [name] [value]"
+    echo ""
+    echo "Examples:"
+    echo "  - Set the variable PROXY_LOG_FILE to /var/log/proxy.log:"
+    echo "    morio vars set PROXY_LOG_FILE /var/log/proxy.log"
+    echo ""
+    echo "  - Set the variable DEBUG to 1:"
+    echo "    morio vars set DEBUG 1"
+    exit 0
+}
+
+show_apt_help() {
+    echo "Desciption:"
+    echo "  Configures the Elastic repository as an APT source so Morio dependencies (beats) can be installed."
+    echo ""
+    echo "Usage:"
+    echo "  morio apt"
+    exit 0
+}
+
+show_restart_help() {
+    echo "Desciption:"
+    echo "  Restarts the Morio beats agents."
+    echo ""
+    echo "Usage:"
+    echo "  morio restart"
+    exit 0
+}
+
+show_start_help() {
+    echo "Desciption:"
+    echo "  Starts the Morio beats agents."
+    echo ""
+    echo "Usage:"
+    echo "  morio start"
+    exit 0
+}
+
+show_stop_help() {
+    echo "Desciption:"
+    echo "  Stops the Morio beats agents."
+    echo ""
+    echo "Usage:"
+    echo "  morio stop"
+    exit 0
+}
+
+show_status_help() {
+    echo "Desciption:"
+    echo "  Shows the status of the Morio beats agents."
+    echo ""
+    echo "Usage:"
+    echo "  morio status"
+    exit 0
+}
+
+show_template_help() {
+    echo "Desciption:"
+    echo "  Templates out the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio template"
+    exit 0
+}
+
+show_version() {
+    echo $MORIO_VERSION
+    exit 0
+}
+
+change_agents_state() {
+  # Check for systemd
+  which systemctl 2> /dev/null
+  # Action to take
+  local STATE="$1"
+  if [ $? -eq 0 ]
+  then
+    CMDO="systemctl $STATE morio-audit"
+    echo $CMDO
+    systemctl $STATE morio-audit
+    systemctl $STATE morio-logs
+    systemctl $STATE morio-metrics
+  else
+    /etc/init.d/morio-audit $STATE
+    /etc/init.d/morio-logs $STATE
+    /etc/init.d/morio-metrics $STATE
+  fi
+}
+
+add_elastic_repo() {
+  #
+  # Keep this idempotent
+  #
+  if file /etc/apt/sources.list.d/elastic-8.x.list >/dev/null ; then
+    echo "Elastic repository already configured"
+    exit 0
+  else
+    #
+    # Figure out what tool we can use to download
+    #
+    if which wget >/dev/null ; then
+      wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+    elif which curl >/dev/null ; then
+        curl --option argument
+    else
+        echo "Cannot download signing key, neither wget nor curl found."
+        exit 1
+    fi
+
+    #
+    # APT repos typically are hosted on HTTP (which is fine coz checksums)
+    # Using an APT repo over HTTPS requires the apt-transport-https package
+    #
+    apt-get install -y apt-transport-https
+
+    #
+    # Now add the APT repo from Elastic
+    #
+    echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-8.x.list
+
+    #
+    # Finally run apt-update
+    #
+    sudo apt update
+  fi
+}
+
+manage_vars() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    -h|--help)
+      show_vars_help
+      ;;
+    ls)
+      case $2 in
+        -h|--help)
+        show_vars_ls_help
+        ;;
+        *)
+        ls -1 /etc/morio/vars
+      esac
+      exit 0
+      ;;
+    dump)
+      case $2 in
+        -h|--help)
+        show_vars_ls_help
+        ;;
+        *)
+        for file in "/etc/morio/vars"/*; do
+          if [ -f "$file" ]; then
+            echo "$(basename $file): `cat $file`"
+          fi
+        done
+      esac
+      exit 0
+      ;;
+    set)
+      case $2 in
+        -h|--help)
+        show_vars_set_help
+        ;;
+        *)
+        echo $3 > /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    rm)
+      case $2 in
+        -h|--help)
+        show_vars_rm_help
+        ;;
+        *)
+        rm -f /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    *)
+      echo "Invalid vars command: $1"
+      show_vars_help
+      ;;
+    esac
+    shift
+  done
+  if [ $# -eq 0 ]; then
+      show_vars_help
+  fi
+}
+
+template() {
+  # Allow 'false' to be false
+  export MO_FALSE_IS_EMPTY=1
+  echo "Loading vars"
+  for file in "/etc/morio/vars"/*; do
+    NAME="$(basename $file)"
+    export ${NAME}=$(cat $file)
+  done
+  echo "Templating out audit configuration"
+  for file in "/etc/morio/audit/module-templates.d"/*; do
+    /usr/sbin/morio-template $file > "/etc/morio/audit/modules.d/$(basename $file)"
+  done
+  echo "Templating out logs configuration"
+  for file in "/etc/morio/logs/module-templates.d"/*; do
+    /usr/sbin/morio-template $file > "/etc/morio/logs/modules.d/$(basename $file)"
+  done
+  for file in "/etc/morio/logs/input-templates.d"/*; do
+    /usr/sbin/morio-template $file > "/etc/morio/logs/inputs.d/$(basename $file)"
+  done
+  echo "Templating out metrics configuration"
+  for file in "/etc/morio/metrics/module-templates.d"/*; do
+    /usr/sbin/morio-template $file > "/etc/morio/metrics/modules.d/$(basename $file)"
+  done
+}
+
+# Parse command-line options
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      show_help
+      ;;
+    -v|--version)
+      show_version
+      ;;
+    -a|--action)
+      shift
+      action="$1"
+      ;;
+    -f|--file)
+      shift
+      filename="$1"
+      ;;
+    apt)
+      case $2 in
+        -h|--help)
+        show_apt_help
+        ;;
+        *)
+        add_elastic_repo
+      esac
+      exit 0
+      ;;
+    audit)
+      # Pass all but the first argument to auditbeat with the morio config
+      /usr/share/auditbeat/bin/auditbeat -c /etc/morio/audit/config.yml ${@:2}
+      exit 0
+      ;;
+    logs)
+      # Pass all but the first argument to filebeat with the morio config
+      /usr/share/filebeat/bin/filebeat -c /etc/morio/logs/config.yml ${@:2}
+      exit 0
+      ;;
+    metrics)
+      # Pass all but the first argument to metricbeat with the morio config
+      /usr/share/metricbeat/bin/metricbeat -c /etc/morio/metrics/config.yml ${@:2}
+      exit 0
+      ;;
+    start)
+      case $2 in
+        -h|--help)
+        show_start_help
+        ;;
+        *)
+        change_agents_state start
+      esac
+      exit 0
+      ;;
+    stop)
+      case $2 in
+        -h|--help)
+        show_stop_help
+        ;;
+        *)
+        change_agents_state stop
+      esac
+      exit 0
+      ;;
+    restart)
+      case $2 in
+        -h|--help)
+        show_restart_help
+        ;;
+        *)
+        change_agents_state restart
+      esac
+      exit 0
+      ;;
+    status)
+      case $2 in
+        -h|--help)
+        show_status_help
+        ;;
+        *)
+        change_agents_state status
+      esac
+      exit 0
+      ;;
+    template)
+      case $2 in
+        -h|--help)
+        show_template_help
+        ;;
+        *)
+        template
+      esac
+      exit 0
+      ;;
+    vars)
+      manage_vars ${@:2}
+      exit 0
+      ;;
+    *)
+      echo "Invalid option: $1"
+      show_help
+      ;;
+  esac
+  shift
+done
+
+# If no options were provided, show the general help
+if [ $# -eq 0 ]; then
+    show_help
+fi
+

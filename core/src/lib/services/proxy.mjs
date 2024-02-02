@@ -6,7 +6,7 @@ import { readFile, writeFile } from '#shared/fs'
  * This will be volume-mapped, so we need to write it to
  * disk first so it's available
  */
-export const preCreate = async (tools, recreate) => {
+export const preCreate = async (tools) => {
   /*
    * See if entrypoint.sh on the host OS is our custom version
    */

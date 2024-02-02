@@ -1,29 +1,10 @@
 import { readFile, writeFile } from '#shared/fs'
-import { resolveControlFile, defaults } from '#config/services/dbuilder'
-
-import { getRevision } from '#shared/time'
-
-/*
- * Before starting the container, generate the control file
- */
-export const ___REMOVEME__preStart = async (tools, recreate) => {
-  /*
-   * Load/write revision from/to disk
-   */
-  let Revision = await loadRevision()
-  Revision++
-  await writeFile('/etc/morio/dbuilder/revision', String(Revision))
-
-  /*
-   * Generate and write control file for the build
-   */
-  await writeFile('/morio/clients/linux/control', resolveControlFile({ Version: tools.info.version, Revision }))
-}
+import { resolveControlFile } from '#config/services/dbuilder'
 
 /*
  * Loads current revision (from disk)
  */
-export const loadRevision = async (tools) => {
+export const loadRevision = async () => {
   const Revision = Number(await readFile('/etc/morio/dbuilder/revision'))
 
   return Revision

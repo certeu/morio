@@ -1,4 +1,0 @@
-#!/bin/bash
-/usr/share/metricbeat/bin/metricbeat \
-  -c /etc/morio/metrics/config.yml \
-  "$@"

@@ -25,7 +25,7 @@ export const resolveServiceConfiguration = (tools) => ({
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static/clients/deb:/morio/dist`,
     ],
     // Don't keep container after it exits
-    //ephemeral: true,
+    ephemeral: true,
   },
 })
 
@@ -47,7 +47,7 @@ export const defaults = {
     ['filebeat', '>= 8.12'],
     ['metricbeat', '>= 8.12'],
   ],
-  'Installed-Size': 1024,
+  'Installed-Size': 500000,
   Maintainer: 'CERT-EU <services@cert.europa.eu>',
   'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
   Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],

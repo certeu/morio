@@ -1,11 +1,11 @@
 Package: morio-client
 Source: morio-client
-Version: 0.0.1-18
+Version: 0.0.1-22
 Section: utils
 Priority: optional
 Architecture: amd64
 Essential: no
-Installed-Size: 1024
+Installed-Size: 500000
 Maintainer: CERT-EU <services@cert.europa.eu>
 Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
 Homepage: https://github.com/certeu/morio

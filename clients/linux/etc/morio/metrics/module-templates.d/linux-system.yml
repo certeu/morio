@@ -28,6 +28,18 @@
           module:
             name: linux-system
 
+{{#TRACK_INVENTORY}}
+# Once per day, submit a list of metrics that detail memory/cores
+# As well as meta info such as installed software
+# This can help you build and overview/inventory of your infrastructure
+#
+# You can disable this by removing the TRACK_INVENTORY var,
+# followed by re-templating and re-starting the morio agents:
+#
+# sudo morio vars rm TRACK_INVENTORY
+# sudo morio template
+# sudo morio restart
+#
 - module: system
   period: 24h
   metricsets:
@@ -44,3 +56,4 @@
             name: linux-system
           inventory:
             update: true
+{{/TRACK_INVENTORY}}

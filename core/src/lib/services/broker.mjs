@@ -1,5 +1,5 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
-import { attempt, sleep } from '#shared/utils'
+import { attempt } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
@@ -95,7 +95,7 @@ const ensureTopicsExist = async (tools) => {
   for (const topic of tools.getPreset('MORIO_BROKER_TOPICS')
     .filter((topic) => !topics.includes(topic))) {
     tools.log.debug(`Topic ${topic} not present, creating now.`)
-    const result = await execContainerCommand(
+    await execContainerCommand(
       'broker',
       ['rpk', 'topic', 'create', topic],
       null,

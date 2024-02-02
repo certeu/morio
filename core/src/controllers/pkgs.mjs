@@ -3,6 +3,10 @@ import { loadRevision, prebuild } from '#lib/services/dbuilder'
 import { ensureMorioService } from '#lib/services/core'
 import { writeFile } from '#shared/fs'
 
+const pkgsDefaults = {
+  deb: debDefaults,
+}
+
 /**
  * This pkgs controller handles the Morio client packages  endpoints
  *
