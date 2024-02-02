@@ -255,6 +255,7 @@ export const ConfigWizard = ({
         pathname: configPathAsView(configPath, prefix),
       }))
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [prefix]
   )
 
@@ -264,6 +265,7 @@ export const ConfigWizard = ({
   useEffect(() => {
     if (view === 'string' && startView !== view) setView(startView)
     else if (view.pathname === '/setup/wizard') setView(startView)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [startView, view, setView])
 
   /*
@@ -282,6 +284,7 @@ export const ConfigWizard = ({
       } else console.log('nope', result)
     }
     getRunningConfig()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [revert])
 
   /*

@@ -6,18 +6,24 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { PlusIcon, TrashIcon, WarningIcon } from 'components/icons.mjs'
+import { PlusIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput, TextInput } from 'components/inputs.mjs'
 import { Debian } from 'components/brands.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Tab, Tabs } from 'components/tabs.mjs'
 import { PageLink } from 'components/link.mjs'
 
-const Docs = ({ field }) => <a
-  href={`https://www.debian.org/doc/debian-policy/ch-controlfields.html#${altDocsFields[field]
-    ? altDocsFields[field]
-    : field
-  }`} target="_BLANK" rel="nofollow">Debian docs</a>
+const Docs = ({ field }) => (
+  <a
+    href={`https://www.debian.org/doc/debian-policy/ch-controlfields.html#${
+      altDocsFields[field] ? altDocsFields[field] : field
+    }`}
+    target="_BLANK"
+    rel="nofollow"
+  >
+    Debian docs
+  </a>
+)
 
 const fields = {
   basics: {
@@ -36,7 +42,7 @@ const fields = {
     Homepage: 'Link to the homepage for the package',
     Description: 'A one-liner short description',
     'Vcs-Git': 'Git repository info',
-  }
+  },
 }
 const altDocsFields = {
   'vcs-git': 'version-control-system-vcs-fields',
@@ -52,8 +58,6 @@ const altDocsFields = {
   Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],
   extended desc
 */
-
-
 
 /**
  * The actual component, in case we want to extract it for re-use later
@@ -80,7 +84,7 @@ const CreatePackage = () => {
    * Helper method to clear the fields
    */
   const empty = () => {
-    const newData = {...defaults}
+    const newData = { ...defaults }
     for (const key in newData) newData[key] = ''
     newData.Uploaders = []
     setData(newData)
@@ -94,8 +98,7 @@ const CreatePackage = () => {
       let result
       try {
         result = await api.getClientPackageDefaults('deb')
-      }
-      catch (err) {
+      } catch (err) {
         if (err) console.log(err)
       }
       if (result[1] === 200) {
@@ -104,6 +107,7 @@ const CreatePackage = () => {
       }
     }
     if (data === false) getDefaults()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   /*
@@ -127,7 +131,10 @@ const CreatePackage = () => {
     return (
       <Popout note>
         <h3>Your build request was submitted</h3>
-        <p>It will be processed without delay, but it can take a few seconds before your newly built package becomes available for download.</p>
+        <p>
+          It will be processed without delay, but it can take a few seconds before your newly built
+          package becomes available for download.
+        </p>
         <div className="flex flex-row justify-between items-center">
           <PageLink className="btn btn-primary" href="/downloads">
             Go to the download page
@@ -139,9 +146,7 @@ const CreatePackage = () => {
       </Popout>
     )
 
-  if (defaults === false) return (
-    <p>One moment please...</p>
-  )
+  if (defaults === false) return <p>One moment please...</p>
 
   /*
    * Update method for the data.Uploaders array
@@ -168,7 +173,6 @@ const CreatePackage = () => {
     setData({ ...data, Uploaders: newArr })
   }
 
-
   /*
    * Update method for the data.Depends object
    */
@@ -190,7 +194,7 @@ const CreatePackage = () => {
    * Adds a dependency to the data.Depends object
    */
   const addDependency = () => {
-    const newArr = [...data.Depends, ['','']]
+    const newArr = [...data.Depends, ['', '']]
     setData({ ...data, Depends: newArr })
   }
 
@@ -200,7 +204,9 @@ const CreatePackage = () => {
   return (
     <>
       <h2 className="flex flex-row justify-between items-center">
-        <span>Create <b>.deb</b> Morio client package</span>
+        <span>
+          Create <b>.deb</b> Morio client package
+        </span>
         <div className="flex flex-row gap-2">
           <button className="btn btn-primary btn-outline btn-sm" onClick={empty}>
             Clear Fields
@@ -216,7 +222,7 @@ const CreatePackage = () => {
       <Tabs tabs="basics,advanced">
         <Tab tabId="basics" key="basics">
           <div className="grid grid-cols-2 gap-4 items-end">
-            {Object.keys(fields.basics).map(field => (
+            {Object.keys(fields.basics).map((field) => (
               <StringInput
                 key={field}
                 placeholder={defaults[field]}
@@ -226,7 +232,7 @@ const CreatePackage = () => {
                 valid={() => true}
                 current={data[field]}
                 update={(val) => {
-                  const newData = {...data}
+                  const newData = { ...data }
                   newData[field] = val
                   setData(newData)
                 }}
@@ -245,7 +251,7 @@ const CreatePackage = () => {
               current={data.Source}
               update={(Source) => setData({ ...data, Source })}
             />
-            {Object.keys(fields.advanced).map(field => (
+            {Object.keys(fields.advanced).map((field) => (
               <StringInput
                 key={field}
                 placeholder={defaults[field]}
@@ -255,7 +261,7 @@ const CreatePackage = () => {
                 valid={() => true}
                 current={data[field]}
                 update={(val) => {
-                  const newData = {...data}
+                  const newData = { ...data }
                   newData[field] = val
                   setData(newData)
                 }}
@@ -264,42 +270,47 @@ const CreatePackage = () => {
           </div>
           <TextInput
             placeholder={defaults.DetailedDescription}
-            label='Detailed description'
+            label="Detailed description"
             labelBL="A multi-line description"
             valid={() => true}
             current={data.DetailedDescription}
             update={(val) => {
-              const newData = {...data}
-              newData[field] = val
+              const newData = { ...data }
+              newData.DetailedDescription = val
               setData(newData)
             }}
           />
           <h5>Additional Maintainers</h5>
-          {data.Uploaders && data.Uploaders.map((san, i) => (
-            <div className="flex flex-row gap-2 items-start" key={i}>
-              <StringInput
-                placeholder="host.my.domain.eu"
-                label={`Maintainer #${i}`}
-                labelBL="A list of co-maintainers"
-                labelBR={<Docs field="uploaders" />}
-                valid={() => true}
-                current={data.Uploaders[i]}
-                update={(val) => updateUploaders(val, i)}
-              />
-              <button className="btn btn-error btn-outline mt-9" onClick={() => removeUploader(i)}>
-                <TrashIcon />
-              </button>
-            </div>
-          ))}
+          {data.Uploaders &&
+            data.Uploaders.map((san, i) => (
+              <div className="flex flex-row gap-2 items-start" key={i}>
+                <StringInput
+                  placeholder="host.my.domain.eu"
+                  label={`Maintainer #${i}`}
+                  labelBL="A list of co-maintainers"
+                  labelBR={<Docs field="uploaders" />}
+                  valid={() => true}
+                  current={data.Uploaders[i]}
+                  update={(val) => updateUploaders(val, i)}
+                />
+                <button
+                  className="btn btn-error btn-outline mt-9"
+                  onClick={() => removeUploader(i)}
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            ))}
           <p className="text-right">
             <button className="btn btn-success btn-sm" onClick={() => addUploader()}>
               <PlusIcon className="w-4 h-4" stroke={4} /> Add Maintainer
             </button>
           </p>
           <h5>Dependencies</h5>
-          {data.Depends && data.Depends.map((dep, i) => (
-            <div className="flex flex-row gap-2 items-start" key={i}>
-               <div className="grid grid-cols-2 gap-4 items-end w-full">
+          {data.Depends &&
+            data.Depends.map((dep, i) => (
+              <div className="flex flex-row gap-2 items-start" key={i}>
+                <div className="grid grid-cols-2 gap-4 items-end w-full">
                   <StringInput
                     placeholder={dep[0]}
                     label={`Dependency #${i} name`}
@@ -319,17 +330,19 @@ const CreatePackage = () => {
                     update={(val) => updateDependencies(dep[0], val, i)}
                   />
                 </div>
-                <button className="btn btn-error btn-outline mt-9" onClick={() => removeDependency(i)}>
+                <button
+                  className="btn btn-error btn-outline mt-9"
+                  onClick={() => removeDependency(i)}
+                >
                   <TrashIcon />
                 </button>
               </div>
-          ))}
+            ))}
           <p className="text-right">
             <button className="btn btn-success btn-sm" onClick={addDependency}>
               <PlusIcon className="w-4 h-4" stroke={4} /> Add Dependency
             </button>
           </p>
-
         </Tab>
       </Tabs>
       <p className="text-center">

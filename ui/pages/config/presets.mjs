@@ -1,10 +1,5 @@
-import { useState, useEffect } from 'react'
-import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { Highlight } from 'components/highlight.mjs'
-import { Tab, Tabs } from 'components/tabs.mjs'
-import { Popout } from 'components/popout.mjs'
 import presets from '/etc/morio/shared/presets.yaml'
 
 const ConfigPage = (props) => {

@@ -239,6 +239,7 @@ export const SetupWizard = ({
         pathname: configPathAsView(configPath, prefix),
       }))
     },
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [prefix]
   )
 
@@ -248,6 +249,7 @@ export const SetupWizard = ({
   useEffect(() => {
     if (view === 'string' && startView !== view) setView(startView)
     else if (view.pathname === '/setup/wizard') setView(startView)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [startView, view, setView])
 
   /*
@@ -301,11 +303,11 @@ export const SetupWizard = ({
     }
   }
 
-  if (deploymentOngoing) return (
-    <div className="flex flex-wrap flex-row gap-8 justify-center min-h-screen">
-      <div className="w-full max-w-xl">
-        {deployResult
-          ? (
+  if (deploymentOngoing)
+    return (
+      <div className="flex flex-wrap flex-row gap-8 justify-center min-h-screen">
+        <div className="w-full max-w-xl">
+          {deployResult ? (
             <>
               <h3>Deploy accepted</h3>
               <DeploymentReport result={deployResult} />
@@ -317,9 +319,9 @@ export const SetupWizard = ({
               <Spinner />
             </>
           )}
+        </div>
       </div>
-    </div>
-  )
+    )
 
   /*
    * Load the template, section, and next
