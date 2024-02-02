@@ -58,7 +58,7 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt },
     ok = await run()
   }
   catch (err) {
-    tools.log.debug(err)
+    console.log.debug(err)
   }
 
   if (ok) return resolve(ok)
@@ -73,7 +73,7 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt },
       ok = await run()
     }
     catch (err) {
-      tools.log.debug(err)
+      console.log.debug(err)
     }
     if (ok) {
       clearInterval(interval)

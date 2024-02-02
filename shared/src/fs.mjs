@@ -70,7 +70,6 @@ export const cp = async (src, dst) => {
 export const globDir = async (
   folderPath='/morio/tmp_static', // The (relative) path to the folder
   pattern='**/*', // Glob pattern to match
-  onError, // Method to run on error
 ) => {
   let list = []
   try {

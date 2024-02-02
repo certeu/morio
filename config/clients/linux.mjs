@@ -7,7 +7,7 @@ const beats = {
   metrics: 'metricbeat',
 }
 
-const beatConfig = (type) => {
+const beatConfig = (type, tools) => {
   const config = {
     /*
      * Disabled HTTP metrics endpoint
@@ -98,7 +98,7 @@ const beatConfig = (type) => {
   /*
    * Logging config
    */
-  config.logging = logginConfig(type)
+  config.logging = loggingConfig(type)
 
   return config
 }
@@ -198,56 +198,4 @@ const resolvers = {
 
 export const resolveClientConfiguration = (type, tools) =>
   resolvers[type] ? resolvers[type](tools) : false
-
-/*
- * These are the defaults that will be used to build the DEB package.
- * You can override them by passing them in to the control method.
- */
-export const debDefaults = {
-  Package: 'morio-client',
-  Source: 'morio-client',
-  Version: '0.0.1',
-  Section: 'utils',
-  Priority: 'optional',
-  Architecture: 'amd64',
-  Essential: 'no',
-  Depends: {
-    auditbeat: '>= 8.12',
-    filebeat: '>= 8.12',
-    metricbeat: '>= 8.12',
-  },
-  'Installed-Size': 1024,
-  Maintainer: 'CERT-EU <services@cert.europa.eu>',
-  'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
-  Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],
-  Homepage: 'https://github.com/certeu/morio',
-  Description: `The Morio client collects and ships observability data to a Morio instance.
-  Deploy this Morio client (based on Elastic Beats) on your endpoints,
-  and collect their data on one or more centralized Morio instances
-  for analysis, further processing, downstream routing & filtering,
-  or event-driven automation.`
-}
-
-/**
- * This generated a control file to build DEB packages.
- *
- * @param {object} settigns - Specific settings to build this package
- * @return {string} controlFile - The control file contents
- */
-export const debConfig = (settings={}) => {
-  const s = {
-    ...debDefaults,
-    ...settings,
-  }
-  const extra = [
-    `Depends: ` + Object.keys(s.Depends).map(pkg => `${pkg} (${s.Depends[pkg]})`).join(', '),
-  ]
-  if (s.Uploaders.length > 0) extra.push(
-    `Uploaders: ` + s.Uploaders.join(', ')
-
-  return [
-    ...Object.keys(s).filter(key => key !== 'Depends').map(key => `${key}: ${s[key]}`),
-    Depends,
-  ].join("\n")
-}
 

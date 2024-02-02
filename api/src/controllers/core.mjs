@@ -176,7 +176,7 @@ Controller.prototype.streamServiceLogs = async (req, res, tools) => {
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) => {
-  const [status, result] = await tools.core.get(`/pkgs/clients/deb/defaults`)
+  const [status, result] = await tools.core.get(`/pkgs/clients/${type}/defaults`)
 
   return res.status(status).send(result)
 }
@@ -190,9 +190,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) =>
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
-  const [status, result] = await tools.core.post(`/pkgs/clients/deb/build`, req.body)
+  const [status, result] = await tools.core.post(`/pkgs/clients/${type}/build`, req.body)
 
   return res.status(status).send(result)
 }
-
-
