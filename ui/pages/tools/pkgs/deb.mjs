@@ -9,7 +9,9 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PlusIcon, TrashIcon, WarningIcon } from 'components/icons.mjs'
 import { StringInput, TextInput } from 'components/inputs.mjs'
 import { Debian } from 'components/brands.mjs'
+import { Popout } from 'components/popout.mjs'
 import { Tab, Tabs } from 'components/tabs.mjs'
+import { PageLink } from 'components/link.mjs'
 
 const Docs = ({ field }) => <a
   href={`https://www.debian.org/doc/debian-policy/ch-controlfields.html#${altDocsFields[field]
@@ -123,16 +125,18 @@ const CreatePackage = () => {
    */
   if (result)
     return (
-      <>
-        <h2 className="flex flex-row justify-between items-center">
-          <span>Your X.509 certificate</span>
-          <div className="flex flex-row gap-2">
-            <button className="btn btn-primary" onClick={() => setResult(false)}>
-              Generate Another
-            </button>
-          </div>
-        </h2>
-      </>
+      <Popout note>
+        <h3>Your build request was submitted</h3>
+        <p>It will be processed without delay, but it can take a few seconds before your newly built package becomes available for download.</p>
+        <div className="flex flex-row justify-between items-center">
+          <PageLink className="btn btn-primary" href="/downloads">
+            Go to the download page
+          </PageLink>
+          <button className="btn btn-primary" onClick={() => setResult(false)}>
+            Build Another Package
+          </button>
+        </div>
+      </Popout>
     )
 
   if (defaults === false) return (

@@ -12,6 +12,7 @@ import {
   ContainerImageIcon,
   DesktopIcon,
   DocumentIcon,
+  DownloadIcon,
   LayersIcon,
   MorioIcon,
   PackageIcon,
@@ -43,6 +44,7 @@ const icons = {
   console: RedPandaConsole,
   config: ConfigurationIcon,
   docker: Docker,
+  downloads: DownloadIcon,
   containers: ContainerIcon,
   images: ContainerImageIcon,
   morio: MorioIcon,
@@ -119,6 +121,7 @@ const links = {
       volumes: {},
     },
   },
+  downloads: {},
   status: {},
   tools: {
     subs: {

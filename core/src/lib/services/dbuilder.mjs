@@ -29,13 +29,7 @@ export const loadRevision = async (tools) => {
   return Revision
 }
 
-export const prebuild = async (settings={}) => {
-  /*
-   * Generate and write control file for the build
-   */
-  const s = resolveControlFile(settings)
-console.log(s)
-  await writeFile('/morio/clients/linux/control', resolveControlFile(settings))
-
-  return
-}
+/*
+ * Generate and write control file for the build
+ */
+export const prebuild = async (settings={}) => await writeFile('/morio/clients/linux/control', resolveControlFile(settings))

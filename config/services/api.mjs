@@ -21,10 +21,14 @@ export const resolveServiceConfiguration = (tools) => ({
     network: tools.getPreset('MORIO_NETWORK'),
     // Volumes
     volumes: tools.inProduction()
-      ? [`${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`]
+      ? [
+        `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+        `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static:/morio/tmp_static`,
+      ]
       : [
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`,
           `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+          `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static:/morio/tmp_static`,
         ],
     // Run an init inside the container to forward signals and avoid PID 1
     init: true,

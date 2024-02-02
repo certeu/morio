@@ -31,9 +31,70 @@ tools.log.debug('Adding JSON support')
 app.use(express.json({ limit: '1mb' }))
 
 /*
+ * Attach the app to our tools object
+ */
+tools.app = app
+
+/*
  * (re)Configure the API
  */
 await reconfigure(tools)
+
+/*
+ * Load the API routes
+ */
+for (const type in routes) {
+  tools.log.debug(`Loading express routes: ${type}`)
+  routes[type](tools)
+}
+
+/*
+ * Add the route for the Swagger (OpenAPI) docs
+ */
+tools.log.debug('Adding openapi documentation endpoints')
+const docs = swaggerUi.setup(openapi)
+app.use(`${tools.prefix}/docs`, swaggerUi.serve, docs)
+
+/*
+ * Handle the root route
+ */
+tools.log.debug(`Loading root route`)
+app.get('/', async (req, res) =>
+  res.send({
+    name: tools.config.name,
+    about: tools.config.about,
+    version: tools.config.version,
+    setup: tools.config.setup,
+    status: `${tools.prefix}/status`,
+    docs: `${tools.prefix}/docs`,
+  })
+)
+
+/*
+ * Handle the reconfigure route
+ */
+app.get(`${tools.prefix}/reconfigure`, async (req, res) => {
+  await reconfigure(tools)
+
+  return res.send({result: 'ok', info: tools.info })
+})
+
+/*
+ * Enable this wildcard route for debugging
+app.get(`${tools.prefix}/*`, async (req, res) =>
+  res.set('Content-Type', 'application/json').status(404).send({
+    url: req.url,
+    method: req.method,
+    originalUrl: req.originalUrl,
+    prefix: tools.prefix,
+  })
+)
+ */
+
+/*
+ * Add tmp_static folder for serving static files
+ */
+app.use(`${tools.prefix}/downloads`, express.static('/morio/tmp_static'))
 
 /*
  * Start listening for requests
@@ -60,62 +121,6 @@ export async function reconfigure() {
    * Use the logger on the tools object from now on
    */
   tools.log.debug('Configuring the API')
-
-  /*
-   * Attach the app to our tools object
-   */
-  tools.app = app
-
-  /*
-   * Load the API routes
-   */
-  for (const type in routes) {
-    tools.log.debug(`Loading express routes: ${type}`)
-    routes[type](tools)
-  }
-
-  /*
-   * Add the route for the Swagger (OpenAPI) docs
-   */
-  tools.log.debug('Adding openapi documentation endpoints')
-  const docs = swaggerUi.setup(openapi)
-  app.use(`${tools.prefix}/docs`, swaggerUi.serve, docs)
-
-  /*
-   * Handle the root route
-   */
-  tools.log.debug(`Loading root route`)
-  app.get('/', async (req, res) =>
-    res.send({
-      name: tools.config.name,
-      about: tools.config.about,
-      version: tools.config.version,
-      setup: tools.config.setup,
-      status: `${tools.prefix}/status`,
-      docs: `${tools.prefix}/docs`,
-    })
-  )
-
-  /*
-   * Handle the reconfigure route
-   */
-  app.get(`${tools.prefix}/reconfigure`, async (req, res) => {
-    await reconfigure(tools)
-
-    return res.send({result: 'ok', info: tools.info })
-  })
-
-  /*
-   * Handle the wildcard route
-   */
-  app.get(`${tools.prefix}/*`, async (req, res) =>
-    res.set('Content-Type', 'application/json').status(404).send({
-      url: req.url,
-      method: req.method,
-      originalUrl: req.originalUrl,
-      prefix: tools.prefix,
-    })
-  )
 
   /*
    * Let the world know we are ready

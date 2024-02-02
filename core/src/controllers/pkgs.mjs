@@ -1,6 +1,7 @@
 import { defaults as debDefaults } from '#config/services/dbuilder'
 import { loadRevision, prebuild } from '#lib/services/dbuilder'
 import { ensureMorioService } from '#lib/services/core'
+import { writeFile } from '#shared/fs'
 
 /**
  * This pkgs controller handles the Morio client packages  endpoints
@@ -44,6 +45,11 @@ Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
    * Start the dbuilder service (but don't wait for it)
    */
   ensureMorioService('dbuilder', {} , tools)
+
+  /*
+   * If revision is set, update it on disk
+   */
+  if (req.body.Revision) await writeFile('/etc/morio/dbuilder/revision', String(Number(req.body.Revision)))
 
   return res.status(201).send({ result: 'ok', status: 'building' })
 }

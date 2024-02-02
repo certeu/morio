@@ -1,7 +1,7 @@
 /*
  * This is hardcoded for now
  */
-const morioConfig = {
+export const morioConfig = {
   api: '/ops/api',
 }
 
@@ -73,6 +73,18 @@ MorioClient.prototype.getCaRoot = async function () {
  */
 MorioClient.prototype.getClientPackageDefaults = async function (type) {
   return await this.call(`${morioConfig.api}/pkgs/clients/${type}/defaults`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * List files in the dowbloads folder (tmp_static)
+ *
+ * @return {array} - The list of files
+ */
+MorioClient.prototype.listDownloads = async function () {
+  return await this.call(`${morioConfig.api}/downloads`, {
     headers: this.jsonHeaders,
     method: 'GET',
   })

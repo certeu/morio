@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
 import { BSON } from 'bson'
+import { glob } from 'glob'
 
 /**
  * The morio root folder
@@ -56,6 +57,31 @@ export const cp = async (src, dst) => {
   }
 
   return true
+}
+
+/**
+ * Reads a folder from disk with an optional glob pattern
+ *
+ * @param {string} (relative) path to the file to read
+ * @param {funtion} onError - a method to call on error
+ *
+ * @return {string} File contents, or false in case of trouble
+ */
+export const globDir = async (
+  folderPath='/morio/tmp_static', // The (relative) path to the folder
+  pattern='**/*', // Glob pattern to match
+  onError, // Method to run on error
+) => {
+  let list = []
+  try {
+    list = await glob(path.resolve(folderPath)+'/'+pattern)
+  }
+  catch (err) {
+    if (err) console.log(err)
+    return false
+  }
+
+  return list
 }
 
 /**
