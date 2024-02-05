@@ -146,7 +146,7 @@ const outputConfig = (type, tools) => ({
     /*
      * It's a me, Morio
      */
-    client_id: 'morio',
+    client_id: '{{ CLIENT_ID }}',
     /*
      * Enable this output
      */
@@ -176,6 +176,10 @@ const outputConfig = (type, tools) => ({
       certificate_authorities: [ '/etc/morio/ca.pem' ],
       // Verify certificates
       verification_mode: 'full',
+      // Certificate to use for mTLS
+      certificate: '/etc/morio/cert.pem',
+      // Key to use for mTLS
+      key: '/etc/morio/key.pem',
     },
     /*
      * Topic to publish to

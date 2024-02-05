@@ -21,7 +21,7 @@ metricbeat:
         enabled: false
 output:
   kafka:
-    client_id: morio
+    client_id: '{{ CLIENT_ID }}'
     enabled: true
     hosts:
       - poc-morio-node1.cert.europa.eu:9092
@@ -32,6 +32,8 @@ output:
       certificate_authorities:
         - /etc/morio/ca.pem
       verification_mode: full
+      certificate: /etc/morio/cert.pem
+      key: /etc/morio/key.pem
     topic: metrics
     version: 2.0.0
 logging:

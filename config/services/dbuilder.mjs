@@ -97,10 +97,13 @@ export const resolveControlFile = (settings={}) => {
   /*
    * Return control file structure/contents
    */
-  return [
-    ...Object.keys(s).map(key => `${key}: ${s[key]}`),
-    ...extra,
-    ''
-  ].join("\n")
+  return {
+    control: [
+      ...Object.keys(s).map(key => `${key}: ${s[key]}`),
+      ...extra,
+      ''
+    ].join("\n"),
+    settings: s
+  }
 }
 

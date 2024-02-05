@@ -12,6 +12,7 @@ clients/linux/control
 clients/linux/etc/audit/config.yml
 clients/linux/etc/metrics/config.yml
 clients/linux/etc/logs/config.yml
+clients/linux/etc/morio/vars/*
 
 # Logs
 logs

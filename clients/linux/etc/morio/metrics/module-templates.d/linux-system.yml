@@ -12,8 +12,7 @@
     - add_fields:
         target: morio
         fields:
-          module:
-            name: linux-system
+          module: linux-system
 
 - module: system
   period: 10m
@@ -52,8 +51,7 @@
     - add_fields:
         target: morio
         fields:
-          module:
-            name: linux-system
+          module: linux-system
           inventory:
             update: true
 {{/TRACK_INVENTORY}}

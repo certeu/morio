@@ -11,8 +11,7 @@
     - add_fields:
         target: morio
         fields:
-          module:
-            name: linux-system
+          module: linux-system
 
 - module: system
   datasets:
@@ -27,5 +26,4 @@
     - add_fields:
         target: morio
         fields:
-          module:
-            name: linux-system
+          module: linux-system

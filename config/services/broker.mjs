@@ -1,3 +1,12 @@
+const tls = [{
+  name: 'external',
+  enabled: true,
+  cert_file: '/etc/redpanda/tls-cert.pem',
+  key_file: '/etc/redpanda/tls-key.pem',
+  truststore_file: '/etc/redpanda/tls-ca.pem',
+  require_client_auth: true,
+}]
+
 /*
  * Export a single method that resolves the service configuration
  */
@@ -20,7 +29,18 @@ export const resolveServiceConfiguration = (tools) => ({
     // Instead, attach to the morio network
     network: tools.getPreset('MORIO_NETWORK'),
     // Ports to export
-    ports: ['18081:18081', '18082:18082', '19082:19082', '19644:19644', '9092:19092'],
+    ports: [
+      '18081:18081',
+      '18082:18082',
+      '19082:19082',
+      '19644:19644',
+      '9092:19092'
+    ],
+    // Environment
+    environment: {
+      // Node ID
+      NODE_ID: tools.config?.core?.node_nr || 1,
+    },
     // Volumes
     volumes: [
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/broker:/etc/redpanda`,
@@ -30,17 +50,14 @@ export const resolveServiceConfiguration = (tools) => ({
     command: [
       'redpanda',
       'start',
+      '--default-log-level=warn',
       ...(tools.inProduction()
         ? [
             // Mode dev-container uses well-known configuration properties for development in containers.
             '--mode dev-container',
-            // Set log level to debug in development
-            '--default-log-level=warn',
           ]
-        : [
-            // Set log level to debug in dev for debugging.
-            '--default-log-level=warn',
-          ]),
+        : []
+          ),
     ],
   },
   /*
@@ -103,40 +120,24 @@ export const resolveServiceConfiguration = (tools) => ({
        */
       kafka_api: [
         {
+          name: 'internal',
           address: `broker_${tools.config.core.node_nr}`,
           port: 9092,
-          name: 'internal',
         },
         {
+          name: 'external',
           address: '0.0.0.0',
           port: 19092,
-          name: 'external',
         },
       ],
 
       /*
-       * No TLS for these
+       * TLS configuration
        */
+      admin_api_tls: [],
+      //kafka_api_tls: tls,
       rpc_server_tls: {},
-      admin_api_tls: {},
 
-      /*
-       * Kafka API TLS
-       */
-      kafka_api_tls: [
-        {
-          name: 'internal',
-          enabled: false,
-        },
-        {
-          name: 'external',
-          enabled: true,
-          cert_file: '/etc/redpanda/tls-cert.pem',
-          key_file: '/etc/redpanda/tls-key.pem',
-          truststore_file: '/etc/redpanda/tls-ca.pem',
-          require_client_auth: false,
-        },
-      ],
       /*
        * Addresses of Kafka API published to clients.
        */
@@ -149,7 +150,7 @@ export const resolveServiceConfiguration = (tools) => ({
         {
           address: tools.config.core.names.external,
           // Advertise the mapped port
-          port: 9092,
+          port: 19092,
           name: 'external',
         },
       ],
@@ -216,6 +217,8 @@ export const resolveServiceConfiguration = (tools) => ({
         },
       ],
 
+      pandaproxy_api_tls: [],
+
       /*
        * A list of address and port of the REST API to publish to clients.
        */
@@ -239,6 +242,7 @@ export const resolveServiceConfiguration = (tools) => ({
           name: 'internal',
         },
       ],
+      schema_registry_api_tls: [],
     },
   },
 })

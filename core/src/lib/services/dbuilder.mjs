@@ -13,9 +13,19 @@ export const loadRevision = async () => {
 /*
  * Generate and write control file for the build
  */
-export const prebuild = async (settings = {}) => {
+export const prebuild = async (customSettings = {}) => {
+  /*
+   * Resolve settings and control file
+   */
+  const { control, settings } = resolveControlFile(customSettings)
+
   /*
    * Write control file to generate the .deb package
    */
-  await writeFile('/morio/clients/linux/control', resolveControlFile(settings))
+  await writeFile('/morio/clients/linux/control', control)
+
+  /*
+   * Return resolved settings
+   */
+  return settings
 }

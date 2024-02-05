@@ -1,8 +1,9 @@
 import { defaults as debDefaults } from '#config/services/dbuilder'
 import { loadRevision, prebuild } from '#lib/services/dbuilder'
 import { ensureMorioService } from '#lib/services/core'
-import { writeFile, writeYamlFile, cp } from '#shared/fs'
+import { writeFile, writeYamlFile } from '#shared/fs'
 import { resolveClientConfiguration } from '#config/clients/linux'
+import { createX509Certificate } from '#lib/services/core'
 
 /**
  * This pkgs controller handles the Morio client packages  endpoints
@@ -36,11 +37,46 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
  * @param {object} tools - An object holding various tools & config
  * @param {object} type - The package type
  */
-Controller.prototype.buildClientPackage = async (req, res, tools) => {
+Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
   /*
    * Prebuild will generate the control file
    */
-  await prebuild(req.body)
+  const settings = await prebuild(req.body)
+
+  /*
+   * Generate a certificate and key for mTLS
+   */
+  const certAndKey = await createX509Certificate(tools, {
+    certificate: {
+      cn: `${settings.Package}-${settings.Version}-${type}`,
+      c: tools.getPreset('MORIO_X509_C'),
+      st: tools.getPreset('MORIO_X509_ST'),
+      l: tools.getPreset('MORIO_X509_L'),
+      o: tools.getPreset('MORIO_X509_O'),
+      ou: tools.getPreset('MORIO_X509_OU'),
+      san: ['localhost'],
+    },
+    notAfter: tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+  })
+
+  /*
+   * Write files for mTLS to disk (cert, chain, and key)
+   */
+  await writeFile('/morio/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
+  await writeFile('/morio/clients/linux/etc/morio/ca.pem', certAndKey.certificate.certChain)
+  await writeFile('/morio/clients/linux/etc/morio/key.pem', certAndKey.key)
+
+  /*
+   * Write client template vars to disk
+   */
+  const vars = {
+    CLIENT_ID: `${settings.Package}-${settings.Version}-${type}`,
+    DEBUG: 'false',
+    TRACK_INVENTORY: 'true',
+  }
+  for (const [key, val] of Object.entries(vars)) {
+    await writeFile(`/morio/clients/linux/etc/morio/vars/${key}`, val)
+  }
 
   /*
    * Write out config files for the different agents
@@ -54,11 +90,6 @@ Controller.prototype.buildClientPackage = async (req, res, tools) => {
   }
 
   /*
-   * Copy the root CA certificate in place
-   */
-  await cp('/etc/morio/shared/root_ca.crt', '/morio/clients/linux/etc/morio/ca.pem')
-
-  /*
    * Start the dbuilder service (but don't wait for it)
    */
   ensureMorioService('dbuilder', {}, tools)
@@ -69,5 +100,5 @@ Controller.prototype.buildClientPackage = async (req, res, tools) => {
   if (req.body.Revision)
     await writeFile('/etc/morio/dbuilder/revision', String(Number(req.body.Revision)))
 
-  return res.status(201).send({ result: 'ok', status: 'building' })
+  return res.status(201).send({ result: 'ok', status: 'building', settings })
 }
