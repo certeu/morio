@@ -11,17 +11,18 @@ show_help() {
     echo "  morio [command]"
     echo ""
     echo "Available Commands:"
-    echo "  apt       Add the Elastic APT repository to the system (to install beats agents)"
-    echo "  audit     Invokes auditbeat agent"
-    echo "  flags     Manage template flags for use in the morio beats agents configuration"
-    echo "  logs      Invokes filebeat agent"
-    echo "  metrics   Invokes metricbeat agent"
-    echo "  restart   Restart morio beats agents"
-    echo "  start     Start morio beats agents"
-    echo "  status    Show status of the morio beats agents"
-    echo "  stop      Stop morio beats agents"
-    echo "  template  Template-out the morio beats agents configuration"
-    echo "  vars      Manage template variables for use in the morio beats agents configuration"
+    echo "  apt         Add the Elastic APT repository to the system (to install beats agents)"
+    echo "  audit       Invokes auditbeat agent"
+    echo "  cc          Set up morio command completion"
+    echo "  flags       Manage template flags for use in the morio beats agents configuration"
+    echo "  logs        Invokes filebeat agent"
+    echo "  metrics     Invokes metricbeat agent"
+    echo "  restart     Restart morio beats agents"
+    echo "  start       Start morio beats agents"
+    echo "  status      Show status of the morio beats agents"
+    echo "  stop        Stop morio beats agents"
+    echo "  template    Template-out the morio beats agents configuration"
+    echo "  vars        Manage template variables for use in the morio beats agents configuration"
     echo ""
     echo "Options:"
     echo "  -h, --help       Display this help message"
@@ -237,6 +238,15 @@ show_template_help() {
     exit 0
 }
 
+show_cc_help() {
+    echo "Description:"
+    echo "  Set up command completion for morio"
+    echo ""
+    echo "Usage:"
+    echo "  morio cc"
+    exit 0
+}
+
 show_version() {
     echo $MORIO_VERSION
     exit 0
@@ -297,6 +307,30 @@ add_elastic_repo() {
     #
     sudo apt update
   fi
+}
+
+suggest_cc() {
+  if grep -q "source /var/lib/morio/morio-completion.sh" ~/.bashrc ; then
+    echo "Auto-completion for morio is already set up."
+    echo "If it does not work, please restart your shell or run source ~/.bashrc to apply the changes."
+  else
+    echo "To enable command completion for the morio command, add the following line to your ~/.bashrc file:"
+    echo ""
+    echo "  source /var/lib/morio/morio-completion.sh"
+    echo ""
+    read -p "Do you want morio to add this line for you? (y/n): " response
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+      echo "" >> ~/.bashrc
+      echo "# morio auto-completion" >> ~/.bashrc
+      echo "source /var/lib/morio/morio-completion.sh" >> ~/.bashrc
+      echo "Auto-completion for morio is now set up."
+      echo "Restart your shell or run source ~/.bashrc to apply the changes."
+      exit 0
+    else
+      echo "Ok $response"
+    fi
+  fi
+  exit 0
 }
 
 manage_vars() {
@@ -493,6 +527,16 @@ while [[ $# -gt 0 ]]; do
         *)
         check_your_privilege
         add_elastic_repo
+      esac
+      exit 0
+      ;;
+    cc)
+      case $2 in
+        -h|--help)
+        show_cc_help
+        ;;
+        *)
+        suggest_cc
       esac
       exit 0
       ;;
