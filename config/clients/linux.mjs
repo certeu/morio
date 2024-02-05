@@ -40,12 +40,10 @@ const beatConfig = (type, tools) => {
         /*
          * Ignore agent field
          */
-        drop_fields: [
-          {
-            fields: ['agent'],
-            ignore_missing: true,
-          }
-        ]
+        drop_fields: {
+          fields: ['agent'],
+          ignore_missing: true,
+        }
       },
     ],
   }
