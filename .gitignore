@@ -8,6 +8,10 @@ hostfs/config/shared/root_ca.crt
 hostfs/config/morio.*.yaml
 hostfs/config/.*.keys
 hostfs/**
+clients/linux/control
+clients/linux/etc/audit/config.yml
+clients/linux/etc/metrics/config.yml
+clients/linux/etc/logs/config.yml
 
 # Logs
 logs

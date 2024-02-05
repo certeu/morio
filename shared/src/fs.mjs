@@ -245,7 +245,7 @@ export const writeFile = async (
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeYamlFile = async (filePath, data) => await writeFile(filePath, yaml.dump(data))
+export const writeYamlFile = async (filePath, data, log=false, mode=0o666) => await writeFile(filePath, yaml.dump(data), log, mode)
 
 /**
  * Writes a BSON file to disk
