@@ -79,12 +79,12 @@ const beatConfig = (type, tools) => {
      */
     path: `/etc/morio/${type}/inputs.d/*.yml`,
     /*
-     * Do not reload when config changes on disk as that
-     * leads to unpredictable behaviour. Instead, be explicit
-     * if you want to update the configuration.
+     * Unless MORIO_DEBUG is set, do not reload when the config
+     * changes on disk as that leads to unpredictable behaviour.
+     * Instead, be explicit if you want to update the configuration.
      */
     reload: {
-      enabled: false
+      enabled: `{{#MORIO_DEBUG}}true{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}false{{/MORIO_DEBUG}}`
     }
   }
 
@@ -108,7 +108,7 @@ const loggingConfig = (type) => ({
   /*
    * Log level (set to debug when debugging)
    */
-  level: 'info',
+  level: `{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warn{{/MORIO_DEBUG}}`,
   /*
    * Log to files on disk
    */
@@ -118,7 +118,7 @@ const loggingConfig = (type) => ({
    */
   files: {
     path: '/var/log/morio',
-    name: `morio-${type}`,
+    name: `${type}`,
     rotateeverybytes: 10485760, // 10MB
     keepfiles: 5,
     permissions: '0600',

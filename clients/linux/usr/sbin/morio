@@ -475,7 +475,7 @@ manage_flags() {
   fi
 }
 
-template() {
+template_out_config() {
   # Allow 'false' to be false
   export MO_FALSE_IS_EMPTY=1
   echo "Loading vars"
@@ -484,10 +484,12 @@ template() {
     export ${NAME}=$(cat $file)
   done
   echo "Templating out audit configuration"
+  /usr/sbin/morio-template "/etc/morio/audit/config-template.yml" > "/etc/morio/audit/config.yml"
   for file in "/etc/morio/audit/module-templates.d"/*; do
     /usr/sbin/morio-template $file > "/etc/morio/audit/modules.d/$(basename $file)"
   done
   echo "Templating out logs configuration"
+  /usr/sbin/morio-template "/etc/morio/logs/config-template.yml" > "/etc/morio/logs/config.yml"
   for file in "/etc/morio/logs/module-templates.d"/*; do
     /usr/sbin/morio-template $file > "/etc/morio/logs/modules.d/$(basename $file)"
   done
@@ -495,6 +497,7 @@ template() {
     /usr/sbin/morio-template $file > "/etc/morio/logs/inputs.d/$(basename $file)"
   done
   echo "Templating out metrics configuration"
+  /usr/sbin/morio-template "/etc/morio/metrics/config-template.yml" > "/etc/morio/metrics/config.yml"
   for file in "/etc/morio/metrics/module-templates.d"/*; do
     /usr/sbin/morio-template $file > "/etc/morio/metrics/modules.d/$(basename $file)"
   done
@@ -613,7 +616,7 @@ while [[ $# -gt 0 ]]; do
         ;;
         *)
         check_your_privilege
-        template
+        template_out_config
       esac
       exit 0
       ;;

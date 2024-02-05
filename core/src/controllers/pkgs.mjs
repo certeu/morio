@@ -47,7 +47,7 @@ Controller.prototype.buildClientPackage = async (req, res, tools) => {
    */
   for (const type of ['audit', 'logs', 'metrics']) {
     await writeYamlFile(
-      `/morio/clients/linux/etc/morio/${type}/config.yml`,
+      `/morio/clients/linux/etc/morio/${type}/config-template.yml`,
       resolveClientConfiguration(type, tools),
       tools.log
     )

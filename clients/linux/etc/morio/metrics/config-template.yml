@@ -1,0 +1,50 @@
+http:
+  enabled: false
+features:
+  fqdn:
+    enabled: true
+path:
+  home: /usr/share/metricbeat
+  config: /etc/morio/metrics
+  data: /var/lib/morio/metrics
+  logs: /var/log/morio/metrics
+processors:
+  - drop_fields:
+      fields:
+        - agent
+      ignore_missing: true
+metricbeat:
+  config:
+    modules:
+      path: /etc/morio/metrics/modules.d/*.yml
+      reload:
+        enabled: false
+output:
+  kafka:
+    client_id: morio
+    enabled: true
+    hosts:
+      - poc-morio-node1.cert.europa.eu:9092
+    max_retries: -1
+    required_acks: 1
+    ssl:
+      enabled: true
+      certificate_authorities:
+        - /etc/morio/ca.pem
+      verification_mode: full
+    topic: metrics
+    version: 2.0.0
+logging:
+  level: '{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warn{{/MORIO_DEBUG}}'
+  to_files: true
+  files:
+    path: /var/log/morio
+    name: metrics
+    rotateeverybytes: 10485760
+    keepfiles: 5
+    permissions: '0600'
+    interval: 24h
+    rotateonstartup: false
+  metrics:
+    enabled: false
+  json: true

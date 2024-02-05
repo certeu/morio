@@ -1,0 +1,50 @@
+http:
+  enabled: false
+features:
+  fqdn:
+    enabled: true
+path:
+  home: /usr/share/auditbeat
+  config: /etc/morio/audit
+  data: /var/lib/morio/audit
+  logs: /var/log/morio/audit
+processors:
+  - drop_fields:
+      fields:
+        - agent
+      ignore_missing: true
+auditbeat:
+  config:
+    modules:
+      path: /etc/morio/audit/modules.d/*.yml
+      reload:
+        enabled: false
+output:
+  kafka:
+    client_id: morio
+    enabled: true
+    hosts:
+      - poc-morio-node1.cert.europa.eu:9092
+    max_retries: -1
+    required_acks: 1
+    ssl:
+      enabled: true
+      certificate_authorities:
+        - /etc/morio/ca.pem
+      verification_mode: full
+    topic: audit
+    version: 2.0.0
+logging:
+  level: '{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warn{{/MORIO_DEBUG}}'
+  to_files: true
+  files:
+    path: /var/log/morio
+    name: audit
+    rotateeverybytes: 10485760
+    keepfiles: 5
+    permissions: '0600'
+    interval: 24h
+    rotateonstartup: false
+  metrics:
+    enabled: false
+  json: true
