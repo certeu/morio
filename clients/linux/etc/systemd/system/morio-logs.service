@@ -4,7 +4,7 @@ Description=Morio logs collection service
 Documentation=https://github.com/certeu/morio
 
 [Service]
-ExecStart=/sbin/morio-logs
+ExecStart=/usr/sbin/morio logs
 Restart=always
 SyslogIdentifier=morio-logs
 

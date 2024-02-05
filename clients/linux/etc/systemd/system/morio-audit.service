@@ -4,7 +4,7 @@ Description=Morio audit info collection service
 Documentation=https://github.com/certeu/morio
 
 [Service]
-ExecStart=/sbin/morio-audit
+ExecStart=/usr/sbin/morio audit
 Restart=always
 SyslogIdentifier=morio-audit
 
