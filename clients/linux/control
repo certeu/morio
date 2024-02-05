@@ -1,6 +1,6 @@
 Package: morio-client
 Source: morio-client
-Version: 0.0.1-22
+Version: 0.0.1-24
 Section: utils
 Priority: optional
 Architecture: amd64
