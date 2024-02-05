@@ -74,6 +74,7 @@ const CreatePackage = () => {
   const [result, setResult] = useState(false)
   const [data, setData] = useState(false)
   const [defaults, setDefaults] = useState(false)
+  const [refresh, setRefresh] = useState(0)
 
   /*
    * We'll need the API
@@ -106,9 +107,9 @@ const CreatePackage = () => {
         setData(result[0])
       }
     }
-    if (data === false) getDefaults()
+    getDefaults()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [])
+  }, [refresh])
 
   /*
    * Method that triggers the API request
@@ -118,6 +119,8 @@ const CreatePackage = () => {
     const [body, status] = await api.buildClientPackage('deb', data)
     if (status === 201) {
       setResult(body)
+      // Force update of the revision
+      setRefresh(refresh + 1)
       setLoadingStatus([true, 'Build request submitted', true, true])
     } else {
       setLoadingStatus([true, 'Build request failed', true, false])
