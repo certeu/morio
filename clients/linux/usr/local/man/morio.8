@@ -1,0 +1,195 @@
+.TH MORIO 8 "February 2024" "Version 1.0" "Administrative Commands"
+
+.SH NAME
+morio \- Manage the morio beats agents and configuration on this system
+
+Morio leverages auditbeat, filebeat, and metricbeat under the hood and this command facilitates managing their configuration.
+
+.SH SYNOPSIS
+.B morio
+[\fIOPTION\fR]
+.br
+.B morio
+[\fICOMMAND\fR]
+
+.SH DESCRIPTION
+\fIMorio\fR is a command-line utility to manage and configure the Morio beats agents on this system.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Display help information
+
+.TP
+\fB\-v, \-\-version\fR
+Display version information
+
+.SH COMMANDS
+.TP
+
+\fBapt\fR
+Add the Elastic APT repository to the system
+
+.TP
+\fBaudit\fR
+Invoke the auditbeat agent. Further command-line options are passed through to auditbeat.
+
+\fBaudit --help\fR
+Show the auditbeat help. Use this to learn about all of auditbeat's commands and options.
+
+.TP
+\fBlogs\fR
+Invoke the filebeat agent. Further command-line options are passed through to filebeat.
+
+\fBlogs --help\fR
+Show the filebeat help. Use this to learn about all of filebeat's commands and options.
+
+.TP
+\fBmetrics\fR
+Invoke the metricbeat agent. Further command-line options are passed through to metricbeat.
+
+\fBlogs --help\fR
+Show the metricbeat help. Use this to learn about all of metricbeat's commands and options.
+
+.TP
+\fBstart\fR
+Start morio beats agents
+
+.TP
+\fBstop\fR
+Stop morio beats agents
+
+.TP
+\fBrestart\fR
+Restart morio beats agents
+
+.TP
+\fBstatus\fR
+Show status of the morio beats agents
+
+.TP
+\fBtemplate\fR
+Template-out the morio beats agents configuration.
+
+Morio uses the Mustache template language to combine configuration templates for the various beats agents with local variables.
+.br
+The variables are kept in \fI/etc/morio/vars\fR and this command will read them and then template out the configuration based on the templates in:
+
+- \fI/etc/morio/audit/module-templates.d\fR for Auditbeat
+.br
+- \fI/etc/morio/metrics/module-templates.d\fR for Metricbeat
+.br
+- \fI/etc/morio/metrics/module-templates.d\fR for Filebeat modules
+.br
+- \fI/etc/morio/metrics/input-templates.d\fR for Filebeat inputs
+
+.TP
+\fBvars\fR
+Manage template variables for use in the morio beats agents configurations
+
+\fBvars set NAME VALUE\fR
+Set variable NAME to VALUE
+
+\fBvars edit NAME\fR
+Open an editor to edit variable NAME
+
+\fBvars ls\fR
+List the names of all morio variables set on the system
+
+\fBvars dump\fR
+List the names and values of all morio variables set on the system
+
+\fBvars rm NAME\fR
+Remove variable NAME
+
+\fBvars wipe\fR
+Remove all morio variables set on the system
+
+.TP
+\fBflags\fR
+Flags are what we call morio variables (vars) that are booleans (true or false), and can be manage with the \fBvars\fR command.
+.br
+When templating out the agents configuration, morio will resolve any variable that is not set, or holds the string \fBfalse\fR as boolean false.
+.br
+So while flags are variables under the hood, and can be managed with the \fBmorio vars\fR command, the \fBmorio flags\fR command is provided for convenience to manage such boolean variables.
+
+\fBvars enable NAME\fR
+Set variable NAME to true
+
+\fBvars disable NAME\fR
+Set variable NAME to false
+
+\fBvars rm NAME\fR
+Remove variable NAME
+
+
+.SH EXAMPLES
+$ sudo \fBmorio apt\fR
+.br
+Set up the Elastic Beats apt repository on this system, so the beats agents
+can be installed as dependencies.
+
+$ sudo \fBmorio audit --help\fR
+.br
+Show the auditbeat help
+
+$ sudo \fBmorio logs --help\fR
+.br
+Show the filebeat help
+
+$ sudo \fBmorio metrics --help\fR
+.br
+Show the metricbeat help
+
+$ sudo \fBmorio start\fR
+.br
+Starts all morio beats agents (auditbeat, metricbeat, and filebeat).
+
+$ sudo \fBmorio stop\fR
+.br
+Stops all morio beats agents (auditbeat, metricbeat, and filebeat).
+
+$ sudo \fBmorio restart\fR
+.br
+Restarts all morio beats agents (auditbeat, metricbeat, and filebeat).
+
+$ sudo \fBmorio status\fR
+.br
+Shows the status of all morio beats agents (auditbeat, metricbeat, and filebeat).
+
+$ sudo \fBmorio template\fR
+.br
+Template-out the confuguration for the various agents, using the morio variables set on the system.
+
+$ sudo \fBmorio vars list\fR
+.br
+List the names of the morio template variables set on this system.
+
+$ sudo \fBmorio vars dump\fR
+.br
+List the names and values of the morio template variables set on this system.
+
+$ sudo \fBmorio vars set PROXY_FILE_NAME /var/log/nginx.access.log\fR
+.br
+Set the PROXY_FILE_NAME variable to /var/log/nginx.access.log
+
+$ sudo \fBmorio vars edit PROXY_FILE_NAME\fR
+.br
+Open an editor to edit the PROXY_FILE_NAME variable
+
+$ sudo \fBmorio vars rm PROXY_FILE_NAME\fR
+.br
+Remove the PROXY_FILE_NAME variable
+
+$ sudo \fBmorio flags enable MORIO_DEBUG\fR
+.br
+Set the MORIO_DEBUG variable to true
+
+$ sudo \fBmorio flags disable MORIO_DEBUG\fR
+.br
+Set the MORIO_DEBUG variable to false
+
+.SH AUTHOR
+Joost De Cock (joost.decock@cert.europa.eu)
+
+

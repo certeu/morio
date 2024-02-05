@@ -7,12 +7,13 @@ MORIO_VERSION=0.1.0
 
 show_help() {
     echo "Usage:"
-    echo "  morio [flags]"
+    echo "  morio [options]"
     echo "  morio [command]"
     echo ""
     echo "Available Commands:"
     echo "  apt       Add the Elastic APT repository to the system (to install beats agents)"
     echo "  audit     Invokes auditbeat agent"
+    echo "  flags     Manage template flags for use in the morio beats agents configuration"
     echo "  logs      Invokes filebeat agent"
     echo "  metrics   Invokes metricbeat agent"
     echo "  restart   Restart morio beats agents"
@@ -22,37 +23,52 @@ show_help() {
     echo "  template  Template-out the morio beats agents configuration"
     echo "  vars      Manage template variables for use in the morio beats agents configuration"
     echo ""
-    echo "Flags:"
+    echo "Options:"
     echo "  -h, --help       Display this help message"
     echo "  -v, --version    Display version information"
-    echo "  -a, --action     Specify an action (e.g., morio -a some_action)"
-    echo "  -f, --file       Specify a file (e.g., morio -f filename)"
     echo ""
     echo "Use \"morio [command] --help\" for more information about a command."
     exit 0
 }
 
 show_vars_help() {
+    echo "Description:"
+    echo "  Manage template variables for the Morio beats agents configuration."
+    echo ""
     echo "Usage:"
-    echo "  morio vars [flags]"
+    echo "  morio vars [options]"
     echo "  morio vars [commamd]"
     echo ""
     echo "Available Commands:"
+    echo "  dump    List the current morio vars and their values"
+    echo "  edit    Opens an editor to edit a morio variable"
     echo "  ls      List the current morio vars"
     echo "  set     Set the value of a morio variable"
-    echo "  edit    Opens an editor to edit a morio variable"
     echo "  rm      Remove a morio variable"
-    echo "  dump    List the current morio vars and their values"
+    echo "  wipe    Removes all morio variables"
     echo ""
-    echo "Flags:"
+    echo "Options:"
     echo "  -h, --help       Display this help message"
     echo ""
     echo "Use \"morio vars [command] --help\" for more information about a vars command."
     exit 0
 }
 
+show_vars_edit_help() {
+    echo "Description:"
+    echo "  Opens an editor to update a variable set on this sytem to template the Morio beats agents configuration."
+    echo ""
+    echo "Usage:"
+    echo "  morio vars edit [variable]"
+    echo ""
+    echo "Example:"
+    echo "  - Edit the variable PROXY_LOG_FILE:"
+    echo "    morio vars edit PROXY_LOG_FILE"
+    exit 0
+}
+
 show_vars_ls_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  List the variables set on this sytem to template the Morio beats agents configuration."
     echo ""
     echo "Usage:"
@@ -61,7 +77,7 @@ show_vars_ls_help() {
 }
 
 show_vars_dump_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  List the variables and values set on this sytem to template the Morio beats agents configuration."
     echo ""
     echo "Usage:"
@@ -70,39 +86,105 @@ show_vars_dump_help() {
 }
 
 show_vars_rm_help() {
-    echo "Desciption:"
-    echo "  Removes a variables set on this sytem to template the Morio beats agents configuration."
+    echo "Description:"
+    echo "  Removes a variable set on this sytem to template the Morio beats agents configuration."
     echo ""
     echo "Usage:"
-    echo "  morio rm [variable]"
+    echo "  morio vars rm [variable]"
     echo ""
-    echo "Examples:"
+    echo "Example:"
     echo "  - Remove the variable PROXY_LOG_FILE:"
     echo "    morio vars rm PROXY_LOG_FILE"
+    exit 0
+}
+
+show_vars_wipe_help() {
+    echo "Description:"
+    echo "  Removes all variables set on this sytem to template the Morio beats agents configuration."
     echo ""
-    echo "  - Remove the variable DEBUG:"
-    echo "    morio vars rm DEBUG"
+    echo "Usage:"
+    echo "  morio vars wipe"
     exit 0
 }
 
 show_vars_set_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Sets a variable to be used when templating the Morio beats agents configuration."
     echo ""
     echo "Usage:"
     echo "  morio vars set [name] [value]"
     echo ""
-    echo "Examples:"
+    echo "Example:"
     echo "  - Set the variable PROXY_LOG_FILE to /var/log/proxy.log:"
     echo "    morio vars set PROXY_LOG_FILE /var/log/proxy.log"
+    exit 0
+}
+
+show_flags_help() {
+    echo "Description:"
+    echo "  Manage boolean template variables (flags) for the Morio beats agents configuration."
     echo ""
-    echo "  - Set the variable DEBUG to 1:"
-    echo "    morio vars set DEBUG 1"
+    echo "  Flags are template variables (vars) that are either true or false."
+    echo "  Because they are vars, flags can also be managed with the vars command."
+    echo "  The flags commands is provided for convenience."
+    echo ""
+    echo "Usage:"
+    echo "  morio flags -h"
+    echo "  morio flags [commamd]"
+    echo ""
+    echo "Available Commands:"
+    echo "  disable  Disable a flag (sets variable to false)"
+    echo "  enable   Enable a flag (sets variable to true)"
+    echo "  rm       Remove a morio flag (removes variable)"
+    echo ""
+    echo "Options:"
+    echo "  -h, --help       Display this help message"
+    echo ""
+    echo "Use \"morio flags [command] --help\" for more information about a vars command."
+    exit 0
+}
+
+show_flags_enable_help() {
+    echo "Description:"
+    echo "  Enables a flag by setting its variable to true."
+    echo ""
+    echo "Usage:"
+    echo "  morio flags enable [name]"
+    echo ""
+    echo "Example:"
+    echo "  - Enable the MORIO_DEBUG flag (sets the MORIO_DEBUG variable to true):"
+    echo "    morio flags enable MORIO_DEBUG"
+    exit 0
+}
+
+show_flags_disable_help() {
+    echo "Description:"
+    echo "  Disables a flag by setting its variable to false."
+    echo ""
+    echo "Usage:"
+    echo "  morio flags enable [name]"
+    echo ""
+    echo "Example:"
+    echo "  - Disable the MORIO_DEBUG flag (sets the MORIO_DEBUG variable to false):"
+    echo "    morio flags disable MORIO_DEBUG"
+    exit 0
+}
+
+show_flags_rm_help() {
+    echo "Description:"
+    echo "  Removes a flag by removing its variable."
+    echo ""
+    echo "Usage:"
+    echo "  morio flags rm [flag]"
+    echo ""
+    echo "Example:"
+    echo "  - Remove the MORIO_DEBUG flag (removes the MORIO_DEBUG variable):"
+    echo "    morio flags rm MORIO_DEBUG"
     exit 0
 }
 
 show_apt_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Configures the Elastic repository as an APT source so Morio dependencies (beats) can be installed."
     echo ""
     echo "Usage:"
@@ -111,7 +193,7 @@ show_apt_help() {
 }
 
 show_restart_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Restarts the Morio beats agents."
     echo ""
     echo "Usage:"
@@ -120,7 +202,7 @@ show_restart_help() {
 }
 
 show_start_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Starts the Morio beats agents."
     echo ""
     echo "Usage:"
@@ -129,7 +211,7 @@ show_start_help() {
 }
 
 show_stop_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Stops the Morio beats agents."
     echo ""
     echo "Usage:"
@@ -138,7 +220,7 @@ show_stop_help() {
 }
 
 show_status_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Shows the status of the Morio beats agents."
     echo ""
     echo "Usage:"
@@ -147,7 +229,7 @@ show_status_help() {
 }
 
 show_template_help() {
-    echo "Desciption:"
+    echo "Description:"
     echo "  Templates out the Morio beats agents configuration."
     echo ""
     echo "Usage:"
@@ -223,12 +305,27 @@ manage_vars() {
     -h|--help)
       show_vars_help
       ;;
+    edit)
+      case $2 in
+        -h|--help)
+        show_vars_edit_help
+        ;;
+        *)
+        check_your_privilege
+        if [ -z "$EDITOR" ]; then
+          EDITOR="vi"
+        fi
+        $EDITOR /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
     ls)
       case $2 in
         -h|--help)
         show_vars_ls_help
         ;;
         *)
+        check_your_privilege
         ls -1 /etc/morio/vars
       esac
       exit 0
@@ -239,6 +336,7 @@ manage_vars() {
         show_vars_ls_help
         ;;
         *)
+        check_your_privilege
         for file in "/etc/morio/vars"/*; do
           if [ -f "$file" ]; then
             echo "$(basename $file): `cat $file`"
@@ -253,6 +351,7 @@ manage_vars() {
         show_vars_set_help
         ;;
         *)
+        check_your_privilege
         echo $3 > /etc/morio/vars/$2
       esac
       exit 0
@@ -263,7 +362,19 @@ manage_vars() {
         show_vars_rm_help
         ;;
         *)
+        check_your_privilege
         rm -f /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    wipe)
+      case $2 in
+        -h|--help)
+        show_vars_wipe_help
+        ;;
+        *)
+        check_your_privilege
+        rm -f /etc/morio/vars/*
       esac
       exit 0
       ;;
@@ -276,6 +387,57 @@ manage_vars() {
   done
   if [ $# -eq 0 ]; then
       show_vars_help
+  fi
+}
+
+manage_flags() {
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+    -h|--help)
+      show_flags_help
+      ;;
+    disable)
+      case $2 in
+        -h|--help)
+        show_flags_disable_help
+        ;;
+        *)
+        check_your_privilege
+        echo false > /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    enable)
+      case $2 in
+        -h|--help)
+        show_flags_enable_help
+        ;;
+        *)
+        check_your_privilege
+        echo true > /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    rm)
+      case $2 in
+        -h|--help)
+        show_flags_rm_help
+        ;;
+        *)
+        check_your_privilege
+        rm -f /etc/morio/vars/$2
+      esac
+      exit 0
+      ;;
+    *)
+      echo "Invalid flags command: $1"
+      show_flags_help
+      ;;
+    esac
+    shift
+  done
+  if [ $# -eq 0 ]; then
+      show_flags_help
   fi
 }
 
@@ -304,6 +466,16 @@ template() {
   done
 }
 
+check_your_privilege() {
+  if [ "$EUID" -eq 0 ]; then
+      true
+  else
+      echo "Morio requires elevated privileges."
+      echo "Please use sudo, or run this command as root."
+      exit 1
+  fi
+}
+
 # Parse command-line options
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -313,35 +485,35 @@ while [[ $# -gt 0 ]]; do
     -v|--version)
       show_version
       ;;
-    -a|--action)
-      shift
-      action="$1"
-      ;;
-    -f|--file)
-      shift
-      filename="$1"
-      ;;
     apt)
       case $2 in
         -h|--help)
         show_apt_help
         ;;
         *)
+        check_your_privilege
         add_elastic_repo
       esac
       exit 0
       ;;
     audit)
+      check_your_privilege
       # Pass all but the first argument to auditbeat with the morio config
       /usr/share/auditbeat/bin/auditbeat -c /etc/morio/audit/config.yml ${@:2}
       exit 0
       ;;
+    flags)
+      manage_flags ${@:2}
+      exit 0
+      ;;
     logs)
+      check_your_privilege
       # Pass all but the first argument to filebeat with the morio config
       /usr/share/filebeat/bin/filebeat -c /etc/morio/logs/config.yml ${@:2}
       exit 0
       ;;
     metrics)
+      check_your_privilege
       # Pass all but the first argument to metricbeat with the morio config
       /usr/share/metricbeat/bin/metricbeat -c /etc/morio/metrics/config.yml ${@:2}
       exit 0
@@ -352,6 +524,7 @@ while [[ $# -gt 0 ]]; do
         show_start_help
         ;;
         *)
+        check_your_privilege
         change_agents_state start
       esac
       exit 0
@@ -362,6 +535,7 @@ while [[ $# -gt 0 ]]; do
         show_stop_help
         ;;
         *)
+        check_your_privilege
         change_agents_state stop
       esac
       exit 0
@@ -372,6 +546,7 @@ while [[ $# -gt 0 ]]; do
         show_restart_help
         ;;
         *)
+        check_your_privilege
         change_agents_state restart
       esac
       exit 0
@@ -382,6 +557,7 @@ while [[ $# -gt 0 ]]; do
         show_status_help
         ;;
         *)
+        check_your_privilege
         change_agents_state status
       esac
       exit 0
@@ -392,6 +568,7 @@ while [[ $# -gt 0 ]]; do
         show_template_help
         ;;
         *)
+        check_your_privilege
         template
       esac
       exit 0
