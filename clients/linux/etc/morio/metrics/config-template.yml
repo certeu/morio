@@ -37,7 +37,7 @@ output:
     topic: metrics
     version: 2.0.0
 logging:
-  level: '{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warn{{/MORIO_DEBUG}}'
+  level: '{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warning{{/MORIO_DEBUG}}'
   to_files: true
   files:
     path: /var/log/morio

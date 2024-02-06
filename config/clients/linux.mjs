@@ -108,7 +108,7 @@ const loggingConfig = (type) => ({
   /*
    * Log level (set to debug when debugging)
    */
-  level: `{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warn{{/MORIO_DEBUG}}`,
+  level: `{{#MORIO_DEBUG}}debug{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}warning{{/MORIO_DEBUG}}`,
   /*
    * Log to files on disk
    */
