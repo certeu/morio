@@ -21,6 +21,6 @@ export default ContainerImagePage
 
 export const getStaticProps = () => ({
   props: {
-    page: ['docker', 'images'],
+    page: ['status', 'docker', 'images'],
   },
 })

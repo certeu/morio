@@ -52,11 +52,14 @@ export const Header = ({
             <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
               Configuration
             </NavButton>
-            <NavButton href="/docker" label="Docker" extraClasses="hidden lg:flex">
-              Docker
+            <NavButton href="/downloads" label="Downloads" extraClasses="hidden lg:flex">
+              Downloads
             </NavButton>
             <NavButton href="/status" label="Status" extraClasses="hidden lg:flex">
               Status
+            </NavButton>
+            <NavButton href="/tools" label="Status" extraClasses="hidden lg:flex">
+              Tools
             </NavButton>
           </div>
           <div className="flex flex-row">

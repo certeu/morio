@@ -30,6 +30,6 @@ export default ContainerPage
 
 export const getStaticProps = () => ({
   props: {
-    page: ['docker', 'containers'],
+    page: ['status', 'docker', 'containers'],
   },
 })

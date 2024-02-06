@@ -15,6 +15,7 @@ const nextConfig = {
   pageExtensions: ['mjs'],
   reactStrictMode: true,
   output: 'standalone',
+  trailingSlash: true,
   webpack: (config, options) => {
     /*
      * Webpack aliases to simplify import paths

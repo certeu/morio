@@ -56,7 +56,7 @@ const components = {
           Console <small className="italic text-sm">( RedPanda Console )</small>
         </span>
       }
-      href="/components/broker"
+      href="/components/console"
       desc="The console provides a live view into the heart of Morio's streaming data platform."
       width="w-full"
       Icon={RedPandaConsole}

@@ -311,7 +311,7 @@ const DisplayDockerContainers = ({ data }) => {
           {data.map((container) => (
             <tr key={container.Id} className="hover:bg-secondary hover:bg-opacity-30">
               <td className="px-4">
-                <PageLink href={`/docker/containers/${container.Id}`}>
+                <PageLink href={`/status/docker/containers/${container.Id}`}>
                   {formatContainerName(container.Names[0])}
                 </PageLink>
               </td>
@@ -709,7 +709,7 @@ const DisplayDockerImages = ({ data }) => {
           {data.map((image) => (
             <tr key={image.Id} className="hover:bg-secondary hover:bg-opacity-30">
               <td className="px-4">
-                <PageLink href={`/docker/images/${image.Id.slice(7)}`}>
+                <PageLink href={`/status/docker/images/${image.Id.slice(7)}`}>
                   {image.RepoTags.length > 0
                     ? formatContainerName(image.RepoTags[0])
                     : image.Id.slice(7, 13)}
@@ -832,7 +832,7 @@ const DisplayDockerNetworks = ({ data }) => {
           {data.map((network) => (
             <tr key={network.Id} className="hover:bg-secondary hover:bg-opacity-30">
               <td className="px-4">
-                <PageLink href={`/docker/networks/${network.Id}`}>{network.Name}</PageLink>
+                <PageLink href={`/status/docker/networks/${network.Id}`}>{network.Name}</PageLink>
               </td>
               <td className="px-4">
                 <TimeAgo date={new Date(network.Created)} />

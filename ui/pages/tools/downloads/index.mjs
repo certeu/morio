@@ -85,6 +85,6 @@ export default DownloadsPage
 export const getStaticProps = () => ({
   props: {
     title: 'Downloads',
-    page: ['downloads'],
+    page: ['tools', 'downloads'],
   },
 })

@@ -110,27 +110,30 @@ const links = {
       },
     },
   },
-  docker: {
+  status: {
     subs: {
-      containers: {},
-      images: {},
-      networks: {},
-      nodes: {},
-      services: {},
-      tasks: {},
-      volumes: {},
+      docker: {
+        subs: {
+          containers: {},
+          images: {},
+          networks: {},
+          nodes: {},
+          services: {},
+          tasks: {},
+          volumes: {},
+        },
+      },
     },
   },
-  downloads: {},
-  status: {},
   tools: {
     subs: {
       certificates: {
         title: 'X.509 Certificates',
       },
       pkgs: {
-        title: 'Client Packages'
+        title: 'Client Packages',
       },
+      downloads: {},
     },
   },
 }

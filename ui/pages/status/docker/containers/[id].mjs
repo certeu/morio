@@ -69,7 +69,7 @@ export default ContainerPage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    page: ['docker', 'containers', params.id],
+    page: ['status', 'docker', 'containers', params.id],
     id: params.id,
   },
 })

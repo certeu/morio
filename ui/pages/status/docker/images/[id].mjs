@@ -34,7 +34,7 @@ export default ContainerImagePage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    page: ['docker', 'images', params.id],
+    page: ['status', 'docker', 'images', params.id],
     id: params.id,
   },
 })

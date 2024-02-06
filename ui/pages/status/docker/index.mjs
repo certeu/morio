@@ -26,42 +26,42 @@ const StatusPage = (props) => {
         <div className="flex flex-row flex-wrap gap-4 items-center justify-between items-stretch max-w-4xl mt-4">
           <Card
             title="Containers"
-            href="/docker/containers"
+            href="/status/docker/containers"
             desc="See which containers are running, or not running, start and stop containers, or inspect them."
             Icon={ContainerIcon}
           />
           <Card
-            href="/docker/images"
+            href="/status/docker/images"
             title="Images"
             desc="See which container images are availabe, pull new images, or purge the image cache."
             Icon={ContainerImageIcon}
           />
           <Card
-            href="/docker/networks"
+            href="/status/docker/networks"
             title="Networks"
             desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
             Icon={WifiIcon}
           />
           <Card
-            href="/docker/nodes"
+            href="/status/docker/nodes"
             title="Nodes"
             desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
             Icon={ServersIcon}
           />
           <Card
-            href="/docker/services"
+            href="/status/docker/services"
             title="Services"
             desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
             Icon={LayersIcon}
           />
           <Card
-            href="/docker/tasks"
+            href="/status/docker/tasks"
             title="Tasks"
             desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
             Icon={TaskIcon}
           />
           <Card
-            href="/docker/volumes"
+            href="/status/docker/volumes"
             title="Volumes"
             desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
             Icon={StorageIcon}
@@ -76,6 +76,6 @@ export default StatusPage
 
 export const getStaticProps = () => ({
   props: {
-    page: ['docker'],
+    page: ['status', 'docker'],
   },
 })
