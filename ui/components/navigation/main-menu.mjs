@@ -211,7 +211,7 @@ export const NavButton = ({
         ? Object.entries(subs).map(([key, nav]) => (
             <NavButton
               key={key}
-              subs={nav.children}
+              subs={nav.subs}
               title={nav.title}
               target={key}
               level={level + 1}

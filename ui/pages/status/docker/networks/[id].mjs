@@ -27,7 +27,7 @@ export default DockerNetworkPage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    page: ['docker', 'networks', params.id],
+    page: ['status', 'docker', 'networks', params.id],
     id: params.id,
   },
 })
