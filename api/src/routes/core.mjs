@@ -107,4 +107,14 @@ export function routes(tools) {
    * Build a .deb client package
    */
   app.post(`${PREFIX}/pkgs/clients/deb/build`, (req, res) => Core.buildClientPackage(req, res, tools, 'deb'))
+
+  /*
+   * Hit this route to get the running config
+   */
+  app.get(`${PREFIX}/configs/current`, (req, res) => Core.getCurrentConfig(req, res, tools))
+
+  /*
+   * Hit this route to get the running presets
+   */
+  app.get(`${PREFIX}/presets`, (req, res) => Core.getPresets(req, res, tools))
 }

@@ -182,6 +182,38 @@ Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) =>
 }
 
 /**
+ * Loads the current config from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.getCurrentConfig = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/configs/current`)
+
+  if (result.deployment) {
+    tools.config = result
+    return res.status(status).send(result)
+  } else return res.status(500).send()
+}
+
+/**
+ * Loads the current presets from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.getPresets = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/presets`)
+
+  if (status === 200) {
+    tools.presets = result
+    return res.status(status).send(result)
+  } else return res.status(500).send()
+}
+
+/**
  * Submits a build request for a client package to core
  *
  * @param {object} req - The request object from Express

@@ -33,6 +33,11 @@ export function routes(tools) {
   app.get('/configs/current', (req, res) => res.send(tools.config))
 
   /*
+   * Load the current presets
+   */
+  app.get('/presets', (req, res) => res.send(tools.presets))
+
+  /*
    * Load the CA configuration
    */
   app.get('/configs/ca', (req, res) => Config.getCaConfig(req, res, tools))

@@ -48,12 +48,21 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
 }
 
 /**
- * Gets the crrent configuration
+ * Gets the current configuration
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.getCurrentConfig = async function () {
   return await this.call(`${morioConfig.api}/configs/current`)
+}
+
+/**
+ * Gets the current presets
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getPresets = async function () {
+  return await this.call(`${morioConfig.api}/presets`)
 }
 
 /**
@@ -97,7 +106,7 @@ MorioClient.prototype.listDownloads = async function () {
  * @param {object} settings - The build settings
  * @return {object} - The result
  */
-MorioClient.prototype.buildClientPackage = async function (type, settings={}) {
+MorioClient.prototype.buildClientPackage = async function (type, settings = {}) {
   return await this.call(`${morioConfig.api}/pkgs/clients/${type}/build`, {
     headers: this.jsonHeaders,
     method: 'POST',

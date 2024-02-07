@@ -23,12 +23,7 @@ export function routes(tools) {
   app.get(`${PREFIX}/status`, (req, res) => Status.status(req, res, tools))
 
   /*
-   * Hit this route to get the running config
-   */
-  app.get(`${PREFIX}/configs/current`, (req, res) => res.send(tools.config))
-
-  /*
-   * Hit this route to get the running config
+   * Hit this route to get the available downloads
    */
   app.get(`${PREFIX}/downloads`, (req, res) => Status.listDownloads(req, res, tools))
 }
