@@ -132,10 +132,28 @@ export const resolveServiceConfiguration = (tools) => ({
       ],
 
       /*
-       * TLS configuration
+       * Kafka API TLS
+       *
+        */
+      kafka_api_tls: [
+        {
+          name: 'internal',
+          enabled: false,
+        },
+        {
+          name: 'external',
+          enabled: true,
+          cert_file: '/etc/redpanda/tls-cert.pem',
+          key_file: '/etc/redpanda/tls-key.pem',
+          truststore_file: '/etc/redpanda/tls-ca.pem',
+          require_client_auth: false,
+        },
+      ],
+
+      /*
+       * Other TLS configuration
        */
       admin_api_tls: [],
-      //kafka_api_tls: tls,
       rpc_server_tls: {},
 
       /*
@@ -150,7 +168,7 @@ export const resolveServiceConfiguration = (tools) => ({
         {
           address: tools.config.core.names.external,
           // Advertise the mapped port
-          port: 19092,
+          port: 9092,
           name: 'external',
         },
       ],
