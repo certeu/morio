@@ -38,7 +38,7 @@ const ChildPages = ({ pages = false, links, level, levels = 1, href }) =>
       {Object.entries(pages)
         .filter(([key, page]) => !['t', 'o'].includes(key))
         .map(([key, page]) => (
-          <li>
+          <li key={key}>
             <PageLink href={`${href}/${key}`}>
               {page.t || <span className="capitalize">{key}</span>}
             </PageLink>

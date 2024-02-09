@@ -236,7 +236,7 @@ export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => 
   if (!navs) navs = links
   const list = []
   for (const [key, page] of Object.entries(navs))
-    list.push(<NavButton page={page} target={key} {...{ current, parents, level }} />)
+    list.push(<NavButton page={page} target={key} key={key} {...{ current, parents, level }} />)
 
   return list
 }
