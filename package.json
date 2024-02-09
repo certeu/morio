@@ -33,6 +33,7 @@
   "workspaces": [
     "api",
     "core",
+    "docs",
     "schema",
     "shared",
     "config"

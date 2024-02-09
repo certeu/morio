@@ -56,11 +56,9 @@
   }
 
   /* mdx styles */
-  .md a:not(.btn),
   .mdx a:not(.btn) {
     @apply underline decoration-2;
   }
-  .md a:hover,
   .mdx a:hover {
     @apply decoration-4;
   }

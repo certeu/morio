@@ -1,0 +1,22 @@
+---
+title: Can you trust the internal Morio Certificate Authority?
+---
+
+Out of the box, Morio's internal Certificate Authority (CA) will not be trusted
+by any of your systems. Your browser will complain when visiting the Morio UI,
+and any software connecting to Morio will also be unhappy.
+
+You may wonder whether you can you trust these certificates?
+
+## Trust the encryption
+
+Certificates are a requirement for TLS which allows us to encrypt traffic on
+the network. You can trust that the certificates provided by Morio's internal
+CA will keep your data secure while in transit.
+
+## Verify the identity
+
+Certificates can also be used to verify an identity. You should not rely on
+Morio's internal CA for such verification. Instead, use your own judgement to
+determine whether a remote party presenting a certificate issued by Morio's
+internal CA is trustworthy.

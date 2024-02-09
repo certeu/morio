@@ -1,0 +1,11 @@
+---
+title: Ingest API
+---
+
+Morio is a streaming data platform, and we leverage
+[RedPanda](https://redpanda.com) to provide those streaming capabilities.
+
+RedPanda provides an Apache Kafka-compatible API, but speaking native Kafka is a big ask when you quickle want to ingest some data.
+
+For this reason, RedPanda comes with a HTTP REST API that allows you to ingest data with an HTTP request.
+In Morio, we refer to this as the Ingest API. RedPanda calls it the _REST Proxy_.

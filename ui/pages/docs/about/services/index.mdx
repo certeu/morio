@@ -1,0 +1,30 @@
+---
+title: Morio Services
+---
+
+Morio is composed of serveral (micro-)services that work together to provide
+the Morio platform. They are divided into different service types:
+
+**Morio Core**  
+The [Morio Core](/docs/about/services/core) service must be deployed on each node in a Morio deployment.
+
+**Distributed Services**  
+The various distributed services must be deployed on all broker nodes. They are:
+
+- [Operator API](/docs/about/services/api)
+- [Broker Console](/docs/about/services/console)
+- [Ingest API](/docs/about/services/ingest)
+- [Kafka API](/docs/about/services/kafka)
+- [Proxy](/docs/about/services/proxy)
+
+**Flanking Services**  
+The various flanking services can be deloyed on either broker or flanking nodes. They are:
+
+- [Certificate Authority](/docs/about/services/ca)
+- [Web Interface](/docs/about/services/ui)
+
+## Service overview
+
+For convenience, here is a list of all Morio Services:
+
+<ReadMore levels={2} />

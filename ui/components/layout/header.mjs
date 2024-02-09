@@ -46,14 +46,11 @@ export const Header = ({
             <MorioLogo className="h-8" noLine />
           </Link>
           <div className="grow pl-4 justify-start flex flex-row">
-            <NavButton href="/components" label="Components" extraClasses="hidden lg:flex">
-              components
-            </NavButton>
             <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
               Configuration
             </NavButton>
-            <NavButton href="/downloads" label="Downloads" extraClasses="hidden lg:flex">
-              Downloads
+            <NavButton href="/docs" label="Documentation" extraClasses="hidden lg:flex">
+              Documentation
             </NavButton>
             <NavButton href="/status" label="Status" extraClasses="hidden lg:flex">
               Status

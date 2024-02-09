@@ -194,3 +194,15 @@ export const validateConfiguration = async (api, config, setLoadingStatus) => {
 
   return report
 }
+
+/**
+ * Helper method to determine whether a page has children
+ */
+export const pageChildren = (page) => {
+  const children = {}
+  for (const [key, val] of Object.entries(page)) {
+    if (!['t', 'o'].includes(key)) children[key] = val
+  }
+
+  return Object.keys(children).length > 0 ? children : false
+}

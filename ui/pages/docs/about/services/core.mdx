@@ -1,0 +1,15 @@
+---
+title: Core
+---
+
+Morio's Core service handles orchestration and **co**nfiguration **re**solving for for
+all other Morio services.
+
+Core is the only service running with elevated privileges, which it needs to be
+able to configure and orchestrate containers for the other Morio services.
+
+<Note>
+  The internal API of the Core service is not exposed to users. Instead, it is only accessible to
+  other Morio services. However, much of [the Operator API](/docs/about/services/api)'a
+  functionality is provided by the Core under the hood.
+</Note>

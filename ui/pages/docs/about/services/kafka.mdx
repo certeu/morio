@@ -1,0 +1,12 @@
+---
+title: Kafka API
+---
+
+Morio is a streaming data platform, and we leverage
+[RedPanda](https://redpanda.com) to provide those streaming capabilities.
+
+RedPanda provides an Apache Kafka-compatible API, so if you know Kafka, you will find it very familiar.  
+If you don't know Kafka, the news is even better: In comparison to Kafka, RedPanda is much easier to maintain and operate in production.
+Which is why we chose it for Morio's streaming backbone.
+
+The Kafka API uses mTLS for authentication, and does only allow encrypted connections. It listens on TCP port 9092.

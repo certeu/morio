@@ -1,7 +1,9 @@
 // Dependencies
-import { capitalize } from 'lib/utils.mjs'
+import { capitalize, pageChildren } from 'lib/utils.mjs'
+import { docsNavs } from 'prebuild/docs-navs.mjs'
 // Components
 import {
+  BookIcon,
   CertificateIcon,
   CheckCircleIcon,
   ComponentIcon,
@@ -16,10 +18,12 @@ import {
   LayersIcon,
   MorioIcon,
   PackageIcon,
+  QuestionIcon,
   ServersIcon,
   StatusIcon,
   StorageIcon,
   TaskIcon,
+  UlIcon,
   WifiIcon,
   WrenchIcon,
 } from 'components/icons.mjs'
@@ -41,11 +45,13 @@ const icons = {
   certificates: CertificateIcon,
   core: MorioIcon,
   components: ComponentIcon,
+  containers: ContainerIcon,
   console: RedPandaConsole,
   config: ConfigurationIcon,
   docker: Docker,
+  docs: BookIcon,
   downloads: DownloadIcon,
-  containers: ContainerIcon,
+  faq: QuestionIcon,
   images: ContainerImageIcon,
   morio: MorioIcon,
   networks: WifiIcon,
@@ -53,6 +59,7 @@ const icons = {
   pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
+  reference: UlIcon,
   services: LayersIcon,
   show: DocumentIcon,
   tasks: TaskIcon,
@@ -70,72 +77,49 @@ const icons = {
 /*
  * This object represents the navigation structure
  */
-const links = {
-  components: {
-    subs: {
-      api: {
-        title: 'API',
-      },
-      broker: {
-        title: 'Broker',
-      },
-      ca: {
-        title: 'Certificate Authority',
-      },
-      console: {
-        title: 'Console',
-      },
-      core: {
-        title: 'Core',
-      },
-      proxy: {
-        title: 'Proxy',
-      },
-      ui: {
-        title: 'Web Interface',
-      },
+export const links = {
+  config: {
+    t: 'Configuration',
+    show: {
+      t: 'Show Configuration',
+    },
+    presets: {
+      t: 'Show Presets',
+    },
+    wizard: {
+      t: 'Update Configuration',
     },
   },
-  config: {
-    title: 'Configuration',
-    subs: {
-      show: {
-        title: 'Show Configuration',
-      },
-      presets: {
-        title: 'Show Presets',
-      },
-      wizard: {
-        title: 'Update Configuration',
-      },
+  docs: {
+    t: 'Documentation',
+    faq: {
+      t: 'FAQ',
+    },
+    reference: {
+      t: 'Reference',
     },
   },
   status: {
-    subs: {
-      docker: {
-        subs: {
-          containers: {},
-          images: {},
-          networks: {},
-          nodes: {},
-          services: {},
-          tasks: {},
-          volumes: {},
-        },
-      },
+    docker: {
+      containers: {},
+      images: {},
+      networks: {},
+      nodes: {},
+      services: {},
+      tasks: {},
+      volumes: {},
     },
   },
   tools: {
-    subs: {
-      certificates: {
-        title: 'X.509 Certificates',
-      },
-      pkgs: {
-        title: 'Client Packages',
-      },
-      downloads: {},
+    certificates: {
+      t: 'X.509 Certificates',
     },
+    pkgs: {
+      t: 'Client Packages',
+    },
+    downloads: {},
   },
+  ...docsNavs,
 }
 
 const Null = () => null
@@ -157,10 +141,9 @@ const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length
  * @parem {function} onClick - Set this to make the element a button
  */
 export const NavButton = ({
-  subs,
-  title = '',
-  current,
+  page,
   target,
+  current,
   parents,
   level = 0,
   onClick = false,
@@ -170,9 +153,10 @@ export const NavButton = ({
    * Pre-calculate some things we need
    */
   const href = getHref(target, parents)
-  const linkTitle = title ? title : capitalize(target)
   const active = isActive(href, current)
+  const children = pageChildren(page)
   const here = `/${current.join('/')}` === href
+  const title = page.t || capitalize(target)
   const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
     active
       ? here
@@ -182,10 +166,10 @@ export const NavButton = ({
   }`
   const span = (
     <span className="block grow text-left" style={{ paddingLeft: level * 8 + 'px' }}>
-      {linkTitle}
+      {title}
     </span>
   )
-  const Icon = icons[target] || Null
+  const Icon = parents[0] === 'docs' ? Null : icons[target] || Null
   const sizedIcon =
     level > 0 ? (
       <Icon className="w-6 h-6 shrink-0 grow-0 opacity-80" stroke={1.5} />
@@ -207,12 +191,11 @@ export const NavButton = ({
         {span}
         <div className="w-12 -mr-4 text-center flex items-center justify-center">{sizedIcon}</div>
       </Link>
-      {active && subs
-        ? Object.entries(subs).map(([key, nav]) => (
+      {active && children
+        ? Object.entries(children).map(([key, page]) => (
             <NavButton
               key={key}
-              subs={nav.subs}
-              title={nav.title}
+              page={page}
               target={key}
               level={level + 1}
               parents={[...parents, target]}
@@ -252,15 +235,8 @@ const getHref = (page, parents = [], slug = false) =>
 export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => {
   if (!navs) navs = links
   const list = []
-  for (const [key, nav] of Object.entries(navs))
-    list.push(
-      <NavButton
-        title={nav.title}
-        subs={nav.subs}
-        target={key}
-        {...{ current, key, parents, level }}
-      />
-    )
+  for (const [key, page] of Object.entries(navs))
+    list.push(<NavButton page={page} target={key} {...{ current, parents, level }} />)
 
   return list
 }
