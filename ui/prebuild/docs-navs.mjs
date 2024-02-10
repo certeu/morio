@@ -39,6 +39,16 @@ export const docsNavs = {
         },
       },
     },
-    reference: { t: 'Reference', o: '10Reference' },
+    reference: {
+      t: 'Reference',
+      o: '10Reference',
+      terminology: {
+        t: 'Terminology',
+        o: 'Terminology',
+        ca: { t: 'CA', o: 'CA' },
+        tls: { t: 'TLS', o: 'TLS' },
+        x509: { t: 'X.509', o: 'X.509' },
+      },
+    },
   },
 }

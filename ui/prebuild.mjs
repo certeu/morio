@@ -27,11 +27,7 @@ const stripQuotes = (str) => {
 /*
  * This is the fast and low-tech way to some frontmatter from all files in a folder
  */
-const loadFolderFrontmatter = async (key, pages = {}) => {
-  /*
-   * Figure out what directory to spawn the child process in
-   */
-  const cwd = await path.resolve(process.cwd(), 'pages', 'docs')
+const loadFolderFrontmatter = async (key, cwd, pages = {}) => {
   /*
    * When going through a small number of files in a flat directory (eg. blog posts) a
    * recursive grep through all files is faster.
@@ -98,27 +94,46 @@ const mergeDocs = (pages) => {
 /*
  * Loads all docs files, titles and order
  */
-const loadDocs = async (site) => {
-  const pages = await loadFolderFrontmatter('title')
-  await loadFolderFrontmatter('order', pages)
+const loadDocs = async () => {
+  /*
+   * Figure out what directory to spawn the child process in
+   */
+  const cwd = await path.resolve(process.cwd(), 'pages', 'docs')
+  const pages = await loadFolderFrontmatter('title', cwd)
+  await loadFolderFrontmatter('order', cwd, pages)
 
   return mergeDocs(pages)
 }
 
 /*
- * Write out prebuild files
- */
-const writeNavs = async (navs) => {}
-
-/*
  * Main method that does what needs doing for the docs
  */
 export const prebuildDocs = async () => {
+  /*
+   * Navigation structure
+   */
   const navs = await loadDocs()
-
   fs.writeFileSync(
     path.resolve('.', 'prebuild', `docs-navs.mjs`),
     `${header}export const docsNavs = ${JSON.stringify(navs)}`
+  )
+
+  /*
+   * Terminology
+   */
+  const terms = Object.keys(navs.docs.reference.terminology).filter(
+    (key) => !['t', 'o'].includes(key)
+  )
+  const _import = terms
+    .map((term) => `import * as ${term} from 'pages/docs/reference/terminology/${term}.mdx'`)
+    .join('\n')
+  const _export = `
+export const terminology = { ${terms.map((term) => '\n  ' + term).join(',')}
+}
+`
+  fs.writeFileSync(
+    path.resolve('.', 'prebuild', `terminology.mjs`),
+    header + _import + '\n' + _export
   )
 }
 

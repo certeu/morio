@@ -1,5 +1,6 @@
 import { Popout } from 'components/popout.mjs'
-import { ReadMore } from 'components/read-more.mjs'
+import { Term } from 'components/term.mjs'
+import { LearnMore } from 'components/learn-more.mjs'
 
 export function useMDXComponents(components) {
   return {
@@ -11,10 +12,11 @@ export function useMDXComponents(components) {
     Popout: (props) => <Popout {...props} neutral />,
     Note: (props) => <Popout {...props} note />,
     Related: (props) => <Popout {...props} related />,
-    //ReadMore: props => <ReadMore {...props} />,
     Tip: (props) => <Popout {...props} tip />,
     Tldr: (props) => <Popout {...props} tldr />,
     Warning: (props) => <Popout {...props} warning />,
+    em: (props) => <Term {...props} />,
+    LearnMore: (props) => <LearnMore {...props} />,
     ...components,
   }
 }
