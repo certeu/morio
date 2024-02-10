@@ -5,7 +5,7 @@ import { WideIcon, NarrowIcon } from 'components/icons.mjs'
 
 const ToggleIcon = ({ wide, setWide }) => (
   <button className="" onClick={() => setWide(!wide)} title="Toggle wide/narrow layout">
-    {wide ? <WideIcon className="w-12 h-12" /> : <NarrowIcon className="w-12 h-12" />}
+    {wide ? <NarrowIcon className="w-12 h-12" /> : <WideIcon className="w-12 h-12" />}
   </button>
 )
 
