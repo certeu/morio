@@ -22,6 +22,7 @@ const StatusPage = (props) => {
             />
             <Card
               title="Traefik Dashboard"
+              target="_blank"
               href={`/dashboard/?cache_bust=${Date.now()}#/`}
               desc="Display Morio's HTTP microservices, their status, configuration, and availability."
               width="w-full"
@@ -29,6 +30,7 @@ const StatusPage = (props) => {
             />
             <Card
               title="RedPanda Console"
+              target="_blank"
               href="/console/overview"
               desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
               width="w-full"
