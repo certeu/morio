@@ -6,6 +6,9 @@ export const presets = {
    * Morio presets
    */
 
+  // Whether or not to enable debug
+  MORIO_DEBUG: true,
+
   // The docker network name to use
   MORIO_NETWORK: 'morionet',
 
