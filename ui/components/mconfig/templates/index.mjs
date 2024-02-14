@@ -1,7 +1,9 @@
 import { deployment } from './deployment.mjs'
-import { logstash } from './logstash.mjs'
+import { connector } from './connector.mjs'
+import { meta } from './meta.mjs'
 
 export const templates = {
+  connector,
   deployment,
-  logstash,
+  meta,
 }

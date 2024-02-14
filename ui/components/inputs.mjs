@@ -1,9 +1,10 @@
 // Hooks
 import { useCallback } from 'react'
+import { useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon, ResetIcon } from 'components/icons.mjs'
+import { OkIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -15,6 +16,7 @@ export const FormControl = ({
   labelBL = false, // Optional bottom-left label
   labelBR = false, // Optional bottom-right label
   forId = false, // ID of the for element we are wrapping
+  isValid = false, // Result of validation
 }) => {
   const topLabelChildren = (
     <>
@@ -50,6 +52,7 @@ export const FormControl = ({
           <div className="label">{bottomLabelChildren}</div>
         )
       ) : null}
+      <ValidationErrors valid={isValid} />
     </div>
   )
 }
@@ -63,8 +66,10 @@ export const ButtonFrame = ({
   active, // Whether or not to render the button as active/selected
   accordion = false, // Set this to true to not set a background color when active
   dense = false, // Use less padding
+  disabled = false, // Allows rendering a disabled view
 }) => (
   <button
+    disabled={disabled}
     className={`
     btn btn-ghost btn-secondary relative
     w-full ${dense ? 'mt-1 py-0 btn-sm' : 'mt-2 py-4 h-auto content-start'}
@@ -107,6 +112,39 @@ export const FakeButtonFrame = ({
 )
 
 /*
+ * Input for booleans
+ */
+export const ToggleInput = ({
+  label, // Label to use
+  update, // onChange handler
+  current, // The current value
+  disabled = false, // Allows rendering a disabled view
+  list = [true, false], // The values to chose between
+  labels = ['Yes', 'No'], // The labels for the values
+  on = true, // The value that should show the toggle in the 'on' state
+  id = '', // An id to tie the input to the label
+  labelTR = false, // Top-Right label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+}) => (
+  <FormControl
+    {...{ labelBL, labelBR, labelTR }}
+    label={`${label} (${current === on ? labels[0] : labels[1]})`}
+    forId={id}
+  >
+    <input
+      id={id}
+      disabled={disabled}
+      type="checkbox"
+      value={current}
+      onChange={(evt) => update(list.indexOf(current) === 0 ? list[1] : list[0])}
+      className="toggle my-3 toggle-primary"
+      checked={list.indexOf(current) === 0 ? true : false}
+    />
+  </FormControl>
+)
+
+/*
  * Input for integers
  */
 export const NumberInput = ({
@@ -120,24 +158,34 @@ export const NumberInput = ({
   labelTR = false, // Top-Right label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
+  disabled = false, // Allows rendering a disabled view
   max = 0,
   min = 220,
   step = 1,
-}) => (
-  <FormControl {...{ label, labelBL, labelBR, labelTR }} forId={id}>
-    <input
-      id={id}
-      type="number"
-      placeholder={placeholder}
-      value={current}
-      onChange={(evt) => update(evt.target.value)}
-      className={`input w-full input-bordered ${
-        current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
-      }`}
-      {...{ max, min, step }}
-    />
-  </FormControl>
-)
+}) => {
+  const isValid = valid(current)
+
+  return (
+    <FormControl {...{ label, labelBL, labelBR, labelTR, isValid }} forId={id}>
+      <input
+        id={id}
+        disabled={disabled}
+        type="number"
+        placeholder={placeholder}
+        value={current}
+        onChange={(evt) => update(evt.target.value)}
+        className={`input w-full input-bordered ${
+          isValid?.error
+            ? 'input-error'
+            : current === original
+              ? 'input-secondary'
+              : 'input-success'
+        }`}
+        {...{ max, min, step }}
+      />
+    </FormControl>
+  )
+}
 
 /*
  * Input for strings
@@ -153,20 +201,79 @@ export const StringInput = ({
   labelTR = false, // Top-right label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
-}) => (
-  <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id}>
-    <input
-      id={id}
-      type="text"
-      placeholder={placeholder}
-      value={current}
-      onChange={(evt) => update(evt.target.value)}
-      className={`input w-full input-bordered ${
-        current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
+  disabled = false, // Allows rendering a disabled view
+}) => {
+  const isValid = valid(current)
+
+  return (
+    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid }} forId={id}>
+      <input
+        id={id}
+        disabled={disabled}
+        type="text"
+        placeholder={placeholder}
+        value={current}
+        onChange={(evt) => update(evt.target.value)}
+        className={`input w-full input-bordered ${
+          isValid?.error
+            ? 'input-error'
+            : current === original
+              ? 'input-secondary'
+              : 'input-success'
+        }`}
+      />
+    </FormControl>
+  )
+}
+
+/*
+ * Input for secrets
+ */
+export const SecretInput = ({
+  label, // Label to use
+  update, // onChange handler
+  valid, // Method that should return whether the value is valid or not
+  current = '', // The current value
+  original, // The original value
+  placeholder, // The placeholder text
+  id = '', // An id to tie the input to the label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+  disabled = false, // Allows rendering a disabled view
+}) => {
+  const isValid = valid(current)
+  const [reveal, setReveal] = useState(false)
+  const labelTR = (
+    <button
+      onClick={() => setReveal(!reveal)}
+      className={`px-2 rounded ${
+        reveal ? 'bg-success text-success-content' : 'bg-warning text-warning-content'
       }`}
-    />
-  </FormControl>
-)
+    >
+      {reveal ? 'Hide' : 'Reveal'}
+    </button>
+  )
+
+  return (
+    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid }} forId={id}>
+      <input
+        id={id}
+        disabled={disabled}
+        type={reveal ? 'text' : 'password'}
+        placeholder={placeholder}
+        value={current}
+        onChange={(evt) => update(evt.target.value)}
+        className={`input w-full input-bordered ${
+          isValid?.error
+            ? 'input-error'
+            : current === original
+              ? 'input-secondary'
+              : 'input-success'
+        }`}
+      />
+    </FormControl>
+  )
+}
 
 /*
  * Input for text (longer than strings, textarea)
@@ -182,10 +289,12 @@ export const TextInput = ({
   labelTR = false, // Top-right label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
+  disabled = false, // Allows rendering a disabled view
 }) => (
   <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id}>
     <textarea
       id={id}
+      disabled={disabled}
       type="text"
       placeholder={placeholder}
       value={current}
@@ -205,6 +314,7 @@ export const ListInput = ({
   label, // The label
   list, // The list of items to present { val, label, about }
   current, // The (value of the) current item
+  disabled = false, // Allows rendering a disabled view
 }) => (
   <FormControl label={label}>
     {list.map((item, i) => {
@@ -222,6 +332,7 @@ export const ListInput = ({
                 {item.val.labels.map((lbl, i) => (
                   <button
                     key={i}
+                    disabled={disabled}
                     className={`btn btn-sm ${
                       current === item.val.values[i] ? 'btn-primary' : 'btn-secondary'
                     }`}
@@ -234,7 +345,12 @@ export const ListInput = ({
             </div>
           </FakeButtonFrame>
         ) : (
-          <ButtonFrame key={i} active={item.val === current} onClick={() => update(item.val)}>
+          <ButtonFrame
+            key={i}
+            active={item.val === current}
+            onClick={() => update(item.val)}
+            disabled={disabled}
+          >
             <div className="w-full flex flex-col gap-2">
               <div className="w-full text-lg leading-5">{item.label}</div>
               {item.about ? (
@@ -322,3 +438,20 @@ export const FileInput = ({
     </FormControl>
   )
 }
+
+export const ValidationErrors = ({ valid }) => (
+  <ul className="list-inside text-sm text-error ml-2 -mt-1">
+    {
+      valid?.error?.details ? (
+        valid.error.details.map((err, i) => (
+          <li key={i} className="flex flex-row gap-2 items-center text-xs">
+            <WarningIcon className="h-4 w-4" />
+            {err.message.replace('must not be a sparse array item', 'cannot contain empty values')}
+          </li>
+        ))
+      ) : (
+        <li>&nbsp;</li>
+      ) /* Always include this to prevent layout-shift */
+    }
+  </ul>
+)

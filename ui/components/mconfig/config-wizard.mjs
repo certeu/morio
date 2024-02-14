@@ -20,6 +20,7 @@ import { RightIcon, ConfigurationIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/mconfig/diff.mjs'
 import yaml from 'yaml'
+import ShowWelcome from './config-welcome.mdx'
 
 /**
  * This React component renders the side menu with a list of various config views
@@ -131,65 +132,13 @@ const ShowConfigurationValidation = ({
 )
 
 /**
- * Displays a block plus navigation
- */
-const ShowConfigurationBlock = ({
-  updateMConf,
-  mConf,
-  setValid,
-  configPath,
-  template,
-  section,
-  next,
-  valid,
-  loadView,
-  setView,
-}) => (
-  <>
-    <Block
-      update={updateMConf}
-      {...{ mConf, setValid, configPath, template, section, setView, loadView }}
-    />
-    {next && (
-      <button
-        className="btn btn-primary w-full mt-4 flex flex-row gap-2 justify-between"
-        disabled={valid.error ? true : !valid}
-        onClick={() => loadView(next)}
-      >
-        Continue
-        <div className="flex flex-row gap-2 items-center">
-          {template.children?.[next.split('.').pop()]?.label}
-          {next === 'validate' ? 'Validate Configuration' : null}
-          <RightIcon />
-        </div>
-      </button>
-    )}
-    <ul className="list-inside text-sm text-error ml-2 mt-2">
-      {
-        valid?.error ? (
-          valid.error.details.map((err, i) => (
-            <li key={i}>
-              {err.message.replace(
-                'must not be a sparse array item',
-                'cannot contain empty values'
-              )}
-            </li>
-          ))
-        ) : (
-          <li>&nbsp;</li>
-        ) /* Always include this to prevent layout-shift */
-      }
-    </ul>
-  </>
-)
-
-/**
  * Displays configuration preview (or a button to show it)
  */
 const ShowConfigurationPreview = ({ preview, setPreview, mConf }) =>
   preview ? (
     <div className="w-full mt-8">
       <h3>Configuration Preview</h3>
+      <pre>{JSON.stringify(mConf, null, 2)}</pre>
       <Yaml js={mConf} />
       <p className="text-center">
         <button
@@ -219,7 +168,7 @@ export const viewInLocation = atomWithLocation('deployment/node_count')
 /*
  * Start wizard with this view
  */
-const startView = 'deployment/node_count'
+const startView = 'edit'
 
 /**
  * This is the React component for the configuration wizard itself
@@ -264,7 +213,7 @@ export const ConfigWizard = ({
    */
   useEffect(() => {
     if (view === 'string' && startView !== view) setView(startView)
-    else if (view.pathname === '/setup/wizard') setView(startView)
+    else if (view.pathname.slice(0, 14) === '/config/wizard') setView(startView)
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [startView, view, setView])
 
@@ -277,6 +226,7 @@ export const ConfigWizard = ({
       if (result[1] === 200 && result[0].deployment) {
         const newMConf = { ...result[0] }
         delete newMConf.services
+        delete newMConf.containers
         delete newMConf.deployment.key_pair
         delete newMConf.core
         setMConf(newMConf)
@@ -308,22 +258,6 @@ export const ConfigWizard = ({
   }
 
   /*
-   * Helper method to update the configuration and set valid status
-   */
-  const updateMConf = (val) => {
-    /*
-     * Always update mConf
-     */
-    update(configPath, val)
-
-    /*
-     * But also run validate
-     */
-    const valid = validate(`deployment.${section}`, val, mConf)
-    setValid(valid, mConf)
-  }
-
-  /*
    * Helper method to deploy the configuration
    */
   const deploy = async () => {
@@ -345,12 +279,10 @@ export const ConfigWizard = ({
     )
 
   /*
-   * Load the template, section, and next
+   * Load the template and section
    */
-  const section = configPath.split('.').pop()
-  const group = configPath.split('.').shift()
+  const [group, section] = configPath.split('.')
   const template = templates[group] ? templates[group]({ mConf }) : false
-  const next = template.children?.[section]?.next
 
   /*
    * Handle config delta
@@ -375,13 +307,13 @@ export const ConfigWizard = ({
           setLoadingStatus,
         }
       : {
-          updateMConf,
+          update,
           mConf,
           setValid,
           configPath,
           template,
+          group,
           section,
-          next,
           valid,
           loadView,
           setView,
@@ -397,15 +329,11 @@ export const ConfigWizard = ({
               ? template.children[section]?.title
               : template.title
                 ? template.title
-                : 'Configuration'}
+                : 'Update Configuration'}
             <ConfigurationIcon className="w-16 h-16" />
           </h1>
-          {view.pathname === `${prefix}/validate` ? (
-            <ShowConfigurationValidation {...showProps} />
-          ) : (
-            <ShowConfigurationBlock {...showProps} next={false} />
-          )}
-          {delta && configPath !== 'validate' ? (
+          <Block {...showProps} edit={true} />
+          {delta ? (
             <Popout note>
               <h4>You have made changes that are yet to be deployed</h4>
               <p>

@@ -4,6 +4,7 @@
 import mustache from 'mustache'
 import { config as configSchema } from '#schema/config'
 import Joi from 'joi'
+import _slugify from 'slugify'
 
 /**
  * A method to capitalize a string (first character only)
@@ -206,3 +207,16 @@ export const pageChildren = (page) => {
 
   return Object.keys(children).length > 0 ? children : false
 }
+
+/**
+ * Helper method to slugify a string
+ */
+export const slugify = (input) =>
+  _slugify(input, {
+    replacement: '-',
+    lower: true,
+    strip: true,
+    locale: 'en',
+    trim: false,
+    remove: /[*+~#\^=\`.(),;\/\?\\\[\]\{\}|'"!:@]/g,
+  }).trim()

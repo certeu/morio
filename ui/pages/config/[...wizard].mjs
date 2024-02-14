@@ -28,7 +28,7 @@ export default ConfigPage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    title: 'Morio Configuration',
+    title: 'Update Configuration',
     view: params.wizard.join('.'),
     page: ['config', ...params.wizard],
   },

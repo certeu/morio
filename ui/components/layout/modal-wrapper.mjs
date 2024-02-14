@@ -20,6 +20,7 @@ export const ModalWrapper = ({
   keepOpenOnClick = false,
   slideFrom = 'left',
   fullWidth = false,
+  wClass = '',
 }) => {
   const { clearModal } = useContext(ModalContext)
   const [animate, setAnimate] = useState('in')
@@ -57,7 +58,7 @@ export const ModalWrapper = ({
         <div
           onClick={keepOpenOnClick ? stopClick : null}
           className={`z-30 bg-base-100 p-4 lg:px-8 lg:rounded-lg lg:shadow-lg max-h-full overflow-auto hover:cursor-default ${
-            fullWidth ? 'w-full' : ''
+            fullWidth ? 'w-full' : wClass
           }`}
         >
           {children}

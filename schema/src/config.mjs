@@ -1,6 +1,8 @@
 import Joi from 'joi'
 import { deployment } from './config.deployment.mjs'
+import { connect } from './config.connect.mjs'
 
-export const config = Joi.object({
-  deployment,
-})
+export {
+  connect,
+  deployment
+}

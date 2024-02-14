@@ -35,6 +35,7 @@ export const deployment = (context) => {
   Without this configuration, Morio cannot function.`,
     title: 'Morio Deployment',
     type: 'info',
+    lockOnEdit: true,
     next: 'morio.cluster',
     children: {
       /*
@@ -45,6 +46,7 @@ export const deployment = (context) => {
         next: 'deployment.nodes',
         type: 'list',
         title: 'Node vs Cluster',
+        lockOnEdit: true,
         input: [
           {
             val: 1,
@@ -90,6 +92,7 @@ export const deployment = (context) => {
         type: 'strings',
         count: context.mConf?.deployment?.node_count || 1,
         title: 'Nodes',
+        lockOnEdit: true,
         labels: [...Array(context.mConf?.deployment?.node_count || 0)].map(
           (i, j) => `Node ${Number(j) + 1}`
         ),
@@ -108,6 +111,7 @@ export const deployment = (context) => {
       display_name: {
         type: 'string',
         title: 'Display Name',
+        lockOnEdit: true,
         about: 'A human-friendly name to refer to this Morio setup',
         placeholder: 'Morio Production',
         next: context.mConf?.deployment?.node_count === 1 ? 'validate' : 'deployment.fqdn',
@@ -119,6 +123,7 @@ export const deployment = (context) => {
       fqdn: {
         type: 'string',
         title: 'Cluster Name (FQDN)',
+        lockOnEdit: true,
         about: `A round-robin DNS record for the entire Morio cluster.
 This should resolve to the IP addresses of all cluster nodes.`,
         placeholder: 'cluster.my.domain.com',
@@ -133,6 +138,7 @@ This should resolve to the IP addresses of all cluster nodes.`,
       leader_ip: {
         type: 'string',
         title: 'Leader IP Address',
+        lockOnEdit: true,
         about: `In addition to the name, we need the IP address of the leader node (this node).`,
         placeholder: '10.0.0.1',
         suggest: {

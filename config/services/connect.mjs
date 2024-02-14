@@ -108,3 +108,13 @@ export const resolveServiceConfiguration = (tools) => ({
     },
   },
 })
+
+
+const plugins = {
+  azure_event_hubs: {
+  }
+}
+
+export const resolvePluginConfiguration = (type, id, vars) => {
+
+
