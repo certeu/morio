@@ -6,6 +6,7 @@ import {
   TextInput,
   NumberInput,
   ToggleInput,
+  ListInput,
 } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
@@ -54,7 +55,7 @@ export const FormBlock = (props) => {
         if (typeof val === 'object') {
           if (val.tabs)
             return (
-              <Tabs tabs={Object.keys(val.tabs).join()} navs>
+              <Tabs {...val} tabs={Object.keys(val.tabs).join()} navs>
                 {Object.keys(val.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
                     <FormBlock {...props} form={val.tabs[key]} />
@@ -106,6 +107,8 @@ export const FormElement = (props) => {
     },
   }
 
+  if (props.inputType === 'buttonList') return <ListInput {...inputProps} />
+
   switch (type) {
     case 'string':
       return props.textarea ? (
@@ -150,7 +153,7 @@ export const FormWrapper = (props) => {
         </button>
       ) : (
         <>
-          <Progress value={done} />
+          {formValidation ? <Progress value={done} /> : null}
           <div className="grid grid-cols-3 gap-2 mt-4">
             <button
               className={`btn btn-primary w-full ${

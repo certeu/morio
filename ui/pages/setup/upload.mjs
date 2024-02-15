@@ -6,7 +6,7 @@ import { useState, useContext } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { FileInput } from 'components/inputs.mjs'
-import { SetupWizard } from 'components/mconfig/setup-wizard.mjs'
+import { SetupWizard } from 'components/settings/setup.mjs'
 import { Link } from 'components/link.mjs'
 import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
@@ -15,11 +15,11 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 
-const ConfigUploadPage = (props) => {
+const SettingsUploadPage = (props) => {
   /*
    * React state
    */
-  const [config, setConfig] = useState() // Holds the uploaded data parsed into a config
+  const [mSettings, setMSettings] = useState() // Holds the uploaded data parsed into a settings object
   const [error, setError] = useState(false)
 
   const { setModal } = useContext(ModalContext)
@@ -37,16 +37,16 @@ const ConfigUploadPage = (props) => {
     } catch (err) {
       setError(err)
     }
-    setConfig(data)
+    setMSettings(data)
   }
 
   return (
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
       {error ? <pre>{JSON.stringify(error, null, 2)}</pre> : null}
-      {config ? (
+      {mSettings ? (
         <div className="py-12 px-4">
-          <h1 className="text-center">Configure Morio</h1>
-          <SetupWizard preloadConfig={config} preloadView="validate" />
+          <h1 className="text-center">Set Up Morio</h1>
+          <SetupWizard preloadSettings={mSettings} preloadView="validate" />
         </div>
       ) : (
         <div className="px-4">
@@ -67,7 +67,7 @@ const ConfigUploadPage = (props) => {
               <div className="py-12 px-4 max-w-xl m-auto">
                 <h3 className="text-center">{props.title}</h3>
                 <FileInput
-                  label="Configuration file (YAML or JSON)"
+                  label="Settings file (YAML or JSON)"
                   update={processUpload}
                   current=""
                   id="file"
@@ -125,11 +125,11 @@ const ConfigUploadPage = (props) => {
   )
 }
 
-export default ConfigUploadPage
+export default SettingsUploadPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Provide a Morio Configuration File',
+    title: 'Provide a Morio Settings File',
     page: ['setup', 'upload'],
   },
 })

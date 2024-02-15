@@ -57,6 +57,15 @@ MorioClient.prototype.getCurrentConfig = async function () {
 }
 
 /**
+ * Gets the current settings
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getCurrentSettings = async function () {
+  return await this.call(`${morioConfig.api}/settings/current`)
+}
+
+/**
  * Gets the current presets
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
@@ -115,17 +124,17 @@ MorioClient.prototype.buildClientPackage = async function (type, settings = {}) 
 }
 
 /**
- * Validated a configuration
+ * Validates the settings
  *
  * This endpoint does not require authentication
- * @param {object} config - The configuration object to validate
+ * @param {object} settings - The settings object to validate
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.validateConfiguration = async function (config) {
-  return await this.call(`${morioConfig.api}/validate/config`, {
+MorioClient.prototype.validateSettings = async function (settings) {
+  return await this.call(`${morioConfig.api}/validate/settings`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ config }),
+    body: JSON.stringify({ settings }),
   })
 }
 

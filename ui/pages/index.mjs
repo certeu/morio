@@ -23,13 +23,13 @@ export const EphemeralInfo = () => (
       State
     </h2>
     <p>
-      Before a Morio node receives its initial configuration, it will run in an ephemeral state,
-      where it does nothing but eagerly await its initial setup.
+      Before a Morio node receives its initial settings, it will run in an ephemeral state, where it
+      does nothing but eagerly await its setup.
     </p>
     <p>
-      To bring this node out of its ephemeral state, you need to configure it.
+      To bring this node out of its ephemeral state, you need to provide initial settings
       <br />
-      We recommend to <PageLink href="/setup/wizard">use the setup wizard</PageLink> to do so.
+      We recommend to <PageLink href="/setup">use the setup wizard</PageLink> to do so.
     </p>
     <Popout important>
       <h5>
@@ -74,11 +74,11 @@ const Setup = ({ pageProps }) => {
               </button>
             </h1>
             <div className="flex flex-col gap-2 mt-4 mb-24">
-              <Link className="btn btn-primary btn-lg" href="/setup/wizard">
+              <Link className="btn btn-primary btn-lg" href="/setup">
                 Use the Setup Wizard
               </Link>
               <Link href="/setup/upload" className="btn btn-ghost">
-                Provide a Configuration File
+                Provide a Settings File
               </Link>
             </div>
           </div>
@@ -121,18 +121,18 @@ const Setup = ({ pageProps }) => {
 
 export const NotUnlessSetup = ({ children, pageProps }) => {
   const { api } = useApi()
-  const [config, setConfig] = useState(null)
+  const [mSettings, setMSettings] = useState(null)
 
   useEffect(() => {
-    const loadConfig = async () => {
-      const [content] = await api.getCurrentConfig()
-      setConfig(content)
+    const loadMSettings = async () => {
+      const [content] = await api.getCurrentSettings()
+      setMSettings(content)
     }
-    if (!config) loadConfig()
+    if (!mSettings) loadMSettings()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
-  if (config === null)
+  if (mSettings === null)
     return (
       <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
         <div className="flex flex-col items-center justify-between h-screen">
@@ -140,13 +140,13 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
           <div className="flex flex-col gap-2 text-center">
             <h5 className="font-bold">MORIO</h5>
             <MorioIcon className="w-20 h-20 animate-spin mx-auto" />
-            <span className="animate-pulse italic">loading configuration</span>
+            <span className="animate-pulse italic">loading settings</span>
           </div>
           <span> </span>
         </div>
       </PageWrapper>
     )
-  if (typeof config.deployment === 'undefined') return <Setup pageProps={pageProps} />
+  if (typeof mSettings.deployment === 'undefined') return <Setup pageProps={pageProps} />
 
   return children
 }

@@ -187,10 +187,10 @@ export const validate = (key, value, context) => {
  * @param {object} config - The configuration to validate
  * @param {function} setLoadingStatus - The setLoadingStatus method from loading context
  */
-export const validateConfiguration = async (api, config, setLoadingStatus) => {
+export const validateSettings = async (api, settings, setLoadingStatus) => {
   setLoadingStatus([true, 'Contacting Morio API'])
-  const [report, statusCode] = await api.validateConfiguration(config)
-  if (report && statusCode === 200) setLoadingStatus([true, 'Configuration validated', true, true])
+  const [report, statusCode] = await api.validateSettings(settings)
+  if (report && statusCode === 200) setLoadingStatus([true, 'Settings validated', true, true])
   else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
 
   return report

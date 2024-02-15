@@ -37,7 +37,7 @@ const LockedOnEdit = () => (
  * @return {function} Component - React component
  */
 export const Block = (props) => {
-  const viewConfig = props.template?.children?.[props.section]
+  const viewConfig = props.viewConfig || props.template?.children?.[props.section]
   if (viewConfig && typeof blocks[viewConfig.type] === 'function') {
     const Component = viewConfig.locked ? viewConfig.locked : blocks[viewConfig.type]
     const disabled = props.edit && props.template.lockOnEdit
