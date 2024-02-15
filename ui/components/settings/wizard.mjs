@@ -16,74 +16,12 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Yaml } from 'components/yaml.mjs'
 import { ConfigReport, DeploymentReport } from './report.mjs'
-import { RightIcon, ConfigurationIcon } from 'components/icons.mjs'
+import { RightIcon, SettingsIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
-import { DiffViewer, diffCheck } from 'components/mconfig/diff.mjs'
+import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import yaml from 'yaml'
-import ShowWelcome from './config-welcome.mdx'
-
-/**
- * This React component renders the side menu with a list of various config views
- */
-export const ConfigNavigation = ({
-  view, // The current view
-  nav, // Views for which to render a navigation structure
-  loadView, // Method to load a view
-  mConf, // The current mConf configuration
-  lead = [], // Lead for looking up IDs
-}) => (
-  <ul className="list list-inside list-disc ml-4">
-    {Object.entries(nav)
-      .map(([key, val]) =>
-        typeof val === 'function' ? { ...val(mConf), id: key } : { ...val, id: key }
-      )
-      .filter((entry) => !entry.hide)
-      .map((entry) => (
-        <li key={entry.id}>
-          <button
-            className={`btn ${
-              entry.id === view ? 'btn-ghost' : 'btn-link no-underline hover:underline'
-            } px-0 btn-sm`}
-            onClick={() => loadView([...lead, entry.id].join('/'))}
-          >
-            <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
-              {entry.title ? entry.title : entry.label}
-            </span>
-          </button>
-          {entry.children && (
-            <ConfigNavigation
-              {...{ view, loadView, mConf }}
-              nav={entry.children}
-              lead={[...lead, entry.id]}
-            />
-          )}
-        </li>
-      ))}
-  </ul>
-)
-
-/**
- * A helper method to turn a wizard url into a config path
- *
- * Eg: Turns core.node_count into `${prefix}/core/node_count`
- *
- * @param {string} url
- */
-export const viewAsConfigPath = (view, prefix) =>
-  view
-    ? view
-        .slice(prefix.length + 1)
-        .split('/')
-        .join('.')
-    : prefix
-
-/**
- * A helper method to turn a config key a wizard url
- *
- * Eg: Turns `${prefix}/core/node_count` into core.node_count
- */
-const configPathAsView = (path, prefix) =>
-  path ? prefix + '/' + path.split('.').join('/') : prefix
+import { SettingsNavigation } from './navigation.mjs'
+import { viewAsSettingsPath, settingsPathAsView } from './utils.mjs'
 
 /**
  * Displays configuration validation
@@ -173,7 +111,7 @@ const startView = 'edit'
 /**
  * This is the React component for the configuration wizard itself
  */
-export const ConfigWizard = ({
+export const SettingsWizard = ({
   prefix = '/config/wizard', // Prefix to use for the keeping the view state in the URL
 }) => {
   /*
@@ -190,18 +128,18 @@ export const ConfigWizard = ({
   const [showDelta, setShowDelta] = useState(false)
 
   /*
-   * Figure out the current configPath from the view
+   * Figure out the current settingsPath from the view
    */
-  const configPath = viewAsConfigPath(view.pathname, prefix)
+  const settingsPath = viewAsSettingsPath(view.pathname, prefix)
 
   /*
    * Handler method for view state updates
    */
   const setView = useCallback(
-    (configPath) => {
+    (settingsPath) => {
       _setView((prev) => ({
         ...prev,
-        pathname: configPathAsView(configPath, prefix),
+        pathname: settingsPathAsView(settingsPath, prefix),
       }))
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -281,7 +219,7 @@ export const ConfigWizard = ({
   /*
    * Load the template and section
    */
-  const [group, section] = configPath.split('.')
+  const [group, section] = settingsPath.split('.')
   const template = templates[group] ? templates[group]({ mConf }) : false
 
   /*
@@ -310,7 +248,7 @@ export const ConfigWizard = ({
           update,
           mConf,
           setValid,
-          configPath,
+          settingsPath,
           template,
           group,
           section,
@@ -322,7 +260,7 @@ export const ConfigWizard = ({
   return (
     <div className="flex flex-row gap-8 justify-start">
       <div className="w-full max-w-4xl p-8 grow">
-        <Breadcrumbs page={['config', ...configPath.split('.')]} />
+        <Breadcrumbs page={['config', ...settingsPath.split('.')]} />
         <div className="w-full">
           <h1 className="capitalize flex w-full max-w-4xl justify-between">
             {template.children?.[section]?.title
@@ -330,7 +268,7 @@ export const ConfigWizard = ({
               : template.title
                 ? template.title
                 : 'Update Configuration'}
-            <ConfigurationIcon className="w-16 h-16" />
+            <SettingsIcon className="w-16 h-16" />
           </h1>
           <Block {...showProps} edit={true} />
           {delta ? (
@@ -370,8 +308,8 @@ export const ConfigWizard = ({
         </div>
       </div>
       <div className="grow-0 shrink-0 pt-24 min-h-screen">
-        <h5>Configuration Blocks</h5>
-        <ConfigNavigation view={configPath} loadView={loadView} nav={templates} mConf={mConf} />
+        <h5>Settings</h5>
+        <SettingsNavigation view={settingsPath} loadView={loadView} nav={templates} mConf={mConf} />
       </div>
     </div>
   )

@@ -16,9 +16,8 @@ import {
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Popout } from 'components/popout.mjs'
-import { connect as schema } from '#schema/config'
 import Joi from 'joi'
-import { FormBlock } from 'components/mconfig/blocks/form.mjs'
+import { FormBlock } from 'components/settings/blocks/form.mjs'
 import set from 'lodash.set'
 import { FormWrapper } from './form.mjs'
 
@@ -72,8 +71,7 @@ const UpdateXput = ({ type, id, title, setModal, desc = false }) => {
         <Popout note>
           <h5>You cannot update or remove this {type}</h5>
           <p>
-            The <b>{title}</b> connector {type} does not require any configuration and cannot be
-            removed.
+            The <b>{title}</b> connector {type} does not have any settings and cannot be removed.
           </p>
           <p className="text-center">
             <button onClick={() => setModal(false)} className="btn btn-neutral btn-outline">
@@ -96,8 +94,7 @@ const ShowXput = ({ type, id, title, setModal, desc = false }) => {
         <Popout note>
           <h5>You cannot update or remove this {type}</h5>
           <p>
-            The <b>{title}</b> connector {type} does not require any configuration and cannot be
-            removed.
+            The <b>{title}</b> connector {type} does not have any settings and cannot be removed.
           </p>
           <p className="text-center">
             <button onClick={() => setModal(false)} className="btn btn-neutral btn-outline">

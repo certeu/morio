@@ -47,8 +47,7 @@ export const connector = () => ({
     inputs: {
       type: 'connectorInputs',
       label: 'Connector Inputs',
-      about: `Add a connector input for Morio to read data from.
-  Once configured, you can use the input in your connector pipelines.`,
+      about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
         amazon_cloudwatch: {
           title: 'Amazon Cloudwatch',

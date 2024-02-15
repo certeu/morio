@@ -130,15 +130,6 @@ export const ComponentIcon = (props) => (
 )
 
 /*
- * ConfigurationIcon - Looks like a mixing panel with sliders
- */
-export const ConfigurationIcon = (props) => (
-  <IconWrapper {...props}>
-    <path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
-  </IconWrapper>
-)
-
-/*
  * ContainerIcon - Looks like a cube
  */
 export const ContainerIcon = (props) => (
@@ -426,6 +417,15 @@ export const RightIcon = (props) => (
 export const ServersIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M5.25 14.25h13.5m-13.5 0a3 3 0 0 1-3-3m3 3a3 3 0 1 0 0 6h13.5a3 3 0 1 0 0-6m-16.5-3a3 3 0 0 1 3-3h13.5a3 3 0 0 1 3 3m-19.5 0a4.5 4.5 0 0 1 .9-2.7L5.737 5.1a3.375 3.375 0 0 1 2.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 0 1 .9 2.7m0 0a3 3 0 0 1-3 3m0 3h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Zm-3 6h.008v.008h-.008v-.008Zm0-6h.008v.008h-.008v-.008Z" />
+  </IconWrapper>
+)
+
+/*
+ * SettingsIcon - Looks like a mixing panel with sliders
+ */
+export const SettingsIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
   </IconWrapper>
 )
 

@@ -6,15 +6,15 @@ const prefix = '/config'
 /*
  * Avoid hydration woes with a dynamic import and disabled SSR rendering
  */
-const DynamicConfigurationWizard = dynamic(
-  () => import('components/mconfig/config-wizard.mjs').then((mod) => mod.ConfigWizard),
+const DynamicSettingsWizard = dynamic(
+  () => import('components/settings/wizard.mjs').then((mod) => mod.SettingsWizard),
   { ssr: false }
 )
 
-const ConfigPage = (props) => {
+const SettingsPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <DynamicConfigurationWizard
+      <DynamicSettingsWizard
         preloadView={props.view}
         splash={false}
         prefix={prefix}
@@ -24,13 +24,13 @@ const ConfigPage = (props) => {
   )
 }
 
-export default ConfigPage
+export default SettingsPage
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    title: 'Update Configuration',
+    title: 'Update Settings',
     view: params.wizard.join('.'),
-    page: ['config', ...params.wizard],
+    page: ['settings', ...params.wizard],
   },
 })
 

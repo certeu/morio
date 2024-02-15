@@ -16,9 +16,9 @@ import Markdown from 'react-markdown'
  */
 export const InfoBlock = (props) => {
   const {
-    about = false, // About provided by the configuration schema
-    label = false, // Label provided by the configuration schema
-    title = false, // Title provided by the configuration schema
+    about = false, // About provided by the settings template
+    label = false, // Label provided by the settings template
+    title = false, // Title provided by the settings template
   } = props.viewConfig
 
   return (
@@ -93,8 +93,8 @@ export const StringsBlock = (props) => {
    * Deconstruct the viewConfig properties we use, and detail what they are about
    */
   const {
-    about = false, // About provided by the configuration schema
-    label = false, // Labale provided by the configuration schema
+    about = false, // About provided by the settings template
+    label = false, // Labale provided by the settings template
     id, // Path to the configuration key we are updating
   } = viewConfig
 

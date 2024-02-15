@@ -4,7 +4,7 @@ import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
 import { InfoBlock, ListBlock, StringBlock, StringsBlock } from './base.mjs'
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
-import { ConfigNavigation } from '../config-wizard.mjs'
+import { SettingsNavigation } from '../navigation.mjs'
 import { FormWrapper } from './form.mjs'
 
 /*
@@ -22,12 +22,9 @@ const blocks = {
 }
 
 const LockedOnEdit = () => (
-  <Popout warning>
-    <h5>This configuration block is locked for editing</h5>
-    <p>
-      This typically indicates that the configuration is part of the initial Morio setup, and cannot
-      be changed on an active Morio deployment.
-    </p>
+  <Popout note>
+    <h5>These settings are locked</h5>
+    <p>Once deployed, these settings cannot be changed.</p>
   </Popout>
 )
 
@@ -46,8 +43,8 @@ export const Block = (props) => {
     const disabled = props.edit && props.template.lockOnEdit
 
     return viewConfig.locked ? (
-      <Popout warning>
-        <h3>This configuration block is locked</h3>
+      <Popout note>
+        <h3>These settings are locked</h3>
         <p>This indicated that a prerequisite is not fulfilled.</p>
         <Component {...props} viewConfig={viewConfig} disabled={disabled} />
       </Popout>
@@ -61,18 +58,10 @@ export const Block = (props) => {
     if (props.template.title && props.template.children)
       return (
         <div className="max-w-prose">
-          {props.edit && props.template.lockOnEdit ? (
-            <Popout warning>
-              <h5>This configuration block is locked for editing</h5>
-              <p>
-                This typically indicates that the configuration is part of the initial Morio setup,
-                and cannot be changed on a Morio deployment.
-              </p>
-            </Popout>
-          ) : null}
+          {props.edit && props.template.lockOnEdit ? <LockedOnEdit /> : null}
           <Markdown>{props.template.about}</Markdown>
-          <ConfigNavigation
-            view={props.configPath}
+          <SettingsNavigation
+            view={props.settingsPath}
             loadView={props.loadView}
             nav={props.template.children}
             mConf={props.mConf}

@@ -8,7 +8,7 @@
  */
 export const deployment = (context) => {
   /*
-   * Helper object for those configuration blocks that
+   * Helper object for those settings blocks that
    * should remain locked until we know the node_count
    */
   const nodeCountFirst = context.mConf?.deployment?.node_count
@@ -16,8 +16,7 @@ export const deployment = (context) => {
     : ({ setView, template }) => (
         <>
           <p>
-            You need to complete the <b>{template.children.node_count.title}</b> configuration block
-            first.
+            You need to complete the <b>{template.children.node_count.title}</b> settings first.
           </p>
           <p className="text-right">
             <button
@@ -33,7 +32,7 @@ export const deployment = (context) => {
   return {
     about: `The Morio deployment configuration holds the most foundational settings of your Morio setup.
   Without this configuration, Morio cannot function.`,
-    title: 'Morio Deployment',
+    title: 'Deployment',
     type: 'info',
     lockOnEdit: true,
     next: 'morio.cluster',

@@ -9,7 +9,6 @@ import {
   ComponentIcon,
   CodeIcon,
   CogIcon,
-  ConfigurationIcon,
   ContainerIcon,
   ContainerImageIcon,
   DesktopIcon,
@@ -20,6 +19,7 @@ import {
   PackageIcon,
   QuestionIcon,
   ServersIcon,
+  SettingsIcon,
   StatusIcon,
   StorageIcon,
   TaskIcon,
@@ -47,7 +47,6 @@ const icons = {
   components: ComponentIcon,
   containers: ContainerIcon,
   console: RedPandaConsole,
-  config: ConfigurationIcon,
   docker: Docker,
   docs: BookIcon,
   downloads: DownloadIcon,
@@ -61,6 +60,7 @@ const icons = {
   proxy: Traefik,
   reference: UlIcon,
   services: LayersIcon,
+  settings: SettingsIcon,
   show: DocumentIcon,
   tasks: TaskIcon,
   tools: CogIcon,
@@ -78,16 +78,16 @@ const icons = {
  * This object represents the navigation structure
  */
 export const links = {
-  config: {
-    t: 'Configuration',
+  settings: {
+    t: 'Settings',
     show: {
-      t: 'Show Configuration',
+      t: 'Show Settings',
     },
     presets: {
       t: 'Show Presets',
     },
     wizard: {
-      t: 'Update Configuration',
+      t: 'Update Settings',
     },
   },
   docs: {
