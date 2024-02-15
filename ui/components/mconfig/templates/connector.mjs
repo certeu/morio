@@ -5,13 +5,28 @@ import { slugify } from 'lib/utils.mjs'
 /*
  * Reuse this for the input ID
  */
-const inputId = {
-  schema: Joi.string().required().label('ID'),
-  label: 'ID',
-  labelBL: 'A unique ID to reference this input in your connector pipelines (will be slugified)',
-  key: 'id',
-  transform: slugify,
-}
+const xputMeta = (type, name) => [
+  {
+    schema: Joi.string().required().label('ID'),
+    label: 'ID',
+    labelBL: `A unique ID to reference this ${type} in your connector pipelines`,
+    labelBR: <span className="italic opacity-70">Input will be slugified</span>,
+    key: 'id',
+    transform: slugify,
+  },
+  {
+    schema: Joi.string().optional().allow('').label('Description'),
+    label: 'Description',
+    labelBL: `A description to help understand the purpose of this ${type}`,
+    labelBR: <span className="italic opacity-70">Optional</span>,
+    key: 'about',
+    textarea: true,
+  },
+]
+const readOnlyForm = (type, name) => [
+  `##### You cannot update or remove this connector ${type}`,
+  `The __${name}__ connector ${type} does not require any configuration and cannot be removed.`,
+]
 
 /*
  * Connector
@@ -84,10 +99,10 @@ export const connector = () => ({
           about: 'Reads mail from an IMAP server',
           desc: 'Use this to read incoming email from a mail server over IMAP',
           form: [
-            `##### Create your IMAP connector input below`,
-            inputId,
+            `##### Create a new IMAP connector input`,
             {
               tabs: {
+                Metadata: xputMeta('input', 'imap'),
                 Settings: [
                   [
                     {
@@ -179,6 +194,8 @@ export const connector = () => ({
         generator: {
           title: 'Generator',
           about: 'Generates messages (useful for testing)',
+          form: readOnlyForm('input', 'generator'),
+          readOnly: true,
         },
         kafka: {
           title: 'Kafka',

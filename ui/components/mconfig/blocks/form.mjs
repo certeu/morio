@@ -11,6 +11,7 @@ import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
 import get from 'lodash.get'
 import { useStateObject } from 'hooks/use-state-object.mjs'
+import { Progress } from 'components/animations.mjs'
 
 /**
  * A method to provide validation based on the Joi validation library
@@ -53,7 +54,7 @@ export const FormBlock = (props) => {
         if (typeof val === 'object') {
           if (val.tabs)
             return (
-              <Tabs tabs={Object.keys(val.tabs).join()}>
+              <Tabs tabs={Object.keys(val.tabs).join()} navs>
                 {Object.keys(val.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
                     <FormBlock {...props} form={val.tabs[key]} />
@@ -140,30 +141,40 @@ export const FormWrapper = (props) => {
   return (
     <>
       <FormBlock {...props} {...{ update, formValidation, updateFormValidation, data }} />
-      <progress className="progress progress-primary w-full mb-4" value={done} max="100"></progress>
-      <div className="grid grid-cols-3 gap-2">
+      {props.readOnly ? (
         <button
-          className={`btn btn-primary w-full ${
-            props.setModal ? 'col-span-2' : 'col-span-1 col-start-2'
-          }`}
-          disabled={done < 100}
-          onClick={() => {
-            if (props.setModal) props.setModal(false)
-            else console.log('no setmodal')
-            props.update(`${props.group}.${props.section}${data.id ? '.' + data.id : ''}`, data)
-          }}
+          className="btn btn-primary btn-outline w-full"
+          onClick={() => props.setModal(false)}
         >
-          Save
+          Close
         </button>
-        {props.setModal ? (
-          <button
-            className="btn btn-primary btn-outline w-full"
-            onClick={() => props.setModal(false)}
-          >
-            Cancel
-          </button>
-        ) : null}
-      </div>
+      ) : (
+        <>
+          <Progress value={done} />
+          <div className="grid grid-cols-3 gap-2 mt-4">
+            <button
+              className={`btn btn-primary w-full ${
+                props.setModal ? 'col-span-2' : 'col-span-1 col-start-2'
+              }`}
+              disabled={done < 100}
+              onClick={() => {
+                if (props.setModal) props.setModal(false)
+                props.update(`${props.group}.${props.section}${data.id ? '.' + data.id : ''}`, data)
+              }}
+            >
+              Save
+            </button>
+            {props.setModal ? (
+              <button
+                className="btn btn-primary btn-outline w-full"
+                onClick={() => props.setModal(false)}
+              >
+                Cancel
+              </button>
+            ) : null}
+          </div>
+        </>
+      )}
     </>
   )
 }

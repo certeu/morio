@@ -29,3 +29,12 @@ export const LogoSpinner = () => (
     <path cx="12" cy="12" d={logoPath} fill="currentColor" strokeWidth="0" />
   </svg>
 )
+
+export const Progress = ({ value, color = 'primary' }) => (
+  <div className={`h-2 bg-${color} rounded-full my-1 bg-opacity-30`}>
+    <div
+      className={`h-2 bg-${color} rounded-full transition-all ease-in-out duration-500`}
+      style={{ width: `${value}%` }}
+    ></div>
+  </div>
+)
