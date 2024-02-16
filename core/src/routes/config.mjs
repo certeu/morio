@@ -18,11 +18,6 @@ export function routes(tools) {
   const { app } = tools
 
   /*
-   * Deploy a new configuration
-   */
-  app.post('/config/deploy', (req, res) => Config.deploy(req, res, tools))
-
-  /*
    * Load a list of all configurations
    */
   app.get('/configs', (req, res) => Config.getConfigsList(req, res, tools))

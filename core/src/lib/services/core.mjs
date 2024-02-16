@@ -1,4 +1,4 @@
-import { pkg } from '#shared/pkg'
+import { corePkg as pkg } from '#shared/pkg'
 import { restClient } from '#shared/network'
 import { readYamlFile, readBsonFile, readDirectory, writeYamlFile } from '#shared/fs'
 import { generateJwt, generateCsr, keypairAsJwk } from '#shared/crypto'
@@ -19,7 +19,6 @@ import { createPrivateKey } from 'crypto'
 import { reconfigure } from '../../index.mjs'
 import { lifecycle } from '../lifecycle.mjs'
 
-
 /*
  * Re-export this as it makes more sense to import this from here
  */
@@ -36,32 +35,33 @@ export const preStartCore = async (tools) => {
   /*
    * First populate the tools object
    */
-  if (!tools.info) tools.info = {
-    about: pkg.description,
-    name: pkg.name,
-    production: inProduction(),
-    start_time: Date.now(),
-    version: pkg.version,
-  }
+  if (!tools.info)
+    tools.info = {
+      about: pkg.description,
+      name: pkg.name,
+      production: inProduction(),
+      version: pkg.version,
+    }
+  tools.start_time = Date.now()
   if (!tools.inProduction) tools.inProduction = inProduction
 
   /*
    * Add a getPreset() wrapper that will output trace logs about how presets are resolved
    * This is surprisingly helpful during debugging
    */
-  tools.getPreset = (key, dflt, opts) => {
-    const result = getPreset(key, dflt, opts)
-    tools.log.trace(`Preset ${key} = ${result}`)
+  if (!tools.getPreset)
+    tools.getPreset = (key, dflt, opts) => {
+      const result = getPreset(key, dflt, opts)
+      tools.log.trace(`Preset ${key} = ${result}`)
 
-    return result
-  }
+      return result
+    }
 
   /*
    * Add the API client
    */
-  tools.apiClient = restClient(
-    `http://api:${tools.getPreset('MORIO_API_PORT')}`
-  )
+  if (!tools.apiClient)
+    tools.apiClient = restClient(`http://api:${tools.getPreset('MORIO_API_PORT')}`)
 
   /*
    * Load configuration(s) from disk
@@ -78,6 +78,10 @@ export const preStartCore = async (tools) => {
     tools.config = tools.configs.current.config
     tools.keys = tools.configs.current.keys
     delete tools.configs.current
+    /*
+     * Also load setings file(s) from disk
+     */
+    tools.settings = await loadSettings(tools.config.settings)
   } else {
     tools.info.running_config = false
     tools.info.ephemeral = true
@@ -145,7 +149,7 @@ export const loadConfigurations = async () => {
    * Find out what configuration exists on disk
    */
   const timestamps = ((await readDirectory(`/etc/morio`)) || [])
-    .filter((file) => new RegExp('morio.[0-9]+.yaml').test(file))
+    .filter((file) => new RegExp('config.[0-9]+.yaml').test(file))
     .map((file) => file.split('.')[1])
     .sort()
 
@@ -155,7 +159,7 @@ export const loadConfigurations = async () => {
   const configs = {}
   let i = 0
   for (const timestamp of timestamps) {
-    const config = await readYamlFile(`/etc/morio/morio.${timestamp}.yaml`)
+    const config = await readYamlFile(`/etc/morio/config.${timestamp}.yaml`)
     configs[timestamp] = {
       timestamp,
       current: false,
@@ -170,6 +174,14 @@ export const loadConfigurations = async () => {
 
   return configs
 }
+
+/**
+ * Loads a Morio settings file from disk
+ *
+ * These are typically settings files that have been written to disk by CORE
+ */
+export const loadSettings = async (timestamp) =>
+  await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
 
 /**
  * Logs messages on start based on configuration values
@@ -190,7 +202,11 @@ export const logStartedConfig = (tools) => {
    * Has MORIO been setup?
    * If so, we should have a current config
    */
-  if (tools.info.running_config && tools.info.ephemeral === false) {
+  if (
+    tools.info.running_config &&
+    tools.info.ephemeral === false &&
+    tools.config?.deployment?.nodes
+  ) {
     tools.log.debug(`Running configuration ${tools.info.running_config}`)
     if (tools.config.deployment.nodes.length > 1) {
       tools.log.debug(
@@ -263,10 +279,7 @@ export const ensureMorioService = async (service, running, tools) => {
    * Generate service & container config
    */
   tools.config.services[service] = resolveServiceConfig(service, tools)
-  tools.config.containers[service] = generateContainerConfig(
-    tools.config.services[service],
-    tools
-  )
+  tools.config.containers[service] = generateContainerConfig(tools.config.services[service], tools)
 
   /*
    * Figure out whether or not we need to
@@ -394,7 +407,7 @@ const startMorioNode = async (tools) => {
   tools.config.core.node_nr = 1
   tools.config.core.names = {
     internal: 'core_1',
-    external: tools.config.deployment.nodes[0]
+    external: tools.config.deployment.nodes[0],
   }
   tools.config.deployment.fqdn = tools.config.deployment.nodes[0]
 

@@ -67,19 +67,18 @@ Controller.prototype.status = async (req, res, tools) => {
    * Return this in any case
    */
   const base = {
-    name: tools.config.name,
-    about: tools.config.about,
-    version: tools.config.version,
-    ...timeSince(tools.config.start_time),
+    ...tools.info,
+    ...timeSince(tools.start_time),
   }
 
   /*
    * If MORIO is not setup, return limited info
    */
-  if (!tools.config.setup) return res.send(base)
+  if (!tools.config.deployment) return res.send({ ...base, setup: false })
 
   return res.send({
     ...base,
+    setup: true,
     fixme: 'Handle post-setup status',
   })
 }
@@ -94,7 +93,6 @@ Controller.prototype.status = async (req, res, tools) => {
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.streamServiceLogs = async (req, res, tools) => {
-
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Transfer-Encoding', 'chunked')
 
@@ -102,6 +100,6 @@ Controller.prototype.streamServiceLogs = async (req, res, tools) => {
     req.params.service,
     (data) => res.write(data),
     () => res.end(),
-    tools,
+    tools
   )
 }

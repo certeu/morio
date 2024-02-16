@@ -34,15 +34,15 @@ export const validate = async (targetPath, input) => {
 }
 
 /**
- * Validates deployment configuration
+ * Validates deployment settings
  *
  * This will not catch all problems, but it should at least catch some common
- * configuration issues, in particular for people writing their own config.
+ * settings issues, in particular for people writing their own settings.
  *
- * @param {object} newConfig - The configuration to validate
+ * @param {object} newSettings - The settings to validate
  * @retrun {object} report - An object detailing the results of the validation
  */
-export const validateConfiguration = async (newConfig) => {
+export const validateSettings = async (newSettings) => {
   /*
    * Set up the report skeleton that we will return
    */
@@ -65,33 +65,33 @@ export const validateConfiguration = async (newConfig) => {
 
   /*
    * Nodes will check that there are as many as node_count
-   * But if the entire config is empty, this will pass validation
+   * But if the entire settings object is empty, this will pass validation
    * So let's guard against that here
    */
   if (
-    !newConfig.deployment ||
-    !newConfig.deployment.node_count ||
-    !newConfig.deployment.nodes ||
-    !Array.isArray(newConfig.deployment.nodes) ||
-    newConfig.deployment.nodes.length !== newConfig.deployment.node_count
+    !newSettings?.deployment ||
+    !newSettings.deployment.node_count ||
+    !newSettings.deployment.nodes ||
+    !Array.isArray(newSettings.deployment.nodes) ||
+    newSettings.deployment.nodes.length !== newSettings.deployment.node_count
   ) {
-    report.info.push(`Configuration is not valid`)
+    report.info.push(`Settings are not valid`)
     report.errors.push(`Node count and nodes do not match`)
 
     return abort()
   }
 
   /*
-   * Validate config against the config schema
+   * Validate settings against the settings schema
    */
-  let config
+  let settings
   try {
-    config = await deploymentSchema.validateAsync(newConfig)
+    settings = await deploymentSchema.validateAsync(newSettings)
   } catch (err) {
     /*
      * Validate failed, bail out here
      */
-    report.info.push(`Configuration did not pass schema validation`)
+    report.info.push(`Settings did not pass schema validation`)
     for (const msg of err.details) report.errors.push(msg.message)
 
     return abort()
@@ -100,14 +100,14 @@ export const validateConfiguration = async (newConfig) => {
   /*
    * Schema validation successful
    */
-  report.info.push('Configuration passed schema validation')
+  report.info.push('Settings passed schema validation')
 
   /*
    * Verify nodes
    */
   let i = 0
   const ips = []
-  for (const node of config.deployment.nodes) {
+  for (const node of settings.deployment.nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
     /*
@@ -175,7 +175,7 @@ export const validateConfiguration = async (newConfig) => {
    */
   report.valid = true
   report.deployable = true
-  report.validated_config = config
+  report.validated_settings = settings
 
   return report
 }

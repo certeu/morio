@@ -11,6 +11,25 @@ const shared = {
 }
 
 /*
+ * This describes the schema of the deployment settings
+ */
+export const deploymentSchema = Joi.object({
+  deployment: Joi.object({
+    display_name: Joi.string().required().min(2).max(255),
+    node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
+    nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
+    fqdn: Joi.string()
+      .hostname()
+      .when('node_count', {
+        is: Joi.number().max(1),
+        then: Joi.optional(),
+        otherwise: Joi.required(),
+      }),
+  }),
+  comment: Joi.string(),
+})
+
+/*
  * This describes the schema of request objects
  */
 export const requestSchema = {
@@ -37,8 +56,8 @@ export const requestSchema = {
     }),
   },
   validate: {
-    configuration: Joi.object({
-      config: Joi.object(),
+    settings: Joi.object({
+      settings: deploymentSchema,
     }),
     node: Joi.object({
       hostname: Joi.string().hostname(),
@@ -82,22 +101,3 @@ export const responseSchema = {
  * This describes the schema of error responses
  */
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
-
-/*
- * This describes the schema of the deployment configuration
- */
-export const deploymentSchema = Joi.object({
-  deployment: Joi.object({
-    display_name: Joi.string().required().min(2).max(255),
-    node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
-    nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
-    fqdn: Joi.string()
-      .hostname()
-      .when('node_count', {
-        is: Joi.number().max(1),
-        then: Joi.optional(),
-        otherwise: Joi.required(),
-      }),
-  }),
-  comment: Joi.string(),
-})

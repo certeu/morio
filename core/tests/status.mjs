@@ -1,4 +1,5 @@
-export const tests = async ({ chai, expect, config, store }) => {
+/* eslint-disable no-undef */
+export const tests = async ({ chai, expect, config }) => {
   describe(`[CORE] Status tests`, () => {
     it(`Should load the status endpoint`, (done) => {
       chai
@@ -19,3 +20,4 @@ export const tests = async ({ chai, expect, config, store }) => {
     })
   })
 }
+/* eslint-enable no-undef */

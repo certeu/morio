@@ -52,7 +52,11 @@ export const resolveServiceConfiguration = (tools) => ({
      */
     log: {
       level: tools.getPreset('MORIO_DEBUG') ? 'info' : 'warn',
-      format: 'json'
+      format: 'json',
+      reload: {
+        automatic: true,
+        interval: '30s',
+      }
     },
     /*
      * Do not debug config, unless debug is on
@@ -66,11 +70,11 @@ export const resolveServiceConfiguration = (tools) => ({
     queue: {
       type: 'persisted',
       drain: true,
-    }
+    },
     /*
      * No dead letter queue
-     */,
-    dead_letter_queue.enable: false
+     */
+    'dead_letter_queue.enable': false,
     /*
      * Disable monitoring, use metricbeat instead.
      * See: https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html
@@ -81,12 +85,6 @@ export const resolveServiceConfiguration = (tools) => ({
     xpack: {
       management: {
         enabled: false
-      }
-    },
-    config: {
-      reload: {
-        automatic: true,
-        interval: '30s',
       }
     },
     api: {
@@ -108,13 +106,4 @@ export const resolveServiceConfiguration = (tools) => ({
     },
   },
 })
-
-
-const plugins = {
-  azure_event_hubs: {
-  }
-}
-
-export const resolvePluginConfiguration = (type, id, vars) => {
-
 

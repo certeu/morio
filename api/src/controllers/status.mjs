@@ -1,4 +1,3 @@
-import { timeSince } from '#shared/time'
 import { globDir } from '#shared/fs'
 
 /**
@@ -18,29 +17,12 @@ export function Controller() {}
  * @param {object} tools - An object holding various tools & config
  */
 Controller.prototype.status = async (req, res, tools) => {
-  const { time_since, seconds_since } = timeSince(tools.config.start_time)
-
   /*
-   * Return this in any case
+   * Just get the status from core and pass it
    */
-  const base = {
-    name: tools.config.name,
-    about: tools.config.about,
-    version: tools.config.version,
-    uptime: time_since,
-    uptime_seconds: seconds_since,
-    setup: tools.config.setup,
-  }
+  const [status, result] = await tools.core.get(`/status`)
 
-  /*
-   * If Morio is not setup, return limited info
-   */
-  if (!tools.config.setup) return res.send(base)
-
-  return res.send({
-    ...base,
-    fixme: 'Handle post-setup status',
-  })
+  return res.status(status).send(result)
 }
 
 /**
@@ -55,7 +37,9 @@ Controller.prototype.status = async (req, res, tools) => {
 Controller.prototype.listDownloads = async (req, res, tools) => {
   const list = await globDir('/morio/tmp_static')
 
-  if (list) return res.send(list.map(file => file.replace("/morio/tmp_static", tools.prefix+'/downloads')))
-  else return res.status(500).send({ errors: [ 'Failed to read file list' ] })
+  if (list)
+    return res.send(
+      list.map((file) => file.replace('/morio/tmp_static', tools.prefix + '/downloads'))
+    )
+  else return res.status(500).send({ errors: ['Failed to read file list'] })
 }
-

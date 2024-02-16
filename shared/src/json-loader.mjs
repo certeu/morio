@@ -7,6 +7,10 @@
  *
  * This way, we just ignore this file in eslint and voila.
  */
-import pkg from '../package.json' assert { type: 'json' }
+import corePkg from '../../core/package.json' assert { type: 'json' }
+import apiPkg from '../../api/package.json' assert { type: 'json' }
 
-export { pkg }
+export {
+  corePkg,
+  apiPkg,
+}

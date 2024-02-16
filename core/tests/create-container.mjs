@@ -1,5 +1,6 @@
-import containerCreateBody from './bodies/container-create.json' assert { type: 'json' }
+import containerCreateBody from './bodies/container-create.mjs'
 
+/* eslint-disable no-undef */
 export const tests = async ({ chai, expect, config, store }) => {
   describe(`[CORE] Docker test container setup`, () => {
     /*
@@ -34,3 +35,4 @@ export const tests = async ({ chai, expect, config, store }) => {
     })
   })
 }
+/* eslint-enable no-undef */

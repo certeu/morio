@@ -1,6 +1,6 @@
 import chai from 'chai'
 import http from 'chai-http'
-import { fromEnv } from '#shared/env'
+import { getPreset } from '#config'
 
 const expect = chai.expect
 chai.use(http)
@@ -10,6 +10,6 @@ export const setup = async () => ({
   expect,
   store: {},
   config: {
-    api: `http://localhost:${fromEnv('MORIO_API_PORT')}${fromEnv('MORIO_API_PREFIX')}`,
+    api: `http://localhost:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`,
   },
 })

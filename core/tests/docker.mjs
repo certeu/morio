@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export const tests = async ({ chai, expect, config, store }) => {
   describe(`[CORE] Docker tests`, () => {
     it(`Should show docker info`, (done) => {
@@ -160,23 +161,6 @@ export const tests = async ({ chai, expect, config, store }) => {
         })
     })
 
-    it(`Should list configs`, (done) => {
-      chai
-        .request(config.api)
-        .get('/docker/configs')
-        .end((err, res) => {
-          if (res.status === 500)
-            expect(res.body.error.indexOf('not a swarm manager') !== -1).to.equal(true)
-          else {
-            expect(res.status).to.equal(200)
-            expect(Array.isArray(res.body)).to.equal(true)
-          }
-          expect(res.type).to.equal('application/json')
-          expect(res.charset).to.equal('utf-8')
-          done()
-        })
-    })
-
     it(`Should list plugins`, (done) => {
       chai
         .request(config.api)
@@ -217,3 +201,4 @@ export const tests = async ({ chai, expect, config, store }) => {
     })
   })
 }
+/* eslint-enable no-undef */

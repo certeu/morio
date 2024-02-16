@@ -114,6 +114,11 @@ export function routes(tools) {
   app.get(`${PREFIX}/configs/current`, (req, res) => Core.getCurrentConfig(req, res, tools))
 
   /*
+   * Hit this route to get the running settings
+   */
+  app.get(`${PREFIX}/settings/current`, (req, res) => Core.getCurrentSettings(req, res, tools))
+
+  /*
    * Hit this route to get the running presets
    */
   app.get(`${PREFIX}/presets`, (req, res) => Core.getPresets(req, res, tools))

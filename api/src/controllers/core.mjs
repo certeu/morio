@@ -1,4 +1,4 @@
-import { validateConfiguration } from '#lib/validation'
+import { validateSettings } from '#lib/validation'
 
 /**
  * This core controller provides access to morio core
@@ -124,7 +124,7 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
 }
 
 /**
- * Deploys a new configuration
+ * Deploys new settings
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -133,25 +133,25 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
  */
 Controller.prototype.deploy = async (req, res, tools) => {
   /*
-   * Validate configuration
+   * Validate settings
    */
-  const report = await validateConfiguration(req.body)
+  const report = await validateSettings(req.body)
 
   /*
-   * Make sure config is valid
+   * Make sure setting are valid
    */
-  if (!report.valid) return res.status(400).send({ errors: ['Config is not valid'], report })
+  if (!report.valid) return res.status(400).send({ errors: ['Settings are not valid'], report })
 
   /*
-   * Make sure config is deployable
+   * Make sure settings are deployable
    */
   if (!report.deployable)
-    return res.status(400).send({ errors: ['Config is not deployable'], report })
+    return res.status(400).send({ errors: ['Settings are not deployable'], report })
 
   /*
-   * Configuration is valid and deployable, pass it to core
+   * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await tools.core.post(`/config/deploy`, req.body)
+  const [status, result] = await tools.core.post(`/settings/deploy`, req.body)
 
   return res.status(status).send(result)
 }
@@ -193,6 +193,22 @@ Controller.prototype.getCurrentConfig = async (req, res, tools) => {
 
   if (result.deployment) {
     tools.config = result
+    return res.status(status).send(result)
+  } else return res.status(500).send()
+}
+
+/**
+ * Loads the current settings from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.getCurrentSettings = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/settings/current`)
+
+  if (result.deployment) {
+    tools.settings = result
     return res.status(status).send(result)
   } else return res.status(500).send()
 }

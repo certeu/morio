@@ -1,12 +1,3 @@
-const tls = [{
-  name: 'external',
-  enabled: true,
-  cert_file: '/etc/redpanda/tls-cert.pem',
-  key_file: '/etc/redpanda/tls-key.pem',
-  truststore_file: '/etc/redpanda/tls-ca.pem',
-  require_client_auth: true,
-}]
-
 /*
  * Export a single method that resolves the service configuration
  */

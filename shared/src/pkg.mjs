@@ -1,3 +1,3 @@
-import { pkg } from './json-loader.mjs'
+import { corePkg, apiPkg } from './json-loader.mjs'
 
-export { pkg }
+export { corePkg, apiPkg }

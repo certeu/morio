@@ -18,9 +18,9 @@ export function routes(tools) {
   const PREFIX = tools.getPreset('MORIO_API_PREFIX')
 
   /*
-   * Validates a Morio configuration
+   * Validates Morio settings
    */
-  app.post(`${PREFIX}/validate/config`, (req, res) => Validate.configuration(req, res, tools))
+  app.post(`${PREFIX}/validate/settings`, (req, res) => Validate.settings(req, res, tools))
 
   /*
    * Validates a (potential) Morio node

@@ -1,4 +1,4 @@
-import { validate, validateConfiguration, validateNode } from '#lib/validation'
+import { validate, validateSettings, validateNode } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
 
 /**
@@ -12,27 +12,27 @@ import { schemaViolation } from '#lib/response'
 export function Controller() {}
 
 /**
- * Validate a Morio configuration
+ * Validate Morio settings
  *
- * This allows people to validate a configuration prior to applying it.
+ * This allows people to validate a settings object prior to applying it.
  * Which should hopefully avoid at least some mistakes.
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.configuration = async (req, res, tools) => {
+Controller.prototype.settings = async (req, res, tools) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate('validate.configuration', req.body)
+  const [valid, err] = await validate('validate.settings', req.body)
   if (!valid) return schemaViolation(err, res)
 
   /*
    * Run the config validateion helper, which takes proposed and current
    * config and returns a report object
    */
-  const report = await validateConfiguration(valid.config, tools)
+  const report = await validateSettings(valid.settings, tools)
 
   return res.send(report).end()
 }

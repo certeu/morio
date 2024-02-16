@@ -5,9 +5,11 @@ import { tests as dockerTests } from './docker.mjs'
 import { tests as createContainer } from './create-container.mjs'
 import { tests as containerTests } from './container.mjs'
 
+/* eslint-disable no-undef */
+
 const runTests = async (props) => {
-  //await statusTests(props)
-  //await setupTests(props)
+  await statusTests(props)
+  await setupTests(props)
   await dockerTests(props)
   await createContainer(props)
   await containerTests(props)
@@ -18,3 +20,5 @@ const props = await setup()
 
 // Note run the tests using this data
 runTests(props)
+
+/* eslint-enable no-undef */

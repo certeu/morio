@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export const tests = async ({ chai, expect, config, store }) => {
   describe(`[CORE] Docker container tests`, () => {
     it(`Should show inspect of a specific container`, (done) => {
@@ -26,17 +27,6 @@ export const tests = async ({ chai, expect, config, store }) => {
         })
     }).timeout(5000)
 
-    it(`Should show logs of a specific container`, (done) => {
-      chai
-        .request(config.api)
-        .get(`/docker/containers/${store.container.id}/logs`)
-        .end((err, res) => {
-          expect(res.status).to.equal(200)
-          expect(res.type).to.equal('text/html')
-          done()
-        })
-    }).timeout(5000)
-
     for (const state of ['pause', 'unpause', 'stop', 'start', 'kill']) {
       it(`Should ${state} a specific container`, (done) => {
         chai
@@ -50,3 +40,4 @@ export const tests = async ({ chai, expect, config, store }) => {
     }
   })
 }
+/* eslint-enable no-undef */

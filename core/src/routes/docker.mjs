@@ -21,10 +21,7 @@ export function routes(tools) {
    * API routes to get data from a specific container
    */
   app.get(`/docker/containers/:id`,              (req, res) => Docker.getContainerData(req, res, tools, 'inspect'))
-  app.get(`/docker/containers/:id/logs`,         (req, res) => Docker.getContainerData(req, res, tools, 'logs', { follow: false, stdout: true, stderr: true, timestamps: true }))
   app.get(`/docker/containers/:id/stats`,        (req, res) => Docker.getContainerData(req, res, tools, 'stats', { stream: false }))
-  app.get(`/docker/containers/:id/stream/logs`,  (req, res) => Docker.getContainerData(req, res, tools, 'logs', { follow: true, stdout: true, stderr: true, timestamps: true }))
-  app.get(`/docker/containers/:id/stream/stats`, (req, res) => Docker.getContainerData(req, res, tools, 'stats', { stream: true }))
 
   /*
    * API routes to get data from a specific container image
@@ -52,7 +49,6 @@ export function routes(tools) {
    */
   app.post(`/docker/container`, (req, res) => Docker.createResource(req, res, tools, 'createContainer'))
   app.post(`/docker/secret`,    (req, res) => Docker.createResource(req, res, tools, 'createSecret'))
-  app.post(`/docker/config`,    (req, res) => Docker.createResource(req, res, tools, 'createConfig'))
   app.post(`/docker/plugin`,    (req, res) => Docker.createResource(req, res, tools, 'createPlugin'))
   app.post(`/docker/volume`,    (req, res) => Docker.createResource(req, res, tools, 'createVolume'))
   app.post(`/docker/service`,   (req, res) => Docker.createResource(req, res, tools, 'createService'))
