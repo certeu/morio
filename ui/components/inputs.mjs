@@ -291,7 +291,7 @@ export const TextInput = ({
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
 }) => (
-  <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id}>
+  <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} isValid={valid(current)}>
     <textarea
       id={id}
       disabled={disabled}
@@ -311,12 +311,13 @@ export const TextInput = ({
  */
 export const ListInput = ({
   update, // the onChange handler
+  valid, // Method that should return whether the value is valid or not
   label, // The label
   list, // The list of items to present { val, label, about }
   current, // The (value of the) current item
   disabled = false, // Allows rendering a disabled view
 }) => (
-  <FormControl label={label}>
+  <FormControl label={label} isValid={valid(current)}>
     {list.map((item, i) => {
       const entry =
         typeof item.val === 'object' && item.val.type === 'select' ? (
@@ -379,6 +380,7 @@ export const ListInput = ({
  */
 export const FileInput = ({
   label, // The label
+  valid, // Method that should return whether the value is valid or not
   update, // The onChange handler
   current, // The current value
   original, // The original value
@@ -407,7 +409,7 @@ export const FileInput = ({
    */
   if (current)
     return (
-      <FormControl label={label}>
+      <FormControl label={label} isValid={valid(current)}>
         <div className="bg-base-100 w-full h-36 mb-2 mx-auto flex flex-col items-center text-center justify-center">
           <button
             className="btn btn-neutral btn-circle opacity-50 hover:opacity-100"
@@ -423,7 +425,7 @@ export const FileInput = ({
    * Return upload form
    */
   return (
-    <FormControl label={label} forId={id}>
+    <FormControl label={label} forId={id} isValid={valid(current)}>
       <div
         {...getRootProps()}
         className={`

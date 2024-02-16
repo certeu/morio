@@ -48,10 +48,15 @@ export const deployment = (context, toggleValidate) => {
           {
             linearTabs: true,
             tabs: {
-              'Deployment Type': [
+              Size: [
+                '### __Size__: Standalone or Cluster?',
+                `##### Choose your deployment size`,
                 {
                   key: 'deployment.node_count',
-                  schema: Joi.number(),
+                  schema: Joi.number()
+                    .valid(1, 3, 5, 7, 9, 11, 13, 15)
+                    .required()
+                    .label('Node Count'),
                   inputType: 'buttonList',
                   title: 'Node vs Cluster',
                   lockOnEdit: true,
@@ -100,32 +105,40 @@ export const deployment = (context, toggleValidate) => {
                   ],
                 },
               ],
-              Names: (context.deployment?.node_count
-                ? [...Array(context.deployment?.node_count || 0)].map((un, i) => ({
-                    key: `nodes.${i}`,
-                    label: `Node ${i + 1} FQDN`,
-                    labelBL: `Enter the fully qualified domain name of node ${i + 1}`,
-                    placeholder: `morio-node${i + 1}.my.domain.com`,
-                    lockOnEdit: true,
-                    schema: Joi.string().hostname().required().label('FQDN'),
-                  }))
-                : [
-                    <Popout tip>
-                      <h5>You need to choose a cluster size first</h5>
-                      <p>Once you have chosen a cluster size, you can enter the node names here.</p>
-                    </Popout>,
-                  ]
-              ).concat([
+              Names: [
+                '### __Names__: One global, and one for each node',
+                '##### A global display name for this Morio deployment',
                 {
-                  key: 'display_name',
+                  key: 'deployment.display_name',
                   schema: Joi.string().required().label('Display Name'),
                   label: 'Display Name',
                   labelBL: 'A human-friendly name to refer to this Morio setup',
                   lockOnEdit: true,
                   placeholder: 'Morio Production',
                 },
-              ]),
-              'Cluster Settings': [
+                '&nbsp;',
+                '##### DNS names for the nodes in this deployment',
+              ].concat(
+                context.deployment?.node_count
+                  ? [...Array(context.deployment?.node_count || 0)].map((un, i) => ({
+                      key: `deployment.nodes.${i}`,
+                      label: `Node ${i + 1} FQDN`,
+                      labelBL: `Enter the fully qualified domain name of node ${i + 1}`,
+                      placeholder: `morio-node${i + 1}.my.domain.com`,
+                      lockOnEdit: true,
+                      schema: Joi.string().hostname().required().label('FQDN'),
+                    }))
+                  : [
+                      <Popout tip>
+                        <h5>You need to choose a cluster size first</h5>
+                        <p>
+                          Once you have chosen a cluster size, you can enter the node names here.
+                        </p>
+                      </Popout>,
+                    ]
+              ),
+              Cluster: [
+                '### __Cluster__: Requires a few extra settings',
                 '##### Cluster Name',
                 'This name should resolve to the IP addresses of all cluster nodes.',
                 {
@@ -141,28 +154,21 @@ export const deployment = (context, toggleValidate) => {
                 },
                 '&nbsp;',
                 '##### Leader IP Address',
-                `In addition to the name, we need the IP address of the leader node (this node).`,
+                `The IPv4 address of the leader node (this node).`,
                 {
                   key: 'deployment.leader_ip',
                   label: 'Leader IP Address',
-                  labelBL: 'A fully qualified domain name for the entire Morio cluster',
-                  labelBR: (
-                    <span className="italic opacity-70">
-                      Create a round-robin A record for this
-                    </span>
-                  ),
+                  labelBL: 'An IPv4 address',
                   schema: Joi.string()
                     .ip({ version: 'ipv4', cidr: 'forbidden' })
                     .required()
                     .label('Leader IP Address'),
                 },
               ],
-              'Validate Settings': [
-                '## Validate Settings',
-                'No changes will be made to your Morio setup at this time.  ' +
-                  `
-                Instead, the settings you created will be validated to detect potential issues.`,
-                'If you are ready, click below to start the validation',
+              Validate: [
+                '### __Validate__: All systems go?',
+                'Before we deploy Morio using these settings, we will run a series of validation tests.',
+                'No changes will be made at this time. Click below to start the tests.',
                 <p className="text-center">
                   <button className="btn btn-primary btn-lg px-12 mt-4" onClick={toggleValidate}>
                     Validate Morio Settings
@@ -177,7 +183,7 @@ export const deployment = (context, toggleValidate) => {
   }
 
   if (!context.deployment?.node_count || context.deployment.node_count < 2) {
-    delete template.children.setup.form[0].tabs['Cluster Settings']
+    delete template.children.setup.form[0].tabs.Cluster
   }
   if (!toggleValidate) delete template.children.setup.form[0].tabs['Validate Settings']
 

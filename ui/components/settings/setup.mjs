@@ -15,7 +15,7 @@ import { useAtom } from 'jotai'
 // Components
 import { Block } from './blocks/index.mjs'
 import { Yaml } from 'components/yaml.mjs'
-import { ConfigReport, DeploymentReport } from './report.mjs'
+import { SettingsReport, DeploymentReport } from './report.mjs'
 import { RightIcon } from 'components/icons.mjs'
 import { Spinner } from 'components/animations.mjs'
 import { ValidationErrors } from 'components/inputs.mjs'
@@ -38,7 +38,8 @@ const ShowConfigurationValidation = ({
   <>
     {validationReport ? (
       <>
-        <ConfigReport report={validationReport} />
+        <h3>Validation Results</h3>
+        <SettingsReport report={validationReport} />
         {validationReport.valid ? (
           <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
             Deploy Configuration
@@ -51,12 +52,13 @@ const ShowConfigurationValidation = ({
           <LogoSpinner />
         </div>
         One moment please
-        <br />
-        <button className="btn btn-primary btn-ghost mt-4" onClick={toggleValidate}>
-          Back to Settings
-        </button>
       </div>
     )}
+    <p className="text-center">
+      <button className="btn btn-primary btn-ghost mt-4" onClick={toggleValidate}>
+        Back to Settings
+      </button>
+    </p>
   </>
 )
 
@@ -105,13 +107,13 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
         <div className="w-full max-w-xl">
           {deployResult ? (
             <>
-              <h3>Deploy accepted</h3>
+              <h3>Deployment initiated</h3>
               <DeploymentReport result={deployResult} />
             </>
           ) : (
             <>
               <h3>Deploy requested</h3>
-              <p>Please wait while your configuration is being deployed.</p>
+              <p>Please wait while your settings are being deployed.</p>
               <Spinner />
             </>
           )}

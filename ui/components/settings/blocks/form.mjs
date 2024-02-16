@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Fragment } from 'react'
 import Markdown from 'react-markdown'
 import {
   StringInput,
@@ -47,15 +47,20 @@ export const FormBlock = (props) => {
       {form.map((val, i) => {
         if (Array.isArray(val))
           return (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2" key={i}>
               <FormBlock {...props} form={val} />
             </div>
           )
-        if (typeof val === 'string') return <Markdown key={i}>{val}</Markdown>
+        if (typeof val === 'string')
+          return (
+            <div className="mdx">
+              <Markdown key={i}>{val}</Markdown>
+            </div>
+          )
         if (typeof val === 'object') {
           if (val.tabs)
             return (
-              <Tabs {...val} tabs={Object.keys(val.tabs).join()} navs>
+              <Tabs {...val} tabs={Object.keys(val.tabs).join()} navs key={i}>
                 {Object.keys(val.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
                     <FormBlock {...props} form={val.tabs[key]} />
@@ -66,6 +71,7 @@ export const FormBlock = (props) => {
           if (Joi.isSchema(val.schema))
             return (
               <FormElement
+                key={i}
                 {...val}
                 update={(input) =>
                   typeof val.transform === 'function'
@@ -77,9 +83,9 @@ export const FormBlock = (props) => {
                 {...{ formValidation, updateFormValidation }}
               />
             )
-          if (React.isValidElement(val)) return val
-          else return <p>val.schema is no schema</p>
-        } else return <p>Not sure what to do with {i}</p>
+          if (React.isValidElement(val)) return <Fragment key={i}>{val}</Fragment>
+          else return <p key={i}>val.schema is no schema</p>
+        } else return <p key={i}>Not sure what to do with {i}</p>
       })}
     </>
   )

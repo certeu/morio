@@ -12,7 +12,7 @@ const TabnavButtons = ({ activeTab, setActiveTab, tablist, linearTabs = false })
   }
 
   return (
-    <div className="flex flex-row items-center w-full justify-between">
+    <div className="flex flex-row items-center w-full justify-between mt-4">
       {navids.prev === false ? (
         <span></span>
       ) : (

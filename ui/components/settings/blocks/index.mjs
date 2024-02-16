@@ -11,11 +11,11 @@ import { FormWrapper } from './form.mjs'
  * Map between type in wizard config and React component
  */
 const blocks = {
-  info: InfoBlock,
+  //info: InfoBlock,
   form: FormWrapper,
-  list: ListBlock,
-  string: StringBlock,
-  strings: StringsBlock,
+  //list: ListBlock,
+  //string: StringBlock,
+  //strings: StringsBlock,
   connectorInputs: ConnectorInputs,
   connectorOutputs: ConnectorOutputs,
   connectorPipelines: ConnectorPipelines,

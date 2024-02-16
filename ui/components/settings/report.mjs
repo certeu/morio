@@ -9,19 +9,19 @@ import { Highlight } from 'components/highlight.mjs'
 import { Popout } from 'components/popout.mjs'
 
 /**
- * A React component to display a configuration report
+ * A React component to display a settings report
  *
  * @param {object} report - The report object returns from the API
  * @return {functino} component - The React component
  */
-export const ConfigReport = ({ report }) => (
+export const SettingsReport = ({ report }) => (
   <div className="py-2">
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
         <div className="text-inherit">
-          This configuration
-          {report.valid ? <span> is </span> : <b className="px-1 underline">is NOT</b>}
+          These settings
+          {report.valid ? <span> are </span> : <b className="px-1 underline">are NOT</b>}
           valid
         </div>
       </div>
@@ -30,14 +30,14 @@ export const ConfigReport = ({ report }) => (
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
         <div className="text-inherit">
-          This configuration
+          These settings
           {report.valid ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
           be deployed
         </div>
       </div>
     </Box>
     {['errors', 'warnings', 'info'].map((type) =>
-      report[type].length > 0 ? (
+      report[type] && report[type].length > 0 ? (
         <div key={type} className="mt-3">
           <h6 className="capitalize">{type}</h6>
           <Messages list={report[type]} />
@@ -58,7 +58,7 @@ export const DeploymentReport = ({ result }) => {
       <Box color="success">
         <div className="flex flex-row gap-4 items-center w-full">
           <OkIcon stroke={4} />
-          Configuration was <b>accepted</b> for deployment
+          Settings were <b>accepted</b> for deployment
         </div>
       </Box>
       {result.fresh_deploy && result.root_token ? (
@@ -66,28 +66,10 @@ export const DeploymentReport = ({ result }) => {
           <h5>Store the Morio Root Token in a safe place now</h5>
           <p>Below is the Morio Root Token for this deployment:</p>
           <Highlight title="Root Token">{result.root_token}</Highlight>
-          <p>
-            You should use it as your initial login before configuring an authentication provider.
-          </p>
         </Popout>
       ) : null}
       <h4>What now?</h4>
-      <p>
-        Morio core will reconfigure this Morio deployment to run{' '}
-        <button
-          className=""
-          onClick={() =>
-            setModal(
-              <ModalWrapper>
-                <Highlight language="json" js={result.config} />
-              </ModalWrapper>
-            )
-          }
-        >
-          the new configuration
-        </button>
-        .
-      </p>
+      <p>Morio core will configure this Morio deployment according to these settings.</p>
       <p>Give it some time until the logs stabilize and you see this line:</p>
       <pre>Morio Core ready - Configuration resolved</pre>
       <p>
@@ -103,7 +85,7 @@ export const DeploymentReport = ({ result }) => {
 }
 
 /**
- * A React compnent to display messages from a configuration report
+ * A React compnent to display messages from a settings report
  */
 const Messages = ({ list }) => (
   <ul className="list list-disc list-inside pl-2">
