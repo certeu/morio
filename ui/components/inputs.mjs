@@ -299,7 +299,7 @@ export const TextInput = ({
       placeholder={placeholder}
       value={current}
       onChange={(evt) => update(evt.target.value)}
-      className={`input w-full input-bordered h-36 ${
+      className={`input w-full input-bordered h-36 py-2 ${
         current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
       }`}
     />

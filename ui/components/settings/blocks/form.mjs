@@ -183,29 +183,7 @@ export const FormWrapper = (props) => {
         >
           Close
         </button>
-      ) : (
-        <>
-          <div className="grid grid-cols-3 gap-2 mt-4">
-            <button
-              className={`btn btn-primary w-full ${
-                props.setModal ? 'col-span-2' : 'col-span-1 col-start-2'
-              }`}
-              disabled={props.disabled || done < 100}
-              onClick={process}
-            >
-              {props.btn ? props.btn : 'Save'}
-            </button>
-            {props.setModal ? (
-              <button
-                className="btn btn-primary btn-outline w-full"
-                onClick={() => props.setModal(false)}
-              >
-                Cancel
-              </button>
-            ) : null}
-          </div>
-        </>
-      )}
+      ) : null}
     </>
   )
 }
