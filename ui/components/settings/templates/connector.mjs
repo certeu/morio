@@ -97,6 +97,8 @@ export const connector = () => ({
           title: 'IMAP',
           about: 'Reads mail from an IMAP server',
           desc: 'Use this to read incoming email from a mail server over IMAP',
+          local: (data) => `connector.inputs.${data.id}`,
+          btn: 'Create IMAP Input',
           form: [
             `##### Create a new IMAP connector input`,
             {

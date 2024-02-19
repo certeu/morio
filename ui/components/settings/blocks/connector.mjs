@@ -197,8 +197,8 @@ const BlockItems = (props) => {
 }
 
 export const ConnectorXputs = (props) => {
-  const xputs = props.mConf?.connector?.[props.type + 's']
-    ? props.mConf.connector[props.type + 's']
+  const xputs = props.mSettings?.connector?.[props.type + 's']
+    ? props.mSettings.connector[props.type + 's']
     : {}
 
   return (

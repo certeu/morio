@@ -21,16 +21,14 @@ export const Highlight = (props) => {
     if (language.indexOf('.') !== -1) language = language.split('.')[0]
   }
 
-  const preProps = {
-    className: `${language} language-${language} hljs text-base whitespace-break-spaces overflow-auto px-4 py-2`,
-  }
+  const preProps = { language, className: language }
   if (props.raw) preProps.dangerouslySetInnerHTML = { __html: props.raw }
 
   const content = props.js
     ? isError(props.js)
       ? JSON.stringify('' + props.js, null, 2)
       : language === 'yaml'
-        ? yaml.stringify(props.js, null, 2)
+        ? yaml.stringify(props.js)
         : JSON.stringify(props.js, null, 2)
     : props.children
 

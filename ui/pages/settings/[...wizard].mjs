@@ -1,8 +1,6 @@
 import dynamic from 'next/dynamic'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 
-const prefix = '/config'
-
 /*
  * Avoid hydration woes with a dynamic import and disabled SSR rendering
  */
@@ -14,12 +12,7 @@ const DynamicSettingsWizard = dynamic(
 const SettingsPage = (props) => {
   return (
     <PageWrapper {...props}>
-      <DynamicSettingsWizard
-        preloadView={props.view}
-        splash={false}
-        prefix={prefix}
-        page={props.page}
-      />
+      <DynamicSettingsWizard preloadView={props.view} page={props.page} />
     </PageWrapper>
   )
 }

@@ -67,7 +67,7 @@ const icons = {
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
-  wizard: WrenchIcon,
+  start: WrenchIcon,
 }
 
 /*
@@ -86,7 +86,7 @@ export const links = {
     presets: {
       t: 'Show Presets',
     },
-    wizard: {
+    start: {
       t: 'Update Settings',
     },
   },

@@ -7,6 +7,7 @@ export const Yaml = (props) => {
   if (props.json) code = yaml.dump(JSON.parse(props.json))
   else if (props.js) code = yaml.dump(props.js)
   else code = props.children
+  console.log(hljs.highlight(code, { language: 'yaml' }))
 
   return <Highlight language="yaml" raw={hljs.highlight(code, { language: 'yaml' }).value} />
 }

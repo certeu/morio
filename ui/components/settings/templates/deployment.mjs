@@ -14,28 +14,6 @@ import { Popout } from 'components/popout.mjs'
  * setup template.
  */
 export const deployment = (context, toggleValidate) => {
-  /*
-   * Helper object for those settings blocks that
-   * should remain locked until we know the node_count
-   */
-  const nodeCountFirst = context.mConf?.deployment?.node_count
-    ? false
-    : ({ setView, template }) => (
-        <>
-          <p>
-            You need to complete the <b>{template.children.node_count.title}</b> settings first.
-          </p>
-          <p className="text-right">
-            <button
-              className="btn btn-warning px-8"
-              onClick={() => setView('deployment/node_count')}
-            >
-              Fix it
-            </button>
-          </p>
-        </>
-      )
-
   const template = {
     title: 'Morio Initial Setup',
     type: 'info',
@@ -43,10 +21,12 @@ export const deployment = (context, toggleValidate) => {
     children: {
       setup: {
         type: 'form',
-        title: 'fixme',
+        lockOnEdit: true,
+        title: 'Morio Deployment',
         form: [
           {
             linearTabs: true,
+            setupOnly: true,
             tabs: {
               Size: [
                 '### __Size__: Standalone or Cluster?',
@@ -186,6 +166,14 @@ export const deployment = (context, toggleValidate) => {
     delete template.children.setup.form[0].tabs.Cluster
   }
   if (!toggleValidate) delete template.children.setup.form[0].tabs['Validate Settings']
+  if (context.version) {
+    delete template.children.setup.form
+    template.children.setup.type = 'mdx'
+    template.children.setup.mdx = [
+      '### Morio Deployment',
+      'These settings cannot be changed. You can review the current settings at [/settings/show](/settings/show).',
+    ]
+  }
 
   return template
 }

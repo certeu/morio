@@ -34,13 +34,15 @@ export const objUpdate = (obj = {}, path, val = 'MORIO_UNSET') => {
 export const useStateObject = (dflt = {}) => {
   const [obj, setObj] = useState(dflt)
 
-  const update = (path, val) => {
-    const newObj = { ...obj }
+  const replace = (val) => setObj(val)
+
+  const update = (path, val, altObj = false) => {
+    const newObj = altObj ? { ...altObj } : { ...obj }
     objUpdate(newObj, path, val)
     setObj(newObj)
 
     return newObj
   }
 
-  return [obj, update, setObj]
+  return [obj, update, replace]
 }

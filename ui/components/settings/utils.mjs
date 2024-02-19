@@ -1,15 +1,16 @@
 /**
- * A helper method to turn a wizard url into a settings path
+ * A helper method to turn a wizard url into a section path
  *
  * Eg: Turns core.node_count into `${prefix}/core/node_count`
  *
  * @param {string} url
  */
-export const viewAsSettingsPath = (view, prefix) =>
+export const viewAsSectionPath = (view, prefix) =>
   view
     ? view
         .slice(prefix.length + 1)
         .split('/')
+        .filter((el) => el.length > 0)
         .join('.')
     : prefix
 
@@ -18,5 +19,5 @@ export const viewAsSettingsPath = (view, prefix) =>
  *
  * Eg: Turns `${prefix}/core/node_count` into core.node_count
  */
-export const settingsPathAsView = (path, prefix) =>
+export const sectionPathAsView = (path, prefix) =>
   path ? prefix + '/' + path.split('.').join('/') : prefix

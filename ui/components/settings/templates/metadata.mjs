@@ -3,11 +3,11 @@ import { Popout } from 'components/popout.mjs'
 import { slugify } from 'lib/utils.mjs'
 
 /*
- * Meta data
+ * Metadata
  *
  * This holds the configuration wizard view settings for metadata
  */
-export const meta = () => ({
+export const metadata = () => ({
   about: `This is metadata that helps telling different configurations apart.`,
   title: 'Metadata',
   type: 'info',
@@ -21,8 +21,8 @@ export const meta = () => ({
           schema: Joi.string().required(),
           label: 'Comment',
           placeholder: `Write your comment here`,
-          textarea: true,
-          key: 'msg',
+          textarea: false,
+          key: 'metadata.comment',
         },
       ],
     },

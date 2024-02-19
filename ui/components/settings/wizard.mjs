@@ -1,7 +1,7 @@
 // Dependencies
 import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
-import { validate, validateConfiguration } from 'lib/utils.mjs'
+import { validate, validateSettings } from 'lib/utils.mjs'
 // Templates
 import { templates } from './templates/index.mjs'
 // Context
@@ -14,54 +14,72 @@ import { useAtom } from 'jotai'
 // Components
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
-import { Yaml } from 'components/yaml.mjs'
-import { ConfigReport, DeploymentReport } from './report.mjs'
+import { Highlight } from 'components/highlight.mjs'
+import { settingsReport, DeploymentReport } from './report.mjs'
 import { RightIcon, SettingsIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import yaml from 'yaml'
 import { SettingsNavigation } from './navigation.mjs'
-import { viewAsSettingsPath, settingsPathAsView } from './utils.mjs'
+import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
+
+const Welcome = () => (
+  <>
+    <h3>Getting started</h3>
+    <h5>About sections and groups</h5>
+    <p>
+      Settings are organized in <b>sections</b> and grouped in <b>groups</b>.
+      <br />
+      Groups merely add structure, and do not hold any settings, only sections do.
+    </p>
+    <h5>Undertanding state</h5>
+    <p>
+      Settings are kept in browser state, until you save them.
+      <br />
+      If you reload the page, your changes are lost.
+    </p>
+  </>
+)
 
 /**
- * Displays configuration validation
+ * Displays settings validation
  */
-const ShowConfigurationValidation = ({
+const ShowSettingsValidation = ({
   api,
-  mConf,
+  mSettings,
   deploy,
   validationReport,
   setValidationReport,
-  validateConfiguration,
+  validateSettings,
   setLoadingStatus,
 }) => (
   <>
     {validationReport ? (
       <>
-        <ConfigReport report={validationReport} />
+        <SettingsReport report={validationReport} />
         {validationReport.valid ? (
           <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
-            Deploy Configuration
+            Deploy Settings
           </button>
         ) : null}
       </>
     ) : (
       <>
-        <h3>Validate Configuration</h3>
+        <h3>Validate Settings</h3>
         <p>
           No changes will be made to your Morio setup at this time.
           <br />
-          Instead, the configuration you created will be validated and tested to detect any
-          potential issues.
+          Instead, the settings you created will be validated and tested to detect any potential
+          issues.
         </p>
         <p className="text-center">
           <button
             className="btn btn-primary w-full"
             onClick={async () =>
-              setValidationReport(await validateConfiguration(api, mConf, setLoadingStatus))
+              setValidationReport(await validateSettings(api, mSettings, setLoadingStatus))
             }
           >
-            Validate Configuration
+            Validate Settings
           </button>
         </p>
       </>
@@ -70,20 +88,19 @@ const ShowConfigurationValidation = ({
 )
 
 /**
- * Displays configuration preview (or a button to show it)
+ * Displays settings preview (or a button to show it)
  */
-const ShowConfigurationPreview = ({ preview, setPreview, mConf }) =>
+const ShowSettingsPreview = ({ preview, setPreview, mSettings }) =>
   preview ? (
     <div className="w-full mt-8">
-      <h3>Configuration Preview</h3>
-      <pre>{JSON.stringify(mConf, null, 2)}</pre>
-      <Yaml js={mConf} />
+      <h3>Settings Preview</h3>
+      <Highlight language="yaml">{yaml.stringify(mSettings)}</Highlight>
       <p className="text-center">
         <button
           onClick={() => setPreview(!preview)}
           className="btn btn-ghost font-normal text-primary"
         >
-          Hide configuration preview
+          Hide settings preview
         </button>
       </p>
     </div>
@@ -93,7 +110,7 @@ const ShowConfigurationPreview = ({ preview, setPreview, mConf }) =>
         onClick={() => setPreview(!preview)}
         className="btn btn-ghost font-normal text-primary"
       >
-        Show configuration preview
+        Show settings preview
       </button>
     </p>
   )
@@ -106,74 +123,77 @@ export const viewInLocation = atomWithLocation('deployment/node_count')
 /*
  * Start wizard with this view
  */
-const startView = 'edit'
+const startView = 'start'
 
 /**
- * This is the React component for the configuration wizard itself
+ * This is the React component for the settings wizard itself
  */
-export const SettingsWizard = ({
-  prefix = '/config/wizard', // Prefix to use for the keeping the view state in the URL
-}) => {
+export const SettingsWizard = (props) => {
+  const [runningSettings, setRunningSettings] = useState(false) // Holds the current running settings
+  const [revert, setRevert] = useState(0)
+  const { api } = useApi()
+
+  /*
+   * Effect for loading the running settings
+   */
+  useEffect(() => {
+    const getRunningSettings = async () => {
+      const result = await api.getCurrentSettings()
+      if (result[1] === 200 && result[0].deployment) {
+        const newMSettings = { ...result[0] }
+        setRunningSettings(JSON.parse(JSON.stringify(newMSettings)))
+      } else console.log('nope', result)
+    }
+    getRunningSettings()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [revert])
+
+  return runningSettings?.metadata ? (
+    <PrimedSettingsWizard {...props} {...{ runningSettings, revert, setRevert }} />
+  ) : (
+    <p>One moment please...</p>
+  )
+}
+
+/**
+ * This is the React component for the settings wizard itself
+ */
+export const PrimedSettingsWizard = (props) => {
+  /*
+   * Destructure props
+   */
+  const { prefix = '/settings', runningSettings, revert, setRevert } = props
+
   /*
    * React state
    */
-  const [runningConfig, setRunningConfig] = useState(false) // Holds the current running config
-  const [mConf, update, setMConf] = useStateObject({}) // Holds the config this wizard builds
+  const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings this wizard builds
   const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
-  const [preview, setPreview] = useState(false) // Whether or not to show the config preview
+  const [preview, setPreview] = useState(false) // Whether or not to show the settings preview
   const [deployResult, setDeployResult] = useState(false)
-  const [revert, setRevert] = useState(0)
   const [showDelta, setShowDelta] = useState(false)
 
   /*
-   * Figure out the current settingsPath from the view
+   * Figure out the current sectionPath from the view
    */
-  const settingsPath = viewAsSettingsPath(view.pathname, prefix)
+  const sectionPath = viewAsSectionPath(view.pathname, prefix)
 
   /*
    * Handler method for view state updates
    */
   const setView = useCallback(
-    (settingsPath) => {
+    (sectionPath) => {
+      console.log('setting view to', sectionPath)
       _setView((prev) => ({
         ...prev,
-        pathname: settingsPathAsView(settingsPath, prefix),
+        pathname: sectionPathAsView(sectionPath, prefix),
       }))
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [prefix]
   )
-
-  /*
-   * Effect for preloading the view
-   */
-  useEffect(() => {
-    if (view === 'string' && startView !== view) setView(startView)
-    else if (view.pathname.slice(0, 14) === '/config/wizard') setView(startView)
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [startView, view, setView])
-
-  /*
-   * Effect for loading the running configuration
-   */
-  useEffect(() => {
-    const getRunningConfig = async () => {
-      const result = await api.getCurrentConfig()
-      if (result[1] === 200 && result[0].deployment) {
-        const newMConf = { ...result[0] }
-        delete newMConf.services
-        delete newMConf.containers
-        delete newMConf.deployment.key_pair
-        delete newMConf.core
-        setMConf(newMConf)
-        setRunningConfig(JSON.parse(JSON.stringify(newMConf)))
-      } else console.log('nope', result)
-    }
-    getRunningConfig()
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [revert])
 
   /*
    * API client
@@ -191,23 +211,25 @@ export const SettingsWizard = ({
    */
   const loadView = (key) => {
     setView(key)
-    if (key !== 'validate') setValid(validate(key, get(mConf, key), mConf))
+    if (key !== 'validate') setValid(validate(key, get(mSettings, key), mSettings))
     setValidationReport(false)
   }
 
   /*
-   * Helper method to deploy the configuration
+   * Helper method to deploy the settings
    */
   const deploy = async () => {
-    setLoadingStatus([true, 'Uploading configuration'])
-    const [data, status] = await api.deploy(mConf)
+    setLoadingStatus([true, 'Uploading settings'])
+    const [data, status] = await api.deploy(mSettings)
     if (data.result !== 'success' || status !== 200)
-      return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
+      return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
     else {
       setDeployResult(data)
       setLoadingStatus([true, 'Deployment initialized', true, true])
     }
   }
+
+  if (!mSettings.deployment) return null
 
   if (deployResult)
     return (
@@ -219,36 +241,31 @@ export const SettingsWizard = ({
   /*
    * Load the template and section
    */
-  const [group, section] = settingsPath.split('.')
-  const template = templates[group] ? templates[group]({ mConf }) : false
+  const [group, section] = sectionPath.split('.')
+  const template = templates[group] ? templates[group](mSettings) : false
 
   /*
-   * Handle config delta
+   * Handle settings delta
    */
   const delta =
-    diffCheck(yaml.stringify(runningConfig), yaml.stringify(mConf)).length > 1 ? true : false
-
-  /*
-   * Patch the navigation with an id
-   */
-  for (const key in template.children) template.children[key].id = `deployment.${key}`
+    diffCheck(yaml.stringify(runningSettings), yaml.stringify(mSettings)).length > 1 ? true : false
 
   const showProps =
     section === 'validate'
       ? {
           api,
-          mConf,
+          mSettings,
           deploy,
           validationReport,
           setValidationReport,
-          validateConfiguration,
+          validateSettings,
           setLoadingStatus,
         }
       : {
           update,
-          mConf,
+          data: mSettings,
           setValid,
-          settingsPath,
+          sectionPath,
           template,
           group,
           section,
@@ -260,56 +277,61 @@ export const SettingsWizard = ({
   return (
     <div className="flex flex-row gap-8 justify-start">
       <div className="w-full max-w-4xl p-8 grow">
-        <Breadcrumbs page={['config', ...settingsPath.split('.')]} />
+        <Breadcrumbs page={['settings', ...sectionPath.split('.')]} />
         <div className="w-full">
           <h1 className="capitalize flex w-full max-w-4xl justify-between">
             {template.children?.[section]?.title
               ? template.children[section]?.title
               : template.title
                 ? template.title
-                : 'Update Configuration'}
+                : 'Update Settings'}
             <SettingsIcon className="w-16 h-16" />
           </h1>
-          <Block {...showProps} edit={true} />
+          {template === false ? <Welcome /> : <Block {...showProps} edit={true} />}
           {delta ? (
             <Popout note>
               <h4>You have made changes that are yet to be deployed</h4>
               <p>
-                The configuration has been edited, and is now different from the currently deployed
-                configuration.
+                The settings habe been edited, and is now different from those currently deployed.
               </p>
               {showDelta ? (
                 <div className="my-4">
                   <DiffViewer
-                    from={yaml.stringify(runningConfig)}
-                    to={yaml.stringify(mConf)}
-                    fromTitle="Currently deployed configuration"
+                    from={yaml.stringify(runningSettings)}
+                    to={yaml.stringify(mSettings)}
+                    fromTitle="Currently deployed settings"
                     toTitle="Your edits"
                   />
                 </div>
               ) : null}
               <div className="flex flex-row flex-wrap gap-2 justify-end w-full">
                 <button className="btn btn-warning btn-ghost" onClick={() => setRevert(revert + 1)}>
-                  Revert to Running Configuration
+                  Revert to Running Settings
                 </button>
                 <button
                   className="btn btn-primary btn-outline"
                   onClick={() => setShowDelta(!showDelta)}
                 >
-                  {showDelta ? 'Hide' : 'Show'} Configuration Delta
+                  {showDelta ? 'Hide' : 'Show'} Settings Delta
                 </button>
                 <button className="btn btn-primary" onClick={() => setView('validate')}>
-                  Validate Configuration Changes
+                  Validate Changed to Settings
                 </button>
               </div>
             </Popout>
           ) : null}
-          <ShowConfigurationPreview {...{ preview, setPreview, mConf }} />
+          <ShowSettingsPreview {...{ preview, setPreview, mSettings }} />
         </div>
       </div>
       <div className="grow-0 shrink-0 pt-24 min-h-screen">
         <h5>Settings</h5>
-        <SettingsNavigation view={settingsPath} loadView={loadView} nav={templates} mConf={mConf} />
+        <SettingsNavigation
+          view={sectionPath}
+          loadView={loadView}
+          nav={templates}
+          mSettings={mSettings}
+          edit
+        />
       </div>
     </div>
   )

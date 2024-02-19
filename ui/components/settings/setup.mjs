@@ -127,6 +127,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
     }
     setValidateView(!validateView)
   }
+  const formEl = deployment(mSettings, toggleValidate).children.setup.form
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -146,11 +147,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
           />
         ) : (
           <>
-            <FormBlock
-              {...{ update }}
-              data={mSettings}
-              form={deployment(mSettings, toggleValidate).children.setup.form}
-            />
+            <FormBlock update={update} data={mSettings} form={formEl} />
           </>
         )}
       </div>

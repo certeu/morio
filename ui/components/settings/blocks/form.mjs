@@ -42,49 +42,53 @@ const validate = (value, schema, label) => {
 export const FormBlock = (props) => {
   const { form, update, formValidation, updateFormValidation } = props
 
+  /*
+   * Local update handles some extra checks and passes in data object
+   */
+  const _update = (val, path, transform = false) => {
+    if (typeof transform === 'function') update(path, transform(val), props.data)
+    else update(path, val, props.data)
+  }
+
   return (
     <>
-      {form.map((val, i) => {
-        if (Array.isArray(val))
+      {form.map((formEl, i) => {
+        if (Array.isArray(formEl))
           return (
             <div className="grid grid-cols-2 gap-2" key={i}>
-              <FormBlock {...props} form={val} />
+              <FormBlock {...props} form={formEl} />
             </div>
           )
-        if (typeof val === 'string')
+        if (typeof formEl === 'string')
           return (
-            <div className="mdx">
-              <Markdown key={i}>{val}</Markdown>
+            <div className="mdx" key={i}>
+              <Markdown key={i}>{formEl}</Markdown>
             </div>
           )
-        if (typeof val === 'object') {
-          if (val.tabs)
+        if (typeof formEl === 'object') {
+          if (formEl.tabs)
             return (
-              <Tabs {...val} tabs={Object.keys(val.tabs).join()} navs key={i}>
-                {Object.keys(val.tabs).map((key) => (
+              <Tabs {...formEl} tabs={Object.keys(formEl.tabs).join()} navs key={i}>
+                {Object.keys(formEl.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
-                    <FormBlock {...props} form={val.tabs[key]} />
+                    <FormBlock {...props} form={formEl.tabs[key]} />
                   </Tab>
                 ))}
               </Tabs>
             )
-          if (Joi.isSchema(val.schema))
+          if (Joi.isSchema(formEl.schema))
             return (
               <FormElement
                 key={i}
-                {...val}
-                update={(input) =>
-                  typeof val.transform === 'function'
-                    ? props.update(val.key, val.transform(input))
-                    : props.update(val.key, input)
-                }
-                current={get(props.data, val.key, val.current)}
-                id={val.key}
+                {...formEl}
+                update={(val) => _update(val, formEl.key, formEl.transform)}
+                current={get(props.data, formEl.key, formEl.current)}
+                id={formEl.key}
                 {...{ formValidation, updateFormValidation }}
               />
             )
-          if (React.isValidElement(val)) return <Fragment key={i}>{val}</Fragment>
-          else return <p key={i}>val.schema is no schema</p>
+          if (React.isValidElement(formEl)) return <Fragment key={i}>{formEl}</Fragment>
+          else return <p key={i}>formEl.schema is no schema</p>
         } else return <p key={i}>Not sure what to do with {i}</p>
       })}
     </>
@@ -135,6 +139,8 @@ export const FormElement = (props) => {
 }
 
 export const FormWrapper = (props) => {
+  // Should we maintain this data locally?
+  const { local = false } = props
   const [data, update, setData] = useStateObject(props.settings || {}) // Holds the config this form builds
   const [formValidation, setFormValidation] = useState({})
 
@@ -147,9 +153,29 @@ export const FormWrapper = (props) => {
     Object.values(formValidation).filter((el) => el === true).length *
     (100 / Object.values(formValidation).length)
 
+  /*
+   * Global update to Msettings handles some extra checks and passes in data
+   */
+  const process =
+    typeof local === 'function'
+      ? () => {
+          if (props.setModal) props.setModal(false)
+          props.update(
+            local(data),
+            typeof props.transform === 'function' ? props.transform(data) : data,
+            props.data
+          )
+        }
+      : undefined
+
   return (
     <>
-      <FormBlock {...props} {...{ update, formValidation, updateFormValidation, data }} />
+      <FormBlock
+        {...props}
+        {...{ formValidation, updateFormValidation }}
+        data={local ? data : props.data}
+        update={local ? update : props.update}
+      />
       {props.readOnly ? (
         <button
           className="btn btn-primary btn-outline w-full"
@@ -159,19 +185,15 @@ export const FormWrapper = (props) => {
         </button>
       ) : (
         <>
-          {formValidation ? <Progress value={done} /> : null}
           <div className="grid grid-cols-3 gap-2 mt-4">
             <button
               className={`btn btn-primary w-full ${
                 props.setModal ? 'col-span-2' : 'col-span-1 col-start-2'
               }`}
-              disabled={done < 100}
-              onClick={() => {
-                if (props.setModal) props.setModal(false)
-                props.update(`${props.group}.${props.section}${data.id ? '.' + data.id : ''}`, data)
-              }}
+              disabled={props.disabled || done < 100}
+              onClick={process}
             >
-              Save
+              {props.btn ? props.btn : 'Save'}
             </button>
             {props.setModal ? (
               <button

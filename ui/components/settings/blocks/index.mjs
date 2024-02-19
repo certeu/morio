@@ -2,23 +2,19 @@
 import { Popout } from 'components/popout.mjs'
 import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
-import { InfoBlock, ListBlock, StringBlock, StringsBlock } from './base.mjs'
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
-import { SettingsNavigation } from '../navigation.mjs'
 import { FormWrapper } from './form.mjs'
+import { MdxWrapper } from './mdx.mjs'
 
 /*
  * Map between type in wizard config and React component
  */
 const blocks = {
-  //info: InfoBlock,
-  form: FormWrapper,
-  //list: ListBlock,
-  //string: StringBlock,
-  //strings: StringsBlock,
   connectorInputs: ConnectorInputs,
   connectorOutputs: ConnectorOutputs,
   connectorPipelines: ConnectorPipelines,
+  form: FormWrapper,
+  mdx: ({ viewConfig }) => <MdxWrapper>{viewConfig.mdx}</MdxWrapper>,
 }
 
 const LockedOnEdit = () => (
@@ -29,7 +25,7 @@ const LockedOnEdit = () => (
 )
 
 /*
- * A wrapper component for all configuration blocks
+ * A wrapper component for all settings blocks
  *
  * This will return a specific block based on the type and pass down props
  *
@@ -60,13 +56,6 @@ export const Block = (props) => {
         <div className="max-w-prose">
           {props.edit && props.template.lockOnEdit ? <LockedOnEdit /> : null}
           <Markdown>{props.template.about}</Markdown>
-          <SettingsNavigation
-            view={props.settingsPath}
-            loadView={props.loadView}
-            nav={props.template.children}
-            mConf={props.mConf}
-            lead={[props.section]}
-          />
         </div>
       )
   }
