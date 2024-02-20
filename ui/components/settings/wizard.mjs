@@ -1,7 +1,8 @@
 // Dependencies
 import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
-import { validate, validateSettings } from 'lib/utils.mjs'
+import { validate, validateSettings, cloneAsPojo } from 'lib/utils.mjs'
+import yaml from 'yaml'
 // Templates
 import { templates } from './templates/index.mjs'
 // Context
@@ -15,39 +16,71 @@ import { useAtom } from 'jotai'
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
-import { settingsReport, DeploymentReport } from './report.mjs'
+import { SettingsReport, DeploymentReport } from './report.mjs'
 import { RightIcon, SettingsIcon, QuestionIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
-import yaml from 'yaml'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
+import { LogoSpinner } from 'components/animations.mjs'
 
-const Welcome = () => (
+const Welcome = ({ setView }) => (
   <>
-    <h3>Getting started</h3>
-    <h5>About sections and groups</h5>
-    <p>
-      Settings are organized in <b>sections</b> and grouped in <b>groups</b>.
-      <br />
-      Groups merely add structure, and do not hold any settings, only sections do.
-    </p>
-    <h5>Undertanding state</h5>
-    <p>
-      Settings are kept in browser state, until you save them.
-      <br />
-      If you reload the page, your changes are lost.
-    </p>
+    <p>These pages allow you to update the settings of this Morio deployment.</p>
+    <Popout warning compact noP dense>
+      All changes are ephemeral until you apply them.
+    </Popout>
+    <Popout tip>
+      <h5>Getting started</h5>
+      <p>
+        Use the navigation menu on the right to locate the settings you want to update.
+        <br />
+        When you have made your changes{' '}
+        <a role="button" onClick={() => setView('validate')}>
+          navigate to the validation page
+        </a>{' '}
+        to apply your changes:
+      </p>
+      <ul className="list list-disc list-inside ml-4">
+        <li>
+          <b>Step 1</b>: Click the <b>Validate Settings</b> button
+          <br />
+          <small className="pl-4">No changes will be made at this point</small>
+        </li>
+        <li>
+          <b>Step 2</b>: Click the <b>Apply Settings</b> button to make the changes permanent
+          <br />
+          <small className="pl-4">Only possible if validation is successful</small>
+        </li>
+      </ul>
+      <h5>Shortcuts</h5>
+      <ul className="list list-disc list-inside ml-4">
+        <li>
+          The <b>Validate Settings</b> button on the right will always take you to{' '}
+          <a role="button" onClick={() => setView('validate')}>
+            the validation page
+          </a>
+        </li>
+        <li>
+          The <b>Getting Started</b> button on the right will always bring you back to{' '}
+          <a role="button" onClick={() => setView('start')}>
+            this page
+          </a>
+        </li>
+      </ul>
+    </Popout>
   </>
 )
 
-const Nr = ({ children, disabled = false }) => (
+const Nr = ({ children, disabled = false, color = 'primary' }) => (
   <span
     className={`font-black w-8 h-8 border rounded-full border-2
     flex flex-col items-center justify-center ${
       disabled
         ? 'text-base-content border-base-content opacity-20'
-        : 'border-primary-content text-primary-content'
+        : color === 'accent'
+          ? `border-accent-content text-accent-content`
+          : `border-primary-content text-primary-content`
     }`}
   >
     {children}
@@ -63,7 +96,6 @@ const ShowSettingsValidation = ({
   deploy,
   validationReport,
   setValidationReport,
-  validateSettings,
   setLoadingStatus,
 }) => (
   <>
@@ -71,20 +103,40 @@ const ShowSettingsValidation = ({
       <>
         <SettingsReport report={validationReport} />
         {validationReport.valid ? (
-          <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
-            Deploy Settings
-          </button>
+          <div className="text-center">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                className="btn btn-primary btn-lg flex flex-row justify-between"
+                onClick={async () =>
+                  setValidationReport(await validateSettings(api, mSettings, setLoadingStatus))
+                }
+              >
+                <Nr>1</Nr>
+                Validate Settings
+              </button>
+              <button
+                className="btn btn-accent btn-lg flex flex-row justify-between"
+                onClick={deploy}
+              >
+                <Nr color="accent">2</Nr>
+                Apply Settings
+              </button>
+            </div>
+            <Popout warning compact noP>
+              Deploying these settings may cause services to restart
+            </Popout>
+          </div>
         ) : null}
       </>
     ) : (
       <>
-        <p className="max-w-prose">
+        <p>
           Click the <b>Validate Settings</b> button below to submit the updated settings for
           validation.
           <br />
           After validation succeeds, you will be able to apply the settings.
         </p>
-        <div className="text-center max-w-prose">
+        <div className="text-center">
           <div className="grid grid-cols-2 gap-2">
             <button
               className="btn btn-primary btn-lg flex flex-row justify-between"
@@ -130,33 +182,66 @@ export const viewInLocation = atomWithLocation('deployment/node_count')
  */
 const startView = 'start'
 
+const NotCool = () => (
+  <div className="flex flex-row gap-8 justify-start">
+    <div className="w-full max-w-4xl p-8 grow">
+      <div className="w-full">
+        <h1 className="capitalize flex w-full max-w-4xl justify-between">
+          Things are Not Cool
+          <SettingsIcon className="w-16 h-16" />
+        </h1>
+        <p>We were unable to fetch the running settings from the API.</p>
+      </div>
+    </div>
+  </div>
+)
+
+const PleaseWait = () => (
+  <div className="flex flex-row gap-8 justify-start">
+    <div className="w-full max-w-4xl p-8 grow">
+      <div className="w-full">
+        <h1 className="capitalize flex w-full max-w-4xl justify-between">
+          One moment please
+          <SettingsIcon className="w-16 h-16" />
+        </h1>
+        <div className="w-36 mx-auto">
+          <LogoSpinner />
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+const getRunningSettings = async (api, setOk, setKo) => {
+  const result = await api.getCurrentSettings()
+  if (result[1] === 200 && result[0].deployment) {
+    const newMSettings = { ...result[0] }
+    setOk(JSON.parse(JSON.stringify(newMSettings)))
+  } else setKo(true)
+}
+
 /**
  * This is the React component for the settings wizard itself
  */
 export const SettingsWizard = (props) => {
   const [runningSettings, setRunningSettings] = useState(false) // Holds the current running settings
-  const [revert, setRevert] = useState(0)
+  const [notCool, setNotCool] = useState(false)
   const { api } = useApi()
 
   /*
    * Effect for loading the running settings
    */
   useEffect(() => {
-    const getRunningSettings = async () => {
-      const result = await api.getCurrentSettings()
-      if (result[1] === 200 && result[0].deployment) {
-        const newMSettings = { ...result[0] }
-        setRunningSettings(JSON.parse(JSON.stringify(newMSettings)))
-      } else console.log('nope', result)
-    }
-    getRunningSettings()
+    getRunningSettings(api, setRunningSettings, setNotCool)
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [revert])
+  }, [])
 
   return runningSettings?.metadata ? (
-    <PrimedSettingsWizard {...props} {...{ runningSettings, revert, setRevert }} />
+    <PrimedSettingsWizard {...props} {...{ runningSettings }} />
+  ) : notCool ? (
+    <NotCool />
   ) : (
-    <p>One moment please...</p>
+    <PleaseWait />
   )
 }
 
@@ -167,7 +252,7 @@ export const PrimedSettingsWizard = (props) => {
   /*
    * Destructure props
    */
-  const { prefix = '/settings', runningSettings, revert, setRevert } = props
+  const { prefix = '/settings', runningSettings } = props
 
   /*
    * React state
@@ -201,6 +286,11 @@ export const PrimedSettingsWizard = (props) => {
   )
 
   /*
+   * Method to revert to running settings
+   */
+  const revert = () => setMSettings(cloneAsPojo(runningSettings))
+
+  /*
    * API client
    */
   const { api } = useApi()
@@ -225,7 +315,7 @@ export const PrimedSettingsWizard = (props) => {
    */
   const deploy = async () => {
     setLoadingStatus([true, 'Uploading settings'])
-    const [data, status] = await api.deploy(mSettings)
+    const [data, status] = await api.setup(mSettings)
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
     else {
@@ -256,29 +346,27 @@ export const PrimedSettingsWizard = (props) => {
   const delta =
     diffCheck(yaml.stringify(runningSettings), yaml.stringify(mSettings)).length > 1 ? true : false
 
-  const showProps =
-    section === 'validate'
-      ? {
-          api,
-          mSettings,
-          deploy,
-          validationReport,
-          setValidationReport,
-          validateSettings,
-          setLoadingStatus,
-        }
-      : {
-          update,
-          data: mSettings,
-          setValid,
-          sectionPath,
-          template,
-          group,
-          section,
-          valid,
-          loadView,
-          setView,
-        }
+  const showProps = doValidate
+    ? {
+        api,
+        mSettings,
+        deploy,
+        validationReport,
+        setValidationReport,
+        setLoadingStatus,
+      }
+    : {
+        update,
+        data: mSettings,
+        setValid,
+        sectionPath,
+        template,
+        group,
+        section,
+        valid,
+        loadView,
+        setView,
+      }
 
   return (
     <div className="flex flex-row gap-8 justify-start">
@@ -296,7 +384,7 @@ export const PrimedSettingsWizard = (props) => {
             <SettingsIcon className="w-16 h-16" />
           </h1>
           {template === false && !doValidate ? (
-            <Welcome />
+            <Welcome setView={setView} />
           ) : doValidate ? (
             <ShowSettingsValidation {...showProps} />
           ) : (
@@ -319,7 +407,7 @@ export const PrimedSettingsWizard = (props) => {
                 </div>
               ) : null}
               <div className="flex flex-row flex-wrap gap-2 justify-end w-full">
-                <button className="btn btn-warning btn-ghost" onClick={() => setRevert(revert + 1)}>
+                <button className="btn btn-warning btn-ghost" onClick={revert}>
                   Revert to Running Settings
                 </button>
                 <button
@@ -334,7 +422,7 @@ export const PrimedSettingsWizard = (props) => {
           <ShowSettingsPreview {...{ preview, setPreview, mSettings }} />
         </div>
       </div>
-      <div className="grow-0 shrink-0 pt-24 min-h-screen w-64">
+      <div className="grow-0 shrink-0 pt-24 min-h-screen w-64 pr-4">
         <h5>Settings</h5>
         <SettingsNavigation
           view={sectionPath}
@@ -358,11 +446,7 @@ export const PrimedSettingsWizard = (props) => {
           >
             {preview ? 'Hide ' : 'Show '} settings preview
           </button>
-          <button
-            className="btn btn-primary w-full"
-            onClick={() => loadView('validate')}
-            disabled={!delta}
-          >
+          <button className="btn btn-primary w-full" onClick={() => loadView('validate')}>
             <span>Validate Settings</span>
           </button>
         </div>

@@ -14,23 +14,32 @@ const shared = {
  * This describes the schema of the deployment settings
  */
 export const deploymentSchema = Joi.object({
-  deployment: Joi.object({
-    display_name: Joi.string().required().min(2).max(255),
-    node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
-    nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
-    fqdn: Joi.string()
-      .hostname()
-      .when('node_count', {
-        is: Joi.number().max(1),
-        then: Joi.optional(),
-        otherwise: Joi.required(),
-      }),
+  display_name: Joi.string().required().min(2).max(255),
+  node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
+  nodes: Joi.array().required().length(Joi.ref('node_count')).items(Joi.string().hostname()),
+  fqdn: Joi.string()
+    .hostname()
+    .when('node_count', {
+      is: Joi.number().max(1),
+      then: Joi.optional(),
+      otherwise: Joi.required(),
+    }),
+})
+
+/*
+ * This describes the schema of the deployment settings
+ */
+export const settingsSchema = Joi.object({
+  deployment: deploymentSchema,
+  metadata: Joi.object({
+    version: Joi.number(),
+    comment: Joi.string(),
   }),
-  comment: Joi.string(),
 })
 
 /*
  * This describes the schema of request objects
+ * FIXME: This needs to be refactored
  */
 export const requestSchema = {
   setup: {
@@ -55,18 +64,11 @@ export const requestSchema = {
       passphrase: Joi.string().min(8).max(64).required(),
     }),
   },
-  validate: {
-    settings: Joi.object({
-      settings: deploymentSchema,
-    }),
-    node: Joi.object({
-      hostname: Joi.string().hostname(),
-    }),
-  },
 }
 
 /*
  * This describes the schema of response objects
+ * FIXME: This needs to be refactored
  */
 export const responseSchema = {
   setup: {

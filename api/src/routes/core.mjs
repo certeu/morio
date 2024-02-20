@@ -79,9 +79,9 @@ export function routes(tools) {
   app.get(`${PREFIX}/docker/volumes`,            (req, res) => Core.getDockerData(req, res, tools, 'volumes'))
 
   /*
-   * API route for deploying a new configuration
+   * API route for initial setup of a Morio instance
    */
-  app.post(`${PREFIX}/deploy`, (req, res) => Core.deploy(req, res, tools))
+  app.post(`${PREFIX}/setup`, (req, res) => Core.setup(req, res, tools))
 
   /*
    * Hit this route to get the ca root certificate and fingerprint

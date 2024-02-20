@@ -41,7 +41,7 @@ const ShowConfigurationValidation = ({
         <h3>Validation Results</h3>
         <SettingsReport report={validationReport} />
         {validationReport.valid ? (
-          <button className="btn btn-warning btn-lg w-full mt-4" onClick={deploy}>
+          <button className="btn btn-accent btn-lg w-full mt-4" onClick={deploy}>
             Deploy Configuration
           </button>
         ) : null}
@@ -92,7 +92,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   const deploy = async () => {
     setDeploymentOngoing(true)
     setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
-    const [data, status] = await api.deploy(mSettings)
+    const [data, status] = await api.setup(mSettings)
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
     else {

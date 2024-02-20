@@ -42,6 +42,14 @@ export const isUri = (uri) => {
 }
 
 /**
+ * Clone a data structure in a way that ensures no references
+ * are kept, and it's just a plain old javascript object (pojo)
+ *
+ * @param {object} obj - The object to clone
+ */
+export const cloneAsPojo = (obj) => JSON.parse(JSON.stringify(obj))
+
+/**
  * Helper method to download a file
  *
  * @param {string} url - The URL to download

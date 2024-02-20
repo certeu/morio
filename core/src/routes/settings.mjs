@@ -20,7 +20,12 @@ export function routes(tools) {
   /*
    * Deploy a new configuration
    */
-  app.post('/settings/deploy', (req, res) => Settings.deploy(req, res, tools))
+  app.post('/setup', (req, res) => Settings.setup(req, res, tools))
+
+  /*
+   * Deploy a new configuration
+   */
+  app.post('/settings', (req, res) => Settings.deploy(req, res, tools))
 
   /*
    * Load a list of all settings

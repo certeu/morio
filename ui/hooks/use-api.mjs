@@ -134,7 +134,7 @@ MorioClient.prototype.validateSettings = async function (settings) {
   return await this.call(`${morioConfig.api}/validate/settings`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ settings }),
+    body: JSON.stringify(settings),
   })
 }
 
@@ -168,17 +168,18 @@ MorioClient.prototype.dockerGetContainer = async function (id) {
 }
 
 /**
- * Deploys a configuration
+ * Initial setup
  *
- * This endpoint does not require authentication
+ * This endpoint does not require authentication but only
+ * works on an ephemeral node
  * @param {object} config - The configuration to deploy
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.deploy = async function (config) {
-  return await this.call(`${morioConfig.api}/deploy`, {
+MorioClient.prototype.setup = async function (settings) {
+  return await this.call(`${morioConfig.api}/setup`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify(config),
+    body: JSON.stringify(settings),
   })
 }
 

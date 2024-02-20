@@ -1,4 +1,4 @@
-import { requestSchema as schema, deploymentSchema } from '../schema.mjs'
+import { requestSchema as schema, settingsSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
@@ -86,7 +86,7 @@ export const validateSettings = async (newSettings) => {
    */
   let settings
   try {
-    settings = await deploymentSchema.validateAsync(newSettings)
+    settings = await settingsSchema.validateAsync(newSettings)
   } catch (err) {
     /*
      * Validate failed, bail out here

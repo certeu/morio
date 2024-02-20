@@ -124,14 +124,22 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
 }
 
 /**
- * Deploys new settings
+ * Handles the initial setup
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.deploy = async (req, res, tools) => {
+Controller.prototype.setup = async (req, res, tools) => {
+  /*
+   * This route is only accessible when running in ephemeral mode
+   */
+  if (!tools.info?.ephemeral)
+    return res.status(400).send({
+      errors: ['You can only use this endpoint on an ephemeral Morio node'],
+    })
+
   /*
    * Validate settings
    */
@@ -151,7 +159,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await tools.core.post(`/settings/deploy`, req.body)
+  const [status, result] = await tools.core.post(`/setup`, req.body)
 
   return res.status(status).send(result)
 }

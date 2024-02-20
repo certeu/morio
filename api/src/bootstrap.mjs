@@ -12,13 +12,14 @@ export const bootstrapConfiguration = async (tools) => {
   /*
    * Add info to tools
    */
-  if (!tools.info) tools.info = {
-    about: pkg.description,
-    name: pkg.name,
-    ping: Date.now(),
-    start_time: Date.now(),
-    version: pkg.version,
-  }
+  if (!tools.info)
+    tools.info = {
+      about: pkg.description,
+      name: pkg.name,
+      ping: Date.now(),
+      start_time: Date.now(),
+      version: pkg.version,
+    }
 
   /*
    * Add core client to tools
@@ -33,13 +34,21 @@ export const bootstrapConfiguration = async (tools) => {
     every: 2,
     timeout: 60,
     run: async () => await tools.core.get('/configs/current'),
-    onFailedAttempt: (s) => tools.log.debug(`Waited ${s} seconds for core, will continue waiting.`)
+    onFailedAttempt: (s) => tools.log.debug(`Waited ${s} seconds for core, will continue waiting.`),
   })
   if (result && Array.isArray(result) && result[0] === 200 && result[1]) {
     config = result[1]
     tools.log.debug(`Loaded configuration from core.`)
-  }
-  else {
+    /*
+     * Also load the info from core
+     * This will tell us whether we are running ephemeral or not
+     */
+    const infoResult = await tools.core.get('/info')
+    if (infoResult && Array.isArray(infoResult) && infoResult[0] === 200 && infoResult[1]) {
+      tools.info.production = infoResult[1].production
+      tools.info.ephemeral = infoResult[1].ephemeral
+    }
+  } else {
     tools.log.warn('Failed to load Morio config from core')
   }
   tools.config = config
@@ -47,17 +56,15 @@ export const bootstrapConfiguration = async (tools) => {
   /*
    * Add prefix to tools
    */
-  tools.prefix = getPreset('MORIO_API_PREFIX'),
+  ;(tools.prefix = getPreset('MORIO_API_PREFIX')),
+    /*
+     * Add a getPreset() wrapper that will output debug logs about how presets are resolved
+     * This is surprisingly helpful during debugging
+     */
+    (tools.getPreset = (key, dflt, opts) => {
+      const result = getPreset(key, dflt, opts)
+      tools.log.debug(`Preset ${key} = ${result}`)
 
-
-  /*
-   * Add a getPreset() wrapper that will output debug logs about how presets are resolved
-   * This is surprisingly helpful during debugging
-   */
-  tools.getPreset = (key, dflt, opts) => {
-    const result = getPreset(key, dflt, opts)
-    tools.log.debug(`Preset ${key} = ${result}`)
-
-    return result
-  }
+      return result
+    })
 }

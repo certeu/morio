@@ -22,6 +22,11 @@ export function routes(tools) {
   app.get('/status', (req, res) => Status.status(req, res, tools))
 
   /*
+   * Hit this route to get the info object
+   */
+  app.get('/info', (req, res) => res.send(tools.info))
+
+  /*
    * Hit this route to get info on the CA root
    */
   app.get('/ca/root', (req, res) => res.send(tools.ca))

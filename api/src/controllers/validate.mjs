@@ -23,16 +23,10 @@ export function Controller() {}
  */
 Controller.prototype.settings = async (req, res, tools) => {
   /*
-   * Validate request against schema
+   * Run the settings validation helper, which takes proposed
+   * and current settings and returns a report object
    */
-  const [valid, err] = await validate('validate.settings', req.body)
-  if (!valid) return schemaViolation(err, res)
-
-  /*
-   * Run the config validateion helper, which takes proposed and current
-   * config and returns a report object
-   */
-  const report = await validateSettings(valid.settings, tools)
+  const report = await validateSettings(req.body, tools)
 
   return res.send(report).end()
 }
