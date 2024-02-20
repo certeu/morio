@@ -315,7 +315,7 @@ export const PrimedSettingsWizard = (props) => {
    */
   const deploy = async () => {
     setLoadingStatus([true, 'Uploading settings'])
-    const [data, status] = await api.setup(mSettings)
+    const [data, status] = await api.deploy(mSettings)
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
     else {
@@ -337,7 +337,7 @@ export const PrimedSettingsWizard = (props) => {
    * Load the template and section
    */
   const [group, section] = sectionPath.split('.')
-  const template = templates[group] ? templates[group](mSettings) : false
+  const template = templates[group] ? templates[group]({ mSettings, update }) : false
   const doValidate = group === 'validate'
 
   /*

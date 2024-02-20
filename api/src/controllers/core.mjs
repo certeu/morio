@@ -129,7 +129,6 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
- * @param {string} path - The core api path
  */
 Controller.prototype.setup = async (req, res, tools) => {
   /*
@@ -160,6 +159,46 @@ Controller.prototype.setup = async (req, res, tools) => {
    * Settings are valid and deployable, pass them to core
    */
   const [status, result] = await tools.core.post(`/setup`, req.body)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Deploys new settings
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.deploy = async (req, res, tools) => {
+  /*
+   * This route is not accessible when running in ephemeral mode
+   */
+  if (tools.info?.ephemeral)
+    return res.status(400).send({
+      errors: ['You can not use this endpoint on an ephemeral Morio node'],
+    })
+
+  /*
+   * Validate settings
+   */
+  const report = await validateSettings(req.body)
+
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid) return res.status(400).send({ errors: ['Settings are not valid'], report })
+
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return res.status(400).send({ errors: ['Settings are not deployable'], report })
+
+  /*
+   * Settings are valid and deployable, pass them to core
+   */
+  const [status, result] = await tools.core.post(`/settings`, req.body)
 
   return res.status(status).send(result)
 }

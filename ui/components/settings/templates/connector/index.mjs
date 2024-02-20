@@ -101,6 +101,7 @@ export const connector = (context) => ({
         generator: {
           title: 'Generator',
           about: 'Generates messages (useful for testing)',
+          desc: 'Use this to genenate test data',
           form: readOnlyForm('input', 'generator'),
           readOnly: true,
         },
@@ -112,6 +113,7 @@ export const connector = (context) => ({
         morio_local: {
           title: 'Local Morio',
           about: 'Reads data from this Morio deployment',
+          desc: 'Use this to read data from one or more topics in this Morio deployment',
         },
         morio_remote: {
           title: 'Remote Morio',

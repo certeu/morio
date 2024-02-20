@@ -35,6 +35,7 @@ export const settingsSchema = Joi.object({
     version: Joi.number(),
     comment: Joi.string(),
   }),
+  connector: Joi.object(),
 })
 
 /*

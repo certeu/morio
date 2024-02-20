@@ -18,12 +18,12 @@ export function routes(tools) {
   const { app } = tools
 
   /*
-   * Deploy a new configuration
+   * Deploy an initial set of settings
    */
   app.post('/setup', (req, res) => Settings.setup(req, res, tools))
 
   /*
-   * Deploy a new configuration
+   * Deploy a new set of settings
    */
   app.post('/settings', (req, res) => Settings.deploy(req, res, tools))
 

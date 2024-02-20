@@ -84,6 +84,11 @@ export function routes(tools) {
   app.post(`${PREFIX}/setup`, (req, res) => Core.setup(req, res, tools))
 
   /*
+   * API route to update (replace) Morio settings
+   */
+  app.post(`${PREFIX}/settings`, (req, res) => Core.deploy(req, res, tools))
+
+  /*
    * Hit this route to get the ca root certificate and fingerprint
    */
   app.get(`${PREFIX}/ca/root`, (req, res) => Core.getCaRoot(req, res, tools))

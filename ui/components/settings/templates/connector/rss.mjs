@@ -10,9 +10,12 @@ export const rss = {
     about: 'Reads items from an RSS or Atom feed',
     desc: 'Use this to read content from a website feed',
     local: (data) => `connector.inputs.${data.id}`,
-    btn: 'Create RSS Input',
+    btn: {
+      create: 'Create RSS Input',
+      update: 'Update RSS Input',
+      remove: 'Remove RSS Input',
+    },
     form: [
-      `##### Create a new RSS connector input`,
       {
         tabs: {
           Metadata: xputMeta('input', 'rss'),

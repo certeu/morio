@@ -184,6 +184,20 @@ MorioClient.prototype.setup = async function (settings) {
 }
 
 /**
+ * Deploy set of new settings
+ *
+ * @param {object} settings - The settings to deploy
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.deploy = async function (settings) {
+  return await this.call(`${morioConfig.api}/settings`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(settings),
+  })
+}
+
+/**
  * Changes a container state
  *
  * @param {string} id - The Docker Container ID
