@@ -11,6 +11,7 @@ import {
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
 import get from 'lodash.get'
+import set from 'lodash.set'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { Progress } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -160,8 +161,8 @@ const getFormValidation = (el, data, result) => {
     if (Array.isArray(el)) for (const sel of el) getFormValidation(sel, data, result)
     if (el.tabs) for (const tab of Object.values(el.tabs)) getFormValidation(tab, data, result)
     if (el.schema && el.key) {
-      const valid = el.schema.validate(data[el.key])
-      result[el.key] = valid?.error ? false : true
+      const valid = el.schema.validate(get(data, el.key))
+      set(result, el.key, valid?.error ? false : true)
     }
   }
 
@@ -171,12 +172,30 @@ const getFormValidation = (el, data, result) => {
 /*
  * Top-level form validation method
  */
-const runFormValidation = (form, data) => {
+export const runFormValidation = (form, data) => {
   const result = {}
   for (const el of form) getFormValidation(el, data, result)
 
   return result
 }
+
+const formValidationReducer = (result) => {
+  for (const [key, val] of Object.entries(result)) {
+    if (typeof val === 'object') {
+      const valid = formValidationReducer(val)
+      if (!valid) return false
+    } else if (val !== true) return false
+  }
+
+  return true
+}
+
+/*
+ * Return a simple true/false for an entire form validation
+ * Typically used to enable/disable submit buttons
+ */
+export const reduceFormValidation = (form, data) =>
+  formValidationReducer(runFormValidation(form, data))
 
 export const FormWrapper = (props) => {
   // Should we maintain this data locally?
@@ -237,12 +256,11 @@ export const FormWrapper = (props) => {
           Close
         </button>
       ) : null}
-      {props.local && props.btn && props.action ? (
+      {props.local && props.action ? (
         <>
           <Progress value={done} />
           <LocalButtons
             local={props.local}
-            btn={props.btn}
             action={props.action}
             setModal={props.setModal}
             applyLocal={applyLocal}

@@ -37,7 +37,6 @@ export const useStateObject = (dflt = {}) => {
   const replace = (val) => setObj(val)
 
   const update = (path, val, altObj = false) => {
-    console.log('in global update', { path, val })
     const newObj = altObj ? { ...altObj } : { ...obj }
     objUpdate(newObj, path, val)
     setObj(newObj)

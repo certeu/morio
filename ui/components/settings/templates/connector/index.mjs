@@ -4,6 +4,8 @@ import { slugify } from 'lib/utils.mjs'
 // Connectors
 import { imap } from './imap.mjs'
 import { rss } from './rss.mjs'
+import { sink } from './sink.mjs'
+import { morio } from './morio.mjs'
 
 /*
  * Reuse this for the input ID
@@ -49,7 +51,7 @@ export const connector = (context) => ({
      */
     inputs: {
       type: 'connectorInputs',
-      label: 'Connector Inputs',
+      title: 'Connector Inputs',
       about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
         amazon_cloudwatch: {
@@ -110,16 +112,8 @@ export const connector = (context) => ({
           about: 'Reads data from a Kafka topic',
           desc: 'Use this to read data from one or more Kafka topics',
         },
-        morio_local: {
-          title: 'Local Morio',
-          about: 'Reads data from this Morio deployment',
-          desc: 'Use this to read data from one or more topics in this Morio deployment',
-        },
-        morio_remote: {
-          title: 'Remote Morio',
-          about: 'Reads data from a Morio deployment',
-          desc: 'Use this to read data from one or more topics of a Morio deployment.',
-        },
+        morio_local: morio.local.in(context),
+        morio_remote: morio.remote.in(context),
       },
     },
 
@@ -128,10 +122,8 @@ export const connector = (context) => ({
      */
     outputs: {
       type: 'connectorOutputs',
-      label: 'Connector Outputs',
-      about: `
-  Add a connector output for Morio to write data to.
-  Once configured, you can use the output in your connector pipelines.`,
+      title: 'Connector Outputs',
+      about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
         elasticsearch: {
           title: 'Elasticsearch',
@@ -148,19 +140,9 @@ export const connector = (context) => ({
           about: 'Writes data to a Kafka topic',
           desc: 'Use this to write data to a Kafka broker or cluster',
         },
-        morio_local: {
-          title: 'Local Morio',
-          about: 'Writes data to this Morio deployment',
-        },
-        morio_remote: {
-          title: 'Remote Morio',
-          about: 'Writes data to a different Morio deployment',
-          desc: 'Local morio address',
-        },
-        sink: {
-          title: 'Trash',
-          about: 'Discards data (useful for pipeline testing)',
-        },
+        morio_local: morio.local.out(context),
+        morio_remote: morio.remote.out(context),
+        sink: sink.out(context),
       },
     },
 
@@ -169,7 +151,7 @@ export const connector = (context) => ({
      */
     pipelines: {
       type: 'connectorPipelines',
-      label: 'Connector Pipelines',
+      title: 'Connector Pipelines',
       about: 'Pipelines about',
     },
   },

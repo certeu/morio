@@ -72,9 +72,6 @@ export const DeploymentReport = ({ result }) => {
       <p>Morio core will configure this Morio deployment according to these settings.</p>
       <p>Give it some time until the logs stabilize and you see this line:</p>
       <pre>Morio Core ready - Configuration resolved</pre>
-      <p>
-        At that time, you should <PageLink href="/">return to the home page</PageLink>.
-      </p>
     </>
   ) : (
     <>

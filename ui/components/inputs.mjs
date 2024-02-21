@@ -52,7 +52,7 @@ export const FormControl = ({
           <div className="label">{bottomLabelChildren}</div>
         )
       ) : null}
-      <ValidationErrors valid={isValid} />
+      <ValidationErrors valid={isValid} bLabel={labelBL || labelBR} />
     </div>
   )
 }
@@ -441,8 +441,8 @@ export const FileInput = ({
   )
 }
 
-export const ValidationErrors = ({ valid }) => (
-  <ul className="list-inside text-sm text-error ml-2 -mt-1">
+export const ValidationErrors = ({ valid, bLabel }) => (
+  <ul className={`list-inside text-sm text-error ml-2 ${bLabel ? '-mt-1' : 'mt-1'}`}>
     {
       valid?.error?.details ? (
         valid.error.details.map((err, i) => (

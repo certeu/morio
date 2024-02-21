@@ -13,6 +13,8 @@ import {
   LeftIcon,
   MorioIcon,
   OutputIcon,
+  PipelineIcon,
+  PlusIcon,
   RightIcon,
   RssIcon,
   SparklesIcon,
@@ -22,9 +24,12 @@ import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Popout } from 'components/popout.mjs'
 import Joi from 'joi'
-import { FormBlock } from 'components/settings/blocks/form.mjs'
 import set from 'lodash.set'
-import { FormWrapper } from './form.mjs'
+import { FormWrapper, FormElement } from './form.mjs'
+import { TextInput, StringInput } from 'components/inputs.mjs'
+import { slugify } from 'lib/utils.mjs'
+import { Tabs, Tab } from 'components/tabs.mjs'
+import { reduceFormValidation } from './form.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
@@ -103,29 +108,6 @@ const UpdateXput = (props) => {
   )
 }
 
-const ShowXput = ({ type, id, title, setModal, desc = false }) => {
-  return (
-    <div className="max-w-2xl w-full">
-      <XputHeader {...{ id, title, type }} />
-      {desc ? (
-        <p>fixme, remove connector {type} with desc</p>
-      ) : (
-        <Popout note>
-          <h5>You cannot update or remove this {type}</h5>
-          <p>
-            The <b>{title}</b> connector {type} does not have any settings and cannot be removed.
-          </p>
-          <p className="text-center">
-            <button onClick={() => setModal(false)} className="btn btn-neutral btn-outline">
-              Close
-            </button>
-          </p>
-        </Popout>
-      )}
-    </div>
-  )
-}
-
 const XputButton = ({
   title,
   about,
@@ -167,26 +149,29 @@ const BlockItems = (props) => {
 
   return (
     <>
-      <h4 className="capitalize">Available Connector {type}s</h4>
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        {Object.keys(allXputs)
-          .filter((id) => allXputs[id].desc === undefined || allXputs[id].about === undefined)
-          .map((id) => (
-            <XputButton
-              available
-              key={id}
-              {...{ id, type }}
-              {...allXputs[id]}
-              onClick={() =>
-                setModal(
-                  <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                    <UpdateXput {...props} {...{ type, id, setModal }} {...allXputs[id]} />
-                  </ModalWrapper>
-                )
-              }
-            />
-          ))}
-      </div>
+      {Object.keys(allXputs).filter(
+        (id) => allXputs[id].desc === undefined || allXputs[id].about === undefined
+      ).length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          {Object.keys(allXputs)
+            .filter((id) => allXputs[id].desc === undefined || allXputs[id].about === undefined)
+            .map((id) => (
+              <XputButton
+                available
+                key={id}
+                {...{ id, type }}
+                {...allXputs[id]}
+                onClick={() =>
+                  setModal(
+                    <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                      <UpdateXput {...props} {...{ type, id, setModal }} {...allXputs[id]} />
+                    </ModalWrapper>
+                  )
+                }
+              />
+            ))}
+        </div>
+      ) : null}
       <h4 className="mt-4 capitalize">Add a Connector {type}</h4>
       <div className="grid grid-cols-2 gap-2 mt-4">
         {Object.keys(blocks)
@@ -219,3 +204,245 @@ export const ConnectorXputs = (props) => (
 )
 export const ConnectorInputs = (props) => <ConnectorXputs {...props} type="input" />
 export const ConnectorOutputs = (props) => <ConnectorXputs {...props} type="output" />
+
+const PipelineHeader = ({ id, title, type }) => (
+  <h3 className="flex flex-row justify-between items-center w-full">
+    <InputIcon className="w-12 h-12" stroke={1.25} />
+    Pipeline {id}
+    <OutputIcon className="w-12 h-12" stroke={1.25} />
+  </h3>
+)
+
+const PipelineButton = ({
+  type, // Either input our output
+  id, // Current picked id
+  setter, // Setter method
+}) => (
+  <button className={`btn btn-ghost btn-primary`} onClick={() => setter(null)}>
+    {id ? id : type === 'input' ? 'Select an input below' : 'Select an output below'}
+  </button>
+)
+
+const AddPipeline = (props) => {
+  const [pipelineSettings, setPipelineSettings] = useState({})
+
+  const templates = connectorTemplates({
+    mSettings: props.data,
+    update: props.update,
+    pipelineSettings,
+  })
+  const forms = {
+    in:
+      templates.children.inputs.blocks?.[
+        props.data.connector.inputs?.[pipelineSettings.input?.id]?.plugin
+      ]?.pipeline_form || false,
+    out:
+      templates.children.outputs.blocks?.[
+        props.data.connector.outputs?.[pipelineSettings.output?.id]?.plugin
+      ]?.pipeline_form || false,
+  }
+  const validationSchema = {
+    id: {
+      schema: Joi.string().required().label('ID'),
+      update: (val) => localUpdate('id', slugify(val)),
+      current: pipelineSettings?.id,
+      placeholder: 'my-pipeline',
+      label: 'ID',
+      labelBL: 'A unique ID to reference this pipeline',
+      labelBR: <span className="italic opacity-70">Input will be slugified</span>,
+      key: 'id',
+    },
+    about: {
+      schema: Joi.string().optional().allow('').label('Description'),
+      update: (val) => localUpdate('about', val),
+      label: 'Description',
+      labelBL: 'A description to help understand the purpose of this pipeline',
+      labelBR: <span className="italic opacity-70">Optional</span>,
+      key: 'about',
+      current: pipelineSettings?.about,
+      textarea: true,
+    },
+    inputId: {
+      schema: Joi.string()
+        .required()
+        .valid(...(Object.keys(props.data?.connector?.inputs) || []))
+        .label('Input Connector'),
+      key: 'input.id',
+    },
+    outputId: {
+      schema: Joi.string()
+        .required()
+        .valid(...(Object.keys(props.data?.connector?.outputs) || []))
+        .label('Output Connector'),
+      key: 'output.id',
+    },
+  }
+  if (forms.in) validationSchema.input = forms.in
+  if (forms.out) validationSchema.output = forms.out
+  const valid = reduceFormValidation(Object.values(validationSchema), pipelineSettings)
+
+  const create = () => {
+    // Keep the id out of the settings as the key will be the id
+    const settings = { ...pipelineSettings }
+    delete settings.id
+    props.update(`connector.pipelines.${pipelineSettings.id}`, settings, props.data)
+    props.setModal(false)
+  }
+  const remove = (id) => {
+    props.update(`connector.pipelines.${id}`, 'MORIO_UNSET', props.data)
+    props.setModal(false)
+  }
+  const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
+
+  const localUpdate = (key, val) => {
+    const newSettings = { ...pipelineSettings }
+    set(newSettings, key, val)
+    setPipelineSettings(newSettings)
+  }
+
+  return (
+    <div className="max-w-2xl w-full">
+      <PipelineHeader id={props.id} />
+      <Tabs tabs={`Connectors, Metadata, Input Settings, Output Settings`}>
+        <Tab tabId="Connectors" key="Connectors">
+          <div className="flex flex-row justify-center w-full items-center">
+            <button
+              className={`btn btn-ghost btn-primary text-lg italic ${
+                pipelineSettings.input?.id ? 'text-success hover:text-error' : 'opacity-70'
+              }`}
+              onClick={() => localUpdate('input.id', null)}
+            >
+              {pipelineSettings.input?.id || 'Select an input below'}
+            </button>
+            <div className="col-span-1 flex flex-row gap-1 items-center justify-center">
+              <RightIcon className="h-5 w-5" />
+              <RightIcon className="h-5 w-5 -ml-4" />
+              <RightIcon className="h-5 w-5 -ml-4" />
+            </div>
+            <button
+              className={`btn btn-ghost btn-primary text-lg italic ${
+                pipelineSettings.output?.id ? 'text-success hover:text-error' : 'opacity-70'
+              }`}
+              onClick={() => localUpdate('output.id', null)}
+            >
+              {pipelineSettings.output?.id || 'Select an output below'}
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
+              <h4>Pipeline Inputs</h4>
+              {Object.keys(props.data?.connector?.inputs || {}).map((id) => (
+                <button
+                  className={`${btnClasses} ${
+                    pipelineSettings.input?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
+                  }`}
+                  onClick={() => localUpdate('input.id', id)}
+                  key={id}
+                >
+                  {id}
+                  <InputIcon stroke={1.5} className="w-8 h-8" />
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-col gap-1">
+              <h4>Pipeline Outputs</h4>
+              {Object.keys(props.data?.connector?.outputs || {}).map((id) => (
+                <button
+                  className={`${btnClasses} ${
+                    pipelineSettings.output?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
+                  }`}
+                  onClick={() => localUpdate('output.id', id)}
+                  key={id}
+                >
+                  <OutputIcon stroke={1.5} className="w-8 h-8" />
+                  {id}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Tab>
+        <Tab tabId="Metadata" key="Metadata">
+          <FormElement {...validationSchema.id} />
+          <FormElement {...validationSchema.about} />
+        </Tab>
+        <Tab tabId="Input Settings" key="Input Settings">
+          {forms.in ? (
+            <FormWrapper {...props} form={forms.in} update={localUpdate} />
+          ) : (
+            <p className="text-center font-bold italic opacity-70">
+              This input requires no pipeline-specific configuration
+            </p>
+          )}
+        </Tab>
+        <Tab tabId="Output Settings" key="Output Settings">
+          {forms.out ? (
+            <FormWrapper {...props} form={forms.out} update={localUpdate} />
+          ) : (
+            <p className="text-center font-bold italic opacity-70">
+              This output requires no pipeline-specific configuration
+            </p>
+          )}
+        </Tab>
+      </Tabs>
+      <div className="mt-2 flex flex-row gap-2 items-center justify-center">
+        <button className="btn btn-primary px-12" onClick={create} disabled={!valid}>
+          {props.edit ? 'Update' : 'Create'} Pipeline
+        </button>
+        {props.edit ? (
+          <button className="btn btn-error" onClick={() => remove(props.id)}>
+            <TrashIcon />
+          </button>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+const ShowPipeline = (props) => (
+  <button
+    className="max-w-2xl w-full grid grid-cols-12 gap-2 items-center border rounded-lg hover:bg-secondary hover:bg-opacity-20 mb-2"
+    onClick={() =>
+      props.setModal(
+        <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+          <AddPipeline {...props} settings={props.data.connector.pipelines[props.id]} edit />
+        </ModalWrapper>
+      )
+    }
+  >
+    <div className="bg-secondary p-2 rounded-l-lg font-bold text-right col-span-3 bg-opacity-50">
+      {props.id}
+    </div>
+    <div className="col-span-4 text-right">{props.data.connector.pipelines[props.id].input.id}</div>
+    <div className="col-span-1 flex flex-row gap-1 items-center justify-center">
+      <RightIcon className="h-5 w-5" />
+      <RightIcon className="h-5 w-5 -ml-4" />
+      <RightIcon className="h-5 w-5 -ml-4" />
+    </div>
+    <div className="col-span-4 text-left">{props.data.connector.pipelines[props.id].output.id}</div>
+  </button>
+)
+
+export const ConnectorPipelines = (props) => {
+  const { setModal } = useContext(ModalContext)
+
+  return (
+    <>
+      <h3>{props.viewConfig.title ? props.viewConfig.title : props.viewConfig.label}</h3>
+      {Object.keys(props.data?.connector?.pipelines || {}).map((id) => {
+        return <ShowPipeline key={id} {...props} id={id} setModal={setModal} />
+      })}
+      <button
+        className="btn btn-primary"
+        onClick={() =>
+          setModal(
+            <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+              <AddPipeline {...props} setModal={setModal} edit={false} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <PlusIcon className="w-6 h-6 mr-4" stroke={3} /> Add Pipeline
+      </button>
+    </>
+  )
+}

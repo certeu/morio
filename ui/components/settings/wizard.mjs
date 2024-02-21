@@ -245,6 +245,67 @@ export const SettingsWizard = (props) => {
   )
 }
 
+const WizardWrapper = ({
+  title,
+  section,
+  sectionPath,
+  doValidate,
+  template,
+  loadView,
+  mSettings,
+  preview,
+  setPreview,
+  children,
+}) => (
+  <div className="flex flex-row gap-8 justify-start">
+    <div className="w-full max-w-4xl p-8 grow">
+      <Breadcrumbs page={['settings', ...sectionPath.split('.')]} />
+      <div className="w-full">
+        <h1 className="capitalize flex w-full max-w-4xl justify-between">
+          {template.children?.[section]?.title
+            ? template.children[section]?.title
+            : template.title
+              ? template.title
+              : doValidate
+                ? 'Validate Settings'
+                : 'Update Settings'}
+          <SettingsIcon className="w-16 h-16" />
+        </h1>
+        {children}
+      </div>
+    </div>
+    <div className="grow-0 shrink-0 pt-24 min-h-screen w-64 pr-4">
+      <h5>Settings</h5>
+      <SettingsNavigation
+        view={sectionPath}
+        loadView={loadView}
+        nav={templates}
+        mSettings={mSettings}
+        edit
+      />
+      <h5>Actions</h5>
+      <div className="flex flex-col gap-2">
+        <button
+          className="btn btn-outline btn-primary btn-sm w-full"
+          onClick={() => loadView('start')}
+          disabled={sectionPath === 'start'}
+        >
+          Getting Started
+        </button>
+        <button
+          className="btn btn-outline btn-primary btn-sm w-full"
+          onClick={() => setPreview(!preview)}
+        >
+          {preview ? 'Hide ' : 'Show '} settings preview
+        </button>
+        <button className="btn btn-primary w-full" onClick={() => loadView('validate')}>
+          <span>Validate Settings</span>
+        </button>
+      </div>
+    </div>
+  </div>
+)
+
 /**
  * This is the React component for the settings wizard itself
  */
@@ -275,11 +336,11 @@ export const PrimedSettingsWizard = (props) => {
    */
   const setView = useCallback(
     (sectionPath) => {
-      console.log('setting view to', sectionPath)
       _setView((prev) => ({
         ...prev,
         pathname: sectionPathAsView(sectionPath, prefix),
       }))
+      setDeployResult(false)
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [prefix]
@@ -326,13 +387,6 @@ export const PrimedSettingsWizard = (props) => {
 
   if (!mSettings.deployment) return null
 
-  if (deployResult)
-    return (
-      <div className="w-fill min-h-screen max-w-2xl mx-auto">
-        <DeploymentReport result={deployResult} />
-      </div>
-    )
-
   /*
    * Load the template and section
    */
@@ -347,14 +401,7 @@ export const PrimedSettingsWizard = (props) => {
     diffCheck(yaml.stringify(runningSettings), yaml.stringify(mSettings)).length > 1 ? true : false
 
   const showProps = doValidate
-    ? {
-        api,
-        mSettings,
-        deploy,
-        validationReport,
-        setValidationReport,
-        setLoadingStatus,
-      }
+    ? { api, mSettings, deploy, validationReport, setValidationReport, setLoadingStatus }
     : {
         update,
         data: mSettings,
@@ -367,90 +414,61 @@ export const PrimedSettingsWizard = (props) => {
         loadView,
         setView,
       }
+  const wrapProps = {
+    section,
+    sectionPath,
+    doValidate,
+    template,
+    loadView,
+    mSettings,
+    preview,
+    setPreview,
+  }
+
+  if (deployResult)
+    return (
+      <WizardWrapper {...wrapProps}>
+        <DeploymentReport result={deployResult} />
+      </WizardWrapper>
+    )
 
   return (
-    <div className="flex flex-row gap-8 justify-start">
-      <div className="w-full max-w-4xl p-8 grow">
-        <Breadcrumbs page={['settings', ...sectionPath.split('.')]} />
-        <div className="w-full">
-          <h1 className="capitalize flex w-full max-w-4xl justify-between">
-            {template.children?.[section]?.title
-              ? template.children[section]?.title
-              : template.title
-                ? template.title
-                : doValidate
-                  ? 'Validate Settings'
-                  : 'Update Settings'}
-            <SettingsIcon className="w-16 h-16" />
-          </h1>
-          {template === false && !doValidate ? (
-            <Welcome setView={setView} />
-          ) : doValidate ? (
-            <ShowSettingsValidation {...showProps} />
-          ) : (
-            <Block {...showProps} edit={true} />
-          )}
-          {!doValidate && delta ? (
-            <Popout note>
-              <h4>You have made changes that are yet to be deployed</h4>
-              <p>
-                The settings have been edited, and are now different from the deployed settings.
-              </p>
-              {showDelta ? (
-                <div className="my-4">
-                  <DiffViewer
-                    from={yaml.stringify(runningSettings)}
-                    to={yaml.stringify(mSettings)}
-                    fromTitle="Currently deployed settings"
-                    toTitle="Your edits"
-                  />
-                </div>
-              ) : null}
-              <div className="flex flex-row flex-wrap gap-2 justify-end w-full">
-                <button className="btn btn-warning btn-ghost" onClick={revert}>
-                  Revert to Running Settings
-                </button>
-                <button
-                  className="btn btn-primary btn-outline"
-                  onClick={() => setShowDelta(!showDelta)}
-                >
-                  {showDelta ? 'Hide' : 'Show'} Settings Delta
-                </button>
-              </div>
-            </Popout>
+    <WizardWrapper {...wrapProps}>
+      {template === false && !doValidate ? (
+        <Welcome setView={setView} />
+      ) : doValidate ? (
+        <ShowSettingsValidation {...showProps} />
+      ) : (
+        <Block {...showProps} edit={true} />
+      )}
+      {!doValidate && delta ? (
+        <Popout note>
+          <h4>You have made changes that are yet to be deployed</h4>
+          <p>The settings have been edited, and are now different from the deployed settings.</p>
+          {showDelta ? (
+            <div className="my-4">
+              <DiffViewer
+                from={yaml.stringify(runningSettings)}
+                to={yaml.stringify(mSettings)}
+                fromTitle="Currently deployed settings"
+                toTitle="Your edits"
+              />
+            </div>
           ) : null}
-          <ShowSettingsPreview {...{ preview, setPreview, mSettings }} />
-        </div>
-      </div>
-      <div className="grow-0 shrink-0 pt-24 min-h-screen w-64 pr-4">
-        <h5>Settings</h5>
-        <SettingsNavigation
-          view={sectionPath}
-          loadView={loadView}
-          nav={templates}
-          mSettings={mSettings}
-          edit
-        />
-        <h5>Actions</h5>
-        <div className="flex flex-col gap-2">
-          <button
-            className="btn btn-outline btn-primary btn-sm w-full"
-            onClick={() => loadView('start')}
-            disabled={sectionPath === 'start'}
-          >
-            Getting Started
-          </button>
-          <button
-            className="btn btn-outline btn-primary btn-sm w-full"
-            onClick={() => setPreview(!preview)}
-          >
-            {preview ? 'Hide ' : 'Show '} settings preview
-          </button>
-          <button className="btn btn-primary w-full" onClick={() => loadView('validate')}>
-            <span>Validate Settings</span>
-          </button>
-        </div>
-      </div>
-    </div>
+          <div className="flex flex-row flex-wrap gap-2 justify-end w-full">
+            <button className="btn btn-warning btn-ghost" onClick={revert}>
+              Revert to Running Settings
+            </button>
+            <button
+              className="btn btn-primary btn-outline"
+              onClick={() => setShowDelta(!showDelta)}
+            >
+              {showDelta ? 'Hide' : 'Show'} Settings Delta
+            </button>
+          </div>
+        </Popout>
+      ) : null}
+      <ShowSettingsPreview {...{ preview, setPreview, mSettings }} />
+    </WizardWrapper>
   )
 }
