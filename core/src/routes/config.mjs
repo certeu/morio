@@ -18,14 +18,9 @@ export function routes(tools) {
   const { app } = tools
 
   /*
-   * Load a list of all configurations
-   */
-  app.get('/configs', (req, res) => Config.getConfigsList(req, res, tools))
-
-  /*
    * Load the current (running) configuration
    */
-  app.get('/configs/current', (req, res) => res.send(tools.config))
+  app.get('/config', (req, res) => res.send(tools.config))
 
   /*
    * Load the current presets
@@ -36,11 +31,6 @@ export function routes(tools) {
    * Load the CA configuration
    */
   app.get('/configs/ca', (req, res) => Config.getCaConfig(req, res, tools))
-
-  /*
-   * Load a confiration by timestamp
-   */
-  app.get('/configs/:timestamp', (req, res) => Config.getConfig(req, res, tools))
 
   /*
    * Load the defaults

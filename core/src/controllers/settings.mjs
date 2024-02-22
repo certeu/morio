@@ -1,5 +1,4 @@
 import { writeYamlFile, writeBsonFile, readDirectory, readYamlFile } from '#shared/fs'
-import { cloneAsPojo } from '#shared/utils'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 
@@ -114,32 +113,12 @@ Controller.prototype.setup = async (req, res, tools) => {
   tools.log.debug(`Initial settings will be tracked as: ${time}`)
 
   /*
-   * Create object to hold the configuration, starting with the cloned settings
-   */
-  const mConf = {
-    ...cloneAsPojo(mSettings),
-    settings: time,
-    comment: 'Initial deployment',
-    core: {},
-    optional_services: {},
-  }
-  mConf.optional_services.ui = mConf.flags
-    ? mConf.flags.includes['headless']
-      ? true
-      : false
-    : true
-
-  /*
    * This is the initial deploy, there will be no key pair, so generate one.
    */
   tools.log.debug(`Generating root token`)
   const morioRootToken = 'mrt.' + (await randomString(32))
   tools.log.debug(`Generating key pair`)
   const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
-  mConf.deployment.key_pair = {
-    public: publicKey,
-    private: privateKey,
-  }
   const keys = {
     jwt: generateJwtKey(),
     mrt: morioRootToken,
@@ -150,24 +129,16 @@ Controller.prototype.setup = async (req, res, tools) => {
   /*
    * Make sure we have a keypair
    */
-  if (!mConf.deployment.key_pair?.public || !mConf.deployment.key_pair.private) {
+  if (!keys.public || !keys.private) {
     tools.log.debug(`Configuration lacks key pair`)
     return res.status(400).send({ errors: ['Configuration lacks key pair'] })
   }
 
   /*
-   * Write the mConf configuration to disk
-   */
-  tools.log.debug(`Writing initial configuration to config.${time}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/config.${time}.yaml`, mConf)
-  if (!result)
-    return res.status(500).send({ errors: ['Failed to write initial configuration to disk'] })
-
-  /*
    * Write the mSettings settings to disk
    */
   tools.log.debug(`Writing initial settings to settings.${time}.yaml`)
-  result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
+  let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
   if (!result) return res.status(500).send({ errors: ['Failed to write initial settings to disk'] })
 
   /*

@@ -236,8 +236,8 @@ Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) =>
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getCurrentConfig = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/configs/current`)
+Controller.prototype.getConfig = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/config`)
 
   if (result.deployment) {
     tools.config = result
@@ -252,8 +252,8 @@ Controller.prototype.getCurrentConfig = async (req, res, tools) => {
  * @param {object} res - The response object from Express
  * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getCurrentSettings = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/settings/current`)
+Controller.prototype.getSettings = async (req, res, tools) => {
+  const [status, result] = await tools.core.get(`/settings`)
 
   if (result.deployment) {
     tools.settings = result

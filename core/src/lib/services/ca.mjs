@@ -66,7 +66,7 @@ export const service = {
       /*
        * Generate JWK
        */
-      const jwk = await keypairAsJwk(tools.config.deployment.key_pair)
+      const jwk = await keypairAsJwk(tools.keys)
 
       /*
        * Store root certificate and fingerprint in tools

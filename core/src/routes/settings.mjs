@@ -28,20 +28,9 @@ export function routes(tools) {
   app.post('/settings', (req, res) => Settings.deploy(req, res, tools))
 
   /*
-   * Load a list of all settings
-   */
-  app.get('/settings', (req, res) => Settings.getSettingsList(req, res, tools))
-
-  /*
    * Load the current (running) settings
    */
-  app.get('/settings/current', (req, res) => res.send({
-    ...tools.settings,
-    metadata: {
-      version: tools.config?.settings,
-      comment: tools.config?.comment,
-    }
-  }))
+  app.get('/settings', (req, res) => res.send(tools.settings))
 
   /*
    * Load settings by timestamp

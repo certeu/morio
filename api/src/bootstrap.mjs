@@ -33,7 +33,7 @@ export const bootstrapConfiguration = async (tools) => {
   const result = await attempt({
     every: 2,
     timeout: 60,
-    run: async () => await tools.core.get('/configs/current'),
+    run: async () => await tools.core.get('/config'),
     onFailedAttempt: (s) => tools.log.debug(`Waited ${s} seconds for core, will continue waiting.`),
   })
   if (result && Array.isArray(result) && result[0] === 200 && result[1]) {

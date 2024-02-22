@@ -53,7 +53,7 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.getCurrentConfig = async function () {
-  return await this.call(`${morioConfig.api}/configs/current`)
+  return await this.call(`${morioConfig.api}/config`)
 }
 
 /**
@@ -62,7 +62,7 @@ MorioClient.prototype.getCurrentConfig = async function () {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.getCurrentSettings = async function () {
-  return await this.call(`${morioConfig.api}/settings/current`)
+  return await this.call(`${morioConfig.api}/settings`)
 }
 
 /**

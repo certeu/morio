@@ -95,6 +95,7 @@ export const service = {
        * FIXME: Handle clustering
        */
       if (tools.config.deployment && tools.config.deployment.node_count === 1) {
+        if (!tools.config.core) tools.config.core = {}
         tools.config.core.node_nr = 1
         tools.config.core.names = {
           internal: 'core_1',
@@ -131,7 +132,7 @@ const loadSettingsAndKeys = async () => {
   /*
    * Now read the settings file and keys
    */
-  const settings = await readYamlFile(`/etc/morio/config.${timestamp}.yaml`)
+  const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readBsonFile(`/etc/morio/.${timestamp}.keys`)
 
   return { settings, keys, timestamp }

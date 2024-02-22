@@ -236,7 +236,7 @@ export const SettingsWizard = (props) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
-  return runningSettings?.metadata ? (
+  return runningSettings?.deployment ? (
     <PrimedSettingsWizard {...props} {...{ runningSettings }} />
   ) : notCool ? (
     <NotCool />
