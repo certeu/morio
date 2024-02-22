@@ -1,6 +1,6 @@
 import { defaults as debDefaults } from '#config/services/dbuilder'
-import { loadRevision, prebuild } from '#lib/services/dbuilder'
-import { ensureMorioService } from '#lib/services/core'
+import { loadRevision } from '#lib/services/dbuilder'
+import { ensureMorioService, runHook } from '#lib/services/index'
 import { writeFile, writeYamlFile } from '#shared/fs'
 import { resolveClientConfiguration } from '#config/clients/linux'
 import { createX509Certificate } from '#lib/services/core'
@@ -39,9 +39,9 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
  */
 Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
   /*
-   * Prebuild will generate the control file
+   * The preBuild lifecycle hook will generate the control file
    */
-  const settings = await prebuild(req.body)
+  const settings = await runHook('prebuild', 'dbuilder', tools, req.body)
 
   /*
    * Generate a certificate and key for mTLS

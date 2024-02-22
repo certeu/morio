@@ -3,8 +3,8 @@ import express from 'express'
 import { logger } from '#shared/logger'
 import { wrapExpress } from '#shared/utils'
 import { getPreset } from '#config'
-// Bootstrap core method
-import { preStartCore } from './lib/services/core.mjs'
+// Start Morio method
+import { startMorio } from './lib/services/index.mjs'
 // Routes
 import { routes } from '#routes/index'
 
@@ -12,7 +12,7 @@ import { routes } from '#routes/index'
  * Instantiate the tools object with logger
  */
 const tools = {
-  log: logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
+  log: logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core'),
 }
 
 /*
@@ -45,11 +45,11 @@ wrapExpress(
  * own configuration
  */
 export async function reconfigure() {
-
   /*
    * First of all, we bootstrap core which will popular tools with what we need
    */
-  await preStartCore(tools)
+  await startMorio(tools)
+  //core.hooks.preStart(tools)
 
   /*
    * Use the logger on the tools object from now on
@@ -97,5 +97,3 @@ export async function reconfigure() {
 
   return tools
 }
-
-

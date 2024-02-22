@@ -1,6 +1,6 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
-import { hotReload } from '#lib/services/core'
+import { reconfigure } from '../index.mjs'
 
 /**
  * This config controller handles configuration routes
@@ -129,7 +129,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
    * Don't await deployment, just return
    */
   tools.log.info(`Starting Morio`)
-  hotReload()
+  reconfigure()
 
   return res.send(data)
 }

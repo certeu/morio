@@ -10,8 +10,8 @@ export const resolveServiceConfiguration = (tools) => ({
    */
   container: {
     // Name to use for the running container
-    container_name: 'pipes',
-    // Image to run (different in dev)
+    container_name: 'connector',
+    // Image to run
     image: 'docker.elastic.co/logstash/logstash',
     // Image tag (version) to run
     tag: '8.12.1',
@@ -30,10 +30,10 @@ export const resolveServiceConfiguration = (tools) => ({
     },
     // Volumes
     volumes: [
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/pipes:/usr/share/logstash/data`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs/pipes:/usr/share/logstash/logs`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/etc/morio/pipes/config:/usr/share/logstash/config:ro`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/etc/morio/pipes/pipelines:/usr/share/logstash/pipeline:ro`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/connector:/usr/share/logstash/data`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs/connector:/usr/share/logstash/logs`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/pipelines:/usr/share/logstash/pipeline:ro`,
     ],
   },
 
@@ -42,27 +42,33 @@ export const resolveServiceConfiguration = (tools) => ({
    */
   logstash: {
     /*
+     * Configure paths
+     */
+    path: {
+      data: '/usr/share/logstash/data',
+      config: '/use/share/logstash/config',
+      logs: '/usr/share/logstash/logs',
+    },
+    /*
      * Set node name based on the node_nr and nodes list
      */
     node: {
-      name: tools.config?.core?.nodes[(tools.config?.core?.node_nr || 1) - 1],
+      name: tools.config?.deployment?.nodes[(tools.config?.deployment?.node_nr || 1) - 1],
     },
     /*
      * Set the log level and format
      */
     log: {
-      level: tools.getPreset('MORIO_DEBUG') ? 'info' : 'warn',
+      level: 'warn',
       format: 'json',
-      reload: {
-        automatic: true,
-        interval: '30s',
-      }
     },
     /*
-     * Do not debug config, unless debug is on
+     * Do not debug config
      */
     config: {
-      debug: tools.getPreset('MORIO_DEBUG') ? true : false
+      reload: {
+        automatic: false,
+      }
     },
     /*
      * Configure queue
@@ -89,7 +95,7 @@ export const resolveServiceConfiguration = (tools) => ({
     },
     api: {
       enabled: true,
-      environment: tools.config?.core?.nodes[(tools.config?.core?.node_nr || 1) - 1],
+      environment: tools.config?.deployment?.nodes[(tools.config?.deployment?.node_nr || 1) - 1],
       http: {
         host: '0.0.0.0'
       },
@@ -98,12 +104,6 @@ export const resolveServiceConfiguration = (tools) => ({
       }
     },
     allow_superuser: false,
-    slowlog: {
-      treshold: {
-        warn: '2s',
-        info: '1s',
-      }
-    },
   },
 })
 

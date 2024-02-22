@@ -1,55 +1,54 @@
 import { readFile, writeFile } from '#shared/fs'
 
-/*
- * Before creating the container, update the entrypoint
- * shell script with our own one.
- * This will be volume-mapped, so we need to write it to
- * disk first so it's available
+/**
+ * Service object holds the various lifecycle methods
  */
-export const preCreate = async (tools) => {
-  /*
-   * See if entrypoint.sh on the host OS is our custom version
-   */
-  let file = '/etc/morio/proxy/entrypoint.sh'
-  const entrypoint = await readFile(file)
-  if (entrypoint && entrypoint.includes('update-ca-certificates')) {
-    tools.log.debug('Proxy: Custom entrypoint exists, no action needed')
-  } else {
-    tools.log.debug('Proxy: Creating custom entrypoint')
-    await writeFile(
-      file,
-      tools.config.services.proxy.entrypoint,
-      tools.log,
-      0o755
-    )
-  }
+export const service = {
+  name: 'proxy',
+  hooks: {
+    /*
+     * Before creating the container, update the entrypoint
+     * shell script with our own one.
+     * This will be volume-mapped, so we need to write it to
+     * disk first so it's available
+     */
+    preCreate: async (tools) => {
+      /*
+       * See if entrypoint.sh on the host OS is our custom version
+       */
+      let file = '/etc/morio/proxy/entrypoint.sh'
+      const entrypoint = await readFile(file)
+      if (entrypoint && entrypoint.includes('update-ca-certificates')) {
+        tools.log.debug('Proxy: Custom entrypoint exists, no action needed')
+      } else {
+        tools.log.debug('Proxy: Creating custom entrypoint')
+        await writeFile(file, tools.config.services.proxy.entrypoint, tools.log, 0o755)
+      }
 
-  /*
-   * See if root certificate exists, create empty file if not
-   * This is required because the root certificate is bind-mounted
-   * in the proxy container. However, the file won't exist on the
-   * host OS until the CA is started. So when Morio runs in
-   * ephemeral mode, there is no CA, and Docker will (when a
-   * bind mounted file does not exist) create a folder (instead
-   * of a file) with this name.
-   * Long story short, all will break unless we make sure there
-   * is a file in place that can be overwritten later.
-   */
-  file = '/morio/data/ca/certs/root_ca.crt'
-  const ca = await readFile(file)
-  if (ca) {
-    tools.log.debug('Proxy: Root certificate file exists, no action needed')
-  } else  {
-    tools.log.debug('Proxy: Creating placeholder root certificate file')
-    await writeFile(
-      file,
-      '',
-      tools.log,
-      0o755
-    )
-  }
+      /*
+       * See if root certificate exists, create empty file if not
+       * This is required because the root certificate is bind-mounted
+       * in the proxy container. However, the file won't exist on the
+       * host OS until the CA is started. So when Morio runs in
+       * ephemeral mode, there is no CA, and Docker will (when a
+       * bind mounted file does not exist) create a folder (instead
+       * of a file) with this name.
+       * Long story short, all will break unless we make sure there
+       * is a file in place that can be overwritten later.
+       */
+      file = '/morio/data/ca/certs/root_ca.crt'
+      const ca = await readFile(file)
+      if (ca) {
+        tools.log.debug('Proxy: Root certificate file exists, no action needed')
+      } else {
+        tools.log.debug('Proxy: Creating placeholder root certificate file')
+        await writeFile(file, '', tools.log, 0o755)
+      }
+
+      return true
+    },
+  },
 }
-
 
 /**
  * Returns an array populated with Traefik routers that are

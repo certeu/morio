@@ -1,7 +1,7 @@
 import { writeYamlFile, writeBsonFile, readDirectory, readYamlFile } from '#shared/fs'
 import { cloneAsPojo } from '#shared/utils'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
-import { hotReload } from '#lib/services/core'
+import { reconfigure } from '../index.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -64,40 +64,17 @@ Controller.prototype.deploy = async (req, res, tools) => {
   tools.log.debug(`New settings will be tracked as: ${time}`)
 
   /*
-   * Create object to hold the configuration, starting with the cloned settings
-   */
-  const mConf = {
-    ...cloneAsPojo(mSettings),
-    settings: time,
-  }
-
-  /*
-   * Make sure all services are present
-   */
-  if (typeof mConf.core === 'undefined') mConf.core = {}
-  if (typeof mConf.optional_services === 'undefined') mConf.optionalServices = {}
-  mConf.optionalServices.ui = mConf.flags ? (mConf.flags.includes['headless'] ? true : false) : true
-
-  /*
-   * Write the mConf configuration to disk
-   */
-  tools.log.debug(`Writing new configuration to config.${time}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/config.${time}.yaml`, mConf)
-  if (!result)
-    return res.status(500).send({ errors: ['Failed to write new configuration to disk'] })
-
-  /*
    * Write the mSettings settings to disk
    */
   tools.log.debug(`Writing new settings to settings.${time}.yaml`)
-  result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
    * Don't await deployment, just return
    */
-  tools.log.info(`Reloading Morio`)
-  hotReload()
+  tools.log.info(`Reconfiguring Morio`)
+  reconfigure()
 
   return res.send({ result: 'success', settings: mSettings })
 }
@@ -214,7 +191,7 @@ Controller.prototype.setup = async (req, res, tools) => {
    * Don't await deployment, just return
    */
   tools.log.info(`Bring Morio out of ephemeral mode`)
-  hotReload()
+  reconfigure()
 
   return res.send(data)
 }

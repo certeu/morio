@@ -92,6 +92,13 @@ export const presets = {
   MORIO_CA_UID: 1000,
 
   /*
+   * Connnector presets
+   */
+
+  // Connector UID inside container
+  MORIO_CONNECTOR_UID: 1000,
+
+  /*
    * Console presets
    */
 
