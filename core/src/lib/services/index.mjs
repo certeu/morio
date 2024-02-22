@@ -43,6 +43,7 @@ export const services = {
  */
 export const serviceOrder = [
   'core',
+  'ca',
   'proxy',
   'api',
   'ui',
@@ -191,13 +192,14 @@ export const startMorio = async (tools) => {
  * @param {string} service = The service name
  * @param {object} running = On object holding info on running containers and their config
  * @param {object} tools = The tools object
+ * @param {object} hookParams = Parameters to pass through to runHooks
  * @return {bool} ok = Whether or not the service was started
  */
-export const ensureMorioService = async (service, running, tools) => {
+export const ensureMorioService = async (service, running, tools, hookParams) => {
   /*
    * Is the service wanted?
    */
-  const wanted = await runHook('wanted', service, tools)
+  const wanted = await runHook('wanted', service, tools, hookParams)
   if (!wanted) {
     tools.log.debug(`Service ${service} is not wanted`)
     /*
@@ -245,7 +247,7 @@ export const ensureMorioService = async (service, running, tools) => {
   /*
    * Run preCreate lifecycle hook
    */
-  runHook('preCreate', service, tools, recreate)
+  runHook('preCreate', service, tools, recreate, hookParams)
 
   /*
    * Recreate the container if needed
@@ -255,7 +257,7 @@ export const ensureMorioService = async (service, running, tools) => {
   /*
    * Run preStart lifecycle hook
    */
-  runHook('preStart', service, tools, recreate)
+  runHook('preStart', service, tools, recreate, hookParams)
 
   /*
    * Restart the container if needed
@@ -265,7 +267,7 @@ export const ensureMorioService = async (service, running, tools) => {
   /*
    * Run postStart lifecycle hook
    */
-  runHook('postStart', service, tools, recreate)
+  runHook('postStart', service, tools, recreate, hookParams)
 }
 
 export const runHook = async (hook, service, tools, ...params) => {

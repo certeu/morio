@@ -8,4 +8,4 @@ curl --insecure \
       "display_name": "POC"
     }
   }' \
-  https://poc-morio-node1.cert.europa.eu/ops/api/deploy | jq
+  https://poc-morio-node1.cert.europa.eu/ops/api/setup | jq

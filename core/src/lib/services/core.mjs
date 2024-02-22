@@ -146,9 +146,6 @@ export const createX509Certificate = async (tools, data) => {
   /*
    * Extract the key id (kid) from the public key
    */
-  console.log({ keys: tools.keys })
-  const tmp = await keypairAsJwk({ public: tools.keys.public })
-  console.log({ tmp })
   const kid = (await keypairAsJwk({ public: tools.keys.public })).kid
 
   /*
@@ -198,10 +195,6 @@ export const createX509Certificate = async (tools, data) => {
       format: 'pem',
     }),
   })
-
-  /*
-   * Handle custom expiry
-   */
 
   /*
    * Now ask the CA to sign the CSR

@@ -1,5 +1,5 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
-import { attempt } from '#shared/utils'
+import { attempt, sleep } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
@@ -31,9 +31,11 @@ export const service = {
        * but 9 tiumes out of 10, this means the CA has just been starte
        * by core. So let's give it 6.66 seconds to come up
        */
-      //tools.log.debug('Sleeping 6.66 seconds before requesting broker certificate from CA (so it can come up)')
-      //await sleep(6.66)
-      //tools.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
+      tools.log.debug(
+        'Sleeping 6.66 seconds before requesting broker certificate from CA (so it can come up)'
+      )
+      await sleep(6.66)
+      tools.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
 
       /*
        * It is not, generate X.509 certificate/key for the broker(s)

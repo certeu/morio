@@ -92,7 +92,7 @@ Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
   /*
    * Start the dbuilder service (but don't wait for it)
    */
-  ensureMorioService('dbuilder', {}, tools)
+  ensureMorioService('dbuilder', {}, tools, true)
 
   /*
    * If revision is set, update it on disk

@@ -150,7 +150,7 @@ export const ToggleInput = ({
 export const NumberInput = ({
   label, // Label to use
   update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   current, // The current value
   original, // The original value
   placeholder, // The placeholder text
@@ -193,7 +193,7 @@ export const NumberInput = ({
 export const StringInput = ({
   label, // Label to use
   update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   current = '', // The current value
   original, // The original value
   placeholder, // The placeholder text
@@ -232,7 +232,7 @@ export const StringInput = ({
 export const SecretInput = ({
   label, // Label to use
   update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   current = '', // The current value
   original, // The original value
   placeholder, // The placeholder text
@@ -281,7 +281,7 @@ export const SecretInput = ({
 export const TextInput = ({
   label, // Label to use
   update, // onChange handler
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   current = '', // The current value
   original, // The original value
   placeholder, // The placeholder text
@@ -311,7 +311,7 @@ export const TextInput = ({
  */
 export const ListInput = ({
   update, // the onChange handler
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   label, // The label
   list, // The list of items to present { val, label, about }
   current, // The (value of the) current item
@@ -380,7 +380,7 @@ export const ListInput = ({
  */
 export const FileInput = ({
   label, // The label
-  valid, // Method that should return whether the value is valid or not
+  valid = () => true, // Method that should return whether the value is valid or not
   update, // The onChange handler
   current, // The current value
   original, // The original value

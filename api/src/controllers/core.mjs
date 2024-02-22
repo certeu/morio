@@ -134,6 +134,7 @@ Controller.prototype.setup = async (req, res, tools) => {
   /*
    * This route is only accessible when running in ephemeral mode
    */
+  console.log(tools.info)
   if (!tools.info?.ephemeral)
     return res.status(400).send({
       errors: ['You can only use this endpoint on an ephemeral Morio node'],

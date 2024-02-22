@@ -58,7 +58,7 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt },
     ok = await run()
   }
   catch (err) {
-    console.log.debug(err)
+    console.log(err)
   }
 
   if (ok) return resolve(ok)
@@ -80,7 +80,10 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt },
       return resolve(ok)
     } else {
       const delta = (Date.now() - now) / 1000
-      if (delta > timeout * 1000) return resolve(false)
+      if (delta > timeout) {
+        clearInterval(interval)
+        return resolve(false)
+      }
       else if (onFailedAttempt && typeof onFailedAttempt === 'function') onFailedAttempt(Math.floor(delta))
     }
   }, every * 1000)

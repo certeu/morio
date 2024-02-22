@@ -20,6 +20,7 @@ then
   echo "Hope you know what you're doing"
   npm run dev:clean
   sudo rm -rf ${DIR}/hostfs/config/*
+  sudo rm -rf ${DIR}/hostfs/config/.1*.keys
   sudo rm -rf ${DIR}/hostfs/data/*
   touch ${DIR}/hostfs/data/ca/secrets/.gitkeep
 else

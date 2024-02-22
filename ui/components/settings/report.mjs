@@ -61,7 +61,7 @@ export const DeploymentReport = ({ result }) => {
           Settings were <b>accepted</b> for deployment
         </div>
       </Box>
-      {result.fresh_deploy && result.root_token ? (
+      {result.root_token ? (
         <Popout important>
           <h5>Store the Morio Root Token in a safe place now</h5>
           <p>Below is the Morio Root Token for this deployment:</p>

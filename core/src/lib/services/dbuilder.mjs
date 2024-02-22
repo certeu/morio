@@ -4,6 +4,7 @@ import { resolveControlFile } from '#config/services/dbuilder'
 export const service = {
   name: 'dbuilder',
   hooks: {
+    wanted: (tools, onDemandBuild = false) => onDemandBuild,
     /*
      * Generate and write control file for the build
      */
