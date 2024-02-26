@@ -67,6 +67,7 @@ export const service = {
        * Load existing settings and keys from disk
        */
       const { settings, keys, timestamp } = await loadSettingsAndKeys(tools)
+      console.log({ keys })
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -133,7 +134,7 @@ const loadSettingsAndKeys = async () => {
    * Now read the settings file and keys
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
-  const keys = await readBsonFile(`/etc/morio/.${timestamp}.keys`)
+  const keys = await readBsonFile(`/etc/morio/.keys`)
 
   return { settings, keys, timestamp }
 }

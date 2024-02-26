@@ -144,8 +144,8 @@ Controller.prototype.setup = async (req, res, tools) => {
   /*
    * Also write the keys to disk
    */
-  tools.log.debug(`Writing key data to .${time}.keys`)
-  result = await writeBsonFile(`/etc/morio/.${time}.keys`, keys)
+  tools.log.debug(`Writing key data to .keys`)
+  result = await writeBsonFile(`/etc/morio/.keys`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*
