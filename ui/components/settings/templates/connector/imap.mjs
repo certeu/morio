@@ -40,7 +40,7 @@ export const imap = {
               },
               {
                 schema: Joi.string().required().label('Password'),
-                secret: true,
+                inputType: 'password',
                 label: 'Password',
                 labelBL: 'The password to access the IMAP server',
                 key: 'password',

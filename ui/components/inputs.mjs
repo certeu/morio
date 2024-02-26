@@ -145,6 +145,11 @@ export const ToggleInput = ({
 )
 
 /*
+ * Slider input (variant for numbers)
+ */
+export const SliderInput = (props) => <NumberInput {...props} inputType="range" />
+
+/*
  * Input for integers
  */
 export const NumberInput = ({
@@ -162,19 +167,23 @@ export const NumberInput = ({
   max = 0,
   min = 220,
   step = 1,
+  inputType = 'input',
 }) => {
   const isValid = valid(current)
+  if (inputType === 'range') label += ` (${current})`
 
   return (
     <FormControl {...{ label, labelBL, labelBR, labelTR, isValid }} forId={id}>
       <input
         id={id}
         disabled={disabled}
-        type="number"
+        type={inputType === 'range' ? 'range' : 'number'}
         placeholder={placeholder}
         value={current}
         onChange={(evt) => update(evt.target.value)}
-        className={`input w-full input-bordered ${
+        className={`w-full ${
+          inputType === 'range' ? 'range range-primary range-sm' : 'input input-bordered'
+        } ${
           isValid?.error
             ? 'input-error'
             : current === original

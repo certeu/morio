@@ -2,10 +2,11 @@ import Joi from 'joi'
 import { Popout } from 'components/popout.mjs'
 import { slugify } from 'lib/utils.mjs'
 // Connectors
+import { elasticsearch } from './elasticsearch.mjs'
 import { imap } from './imap.mjs'
+import { morio } from './morio.mjs'
 import { rss } from './rss.mjs'
 import { sink } from './sink.mjs'
-import { morio } from './morio.mjs'
 
 /*
  * Reuse this for the input ID
@@ -25,7 +26,7 @@ export const xputMeta = (type, name) => [
     labelBL: `A description to help understand the purpose of this ${type}`,
     labelBR: <span className="italic opacity-70">Optional</span>,
     key: 'about',
-    textarea: true,
+    inputType: 'textarea',
   },
 ]
 const readOnlyForm = (type, name) => [
@@ -125,11 +126,7 @@ export const connector = (context) => ({
       title: 'Connector Outputs',
       about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
-        elasticsearch: {
-          title: 'Elasticsearch',
-          about: 'Writes data to Elasticsearch',
-          desc: 'Use this to index Morio data to an Elasticsearch instance.',
-        },
+        elasticsearch: elasticsearch.out(context),
         http: {
           title: 'HTTP',
           about: 'Writes data to an HTTP endpoint',

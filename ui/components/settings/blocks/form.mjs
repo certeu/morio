@@ -7,6 +7,7 @@ import {
   NumberInput,
   ToggleInput,
   ListInput,
+  SliderInput,
 } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
@@ -119,7 +120,9 @@ export const FormBlock = (props) => {
               />
             )
           else return <p key={i}>formEl.schema is no schema</p>
-        } else return <p key={i}>Not sure what to do with {i}</p>
+        }
+        if (typeof formEl === 'function') return <FormBlock {...props} form={formEl(props)} />
+        else return <p key={i}>Not sure what to do with {i}</p>
       })}
     </>
   )
@@ -150,17 +153,14 @@ export const FormElement = (props) => {
   }
 
   if (props.inputType === 'buttonList') return <ListInput {...inputProps} />
+  if (props.inputType === 'toggle') return <ToggleInput {...inputProps} />
+  if (props.inputType === 'slider') return <SliderInput {...inputProps} />
+  if (props.inputType === 'textarea') return <TextInput {...inputProps} />
+  if (props.inputType === 'password') return <SecretInput {...inputProps} />
 
   switch (type) {
     case 'string':
-      return props.textarea ? (
-        <TextInput {...inputProps} />
-      ) : props.secret ? (
-        <SecretInput {...inputProps} />
-      ) : (
-        <StringInput {...inputProps} />
-      )
-      break
+      return <StringInput {...inputProps} />
     case 'number':
       return <NumberInput {...inputProps} />
     case 'boolean':
