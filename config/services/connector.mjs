@@ -33,7 +33,8 @@ export const resolveServiceConfiguration = (tools) => ({
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/connector:/usr/share/logstash/data`,
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs/connector:/usr/share/logstash/logs`,
       `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/pipelines:/usr/share/logstash/pipeline:ro`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/pipelines/:/usr/share/logstash/pipeline/`,
+      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
     ],
   },
 
@@ -41,14 +42,11 @@ export const resolveServiceConfiguration = (tools) => ({
    * Logstash configuration file
    */
   logstash: {
+
     /*
-     * Configure paths
+     * NOTE: Do not configure paths as doing so will make Logstash ignore pipelines.yml
      */
-    path: {
-      data: '/usr/share/logstash/data',
-      config: '/use/share/logstash/config',
-      logs: '/usr/share/logstash/logs',
-    },
+
     /*
      * Set node name based on the node_nr and nodes list
      */
@@ -59,7 +57,7 @@ export const resolveServiceConfiguration = (tools) => ({
      * Set the log level and format
      */
     log: {
-      level: 'warn',
+      level: 'debug',
       format: 'json',
     },
     /*
@@ -68,7 +66,8 @@ export const resolveServiceConfiguration = (tools) => ({
     config: {
       reload: {
         automatic: false,
-      }
+      },
+      test_and_exit: true,
     },
     /*
      * Configure queue
