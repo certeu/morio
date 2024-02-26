@@ -122,17 +122,23 @@ ${generateXputConfig(output, pipeline, 'output', tools)}
 `
 }
 
-const generateXputConfig = (xput, pipeline, type, tools) => `
+const logstashPluginName = (plugin) =>
+  ['morio_local', 'morio_remote'].includes(plugin) ? 'kafka' : plugin
+
+const generateXputConfig = (xput, pipeline, type, tools) =>
+  logstash[type]?.[xput.plugin]
+    ? logstash[type][xput.plugin](xput, pipeline, tools)
+    : `
 # ${type === 'input' ? 'Input' : 'Output'}, aka where to ${type === 'input' ? 'read data from' : 'write data to'}
 ${type} {
-  ${xput.plugin} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, type, tools)}  }
+  ${logstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, type, tools)}  }
 }
 `
 
 const generatePipelinePluginConfig = (plugin, xput, pipeline, type) => {
   let config = ''
   for (const [key, val] of Object.entries(xput)) {
-    if (!['id', 'type', 'plugin', 'about'].includes(key)) {
+    if (!['type', 'plugin', 'about'].includes(key)) {
       config += `\n    ${key} => ${JSON.stringify(val)}`
     }
   }
@@ -144,4 +150,22 @@ const generatePipelinePluginConfig = (plugin, xput, pipeline, type) => {
   }
 
   return config + '\n'
+}
+
+const logstash = {
+  input: {},
+  output: {
+    morio_local: (xput, pipeline, tools) => `
+# Output data to the local Morio deployment
+output {
+  kafka {
+    codec => json
+    topic_id => "${pipeline.output.topic}"
+    bootstrap_servers => "${tools.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    client_id => "morio_connector"
+    id => "${xput.id}"
+  }
+}
+`,
+  },
 }

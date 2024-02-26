@@ -12,13 +12,15 @@ export const morio = {
       desc: 'Use this to read data from this very Morio system',
       local: (data) => `connector.inputs.${data.id}`,
       form: xputMeta('input', 'morio_local'),
-      pipeline_form: [
+      pipeline_form: (pipelineContext) => [
         {
           schema: Joi.string().required().label('Topic'),
           label: 'Topic',
-          labelBL: 'Thename of the topic to read from',
+          labelBL: 'The name of the topic to read from',
           key: 'input.topic',
-          current: context.pipelineSettings?.input?.topic || '',
+          dflt: context.pipelineSettings?.input?.topic || '',
+          current: pipelineContext.data.input.topic,
+          update: pipelineContext.data.input?.topic,
         },
       ],
     }),
@@ -28,13 +30,15 @@ export const morio = {
       desc: 'Use this to write data to this very Morio system',
       local: (data) => `connector.outputs.${data.id}`,
       form: xputMeta('output', 'morio_local'),
-      pipeline_form: [
+      pipeline_form: (pipelineContext) => [
         {
           schema: Joi.string().required().label('Topic'),
           label: 'Topic',
-          labelBL: 'Thename of the topic to write to',
+          labelBL: 'The name of the topic to write to',
           key: 'output.topic',
-          current: context.pipelineSettings?.output?.topic || '',
+          dflt: context.pipelineSettings?.output?.topic || '',
+          current: pipelineContext.data.output.topic,
+          update: pipelineContext.data.output?.topic,
         },
       ],
     }),

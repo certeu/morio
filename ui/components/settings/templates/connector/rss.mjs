@@ -37,7 +37,7 @@ export const rss = {
               labelBL:
                 'This amount in seconds controls the interval at which we check for new data',
               placeholder: 3600,
-              current: 3600,
+              dflt: 3600,
               key: 'interval',
             },
           ],

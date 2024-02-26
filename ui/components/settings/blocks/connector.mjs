@@ -25,7 +25,7 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Popout } from 'components/popout.mjs'
 import Joi from 'joi'
 import set from 'lodash.set'
-import { FormWrapper, FormElement } from './form.mjs'
+import { FormWrapper, FormElement, loadFormDefaults } from './form.mjs'
 import { TextInput, StringInput } from 'components/inputs.mjs'
 import { slugify } from 'lib/utils.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
@@ -65,21 +65,38 @@ const XputHeader = ({ id, title, type }) => (
   </h3>
 )
 
-const AddXput = (props) => (
-  <div className="max-w-2xl w-full">
-    <XputHeader id={props.id} title={props.title} type={props.type} />
-    {props.form ? (
-      <FormWrapper {...props} settings={{ plugin: props.id, type: props.type }} action="create" />
-    ) : (
-      <p>No form for this type of connector</p>
-    )}
-  </div>
-)
+const AddXput = (props) => {
+  const defaults = loadFormDefaults(
+    {
+      plugin: props.id,
+      type: props.type,
+    },
+    props.form
+  )
+
+  return (
+    <div className="max-w-2xl w-full">
+      <XputHeader id={props.id} title={props.title} type={props.type} />
+      {props.form ? (
+        <FormWrapper {...props} defaults={defaults} action="create" />
+      ) : (
+        <p>No form for this type of connector</p>
+      )}
+    </div>
+  )
+}
 
 const UpdateXput = (props) => {
   const templates = connectorTemplates({ mSettings: props.data, update: props.update })
   const formProps = templates.children?.[props.type + 's']?.blocks?.[props.plugin]
   const formData = props.data?.connector?.[props.type + 's']?.[props.id] || {}
+  const defaults = loadFormDefaults(
+    {
+      plugin: props.id,
+      type: props.type,
+    },
+    formProps.form
+  )
 
   if (formProps)
     return (
@@ -88,11 +105,7 @@ const UpdateXput = (props) => {
         <FormWrapper
           {...props}
           {...formProps}
-          settings={{
-            plugin: props.id,
-            type: props.type,
-            ...formData,
-          }}
+          defaults={{ ...defaults, ...formData }}
           action="update"
         />
       </div>
@@ -223,63 +236,78 @@ const PipelineButton = ({
   </button>
 )
 
+const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
+  const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
+
+  return (
+    <>
+      <div className="flex flex-row justify-center w-full items-center">
+        <button
+          className={`btn btn-ghost btn-primary text-lg italic ${
+            pipelineSettings.input?.id ? 'text-success hover:text-error' : 'opacity-70'
+          }`}
+          onClick={() => localUpdate('input.id', null)}
+        >
+          {pipelineSettings.input?.id || 'Select an input below'}
+        </button>
+        <div className="col-span-1 flex flex-row gap-1 items-center justify-center">
+          <RightIcon className="h-5 w-5" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+        </div>
+        <button
+          className={`btn btn-ghost btn-primary text-lg italic ${
+            pipelineSettings.output?.id ? 'text-success hover:text-error' : 'opacity-70'
+          }`}
+          onClick={() => localUpdate('output.id', null)}
+        >
+          {pipelineSettings.output?.id || 'Select an output below'}
+        </button>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-col gap-1">
+          <h4>Pipeline Inputs</h4>
+          {Object.keys(data?.connector?.inputs || {}).map((id) => (
+            <button
+              className={`${btnClasses} ${
+                pipelineSettings.input?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
+              }`}
+              onClick={() => localUpdate('input.id', id)}
+              key={id}
+            >
+              {id}
+              <InputIcon stroke={1.5} className="w-8 h-8" />
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h4>Pipeline Outputs</h4>
+          {Object.keys(data?.connector?.outputs || {}).map((id) => (
+            <button
+              className={`${btnClasses} ${
+                pipelineSettings.output?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
+              }`}
+              onClick={() => localUpdate('output.id', id)}
+              key={id}
+            >
+              <OutputIcon stroke={1.5} className="w-8 h-8" />
+              {id}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
 const AddPipeline = (props) => {
-  const [pipelineSettings, setPipelineSettings] = useState({})
+  const [pipelineSettings, setPipelineSettings] = useState(props.edit ? props.settings : {})
 
   const templates = connectorTemplates({
     mSettings: props.data,
     update: props.update,
     pipelineSettings,
   })
-  const forms = {
-    in:
-      templates.children.inputs.blocks?.[
-        props.data.connector.inputs?.[pipelineSettings.input?.id]?.plugin
-      ]?.pipeline_form || false,
-    out:
-      templates.children.outputs.blocks?.[
-        props.data.connector.outputs?.[pipelineSettings.output?.id]?.plugin
-      ]?.pipeline_form || false,
-  }
-  const validationSchema = {
-    id: {
-      schema: Joi.string().required().label('ID'),
-      update: (val) => localUpdate('id', slugify(val)),
-      current: pipelineSettings?.id,
-      placeholder: 'my-pipeline',
-      label: 'ID',
-      labelBL: 'A unique ID to reference this pipeline',
-      labelBR: <span className="italic opacity-70">Input will be slugified</span>,
-      key: 'id',
-    },
-    about: {
-      schema: Joi.string().optional().allow('').label('Description'),
-      update: (val) => localUpdate('about', val),
-      label: 'Description',
-      labelBL: 'A description to help understand the purpose of this pipeline',
-      labelBR: <span className="italic opacity-70">Optional</span>,
-      key: 'about',
-      current: pipelineSettings?.about,
-      textarea: true,
-    },
-    inputId: {
-      schema: Joi.string()
-        .required()
-        .valid(...(Object.keys(props.data?.connector?.inputs) || []))
-        .label('Input Connector'),
-      key: 'input.id',
-    },
-    outputId: {
-      schema: Joi.string()
-        .required()
-        .valid(...(Object.keys(props.data?.connector?.outputs) || []))
-        .label('Output Connector'),
-      key: 'output.id',
-    },
-  }
-  if (forms.in) validationSchema.input = forms.in
-  if (forms.out) validationSchema.output = forms.out
-  const valid = reduceFormValidation(Object.values(validationSchema), pipelineSettings)
 
   const create = () => {
     // Keep the id out of the settings as the key will be the id
@@ -292,98 +320,72 @@ const AddPipeline = (props) => {
     props.update(`connector.pipelines.${id}`, 'MORIO_UNSET', props.data)
     props.setModal(false)
   }
-  const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
-
   const localUpdate = (key, val) => {
     const newSettings = { ...pipelineSettings }
     set(newSettings, key, val)
     setPipelineSettings(newSettings)
   }
+  const inputPlugin = props.data.connector.inputs?.[pipelineSettings.input?.id]?.plugin
+  const outputPlugin = props.data.connector.outputs?.[pipelineSettings.output?.id]?.plugin
+
+  const form = [
+    {
+      tabs: {
+        Connectors: [
+          <PipelineConnectors key="pc" data={props.data} {...{ pipelineSettings, localUpdate }} />,
+        ],
+        Metadata: [
+          {
+            schema: Joi.string().required().label('ID'),
+            update: (val) => localUpdate('id', slugify(val)),
+            current: pipelineSettings?.id,
+            placeholder: 'my-pipeline',
+            label: 'ID',
+            labelBL: 'A unique ID to reference this pipeline',
+            labelBR: <span className="italic opacity-70">Input will be slugified</span>,
+            key: 'id',
+            disabled: props.edit,
+          },
+          {
+            schema: Joi.string().optional().allow('').label('Description'),
+            update: (val) => localUpdate('about', val),
+            label: 'Description',
+            labelBL: 'A description to help understand the purpose of this pipeline',
+            labelBR: <span className="italic opacity-70">Optional</span>,
+            key: 'about',
+            current: pipelineSettings?.about,
+            textarea: true,
+          },
+        ],
+        'Input Settings': templates.children.inputs.blocks?.[inputPlugin]?.pipeline_form ? (
+          templates.children.inputs.blocks?.[inputPlugin]?.pipeline_form({
+            update: localUpdate,
+            data: pipelineSettings,
+          })
+        ) : (
+          <p className="text-center font-bold italic opacity-70">
+            This input requires no pipeline-specific configuration
+          </p>
+        ),
+        'Output Settings': templates.children.outputs.blocks?.[outputPlugin]?.pipeline_form ? (
+          templates.children.outputs.blocks?.[outputPlugin]?.pipeline_form({
+            update: localUpdate,
+            data: pipelineSettings,
+          })
+        ) : (
+          <p className="text-center font-bold italic opacity-70">
+            This output requires no pipeline-specific configuration
+          </p>
+        ),
+      },
+    },
+  ]
+  const valid = reduceFormValidation(form, pipelineSettings)
 
   return (
     <div className="max-w-2xl w-full">
       <PipelineHeader id={props.id} />
-      <Tabs tabs={`Connectors, Metadata, Input Settings, Output Settings`}>
-        <Tab tabId="Connectors" key="Connectors">
-          <div className="flex flex-row justify-center w-full items-center">
-            <button
-              className={`btn btn-ghost btn-primary text-lg italic ${
-                pipelineSettings.input?.id ? 'text-success hover:text-error' : 'opacity-70'
-              }`}
-              onClick={() => localUpdate('input.id', null)}
-            >
-              {pipelineSettings.input?.id || 'Select an input below'}
-            </button>
-            <div className="col-span-1 flex flex-row gap-1 items-center justify-center">
-              <RightIcon className="h-5 w-5" />
-              <RightIcon className="h-5 w-5 -ml-4" />
-              <RightIcon className="h-5 w-5 -ml-4" />
-            </div>
-            <button
-              className={`btn btn-ghost btn-primary text-lg italic ${
-                pipelineSettings.output?.id ? 'text-success hover:text-error' : 'opacity-70'
-              }`}
-              onClick={() => localUpdate('output.id', null)}
-            >
-              {pipelineSettings.output?.id || 'Select an output below'}
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1">
-              <h4>Pipeline Inputs</h4>
-              {Object.keys(props.data?.connector?.inputs || {}).map((id) => (
-                <button
-                  className={`${btnClasses} ${
-                    pipelineSettings.input?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
-                  }`}
-                  onClick={() => localUpdate('input.id', id)}
-                  key={id}
-                >
-                  {id}
-                  <InputIcon stroke={1.5} className="w-8 h-8" />
-                </button>
-              ))}
-            </div>
-            <div className="flex flex-col gap-1">
-              <h4>Pipeline Outputs</h4>
-              {Object.keys(props.data?.connector?.outputs || {}).map((id) => (
-                <button
-                  className={`${btnClasses} ${
-                    pipelineSettings.output?.id === id ? 'btn-success' : 'btn-neutral btn-outline'
-                  }`}
-                  onClick={() => localUpdate('output.id', id)}
-                  key={id}
-                >
-                  <OutputIcon stroke={1.5} className="w-8 h-8" />
-                  {id}
-                </button>
-              ))}
-            </div>
-          </div>
-        </Tab>
-        <Tab tabId="Metadata" key="Metadata">
-          <FormElement {...validationSchema.id} />
-          <FormElement {...validationSchema.about} />
-        </Tab>
-        <Tab tabId="Input Settings" key="Input Settings">
-          {forms.in ? (
-            <FormWrapper {...props} form={forms.in} update={localUpdate} />
-          ) : (
-            <p className="text-center font-bold italic opacity-70">
-              This input requires no pipeline-specific configuration
-            </p>
-          )}
-        </Tab>
-        <Tab tabId="Output Settings" key="Output Settings">
-          {forms.out ? (
-            <FormWrapper {...props} form={forms.out} update={localUpdate} />
-          ) : (
-            <p className="text-center font-bold italic opacity-70">
-              This output requires no pipeline-specific configuration
-            </p>
-          )}
-        </Tab>
-      </Tabs>
+      <FormWrapper {...props} form={form} update={localUpdate} />
       <div className="mt-2 flex flex-row gap-2 items-center justify-center">
         <button className="btn btn-primary px-12" onClick={create} disabled={!valid}>
           {props.edit ? 'Update' : 'Create'} Pipeline
@@ -404,7 +406,11 @@ const ShowPipeline = (props) => (
     onClick={() =>
       props.setModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-          <AddPipeline {...props} settings={props.data.connector.pipelines[props.id]} edit />
+          <AddPipeline
+            {...props}
+            settings={{ ...props.data.connector.pipelines[props.id], id: props.id }}
+            edit
+          />
         </ModalWrapper>
       )
     }

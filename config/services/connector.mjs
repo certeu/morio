@@ -57,7 +57,7 @@ export const resolveServiceConfiguration = (tools) => ({
      * Set the log level and format
      */
     log: {
-      level: 'debug',
+      level: 'warn',
       format: 'json',
     },
     /*
@@ -67,7 +67,6 @@ export const resolveServiceConfiguration = (tools) => ({
       reload: {
         automatic: false,
       },
-      test_and_exit: true,
     },
     /*
      * Configure queue

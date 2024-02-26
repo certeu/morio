@@ -17,6 +17,21 @@ import { Progress } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
 import { CloseIcon, TrashIcon } from 'components/icons.mjs'
 
+export const loadFormDefaults = (defaults, form) => {
+  if (!Array.isArray(form)) return loadFormDefaults(defaults, [form])
+  for (const el of form) {
+    if (Array.isArray(el)) loadFormDefaults(defaults, el)
+    if (typeof el === 'object') {
+      if (el.tabs) {
+        for (const tab in el.tabs) loadFormDefaults(defaults, el.tabs[tab])
+      }
+      if (el.key && el.dflt !== undefined) set(defaults, el.key, el.dflt)
+    }
+  }
+
+  return defaults
+}
+
 /**
  * A method to provide validation based on the Joi validation library
  *
@@ -43,7 +58,9 @@ const validate = (value, schema, label) => {
 }
 
 export const FormBlock = (props) => {
-  const { form, update, formValidation, updateFormValidation } = props
+  const { update, formValidation, updateFormValidation } = props
+  // Ensure form is always an array
+  const form = Array.isArray(props.form) ? props.form : [props.form]
 
   /*
    * Local update handles some extra checks and passes in data object
@@ -199,8 +216,8 @@ export const reduceFormValidation = (form, data) =>
 
 export const FormWrapper = (props) => {
   // Should we maintain this data locally?
-  const { local = false, settings = {} } = props
-  const [data, update, setData] = useStateObject(props.settings || {}) // Holds the config this form builds
+  const { local = false, defaults = {} } = props
+  const [data, update, setData] = useStateObject(props.defaults) // Holds the data this form builds
 
   // Run form validation and count how much is done
   const formValidation = runFormValidation(props.form, data)
@@ -216,10 +233,10 @@ export const FormWrapper = (props) => {
       ? () => {
           if (props.setModal) props.setModal(false)
           props.update(
-            local({ ...data, ...settings }),
+            local({ ...props.defaults, ...data }),
             typeof props.transform === 'function'
               ? props.transform(data)
-              : { ...data, ...settings },
+              : { ...defaults, ...data },
             props.data
           )
         }

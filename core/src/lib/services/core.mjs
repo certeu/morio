@@ -67,7 +67,6 @@ export const service = {
        * Load existing settings and keys from disk
        */
       const { settings, keys, timestamp } = await loadSettingsAndKeys(tools)
-      console.log({ keys })
 
       /*
        * If timestamp is false, no on-disk settings exist and we
