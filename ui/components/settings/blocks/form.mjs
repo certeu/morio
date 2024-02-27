@@ -250,14 +250,6 @@ export const FormWrapper = (props) => {
     props.setModal(false)
   }
 
-  /*
-   * This takes the local data and stores it in MSettings
-   */
-  const removeLocal = (remove = false) => {
-    props.update(props.local(data), 'MORIO_UNSET')
-    props.setModal(false)
-  }
-
   return (
     <>
       <FormBlock
@@ -281,7 +273,7 @@ export const FormWrapper = (props) => {
             action={props.action}
             setModal={props.setModal}
             applyLocal={applyLocal}
-            removeLocal={removeLocal}
+            removeLocal={props.removeLocal}
           />
         </>
       ) : null}
@@ -303,7 +295,11 @@ const LocalButtons = ({ local, action, setModal, applyLocal, removeLocal }) => {
     </div>
   ) : (
     <div className="grid grid-cols-8 gap-2 my-3">
-      <button className="btn btn-error w-full" onClick={removeLocal}>
+      <button
+        className="btn btn-error w-full"
+        onClick={removeLocal ? removeLocal : null}
+        disabled={removeLocal ? false : true}
+      >
         <TrashIcon />
       </button>
       <button className="btn btn-primary w-full col-span-6" onClick={applyLocal}>

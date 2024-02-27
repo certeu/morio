@@ -86,6 +86,16 @@ const AddXput = (props) => {
   )
 }
 
+const xputPipelineList = (id, type, data) => {
+  if (!data.connector.pipelines) return false
+  const list = []
+  for (const [pipelineId, config] of Object.entries(data.connector.pipelines)) {
+    if (config[type]?.id === id) list.push(pipelineId)
+  }
+
+  return list.length > 0 ? list : false
+}
+
 const UpdateXput = (props) => {
   const templates = connectorTemplates({ mSettings: props.data, update: props.update })
   const formProps = templates.children?.[props.type + 's']?.blocks?.[props.plugin]
@@ -98,6 +108,13 @@ const UpdateXput = (props) => {
     formProps.form
   )
 
+  const removeLocal = props.pipelines
+    ? false
+    : () => {
+        props.update(`connector.inputs.${props.id}`, 'MORIO_UNSET')
+        props.setModal(false)
+      }
+
   if (formProps)
     return (
       <div className="max-w-2xl w-full">
@@ -105,9 +122,26 @@ const UpdateXput = (props) => {
         <FormWrapper
           {...props}
           {...formProps}
+          removeLocal={removeLocal}
           defaults={{ ...defaults, ...formData }}
           action="update"
         />
+        {props.pipelines ? (
+          <Popout note>
+            <b>
+              The <em>{props.id}</em> {props.type} is used in the following pipelines:
+            </b>
+            <ul className="list list-inside list-disc ml-4">
+              {props.pipelines.map((id) => (
+                <li key={id}>{id}</li>
+              ))}
+            </ul>
+            <small>
+              You cannot remove an {props.type} that is in use. You need to remove the pipeline
+              first.
+            </small>
+          </Popout>
+        ) : null}
       </div>
     )
 
@@ -131,26 +165,33 @@ const XputButton = ({
   onClick,
   plugin = false,
   available = false,
+  pipelines = false,
 }) => (
-  <button
-    className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer
-      flex flex-row ${type === 'input' ? 'flex-row-reverse' : ''} gap-0 items-center`}
-    onClick={onClick}
-  >
-    {type === 'input' && available && (
-      <InputIcon className="w-12 h-12 shrink-0 grow-0 text-success -mr-4" stroke={1.25} />
-    )}
-    {type === 'output' && available && (
-      <OutputIcon className="w-12 h-12 shrink-0 grow-0 text-success -ml-4" stroke={1.25} />
-    )}
-    <div className="flex flex-col items-start justify-between p-2 grow">
-      <span className="capitalize text-lg font-bold">{title ? title : id}</span>
-      <span className="-mt-1 text-sm italic opacity-80">{about}</span>
-    </div>
-    <div>
-      {brands[id] ? brands[id] : brands[plugin] ? brands[plugin] : <InputIcon {...iconProps} />}
-    </div>
-  </button>
+  <div className="indicator w-full">
+    {pipelines.length > 0 ? (
+      <span className="indicator-item badge badge-success mr-6">{pipelines.length}</span>
+    ) : null}
+    <button
+      className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer w-full
+        flex flex-row ${type === 'input' ? 'flex-row-reverse' : ''} gap-0 items-center
+        ${pipelines ? 'bg-success bg-opacity-20' : ''}`}
+      onClick={onClick}
+    >
+      {type === 'input' && available && (
+        <InputIcon className="w-12 h-12 shrink-0 grow-0 text-success -mr-4" stroke={1.25} />
+      )}
+      {type === 'output' && available && (
+        <OutputIcon className="w-12 h-12 shrink-0 grow-0 text-success -ml-4" stroke={1.25} />
+      )}
+      <div className="flex flex-col items-start justify-between p-2 grow">
+        <span className="capitalize text-lg font-bold">{title ? title : id}</span>
+        <span className="-mt-1 text-sm italic opacity-80">{about}</span>
+      </div>
+      <div>
+        {brands[id] ? brands[id] : brands[plugin] ? brands[plugin] : <InputIcon {...iconProps} />}
+      </div>
+    </button>
+  </div>
 )
 
 const BlockItems = (props) => {
@@ -168,21 +209,29 @@ const BlockItems = (props) => {
         <div className="grid grid-cols-2 gap-4 mt-4">
           {Object.keys(allXputs)
             .filter((id) => allXputs[id].desc === undefined || allXputs[id].about === undefined)
-            .map((id) => (
-              <XputButton
-                available
-                key={id}
-                {...{ id, type }}
-                {...allXputs[id]}
-                onClick={() =>
-                  setModal(
-                    <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                      <UpdateXput {...props} {...{ type, id, setModal }} {...allXputs[id]} />
-                    </ModalWrapper>
-                  )
-                }
-              />
-            ))}
+            .map((id) => {
+              const pipelines = xputPipelineList(id, type, props.data)
+
+              return (
+                <XputButton
+                  available
+                  key={id}
+                  {...{ id, type, pipelines }}
+                  {...allXputs[id]}
+                  onClick={() =>
+                    setModal(
+                      <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                        <UpdateXput
+                          {...props}
+                          {...{ type, id, setModal, pipelines }}
+                          {...allXputs[id]}
+                        />
+                      </ModalWrapper>
+                    )
+                  }
+                />
+              )
+            })}
         </div>
       ) : null}
       <h4 className="mt-4 capitalize">Add a Connector {type}</h4>

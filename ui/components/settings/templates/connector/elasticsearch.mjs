@@ -10,12 +10,12 @@ export const elasticsearch = {
     title: 'ElasticSearch',
     about: 'Index data to an Elasticsearch node or cluster',
     desc: 'Use this to read data from an Elasticsearch index',
-    local: (data) => `connector.inputs.${data.id}`,
+    local: (data) => `connector.outputs.${data.id}`,
     form: [
       `##### Create a new Elasticsearch connector output`,
       {
         tabs: {
-          Metadata: xputMeta('input', 'imap'),
+          Metadata: xputMeta('output', 'elasticsearch'),
           Setup: [
             {
               label: 'Hosting Type',
