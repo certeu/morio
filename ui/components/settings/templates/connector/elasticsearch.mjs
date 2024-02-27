@@ -11,65 +11,85 @@ export const elasticsearch = {
     about: 'Index data to an Elasticsearch node or cluster',
     desc: 'Use this to read data from an Elasticsearch index',
     local: (data) => `connector.outputs.${data.id}`,
+    pipeline_form: (pipelineContext) => {
+      const form = [
+        {
+          label: 'Index Type',
+          labelBL: 'The type of Elasticsearch index',
+          schema: Joi.string().required().valid('stream', 'docs').label('Index Type'),
+          key: 'index_type',
+          current: pipelineContext.data?.index_type,
+          inputType: 'buttonList',
+          list: [
+            {
+              val: 'stream',
+              label: 'Data Stream',
+              about: [
+                '- Choose this for append-only timeseries data like logs, metrics, or events',
+                '- Routes automatically to a backing index based on the timestamp',
+              ].join('\n'),
+            },
+            {
+              val: 'docs',
+              label: 'Document Index',
+              about: [
+                '- Choose this to use a classic index for Elasticsearch documents',
+                '- Avoid using this for logs, metrics, and other continuously generated data',
+              ].join('\n'),
+            },
+          ],
+        },
+        {
+          schema: Joi.string().required().label('Index'),
+          label: 'Index',
+          labelBL: (
+            <span>
+              Name of the index to use. Supports dynamic values using <code>{'%{field}'}</code>{' '}
+              formatting
+            </span>
+          ),
+          key: 'index',
+        },
+      ]
+      if (pipelineContext.data?.index === 'stream') form.push(<p>Stream shit here</p>)
+      else if (pipelineContext.data?.index === 'docs') form.push(<p>docsj shit here</p>)
+
+      return form
+    },
     form: [
       `##### Create a new Elasticsearch connector output`,
       {
         tabs: {
           Metadata: xputMeta('output', 'elasticsearch'),
-          Setup: [
+          Environment: [
             {
-              label: 'Hosting Type',
+              label: 'Environment',
               labelBL: 'The type of Elasticsearch deployment',
-              schema: Joi.string().required().valid('stack', 'cloud').label('Hosting Type'),
-              key: 'hosting',
+              schema: Joi.string().required().valid('stack', 'cloud').label('Environment'),
+              key: 'environment',
               inputType: 'buttonList',
               list: [
                 {
                   val: 'cloud',
                   label: 'Elastic Cloud',
-                  about: `
-- Elasticsearch Managed Service provided by Elastic.co
-- Hosted on Amazon Web Services, Google Cloud, or Microsoft Azure
-`,
+                  about: [
+                    '- Elasticsearch Managed Service provided by Elastic.co',
+                    '- Hosted on Amazon Web Services, Google Cloud, or Microsoft Azure',
+                  ].join('\n'),
                 },
                 {
                   val: 'stack',
                   label: 'Elastic Stack',
-                  about: `
-- Any Elasticsearch deloyment that is not Elastic's own cloud offering
-- Hosted on-prem, in the cloud, on your toaster, whatever
-`,
-                },
-              ],
-            },
-            {
-              label: 'Index Type',
-              labelBL: 'The type of Elasticsearch index',
-              schema: Joi.string().required().valid('stream', 'index').label('Index Type'),
-              key: 'index',
-              inputType: 'buttonList',
-              list: [
-                {
-                  val: 'stream',
-                  label: 'Data Stream',
-                  about: `
-- Choose this for append-only timeseries data like logs, metrics, or events
-- Routes automatically to a backing index based on the timestamp
-`,
-                },
-                {
-                  val: 'index',
-                  label: 'Document Index',
-                  about: `
-- Choose this to use a classic index for Elasticsearch documents
-- Avoid using this for logs, metrics, and other continuously generated data
-`,
+                  about: [
+                    "- Any Elasticsearch deloyment that is not Elastic's own cloud offering",
+                    '- Hosted on-prem, in the cloud, on your toaster, whatever',
+                  ].join('\n'),
                 },
               ],
             },
           ],
           Settings: ({ data = {} }) => {
-            if (data.hosting === 'cloud')
+            if (data.environment === 'cloud')
               return [
                 {
                   schema: Joi.string().required().label('Cloud ID'),
@@ -84,58 +104,43 @@ export const elasticsearch = {
                   key: 'cloud_auth',
                 },
               ]
-            if (data.hosting === 'stack')
+            if (data.environment === 'stack')
               return [
-                {
-                  schema: Joi.string().required().label('API Key'),
-                  label: 'API Key',
-                  labelBL: 'The API key to authenticate to Elasticsearch',
-                  key: 'api_key',
-                },
-                {
-                  schema: Joi.string().required().label('CA Fingerprint'),
-                  label: 'CA Fingerprint',
-                  labelBL: 'The fingerprint of a certificate authority that should be trusted',
-                  labelTR: 'A string of 64 hexadecimal characters',
-                  key: 'ca_trusted_finterprint',
-                },
-                {
-                  schema: Joi.string().required().label('Username'),
-                  label: 'Username',
-                  labelBL: 'The username to access Elasticsearch',
-                  key: 'user',
-                },
-                {
-                  schema: Joi.string().required().label('Password'),
-                  inputType: 'password',
-                  label: 'Password',
-                  labelBL: 'The password to access the IMAP server',
-                  key: 'password',
-                },
                 {
                   schema: Joi.string().required().label('Hosts'),
                   label: 'Hosts',
                   labelBL: 'FIXME',
                   key: 'hosts',
                 },
-                {
-                  schema: Joi.string().required().label('ILM Policy'),
-                  label: 'ILM Policy',
-                  labelBL: 'FIXME',
-                  key: 'ilm_policy',
-                },
-                {
-                  schema: Joi.string().required().label('ILM Rollover Alias'),
-                  label: 'ILM Rollover Alias',
-                  labelBL: 'FIXME',
-                  key: 'ilm_rollover_alias',
-                },
-                {
-                  schema: Joi.string().required().label('Index'),
-                  label: 'Index',
-                  labelBL: 'FIXME',
-                  key: 'index',
-                },
+                [
+                  {
+                    schema: Joi.string().optional().allow('').label('API Key ID'),
+                    label: 'API Key ID',
+                    labelBL: 'The API key ID to authenticate with',
+                    key: 'api_key_id',
+                  },
+                  {
+                    schema: Joi.string().allow('').label('API Key'),
+                    label: 'API Key',
+                    labelBL: 'The API key to authenticate with',
+                    key: 'api_key_key',
+                  },
+                ],
+                [
+                  {
+                    schema: Joi.string().allow('').label('Username'),
+                    label: 'Username',
+                    labelBL: 'The username to access Elasticsearch',
+                    key: 'user',
+                  },
+                  {
+                    schema: Joi.string().allow('').label('Password'),
+                    inputType: 'password',
+                    label: 'Password',
+                    labelBL: 'The password to access the IMAP server',
+                    key: 'password',
+                  },
+                ],
               ]
             return [
               <Popout tip compact noP>
@@ -159,8 +164,8 @@ export const elasticsearch = {
               current: typeof data.complession_level === 'undefined' ? 1 : data.compression_level,
             }
 
-            if (data.hosting === 'cloud') return [compression]
-            if (data.hosting === 'stack') {
+            if (data.environment === 'cloud') return [compression]
+            if (data.environment === 'stack') {
               const form = {
                 ssl_enabled: {
                   schema: Joi.boolean().default(true).label('Enable TLS'),
@@ -187,23 +192,33 @@ export const elasticsearch = {
                     current: data.ssl_verification_mode === false ? false : true,
                   },
                 ]
-                if (data.ssl_verification_mode !== false)
+                if (data.ssl_verification_mode !== false) {
+                  form.ssl_ca_fingerprint = {
+                    schema: Joi.string().allow('').label('CA Fingerprint'),
+                    label: 'CA Fingerprint',
+                    labelBL: 'The fingerprint of a certificate authority that should be trusted',
+                    labelTR: 'A string of 64 hexadecimal characters',
+                    key: 'ca_trusted_finterprint',
+                  }
                   form.ssl_certificate_authorities = {
-                    schema: Joi.string().label('Certificate Authorities'),
+                    schema: Joi.string().allow('').label('Certificate Authorities'),
                     inputType: 'textarea',
                     label: 'Certificate Authorities',
-                    labelBL: 'PEM-encoded CA certificates to trust',
+                    labelTR: 'One or more PEM-encoded certificates',
+                    labelBL: 'Certificate Authorities to trust',
                     key: 'ssl_certificate_authorities',
                   }
+                }
                 form.ssl_certificate = {
-                  schema: Joi.string().label('Client TLS Certificate'),
+                  schema: Joi.string().allow('').label('Client TLS Certificate'),
                   inputType: 'textarea',
                   label: 'Client TLS Certificate',
+                  labelTR: 'For mutual TLS',
                   labelBL: 'X.509 certificate to authenticate the client',
                   key: 'ssl_certificate',
                 }
                 form.ssl_key = {
-                  schema: Joi.string().label('Client TLS Key'),
+                  schema: Joi.string().allow('').label('Client TLS Key'),
                   inputType: 'textarea',
                   label: 'Client TLS Key',
                   labelBL: 'RSA key for the X.509 client certificate',

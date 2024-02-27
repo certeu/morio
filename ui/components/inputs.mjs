@@ -26,8 +26,8 @@ export const FormControl = ({
   )
   const bottomLabelChildren = (
     <>
-      {labelBL ? <span className="label-text-alt -mt-1.5">{labelBL}</span> : <span></span>}
-      {labelBR ? <span className="label-text-alt -mt-1.5">{labelBR}</span> : null}
+      {labelBL ? <span className="label-text-alt -mt-1">{labelBL}</span> : <span></span>}
+      {labelBR ? <span className="label-text-alt -mt-1">{labelBR}</span> : null}
     </>
   )
 

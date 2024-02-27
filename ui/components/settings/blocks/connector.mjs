@@ -183,7 +183,7 @@ const XputButton = ({
       {type === 'output' && available && (
         <OutputIcon className="w-12 h-12 shrink-0 grow-0 text-success -ml-4" stroke={1.25} />
       )}
-      <div className="flex flex-col items-start justify-between p-2 grow">
+      <div className="flex flex-col items-start justify-between p-2 grow text-left">
         <span className="capitalize text-lg font-bold">{title ? title : id}</span>
         <span className="-mt-1 text-sm italic opacity-80">{about}</span>
       </div>
@@ -370,6 +370,7 @@ const AddPipeline = (props) => {
     props.setModal(false)
   }
   const localUpdate = (key, val) => {
+    console.log('locally setting', key, 'to', val)
     const newSettings = { ...pipelineSettings }
     set(newSettings, key, val)
     setPipelineSettings(newSettings)
@@ -403,7 +404,7 @@ const AddPipeline = (props) => {
             labelBR: <span className="italic opacity-70">Optional</span>,
             key: 'about',
             current: pipelineSettings?.about,
-            textarea: true,
+            inputType: 'textarea',
           },
         ],
         'Input Settings': templates.children.inputs.blocks?.[inputPlugin]?.pipeline_form ? (
@@ -451,7 +452,7 @@ const AddPipeline = (props) => {
 
 const ShowPipeline = (props) => (
   <button
-    className="max-w-2xl w-full grid grid-cols-12 gap-2 items-center border rounded-lg hover:bg-secondary hover:bg-opacity-20 mb-2"
+    className="max-w-4xl w-full grid grid-cols-3 gap-2 items-center border rounded-lg hover:bg-secondary hover:bg-opacity-20 mb-2"
     onClick={() =>
       props.setModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
@@ -464,16 +465,20 @@ const ShowPipeline = (props) => (
       )
     }
   >
-    <div className="bg-secondary p-2 rounded-l-lg font-bold text-right col-span-3 bg-opacity-50">
+    <div className="bg-secondary p-2 rounded-l-lg font-bold text-right bg-opacity-50">
       {props.id}
     </div>
-    <div className="col-span-4 text-right">{props.data.connector.pipelines[props.id].input.id}</div>
-    <div className="col-span-1 flex flex-row gap-1 items-center justify-center">
-      <RightIcon className="h-5 w-5" />
-      <RightIcon className="h-5 w-5 -ml-4" />
-      <RightIcon className="h-5 w-5 -ml-4" />
+    <div className="col-span-2 flex flex-row items-center justify-start">
+      <b>
+        <em>{props.data.connector.pipelines[props.id].input.id}</em>
+      </b>
+      <div className="flex flex-row items-center justify-center">
+        <RightIcon className="h-4 w-4 text-success" stroke={2} />
+        <RightIcon className="h-4 w-4 -ml-3 text-success" stroke={2} />
+        <RightIcon className="h-4 w-4 -ml-3 text-success" stroke={2} />
+      </div>
+      <b>{props.data.connector.pipelines[props.id].output.id}</b>
     </div>
-    <div className="col-span-4 text-left">{props.data.connector.pipelines[props.id].output.id}</div>
   </button>
 )
 
