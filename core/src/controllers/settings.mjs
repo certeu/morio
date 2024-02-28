@@ -1,6 +1,9 @@
 import { writeYamlFile, writeBsonFile, readDirectory, readYamlFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
+import { protectSettings } from '../lib/services/core.mjs'
+import { validate } from '#lib/validation'
+import { schemaViolation } from '#lib/response'
 
 /**
  * This settings controller handles settings routes
@@ -63,10 +66,13 @@ Controller.prototype.deploy = async (req, res, tools) => {
   tools.log.debug(`New settings will be tracked as: ${time}`)
 
   /*
-   * Write the mSettings settings to disk
+   * Write the protected mSettings settings to disk
    */
   tools.log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
+  const result = await writeYamlFile(
+    `/etc/morio/settings.${time}.yaml`,
+    protectSettings(mSettings, tools)
+  )
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
@@ -165,4 +171,53 @@ Controller.prototype.setup = async (req, res, tools) => {
   reconfigure()
 
   return res.send(data)
+}
+
+/**
+ * Encrypt data
+ *
+ * This will encrypt data and return it
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.encrypt = async (req, res, tools) => {
+  if (typeof req.body.data === 'undefined')
+    return res.status(400).send({ errors: ['No data in body'] })
+
+  let data
+  try {
+    data = tools.encrypt(req.body.data)
+  } catch (err) {
+    return res.status(500).send({ errors: ['Failed to encrypt data'] })
+  }
+
+  return res.send(data)
+}
+
+/**
+ * Decrypt data
+ *
+ * This will decrypt data and return it
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.decrypt = async (req, res, tools) => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`decrypt`, req.body)
+  if (!valid) return schemaViolation(err, res)
+
+  let data
+  try {
+    data = tools.decrypt(JSON.stringify(valid))
+  } catch (err) {
+    return res.status(500).send({ errors: ['Failed to encrypt data'] })
+  }
+
+  return res.send({ data })
 }

@@ -6,6 +6,7 @@ import {
   BookIcon,
   CertificateIcon,
   CheckCircleIcon,
+  ClosedLockIcon,
   ComponentIcon,
   CodeIcon,
   CogIcon,
@@ -16,6 +17,7 @@ import {
   DownloadIcon,
   LayersIcon,
   MorioIcon,
+  OpenLockIcon,
   PackageIcon,
   QuestionIcon,
   ServersIcon,
@@ -47,9 +49,11 @@ const icons = {
   components: ComponentIcon,
   containers: ContainerIcon,
   console: RedPandaConsole,
+  decrypt: OpenLockIcon,
   docker: Docker,
   docs: BookIcon,
   downloads: DownloadIcon,
+  encrypt: ClosedLockIcon,
   faq: QuestionIcon,
   images: ContainerImageIcon,
   morio: MorioIcon,
@@ -111,13 +115,19 @@ export const links = {
     },
   },
   tools: {
-    certificates: {
-      t: 'X.509 Certificates',
-    },
     pkgs: {
       t: 'Client Packages',
     },
+    decrypt: {
+      t: 'Decrypt Data',
+    },
     downloads: {},
+    encrypt: {
+      t: 'Enrypt Data',
+    },
+    certificates: {
+      t: 'X.509 Certificates',
+    },
   },
   ...docsNavs,
 }

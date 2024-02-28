@@ -43,7 +43,7 @@ export const imap = {
                 inputType: 'password',
                 label: 'Password',
                 labelBL: 'The password to access the IMAP server',
-                key: 'password',
+                key: 'enc|password',
               },
             ],
             [
@@ -73,6 +73,7 @@ export const imap = {
                 labelBL:
                   'This amount in seconds controls the interval at which we check for new messages',
                 placeholder: 300,
+                dflt: 300,
                 key: 'check_interval',
               },
               {
@@ -80,6 +81,7 @@ export const imap = {
                 label: 'Fetch Count',
                 labelBL: 'Number of messages to fetch in one batch',
                 placeholder: 50,
+                dflt: 50,
                 key: 'fetch_count',
               },
             ],

@@ -278,6 +278,33 @@ Controller.prototype.getPresets = async (req, res, tools) => {
 }
 
 /**
+ * Submits a decryption request to core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.decrypt = async (req, res, tools) => {
+  console.log('passing decrypt call to core')
+  const [status, result] = await tools.core.post(`/decrypt`, req.body)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Submits an encryption request to core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - Variety of tools include logger and config
+ */
+Controller.prototype.encrypt = async (req, res, tools) => {
+  const [status, result] = await tools.core.post(`/encrypt`, req.body)
+
+  return res.status(status).send(result)
+}
+
+/**
  * Submits a build request for a client package to core
  *
  * @param {object} req - The request object from Express

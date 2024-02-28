@@ -30,6 +30,10 @@ export const requestSchema = {
       }),
     },
   },
+  decrypt: Joi.object({
+    iv: Joi.string().required(),
+    ct: Joi.string().required(),
+  }),
 }
 
 /*

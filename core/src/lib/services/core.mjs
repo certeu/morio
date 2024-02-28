@@ -12,7 +12,7 @@ import { getPreset, inProduction, loadAllPresets } from '#config'
 import https from 'https'
 import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk } from '#shared/crypto'
+import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
 import { createPrivateKey } from 'crypto'
 
 /*
@@ -69,6 +69,13 @@ export const service = {
       const { settings, keys, timestamp } = await loadSettingsAndKeys(tools)
 
       /*
+       * Add encryption methods
+       */
+      const { encrypt, decrypt } = encryptionMethods(keys.mrt, 'Morio by CERT-EU', tools.log)
+      tools.encrypt = encrypt
+      tools.decrypt = decrypt
+
+      /*
        * If timestamp is false, no on-disk settings exist and we
        * are running in ephemeral mode. In which case we return early.
        */
@@ -87,7 +94,8 @@ export const service = {
       tools.info.ephemeral = false
       tools.info.current_settings = timestamp
       tools.config = cloneAsPojo(settings)
-      tools.settings = settings
+      // Take care of encrypted settings
+      tools.settings = settings //revealSettings(settings, tools)
       tools.keys = keys
 
       /*
@@ -223,4 +231,42 @@ export const createX509Certificate = async (tools, data) => {
    * If it went well, return certificate and the private key
    */
   return result.data ? { certificate: result.data, key: csr.key } : false
+}
+
+export const protectSettings = (obj, tools) => {
+  // Don't bother with scalars, or functions, or whatnot
+  if (typeof obj !== 'object') return obj
+
+  // Arrays can be mapped recursively
+  if (Array.isArray(obj)) {
+    return [...obj].map((val) => (typeof val === 'object' ? protectSettings(val, tools) : val))
+  }
+
+  // Objects need to be walked recursively
+  const newObj = { ...obj }
+  for (const [key, val] of Object.entries(newObj)) {
+    if (key.slice(0, 4) === 'enc|') newObj[key] = tools.encrypt(val)
+    else if (typeof val === 'object') newObj[key] = protectSettings(val, tools)
+  }
+
+  return newObj
+}
+
+export const revealSettings = (obj, tools) => {
+  // Don't bother with scalars, or functions, or whatnot
+  if (typeof obj !== 'object') return obj
+
+  // Arrays can be mapped recursively
+  if (Array.isArray(obj)) {
+    return [...obj].map((val) => (typeof val === 'object' ? revealSettings(val, tools) : val))
+  }
+
+  // Objects need to be walked recursively
+  const newObj = { ...obj }
+  for (const [key, val] of Object.entries(newObj)) {
+    if (key.slice(0, 4) === 'enc|') newObj[key] = tools.decrypt(val)
+    else if (typeof val === 'object') newObj[key] = revealSettings(val, tools)
+  }
+
+  return newObj
 }

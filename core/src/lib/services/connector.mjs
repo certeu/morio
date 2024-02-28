@@ -134,7 +134,6 @@ ${type} {
   ${logstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, type, tools)}  }
 }
 `
-
 const generatePipelinePluginConfig = (plugin, xput, pipeline, type) => {
   let config = ''
   for (const [key, val] of Object.entries(xput)) {

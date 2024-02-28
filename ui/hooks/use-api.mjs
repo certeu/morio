@@ -109,6 +109,34 @@ MorioClient.prototype.listDownloads = async function () {
 }
 
 /**
+ * Encrypt data
+ *
+ * @param {string} data - The data to encrypt
+ * @return {object} - The result
+ */
+MorioClient.prototype.encrypt = async function (data) {
+  return await this.call(`${morioConfig.api}/encrypt`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ data }),
+  })
+}
+
+/**
+ * Decrypt data
+ *
+ * @param {string} data - The data to decrypt
+ * @return {object} - The result
+ */
+MorioClient.prototype.decrypt = async function (data) {
+  return await this.call(`${morioConfig.api}/decrypt`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
  * Request the build of a client package
  *
  * @param {string} type - The package type

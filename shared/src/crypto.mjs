@@ -1,4 +1,4 @@
-import { randomBytes, generateKeyPairSync } from 'crypto'
+import { randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
@@ -292,4 +292,114 @@ const x509Extentions = {
     },
     { name: 'subjectKeyIdentifier' },
   ],
+}
+
+/*
+ * Returns an object holding encrypt() and decrypt() methods
+ *
+ * These utility methods are used inside core to encrypt/decrypt
+ * sensitive configuration values like passwords and so on.
+ */
+export function encryptionMethods(stringKey, salt, logger) {
+  // Keep the logger around
+  const log = logger
+
+  // Shout-out to the OG crypto bros Joan and Vincent
+  const algorithm = 'aes-256-cbc'
+
+  // Key and (optional) salt are passed in, prep them for aes-256
+  const key = Buffer.from(scryptSync(stringKey, salt, 32))
+
+  return {
+    encrypt: (data) => {
+      /*
+       * This will encrypt almost anything, but undefined we cannot encrypt.
+       * We could side-step this by assigning a default to data, but that would
+       * lead to confusing bugs when people think they pass in data and instead
+       * get an encrypted default. So instead, let's bail out loudly
+       */
+      if (typeof data === 'undefined') throw 'Undefined cannot be uncrypted'
+
+      /*
+       * One type of bug that is particularly hard to troubleshoot is when a
+       * JSON string holding encrypted data is encrypted again.
+       * This results in double encryption which is hard to detect and should
+       * never happen. So let's see if the data looks like it's encrypted, and
+       * warn in that case.
+       */
+      if (
+        typeof data === 'object' &&
+        !Array.isArray(data) &&
+        Object.keys(data).length === 2 &&
+        data.iv &&
+        data.ct &&
+        typeof data.iv === 'string' &&
+        typeof data.ct === 'string'
+      ) {
+        log.warn(`About to encrypt data that is already encrypted. This is almost certainly a bug`)
+      }
+
+      /*
+       * With undefined out of the way, there's still some things we cannot encrypt.
+       * Essentially, anything that can't be serialized to JSON, such as functions.
+       * So let's catch the JSON.stringify() call and once again bail out if things
+       * go off the rails here.
+       */
+      try {
+        data = JSON.stringify(data)
+      } catch (err) {
+        throw 'Could not parse input to encrypt() call'
+      }
+
+      /*
+       * Even with the same salt, this initialization vector avoids that
+       * two identical input strings would generate the same ciphertext
+       * (which is also why we don't care too much about the salt)
+       */
+      const iv = randomBytes(16)
+
+      /*
+       * The thing that does the encrypting
+       */
+      const cipher = createCipheriv(algorithm, key, iv)
+
+      /*
+       * Always return a string so we can store this in all sorts of ways
+       */
+      return JSON.stringify({
+        // iv = Initialization Vector
+        iv: iv.toString('hex'),
+        // ct = CipherText
+        ct: Buffer.concat([cipher.update(data), cipher.final()]).toString('hex'),
+      })
+    },
+    decrypt: (data) => {
+      if (data === null || data === '') return ''
+      /*
+       * Don't blindly assume this data is properly formatted ciphertext
+       */
+      try {
+        data = JSON.parse(data)
+      } catch (err) {
+        throw 'Could not parse encrypted data in decrypt() call'
+      }
+      if (!data.iv || typeof data.ct === 'undefined') {
+        throw 'Encrypted data passed to decrypt() was malformed'
+      }
+      /*
+       * The thing that does the decrypting
+       */
+      const decipher = createDecipheriv(algorithm, key, Buffer.from(data.iv, 'hex'))
+
+      /*
+       * Parse this string as JSON
+       * so we return the same type as what was passed to encrypt()
+       */
+      return JSON.parse(
+        Buffer.concat([decipher.update(Buffer.from(data.ct, 'hex')), decipher.final()]).toString(
+          'utf-8'
+        )
+      )
+    },
+  }
 }

@@ -109,6 +109,16 @@ export function routes(tools) {
   app.get(`${PREFIX}/pkgs/clients/deb/defaults`, (req, res) => Core.getClientPackageDefaults(req, res, tools, 'deb'))
 
   /*
+   * Encrypt data
+   */
+  app.post(`${PREFIX}/encrypt`, (req, res) => Core.encrypt(req, res, tools))
+
+  /*
+   * Decrypt data
+   */
+  app.post(`${PREFIX}/decrypt`, (req, res) => Core.decrypt(req, res, tools))
+
+  /*
    * Build a .deb client package
    */
   app.post(`${PREFIX}/pkgs/clients/deb/build`, (req, res) => Core.buildClientPackage(req, res, tools, 'deb'))

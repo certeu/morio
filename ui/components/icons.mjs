@@ -79,6 +79,15 @@ export const CheckCircleIcon = (props) => (
 )
 
 /*
+ * ClosedLockIcon - Looks like a closed lock
+ */
+export const ClosedLockIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+  </IconWrapper>
+)
+
+/*
  * CloseIcon - Looks like X
  */
 export const CloseIcon = (props) => (
@@ -276,15 +285,6 @@ export const LinkIcon = (props) => (
 )
 
 /*
- * LockIcon - Looks like a (closed) lock
- */
-export const LockIcon = (props) => (
-  <IconWrapper {...props}>
-    <path d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-  </IconWrapper>
-)
-
-/*
  * MenuIcon - Looks like a hamburger menu (3 horizontal lines)
  */
 export const MenuIcon = (props) => (
@@ -335,6 +335,15 @@ export const NoteIcon = (props) => (
 export const OkIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M4.5 12.75l6 6 9-13.5" />
+  </IconWrapper>
+)
+
+/*
+ * OpenLockIcon - Looks like an open lock
+ */
+export const OpenLockIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
   </IconWrapper>
 )
 

@@ -36,4 +36,14 @@ export function routes(tools) {
    * Load settings by timestamp
    */
   app.get('/settings/:timestamp', (req, res) => Settings.getSettings(req, res, tools))
+
+  /*
+   * Encrypt data
+   */
+  app.post('/encrypt', (req, res) => Settings.encrypt(req, res, tools))
+
+  /*
+   * Decrypt data
+   */
+  app.post('/decrypt', (req, res) => Settings.decrypt(req, res, tools))
 }
