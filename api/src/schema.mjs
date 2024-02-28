@@ -36,6 +36,10 @@ export const settingsSchema = Joi.object({
     comment: Joi.string(),
   }),
   connector: Joi.object(),
+  tokens: Joi.object({
+    vars: Joi.object(),
+    secrets: Joi.object(),
+  }),
 })
 
 /*

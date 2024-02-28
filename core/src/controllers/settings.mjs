@@ -1,7 +1,6 @@
 import { writeYamlFile, writeBsonFile, readDirectory, readYamlFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
-import { protectSettings } from '../lib/services/core.mjs'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
 
@@ -39,6 +38,14 @@ Controller.prototype.getSettingsList = async (req, res, tools) => {
   return res.send({ current: tools.config.settings, sets }).end()
 }
 
+const ensureTokenSecrecy = (secrets, tools) => {
+  for (let [key, val] of Object.entries(secrets)) {
+    if (!tools.isEncrypted(val)) secrets[key] = tools.encrypt(val)
+  }
+
+  return secrets
+}
+
 /**
  * Deploy new settings
  *
@@ -66,13 +73,16 @@ Controller.prototype.deploy = async (req, res, tools) => {
   tools.log.debug(`New settings will be tracked as: ${time}`)
 
   /*
+   * Handle secrets
+   */
+  if (mSettings.tokens?.secrets)
+    mSettings.tokens.secrets = ensureTokenSecrecy(mSettings.tokens.secrets, tools)
+
+  /*
    * Write the protected mSettings settings to disk
    */
   tools.log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(
-    `/etc/morio/settings.${time}.yaml`,
-    protectSettings(mSettings, tools)
-  )
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*

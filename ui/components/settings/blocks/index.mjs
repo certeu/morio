@@ -1,8 +1,10 @@
 // Components
+import React, { Fragment } from 'react'
 import { Popout } from 'components/popout.mjs'
 import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
+import { Vars, Secrets } from './tokens.mjs'
 import { FormWrapper } from './form.mjs'
 import { MdxWrapper } from './mdx.mjs'
 
@@ -13,6 +15,8 @@ const blocks = {
   connectorInputs: ConnectorInputs,
   connectorOutputs: ConnectorOutputs,
   connectorPipelines: ConnectorPipelines,
+  vars: Vars,
+  secrets: Secrets,
   form: FormWrapper,
   mdx: ({ viewConfig }) => <MdxWrapper>{viewConfig.mdx}</MdxWrapper>,
 }
@@ -53,9 +57,13 @@ export const Block = (props) => {
   } else {
     if (props.template.title && props.template.children)
       return (
-        <div className="max-w-prose">
+        <div className="max-w-prose mdx">
           {props.edit && props.template.lockOnEdit ? <LockedOnEdit /> : null}
-          <Markdown>{props.template.about}</Markdown>
+          {React.isValidElement(props.template.about) ? (
+            <Fragment>{props.template.about}</Fragment>
+          ) : (
+            <Markdown>{props.template.about}</Markdown>
+          )}
         </div>
       )
   }

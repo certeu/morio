@@ -14,6 +14,8 @@ import axios from 'axios'
 // Required to generated X.509 certificates
 import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
 import { createPrivateKey } from 'crypto'
+// Used for templating the settings
+import mustache from 'mustache'
 
 /*
  * This service object holds the service name,
@@ -71,9 +73,14 @@ export const service = {
       /*
        * Add encryption methods
        */
-      const { encrypt, decrypt } = encryptionMethods(keys.mrt, 'Morio by CERT-EU', tools.log)
+      const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+        keys.mrt,
+        'Morio by CERT-EU',
+        tools.log
+      )
       tools.encrypt = encrypt
       tools.decrypt = decrypt
+      tools.isEncrypted = isEncrypted
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -95,8 +102,7 @@ export const service = {
       tools.info.current_settings = timestamp
       tools.config = cloneAsPojo(settings)
       // Take care of encrypted settings
-      tools.settings = settings //revealSettings(settings, tools)
-      tools.keys = keys
+      ;(tools.settings = templateSettings(settings, tools)), (tools.keys = keys)
 
       /*
        * Only one node makes this easy
@@ -233,40 +239,23 @@ export const createX509Certificate = async (tools, data) => {
   return result.data ? { certificate: result.data, key: csr.key } : false
 }
 
-export const protectSettings = (obj, tools) => {
-  // Don't bother with scalars, or functions, or whatnot
-  if (typeof obj !== 'object') return obj
-
-  // Arrays can be mapped recursively
-  if (Array.isArray(obj)) {
-    return [...obj].map((val) => (typeof val === 'object' ? protectSettings(val, tools) : val))
+export const templateSettings = (settings, tools) => {
+  const tokens = {}
+  // Build the tokens object
+  for (const [key, val] of Object.entries(settings.tokens.vars || {})) {
+    tokens[key] = val
+  }
+  for (const [key, val] of Object.entries(settings.tokens.secrets || {})) {
+    tokens[key] = tools.decrypt(val)
   }
 
-  // Objects need to be walked recursively
-  const newObj = { ...obj }
-  for (const [key, val] of Object.entries(newObj)) {
-    if (key.slice(0, 4) === 'enc|') newObj[key] = tools.encrypt(val)
-    else if (typeof val === 'object') newObj[key] = protectSettings(val, tools)
+  // Now template the settings
+  let newSettings
+  try {
+    newSettings = JSON.parse(mustache.render(JSON.stringify(settings), tokens))
+  } catch (err) {
+    tools.log.warn(err, 'Failed to template out settings')
   }
 
-  return newObj
-}
-
-export const revealSettings = (obj, tools) => {
-  // Don't bother with scalars, or functions, or whatnot
-  if (typeof obj !== 'object') return obj
-
-  // Arrays can be mapped recursively
-  if (Array.isArray(obj)) {
-    return [...obj].map((val) => (typeof val === 'object' ? revealSettings(val, tools) : val))
-  }
-
-  // Objects need to be walked recursively
-  const newObj = { ...obj }
-  for (const [key, val] of Object.entries(newObj)) {
-    if (key.slice(0, 4) === 'enc|') newObj[key] = tools.decrypt(val)
-    else if (typeof val === 'object') newObj[key] = revealSettings(val, tools)
-  }
-
-  return newObj
+  return newSettings
 }

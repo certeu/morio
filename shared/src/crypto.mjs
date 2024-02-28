@@ -401,5 +401,25 @@ export function encryptionMethods(stringKey, salt, logger) {
         )
       )
     },
+    isEncrypted: (data) => {
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data)
+        }
+        catch (err) {
+          // noop
+        }
+      }
+      if (
+        typeof data === 'object' &&
+        data.iv &&
+        data.ct &&
+        typeof data.iv === 'string' &&
+        typeof data.ct === 'string' &&
+        Object.keys(data).length === 2
+      ) return true
+
+      return false
+    },
   }
 }

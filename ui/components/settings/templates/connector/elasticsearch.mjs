@@ -135,7 +135,7 @@ export const elasticsearch = {
                   },
                   {
                     schema: Joi.string().allow('').label('Password'),
-                    inputType: 'password',
+                    inputType: 'secret',
                     label: 'Password',
                     labelBL: 'The password to access the IMAP server',
                     key: 'password',

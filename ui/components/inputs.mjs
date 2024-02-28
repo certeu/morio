@@ -67,12 +67,14 @@ export const ButtonFrame = ({
   accordion = false, // Set this to true to not set a background color when active
   dense = false, // Use less padding
   disabled = false, // Allows rendering a disabled view
+  dir = 'col',
 }) => (
   <button
     disabled={disabled}
     className={`
-    btn btn-ghost btn-secondary relative
-    w-full ${dense ? 'mt-1 py-0 btn-sm' : 'mt-2 py-4 h-auto content-start'}
+    btn btn-ghost btn-secondary relative grow
+    ${dir === 'col' ? 'w-full' : 'mr-2'}
+    ${dense ? 'mt-0 py-2 btn' : 'mt-2 py-4 h-auto content-start'}
     border-2 border-secondary text-left bg-opacity-20
     ${accordion ? 'hover:bg-transparent' : 'hover:bg-secondary hover:bg-opacity-10'}
     hover:border-secondary hover:border-solid hover:border-2
@@ -82,7 +84,12 @@ export const ButtonFrame = ({
     onClick={onClick}
   >
     {children}
-    {active ? <OkIcon className="text-success w-8 h-8 absolute top-2 right-2" stroke={4} /> : null}
+    {active ? (
+      <OkIcon
+        className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
+        stroke={4}
+      />
+    ) : null}
   </button>
 )
 
@@ -322,16 +329,21 @@ export const ListInput = ({
   update, // the onChange handler
   valid = () => true, // Method that should return whether the value is valid or not
   label, // The label
+  labelTR = false, // Top-right label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
   list, // The list of items to present { val, label, about }
   current, // The (value of the) current item
   disabled = false, // Allows rendering a disabled view
+  dir = 'col', // Allows to change the direction
+  dense = false,
 }) => (
-  <FormControl label={label} isValid={valid(current)}>
-    {list.map((item, i) => {
-      const entry =
-        typeof item.val === 'object' && item.val.type === 'select' ? (
-          <FakeButtonFrame key={i} active={item.val.values.includes(current)}>
-            <div className="w-full flex flex-col gap-2">
+  <FormControl {...{ label, labelTR, labelBL, labelBR }} isValid={valid(current)}>
+    <div className={`flex flex-${dir} flex-wrap`}>
+      {list.map((item, i) => {
+        const entry =
+          typeof item.val === 'object' && item.val.type === 'select' ? (
+            <FakeButtonFrame dense={dense} key={i} active={item.val.values.includes(current)}>
               <div className="w-full text-lg leading-5">{item.label}</div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
@@ -352,35 +364,39 @@ export const ListInput = ({
                   </button>
                 ))}
               </div>
-            </div>
-          </FakeButtonFrame>
-        ) : (
-          <ButtonFrame
-            key={i}
-            active={item.val === current}
-            onClick={() => update(item.val)}
-            disabled={disabled}
-          >
-            <div className="w-full flex flex-col gap-2">
-              <div className="w-full text-lg leading-5">{item.label}</div>
+            </FakeButtonFrame>
+          ) : (
+            <ButtonFrame
+              key={i}
+              dense={dense}
+              active={item.val === current}
+              onClick={() => update(item.val)}
+              disabled={disabled}
+              dir={dir}
+            >
+              <div className={`w-full ${dir === 'col' ? 'text-lg leading-5' : 'text-sm'}`}>
+                {item.label}
+              </div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
                   <Markdown>{item.about}</Markdown>
                 </div>
               ) : null}
-            </div>
-          </ButtonFrame>
-        )
+            </ButtonFrame>
+          )
 
-      return item.hide ? (
-        <details key={i} className="py-2">
-          <summary className="pl-4 hover:cursor-pointer text-sm text-primary">{item.hide}</summary>
-          {entry}
-        </details>
-      ) : (
-        entry
-      )
-    })}
+        return item.hide ? (
+          <details key={i} className="py-2">
+            <summary className="pl-4 hover:cursor-pointer text-sm text-primary">
+              {item.hide}
+            </summary>
+            {entry}
+          </details>
+        ) : (
+          entry
+        )
+      })}
+    </div>
   </FormControl>
 )
 

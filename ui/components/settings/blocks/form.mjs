@@ -17,6 +17,7 @@ import { useStateObject } from 'hooks/use-state-object.mjs'
 import { Progress } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
 import { CloseIcon, TrashIcon } from 'components/icons.mjs'
+import { TokenSelect } from './tokens.mjs'
 
 export const loadFormDefaults = (defaults, form) => {
   if (!Array.isArray(form)) return loadFormDefaults(defaults, [form])
@@ -70,7 +71,6 @@ export const FormBlock = (props) => {
     if (typeof transform === 'function') update(path, transform(val), props.data)
     else update(path, val, props.data)
   }
-
   return (
     <>
       {form.map((formEl, i) => {
@@ -106,6 +106,7 @@ export const FormBlock = (props) => {
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}
                 {...{ formValidation, updateFormValidation }}
+                mSettings={props.mSettings}
               />
             )
           if (React.isValidElement(formEl)) return <Fragment key={i}>{formEl}</Fragment>
@@ -156,7 +157,8 @@ export const FormElement = (props) => {
   if (props.inputType === 'toggle') return <ToggleInput {...inputProps} />
   if (props.inputType === 'slider') return <SliderInput {...inputProps} />
   if (props.inputType === 'textarea') return <TextInput {...inputProps} />
-  if (props.inputType === 'password') return <SecretInput {...inputProps} />
+  if (props.inputType === 'secret') return <TokenSelect {...inputProps} secrets={true} />
+  if (props.inputType === 'variable') return <TokenSelect {...inputProps} secrets={false} />
 
   switch (type) {
     case 'string':
@@ -256,6 +258,7 @@ export const FormWrapper = (props) => {
         {...props}
         data={local ? data : props.data}
         update={local ? update : props.update}
+        mSettings={local ? props.data : false}
       />
       {props.readOnly ? (
         <button
