@@ -1,5 +1,7 @@
 import { readYamlFile, readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
 import { extname, basename } from 'node:path'
+// Store
+import { store } from '../store.mjs'
 
 export const wanted = () => false
 
@@ -9,10 +11,10 @@ export const wanted = () => false
 export const service = {
   name: 'connector',
   hooks: {
-    wanted: async (tools) => {
-      if (tools.config?.connector?.pipelines) {
+    wanted: async () => {
+      if (store.config?.connector?.pipelines) {
         if (
-          Object.values(tools.config.connector.pipelines).filter((pipe) => !pipe.disabled).length >
+          Object.values(store.config.connector.pipelines).filter((pipe) => !pipe.disabled).length >
           0
         )
           return true
@@ -27,23 +29,23 @@ export const service = {
      * This will be volume-mapped, so we need to write it to
      * disk first so it's available
      */
-    preCreate: async (tools) => {
+    preCreate: async () => {
       /*
        * See if logstash.yml on the host OS is present
        */
       const file = '/etc/morio/connector/config/logstash.yml'
       const config = await readYamlFile(file)
       if (config && false === 'fixme') {
-        tools.log.debug('Connector: Config file exists, no action needed')
+        store.log.debug('Connector: Config file exists, no action needed')
       } else {
-        tools.log.debug('Connector: Creating config file')
-        await writeYamlFile(file, tools.config.services.connector.logstash, tools.log, 0o644)
+        store.log.debug('Connector: Creating config file')
+        await writeYamlFile(file, store.config.services.connector.logstash, store.log, 0o644)
       }
 
       /*
        * Make sure the data directory exists, and is writable
        */
-      const uid = tools.getPreset('MORIO_CONNECTOR_UID')
+      const uid = store.getPreset('MORIO_CONNECTOR_UID')
       await mkdir('/morio/data/connector')
       await chown('/morio/data/connector', uid, uid)
 
@@ -55,23 +57,23 @@ export const service = {
 
       return true
     },
-    preStart: async (tools) => {
+    preStart: async () => {
       /*
        * Need to write out pipelines, but also remove any that
        * may no longer be there, so we first need to load all
        * pipelines that are on disk
        */
       const currentPipelines = await loadPipelinesFromDisk()
-      const wantedPipelines = (Object.keys(tools.settings.connector?.pipelines) || []).filter(
+      const wantedPipelines = (Object.keys(store.settings.connector?.pipelines) || []).filter(
         (id) => {
-          if (!tools.settings?.connector?.pipelines?.[id]) return false
-          if (tools.settings?.connector?.pipelines?.[id].disabled) return false
+          if (!store.settings?.connector?.pipelines?.[id]) return false
+          if (store.settings?.connector?.pipelines?.[id].disabled) return false
           return true
         }
       )
 
-      await createWantedPipelines(wantedPipelines, tools)
-      await removeUnwantedPipelines(currentPipelines, wantedPipelines, tools)
+      await createWantedPipelines(wantedPipelines)
+      await removeUnwantedPipelines(currentPipelines, wantedPipelines)
 
       return true
     },
@@ -86,55 +88,55 @@ const loadPipelinesFromDisk = async () =>
 
 const pipelineFilename = (id) => `${id}.config`
 
-const createWantedPipelines = async (wantedPipelines, tools) => {
+const createWantedPipelines = async (wantedPipelines) => {
   const pipelines = []
   for (const id of wantedPipelines) {
-    const config = generatePipelineConfiguration(tools.settings.connector.pipelines[id], id, tools)
+    const config = generatePipelineConfiguration(store.settings.connector.pipelines[id], id)
     if (config) {
       const file = pipelineFilename(id)
-      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, tools.log)
-      tools.log.debug(`Created connector pipeline ${id}`)
+      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, store.log)
+      store.log.debug(`Created connector pipeline ${id}`)
       pipelines.push({
         'pipeline.id': id,
         'path.config': `/usr/share/logstash/pipeline/${file}`,
       })
     }
   }
-  await writeYamlFile(`/etc/morio/connector/config/pipelines.yml`, pipelines, tools.log)
+  await writeYamlFile(`/etc/morio/connector/config/pipelines.yml`, pipelines, store.log)
 }
 
-const removeUnwantedPipelines = async (currentPipelines, wantedPipelines, tools) => {
+const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
-      tools.log.debug(`Removing pipeline: ${id}`)
+      store.log.debug(`Removing pipeline: ${id}`)
       await rm(`/etc/morio/connector/pipelines/${id}.config`)
     }
   }
 }
 
-const generatePipelineConfiguration = (pipeline, pipelineId, tools) => {
-  const input = tools.settings.connector?.inputs?.[pipeline.input.id] || false
-  const output = tools.settings.connector?.outputs?.[pipeline.output.id] || false
+const generatePipelineConfiguration = (pipeline, pipelineId) => {
+  const input = store.settings.connector?.inputs?.[pipeline.input.id] || false
+  const output = store.settings.connector?.outputs?.[pipeline.output.id] || false
 
   if (!input || !output) return false
 
   return `# This pipeline configuration is auto-generated by Morio core
 # Any changes you make to this file will be overwritten
-${generateXputConfig(input, pipeline, pipelineId, 'input', tools)}
-${generateXputConfig(output, pipeline, pipelineId, 'output', tools)}
+${generateXputConfig(input, pipeline, pipelineId, 'input')}
+${generateXputConfig(output, pipeline, pipelineId, 'output')}
 `
 }
 
 const logstashPluginName = (plugin) =>
   ['morio_local', 'morio_remote'].includes(plugin) ? 'kafka' : plugin
 
-const generateXputConfig = (xput, pipeline, pipelineId, type, tools) =>
+const generateXputConfig = (xput, pipeline, pipelineId, type) =>
   logstash[type]?.[xput.plugin]
-    ? logstash[type][xput.plugin](xput, pipeline, pipelineId, tools)
+    ? logstash[type][xput.plugin](xput, pipeline, pipelineId)
     : `
 # ${type === 'input' ? 'Input' : 'Output'}, aka where to ${type === 'input' ? 'read data from' : 'write data to'}
 ${type} {
-  ${logstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, pipelineId, type, tools)}  }
+  ${logstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, pipelineId, type)}  }
 }
 `
 const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) => {
@@ -158,13 +160,13 @@ const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) 
 const logstash = {
   input: {},
   output: {
-    morio_local: (xput, pipeline, pipelineId, tools) => `
+    morio_local: (xput, pipeline, pipelineId) => `
 # Output data to the local Morio deployment
 output {
   kafka {
     codec => json
     topic_id => "${pipeline.output.topic}"
-    bootstrap_servers => "${tools.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${store.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
     client_id => "morio_connector"
     id => "${pipelineId}_${xput.id}"
   }

@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (tools) => ({
+export const resolveServiceConfiguration = (store) => ({
   /**
    * Container configuration
    *
@@ -18,7 +18,7 @@ export const resolveServiceConfiguration = (tools) => ({
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: tools.getPreset('MORIO_NETWORK'),
+    network: store.getPreset('MORIO_NETWORK'),
     // Ports to export
     ports: [
       '18081:18081',
@@ -30,19 +30,19 @@ export const resolveServiceConfiguration = (tools) => ({
     // Environment
     environment: {
       // Node ID
-      NODE_ID: tools.config?.core?.node_nr || 1,
+      NODE_ID: store.config?.core?.node_nr || 1,
     },
     // Volumes
     volumes: [
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/broker:/etc/redpanda`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/broker:/var/lib/redpanda/data`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/broker:/etc/redpanda`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/broker:/var/lib/redpanda/data`,
     ],
     // Command
     command: [
       'redpanda',
       'start',
       '--default-log-level=warn',
-      ...(tools.inProduction()
+      ...(store.inProduction()
         ? [
             // Mode dev-container uses well-known configuration properties for development in containers.
             '--mode dev-container',
@@ -68,7 +68,7 @@ export const resolveServiceConfiguration = (tools) => ({
        * Flag to enable developer mode,
        * which skips most of the checks performed at startup.
        */
-      developer_mode: tools.info.production ? false : true,
+      developer_mode: store.info.production ? false : true,
 
       /*
        * Broker won't start without a data directory
@@ -78,7 +78,7 @@ export const resolveServiceConfiguration = (tools) => ({
       /*
        * Set the node ID to the node number
        */
-      node_id: tools.config?.core?.node_nr || 1,
+      node_id: store.config?.core?.node_nr || 1,
 
       /*
        * The IP address and port for the admin server.
@@ -94,7 +94,7 @@ export const resolveServiceConfiguration = (tools) => ({
        * The IP address and port for the internal RPC server.
        */
       rpc_server: {
-        address: `broker_${tools.config.core.node_nr}`,
+        address: `broker_${store.config.core.node_nr}`,
         port: 33145,
       },
 
@@ -102,7 +102,7 @@ export const resolveServiceConfiguration = (tools) => ({
        * Address of RPC endpoint published to other cluster members.
        */
       advertised_rpc_api: {
-        address: `broker_${tools.config.core.node_nr}`,
+        address: `broker_${store.config.core.node_nr}`,
         port: 33145,
       },
 
@@ -112,7 +112,7 @@ export const resolveServiceConfiguration = (tools) => ({
       kafka_api: [
         {
           name: 'internal',
-          address: `broker_${tools.config.core.node_nr}`,
+          address: `broker_${store.config.core.node_nr}`,
           port: 9092,
         },
         {
@@ -152,12 +152,12 @@ export const resolveServiceConfiguration = (tools) => ({
        */
       advertised_kafka_api: [
         {
-          address: `broker_${tools.config.core.node_nr}`,
+          address: `broker_${store.config.core.node_nr}`,
           port: 9092,
           name: 'internal',
         },
         {
-          address: tools.config.core.names.external,
+          address: store.config.core.names.external,
           // Advertise the mapped port
           port: 9092,
           name: 'external',
@@ -172,12 +172,12 @@ export const resolveServiceConfiguration = (tools) => ({
        * Organisation name helps identify this as a Morio system
        */
       // This breaks, not expected here?
-      //organization: tools.config?.core?.display_name || 'Nameless Morio',
+      //organization: store.config?.core?.display_name || 'Nameless Morio',
 
       /*
        * Cluster ID helps differentiate different Morio deployments
        */
-      cluster_id: tools.config?.deployment?.fqdn || Date.now(),
+      cluster_id: store.config?.deployment?.fqdn || Date.now(),
 
       /*
        * Enable audit log FIXME
@@ -197,7 +197,7 @@ export const resolveServiceConfiguration = (tools) => ({
       /*
        * Default replication for topics
        */
-      default_topic_replications: tools.config.deployment.nodes.length < 4 ? 1 : 3,
+      default_topic_replications: store.config.deployment.nodes.length < 4 ? 1 : 3,
 
       /*
        * These were auto-added, but might not be a good fit for production
@@ -220,7 +220,7 @@ export const resolveServiceConfiguration = (tools) => ({
        */
       pandaproxy_api: [
         {
-          address: `broker_${tools.config.core.node_nr}`,
+          address: `broker_${store.config.core.node_nr}`,
           port: 8082,
           name: 'internal',
         },
@@ -233,7 +233,7 @@ export const resolveServiceConfiguration = (tools) => ({
        */
       advertised_pandaproxy_api: [
         {
-          address: tools.config.core.names.external,
+          address: store.config.core.names.external,
           name: 'external',
           port: 443,
         },
@@ -246,7 +246,7 @@ export const resolveServiceConfiguration = (tools) => ({
     schema_registry: {
       schema_registry_api: [
         {
-          address: `broker_${tools.config.core.node_nr}`,
+          address: `broker_${store.config.core.node_nr}`,
           port: 8081,
           name: 'internal',
         },

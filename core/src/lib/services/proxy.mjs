@@ -1,4 +1,6 @@
 import { readFile, writeFile } from '#shared/fs'
+// Store
+import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -14,17 +16,17 @@ export const service = {
      * This will be volume-mapped, so we need to write it to
      * disk first so it's available
      */
-    preCreate: async (tools) => {
+    preCreate: async () => {
       /*
        * See if entrypoint.sh on the host OS is our custom version
        */
       let file = '/etc/morio/proxy/entrypoint.sh'
       const entrypoint = await readFile(file)
       if (entrypoint && entrypoint.includes('update-ca-certificates')) {
-        tools.log.debug('Proxy: Custom entrypoint exists, no action needed')
+        store.log.debug('Proxy: Custom entrypoint exists, no action needed')
       } else {
-        tools.log.debug('Proxy: Creating custom entrypoint')
-        await writeFile(file, tools.config.services.proxy.entrypoint, tools.log, 0o755)
+        store.log.debug('Proxy: Creating custom entrypoint')
+        await writeFile(file, store.config.services.proxy.entrypoint, store.log, 0o755)
       }
 
       /*
@@ -41,10 +43,10 @@ export const service = {
       file = '/morio/data/ca/certs/root_ca.crt'
       const ca = await readFile(file)
       if (ca) {
-        tools.log.debug('Proxy: Root certificate file exists, no action needed')
+        store.log.debug('Proxy: Root certificate file exists, no action needed')
       } else {
-        tools.log.debug('Proxy: Creating placeholder root certificate file')
-        await writeFile(file, '', tools.log, 0o755)
+        store.log.debug('Proxy: Creating placeholder root certificate file')
+        await writeFile(file, '', store.log, 0o755)
       }
 
       return true
@@ -82,14 +84,13 @@ const getTraefikRouters = (srvConf) => {
  * Adds/Adapts container labels to configure TLS on Traefik
  *
  * @param {object} srvConf - The service configuration
- * @param {object} tools - The tools object
  * @return {object} srvconf - The updated service configuration
  */
-export const addTraefikTlsConfiguration = (srvConf, tools) => {
+export const addTraefikTlsConfiguration = (srvConf) => {
   /*
    * Don't bother if we are running in ephemeral mode
    */
-  if (tools.info.ephemeral) return srvConf
+  if (store.info.ephemeral) return srvConf
 
   /*
    * Add default cert to router
@@ -98,8 +99,8 @@ export const addTraefikTlsConfiguration = (srvConf, tools) => {
     srvConf.container.labels.push(
       `traefik.http.routers.${router}.tls.certresolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${tools.config.deployment.nodes[0]}`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${tools.config.deployment.nodes.join(', ')}`
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${store.config.deployment.nodes[0]}`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${store.config.deployment.nodes.join(', ')}`
     )
   }
   /*
@@ -112,7 +113,7 @@ export const addTraefikTlsConfiguration = (srvConf, tools) => {
       srvConf.container.labels[i] =
         chunks[0] +
         'rule=(Host(' +
-        tools.config.deployment.nodes.map((node) => `\`${node}\``).join(',') +
+        store.config.deployment.nodes.map((node) => `\`${node}\``).join(',') +
         ')) && (' +
         chunks[1]
     }

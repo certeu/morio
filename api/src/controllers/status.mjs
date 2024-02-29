@@ -26,6 +26,24 @@ Controller.prototype.status = async (req, res, tools) => {
 }
 
 /**
+ * Status logs
+ *
+ * This returns the status logs
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {object} tools - An object holding various tools & config
+ */
+Controller.prototype.statusLogs = async (req, res, tools) => {
+  /*
+   * Just get the status from core and pass it
+   */
+  const [status, result] = await tools.core.get(`/status_logs`)
+
+  return res.status(status).send(result)
+}
+
+/**
  * List downloads
  *
  * This returns a list of files in the downloads (tmp_static) folder

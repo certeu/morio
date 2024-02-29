@@ -22,3 +22,17 @@ export const TimeAgoBrief = ({ date }) => {
 
   return ago
 }
+
+const day = 86400000
+const hour = 3600000
+const minute = 60000
+const second = 1000
+
+export const MsAgo = ({ time }) => {
+  const d = Math.floor(Date.now() - time)
+  if (d > day) return `${Math.floor(d / day)}d ago`
+  if (d > hour) return `${Math.floor(d / hour)}h ago`
+  if (d > minute * 10) return `${Math.floor(d / minute)}m ago`
+  if (d > second) return `${Math.floor(d / second)}s  ago`
+  return `${d}ms ago`
+}

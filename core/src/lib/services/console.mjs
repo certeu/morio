@@ -1,4 +1,6 @@
 import { readJsonFile, writeYamlFile } from '#shared/fs'
+// Store
+import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -6,10 +8,10 @@ import { readJsonFile, writeYamlFile } from '#shared/fs'
 export const service = {
   name: 'console',
   hooks: {
-    wanted: (tools) => (tools.info.ephemeral ? false : true),
+    wanted: () => (store.info.ephemeral ? false : true),
     recreateContainer: () => false,
     restartContainer: () => false,
-    preCreate: async (tools) => {
+    preCreate: async () => {
       /*
        * We'll check if there's a config file on disk
        * If so, the console has already been initialized
@@ -20,22 +22,22 @@ export const service = {
        * If the Console is initialized, return early
        */
       if (bootstrapped && bootstrapped.redpanda) {
-        tools.log.debug('Console already initialized')
+        store.log.debug('Console already initialized')
         return
       }
 
       /*
-       * Load configration base
+       * Load configuration base
        */
-      const base = { ...tools.config.services.console.console }
+      const base = { ...store.config.services.console.console }
       /*
        * Populate Kafka nodes, schema URLs, and RedPanda URLs
        */
-      base.kafka.brokers = tools.config.deployment.nodes.map((n, i) => `broker_${i + 1}:9092`)
-      base.kafka.schemaRegistry.urls = tools.config.deployment.nodes.map(
+      base.kafka.brokers = store.config.deployment.nodes.map((n, i) => `broker_${i + 1}:9092`)
+      base.kafka.schemaRegistry.urls = store.config.deployment.nodes.map(
         (n, i) => `http://broker_${i + 1}:8081`
       )
-      base.redpanda.adminApi.urls = tools.config.deployment.nodes.map(
+      base.redpanda.adminApi.urls = store.config.deployment.nodes.map(
         (n, i) => `http://broker_${i + 1}:9644`
       )
       /*

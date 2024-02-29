@@ -4,13 +4,13 @@ import { resolveControlFile } from '#config/services/dbuilder'
 export const service = {
   name: 'dbuilder',
   hooks: {
-    wanted: (tools, onDemandBuild = false) => onDemandBuild,
+    wanted: (onDemandBuild = false) => onDemandBuild,
     recreateContainer: () => false,
     restartContainer: () => false,
     /*
      * Generate and write control file for the build
      */
-    prebuild: async (tools, customSettings = {}) => {
+    prebuild: async (customSettings = {}) => {
       /*
        * Resolve settings and control file
        */

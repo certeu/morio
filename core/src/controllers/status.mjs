@@ -1,4 +1,6 @@
 import { streamContainerLogs } from '#lib/docker'
+// Store
+import { store } from '../lib/store.mjs'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -60,21 +62,20 @@ const timeSince = (timestamp) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.status = async (req, res, tools) => {
+Controller.prototype.status = async (req, res) => {
   /*
    * Return this in any case
    */
   const base = {
-    ...tools.info,
-    ...timeSince(tools.start_time),
+    ...store.info,
+    ...timeSince(store.start_time),
   }
 
   /*
    * If MORIO is not setup, return limited info
    */
-  if (!tools.config.deployment) return res.send({ ...base, setup: false })
+  if (!store.config.deployment) return res.send({ ...base, setup: false })
 
   return res.send({
     ...base,
@@ -90,16 +91,14 @@ Controller.prototype.status = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.streamServiceLogs = async (req, res, tools) => {
+Controller.prototype.streamServiceLogs = async (req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.setHeader('Transfer-Encoding', 'chunked')
 
   return streamContainerLogs(
     req.params.service,
     (data) => res.write(data),
-    () => res.end(),
-    tools
+    () => res.end()
   )
 }

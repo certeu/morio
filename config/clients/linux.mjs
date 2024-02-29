@@ -7,7 +7,7 @@ const beats = {
   metrics: 'metricbeat',
 }
 
-const beatConfig = (type, tools) => {
+const beatConfig = (type, store) => {
   const config = {
     /*
      * Disabled HTTP metrics endpoint
@@ -91,7 +91,7 @@ const beatConfig = (type, tools) => {
   /*
    * Output config
    */
-  config.output = outputConfig(type, tools)
+  config.output = outputConfig(type, store)
 
   /*
    * Logging config
@@ -138,7 +138,7 @@ const loggingConfig = (type) => ({
 /*
  * Shared output configuration
  */
-const outputConfig = (type, tools) => ({
+const outputConfig = (type, store) => ({
   /*
    * Morio uses RedPanda under the hood which exposes a Kafka API
    */
@@ -154,7 +154,7 @@ const outputConfig = (type, tools) => ({
     /*
      * Kafka brokers
      */
-    hosts: tools.config.deployment.nodes.map(name => `${name}:9092`),
+    hosts: store.config.deployment.nodes.map(name => `${name}:9092`),
     /*
      * Never give up, keep trying to publish data
      */
@@ -193,11 +193,11 @@ const outputConfig = (type, tools) => ({
 })
 
 const resolvers = {
-  audit: (tools) => beatConfig('audit', tools),
-  logs: (tools) => beatConfig('logs', tools),
-  metrics: (tools) => beatConfig('metrics', tools),
+  audit: (store) => beatConfig('audit', store),
+  logs: (store) => beatConfig('logs', store),
+  metrics: (store) => beatConfig('metrics', store),
 }
 
-export const resolveClientConfiguration = (type, tools) =>
-  resolvers[type] ? resolvers[type](tools) : false
+export const resolveClientConfiguration = (type, store) =>
+  resolvers[type] ? resolvers[type](store) : false
 

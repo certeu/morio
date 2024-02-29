@@ -3,6 +3,8 @@ import { generateCaRoot, keypairAsJwk } from '#shared/crypto'
 import { cp, readJsonFile, readFile, writeFile, chown, mkdir } from '#shared/fs'
 import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
+// Store
+import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -10,7 +12,7 @@ import { testUrl } from '#shared/network'
 export const service = {
   name: 'ca',
   hooks: {
-    wanted: (tools) => (tools.info.ephemeral ? false : true),
+    wanted: () => (store.info.ephemeral ? false : true),
     recreateContainer: () => false,
     restartContainer: () => false,
     /*
@@ -18,7 +20,7 @@ export const service = {
      * and secret, and even output the secret in the logs.
      * So instead, let's tell it what root certificate/keys/password it should use.
      */
-    preStart: async (tools) => {
+    preStart: async () => {
       /*
        * We'll check if there's a default ca-cli config file on disk
        * If so, the CA has already been initialized
@@ -37,8 +39,8 @@ export const service = {
         /*
          * Store fingerprint & JWK for easy access
          */
-        tools.ca = {
-          url: `https://ca_${tools.config.core.node_nr}:9000`,
+        store.ca = {
+          url: `https://ca_${store.config.core.node_nr}:9000`,
           fingerprint: bootstrapped.fingerprint,
           jwk,
         }
@@ -47,34 +49,34 @@ export const service = {
          * Load the root certficate, then return early
          */
         const root = await readFile('/etc/morio/shared/root_ca.crt')
-        tools.ca.certificate = root
+        store.ca.certificate = root
 
-        return tools
+        return true
       }
 
       /*
        * No config, generate configuration, keys, certs, and secrets file
        */
-      tools.log.debug('Generating inital CA config - This will take a couple of seconds')
+      store.log.debug('Generating inital CA config - This will take a couple of seconds')
 
       /*
        * Generate keys and certificates
        */
       const init = await generateCaRoot(
-        tools.config.deployment.nodes,
-        tools.config.deployment.display_name
+        store.config.deployment.nodes,
+        store.config.deployment.display_name
       )
 
       /*
        * Generate JWK
        */
-      const jwk = await keypairAsJwk(tools.keys)
+      const jwk = await keypairAsJwk(store.keys)
 
       /*
-       * Store root certificate and fingerprint in tools
+       * Store root certificate and fingerprint in store
        */
-      tools.ca = {
-        url: `https://ca_${tools.config.core.node_nr}:9000`,
+      store.ca = {
+        url: `https://ca_${store.config.core.node_nr}:9000`,
         fingerprint: init.root.fingerprint,
         jwk,
         certificate: init.root.certificate,
@@ -84,11 +86,11 @@ export const service = {
        * Construct step-ca (server) configuration
        */
       const stepServerConfig = {
-        ...tools.config.services.ca.server,
+        ...store.config.services.ca.server,
         root: '/home/step/certs/root_ca.crt',
         crt: '/home/step/certs/intermediate_ca.crt',
         key: '/home/step/secrets/intermediate_ca.key',
-        dnsNames: [...tools.config.services.ca.server.dnsNames, ...tools.config.deployment.nodes],
+        dnsNames: [...store.config.services.ca.server.dnsNames, ...store.config.deployment.nodes],
       }
 
       /*
@@ -100,14 +102,14 @@ export const service = {
        * Construct step (client) configuration
        */
       const stepClientConfig = {
-        ...tools.config.services.ca.client,
+        ...store.config.services.ca.client,
         fingerprint: init.root.fingerprint,
       }
 
       /*
        * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
        */
-      const uid = tools.getPreset('MORIO_CA_UID')
+      const uid = store.getPreset('MORIO_CA_UID')
       await mkdir('/morio/data/ca')
       await chown('/morio/data/ca', uid, uid)
       await mkdir('/etc/morio/ca')
@@ -147,19 +149,19 @@ export const service = {
      * We need to make sure the CA is up and running before we continue.
      * If not, provisioning of certificates will fail.
      */
-    postStart: async (tools) => {
+    postStart: async () => {
       /*
        * Make sure CA is up
        */
       const up = await attempt({
         every: 2,
         timeout: 60,
-        run: async () => await isCaUp(tools),
+        run: async () => await isCaUp(),
         onFailedAttempt: (s) =>
-          tools.log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
+          store.log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
       })
-      if (up) tools.log.debug(`CA is up.`)
-      else tools.log.warn(`CA did not come up before timeout. Moving on anyway.`)
+      if (up) store.log.debug(`CA is up.`)
+      else store.log.warn(`CA did not come up before timeout. Moving on anyway.`)
 
       return true
     },
@@ -169,11 +171,10 @@ export const service = {
 /**
  * Helper method to check whether the CA is up
  *
- * @param {object} tools - The tools object
  * @return {bool} result - True if the CA is up, false if not
  */
-const isCaUp = async (tools) => {
-  const result = await testUrl(`https://ca_${tools.config.core.node_nr}:9000/health`, {
+const isCaUp = async () => {
+  const result = await testUrl(`https://ca_${store.config.core.node_nr}:9000/health`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

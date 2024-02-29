@@ -3,6 +3,8 @@ import { attempt, sleep } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
+// Store
+import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -10,10 +12,10 @@ import { testUrl } from '#shared/network'
 export const service = {
   name: 'broker',
   hooks: {
-    wanted: (tools) => (tools.info.ephemeral ? false : true),
+    wanted: () => (store.info.ephemeral ? false : true),
     recreateContainer: () => false,
     restartContainer: () => false,
-    preStart: async (tools) => {
+    preStart: async () => {
       // Don't repeat yourself
       const brokerConfigFile = `/etc/morio/broker/redpanda.yaml`
 
@@ -26,42 +28,42 @@ export const service = {
       /*
        * If the broker is initialized, return early
        */
-      if (bootstrapped) return tools
+      if (bootstrapped) return true
 
       /*
        * Broker is not initialized, we need to get a certitificate,
        * but 9 tiumes out of 10, this means the CA has just been starte
        * by core. So let's give it 6.66 seconds to come up
        */
-      tools.log.debug(
+      store.log.debug(
         'Sleeping 6.66 seconds before requesting broker certificate from CA (so it can come up)'
       )
       await sleep(6.66)
-      tools.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
+      store.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
 
       /*
        * It is not, generate X.509 certificate/key for the broker(s)
        */
-      const certAndKey = await createX509Certificate(tools, {
+      const certAndKey = await createX509Certificate({
         certificate: {
           cn: 'Morio Broker',
-          c: tools.getPreset('MORIO_X509_C'),
-          st: tools.getPreset('MORIO_X509_ST'),
-          l: tools.getPreset('MORIO_X509_L'),
-          o: tools.getPreset('MORIO_X509_O'),
-          ou: tools.getPreset('MORIO_X509_OU'),
-          san: tools.config.deployment.nodes,
+          c: store.getPreset('MORIO_X509_C'),
+          st: store.getPreset('MORIO_X509_ST'),
+          l: store.getPreset('MORIO_X509_L'),
+          o: store.getPreset('MORIO_X509_O'),
+          ou: store.getPreset('MORIO_X509_OU'),
+          san: store.config.deployment.nodes,
         },
-        notAfter: tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+        notAfter: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       })
 
       /*
        * No config, generate configuration file and write it to disk
        */
       // 101 is the UID that redpanda runs under inside the container
-      const uid = tools.getPreset('MORIO_BROKER_UID')
-      tools.log.debug('Storing inital broker configuration')
-      await writeYamlFile(brokerConfigFile, tools.config.services.broker.broker, tools.log)
+      const uid = store.getPreset('MORIO_BROKER_UID')
+      store.log.debug('Storing inital broker configuration')
+      await writeYamlFile(brokerConfigFile, store.config.services.broker.broker, store.log)
       await chown(brokerConfigFile, uid, uid)
       await writeFile('/etc/morio/broker/tls-cert.pem', certAndKey.certificate.crt)
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
@@ -73,55 +75,54 @@ export const service = {
       await mkdir('/morio/data/broker')
       await chown('/morio/data/broker', uid, uid)
 
-      return tools
+      return true
     },
-    postStart: async (tools) => {
+    postStart: async () => {
       /*
        * Make sure broker is up
        */
       const up = await attempt({
         every: 2,
         timeout: 60,
-        run: async () => await isBrokerUp(tools),
+        run: async () => await isBrokerUp(),
         onFailedAttempt: (s) =>
-          tools.log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
+          store.log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
       })
-      if (up) tools.log.debug(`Broker is up.`)
+      if (up) store.log.debug(`Broker is up.`)
       else {
-        tools.log.warn(`Broker did not come up before timeout. Not creating topics.`)
+        store.log.warn(`Broker did not come up before timeout. Not creating topics.`)
         return
       }
 
       /*
        * Ensure topics exist
        */
-      await ensureTopicsExist(tools)
+      await ensureTopicsExist()
 
       return true
     },
   },
 }
 
-const ensureTopicsExist = async (tools) => {
-  const topics = await getTopics(tools)
+const ensureTopicsExist = async () => {
+  const topics = await getTopics()
 
-  for (const topic of tools
+  for (const topic of store
     .getPreset('MORIO_BROKER_TOPICS')
     .filter((topic) => !topics.includes(topic))) {
-    tools.log.debug(`Topic ${topic} not present, creating now.`)
-    await execContainerCommand('broker', ['rpk', 'topic', 'create', topic], null, tools)
+    store.log.debug(`Topic ${topic} not present, creating now.`)
+    await execContainerCommand('broker', ['rpk', 'topic', 'create', topic])
   }
 }
 
 /**
  * This method checks whether or not the broker is up
  *
- * @param {object} tools - The tools object
  * @return {bool} result - True if the broker is up, false if not
  */
-const isBrokerUp = async (tools) => {
+const isBrokerUp = async () => {
   const result = await testUrl(
-    `http://broker_${tools.config.core.node_nr}:9644/v1/cluster/health_overview`,
+    `http://broker_${store.config.core.node_nr}:9644/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
@@ -135,11 +136,10 @@ const isBrokerUp = async (tools) => {
 /**
  * Get the list of topics from RedPanda
  *
- * @param {object} tools - The tools object
  * @return {object} result - The JSON output as a POJO
  */
-const getTopics = async (tools) => {
-  const result = await testUrl(`http://broker_${tools.config.core.node_nr}:8082/topics`, {
+const getTopics = async () => {
+  const result = await testUrl(`http://broker_${store.config.core.node_nr}:8082/topics`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

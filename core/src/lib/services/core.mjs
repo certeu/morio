@@ -16,6 +16,8 @@ import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shar
 import { createPrivateKey } from 'crypto'
 // Used for templating the settings
 import mustache from 'mustache'
+// Store
+import { store } from '../store.mjs'
 
 /*
  * This service object holds the service name,
@@ -29,28 +31,28 @@ export const service = {
     /*
      * This runs only when core is cold-started.
      */
-    beforeAll: async (tools) => {
+    beforeAll: async () => {
       /*
-       * First populate the tools object
+       * First populate the store
        */
-      if (!tools.info)
-        tools.info = {
+      if (!store.info)
+        store.info = {
           about: pkg.description,
           name: pkg.name,
           production: inProduction(),
           version: pkg.version,
         }
-      tools.start_time = Date.now()
-      if (!tools.inProduction) tools.inProduction = inProduction
+      store.start_time = Date.now()
+      if (!store.inProduction) store.inProduction = inProduction
 
       /*
        * Add a getPreset() wrapper that will output trace logs about how presets are resolved
        * This is surprisingly helpful during debugging
        */
-      if (!tools.getPreset)
-        tools.getPreset = (key, dflt, opts) => {
+      if (!store.getPreset)
+        store.getPreset = (key, dflt, opts) => {
           const result = getPreset(key, dflt, opts)
-          tools.log.trace(`Preset ${key} = ${result}`)
+          store.log.trace(`Preset ${key} = ${result}`)
 
           return result
         }
@@ -58,19 +60,19 @@ export const service = {
       /*
        * Add the API client
        */
-      if (!tools.apiClient)
-        tools.apiClient = restClient(`http://api:${tools.getPreset('MORIO_API_PORT')}`)
+      if (!store.apiClient)
+        store.apiClient = restClient(`http://api:${store.getPreset('MORIO_API_PORT')}`)
 
       /*
        * Load all presets and write them to disk for other services to load
        */
-      tools.presets = loadAllPresets()
-      await writeYamlFile('/etc/morio/shared/presets.yaml', tools.presets)
+      store.presets = loadAllPresets()
+      await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
 
       /*
        * Load existing settings and keys from disk
        */
-      const { settings, keys, timestamp } = await loadSettingsAndKeys(tools)
+      const { settings, keys, timestamp } = await loadSettingsAndKeys()
 
       /*
        * Add encryption methods
@@ -78,21 +80,21 @@ export const service = {
       const { encrypt, decrypt, isEncrypted } = encryptionMethods(
         keys.mrt,
         'Morio by CERT-EU',
-        tools.log
+        store.log
       )
-      tools.encrypt = encrypt
-      tools.decrypt = decrypt
-      tools.isEncrypted = isEncrypted
+      store.encrypt = encrypt
+      store.decrypt = decrypt
+      store.isEncrypted = isEncrypted
 
       /*
        * If timestamp is false, no on-disk settings exist and we
        * are running in ephemeral mode. In which case we return early.
        */
       if (!timestamp) {
-        tools.info.current_settings = false
-        tools.info.ephemeral = true
-        tools.settings = {}
-        tools.config = {}
+        store.info.current_settings = false
+        store.info.ephemeral = true
+        store.settings = {}
+        store.config = {}
 
         return true
       }
@@ -100,26 +102,26 @@ export const service = {
       /*
        * If we get here, we have a timestamp and on-disk settings
        */
-      tools.info.ephemeral = false
-      tools.info.current_settings = timestamp
-      tools.config = cloneAsPojo(settings)
+      store.info.ephemeral = false
+      store.info.current_settings = timestamp
+      store.config = cloneAsPojo(settings)
       // Take care of encrypted settings and store the save ones
-      tools.saveSettings = cloneAsPojo(settings)
-      tools.settings = templateSettings(settings, tools)
-      tools.keys = keys
+      store.saveSettings = cloneAsPojo(settings)
+      store.settings = templateSettings(settings)
+      store.keys = keys
 
       /*
        * Only one node makes this easy
        * FIXME: Handle clustering
        */
-      if (tools.config.deployment && tools.config.deployment.node_count === 1) {
-        if (!tools.config.core) tools.config.core = {}
-        tools.config.core.node_nr = 1
-        tools.config.core.names = {
+      if (store.config.deployment && store.config.deployment.node_count === 1) {
+        if (!store.config.core) store.config.core = {}
+        store.config.core.node_nr = 1
+        store.config.core.names = {
           internal: 'core_1',
-          external: tools.config.deployment.nodes[0],
+          external: store.config.deployment.nodes[0],
         }
-        tools.config.deployment.fqdn = tools.config.deployment.nodes[0]
+        store.config.deployment.fqdn = store.config.deployment.nodes[0]
       }
 
       return true
@@ -156,16 +158,16 @@ const loadSettingsAndKeys = async () => {
   return { settings, keys, timestamp }
 }
 
-export const createX509Certificate = async (tools, data) => {
+export const createX509Certificate = async (data) => {
   /*
    * Generate the CSR (and private key)
    */
-  const csr = await generateCsr(data.certificate, tools)
+  const csr = await generateCsr(data.certificate)
 
   /*
    * Extract the key id (kid) from the public key
    */
-  const kid = (await keypairAsJwk({ public: tools.keys.public })).kid
+  const kid = (await keypairAsJwk({ public: store.keys.public })).kid
 
   /*
    * Generate the JSON web token to talk to the CA
@@ -194,7 +196,7 @@ export const createX509Certificate = async (tools, data) => {
       nbf: Math.floor(Date.now() / 1000) - 1,
       exp: Number(Date.now()) + 300000,
     },
-    tools,
+    store,
     options: {
       keyid: kid,
       algorithm: 'RS256',
@@ -206,9 +208,9 @@ export const createX509Certificate = async (tools, data) => {
      * So this will decrypt the key, export it, and pass it through
      */
     key: createPrivateKey({
-      key: tools.keys.private,
+      key: store.keys.private,
       format: 'pem',
-      passphrase: tools.keys.mrt,
+      passphrase: store.keys.mrt,
     }).export({
       type: 'pkcs8',
       format: 'pem',
@@ -227,14 +229,14 @@ export const createX509Certificate = async (tools, data) => {
         ott: jwt,
         notAfter: data.notAfter
           ? data.notAfter
-          : tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+          : store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       },
       {
-        httpsAgent: new https.Agent({ ca: tools.ca.certificate, keepAlive: false }),
+        httpsAgent: new https.Agent({ ca: store.ca.certificate, keepAlive: false }),
       }
     )
   } catch (err) {
-    tools.log.debug(err, 'Failed to get certificate signed by CA')
+    store.log.debug(err, 'Failed to get certificate signed by CA')
   }
 
   /*
@@ -243,14 +245,14 @@ export const createX509Certificate = async (tools, data) => {
   return result.data ? { certificate: result.data, key: csr.key } : false
 }
 
-export const templateSettings = (settings, tools) => {
+export const templateSettings = (settings) => {
   const tokens = {}
   // Build the tokens object
   for (const [key, val] of Object.entries(settings.tokens.vars || {})) {
     tokens[key] = val
   }
   for (const [key, val] of Object.entries(settings.tokens.secrets || {})) {
-    tokens[key] = tools.decrypt(val)
+    tokens[key] = store.decrypt(val)
   }
 
   // Now template the settings
@@ -258,7 +260,7 @@ export const templateSettings = (settings, tools) => {
   try {
     newSettings = JSON.parse(mustache.render(JSON.stringify(settings), tokens))
   } catch (err) {
-    tools.log.warn(err, 'Failed to template out settings')
+    store.log.warn(err, 'Failed to template out settings')
   }
 
   return newSettings

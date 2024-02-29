@@ -1,49 +1,28 @@
-/*
- * Import the settings controller
- */
+import { store } from '../lib/store.mjs'
 import { Controller } from '#controllers/settings'
 
-/*
- * Instantiate the controller
- */
 const Settings = new Controller()
 
-// prettier-ignore
 /**
- * This method adds the config routes
+ * This method adds the settings routes to Express
  *
- * @param {object} A tools object from which we destructure the app object
+ * @param {abject} app - The ExpressJS app
  */
-export function routes(tools) {
-  const { app } = tools
-
+export function routes(app) {
   /*
    * Deploy an initial set of settings
    */
-  app.post('/setup', (req, res) => Settings.setup(req, res, tools))
+  app.post('/setup', Settings.setup)
 
   /*
    * Deploy a new set of settings
    */
-  app.post('/settings', (req, res) => Settings.deploy(req, res, tools))
+  app.post('/settings', Settings.deploy)
 
   /*
    * Load the current (running) settings
+   * This will return the saveSettings as stored in the store
+   * Save settings means secrets are not decrypted
    */
-  app.get('/settings', (req, res) => res.send(tools.saveSettings))
-
-  /*
-   * Load settings by timestamp
-   */
-  app.get('/settings/:timestamp', (req, res) => Settings.getSettings(req, res, tools))
-
-  /*
-   * Encrypt data
-   */
-  app.post('/encrypt', (req, res) => Settings.encrypt(req, res, tools))
-
-  /*
-   * Decrypt data
-   */
-  app.post('/decrypt', (req, res) => Settings.decrypt(req, res, tools))
+  app.get('/settings', (req, res) => res.send(store.get('saveSettings', {})))
 }

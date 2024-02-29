@@ -23,6 +23,11 @@ export function routes(tools) {
   app.get(`${PREFIX}/status`, (req, res) => Status.status(req, res, tools))
 
   /*
+   * Hit this route to get the Morio status
+   */
+  app.get(`${PREFIX}/status_logs`, (req, res) => Status.statusLogs(req, res, tools))
+
+  /*
    * Hit this route to get the available downloads
    */
   app.get(`${PREFIX}/downloads`, (req, res) => Status.listDownloads(req, res, tools))

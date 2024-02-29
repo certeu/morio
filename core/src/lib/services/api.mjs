@@ -1,4 +1,6 @@
 import { addTraefikTlsConfiguration } from './proxy.mjs'
+// Store
+import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -8,9 +10,9 @@ export const service = {
   hooks: {
     recreateContainer: () => false,
     restartContainer: () => false,
-    preCreate: async (tools) => {
+    preCreate: async () => {
       // Configure TLS
-      addTraefikTlsConfiguration(tools.config.services.api, tools)
+      addTraefikTlsConfiguration(store.config.services.api)
 
       return true
     },

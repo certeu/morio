@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (tools) => ({
+export const resolveServiceConfiguration = (store) => ({
   /**
    * Container configuration
    *
@@ -18,16 +18,16 @@ export const resolveServiceConfiguration = (tools) => ({
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: tools.getPreset('MORIO_NETWORK'),
+    network: store.getPreset('MORIO_NETWORK'),
     // Ports
     ports: ['80:80', '443:443'],
     // Volumes
     volumes: [
-      `${tools.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio/`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/proxy/entrypoint.sh:/entrypoint.sh`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+      `${store.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio/`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/proxy/entrypoint.sh:/entrypoint.sh`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
     ],
     // Command
     command: [
@@ -44,15 +44,15 @@ export const resolveServiceConfiguration = (tools) => ({
       //  Create HTTPS entrypoint
       '--entrypoints.https.address=:443',
       // Set the log level to debug in development
-      `--log.level=${tools.inProduction() ? tools.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
+      `--log.level=${store.inProduction() ? store.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
       // Set the log destination
-      `--log.filePath=${tools.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
+      `--log.filePath=${store.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
       // Set the log format
-      `--log.format=${tools.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
+      `--log.format=${store.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
       // Enable access logs
       '--accesslog=true',
       // Set the access log destination
-      `--accesslog.filePath=${tools.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
+      `--accesslog.filePath=${store.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
       // Do not verify backend certificates, just encrypt
       '--serversTransport.insecureSkipVerify=true',
       // Enable ACME certificate resolver (will only work after CA is initialized)
@@ -67,7 +67,7 @@ export const resolveServiceConfiguration = (tools) => ({
       // Tell traefik to watch itself (so meta)
       'traefik.enable=true',
       // Attach to the morio docker network
-      `traefik.docker.network=${tools.getPreset('MORIO_NETWORK')}`,
+      `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
       // Match rule for Traefik's internal dashboard
       'traefik.http.routers.traefik_dashboard.rule=(PathPrefix(`/api/`) || PathPrefix(`/dashboard/`))',
       //# Avoid rule conflicts by setting priority manually

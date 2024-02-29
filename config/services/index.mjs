@@ -20,5 +20,5 @@ const resolvers = {
   ui,
 }
 
-export const resolveServiceConfiguration = (name, tools) =>
-  resolvers[name] ? resolvers[name](tools) : false
+export const resolveServiceConfiguration = (name, store) =>
+  resolvers[name] ? resolvers[name](store) : false

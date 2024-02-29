@@ -36,15 +36,14 @@ export function Controller() {}
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  * @param {object} options - Any options to pass to the command
  */
-Controller.prototype.getDockerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
+Controller.prototype.getDockerData = async (req, res, cmd = 'inspect', options = {}) => {
   /*
    * Run the Docker command, with options if there are any
    */
-  const [success, result] = await runDockerApiCommand(cmd, options, tools)
+  const [success, result] = await runDockerApiCommand(cmd, options)
 
   /*
    * Return result
@@ -62,11 +61,10 @@ Controller.prototype.getDockerData = async (req, res, tools, cmd = 'inspect', op
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  * @param {object} options - Options to pass to the container API
  */
-Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect', options = {}) => {
+Controller.prototype.getContainerData = async (req, res, cmd = 'inspect', options = {}) => {
   /*
    * Validate request against schema
    */
@@ -76,7 +74,7 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect',
   /*
    * Now run the container API command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd, options, tools)
+  const [success, result] = await runContainerApiCommand(valid.id, cmd, options)
 
   /*
    * Return result
@@ -99,13 +97,12 @@ Controller.prototype.getContainerData = async (req, res, tools, cmd = 'inspect',
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.createResource = async (req, res, tools, cmd) => {
+Controller.prototype.createResource = async (req, res, cmd) => {
   /*
    * Run the Docker command, with options if there are any
    */
-  const [success, result] = await runDockerApiCommand(cmd, req.body, tools)
+  const [success, result] = await runDockerApiCommand(cmd, req.body)
 
   /*
    * Return result
@@ -126,9 +123,8 @@ Controller.prototype.createResource = async (req, res, tools, cmd) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
+Controller.prototype.updateContainer = async (req, res, cmd) => {
   /*
    * Validate request against schema
    */
@@ -138,7 +134,7 @@ Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
   /*
    * Run the container command
    */
-  const [success, result] = await runContainerApiCommand(valid.id, cmd, {}, tools)
+  const [success, result] = await runContainerApiCommand(valid.id, cmd)
 
   /*
    * Return result
@@ -155,10 +151,9 @@ Controller.prototype.updateContainer = async (req, res, tools, cmd) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => {
+Controller.prototype.getImageData = async (req, res, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
@@ -168,7 +163,7 @@ Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => 
   /*
    * Now run the container image API command
    */
-  const [success, result] = await runContainerImageApiCommand(valid.id, cmd, tools)
+  const [success, result] = await runContainerImageApiCommand(valid.id, cmd)
 
   /*
    * Return result
@@ -184,10 +179,9 @@ Controller.prototype.getImageData = async (req, res, tools, cmd = 'inspect') => 
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getNetworkData = async (req, res, tools, cmd = 'inspect') => {
+Controller.prototype.getNetworkData = async (req, res, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
@@ -197,7 +191,7 @@ Controller.prototype.getNetworkData = async (req, res, tools, cmd = 'inspect') =
   /*
    * Now run the docker network API command
    */
-  const [success, result] = await runNetworkApiCommand(valid.id, cmd, tools)
+  const [success, result] = await runNetworkApiCommand(valid.id, cmd)
 
   /*
    * Return result
@@ -279,7 +273,7 @@ Controller.prototype.pull = async (req, res) => {
  * @param {object} res - The response object from Express
  * @param {object} options - Any command options
  */
-Controller.prototype.dockerPostCmd = async (req, res, tools) => {
+Controller.prototype.dockerPostCmd = async (req, res) => {
   /*
    * Map API path to Docker command
    */
@@ -302,7 +296,7 @@ Controller.prototype.dockerPostCmd = async (req, res, tools) => {
   const [valid, err] = await validate('docker.postCommand', req.params)
   if (!valid) return schemaViolation(err, res)
 
-  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body, tools)
+  const [success, result] = await runDockerApiCommand(commands[valid.cmd], req.body)
 
   return success ? res.send(result) : dockerError(result, res)
 }

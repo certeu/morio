@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (tools) => ({
+export const resolveServiceConfiguration = (store) => ({
   /**
    * Container configuration
    *
@@ -14,15 +14,15 @@ export const resolveServiceConfiguration = (tools) => ({
     // Image to run (different in dev)
     image: 'morio/dbuilder',
     // Image tag (version) to run
-    tag: tools.getPreset('MORIO_VERSION'),
+    tag: store.getPreset('MORIO_VERSION'),
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: tools.getPreset('MORIO_NETWORK'),
+    network: store.getPreset('MORIO_NETWORK'),
     // Volumes
     volumes: [
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients/linux:/morio/src`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static/clients/deb:/morio/dist`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients/linux:/morio/src`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static/clients/deb:/morio/dist`,
     ],
     // Don't keep container after it exits
     ephemeral: true,

@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (tools) => ({
+export const resolveServiceConfiguration = (store) => ({
   /**
    * Container configuration
    *
@@ -18,22 +18,22 @@ export const resolveServiceConfiguration = (tools) => ({
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: tools.getPreset('MORIO_NETWORK'),
+    network: store.getPreset('MORIO_NETWORK'),
     // Ports to export
     ports: ['9000:9000'],
     // Volumes
     volumes: [
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/ca:/home/step/config`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs:/home/step/certs`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/db:/home/step/db`,
-      `${tools.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/secrets:/home/step/secrets`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/ca:/home/step/config`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs:/home/step/certs`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/db:/home/step/db`,
+      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/secrets:/home/step/secrets`,
     ],
     // Configure Traefik with container labels
     labels: [
       // Tell traefik to watch this container
       'traefik.enable=true',
       // Attach to the morio docker network
-      `traefik.docker.network=${tools.getPreset('MORIO_NETWORK')}`,
+      `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
       // Match requests going to the CA root certificate
       'traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`, `/provisioners`))',
       // Set priority to avoid rule conflicts
@@ -71,9 +71,9 @@ export const resolveServiceConfiguration = (tools) => ({
     },
     authority: {
       claims: {
-        minTLSCertDuration: tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MIN'),
-        maxTLSCertDuration: tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-        defaultTLSCertDuration: tools.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_DFLT'),
+        minTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MIN'),
+        maxTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+        defaultTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_DFLT'),
         disableRenewal: false,
         allowRenewalAfterExpiry: true,
       },

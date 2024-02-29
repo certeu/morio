@@ -1,19 +1,19 @@
 // Dependencies
 import express from 'express'
-import { logger } from '#shared/logger'
 import { wrapExpress } from '#shared/utils'
 import { getPreset } from '#config'
 // Start Morio method
 import { startMorio } from './lib/services/index.mjs'
 // Routes
 import { routes } from '#routes/index'
+// Load the store
+import { store } from './lib/store.mjs'
 
 /*
- * Instantiate the tools object with logger
+ * Get the logger from the store
  */
-const tools = {
-  log: logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core'),
-}
+const log = store.log
+log.status('Cold start of Morio Core')
 
 /*
  * Instantiate the Express app
@@ -26,6 +26,26 @@ const app = express()
 app.use(express.json({ limit: '1mb' }))
 
 /*
+ * Load the API routes
+ */
+for (const type in routes) routes[type](app)
+
+/*
+ * Add the wildcard route
+ */
+app.get('/*', async (req, res) =>
+  res
+    .set('Content-Type', 'application/json')
+    .status(404)
+    .send({
+      url: req.url,
+      method: req.method,
+      originalUrl: req.originalUrl,
+      prefix: getPreset('MORIO_CORE_PREFIX'),
+    })
+)
+
+/*
  * (re)Configure core
  */
 await reconfigure()
@@ -34,9 +54,9 @@ await reconfigure()
  * Start listening for requests
  */
 wrapExpress(
-  tools.log,
+  log,
   app.listen(getPreset('MORIO_CORE_PORT'), (err) => {
-    if (err) tools.log.error(err, 'An error occured')
+    if (err) log.error(err, 'An error occured')
   })
 )
 
@@ -45,55 +65,19 @@ wrapExpress(
  * own configuration
  */
 export async function reconfigure() {
+  log.status('(Re)Configuring Morio Core')
   /*
-   * First of all, we bootstrap core which will popular tools with what we need
+   * This will (re)start all services if that is needed
    */
-  await startMorio(tools)
-  //core.hooks.preStart(tools)
-
-  /*
-   * Use the logger on the tools object from now on
-   */
-  tools.log.debug('Configuring Mario core')
-
-  /*
-   * Attach the app to our tools object
-   */
-  tools.app = app
-
-  /*
-   * Load the API routes
-   */
-  for (const type in routes) {
-    tools.log.debug(`Loading express routes: ${type}`)
-    routes[type](tools)
-  }
-
-  /*
-   * Add the wildcard route
-   */
-  tools.log.debug(`Loading express wildcard route`)
-  app.get('/*', async (req, res) =>
-    res
-      .set('Content-Type', 'application/json')
-      .status(404)
-      .send({
-        url: req.url,
-        method: req.method,
-        originalUrl: req.originalUrl,
-        prefix: getPreset('MORIO_CORE_PREFIX'),
-      })
-  )
-
-  /*
-   * Let the world know we are ready
-   */
-  tools.log.info(`Morio Core ready - Configuration resolved`)
+  await startMorio()
 
   /*
    * Tell the API to refresh the config
    */
-  await tools.apiClient.get(`${tools.getPreset('MORIO_API_PREFIX')}/reconfigure`)
+  await store.apiClient.get(`${store.getPreset('MORIO_API_PREFIX')}/reconfigure`)
 
-  return tools
+  /*
+   * Let the world know we are ready
+   */
+  log.status('Morio Core ready - Configuration Resolved')
 }

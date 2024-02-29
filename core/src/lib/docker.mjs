@@ -1,5 +1,7 @@
 import { getPreset } from '#config'
 import Docker from 'dockerode'
+// Store
+import { store } from './store.mjs'
 
 /**
  * This is the docker client as provided by dockerode
@@ -11,24 +13,18 @@ export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') 
  *
  * @param {string} name = Name of the service
  * @param {object} containerConfig = The container config to pass to the Docker API
- * @param {object} tools = The tools object
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-export const createDockerContainer = async (name, containerConfig, tools) => {
-  tools.log.debug(`Creating container: ${name}`)
-  const [success, result] = await runDockerApiCommand(
-    'createContainer',
-    containerConfig,
-    tools,
-    true
-  )
+export const createDockerContainer = async (name, containerConfig) => {
+  store.log.debug(`Creating container: ${name}`)
+  const [success, result] = await runDockerApiCommand('createContainer', containerConfig, true)
   if (success) {
-    tools.log.debug(`Service created: ${name}`)
+    store.log.debug(`Service created: ${name}`)
     return result.id
   }
 
   if (result?.json?.message && result.json.message.includes('is already in use by container')) {
-    if (!tools.info.production) {
+    if (!store.info.production) {
       /*
        * Container already exists, but we're not running in production, so let's just recreate it
        */
@@ -39,22 +35,17 @@ export const createDockerContainer = async (name, containerConfig, tools) => {
       /*
        * Now remove it
        */
-      const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true }, tools)
+      const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
       if (removed) {
-        tools.log.debug(`Removed existing container: ${name}`)
-        const [ok, created] = await runDockerApiCommand(
-          'createContainer',
-          containerConfig,
-          tools,
-          true
-        )
+        store.log.debug(`Removed existing container: ${name}`)
+        const [ok, created] = await runDockerApiCommand('createContainer', containerConfig, true)
         if (ok) {
-          tools.log.debug(`Service recreated: ${name}`)
+          store.log.debug(`Service recreated: ${name}`)
           return created.id
-        } else tools.log.warn(`Failed to recreate container ${name}`)
-      } else tools.log.warn(`Failed to remove container ${name} - Not creating new container`)
-    } else tools.log.debug(`Container ${name} is already present.`)
-  } else tools.log.warn(result, `Failed to create container: ${name}`)
+        } else store.log.warn(`Failed to recreate container ${name}`)
+      } else store.log.warn(`Failed to remove container ${name} - Not creating new container`)
+    } else store.log.debug(`Container ${name} is already present.`)
+  } else store.log.warn(result, `Failed to create container: ${name}`)
 
   return false
 }
@@ -63,11 +54,10 @@ export const createDockerContainer = async (name, containerConfig, tools) => {
  * Creates a docker network
  *
  * @param {string} name - The name of the network
- * @param {object} tools - The tools object
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
-export const createDockerNetwork = async (name, tools) => {
-  tools.log.debug(`Creating Docker network: ${name}`)
+export const createDockerNetwork = async (name) => {
+  store.log.debug(`Creating Docker network: ${name}`)
   const [success, result] = await runDockerApiCommand(
     'createNetwork',
     {
@@ -75,11 +65,10 @@ export const createDockerNetwork = async (name, tools) => {
       CheckDuplicate: true,
       EnableIPv6: false,
     },
-    tools,
     true
   )
   if (success) {
-    tools.log.debug(`Network created: ${name}`)
+    store.log.debug(`Network created: ${name}`)
     return result.id
   }
 
@@ -87,8 +76,8 @@ export const createDockerNetwork = async (name, tools) => {
     result?.json?.message &&
     result.json.message.includes(`network with name ${name} already exists`)
   )
-    tools.log.debug(`Network already exists: ${name}`)
-  else tools.log.warn(result, `Failed to create network: ${name}`)
+    store.log.debug(`Network already exists: ${name}`)
+  else store.log.warn(result, `Failed to create network: ${name}`)
 
   return false
 }
@@ -100,10 +89,9 @@ export const createDockerNetwork = async (name, tools) => {
  * object to configure the container as listed in this file
  *
  * @param {object} srvConf - The resolved service configuration
- * @param {object} tools - The tools object
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateContainerConfig = (srvConf, tools) => {
+export const generateContainerConfig = (srvConf) => {
   /*
    * Basic options
    */
@@ -122,7 +110,7 @@ export const generateContainerConfig = (srvConf, tools) => {
     },
   }
   opts.NetworkingConfig.EndpointsConfig[getPreset('MORIO_NETWORK')] = {
-    Aliases: [name, `${name}_${tools.config.core?.node_nr || 1}`],
+    Aliases: [name, `${name}_${store.config.core?.node_nr || 1}`],
   }
 
   /*
@@ -176,19 +164,18 @@ export const generateContainerConfig = (srvConf, tools) => {
  *
  * @param {string} cmd - A docker client method to run
  * @param {object} options - Options to pass to the Docker API
- * @param {object} tools = The tools object
  * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runDockerApiCommand = async (cmd, options = {}, tools, silent = false) => {
+export const runDockerApiCommand = async (cmd, options = {}, silent = false) => {
   let result
   try {
     result = await docker[cmd](options)
   } catch (err) {
     if (!silent) {
-      if (err instanceof Error) tools.log.warn(err.message)
-      else tools.log.warn(err)
+      if (err instanceof Error) store.log.warn(err.message)
+      else store.log.warn(err)
     }
     return [false, err]
   }
@@ -202,13 +189,12 @@ export const runDockerApiCommand = async (cmd, options = {}, tools, silent = fal
  * @param {string} id - The container id
  * @param {string} cmd - A instance method to run
  * @param {object} options - Options to pass to the Docker API
- * @param {object} tools = The tools object
  * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runContainerApiCommand = async (id, cmd, options = {}, tools, silent = false) => {
-  const [ready, container] = await runDockerApiCommand('getContainer', id, tools)
+export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
+  const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return [false, false]
 
   let result
@@ -216,10 +202,10 @@ export const runContainerApiCommand = async (id, cmd, options = {}, tools, silen
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) tools.log.warn(err.message)
+      if (!silent) store.log.warn(err.message)
       return [false, err.message]
     } else {
-      if (!silent) tools.log.warn(err)
+      if (!silent) store.log.warn(err)
       return [false, err]
     }
   }
@@ -233,10 +219,9 @@ export const runContainerApiCommand = async (id, cmd, options = {}, tools, silen
  * @param {string} id - The container id
  * @param {array} Cmd - The command to run inside the container
  * @param {functino} callback - Callback to run when the stream ends
- * @param {object} tools = The tools object
  */
-export const execContainerCommand = async (id, Cmd, callback, tools) => {
-  const [ready, container] = await runDockerApiCommand('getContainer', id, tools)
+export const execContainerCommand = async (id, Cmd, callback) => {
+  const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return false
 
   /*
@@ -260,13 +245,12 @@ export const execContainerCommand = async (id, Cmd, callback, tools) => {
  *
  * @param {string} id - The container id
  * @param {function} callback - Callback to run when the stream produces data
- * @param {object} tools = The tools object
  */
-export const streamContainerLogs = async (id, onData, onEnd, tools) => {
+export const streamContainerLogs = async (id, onData, onEnd) => {
   /*
    * First get the internal container id
    */
-  const [ready, container] = await runDockerApiCommand('getContainer', id, tools)
+  const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return false
 
   /*
@@ -274,7 +258,7 @@ export const streamContainerLogs = async (id, onData, onEnd, tools) => {
    */
   container.attach({ stream: true, stdout: true, stderr: true }, function (err, stream) {
     stream.on('data', (data) => {
-      tools.log.debug(data.toString())
+      store.log.debug(data.toString())
       onData(data)
     })
     stream.on('end', () => onEnd())
@@ -286,13 +270,12 @@ export const streamContainerLogs = async (id, onData, onEnd, tools) => {
  *
  * @param {string} id - The container image id
  * @param {string} cmd - A instance method to run
- * @param {object} tools = The tools object
  * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runContainerImageApiCommand = async (id, cmd, tools, silent = false) => {
-  const [ready, image] = await runDockerApiCommand('getImage', id, tools)
+export const runContainerImageApiCommand = async (id, cmd, silent = false) => {
+  const [ready, image] = await runDockerApiCommand('getImage', id)
   if (!ready) return [false, false]
 
   let result
@@ -300,10 +283,10 @@ export const runContainerImageApiCommand = async (id, cmd, tools, silent = false
     result = await image[cmd]()
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) tools.log.warn(err.message)
+      if (!silent) store.log.warn(err.message)
       return [false, err.message]
     } else {
-      if (!silent) tools.log.warn(err)
+      if (!silent) store.log.warn(err)
       return [false, err]
     }
   }
@@ -341,12 +324,11 @@ export const runDockerCliCommand = async (cmd, ...params) => {
  *
  * @param {string} id - The container image id
  * @param {string} cmd - A instance method to run
- * @param {object} tools = The tools object
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runNetworkApiCommand = async (id, cmd, tools) => {
-  const [ready, network] = await runDockerApiCommand('getNetwork', id, tools)
+export const runNetworkApiCommand = async (id, cmd) => {
+  const [ready, network] = await runDockerApiCommand('getNetwork', id)
   if (!ready) return [false, false]
 
   let result
