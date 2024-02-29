@@ -2,6 +2,7 @@ import { requestSchema as schema, settingsSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
+import { store } from './store.mjs'
 
 /*
  * Validation helpers
@@ -184,10 +185,9 @@ export const validateSettings = async (newSettings) => {
  * Validates a (potential) Morio node
  *
  * @param {string} hostname - The hostname of the node to validate
- * @param {object] tools - The tools object
  * @return {object} valid - The result of the validation
  */
-export const validateNode = async (hostname, tools) => {
+export const validateNode = async (hostname) => {
   const data = {}
 
   /*
@@ -200,12 +200,12 @@ export const validateNode = async (hostname, tools) => {
   /*
    * Generate a random ping challenge
    */
-  tools.info.ping = randomString(8)
+  store.info.ping = randomString(8)
 
   /*
    * Try contacting node over HTTPS, ignore certificate
    */
-  const https = await testUrl(`https://${hostname}/${tools.prefix}/validate/ping`, {
+  const https = await testUrl(`https://${hostname}/${store.prefix}/validate/ping`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })
@@ -213,7 +213,7 @@ export const validateNode = async (hostname, tools) => {
     data.https = true
     if (https.morio_node) data.morio_node = true
     else data.morio_node = false
-    if (https.pong === tools.info.ping) data.this_morio_node = true
+    if (https.pong === store.info.ping) data.this_morio_node = true
     else data.this_morio_node = false
   }
 

@@ -75,7 +75,7 @@ export const generateCsr = async (data) => {
  * @param {object} data - Data to encode in the token
  * @return {object} jwt - The JSON web token
  */
-export const generateJwt = ({ data, tools, options = {}, noDefaults = false, key = false }) => {
+export const generateJwt = ({ data, store, options = {}, noDefaults = false, key = false }) => {
   const dfltOptions = {
     expiresIn: '4h',
     notBefore: 0,
@@ -86,7 +86,7 @@ export const generateJwt = ({ data, tools, options = {}, noDefaults = false, key
 
   return jwt.sign(
     data,
-    key ? key : tools.config.deployment.key_pair.private,
+    key ? key : store.config.deployment.key_pair.private,
     noDefaults ? options : { ...dfltOptions, ...options }
   )
 }

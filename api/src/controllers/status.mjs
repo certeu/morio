@@ -1,4 +1,5 @@
 import { globDir } from '#shared/fs'
+import { store } from '../lib/store.mjs'
 
 /**
  * This status controller handles the Morio status endpoint
@@ -14,13 +15,12 @@ export function Controller() {}
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.status = async (req, res, tools) => {
+Controller.prototype.status = async (req, res) => {
   /*
    * Just get the status from core and pass it
    */
-  const [status, result] = await tools.core.get(`/status`)
+  const [status, result] = await store.core.get(`/status`)
 
   return res.status(status).send(result)
 }
@@ -32,13 +32,12 @@ Controller.prototype.status = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.statusLogs = async (req, res, tools) => {
+Controller.prototype.statusLogs = async (req, res) => {
   /*
    * Just get the status from core and pass it
    */
-  const [status, result] = await tools.core.get(`/status_logs`)
+  const [status, result] = await store.core.get(`/status_logs`)
 
   return res.status(status).send(result)
 }
@@ -50,14 +49,13 @@ Controller.prototype.statusLogs = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.listDownloads = async (req, res, tools) => {
+Controller.prototype.listDownloads = async (req, res) => {
   const list = await globDir('/morio/tmp_static')
 
   if (list)
     return res.send(
-      list.map((file) => file.replace('/morio/tmp_static', tools.prefix + '/downloads'))
+      list.map((file) => file.replace('/morio/tmp_static', store.prefix + '/downloads'))
     )
   else return res.status(500).send({ errors: ['Failed to read file list'] })
 }

@@ -1,4 +1,5 @@
 import { validateSettings } from '#lib/validation'
+import { store } from '../lib/store.mjs'
 
 /**
  * This core controller provides access to morio core
@@ -12,11 +13,10 @@ export function Controller() {}
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerData = async (req, res, tools, path) => {
-  const [status, result] = await tools.core.get(`/docker/${path}`)
+Controller.prototype.getDockerData = async (req, res, path) => {
+  const [status, result] = await store.core.get(`/docker/${path}`)
 
   return res.status(status).send(result)
 }
@@ -26,11 +26,10 @@ Controller.prototype.getDockerData = async (req, res, tools, path) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.getContainerData = async (req, res, tools, path = false) => {
-  const [status, result] = await tools.core.get(
+Controller.prototype.getContainerData = async (req, res, path = false) => {
+  const [status, result] = await store.core.get(
     `/docker/containers/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -42,11 +41,10 @@ Controller.prototype.getContainerData = async (req, res, tools, path = false) =>
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.updateContainer = async (req, res, tools, path) => {
-  const [status, result] = await tools.core.put(`/docker/containers/${req.params.id}/${path}`)
+Controller.prototype.updateContainer = async (req, res, path) => {
+  const [status, result] = await store.core.put(`/docker/containers/${req.params.id}/${path}`)
 
   return res.status(status).send(result)
 }
@@ -56,11 +54,10 @@ Controller.prototype.updateContainer = async (req, res, tools, path) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.createDockerResource = async (req, res, tools, path) => {
-  const [status, result] = await tools.core.post(`/docker/${path}`, req.body)
+Controller.prototype.createDockerResource = async (req, res, path) => {
+  const [status, result] = await store.core.post(`/docker/${path}`, req.body)
 
   return res.status(status).send(result)
 }
@@ -70,10 +67,9 @@ Controller.prototype.createDockerResource = async (req, res, tools, path) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getCaRoot = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/ca/root`)
+Controller.prototype.getCaRoot = async (req, res) => {
+  const [status, result] = await store.core.get(`/ca/root`)
 
   return res.status(status).send(result)
 }
@@ -83,10 +79,9 @@ Controller.prototype.getCaRoot = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.createCertificate = async (req, res, tools) => {
-  const [status, result] = await tools.core.post(`/ca/certificate`, req.body)
+Controller.prototype.createCertificate = async (req, res) => {
+  const [status, result] = await store.core.post(`/ca/certificate`, req.body)
 
   return res.status(status).send(result)
 }
@@ -96,11 +91,10 @@ Controller.prototype.createCertificate = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerImageData = async (req, res, tools, path = false) => {
-  const [status, result] = await tools.core.get(
+Controller.prototype.getDockerImageData = async (req, res, path = false) => {
+  const [status, result] = await store.core.get(
     `/docker/images/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -112,11 +106,10 @@ Controller.prototype.getDockerImageData = async (req, res, tools, path = false) 
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false) => {
-  const [status, result] = await tools.core.get(
+Controller.prototype.getDockerNetworkData = async (req, res, path = false) => {
+  const [status, result] = await store.core.get(
     `/docker/networks/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -128,14 +121,12 @@ Controller.prototype.getDockerNetworkData = async (req, res, tools, path = false
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.setup = async (req, res, tools) => {
+Controller.prototype.setup = async (req, res) => {
   /*
    * This route is only accessible when running in ephemeral mode
    */
-  console.log(tools.info)
-  if (!tools.info?.ephemeral)
+  if (!store.info?.ephemeral)
     return res.status(400).send({
       errors: ['You can only use this endpoint on an ephemeral Morio node'],
     })
@@ -159,7 +150,7 @@ Controller.prototype.setup = async (req, res, tools) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await tools.core.post(`/setup`, req.body)
+  const [status, result] = await store.core.post(`/setup`, req.body)
 
   return res.status(status).send(result)
 }
@@ -169,13 +160,12 @@ Controller.prototype.setup = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.deploy = async (req, res, tools) => {
+Controller.prototype.deploy = async (req, res) => {
   /*
    * This route is not accessible when running in ephemeral mode
    */
-  if (tools.info?.ephemeral)
+  if (store.info?.ephemeral)
     return res.status(400).send({
       errors: ['You can not use this endpoint on an ephemeral Morio node'],
     })
@@ -199,7 +189,7 @@ Controller.prototype.deploy = async (req, res, tools) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await tools.core.post(`/settings`, req.body)
+  const [status, result] = await store.core.post(`/settings`, req.body)
 
   return res.status(status).send(result)
 }
@@ -209,10 +199,9 @@ Controller.prototype.deploy = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.streamServiceLogs = async (req, res, tools) => {
-  return await tools.core.streamGet(`/logs/${req.params.service}`, res)
+Controller.prototype.streamServiceLogs = async (req, res) => {
+  return await store.core.streamGet(`/logs/${req.params.service}`, res)
 }
 
 /**
@@ -220,11 +209,10 @@ Controller.prototype.streamServiceLogs = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
-Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) => {
-  const [status, result] = await tools.core.get(`/pkgs/clients/${type}/defaults`)
+Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
+  const [status, result] = await store.core.get(`/pkgs/clients/${type}/defaults`)
 
   return res.status(status).send(result)
 }
@@ -234,13 +222,12 @@ Controller.prototype.getClientPackageDefaults = async (req, res, tools, type) =>
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getConfig = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/config`)
+Controller.prototype.getConfig = async (req, res) => {
+  const [status, result] = await store.core.get(`/config`)
 
   if (result.deployment) {
-    tools.config = result
+    store.config = result
     return res.status(status).send(result)
   } else return res.status(500).send()
 }
@@ -250,13 +237,12 @@ Controller.prototype.getConfig = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getSettings = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/settings`)
+Controller.prototype.getSettings = async (req, res) => {
+  const [status, result] = await store.core.get(`/settings`)
 
   if (result.deployment) {
-    tools.settings = result
+    store.settings = result
     return res.status(status).send(result)
   } else return res.status(500).send()
 }
@@ -266,13 +252,12 @@ Controller.prototype.getSettings = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.getPresets = async (req, res, tools) => {
-  const [status, result] = await tools.core.get(`/presets`)
+Controller.prototype.getPresets = async (req, res) => {
+  const [status, result] = await store.core.get(`/presets`)
 
   if (status === 200) {
-    tools.presets = result
+    store.presets = result
     return res.status(status).send(result)
   } else return res.status(500).send()
 }
@@ -282,11 +267,9 @@ Controller.prototype.getPresets = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.decrypt = async (req, res, tools) => {
-  console.log('passing decrypt call to core')
-  const [status, result] = await tools.core.post(`/decrypt`, req.body)
+Controller.prototype.decrypt = async (req, res) => {
+  const [status, result] = await store.core.post(`/decrypt`, req.body)
 
   return res.status(status).send(result)
 }
@@ -296,10 +279,9 @@ Controller.prototype.decrypt = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  */
-Controller.prototype.encrypt = async (req, res, tools) => {
-  const [status, result] = await tools.core.post(`/encrypt`, req.body)
+Controller.prototype.encrypt = async (req, res) => {
+  const [status, result] = await store.core.post(`/encrypt`, req.body)
 
   return res.status(status).send(result)
 }
@@ -309,11 +291,10 @@ Controller.prototype.encrypt = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - Variety of tools include logger and config
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
-Controller.prototype.buildClientPackage = async (req, res, tools, type) => {
-  const [status, result] = await tools.core.post(`/pkgs/clients/${type}/build`, req.body)
+Controller.prototype.buildClientPackage = async (req, res, type) => {
+  const [status, result] = await store.core.post(`/pkgs/clients/${type}/build`, req.body)
 
   return res.status(status).send(result)
 }

@@ -1,5 +1,6 @@
 import { validate, validateSettings, validateNode } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
+import { store } from '../lib/store.mjs'
 
 /**
  * This validation controller handles various validation tasks
@@ -19,14 +20,13 @@ export function Controller() {}
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.settings = async (req, res, tools) => {
+Controller.prototype.settings = async (req, res) => {
   /*
    * Run the settings validation helper, which takes proposed
    * and current settings and returns a report object
    */
-  const report = await validateSettings(req.body, tools)
+  const report = await validateSettings(req.body)
 
   return res.send(report).end()
 }
@@ -41,9 +41,8 @@ Controller.prototype.settings = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.node = async (req, res, tools) => {
+Controller.prototype.node = async (req, res) => {
   /*
    * Validate request against schema
    */
@@ -54,7 +53,7 @@ Controller.prototype.node = async (req, res, tools) => {
    * Run the config validation helper, which takes proposed and current
    * config and returns a report object
    */
-  const report = await validateNode(req.body.hostname, tools)
+  const report = await validateNode(req.body.hostname)
 
   return res.send(report).end()
 }
@@ -66,7 +65,6 @@ Controller.prototype.node = async (req, res, tools) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {object} tools - An object holding various tools & config
  */
-Controller.prototype.pong = async (req, res, tools) =>
-  res.send({ pong: tools.info.ping, info: tools.info, morio_node: true })
+Controller.prototype.pong = async (req, res) =>
+  res.send({ pong: store.info.ping, info: store.info, morio_node: true })

@@ -1,34 +1,28 @@
-/*
- * Import the Validation controller
- */
 import { Controller } from '#controllers/validate'
+import { store } from '../lib/store.mjs'
 
-/*
- * Instantiate the controller
- */
 const Validate = new Controller()
 
 /**
- * This method adds the setup routes
+ * This method adds the validation routes to Express
  *
- * @param {object} A tools object from which we destructure the app object
+ * @param {abject} app - The ExpressJS app
  */
-export function routes(tools) {
-  const { app } = tools
-  const PREFIX = tools.getPreset('MORIO_API_PREFIX')
+export function routes(app) {
+  const PREFIX = store.prefix
 
   /*
    * Validates Morio settings
    */
-  app.post(`${PREFIX}/validate/settings`, (req, res) => Validate.settings(req, res, tools))
+  app.post(`${PREFIX}/validate/settings`, Validate.settings)
 
   /*
    * Validates a (potential) Morio node
    */
-  app.post(`${PREFIX}/validate/node`, (req, res) => Validate.node(req, res, tools))
+  app.post(`${PREFIX}/validate/node`, Validate.node)
 
   /*
    * Validates a ping (responding with the ping response code kept in state)
    */
-  app.get(`${PREFIX}/validate/ping`, (req, res) => Validate.pong(req, res, tools))
+  app.get(`${PREFIX}/validate/ping`, Validate.pong)
 }
