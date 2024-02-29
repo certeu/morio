@@ -5,6 +5,8 @@ export const service = {
   name: 'dbuilder',
   hooks: {
     wanted: (tools, onDemandBuild = false) => onDemandBuild,
+    recreateContainer: () => false,
+    restartContainer: () => false,
     /*
      * Generate and write control file for the build
      */

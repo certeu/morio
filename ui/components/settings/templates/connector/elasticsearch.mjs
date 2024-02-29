@@ -99,8 +99,9 @@ export const elasticsearch = {
                 },
                 {
                   schema: Joi.string().required().label('Cloud Authentication'),
+                  inputType: 'secret',
                   label: 'Cloud Authentication',
-                  labelBL: 'The cloud authentication string formatted as username:password',
+                  labelBL: 'The cloud authentication string',
                   key: 'cloud_auth',
                 },
               ]

@@ -6,6 +6,8 @@ import { readFile, writeFile } from '#shared/fs'
 export const service = {
   name: 'proxy',
   hooks: {
+    recreateContainer: () => false,
+    restartContainer: () => false,
     /*
      * Before creating the container, update the entrypoint
      * shell script with our own one.

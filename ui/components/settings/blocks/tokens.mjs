@@ -1,19 +1,27 @@
 import { useState, useContext } from 'react'
-import { PlusIcon, TrashIcon, VariableIcon, WarningIcon, HelpIcon } from 'components/icons.mjs'
+import { PlusIcon, TrashIcon, VariableIcon, WarningIcon, QuestionIcon } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import Joi from 'joi'
 import { FormWrapper } from './form.mjs'
 import { slugify } from 'lib/utils.mjs'
 import { FormControl } from '../../inputs.mjs'
+import SecretSelectDocs from 'mdx/secret-select.mdx'
+import VariableSelectDocs from 'mdx/variable-select.mdx'
 
-const TokenHelp = ({ pushModal }) => (
-  <button className="" onClick={() => pushModal(
-    <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-      <p>fixme</p>
-    </ModalWrapper>
-  )}
-  ><WarningIcon /></button>
+const TokenHelp = ({ secrets, pushModal }) => (
+  <button
+    className=""
+    onClick={() =>
+      pushModal(
+        <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+          {secrets ? <VariableSelectDocs /> : <SecretSelectDocs />}
+        </ModalWrapper>
+      )
+    }
+  >
+    <QuestionIcon className="w-4 h-4 text-warning" />
+  </button>
 )
 
 export const TokenSelect = (props) => {
@@ -35,7 +43,11 @@ export const TokenSelect = (props) => {
   const allTokens = secrets ? mSettings?.tokens?.secrets || {} : mSettings?.tokens?.vars || {}
 
   return (
-    <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} labelTR={<TokenHelp pushModal={pushModal}/>}>
+    <FormControl
+      {...{ label, labelTR, labelBL, labelBR }}
+      forId={id}
+      labelTR={<TokenHelp {...{ pushModal, secrets }} />}
+    >
       <select
         className={`select w-full select-bordered select-success`}
         onChange={(evt) => update(evt.target.value)}

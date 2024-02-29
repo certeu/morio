@@ -3,6 +3,7 @@ import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
 import jwt from 'jsonwebtoken'
+import { Buffer } from 'node:buffer'
 
 /**
  * Generate a certificate signing request (csr)

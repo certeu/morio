@@ -46,6 +46,7 @@ export const docsNavs = {
         t: 'Terminology',
         o: 'Terminology',
         ca: { t: 'CA', o: 'CA' },
+        dry: { t: 'DRY', o: 'DRY' },
         tls: { t: 'TLS', o: 'TLS' },
         x509: { t: 'X.509', o: 'X.509' },
       },

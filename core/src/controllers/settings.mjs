@@ -3,6 +3,7 @@ import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
+import { cloneAsPojo } from '#shared/utils'
 
 /**
  * This settings controller handles settings routes
@@ -67,6 +68,13 @@ Controller.prototype.deploy = async (req, res, tools) => {
   } else tools.log.debug(`Processing request to deploy new settings`)
 
   /*
+   * Keep previous settings so we can check the delta when figuring
+   * out what services need restarting
+   */
+  tools.oldSettings = cloneAsPojo(tools.settings)
+  tools.oldConfig = cloneAsPojo(tools.config)
+
+  /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
@@ -86,12 +94,17 @@ Controller.prototype.deploy = async (req, res, tools) => {
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
+   * Keep safe settings so we return them whenever settings are requested
+   */
+  tools.safeSettings = cloneAsPojo(mSettings)
+
+  /*
    * Don't await deployment, just return
    */
   tools.log.info(`Reconfiguring Morio`)
   reconfigure()
 
-  return res.send({ result: 'success', settings: mSettings })
+  return res.send({ result: 'success', settings: tools.saveSettings })
 }
 
 /**

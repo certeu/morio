@@ -30,7 +30,7 @@ export function routes(tools) {
   /*
    * Load the current (running) settings
    */
-  app.get('/settings', (req, res) => res.send(tools.settings))
+  app.get('/settings', (req, res) => res.send(tools.saveSettings))
 
   /*
    * Load settings by timestamp

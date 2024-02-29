@@ -17,7 +17,6 @@ import {
   createDockerNetwork,
   runDockerApiCommand,
   runContainerApiCommand,
-  shouldContainerBeRecreated,
   generateContainerConfig,
 } from '#lib/docker'
 
@@ -223,51 +222,108 @@ export const ensureMorioService = async (service, running, tools, hookParams) =>
   tools.config.containers[service] = generateContainerConfig(tools.config.services[service], tools)
 
   /*
-   * Figure out whether or not we need to
-   * recreate the container/service
+   * (Re)create the container/service (if needed)
    */
-  let recreate = true
-  // FIXME: This empty array below is here to make it easy to debug services
-  // by adding them. This should be removed when things stabilize
-  if (![].includes(service) && running[service]) {
-    recreate = shouldContainerBeRecreated(
-      tools.config.services[service],
-      tools.config.containers[service],
-      running[service],
-      tools
+  const recreate = await shouldContainerBeRecreated(service, running, tools)
+  let containerId = running[service]?.Id
+  if (recreate) {
+    tools.log.debug(`(Re)creating ${service} container`)
+    /*
+     * Run preCreate lifecycle hook
+     */
+    runHook('preCreate', service, tools, hookParams)
+    /*
+     * Recreate the container
+     */
+    containerId = await createMorioServiceContainer(service, tools)
+  } else tools.log.debug(`Not (re)creating ${service} container`)
+
+  /*
+   * (Re)start the container/service (if needed)
+   */
+  const restart = containerId
+    ? true // Always start if the container was just created
+    : shouldContainerBeRestarted(service, running, tools)
+  if (restart && service !== 'core') {
+    // Don't restart core or you'll have a restartloop
+    /*
+     * Run preStart lifecycle hook
+     */
+    runHook('preStart', service, tools, recreate, hookParams)
+    /*
+     * Restart the container
+     */
+    await restartMorioServiceContainer(service, containerId, tools)
+    /*
+     * Run postStart lifecycle hook
+     */
+    runHook('postStart', service, tools, recreate, hookParams)
+  }
+}
+
+/**
+ * Determines whether a morio service container should be recreated
+ *
+ * @param {string} sercice = The name of the service
+ * @param {object} running = Running containers info from the Docker daemon
+ * @param {object} tools = The tools object
+ * @return {bool} recreate = Whether or not the container should be recreated
+ */
+const shouldContainerBeRecreated = async (service, running, tools) => {
+  /*
+   * Never recreate core from within core as the container will be destroyed
+   * and then core will exit before it can recreate itself
+   */
+  if (service === 'core') return false
+
+  /*
+   * Always recreate if the container is not running
+   */
+  if (!running[service]?.Id) return true
+
+  /*
+   * Always recreate if the container image is different
+   */
+  if (tools.config.containers[service].Image !== running[service]?.Image) {
+    tools.log.debug(
+      `Container image changed from ${running[service].Image} to ${tools.config.containers[service].Image}`
     )
-    if (recreate)
-      tools.log.debug(`${service} container is running, configuration has changed: Recreating`)
-    else
-      tools.log.debug(
-        `${service} container is running, configuration has not changed: Not Recreating`
-      )
-  } else tools.log.debug(`${service} container is not running: Creating`)
+    return true
+  }
 
   /*
-   * Run preCreate lifecycle hook
+   * Always recreate if the service configuration has changed
    */
-  runHook('preCreate', service, tools, recreate, hookParams)
+  //if (JSON.stringify(tools.config.services[service] !== JSON.stringify(tools.
+  /*
+   * After from basic check, defer to the recreateContainer lifecycle hook
+   */
+  const recreate = await runHook('recreateContainer', service, tools, { running })
+
+  return recreate
+}
+
+/**
+ * Determines whether a morio service container should be restarted
+ *
+ * @param {string} sercice = The name of the service
+ * @param {object} running = Running containers info from the Docker daemon
+ * @param {object} tools = The tools object
+ * @return {bool} recreate = Whether or not the container should be recreated
+ */
+const shouldContainerBeRestarted = async (service, running, tools) => {
+  /*
+   * Never restart core from within core as the container will be destroyed
+   * and then core will exit before it can recreate itself
+   */
+  if (service === 'core') return false
 
   /*
-   * Recreate the container if needed
+   * Defer to the restartContainer lifecycle hook
    */
-  const container = recreate ? await createMorioServiceContainer(service, tools) : null
+  const restart = await runHook('restartContainer', service, tools, { running })
 
-  /*
-   * Run preStart lifecycle hook
-   */
-  runHook('preStart', service, tools, recreate, hookParams)
-
-  /*
-   * Restart the container if needed
-   */
-  if (recreate && container) await startMorioServiceContainer(container, service, tools)
-
-  /*
-   * Run postStart lifecycle hook
-   */
-  runHook('postStart', service, tools, recreate, hookParams)
+  return restart
 }
 
 export const runHook = async (hook, service, tools, ...params) => {
@@ -282,7 +338,8 @@ export const runHook = async (hook, service, tools, ...params) => {
     tools.log.warn(err)
   }
 
-  if (!result && hook !== 'wanted') tools.log.warn(`The ${hook} hook failed for service ${service}`)
+  if (!result && !['wanted', 'recreateContainer', 'restartContainer'].includes(hook))
+    tools.log.warn(`The ${hook} hook failed for service ${service}`)
 
   return result
 }
@@ -295,18 +352,18 @@ const stopService = async (service, id, tools) => {
 }
 
 /**
- * Starts a morio service container
+ * (re)Starts a morio service container
  *
- * @param {string} containerId = The container ID
- * @param {string} name = The service name
+ * @param {string} service = The service name
+ * @param {object} running = The running containers from the Docker daemon
  * @param {object} tools = The tools object
  * @return {bool} ok = Whether or not the service was started
  */
-export const startMorioServiceContainer = async (containerId, name, tools) => {
-  const [ok, started] = await runContainerApiCommand(containerId, 'start', {}, tools)
+export const restartMorioServiceContainer = async (service, containerId, tools) => {
+  const [ok, err] = await runContainerApiCommand(containerId, 'restart', {}, tools)
 
-  if (ok) tools.log.info(`Service started: ${name}`)
-  else tools.log.warn(started, `Failed to start ${name}`)
+  if (ok) tools.log.info(`Service started: ${service}`)
+  else tools.log.warn(err, `Failed to start ${service}`)
 
   return ok
 }

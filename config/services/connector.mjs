@@ -65,7 +65,7 @@ export const resolveServiceConfiguration = (tools) => ({
      */
     config: {
       reload: {
-        automatic: false,
+        automatic: true,
       },
     },
     /*

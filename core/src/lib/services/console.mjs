@@ -7,12 +7,9 @@ export const service = {
   name: 'console',
   hooks: {
     wanted: (tools) => (tools.info.ephemeral ? false : true),
-    preStart: async (tools, recreated) => {
-      /*
-       * This does not need to run unless the service is recreated
-       */
-      if (!recreated) return true
-
+    recreateContainer: () => false,
+    restartContainer: () => false,
+    preCreate: async (tools) => {
       /*
        * We'll check if there's a config file on disk
        * If so, the console has already been initialized

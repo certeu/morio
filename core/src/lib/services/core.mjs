@@ -24,6 +24,8 @@ import mustache from 'mustache'
 export const service = {
   name: 'core',
   hooks: {
+    recreateContainer: () => false,
+    restartContainer: () => false,
     /*
      * This runs only when core is cold-started.
      */
@@ -101,8 +103,10 @@ export const service = {
       tools.info.ephemeral = false
       tools.info.current_settings = timestamp
       tools.config = cloneAsPojo(settings)
-      // Take care of encrypted settings
-      ;(tools.settings = templateSettings(settings, tools)), (tools.keys = keys)
+      // Take care of encrypted settings and store the save ones
+      tools.saveSettings = cloneAsPojo(settings)
+      tools.settings = templateSettings(settings, tools)
+      tools.keys = keys
 
       /*
        * Only one node makes this easy

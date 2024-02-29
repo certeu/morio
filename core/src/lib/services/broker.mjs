@@ -11,6 +11,8 @@ export const service = {
   name: 'broker',
   hooks: {
     wanted: (tools) => (tools.info.ephemeral ? false : true),
+    recreateContainer: () => false,
+    restartContainer: () => false,
     preStart: async (tools) => {
       // Don't repeat yourself
       const brokerConfigFile = `/etc/morio/broker/redpanda.yaml`

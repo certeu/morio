@@ -11,6 +11,8 @@ export const service = {
   name: 'ca',
   hooks: {
     wanted: (tools) => (tools.info.ephemeral ? false : true),
+    recreateContainer: () => false,
+    restartContainer: () => false,
     /*
      * We need to bootstrap the CA or it will generate a random root certificate
      * and secret, and even output the secret in the logs.

@@ -60,6 +60,23 @@ export const cp = async (src, dst) => {
 }
 
 /**
+ * Removes a file
+ *
+ * @param {string} file - Path to the file to remove
+ * @param {object} options - Options for NodeJS' rm method
+ *
+ */
+export const rm = async (file, options={ force: true }) => {
+  try {
+    await fs.promises.rm(path.resolve(root, file), options)
+  } catch (err) {
+    return false
+  }
+
+  return true
+}
+
+/**
  * Reads a folder from disk with an optional glob pattern
  *
  * @param {string} (relative) path to the file to read

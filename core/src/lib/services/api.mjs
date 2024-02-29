@@ -6,6 +6,8 @@ import { addTraefikTlsConfiguration } from './proxy.mjs'
 export const service = {
   name: 'api',
   hooks: {
+    recreateContainer: () => false,
+    restartContainer: () => false,
     preCreate: async (tools) => {
       // Configure TLS
       addTraefikTlsConfiguration(tools.config.services.api, tools)

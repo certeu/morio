@@ -48,6 +48,7 @@ const nextConfig = {
     config.resolve.alias.lib = path.resolve(`./lib`)
     config.resolve.alias.pages = path.resolve(`./pages`)
     config.resolve.alias.ui = path.resolve('./')
+    config.resolve.alias.mdx = path.resolve('./mdx')
     config.resolve.alias.prebuild = path.resolve(`./prebuild`)
 
     /*

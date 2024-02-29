@@ -370,7 +370,6 @@ const AddPipeline = (props) => {
     props.popModal()
   }
   const localUpdate = (key, val) => {
-    console.log('locally setting', key, 'to', val)
     const newSettings = { ...pipelineSettings }
     set(newSettings, key, val)
     setPipelineSettings(newSettings)
@@ -437,6 +436,16 @@ const AddPipeline = (props) => {
       <PipelineHeader id={props.id} />
       <FormWrapper {...props} form={form} update={localUpdate} />
       <div className="mt-2 flex flex-row gap-2 items-center justify-center">
+        {props.edit ? (
+          <button
+            className={`btn btn-outline ${
+              pipelineSettings.disabled ? 'btn-success' : 'btn-warning'
+            }`}
+            onClick={() => localUpdate('disabled', pipelineSettings.disabled ? false : true)}
+          >
+            {pipelineSettings.disabled ? 'Enable Pipeline' : 'Disable Pipeline'}
+          </button>
+        ) : null}
         <button className="btn btn-primary px-12" onClick={create} disabled={!valid}>
           {props.edit ? 'Update' : 'Create'} Pipeline
         </button>
@@ -450,37 +459,51 @@ const AddPipeline = (props) => {
   )
 }
 
-const ShowPipeline = (props) => (
-  <button
-    className="max-w-4xl w-full grid grid-cols-3 gap-2 items-center border rounded-lg hover:bg-secondary hover:bg-opacity-20 mb-2"
-    onClick={() =>
-      props.pushModal(
-        <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-          <AddPipeline
-            {...props}
-            settings={{ ...props.data.connector.pipelines[props.id], id: props.id }}
-            edit
-          />
-        </ModalWrapper>
-      )
-    }
-  >
-    <div className="bg-secondary p-2 rounded-l-lg font-bold text-right bg-opacity-50">
-      {props.id}
-    </div>
-    <div className="col-span-2 flex flex-row items-center justify-start">
-      <b>
-        <em>{props.data.connector.pipelines[props.id].input.id}</em>
-      </b>
-      <div className="flex flex-row items-center justify-center">
-        <RightIcon className="h-4 w-4 text-success" stroke={2} />
-        <RightIcon className="h-4 w-4 -ml-3 text-success" stroke={2} />
-        <RightIcon className="h-4 w-4 -ml-3 text-success" stroke={2} />
+const ShowPipeline = (props) => {
+  const pipeline = props.data.connector.pipelines[props.id]
+
+  return (
+    <button
+      className={`max-w-4xl w-full grid grid-cols-3 gap-2 items-center
+         border rounded-lg mb-2 hover:bg-secondary hover:bg-opacity-20
+        ${pipeline.disabled ? 'opacity-50' : ''}`}
+      onClick={() =>
+        props.pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <AddPipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+          </ModalWrapper>
+        )
+      }
+    >
+      <div
+        className={`p-2 rounded-l-lg font-bold text-right bg-opacity-50
+          ${pipeline.disabled ? 'bg-neutral' : 'bg-success'}`}
+      >
+        {props.id}
       </div>
-      <b>{props.data.connector.pipelines[props.id].output.id}</b>
-    </div>
-  </button>
-)
+      <div className="col-span-2 flex flex-row items-center justify-start">
+        <b>
+          <em>{pipeline.input.id}</em>
+        </b>
+        <div className="flex flex-row items-center justify-center">
+          <RightIcon
+            className={`h-4 w-4 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+            stroke={2}
+          />
+          <RightIcon
+            className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+            stroke={2}
+          />
+          <RightIcon
+            className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+            stroke={2}
+          />
+        </div>
+        <b>{pipeline.output.id}</b>
+      </div>
+    </button>
+  )
+}
 
 export const ConnectorPipelines = (props) => {
   const { pushModal, popModal } = useContext(ModalContext)
@@ -489,7 +512,7 @@ export const ConnectorPipelines = (props) => {
     <>
       <h3>{props.viewConfig.title ? props.viewConfig.title : props.viewConfig.label}</h3>
       {Object.keys(props.data?.connector?.pipelines || {}).map((id) => {
-        return <ShowPipeline key={id} {...props} id={id} {... {pushModal, popModal }} />
+        return <ShowPipeline key={id} {...props} id={id} {...{ pushModal, popModal }} />
       })}
       <button
         className="btn btn-primary"

@@ -3,5 +3,8 @@
  */
 export const service = {
   name: 'ui',
-  hooks: {},
+  hooks: {
+    recreateContainer: () => false,
+    restartContainer: () => false,
+  },
 }
