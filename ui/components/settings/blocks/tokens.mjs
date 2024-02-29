@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import { PlusIcon, TrashIcon, VariableIcon, WarningIcon } from 'components/icons.mjs'
+import { PlusIcon, TrashIcon, VariableIcon, WarningIcon, HelpIcon } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import Joi from 'joi'
@@ -7,8 +7,18 @@ import { FormWrapper } from './form.mjs'
 import { slugify } from 'lib/utils.mjs'
 import { FormControl } from '../../inputs.mjs'
 
+const TokenHelp = ({ pushModal }) => (
+  <button className="" onClick={() => pushModal(
+    <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+      <p>fixme</p>
+    </ModalWrapper>
+  )}
+  ><WarningIcon /></button>
+)
+
 export const TokenSelect = (props) => {
-  console.log(props)
+  const { pushModal, modalContent } = useContext(ModalContext)
+
   const {
     update,
     secrets = true,
@@ -25,7 +35,7 @@ export const TokenSelect = (props) => {
   const allTokens = secrets ? mSettings?.tokens?.secrets || {} : mSettings?.tokens?.vars || {}
 
   return (
-    <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id}>
+    <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} labelTR={<TokenHelp pushModal={pushModal}/>}>
       <select
         className={`select w-full select-bordered select-success`}
         onChange={(evt) => update(evt.target.value)}
@@ -138,16 +148,16 @@ export const TokenInput = ({ token, setToken }) => {
   )
 }
 
-const AddVariable = ({ update, data, current = {}, edit, secrets, setModal }) => {
+const AddVariable = ({ update, data, current = {}, edit, secrets, pushModal, popModal }) => {
   const [token, setToken] = useState(current)
 
   const create = () => {
     update(`tokens.${secrets ? 'secrets' : 'vars'}.${token.key}`, token.val, data)
-    setModal(false)
+    popModal()
   }
   const remove = (id) => {
     update(`tokens.${secrets ? 'secrets' : 'vars'}.${token.key}`, 'MORIO_UNSET', data)
-    setModal(false)
+    popModal()
   }
 
   return (
@@ -175,13 +185,13 @@ const AddVariable = ({ update, data, current = {}, edit, secrets, setModal }) =>
   )
 }
 
-const ShowVariable = ({ setModal, token, update, data, edit, secrets }) => (
+const ShowVariable = ({ pushModal, token, update, data, edit, secrets }) => (
   <button
     className="btn btn-outline btn-primary btn-sm"
     onClick={() =>
-      setModal(
+      pushModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-          <AddVariable {...{ setModal, update, data, secrets }} edit={true} current={token} />
+          <AddVariable {...{ pushModal, update, data, secrets }} edit={true} current={token} />
         </ModalWrapper>
       )
     }
@@ -191,7 +201,7 @@ const ShowVariable = ({ setModal, token, update, data, edit, secrets }) => (
 )
 
 export const Tokens = ({ update, data, secrets = false }) => {
-  const { setModal } = useContext(ModalContext)
+  const { pushModal, popModal } = useContext(ModalContext)
 
   const allTokens = secrets ? data?.tokens?.secrets || {} : data?.tokens?.vars || {}
 
@@ -203,7 +213,7 @@ export const Tokens = ({ update, data, secrets = false }) => {
           .map((key) => {
             return (
               <ShowVariable
-                {...{ key, setModal, data, secrets, update }}
+                {...{ key, pushModal, data, secrets, update }}
                 token={{ key, val: allTokens[key] }}
               />
             )
@@ -212,9 +222,9 @@ export const Tokens = ({ update, data, secrets = false }) => {
       <button
         className="btn btn-primary"
         onClick={() =>
-          setModal(
+          pushModal(
             <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-              <AddVariable {...{ setModal, data, update, secrets }} edit={false} />
+              <AddVariable {...{ popModal, pushModal, data, update, secrets }} edit={false} />
             </ModalWrapper>
           )
         }

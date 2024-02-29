@@ -64,7 +64,7 @@ export const PageWrapper = ({
         </main>
         {footer && <Footer />}
       </div>
-      {typeof modalContent === 'function' ? modalContent() : modalContent}
+      {modalContent}
     </div>
   )
 }

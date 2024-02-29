@@ -285,7 +285,7 @@ const DisplayDockerContainers = ({ data }) => {
   /*
    * Modal context
    */
-  const { setModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
 
   /*
    * If there's no containers, let the user know because if not they might
@@ -326,7 +326,7 @@ const DisplayDockerContainers = ({ data }) => {
               <td className="px-4 py-2">
                 <button
                   onClick={() =>
-                    setModal(
+                    pushModal(
                       <ModalWrapper>
                         <Highlight language="json" js={container} />
                       </ModalWrapper>

@@ -112,7 +112,7 @@ const UpdateXput = (props) => {
     ? false
     : () => {
         props.update(`connector.inputs.${props.id}`, 'MORIO_UNSET')
-        props.setModal(false)
+        props.popModal()
       }
 
   if (formProps)
@@ -197,7 +197,7 @@ const XputButton = ({
 const BlockItems = (props) => {
   const { blocks, type, xputs, data } = props
   const [open, setOpen] = useState(false)
-  const { setModal } = useContext(ModalContext)
+  const { pushModal, popModal } = useContext(ModalContext)
 
   const allXputs = { ...blocks, ...(data?.connector?.[type + 's'] || {}) }
 
@@ -219,11 +219,11 @@ const BlockItems = (props) => {
                   {...{ id, type, pipelines }}
                   {...allXputs[id]}
                   onClick={() =>
-                    setModal(
+                    pushModal(
                       <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
                         <UpdateXput
                           {...props}
-                          {...{ type, id, setModal, pipelines }}
+                          {...{ type, id, pushModal, popModal, pipelines }}
                           {...allXputs[id]}
                         />
                       </ModalWrapper>
@@ -244,9 +244,9 @@ const BlockItems = (props) => {
               {...{ id, type }}
               {...blocks[id]}
               onClick={() =>
-                setModal(
+                pushModal(
                   <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                    <AddXput {...props} {...{ type, id, setModal }} {...blocks[id]} />
+                    <AddXput {...props} {...{ type, id, pushModal, popModal }} {...blocks[id]} />
                   </ModalWrapper>
                 )
               }
@@ -363,11 +363,11 @@ const AddPipeline = (props) => {
     const settings = { ...pipelineSettings }
     delete settings.id
     props.update(`connector.pipelines.${pipelineSettings.id}`, settings, props.data)
-    props.setModal(false)
+    props.popModal()
   }
   const remove = (id) => {
     props.update(`connector.pipelines.${id}`, 'MORIO_UNSET', props.data)
-    props.setModal(false)
+    props.popModal()
   }
   const localUpdate = (key, val) => {
     console.log('locally setting', key, 'to', val)
@@ -454,7 +454,7 @@ const ShowPipeline = (props) => (
   <button
     className="max-w-4xl w-full grid grid-cols-3 gap-2 items-center border rounded-lg hover:bg-secondary hover:bg-opacity-20 mb-2"
     onClick={() =>
-      props.setModal(
+      props.pushModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
           <AddPipeline
             {...props}
@@ -483,20 +483,20 @@ const ShowPipeline = (props) => (
 )
 
 export const ConnectorPipelines = (props) => {
-  const { setModal } = useContext(ModalContext)
+  const { pushModal, popModal } = useContext(ModalContext)
 
   return (
     <>
       <h3>{props.viewConfig.title ? props.viewConfig.title : props.viewConfig.label}</h3>
       {Object.keys(props.data?.connector?.pipelines || {}).map((id) => {
-        return <ShowPipeline key={id} {...props} id={id} setModal={setModal} />
+        return <ShowPipeline key={id} {...props} id={id} {... {pushModal, popModal }} />
       })}
       <button
         className="btn btn-primary"
         onClick={() =>
-          setModal(
+          pushModal(
             <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-              <AddPipeline {...props} setModal={setModal} edit={false} />
+              <AddPipeline {...props} pushModal={pushModal} popModal={popModal} edit={false} />
             </ModalWrapper>
           )
         }

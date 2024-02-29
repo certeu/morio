@@ -18,7 +18,7 @@ const DynamicSetupWizard = dynamic(
 
 const ConfigWizardPage = (props) => {
   const { theme, toggleTheme } = useTheme()
-  const { setModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
   return (
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
       <div className="px-4">
@@ -42,7 +42,7 @@ const ConfigWizardPage = (props) => {
             <p className="text-sm text-center">
               <button
                 onClick={() =>
-                  setModal(
+                  pushModal(
                     <ModalWrapper>
                       <EphemeralInfo />
                     </ModalWrapper>

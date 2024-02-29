@@ -22,14 +22,16 @@ export const ModalWrapper = ({
   fullWidth = false,
   wClass = '',
 }) => {
-  const { clearModal } = useContext(ModalContext)
+  const { popModal, stackCount } = useContext(ModalContext)
   const [animate, setAnimate] = useState('in')
 
   const close = (evt) => {
     // Only process the first event
     if (evt?.event) evt.event.stopPropagation()
-    setAnimate('out')
-    window.setTimeout(clearModal, 150)
+    if (stackCount < 2) {
+      setAnimate('out')
+      window.setTimeout(popModal, 150)
+    } else popModal()
   }
 
   useEffect(() => {
@@ -52,6 +54,7 @@ export const ModalWrapper = ({
         flex flex-${flex} justify-${justify} items-${items} lg:p-12`}
       onClick={close}
     >
+
       {bare ? (
         children
       ) : (

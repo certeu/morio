@@ -233,7 +233,7 @@ export const FormWrapper = (props) => {
   const process =
     typeof local === 'function'
       ? () => {
-          if (props.setModal) props.setModal(false)
+          if (props.popModal) props.popModal()
           props.update(
             local({ ...props.defaults, ...data }),
             typeof props.transform === 'function'
@@ -249,7 +249,7 @@ export const FormWrapper = (props) => {
    */
   const applyLocal = () => {
     props.update(props.local(data), data)
-    props.setModal(false)
+    props.popModal()
   }
 
   return (
@@ -263,7 +263,7 @@ export const FormWrapper = (props) => {
       {props.readOnly ? (
         <button
           className="btn btn-primary btn-outline w-full"
-          onClick={() => props.setModal(false)}
+          onClick={() => props.popModal()}
         >
           Close
         </button>
@@ -274,7 +274,8 @@ export const FormWrapper = (props) => {
           <LocalButtons
             local={props.local}
             action={props.action}
-            setModal={props.setModal}
+            popModal={props.popModal}
+            pushModal={props.pushModal}
             applyLocal={applyLocal}
             removeLocal={props.removeLocal}
           />
@@ -284,7 +285,7 @@ export const FormWrapper = (props) => {
   )
 }
 
-const LocalButtons = ({ local, action, setModal, applyLocal, removeLocal }) => {
+const LocalButtons = ({ local, action, pushModal, popModal, applyLocal, removeLocal }) => {
   if (!local) return null
 
   return action === 'create' ? (
@@ -292,7 +293,7 @@ const LocalButtons = ({ local, action, setModal, applyLocal, removeLocal }) => {
       <button className="btn btn-primary w-full col-span-7" onClick={applyLocal}>
         Create
       </button>
-      <button className="btn btn-neutral btn-outline w-full" onClick={() => setModal(false)}>
+      <button className="btn btn-neutral btn-outline w-full" onClick={() => popModal()}>
         <CloseIcon stroke={3} />
       </button>
     </div>
@@ -308,7 +309,7 @@ const LocalButtons = ({ local, action, setModal, applyLocal, removeLocal }) => {
       <button className="btn btn-primary w-full col-span-6" onClick={applyLocal}>
         Update
       </button>
-      <button className="btn btn-neutral btn-outline w-full" onClick={() => setModal(false)}>
+      <button className="btn btn-neutral btn-outline w-full" onClick={() => popModal()}>
         <CloseIcon stroke={3} />
       </button>
     </div>

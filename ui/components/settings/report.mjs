@@ -1,8 +1,4 @@
-import { useContext } from 'react'
-// Context
-import { ModalContext } from 'context/modal.mjs'
 // Components
-import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { OkIcon, WarningIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -50,10 +46,8 @@ export const SettingsReport = ({ report }) => (
 /**
  * A React compnent to display a deployment (request) report
  */
-export const DeploymentReport = ({ result }) => {
-  const { setModal } = useContext(ModalContext)
-
-  return result.result === 'success' ? (
+export const DeploymentReport = ({ result }) => result.result === 'success'
+  ? (
     <>
       <Box color="success">
         <div className="flex flex-row gap-4 items-center w-full">
@@ -79,7 +73,6 @@ export const DeploymentReport = ({ result }) => {
       <pre>{JSON.stringify(result, null, 2)}</pre>
     </>
   )
-}
 
 /**
  * A React compnent to display messages from a settings report

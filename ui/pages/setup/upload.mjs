@@ -30,7 +30,7 @@ const SettingsUploadPage = (props) => {
   const [report, setReport] = useState(false)
   const [deployResult, setDeployResult] = useState(false)
 
-  const { setModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
   const { api } = useApi()
   const { theme, toggleTheme } = useTheme()
@@ -163,7 +163,7 @@ const SettingsUploadPage = (props) => {
             <p className="text-sm text-center">
               <button
                 onClick={() =>
-                  setModal(
+                  pushModal(
                     <ModalWrapper>
                       <EphemeralInfo />
                     </ModalWrapper>

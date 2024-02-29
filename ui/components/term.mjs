@@ -34,14 +34,14 @@ const TermInfo = ({ term }) => {
  * If not, it will merely return the em tag.
  */
 export const Term = ({ children }) => {
-  const { setModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
   const term = asTerm(children)
 
   return term ? (
     <button
       className="italic underline decoration-warning decoration-dotted decoration-2 bg-warning bg-opacity-20 px-1 hover:bg-transparent hover:decoration-solid hover:cursor-help"
       onClick={() =>
-        setModal(
+        pushModal(
           <ModalWrapper>
             <TermInfo term={term} />
           </ModalWrapper>

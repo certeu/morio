@@ -54,7 +54,7 @@ export const EphemeralInfo = () => (
 
 const Setup = ({ pageProps }) => {
   const { theme, toggleTheme } = useTheme()
-  const { setModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
@@ -86,7 +86,7 @@ const Setup = ({ pageProps }) => {
             <p className="text-sm text-center">
               <button
                 onClick={() =>
-                  setModal(
+                  pushModal(
                     <ModalWrapper>
                       <EphemeralInfo />
                     </ModalWrapper>
