@@ -1,6 +1,4 @@
 import Joi from 'joi'
-import { Popout } from 'components/popout.mjs'
-import { slugify } from 'lib/utils.mjs'
 
 /*
  * Metadata

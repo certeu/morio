@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { Popout } from 'components/popout.mjs'
 import { slugify } from 'lib/utils.mjs'
 // Connectors
 import { elasticsearch } from './elasticsearch.mjs'
@@ -11,7 +10,7 @@ import { sink } from './sink.mjs'
 /*
  * Reuse this for the input ID
  */
-export const xputMeta = (type, name) => [
+export const xputMeta = (type) => [
   {
     schema: Joi.string().required().label('ID'),
     label: 'ID',

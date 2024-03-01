@@ -1,8 +1,5 @@
 // Components
 import { OkIcon, WarningIcon } from 'components/icons.mjs'
-import { PageLink } from 'components/link.mjs'
-import { Highlight } from 'components/highlight.mjs'
-import { Popout } from 'components/popout.mjs'
 import { Box } from 'components/box.mjs'
 
 /**

@@ -1,6 +1,3 @@
-import Joi from 'joi'
-import { slugify } from 'lib/utils.mjs'
-
 /*
  * Tokens
  *
@@ -24,7 +21,7 @@ export const tokens = () => ({
       <h4>Variables</h4>
       <p>Variables help keep your settings DRY.</p>
       <p>
-        When you find yourself often repeating the same data in your settings, there's no need to
+        When you find yourself often repeating the same data in your settings, there is no need to
         repeat yourself. Instead, create a variable, and use that instead.
       </p>
 

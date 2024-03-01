@@ -109,7 +109,7 @@ export const deployment = (context, toggleValidate) => {
                       schema: Joi.string().hostname().required().label('FQDN'),
                     }))
                   : [
-                      <Popout tip>
+                      <Popout tip key={1}>
                         <h5>You need to choose a cluster size first</h5>
                         <p>
                           Once you have chosen a cluster size, you can enter the node names here.
@@ -149,7 +149,7 @@ export const deployment = (context, toggleValidate) => {
                 '### __Validate__: All systems go?',
                 'Before we deploy Morio using these settings, we will run a series of validation tests.',
                 'No changes will be made at this time. Click below to start the tests.',
-                <p className="text-center">
+                <p className="text-center" key={1}>
                   <button className="btn btn-primary btn-lg px-12 mt-4" onClick={toggleValidate}>
                     Validate Morio Settings
                   </button>

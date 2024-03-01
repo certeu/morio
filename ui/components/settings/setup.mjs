@@ -1,40 +1,22 @@
 // Dependencies
-import get from 'lodash.get'
-import set from 'lodash.set'
-import { atomWithLocation } from 'jotai-location'
 import { validateSettings } from 'lib/utils.mjs'
 // Deployment template
 import { deployment } from './templates/deployment.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useContext, useEffect, useCallback } from 'react'
+import { useState, useContext } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAtom } from 'jotai'
 // Components
-import { Block } from './blocks/index.mjs'
-import { Yaml } from 'components/yaml.mjs'
 import { SettingsReport, DeploymentReport } from './report.mjs'
-import { RightIcon } from 'components/icons.mjs'
-import { Spinner } from 'components/animations.mjs'
-import { ValidationErrors } from 'components/inputs.mjs'
 import { FormBlock } from './blocks/form.mjs'
-import { Progress, LogoSpinner } from 'components/animations.mjs'
+import { Spinner, LogoSpinner } from 'components/animations.mjs'
 
 /*
  * Displays configuration validation
  */
-const ShowConfigurationValidation = ({
-  api,
-  mSettings,
-  deploy,
-  validationReport,
-  setValidationReport,
-  validateSettings,
-  setLoadingStatus,
-  toggleValidate,
-}) => (
+const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate }) => (
   <>
     {validationReport ? (
       <>
@@ -69,8 +51,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   /*
    * React state
    */
-  const [mSettings, update, setMSettings] = useStateObject(preload) // Holds the settings object this wizard builds
-  const [valid, setValid] = useState(false) // Whether or not the current settings are valid
+  const [mSettings, update] = useStateObject(preload) // Holds the settings object this wizard builds
   const [validationReport, setValidationReport] = useState(false) // Holds the validation report
   const [deployResult, setDeployResult] = useState(false)
   const [deploymentOngoing, setDeploymentOngoing] = useState(false)

@@ -8,7 +8,6 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ClosedLockIcon, LeftIcon } from 'components/icons.mjs'
 import { TextInput, ToggleInput } from 'components/inputs.mjs'
-import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
 
 /**

@@ -1,4 +1,3 @@
-import { MorioIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import get from 'lodash.get'
 
@@ -36,7 +35,7 @@ const ChildPages = ({ pages = false, links, level, levels = 1, href }) =>
   pages ? (
     <ul className="list list-inside list-disc ml-2">
       {Object.entries(pages)
-        .filter(([key, page]) => !['t', 'o'].includes(key))
+        .filter(([key]) => !['t', 'o'].includes(key))
         .map(([key, page]) => (
           <li key={key}>
             <PageLink href={`${href}/${key}`}>

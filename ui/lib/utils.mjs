@@ -226,5 +226,5 @@ export const slugify = (input) =>
     strip: true,
     locale: 'en',
     trim: false,
-    remove: /[*+~#\^=\`.(),;\/\?\\\[\]\{\}|'"!:@]/g,
+    remove: /[*+~#^=`.(),;/?\\[]{}|'"!:@]/g,
   }).trim()

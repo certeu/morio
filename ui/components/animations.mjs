@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { logoPath } from 'components/icons.mjs'
-import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 
 export const Spinner = ({ className = 'h-6 w-6 animate-spin' }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -46,6 +45,7 @@ export const CountdownCircle = ({ className = '', duration = 1, stroke = 3 }) =>
 
   useEffect(() => {
     setStart(start + 1)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [duration])
 
   const style = {

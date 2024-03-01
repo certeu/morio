@@ -44,14 +44,14 @@ export const morio = {
     }),
   },
   remote: {
-    in: (context) => ({
+    in: () => ({
       title: 'Remote Morio',
       about: 'Reads data from a different Morio deployment',
       desc: 'Use this to read data from a remote Morio system',
       local: (data) => `connector.inputs.${data.id}`,
       form: xputMeta('input', 'morio_remote'),
     }),
-    out: (context) => ({
+    out: () => ({
       title: 'Remote Morio',
       about: 'Writes data to a remote Morio deployment',
       desc: 'Use this to write data to a different Morio system',

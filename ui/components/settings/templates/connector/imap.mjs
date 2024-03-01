@@ -5,7 +5,7 @@ import { xputMeta } from './index.mjs'
  * IMAP input & output Connector templates
  */
 export const imap = {
-  in: (context) => ({
+  in: () => ({
     title: 'IMAP',
     about: 'Reads mail from an IMAP server',
     desc: 'Use this to read incoming email from a mail server over IMAP',

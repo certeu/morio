@@ -36,6 +36,7 @@ const nextConfig = {
   pageExtensions: ['mjs', 'mdx'],
   reactStrictMode: true,
   output: 'standalone',
+  distDir: 'dist',
   trailingSlash: true,
   webpack: (config, options) => {
     /*

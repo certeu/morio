@@ -29,7 +29,6 @@ const loadStatusLogs = async (api, setLogs) => {
  */
 export const StatusLogs = ({ lastLineSetter = false }) => {
   const [logs, _setLogs] = useState(false)
-  const [timer, setTimer] = useState(false)
   const [delay, setDelay] = useState(1)
   const { api } = useApi()
 
@@ -41,8 +40,8 @@ export const StatusLogs = ({ lastLineSetter = false }) => {
   }
 
   useEffect(() => {
-    setTimeout(async () => {
-      const loaded = await loadStatusLogs(api, setLogs)
+    const timer = setTimeout(async () => {
+      await loadStatusLogs(api, setLogs)
       /*
        * Start with fast refreshes, increase backoff by 25% until we reach 5 seconds
        * Keeping the delay stable at 5 will prevent this effect from firing however.
@@ -53,6 +52,9 @@ export const StatusLogs = ({ lastLineSetter = false }) => {
         setDelay(newDelay > 5 ? 5 : newDelay)
       } else setDelay(4.999)
     }, delay * 1000)
+
+    return () => clearTimeout(timer)
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [delay])
 
   return logs ? (

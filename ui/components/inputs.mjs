@@ -144,7 +144,7 @@ export const ToggleInput = ({
       disabled={disabled}
       type="checkbox"
       value={current}
-      onChange={(evt) => update(list.indexOf(current) === 0 ? list[1] : list[0])}
+      onChange={() => update(list.indexOf(current) === 0 ? list[1] : list[0])}
       className="toggle my-3 toggle-primary"
       checked={list.indexOf(current) === 0 ? true : false}
     />

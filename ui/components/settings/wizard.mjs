@@ -17,13 +17,7 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport } from './report.mjs'
-import {
-  RightIcon,
-  SettingsIcon,
-  QuestionIcon,
-  OkIcon,
-  CheckCircleIcon,
-} from 'components/icons.mjs'
+import { SettingsIcon, OkIcon, CheckCircleIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
@@ -173,7 +167,7 @@ const ShowSettingsValidation = ({
 /**
  * Displays settings preview (or a button to show it)
  */
-const ShowSettingsPreview = ({ preview, setPreview, mSettings }) =>
+const ShowSettingsPreview = ({ preview, mSettings }) =>
   preview ? (
     <div className="w-full mt-8">
       <h3>Settings Preview</h3>
@@ -185,11 +179,6 @@ const ShowSettingsPreview = ({ preview, setPreview, mSettings }) =>
  * Keeps track of the view in the URL location
  */
 export const viewInLocation = atomWithLocation('deployment/node_count')
-
-/*
- * Start wizard with this view
- */
-const startView = 'start'
 
 const NotCool = () => (
   <div className="flex flex-row gap-8 justify-start">
@@ -253,21 +242,11 @@ export const SettingsWizard = (props) => {
     <PleaseWait />
   )
 }
-//{template.children?.[section]?.title
-//  ? template.children[section]?.title
-//  : template.title
-//    ? template.title
-//    : doValidate
-//      ? 'Validate Settings'
-//      : 'Update Settings'}
 
 const WizardWrapper = ({
   title,
   Icon = SettingsIcon,
-  section,
   sectionPath,
-  doValidate,
-  template,
   loadView,
   mSettings,
   preview,
@@ -334,7 +313,6 @@ export const PrimedSettingsWizard = (props) => {
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview
-  const [deployResult, setDeployResult] = useState(false)
   const [showDelta, setShowDelta] = useState(false)
   const [deployOngoing, setDeployOngoing] = useState(false)
   const [lastLogLine, setLastLogLine] = useState(false)
@@ -353,7 +331,6 @@ export const PrimedSettingsWizard = (props) => {
         ...prev,
         pathname: sectionPathAsView(sectionPath, prefix),
       }))
-      setDeployResult(false)
     },
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [prefix]
@@ -395,7 +372,6 @@ export const PrimedSettingsWizard = (props) => {
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
     else {
-      setDeployResult(data)
       setLoadingStatus([true, 'Deployment initialized', true, true])
     }
   }

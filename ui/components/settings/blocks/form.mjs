@@ -1,8 +1,7 @@
-import React, { useState, Fragment } from 'react'
+import React, { Fragment } from 'react'
 import Markdown from 'react-markdown'
 import {
   StringInput,
-  SecretInput,
   TextInput,
   NumberInput,
   ToggleInput,
@@ -130,7 +129,7 @@ export const FormBlock = (props) => {
 }
 
 export const FormElement = (props) => {
-  const { schema, update, formValidation, updateFormValidation } = props
+  const { schema, formValidation, updateFormValidation } = props
   if (!Joi.isSchema(schema) && !props.hidden)
     return (
       <Popout fixme>
@@ -142,7 +141,7 @@ export const FormElement = (props) => {
   const inputProps = {
     ...props,
     valid: props.hidden
-      ? (val) => true
+      ? () => true
       : (val) => {
           const result = validate(val, schema, props.id)
           const newValid = result.error ? false : true
@@ -199,7 +198,7 @@ export const runFormValidation = (form, data) => {
 }
 
 const formValidationReducer = (result) => {
-  for (const [key, val] of Object.entries(result)) {
+  for (const val of Object.values(result)) {
     if (typeof val === 'object') {
       const valid = formValidationReducer(val)
       if (!valid) return false
@@ -218,31 +217,14 @@ export const reduceFormValidation = (form, data) =>
 
 export const FormWrapper = (props) => {
   // Should we maintain this data locally?
-  const { local = false, defaults = {} } = props
-  const [data, update, setData] = useStateObject(props.defaults) // Holds the data this form builds
+  const { local = false } = props
+  const [data, update] = useStateObject(props.defaults) // Holds the data this form builds
 
   // Run form validation and count how much is done
   const formValidation = runFormValidation(props.form, data)
   const done =
     Object.values(formValidation).filter((el) => el === true).length *
     (100 / Object.values(formValidation).length)
-
-  /*
-   * Global update to Msettings handles some extra checks and passes in data
-   */
-  const process =
-    typeof local === 'function'
-      ? () => {
-          if (props.popModal) props.popModal()
-          props.update(
-            local({ ...props.defaults, ...data }),
-            typeof props.transform === 'function'
-              ? props.transform(data)
-              : { ...defaults, ...data },
-            props.data
-          )
-        }
-      : undefined
 
   /*
    * This takes the local data and stores it in MSettings
@@ -261,10 +243,7 @@ export const FormWrapper = (props) => {
         mSettings={local ? props.data : false}
       />
       {props.readOnly ? (
-        <button
-          className="btn btn-primary btn-outline w-full"
-          onClick={() => props.popModal()}
-        >
+        <button className="btn btn-primary btn-outline w-full" onClick={() => props.popModal()}>
           Close
         </button>
       ) : null}
@@ -285,7 +264,7 @@ export const FormWrapper = (props) => {
   )
 }
 
-const LocalButtons = ({ local, action, pushModal, popModal, applyLocal, removeLocal }) => {
+const LocalButtons = ({ local, action, popModal, applyLocal, removeLocal }) => {
   if (!local) return null
 
   return action === 'create' ? (

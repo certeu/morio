@@ -5,7 +5,7 @@ import { xputMeta } from './index.mjs'
  * RSS input & output Connector templates
  */
 export const rss = {
-  in: (context) => ({
+  in: () => ({
     title: 'RSS',
     about: 'Reads items from an RSS or Atom feed',
     desc: 'Use this to read content from a website feed',

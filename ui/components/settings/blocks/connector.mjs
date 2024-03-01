@@ -1,4 +1,3 @@
-import get from 'lodash.get'
 import { useState, useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
 import { AmazonCloudWatch, Azure, Elasticsearch, Kafka } from 'components/brands.mjs'
@@ -6,14 +5,11 @@ import { AmazonCloudWatch, Azure, Elasticsearch, Kafka } from 'components/brands
 import { connector as connectorTemplates } from '../templates/connector/index.mjs'
 import {
   CodeIcon,
-  ConnectorIcon,
   EmailIcon,
   HttpIcon,
   InputIcon,
-  LeftIcon,
   MorioIcon,
   OutputIcon,
-  PipelineIcon,
   PlusIcon,
   RightIcon,
   RssIcon,
@@ -25,10 +21,8 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Popout } from 'components/popout.mjs'
 import Joi from 'joi'
 import set from 'lodash.set'
-import { FormWrapper, FormElement, loadFormDefaults } from './form.mjs'
-import { TextInput, StringInput } from 'components/inputs.mjs'
+import { FormWrapper, loadFormDefaults } from './form.mjs'
 import { slugify } from 'lib/utils.mjs'
-import { Tabs, Tab } from 'components/tabs.mjs'
 import { reduceFormValidation } from './form.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
@@ -159,8 +153,6 @@ const XputButton = ({
   title,
   about,
   id,
-  desc = false,
-  btn = false,
   type,
   onClick,
   plugin = false,
@@ -195,8 +187,7 @@ const XputButton = ({
 )
 
 const BlockItems = (props) => {
-  const { blocks, type, xputs, data } = props
-  const [open, setOpen] = useState(false)
+  const { blocks, type, data } = props
   const { pushModal, popModal } = useContext(ModalContext)
 
   const allXputs = { ...blocks, ...(data?.connector?.[type + 's'] || {}) }
@@ -267,22 +258,12 @@ export const ConnectorXputs = (props) => (
 export const ConnectorInputs = (props) => <ConnectorXputs {...props} type="input" />
 export const ConnectorOutputs = (props) => <ConnectorXputs {...props} type="output" />
 
-const PipelineHeader = ({ id, title, type }) => (
+const PipelineHeader = ({ id }) => (
   <h3 className="flex flex-row justify-between items-center w-full">
     <InputIcon className="w-12 h-12" stroke={1.25} />
     Pipeline {id}
     <OutputIcon className="w-12 h-12" stroke={1.25} />
   </h3>
-)
-
-const PipelineButton = ({
-  type, // Either input our output
-  id, // Current picked id
-  setter, // Setter method
-}) => (
-  <button className={`btn btn-ghost btn-primary`} onClick={() => setter(null)}>
-    {id ? id : type === 'input' ? 'Select an input below' : 'Select an output below'}
-  </button>
 )
 
 const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {

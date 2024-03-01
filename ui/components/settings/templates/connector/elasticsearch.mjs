@@ -6,7 +6,7 @@ import { Popout } from 'components/popout.mjs'
  * Elasticsearch input & output Connector templates
  */
 export const elasticsearch = {
-  out: (context) => ({
+  out: () => ({
     title: 'ElasticSearch',
     about: 'Index data to an Elasticsearch node or cluster',
     desc: 'Use this to read data from an Elasticsearch index',
@@ -144,7 +144,7 @@ export const elasticsearch = {
                 ],
               ]
             return [
-              <Popout tip compact noP>
+              <Popout tip compact noP key={1}>
                 Please complete the <b>Setup</b> tab first
               </Popout>,
             ]
@@ -231,7 +231,7 @@ export const elasticsearch = {
               return Object.values(form)
             }
             return [
-              <Popout tip compact noP>
+              <Popout tip compact noP key={1}>
                 Please complete the <b>Setup</b> tab first
               </Popout>,
             ]

@@ -2,10 +2,9 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { StatusIcon } from 'components/icons.mjs'
-import { Popout } from 'components/popout.mjs'
 import { Card } from 'components/card.mjs'
 import { Docker, Traefik, RedPandaConsole } from 'components/brands.mjs'
-import { CodeIcon, StorageIcon } from 'components/icons.mjs'
+import { StorageIcon } from 'components/icons.mjs'
 
 const StatusPage = (props) => {
   return (

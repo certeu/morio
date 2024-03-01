@@ -25,7 +25,7 @@ const TokenHelp = ({ secrets, pushModal }) => (
 )
 
 export const TokenSelect = (props) => {
-  const { pushModal, modalContent } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
 
   const {
     update,
@@ -160,14 +160,14 @@ export const TokenInput = ({ token, setToken }) => {
   )
 }
 
-const AddVariable = ({ update, data, current = {}, edit, secrets, pushModal, popModal }) => {
+const AddVariable = ({ update, data, current = {}, edit, secrets, popModal }) => {
   const [token, setToken] = useState(current)
 
   const create = () => {
     update(`tokens.${secrets ? 'secrets' : 'vars'}.${token.key}`, token.val, data)
     popModal()
   }
-  const remove = (id) => {
+  const remove = () => {
     update(`tokens.${secrets ? 'secrets' : 'vars'}.${token.key}`, 'MORIO_UNSET', data)
     popModal()
   }
@@ -197,7 +197,7 @@ const AddVariable = ({ update, data, current = {}, edit, secrets, pushModal, pop
   )
 }
 
-const ShowVariable = ({ pushModal, token, update, data, edit, secrets }) => (
+const ShowVariable = ({ pushModal, token, update, data, secrets }) => (
   <button
     className="btn btn-outline btn-primary btn-sm"
     onClick={() =>
@@ -225,7 +225,8 @@ export const Tokens = ({ update, data, secrets = false }) => {
           .map((key) => {
             return (
               <ShowVariable
-                {...{ key, pushModal, data, secrets, update }}
+                key={key}
+                {...{ pushModal, data, secrets, update }}
                 token={{ key, val: allTokens[key] }}
               />
             )

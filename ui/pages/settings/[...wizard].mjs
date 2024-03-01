@@ -28,6 +28,21 @@ export const getStaticProps = ({ params }) => ({
 })
 
 export const getStaticPaths = () => ({
-  paths: [],
+  paths: [
+    '/settings/wizard/',
+    '/settings/start/',
+    '/settings/validate',
+    '/settings/connector/',
+    '/settings/connector/inputs/',
+    '/settings/connector/outputs/',
+    '/settings/connector/pipelines/',
+    '/settings/deployment/',
+    '/settings/deployment/setup/',
+    '/settings/metadata/',
+    '/settings/metadata/comment/',
+    '/settings/tokens/',
+    '/settings/tokens/secrets/',
+    '/settings/tokens/variables/',
+  ],
   fallback: 'blocking',
 })
