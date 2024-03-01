@@ -17,12 +17,21 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport, DeploymentReport } from './report.mjs'
-import { RightIcon, SettingsIcon, QuestionIcon } from 'components/icons.mjs'
+import {
+  RightIcon,
+  SettingsIcon,
+  QuestionIcon,
+  OkIcon,
+  CheckCircleIcon,
+} from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
+import { StatusLogs } from 'components/status-logs.mjs'
+import { Markdown } from 'components/markdown.mjs'
+import { Box } from 'components/box.mjs'
 
 const Welcome = ({ setView }) => (
   <>
@@ -244,9 +253,17 @@ export const SettingsWizard = (props) => {
     <PleaseWait />
   )
 }
+//{template.children?.[section]?.title
+//  ? template.children[section]?.title
+//  : template.title
+//    ? template.title
+//    : doValidate
+//      ? 'Validate Settings'
+//      : 'Update Settings'}
 
 const WizardWrapper = ({
   title,
+  Icon = SettingsIcon,
   section,
   sectionPath,
   doValidate,
@@ -262,14 +279,8 @@ const WizardWrapper = ({
       <Breadcrumbs page={['settings', ...sectionPath.split('.')]} />
       <div className="w-full">
         <h1 className="capitalize flex w-full max-w-4xl justify-between">
-          {template.children?.[section]?.title
-            ? template.children[section]?.title
-            : template.title
-              ? template.title
-              : doValidate
-                ? 'Validate Settings'
-                : 'Update Settings'}
-          <SettingsIcon className="w-16 h-16" />
+          {title}
+          <Icon className="w-16 h-16" />
         </h1>
         {children}
       </div>
@@ -325,6 +336,8 @@ export const PrimedSettingsWizard = (props) => {
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview
   const [deployResult, setDeployResult] = useState(false)
   const [showDelta, setShowDelta] = useState(false)
+  const [deployOngoing, setDeployOngoing] = useState(false)
+  const [lastLogLine, setLastLogLine] = useState(false)
 
   /*
    * Figure out the current sectionPath from the view
@@ -366,6 +379,7 @@ export const PrimedSettingsWizard = (props) => {
    * Sets the view, update valid, and invalidate the report
    */
   const loadView = (key) => {
+    setDeployOngoing(false)
     setView(key)
     if (key !== 'validate') setValid(validate(key, get(mSettings, key), mSettings))
     setValidationReport(false)
@@ -376,6 +390,7 @@ export const PrimedSettingsWizard = (props) => {
    */
   const deploy = async () => {
     setLoadingStatus([true, 'Uploading settings'])
+    setDeployOngoing(true)
     const [data, status] = await api.deploy(mSettings)
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
@@ -400,6 +415,18 @@ export const PrimedSettingsWizard = (props) => {
   const delta =
     diffCheck(yaml.stringify(runningSettings), yaml.stringify(mSettings)).length > 1 ? true : false
 
+  /*
+   * Title and title icon
+   */
+  let title
+  let Icon = SettingsIcon
+  if (template.children?.[section]?.title) title = template.children[section].title
+  else if (template.title) title = template.title
+  else if (doValidate) {
+    title = 'Validate Settings'
+    Icon = CheckCircleIcon
+  } else title = 'Update Settings'
+
   const showProps = doValidate
     ? { api, mSettings, deploy, validationReport, setValidationReport, setLoadingStatus }
     : {
@@ -415,6 +442,8 @@ export const PrimedSettingsWizard = (props) => {
         setView,
       }
   const wrapProps = {
+    title,
+    Icon,
     section,
     sectionPath,
     doValidate,
@@ -425,9 +454,43 @@ export const PrimedSettingsWizard = (props) => {
     setPreview,
   }
 
+  if (deployOngoing) {
+    const done = lastLogLine?.msg === 'Morio Core ready - Configuration Resolved'
+    const text = `text-${done ? 'success' : 'accent'}-content`
+    return (
+      <WizardWrapper {...wrapProps} title="Apply Settings">
+        <Box color={done ? 'success' : 'accent'}>
+          <div className={`flex flex-row items-center gap-2 ${text}`}>
+            <div className="w-6 h-6">
+              {done ? (
+                <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
+              ) : (
+                <LogoSpinner />
+              )}
+            </div>
+            {done ? (
+              <Markdown className={`mdx dense ${text} inherit-color grow`}>
+                {lastLogLine?.msg}
+              </Markdown>
+            ) : (
+              <span>Processing deploy request</span>
+            )}
+            {done ? (
+              <button className="btn-success" onClick={() => setDeployOngoing(false)}>
+                Close
+              </button>
+            ) : null}
+          </div>
+        </Box>
+        <h2>Status Logs</h2>
+        <StatusLogs lastLineSetter={setLastLogLine} />
+      </WizardWrapper>
+    )
+  }
+
   if (deployResult)
     return (
-      <WizardWrapper {...wrapProps}>
+      <WizardWrapper {...wrapProps} title="Settings Applied">
         <DeploymentReport result={deployResult} />
       </WizardWrapper>
     )

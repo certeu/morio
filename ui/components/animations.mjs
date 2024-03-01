@@ -1,4 +1,6 @@
+import { useState, useEffect } from 'react'
 import { logoPath } from 'components/icons.mjs'
+import { CountdownCircleTimer } from 'react-countdown-circle-timer'
 
 export const Spinner = ({ className = 'h-6 w-6 animate-spin' }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -38,3 +40,57 @@ export const Progress = ({ value, color = 'primary' }) => (
     ></div>
   </div>
 )
+
+export const CountdownCircle = ({ className = '', duration = 1, stroke = 3 }) => {
+  const [start, setStart] = useState(0)
+
+  useEffect(() => {
+    setStart(start + 1)
+  }, [duration])
+
+  const style = {
+    fill: 'none',
+    strokeWidth: stroke,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    strokeMiterlimit: 4,
+    stroke: 'currentColor',
+  }
+
+  const c = 12
+  const r = 10
+  const l = 2 * r * Math.PI
+  const size = { cx: c, cy: c, r }
+
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <g transform-origin="center center" transform="rotate(-87)">
+        <circle
+          {...size}
+          style={{
+            ...style,
+            strokeOpacity: 0.3,
+          }}
+        />
+        <circle
+          {...size}
+          style={{
+            ...style,
+            strokeOpacity: 1,
+            strokeDasharray: `${l} ${2 * l}`,
+          }}
+        >
+          <animate
+            attributeType="CSS"
+            attributeName="stroke-dashoffset"
+            begin="0"
+            from={l}
+            to={0}
+            dur={`${duration}s`}
+            repeatCount="indefinite"
+          />
+        </circle>
+      </g>
+    </svg>
+  )
+}

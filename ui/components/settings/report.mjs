@@ -3,6 +3,7 @@ import { OkIcon, WarningIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { Popout } from 'components/popout.mjs'
+import { Box } from 'components/box.mjs'
 
 /**
  * A React component to display a settings report
@@ -46,8 +47,8 @@ export const SettingsReport = ({ report }) => (
 /**
  * A React compnent to display a deployment (request) report
  */
-export const DeploymentReport = ({ result }) => result.result === 'success'
-  ? (
+export const DeploymentReport = ({ result }) =>
+  result.result === 'success' ? (
     <>
       <Box color="success">
         <div className="flex flex-row gap-4 items-center w-full">
@@ -83,15 +84,4 @@ const Messages = ({ list }) => (
       <li key={i}>{msg}</li>
     ))}
   </ul>
-)
-
-/**
- * Little helper component to display a box in the report
- */
-export const Box = ({ color, children }) => (
-  <div
-    className={`bg-${color} text-${color}-content rounded-lg p-4 w-full bg-opacity-80 shadow mb-2`}
-  >
-    {children}
-  </div>
 )
