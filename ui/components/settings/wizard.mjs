@@ -16,7 +16,7 @@ import { useAtom } from 'jotai'
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
-import { SettingsReport, DeploymentReport } from './report.mjs'
+import { SettingsReport } from './report.mjs'
 import {
   RightIcon,
   SettingsIcon,
@@ -487,13 +487,6 @@ export const PrimedSettingsWizard = (props) => {
       </WizardWrapper>
     )
   }
-
-  if (deployResult)
-    return (
-      <WizardWrapper {...wrapProps} title="Settings Applied">
-        <DeploymentReport result={deployResult} />
-      </WizardWrapper>
-    )
 
   return (
     <WizardWrapper {...wrapProps}>

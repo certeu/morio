@@ -45,37 +45,6 @@ export const SettingsReport = ({ report }) => (
 )
 
 /**
- * A React compnent to display a deployment (request) report
- */
-export const DeploymentReport = ({ result }) =>
-  result.result === 'success' ? (
-    <>
-      <Box color="success">
-        <div className="flex flex-row gap-4 items-center w-full">
-          <OkIcon stroke={4} />
-          Settings were <b>accepted</b> for deployment
-        </div>
-      </Box>
-      {result.root_token ? (
-        <Popout important>
-          <h5>Store the Morio Root Token in a safe place now</h5>
-          <p>Below is the Morio Root Token for this deployment:</p>
-          <Highlight title="Root Token">{result.root_token}</Highlight>
-        </Popout>
-      ) : null}
-      <h4>What now?</h4>
-      <p>Morio core will configure this Morio deployment according to these settings.</p>
-      <p>Give it some time until the logs stabilize and you see this line:</p>
-      <pre>Morio Core ready - Configuration resolved</pre>
-    </>
-  ) : (
-    <>
-      <h3>Unexpected deployment result</h3>
-      <pre>{JSON.stringify(result, null, 2)}</pre>
-    </>
-  )
-
-/**
  * A React compnent to display messages from a settings report
  */
 const Messages = ({ list }) => (
