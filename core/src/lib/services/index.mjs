@@ -166,9 +166,12 @@ export const startMorio = async () => {
       running[container.Names[0].split('/').pop()] = container
 
   /*
-   * Create services
+   * Create services (in parallel)
    */
-  for (const service of store.serviceOrder) await ensureMorioService(service, running)
+  const promises = []
+  for (const service of store.serviceOrder) promises.push(ensureMorioService(service, running))
+
+  return await Promise.all(promises)
 }
 
 /**
@@ -226,11 +229,10 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * (Re)start the container/service (if needed)
    */
-  const restart = containerId
-    ? true // Always start if the container was just created
-    : shouldContainerBeRestarted(service, running)
-  if (restart && service !== 'core') {
-    // Don't restart core or you'll have a restartloop
+  const restart = await shouldContainerBeRestarted(service, running)
+  if (restart) {
+    store.log.info(`(Re)Starting \`${service}\` container`)
+    store.log.status(`(Re)Starting \`${service}\` container`)
     /*
      * Run preStart lifecycle hook
      */
@@ -243,6 +245,8 @@ export const ensureMorioService = async (service, running, hookParams) => {
      * Run postStart lifecycle hook
      */
     runHook('postStart', service, recreate, hookParams)
+  } else {
+    store.log.stabug(`Not restarting \`${service}\` container`)
   }
 }
 
@@ -296,15 +300,9 @@ const shouldContainerBeRecreated = async (service, running) => {
  */
 const shouldContainerBeRestarted = async (service, running) => {
   /*
-   * Never restart core from within core as the container will be destroyed
-   * and then core will exit before it can recreate itself
-   */
-  if (service === 'core') return false
-
-  /*
    * Defer to the restartContainer lifecycle hook
    */
-  const restart = await runHook('restartContainer', service, { running })
+  const restart = await runHook('restartContainer', service, running)
 
   return restart
 }

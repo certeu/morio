@@ -16,7 +16,7 @@ export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') 
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
 export const createDockerContainer = async (name, containerConfig) => {
-  store.log.debug(`Creating container: ${name}`)
+  store.log.stabug(`Creating container: ${name}`)
   const [success, result] = await runDockerApiCommand('createContainer', containerConfig, true)
   if (success) {
     store.log.debug(`Service created: ${name}`)
@@ -57,7 +57,7 @@ export const createDockerContainer = async (name, containerConfig) => {
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
 export const createDockerNetwork = async (name) => {
-  store.log.debug(`Creating Docker network: ${name}`)
+  store.log.stabug(`Creating Docker network: ${name}`)
   const [success, result] = await runDockerApiCommand(
     'createNetwork',
     {
@@ -96,6 +96,7 @@ export const generateContainerConfig = (srvConf) => {
    * Basic options
    */
   const name = srvConf.container.container_name
+  store.log.stabug(`Generating container configuration: ${name}`)
   const tag = srvConf.container.tag ? `:${srvConf.container.tag}` : ''
   const opts = {
     name,
@@ -169,6 +170,7 @@ export const generateContainerConfig = (srvConf) => {
  * failure, and the command return value
  */
 export const runDockerApiCommand = async (cmd, options = {}, silent = false) => {
+  store.log.stabug(`Running Docker command: ${cmd}`)
   let result
   try {
     result = await docker[cmd](options)
@@ -199,6 +201,8 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
 
   let result
   try {
+    console.log(container)
+    store.log.stabug(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {

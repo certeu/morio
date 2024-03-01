@@ -9,3 +9,7 @@ export const store = new Store()
     store.status_logs.add({ time: Date.now(), msg })
     if (store.status_logs.size > 20) store.status_logs = new Set([...store.status_logs].slice(-20))
   })
+  .set('log.stabug', (msg) => {
+    store.log.debug(msg)
+    store.log.status(msg)
+  })
