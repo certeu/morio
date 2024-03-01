@@ -64,16 +64,21 @@ export const StatusLogs = ({ lastLineSetter = false }) => {
         </button>
       </div>
       <table className="statuslog w-full">
-        {[...logs].reverse().map((line, i) => (
-          <tr key={i} className={`${i % 2 === 0 ? 'bg-primary' : 'bg-transparent'} bg-opacity-10`}>
-            <td className="w-24 text-sm text-right px-4 py-1 italic opacity-80">
-              <MsAgo time={line.time} />
-            </td>
-            <td className="px-4 py-1">
-              <Markdown>{line.msg}</Markdown>
-            </td>
-          </tr>
-        ))}
+        <tbody>
+          {[...logs].reverse().map((line, i) => (
+            <tr
+              key={i}
+              className={`${i % 2 === 0 ? 'bg-primary' : 'bg-transparent'} bg-opacity-10`}
+            >
+              <td className="w-24 text-sm text-right px-4 py-1 italic opacity-80">
+                <MsAgo time={line.time} />
+              </td>
+              <td className="px-4 py-1">
+                <Markdown>{line.msg}</Markdown>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </table>
     </>
   ) : null

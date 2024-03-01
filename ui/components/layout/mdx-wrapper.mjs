@@ -23,7 +23,7 @@ export const MDXWrapper = ({ pageProps, filePath, children }) => {
         {wide ? (
           children
         ) : (
-          <div className="mdx max-w-4xl mx-auto">
+          <div className="mdx max-w-4xl">
             <div className="mdx max-w-prose">{children}</div>
           </div>
         )}

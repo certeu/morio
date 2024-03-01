@@ -49,6 +49,7 @@ const icons = {
   components: ComponentIcon,
   containers: ContainerIcon,
   console: RedPandaConsole,
+  dashboard: Traefik,
   decrypt: OpenLockIcon,
   docker: Docker,
   docs: BookIcon,
@@ -56,6 +57,7 @@ const icons = {
   encrypt: ClosedLockIcon,
   faq: QuestionIcon,
   images: ContainerImageIcon,
+  logs: StorageIcon,
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
@@ -75,13 +77,18 @@ const icons = {
 }
 
 /*
- * Object to match titles to a page
- */
-
-/*
  * This object represents the navigation structure
  */
 export const links = {
+  docs: {
+    t: 'Documentation',
+    faq: {
+      t: 'FAQ',
+    },
+    reference: {
+      t: 'Reference',
+    },
+  },
   settings: {
     t: 'Settings',
     show: {
@@ -94,15 +101,6 @@ export const links = {
       t: 'Update Settings',
     },
   },
-  docs: {
-    t: 'Documentation',
-    faq: {
-      t: 'FAQ',
-    },
-    reference: {
-      t: 'Reference',
-    },
-  },
   status: {
     docker: {
       containers: {},
@@ -112,6 +110,19 @@ export const links = {
       services: {},
       tasks: {},
       volumes: {},
+    },
+    logs: {
+      t: 'Status Logs',
+    },
+    dashboard: {
+      t: 'Traefik Dashboard',
+      href: `/dashboard/?cache_bust=${String(Date.now()).slice(0, 8)}`,
+      target: '_BLANK',
+    },
+    console: {
+      t: 'RedPanda Console',
+      href: `/console/`,
+      target: '_BLANK',
     },
   },
   tools: {
@@ -146,27 +157,29 @@ const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length
  *
  * @param {object} subs - Any additional children (sub-pages) to render
  * @param {string} current - The current page
- * @param {string} target - The target page
+ * @param {string} k - The target page (key in the object)
  * @param {array} parents - The page's parents
  * @parem {function} onClick - Set this to make the element a button
  */
 export const NavButton = ({
+  k,
   page,
-  target,
   current,
   parents,
   level = 0,
   onClick = false,
+  href = false,
+  target = '',
   extraClasses = 'lg:hover:bg-secondary lg:hover:text-secondary-content',
 }) => {
   /*
    * Pre-calculate some things we need
    */
-  const href = getHref(target, parents)
+  if (!href) href = getHref(k, parents)
   const active = isActive(href, current)
   const children = pageChildren(page)
   const here = `/${current.join('/')}` === href
-  const title = page.t || capitalize(target)
+  const title = page.t || capitalize(k)
   const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
     active
       ? here
@@ -179,7 +192,7 @@ export const NavButton = ({
       {title}
     </span>
   )
-  const Icon = parents[0] === 'docs' ? Null : icons[target] || Null
+  const Icon = parents[0] === 'docs' ? Null : icons[k] || Null
   const sizedIcon =
     level > 0 ? (
       <Icon className="w-6 h-6 shrink-0 grow-0 opacity-80" stroke={1.5} />
@@ -197,7 +210,7 @@ export const NavButton = ({
     </button>
   ) : (
     <>
-      <Link {...{ href, className }} title={title}>
+      <Link {...{ href, className }} title={title} target={target}>
         {span}
         <div className="w-12 -mr-4 text-center flex items-center justify-center">{sizedIcon}</div>
       </Link>
@@ -206,10 +219,11 @@ export const NavButton = ({
             <NavButton
               key={key}
               page={page}
-              target={key}
+              k={key}
               level={level + 1}
-              parents={[...parents, target]}
+              parents={[...parents, k]}
               {...{ current, key }}
+              {...page}
             />
           ))
         : null}
@@ -246,7 +260,7 @@ export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => 
   if (!navs) navs = links
   const list = []
   for (const [key, page] of Object.entries(navs))
-    list.push(<NavButton page={page} target={key} key={key} {...{ current, parents, level }} />)
+    list.push(<NavButton page={page} k={key} key={key} {...{ current, parents, level }} />)
 
   return list
 }

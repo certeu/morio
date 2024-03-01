@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { MorioLogo } from 'components/logos/morio.mjs'
+import pkg from 'ui/package.json'
 
 export const NavButton = ({
   href,
@@ -46,11 +47,11 @@ export const Header = ({
             <MorioLogo className="h-8" noLine />
           </Link>
           <div className="grow pl-4 justify-start flex flex-row">
-            <NavButton href="/config" label="Configuration" extraClasses="hidden lg:flex">
-              Configuration
-            </NavButton>
             <NavButton href="/docs" label="Documentation" extraClasses="hidden lg:flex">
               Documentation
+            </NavButton>
+            <NavButton href="/settings" label="Settings" extraClasses="hidden lg:flex">
+              settings
             </NavButton>
             <NavButton href="/status" label="Status" extraClasses="hidden lg:flex">
               Status
@@ -60,9 +61,15 @@ export const Header = ({
             </NavButton>
           </div>
           <div className="flex flex-row">
-            <NavButton href="/support" label="Support" extraClasses="hidden lg:flex">
-              support
-            </NavButton>
+            <Link
+              className={`
+              border-0 px-1 lg:px-3 xl:px-4 text-secondary py-3 md:py-4 text-center items-center
+              hover:bg-accent hover:text-accent-content grow-0 relative capitalize hidden lg:flex`}
+              href="/support"
+              label={pkg.version}
+            >
+              <span className="textsecondary">Morio {pkg.version}</span>
+            </Link>
             <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
               {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
             </NavButton>
