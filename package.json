@@ -13,7 +13,7 @@
     "predev": "npm run reconfigure",
     "dev": "./core/run-container.sh",
     "dev:clean": "docker rm -fv core api ui proxy ca broker console",
-    "saltnburn": "./scripts/salt-and-burn.sh",
+    "destroy": "./scripts/destroy.sh",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "reconfigure": "node scripts/reconfigure.mjs",
     "prebuild": "npm run reconfigure",
