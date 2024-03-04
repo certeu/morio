@@ -9,7 +9,12 @@ export const service = {
   name: 'proxy',
   hooks: {
     recreateContainer: () => false,
-    restartContainer: () => false,
+    restartContainer: (running, recreate) => {
+      if (recreate) return true
+      if (!running.api) return true
+
+      return false
+    },
     /*
      * Before creating the container, update the entrypoint
      * shell script with our own one.
