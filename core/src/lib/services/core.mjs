@@ -73,18 +73,6 @@ export const service = {
       const { settings, keys, timestamp } = await loadSettingsAndKeys()
 
       /*
-       * Add encryption methods
-       */
-      const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-        keys.mrt,
-        'Morio by CERT-EU',
-        store.log
-      )
-      store.encrypt = encrypt
-      store.decrypt = decrypt
-      store.isEncrypted = isEncrypted
-
-      /*
        * If timestamp is false, no on-disk settings exist and we
        * are running in ephemeral mode. In which case we return early.
        */
@@ -107,6 +95,18 @@ export const service = {
       store.saveSettings = cloneAsPojo(settings)
       store.settings = templateSettings(settings)
       store.keys = keys
+
+      /*
+       * Add encryption methods
+       */
+      const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+        keys.mrt,
+        'Morio by CERT-EU',
+        store.log
+      )
+      store.encrypt = encrypt
+      store.decrypt = decrypt
+      store.isEncrypted = isEncrypted
 
       /*
        * Only one node makes this easy
