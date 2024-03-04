@@ -246,10 +246,10 @@ export const createX509Certificate = async (data) => {
 export const templateSettings = (settings) => {
   const tokens = {}
   // Build the tokens object
-  for (const [key, val] of Object.entries(settings.tokens.vars || {})) {
+  for (const [key, val] of Object.entries(settings.tokens?.vars || {})) {
     tokens[key] = val
   }
-  for (const [key, val] of Object.entries(settings.tokens.secrets || {})) {
+  for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
     tokens[key] = store.decrypt(val)
   }
 
