@@ -66,6 +66,15 @@ MorioClient.prototype.getCurrentConfig = async function () {
 }
 
 /**
+ * Gets the current status
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getStatus = async function () {
+  return await this.call(`${morioConfig.api}/status`)
+}
+
+/**
  * Gets the current settings
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
