@@ -76,12 +76,12 @@ const createMorioServiceContainer = async (name) => {
 
     return new Promise((resolve) => {
       docker.pull(cntConf.Image, (err, stream) => {
-        docker.modem.followProgress(stream, onFinished)
         async function onFinished() {
           store.log.debug(`Image pulled: ${cntConf.Image}`)
           const id = await createDockerContainer(name, cntConf)
           resolve(id)
         }
+        if (stream) docker.modem.followProgress(stream, onFinished)
       })
     })
   } else return await createDockerContainer(name, cntConf)
