@@ -1,2 +1,4 @@
 **/*.json
 json-loader.mjs
+Dockerfile.dev
+Dockerfile.prod

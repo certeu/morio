@@ -1,4 +1,4 @@
-import { pkg } from '../src/json-loader.mjs'
+import { getPreset } from '#config'
 import { paths as setup } from './setup.mjs'
 import { paths as status } from './status.mjs'
 import { paths as validate } from './validate.mjs'
@@ -26,7 +26,7 @@ export const openapi = {
       name: 'FIXME: What license?',
       url: 'https://cert.europa.eu',
     },
-    version: pkg.version,
+    version: getPreset('MORIO_VERSION'),
   },
   externalDocs: {
     description: 'Morio documentation on GitHub',

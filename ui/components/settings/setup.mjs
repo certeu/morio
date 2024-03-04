@@ -9,7 +9,7 @@ import { useState, useContext } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
-import { SettingsReport, DeploymentReport } from './report.mjs'
+import { SettingsReport } from './report.mjs'
 import { FormBlock } from './blocks/form.mjs'
 import { Spinner, LogoSpinner } from 'components/animations.mjs'
 
@@ -89,7 +89,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
           {deployResult ? (
             <>
               <h3>Deployment initiated</h3>
-              <DeploymentReport result={deployResult} />
+              <p>FIXME: Include status logs here</p>
             </>
           ) : (
             <>

@@ -17,7 +17,7 @@ import { useTheme } from 'hooks/use-theme.mjs'
 import { EphemeralInfo } from 'pages/index.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
-import { SettingsReport, DeploymentReport } from 'components/settings/report.mjs'
+import { SettingsReport } from 'components/settings/report.mjs'
 
 const SettingsUploadPage = (props) => {
   /*
@@ -124,7 +124,6 @@ const SettingsUploadPage = (props) => {
               ) : null}
               {!loading && deployResult ? (
                 <>
-                  <DeploymentReport result={deployResult} />
                   <p className="text-center mt-4">
                     <Link className="btn btn-primary" href="/">
                       To the home page

@@ -27,18 +27,16 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 ## Add a morio user to run the NodeJS code
-RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
-  && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio}
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser  --system --uid 100 nextjs
 
 ## Copy built node modules and binaries without including the toolchain
-COPY --from=builder /morio/ui/public ./public
+COPY --from=builder --chown=nextjs:nodejs /morio/ui/public ./public
+COPY --from=builder --chown=nextjs:nodejs /morio/ui/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /morio/ui/.next/static ./.next/static
 
-## Setup folder for next cache
-RUN mkdir ./.next
-COPY --from=builder --chown=morio:morio /morio/ui/public ./public
-COPY --from=builder --chown=morio:morio /morio/ui/.next/standalone ./
-COPY --from=builder --chown=morio:morio /morio/ui/.next/static ./.next/static
+ENV HOSTNAME "0.0.0.0"
 
 ## Drop privleges and run NodeJS code
-USER ${USER:-morio}
-CMD ["node",  "./server.js"]
+USER nextjs
+CMD ["node",  "./server.js", "-h 0.0.0.0"]

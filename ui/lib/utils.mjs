@@ -164,31 +164,6 @@ export const template = (input, replace = {}) =>
   typeof input === 'undefined' ? input : mustache.render(input, replace)
 
 /**
- * A method to provide validation based on the Joi validation library
- *
- * Since we are only validating 1 field at a time, rather than the entire
- * config, we need to extract that field from the config schema. However, doing
- * so will break in-schema references, as they now fall outside of the schema
- * root. To fix that, you should pass the entire config object to this method
- * so it can be used to resolve those references.
- *
- * @param {string} key - Key to lookup in the schema
- * @param {any} value - Value to validate against the schema
- * @param {object} config - Config that will server as context to resolve schema references
- * @return {object} result - The Joi validation result object
- */
-export const validate = (key, value, context) => {
-  let result = true
-  try {
-    result = configSchema.extract(key).label(key).validate(value, { context })
-  } catch (err) {
-    return false
-  }
-
-  return result
-}
-
-/**
  * Helper method to validate the configuration
  *
  * @param {object} api - The api client as returned from the useApi hook

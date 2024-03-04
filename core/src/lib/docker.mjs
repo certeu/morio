@@ -201,7 +201,6 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
 
   let result
   try {
-    console.log(container)
     store.log.stabug(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
   } catch (err) {

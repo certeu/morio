@@ -55,6 +55,7 @@ export const PageWrapper = ({
       <Head>
         <title>{title ? `Morio: ${title}` : 'Morio'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.svg" />
       </Head>
       <LoadingStatus />
       <div className="flex flex-col justify-between bg-neutral w-full">

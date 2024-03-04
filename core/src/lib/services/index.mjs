@@ -229,7 +229,7 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * (Re)start the container/service (if needed)
    */
-  const restart = await shouldContainerBeRestarted(service, running)
+  const restart = await shouldContainerBeRestarted(service, running, recreate)
   if (restart) {
     store.log.info(`(Re)Starting \`${service}\` container`)
     store.log.status(`(Re)Starting \`${service}\` container`)
@@ -254,8 +254,7 @@ export const ensureMorioService = async (service, running, hookParams) => {
  * Determines whether a morio service container should be recreated
  *
  * @param {string} sercice = The name of the service
- * @param {object} running = Running containers info from the Docker daemon
- * @return {bool} recreate = Whether or not the container should be recreated
+ * @param {object} running = A list of running containers
  */
 const shouldContainerBeRecreated = async (service, running) => {
   /*
@@ -286,7 +285,7 @@ const shouldContainerBeRecreated = async (service, running) => {
   /*
    * After from basic check, defer to the recreateContainer lifecycle hook
    */
-  const recreate = await runHook('recreateContainer', service, { running })
+  const recreate = await runHook('recreateContainer', service, running)
 
   return recreate
 }
@@ -295,14 +294,14 @@ const shouldContainerBeRecreated = async (service, running) => {
  * Determines whether a morio service container should be restarted
  *
  * @param {string} sercice = The name of the service
- * @param {object} running = Running containers info from the Docker daemon
+ * @param {object} running = A list of running containers
  * @return {bool} recreate = Whether or not the container should be recreated
  */
-const shouldContainerBeRestarted = async (service, running) => {
+const shouldContainerBeRestarted = async (service, running, recreate) => {
   /*
    * Defer to the restartContainer lifecycle hook
    */
-  const restart = await runHook('restartContainer', service, running)
+  const restart = await runHook('restartContainer', service, running, recreate)
 
   return restart
 }

@@ -1,10 +1,12 @@
-import { pkg } from './json-loader.mjs'
 import path from 'path' // This requires NodeJS, it won't work in the browser
 
 export const presets = {
   /*
    * Morio presets
    */
+
+  // Version number
+  MORIO_VERSION: "0.1.0",
 
   // Whether or not to enable debug
   MORIO_DEBUG: true,
@@ -17,9 +19,6 @@ export const presets = {
 
   // Location of the Docker socket
   MORIO_DOCKER_SOCKET: '/var/run/docker.sock',
-
-  // The current Morio version
-  MORIO_VERSION: pkg.version,
 
   // The epoch data of the current version
   MORIO_VERSION_EPOCH: '20240201',

@@ -4,9 +4,6 @@ FROM node:20-slim
 # Make this folder our working directory
 WORKDIR /morio/ui
 
-## Add a morio user to run the NodeJS code
-#RUN adduser --system --uid ${UID:-1000} --gid ${GIS:-1000} --gecos "Morio User" --home=/home/morio ${USER:-morio}
-
 ## Drop privleges and run NodeJS code via pm2
 USER node
 CMD ["npm", "run", "dev"]

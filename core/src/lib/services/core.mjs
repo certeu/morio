@@ -1,5 +1,3 @@
-// Version info
-import { corePkg as pkg } from '#shared/pkg'
 // REST client for API
 import { restClient } from '#shared/network'
 // Required for config file management
@@ -33,19 +31,6 @@ export const service = {
      */
     beforeAll: async () => {
       /*
-       * First populate the store
-       */
-      if (!store.info)
-        store.info = {
-          about: pkg.description,
-          name: pkg.name,
-          production: inProduction(),
-          version: pkg.version,
-        }
-      store.start_time = Date.now()
-      if (!store.inProduction) store.inProduction = inProduction
-
-      /*
        * Add a getPreset() wrapper that will output trace logs about how presets are resolved
        * This is surprisingly helpful during debugging
        */
@@ -56,6 +41,19 @@ export const service = {
 
           return result
         }
+
+      /*
+       * Now populate the store
+       */
+      if (!store.info)
+        store.info = {
+          about: 'Morio Core',
+          name: '@morio/core',
+          production: inProduction(),
+          version: getPreset('MORIO_VERSION'),
+        }
+      store.start_time = Date.now()
+      if (!store.inProduction) store.inProduction = inProduction
 
       /*
        * Add the API client

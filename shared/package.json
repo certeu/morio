@@ -22,13 +22,11 @@
   "exports": {
     ".": "./src/index.js",
     "./*": "./src/*.mjs",
-    "./config": "./src/config.mjs",
     "./crypto": "./src/crypto.mjs",
     "./env": "./src/env.mjs",
     "./fs": "./src/fs.mjs",
     "./logger": "./src/logger.mjs",
     "./network": "./src/network.mjs",
-    "./pkg": "./src/pkg.mjs",
     "./store": "./src/store.mjs",
     "./time": "./src/time.mjs",
     "./utils": "./src/utils.mjs"

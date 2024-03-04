@@ -4,6 +4,12 @@
  */
 
 /*
+ * Are we running in development, or is this a production
+ * build requiring a static export?
+ */
+const EXPORT = process.env.STATIC_EXORT
+
+/*
  * NodeJS path is used to resolve local path to full path
  */
 import path from 'path'
@@ -36,7 +42,6 @@ const nextConfig = {
   pageExtensions: ['mjs', 'mdx'],
   reactStrictMode: true,
   output: 'standalone',
-  distDir: 'dist',
   trailingSlash: true,
   webpack: (config, options) => {
     /*

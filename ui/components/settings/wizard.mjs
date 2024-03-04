@@ -1,7 +1,7 @@
 // Dependencies
 import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
-import { validate, validateSettings, cloneAsPojo } from 'lib/utils.mjs'
+import { validateSettings, cloneAsPojo } from 'lib/utils.mjs'
 import yaml from 'yaml'
 // Templates
 import { templates } from './templates/index.mjs'
@@ -358,7 +358,6 @@ export const PrimedSettingsWizard = (props) => {
   const loadView = (key) => {
     setDeployOngoing(false)
     setView(key)
-    if (key !== 'validate') setValid(validate(key, get(mSettings, key), mSettings))
     setValidationReport(false)
   }
 
@@ -408,12 +407,10 @@ export const PrimedSettingsWizard = (props) => {
     : {
         update,
         data: mSettings,
-        setValid,
         sectionPath,
         template,
         group,
         section,
-        valid,
         loadView,
         setView,
       }

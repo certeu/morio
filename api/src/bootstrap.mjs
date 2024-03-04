@@ -1,4 +1,3 @@
-import { pkg } from './json-loader.mjs'
 import { getPreset } from '#config'
 import { coreClient } from '#lib/core'
 import { attempt } from '#shared/utils'
@@ -11,21 +10,32 @@ import { store } from './lib/store.mjs'
  */
 export const bootstrapConfiguration = async () => {
   /*
-   * Add info to store
+   * Add a getPreset() wrapper that will output debug logs about how presets are resolved
+   * This is surprisingly helpful during debugging
+   */
+  store.getPreset = (key, dflt, opts) => {
+    const result = getPreset(key, dflt, opts)
+    store.log.debug(`Preset ${key} = ${result}`)
+
+    return result
+  }
+
+  /*
+   * Now info to store
    */
   if (!store.info)
     store.info = {
-      about: pkg.description,
-      name: pkg.name,
+      about: 'Morio Management API',
+      name: '@morio/api',
       ping: Date.now(),
       start_time: Date.now(),
-      version: pkg.version,
+      version: store.getPreset('MORIO_VERSION'),
     }
 
   /*
    * Add core client to store
    */
-  if (!store.core) store.core = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+  if (!store.core) store.core = coreClient(`http://core:${store.getPreset('MORIO_CORE_PORT')}`)
 
   /*
    * Attempt to load the config from CORE
@@ -53,15 +63,4 @@ export const bootstrapConfiguration = async () => {
     store.log.warn('Failed to load Morio config from core')
   }
   store.config = config
-
-  /*
-   * Add a getPreset() wrapper that will output debug logs about how presets are resolved
-   * This is surprisingly helpful during debugging
-   */
-  store.getPreset = (key, dflt, opts) => {
-    const result = getPreset(key, dflt, opts)
-    store.log.debug(`Preset ${key} = ${result}`)
-
-    return result
-  }
 }
