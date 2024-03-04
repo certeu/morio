@@ -34,7 +34,7 @@ export const EphemeralWrapper = ({ children }) => {
   useEffect(() => {
     const checkState = async () => {
       const result = await api.getStatus()
-      if (result[1] === 200 && result[0].ephemeral === false) setEphemeral(false)
+      if (result[1] === 200 && result[0].ephemeral === true) setEphemeral(true)
     }
     if (!ephemeral) checkState()
   }, [])
