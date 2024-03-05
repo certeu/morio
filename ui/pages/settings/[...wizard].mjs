@@ -11,7 +11,7 @@ const DynamicSettingsWizard = dynamic(
 
 const SettingsPage = (props) => {
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="operator">
       <DynamicSettingsWizard preloadView={props.view} page={props.page} />
     </PageWrapper>
   )

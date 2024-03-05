@@ -239,16 +239,6 @@ export const InputIcon = (props) => (
 )
 
 /*
- * OutputIcon - Looks like a pipe bend with an arrow pointing out of it
- */
-export const OutputIcon = (props) => (
-  <IconWrapper {...props}>
-    <path d="M 14.144767,7.8819999 H 2.391512 C 1.650616,7.8820003 1.05,9.7256917 1.05,12 c 0,2.274309 0.600616,4.118 1.341512,4.118 H 14.024631 M 12.783231,12 A 1.3415127,4.1180004 0 0 0 14.124744,16.118 1.3415127,4.1180004 0 0 0 15.466257,12 1.3415127,4.1180004 0 0 0 14.124744,7.8819999 1.3415127,4.1180004 0 0 0 12.783231,12 Z" />
-    <path d="M 20.158154,10.746803 22.950005,12 m 0,0 -2.791851,1.253197 M 22.950005,12 c -2.866008,-0.0032 -6.786527,-0.05902 -6.034834,0" />
-  </IconWrapper>
-)
-
-/*
  * LayersIcon - Looks like 3 stacked layers
  */
 export const LayersIcon = (props) => (
@@ -281,6 +271,15 @@ export const LeftIcon = (props) => (
 export const LinkIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+  </IconWrapper>
+)
+
+/*
+ * LogoutIcon - Looks like a door with an arrow pointing outwards to the right
+ */
+export const LogoutIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
   </IconWrapper>
 )
 
@@ -344,6 +343,16 @@ export const OkIcon = (props) => (
 export const OpenLockIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+  </IconWrapper>
+)
+
+/*
+ * OutputIcon - Looks like a pipe bend with an arrow pointing out of it
+ */
+export const OutputIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M 14.144767,7.8819999 H 2.391512 C 1.650616,7.8820003 1.05,9.7256917 1.05,12 c 0,2.274309 0.600616,4.118 1.341512,4.118 H 14.024631 M 12.783231,12 A 1.3415127,4.1180004 0 0 0 14.124744,16.118 1.3415127,4.1180004 0 0 0 15.466257,12 1.3415127,4.1180004 0 0 0 14.124744,7.8819999 1.3415127,4.1180004 0 0 0 12.783231,12 Z" />
+    <path d="M 20.158154,10.746803 22.950005,12 m 0,0 -2.791851,1.253197 M 22.950005,12 c -2.866008,-0.0032 -6.786527,-0.05902 -6.034834,0" />
   </IconWrapper>
 )
 
@@ -517,6 +526,15 @@ export const TrashIcon = (props) => (
 export const UlIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+  </IconWrapper>
+)
+
+/*
+ * UserIcon - Looks like a face in a circle
+ */
+export const UserIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
   </IconWrapper>
 )
 

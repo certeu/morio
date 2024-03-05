@@ -127,6 +127,32 @@ MorioClient.prototype.listDownloads = async function () {
 }
 
 /**
+ * Login
+ *
+ * @param {string} provider - (name of the) authentication provider
+ * @param {object} data - The login data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.login = async function (provider, data) {
+  return await this.call(`${morioConfig.api}/login`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ provider, data }),
+  })
+}
+
+/**
+ * Renew token
+ *
+ * @param {string} provider - (name of the) authentication provider
+ * @param {object} data - The login data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.renewToken = async function () {
+  return await this.call(`${morioConfig.api}/token`)
+}
+
+/**
  * Encrypt data
  *
  * @param {string} data - The data to encrypt

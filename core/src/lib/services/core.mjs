@@ -11,7 +11,6 @@ import https from 'https'
 import axios from 'axios'
 // Required to generated X.509 certificates
 import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
-import { createPrivateKey } from 'crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Store
@@ -194,25 +193,13 @@ export const createX509Certificate = async (data) => {
       nbf: Math.floor(Date.now() / 1000) - 1,
       exp: Number(Date.now()) + 300000,
     },
-    store,
     options: {
       keyid: kid,
       algorithm: 'RS256',
     },
     noDefaults: true,
-    /*
-     * We need to pass a plain text PEM-encoded private key here
-     * since it is not stored on disk or in the config.
-     * So this will decrypt the key, export it, and pass it through
-     */
-    key: createPrivateKey({
-      key: store.keys.private,
-      format: 'pem',
-      passphrase: store.keys.mrt,
-    }).export({
-      type: 'pkcs8',
-      format: 'pem',
-    }),
+    key: store.keys.private,
+    passphrase: store.keys.mrt,
   })
 
   /*

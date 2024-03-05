@@ -73,7 +73,7 @@ export const ButtonFrame = ({
     disabled={disabled}
     className={`
     btn btn-ghost btn-secondary relative grow
-    ${dir === 'col' ? 'w-full' : 'mr-2'}
+    ${dir === 'col' ? 'w-full' : 'mr-2 mb-2'}
     ${dense ? 'mt-0 py-2 btn' : 'mt-2 py-4 h-auto content-start'}
     border-2 border-secondary text-left bg-opacity-20
     ${accordion ? 'hover:bg-transparent' : 'hover:bg-secondary hover:bg-opacity-10'}

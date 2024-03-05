@@ -56,6 +56,10 @@ export const resolveServiceConfiguration = (store) => {
         `traefik.http.services.api.loadbalancer.server.port=${store.getPreset('MORIO_API_PORT')}`,
         // Enable TLS
         `traefik.http.routers.api.tls=true`,
+        // Enable authentication
+        `traefik.http.middlewares.auth.forwardauth.address=http://api:${store.getPreset('MORIO_API_PORT')}/auth`,
+        `traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-`,
+        `traefik.http.routers.api.middlewares=auth@docker`,
       ],
     },
   }

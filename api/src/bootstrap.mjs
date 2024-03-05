@@ -40,7 +40,6 @@ export const bootstrapConfiguration = async () => {
   /*
    * Attempt to load the config from CORE
    */
-  let config
   const result = await attempt({
     every: 2,
     timeout: 60,
@@ -48,7 +47,6 @@ export const bootstrapConfiguration = async () => {
     onFailedAttempt: (s) => store.log.debug(`Waited ${s} seconds for core, will continue waiting.`),
   })
   if (result && Array.isArray(result) && result[0] === 200 && result[1]) {
-    config = result[1]
     store.log.debug(`Loaded configuration from core.`)
     /*
      * Also load the info from core
@@ -62,5 +60,6 @@ export const bootstrapConfiguration = async () => {
   } else {
     store.log.warn('Failed to load Morio config from core')
   }
-  store.config = config
+  store.config = result[1].config
+  store.keys = result[1].keys
 }

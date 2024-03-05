@@ -5,6 +5,18 @@ import mustache from 'mustache'
 import { config as configSchema } from '#schema/config'
 import Joi from 'joi'
 import _slugify from 'slugify'
+import { jwtDecode } from 'jwt-decode'
+
+export const decodeJwt = (token) => {
+  let result
+  try {
+    result = jwtDecode(token)
+  } catch (err) {
+    return false
+  }
+
+  return result
+}
 
 /**
  * A method to capitalize a string (first character only)

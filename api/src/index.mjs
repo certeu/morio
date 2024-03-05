@@ -2,6 +2,9 @@
 import express from 'express'
 import { wrapExpress } from '#shared/utils'
 import { getPreset } from '#config'
+import cookieParser from 'cookie-parser'
+// Middleware for RBAC headers
+import { addRbacHeaders } from './rbac.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
@@ -21,6 +24,16 @@ const app = express()
  * Add support for JSON with a limit to the request body
  */
 app.use(express.json({ limit: '1mb' }))
+
+/*
+ * Add support for cookies with a limit to the request body
+ */
+app.use(cookieParser())
+
+/*
+ * Add custom middleware to load roles from header
+ */
+app.use(addRbacHeaders)
 
 /*
  * Load the API routes

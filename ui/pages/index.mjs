@@ -121,18 +121,18 @@ const Setup = ({ pageProps }) => {
 
 export const NotUnlessSetup = ({ children, pageProps }) => {
   const { api } = useApi()
-  const [mSettings, setMSettings] = useState(null)
+  const [status, setStatus] = useState(null)
 
   useEffect(() => {
-    const loadMSettings = async () => {
-      const [content] = await api.getCurrentSettings()
-      setMSettings(content)
+    const loadStatus = async () => {
+      const [content] = await api.getStatus()
+      setStatus(content)
     }
-    if (!mSettings) loadMSettings()
+    if (!status) loadStatus()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
-  if (mSettings === null)
+  if (status === null)
     return (
       <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
         <div className="flex flex-col items-center justify-between h-screen">
@@ -146,7 +146,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
         </div>
       </PageWrapper>
     )
-  if (typeof mSettings.deployment === 'undefined') return <Setup pageProps={pageProps} />
+  if (status.ephemeral === true) return <Setup pageProps={pageProps} />
 
   return children
 }

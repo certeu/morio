@@ -50,7 +50,7 @@ export const Tabs = ({ tabs = '', active = 0, navs = false, linearTabs = false, 
   )
 
   return (
-    <div className="my-4">
+    <div className="my-2">
       <div className="tabs tabs-bordered" role="tablist">
         {tablist.map((title, tabId) => (
           <button

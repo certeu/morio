@@ -1,4 +1,4 @@
-import { randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync } from 'crypto'
+import { randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
@@ -75,18 +75,22 @@ export const generateCsr = async (data) => {
  * @param {object} data - Data to encode in the token
  * @return {object} jwt - The JSON web token
  */
-export const generateJwt = ({ data, store, options = {}, noDefaults = false, key = false }) => {
+export const generateJwt = ({ data, key, passphrase=false, options = {}, noDefaults = false }) => {
   const dfltOptions = {
     expiresIn: '4h',
     notBefore: 0,
-    audience: 'admin',
-    subject: 'admin',
-    issuer: 'admin',
+    audience: 'morio',
+    subject: 'morio',
+    issuer: 'morio',
+    algorithm: 'RS256',
   }
 
   return jwt.sign(
     data,
-    key ? key : store.config.deployment.key_pair.private,
+    passphrase
+      ? createPrivateKey({ key, passphrase, format: 'pem'})
+        .export({ type: 'pkcs8', format: 'pem' })
+      : key,
     noDefaults ? options : { ...dfltOptions, ...options }
   )
 }

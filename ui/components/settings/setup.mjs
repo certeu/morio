@@ -12,10 +12,12 @@ import { useApi } from 'hooks/use-api.mjs'
 import { SettingsReport } from './report.mjs'
 import { FormBlock } from './blocks/form.mjs'
 import { Spinner, LogoSpinner } from 'components/animations.mjs'
-import { StatusLogs } from 'components/status-logs.mjs'
 import { Box } from 'components/box.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { OkIcon } from 'components/icons.mjs'
+import { Popout } from 'components/popout.mjs'
+import { Highlight } from 'components/highlight.mjs'
+import { Link } from 'components/link.mjs'
 
 /*
  * Displays configuration validation
@@ -88,32 +90,45 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   }
 
   if (deploymentOngoing) {
-    const done = lastLogLine?.msg === 'Morio Core ready - Configuration Resolved'
-    const text = `text-${done ? 'success' : 'accent'}-content`
+    const text = `text-${deployResult?.root_token ? 'success' : 'accent'}-content`
     return (
-      <div className="flex flex-wrap flex-row gap-8 justify-center min-h-screen">
+      <div className="flex flex-wrap flex-row gap-8 justify-center">
         <div className="w-full max-w-xl">
-          <Box color={done ? 'success' : 'accent'}>
+          <Box color={deployResult?.root_token ? 'success' : 'accent'}>
             <div className={`flex flex-row items-center gap-2 ${text}`}>
               <div className="w-6 h-6">
-                {done ? (
+                {deployResult?.root_token ? (
                   <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                 ) : (
                   <LogoSpinner />
                 )}
               </div>
-              {done ? (
-                <Markdown className={`mdx dense ${text} inherit-color grow`}>
-                  {lastLogLine?.msg}
-                </Markdown>
+              {deployResult.root_token ? (
+                <span>Settings deployed.</span>
               ) : (
                 <span>Please wait while your settings are being deployed.</span>
               )}
             </div>
           </Box>
-          <h3>Status Logs</h3>
-          <StatusLogs lastLineSetter={setLastLogLine} />
+          {deployResult?.root_token ? (
+            <>
+              <Popout important>
+                <h5>Store the Morio Root Token in a safe place</h5>
+                <p>
+                  Below is the Morio Root Token which you can use to authenticate while no (other)
+                  authentication provider has been setup.
+                </p>
+                <Highlight>{deployResult.root_token}</Highlight>
+              </Popout>
+              <p className="text-center">
+                <Link className="btn btn-primary nt-4 btn-lg" href="/">
+                  Go to the Home Page
+                </Link>
+              </p>
+            </>
+          ) : null}
         </div>
+        <span></span>
       </div>
     )
   }

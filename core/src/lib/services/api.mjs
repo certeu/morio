@@ -18,6 +18,8 @@ export const service = {
     preCreate: async () => {
       // Configure TLS
       addTraefikTlsConfiguration(store.config.services.api)
+      // Configure authentication
+      //addTraefikAuthConfiguration(store.config.services.api)
 
       return true
     },

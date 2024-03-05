@@ -36,3 +36,12 @@ export const MsAgo = ({ time }) => {
   if (d > second) return `${Math.floor(d / second)}s  ago`
   return `${d}ms ago`
 }
+
+export const TimeToGo = ({ time }) => {
+  const d = Math.floor(time * 1000 - Date.now())
+  if (d > day) return `${Math.floor(d / day)}d`
+  if (d > hour) return `${Math.floor(d / hour)}h`
+  if (d > minute * 2) return `${Math.floor(d / minute)}m`
+  if (d > second) return `${Math.floor(d / second)}s`
+  return `${d}ms`
+}
