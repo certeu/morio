@@ -26,7 +26,7 @@ const AccountPage = (props) => {
               <p>
                 Your hold the following roles:{' '}
                 {account.roles.map((role) => (
-                  <span className="badge badge-success ml-1" key="role">
+                  <span className="badge badge-success ml-1" key={role}>
                     {role}
                   </span>
                 ))}
