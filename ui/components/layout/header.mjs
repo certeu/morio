@@ -87,9 +87,11 @@ export const Header = ({
               <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
                 {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
               </NavButton>
-              <NavButton href="/account" label="Your Account" extraClasses="hidden lg:flex">
-                <UserIcon />
-              </NavButton>
+              {user ? (
+                <NavButton href="/account" label="Your Account" extraClasses="hidden lg:flex">
+                  <UserIcon />
+                </NavButton>
+              ) : null}
             </div>
           </div>
         </div>

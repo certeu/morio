@@ -1,7 +1,7 @@
 import { useTheme } from 'hooks/use-theme.mjs'
 import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
 
-const Arrows = () => (
+export const Arrows = () => (
   <>
     <RightIcon className="w-4 h-4 text-success" />
     <RightIcon className="w-4 h-4 -ml-3 text-secondary" />
