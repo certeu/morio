@@ -48,6 +48,7 @@ export const docsNavs = {
         o: 'Terminology',
         ca: { t: 'CA', o: 'CA' },
         dry: { t: 'DRY', o: 'DRY' },
+        lomo: { t: 'LoMO', o: 'LoMO' },
         tls: { t: 'TLS', o: 'TLS' },
         x509: { t: 'X.509', o: 'X.509' },
       },

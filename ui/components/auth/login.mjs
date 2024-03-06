@@ -7,6 +7,7 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { PasswordInput } from '../inputs.mjs'
 import { Popout } from 'components/popout.mjs'
+import { Term } from 'components/term.mjs'
 // Providers
 import { MrtProvider } from './mrt-provider.mjs'
 
@@ -72,11 +73,23 @@ export const Login = ({ setAccount, account = false, role = false }) => {
           </Popout>
         </>
       ) : null}
-      <Tabs tabs="Root Token, other">
-        <Tab tabId="Root Token">
+      <Tabs tabs="Root Token, Not Sure?">
+        <Tab tabId="Root Token" key="mrt">
           <MrtProvider {...providerProps} />
         </Tab>
-        <Tab tabId="other">fixme: Handle other providers</Tab>
+        <Tab tabId="Not Sure?" key="help">
+          <h3>Not certain how to authenticate?</h3>
+          <p>
+            Morio supports a variety of authentication providers. Each tab lists one of them.
+            <br />
+            With the exception of the <b>Root Token</b> provider, they are set up by the local Morio
+            operator (<Term>LoMO</Term>).
+          </p>
+          <p>
+            Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
+            deployment.
+          </p>
+        </Tab>
       </Tabs>
       {error ? (
         <Popout warning compact noP>
