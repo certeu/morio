@@ -32,8 +32,8 @@ export const AuthWrapper = ({ role, account, setAccount, children }) => {
    * Avoid hydration errros
    */
   useEffect(() => {
-    if (!user && account) setUser(true)
-  }, [account])
+    if (!user) setUser(true)
+  }, [user])
 
   /*
    * This will render server-side, so it will also render
