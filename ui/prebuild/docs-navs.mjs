@@ -42,6 +42,7 @@ export const docsNavs = {
     reference: {
       t: 'Reference',
       o: '10Reference',
+      rbac: { t: 'RBAC', o: 'RBAC' },
       terminology: {
         t: 'Terminology',
         o: 'Terminology',

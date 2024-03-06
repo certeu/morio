@@ -1,0 +1,19 @@
+---
+title: RBAC
+---
+
+These are the roles as they are currently defined.
+The absence of a role is what is available to a user prior to authentication.
+
+| Action / Role     |     | user | manager | operator | engineer | root |
+| ----------------- | :-: | :--: | :-----: | :------: | :------: | :--: |
+| Access API        | ✅  |  ✅  |   ✅    |    ✅    |    ✅    |  ✅  |
+| Access UI         | ✅  |  ✅  |   ✅    |    ✅    |    ✅    |  ✅  |
+| Read Docs         | ❌  |  ✅  |   ✅    |    ✅    |    ✅    |  ✅  |
+| Traefik Dashboard | ❌  |  ❌  |   ✅    |    ✅    |    ✅    |  ✅  |
+| Read Status       | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
+| Read Settings     | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
+| Read Docker       | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
+| Write Docker      | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
+| RedPanda Console  | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
+| Write Settings    | ❌  |  ❌  |   ❌    |    ✅    |    ✅    |  ✅  |
