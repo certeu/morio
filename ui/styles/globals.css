@@ -97,6 +97,22 @@
     @apply bg-base-300 border border-base-300 px-1.5 py-0.5 bg-opacity-30 rounded;
   }
 
+  .mdx table {
+    @apply w-full border border-base-300;
+  }
+  .mdx thead tr {
+    @apply bg-primary text-neutral-content;
+  }
+  .mdx tbody tr:nth-child(odd) {
+    @apply bg-primary bg-opacity-10;
+  }
+  .mdx table th {
+    @apply px-3 py-2;
+  }
+  .mdx table td {
+    @apply px-3 py-1;
+  }
+
   /* statuslug styles */
   table.statuslog > tr > td > div.mdx > p {
     padding: 0;
