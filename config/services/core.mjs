@@ -50,5 +50,12 @@ export const resolveServiceConfiguration = (store) => {
         `MORIO_CORE_LOG_LEVEL=${store.inProduction() ? store.getPreset('MORIO_CORE_LOG_LEVEL') : 'debug'}`,
       ],
     },
+    /*
+     * When the initial settings are created, these values will be merged in
+     */
+    default_settings: [
+      ['tokens.flags.HEADLESS_MORIO', false],
+      ['tokens.flags.DISABLE_ROOT_TOKEN', false],
+    ],
   }
 }

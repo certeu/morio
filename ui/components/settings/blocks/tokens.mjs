@@ -1,5 +1,13 @@
 import { useState, useContext } from 'react'
-import { PlusIcon, TrashIcon, VariableIcon, WarningIcon, QuestionIcon } from 'components/icons.mjs'
+import {
+  PlusIcon,
+  TrashIcon,
+  VariableIcon,
+  WarningIcon,
+  QuestionIcon,
+  BoolNoIcon,
+  BoolYesIcon,
+} from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import Joi from 'joi'
@@ -15,7 +23,7 @@ const TokenHelp = ({ secrets, pushModal }) => (
     onClick={() =>
       pushModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-          {secrets ? <VariableSelectDocs /> : <SecretSelectDocs />}
+          {secrets ? <SecretSelectDocs /> : <VariableSelectDocs />}
         </ModalWrapper>
       )
     }
@@ -250,3 +258,53 @@ export const Tokens = ({ update, data, secrets = false }) => {
 
 export const Vars = Tokens
 export const Secrets = (props) => <Tokens {...props} secrets />
+
+const flags = {
+  DISABLE_ROOT_TOKEN: 'Block authentication with the Morio Root Token',
+  HEADLESS_MORIO: 'Run Morio in headless mode, where the UI is not available',
+}
+
+export const Flags = ({ update, data }) => {
+  const { pushModal, popModal } = useContext(ModalContext)
+
+  const allFlags = data?.tokens?.flags || {}
+
+  return (
+    <>
+      <div className="flex flex-col gap-2">
+        {Object.keys(data?.tokens?.flags || {})
+          .sort()
+          .map((key) => (
+            <label
+              className={`hover:cursor-pointer border-4 border-y-0 border-r-0 p-2
+              hover:border-primary hover:bg-primary hover:bg-opacity-10`}
+              key={key}
+              for={key}
+            >
+              <div for={key} className="flex flex-row gap-2 items-center">
+                {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
+                <span
+                  className={`badge badge-lg badge-${data.tokens.flags[key] ? 'success' : 'error'}`}
+                >
+                  {key}
+                </span>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <input
+                  id={key}
+                  type="checkbox"
+                  value={data.tokens.flags[key]}
+                  onChange={() => update(`tokens.flags.${key}`, !data.tokens.flags[key])}
+                  className="toggle my-3 toggle-primary"
+                  checked={data.tokens.flags[key]}
+                />
+                <label className="hover:cursor-pointer" for={key}>
+                  {flags[key]}
+                </label>
+              </div>
+            </label>
+          ))}
+      </div>
+    </>
+  )
+}

@@ -85,17 +85,6 @@ export const service = {
       }
 
       /*
-       * If we get here, we have a timestamp and on-disk settings
-       */
-      store.info.ephemeral = false
-      store.info.current_settings = timestamp
-      store.config = cloneAsPojo(settings)
-      // Take care of encrypted settings and store the save ones
-      store.saveSettings = cloneAsPojo(settings)
-      store.settings = templateSettings(settings)
-      store.keys = keys
-
-      /*
        * Add encryption methods
        */
       const { encrypt, decrypt, isEncrypted } = encryptionMethods(
@@ -108,11 +97,25 @@ export const service = {
       store.isEncrypted = isEncrypted
 
       /*
+       * If we get here, we have a timestamp and on-disk settings
+       */
+      store.info.ephemeral = false
+      store.info.current_settings = timestamp
+      store.config = cloneAsPojo(settings)
+      // Take care of encrypted settings and store the save ones
+      store.saveSettings = cloneAsPojo(settings)
+      store.settings = templateSettings(settings)
+      store.keys = keys
+
+      /*
        * Only one node makes this easy
        * FIXME: Handle clustering
        */
+      if (typeof store.config === 'undefined') store.config = {}
+      if (typeof store.config.services === 'undefined') store.config.services = {}
+      if (typeof store.config.containers === 'undefined') store.config.containers = {}
+      if (typeof store.config.core === 'undefined') store.config.core = {}
       if (store.config.deployment && store.config.deployment.node_count === 1) {
-        if (!store.config.core) store.config.core = {}
         store.config.core.node_nr = 1
         store.config.core.names = {
           internal: 'core_1',

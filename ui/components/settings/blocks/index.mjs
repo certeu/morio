@@ -3,8 +3,9 @@ import React, { Fragment } from 'react'
 import { Popout } from 'components/popout.mjs'
 import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
+import { AuthProviders } from './iam.mjs'
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
-import { Vars, Secrets } from './tokens.mjs'
+import { Flags, Vars, Secrets } from './tokens.mjs'
 import { FormWrapper } from './form.mjs'
 import { MdxWrapper } from './mdx.mjs'
 
@@ -12,9 +13,11 @@ import { MdxWrapper } from './mdx.mjs'
  * Map between type in wizard config and React component
  */
 const blocks = {
+  authProviders: AuthProviders,
   connectorInputs: ConnectorInputs,
   connectorOutputs: ConnectorOutputs,
   connectorPipelines: ConnectorPipelines,
+  flags: Flags,
   vars: Vars,
   secrets: Secrets,
   form: FormWrapper,

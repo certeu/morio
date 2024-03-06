@@ -128,6 +128,11 @@ export function routes(app) {
   app.get(`${PREFIX}/settings`, Core.getSettings)
 
   /*
+   * Hit this route to get the available idenity/authentication providers (idps)
+   */
+  app.get(`${PREFIX}/idps`, Core.getIdps)
+
+  /*
    * Hit this route to get the running presets
    */
   app.get(`${PREFIX}/presets`, Core.getPresets)

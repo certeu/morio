@@ -165,16 +165,10 @@ const XputButton = ({
     ) : null}
     <button
       className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer w-full
-        flex flex-row ${type === 'input' ? 'flex-row-reverse' : ''} gap-0 items-center
+        flex flex-row gap-0 items-center
         ${pipelines ? 'bg-success bg-opacity-20' : ''}`}
       onClick={onClick}
     >
-      {type === 'input' && available && (
-        <InputIcon className="w-12 h-12 shrink-0 grow-0 text-success -mr-4" stroke={1.25} />
-      )}
-      {type === 'output' && available && (
-        <OutputIcon className="w-12 h-12 shrink-0 grow-0 text-success -ml-4" stroke={1.25} />
-      )}
       <div className="flex flex-col items-start justify-between p-2 grow text-left">
         <span className="capitalize text-lg font-bold">{title ? title : id}</span>
         <span className="-mt-1 text-sm italic opacity-80">{about}</span>
@@ -355,8 +349,8 @@ const AddPipeline = (props) => {
     set(newSettings, key, val)
     setPipelineSettings(newSettings)
   }
-  const inputPlugin = props.data.connector.inputs?.[pipelineSettings.input?.id]?.plugin
-  const outputPlugin = props.data.connector.outputs?.[pipelineSettings.output?.id]?.plugin
+  const inputPlugin = props.data?.connector?.inputs?.[pipelineSettings.input?.id]?.plugin
+  const outputPlugin = props.data?.connector?.outputs?.[pipelineSettings.output?.id]?.plugin
 
   const form = [
     {
@@ -378,7 +372,7 @@ const AddPipeline = (props) => {
           },
           {
             schema: Joi.string().optional().allow('').label('Description'),
-            update: (val) => localUpdate('about', val),
+            epdate: (val) => localUpdate('about', val),
             label: 'Description',
             labelBL: 'A description to help understand the purpose of this pipeline',
             labelBR: <span className="italic opacity-70">Optional</span>,

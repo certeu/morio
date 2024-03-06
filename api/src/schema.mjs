@@ -39,6 +39,10 @@ export const settingsSchema = Joi.object({
   tokens: Joi.object({
     vars: Joi.object(),
     secrets: Joi.object(),
+    flags: Joi.object(),
+  }),
+  iam: Joi.object({
+    providers: Joi.object(),
   }),
 })
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { SecretInput, ListInput } from '../inputs.mjs'
 
 /**
@@ -38,6 +38,7 @@ export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => 
       />
       <ListInput
         label="Role"
+        labelBL="Not selecting any role will result in all roles being assigned"
         dense
         dir="row"
         update={(val) => (role === val ? setRole(false) : setRole(val))}

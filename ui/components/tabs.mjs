@@ -45,9 +45,9 @@ export const Tabs = ({ tabs = '', active = 0, navs = false, linearTabs = false, 
   if (!tablist) return null
 
   // Pass down activeTab and tabId for conditional rendering
-  const childrenWithTabSetter = children.map((child, tabId) =>
-    React.cloneElement(child, { activeTab, tabId })
-  )
+  const childrenWithTabSetter = children
+    .map((child, tabId) => React.cloneElement(child, { activeTab, tabId }))
+    .filter((el) => el.key !== undefined)
 
   return (
     <div className="my-2">

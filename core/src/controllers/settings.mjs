@@ -1,7 +1,8 @@
-import { writeYamlFile, writeBsonFile, readDirectory, readYamlFile } from '#shared/fs'
+import { writeYamlFile, writeBsonFile } from '#shared/fs'
 import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
+import set from 'lodash.set'
 // Store
 import { store } from '../lib/store.mjs'
 
@@ -13,29 +14,34 @@ import { store } from '../lib/store.mjs'
 export function Controller() {}
 
 /**
- * Loads the list of available (sets of) settings
+ * Returns a list of available identity/authentication providers
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getSettingsList = async (req, res) => {
-  /*
-   * Find out what settings files exists on disk
-   */
-  const timestamps = ((await readDirectory(`/etc/morio`)) || [])
-    .filter((file) => new RegExp('config.[0-9]+.yaml').test(file))
-    .map((file) => file.split('.')[1])
-    .sort()
+Controller.prototype.getIdps = async (req, res) => {
+  const idps = {}
 
   /*
-   * Now load settings files
+   * Add the root token idp, unless it's disabled by a feature flag
    */
-  const sets = {}
-  for (const timestamp of timestamps) {
-    sets[timestamp] = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
+  if (store.settings.tokens?.flags?.DISABLE_ROOT_TOKEN !== true) {
+    idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
   }
 
-  return res.send({ current: store.config.settings, sets }).end()
+  /*
+   * Add the IDPs configured by the user
+   */
+  if (store.settings?.iam?.providers) {
+    for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
+      idps[conf.label] = { id, provider: conf.provider }
+    }
+  }
+
+  /*
+   * Return the list
+   */
+  return res.send({ idps }).end()
 }
 
 const ensureTokenSecrecy = (secrets) => {
@@ -158,6 +164,13 @@ Controller.prototype.setup = async (req, res) => {
   if (!keys.public || !keys.private) {
     store.log.debug(`Configuration lacks key pair`)
     return res.status(400).send({ errors: ['Configuration lacks key pair'] })
+  }
+
+  /*
+   * Update the settings with the defaults that are configured
+   */
+  for (const [key, val] of store.config.services.core.default_settings) {
+    set(mSettings, key, val)
   }
 
   /*

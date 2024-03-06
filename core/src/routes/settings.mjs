@@ -25,4 +25,9 @@ export function routes(app) {
    * Save settings means secrets are not decrypted
    */
   app.get('/settings', (req, res) => res.send(store.get('saveSettings', {})))
+
+  /*
+   * Load the available authentication/identity providers (IDPs)
+   */
+  app.get('/idps', Settings.getIdps)
 }

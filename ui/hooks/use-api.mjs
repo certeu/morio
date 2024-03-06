@@ -66,6 +66,15 @@ MorioClient.prototype.getCurrentConfig = async function () {
 }
 
 /**
+ * Gets the list of authentication providers
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getIdps = async function () {
+  return await this.call(`${morioConfig.api}/idps`)
+}
+
+/**
  * Gets the current status
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble

@@ -59,7 +59,7 @@ const validate = (value, schema, label) => {
 }
 
 export const FormBlock = (props) => {
-  const { update, formValidation, updateFormValidation } = props
+  const { update, formValidation, updateFormValidation, freeze = false } = props
   // Ensure form is always an array
   const form = Array.isArray(props.form) ? props.form : [props.form]
 
@@ -104,7 +104,7 @@ export const FormBlock = (props) => {
                 update={(val) => _update(val, formEl.key, formEl.transform)}
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}
-                {...{ formValidation, updateFormValidation }}
+                {...{ formValidation, updateFormValidation, freeze }}
                 mSettings={props.mSettings}
               />
             )
@@ -129,7 +129,7 @@ export const FormBlock = (props) => {
 }
 
 export const FormElement = (props) => {
-  const { schema, formValidation, updateFormValidation } = props
+  const { schema, formValidation, updateFormValidation, freeze = false } = props
   if (!Joi.isSchema(schema) && !props.hidden)
     return (
       <Popout fixme>
@@ -151,6 +151,7 @@ export const FormElement = (props) => {
           return result
         },
   }
+  if (freeze && freeze.includes(props.id)) inputProps.disabled = true
 
   if (props.inputType === 'buttonList') return <ListInput {...inputProps} />
   if (props.inputType === 'toggle') return <ToggleInput {...inputProps} />

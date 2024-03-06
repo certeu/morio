@@ -78,6 +78,8 @@ const allowedUris = [
   `${store.prefix}/status/`,
   `${store.prefix}/login`,
   `${store.prefix}/login/`,
+  `${store.prefix}/idps`,
+  `${store.prefix}/idps/`,
 ]
 
 /**

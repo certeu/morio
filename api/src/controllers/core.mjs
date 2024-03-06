@@ -248,6 +248,18 @@ Controller.prototype.getSettings = async (req, res) => {
 }
 
 /**
+ * Loads the available idenitity/authentication providers (IDPs)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getIdps = async (req, res) => {
+  const [status, result] = await store.core.get(`/idps`)
+
+  return res.status(status).send(result)
+}
+
+/**
  * Loads the current presets from core
  *
  * @param {object} req - The request object from Express
