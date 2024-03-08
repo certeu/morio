@@ -2,7 +2,7 @@ import { store } from '../lib/store.mjs'
 import { roles } from '../rbac.mjs'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
-import { createSecureContext } from 'node:tls'
+import tls from 'tls'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -37,10 +37,9 @@ const strategy = (id) => {
 
   /*
    * Or trust a specific certificate?
-   * FIXME: This does not work (yet)
    */
     options.server.tlsOptions = {
-      secureContext: createSecureContext({
+      secureContext: tls.createSecureContext({
         ca: store.config.iam.providers[id].trust_certificate,
       }),
     }
