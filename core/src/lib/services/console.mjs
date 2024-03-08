@@ -1,4 +1,6 @@
 import { readJsonFile, writeYamlFile } from '#shared/fs'
+// Default hooks
+import { defaultWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -8,9 +10,28 @@ import { store } from '../store.mjs'
 export const service = {
   name: 'console',
   hooks: {
-    wanted: () => (store.info.ephemeral ? false : true),
-    recreateContainer: () => false,
-    restartContainer: () => false,
+    /*
+     * Lifecycle hook to determine whether the container is wanted
+     * We just reuse the default hook here, checking for ephemeral state
+     */
+    wanted: defaultWantedHook,
+    /*
+     * Lifecycle hook to determine whether to recreate the container
+     * We just reuse the default hook here, checking for changes in
+     * name/version of the container.
+     */
+    recreateContainer: defaultRecreateContainerHook,
+    /**
+     * Lifecycle hook to determine whether to restart the container
+     * We just reuse the default hook here, checking whether the container
+     * was recreated or is not running.
+     */
+    restartContainer: defaultRestartContainerHook,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
     preCreate: async () => {
       /*
        * We'll check if there's a config file on disk

@@ -348,3 +348,87 @@ export const restartMorioServiceContainer = async (service, containerId) => {
 
   return ok
 }
+
+/**
+ * The default wanted lifecycle hook
+ *
+ * Containers need to specify this hook, but for several containers
+ * we just check whether we are running in ephemeral state of not.
+ * So rather than create that hook for each service, we reuse this method.
+ *
+ * @retrun {boolean} result - True to indicate the container is wanted
+ */
+export function defaultWantedHook() {
+  return store.info.ephemeral ? false : true
+}
+
+/**
+ * The 'always' wanted lifecycle hook
+ *
+ * Containers need to specify this hook, but several containers should always
+ * be running. So rather than create that hook for each service, we reuse this
+ * method.
+ *
+ * @retrun {boolean} result - True to indicate the container is wanted
+ */
+export function alwaysWantedHook() {
+  return true
+}
+
+/**
+ * The default recreateContainer lifecycle hook
+ *
+ * Containers need to specify this hook, but for most containers
+ * we just check whether the version or name has changed, and that's it.
+ * So rather than create that hook for each service, we reuse this method.
+ *
+ * @param {string} service - Name of the service
+ * @param {object} running - Holds info of running containers
+ * @retrun {boolean} result - True to recreate the container
+ */
+export function defaultRecreateContainerHook(service, running) {
+  /*
+   * If the container is not currently running, recreate it
+   */
+  if (!running[service]) return true
+
+  /*
+   * If container name or image changes, recreate it
+   */
+  const cConf = store.config.services[service].container // Save us some typing
+  if (
+    running.services.Names[0] !== `/${cConf.container_name}` ||
+    running.services.Image !== `${cConf.image}:${cConf.tag}`
+  ) return true
+
+  /*
+   * If not, leave it as is
+   */
+  return false
+}
+
+/**
+ * The default restartContainer lifecycle hook
+ *
+ * Containers need to specify this hook, but for most containers
+ * we just check whether the container was just (re)created or is
+ * not running, and that's it.
+ * So rather than create that hook for each service, we reuse this method.
+ *
+ * @param {string} service - Name of the service
+ * @param {object} running - Holds info of running containers
+ * @param {boolean} recreate - Whether the container was just (re)created
+ * @retrun {boolean} result - True to restart the container
+ */
+export function defaultRestartContainerHook(service, running, recreate) {
+  /*
+   * If the container was recreated, or is not running, always start it
+   */
+  if (recreate || !running[service]) return true
+
+  /*
+   * In all other cases, leave it as is
+   */
+  return false
+}
+

@@ -1,4 +1,6 @@
 import { readFile, writeFile } from '#shared/fs'
+// Default hooks
+import { alwaysWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -8,18 +10,29 @@ import { store } from '../store.mjs'
 export const service = {
   name: 'proxy',
   hooks: {
-    recreateContainer: () => false,
-    restartContainer: (running, recreate) => {
-      if (recreate) return true
-      if (!running.api) return true
-
-      return false
-    },
     /*
-     * Before creating the container, update the entrypoint
-     * shell script with our own one.
-     * This will be volume-mapped, so we need to write it to
-     * disk first so it's available
+     * Lifecycle hook to determine whether the container is wanted
+     * We reuse the always method here, since this should always be running
+     */
+    wanted: alwaysWantedHook,
+    /*
+     * Lifecycle hook to determine whether to recreate the container
+     * We just reuse the default hook here, checking for changes in
+     * name/version of the container.
+     */
+    recreateContainer: defaultRecreateContainerHook,
+    /**
+     * Lifecycle hook to determine whether to restart the container
+     * We just reuse the default hook here, checking whether the container
+     * was recreated or is not running.
+     */
+    restartContainer: defaultRestartContainerHook,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * We update the entrypoint shell script with our own one.
+     * This will be volume-mapped, so we need to write it to disk so it's available
+     * when the container is created.
      */
     preCreate: async () => {
       /*

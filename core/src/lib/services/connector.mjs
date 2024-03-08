@@ -1,9 +1,9 @@
 import { readYamlFile, readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
 import { extname, basename } from 'node:path'
+// Default hooks
+import { defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
-
-export const wanted = () => false
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -11,23 +11,41 @@ export const wanted = () => false
 export const service = {
   name: 'connector',
   hooks: {
+    /**
+     * Lifecycle hook to determine whether the container is wanted
+     *
+     * For the connector, the answer is only true when there are pipelines configured
+     *
+     * @return {boolean} wanted - Wanted or not
+     */
     wanted: async () => {
       if (store.config?.connector?.pipelines) {
         if (
-          Object.values(store.config.connector.pipelines).filter((pipe) => !pipe.disabled).length >
-          0
+          Object.values(store.config.connector.pipelines)
+          .filter((pipe) => !pipe.disabled).length > 0
         )
           return true
       }
 
       return false
     },
-    recreateContainer: () => false,
-    restartContainer: () => false,
     /*
-     * Before creating the container, write out the logstash.yml file
-     * This will be volume-mapped, so we need to write it to
-     * disk first so it's available
+     * Lifecycle hook to determine whether to recreate the container
+     * We just reuse the default hook here, checking for changes in
+     * name/version of the container.
+     */
+    recreateContainer: defaultRecreateContainerHook,
+    /**
+     * Lifecycle hook to determine whether to restart the container
+     * We just reuse the default hook here, checking whether the container
+     * was recreated or is not running.
+     */
+    restartContainer: defaultRestartContainerHook,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * Write out the logstash.yml file as it will be volume-mapped,
+     * so we need to write it to disk first so it's available
      */
     preCreate: async () => {
       /*
@@ -57,6 +75,9 @@ export const service = {
 
       return true
     },
+    /**
+     * Lifecycle hook for anything to be done prior to starting the container
+     */
     preStart: async () => {
       /*
        * Need to write out pipelines, but also remove any that
@@ -80,14 +101,29 @@ export const service = {
   },
 }
 
+/**
+ * Helper method to load a list of all pipeline configurations from disk
+ *
+ * @return {Array} list - A list of filenames
+ */
 const loadPipelinesFromDisk = async () =>
   ((await readDirectory(`/etc/morio/connector/pipelines`)) || [])
     .filter((file) => extname(file) === '.config')
     .map((file) => basename(file).slice(0, -7))
     .sort()
 
+/**
+ * Helper method to generate the pipeline configuration filename
+ *
+ * @return {string} filename - The filename for the configuration
+ */
 const pipelineFilename = (id) => `${id}.config`
 
+/*
+ * Helper method to create the pipelines wanted by the user
+ *
+ * @param {Array} wantedPipelines - List of pipelines wanted by the user
+ */
 const createWantedPipelines = async (wantedPipelines) => {
   const pipelines = []
   for (const id of wantedPipelines) {
@@ -105,6 +141,15 @@ const createWantedPipelines = async (wantedPipelines) => {
   await writeYamlFile(`/etc/morio/connector/config/pipelines.yml`, pipelines, store.log)
 }
 
+/**
+ * Helper method to remove pipeline configurations files from disk
+ *
+ * When you create a pipeline, and then remove it later, this will
+ * garbage-collect its configuration file
+ *
+ * @param {Array} currentPipelines - List of pipelines currently on disk
+ * @param {Array} wantedPipelines - List of pipelines wanted by the user
+ */
 const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
@@ -114,6 +159,13 @@ const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
   }
 }
 
+/**
+ * Helper method to generate a Logstash pipeline configuration
+ *
+ * @param {object} pipeline - The pipeline configuration
+ * @param {string} pipelineId - The pipeline ID
+ * @return {string} config - The generated pipeline configuration
+ */
 const generatePipelineConfiguration = (pipeline, pipelineId) => {
   const input = store.settings.connector?.inputs?.[pipeline.input.id] || false
   const output = store.settings.connector?.outputs?.[pipeline.output.id] || false
@@ -127,18 +179,48 @@ ${generateXputConfig(output, pipeline, pipelineId, 'output')}
 `
 }
 
-const logstashPluginName = (plugin) =>
+/**
+ * Gets the Logstash plugin name based on the pipeline plugin
+ *
+ * Most of the time, the plugin name used by morio is the same as the Logstash
+ * plugin name. For example, rss is rss, imap is imap, and so on.
+ * But for some, there is a difference. Specifically morio_local and
+ * morio_remote which both use the kafka logstash plugin under the hood
+ *
+ * @param {string} plugin - The morip connector plugin name
+ * @return {string} logStashplugin - The Logstash plugin name
+ */
+const morioPluginAsLogstashPluginName = (plugin) =>
   ['morio_local', 'morio_remote'].includes(plugin) ? 'kafka' : plugin
 
+/**
+ * Generates an input or output (xput) configuration for Logstash
+ *
+ * @param {object} xput - the xput configuration
+ * @param {object} pipeline - the pipeline configuration
+ * @param {string} pipelineId - the pipeline ID
+ * @return {string} config - the xput configuration
+ */
 const generateXputConfig = (xput, pipeline, pipelineId, type) =>
   logstash[type]?.[xput.plugin]
     ? logstash[type][xput.plugin](xput, pipeline, pipelineId)
     : `
 # ${type === 'input' ? 'Input' : 'Output'}, aka where to ${type === 'input' ? 'read data from' : 'write data to'}
 ${type} {
-  ${logstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, pipelineId, type)}  }
+  ${morioPluginAsLogstashPluginName(xput.plugin)} { ${generatePipelinePluginConfig(xput.plugin, xput, pipeline, pipelineId, type)}  }
 }
+
 `
+/**
+ * Generates a pipeline plugin configuration for Logstash
+ *
+ * @param {string} plugin - the morio plugin name
+ * @param {object} xput - the xput configuration
+ * @param {object} pipeline - the pipeline configuration
+ * @param {string} pipelineId - the pipeline ID
+ * @param {string} type - one of 'input' or 'output'
+ * @return {string} config - the xput configuration
+ */
 const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) => {
   let config = ''
   for (const [key, val] of Object.entries(xput)) {
@@ -157,6 +239,9 @@ const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) 
   return config + '\n'
 }
 
+/*
+ * The base logstash configuration prepopulated with the local morio output
+ */
 const logstash = {
   input: {},
   output: {

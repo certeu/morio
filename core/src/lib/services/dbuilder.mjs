@@ -4,10 +4,21 @@ import { resolveControlFile } from '#config/services/dbuilder'
 export const service = {
   name: 'dbuilder',
   hooks: {
+    /*
+     * Lifecycle hook to determine whether the container is wanted
+     *
+     * We simply return the passed in value here
+     */
     wanted: (onDemandBuild = false) => onDemandBuild,
+    /*
+     * This is an epehemeral container
+     * It should never be recreated/restarted as part of the regular lifecycle
+     */
     recreateContainer: () => false,
     restartContainer: () => false,
-    /*
+    /**
+     * Lifecycle hook for anything to be done prior to starting the build
+     *
      * Generate and write control file for the build
      */
     prebuild: async (customSettings = {}) => {

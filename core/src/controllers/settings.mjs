@@ -1,5 +1,5 @@
 import { writeYamlFile, writeBsonFile } from '#shared/fs'
-import { generateJwtKey, generateKeyPair, randomString } from '#shared/crypto'
+import { generateJwtKey, generateKeyPair, randomString, encryptionMethods } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import set from 'lodash.set'
@@ -171,6 +171,38 @@ Controller.prototype.setup = async (req, res) => {
    */
   for (const [key, val] of store.config.services.core.default_settings) {
     set(mSettings, key, val)
+  }
+
+  /*
+   * Handle secrets - Which requires some extra work
+   * At this point, the store does not (yet) hold our encryption methods.
+   * So we need to add them prior to calling ensureTokenSecrecy.
+   * However, all of this is only required if/when the initial settings
+   * contain secrets. Soemthing which is not supported in the UI but can
+   * happen when people either use the API for initial setup, or upload a
+   * settings file.
+   *
+   * So let's first check whether there are any secrets, and if not just
+   * bypass the entire secret handling.
+   */
+  if (mSettings.tokens?.secrets) {
+
+    /*
+     * Add encryption methods
+     */
+    const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+      keys.mrt,
+      'Morio by CERT-EU',
+      store.log
+    )
+    store.encrypt = encrypt
+    store.decrypt = decrypt
+    store.isEncrypted = isEncrypted
+
+    /*
+     * Now ensure token secrecy before we write to disk
+     */
+    mSettings.tokens.secrets = ensureTokenSecrecy(mSettings.tokens.secrets)
   }
 
   /*

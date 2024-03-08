@@ -13,6 +13,8 @@ import axios from 'axios'
 import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
+// Default hooks
+import { alwaysWantedHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -23,6 +25,14 @@ import { store } from '../store.mjs'
 export const service = {
   name: 'core',
   hooks: {
+    /*
+     * Lifecycle hook to determine whether the container is wanted
+     * We reuse the always method here, since this should always be running
+     */
+    wanted: alwaysWantedHook,
+    /*
+     * Core cannot/should not recreate or restart itself
+     */
     recreateContainer: () => false,
     restartContainer: () => false,
     /*

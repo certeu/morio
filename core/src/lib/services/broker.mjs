@@ -3,6 +3,8 @@ import { attempt, sleep } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
+// Default hooks
+import { defaultWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -12,11 +14,32 @@ import { store } from '../store.mjs'
 export const service = {
   name: 'broker',
   hooks: {
-    wanted: () => (store.info.ephemeral ? false : true),
-    recreateContainer: () => false,
-    restartContainer: () => false,
+    /*
+     * Lifecycle hook to determine whether the container is wanted
+     * We just reuse the default hook here, checking for ephemeral state
+     */
+    wanted: defaultWantedHook,
+    /*
+     * Lifecycle hook to determine whether to recreate the container
+     * We just reuse the default hook here, checking for changes in
+     * name/version of the container.
+     */
+    recreateContainer: defaultRecreateContainerHook,
+    /**
+     * Lifecycle hook to determine whether to restart the container
+     * We just reuse the default hook here, checking whether the container
+     * was recreated or is not running.
+     */
+    restartContainer: defaultRestartContainerHook,
+    /**
+     * Lifecycle hook for anything to be done prior to starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
     preStart: async () => {
-      // Don't repeat yourself
+      /*
+       * Location of the broker config file within the core container
+       */
       const brokerConfigFile = `/etc/morio/broker/redpanda.yaml`
 
       /*
@@ -32,7 +55,7 @@ export const service = {
 
       /*
        * Broker is not initialized, we need to get a certitificate,
-       * but 9 tiumes out of 10, this means the CA has just been starte
+       * but 9 times out of 10, this means the CA has just been started
        * by core. So let's give it 6.66 seconds to come up
        */
       store.log.debug(
@@ -42,7 +65,7 @@ export const service = {
       store.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
 
       /*
-       * It is not, generate X.509 certificate/key for the broker(s)
+       * Generate X.509 certificate/key for the broker(s)
        */
       const certAndKey = await createX509Certificate({
         certificate: {
@@ -58,7 +81,7 @@ export const service = {
       })
 
       /*
-       * No config, generate configuration file and write it to disk
+       * Now generate the configuration file and write it to disk
        */
       // 101 is the UID that redpanda runs under inside the container
       const uid = store.getPreset('MORIO_BROKER_UID')
@@ -77,6 +100,11 @@ export const service = {
 
       return true
     },
+    /**
+     * Lifecycle hook for anything to be done right after starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
     postStart: async () => {
       /*
        * Make sure broker is up
@@ -104,6 +132,9 @@ export const service = {
   },
 }
 
+/**
+ * Helper method to create topics on the broker
+ */
 const ensureTopicsExist = async () => {
   const topics = await getTopics()
 

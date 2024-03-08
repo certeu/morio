@@ -59,6 +59,11 @@ export const presets = {
     //'traces', // For distributed tracing / spans
   ],
 
+  // Broker KV topics to create at startup (compacted topics)
+  MORIO_BROKER_KV_TOPICS: [
+    'morio_accounts', // Holds morio account data
+  ],
+
   // Broker UID inside container
   MORIO_BROKER_UID: 101,
 

@@ -3,6 +3,8 @@ import { generateCaRoot, keypairAsJwk } from '#shared/crypto'
 import { cp, readJsonFile, readFile, writeFile, chown, mkdir } from '#shared/fs'
 import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
+// Default hooks
+import { defaultWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -12,10 +14,26 @@ import { store } from '../store.mjs'
 export const service = {
   name: 'ca',
   hooks: {
-    wanted: () => (store.info.ephemeral ? false : true),
-    recreateContainer: () => false,
-    restartContainer: () => false,
     /*
+     * Lifecycle hook to determine whether the container is wanted
+     * We just reuse the default hook here, checking for ephemeral state
+     */
+    wanted: defaultWantedHook,
+    /*
+     * Lifecycle hook to determine whether to recreate the container
+     * We just reuse the default hook here, checking for changes in
+     * name/version of the container.
+     */
+    recreateContainer: defaultRecreateContainerHook,
+    /**
+     * Lifecycle hook to determine whether to restart the container
+     * We just reuse the default hook here, checking whether the container
+     * was recreated or is not running.
+     */
+    restartContainer: defaultRestartContainerHook,
+    /**
+     * Lifecycle hook for anything to be done prior to starting the container
+     *
      * We need to bootstrap the CA or it will generate a random root certificate
      * and secret, and even output the secret in the logs.
      * So instead, let's tell it what root certificate/keys/password it should use.
@@ -55,7 +73,7 @@ export const service = {
       }
 
       /*
-       * No config, generate configuration, keys, certs, and secrets file
+       * No config found, generate configuration, keys, certs, and secrets file
        */
       store.log.debug('Generating inital CA config - This will take a couple of seconds')
 
@@ -145,9 +163,13 @@ export const service = {
 
       return true
     },
-    /*
+    /**
+     * Lifecycle hook for anything to be done right after starting the container
+     *
      * We need to make sure the CA is up and running before we continue.
      * If not, provisioning of certificates will fail.
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
      */
     postStart: async () => {
       /*
