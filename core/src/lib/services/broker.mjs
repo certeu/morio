@@ -4,7 +4,11 @@ import { createX509Certificate } from './core.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
 // Default hooks
-import { defaultWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
+import {
+  defaultWantedHook,
+  defaultRecreateContainerHook,
+  defaultRestartContainerHook,
+} from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -143,6 +147,24 @@ const ensureTopicsExist = async () => {
     .filter((topic) => !topics.includes(topic))) {
     store.log.debug(`Topic ${topic} not present, creating now.`)
     await execContainerCommand('broker', ['rpk', 'topic', 'create', topic])
+  }
+
+  for (const topic of store
+    .getPreset('MORIO_BROKER_KV_TOPICS')
+    .filter((topic) => !topics.includes(topic))) {
+    store.log.debug(`Topic ${topic} not present, creating now.`)
+    await execContainerCommand('broker', [
+      'rpk',
+      'topic',
+      'create',
+      '--topic-config',
+      'cleanup.policy=compact',
+      '--topic-config',
+      'retention.ms=-1',
+      '--topic-config',
+      'retention.bytes=1073741824',
+      topic,
+    ])
   }
 }
 
