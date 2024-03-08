@@ -1,21 +1,17 @@
 import { useState, useEffect } from 'react'
-import { SecretInput, ListInput } from '../inputs.mjs'
-
-/**
- * Roles supported by this provider
- */
-const roles = ['user', 'manager', 'operator', 'engineer', 'root']
+import { SecretInput } from '../inputs.mjs'
+import { RoleInput } from './login.mjs'
 
 /**
  * The login for for the Morio Root Token provider
  */
-export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => {
+export const MrtProvider = ({ id, api, setLoadingStatus, setAccount, setError }) => {
   const [mrt, setMrt] = useState('')
-  const [role, setRole] = useState(false)
+  const [role, setRole] = useState('user')
 
   const submit = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.login('mrt', { mrt, role })
+    const result = await api.login(id, { mrt, role })
     if (result?.[1] === 200 && result?.[0]?.jwt) {
       setLoadingStatus([true, 'Authentication Succeeded', true, true])
       setError(false)
@@ -36,15 +32,7 @@ export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => 
         update={setMrt}
         valid={valid}
       />
-      <ListInput
-        label="Role"
-        labelBL="Not selecting any role will result in all roles being assigned"
-        dense
-        dir="row"
-        update={(val) => (role === val ? setRole(false) : setRole(val))}
-        current={role}
-        list={roles.map((role) => ({ val: role, label: role }))}
-      />
+      <RoleInput {...{ role, setRole }} />
       <button className="btn btn-lg btn-primary w-full" disabled={!valid(mrt)} onClick={submit}>
         Sign in
       </button>

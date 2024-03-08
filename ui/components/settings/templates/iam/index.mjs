@@ -1,6 +1,6 @@
 import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
-// Authentication Providers
+// Identity Providers
 import { ldap } from './ldap.mjs'
 
 /*
@@ -9,7 +9,7 @@ import { ldap } from './ldap.mjs'
 export const providerMeta = () => [
   [
     {
-      schema: Joi.string().required().label('ID'),
+      schema: Joi.string().invalid('mrt').required().label('ID'),
       label: 'ID',
       labelBL: `A unique ID to reference this provider`,
       labelBR: <span className="italic opacity-70">Input will be slugified</span>,
@@ -48,19 +48,19 @@ export const iam = (context) => ({
   type: 'info',
   children: {
     /*
-     * Authentication providers
+     * Identity providers
      */
-    inputs: {
+    providers: {
       type: 'authProviders',
-      title: 'Authentication Providers',
-      about: 'Authentication providers are ways for users to prove their identity',
+      title: 'Identity Providers',
+      about: 'Identity providers are services that allow users to prove their identity',
       blocks: {
         apikeys: {
           title: 'API Keys',
           about: 'Provides authentication with API key/secret',
           desc: 'Use this to pull events from the Amazon Web Services CloudWatch API.',
         },
-        ldap: ldap(),
+        ldap: ldap(context),
         local: {
           title: 'Local Accounts',
           about: 'Allows creating and using local Morio accounts',

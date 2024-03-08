@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
 import { LogoSpinner, CountdownCircle } from 'components/animations.mjs'
 import { Arrows } from './layout.mjs'
+import { roles } from 'config/roles.mjs'
 
 const OneMomentPlease = () => (
   <div className="grid grid-cols-1 h-screen bg-gradient-to-br from-secondary to-neutral">
@@ -24,6 +25,13 @@ const OneMomentPlease = () => (
     </div>
   </div>
 )
+
+const checkRole = (role = false, requiredRole = 'user') => {
+  if (!role) return false
+  if (roles.indexOf(role) >= roles.indexOf(requiredRole)) return true
+
+  return false
+}
 
 export const AuthWrapper = ({ role, account, setAccount, children }) => {
   const [user, setUser] = useState(false)
@@ -57,7 +65,7 @@ export const AuthWrapper = ({ role, account, setAccount, children }) => {
   /*
    * If the user is logged in and has the required role, show content
    */
-  if (Array.isArray(account.roles) && account.roles.includes(role)) return children
+  if (checkRole(account.role, role)) return children
 
   /*
    * If the user is logged in but does not have the required role, show warning

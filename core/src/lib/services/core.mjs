@@ -101,10 +101,11 @@ export const service = {
        */
       store.info.ephemeral = false
       store.info.current_settings = timestamp
-      store.config = cloneAsPojo(settings)
+      store.saveConfig = cloneAsPojo(settings)
       // Take care of encrypted settings and store the save ones
       store.saveSettings = cloneAsPojo(settings)
       store.settings = templateSettings(settings)
+      store.config = cloneAsPojo(store.settings)
       store.keys = keys
 
       /*
@@ -242,6 +243,13 @@ export const templateSettings = (settings) => {
   for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
     tokens[key] = store.decrypt(val)
   }
+
+  /*
+   * Replace any user of {{ username }} with  literal '{{username}}' (no spaces).
+   * This is needed because it's not a mustache template, but instead hardcoded in:
+   * https://github.com/vesse/node-ldapauth-fork/blob/8a461ea72e5d7b6af0b5bb4f272ebf881659a832/lib/ldapauth.js#L160
+   */
+  tokens.username = '{{username}}'
 
   // Now template the settings
   let newSettings

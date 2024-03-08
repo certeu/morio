@@ -25,7 +25,6 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 //import set from 'lodash.set'
 import { FormWrapper, loadFormDefaults } from './form.mjs'
 //import { slugify } from 'lib/utils.mjs'
-//import { reduceFormValidation } from './form.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
@@ -56,7 +55,7 @@ const AddProvider = (props) => {
       {props.form ? (
         <FormWrapper {...props} defaults={defaults} action="create" local={true} />
       ) : (
-        <p>No form for this type of authentication provider</p>
+        <p>No form for this type of identity provider</p>
       )}
     </div>
   )
@@ -85,7 +84,7 @@ const UpdateProvider = (props) => {
           {...{ removeLocal }}
         />
       ) : (
-        <p>No form for this type of authentication provider</p>
+        <p>No form for this type of identity provider</p>
       )}
     </div>
   )
@@ -139,7 +138,7 @@ export const AuthProviders = (props) => {
           ))}
         </div>
       ) : null}
-      <h4 className="mt-4 capitalize">Add an authentication provider</h4>
+      <h4 className="mt-4 capitalize">Add an identity provider</h4>
       <div className="grid grid-cols-2 gap-2 mt-4">
         {Object.keys(blocks).map((id) => (
           <ProviderButton

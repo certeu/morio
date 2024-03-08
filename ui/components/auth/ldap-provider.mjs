@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { SecretInput, StringInput } from '../inputs.mjs'
+import { RoleInput } from './login.mjs'
 
 /**
  * The login form for the LDAP provider
  */
-export const LdapProvider = ({ api, setLoadingStatus, setAccount, setError }) => {
+export const LdapProvider = ({ id, api, setLoadingStatus, setAccount, setError }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [role, setRole] = useState('user')
 
   const submit = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.login('ldap', { username, password })
+    const result = await api.login(id, { username, password, role })
     if (result?.[1] === 200 && result?.[0]?.jwt) {
       setLoadingStatus([true, 'Authentication Succeeded', true, true])
       setError(false)
@@ -31,6 +33,7 @@ export const LdapProvider = ({ api, setLoadingStatus, setAccount, setError }) =>
         valid={(val) => val.length > 0}
       />
       <SecretInput label="Password" current={password} update={setPassword} valid={() => true} />
+      <RoleInput {...{ role, setRole }} />
       <button
         className="btn btn-lg btn-primary w-full"
         disabled={username.length < 1}

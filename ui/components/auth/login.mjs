@@ -1,13 +1,18 @@
+import { roles } from 'config/roles.mjs'
 // Hooks
 import { useApi } from 'hooks/use-api.mjs'
 import { useEffect, useContext, useState } from 'react'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
+import { ModalContext } from 'context/modal.mjs'
 // Components
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { PasswordInput } from '../inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Term } from 'components/term.mjs'
+import { ListInput } from '../inputs.mjs'
+import { QuestionIcon } from 'components/icons.mjs'
 // Providers
 import { MrtProvider } from './mrt-provider.mjs'
 import { LdapProvider } from './ldap-provider.mjs'
@@ -119,22 +124,27 @@ export const Login = ({ setAccount, account = false, role = false }) => {
                   <span className="badge badge-error ml-1">{role}</span>
                 </td>
                 <td>
-                  {account.roles.map((role) => (
-                    <span className="badge badge-success ml-1" key={role}>
-                      {role}
-                    </span>
-                  ))}
+                  {account.roles &&
+                    account.roles.map((role) => (
+                      <span className="badge badge-success ml-1" key={role}>
+                        {role}
+                      </span>
+                    ))}
                 </td>
               </tr>
             </tbody>
           </table>
           <br />
           <Popout note compact dense noP>
-            You can assume a different role, or{' '}
+            You can{' '}
             <a role="button" onClick={back}>
               go back
             </a>
-            .
+            , or{' '}
+            <a role="button" onClick={() => setAccount(null)}>
+              log out
+            </a>{' '}
+            to assume a different role.
           </Popout>
         </>
       ) : null}
@@ -167,5 +177,21 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         </Popout>
       ) : null}
     </div>
+  )
+}
+
+export const RoleInput = ({ role, setRole }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <ListInput
+      label="Role"
+      dense
+      dir="row"
+      update={(val) => (role === val ? setRole(false) : setRole(val))}
+      current={role}
+      list={roles.map((role) => ({ val: role, label: role }))}
+      dflt="user"
+    />
   )
 }

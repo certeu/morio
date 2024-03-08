@@ -205,13 +205,17 @@ const AddVariable = ({ update, data, current = {}, edit, secrets, popModal }) =>
   )
 }
 
-const ShowVariable = ({ pushModal, token, update, data, secrets }) => (
+const ShowVariable = ({ pushModal, popModal, token, update, data, secrets }) => (
   <button
     className="btn btn-outline btn-primary btn-sm"
     onClick={() =>
       pushModal(
         <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-          <AddVariable {...{ pushModal, update, data, secrets }} edit={true} current={token} />
+          <AddVariable
+            {...{ pushModal, popModal, update, data, secrets }}
+            edit={true}
+            current={token}
+          />
         </ModalWrapper>
       )
     }
@@ -234,7 +238,7 @@ export const Tokens = ({ update, data, secrets = false }) => {
             return (
               <ShowVariable
                 key={key}
-                {...{ pushModal, data, secrets, update }}
+                {...{ pushModal, popModal, data, secrets, update }}
                 token={{ key, val: allTokens[key] }}
               />
             )

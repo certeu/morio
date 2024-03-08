@@ -88,7 +88,12 @@ export const FormBlock = (props) => {
         if (typeof formEl === 'object') {
           if (formEl.tabs)
             return (
-              <Tabs {...formEl} tabs={Object.keys(formEl.tabs).join()} navs key={i}>
+              <Tabs
+                {...formEl}
+                tabs={Object.keys(formEl.tabs).join()}
+                navs={formEl.navs === false ? false : true}
+                key={i}
+              >
                 {Object.keys(formEl.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
                     <FormBlock {...props} form={formEl.tabs[key]} />
@@ -192,6 +197,7 @@ const getFormValidation = (el, data, result) => {
  * Top-level form validation method
  */
 export const runFormValidation = (form, data) => {
+  if (typeof form === 'function') form = form(data)
   const result = {}
   for (const el of form) getFormValidation(el, data, result)
 

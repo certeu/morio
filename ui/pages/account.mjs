@@ -5,9 +5,16 @@ import { Highlight } from 'components/highlight.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
 import { RestartIcon, UserIcon, LogoutIcon } from 'components/icons.mjs'
 import { TimeToGo } from 'components/time-ago.mjs'
+import { roles } from 'config/roles.mjs'
+import { Tabs, Tab } from 'components/tabs.mjs'
+
+const dangerRoles = roles.slice(-2)
 
 const AccountPage = (props) => {
   const { account, logout, renewToken } = useAccount()
+
+  const level = roles.indexOf(account.role)
+  const maxLevel = roles.indexOf(account.maxRole)
 
   return (
     <PageWrapper {...props} Icon={UserIcon}>
@@ -15,31 +22,69 @@ const AccountPage = (props) => {
         <div className="max-w-4xl">
           {account ? (
             <>
-              <h2>You</h2>
-              <p>
-                You are user <span className="badge badge-primary">{account.user}</span> and were
-                authenticated via the{' '}
-                <span className="badge badge-neutral">{account.provider}</span> authentication
-                provider.
-              </p>
-              <h2>Your roles</h2>
-              <p>
-                Your hold the following roles:{' '}
-                {account.roles.map((role) => (
-                  <span className="badge badge-success ml-1" key={role}>
-                    {role}
-                  </span>
-                ))}
-              </p>
-              <h2>Your access</h2>
-              <p>
-                Your access will expire in{' '}
-                <b>
-                  <TimeToGo time={account.exp} />
-                </b>
-                .
-              </p>
-              <div className="flex flex-row gap-2">
+              <Tabs tabs="Account Data, Account Token">
+                <Tab key="account">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th className="w-36 text-right">Description</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="w-36 text-right font-bold">Username</td>
+                        <td>
+                          <span className="badge badge-primary">{account.user}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="w-36 text-right font-bold">Current role</td>
+                        <td>
+                          <span
+                            className={`badge badge-${
+                              dangerRoles.includes(account.role) ? 'warning' : 'success'
+                            }`}
+                          >
+                            {account.role}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="w-36 text-right font-bold">Maximum role</td>
+                        <td>
+                          <span
+                            className={`badge badge-${
+                              dangerRoles.includes(account.maxRole) ? 'warning' : 'success'
+                            }`}
+                          >
+                            {account.maxRole}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="w-36 text-right font-bold">Identity Provider</td>
+                        <td>
+                          <span className="badge badge-neutral">{account.provider}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="w-36 text-right font-bold">Session</td>
+                        <td>
+                          Your session will expire in{' '}
+                          <b>
+                            <TimeToGo time={account.exp} />
+                          </b>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </Tab>
+                <Tab key="token">
+                  <Highlight js={account} title="JSON Web Token" />
+                </Tab>
+              </Tabs>
+              <div className="flex flex-row gap-8 justify-center">
                 <button className="btn btn-primary" onClick={renewToken}>
                   <RestartIcon />
                   <span className="pl-4"> Renew Token</span>
@@ -49,9 +94,6 @@ const AccountPage = (props) => {
                   <span className="pl-4"> Logout</span>
                 </button>
               </div>
-              <h2>Your data</h2>
-              <p>Your raw account data is included below:</p>
-              <Highlight js={account} title="Account Data" />
             </>
           ) : null}
         </div>

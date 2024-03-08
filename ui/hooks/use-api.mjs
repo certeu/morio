@@ -138,7 +138,7 @@ MorioClient.prototype.listDownloads = async function () {
 /**
  * Login
  *
- * @param {string} provider - (name of the) authentication provider
+ * @param {string} providerId - ID of the authentication provider
  * @param {object} data - The login data to submit
  * @return {object} - The result
  */

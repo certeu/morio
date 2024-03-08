@@ -1,7 +1,19 @@
 import { store } from '../lib/store.mjs'
 import { generateJwt } from '#shared/crypto'
-import { roles } from '../rbac.mjs'
 import jwt from 'jsonwebtoken'
+import { idps } from '../idps/index.mjs'
+
+/**
+ * List of allowListed URLs that do not require authentication
+ */
+const allowedUris = [
+  `${store.prefix}/status`,
+  `${store.prefix}/status/`,
+  `${store.prefix}/login`,
+  `${store.prefix}/login/`,
+  `${store.prefix}/idps`,
+  `${store.prefix}/idps/`,
+]
 
 /**
  * This auth controller handles authentication in Morio
@@ -60,7 +72,7 @@ Controller.prototype.authenticate = async (req, res) => {
          * These will be injected by Traefik in the original request
          */
         return res
-          .set('X-Morio-Roles', payload.roles.join(','))
+          .set('X-Morio-Role', payload.role)
           .set('X-Morio-User', payload.user)
           .set('X-Morio-Provider', payload.provider)
           .status(200)
@@ -70,31 +82,28 @@ Controller.prototype.authenticate = async (req, res) => {
 }
 
 /**
- * List of allowListed URLs that do not require authentication
- * (it's a short list)
- */
-const allowedUris = [
-  `${store.prefix}/status`,
-  `${store.prefix}/status/`,
-  `${store.prefix}/login`,
-  `${store.prefix}/login/`,
-  `${store.prefix}/idps`,
-  `${store.prefix}/idps/`,
-]
-
-/**
  * Login
  *
- * This handles user logins from a variaty of authentincation providers
+ * This handles user logins from a varaity of IDPs
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.login = async (req, res) => {
   /*
-   * Verify we have a provider method for the request
+   * Get the provider ID & type
    */
-  if (typeof providers[req.body?.provider] !== 'function') {
+  const providerId = req.body?.provider || false
+  const providerType =
+    providerId === 'mrt'
+      ? 'mrt' // Don't allow anything but mrt for a provider with id mrt
+      : store.config?.iam?.providers?.[providerId]?.provider || false
+
+  /*
+   * Verify the provider ID is valid
+   * and that we have a provider method to handle the request
+   */
+  if (!providerId || !providerType || typeof idps[providerType] !== 'function') {
     return res.status(400).send({
       success: false,
       reason: 'Bad request',
@@ -105,7 +114,7 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Looks good, hand over to provider
    */
-  const [success, data] = await providers[req.body.provider](req.body.data)
+  const [success, data] = await idps[providerType](providerId, req.body.data, req, res)
 
   if (!success) {
     /*
@@ -164,7 +173,8 @@ Controller.prototype.renewToken = async (req, res) => {
         const jwt = await generateJwt({
           data: {
             user: payload.user,
-            roles: payload.roles,
+            role: payload.role,
+            maxRole: payload.maxRole,
             provider: payload.provider,
           },
           key: store.keys.private,
@@ -174,30 +184,4 @@ Controller.prototype.renewToken = async (req, res) => {
         return res.send({ jwt })
       }
     )
-}
-
-const providers = {
-  /**
-   * mrt: Morio Root Token provider
-   *
-   * Checks the provided value against the Morio root token
-   *
-   * @param {string} data.mrt - The root token to verify
-   * @return {[Bool, Object]} [result, data] - An array indicating result and data
-   */
-  mrt: async (data) => {
-    if (data.mrt === store.keys.mrt) {
-      if (data.role)
-        return [
-          true,
-          {
-            user: 'root',
-            roles: [data.role],
-          },
-        ]
-      else return [true, { user: 'root', roles }]
-    }
-
-    return [false, { success: false, reason: 'Authentication failed', error: 'Invalid token' }]
-  },
 }

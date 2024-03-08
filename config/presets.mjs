@@ -34,7 +34,7 @@ export const presets = {
   MORIO_API_PREFIX: '/ops/api',
 
   // API log level
-  MORIO_API_LOG_LEVEL: 'debug',
+  MORIO_API_LOG_LEVEL: 'trace',
 
   // TCP port API should listen on
   MORIO_API_PORT: 3000,
