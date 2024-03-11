@@ -82,7 +82,7 @@ const SettingsUploadPage = (props) => {
   }
 
   return (
-    <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
+    <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
       {error ? <pre>{JSON.stringify(error, null, 2)}</pre> : null}
       <div className="px-4">
         <EphemeralWrapper>

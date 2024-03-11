@@ -33,7 +33,7 @@ const checkRole = (role = false, requiredRole = 'user') => {
   return false
 }
 
-export const AuthWrapper = ({ role, account, setAccount, children }) => {
+export const AuthWrapper = ({ role = 'user', account, setAccount, children }) => {
   const [user, setUser] = useState(false)
 
   /*
@@ -42,6 +42,14 @@ export const AuthWrapper = ({ role, account, setAccount, children }) => {
   useEffect(() => {
     if (!user) setUser(true)
   }, [user])
+
+  /*
+   * If no role is specified, we default to user.
+   * But if role is explictly passed as false, it means authentication is not
+   * needed, or even wanted. This is true for things like login pages, and the
+   * initial setup.
+   */
+  if (role === false) return children
 
   /*
    * This will render server-side, so it will also render

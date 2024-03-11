@@ -57,7 +57,7 @@ const Setup = ({ pageProps }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
-    <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false}>
+    <PageWrapper {...pageProps} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
         <div className="flex flex-col justify-between h-screen py-2 mx-auto max-w-xl">
           <span> </span>

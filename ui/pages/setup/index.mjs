@@ -74,7 +74,7 @@ const ConfigWizardPage = (props) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
-    <PageWrapper {...props} layout={SplashLayout} header={false} footer={false}>
+    <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
       <div className="px-4">
         <EphemeralWrapper>
           <div className="flex flex-col justify-between h-screen py-2 mx-auto max-w-xl">
