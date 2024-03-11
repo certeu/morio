@@ -1,9 +1,11 @@
 // Default hooks
-import { alwaysWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
+import {
+  alwaysWantedHook,
+  defaultRecreateContainerHook,
+  defaultRestartContainerHook,
+} from './index.mjs'
 // Helper method to add Traefik labels to container for TLS
 import { addTraefikTlsConfiguration } from './proxy.mjs'
-// Store
-import { store } from '../store.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -21,13 +23,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: defaultRecreateContainerHook,
+    recreateContainer: (...params) => defaultRecreateContainerHook('api', ...params),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: defaultRestartContainerHook,
+    restartContainer: (...params) => defaultRestartContainerHook('api', ...params),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
@@ -39,7 +41,7 @@ export const service = {
       /*
        * Add labels for Traefik TLS configuration
        */
-      addTraefikTlsConfiguration(store.config.services.api)
+      addTraefikTlsConfiguration('api')
 
       return true
     },

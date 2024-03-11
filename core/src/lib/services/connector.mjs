@@ -21,8 +21,8 @@ export const service = {
     wanted: async () => {
       if (store.config?.connector?.pipelines) {
         if (
-          Object.values(store.config.connector.pipelines)
-          .filter((pipe) => !pipe.disabled).length > 0
+          Object.values(store.config.connector.pipelines).filter((pipe) => !pipe.disabled).length >
+          0
         )
           return true
       }
@@ -34,13 +34,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: defaultRecreateContainerHook,
+    recreateContainer: (...params) => defaultRecreateContainerHook('connector', ...params),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: defaultRestartContainerHook,
+    restartContainer: (...params) => defaultRestartContainerHook('connector', ...params),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *

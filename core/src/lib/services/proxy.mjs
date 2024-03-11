@@ -1,6 +1,10 @@
 import { readFile, writeFile } from '#shared/fs'
 // Default hooks
-import { alwaysWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
+import {
+  alwaysWantedHook,
+  defaultRecreateContainerHook,
+  defaultRestartContainerHook,
+} from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -20,13 +24,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: defaultRecreateContainerHook,
+    recreateContainer: (...params) => defaultRecreateContainerHook('proxy', ...params),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: defaultRestartContainerHook,
+    restartContainer: (...params) => defaultRestartContainerHook('proxy', ...params),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
@@ -100,35 +104,36 @@ const getTraefikRouters = (srvConf) => {
 
 /**
  * Adds/Adapts container labels to configure TLS on Traefik
+ * Note that this mutates the config in store
  *
- * @param {object} srvConf - The service configuration
- * @return {object} srvconf - The updated service configuration
+ * @param {string} service - The name of the service
  */
-export const addTraefikTlsConfiguration = (srvConf) => {
+export const addTraefikTlsConfiguration = (service) => {
   /*
    * Don't bother if we are running in ephemeral mode
    */
-  if (store.info.ephemeral) return srvConf
+  if (store.info.ephemeral) return
 
   /*
-   * Add default cert to router
+   * Add acme config to the router
    */
-  for (const router of getTraefikRouters(srvConf)) {
-    srvConf.container.labels.push(
+  for (const router of getTraefikRouters(store.config.services[service])) {
+    store.config.services[service].container.labels.push(
       `traefik.http.routers.${router}.tls.certresolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${store.config.deployment.nodes[0]}`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${store.config.deployment.nodes.join(', ')}`
     )
   }
+
   /*
    * Update rule with hostname(s)
    * FIXME: This does not yet support clustering
    */
-  for (const i in srvConf.container?.labels || []) {
-    if (srvConf.container.labels[i].toLowerCase().indexOf('rule=(') !== -1) {
-      const chunks = srvConf.container.labels[i].split('rule=(')
-      srvConf.container.labels[i] =
+  for (const i in store.config.services[service].container?.labels || []) {
+    if (store.config.services[service].container.labels[i].toLowerCase().indexOf('rule=(') !== -1) {
+      const chunks = store.config.services[service].container.labels[i].split('rule=(')
+      store.config.services[service].container.labels[i] =
         chunks[0] +
         'rule=(Host(' +
         store.config.deployment.nodes.map((node) => `\`${node}\``).join(',') +
@@ -136,6 +141,4 @@ export const addTraefikTlsConfiguration = (srvConf) => {
         chunks[1]
     }
   }
-
-  return srvConf
 }

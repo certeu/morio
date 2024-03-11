@@ -1,6 +1,10 @@
 import { readJsonFile, writeYamlFile } from '#shared/fs'
 // Default hooks
-import { defaultWantedHook, defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
+import {
+  defaultWantedHook,
+  defaultRecreateContainerHook,
+  defaultRestartContainerHook,
+} from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -20,13 +24,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: defaultRecreateContainerHook,
+    recreateContainer: (...params) => defaultRecreateContainerHook('console', ...params),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: defaultRestartContainerHook,
+    restartContainer: (...params) => defaultRestartContainerHook('console', ...params),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *

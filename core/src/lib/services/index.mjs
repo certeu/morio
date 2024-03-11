@@ -204,7 +204,8 @@ export const ensureMorioService = async (service, running, hookParams) => {
   }
 
   /*
-   * Generate service & container config
+   * Generate service config
+   * Container config will be generated after the preCreate lifecycle hook
    */
   store.config.services[service] = resolveServiceConfiguration(service, store)
   store.config.containers[service] = generateContainerConfig(store.config.services[service])
@@ -220,11 +221,23 @@ export const ensureMorioService = async (service, running, hookParams) => {
      * Run preCreate lifecycle hook
      */
     runHook('preCreate', service, hookParams)
+
+    /*
+     * Generate container config
+     */
+    store.config.containers[service] = generateContainerConfig(store.config.services[service])
+
     /*
      * Recreate the container
      */
     containerId = await createMorioServiceContainer(service)
-  } else store.log.debug(`Not (re)creating ${service} container`)
+  } else {
+    store.log.debug(`Not (re)creating ${service} container`)
+    /*
+     * Generate container config
+     */
+    store.config.containers[service] = generateContainerConfig(store.config.services[service])
+  }
 
   /*
    * (Re)start the container/service (if needed)
@@ -397,9 +410,10 @@ export function defaultRecreateContainerHook(service, running) {
    */
   const cConf = store.config.services[service].container // Save us some typing
   if (
-    running.services.Names[0] !== `/${cConf.container_name}` ||
-    running.services.Image !== `${cConf.image}:${cConf.tag}`
-  ) return true
+    running[service].Names[0] !== `/${cConf.container_name}` ||
+    running[service].Image !== `${cConf.image}:${cConf.tag}`
+  )
+    return true
 
   /*
    * If not, leave it as is
@@ -431,4 +445,3 @@ export function defaultRestartContainerHook(service, running, recreate) {
    */
   return false
 }
-
