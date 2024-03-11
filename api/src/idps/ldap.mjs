@@ -3,6 +3,7 @@ import { roles } from '../rbac.mjs'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'
+import { storeLastLoginTime } from '../lib/account.mjs'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -34,10 +35,9 @@ const strategy = (id) => {
   if (store.config.iam.providers[id].verify_certificate === false) {
     options.server.tlsOptions = { rejectUnauthorized: false }
   } else if (store.config.iam.providers[id].trust_certificate) {
-
-  /*
-   * Or trust a specific certificate?
-   */
+    /*
+     * Or trust a specific certificate?
+     */
     options.server.tlsOptions = {
       secureContext: tls.createSecureContext({
         ca: store.config.iam.providers[id].trust_certificate,
@@ -109,6 +109,11 @@ export const ldap = (id, data, req) => {
               error: 'This role is not available to you',
             },
           ])
+
+        /*
+         * Store the latest login time, but don't wait for it
+         */
+        storeLastLoginTime(id, username)
 
         return resolve([
           true,

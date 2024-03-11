@@ -38,6 +38,11 @@ export const resolveServiceConfiguration = (store) => {
           ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
+      // Environment
+      environment: [
+        // Silence this message from the Kafka JS client
+        `KAFKAJS_NO_PARTITIONER_WARNING=1`,
+      ],
       // Configure Traefik with container labels
       labels: [
         // Tell traefik to watch this container

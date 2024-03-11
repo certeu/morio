@@ -29,6 +29,7 @@
     "joi": "^17.11.0",
     "joi-to-swagger": "^6.2.0",
     "js-yaml": "^4.1.0",
+    "kafkajs": "^2.2.4",
     "lodash.get": "^4.4.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",

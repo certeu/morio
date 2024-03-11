@@ -1,4 +1,5 @@
 import { store } from '../lib/store.mjs'
+import { storeLastLoginTime } from '../lib/account.mjs'
 
 /**
  * mrt: Morio Root Token identtiy/authentication provider
@@ -32,7 +33,7 @@ export const mrt = async (id, data) => {
       {
         success: false,
         reason: 'Authentication failed',
-        error: 'Called the Root Token rpovider with an id that is not `mrt`',
+        error: 'Called the Root Token provider with an id that is not `mrt`',
       },
     ]
   }
@@ -40,7 +41,15 @@ export const mrt = async (id, data) => {
   /*
    * Now authenticate
    */
-  if (data.mrt === store.keys.mrt)
+  if (data.mrt === store.keys.mrt) {
+    /*
+     * Store the latest login time, but don't wait for it
+     */
+    storeLastLoginTime('mrt', 'root')
+
+    /*
+     * Return result
+     */
     return [
       true,
       {
@@ -48,6 +57,7 @@ export const mrt = async (id, data) => {
         role: data.role || 'user',
       },
     ]
+  }
 
   /*
    * If we get here, it means authentication failed

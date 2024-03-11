@@ -2,6 +2,8 @@ import { getPreset } from '#config'
 import { coreClient } from '#lib/core'
 import { attempt } from '#shared/utils'
 import { store } from './lib/store.mjs'
+import { KafkaClient } from './lib/kafka.mjs'
+import { RpKvClient } from './lib/rpkv.mjs'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -62,4 +64,29 @@ export const bootstrapConfiguration = async () => {
   }
   store.config = result[1].config
   store.keys = result[1].keys
+
+  /*
+   * Initialize Kafka client
+   */
+  store.kafka = await new KafkaClient(store)
+
+  /*
+   * Add eventlisteners for connecting producer/consumer
+   */
+  store.kafka.producer.on(store.kafka.producer.events.CONNECT, () => {
+    store.log.debug('Kafka producer connected')
+  })
+  store.kafka.consumer.on(store.kafka.consumer.events.CONNECT, () => {
+    store.log.debug('Kafka consumer connected')
+  })
+
+  /*
+   * Not connect both consumer and producer
+   */
+  await store.kafka.connect()
+
+  /*
+   * Initialize RpKv client
+   */
+  store.rpkv = await new RpKvClient(store)
 }
