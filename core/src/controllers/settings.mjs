@@ -34,7 +34,8 @@ Controller.prototype.getIdps = async (req, res) => {
    */
   if (store.settings?.iam?.providers) {
     for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
-      idps[conf.label] = { id, provider: conf.provider }
+      if (id === 'mrt') idps['Root Token'] = { ...idps['Root Token'], ...conf }
+      else idps[conf.label] = { id, provider: conf.provider }
     }
   }
 
@@ -186,7 +187,6 @@ Controller.prototype.setup = async (req, res) => {
    * bypass the entire secret handling.
    */
   if (mSettings.tokens?.secrets) {
-
     /*
      * Add encryption methods
      */

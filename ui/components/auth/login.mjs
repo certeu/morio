@@ -12,7 +12,7 @@ import { PasswordInput } from '../inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Term } from 'components/term.mjs'
 import { ListInput } from '../inputs.mjs'
-import { QuestionIcon } from 'components/icons.mjs'
+import { QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'components/icons.mjs'
 // Providers
 import { MrtProvider } from './mrt-provider.mjs'
 import { LdapProvider } from './ldap-provider.mjs'
@@ -49,6 +49,7 @@ const help = (
 export const Login = ({ setAccount, account = false, role = false }) => {
   const [error, setError] = useState(false)
   const [idps, setIdps] = useState({})
+  const [showMrt, setShowMrt] = useState(false)
 
   /*
    * API client
@@ -84,31 +85,54 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   const providerProps = { api, setAccount, setLoadingStatus, setError }
 
   /*
+   * Helper method to filter out the mrt provider
+   */
+  const filterMrt = (name) =>
+    !(idps[name].provider === 'mrt' && idps[name].visibility !== 'tab' && !showMrt)
+
+  /*
    * Helper to get the tablist, and array of tabs with IDPs
    */
   const tabList =
     Object.keys(idps).length > 0
-      ? String(Object.keys(idps).sort().join(',')) + ', Not Sure?'
+      ? String(
+          Object.keys(idps)
+            .filter(filterMrt)
+            .map((name) => (idps[name].label ? idps[name].label : name))
+            .sort()
+            .join(',')
+        ) + (showMrt ? '' : ', Not Sure?')
       : false
+
   const tabs = tabList
-    ? [
-        ...Object.keys(idps)
-          .sort()
-          .map((label) => {
-            const Idp = providers[idps[label].provider] || UnknownIdp
-            return (
-              <Tab key={label}>
-                <Idp {...idps[label]} label={label} {...providerProps} />
-              </Tab>
-            )
-          }),
-        help,
-      ]
+    ? Object.keys(idps)
+        .filter(filterMrt)
+        .sort()
+        .map((label) => {
+          const Idp = providers[idps[label].provider] || UnknownIdp
+          return (
+            <Tab key={label}>
+              <Idp {...idps[label]} label={label} {...providerProps} />
+            </Tab>
+          )
+        })
     : []
+  if (tabs.length > 0 && !showMrt) tabs.push(help)
 
   return (
     <div className="w-full max-w-2xl m-auto bg-base-100 bg-opacity-60 rounded-lg shadow py-4 px-8 pb-2">
-      <h2 className="">{account && role ? 'A different role is required' : 'Sign in to Morio'}</h2>
+      <h2 className="flex flex-row w-full items-center justify-between gap-2">
+        {account && role ? 'A different role is required' : 'Sign in to Morio'}
+        {idps?.['Root Token']?.visibility === 'icon' ? (
+          <button onClick={() => setShowMrt(!showMrt)} title="Allow Root Token logins">
+            {showMrt ? (
+              <OpenLockIcon className="text-warning hover:text-success h-8 w-8" />
+            ) : (
+              <ClosedLockIcon className="text-success hover:text-warning h-8 w-8" />
+            )}
+          </button>
+        ) : null}
+      </h2>
       {account && role ? (
         <>
           <table className="table table-fixed">
@@ -153,19 +177,23 @@ export const Login = ({ setAccount, account = false, role = false }) => {
           tabs={tabList}
           children={[
             ...tabs,
-            <Tab tabI="Not Sure?" key="help">
-              <h3>Not certain how to authenticate?</h3>
-              <p>
-                Morio supports a variety of identity providers. Each tab lists one of them.
-                <br />
-                With the exception of the <b>Root Token</b> provider, they are set up by the local
-                Morio operator (<Term>LoMO</Term>).
-              </p>
-              <p>
-                Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
-                deployment.
-              </p>
-            </Tab>,
+            showMrt ? (
+              <span />
+            ) : (
+              <Tab tabI="Not Sure?" key="help">
+                <h3>Not certain how to authenticate?</h3>
+                <p>
+                  Morio supports a variety of identity providers. Each tab lists one of them.
+                  <br />
+                  With the exception of the <b>Root Token</b> provider, they are set up by the local
+                  Morio operator (<Term>LoMO</Term>).
+                </p>
+                <p>
+                  Contact your <Term>LoMO</Term> for questions about how to authenticate to this
+                  Morio deployment.
+                </p>
+              </Tab>
+            ),
           ]}
         />
       ) : (

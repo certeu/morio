@@ -1,30 +1,18 @@
 import { useState, useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
-//import { AmazonCloudWatch, Azure, Elasticsearch, Kafka } from 'components/brands.mjs'
-//// Templates
-//import { connector as connectorTemplates } from '../templates/connector/index.mjs'
+// Templates
+import { mrt as mrtTemplate } from '../templates/iam/mrt.mjs'
 import {
-  //  CodeIcon,
-  //  EmailIcon,
-  //  HttpIcon,
   FingerprintIcon,
   ClosedLockIcon,
   MorioIcon,
-  //  PlusIcon,
-  //  RightIcon,
-  //  RssIcon,
   StorageIcon,
   UserIcon,
-  //  SparklesIcon,
   TrashIcon,
 } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-//import { Popout } from 'components/popout.mjs'
-//import Joi from 'joi'
-//import set from 'lodash.set'
 import { FormWrapper, loadFormDefaults } from './form.mjs'
-//import { slugify } from 'lib/utils.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
@@ -110,51 +98,77 @@ export const AuthProviders = (props) => {
   const { blocks, data } = props
   const { pushModal, popModal } = useContext(ModalContext)
 
+  const mrt = mrtTemplate().form({ data: data.iam?.mrt })
+
   return (
     <>
       <h3>{props.viewConfig.title ? props.viewConfig.title : props.viewConfig.label}</h3>
       <Markdown>{props.viewConfig.about}</Markdown>
       {data?.iam?.providers ? (
         <div className="grid grid-cols-2 gap-4 mt-4">
-          {Object.keys(data?.iam?.providers).map((id) => (
+          <ProviderButton
+            available
+            id="mrt"
+            type="mrt"
+            title="Morio Root Token"
+            about="Authentication via the Morio Root Token"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                  <UpdateProvider
+                    {...props}
+                    id="mrt"
+                    provider="mrt"
+                    {...{ pushModal, popModal }}
+                    {...blocks.mrt}
+                  />
+                </ModalWrapper>
+              )
+            }
+          />
+          {Object.keys(data?.iam?.providers)
+            .filter((id) => id !== 'mrt')
+            .map((id) => (
+              <ProviderButton
+                available
+                key={id}
+                id={id}
+                type={data.iam.providers[id].provider}
+                {...data.iam.providers[id]}
+                onClick={() =>
+                  pushModal(
+                    <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                      <UpdateProvider
+                        {...props}
+                        {...{ id, pushModal, popModal }}
+                        {...data.iam.providers[id]}
+                      />
+                    </ModalWrapper>
+                  )
+                }
+              />
+            ))}
+        </div>
+      ) : null}
+      <h4 className="mt-4 capitalize">Add an identity provider</h4>
+      <div className="grid grid-cols-2 gap-2 mt-4">
+        {Object.keys(blocks)
+          .filter((id) => id !== 'mrt')
+          .map((id) => (
             <ProviderButton
-              available
               key={id}
               id={id}
-              type={data.iam.providers[id].provider}
-              {...data.iam.providers[id]}
+              type={id}
+              {...blocks[id]}
               onClick={() =>
                 pushModal(
                   <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                    <UpdateProvider
-                      {...props}
-                      {...{ id, pushModal, popModal }}
-                      {...data.iam.providers[id]}
-                    />
+                    <AddProvider {...props} {...{ id, pushModal, popModal }} {...blocks[id]} />
                   </ModalWrapper>
                 )
               }
             />
           ))}
-        </div>
-      ) : null}
-      <h4 className="mt-4 capitalize">Add an identity provider</h4>
-      <div className="grid grid-cols-2 gap-2 mt-4">
-        {Object.keys(blocks).map((id) => (
-          <ProviderButton
-            key={id}
-            id={id}
-            type={id}
-            {...blocks[id]}
-            onClick={() =>
-              pushModal(
-                <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                  <AddProvider {...props} {...{ id, pushModal, popModal }} {...blocks[id]} />
-                </ModalWrapper>
-              )
-            }
-          />
-        ))}
       </div>
     </>
   )

@@ -7,6 +7,7 @@ import {
   ToggleInput,
   ListInput,
   SliderInput,
+  HiddenInput,
 } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
@@ -172,6 +173,8 @@ export const FormElement = (props) => {
       return <NumberInput {...inputProps} />
     case 'boolean':
       return <ToggleInput {...inputProps} />
+    case 'hidden':
+      return <HiddenInput {...inputProps} />
     default:
       return <p>Unknown type: {type}</p>
   }

@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
 // Identity Providers
+import { mrt } from './mrt.mjs'
 import { ldap } from './ldap.mjs'
 
 /*
@@ -66,6 +67,7 @@ export const iam = (context) => ({
           about: 'Allows creating and using local Morio accounts',
           desc: 'Use this to pull events from the Amazon Web Services CloudWatch API.',
         },
+        mrt: mrt(context),
       },
     },
   },

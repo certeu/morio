@@ -292,6 +292,14 @@ export const SecretInput = ({
 }
 
 /*
+ * Input for hidden values
+ */
+export const HiddenInput = ({
+  current = '', // The current value
+  id = '', // An id to tie the input to the label
+}) => <input id={id} type="hidden" value={current} />
+
+/*
  * Input for text (longer than strings, textarea)
  */
 export const TextInput = ({
