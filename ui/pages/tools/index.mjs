@@ -7,6 +7,7 @@ import {
   PackageIcon,
   OpenLockIcon,
   ClosedLockIcon,
+  UserIcon,
 } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
@@ -16,6 +17,13 @@ const ToolsPage = (props) => {
       <ContentWrapper {...props} Icon={CogIcon} title={props.title}>
         <div className="max-w-4xl">
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
+            <Card
+              title="Accounts"
+              href="/tools/accounts"
+              desc="Manage local Morio accounts or list accounts from various identity providers."
+              width="w-full"
+              Icon={UserIcon}
+            />
             <Card
               title="Client Packages"
               href="/tools/pkgs"

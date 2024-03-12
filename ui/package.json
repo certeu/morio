@@ -24,6 +24,7 @@
     "jotai-location": "^0.5.2",
     "jwt-decode": "^4.0.0",
     "lodash.get": "^4.4.2",
+    "lodash.orderby": "^4.6.0",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",
     "luxon": "^3.4.4",

@@ -35,6 +35,31 @@ export const validate = async (targetPath, input) => {
 }
 
 /**
+ * Validates input to a schema you pass it (ad-hoc validation)
+ *
+ * The Joi library throws when validation fails
+ * NodeJS does not like it (at all) when you throw in async code
+ * We could validate in sync, but NodeJS is single-threaded so if we
+ * can async it, we should.
+ *
+ * This is why this wrapper function provides a try...catch block for validation
+ *
+ * @param {string} targetPath - The location of the target object in the schema, in dot notation
+ * @param {object] input - The input to validate
+ * @return {object} valid - The result of the Joi validation
+ */
+export const validateSchema = async (input, schema) => {
+  let valid
+  try {
+    valid = await schema.validateAsync(input)
+  } catch (err) {
+    return [false, err]
+  }
+
+  return [valid, null]
+}
+
+/**
  * Validates deployment settings
  *
  * This will not catch all problems, but it should at least catch some common

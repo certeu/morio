@@ -5,6 +5,7 @@ import { mrt as mrtTemplate } from '../templates/iam/mrt.mjs'
 import {
   FingerprintIcon,
   ClosedLockIcon,
+  KeyIcon,
   MorioIcon,
   StorageIcon,
   UserIcon,
@@ -21,7 +22,7 @@ const brands = {
   mrt: <MorioIcon {...iconProps} />,
   ldap: <StorageIcon {...iconProps} />,
   local: <UserIcon {...iconProps} />,
-  apikeys: <ClosedLockIcon {...iconProps} />,
+  apikeys: <KeyIcon {...iconProps} />,
 }
 
 const ProviderHeader = ({ id, title }) => (
@@ -36,12 +37,17 @@ const ProviderHeader = ({ id, title }) => (
 
 const AddProvider = (props) => {
   const defaults = loadFormDefaults({ provider: props.id }, props.form)
-
+  console.log({ props })
   return (
     <div className="max-w-2xl w-full">
       <ProviderHeader id={props.id} title={props.title} />
       {props.form ? (
-        <FormWrapper {...props} defaults={defaults} action="create" local={true} />
+        <FormWrapper
+          {...props}
+          defaults={defaults}
+          action="create"
+          local={props.blocks[props.id].local}
+        />
       ) : (
         <p>No form for this type of identity provider</p>
       )}

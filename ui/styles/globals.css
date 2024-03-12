@@ -103,10 +103,10 @@
   .mdx thead tr {
     @apply bg-primary text-neutral-content;
   }
-  .mdx tbody tr:nth-child(odd) {
+  .mdx tbody:not(.nostripes) tr:nth-child(odd) {
     @apply bg-primary bg-opacity-10;
   }
-  .mdx table th {
+  .md .mdx table th {
     @apply px-3 py-2;
   }
   .mdx table td {

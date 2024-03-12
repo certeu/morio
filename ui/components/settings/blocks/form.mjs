@@ -239,6 +239,7 @@ export const FormWrapper = (props) => {
   /*
    * This takes the local data and stores it in MSettings
    */
+  console.log({ props })
   const applyLocal = () => {
     props.update(props.local(data), data)
     props.popModal()

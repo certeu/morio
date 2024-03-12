@@ -14,11 +14,6 @@ export function RpKvClient(store) {
   this.store = store
 
   /*
-   * Header name is always morio-key
-   */
-  this.header = 'morio-key'
-
-  /*
    * Verify the Kafka client is attached to the store
    */
   if (!store.kafka.consumer || !store.kafka.producer) return false
@@ -37,8 +32,7 @@ export function RpKvClient(store) {
 RpKvClient.prototype.set = async function (topic = false, key = false, val) {
   if (!topic || !key) return false
 
-  const msg = { key, value: JSON.stringify(val), headers: {} }
-  msg.headers[this.header] = key
+  const msg = { key, value: JSON.stringify(val) }
 
   let result
   try {
@@ -108,7 +102,7 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
      */
     consumer.run({
       eachMessage: async ({ message }) => {
-        if (message.headers[this.header].toString() === key) {
+        if (message.key.toString() === key) {
           if (Number(message.timestamp) > latest.timestamp)
             latest = {
               timestamp: message.timestamp,
@@ -118,4 +112,88 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
       },
     })
   })
+}
+
+/*
+ * Get all keys that match a regex
+ *
+ * @param {string} topic - The topic to read from
+ * @param {string} regex - The regex to match keys against
+ */
+RpKvClient.prototype.find = async function (topic = false, regex = false) {
+  if (!topic || !regex || typeof regex.test !== 'function') return false
+
+  /*
+   * Create a consumer
+   */
+  const consumer = await this.createConsumer()
+
+  /*
+   * Subscribe to topic (from beginning)
+   */
+  await consumer.subscribe({ topics: [topic], fromBeginning: true })
+
+  /*
+   * We can't simply await the consumer, instead we return a
+   * promise, and we'll resolve that promise in an eventlistener
+   * that will trigger at the end of the batch
+   */
+  return new Promise((resolve) => {
+    /*
+     * This will hold the message that match the regex
+     * Per key, we keep those with the highest timestamp,
+     * which means it's the most recent one
+     */
+    const matches = {}
+
+    /*
+     * Add an even handler for the end of the fetch
+     * This will resolve the promise
+     */
+    consumer.on(consumer.events.END_BATCH_PROCESS, () => {
+      consumer.disconnect()
+      /*
+       * Remove timestamp
+       */
+      for (const key in matches) matches[key] = JSON.parse(matches[key].value.toString())
+
+      return resolve(matches)
+    })
+
+    /*
+     * Now walk the topic and find matches for the requested key
+     */
+    consumer.run({
+      eachMessage: async ({ message }) => {
+        if (message.key.toString().match(regex)) {
+          const key = message.key.toString()
+          if (typeof matches[key] === 'undefined') matches[key] = message
+          else if (Number(message.timestamp) > Number(matches[key].timestamp))
+            matches[key] = message
+        }
+      },
+    })
+  })
+}
+
+/*
+ * Helper method to create a consumer
+ */
+RpKvClient.prototype.createConsumer = async function () {
+  /*
+   * Create the consumer
+   */
+  const consumer = this.store.kafka.client.consumer({
+    groupId: `api-${this.store.config.core.node_nr}-${Date.now()}`,
+  })
+
+  /*
+   * Connect the consumer
+   */
+  await consumer.connect()
+
+  /*
+   * Return the connected consumer
+   */
+  return consumer
 }

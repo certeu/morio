@@ -136,6 +136,18 @@ MorioClient.prototype.listDownloads = async function () {
 }
 
 /**
+ * List accounts in Morio
+ *
+ * @return {array} - The list of files
+ */
+MorioClient.prototype.getAccounts = async function () {
+  return await this.call(`${morioConfig.api}/accounts`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
  * Login
  *
  * @param {string} providerId - ID of the authentication provider
@@ -147,6 +159,21 @@ MorioClient.prototype.login = async function (provider, data) {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify({ provider, data }),
+  })
+}
+
+/**
+ * Create (local) morio account
+ *
+ * @param {object} data - The data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.createAccount = async function (data) {
+  console.log('data in create account', data)
+  return await this.call(`${morioConfig.api}/accounts`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
   })
 }
 
