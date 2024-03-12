@@ -81,7 +81,8 @@ export const bootstrapConfiguration = async () => {
   })
 
   /*
-   * Not connect both consumer and producer
+   * This will connect the producer.
+   * The consumer needs to be connected on-demand.
    */
   await store.kafka.connect()
 
