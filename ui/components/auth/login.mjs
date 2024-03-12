@@ -218,7 +218,10 @@ export const RoleInput = ({ role, setRole }) => {
       dir="row"
       update={(val) => (role === val ? setRole(false) : setRole(val))}
       current={role}
-      list={roles.map((role) => ({ val: role, label: role }))}
+      list={roles.map((role) => ({
+        val: role,
+        label: <span className="text-center block">{role}</span>,
+      }))}
       dflt="user"
     />
   )
