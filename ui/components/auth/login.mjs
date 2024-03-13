@@ -14,12 +14,14 @@ import { Term } from 'components/term.mjs'
 import { ListInput } from '../inputs.mjs'
 import { QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'components/icons.mjs'
 // Providers
+import { BaseProvider } from './base-provider.mjs'
+import { LocalProvider } from './local-provider.mjs'
 import { MrtProvider } from './mrt-provider.mjs'
-import { LdapProvider } from './ldap-provider.mjs'
 
 const providers = {
+  ldap: BaseProvider,
+  local: LocalProvider,
   mrt: MrtProvider,
-  ldap: LdapProvider,
 }
 
 const UnknownIdp = ({ label }) => (

@@ -1,9 +1,20 @@
-import { randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey } from 'crypto'
+import { createHash, randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
 import jwt from 'jsonwebtoken'
 import { Buffer } from 'node:buffer'
+
+/**
+ * Hashes a string
+ *
+ * @param {string} string - The input string to hash
+ * @return {string} hash - The hash result
+ */
+export function hash(string) {
+  return createHash('sha256').update(string).digest('hex')
+}
+
 
 /**
  * Generate a certificate signing request (csr)
@@ -428,3 +439,49 @@ export function encryptionMethods(stringKey, salt, logger) {
     },
   }
 }
+
+
+/*
+ * Salts and hashes a password
+ */
+export function hashPassword(userInput, salt=false) {
+  if (salt === false) salt = randomString(32)
+  const hash = scryptSync(userInput, salt, 64)
+
+  return {
+    hash: hash.toString('hex'),
+    salt: salt.toString('hex'),
+  }
+}
+
+/*
+ * Verifies a (user-provided) password against the stored hash + salt
+ *
+ * The password field will hold an object with a 'hash' and 'salt' field.
+ */
+export function verifyPassword(userInput, storedPassword) {
+  let data
+  try {
+    data = typeof storedPassword === 'string'
+      ? JSON.parse(storedPassword)
+      : storedPassword
+  } catch {
+    return false
+  }
+
+  /*
+   * Verify password
+   */
+  if (data.hash && data.salt) {
+    const verify = hashPassword(userInput, data.salt)
+    if (data.hash === verify.hash && data.salt === verify.salt) {
+      /*
+       * Son of a bitch, you're in
+       */
+      return true
+    }
+  }
+
+  return false
+}
+

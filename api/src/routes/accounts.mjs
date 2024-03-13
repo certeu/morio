@@ -20,4 +20,14 @@ export function routes(app) {
    * Create account
    */
   app.post(`${PREFIX}/accounts`, Accounts.create)
+
+  /*
+   * Activate account
+   */
+  app.post(`${PREFIX}/activate-account`, Accounts.activateAccount)
+
+  /*
+   * Activate MFA
+   */
+  app.post(`${PREFIX}/activate-mfa`, Accounts.activateMfa)
 }

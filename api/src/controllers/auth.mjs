@@ -13,6 +13,10 @@ const allowedUris = [
   `${store.prefix}/login/`,
   `${store.prefix}/idps`,
   `${store.prefix}/idps/`,
+  `${store.prefix}/activate-account`,
+  `${store.prefix}/activate-account/`,
+  `${store.prefix}/activate-mfa`,
+  `${store.prefix}/activate-mfa/`,
 ]
 
 /**

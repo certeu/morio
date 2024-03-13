@@ -1,6 +1,7 @@
 import orderBy from 'lodash.orderby'
 // Context
 import { ModalContext } from 'context/modal.mjs'
+import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
@@ -10,7 +11,9 @@ import { PlayIcon } from 'components/icons.mjs'
 import { MsAgo } from 'components/time-ago.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SecretInput } from 'components/inputs.mjs'
+import { Highlight } from 'components/highlight.mjs'
+import { PageLink } from 'components/link.mjs'
 
 /**
  * React component to display the accounts
@@ -165,9 +168,20 @@ const AddLocalAccountModal = () => {
   const [username, setUsername] = useState('')
   const [about, setAbout] = useState('')
   const { api } = useApi()
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+  const { pushModal } = useContext(ModalContext)
 
   const createAccount = async () => {
+    setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
     const result = await api.createAccount({ username, about, provider: 'local' })
+    if (result[1] === 200 && result[0].data) {
+      setLoadingStatus([true, 'Account created', true, true])
+      pushModal(
+        <ModalWrapper keepOpenOnClick>
+          <InviteResult data={result[0].data} />
+        </ModalWrapper>
+      )
+    } else return setLoadingStatus([true, `Unable to create account`, true, false])
   }
 
   return (
@@ -192,6 +206,151 @@ const AddLocalAccountModal = () => {
       >
         Create Account
       </button>
+    </div>
+  )
+}
+
+const InviteResult = ({ data }) => (
+  <div className="max-w-3xl w-full">
+    <h2>Local Morio Account Created</h2>
+    <ul>
+      <li>
+        <b>Username</b>: {data.username}
+      </li>
+      <li>
+        <b>Invite code</b>: <code>{data.invite}</code>
+      </li>
+    </ul>
+    <Highlight title="Invite Link">{data.inviteUrl}</Highlight>
+  </div>
+)
+
+export const ActivateAccount = ({ invite = '', user = '' }) => {
+  const [inviteCode, setInviteCode] = useState(invite)
+  const [username, setUsername] = useState(user)
+  const { api } = useApi()
+  const { pushModal } = useContext(ModalContext)
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+  const [data, setData] = useState(false)
+  const [mfa, setMfa] = useState('')
+  const [password, setPassword] = useState('')
+  const [scratchCodes, setScratchCodes] = useState(false)
+
+  const activateAccount = async () => {
+    setLoadingStatus([true, 'One moment please, contacting the Morio API'])
+    const result = await api.activateAccount({ username, invite: inviteCode, provider: 'local' })
+    if (result[1] === 200 && result[0].data) {
+      setLoadingStatus([true, 'Account needs to be setup', true, true])
+      setData(result[0].data)
+    } else return setLoadingStatus([true, `Unable to activate account`, true, false])
+  }
+
+  const activateMfa = async () => {
+    setLoadingStatus([true, 'One moment please, contacting the Morio API'])
+    const result = await api.activateMfa({
+      username,
+      invite: inviteCode,
+      provider: 'local',
+      password,
+      token: mfa,
+    })
+    if (result[1] === 200 && result[0].data) {
+      setLoadingStatus([true, 'Account activated', true, true])
+      setScratchCodes(result[0].data.scratchCodes)
+    } else
+      return setLoadingStatus([
+        true,
+        result[0].error ? result[0].error : `Unable to activate account`,
+        true,
+        false,
+      ])
+  }
+
+  if (scratchCodes)
+    return (
+      <>
+        <h2>Account activated</h2>
+        <p>
+          You can now <PageLink href="/account">login with your local Morio account</PageLink>{' '}
+          (username: <b>{username}</b>).
+        </p>
+        <Popout important>
+          <h5>Store these scratch codes in a save space</h5>
+          <ul className="list list-inside list-disc ml-4">
+            {scratchCodes.map((code, i) => (
+              <li key={i}>{code}</li>
+            ))}
+          </ul>
+          <p>
+            Without access to your phone, you can still access Morio using one of these codes as
+            one-time MFA token.
+          </p>
+        </Popout>
+      </>
+    )
+
+  return data ? (
+    <div className="">
+      <div className="max-w-2xl mx-auto">
+        <h2>Account Setup</h2>
+        <p>Almost there, now choose a password and setup MFA on your phone.</p>
+        <div className="grid grid-cols-2 gap-4">
+          <div dangerouslySetInnerHTML={{ __html: data.qrcode }} className="max-w-sm mx-auto" />
+          <div>
+            <StringInput
+              label="Password"
+              current={password}
+              update={setPassword}
+              valid={(val) => (val.length > 6 ? true : { error: true })}
+              labelBL="Choose a password for your account"
+            />
+            <StringInput
+              label="MFA code"
+              labelBL="Scan the QR code, then enter the MFA code here"
+              current={mfa}
+              update={setMfa}
+              valid={(val) => (val.length > 4 ? true : { error: true })}
+            />
+            <p className="text-center">
+              <button
+                className="btn btn-primary btn-lg w-full"
+                onClick={activateMfa}
+                disabled={mfa.length < 5}
+              >
+                Setup MFA
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+      <Popout note>
+        <h5>MFA is mandatory on local Morio accounts</h5>
+        <p>For non-human access, use an API key instead.</p>
+      </Popout>
+    </div>
+  ) : (
+    <div className="">
+      <StringInput
+        label="Username"
+        current={username}
+        update={setUsername}
+        valid={(val) => (val.length > 0 ? true : { error: true })}
+      />
+      <StringInput
+        label="Invite Code"
+        current={inviteCode}
+        update={setInviteCode}
+        valid={(val) => (val.length === 48 ? true : { error: true })}
+      />
+      <p className="text-center">
+        <button
+          className="btn btn-primary btn-lg"
+          onClick={activateAccount}
+          disabled={inviteCode.length !== 48 || username.length < 1}
+        >
+          Activate Account
+        </button>
+      </p>
     </div>
   )
 }

@@ -169,8 +169,35 @@ MorioClient.prototype.login = async function (provider, data) {
  * @return {object} - The result
  */
 MorioClient.prototype.createAccount = async function (data) {
-  console.log('data in create account', data)
   return await this.call(`${morioConfig.api}/accounts`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Activate a (local) morio account
+ *
+ * @param {object} data - The data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.activateAccount = async function (data) {
+  return await this.call(`${morioConfig.api}/activate-account`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Activates MFA on  a (local) morio account
+ *
+ * @param {object} data - The data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.activateMfa = async function (data) {
+  return await this.call(`${morioConfig.api}/activate-mfa`, {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(data),

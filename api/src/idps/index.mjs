@@ -1,5 +1,6 @@
 import { mrt } from './mrt.mjs'
 import { ldap } from './ldap.mjs'
+import { local } from './local.mjs'
 
 /*
  * This object facilitates checking
@@ -8,4 +9,5 @@ import { ldap } from './ldap.mjs'
 export const idps = {
   mrt,
   ldap,
+  local,
 }

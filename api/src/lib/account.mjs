@@ -48,8 +48,12 @@ export const saveAccount = async (providerId, username, data) => {
 
 /**
  * Helper method to store the last login time in the account data
+ *
+ * @param {string} providerId - The ID of the identity provider
+ * @param {string} username - The username
+ * @param {object} extraData - Any additional data to store for the account
  */
-export const storeLastLoginTime = async (providerId, username) => {
+export const storeLastLoginTime = async (providerId, username, extraData = {}) => {
   const lastLogin = Date.now()
   const data = await loadAccount(providerId, username)
   /*
@@ -57,5 +61,9 @@ export const storeLastLoginTime = async (providerId, username) => {
    */
   data.status = 'active'
 
-  return await saveAccount(providerId, username, data ? { ...data, lastLogin } : { lastLogin })
+  return await saveAccount(
+    providerId,
+    username,
+    data ? { ...data, ...extraData, lastLogin } : { lastLogin }
+  )
 }
