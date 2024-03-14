@@ -1,6 +1,7 @@
 import { storeLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
+import { store } from '../lib/store.mjs'
 
 /**
  * local: Local Morio identity/authentication provider
@@ -61,7 +62,11 @@ export const local = async (id, data) => {
     /*
      * Verify MFA
      */
-    const mfaOk = await mfa.verify(data.token, account.mfa, account.scratchCodes)
+    const mfaOk = await mfa.verify(
+      data.token,
+      await store.decrypt(account.mfa),
+      account.scratchCodes
+    )
     if (mfaOk[0]) {
       /*
        * Update scratchcodes in case they were used

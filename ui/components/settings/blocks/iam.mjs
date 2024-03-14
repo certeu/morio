@@ -140,6 +140,7 @@ export const AuthProviders = (props) => {
                 key={id}
                 id={id}
                 type={data.iam.providers[id].provider}
+                about={props.viewConfig?.blocks?.[data.iam.providers[id].provider]?.about}
                 {...data.iam.providers[id]}
                 onClick={() =>
                   pushModal(

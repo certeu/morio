@@ -20,7 +20,8 @@ const strategy = (id) => {
   if (!store.config?.iam?.providers?.[id]) return false
 
   const options = {
-    server: store.config.iam.providers[id].server, // log: store.log },
+    server: store.config.iam.providers[id].server,
+    log: store.log,
     credentialsLookup: (req) => {
       return {
         username: req.body?.data?.username,
@@ -49,7 +50,7 @@ const strategy = (id) => {
 }
 
 /**
- * ldap: LDAP identtiy/authentication provider
+ * ldap: LDAP identity/authentication provider
  *
  * This method handles login/authentnication using the `ldap` provider
  *
@@ -76,6 +77,16 @@ export const ldap = (id, data, req) => {
     passport.authenticate(id, function (err, user) {
       if (err)
         return resolve([false, { success: false, reason: 'Authentication error', error: err }])
+
+      if (!user)
+        return resolve([
+          false,
+          {
+            success: false,
+            reason: 'Authentication failed',
+            error: 'Computer says no',
+          },
+        ])
 
       if (user) {
         /*

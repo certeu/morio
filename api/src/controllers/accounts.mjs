@@ -113,7 +113,7 @@ Controller.prototype.activateAccount = async (req, res) => {
    */
   await saveAccount('local', valid.username, {
     ...pending,
-    mfa: result.secret,
+    mfa: await store.encrypt(result.secret),
   })
 
   /*
@@ -156,7 +156,7 @@ Controller.prototype.activateMfa = async (req, res) => {
   /*
    * Verify MFA token
    */
-  const result = await mfa.verify(valid.token, pending.mfa, [])
+  const result = await mfa.verify(valid.token, await store.decrypt(pending.mfa), [])
   if (!result) return res.status(400).send({ error: 'Invalid MFA token' })
 
   /*

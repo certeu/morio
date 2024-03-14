@@ -4,6 +4,7 @@ import { attempt } from '#shared/utils'
 import { store } from './lib/store.mjs'
 import { KafkaClient } from './lib/kafka.mjs'
 import { RpKvClient } from './lib/rpkv.mjs'
+import { encryptionMethods } from '#shared/crypto'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -64,6 +65,18 @@ export const bootstrapConfiguration = async () => {
   }
   store.config = result[1].config
   store.keys = result[1].keys
+
+  /*
+   * Add encryption methods
+   */
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+    store.keys.mrt,
+    'Morio by CERT-EU',
+    store.log
+  )
+  store.encrypt = encrypt
+  store.decrypt = decrypt
+  store.isEncrypted = isEncrypted
 
   /*
    * Initialize Kafka client

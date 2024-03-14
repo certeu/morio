@@ -26,6 +26,7 @@ import {
   StorageIcon,
   TaskIcon,
   UlIcon,
+  UserIcon,
   WifiIcon,
   WrenchIcon,
 } from 'components/icons.mjs'
@@ -41,6 +42,7 @@ export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
  * Object to map icons to page
  */
 const icons = {
+  accounts: UserIcon,
   api: CodeIcon,
   broker: RedPanda,
   ca: CertificateIcon,
@@ -126,6 +128,7 @@ export const links = {
     },
   },
   tools: {
+    accounts: {},
     pkgs: {
       t: 'Client Packages',
     },

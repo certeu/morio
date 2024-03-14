@@ -44,7 +44,7 @@ for (const role of roles)
  */
 export const local = (context) => ({
   title: 'Local Accounts',
-  about: 'Allows creating and using local Morio accounts',
+  about: 'Provides authentication with username and password',
   local: (data) => 'iam.providers.local',
   form: ({ data }) => [
     {

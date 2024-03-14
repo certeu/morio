@@ -23,6 +23,7 @@ export const ListAccounts = () => {
   const [provider, setProvider] = useState(false)
   const [order, setOrder] = useState('lastLogin')
   const [reverse, setReverse] = useState(false)
+  const { pushModal } = useContext(ModalContext)
 
   const { api } = useApi()
 
@@ -48,7 +49,7 @@ export const ListAccounts = () => {
     <table className="table">
       <thead>
         <tr>
-          {['id', 'provider', 'username', 'lastLogin', 'status'].map((key) => (
+          {['provider', 'username', 'lastLogin', 'status'].map((key) => (
             <th key={key}>
               <button
                 onClick={() => changeOrder(key)}
@@ -70,15 +71,17 @@ export const ListAccounts = () => {
           [order],
           [reverse ? 'desc' : 'asc']
         ).map((acc) => (
-          <tr key={acc.id} className="hover:bg-primary hover:cursor-pointer hover:bg-opacity-20">
-            <td>
-              <button
-                className="btn btn-neutral btn-outline btn-sm"
-                href={`/tools/accounts/${acc.id}`}
-              >
-                {acc.id}
-              </button>
-            </td>
+          <tr
+            key={acc.id}
+            className="hover:bg-primary hover:cursor-pointer hover:bg-opacity-20"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper keepOpenOnClick>
+                  <AccountDetail account={acc} />
+                </ModalWrapper>
+              )
+            }
+          >
             <td>
               <button className="btn btn-ghost btn-sm" onClick={() => changeProvider(acc.provider)}>
                 {acc.provider}
@@ -105,6 +108,13 @@ export const ListAccounts = () => {
     </div>
   )
 }
+
+const AccountDetail = ({ account }) => (
+  <div className="w-2xl w-full">
+    <h2>{account.id}</h2>
+    <Highlight js={account} title="Account Data" />
+  </div>
+)
 
 const statusColors = {
   active: 'success',
