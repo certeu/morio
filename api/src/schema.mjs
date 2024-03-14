@@ -43,6 +43,10 @@ export const settingsSchema = Joi.object({
   }),
   iam: Joi.object({
     providers: Joi.object(),
+    ui: Joi.object({
+      visibility: Joi.object().optional(),
+      order: Joi.array().optional(),
+    }).optional(),
   }),
 })
 

@@ -1,11 +1,18 @@
 import { useState } from 'react'
-import { SecretInput, StringInput } from '../inputs.mjs'
-import { RoleInput } from './login.mjs'
+import { SecretInput, StringInput, RoleInput } from '../inputs.mjs'
 
 /**
  * The login form for any provider that takes username + password
  */
-export const BaseProvider = ({ id, api, setLoadingStatus, setAccount, setError }) => {
+export const BaseProvider = ({
+  id,
+  api,
+  setLoadingStatus,
+  setAccount,
+  setError,
+  usernameLabel = 'Username',
+  passwordLabel = 'Password',
+}) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('user')
@@ -27,12 +34,17 @@ export const BaseProvider = ({ id, api, setLoadingStatus, setAccount, setError }
   return (
     <>
       <StringInput
-        label="Username"
+        label={usernameLabel}
         current={username}
         update={setUsername}
         valid={(val) => val.length > 0}
       />
-      <SecretInput label="Password" current={password} update={setPassword} valid={() => true} />
+      <SecretInput
+        label={passwordLabel}
+        current={password}
+        update={setPassword}
+        valid={() => true}
+      />
       <RoleInput {...{ role, setRole }} />
       <button
         className="btn btn-lg btn-primary w-full"

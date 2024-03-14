@@ -1,19 +1,22 @@
 import orderBy from 'lodash.orderby'
+import { roles } from 'config/roles.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
+import { useAccount } from 'hooks/use-account.mjs'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { PlayIcon } from 'components/icons.mjs'
 import { MsAgo } from 'components/time-ago.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
-import { StringInput, TextInput, SecretInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SecretInput, RoleInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { PageLink } from 'components/link.mjs'
+import { Role } from 'components/role.mjs'
 
 /**
  * React component to display the accounts
@@ -174,16 +177,62 @@ export const AddLocalAccount = () => {
   )
 }
 
+const OverwriteExistingAccount = ({ createAccount }) => {
+  const { popModal } = useContext(ModalContext)
+  const { role } = useAccount()
+
+  return (
+    <div className="max-w-3xl w-full">
+      <h2>This account already exists</h2>
+      {['operator', 'engineer', 'root'].includes(role) ? (
+        <>
+          <p>
+            Since your role is <Role role={role} /> you can overwrite the account if you choose to.
+          </p>
+          <Popout warning>
+            <h5>Replace this account?</h5>
+            <p>We can overwrite the account, but there is no way back from this.</p>
+            <p className="text-center">
+              <button className="btn btn-error" onClick={() => createAccount(true)}>
+                Overwrite Account
+              </button>
+            </p>
+          </Popout>
+        </>
+      ) : (
+        <>
+          <p>
+            With your current <Role role={role} /> role, you cannot overwrite the account.
+          </p>
+          <p className="text-center">
+            <button className="btn btn-primary" onClick={popModal}>
+              Back
+            </button>
+          </p>
+        </>
+      )}
+    </div>
+  )
+}
+
 const AddLocalAccountModal = () => {
   const [username, setUsername] = useState('')
   const [about, setAbout] = useState('')
+  const [userRole, setUserRole] = useState('user')
   const { api } = useApi()
+  const { role } = useAccount()
   const { setLoadingStatus } = useContext(LoadingStatusContext)
-  const { pushModal } = useContext(ModalContext)
+  const { pushModal, popModal } = useContext(ModalContext)
 
-  const createAccount = async () => {
-    setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
-    const result = await api.createAccount({ username, about, provider: 'local' })
+  const createAccount = async (overwrite = false) => {
+    setLoadingStatus([true, 'Contacting the Morio API'])
+    const result = await api.createAccount({
+      username,
+      about,
+      provider: 'local',
+      role: userRole,
+      overwrite,
+    })
     if (result[1] === 200 && result[0].data) {
       setLoadingStatus([true, 'Account created', true, true])
       pushModal(
@@ -191,7 +240,18 @@ const AddLocalAccountModal = () => {
           <InviteResult data={result[0].data} />
         </ModalWrapper>
       )
-    } else return setLoadingStatus([true, `Unable to create account`, true, false])
+    } else if (result[1] === 409) {
+      /*
+       * The account exists
+       */
+      pushModal(
+        <ModalWrapper keepOpenOnClick>
+          <OverwriteExistingAccount createAccount={createAccount} />
+        </ModalWrapper>
+      )
+    } else {
+      return setLoadingStatus([true, `Unable to create account`, true, false])
+    }
   }
 
   return (
@@ -203,6 +263,7 @@ const AddLocalAccountModal = () => {
         current={username}
         update={setUsername}
       />
+      <RoleInput label="Role" role={userRole} setRole={setUserRole} maxRole={role} />
       <TextInput
         label="About"
         labelBL="Optional: To help you remember why this account was created"

@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { providerMeta } from './index.mjs'
 import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
+import { PageLink } from 'components/link.mjs'
 
 const Roles = [
   { tabs: {}, navs: false },
@@ -48,24 +49,24 @@ export const local = (context) => ({
   local: (data) => 'iam.providers.local',
   form: ({ data }) => [
     {
-      tabs: {
-        Metadata: [
-          {
-            key: 'id',
-            current: 'mrt',
-            hidden: true,
-          },
-          {
-            schema: Joi.string().required().label('Label'),
-            label: 'Label',
-            labelBL: `A label to identify this provider on the login screen`,
-            key: 'label',
-            current: 'Morio Account',
-            placeholder: 'Morio Account',
-          },
-        ],
-        Roles,
-      },
+      key: 'id',
+      current: 'mrt',
+      hidden: true,
     },
+    {
+      key: 'label',
+      current: 'Morio Account',
+      hidden: true,
+    },
+    <Popout note>
+      <h5>No settings required</h5>
+      <p>
+        The <b>Local Accounts</b> provider does not require any settings.
+      </p>
+      <p>
+        After adding it as an identity provider, you can add local accounts on the{' '}
+        <PageLink href="/tools/accounts">accounts page</PageLink>.
+      </p>
+    </Popout>,
   ],
 })

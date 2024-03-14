@@ -1,6 +1,8 @@
+import { roles } from 'config/roles.mjs'
+// Context
+import { ModalContext } from 'context/modal.mjs'
 // Hooks
-import { useCallback } from 'react'
-import { useState } from 'react'
+import { useCallback, useState, useContext } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
@@ -351,7 +353,12 @@ export const ListInput = ({
       {list.map((item, i) => {
         const entry =
           typeof item.val === 'object' && item.val.type === 'select' ? (
-            <FakeButtonFrame dense={dense} key={i} active={item.val.values.includes(current)}>
+            <FakeButtonFrame
+              dense={dense}
+              key={i}
+              active={item.val.values.includes(current)}
+              disabled={item.disabled}
+            >
               <div className="w-full text-lg leading-5">{item.label}</div>
               {item.about ? (
                 <div className="w-full text-normal font-normal normal-case pt-1 leading-5">
@@ -381,6 +388,7 @@ export const ListInput = ({
               onClick={() => update(item.val)}
               disabled={disabled}
               dir={dir}
+              disabled={item.disabled}
             >
               <div className={`w-full ${dir === 'col' ? 'text-lg leading-5' : 'text-sm'}`}>
                 {item.label}
@@ -490,3 +498,29 @@ export const ValidationErrors = ({ valid, bLabel }) => (
     }
   </ul>
 )
+
+export const RoleInput = ({ role, setRole, maxRole = false }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  /*
+   * If there's a maxrole set, we need to know it's i value
+   * Let's assume we'll never have more than 100 roles :)
+   */
+  const maxLevel = maxRole ? roles.indexOf(maxRole) : 100
+
+  return (
+    <ListInput
+      label="Role"
+      dense
+      dir="row"
+      update={(val) => (role === val ? setRole(false) : setRole(val))}
+      current={role}
+      list={roles.map((role, i) => ({
+        val: role,
+        label: <span className="text-center block">{role}</span>,
+        disabled: maxRole ? i > roles.indexOf(maxRole) : false,
+      }))}
+      dflt="user"
+    />
+  )
+}

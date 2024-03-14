@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { SecretInput } from '../inputs.mjs'
-import { RoleInput } from './login.mjs'
+import { SecretInput, RoleInput } from '../inputs.mjs'
 
 /**
  * The login for for the Morio Root Token provider

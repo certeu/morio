@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
 // Identity Providers
 import { mrt } from './mrt.mjs'
+import { apikeys } from './apikeys.mjs'
 import { local } from './local.mjs'
 import { ldap } from './ldap.mjs'
 
@@ -36,6 +37,35 @@ export const providerMeta = () => [
 ]
 
 /*
+ * Resuse this for visibility
+ */
+export const providerVisibility = ({ name }) => ({
+  key: 'visibility',
+  schema: Joi.string().valid('tab', 'icon', 'disabled').required().label('Visibilty'),
+  inputType: 'buttonList',
+  title: 'Visibility',
+  label: 'Visibility',
+  current: 'tab',
+  list: [
+    {
+      val: 'tab',
+      label: 'Display as any other provider',
+      about: `Include the ${narm} provider in the list of availble identity providers`,
+    },
+    {
+      val: 'icon',
+      label: 'Display as an icon only',
+      about: `Do not include the ${name} provider in the list of availble identity providers, instead display an icon to bring it up`,
+    },
+    {
+      val: 'disabled',
+      label: 'Do not display',
+      about: `Do not show the ${name} identity provider on the login screen at all`,
+    },
+  ],
+})
+
+/*
  * Identity and Access Management (IAM)
  */
 export const iam = (context) => ({
@@ -57,15 +87,19 @@ export const iam = (context) => ({
       title: 'Identity Providers',
       about: 'Identity providers are services that allow users to prove their identity',
       blocks: {
-        apikeys: {
-          title: 'API Keys',
-          about: 'Provides authentication with API key/secret',
-          desc: 'Use this to pull events from the Amazon Web Services CloudWatch API.',
-        },
+        apikeys: apikeys(context),
         ldap: ldap(context),
         local: local(context),
         mrt: mrt(context),
       },
+    },
+    /*
+     * Login form
+     */
+    ui: {
+      label: 'Login Page',
+      title: 'Login Page',
+      type: 'loginUi',
     },
   },
 })

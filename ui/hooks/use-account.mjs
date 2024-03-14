@@ -54,5 +54,17 @@ export const useAccount = () => {
    */
   const account = decodeJwt(cookies.morio)
 
-  return { account, setAccount, logout, renewToken }
+  return {
+    account,
+    setAccount,
+    logout,
+    renewToken,
+    /*
+     * Add these for easy access to destructuring
+     */
+    provider: account.provider,
+    role: account.role,
+    user: account.user,
+    maxRole: account.maxrole,
+  }
 }

@@ -1,6 +1,7 @@
 import { storeLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
+import { isRoleAvailable } from '../rbac.mjs'
 import { store } from '../lib/store.mjs'
 
 /**
@@ -44,7 +45,7 @@ export const local = async (id, data) => {
   /*
    * Now authenticate
    */
-  if (data.username && data.password && data.token) {
+  if (data.username && data.password && data.token && data.role) {
     /*
      * Look up the account
      */
@@ -58,6 +59,20 @@ export const local = async (id, data) => {
     const passwordOk = verifyPassword(data.password, account.password)
     if (!passwordOk)
       return [false, { success: false, reason: 'Authentication failed', error: 'Invalid password' }]
+
+    /*
+     * Is the role accessible to this user?
+     */
+    const available = isRoleAvailable(account.role, data.role)
+    if (!available)
+      return [
+        false,
+        {
+          success: false,
+          reason: 'Authentication failed',
+          error: 'Role not available to this user',
+        },
+      ]
 
     /*
      * Verify MFA

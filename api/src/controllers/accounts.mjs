@@ -1,4 +1,6 @@
 import Joi from 'joi'
+import { roles } from '#config/roles'
+import { isRoleAvailable } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
 import { store } from '../lib/store.mjs'
 import { validateSchema } from '../lib/validation.mjs'
@@ -57,13 +59,27 @@ Controller.prototype.create = async (req, res) => {
    * Does this user exist?
    */
   const exists = await loadAccount('local', valid.username)
-  if (exists) return res.status(409).send({ error: 'Account exists' })
+  if (exists) {
+    /*
+     * A user with sufficient privileges can overwrite the account
+     */
+    if (valid.overwrite && isRoleAvailable(req, 'operator')) {
+      store.log.debug(`Overwritting ${valid.provider}.${valid.username}`)
+    } else return res.status(409).send({ error: 'Account exists' })
+  }
 
   /*
    * Create the account
    */
   const invite = randomString(24)
-  await saveAccount('local', valid.username, { about: valid.about, invite, status: 'pending' })
+  await saveAccount('local', valid.username, {
+    about: valid.about,
+    invite: hash(invite),
+    status: 'pending',
+    role: valid.role,
+    createdBy: `${req.headers['x-morio-provider']}.${req.headers['x-morio-user']}`,
+    createdAt: Date.now(),
+  })
 
   return res.send({
     result: 'success',
@@ -102,6 +118,12 @@ Controller.prototype.activateAccount = async (req, res) => {
   if (!pending) return res.status(404).send({ error: 'Account not found' })
   if (pending.status !== 'pending')
     return res.status(400).send({ error: 'Account not in pending state' })
+
+  /*
+   * Does the invite match?
+   */
+  if (pending.invite !== hash(req.body.invite))
+    return res.status(400).send({ error: 'Invite mismatch' })
 
   /*
    * MFA is mandatory for local accounts. So set it up
@@ -154,6 +176,12 @@ Controller.prototype.activateMfa = async (req, res) => {
   if (!pending.mfa) return res.status(400).send({ error: 'Account does not have MFA setup' })
 
   /*
+   * Does the invite match?
+   */
+  if (pending.invite !== hash(req.body.invite))
+    return res.status(400).send({ error: 'Invite mismatch' })
+
+  /*
    * Verify MFA token
    */
   const result = await mfa.verify(valid.token, await store.decrypt(pending.mfa), [])
@@ -191,6 +219,8 @@ const schema = {
     username: Joi.string().required(),
     about: Joi.string().optional().allow(''),
     provider: Joi.string().valid('local'),
+    role: Joi.string().valid(...roles),
+    overwrite: Joi.boolean().valid(true, false).optional(),
   }),
   activateAccount: Joi.object({
     username: Joi.string().required().min(1),

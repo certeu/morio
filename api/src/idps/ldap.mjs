@@ -1,5 +1,5 @@
 import { store } from '../lib/store.mjs'
-import { roles } from '../rbac.mjs'
+import { roles } from '#config/roles'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'

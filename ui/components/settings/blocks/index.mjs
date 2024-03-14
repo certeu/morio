@@ -3,7 +3,7 @@ import React, { Fragment } from 'react'
 import { Popout } from 'components/popout.mjs'
 import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
-import { AuthProviders } from './iam.mjs'
+import { AuthProviders, LoginUi } from './iam.mjs'
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
 import { Flags, Vars, Secrets } from './tokens.mjs'
 import { FormWrapper } from './form.mjs'
@@ -21,6 +21,7 @@ const blocks = {
   vars: Vars,
   secrets: Secrets,
   form: FormWrapper,
+  loginUi: LoginUi,
   mdx: ({ viewConfig }) => <MdxWrapper>{viewConfig.mdx}</MdxWrapper>,
 }
 

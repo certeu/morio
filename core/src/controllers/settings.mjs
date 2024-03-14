@@ -23,26 +23,35 @@ Controller.prototype.getIdps = async (req, res) => {
   const idps = {}
 
   /*
-   * Add the root token idp, unless it's disabled by a feature flag
-   */
-  if (store.settings.tokens?.flags?.DISABLE_ROOT_TOKEN !== true) {
-    idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
-  }
-
-  /*
    * Add the IDPs configured by the user
    */
   if (store.settings?.iam?.providers) {
     for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
-      if (id === 'mrt') idps['Root Token'] = { ...idps['Root Token'], ...conf }
-      else idps[conf.label] = { id, provider: conf.provider }
+      idps[id] = {
+        id,
+        provider: id === 'mrt' ? 'mrt' : conf.provider,
+        label: conf.label,
+        about: conf.about || false,
+      }
     }
+  }
+
+  /*
+   * Add the root token idp, unless it's disabled by a feature flag
+   */
+  if (store.settings.tokens?.flags?.DISABLE_ROOT_TOKEN !== true) {
+    //idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
   }
 
   /*
    * Return the list
    */
-  return res.send({ idps }).end()
+  return res
+    .send({
+      idps,
+      ui: store.settings.iam?.ui || {},
+    })
+    .end()
 }
 
 const ensureTokenSecrecy = (secrets) => {

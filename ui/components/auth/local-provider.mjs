@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { SecretInput, StringInput } from '../inputs.mjs'
-import { RoleInput } from './login.mjs'
+import { SecretInput, StringInput, RoleInput } from '../inputs.mjs'
 
 /**
  * The login form for any provider that takes username + password
@@ -35,7 +34,7 @@ export const LocalProvider = ({ id, api, setLoadingStatus, setAccount, setError 
       />
       <div className="grid grid-cols-2 gap-2">
         <SecretInput label="Password" current={password} update={setPassword} valid={() => true} />
-        <StringInput label="MDA Token" current={token} update={setToken} valid={() => true} />
+        <StringInput label="MFA Token" current={token} update={setToken} valid={() => true} />
       </div>
       <RoleInput {...{ role, setRole }} />
       <button

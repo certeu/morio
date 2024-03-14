@@ -20,14 +20,17 @@ import { CloseIcon, TrashIcon } from 'components/icons.mjs'
 import { TokenSelect } from './tokens.mjs'
 
 export const loadFormDefaults = (defaults, form) => {
+  if (typeof form === 'function') form = form({})
   if (!Array.isArray(form)) return loadFormDefaults(defaults, [form])
-  for (const el of form) {
+  for (let el of form) {
+    if (typeof el === 'function') el = el({})
     if (Array.isArray(el)) loadFormDefaults(defaults, el)
     if (typeof el === 'object') {
       if (el.tabs) {
         for (const tab in el.tabs) loadFormDefaults(defaults, el.tabs[tab])
       }
       if (el.key && el.dflt !== undefined) set(defaults, el.key, el.dflt)
+      if (el.hidden && el.current !== undefined) set(defaults, el.key, el.current)
     }
   }
 
@@ -199,7 +202,8 @@ const getFormValidation = (el, data, result) => {
 /*
  * Top-level form validation method
  */
-export const runFormValidation = (form, data) => {
+export const runFormValidation = (form, data = {}) => {
+  console.log({ data })
   if (typeof form === 'function') form = form(data)
   const result = {}
   for (const el of form) getFormValidation(el, data, result)
@@ -222,7 +226,7 @@ const formValidationReducer = (result) => {
  * Return a simple true/false for an entire form validation
  * Typically used to enable/disable submit buttons
  */
-export const reduceFormValidation = (form, data) =>
+export const reduceFormValidation = (form, data = {}) =>
   formValidationReducer(runFormValidation(form, data))
 
 export const FormWrapper = (props) => {
@@ -239,7 +243,6 @@ export const FormWrapper = (props) => {
   /*
    * This takes the local data and stores it in MSettings
    */
-  console.log({ props })
   const applyLocal = () => {
     props.update(props.local(data), data)
     props.popModal()

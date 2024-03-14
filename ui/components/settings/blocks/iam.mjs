@@ -1,5 +1,7 @@
+import Joi from 'joi'
 import { useState, useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
+import orderBy from 'lodash.orderby'
 // Templates
 import { mrt as mrtTemplate } from '../templates/iam/mrt.mjs'
 import {
@@ -10,6 +12,7 @@ import {
   StorageIcon,
   UserIcon,
   TrashIcon,
+  PlayIcon,
 } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
@@ -37,7 +40,7 @@ const ProviderHeader = ({ id, title }) => (
 
 const AddProvider = (props) => {
   const defaults = loadFormDefaults({ provider: props.id }, props.form)
-  console.log({ props })
+
   return (
     <div className="max-w-2xl w-full">
       <ProviderHeader id={props.id} title={props.title} />
@@ -160,6 +163,9 @@ export const AuthProviders = (props) => {
       <h4 className="mt-4 capitalize">Add an identity provider</h4>
       <div className="grid grid-cols-2 gap-2 mt-4">
         {Object.keys(blocks)
+          .filter((id) =>
+            data?.iam?.providers ? !Object.keys(data.iam.providers).includes(id) : true
+          )
           .filter((id) => id !== 'mrt')
           .map((id) => (
             <ProviderButton
@@ -180,3 +186,72 @@ export const AuthProviders = (props) => {
     </>
   )
 }
+
+export const LoginUi = ({ data, update }) => {
+  return (
+    <>
+      <h3>Provider Order & Visibility</h3>
+      <ProviderOrder {...{ data, update }} />
+    </>
+  )
+}
+
+const ProviderOrder = ({ data, update }) => {
+  const order =
+    data.iam?.ui?.order || orderBy(Object.keys(data.iam?.providers) || {}, 'label', 'asc')
+
+  const moveUp = (i) => {
+    const newOrder = [...order]
+    if (i === 0) return
+    const hold = newOrder[i - 1]
+    newOrder[i - 1] = newOrder[i]
+    newOrder[i] = hold
+    update('iam.ui.order', newOrder)
+  }
+  const moveDown = (i) => {}
+
+  return (
+    <div className="flex flex-col gap-1">
+      {order.map((id, i) => (
+        <div key={id} className="flex flex-row gap-2 items-center p-2 px-4">
+          <span className="w-8 text-center block font-bold opacity-70">{i + 1}</span>
+          <button className="btn btn-ghost btn-sm" disabled={i === 0} onClick={() => moveUp(i)}>
+            <PlayIcon className="w-5 h-5 -rotate-90" fill />
+          </button>
+          <div className="font-bold grow p-1 px-4">{data.iam?.providers?.[id]?.label || id}</div>
+          <div className="w-3/5">
+            <FormWrapper form={providerVisibilityForm(id, data)} update={update} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const providerVisibilityForm = (id, data) => [
+  {
+    key: `iam.ui.visibility.${id}`,
+    schema: Joi.string().valid('tab', 'icon', 'disabled').required().label('Visibilty'),
+    inputType: 'buttonList',
+    title: 'Visibility',
+    label: data.iam.providers[id].label || id,
+    current: data.iam.ui?.visibility?.[id] || 'tab',
+    dflt: 'tab',
+    dir: 'row',
+    dense: true,
+    list: [
+      {
+        val: 'tab',
+        label: 'Show as tab',
+      },
+      {
+        val: 'icon',
+        label: 'Hide behind icon',
+      },
+      {
+        val: 'disabled',
+        label: 'Hide completely',
+      },
+    ],
+  },
+]
