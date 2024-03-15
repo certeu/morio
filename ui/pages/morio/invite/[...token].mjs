@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { MorioIcon } from 'components/icons.mjs'
-import { ActivateAccount } from 'components/accounts/index.mjs'
+import { ActivateAccount } from 'components/accounts.mjs'
 
 const MorioInvitePage = (props) => {
   const invite = props.params?.token?.[0] ? props.params.token[0].split('-').pop() : ''

@@ -177,6 +177,70 @@ RpKvClient.prototype.find = async function (topic = false, regex = false) {
 }
 
 /*
+ * Get all keys that match a regex, and filter them
+ *
+ * @param {string} topic - The topic to read from
+ * @param {string} regex - The regex to match keys against
+ */
+RpKvClient.prototype.filter = async function (topic = false, regex = false, filter = false) {
+  if (!topic || !filter || typeof filter !== 'function') return false
+
+  /*
+   * Create a consumer
+   */
+  const consumer = await this.createConsumer()
+
+  /*
+   * Subscribe to topic (from beginning)
+   */
+  await consumer.subscribe({ topics: [topic], fromBeginning: true })
+
+  /*
+   * We can't simply await the consumer, instead we return a
+   * promise, and we'll resolve that promise in an eventlistener
+   * that will trigger at the end of the batch
+   */
+  return new Promise((resolve) => {
+    /*
+     * This will hold the message that match the filter
+     * Per key, we keep those with the highest timestamp,
+     * which means it's the most recent one
+     */
+    const matches = {}
+
+    /*
+     * Add an even handler for the end of the fetch
+     * This will resolve the promise
+     */
+    consumer.on(consumer.events.END_BATCH_PROCESS, () => {
+      consumer.disconnect()
+      /*
+       * Remove timestamp
+       */
+      for (const key in matches) matches[key] = JSON.parse(matches[key].value.toString())
+
+      return resolve(matches)
+    })
+
+    /*
+     * Now walk the topic and find matches for the requested key
+     */
+    consumer.run({
+      eachMessage: async ({ message }) => {
+        const key = message.key.toString()
+        if (
+          (regex === false || key.match(regex)) &&
+          filter(key, message) &&
+          (typeof matches[key] === 'undefined' ||
+            Number(message.timestamp) > Number(matches[key].timestamp))
+        )
+          matches[key] = message
+      },
+    })
+  })
+}
+
+/*
  * Helper method to create a consumer
  */
 RpKvClient.prototype.createConsumer = async function () {

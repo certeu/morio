@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { providerMeta } from './index.mjs'
 import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
+import { PageLink } from 'components/link.mjs'
 
 /*
  * Morio Root Token Identity Provider template
@@ -20,38 +21,27 @@ export const mrt = (context) => ({
       hidden: true,
     },
     {
-      schema: Joi.string().required().label('Label'),
-      label: 'Label',
-      labelBL: `A label to identify this provider on the login screen`,
       key: 'label',
       current: 'Root Token',
-      placeholder: 'Root Token',
+      hidden: 'Root Token',
     },
-    {
-      key: 'visibility',
-      schema: Joi.string().valid('tab', 'icon', 'disabled').required().label('Visibilty'),
-      inputType: 'buttonList',
-      title: 'Visibility',
-      label: 'Visibility',
-      current: 'tab',
-      list: [
-        {
-          val: 'tab',
-          label: 'Display as any other provider',
-          about: 'Include the root token provider in the list of availble identity providers',
-        },
-        {
-          val: 'icon',
-          label: 'Display as an icon only',
-          about:
-            'Do not include the root token provider in the list of availble identity providers, instead display an icon to bring it up',
-        },
-        {
-          val: 'disabled',
-          label: 'Do not display',
-          about: 'Do not show the root token identity provider on the login screen at all',
-        },
-      ],
-    },
+    <>
+      <Popout note>
+        <h5>No settings required</h5>
+        <p>
+          The <b>Root Token</b> provider does not require any settings.
+          <br />
+          Merely adding it as an identity provider makes it active.
+        </p>
+      </Popout>
+      <Popout warning>
+        <h5>Only applies to the user interface (UI)</h5>
+        <p>Keep in mind that this merely enables the Root Token provider for UI logins.</p>
+        <p>
+          The Root Token provider is always active for API access, although you can disabled that
+          with the <code>DISABLE_ROOT_TOKEN</code> feature flag.
+        </p>
+      </Popout>
+    </>,
   ],
 })

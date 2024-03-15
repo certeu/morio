@@ -30,6 +30,31 @@ const requireRole = (req, res, next, role) => {
   next()
 }
 
+/**
+ * Helper method to get the current user ID from headers
+ *
+ * @param {object} req - The request object from express
+ * @return {string} user - The current user as provider.username
+ */
+export const currentUser = (req) =>
+  `${req.headers['x-morio-provider']}.${req.headers['x-morio-user']}`
+
+/**
+ * Helper method to get the current provider ID from headers
+ *
+ * @param {object} req - The request object from express
+ * @return {string} provider - The current provider id
+ */
+export const currentProvider = (req) => req.headers['x-morio-provider']
+
+/**
+ * Helper method to get the current username
+ *
+ * @param {object} req - The request object from express
+ * @return {string} username - The current username
+ */
+export const currentUsername = (req) => req.headers['x-morio-user']
+
 /*
  * Helper RBAC middleware
  */

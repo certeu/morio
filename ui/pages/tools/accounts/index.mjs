@@ -2,7 +2,7 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { UserIcon } from 'components/icons.mjs'
-import { ListAccounts, AddLocalAccount } from 'components/accounts/index.mjs'
+import { ListAccounts, AddLocalAccount } from 'components/accounts.mjs'
 
 const AccountsPage = (props) => (
   <PageWrapper {...props} role="manager">

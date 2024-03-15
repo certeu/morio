@@ -124,6 +124,8 @@ const statusColors = {
   blocked: 'error',
   pending: 'warning',
   unknown: 'neutral',
+  disabled: 'warning',
+  deleted: 'error',
 }
 
 export const AccountStatus = ({ status = 'unknown' }) => (

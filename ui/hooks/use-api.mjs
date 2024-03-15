@@ -169,10 +169,60 @@ MorioClient.prototype.login = async function (provider, data) {
  * @return {object} - The result
  */
 MorioClient.prototype.createAccount = async function (data) {
-  return await this.call(`${morioConfig.api}/accounts`, {
+  return await this.call(`${morioConfig.api}/account`, {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Create an API key
+ *
+ * @param {object} data - The data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.createApikey = async function (data) {
+  return await this.call(`${morioConfig.api}/apikey`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+/**
+ * Gets API keys for the current account
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getApikeys = async function () {
+  return await this.call(`${morioConfig.api}/apikeys`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Updates an API key
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.updateApikey = async function (id, action) {
+  return await this.call(`${morioConfig.api}/apikeys/${id}/${action}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+  })
+}
+
+/**
+ * Removes an API key
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeApikey = async function (id) {
+  return await this.call(`${morioConfig.api}/apikeys/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
   })
 }
 

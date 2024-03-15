@@ -19,9 +19,7 @@ import { MrtProvider } from './mrt-provider.mjs'
 
 const providers = {
   ldap: BaseProvider,
-  apikeys: (props) => (
-    <BaseProvider {...props} usernameLabel="API Key" passwordLabel="API Secret" />
-  ),
+  apikey: (props) => <BaseProvider {...props} usernameLabel="API Key" passwordLabel="API Secret" />,
   local: LocalProvider,
   mrt: MrtProvider,
 }

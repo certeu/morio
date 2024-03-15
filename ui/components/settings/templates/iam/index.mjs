@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
 // Identity Providers
 import { mrt } from './mrt.mjs'
-import { apikeys } from './apikeys.mjs'
+import { apikey } from './apikey.mjs'
 import { local } from './local.mjs'
 import { ldap } from './ldap.mjs'
 
@@ -87,7 +87,7 @@ export const iam = (context) => ({
       title: 'Identity Providers',
       about: 'Identity providers are services that allow users to prove their identity',
       blocks: {
-        apikeys: apikeys(context),
+        apikey: apikey(context),
         ldap: ldap(context),
         local: local(context),
         mrt: mrt(context),

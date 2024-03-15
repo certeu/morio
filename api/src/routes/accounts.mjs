@@ -19,7 +19,7 @@ export function routes(app) {
   /*
    * Create account
    */
-  app.post(`${PREFIX}/accounts`, Accounts.create)
+  app.post(`${PREFIX}/account`, Accounts.create)
 
   /*
    * Activate account
@@ -30,4 +30,24 @@ export function routes(app) {
    * Activate MFA
    */
   app.post(`${PREFIX}/activate-mfa`, Accounts.activateMfa)
+
+  /*
+   * Create an API key
+   */
+  app.post(`${PREFIX}/apikey`, Accounts.createApikey)
+
+  /*
+   * List API keys
+   */
+  app.get(`${PREFIX}/apikeys`, Accounts.listApikeys)
+
+  /*
+   * Update an API key
+   */
+  app.patch(`${PREFIX}/apikeys/:key/:action`, Accounts.updateApikey)
+
+  /*
+   * Remove an API key
+   */
+  app.delete(`${PREFIX}/apikeys/:key`, Accounts.removeApikey)
 }

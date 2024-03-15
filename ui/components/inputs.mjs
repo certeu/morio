@@ -499,7 +499,15 @@ export const ValidationErrors = ({ valid, bLabel }) => (
   </ul>
 )
 
-export const RoleInput = ({ role, setRole, maxRole = false }) => {
+export const RoleInput = ({
+  role,
+  setRole,
+  maxRole = false,
+  label = 'Role',
+  labelBL,
+  labelBR,
+  labelTR,
+}) => {
   const { pushModal } = useContext(ModalContext)
 
   /*
@@ -510,7 +518,8 @@ export const RoleInput = ({ role, setRole, maxRole = false }) => {
 
   return (
     <ListInput
-      label="Role"
+      label={label}
+      {...{ labelBL, labelBR, labelTR }}
       dense
       dir="row"
       update={(val) => (role === val ? setRole(false) : setRole(val))}

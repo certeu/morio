@@ -25,7 +25,7 @@ const topic = 'morio_accounts'
 const key = (providerId, username) => `${providerId}.${username}`
 
 /**
- * Helper method to load an account (or rather it's data)
+ * Helper method to load an account (or rather its data)
  *
  * @param {string} providerId - The ID of the identity provider
  * @param {string} username - The username
@@ -33,6 +33,26 @@ const key = (providerId, username) => `${providerId}.${username}`
  */
 export const loadAccount = async (providerId, username) => {
   return await store.rpkv.get(topic, key(providerId, username))
+}
+
+/**
+ * Helper method to load API keys for a given account
+ *
+ * @param {string} providerId - The ID of the identity provider
+ * @param {string} username - The username
+ * @return {object} keys - The API keys  stored for the account
+ */
+export const loadAccountApikeys = async (user) => {
+  return await store.rpkv.filter(topic, /apikey\./, (key, message) => {
+    let msg = {}
+    try {
+      msg = JSON.parse(message.value.toString())
+    } catch (err) {
+      store.log.debug(msg, 'Failed to parse broker account as JSON')
+    }
+
+    return msg?.createdBy === user
+  })
 }
 
 /**

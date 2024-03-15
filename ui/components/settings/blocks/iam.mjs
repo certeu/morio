@@ -25,7 +25,7 @@ const brands = {
   mrt: <MorioIcon {...iconProps} />,
   ldap: <StorageIcon {...iconProps} />,
   local: <UserIcon {...iconProps} />,
-  apikeys: <KeyIcon {...iconProps} />,
+  apikey: <KeyIcon {...iconProps} />,
 }
 
 const ProviderHeader = ({ id, title }) => (
@@ -60,7 +60,10 @@ const AddProvider = (props) => {
 
 const UpdateProvider = (props) => {
   const { provider } = props
-  const defaults = loadFormDefaults(props.data.iam.providers[props.id], props.blocks[provider].form)
+  const defaults = loadFormDefaults(
+    props.data.iam.providers[props.id],
+    props.blocks?.[provider]?.form
+  )
 
   const removeLocal = () => {
     props.update(`iam.providers.${props.id}`, 'MORIO_UNSET')
@@ -142,6 +145,7 @@ export const AuthProviders = (props) => {
                 available
                 key={id}
                 id={id}
+                title={data.iam.providers[id].label}
                 type={data.iam.providers[id].provider}
                 about={props.viewConfig?.blocks?.[data.iam.providers[id].provider]?.about}
                 {...data.iam.providers[id]}
@@ -152,6 +156,7 @@ export const AuthProviders = (props) => {
                         {...props}
                         {...{ id, pushModal, popModal }}
                         {...data.iam.providers[id]}
+                        title={data.iam.providers[id].label}
                       />
                     </ModalWrapper>
                   )
@@ -197,8 +202,19 @@ export const LoginUi = ({ data, update }) => {
 }
 
 const ProviderOrder = ({ data, update }) => {
-  const order =
-    data.iam?.ui?.order || orderBy(Object.keys(data.iam?.providers) || {}, 'label', 'asc')
+  /*
+   * We need to handle things like providers being removed and so on
+   */
+  const order = new Set()
+
+  //  data.iam?.ui?.order || orderBy(Object.keys(data.iam?.providers) || {}, 'label', 'asc')
+
+  for (const id of data.iam?.ui?.order || []) {
+    if (data.iam.providers[id]) order.add(id)
+  }
+  for (const id in data.iam.providers) {
+    if (!order.has(id)) order.add(id)
+  }
 
   const moveUp = (i) => {
     const newOrder = [...order]
@@ -212,7 +228,7 @@ const ProviderOrder = ({ data, update }) => {
 
   return (
     <div className="flex flex-col gap-1">
-      {order.map((id, i) => (
+      {[...order].map((id, i) => (
         <div key={id} className="flex flex-row gap-2 items-center p-2 px-4">
           <span className="w-8 text-center block font-bold opacity-70">{i + 1}</span>
           <button className="btn btn-ghost btn-sm" disabled={i === 0} onClick={() => moveUp(i)}>
@@ -234,7 +250,7 @@ const providerVisibilityForm = (id, data) => [
     schema: Joi.string().valid('tab', 'icon', 'disabled').required().label('Visibilty'),
     inputType: 'buttonList',
     title: 'Visibility',
-    label: data.iam.providers[id].label || id,
+    label: data.iam.providers?.[id]?.label || id,
     current: data.iam.ui?.visibility?.[id] || 'tab',
     dflt: 'tab',
     dir: 'row',
