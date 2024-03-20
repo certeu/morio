@@ -50,29 +50,10 @@ export const service = {
       const bootstrapped = await readJsonFile('/etc/morio/ca/defaults.json')
 
       /*
-       * If the CA is initialized, load JWK key and return early
+       * If the CA is initialized, we reload the configuration and return
        */
       if (bootstrapped && bootstrapped.fingerprint) {
-        const caConfig = await readJsonFile('/etc/morio/ca/ca.json')
-        const jwk = caConfig.authority.provisioners
-          .filter((provisioner) => provisioner.type.toLowerCase() === 'jwk')
-          .pop().key
-
-        /*
-         * Store fingerprint & JWK for easy access
-         */
-        store.ca = {
-          url: `https://ca_${store.config.core.node_nr}:9000`,
-          fingerprint: bootstrapped.fingerprint,
-          jwk,
-        }
-
-        /*
-         * Load the root certficate, then return early
-         */
-        const root = await readFile('/etc/morio/shared/root_ca.crt')
-        store.ca.certificate = root
-
+        await reloadCaConfiguration()
         return true
       }
 
@@ -191,6 +172,10 @@ export const service = {
 
       return true
     },
+    /**
+     * Lifecycle hook that always runs when core reloads the configuration
+     */
+    reload: async () => reloadCaConfiguration(),
   },
 }
 
@@ -207,4 +192,40 @@ const isCaUp = async () => {
   if (result && result.status && result.status === 'ok') return true
 
   return false
+}
+
+/**
+ * Helper method to reload the configuration, and populate store
+ *
+ */
+const reloadCaConfiguration = async () => {
+  /*
+   * Load CA configuration from disk
+   */
+  const caConfig = await readJsonFile('/etc/morio/ca/ca.json')
+  const caDefaults = await readJsonFile('/etc/morio/ca/defaults.json')
+
+  /*
+   * Extract the JWK from the configuration
+   */
+  const jwk = caConfig.authority.provisioners
+    .filter((provisioner) => provisioner.type.toLowerCase() === 'jwk')
+    .pop().key
+
+  /*
+   * Load the root certficate
+   */
+  const certificate = await readFile('/etc/morio/shared/root_ca.crt')
+
+  /*
+   * Store fingerprint, JWK, and root certificate in the store for easy access
+   */
+  store.ca = {
+    url: `https://ca_${store.config.core.node_nr}:9000`,
+    fingerprint: caDefaults.fingerprint,
+    jwk,
+    certificate,
+  }
+
+  return true
 }

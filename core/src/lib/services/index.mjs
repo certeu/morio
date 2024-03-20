@@ -261,6 +261,11 @@ export const ensureMorioService = async (service, running, hookParams) => {
   } else {
     store.log.stabug(`Not restarting \`${service}\` container`)
   }
+
+  /*
+   * Last but not least, always run the reload lifecycle hook
+   */
+  await runHook('preStart', service, recreate, hookParams)
 }
 
 /**
