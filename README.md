@@ -1,4 +1,5 @@
 # Morio
+![image](https://github.com/certeu/morio/assets/1708494/91892e94-0cb5-4c94-8845-ffe52c19c417)
 
 ## What is Morio?
 
