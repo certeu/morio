@@ -47,16 +47,26 @@ export const bootstrapConfiguration = async () => {
     every: 2,
     timeout: 60,
     run: async () => await store.core.get('/config'),
-    onFailedAttempt: (s) => store.log.debug(`Waited ${s} seconds for core, will continue waiting.`),
+    onFailedAttempt: (s) =>
+      store.log.debug(`Waited ${s} seconds for core/config, will continue waiting.`),
+    validate: coreFetchOk,
   })
-  if (result && Array.isArray(result) && result[0] === 200 && result[1]) {
+  if (coreFetchOk(result)) {
     store.log.debug(`Loaded configuration from core.`)
     /*
      * Also load the info from core
      * This will tell us whether we are running ephemeral or not
      */
-    const infoResult = await store.core.get('/info')
-    if (infoResult && Array.isArray(infoResult) && infoResult[0] === 200 && infoResult[1]) {
+    const infoResult = await attempt({
+      every: 2,
+      timeout: 60,
+      run: async () => await store.core.get('/info'),
+      onFailedAttempt: (s) =>
+        store.log.debug(`Waited ${s} seconds for core/info, will continue waiting.`),
+      validate: coreFetchOk,
+    })
+    if (coreFetchOk(infoResult)) {
+      store.log.debug(`Loaded info from core.`)
       store.info.production = infoResult[1].production
       store.info.ephemeral = infoResult[1].ephemeral
     }
@@ -104,3 +114,8 @@ export const bootstrapConfiguration = async () => {
    */
   store.rpkv = await new RpKvClient(store)
 }
+
+/**
+ * Helper method to verify that a fetch to the core API was successful
+ */
+const coreFetchOk = (result) => result && Array.isArray(result) && result[0] === 200 && result[1]

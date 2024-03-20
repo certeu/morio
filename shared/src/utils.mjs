@@ -36,20 +36,25 @@ export const sleep = async (seconds) => await setTimeout(seconds * 1000)
  * @param {number} opts.timeout - Number of seconds after which to give up
  * @param {function} opts.run - Method to run on each interval
  * @param {function} opts.onFailedAttempt - Callback to run when an attempt fails
+ * @param {function} opts.validate - Optional method to run to see whether the
+ *  result is successfull (if no message is passed, it will just see whether
+ *  it's truthy)
+ *
  * @return {promise} result - The promise
  */
 export const attempt = async ({
   every = 2,
   timeout = 60,
   run,
-  onFailedAttempt = false
-}) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt }, resolve))
+  onFailedAttempt = false,
+  validate = false,
+}) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve))
 
 /*
  * Promise resolver functions should not be async
  * so this method is here to side-step that
  */
-const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt }, resolve) => {
+const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, validate }, resolve) => {
   /*
    * Quick check
    */
@@ -61,7 +66,11 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt },
     console.log(err)
   }
 
-  if (ok) return resolve(ok)
+  if (
+    (typeof validate === 'function' && validate(ok))
+    ||
+    (typeof validate !== 'function' && ok)
+  ) return resolve(ok)
 
   /*
    * Keep trying until timeout
