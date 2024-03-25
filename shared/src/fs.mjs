@@ -229,7 +229,8 @@ export const readYamlFile = async (
  *
  * @param {string} filePath - (relative) path to the file to write
  * @param {string} data - the data to write to disk
- * @param {functino} log - a logger instance (or false)
+ * @param {function} log - a logger instance (or false)
+ * @param {octal} mode - a mode for chmod
  *
  * @return {bool} true of success, false in case of trouble
  */
@@ -243,7 +244,8 @@ export const writeFile = async (
   try {
     file = path.resolve(root, filePath)
     await fs.promises.mkdir(path.dirname(file), { recursive: true })
-    await fs.promises.writeFile(file, data, { mode })
+    await fs.promises.writeFile(file, data)
+    await fs.promises.chmod(file, mode)
   } catch (err) {
     if (log) log.warn(err, `Failed to write file: ${file}`)
     else console.log(`Failed to write file: ${file}`)

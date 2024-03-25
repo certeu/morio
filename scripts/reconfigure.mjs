@@ -22,33 +22,41 @@ const localGetPreset = (key, opts) =>
  */
 const localInProduction = () => false
 
-/*
- * Resolve the configuration
- */
-const srvConf = await resolveServiceConfiguration('core', {
-  getPreset: localGetPreset,
-  inProduction: localInProduction,
-  config: {},
-})
+const config = {
+  /*
+   * Resolve the development configuration
+   */
+  dev: await resolveServiceConfiguration('core', {
+    getPreset: localGetPreset,
+    inProduction: () => false,
+    config: {},
+  }),
+  /*
+   * Resolve the production configuration
+   */
+  prod: await resolveServiceConfiguration('core', {
+    getPreset: localGetPreset,
+    inProduction: () => true,
+    config: {},
+  }),
+}
+
 
 /*
  * Generate run files for development
  */
-const cliOptions = (name) => `  --name=${srvConf.container.container_name} \\
-  --hostname=${srvConf.container.container_name} \\
+const cliOptions = (name, conf) => `  --name=${conf.container.container_name} \\
+  --hostname=${conf.container.container_name} \\
   --network=${getPreset('MORIO_NETWORK')} \\
   --network-alias ${name} \\
-  ${srvConf.container.init ? '--init' : ''} \\
-${(srvConf.container?.volumes || []).map((vol) => `  -v ${vol} `).join(' ')} \\
-  -e MORIO_DEV=1 \\
+  ${conf.container.init ? '--init' : ''} \\
+${(conf.container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
   -e MORIO_HOSTOS_REPO_ROOT=${MORIO_HOSTOS_REPO_ROOT} \\
   -e MORIO_CORE_LOG_LEVEL=debug \\
-  ${srvConf.container.image}:${pkg.version}
+  ${conf.container.image}:${pkg.version}
 `
 
-await writeFile(
-  `core/run-container.sh`,
-  `#!/bin/bash
+const script = (conf) => `#!/bin/bash
 
 #
 # This file is auto-generated
@@ -67,9 +75,11 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d ${cliOptions('core')}
+  docker run -d ${cliOptions('core', conf)}
 else
-  docker run --rm -it ${cliOptions('core')}
+  docker run --rm -it ${cliOptions('core', conf)}
 fi
 `
-)
+for (const env of ['dev', 'prod']) {
+  await writeFile(`core/run-${env}-container.sh`, script(config[env]), false, 0o755)
+}

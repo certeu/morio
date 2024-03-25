@@ -36,7 +36,9 @@ export const esbuildOptions = (pkg, customOptions = {}) => ({
   outfile: 'dist/index.mjs',
   external: [],
   metafile: getPreset('MORIO_ESBUILD_VERBOSE', { dflt: false, as: 'bool' }),
-  minify: getPreset('MORIO_ESBUILD_MINIFY', { dflt: true, as: 'bool' }),
+  // Keep debug simple for now. i
+  //minify: getPreset('MORIO_ESBUILD_MINIFY', { dflt: true, as: 'bool' }),
+  minify: false,
   platform: 'node',
   target: ['node20'],
   sourcemap: false,

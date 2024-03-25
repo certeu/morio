@@ -223,7 +223,11 @@ export const getPreset = (key, opts = {}) => {
 /*
  * Helper method to figure out whether or not we are running in production
  */
-export const inProduction = () => !getPreset('MORIO_DEV', { dflt: false, as: 'bool' })
+export const inProduction = () => {
+  const env = getPreset('NODE_ENV', { dflt: 'production', as: 'string' })
+
+  return (env === 'production')
+}
 
 /**
  * Helper method to load all presets as a single object

@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
@@ -11,11 +11,14 @@
     "build:core": "./scripts/build-container.sh core",
     "build:ui": "./scripts/build-container.sh ui",
     "predev": "npm run reconfigure",
-    "dev": "./core/run-container.sh",
+    "dev": "./core/run-dev-container.sh",
+    "prod": "./core/run-prod-container.sh",
     "dev:clean": "docker rm -fv core api ui proxy ca broker console",
     "destroy": "./scripts/destroy.sh",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "reconfigure": "node scripts/reconfigure.mjs",
+    "reversion": "node scripts/reversion.mjs && npm run reconfigure",
+    "rev": "npm run reversion",
     "prebuild": "npm run reconfigure",
     "prettier": "npx prettier --write .",
     "test": "echo \"Error: no test specified\" && exit 1"
