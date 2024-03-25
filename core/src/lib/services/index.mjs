@@ -250,10 +250,12 @@ export const ensureMorioService = async (service, running, hookParams) => {
      * Run preStart lifecycle hook
      */
     runHook('preStart', service, recreate, hookParams)
+
     /*
-     * Restart the container
+     * (Re)Start the container
      */
     await restartMorioServiceContainer(service, containerId)
+
     /*
      * Run postStart lifecycle hook
      */
@@ -265,7 +267,7 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * Last but not least, always run the reload lifecycle hook
    */
-  await runHook('preStart', service, recreate, hookParams)
+  await runHook('reload', service, recreate, hookParams)
 }
 
 /**

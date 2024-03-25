@@ -24,27 +24,23 @@ export const createDockerContainer = async (name, containerConfig) => {
   }
 
   if (result?.json?.message && result.json.message.includes('is already in use by container')) {
-    if (!store.info.production) {
-      /*
-       * Container already exists, but we're not running in production, so let's just recreate it
-       */
-      const rid = result.json.message.match(
-        new RegExp('is already in use by container "([^"]*)')
-      )[1]
+    /*
+     * Container already exists, so let's just recreate it
+     */
+    const rid = result.json.message.match(new RegExp('is already in use by container "([^"]*)'))[1]
 
-      /*
-       * Now remove it
-       */
-      const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
-      if (removed) {
-        store.log.debug(`Removed existing container: ${name}`)
-        const [ok, created] = await runDockerApiCommand('createContainer', containerConfig, true)
-        if (ok) {
-          store.log.debug(`Service recreated: ${name}`)
-          return created.id
-        } else store.log.warn(`Failed to recreate container ${name}`)
-      } else store.log.warn(`Failed to remove container ${name} - Not creating new container`)
-    } else store.log.debug(`Container ${name} is already present.`)
+    /*
+     * Now remove it
+     */
+    const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
+    if (removed) {
+      store.log.debug(`Removed existing container: ${name}`)
+      const [ok, created] = await runDockerApiCommand('createContainer', containerConfig, true)
+      if (ok) {
+        store.log.debug(`Service recreated: ${name}`)
+        return created.id
+      } else store.log.warn(`Failed to recreate container ${name}`)
+    } else store.log.warn(`Failed to remove container ${name} - Not creating new container`)
   } else store.log.warn(result, `Failed to create container: ${name}`)
 
   return false
@@ -196,6 +192,13 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  * failure, and the command return value
  */
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
+  if (!id) {
+    store.log.stabug(
+      `Attemted to run \`${cmd}\` command on a container but no container ID was passed`
+    )
+    return [false]
+  }
+
   const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return [false, false]
 
