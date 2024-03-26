@@ -99,19 +99,19 @@ export const logStartedConfig = () => {
   /*
    * Are we running in production?
    */
-  if (store.info.production) store.log.debug('Morio is running in production mode')
-  else store.log.debug('Morio is running in development mode')
+  if (store.info.production) store.log.info(`Morio ${store.info.version} is running in PRODUCTION`)
+  else store.log.info(`Morio ${store.info.versino} is running in DEVELOPMENT`)
 
   /*
    * Has MORIO been setup?
    * If so, we should have a current config
    */
   if (
-    store.info.running_config &&
     store.info.ephemeral === false &&
+    store.info.current_settings &&
     store.config?.deployment?.nodes
   ) {
-    store.log.debug(`Running configuration ${store.info.running_config}`)
+    store.log.info(`Running configuration ${store.info.current_settings}`)
     if (store.config.deployment.nodes.length > 1) {
       store.log.debug(
         `This Morio instance is part of a ${store.config.deployment.nodes.length}-node cluster`

@@ -1,4 +1,5 @@
 import path from 'path' // This requires NodeJS, it won't work in the browser
+import { pkg } from './json-loader.mjs'
 
 export const presets = {
   /*
@@ -6,7 +7,7 @@ export const presets = {
    */
 
   // Version number
-  MORIO_VERSION: "0.1.0",
+  MORIO_VERSION: pkg.version,
 
   // Whether or not to enable debug
   MORIO_DEBUG: true,

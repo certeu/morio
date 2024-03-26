@@ -16,7 +16,7 @@ RUN npm install ssh2 cpu-features
 ## Install dependencies
 RUN npm ci
 
-## Build backend into a self-contained application
+## Build core into a self-contained application
 RUN npm run build
 
 ## Stage 2: Run in NodeJS v20 (runner)
