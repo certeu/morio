@@ -75,7 +75,13 @@ export const saveAccount = async (providerId, username, data) => {
  */
 export const storeLastLoginTime = async (providerId, username, extraData = {}) => {
   const lastLogin = Date.now()
-  const data = await loadAccount(providerId, username)
+  const storedData = await loadAccount(providerId, username)
+
+  /*
+   * If this is the first login, we do not have any data
+   */
+  const data = storedData ? storedData : {}
+
   /*
    * If the user was able to login, their status is active
    */
