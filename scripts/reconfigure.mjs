@@ -45,18 +45,19 @@ const config = {
 /*
  * Generate run files for development
  */
-const cliOptions = (name, conf) => `  --name=${conf.container.container_name} \\
-  --hostname=${conf.container.container_name} \\
+const cliOptions = (name, env) => `  --name=${config[env].container.container_name} \\
+  --hostname=${config[env].container.container_name} \\
   --network=${getPreset('MORIO_NETWORK')} \\
   --network-alias ${name} \\
-  ${conf.container.init ? '--init' : ''} \\
-${(conf.container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
+  ${config[env].container.init ? '--init' : ''} \\
+${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
   -e MORIO_HOSTOS_REPO_ROOT=${MORIO_HOSTOS_REPO_ROOT} \\
   -e MORIO_CORE_LOG_LEVEL=debug \\
-  ${conf.container.image}:${pkg.version}
+  -e NODE_ENV=${env === 'prod' ? 'production' : 'development'} \\
+  ${config[env].container.image}:${pkg.version}
 `
 
-const script = (conf) => `#!/bin/bash
+const script = (env) => `#!/bin/bash
 
 #
 # This file is auto-generated
@@ -75,11 +76,11 @@ then
   echo "No request to attach to container. Starting in daemonized mode."
   echo "To attach, pass attach to this script: run-container.sh attach "
   echo ""
-  docker run -d ${cliOptions('core', conf)}
+  docker run -d ${cliOptions('core', env)}
 else
-  docker run --rm -it ${cliOptions('core', conf)}
+  docker run --rm -it ${cliOptions('core', env)}
 fi
 `
 for (const env of ['dev', 'prod']) {
-  await writeFile(`core/run-${env}-container.sh`, script(config[env]), false, 0o755)
+  await writeFile(`core/run-${env}-container.sh`, script(env), false, 0o755)
 }
