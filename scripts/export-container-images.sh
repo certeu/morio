@@ -14,6 +14,8 @@ fi
 
 SERVICES=( api core ui )
 
+mkdir -p $REPO/data/data/tmp_static
+
 for SERVICE in "${SERVICES[@]}"
 do
   FILE=$REPO/data/data/tmp_static/morio-$SERVICE.tar
