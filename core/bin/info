@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# This is included in the Docker image
+# to make it easy to get info about the NodeJS process
+#
+pm2 info 0

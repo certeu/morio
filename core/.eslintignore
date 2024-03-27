@@ -1,3 +1,4 @@
 **/*.json
 json-loader.mjs
 Dockerfile.*
+bin/*

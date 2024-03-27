@@ -31,6 +31,9 @@ ENV NODE_ENV production
 ## Copy build artifact from builder
 COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 
+## Copy the various PM2 scripts into the PATH
+COPY --from=builder /morio/core/bin/* /usr/local/bin/
+
 # Copy dependencies that were kept out of the bundle
 COPY --from=builder /morio/core/node_modules/ssh2 ./node_modules/ssh2
 COPY --from=builder /morio/core/node_modules/asn1 ./node_modules/asn1
@@ -42,5 +45,10 @@ COPY --from=builder /morio/core/node_modules/cpu-features ./node_modules/cpu-fea
 ## Install the pm2 process manager for NodeJS
 RUN npm install pm2 -g
 
-## Now run NodeJS code
-CMD ["pm2-runtime", "./dist/index.mjs"]
+## Now run NodeJS code inside PM2
+CMD [ "pm2-runtime", \
+  "--name", "core", \
+  "--namespace", "morio", \
+  "--log-type", "json", \
+  "--max-memory-bytes", "250000000", \
+  "./dist/index.mjs" ]
