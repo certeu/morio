@@ -1,39 +1,24 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dev side-effects
-hostfs/config/ca/*.json
-hostfs/logs/*
-hostfs/data/**
-hostfs/config/shared/root_ca.crt
-hostfs/config/morio.*.yaml
-hostfs/config/.*.keys
-hostfs/**
-clients/linux/control
-clients/linux/etc/audit/config.yml
-clients/linux/etc/metrics/config.yml
-clients/linux/etc/logs/config.yml
-clients/linux/etc/morio/vars/*
-core/run-dev-container.sh
-core/run-prod-container.sh
-moriod/control
-setup.sh
-setup.json
+# Data folder
 data/
 
-# ruby gems
-*.gem
+# Auto-generated client files
+clients/linux/control
+clients/linux/etc/morio/vars/*
+clients/linux/etc/morio/audit/config-template.yml
+clients/linux/etc/morio/metrics/config-template.yml
+clients/linux/etc/morio/logs/config-template.yml
 
-# Logs
-logs
+# Auto-generated moriod files
+moriod/control
+
+# Auto-generated scripts
+core/run-dev-container.sh
+core/run-prod-container.sh
 
 # dependencies
 node_modules
-.pnp
-.pnp.js
-.yarn/install-state.gz
-
-# testing
-/coverage
 
 # next.js
 .next/
@@ -43,9 +28,13 @@ ui/out/
 ui/build
 dist
 
-# misc
+# Tim Apple litter
 .DS_Store
+
+# Avoid exposure of local files
 *.pem
+setup.sh
+setup.json
 
 # debug
 npm-debug.log*
@@ -55,12 +44,6 @@ yarn-error.log*
 # local env files
 .env*.local
 
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
+# Nx
 .nx/installation
 .nx/cache

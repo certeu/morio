@@ -6,28 +6,39 @@ import yaml from 'js-yaml'
 import path from 'path'
 
 /*
- * Once we're inside a container, there is no way we can figure this out
- * So we pass it to core as an env var
+ * We need to know the root folder of the morio's git repo
+ * since while in development, we don't write data to the regular
+ * locales (like /etc/morio for config for example) but instead write
+ * everything under a 'data' folder in the repo (which is ignored)
  */
-const MORIO_HOSTOS_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
+const MORIO_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
 
 /*
- * Setup a getPreset instance that knows about our extra variable
+ * When in development, we remap the volumes to keep data inside the repo
  */
-const localGetPreset = (key, opts) =>
-  getPreset(key, { ...opts, force: { MORIO_HOSTOS_REPO_ROOT, MORIO_DEV: 1 } })
+const presetGetters = {
+  dev: (key, opts) => getPreset(key, {
+    ...opts,
+    force: {
+      MORIO_CONFIG_ROOT: `${MORIO_REPO_ROOT}/data/config`,
+      MORIO_DATA_ROOT: `${MORIO_REPO_ROOT}/data/data`,
+      MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
+      NODE_ENV: 'development',
+      MORIO_REPO_ROOT,
+      MORIO_CORE_LOG_LEVEL: 'trace',
+    }
+  }),
+  prod: getPreset
+}
 
-/*
- * Ensure this script is not used for production
- */
-const localInProduction = () => false
+
 
 const config = {
   /*
    * Resolve the development configuration
    */
   dev: await resolveServiceConfiguration('core', {
-    getPreset: localGetPreset,
+    getPreset: presetGetters.dev,
     inProduction: () => false,
     config: {},
   }),
@@ -35,51 +46,45 @@ const config = {
    * Resolve the production configuration
    */
   prod: await resolveServiceConfiguration('core', {
-    getPreset: localGetPreset,
+    getPreset: presetGetters.prod,
     inProduction: () => true,
     config: {},
   }),
 }
 
-
 /*
  * Generate run files for development
  */
-const cliOptions = (name, env) => `  --name=${config[env].container.container_name} \\
+const cliOptions = (name, env) => `\\
+  --name=${config[env].container.container_name} \\
   --hostname=${config[env].container.container_name} \\
-  --network=${getPreset('MORIO_NETWORK')} \\
+  --network=morionet \\
   --network-alias ${name} \\
   ${config[env].container.init ? '--init' : ''} \\
 ${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
-  -e MORIO_HOSTOS_REPO_ROOT=${MORIO_HOSTOS_REPO_ROOT} \\
-  -e MORIO_CORE_LOG_LEVEL=debug \\
-  -e NODE_ENV=${env === 'prod' ? 'production' : 'development'} \\
-  ${config[env].container.image}:${pkg.version}
+  -e MORIO_DOCKER_SOCKET=${presetGetters[env]('MORIO_DOCKER_SOCKET')} \\
+  -e MORIO_CONFIG_ROOT=${presetGetters[env]('MORIO_CONFIG_ROOT')} \\
+  -e MORIO_DATA_ROOT=${presetGetters[env]('MORIO_DATA_ROOT')} \\
+  -e MORIO_LOGS_ROOT=${presetGetters[env]('MORIO_LOGS_ROOT')} \\
+  -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
+  -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
+  ${env === 'dev'
+    ? '-e MORIO_REPO_ROOT='+MORIO_REPO_ROOT+" \\\n  "
+    : ''
+  }${config[env].container.image}:${pkg.version}
 `
 
 const script = (env) => `#!/bin/bash
-
 #
 # This file is auto-generated
 #
-# Any changes you make here will be lost next time 'npm run reconfigured' runs.
+# Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
-
-docker network create ${getPreset('MORIO_NETWORK')} 2> /dev/null
+docker network create morionet 2> /dev/null
 docker stop core 2> /dev/null
 docker rm core 2> /dev/null
-
-if [ -z "$1" ];
-then
-  echo ""
-  echo "No request to attach to container. Starting in daemonized mode."
-  echo "To attach, pass attach to this script: run-container.sh attach "
-  echo ""
-  docker run -d ${cliOptions('core', env)}
-else
-  docker run --rm -it ${cliOptions('core', env)}
-fi
+docker run -d ${cliOptions('core', env)}
 `
 for (const env of ['dev', 'prod']) {
   await writeFile(`core/run-${env}-container.sh`, script(env), false, 0o755)

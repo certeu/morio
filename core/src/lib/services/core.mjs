@@ -1,7 +1,7 @@
 // REST client for API
 import { restClient } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readBsonFile, readDirectory, writeYamlFile } from '#shared/fs'
+import { readYamlFile, readBsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -46,7 +46,8 @@ export const service = {
       if (!store.getPreset)
         store.getPreset = (key, dflt, opts) => {
           const result = getPreset(key, dflt, opts)
-          store.log.trace(`Preset ${key} = ${result}`)
+          if (result === undefined) store.log.warn(`Preset ${key} is undefined`)
+          else store.log.trace(`Preset ${key} = ${result}`)
 
           return result
         }
@@ -72,8 +73,12 @@ export const service = {
 
       /*
        * Load all presets and write them to disk for other services to load
+       * Note that this path we write to is inside the container
+       * And since this is the first time we write to it, we cannot assume
+       * the folder exists
        */
       store.presets = loadAllPresets()
+      await mkdir('/etc/morio/shared')
       await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
 
       /*

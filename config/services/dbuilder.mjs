@@ -21,8 +21,8 @@ export const resolveServiceConfiguration = (store) => ({
     network: store.getPreset('MORIO_NETWORK'),
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients/linux:/morio/src`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static/clients/deb:/morio/dist`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/clients/linux:/morio/src`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static/clients/deb:/morio/dist`,
     ],
     // Don't keep container after it exits
     ephemeral: true,

@@ -26,27 +26,24 @@ export const resolveServiceConfiguration = (store) => {
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD
-        ? [
-            `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config:/etc/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data:/morio/data`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients:/morio/clients`,
-          ]
-        : [
-            `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config:/etc/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data:/morio/data`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs:/var/log/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/clients:/morio/clients`,
-          ],
+      volumes: PROD ? [
+        `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
+        `${store.getPreset('MORIO_CONFIG_ROOT')}:/etc/morio`,
+        `${store.getPreset('MORIO_DATA_ROOT')}:/morio/data`,
+        `${store.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
+        `${store.getPreset('MORIO_DATA_ROOT')}/clients:/morio/clients`,
+      ] : [
+        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+        `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/config:/etc/morio`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/data:/morio/data`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+      ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment
       environment: [
-        // Set log level to debug in development
+        // Set log level to trace in development
         `MORIO_CORE_LOG_LEVEL=${store.inProduction() ? store.getPreset('MORIO_CORE_LOG_LEVEL') : 'debug'}`,
       ],
     },

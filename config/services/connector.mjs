@@ -30,11 +30,11 @@ export const resolveServiceConfiguration = (store) => ({
     },
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/connector:/usr/share/logstash/data`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/logs/connector:/usr/share/logstash/logs`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/pipelines/:/usr/share/logstash/pipeline/`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
+      `${store.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/pipeline/`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
     ],
   },
 

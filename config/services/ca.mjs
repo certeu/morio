@@ -23,10 +23,10 @@ export const resolveServiceConfiguration = (store) => ({
     ports: ['9000:9000'],
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/ca:/home/step/config`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/certs:/home/step/certs`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/db:/home/step/db`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/ca/secrets:/home/step/secrets`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
     ],
     // Configure Traefik with container labels
     labels: [

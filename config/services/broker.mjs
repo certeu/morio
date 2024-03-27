@@ -34,8 +34,8 @@ export const resolveServiceConfiguration = (store) => ({
     },
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/broker:/etc/redpanda`,
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/broker:/var/lib/redpanda/data`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
+      `${store.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
     ],
     // Command
     command: [

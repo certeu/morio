@@ -26,16 +26,14 @@ export const resolveServiceConfiguration = (store) => {
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD
-        ? [
-          `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
-          `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static:/morio/tmp_static`,
-        ]
-        : [
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
-            `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/data/tmp_static:/morio/tmp_static`,
-          ],
+      volumes: PROD ? [
+        `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static:/morio/tmp_static`,
+      ] : [
+        `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static:/morio/tmp_static`,
+        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+      ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment

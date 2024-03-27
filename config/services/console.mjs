@@ -28,7 +28,7 @@ export const resolveServiceConfiguration = (store) => ({
     },
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/console:/etc/morio/console`,
+      `${store.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
     ],
     // Configure Traefik with container labels
     labels: [

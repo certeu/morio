@@ -1,7 +1,6 @@
 // Dependencies
 import express from 'express'
 import { wrapExpress } from '#shared/utils'
-import { getPreset } from '#config'
 // Start Morio method
 import { startMorio } from './lib/services/index.mjs'
 // Routes
@@ -34,15 +33,11 @@ for (const type in routes) routes[type](app)
  * Add the wildcard route
  */
 app.get('/*', async (req, res) =>
-  res
-    .set('Content-Type', 'application/json')
-    .status(404)
-    .send({
-      url: req.url,
-      method: req.method,
-      originalUrl: req.originalUrl,
-      prefix: getPreset('MORIO_CORE_PREFIX'),
-    })
+  res.set('Content-Type', 'application/json').status(404).send({
+    url: req.url,
+    method: req.method,
+    originalUrl: req.originalUrl,
+  })
 )
 
 /*
@@ -55,7 +50,7 @@ await reconfigure()
  */
 wrapExpress(
   log,
-  app.listen(getPreset('MORIO_CORE_PORT'), (err) => {
+  app.listen(store.getPreset('MORIO_CORE_PORT'), (err) => {
     if (err) log.error(err, 'An error occured')
   })
 )

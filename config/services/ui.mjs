@@ -28,10 +28,10 @@ export const resolveServiceConfiguration = (store) => {
       // Volumes
       volumes: PROD
         ? [
-          `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+          `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
         ] : [
-          `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}:/morio`,
-          `${store.getPreset('MORIO_HOSTOS_REPO_ROOT')}/hostfs/config/shared:/etc/morio/shared`,
+          `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+          `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
         ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,

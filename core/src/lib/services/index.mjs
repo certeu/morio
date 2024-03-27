@@ -9,7 +9,7 @@ import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService } from './proxy.mjs'
 // Dependencies
-import { getPreset, resolveServiceConfiguration } from '#config'
+import { resolveServiceConfiguration } from '#config'
 // Docker
 import {
   docker,
@@ -100,7 +100,18 @@ export const logStartedConfig = () => {
    * Are we running in production?
    */
   if (store.info.production) store.log.info(`Morio ${store.info.version} is running in PRODUCTION`)
-  else store.log.info(`Morio ${store.info.versino} is running in DEVELOPMENT`)
+  else store.log.info(`Morio ${store.info.version} is running in DEVELOPMENT`)
+
+  /*
+   * Log mount locations, useful for debugging
+   */
+  for (const mount of [
+    'MORIO_CONFIG_ROOT',
+    'MORIO_DATA_ROOT',
+    'MORIO_LOGS_ROOT',
+    'MORIO_DOCKER_SOCKET',
+  ])
+    store.log.debug(`${mount} = ${store.getPreset(mount)}`)
 
   /*
    * Has MORIO been setup?
@@ -153,7 +164,7 @@ export const startMorio = async () => {
   /*
    * Create Docker network
    */
-  await createDockerNetwork(getPreset('MORIO_NETWORK'))
+  await createDockerNetwork(store.getPreset('MORIO_NETWORK'))
 
   /*
    * Load list or running containers because if it's running

@@ -36,6 +36,16 @@ export const service = {
      */
     restartContainer: (...params) => defaultRestartContainerHook('broker', ...params),
     /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * We make sure the `/etc/morio/broker` folder exists
+     */
+    preCreate: async () => {
+      await mkdir('/etc/morio/broker')
+
+      return true
+    },
+    /**
      * Lifecycle hook for anything to be done prior to starting the container
      *
      * @return {boolean} success - Indicates lifecycle hook success

@@ -5,8 +5,11 @@ import { store } from './store.mjs'
 
 /**
  * This is the docker client as provided by dockerode
+ * We cannot use the getPreset attached to store here as this runs
+ * before core is configured.
  */
 export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') })
+export const network = getPreset('MORIO_NETWORK')
 
 /**
  * Creates a container for a morio service
@@ -97,7 +100,7 @@ export const generateContainerConfig = (srvConf) => {
   const opts = {
     name,
     HostConfig: {
-      NetworkMode: getPreset('MORIO_NETWORK'),
+      NetworkMode: network,
       Binds: srvConf.container.volumes,
     },
     Hostname: name,
@@ -106,7 +109,7 @@ export const generateContainerConfig = (srvConf) => {
       EndpointsConfig: {},
     },
   }
-  opts.NetworkingConfig.EndpointsConfig[getPreset('MORIO_NETWORK')] = {
+  opts.NetworkingConfig.EndpointsConfig[network] = {
     Aliases: [name, `${name}_${store.config.core?.node_nr || 1}`],
   }
 

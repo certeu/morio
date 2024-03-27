@@ -6,23 +6,29 @@ export const presets = {
    * Morio presets
    */
 
+  //Node environment
+  NODE_ENV: "production",
+
   // Version number
   MORIO_VERSION: pkg.version,
-
-  // Whether or not to enable debug
-  MORIO_DEBUG: true,
-
-  // The docker network name to use
-  MORIO_NETWORK: 'morionet',
-
-  // Path to the folder holding the Morio monorepo
-  MORIO_REPO_ROOT: path.resolve(path.basename(import.meta.url), '..'),
 
   // Location of the Docker socket
   MORIO_DOCKER_SOCKET: '/var/run/docker.sock',
 
+  // Location of the Morio configuration folder
+  MORIO_CONFIG_ROOT: "/etc/morio",
+
+  // Location of the Morio data folder
+  MORIO_DATA_ROOT: "/var/lib/morio",
+
+  // Location of the Morio logs folder
+  MORIO_LOGS_ROOT: "/var/log/morio",
+
   // The epoch data of the current version
   MORIO_VERSION_EPOCH: '20240201',
+
+  // Network name. Change at your own peril.
+  MORIO_NETWORK: 'morionet',
 
   /*
    * API presets
