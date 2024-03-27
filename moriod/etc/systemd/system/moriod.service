@@ -1,0 +1,26 @@
+# /etc/systemd/system/moriod.service
+[Unit]
+Description=Morio distribution core service
+Documentation=https://github.com/certeu/morio
+
+[Service]
+EnvironmentFile=/etc/morio/core.env
+ExecStart=/usr/bin/docker run -d \
+  --name=core \
+  --hostname=core \
+  --network=morionet \
+  --network-alias core \
+  --init \
+  -v ${MORIO_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock  \
+  -v ${MORIO_CONFIG_ROOT:-/etc/morio}:/etc/morio  \
+  -v ${MORIO_DATA_ROOT:-/var/lib/morio}:/morio/data  \
+  -v ${MORIO_LOGS_ROOT:-/var/log/morio}:/var/log/morio  \
+  -e MORIO_CORE_LOG_LEVEL=$MORIO_CORE_LOG_LEVEL \
+  -e NODE_ENV=$NODE_ENV \
+  morio/core:$MORIO_VERSION
+ExecStop=/usr/bin/docker stop core
+Restart=always
+SyslogIdentifier=moriod
+
+[Install]
+WantedBy=default.target

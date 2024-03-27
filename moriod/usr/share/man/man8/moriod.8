@@ -1,0 +1,55 @@
+.TH MORIOD 8 "March 2024" "Version 0.1.1" "Administrative Commands"
+
+.SH NAME
+moriod \- Manage the morio installation
+
+Morio is an end-to-end streaming data backbone for your observability needs.
+
+.SH SYNOPSIS
+.B morios
+[\fIOPTION\fR]
+.br
+.B moriod
+[\fICOMMAND\fR]
+
+.SH DESCRIPTION
+\fIMoriod\fR is a umbrella package to install the Morio distribution, and provides some command-line features to manage morio's core service.
+
+.SH OPTIONS
+.TP
+\fB\-h, \-\-help\fR
+Display help information
+
+.TP
+\fB\-v, \-\-version\fR
+Display version information
+
+.SH COMMANDS
+.TP
+
+\fBrestart\fR
+Restarts the morio core service
+
+.TP
+\fBstart\fR
+Starts the morio core service
+
+.TP
+\fBstatus\fR
+Shows the status of the morio core service
+
+.TP
+\fBstop\fR
+Stops the morio core service
+
+.TP
+\fBrestart\fR
+Restart morio beats agents
+
+.SH EXAMPLES
+$ sudo \fBmoriod status\fR
+.br
+Query systemd for the status of the morio core service
+
+.SH AUTHOR
+Joost De Cock (joost.decock@cert.europa.eu)
