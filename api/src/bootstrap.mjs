@@ -52,6 +52,7 @@ export const bootstrapConfiguration = async () => {
     validate: coreFetchOk,
   })
   if (coreFetchOk(result)) {
+    store.config = result[1].config
     store.log.debug(`Loaded configuration from core.`)
     /*
      * Also load the info from core
@@ -71,14 +72,22 @@ export const bootstrapConfiguration = async () => {
       store.info.ephemeral = infoResult[1].ephemeral
     }
   } else {
+    /*
+     * This is not good. Warn and return early
+     */
     store.log.warn('Failed to load Morio config from core')
+    return
   }
-  store.config = result[1].config
-  store.keys = result[1].keys
+
+  /*
+   * If we are in ephemeral mode, return early
+   */
+  if (store.info.ephemeral) return
 
   /*
    * Add encryption methods
    */
+  store.keys = result[1].keys
   const { encrypt, decrypt, isEncrypted } = encryptionMethods(
     store.keys.mrt,
     'Morio by CERT-EU',
@@ -113,6 +122,8 @@ export const bootstrapConfiguration = async () => {
    * Initialize RpKv client
    */
   store.rpkv = await new RpKvClient(store)
+
+  return
 }
 
 /**

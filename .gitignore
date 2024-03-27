@@ -15,6 +15,10 @@ clients/linux/etc/logs/config.yml
 clients/linux/etc/morio/vars/*
 core/run-dev-container.sh
 core/run-prod-container.sh
+moriod/control
+setup.sh
+setup.json
+data/
 
 # ruby gems
 *.gem
