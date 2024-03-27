@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '#shared/fs'
+import { readFile, writeFile, mkdir } from '#shared/fs'
 // Default hooks
 import {
   alwaysWantedHook,
@@ -48,6 +48,7 @@ export const service = {
         store.log.debug('Proxy: Custom entrypoint exists, no action needed')
       } else {
         store.log.debug('Proxy: Creating custom entrypoint')
+        await mkdir('/etc/morio/proxy')
         await writeFile(file, store.config.services.proxy.entrypoint, store.log, 0o755)
       }
 
