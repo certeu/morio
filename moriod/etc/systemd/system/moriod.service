@@ -2,24 +2,67 @@
 [Unit]
 Description=Morio distribution core service
 Documentation=https://github.com/certeu/morio
+# Make sure the Docker service is available
+After=docker.service
+Requires=docker.service
 
 [Service]
-EnvironmentFile=/etc/morio/core.env
-ExecStart=/usr/bin/docker run -d \
+# We fist define the defaults for these variables
+# And then include the EnvironmentFile
+# This ensures sensible defaults, while
+# allowing users to override them in the EnvironmentFile
+#
+# DO NOT CHANGE ANYTHING BELOW THIS LINE
+# Instead, make your changes in /etc/morio/core.env instead
+#
+# Location of the Docker socket
+Environment=MORIO_DOCKER_SOCKET=/var/run/docker.sock
+# Location of the Morio configuration folder
+Environment=MORIO_CONFIG_ROOT=/etc/morio
+# Location of the Morio data folder
+Environment=MORIO_DATA_ROOT=/var/lib/morio
+# Location of the Morio logs folder
+Environment=MORIO_LOGS_ROOT=/var/log/morio
+# Log level for Morio core
+Environment=MORIO_CORE_LOG_LEVEL=warn
+# Node environment
+Environment=NODE_ENV=production
+
+# Load environment file to potentially override these vars
+# This is optional
+EnvironmentFile=-/etc/morio/moriod.env
+
+# Load version from the version environment file
+# This is NOT optional
+EnvironmentFile=/etc/morio/version.env
+
+# Make sure to stop & remove the core container if it's running
+ExecStartPre=/usr/bin/docker rm -f core
+
+# Start the core container
+ExecStart=/usr/bin/docker run --rm \
   --name=core \
   --hostname=core \
   --network=morionet \
-  --network-alias core \
+  --network-alias=core \
   --init \
-  -v ${MORIO_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock  \
-  -v ${MORIO_CONFIG_ROOT:-/etc/morio}:/etc/morio  \
-  -v ${MORIO_DATA_ROOT:-/var/lib/morio}:/morio/data  \
-  -v ${MORIO_LOGS_ROOT:-/var/log/morio}:/var/log/morio  \
-  -e MORIO_CORE_LOG_LEVEL=$MORIO_CORE_LOG_LEVEL \
-  -e NODE_ENV=$NODE_ENV \
-  morio/core:$MORIO_VERSION
-ExecStop=/usr/bin/docker stop core
+  -v "${MORIO_DOCKER_SOCKET}:/var/run/docker.sock" \
+  -v "${MORIO_CONFIG_ROOT}:/etc/morio" \
+  -v "${MORIO_DATA_ROOT}:/morio/data" \
+  -v "${MORIO_LOGS_ROOT}:/var/log/morio" \
+  -e "MORIO_CORE_LOG_LEVEL=${MORIO_CORE_LOG_LEVEL}" \
+  -e "NODE_ENV=${NODE_ENV}" \
+  morio/core:${MORIO_VERSION}
+
+# When stopping, we stop & remove core, api, ui, and proxy
+# But we do not stop anything else. So a broker will keep
+# running (for example)
+ExecStop=/usr/bin/docker rm -f core api ui proxy
+
+# Always restart
 Restart=always
+
+# Idenitifier for syslog
 SyslogIdentifier=moriod
 
 [Install]
