@@ -67,7 +67,7 @@ export const PageWrapper = ({
       </Head>
       <LoadingStatus />
       <AuthWrapper {...{ account, setAccount, role }}>
-        <div className="flex flex-col justify-between bg-neutral w-full">
+        <div className="flex flex-col justify-between bg-base-100 w-full">
           {header && <Header {...{ theme, toggleTheme, page }} />}
           <main className={`bg-base-100 grow ${header ? 'mt-12' : ''}`}>
             {Layout ? <Layout {...{ title, page }}>{children}</Layout> : children}

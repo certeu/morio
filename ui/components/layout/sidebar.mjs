@@ -9,19 +9,17 @@ export const Sidebar = ({ page }) => {
 
   return (
     <div
-      className={`w-64 min-h-screen pt-4
-      bg-neutral
+      className={`2xl:w-96 lg:w-64 min-h-screen pt-4
       shrink-0 grow-0 self-stretch
       transition-all
-      border-l-0 border-t-0 border-b-0 border-2 border-secondary
-      ${dense ? '-ml-52' : 'ml-0'}`}
+      ${dense ? 'lg:-ml-[13rem] 2xl:-ml-[21rem]' : 'ml-0'}`}
     >
       <aside className="sticky top-4 lg:top-24">
         <div className="flex flex-col items-center w-full">
           <button
             onClick={() => setDense(!dense)}
             label="Navigation"
-            className="flex flex-row justify-between uppercase font-think text-sm text-secondary bg-neutral hover:bg-accent hover:text-accent-content w-full px-4 py-2 items-center"
+            className="flex flex-row justify-between uppercase font-think text-sm text-secondary hover:bg-accent hover:text-accent-content w-full px-4 py-2 items-center rounded-r-lg"
           >
             Navigation
             <div className="w-12 -mr-4 text-center flex items-center justify-center">

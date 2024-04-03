@@ -10,7 +10,7 @@ const colors = {
   none: 'neutral',
   note: 'primary',
   related: 'info',
-  tip: 'accent',
+  tip: 'success',
   tldr: 'info',
   warning: 'error',
 }

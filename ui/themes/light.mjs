@@ -62,7 +62,7 @@ export const theme = {
   'primary-content': c.bg, //c.dark,
 
   // secondary: The link color on default backgrounds (base-100)
-  secondary: c.light,
+  secondary: c.mid,
   // secondary-focus: The :hover link color for default backgrounds. Or:
   // secondary-focus: An alternative link color for on dark backgrounds
   'secondary-focus': colors.orange['500'],

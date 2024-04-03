@@ -2,7 +2,7 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Popout } from 'components/popout.mjs'
 
-const SupportPage = (props) => (
+const AboutPage = (props) => (
   <PageWrapper {...props}>
     <ContentWrapper {...props}>
       <Popout warning>
@@ -14,11 +14,11 @@ const SupportPage = (props) => (
   </PageWrapper>
 )
 
-export default SupportPage
+export default AboutPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Support',
-    page: ['support'],
+    title: 'About',
+    page: ['about'],
   },
 })

@@ -17,10 +17,10 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport } from './report.mjs'
-import { SettingsIcon, OkIcon, CheckCircleIcon } from 'components/icons.mjs'
+import { SettingsIcon, OkIcon, CheckCircleIcon, RightIcon, PlayIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
-import { SettingsNavigation } from './navigation.mjs'
+import { SettingsNavigation, NavButton } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { StatusLogs } from 'components/status-logs.mjs'
@@ -169,7 +169,7 @@ const ShowSettingsValidation = ({
  */
 const ShowSettingsPreview = ({ preview, mSettings }) =>
   preview ? (
-    <div className="w-full mt-8">
+    <div className="w-full mt-8 max-w-4xl">
       <h3>Settings Preview</h3>
       <Highlight language="yaml">{yaml.stringify(mSettings)}</Highlight>
     </div>
@@ -243,6 +243,10 @@ export const SettingsWizard = (props) => {
   )
 }
 
+const btnClasses =
+  'w-full flex flex-row items-center px-4 py-2 rounded-l-lg ' +
+  'lg:hover:bg-primary lg:hover:text-primary-content text-base-content font-medium'
+
 const WizardWrapper = ({
   title,
   Icon = SettingsIcon,
@@ -253,45 +257,64 @@ const WizardWrapper = ({
   setPreview,
   children,
 }) => (
-  <div className="flex flex-row gap-8 justify-start">
-    <div className="w-full max-w-4xl p-8 grow">
+  <div className="flex flex-row justify-between gap-8 max-w-full">
+    <div className="p-8 grow shrink min-w-0 flex-auto">
       <Breadcrumbs page={['settings', ...sectionPath.split('.')]} />
       <div className="w-full">
-        <h1 className="capitalize flex w-full max-w-4xl justify-between">
+        <h1 className="capitalize flex w-full justify-between">
           {title}
           <Icon className="w-16 h-16" />
         </h1>
         {children}
       </div>
     </div>
-    <div className="grow-0 shrink-0 pt-24 min-h-screen w-64 pr-4">
-      <h5>Settings</h5>
-      <SettingsNavigation
-        view={sectionPath}
-        loadView={loadView}
-        nav={templates}
-        mSettings={mSettings}
-        edit
-      />
-      <h5>Actions</h5>
-      <div className="flex flex-col gap-2">
-        <button
-          className="btn btn-outline btn-primary btn-sm w-full"
-          onClick={() => loadView('start')}
-          disabled={sectionPath === 'start'}
-        >
-          Getting Started
-        </button>
-        <button
-          className="btn btn-outline btn-primary btn-sm w-full"
-          onClick={() => setPreview(!preview)}
-        >
-          {preview ? 'Hide ' : 'Show '} settings preview
-        </button>
-        <button className="btn btn-primary w-full" onClick={() => loadView('validate')}>
-          <span>Validate Settings</span>
-        </button>
-      </div>
+    <div className="grow-0 shrink-0 pt-20 min-h-screen lg:w-64 2xl:w-96">
+      <details className="[&_svg]:open:rotate-90" open>
+        <summary className="flex flex-row">
+          <h5
+            className={`w-full flex flex-row items-center px-4 py-2 rounded-l-lg gap-2
+            lg:hover:bg-accent lg:hover:text-accent-content text-secondary uppercase hover:cursor-pointer text-base`}
+          >
+            <RightIcon stroke={3} className="w-6 h-6 transition-transform" />
+            Settings
+          </h5>
+        </summary>
+        <SettingsNavigation
+          view={sectionPath}
+          loadView={loadView}
+          nav={templates}
+          mSettings={mSettings}
+          edit
+        />
+      </details>
+      <details className="[&_svg]:open:rotate-90" open>
+        <summary className="flex flex-row">
+          <h6
+            className={`w-full flex flex-row items-center px-4 py-2 rounded-l-lg gap-2
+            lg:hover:bg-accent lg:hover:text-accent-content text-secondary uppercase hover:cursor-pointer text-base`}
+          >
+            <RightIcon stroke={3} className="w-6 h-6 transition-transform" />
+            Actions
+          </h6>
+        </summary>
+        <ul className="list list-inside pl-2">
+          <li>
+            <button className={btnClasses} onClick={() => loadView('start')}>
+              Getting Started
+            </button>
+          </li>
+          <li>
+            <button className={btnClasses} onClick={() => setPreview(!preview)}>
+              {preview ? 'Hide ' : 'Show '} settings preview
+            </button>
+          </li>
+          <li>
+            <button className={btnClasses} onClick={() => loadView('validate')}>
+              Validate Settings
+            </button>
+          </li>
+        </ul>
+      </details>
     </div>
   </div>
 )
@@ -475,7 +498,7 @@ export const PrimedSettingsWizard = (props) => {
           <h4>You have made changes that are yet to be deployed</h4>
           <p>The settings have been edited, and are now different from the deployed settings.</p>
           {showDelta ? (
-            <div className="my-4">
+            <div className="my-4 max-w-4xl overflow-scroll">
               <DiffViewer
                 from={yaml.stringify(runningSettings)}
                 to={yaml.stringify(mSettings)}

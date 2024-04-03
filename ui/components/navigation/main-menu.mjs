@@ -1,6 +1,5 @@
 // Dependencies
 import { capitalize, pageChildren } from 'lib/utils.mjs'
-import { docsNavs } from 'prebuild/docs-navs.mjs'
 // Components
 import {
   BookIcon,
@@ -20,6 +19,7 @@ import {
   OpenLockIcon,
   PackageIcon,
   QuestionIcon,
+  RightIcon,
   ServersIcon,
   SettingsIcon,
   StatusIcon,
@@ -54,7 +54,6 @@ const icons = {
   dashboard: Traefik,
   decrypt: OpenLockIcon,
   docker: Docker,
-  docs: BookIcon,
   downloads: DownloadIcon,
   encrypt: ClosedLockIcon,
   faq: QuestionIcon,
@@ -82,15 +81,6 @@ const icons = {
  * This object represents the navigation structure
  */
 export const links = {
-  docs: {
-    t: 'Documentation',
-    faq: {
-      t: 'FAQ',
-    },
-    reference: {
-      t: 'Reference',
-    },
-  },
   settings: {
     t: 'Settings',
     show: {
@@ -143,7 +133,6 @@ export const links = {
       t: 'X.509 Certificates',
     },
   },
-  ...docsNavs,
 }
 
 const Null = () => null
@@ -154,6 +143,11 @@ const Null = () => null
  *
  */
 const isActive = (href, current) => `/${current.join('/')}`.slice(0, href.length) === href
+
+/**
+ * Icon that is shown on an open top-level entry
+ */
+const OpenIcon = () => <RightIcon className="w-6 h-6 shrink-0 grow-0 rotate-90" stroke={3} />
 
 /**
  * This is a component to render a navigation button, which is an entry in the menu
@@ -173,7 +167,7 @@ export const NavButton = ({
   onClick = false,
   href = false,
   target = '',
-  extraClasses = 'lg:hover:bg-secondary lg:hover:text-secondary-content',
+  extraClasses = 'lg:hover:bg-primary lg:hover:text-primary-content',
 }) => {
   /*
    * Pre-calculate some things we need
@@ -183,19 +177,19 @@ export const NavButton = ({
   const children = pageChildren(page)
   const here = `/${current.join('/')}` === href
   const title = page.t || capitalize(k)
-  const className = `w-full flex flex-row items-center px-4 py-2 ${extraClasses} ${
+  const className = `w-full flex flex-row items-center px-4 py-2 rounded-r-lg ${extraClasses} ${
     active
       ? here
-        ? 'bg-secondary font-bold text-secondary-content'
-        : 'bg-secondary text-neutral-content bg-opacity-20 font-bold'
-      : `bg-neutral text-neutral-content ${level > 0 ? 'font-thin text-sm italic' : 'font-medium'}`
+        ? 'bg-primary bg-opacity-30 font-bold text-base-content'
+        : 'text-base-content '
+      : ` text-base-content ${level > 0 ? 'font-thin text-sm italic' : 'font-medium'}`
   }`
   const span = (
     <span className="block grow text-left" style={{ paddingLeft: level * 8 + 'px' }}>
       {title}
     </span>
   )
-  const Icon = parents[0] === 'docs' ? Null : icons[k] || Null
+  const Icon = active && !here ? OpenIcon : icons[k] || Null
   const sizedIcon =
     level > 0 ? (
       <Icon className="w-6 h-6 shrink-0 grow-0 opacity-80" stroke={1.5} />

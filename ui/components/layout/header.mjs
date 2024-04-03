@@ -1,10 +1,19 @@
 // Hooks
 import { useAccount } from 'hooks/use-account.mjs'
 import { useEffect, useState } from 'react'
+import { useScrollPosition } from '@n8tb1t/use-scroll-position'
+import { useRouter } from 'next/router'
 // Components
 import Link from 'next/link'
-import { UserIcon, LogoutIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
-import { MorioLogo } from 'components/logos/morio.mjs'
+import {
+  WarningIcon,
+  MorioIcon,
+  UserIcon,
+  LogoutIcon,
+  LightThemeIcon,
+  DarkThemeIcon,
+} from 'components/icons.mjs'
+import { GitHub } from 'components/brands.mjs'
 import pkg from 'ui/package.json'
 
 export const NavButton = ({
@@ -14,11 +23,18 @@ export const NavButton = ({
   onClick = false,
   extraClasses = '',
   active = false,
+  toggle = false,
+  dense = false,
 }) => {
-  const className =
-    'dark border-0 px-1 lg:px-3 xl:px-4 text-base py-3 md:py-4 text-center items-center ' +
-    `hover:bg-accent hover:text-accent-content grow-0 relative capitalize ${extraClasses} ${
-      active ? 'font-heavy' : ''
+  const className = `border-0 px-1 lg:px-3 xl:px-4 text-base text-center
+    items-center rounded-b-lg grow-0 relative capitalize ${extraClasses}
+    ${dense ? 'py-0' : 'py-2 md:py-4'}
+    ${
+      active
+        ? 'bg-primary bg-opacity-30 text-base-content'
+        : toggle
+          ? 'text-secondary hover:bg-accent hover:text-accent-content'
+          : 'text-base-content hover:bg-primary hover:text-primary-content'
     }`
 
   return onClick ? (
@@ -32,12 +48,27 @@ export const NavButton = ({
   )
 }
 
+const headerMsg = (
+  <div className="flex flex-row gap-2 items-center justify-center w-full">
+    <WarningIcon className="w-5 h-5 text-warning" />
+    <span>Morio v{pkg.version} — this is alpha code</span>
+    <WarningIcon className="w-5 h-5 text-warning" />
+  </div>
+)
+
+const PreHeader = () =>
+  headerMsg ? <div className="mt-14 -mb-12 text-center p-0.5">{headerMsg}</div> : null
+
+const isActive = (page, path) => path.slice(0, page.length) === page
+
 export const Header = ({
   theme, // Name of the current theme (light or dark)
   toggleTheme, // Method to change the theme
 }) => {
   const { account, logout } = useAccount()
   const [user, setUser] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+  const { asPath } = useRouter()
 
   /*
    * Avoid hydration errros
@@ -46,56 +77,79 @@ export const Header = ({
     if (!user && account) setUser(true)
   }, [account])
 
+  /*
+   * Style header differently upon scroll (add shadow)
+   */
+  useScrollPosition(
+    ({ currPos }) => {
+      if (!scrolled && currPos.y < -20) setScrolled(true)
+      else if (scrolled && currPos.y > -5) setScrolled(false)
+    },
+    [scrolled]
+  )
+
   return (
-    <header
-      className={`
-      fixed top-0 left-0
-      bg-neutral drop-shadow-xl w-full
-      border-2 border-t-0 border-l-0 border-r-0 border-solid border-accent z-20
-    `}
-    >
-      <div className="m-auto p-2 lg:py-0 md:px-8">
-        <div className="p-0 flex flex-row gap-2 justify-between text-neutral-content items-center">
-          <div className="flex lg:px-2 flex-row items-center justify-between w-full max-w-7xl mx-auto">
-            <Link href="/" label="Home" className="text-secondary hover:text-accent py-0">
-              <MorioLogo className="h-8" noLine />
-            </Link>
-            <div className="grow pl-4 justify-start flex flex-row">
-              <NavButton href="/docs" label="Documentation" extraClasses="hidden lg:flex">
-                Documentation
-              </NavButton>
-              <NavButton href="/settings" label="Settings" extraClasses="hidden lg:flex">
-                settings
-              </NavButton>
-              <NavButton href="/status" label="Status" extraClasses="hidden lg:flex">
-                Status
-              </NavButton>
-              <NavButton href="/tools" label="Status" extraClasses="hidden lg:flex">
-                Tools
-              </NavButton>
-            </div>
-            <div className="flex flex-row">
-              <Link
-                className={`
-                border-0 px-1 lg:px-3 xl:px-4 text-secondary py-3 md:py-4 text-center items-center
-                hover:bg-accent hover:text-accent-content grow-0 relative capitalize hidden lg:flex`}
-                href="/support"
-                label={pkg.version}
-              >
-                <span className="textsecondary">Morio {pkg.version}</span>
-              </Link>
-              <NavButton onClick={toggleTheme} label="Change theme" extraClasses="hidden lg:flex">
-                {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
-              </NavButton>
-              {user ? (
-                <NavButton href="/account" label="Your Account" extraClasses="hidden lg:flex">
-                  <UserIcon />
+    <>
+      <header
+        className={`fixed top-0 left-0 bg-base-100 w-full z-20 ${
+          scrolled ? 'drop-shadow' : ''
+        } transition-shadow duration-200 ease-in`}
+      >
+        <div className="m-auto p-2 py-0 md:px-8">
+          <div className="p-0 flex flex-row gap-0 justify-between items-center">
+            <NavButton href="/" label="Home" dense>
+              <div className="flex flex-row gap-2 items-center py-2">
+                <MorioIcon className="h-10 w-10" />
+                <span className="lowercase font-bold">morio</span>
+              </div>
+            </NavButton>
+            <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
+              <div className="grow pl-4 justify-start flex flex-row">
+                <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
+                  Settings
                 </NavButton>
-              ) : null}
+                <NavButton
+                  href="/status"
+                  label="Status"
+                  extraClasses="hidden lg:flex"
+                  active={isActive('/status', asPath)}
+                >
+                  Status
+                </NavButton>
+                <NavButton href="/tools" label="Tools" active={isActive('/tools', asPath)}>
+                  Tools
+                </NavButton>
+              </div>
+              <div className="flex flex-row">
+                <NavButton
+                  href="/about"
+                  label="Support"
+                  extraClasses="hidden lg:flex"
+                  active={isActive('/about', asPath)}
+                >
+                  About Morio
+                </NavButton>
+                {user ? (
+                  <NavButton
+                    href="/account"
+                    label="Your Account"
+                    active={isActive('/account', asPath)}
+                  >
+                    Your Account
+                  </NavButton>
+                ) : null}
+              </div>
             </div>
+            <NavButton onClick={toggleTheme} label="Change theme" toggle>
+              {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
+            </NavButton>
+            <NavButton href="https://github.com/certeu/morio" label="Source code on Github">
+              <GitHub />
+            </NavButton>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+      <PreHeader scrolled={scrolled} />
+    </>
   )
 }

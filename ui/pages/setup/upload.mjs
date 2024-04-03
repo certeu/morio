@@ -9,10 +9,13 @@ import { useState, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
+import { Box } from 'components/box.mjs'
+import { Highlight } from 'components/highlight.mjs'
+import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { FileInput } from 'components/inputs.mjs'
 import { Link } from 'components/link.mjs'
-import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
+import { OkIcon, MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
 import { EphemeralInfo } from 'pages/index.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
@@ -81,6 +84,52 @@ const SettingsUploadPage = (props) => {
     }
   }
 
+  if (deployResult) {
+    const text = `text-${deployResult?.root_token ? 'success' : 'accent'}-content`
+    return (
+      <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
+        <div className="flex flex-wrap flex-row gap-8 justify-center">
+          <div className="w-full max-w-xl">
+            <Box color={deployResult?.root_token ? 'success' : 'accent'}>
+              <div className={`flex flex-row items-center gap-2 ${text}`}>
+                <div className="w-6 h-6">
+                  {deployResult?.root_token ? (
+                    <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
+                  ) : (
+                    <LogoSpinner />
+                  )}
+                </div>
+                {deployResult.root_token ? (
+                  <span>Settings deployed.</span>
+                ) : (
+                  <span>Please wait while your settings are being deployed.</span>
+                )}
+              </div>
+            </Box>
+            {deployResult?.root_token ? (
+              <>
+                <Popout important>
+                  <h5>Store the Morio Root Token in a safe place</h5>
+                  <p>
+                    Below is the Morio Root Token which you can use to authenticate while no (other)
+                    authentication provider has been setup.
+                  </p>
+                  <Highlight>{deployResult.root_token}</Highlight>
+                </Popout>
+                <p className="text-center">
+                  <Link className="btn btn-primary nt-4 btn-lg" href="/">
+                    Go to the Home Page
+                  </Link>
+                </p>
+              </>
+            ) : null}
+          </div>
+          <span></span>
+        </div>
+      </PageWrapper>
+    )
+  }
+
   return (
     <PageWrapper {...props} layout={SplashLayout} header={false} footer={false} role={false}>
       {error ? <pre>{JSON.stringify(error, null, 2)}</pre> : null}
@@ -113,7 +162,7 @@ const SettingsUploadPage = (props) => {
                     <SettingsReport report={report} />
                     <p className="text-center mt-4">
                       {report.deployable ? (
-                        <button className="btn btn-primary" onClick={deploy}>
+                        <button className="btn btn-primary btn-lg w-full" onClick={deploy}>
                           Apply Settings
                         </button>
                       ) : (
