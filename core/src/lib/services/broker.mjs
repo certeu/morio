@@ -41,7 +41,11 @@ export const service = {
      * We make sure the `/etc/morio/broker` folder exists
      */
     preCreate: async () => {
-      await mkdir('/etc/morio/broker')
+      // 101 is the UID that redpanda runs under inside the container
+      const uid = store.getPreset('MORIO_BROKER_UID')
+      const dir = '/etc/morio/broker'
+      await mkdir(dir)
+      await chown(dir, uid, uid)
 
       return true
     },
