@@ -89,3 +89,5 @@ docker run -d ${cliOptions('core', env)}
 for (const env of ['dev', 'prod']) {
   await writeFile(`core/run-${env}-container.sh`, script(env), false, 0o755)
 }
+
+await writeFile(`VERSION`, pkg.version)

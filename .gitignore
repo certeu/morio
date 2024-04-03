@@ -12,6 +12,7 @@ clients/linux/etc/morio/logs/config-template.yml
 
 # Auto-generated moriod files
 moriod/control
+VERSION
 
 # Auto-generated scripts
 core/run-dev-container.sh
