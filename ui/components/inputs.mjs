@@ -190,7 +190,7 @@ export const NumberInput = ({
         placeholder={placeholder}
         value={current}
         onChange={(evt) => update(evt.target.value)}
-        className={`w-full ${
+        className={`w-full bg-base-100 ${
           inputType === 'range' ? 'range range-primary range-sm' : 'input input-bordered'
         } ${
           isValid?.error
@@ -232,7 +232,7 @@ export const StringInput = ({
         placeholder={placeholder}
         value={current}
         onChange={(evt) => update(evt.target.value)}
-        className={`input w-full input-bordered ${
+        className={`input w-full bg-base-100 input-bordered ${
           isValid?.error
             ? 'input-error'
             : current === original
@@ -281,7 +281,7 @@ export const SecretInput = ({
         placeholder={placeholder}
         value={current}
         onChange={(evt) => update(evt.target.value)}
-        className={`input w-full input-bordered ${
+        className={`input w-full bg-base-100 input-bordered ${
           isValid?.error
             ? 'input-error'
             : current === original
@@ -325,7 +325,7 @@ export const TextInput = ({
       placeholder={placeholder}
       value={current}
       onChange={(evt) => update(evt.target.value)}
-      className={`input w-full input-bordered h-36 py-2 ${
+      className={`input w-full bg-base-100 input-bordered h-36 py-2 ${
         current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
       }`}
     />
