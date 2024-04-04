@@ -9,9 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- [ui] Renamed PreHeader to BannerMessage as it's a more descriptive name
+
 ### Fixed
 
-- Fix broken link to downloads page in .deb builder output
+- [ui] Fix broken link to downloads page in .deb builder output
 
 
 

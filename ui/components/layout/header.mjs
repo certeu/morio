@@ -48,7 +48,7 @@ export const NavButton = ({
   )
 }
 
-const headerMsg = (
+const bannerMsg = (
   <div className="flex flex-row gap-2 items-center justify-center w-full">
     <WarningIcon className="w-5 h-5 text-warning" />
     <span>Morio v{pkg.version} — this is alpha code</span>
@@ -56,8 +56,8 @@ const headerMsg = (
   </div>
 )
 
-const PreHeader = () =>
-  headerMsg ? <div className="mt-14 -mb-12 text-center p-0.5">{headerMsg}</div> : null
+const BannerMessage = () =>
+  bannerMsg ? <div className="mt-14 -mb-12 text-center p-0.5">{bannerMsg}</div> : null
 
 const isActive = (page, path) => path.slice(0, page.length) === page
 
@@ -149,7 +149,7 @@ export const Header = ({
           </div>
         </div>
       </header>
-      <PreHeader scrolled={scrolled} />
+      <BannerMessage scrolled={scrolled} />
     </>
   )
 }
