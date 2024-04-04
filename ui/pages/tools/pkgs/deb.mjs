@@ -139,7 +139,7 @@ const CreatePackage = () => {
           package becomes available for download.
         </p>
         <div className="flex flex-row justify-between items-center">
-          <PageLink className="btn btn-primary" href="/downloads">
+          <PageLink className="btn btn-primary" href="/tools/downloads">
             Go to the download page
           </PageLink>
           <button className="btn btn-primary" onClick={() => setResult(false)}>
