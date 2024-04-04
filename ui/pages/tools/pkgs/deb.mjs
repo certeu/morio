@@ -49,16 +49,6 @@ const altDocsFields = {
   revision: 'version',
 }
 
-/*
-  Depends: {
-    auditbeat: '>= 8.12',
-    filebeat: '>= 8.12',
-    metricbeat: '>= 8.12',
-  },
-  Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],
-  extended desc
-*/
-
 /**
  * The actual component, in case we want to extract it for re-use later
  */

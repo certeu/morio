@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- [core] Use the current Morio version as default version for the .deb client package
 - [ui] Renamed PreHeader to BannerMessage as it's a more descriptive name
 
 ### Fixed

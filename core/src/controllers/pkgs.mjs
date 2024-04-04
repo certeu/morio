@@ -27,7 +27,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
    */
   const rev = await loadRevision()
 
-  return res.send({ ...debDefaults, Revision: rev + 1 })
+  return res.send({ ...debDefaults, Version: store.info.version, Revision: rev + 1 })
 }
 
 /**

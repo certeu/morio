@@ -37,7 +37,6 @@ export const resolveServiceConfiguration = (store) => ({
 export const defaults = {
   Package: 'morio-client',
   Source: 'morio-client',
-  Version: '0.0.1',
   Section: 'utils',
   Priority: 'optional',
   Architecture: 'amd64',
