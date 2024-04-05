@@ -43,6 +43,9 @@ ExecStartPre=/usr/bin/docker rm -f core
 ExecStart=/usr/bin/docker run --rm \
   --name=core \
   --hostname=core \
+  --label morio.service=core \
+  --log-driver=journald \
+  --log-opt labels=morio.service \
   --network=morionet \
   --network-alias=core \
   --init \

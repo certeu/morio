@@ -102,6 +102,9 @@ export const generateContainerConfig = (srvConf) => {
     HostConfig: {
       NetworkMode: network,
       Binds: srvConf.container.volumes,
+      LogConfig: {
+        Type: 'journald', // All Morio services log via journald
+      },
     },
     Hostname: name,
     Image: srvConf.container.image + tag,
@@ -143,8 +146,10 @@ export const generateContainerConfig = (srvConf) => {
   /*
    * Labels
    */
+  opts.Labels = {
+    'morio.service': name,
+  }
   if (srvConf.container.labels) {
-    opts.Labels = {}
     for (const label of srvConf.container.labels) {
       const [key, val] = label.split('=')
       opts.Labels[key] = val

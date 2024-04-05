@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- [core] Use the journald Docker log driver for all morio containers
 - [core] Use the current Morio version as default version for the .deb client package
 - [core] Pass all props to lifecycle hooks as one object
 - [core] Reorder Dockerfile layers to improve cache hits

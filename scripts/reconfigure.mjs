@@ -58,6 +58,9 @@ const config = {
 const cliOptions = (name, env) => `\\
   --name=${config[env].container.container_name} \\
   --hostname=${config[env].container.container_name} \\
+  --label morio.service=core \\
+  --log-driver=journald \\
+  --log-opt labels=morio.service \\
   --network=morionet \\
   --network-alias ${name} \\
   ${config[env].container.init ? '--init' : ''} \\
