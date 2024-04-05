@@ -7,14 +7,17 @@ WORKDIR /morio/core
 ## Install build toolchange for native bindings
 RUN apt-get update && apt-get install -y python3 make g++
 
-## Copy in source and config
-COPY . .
+## Copy in package.json so we can cache dependencies when changes code only
+COPY package.json package.json
 
 ## Install/Build the depdendencies that have native bindings
 RUN npm install ssh2 cpu-features
 
 ## Install dependencies
 RUN npm ci
+
+## Copy in source and config
+COPY . .
 
 ## Build core into a self-contained application
 RUN npm run build
@@ -28,9 +31,6 @@ WORKDIR /morio/core
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production
 
-## Copy build artifact from builder
-COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
-
 ## Copy the various PM2 scripts into the PATH
 COPY --from=builder /morio/core/bin/* /usr/local/bin/
 
@@ -42,8 +42,14 @@ COPY --from=builder /morio/core/node_modules/tweetnacl ./node_modules/tweetnacl
 COPY --from=builder /morio/core/node_modules/safer-buffer ./node_modules/safer-buffer
 COPY --from=builder /morio/core/node_modules/cpu-features ./node_modules/cpu-features
 
+# Copy client code so we can build client packages from it
+COPY --from=builder /morio/core/clients ./clients
+
 ## Install the pm2 process manager for NodeJS
 RUN npm install pm2 -g
+
+## Copy build artifact from builder
+COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 
 ## Now run NodeJS code inside PM2
 CMD [ "pm2-runtime", \

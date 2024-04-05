@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [core] Use the current Morio version as default version for the .deb client package
 - [core] Pass all props to lifecycle hooks as one object
+- [core] Reorder Dockerfile layers to improve cache hits
 - [ui] Renamed PreHeader to BannerMessage as it's a more descriptive name
 
 ### Fixed
