@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '#shared/fs'
+import { cp, readFile, writeFile } from '#shared/fs'
 import { resolveControlFile } from '#config/services/dbuilder'
 
 export const service = {
@@ -9,19 +9,33 @@ export const service = {
      *
      * We simply return the passed in value here
      */
-    wanted: (onDemandBuild = false) => onDemandBuild,
+    wanted: ({ onDemandBuild = false }) => onDemandBuild,
     /*
      * This is an epehemeral container
-     * It should never be recreated/restarted as part of the regular lifecycle
+     * It should only be recreated/restarted if this is an on-demand build request
      */
-    recreateContainer: () => false,
-    restartContainer: () => false,
+    recreateContainer: ({ onDemandBuild = false }) => onDemandBuild,
+    restartContainer: ({ onDemandBuild = false }) => onDemandBuild,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * We need to make sure the client code is in the right place on the host OS
+     * so that it will be mapped and available in the builder.
+     */
+    preCreate: async () => {
+      /*
+       * Recursively copy the client code in the data folder
+       */
+      await cp('/morio/core/clients/linux', '/morio/data/clients/linux', { recursive: true })
+
+      return true
+    },
     /**
      * Lifecycle hook for anything to be done prior to starting the build
      *
      * Generate and write control file for the build
      */
-    prebuild: async (customSettings = {}) => {
+    prebuild: async ({ customSettings = {} }) => {
       /*
        * Resolve settings and control file
        */

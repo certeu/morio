@@ -28,13 +28,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (...params) => defaultRecreateContainerHook('ca', ...params),
+    recreateContainer: (hookProps) => defaultRecreateContainerHook('ca', hookProps),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (...params) => defaultRestartContainerHook('ca', ...params),
+    restartContainer: (hookProps) => defaultRestartContainerHook('ca', hookProps),
     /**
      * Lifecycle hook for anything to be done prior to starting the container
      *

@@ -190,14 +190,14 @@ export const startMorio = async () => {
  *
  * @param {string} service = The service name
  * @param {object} running = On object holding info on running containers and their config
- * @param {object} hookParams = Parameters to pass through to runHooks
+ * @param {object} hookProps = Optional props to pass to the lifecycle hooks
  * @return {bool} ok = Whether or not the service was started
  */
-export const ensureMorioService = async (service, running, hookParams) => {
+export const ensureMorioService = async (service, running, hookProps) => {
   /*
    * Is the service wanted?
    */
-  const wanted = await runHook('wanted', service, hookParams)
+  const wanted = await runHook('wanted', service, hookProps)
   if (!wanted) {
     store.log.debug(`Service ${service} is not wanted`)
     /*
@@ -224,14 +224,14 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * (Re)create the container/service (if needed)
    */
-  const recreate = await shouldContainerBeRecreated(service, running)
+  const recreate = await shouldContainerBeRecreated(service, running, hookProps)
   let containerId = running[service]?.Id
   if (recreate) {
     store.log.debug(`(Re)creating ${service} container`)
     /*
      * Run preCreate lifecycle hook
      */
-    runHook('preCreate', service, hookParams)
+    runHook('preCreate', service, hookProps)
 
     /*
      * Generate container config
@@ -253,14 +253,14 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * (Re)start the container/service (if needed)
    */
-  const restart = await shouldContainerBeRestarted(service, running, recreate)
+  const restart = await shouldContainerBeRestarted(service, running, { ...hookProps, recreate })
   if (restart) {
     store.log.info(`(Re)Starting \`${service}\` container`)
     store.log.status(`(Re)Starting \`${service}\` container`)
     /*
      * Run preStart lifecycle hook
      */
-    runHook('preStart', service, recreate, hookParams)
+    runHook('preStart', service, { ...hookProps, recreate })
 
     /*
      * (Re)Start the container
@@ -270,7 +270,7 @@ export const ensureMorioService = async (service, running, hookParams) => {
     /*
      * Run postStart lifecycle hook
      */
-    runHook('postStart', service, recreate, hookParams)
+    runHook('postStart', service, { ...hookProps, recreate })
   } else {
     store.log.stabug(`Not restarting \`${service}\` container`)
   }
@@ -278,7 +278,7 @@ export const ensureMorioService = async (service, running, hookParams) => {
   /*
    * Last but not least, always run the reload lifecycle hook
    */
-  await runHook('reload', service, recreate, hookParams)
+  await runHook('reload', service, { ...hookProps, recreate })
 }
 
 /**
@@ -286,8 +286,9 @@ export const ensureMorioService = async (service, running, hookParams) => {
  *
  * @param {string} sercice = The name of the service
  * @param {object} running = A list of running containers
+ * @param {object} hookProps - Optional props to pass to the lifecycle hook
  */
-const shouldContainerBeRecreated = async (service, running) => {
+const shouldContainerBeRecreated = async (service, running, hookProps) => {
   /*
    * Never recreate core from within core as the container will be destroyed
    * and then core will exit before it can recreate itself
@@ -316,7 +317,7 @@ const shouldContainerBeRecreated = async (service, running) => {
   /*
    * After from basic check, defer to the recreateContainer lifecycle hook
    */
-  const recreate = await runHook('recreateContainer', service, running)
+  const recreate = await runHook('recreateContainer', service, { ...hookProps, running })
 
   return recreate
 }
@@ -326,25 +327,25 @@ const shouldContainerBeRecreated = async (service, running) => {
  *
  * @param {string} sercice = The name of the service
  * @param {object} running = A list of running containers
- * @return {bool} recreate = Whether or not the container should be recreated
+ * @param {object} hookProps - Optional parameters to pass to the lifecycle hook
  */
-const shouldContainerBeRestarted = async (service, running, recreate) => {
+const shouldContainerBeRestarted = async (service, running, hookProps) => {
   /*
    * Defer to the restartContainer lifecycle hook
    */
-  const restart = await runHook('restartContainer', service, running, recreate)
+  const restart = await runHook('restartContainer', service, { ...hookProps, running })
 
   return restart
 }
 
-export const runHook = async (hook, service, ...params) => {
+export const runHook = async (hook, service, hookProps) => {
   store.log.status(`**${service}**: Running \`${hook}\` lifecycle hook`)
 
   let result = true
   try {
     if (typeof store.services[service].hooks[hook] === 'function') {
       store.log.debug(`Running ${hook} hook on ${service}`)
-      result = await store.services[service].hooks[hook](...params)
+      result = await store.services[service].hooks[hook](hookProps)
     }
   } catch (err) {
     store.log.warn(`Error in the ${hook} hook for service ${service}`)
@@ -414,10 +415,10 @@ export function alwaysWantedHook() {
  * So rather than create that hook for each service, we reuse this method.
  *
  * @param {string} service - Name of the service
- * @param {object} running - Holds info of running containers
+ * @param {object} hookProps.running - Holds info of running containers
  * @retrun {boolean} result - True to recreate the container
  */
-export function defaultRecreateContainerHook(service, running) {
+export function defaultRecreateContainerHook(service, { running }) {
   /*
    * If the container is not currently running, recreate it
    */
@@ -448,11 +449,11 @@ export function defaultRecreateContainerHook(service, running) {
  * So rather than create that hook for each service, we reuse this method.
  *
  * @param {string} service - Name of the service
- * @param {object} running - Holds info of running containers
- * @param {boolean} recreate - Whether the container was just (re)created
+ * @param {object} hookProps.running - Holds info of running containers
+ * @param {boolean} hookProps.recreate - Whether the container was just (re)created
  * @retrun {boolean} result - True to restart the container
  */
-export function defaultRestartContainerHook(service, running, recreate) {
+export function defaultRestartContainerHook(service, { running, recreate }) {
   /*
    * If the container was recreated, or is not running, always start it
    */

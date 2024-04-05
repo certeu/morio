@@ -9,9 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [shared] The cp method now accepts options to pass to the NodeJS fs.cp call
+
 ### Changed
 
 - [core] Use the current Morio version as default version for the .deb client package
+- [core] Pass all props to lifecycle hooks as one object
 - [ui] Renamed PreHeader to BannerMessage as it's a more descriptive name
 
 ### Fixed

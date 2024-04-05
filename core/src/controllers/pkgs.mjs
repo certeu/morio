@@ -60,6 +60,12 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   })
 
   /*
+   * If it did not work, stop here
+   */
+  if (!certAndKey.certificate)
+    return res.status(500).send({ result: 'failed to generate certificate', status: 'aborted' })
+
+  /*
    * Write files for mTLS to disk (cert, chain, and key)
    */
   await writeFile('/morio/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
@@ -92,7 +98,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   /*
    * Start the dbuilder service (but don't wait for it)
    */
-  ensureMorioService('dbuilder', {}, true)
+  ensureMorioService('dbuilder', {}, { onDemandBuild: true })
 
   /*
    * If revision is set, update it on disk

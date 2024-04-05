@@ -226,6 +226,7 @@ export const createX509Certificate = async (data) => {
    */
   let result
   try {
+    store.log.trace('about ot make CA request')
     result = await axios.post(
       'https://ca:9000/1.0/sign',
       {
@@ -236,9 +237,14 @@ export const createX509Certificate = async (data) => {
           : store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       },
       {
-        httpsAgent: new https.Agent({ ca: store.ca.certificate, keepAlive: false }),
+        httpsAgent: new https.Agent({
+          ca: store.ca.certificate,
+          keepAlive: false,
+          //rejectUnauthorized: false,
+        }),
       }
     )
+    store.log.trace('completed CA request')
   } catch (err) {
     store.log.debug(err, 'Failed to get certificate signed by CA')
   }
@@ -246,7 +252,7 @@ export const createX509Certificate = async (data) => {
   /*
    * If it went well, return certificate and the private key
    */
-  return result.data ? { certificate: result.data, key: csr.key } : false
+  return result?.data ? { certificate: result.data, key: csr.key } : false
 }
 
 export const templateSettings = (settings) => {
