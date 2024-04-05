@@ -12,6 +12,7 @@
     "build:ui": "./scripts/build-container.sh ui",
     "build:dbuilder": "./builders/dbuilder/build-container.sh",
     "predev": "npm run reconfigure",
+    "preprod": "npm run reconfigure",
     "dev": "./core/run-dev-container.sh",
     "prod": "./core/run-prod-container.sh",
     "dev:clean": "docker rm -fv core api ui proxy ca broker console",
