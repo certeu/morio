@@ -47,9 +47,10 @@ export const chown = async (
  *
  * @param {string} src - Source file
  * @param {string} dst - Destination file
+ * @param {object} options - Options for the fs.cp call in NodeJS
  *
  */
-export const cp = async (src, dst) => {
+export const cp = async (src, dst, options={} ) => {
   try {
     await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst))
   } catch (err) {
