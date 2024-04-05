@@ -1,34 +1,43 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => ({
-  /**
-   * Container configuration
-   *
-   * @param {object} config - The high-level Morio configuration
-   * @return {object} container - The container configuration
+export const resolveServiceConfiguration = (store) => {
+  /*
+   * Make it easy to test production containers in a dev environment
    */
-  container: {
-    // Name to use for the running container
-    container_name: 'dbuilder',
-    // Image to run (different in dev)
-    image: 'morio/dbuilder',
-    // Image tag (version) to run
-    tag: store.getPreset('MORIO_VERSION'),
-    // Don't attach to the default network
-    networks: { default: null },
-    // Instead, attach to the morio network
-    network: store.getPreset('MORIO_NETWORK'),
-    // Volumes
-    volumes: [
-      `${store.getPreset('MORIO_DATA_ROOT')}/clients/linux:/morio/src`,
-      `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static/clients/deb:/morio/dist`,
-    ],
-    // Don't keep container after it exits
-    ephemeral: true,
-  },
-})
+  const PROD = store.inProduction()
 
+  return {
+    /**
+     * Container configuration
+     *
+     * @param {object} config - The high-level Morio configuration
+     * @return {object} container - The container configuration
+     */
+    container: {
+      // Name to use for the running container
+      container_name: 'dbuilder',
+      // Image to run (different in dev)
+      image: 'morio/dbuilder',
+      // Image tag (version) to run
+      tag: store.getPreset('MORIO_VERSION'),
+      // Don't attach to the default network
+      networks: { default: null },
+      // Instead, attach to the morio network
+      network: store.getPreset('MORIO_NETWORK'),
+      // Volumes
+      volumes: PROD ? [
+        `${store.getPreset('MORIO_DATA_ROOT')}/clients/linux:/morio/src`,
+        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static/clients/deb:/morio/dist`,
+      ] : [
+        `${store.getPreset('MORIO_REPO_ROOT')}/clients/linux:/morio/src`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/tmp_static/clients/deb:/morio/dist`,
+      ],
+      // Don't keep container after it exits
+      ephemeral: true,
+    },
+  }
+}
 
 /*
  * These are the defaults that will be used to build the DEB package.

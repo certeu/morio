@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [core] Include client files in core container so it can pass them to the builder
 - [ui] Fix broken link to downloads page in .deb builder output
 - [ui] Ensure input background respects light/dark color scheme
 
