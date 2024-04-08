@@ -44,7 +44,7 @@ export const service = {
       /*
        * Write control file to generate the .deb package
        */
-      await writeFile('/morio/clients/linux/control', control)
+      await writeFile('/morio/data/clients/linux/control', control)
 
       /*
        * Return resolved settings
