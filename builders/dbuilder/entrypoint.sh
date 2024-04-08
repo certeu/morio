@@ -5,7 +5,6 @@ DIST=/morio/dist
 
 cd /morio
 mkdir -p pkg/DEBIAN
-ls -l $SRC/*
 cp $SRC/control pkg/DEBIAN
 cp -R $SRC/etc pkg/etc
 cp -R $SRC/usr pkg/usr
