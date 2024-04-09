@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [moriod] Add systemd as a dependency in .deb control file
 
 ## [0.1.3] - 2014-04-09
 
