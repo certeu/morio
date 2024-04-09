@@ -203,6 +203,17 @@ const reloadCaConfiguration = async () => {
    * Load CA configuration from disk
    */
   const caConfig = await readJsonFile('/etc/morio/ca/ca.json')
+
+  if (caConfig === false) {
+    /*
+     * No config on disk. CA is not initialized yet.
+     */
+    return true
+  }
+
+  /*
+   * CA config on disk, continue
+   */
   const caDefaults = await readJsonFile('/etc/morio/ca/defaults.json')
 
   /*

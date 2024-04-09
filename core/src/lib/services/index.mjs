@@ -193,7 +193,7 @@ export const startMorio = async () => {
  * @param {object} hookProps = Optional props to pass to the lifecycle hooks
  * @return {bool} ok = Whether or not the service was started
  */
-export const ensureMorioService = async (service, running, hookProps) => {
+export const ensureMorioService = async (service, running, hookProps = {}) => {
   /*
    * Is the service wanted?
    */
