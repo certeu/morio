@@ -2,64 +2,44 @@
 
 # moriod - A cli wrapper around the Morio distribution
 
+SRV="[srv]"
+bold=$(tput bold)
+base=$(tput sgr0)
+
 show_help() {
-    echo "Usage:"
-    echo "  moriod [options]"
-    echo "  moriod [command]"
-    echo ""
-    echo "Available Commands:"
-    echo "  restart     Restart morio core"
-    echo "  start       Start morio core"
-    echo "  status      Show (systemd) status of morio core"
-    echo "  stop        Stop morio core"
-    echo ""
-    echo "Options:"
-    echo "  -h, --help       Display this help message"
-    echo "  -v, --version    Display version information"
-    echo ""
-    echo "Use \"moriod [command] --help\" for more information about a command."
-    exit 0
-}
-
-show_restart_help() {
-    echo "Description:"
-    echo "  Restarts the Morio core service."
-    echo ""
-    echo "Usage:"
-    echo "  moriod restart"
-    exit 0
-}
-
-show_start_help() {
-    echo "Description:"
-    echo "  Starts the Morio core service."
-    echo ""
-    echo "Usage:"
-    echo "  moriod start"
-    exit 0
-}
-
-show_stop_help() {
-    echo "Description:"
-    echo "  Stops the Morio core service."
-    echo ""
-    echo "Usage:"
-    echo "  moriod stop"
-    exit 0
-}
-
-show_status_help() {
-    echo "Description:"
-    echo "  Shows the status of the Morio services."
-    echo ""
-    echo "Usage:"
-    echo "  moriod status"
-    exit 0
+  echo    "Usage:"
+  echo    "  moriod [options]"
+  echo    "  moriod [command]"
+  echo    "  moriod [service] [command]"
+  echo    ""
+  echo    "Options:"
+  echo    "  -h, --help         Display this help message"
+  echo    "  -v, --version      Display version information"
+  echo    ""
+  echo    "Commands:"
+  echo    "  restart            Restart the moriod service"
+  echo    "  start              Start the moriod service"
+  echo    "  status             Show the status of the moriod service"
+  echo    "  stop               Stop the moriod service"
+  echo    ""
+  echo    "Service Commands:"
+  echo -e "  Note: Replace '$SRV' with the name of the service, eg: 'api' or 'broker'"
+  echo    ""
+  echo    "  [api|core|ui] Service Commands:"
+  echo -e "    $SRV info       Show info about the service running inside the container"
+  echo -e "    $SRV reload     Reload the service running inside the container"
+  echo -e "    $SRV status     Show the status of service inside the container"
+  echo    ""
+  echo    "  [api|broker|ca|connector|console|core|dbuilder|ui] Service Commands:"
+  echo -e "    $SRV  inspect   Inspect the service container"
+  echo -e "    $SRV  kill      Terminate the service container (not available on core)"
+  echo -e "    $SRV  logs      Follow the service container logs"
+  exit 0
 }
 
 show_version() {
-    cat /etc/morio/version
-    exit 0
+  cat /etc/morio/version
+  exit 0
 }
 
 change_core_state() {
@@ -69,12 +49,54 @@ change_core_state() {
 
 check_your_privilege() {
   if [ "$EUID" -eq 0 ]; then
-      true
+    true
   else
-      echo "Morio requires elevated privileges."
-      echo "Please use sudo, or run this command as root."
-      exit 1
+    echo "Morio requires elevated privileges."
+    echo "Please use ${bold}sudo moriod $1 $2${base}, or run this command as root."
+    exit 1
   fi
+}
+
+run_pm2_command() {
+  local CONTAINER="$1"
+  local COMMAND="$2"
+  case $CONTAINER in
+    api|core|ui)
+    case $COMMAND in
+      info|reload|status)
+      docker exec -it $CONTAINER $COMMAND
+      exit 0
+      ;;
+    esac
+  esac
+  show_help
+}
+
+run_container_command() {
+  case $1 in
+    api|broker|ca|connector|console|core|dbuilder|ui)
+    case $2 in
+      inspect)
+      docker inspect $1
+      exit 0
+      ;;
+      logs)
+      journalctl CONTAINER_NAME=$1 -o cat
+      exit 0
+      ;;
+      kill)
+      if [ "$1" = "core" ]; then
+        echo "The core container should not be killed. Run ${bold}moriod stop${base} instead."
+        exit 1
+      else
+        docker rm -f $1
+        exit 0
+      fi
+      exit 0
+      ;;
+    esac
+  esac
+  show_help
 }
 
 # Parse command-line options
@@ -86,67 +108,48 @@ while [[ $# -gt 0 ]]; do
     -v|--version)
       show_version
       ;;
-    apt)
-      case $2 in
-        -h|--help)
-        show_apt_help
-        ;;
-        *)
-        check_your_privilege
-        add_elastic_repo
-      esac
-      exit 0
-      ;;
     start)
-      case $2 in
-        -h|--help)
-        show_start_help
-        ;;
-        *)
-        check_your_privilege
-        change_core_state start
-      esac
+      check_your_privilege $@
+      change_core_state start
       exit 0
       ;;
     stop)
-      case $2 in
-        -h|--help)
-        show_stop_help
-        ;;
-        *)
-        check_your_privilege
-        change_core_state stop
-      esac
+      check_your_privilege $@
+      change_core_state stop
       exit 0
       ;;
     restart)
-      case $2 in
-        -h|--help)
-        show_restart_help
-        ;;
-        *)
-        check_your_privilege
-        change_core_state restart
-      esac
+      check_your_privilege $@
+      change_core_state restart
       exit 0
       ;;
     status)
-      case $2 in
-        -h|--help)
-        show_status_help
-        ;;
-        *)
-        check_your_privilege
-        change_core_state status
-      esac
+      check_your_privilege $@
+      change_core_state status
       exit 0
       ;;
+    api|broker|ca|connector|console|core|dbuilder|ui)
+      check_your_privilege $@
+      case $2 in
+        info|reload|status)
+          run_pm2_command $@
+          exit 0
+          ;;
+        inspect|kill|logs)
+          run_container_command $@
+          exit 0
+      esac
+      show_help
+      exit 1
+      ;;
+    *)
+      show_help
+      exit 1
   esac
-  shift
 done
 
 # If no options were provided, show the general help
 if [ $# -eq 0 ]; then
-    show_help
+  show_help
 fi
 

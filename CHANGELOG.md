@@ -11,10 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [moriod] Extended command line options
+- [clients] Extended auditing for Linux client
 - [shared] The cp method now accepts options to pass to the NodeJS fs.cp call
 
 ### Changed
 
+- [core] Fix check for missing config file at first start of the CA service
 - [core] Fix location of dbuilder control file output
 - [core] Use the journald Docker log driver for all morio containers
 - [core] Use the current Morio version as default version for the .deb client package
