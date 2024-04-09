@@ -1,0 +1,20 @@
+#!/bin/bash
+# Post-Install script for moriod
+
+set -e
+
+# Reload systemd if necessary
+systemctl daemon-reload || true
+
+# Check if the package is being configured for the first time
+if [ "" = "configure" ] && [ -n "" ]; then
+  systemctl enable docker
+  systemctl enable moriod
+  systemctl start docker
+  systemctl start moriod
+fi
+
+# Check if the package is being configured for the first time
+if [ "" = "upgrade" ] && [ -n "" ]; then
+  systemctl try-restart moriod || true
+fi

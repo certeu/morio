@@ -80,6 +80,7 @@ EOF
 # Write out version file
 echo $VERSION > $SRC/etc/morio/version
 
+# Build package
 docker run -it \
   --rm \
   -v $SRC:/morio/src \
