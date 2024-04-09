@@ -5,8 +5,13 @@ DIST=/morio/dist
 
 cd /morio
 mkdir -p pkg/DEBIAN
-cp $SRC/control pkg/DEBIAN
-cp -R $SRC/etc pkg/etc
-cp -R $SRC/usr pkg/usr
-cp -R $SRC/var pkg/var
+for FILE in control postinst; do
+  if [ -f $SRC/$FILE ]
+    then
+    cp $SRC/$FILE pkg/DEBIAN/
+  fi
+done
+for DIR in etc usr var; do
+  cp -R $SRC/$DIR pkg/
+done
 dpkg-deb --build pkg $DIST

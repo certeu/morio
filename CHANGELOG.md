@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.1.3] - 2014-04-09
+
 ### Added
 
 - [moriod] Extended command line options
@@ -17,16 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [core] Fix check for missing config file at first start of the CA service
-- [core] Fix location of dbuilder control file output
 - [core] Use the journald Docker log driver for all morio containers
 - [core] Use the current Morio version as default version for the .deb client package
 - [core] Pass all props to lifecycle hooks as one object
 - [core] Reorder Dockerfile layers to improve cache hits
+- [moriod] Add postinstall script to start/enable services
 - [ui] Renamed PreHeader to BannerMessage as it's a more descriptive name
 
 ### Fixed
 
+- [core] Fix check for missing config file at first start of the CA service
+- [core] Fix location of dbuilder control file output
 - [core] Include client files in core container so it can pass them to the builder
 - [ui] Fix broken link to downloads page in .deb builder output
 - [ui] Ensure input background respects light/dark color scheme

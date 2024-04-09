@@ -488,6 +488,9 @@ template_out_config() {
   for file in "/etc/morio/audit/module-templates.d"/*; do
     /usr/sbin/morio-template $file > "/etc/morio/audit/modules.d/$(basename $file)"
   done
+  for file in "/etc/morio/audit/rule-templates.d"/*; do
+    /usr/sbin/morio-template $file > "/etc/morio/audit/rules.d/$(basename $file)"
+  done
   echo "Templating out logs configuration"
   /usr/sbin/morio-template "/etc/morio/logs/config-template.yml" > "/etc/morio/logs/config.yml"
   for file in "/etc/morio/logs/module-templates.d"/*; do

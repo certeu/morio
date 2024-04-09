@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
