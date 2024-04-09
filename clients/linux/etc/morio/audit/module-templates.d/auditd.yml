@@ -1,0 +1,19 @@
+- module: auditd
+{{#MULTICAST_AUDIT}}
+  socket_type: multicast
+{{/MULTICAST_AUDIT}}
+  audit_rules: |
+    -w /etc/morio/audit/config.yml
+    -w /etc/morio/audit/modules.d/system.yml
+    -w /etc/morio/audit/modules.d/auditd.yml
+{{#MITRE_AUDIT}}
+  audut_rule_files:
+    - /etc/morio/audit/rules.d/mitre
+{{#MITRE_AUDIT}}
+  ignore_errors: false
+  processors:
+    - add_fields:
+        target: morio
+        fields:
+          module: auditd
+

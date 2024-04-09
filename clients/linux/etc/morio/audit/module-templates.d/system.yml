@@ -13,6 +13,7 @@
         fields:
           module: linux-system
 
+{{#TRACK_INVENTORY}}
 - module: system
   datasets:
     - host
@@ -27,3 +28,5 @@
         target: morio
         fields:
           module: linux-system
+{{/TRACK_INVENTORY}}
+
