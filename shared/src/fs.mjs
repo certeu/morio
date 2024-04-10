@@ -52,7 +52,7 @@ export const chown = async (
  */
 export const cp = async (src, dst, options={} ) => {
   try {
-    await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst))
+    await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst), options)
   } catch (err) {
     return false
   }
