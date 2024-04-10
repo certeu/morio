@@ -1,0 +1,26 @@
+#!/bin/bash
+# Post-Install script for morio-client
+
+set -e
+
+# Reload systemd if necessary
+systemctl daemon-reload || true
+
+# Check if the package is being configured for the first time
+if [ "" = "configure" ] && [ -n "" ]; then
+  /usr/sbin/morio template
+  systemctl enable morio-audit
+  systemctl enable morio-logs
+  systemctl enable morio-metrics
+  systemctl start morio-audit
+  systemctl start morio-logs
+  systemctl start morio-metrics
+fi
+
+# Check if the package is being configured for the first time
+if [ "" = "upgrade" ] && [ -n "" ]; then
+  /usr/sbin/morio template
+  systemctl try-restart morio-audit || true
+  systemctl try-restart morio-logs || true
+  systemctl try-restart morio-metrics || true
+fi

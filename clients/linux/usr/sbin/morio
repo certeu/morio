@@ -11,7 +11,6 @@ show_help() {
     echo "  morio [command]"
     echo ""
     echo "Available Commands:"
-    echo "  apt         Add the Elastic APT repository to the system (to install beats agents)"
     echo "  audit       Invokes auditbeat agent"
     echo "  cc          Set up morio command completion"
     echo "  flags       Manage template flags for use in the morio beats agents configuration"
@@ -184,15 +183,6 @@ show_flags_rm_help() {
     exit 0
 }
 
-show_apt_help() {
-    echo "Description:"
-    echo "  Configures the Elastic repository as an APT source so Morio dependencies (beats) can be installed."
-    echo ""
-    echo "Usage:"
-    echo "  morio apt"
-    exit 0
-}
-
 show_restart_help() {
     echo "Description:"
     echo "  Restarts the Morio beats agents."
@@ -268,44 +258,6 @@ change_agents_state() {
     /etc/init.d/morio-audit $STATE
     /etc/init.d/morio-logs $STATE
     /etc/init.d/morio-metrics $STATE
-  fi
-}
-
-add_elastic_repo() {
-  #
-  # Keep this idempotent
-  #
-  if file /etc/apt/sources.list.d/elastic-8.x.list >/dev/null ; then
-    echo "Elastic repository already configured"
-    exit 0
-  else
-    #
-    # Figure out what tool we can use to download
-    #
-    if which wget >/dev/null ; then
-      wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-    elif which curl >/dev/null ; then
-        curl --option argument
-    else
-        echo "Cannot download signing key, neither wget nor curl found."
-        exit 1
-    fi
-
-    #
-    # APT repos typically are hosted on HTTP (which is fine coz checksums)
-    # Using an APT repo over HTTPS requires the apt-transport-https package
-    #
-    apt-get install -y apt-transport-https
-
-    #
-    # Now add the APT repo from Elastic
-    #
-    echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-8.x.list
-
-    #
-    # Finally run apt-update
-    #
-    sudo apt update
   fi
 }
 
@@ -524,17 +476,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     -v|--version)
       show_version
-      ;;
-    apt)
-      case $2 in
-        -h|--help)
-        show_apt_help
-        ;;
-        *)
-        check_your_privilege
-        add_elastic_repo
-      esac
-      exit 0
       ;;
     cc)
       case $2 in

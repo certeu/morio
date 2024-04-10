@@ -55,7 +55,7 @@ export const defaults = {
     ['filebeat', '>= 8.12'],
     ['metricbeat', '>= 8.12'],
   ],
-  'Installed-Size': 500000,
+  'Installed-Size': 5000,
   Maintainer: 'CERT-EU <services@cert.europa.eu>',
   'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
   Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],
