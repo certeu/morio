@@ -11,8 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [clients] Added logs config folders for linux client
 - [moriod] Install revision file with package
 - [moriod] Add systemd as a dependency in .deb control file
+
 
 ### Fixed
 

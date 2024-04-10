@@ -1,0 +1,8 @@
+# This module collects all journald data
+- type: journald
+  id: journald_everything
+  processors:
+    - add_fields:
+        target: morio
+        module:
+          name: lin-journald
