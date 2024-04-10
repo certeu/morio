@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [ca] Fixed volume config when in develop mode
 - [shared] Pass options to NodeJS cp call
 - [dbuilder] Fixed volume config when in develop mode
 - [broker] Fixed volume config when in develop mode
