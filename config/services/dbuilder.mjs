@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = (store) => {
         `${store.getPreset('MORIO_DATA_ROOT')}/clients/linux:/morio/src`,
         `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static/clients/deb:/morio/dist`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/clients/linux:/morio/src`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/clients/linux:/morio/src`,
         `${store.getPreset('MORIO_REPO_ROOT')}/data/data/tmp_static/clients/deb:/morio/dist`,
       ],
       // Don't keep container after it exits

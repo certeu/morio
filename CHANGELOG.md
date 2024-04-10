@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [moriod] Install revision file with package
 - [moriod] Add systemd as a dependency in .deb control file
 
+### Fixed
+
+- [dbuilder] Fixed volume config when in develop mode
+- [broker] Fixed volume config when in develop mode
+
 ### Removed
 
 - [client] Remove option to add Elastic repo as it's a requirement for installation
