@@ -9,7 +9,6 @@ data/
 
 # Auto-generated client files
 clients/linux/control
-clients/linux/etc/morio/vars/*
 clients/linux/etc/morio/audit/config-template.yml
 clients/linux/etc/morio/metrics/config-template.yml
 clients/linux/etc/morio/logs/config-template.yml
