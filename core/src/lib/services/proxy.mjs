@@ -42,7 +42,7 @@ export const service = {
       /*
        * See if entrypoint.sh on the host OS is our custom version
        */
-      let file = '/etc/morio/proxy/entrypoint.sh'
+      let file = '/morio/data/proxy/entrypoint.sh'
       const entrypoint = await readFile(file)
       if (entrypoint && entrypoint.includes('update-ca-certificates')) {
         store.log.debug('Proxy: Custom entrypoint exists, no action needed')

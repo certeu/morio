@@ -2,7 +2,7 @@
 
 # Set up folder
 SRC=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd ../moriod && pwd )
-DIST=$( cd $SRC && cd ../data/data/tmp_static && pwd )
+DIST=/var/nfs/morio/imgs
 
 # Grab the Morio version from package.json
 VERSION=`sed 's/\"version\"/\"VERSION\"/' $SRC/../package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`

@@ -3,18 +3,14 @@
 
 set -e
 
-# Reload systemd if necessary
+# Reload systemd
 systemctl daemon-reload || true
 
-# Check if the package is being configured for the first time
-if [ "" = "configure" ] && [ -n "" ]; then
-  systemctl enable docker
-  systemctl enable moriod
-  systemctl start docker
-  systemctl start moriod
-fi
+# Enable services
+systemctl enable docker || true
+systemctl enable moriod || true
 
-# Check if the package is being configured for the first time
-if [ "" = "upgrade" ] && [ -n "" ]; then
-  systemctl try-restart moriod || true
-fi
+# Start services
+systemctl start docker || true
+systemctl start moriod || true
+

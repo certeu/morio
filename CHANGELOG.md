@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Changed prefix to -/api from ops/api
 - [broker] Check CA status rather than wait an arbitrary time for it to come up
 - [core] Moved config and data into moriod subfolder on host OS
+- [moriod] Updates to folder locations
+- [proxy] Include custom entrypoint.sh in moriod package
 
 ### Fixed
 

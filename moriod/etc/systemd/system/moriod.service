@@ -18,11 +18,11 @@ Requires=docker.service
 # Location of the Docker socket
 Environment=MORIO_DOCKER_SOCKET=/var/run/docker.sock
 # Location of the Morio configuration folder
-Environment=MORIO_CONFIG_ROOT=/etc/morio
+Environment=MORIO_CONFIG_ROOT=/etc/morio/moriod
 # Location of the Morio data folder
-Environment=MORIO_DATA_ROOT=/var/lib/morio
+Environment=MORIO_DATA_ROOT=/var/lib/morio/moriod
 # Location of the Morio logs folder
-Environment=MORIO_LOGS_ROOT=/var/log/morio
+Environment=MORIO_LOGS_ROOT=/var/log/morio/moriod
 # Log level for Morio core
 Environment=MORIO_CORE_LOG_LEVEL=warn
 # Node environment
@@ -30,11 +30,11 @@ Environment=NODE_ENV=production
 
 # Load environment file to potentially override these vars
 # This is optional
-EnvironmentFile=-/etc/morio/moriod.env
+EnvironmentFile=-/etc/morio/moriod/moriod.env
 
 # Load version from the version environment file
 # This is NOT optional
-EnvironmentFile=/etc/morio/version.env
+EnvironmentFile=/etc/morio/moriod/version.env
 
 # Make sure to stop & remove the core container if it's running
 ExecStartPre=/usr/bin/docker rm -f core
