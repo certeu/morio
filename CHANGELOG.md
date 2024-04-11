@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - [client] Remove option to add Elastic repo as it's a requirement for installation
+- [shared] Removed getRevision and verion epoch
 
 
 

@@ -24,9 +24,6 @@ export const presets = {
   // Location of the Morio logs folder
   MORIO_LOGS_ROOT: "/var/log/morio/moriod",
 
-  // The epoch data of the current version
-  MORIO_VERSION_EPOCH: '20240201',
-
   // Network name. Change at your own peril.
   MORIO_NETWORK: 'morionet',
 
