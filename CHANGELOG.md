@@ -21,21 +21,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [ca] Fixed volume config when in develop mode
-- [shared] Pass options to NodeJS cp call
-- [dbuilder] Fixed volume config when in develop mode
 - [broker] Fixed volume config when in develop mode
+- [ca] Fixed volume config when in develop mode
+- [core] Keep auto-generated files out of config image
+- [dbuilder] Fixed volume config when in develop mode
+- [shared] Pass options to NodeJS cp call
 
 ### Removed
 
 - [client] Remove option to add Elastic repo as it's a requirement for installation
 
+
+
 ## [0.1.3] - 2014-04-09
 
 ### Added
 
-- [moriod] Extended command line options
 - [clients] Extended auditing for Linux client
+- [moriod] Extended command line options
 - [shared] The cp method now accepts options to pass to the NodeJS fs.cp call
 
 ### Changed

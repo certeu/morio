@@ -44,6 +44,14 @@ COPY --from=builder /morio/core/node_modules/cpu-features ./node_modules/cpu-fea
 
 # Copy client code so we can build client packages from it
 COPY --from=builder /morio/core/clients ./clients
+# But remove the auto-generated files
+RUN \
+  rm -f /morio/core/clients/linux/etc/morio/audit/config-template.yml && \
+  rm -f /morio/core/clients/linux/etc/morio/audit/config.yml && \
+  rm -f /morio/core/clients/linux/etc/morio/logs/config-template.yml && \
+  rm -f /morio/core/clients/linux/etc/morio/logs/config.yml && \
+  rm -f /morio/core/clients/linux/etc/morio/metrics/config-template.yml && \
+  rm -f /morio/core/clients/linux/etc/morio/metrics/config.yml
 
 ## Install the pm2 process manager for NodeJS
 RUN npm install pm2 -g
