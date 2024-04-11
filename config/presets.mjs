@@ -35,7 +35,7 @@ export const presets = {
   MORIO_API_JWT_EXPIRY: '12h',
 
   // API prefix (since the API is behind Traefik)
-  MORIO_API_PREFIX: '/ops/api',
+  MORIO_API_PREFIX: '/-/api',
 
   // API log level
   MORIO_API_LOG_LEVEL: 'trace',

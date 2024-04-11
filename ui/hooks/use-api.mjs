@@ -2,7 +2,7 @@
  * This is hardcoded for now
  */
 export const morioConfig = {
-  api: '/ops/api',
+  api: '/-/api',
 }
 
 /**
