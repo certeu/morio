@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changes
 
 - [broker] Check CA status rather than wait an arbitrary time for it to come up
+- [core] Moved config and data into moriod subfolder on host OS
 
 ### Fixed
 

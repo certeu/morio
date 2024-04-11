@@ -16,13 +16,13 @@ export const presets = {
   MORIO_DOCKER_SOCKET: '/var/run/docker.sock',
 
   // Location of the Morio configuration folder
-  MORIO_CONFIG_ROOT: "/etc/morio",
+  MORIO_CONFIG_ROOT: "/etc/morio/moriod",
 
   // Location of the Morio data folder
-  MORIO_DATA_ROOT: "/var/lib/morio",
+  MORIO_DATA_ROOT: "/var/lib/morio/moriod",
 
   // Location of the Morio logs folder
-  MORIO_LOGS_ROOT: "/var/log/morio",
+  MORIO_LOGS_ROOT: "/var/log/morio/moriod",
 
   // The epoch data of the current version
   MORIO_VERSION_EPOCH: '20240201',
