@@ -38,7 +38,7 @@ export const resolveServiceConfiguration = (store) => {
         `${store.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
         `${store.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
         `${store.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/proxy/entrypoint.sh:/entrypoint.sh`,
+        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
         `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
       ],
       // Command
