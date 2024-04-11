@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [ui] Fix hardcoded API prefix
 - [broker] Fixed volume config when in develop mode
 - [ca] Fixed volume config when in develop mode
 - [core] Keep auto-generated files out of config image

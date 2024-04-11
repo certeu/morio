@@ -1,8 +1,10 @@
+import { getPreset } from 'config/index.mjs'
+
 /*
  * This is hardcoded for now
  */
 export const morioConfig = {
-  api: '/-/api',
+  api: getPreset('MORIO_API_PREFIX'),
 }
 
 /**
