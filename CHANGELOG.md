@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [moriod] Install revision file with package
 - [moriod] Add systemd as a dependency in .deb control file
 
+### Changes
+
+- [broker] Check CA status rather than wait an arbitrary time for it to come up
 
 ### Fixed
 

@@ -1,6 +1,7 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
-import { attempt, sleep } from '#shared/utils'
+import { attempt } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
+import { isCaUp } from './ca.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
 // Default hooks
@@ -74,13 +75,20 @@ export const service = {
       /*
        * Broker is not initialized, we need to get a certitificate,
        * but 9 times out of 10, this means the CA has just been started
-       * by core. So let's give it 6.66 seconds to come up
+       * by core. So let's give it time to come up
        */
-      store.log.debug(
-        'Sleeping 6.66 seconds before requesting broker certificate from CA (so it can come up)'
-      )
-      await sleep(6.66)
-      store.log.debug('Woke up after 6.66 seconds, requesting broker certificate')
+      const up = await attempt({
+        every: 2,
+        timeout: 60,
+        run: async () => await isCaUp(),
+        onFailedAttempt: (s) =>
+          store.log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
+      })
+      if (up) store.log.debug('CA is up, requesting broker certificate')
+      else {
+        store.log.err('CA did not come up before timeout. Bailing out')
+        return false
+      }
 
       /*
        * Generate X.509 certificate/key for the broker(s)
