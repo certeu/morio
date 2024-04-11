@@ -1,4 +1,3 @@
-import path from 'path' // This requires NodeJS, it won't work in the browser
 import { pkg } from './json-loader.mjs'
 
 export const presets = {

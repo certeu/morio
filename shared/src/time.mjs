@@ -1,5 +1,3 @@
-import { getPreset } from '#config'
-
 /*
  * Returns seconds since a given timestamp
  *
