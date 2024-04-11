@@ -37,7 +37,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    preCreate: async () => {
+    preCreate: () => {
       /*
        * Add labels for Traefik TLS configuration
        */
