@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [moriod] Create version.env file on reconfigure inside repo
 - [ui] Fix hardcoded API prefix
 - [broker] Fixed volume config when in develop mode
 - [ca] Fixed volume config when in develop mode
