@@ -4,7 +4,7 @@ import { isError, formatBytes, formatContainerName } from 'lib/utils.mjs'
 import { ModalContext } from 'context/modal.mjs'
 // Hooks
 import { useState, useEffect, useContext } from 'react'
-import { useApi } from 'hooks/use-api.mjs'
+import { useApi, morioConfig } from 'hooks/use-api.mjs'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -57,7 +57,7 @@ const DockerWrapper = ({
    */
   useEffect(() => {
     const run = async () => {
-      const result = await api.call(`/ops/api/${endpoint}`)
+      const result = await api.call(`${morioConfig.api}/${endpoint}`)
       if (isError(result[0])) setData(result[0])
       else {
         if (result[1] === 200) setData(filter ? filter(result[0]) : result[0])
