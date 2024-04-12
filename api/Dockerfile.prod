@@ -8,7 +8,7 @@ WORKDIR /morio/api
 COPY . .
 
 ## Install dependencies
-RUN npm i
+RUN npm ci
 
 ## Build backend into a self-contained application
 RUN npm run build

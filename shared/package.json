@@ -1,6 +1,6 @@
 {
   "name": "@morio/shared",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
   "scripts": {
@@ -32,8 +32,8 @@
     "./utils": "./src/utils.mjs"
   },
   "dependencies": {
-    "bson": "^6.2.0",
-    "glob": "^10.3.10",
+    "bson": "^6.6.0",
+    "glob": "^10.3.12",
     "jsonwebtoken": "^9.0.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",
