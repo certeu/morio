@@ -8,7 +8,7 @@ WORKDIR /morio/ui
 COPY . .
 
 ## Install dependencies
-RUN npm ci
+RUN npm i
 
 ## We need to re-create this symlink or node resolution will break
 RUN cd /morio/ui/node_modules/.bin && rm next && ln -s ../next/dist/bin/next && cd -

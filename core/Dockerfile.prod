@@ -14,7 +14,7 @@ COPY package.json package.json
 RUN npm install ssh2 cpu-features
 
 ## Install dependencies
-RUN npm ci
+RUN npm i
 
 ## Copy in source and config
 COPY . .
