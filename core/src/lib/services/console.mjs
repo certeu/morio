@@ -24,7 +24,8 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('console', hookProps),
+    recreateContainer: (hookProps) =>
+      defaultRecreateContainerHook('console', { ...hookProps, traefikTLS: true }),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container

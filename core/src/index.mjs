@@ -43,7 +43,7 @@ app.get('/*', async (req, res) =>
 /*
  * (re)Configure core
  */
-await reconfigure()
+await reconfigure({ coldStart: true })
 
 /*
  * Start listening for requests
@@ -58,13 +58,15 @@ wrapExpress(
 /*
  * This method allows core to dynamically reload its
  * own configuration
+ *
+ * @param {object} hookProps = Optional data to pass to lifecycle hooks
  */
-export async function reconfigure() {
+export async function reconfigure(hookProps = {}) {
   log.status('(Re)Configuring Morio Core')
   /*
    * This will (re)start all services if that is needed
    */
-  await startMorio()
+  await startMorio(hookProps)
 
   /*
    * Tell the API to refresh the config

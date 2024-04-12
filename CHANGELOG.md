@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Changed prefix to -/api from ops/api
 - [broker] Check CA status rather than wait an arbitrary time for it to come up
+- [core] Add hookProps to reconfigure for informed choices
 - [core] Moved config and data into moriod subfolder on host OS
 - [moriod] Updates to folder locations
 - [proxy] Include custom entrypoint.sh in moriod package
@@ -29,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Fix hardcoded API prefix
 - [broker] Fixed volume config when in develop mode
 - [ca] Fixed volume config when in develop mode
+- [core] Always recreate containers who need TLS on initial deploy
 - [core] Keep auto-generated files out of config image
 - [dbuilder] Fixed volume config when in develop mode
 - [shared] Pass options to NodeJS cp call

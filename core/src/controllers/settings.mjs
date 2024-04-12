@@ -116,7 +116,7 @@ Controller.prototype.deploy = async (req, res) => {
    * Don't await deployment, just return
    */
   store.log.info(`Reconfiguring Morio`)
-  reconfigure()
+  reconfigure({ hotReload: true })
 
   return res.send({ result: 'success', settings: store.saveSettings })
 }
@@ -242,7 +242,7 @@ Controller.prototype.setup = async (req, res) => {
    * Don't await deployment, just return
    */
   store.log.info(`Bring Morio out of ephemeral mode`)
-  reconfigure()
+  reconfigure({ initialSetup: true })
 
   return res.send(data)
 }

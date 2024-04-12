@@ -142,12 +142,13 @@ export const logStartedConfig = () => {
  * Ensures morio services are running
  *
  * @param {array} services = A list of services that should be running
+ * @param {object} hookProps - Optional data to pass to lifecyle hooks
  */
-export const startMorio = async () => {
+export const startMorio = async (hookProps = {}) => {
   /*
    * Run beforeAll lifecycle hook on the core service
    */
-  await runHook('beforeAll', 'core')
+  await runHook('beforeAll', 'core', hookProps)
 
   /*
    * Log info about the config we'll start
@@ -180,7 +181,8 @@ export const startMorio = async () => {
    * Create services (in parallel)
    */
   const promises = []
-  for (const service of store.serviceOrder) promises.push(ensureMorioService(service, running))
+  for (const service of store.serviceOrder)
+    promises.push(ensureMorioService(service, running, hookProps))
 
   return await Promise.all(promises)
 }
@@ -418,7 +420,7 @@ export function alwaysWantedHook() {
  * @param {object} hookProps.running - Holds info of running containers
  * @retrun {boolean} result - True to recreate the container
  */
-export function defaultRecreateContainerHook(service, { running }) {
+export function defaultRecreateContainerHook(service, { running }, hookProps) {
   /*
    * If the container is not currently running, recreate it
    */
@@ -435,7 +437,29 @@ export function defaultRecreateContainerHook(service, { running }) {
     return true
 
   /*
-   * If not, leave it as is
+   * Ensure Traefik TLS configuration
+   */
+  if (hookProps.traefikTLS) {
+    /*
+     * When we come out of ephemeral mode, there are no TLS labels
+     * on the container, which will cause Traefik to use its default cert.
+     * So if it is the initialSetup, we always recreate the container.
+     */
+    if (hookProps.initialSetup) return true
+
+    /*
+     * If, for whatever reason, the TLS labels are missing anyway, also recreate.
+     */
+    if (
+      !(store.config?.services?.[service]?.container?.labels || []).includes(
+        'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'
+      )
+    )
+      return true
+  }
+
+  /*
+   * If we make it this far, do not recreate the container
    */
   return false
 }

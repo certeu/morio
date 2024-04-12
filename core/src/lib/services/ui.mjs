@@ -20,10 +20,9 @@ export const service = {
     wanted: alwaysWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
-     * We just reuse the default hook here, checking for changes in
-     * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('ui', hookProps),
+    recreateContainer: (hookProps) =>
+      defaultRecreateContainerHook('ui', { ...hookProps, traefikTLS: true }),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
