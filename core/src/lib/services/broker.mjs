@@ -1,5 +1,5 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
-import { attempt } from '#shared/utils'
+import { attempt, sleep } from '#shared/utils'
 import { createX509Certificate } from './core.mjs'
 import { isCaUp } from './ca.mjs'
 import { execContainerCommand } from '#lib/docker'
@@ -84,15 +84,26 @@ export const service = {
         onFailedAttempt: (s) =>
           store.log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
       })
-      if (up) store.log.debug('CA is up, requesting broker certificate')
+      if (up)
+        store.log.debug(
+          'CA is up, still waiting a few seconds before requesting broker certificate'
+        )
       else {
         store.log.err('CA did not come up before timeout. Bailing out')
         return false
       }
 
       /*
+       * Even though the CA is up, requesting a certificate ASAP risk the error:
+       * token issued before the bootstrap of certificate authority
+       * So instead, we sleep for 2 seconds to sidestep this timing issue.
+       */
+      await sleep(2)
+
+      /*
        * Generate X.509 certificate/key for the broker(s)
        */
+      store.log.debug('Requesting broker certificate from CA')
       const certAndKey = await createX509Certificate({
         certificate: {
           cn: 'Morio Broker',

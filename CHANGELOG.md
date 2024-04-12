@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Fix hardcoded API prefix
 - [broker] Fixed volume config when in develop mode
 - [ca] Fixed volume config when in develop mode
+- [core] Wait just a smidge before requesting CA certificate to avoid JWT timestamps that predate the CA epoch
 - [core] Always recreate containers who need TLS on initial deploy
 - [core] Keep auto-generated files out of config image
 - [dbuilder] Fixed volume config when in develop mode
