@@ -68,9 +68,9 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   /*
    * Write files for mTLS to disk (cert, chain, and key)
    */
-  await writeFile('/morio/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
-  await writeFile('/morio/clients/linux/etc/morio/ca.pem', certAndKey.certificate.certChain)
-  await writeFile('/morio/clients/linux/etc/morio/key.pem', certAndKey.key)
+  await writeFile('/morio/data/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
+  await writeFile('/morio/data/clients/linux/etc/morio/ca.pem', certAndKey.certificate.certChain)
+  await writeFile('/morio/data/clients/linux/etc/morio/key.pem', certAndKey.key)
 
   /*
    * Write client template vars to disk
@@ -81,7 +81,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
     TRACK_INVENTORY: 'true',
   }
   for (const [key, val] of Object.entries(vars)) {
-    await writeFile(`/morio/clients/linux/etc/morio/vars/${key}`, val)
+    await writeFile(`/morio/data/clients/linux/etc/morio/vars/${key}`, val)
   }
 
   /*
@@ -89,7 +89,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
    */
   for (const type of ['audit', 'logs', 'metrics']) {
     await writeYamlFile(
-      `/morio/clients/linux/etc/morio/${type}/config-template.yml`,
+      `/morio/data/clients/linux/etc/morio/${type}/config-template.yml`,
       resolveClientConfiguration(type, store),
       store.log
     )

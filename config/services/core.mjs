@@ -31,7 +31,6 @@ export const resolveServiceConfiguration = (store) => {
         `${store.getPreset('MORIO_CONFIG_ROOT')}:/etc/morio`,
         `${store.getPreset('MORIO_DATA_ROOT')}:/morio/data`,
         `${store.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/clients:/morio/clients`,
       ] : [
         `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
         `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,

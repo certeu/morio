@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [core] Fix location of client source files inside container
+
 
 
 ## [0.1.4] - 2014-04-12
