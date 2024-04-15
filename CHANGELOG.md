@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [core] Conditionally check hookprops rather than assume they are set
 - [core] Fix location of client source files inside container
 
 

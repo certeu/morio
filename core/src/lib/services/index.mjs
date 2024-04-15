@@ -439,7 +439,7 @@ export function defaultRecreateContainerHook(service, { running }, hookProps) {
   /*
    * Ensure Traefik TLS configuration
    */
-  if (hookProps.traefikTLS) {
+  if (hookProps?.traefikTLS) {
     /*
      * When we come out of ephemeral mode, there are no TLS labels
      * on the container, which will cause Traefik to use its default cert.
