@@ -8,7 +8,13 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { CertificateIcon, PlusIcon, TrashIcon, WarningIcon } from 'components/icons.mjs'
+import {
+  CertificateIcon,
+  PlusIcon,
+  PlusCircleIcon,
+  TrashIcon,
+  WarningIcon,
+} from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -275,38 +281,8 @@ const CreateCertificate = () => {
 const X509Page = (props) => {
   return (
     <PageWrapper {...props}>
-      <ContentWrapper {...props} Icon={CertificateIcon} title={props.title}>
+      <ContentWrapper {...props} Icon={PlusCircleIcon} title={props.title}>
         <div className="max-w-4xl">
-          <h2>Download X.509 certificates</h2>
-          <ul className="list list-disc list-inside ml-4 mb-8">
-            <li>
-              <b className="text-lg">Morio CA Root Certificate</b>
-              <ul className="pl-6 mb-4">
-                <li>Root certificate of the Morio internal CA.</li>
-                <li>
-                  <a href="/downloads/certs/ca.pem">/downloads/certs/root.pem</a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b className="text-lg">Morio CA Intermediate Certificate</b>
-              <ul className="pl-6 mb-4">
-                <li>Intermediate certificate of the Morio internal CA.</li>
-                <li>
-                  <a href="/downloads/certs/intermediate.pem">/downloads/certs/intermediate.pem</a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <b className="text-lg">Morio Broker Certificate</b>
-              <ul className="pl-6 mb-4">
-                <li>Certificate of the Morio Kafka API</li>
-                <li>
-                  <a href="/downloads/certs/broker.pem">/downloads/certs/broker.pem</a>
-                </li>
-              </ul>
-            </li>
-          </ul>
           <CreateCertificate />
         </div>
       </ContentWrapper>
@@ -318,7 +294,7 @@ export default X509Page
 
 export const getStaticProps = () => ({
   props: {
-    title: 'X.509 Certificates',
-    page: ['tools', 'certificates'],
+    title: 'Create a Certificate',
+    page: ['tools', 'certificates', 'create'],
   },
 })

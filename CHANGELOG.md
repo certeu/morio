@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Download folder was changed from `tmp_static` to `downloads` and is configurable via preset now
+- [ui] Split create/download certificates into different pages
 
 ### Fixed
 

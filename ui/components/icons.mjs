@@ -394,6 +394,15 @@ export const PlayIcon = (props) => (
 )
 
 /*
+ * PlusCircleIcon - Looks like a + in a circle
+ */
+export const PlusCircleIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+  </IconWrapper>
+)
+
+/*
  * PlusIcon - Looks like a big +
  */
 export const PlusIcon = (props) => (

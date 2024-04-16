@@ -18,6 +18,7 @@ import {
   MorioIcon,
   OpenLockIcon,
   PackageIcon,
+  PlusCircleIcon,
   QuestionIcon,
   RightIcon,
   ServersIcon,
@@ -47,6 +48,7 @@ const icons = {
   broker: RedPanda,
   ca: CertificateIcon,
   certificates: CertificateIcon,
+  create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
   containers: ContainerIcon,
@@ -54,6 +56,7 @@ const icons = {
   dashboard: Traefik,
   decrypt: OpenLockIcon,
   docker: Docker,
+  download: DownloadIcon,
   downloads: DownloadIcon,
   encrypt: ClosedLockIcon,
   faq: QuestionIcon,
@@ -131,6 +134,8 @@ export const links = {
     },
     certificates: {
       t: 'X.509 Certificates',
+      create: { t: 'Create a Certificate' },
+      download: { t: 'Download Certificates' },
     },
   },
 }
