@@ -1,6 +1,6 @@
 {
   "name": "@morio/api",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Morio Operator API (API)",
   "private": true,
   "scripts": {
