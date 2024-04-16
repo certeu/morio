@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [api] Do not check for `MORIO_REPO_ROOT` in production
 - [core] Configure TLS chain on Kafka API port, rather than only the leaf certificate
 - [core] Fix incorrect passing of hookProps to lifecycle hook
 - [core] Conditionally check hookprops rather than assume they are set
