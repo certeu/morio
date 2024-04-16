@@ -6,6 +6,11 @@ export const resolveServiceConfiguration = (store) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = store.inProduction()
+  const DIRS = {
+    data: store.getPreset('MORIO_DATA_ROOT'),
+    dl: store.getPreset('MORIO_DOWNLOADS_FOLDER'),
+    repo: store.getPreset('MORIO_REPO_ROOT'),
+  }
 
   return {
     /**
@@ -27,11 +32,11 @@ export const resolveServiceConfiguration = (store) => {
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_DATA_ROOT')}/clients/linux:/morio/src`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static/clients/deb:/morio/dist`,
+        `${DIRS.data}/clients/linux:/morio/src`,
+        `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/dist`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/clients/linux:/morio/src`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/tmp_static/clients/deb:/morio/dist`,
+        `${DIRS.repo}/data/data/clients/linux:/morio/src`,
+        `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/dist`,
       ],
       // Don't keep container after it exits
       ephemeral: true,

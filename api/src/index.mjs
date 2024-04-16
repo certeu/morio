@@ -82,9 +82,17 @@ app.get(`${store.prefix}/*`, async (req, res) =>
  */
 
 /*
- * Add tmp_static folder for serving static files
+ * Add downloads folder for serving static files
  */
-app.use(`${store.prefix}/downloads`, express.static('/morio/tmp_static'))
+app.use(
+  `${store.prefix}/downloads`,
+  express.static(`/morio/${getPreset('MORIO_DOWNLOADS_FOLDER')}`)
+)
+
+/*
+ * Add repos folder for serving repositories
+ */
+app.use(`${store.prefix}/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
 
 /*
  * (re)Configure the API

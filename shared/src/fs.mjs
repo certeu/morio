@@ -86,7 +86,7 @@ export const rm = async (file, options={ force: true }) => {
  * @return {string} File contents, or false in case of trouble
  */
 export const globDir = async (
-  folderPath='/morio/tmp_static', // The (relative) path to the folder
+  folderPath='/morio/downloads', // The (relative) path to the folder
   pattern='**/*', // Glob pattern to match
 ) => {
   let list = []

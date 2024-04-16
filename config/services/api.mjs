@@ -6,6 +6,12 @@ export const resolveServiceConfiguration = (store) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = store.inProduction()
+  const DIRS = {
+    conf: store.getPreset('MORIO_CONFIG_ROOT'),
+    data: store.getPreset('MORIO_DATA_ROOT'),
+    dl: store.getPreset('MORIO_DOWNLOADS_FOLDER'),
+    repo: store.getPreset('MORIO_REPO_ROOT'),
+  }
 
   return {
     /**
@@ -27,12 +33,12 @@ export const resolveServiceConfiguration = (store) => {
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static:/morio/tmp_static`,
+        `${DIRS.conf}/shared:/etc/morio/shared`,
+        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
       ] : [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/tmp_static:/morio/tmp_static`,
-        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+        `${DIRS.conf}/shared:/etc/morio/shared`,
+        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
+        `${DIRS.repo}:/morio`,
       ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,

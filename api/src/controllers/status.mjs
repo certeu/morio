@@ -45,17 +45,17 @@ Controller.prototype.statusLogs = async (req, res) => {
 /**
  * List downloads
  *
- * This returns a list of files in the downloads (tmp_static) folder
+ * This returns a list of files in the downloads folder
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.listDownloads = async (req, res) => {
-  const list = await globDir('/morio/tmp_static')
+  const list = await globDir('/morio/downloads')
 
   if (list)
     return res.send(
-      list.map((file) => file.replace('/morio/tmp_static', store.prefix + '/downloads'))
+      list.map((file) => file.replace('/morio/downloads', store.prefix + '/downloads'))
     )
   else return res.status(500).send({ errors: ['Failed to read file list'] })
 }

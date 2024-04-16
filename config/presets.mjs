@@ -23,6 +23,12 @@ export const presets = {
   // Location of the Morio logs folder
   MORIO_LOGS_ROOT: "/var/log/morio/moriod",
 
+  // Name of the Morio public downloads folder
+  MORIO_DOWNLOADS_FOLDER: "downloads",
+
+  // Name of the Morio public repositories folder
+  MORIO_REPOS_FOLDER: "repos",
+
   // Network name. Change at your own peril.
   MORIO_NETWORK: 'morionet',
 

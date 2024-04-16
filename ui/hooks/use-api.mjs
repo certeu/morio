@@ -126,7 +126,7 @@ MorioClient.prototype.getClientPackageDefaults = async function (type) {
 }
 
 /**
- * List files in the dowbloads folder (tmp_static)
+ * List files in the dowbloads folder
  *
  * @return {array} - The list of files
  */

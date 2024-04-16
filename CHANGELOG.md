@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [config] Added MORIO_DOWNLOADS_FOLDER preset defaulting to downloads
+
+### Changed
+
+- Download folder was changed from `tmp_static` to `downloads` and is configurable via preset now
+
 ### Fixed
 
 - [core] Conditionally check hookprops rather than assume they are set
@@ -23,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [moriod] Install revision file with package
 - [moriod] Add systemd as a dependency in .deb control file
 
-### Changes
+### Changed
 
 - [api] Changed prefix to -/api from ops/api
 - [broker] Check CA status rather than wait an arbitrary time for it to come up
