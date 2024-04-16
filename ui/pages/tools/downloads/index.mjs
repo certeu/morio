@@ -1,6 +1,6 @@
 // Hooks
 import { useState, useEffect } from 'react'
-import { useApi, morioConfig } from 'hooks/use-api.mjs'
+import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
@@ -22,7 +22,7 @@ const DownloadsPage = (props) => {
   useEffect(() => {
     const loadFiles = async () => {
       const types = ['deb', 'rpm', 'msi', 'pkg']
-      const match = morioConfig.api + '/downloads/clients/'
+      const match = '/downloads/clients/'
       const files = await api.listDownloads()
       const obj = {}
       if (files[1] === 200) {

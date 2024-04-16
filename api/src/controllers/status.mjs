@@ -53,9 +53,6 @@ Controller.prototype.statusLogs = async (req, res) => {
 Controller.prototype.listDownloads = async (req, res) => {
   const list = await globDir('/morio/downloads')
 
-  if (list)
-    return res.send(
-      list.map((file) => file.replace('/morio/downloads', store.prefix + '/downloads'))
-    )
+  if (list) return res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))
   else return res.status(500).send({ errors: ['Failed to read file list'] })
 }
