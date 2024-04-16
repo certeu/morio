@@ -10,8 +10,7 @@
   processors:
     - add_fields:
         target: morio
-        fields:
-          module: linux-system
+        fields.module: lin-system
 
 {{#TRACK_INVENTORY}}
 - module: system
@@ -26,7 +25,6 @@
   processors:
     - add_fields:
         target: morio
-        fields:
-          module: linux-system
+        fields.module: lin-system
 {{/TRACK_INVENTORY}}
 

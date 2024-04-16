@@ -4,5 +4,4 @@
   processors:
     - add_fields:
         target: morio
-        module:
-          name: lin-journald
+        fields.module: lin-journald

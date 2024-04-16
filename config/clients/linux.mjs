@@ -55,6 +55,10 @@ const beatConfig = (type, store) => {
     config: {
       modules: {
         /*
+         * Modules are enabled by default, but let's be explicit
+         */
+        enabled: true,
+        /*
          * Where to find the modules
          */
         path: `/etc/morio/${type}/modules.d/*.yml`,
@@ -74,6 +78,10 @@ const beatConfig = (type, store) => {
    * Filebeat not only has modules, but also inputs
    */
   if (type === 'logs') config[beats[type]].config.inputs = {
+    /*
+     * Inputs are disabled by default
+     */
+    enabled: true,
     /*
      * Where to find the inputs
      */

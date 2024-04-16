@@ -11,8 +11,7 @@
   processors:
     - add_fields:
         target: morio
-        fields:
-          module: linux-system
+        fields.module: lin-system
 
 - module: system
   period: 10m
@@ -23,9 +22,7 @@
         system.filesystem.mount_point: '^/(snap|sys|cgroup|proc|dev|etc|host|lib)($|/)'
     - add_fields:
         target: morio
-        fields:
-          module:
-            name: linux-system
+        fields.module: lin-system
 
 {{#TRACK_INVENTORY}}
 # Once per day, submit a list of metrics that detail memory/cores
@@ -50,8 +47,7 @@
         cache.ttl: 60m
     - add_fields:
         target: morio
-        fields:
-          module: linux-system
+        fields.module: lin-system
           inventory:
             update: true
 {{/TRACK_INVENTORY}}

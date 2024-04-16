@@ -7,5 +7,4 @@
   processors:
     - add_fields:
         target: morio
-        fields:
-          module: lin-morio
+        fields.module: lin-morio

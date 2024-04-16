@@ -21,12 +21,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Download folder was changed from `tmp_static` to `downloads` and is configurable via preset now
 - [api] Do not include API prefix when enumerating downloads
+- [clients] Changes to client config
 - [ui] Do not include API prefix when client package downloads
 - [ui] Split create/download certificates into different pages
 
 ### Fixed
 
 - [api] Do not check for `MORIO_REPO_ROOT` in production
+- [clients] Enabled inputs for filebeat
 - [core] Configure TLS chain on Kafka API port, rather than only the leaf certificate
 - [core] Fix incorrect passing of hookProps to lifecycle hook
 - [core] Conditionally check hookprops rather than assume they are set

@@ -10,6 +10,4 @@
   processors:
     - add_fields:
         target: morio
-        fields:
-          module:
-            name: linux-morio-client
+        fields.module: linux-morio-client
