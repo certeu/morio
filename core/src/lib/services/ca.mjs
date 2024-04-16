@@ -83,6 +83,7 @@ export const service = {
         fingerprint: init.root.fingerprint,
         jwk,
         certificate: init.root.certificate,
+        intermediate: init.intermediate.certificate,
       }
 
       /*
@@ -148,10 +149,11 @@ export const service = {
       }
 
       /*
-       * Copy the CA root certificate to a shared config folder
+       * Copy the CA root & intermediate certificates to a shared config folder
        * from where other containers will load it
        */
       await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
+      await cp(`/morio/data/ca/certs/intermediate_ca.crt`, `/etc/morio/shared/intermediate_ca.crt`)
 
       return true
     },
@@ -231,9 +233,10 @@ const reloadCaConfiguration = async () => {
     .pop().key
 
   /*
-   * Load the root certficate
+   * Load the root & intermediate certficate
    */
   const certificate = await readFile('/etc/morio/shared/root_ca.crt')
+  const intermediate = await readFile('/etc/morio/shared/intermediate_ca.crt')
 
   /*
    * Store fingerprint, JWK, and root certificate in the store for easy access
@@ -243,6 +246,7 @@ const reloadCaConfiguration = async () => {
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
+    intermediate,
   }
 
   return true

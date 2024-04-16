@@ -125,11 +125,14 @@ export const service = {
       store.log.debug('Storing inital broker configuration')
       await writeYamlFile(brokerConfigFile, store.config.services.broker.broker, store.log)
       await chown(brokerConfigFile, uid, uid)
-      await writeFile('/etc/morio/broker/tls-cert.pem', certAndKey.certificate.crt)
+      await writeFile(
+        '/etc/morio/broker/tls-cert.pem',
+        certAndKey.certificate.crt + '\n' + store.ca.intermediate
+      )
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
       await writeFile('/etc/morio/broker/tls-key.pem', certAndKey.key)
       await chown('/etc/morio/broker/tls-key.pem', uid, uid)
-      await writeFile('/etc/morio/broker/tls-ca.pem', certAndKey.certificate.certChain)
+      await writeFile('/etc/morio/broker/tls-ca.pem', store.ca.certificate)
       await chown('/etc/morio/broker/tls-ca.pem', uid, uid)
       await chown('/etc/morio/broker', uid, uid)
       await mkdir('/morio/data/broker')

@@ -12,8 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Allow downloads from downloads folder
 - [config] Added `MORIO_DOWNLOADS_FOLDER` preset defaulting to downloads
-- [core] Store broker certificate in downloads/certs folder
 - [core] Store root and intermediate CA certificates in downloads/certs folder
+- [core] Store broker certificate in downloads/certs folder
+- [core] Keep both CA root and intermediate certificates in the store
 - [ui] Add download links for root, intermediate, and broker certs to certificates page
 
 ### Changed
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [core] Configure TLS chain on Kafka API port, rather than only the leaf certificate
 - [core] Fix incorrect passing of hookProps to lifecycle hook
 - [core] Conditionally check hookprops rather than assume they are set
 - [core] Fix location of client source files inside container
