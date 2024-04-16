@@ -66,11 +66,13 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
     return res.status(500).send({ result: 'failed to generate certificate', status: 'aborted' })
 
   /*
-   * Write files for mTLS to disk (cert, chain, and key)
+   * Write files for mTLS to disk (cert, ca, and key)
+   * Note that they go into /morio/core here as this folder will be copied
+   * into /morio/dbuilder by the dbuilder precreate hook
    */
-  await writeFile('/morio/data/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
-  await writeFile('/morio/data/clients/linux/etc/morio/ca.pem', certAndKey.certificate.certChain)
-  await writeFile('/morio/data/clients/linux/etc/morio/key.pem', certAndKey.key)
+  await writeFile('/morio/core/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
+  await writeFile('/morio/core/clients/linux/etc/morio/ca.pem', store.ca.certificate)
+  await writeFile('/morio/core/clients/linux/etc/morio/key.pem', certAndKey.key)
 
   /*
    * Write client template vars to disk
