@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [api] Allow downloads from downloads folder
 - [config] Added `MORIO_DOWNLOADS_FOLDER` preset defaulting to downloads
+- [core] Store broker certificate in downloads/certs folder
 - [core] Store root and intermediate CA certificates in downloads/certs folder
+- [ui] Add download links for root, intermediate, and broker certs to certificates page
 
 ### Changed
 

@@ -277,6 +277,36 @@ const X509Page = (props) => {
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={CertificateIcon} title={props.title}>
         <div className="max-w-4xl">
+          <h2>Download X.509 certificates</h2>
+          <ul className="list list-disc list-inside ml-4 mb-8">
+            <li>
+              <b className="text-lg">Morio CA Root Certificate</b>
+              <ul className="pl-6 mb-4">
+                <li>Root certificate of the Morio internal CA.</li>
+                <li>
+                  <a href="/downloads/certs/ca.pem">/downloads/certs/root.pem</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b className="text-lg">Morio CA Intermediate Certificate</b>
+              <ul className="pl-6 mb-4">
+                <li>Intermediate certificate of the Morio internal CA.</li>
+                <li>
+                  <a href="/downloads/certs/intermediate.pem">/downloads/certs/intermediate.pem</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b className="text-lg">Morio Broker Certificate</b>
+              <ul className="pl-6 mb-4">
+                <li>Certificate of the Morio Kafka API</li>
+                <li>
+                  <a href="/downloads/certs/broker.pem">/downloads/certs/broker.pem</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
           <CreateCertificate />
         </div>
       </ContentWrapper>

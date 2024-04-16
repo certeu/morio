@@ -17,7 +17,14 @@ const allowedUris = [
   `${store.prefix}/activate-account/`,
   `${store.prefix}/activate-mfa`,
   `${store.prefix}/activate-mfa/`,
+  `/downloads/`,
 ]
+
+/**
+ * List of allowListed URL patterns do not require authentication
+ * Each is/can be a regex
+ */
+const allowedUriPatterns = [/^\/downloads\//]
 
 /**
  * This auth controller handles authentication in Morio
@@ -47,6 +54,13 @@ Controller.prototype.authenticate = async (req, res) => {
    */
   const uri = req.headers['x-forwarded-uri']
   if (allowedUris.includes(uri)) return res.status(200).end()
+
+  /*
+   * Is the URL pattern allow-listed?
+   */
+  for (const regex of allowedUriPatterns) {
+    if (uri.match(regex)) return res.status(200).end()
+  }
 
   /*
    * Is there a cookie with a JSON Web Token we can check?

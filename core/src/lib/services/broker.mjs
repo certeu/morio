@@ -135,6 +135,11 @@ export const service = {
       await mkdir('/morio/data/broker')
       await chown('/morio/data/broker', uid, uid)
 
+      /*
+       * Also write broker certificates to the downloads folder
+       */
+      await writeFile('/morio/data/downloads/certs/broker.pem', certAndKey.certificate.crt)
+
       return true
     },
     /**
