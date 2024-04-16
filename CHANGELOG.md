@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [config] Added MORIO_DOWNLOADS_FOLDER preset defaulting to downloads
+- [config] Added `MORIO_DOWNLOADS_FOLDER` preset defaulting to downloads
 
 ### Changed
 
@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [core] Fix incorrect passing of hookProps to lifecycle hook
 - [core] Conditionally check hookprops rather than assume they are set
 - [core] Fix location of client source files inside container
 

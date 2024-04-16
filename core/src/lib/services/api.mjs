@@ -22,7 +22,7 @@ export const service = {
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, telling it we need TLS configured.
      */
-    recreateContainer: (hookProps) =>
+    recreateContainer: (hookProps = {}) =>
       defaultRecreateContainerHook('api', { ...hookProps, traefikTLS: true }),
     /**
      * Lifecycle hook to determine whether to restart the container

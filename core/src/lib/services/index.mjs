@@ -313,6 +313,14 @@ const shouldContainerBeRecreated = async (service, running, hookProps) => {
   }
 
   /*
+   * If this is the initial setup, services that require TLS configuration should be recreated
+   */
+  if (hookProps.initialSetup && ['api', 'ui'].includes(service)) {
+    store.log.debug(`Initial setup, recreating ${service} container to add TLS configuration`)
+    return true
+  }
+
+  /*
    * Always recreate if the service configuration has changed
    */
   //if (JSON.stringify(store.config.services[service] !== JSON.stringify(store.
@@ -418,21 +426,24 @@ export function alwaysWantedHook() {
  *
  * @param {string} service - Name of the service
  * @param {object} hookProps.running - Holds info of running containers
+ * @param {bool} hookProps.traefikTLS - Whether or not the service needs Traefik TLS labels
+ * @param {bool} hookProps.initialSetup - Whether or not this is Morio's initial setup
+ * @param {bool} hookProps.coldStart - Whether or not this is a cold start
  * @retrun {boolean} result - True to recreate the container
  */
-export function defaultRecreateContainerHook(service, { running }, hookProps) {
+export function defaultRecreateContainerHook(service, hookProps) {
   /*
    * If the container is not currently running, recreate it
    */
-  if (!running[service]) return true
+  if (!hookProps?.running?.[service]) return true
 
   /*
    * If container name or image changes, recreate it
    */
   const cConf = store.config.services[service].container // Save us some typing
   if (
-    running[service].Names[0] !== `/${cConf.container_name}` ||
-    running[service].Image !== `${cConf.image}:${cConf.tag}`
+    hookProps?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
+    hookProps?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
   )
     return true
 

@@ -21,7 +21,7 @@ export const service = {
     /*
      * Lifecycle hook to determine whether to recreate the container
      */
-    recreateContainer: (hookProps) =>
+    recreateContainer: (hookProps = {}) =>
       defaultRecreateContainerHook('ui', { ...hookProps, traefikTLS: true }),
     /**
      * Lifecycle hook to determine whether to restart the container
