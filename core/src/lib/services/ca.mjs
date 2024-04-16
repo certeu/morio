@@ -86,6 +86,13 @@ export const service = {
       }
 
       /*
+       * Also write root & intermediate certificates to the downloads folder
+       */
+      await mkdir('/morio/data/downloads/certs/')
+      await writeFile('/morio/data/downloads/certs/root.pem', init.root.certificate)
+      await writeFile('/morio/data/downloads/certs/intermediate.pem', init.intermediate.certificate)
+
+      /*
        * Construct step-ca (server) configuration
        */
       const stepServerConfig = {

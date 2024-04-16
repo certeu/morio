@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [config] Added `MORIO_DOWNLOADS_FOLDER` preset defaulting to downloads
+- [core] Store root and intermediate CA certificates in downloads/certs folder
 
 ### Changed
 
