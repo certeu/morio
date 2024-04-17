@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Added
 
 - [api] Added `/whoami` route
+- [api] Added `/jwks` route
+- [core] Added `/jwks` route
 - [core] Generate node and deployment UUID
 - [core] Return UUIDS after setup
 

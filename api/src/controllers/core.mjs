@@ -310,3 +310,15 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
 
   return res.status(status).send(result)
 }
+
+/**
+ * Gets the JWKS info from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getJwks = async (req, res) => {
+  const [status, result] = await store.core.get(`/jwks`)
+
+  return res.status(status).send(result)
+}

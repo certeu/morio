@@ -136,4 +136,9 @@ export function routes(app) {
    * Hit this route to get the running presets
    */
   app.get(`${PREFIX}/presets`, Core.getPresets)
+
+  /*
+   * Hit this route to get the running presets
+   */
+  app.get(`${PREFIX}/jwks`, (req, res) => Core.getJwks(req, res))
 }

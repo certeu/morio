@@ -17,6 +17,7 @@ const allowedUris = [
   `${store.prefix}/activate-account/`,
   `${store.prefix}/activate-mfa`,
   `${store.prefix}/activate-mfa/`,
+  `${store.prefix}/jwks`,
 ]
 
 /**
@@ -33,6 +34,19 @@ const allowedEphemeralUris = [
   `${store.prefix}/setup`,
   `${store.prefix}/validate/settings`,
 ]
+
+/**
+ * Helper method to deny access
+ */
+const deny = (res, body = {}, status = 401) =>
+  res
+    .status(status)
+    .send({
+      status: 'Unauthorized',
+      reason: 'Request failed all efforts at authentication',
+      ...body,
+    })
+    .end()
 
 /**
  * This auth controller handles authentication in Morio
@@ -63,14 +77,7 @@ Controller.prototype.authenticate = async (req, res) => {
    */
   if (store.info?.ephemeral === true) {
     if (allowedEphemeralUris.includes(uri)) return res.status(200).end()
-    else
-      return res
-        .status(401)
-        .send({
-          status: 'Unauthorized',
-          reason: 'Not allowed in ephemeral mode',
-        })
-        .end()
+    else return deny(res, { status: 'Unauthorized', reason: 'Not allowed in ephemeral mode' })
   }
 
   /*
@@ -89,6 +96,7 @@ Controller.prototype.authenticate = async (req, res) => {
    * Is there a cookie with a JSON Web Token we can check?
    */
   const token = req.cookies?.morio
+  if (!token) return deny(res)
   if (token)
     jwt.verify(
       token,
@@ -99,14 +107,7 @@ Controller.prototype.authenticate = async (req, res) => {
         subject: 'morio',
       },
       (err, payload) => {
-        if (err)
-          return res
-            .status(401)
-            .send({
-              status: 'Unauthorized',
-              reason: 'Request failed all efforts at authentication',
-            })
-            .end()
+        if (err) return deny(res)
 
         /*
          * All good, set roles in response header
@@ -145,11 +146,15 @@ Controller.prototype.login = async (req, res) => {
    * and that we have a provider method to handle the request
    */
   if (!providerId || !providerType || typeof idps[providerType] !== 'function') {
-    return res.status(400).send({
-      success: false,
-      reason: 'Bad request',
-      error: 'No such authentication provider',
-    })
+    return deny(
+      res,
+      {
+        success: false,
+        reason: 'Bad request',
+        error: 'No such authentication provider',
+      },
+      400
+    )
   }
 
   /*
@@ -212,7 +217,7 @@ Controller.prototype.renewToken = async (req, res) => {
 
       return res.send({ jwt })
     })
-  else return res.status(401).send({ status: 'Unauthorized', reason: 'No token found' }).end()
+  else return deny(res, { status: 'Unauthorized', reason: 'No token found' })
 }
 
 /**
@@ -231,7 +236,7 @@ Controller.prototype.whoami = async (req, res) => {
    */
   const token = req.cookies?.morio
   if (token) verifyToken(token, res, async (payload) => res.send(payload).end())
-  else return res.status(401).send({ status: 'Unauthorized', reason: 'No token found' }).end()
+  else return deny(res, { status: 'Unauthorized', reason: 'No token found' })
 }
 
 /**
@@ -252,14 +257,10 @@ const verifyToken = async (token, res, callback) =>
     },
     async (err, payload) => {
       if (err)
-        return res
-          .status(401)
-          .send({
-            status: 'Unauthorized',
-            reason: 'Request failed all efforts at authentication',
-          })
-          .end()
-
+        return deny(res, {
+          status: 'Unauthorized',
+          reason: 'Request failed all efforts at authentication',
+        })
       /*
        * Looks good, run callback
        */

@@ -29,12 +29,17 @@ export function routes(app) {
   app.get('/info', (req, res) => res.send(store.get('info', {})))
 
   /*
+   * Hit this route to get the JWKS info
+   */
+  app.get('/jwks', (req, res) => Status.jwks(req, res))
+
+  /*
    * Hit this route to get info on the CA root
    */
-  app.get('/ca/root', (req, res) => res.send(store.get('ca', {})))
+  //app.get('/ca/root', (req, res) => res.send(store.get('ca', {})))
 
   /*
    * Hit this route to stream container logs for a given service
    */
-  app.get('/logs/:service', (req, res) => Status.streamServiceLogs(req, res))
+  //app.get('/logs/:service', (req, res) => Status.streamServiceLogs(req, res))
 }
