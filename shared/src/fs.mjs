@@ -151,31 +151,6 @@ export const readFile = async (
 }
 
 /**
- * Reads a BSON file from disk and parses it
- *
- * @param {string} path - (relative) path to the file to read
- * @param {string} onError - a string to log on error rather than the default
- *
- * @return {string} File contents, or false in case of trouble
- */
-export const readBsonFile = async (
-  filePath, // The (relative) path to the file
-  onError // Method to run on error
-) => {
-  let content
-  try {
-    content = await readFile(filePath, onError, true)
-    content = BSON.deserialize(content)
-  } catch (err) {
-    if (onError) onError(err)
-
-    return false
-  }
-
-  return content
-}
-
-/**
  * Reads a JSON file from disk and parses it
  *
  * @param {string} path - (relative) path to the file to read
@@ -268,15 +243,15 @@ export const writeFile = async (
 export const writeYamlFile = async (filePath, data, log=false, mode=0o666) => await writeFile(filePath, yaml.dump(data), log, mode)
 
 /**
- * Writes a BSON file to disk
+ * Writes a JSON file to disk
  *
  * @param {string} filePath - (relative) path to the file to write
  * @param {string} data - the data to write to disk as a Javascript object
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeBsonFile = async (filePath, data) =>
-  await writeFile(filePath, BSON.serialize(data))
+export const writeJsonFile = async (filePath, data) =>
+  await writeFile(filePath, JSON.stringify(data, null, 2))
 
 /**
  * Reads the contents of a directory (non-recursive)

@@ -1,10 +1,14 @@
-import { createHash, randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey } from 'crypto'
+import { createHash, randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey, randomUUID } from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
 import jwt from 'jsonwebtoken'
 import { Buffer } from 'node:buffer'
 
+/**
+ * Re-export crypto.randomUUID, which generates v4 UUIDs
+ */
+export const uuid = randomUUID
 /**
  * Hashes a string
  *

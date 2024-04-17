@@ -242,8 +242,15 @@ Controller.prototype.setup = async (req, res) => {
    */
   const data = {
     result: 'success',
-    settings: mSettings,
-    root_token: keys.mrt,
+    uuids: {
+      node: keys.node,
+      deployment: keys.deployment,
+    },
+    root_token: {
+      about:
+        'This is the Morio root token. You can use it to authenticate before any authentication providers have been configured. Store it in safe space, as it will never be show again.',
+      value: keys.mrt,
+    },
   }
 
   /*
