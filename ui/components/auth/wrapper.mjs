@@ -1,6 +1,8 @@
 import { AuthLayout } from './layout.mjs'
 import { Login } from './login.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
+import { useApi } from 'hooks/use-api.mjs'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
 import { LogoSpinner, CountdownCircle } from 'components/animations.mjs'
@@ -35,12 +37,25 @@ const checkRole = (role = false, requiredRole = 'user') => {
 
 export const AuthWrapper = ({ role = 'user', account, setAccount, children }) => {
   const [user, setUser] = useState(false)
+  const { api } = useApi()
+  const router = useRouter()
 
   /*
    * Avoid hydration errros
    */
   useEffect(() => {
     if (!user) setUser(true)
+    /*
+     * Don't bother if token is invalid
+     */
+    const whoAmI = async () => {
+      const result = await api.whoAmI()
+      /*
+       * If we are running in ephemeral mode, always load homepage
+       */
+      if (result[1] === 401 && result[0]?.reason.includes('ephemeral')) router.push('/')
+    }
+    whoAmI()
   }, [user])
 
   /*

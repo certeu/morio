@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Added
 
+- [api] Added `/whoami` route
 - [core] Generate node and deployment UUID
 - [core] Return UUIDS after setup
 
@@ -21,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Only allow specific routes in epehemeral mode
 - [ui] Login form when only MRT is available
+- [ui] Always redirect to home page in epehemeral mode
 
 
 

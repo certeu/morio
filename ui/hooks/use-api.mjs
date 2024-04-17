@@ -268,6 +268,17 @@ MorioClient.prototype.renewToken = async function () {
 }
 
 /**
+ * Who am I? A check to get info about the current user.
+ *
+ * @param {string} provider - (name of the) authentication provider
+ * @param {object} data - The login data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.whoAmI = async function () {
+  return await this.call(`${morioConfig.api}/whoami`)
+}
+
+/**
  * Encrypt data
  *
  * @param {string} data - The data to encrypt

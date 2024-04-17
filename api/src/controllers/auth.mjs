@@ -68,7 +68,7 @@ Controller.prototype.authenticate = async (req, res) => {
         .status(401)
         .send({
           status: 'Unauthorized',
-          reason: 'Not allowee in epehemeral mode',
+          reason: 'Not allowed in ephemeral mode',
         })
         .end()
   }
@@ -195,39 +195,74 @@ Controller.prototype.renewToken = async (req, res) => {
    */
   const token = req.cookies?.morio
   if (token)
-    jwt.verify(
-      token,
-      store.keys.public,
-      {
-        audience: 'morio',
-        issuer: 'morio',
-        subject: 'morio',
-      },
-      async (err, payload) => {
-        if (err)
-          return res
-            .status(401)
-            .send({
-              status: 'Unauthorized',
-              reason: 'Request failed all efforts at authentication',
-            })
-            .end()
+    verifyToken(token, res, async (payload) => {
+      /*
+       * Generate JSON Web Token
+       */
+      const jwt = await generateJwt({
+        data: {
+          user: payload.user,
+          role: payload.role,
+          maxRole: payload.maxRole,
+          provider: payload.provider,
+        },
+        key: store.keys.private,
+        passphrase: store.keys.mrt,
+      })
 
-        /*
-         * Looks good, generate JSON Web Token
-         */
-        const jwt = await generateJwt({
-          data: {
-            user: payload.user,
-            role: payload.role,
-            maxRole: payload.maxRole,
-            provider: payload.provider,
-          },
-          key: store.keys.private,
-          passphrase: store.keys.mrt,
-        })
-
-        return res.send({ jwt })
-      }
-    )
+      return res.send({ jwt })
+    })
+  else return res.status(401).send({ status: 'Unauthorized', reason: 'No token found' }).end()
 }
+
+/**
+ * Who am I?
+ *
+ * This is a check that helps the UI figure out what user we
+ * are dealing with, but can also be used to check the auth status
+ * of a user.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.whoami = async (req, res) => {
+  /*
+   * Is there a cookie with a JSON Web Token we can check?
+   */
+  const token = req.cookies?.morio
+  if (token) verifyToken(token, res, async (payload) => res.send(payload).end())
+  else return res.status(401).send({ status: 'Unauthorized', reason: 'No token found' }).end()
+}
+
+/**
+ * Helper method to verify the token
+ *
+ * @param {object} token - The token to verify
+ * @param {object} res - The response object, needed to send an error response
+ * @param {function} callback - The callback to call after verifying the token
+ */
+const verifyToken = async (token, res, callback) =>
+  jwt.verify(
+    token,
+    store.keys.public,
+    {
+      audience: 'morio',
+      issuer: 'morio',
+      subject: 'morio',
+    },
+    async (err, payload) => {
+      if (err)
+        return res
+          .status(401)
+          .send({
+            status: 'Unauthorized',
+            reason: 'Request failed all efforts at authentication',
+          })
+          .end()
+
+      /*
+       * Looks good, run callback
+       */
+      return callback(payload)
+    }
+  )

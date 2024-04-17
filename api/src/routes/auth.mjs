@@ -23,4 +23,9 @@ export function routes(app) {
    * Refresh token route
    */
   app.get(`${store.prefix}/token`, Auth.renewToken)
+
+  /*
+   * Whoami/ping check
+   */
+  app.get(`${store.prefix}/whoami`, Auth.whoami)
 }
