@@ -17,7 +17,6 @@ const allowedUris = [
   `${store.prefix}/activate-account/`,
   `${store.prefix}/activate-mfa`,
   `${store.prefix}/activate-mfa/`,
-  `/downloads/`,
 ]
 
 /**
@@ -25,6 +24,15 @@ const allowedUris = [
  * Each is/can be a regex
  */
 const allowedUriPatterns = [/^\/downloads\//]
+
+/**
+ * List of allowListed URLs in epeheral mode
+ */
+const allowedEphemeralUris = [
+  `${store.prefix}/status`,
+  `${store.prefix}/setup`,
+  `${store.prefix}/validate/settings`,
+]
 
 /**
  * This auth controller handles authentication in Morio
@@ -45,14 +53,29 @@ export function Controller() {}
  */
 Controller.prototype.authenticate = async (req, res) => {
   /*
-   * In ephemeral mode, there is not auhentication yet
+   * Get the requested URL from the headers
    */
-  if (store.info?.ephemeral === true) return res.status(200).end()
+  const uri = req.headers['x-forwarded-uri']
+
+  /*
+   * In ephemeral mode, there is not auhentication yet
+   * But we only allow certain routes
+   */
+  if (store.info?.ephemeral === true) {
+    if (allowedEphemeralUris.includes(uri)) return res.status(200).end()
+    else
+      return res
+        .status(401)
+        .send({
+          status: 'Unauthorized',
+          reason: 'Not allowee in epehemeral mode',
+        })
+        .end()
+  }
 
   /*
    * Is the URL allow-listed?
    */
-  const uri = req.headers['x-forwarded-uri']
   if (allowedUris.includes(uri)) return res.status(200).end()
 
   /*
@@ -145,7 +168,12 @@ Controller.prototype.login = async (req, res) => {
    * Looks good, generate JSON Web Token
    */
   const jwt = await generateJwt({
-    data: { ...data, provider: req.body.provider },
+    data: {
+      ...data,
+      provider: req.body.provider,
+      node: store.keys.node,
+      deployment: store.keys.deployment,
+    },
     key: store.keys.private,
     passphrase: store.keys.mrt,
   })

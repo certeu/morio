@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [core] Dropped BSON dependency
 
+### Fixed
+
+- [api] Only allow specific routes in epehemeral mode
+
+
+
 ## [0.1.5] - 2014-04-16
 
 ### Added
