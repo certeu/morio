@@ -35,7 +35,7 @@ const checkRole = (role = false, requiredRole = 'user') => {
   return false
 }
 
-export const AuthWrapper = ({ role = 'user', account, setAccount, children }) => {
+export const AuthWrapper = ({ role = 'user', account, setAccount, children, logout }) => {
   const [user, setUser] = useState(false)
   const { api } = useApi()
   const router = useRouter()
@@ -53,7 +53,10 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children }) =>
       /*
        * If we are running in ephemeral mode, always load homepage
        */
-      if (result[1] === 401 && result[0]?.reason.includes('ephemeral')) router.push('/')
+      if (result[1] === 401) {
+        logout()
+        //if (result[0]?.reason.includes('ephemeral')) router.push('/')
+      }
     }
     whoAmI()
   }, [user])

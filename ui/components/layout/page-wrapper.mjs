@@ -35,7 +35,7 @@ export const PageWrapper = ({
   /*
    * Load the account so signing out forces a rerender
    */
-  const { account, setAccount } = useAccount()
+  const { account, setAccount, logout } = useAccount()
 
   /*
    * This forces a re-render upon initial bootstrap of the app
@@ -66,7 +66,7 @@ export const PageWrapper = ({
         <link rel="icon" href="/favicon.svg" />
       </Head>
       <LoadingStatus />
-      <AuthWrapper {...{ account, setAccount, role }}>
+      <AuthWrapper {...{ account, setAccount, role, logout }}>
         <div className="flex flex-col justify-between bg-base-100 w-full">
           {header && <Header {...{ theme, toggleTheme, page }} />}
           <main className={`bg-base-100 grow ${header ? 'mt-12' : ''}`}>
