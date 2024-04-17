@@ -140,6 +140,11 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   })
   if (tabs.length > 0 && !showAll) tabs.push(help)
 
+  /*
+   * Helper var to indicate only the root token is available for authentication
+   */
+  const onlyMrt = Object.keys(idps).length < 1
+
   return (
     <div className="w-full max-w-2xl m-auto bg-base-100 bg-opacity-60 rounded-lg shadow py-4 px-8 pb-2">
       <h2 className="flex flex-row w-full items-center justify-between gap-2">
@@ -148,19 +153,21 @@ export const Login = ({ setAccount, account = false, role = false }) => {
           <button onClick={() => setShowHelp(!showHelp)} title="Not sure what to do?">
             <QuestionIcon className="text-primary hover:text-accent h-8 w-8" />
           </button>
-          <button
-            onClick={() => {
-              setShowHelp(false)
-              setShowAll(!showAll)
-            }}
-            title="Allow Root Token logins"
-          >
-            {showAll ? (
-              <OpenLockIcon className="text-warning hover:text-success h-8 w-8" />
-            ) : (
-              <ClosedLockIcon className="text-success hover:text-warning h-8 w-8" />
-            )}
-          </button>
+          {onlyMrt ? null : (
+            <button
+              onClick={() => {
+                setShowHelp(false)
+                setShowAll(!showAll)
+              }}
+              title="Allow Root Token logins"
+            >
+              {showAll ? (
+                <OpenLockIcon className="text-warning hover:text-success h-8 w-8" />
+              ) : (
+                <ClosedLockIcon className="text-success hover:text-warning h-8 w-8" />
+              )}
+            </button>
+          )}
         </div>
       </h2>
       {account && role ? (
@@ -203,68 +210,84 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         </>
       ) : null}
       {showHelp ? (
-        <>
-          <h3>Not certain how to authenticate?</h3>
-          <p>
-            Morio supports a variety of authentication backends, or <b>identity providers</b>.
-          </p>
-          <h4>Identity Providers</h4>
-          <p>
-            You local Morio operator (<Term>LoMO</Term>) has configured the following identity
-            providers:
-          </p>
-          <ul className="list list-inside list-disc ml-4">
-            {tabList.map((id) => (
-              <li key={id}>
-                <b>{idps[id].label || id}</b>
-                {idps[id].about ? (
-                  <span>
-                    : <em>{idps[id].about}</em>
-                  </span>
-                ) : (
-                  ''
-                )}
-              </li>
-            ))}
-          </ul>
-          <p>
-            Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
-            deployment.
-          </p>
-          {!showAll && tabList.length < Object.keys(idps).length ? (
-            <Popout note>
-              <h5>Advanced Identity Providers</h5>
-              <p>
-                In addition to the providers above, the following providers are avaialable for
-                advanced use cases:
-              </p>
-              <ul className="list list-inside list-disc ml-4">
-                {Object.keys(idps)
-                  .filter((id) => !tabList.includes(id))
-                  .map((id) => (
-                    <li key={id}>
-                      <b>{idps[id].label || id}</b>
-                    </li>
-                  ))}
-              </ul>
-              <p>
-                To access them, click the <ClosedLockIcon className="inline w-6 h-6 text-success" />{' '}
-                icon in the top-right corner.
-              </p>
-            </Popout>
-          ) : null}
-          <button
-            className="btn btn-neutral flex flex-row items-center gap-4 mx-auto mb-4"
-            onClick={() => setShowHelp(false)}
-          >
-            <CloseIcon /> Close this help
-          </button>
-        </>
+        onlyMrt ? (
+          <>
+            <h3>Not certain how to authenticate?</h3>
+            <p>
+              This Morio does not (yet) have any authentication backends, or{' '}
+              <b>identity providers</b>, configured.
+            </p>
+            <p>
+              As a result, only the <b>Morio Root Token</b> can be used to sign in to this Morio
+              instance.
+            </p>
+          </>
+        ) : (
+          <>
+            <h3>Not certain how to authenticate?</h3>
+            <p>
+              Morio supports a variety of authentication backends, or <b>identity providers</b>.
+            </p>
+            <h4>Identity Providers</h4>
+            <p>
+              You local Morio operator (<Term>LoMO</Term>) has configured the following identity
+              providers:
+            </p>
+            <ul className="list list-inside list-disc ml-4">
+              {tabList.map((id) => (
+                <li key={id}>
+                  <b>{idps[id].label || id}</b>
+                  {idps[id].about ? (
+                    <span>
+                      : <em>{idps[id].about}</em>
+                    </span>
+                  ) : (
+                    ''
+                  )}
+                </li>
+              ))}
+            </ul>
+            <p>
+              Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
+              deployment.
+            </p>
+            {!showAll && tabList.length < Object.keys(idps).length ? (
+              <Popout note>
+                <h5>Advanced Identity Providers</h5>
+                <p>
+                  In addition to the providers above, the following providers are avaialable for
+                  advanced use cases:
+                </p>
+                <ul className="list list-inside list-disc ml-4">
+                  {Object.keys(idps)
+                    .filter((id) => !tabList.includes(id))
+                    .map((id) => (
+                      <li key={id}>
+                        <b>{idps[id].label || id}</b>
+                      </li>
+                    ))}
+                </ul>
+                <p>
+                  To access them, click the{' '}
+                  <ClosedLockIcon className="inline w-6 h-6 text-success" /> icon in the top-right
+                  corner.
+                </p>
+              </Popout>
+            ) : null}
+            <button
+              className="btn btn-neutral flex flex-row items-center gap-4 mx-auto mb-4"
+              onClick={() => setShowHelp(false)}
+            >
+              <CloseIcon /> Close this help
+            </button>
+          </>
+        )
       ) : tabList ? (
         <Tabs tabs={tabList.map((id) => idps[id].label || id)} children={tabs} />
       ) : (
         <Popout warning>Failed to load identity providers</Popout>
       )}
+      {onlyMrt ? <MrtProvider label="Morio Root Token" {...providerProps} /> : null}
       {error ? (
         <Popout warning compact noP>
           {error}

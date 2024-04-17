@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [api] Only allow specific routes in epehemeral mode
+- [ui] Login form when only MRT is available
 
 
 

@@ -90,27 +90,27 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   }
 
   if (deploymentOngoing) {
-    const text = `text-${deployResult?.root_token ? 'success' : 'accent'}-content`
+    const text = `text-${deployResult?.root_token?.value ? 'success' : 'accent'}-content`
     return (
       <div className="flex flex-wrap flex-row gap-8 justify-center">
         <div className="w-full max-w-xl">
-          <Box color={deployResult?.root_token ? 'success' : 'accent'}>
+          <Box color={deployResult?.root_token?.value ? 'success' : 'accent'}>
             <div className={`flex flex-row items-center gap-2 ${text}`}>
               <div className="w-6 h-6">
-                {deployResult?.root_token ? (
+                {deployResult?.root_token?.value ? (
                   <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                 ) : (
                   <LogoSpinner />
                 )}
               </div>
-              {deployResult.root_token ? (
+              {deployResult.root_token?.value ? (
                 <span>Settings deployed.</span>
               ) : (
                 <span>Please wait while your settings are being deployed.</span>
               )}
             </div>
           </Box>
-          {deployResult?.root_token ? (
+          {deployResult?.root_token?.value ? (
             <>
               <Popout important>
                 <h5>Store the Morio Root Token in a safe place</h5>
@@ -118,7 +118,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
                   Below is the Morio Root Token which you can use to authenticate while no (other)
                   authentication provider has been setup.
                 </p>
-                <Highlight>{deployResult.root_token}</Highlight>
+                <Highlight>{deployResult.root_token?.value}</Highlight>
               </Popout>
               <p className="text-center">
                 <Link className="btn btn-primary nt-4 btn-lg" href="/">
