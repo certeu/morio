@@ -8,7 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+# Added
 
+- [core] Generate node and deployment UUID
+
+## Changed
+
+- [core] Dropped BSON dependency
 
 ## [0.1.5] - 2014-04-16
 

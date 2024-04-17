@@ -1,5 +1,11 @@
-import { writeYamlFile, writeBsonFile } from '#shared/fs'
-import { generateJwtKey, generateKeyPair, randomString, encryptionMethods } from '#shared/crypto'
+import { writeYamlFile, writeJsonFile } from '#shared/fs'
+import {
+  generateJwtKey,
+  generateKeyPair,
+  randomString,
+  encryptionMethods,
+  uuid,
+} from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import set from 'lodash.set'
@@ -155,7 +161,7 @@ Controller.prototype.setup = async (req, res) => {
   store.log.debug(`Initial settings will be tracked as: ${time}`)
 
   /*
-   * This is the initial deploy, there will be no key pair, so generate one.
+   * This is the initial deploy, there will be no key pair or UUID, so generate one.
    */
   store.log.debug(`Generating root token`)
   const morioRootToken = 'mrt.' + (await randomString(32))
@@ -166,6 +172,8 @@ Controller.prototype.setup = async (req, res) => {
     mrt: morioRootToken,
     public: publicKey,
     private: privateKey,
+    node: uuid(),
+    deployment: uuid(),
   }
 
   /*
@@ -225,7 +233,7 @@ Controller.prototype.setup = async (req, res) => {
    * Also write the keys to disk
    */
   store.log.debug(`Writing key data to .keys`)
-  result = await writeBsonFile(`/etc/morio/.keys`, keys)
+  result = await writeJsonFile(`/etc/morio/keys.json`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*

@@ -1,7 +1,7 @@
 // REST client for API
 import { restClient } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readBsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
+import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -169,7 +169,7 @@ const loadSettingsAndKeys = async () => {
    * Now read the settings file and keys
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
-  const keys = await readBsonFile(`/etc/morio/.keys`)
+  const keys = await readJsonFile(`/etc/morio/keys.json`)
 
   return { settings, keys, timestamp }
 }
