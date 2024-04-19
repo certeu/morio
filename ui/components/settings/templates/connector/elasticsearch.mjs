@@ -48,7 +48,10 @@ export const elasticsearch = {
               formatting
             </span>
           ),
-          key: 'index',
+          key: 'output.index',
+          dflt: pipelineContext.pipelineSettings?.outut?.index || '',
+          current: pipelineContext.data.output.index,
+          update: pipelineContext.data.output?.index,
         },
       ]
       if (pipelineContext.data?.index === 'stream') form.push(<p>Stream shit here</p>)

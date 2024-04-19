@@ -203,7 +203,6 @@ const getFormValidation = (el, data, result) => {
  * Top-level form validation method
  */
 export const runFormValidation = (form, data = {}) => {
-  console.log({ data })
   if (typeof form === 'function') form = form(data)
   const result = {}
   for (const el of form) getFormValidation(el, data, result)
