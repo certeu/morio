@@ -35,6 +35,8 @@ const checkRole = (role = false, requiredRole = 'user') => {
   return false
 }
 
+const ephemeralUrlList = ['/', '/setup', '/setup/upload']
+
 export const AuthWrapper = ({ role = 'user', account, setAccount, children, logout }) => {
   const [user, setUser] = useState(false)
   const { api } = useApi()
@@ -52,10 +54,12 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
       const result = await api.whoAmI()
       /*
        * If we are running in ephemeral mode, always load homepage
+       * unless it's one of the allow-listed URLs
        */
       if (result[1] === 401) {
         logout()
-        //if (result[0]?.reason.includes('ephemeral')) router.push('/')
+        if (result[0]?.reason.includes('ephemeral') && !ephemeralUrlList.includes(router.pathname))
+          router.push('/')
       }
     }
     whoAmI()
