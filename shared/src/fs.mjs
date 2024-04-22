@@ -4,7 +4,6 @@
 import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
-import { BSON } from 'bson'
 import { glob } from 'glob'
 
 /**
