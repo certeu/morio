@@ -1,4 +1,4 @@
-import { readYamlFile, readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
+import { readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
 import { extname, basename } from 'node:path'
 // Default hooks
 import { defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
@@ -49,16 +49,11 @@ export const service = {
      */
     preCreate: async () => {
       /*
-       * See if logstash.yml on the host OS is present
+       * Write out logstash.yml based on the settings
        */
-      const file = '/etc/morio/connector/config/logstash.yml'
-      const config = await readYamlFile(file)
-      if (config && false === 'fixme') {
-        store.log.debug('Connector: Config file exists, no action needed')
-      } else {
-        store.log.debug('Connector: Creating config file')
-        await writeYamlFile(file, store.config.services.connector.logstash, store.log, 0o644)
-      }
+      const file = '/etc/morio/connector/logstash.yml'
+      store.log.debug('Connector: Creating config file')
+      await writeYamlFile(file, store.config.services.connector.logstash, store.log, 0o644)
 
       /*
        * Make sure the data directory exists, and is writable
@@ -134,11 +129,11 @@ const createWantedPipelines = async (wantedPipelines) => {
       store.log.debug(`Created connector pipeline ${id}`)
       pipelines.push({
         'pipeline.id': id,
-        'path.config': `/usr/share/logstash/pipeline/${file}`,
+        'path.config': `/usr/share/logstash/config/pipeline/${file}`,
       })
     }
   }
-  await writeYamlFile(`/etc/morio/connector/config/pipelines.yml`, pipelines, store.log)
+  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, store.log)
 }
 
 /**
@@ -199,6 +194,7 @@ const morioPluginAsLogstashPluginName = (plugin) =>
  * @param {object} xput - the xput configuration
  * @param {object} pipeline - the pipeline configuration
  * @param {string} pipelineId - the pipeline ID
+ * @param {string} type - One of input our output
  * @return {string} config - the xput configuration
  */
 const generateXputConfig = (xput, pipeline, pipelineId, type) =>
@@ -240,19 +236,70 @@ const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) 
 }
 
 /*
- * The base logstash configuration prepopulated with the local morio output
+ * These are the various methods to take Morio settings
+ * and turn it into a Logstash input or output configuration
+ * for a Logstash pipeline
  */
 const logstash = {
-  input: {},
-  output: {
+  input: {
+    /*
+     * Local morio input, essentially Kafka
+     */
     morio_local: (xput, pipeline, pipelineId) => `
-# Output data to the local Morio deployment
+# Read data from a local Morio broker
+input {
+  kafka {
+    codec => json
+    topics => ["${pipeline.input.topic}"]
+    bootstrap_servers => "${store.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    client_id => "morio_connector_input"
+    id => "${pipelineId}_${xput.id}"
+  }
+}
+`,
+  },
+  output: {
+    /*
+     * Elasticsearch output
+     */
+    //data_stream => ${pipeline.output.index_type === 'docs' ? "false" : "true"}
+    //data_stream_auto_routing => false
+    elasticsearch: (xput, pipeline) => {
+      let config = `
+# Output data to Elasticsearch
+output {
+  elasticsearch {
+    action => "create"
+    compression_level => ${xput.compression_level}
+    ecs_compatibility => "${['disabled', 'v1', 'v8'].includes(pipeline.output?.enforce_ecs) ? pipeline.output.enforce_ecs : 'v8'}"
+    index => "${pipeline.output.index}"
+    api_key => "${xput.api_key}"`
+      if (xput.environment === 'cloud')
+        config += `
+    cloud_id => "${xput.cloud_id}"`
+      else
+        config += `
+    # FIXME: Handle non-cloud settings`
+
+      return (
+        config +
+        `
+  }
+}
+`
+      )
+    },
+    /*
+     * Local morio output, essentially Kafka
+     */
+    morio_local: (xput, pipeline, pipelineId) => `
+# Output data to a local Morio broker
 output {
   kafka {
     codec => json
     topic_id => "${pipeline.output.topic}"
     bootstrap_servers => "${store.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
-    client_id => "morio_connector"
+    client_id => "morio_connector_output"
     id => "${pipelineId}_${xput.id}"
   }
 }
