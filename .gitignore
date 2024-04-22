@@ -16,9 +16,10 @@ clients/linux/etc/morio/logs/config-template.yml
 # Auto-generated moriod files
 moriod/control
 VERSION
-moriod/etc/morio/moriod/version.env
 moriod/etc/morio/version
-moriod/etc/morio/version.env
+moriod/etc/morio/moriod/version.env
+moriod/etc/morio/moriod/version
+moriod/etc/morio/moriod/version.env
 
 # Auto-generated scripts
 core/run-dev-container.sh

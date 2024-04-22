@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Only allow specific routes in epehemeral mode
 - [connector] Make sure pipelines.yml exists prior to mount
+- [moriod] Move env files into correct location
 - [ui] Fix index input in Elasticsearch pipeline output form
 - [ui] Login form when only MRT is available
 - [ui] Always redirect to home page in epehemeral mode
