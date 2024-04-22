@@ -40,7 +40,7 @@ export const resolveServiceConfiguration = (store) => {
         `${store.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
         `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
         `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/pipeline/`,
+        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
         //`${store.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
       ] : [
         `${store.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
