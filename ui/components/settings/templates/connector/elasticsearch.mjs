@@ -1,6 +1,7 @@
 import Joi from 'joi'
 import { xputMeta } from './index.mjs'
 import { Popout } from 'components/popout.mjs'
+import { slugify } from 'lib/utils.mjs'
 
 /*
  * Elasticsearch input & output Connector templates
@@ -17,8 +18,9 @@ export const elasticsearch = {
           label: 'Index Type',
           labelBL: 'The type of Elasticsearch index',
           schema: Joi.string().required().valid('stream', 'docs').label('Index Type'),
-          key: 'index_type',
-          current: pipelineContext.data?.index_type,
+          key: 'output.index_type',
+          dflt: 'stream',
+          current: pipelineContext.data?.output?.index_type,
           inputType: 'buttonList',
           list: [
             {
@@ -53,9 +55,25 @@ export const elasticsearch = {
           current: pipelineContext.data.output.index,
           update: pipelineContext.data.output?.index,
         },
+        {
+          label: 'Enforce ECS Compatibility',
+          labelBL:
+            'Whether or not to enforce the Elastic Common Schema (ECS), and if so, which version',
+          schema: Joi.string().required().valid('disabled', 'v1', 'v8').label('Enforce ECS'),
+          key: 'output.enforce_ecs',
+          dflt: 'v8',
+          current: pipelineContext.data?.output?.enforce_ecs,
+          inputType: 'buttonList',
+          list: [
+            { val: 'disabled', label: 'Disabled' },
+            { val: 'v1', label: 'Enabled: v1' },
+            { val: 'v8', label: 'Enabled: v8' },
+          ],
+          dir: 'row',
+        },
       ]
-      if (pipelineContext.data?.index === 'stream') form.push(<p>Stream shit here</p>)
-      else if (pipelineContext.data?.index === 'docs') form.push(<p>docsj shit here</p>)
+      //if (pipelineContext.data?.output?.index === 'stream') form.push(<p>Stream shit here</p>)
+      //else if (pipelineContext.data?.output?.index === 'docs') form.push(<p>docsj shit here</p>)
 
       return form
     },
@@ -92,6 +110,13 @@ export const elasticsearch = {
             },
           ],
           Settings: ({ data = {} }) => {
+            const auth = {
+              schema: Joi.string().allow('').label('API Key'),
+              label: 'API Key in id:secret format',
+              labelBL: 'The API key formatted as id:secret',
+              inputType: 'secret',
+              key: 'api_key',
+            }
             if (data.environment === 'cloud')
               return [
                 {
@@ -100,13 +125,7 @@ export const elasticsearch = {
                   labelBL: 'The cloud ID as found in the Elastic Cloud web console',
                   key: 'cloud_id',
                 },
-                {
-                  schema: Joi.string().required().label('Cloud Authentication'),
-                  inputType: 'secret',
-                  label: 'Cloud Authentication',
-                  labelBL: 'The cloud authentication string',
-                  key: 'cloud_auth',
-                },
+                auth,
               ]
             if (data.environment === 'stack')
               return [
@@ -116,35 +135,6 @@ export const elasticsearch = {
                   labelBL: 'FIXME',
                   key: 'hosts',
                 },
-                [
-                  {
-                    schema: Joi.string().optional().allow('').label('API Key ID'),
-                    label: 'API Key ID',
-                    labelBL: 'The API key ID to authenticate with',
-                    key: 'api_key_id',
-                  },
-                  {
-                    schema: Joi.string().allow('').label('API Key'),
-                    label: 'API Key',
-                    labelBL: 'The API key to authenticate with',
-                    key: 'api_key_key',
-                  },
-                ],
-                [
-                  {
-                    schema: Joi.string().allow('').label('Username'),
-                    label: 'Username',
-                    labelBL: 'The username to access Elasticsearch',
-                    key: 'user',
-                  },
-                  {
-                    schema: Joi.string().allow('').label('Password'),
-                    inputType: 'secret',
-                    label: 'Password',
-                    labelBL: 'The password to access the IMAP server',
-                    key: 'password',
-                  },
-                ],
               ]
             return [
               <Popout tip compact noP key={1}>

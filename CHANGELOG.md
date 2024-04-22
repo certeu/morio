@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Changes to the connector config generators
 - [connector] Changes to the connector configuration
 - [ui] Logout user when in ephemeral mode
+- [ui] Changes to connector pipelines for Elasticsearch
 
 ### Fixed
 

@@ -369,6 +369,7 @@ const AddPipeline = (props) => {
             labelBR: <span className="italic opacity-70">Input will be slugified</span>,
             key: 'id',
             disabled: props.edit,
+            transform: slugify,
           },
           {
             schema: Joi.string().optional().allow('').label('Description'),
