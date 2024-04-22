@@ -68,6 +68,11 @@ export const service = {
       await mkdir('/etc/morio/connector/pipelines')
       await chown('/etc/morio/connector/pipelines', uid, uid)
 
+      /*
+       * Make sure pipelines.yml file exists, so it can be mounted
+       */
+      await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, store.log, 0o644)
+
       return true
     },
     /**
