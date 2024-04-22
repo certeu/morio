@@ -251,9 +251,9 @@ change_agents_state() {
   then
     CMDO="systemctl $STATE morio-audit"
     echo $CMDO
-    systemctl $STATE morio-audit
-    systemctl $STATE morio-logs
-    systemctl $STATE morio-metrics
+    systemctl $STATE morio-audit --no-pager
+    systemctl $STATE morio-logs --no-pager
+    systemctl $STATE morio-metrics --no-pager
   else
     /etc/init.d/morio-audit $STATE
     /etc/init.d/morio-logs $STATE

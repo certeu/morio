@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
+- [client] No pager when invoking systemctl
 - [core] Dropped BSON dependency
 - [core] Changes to the connector config generators
 - [connector] Changes to the connector configuration
