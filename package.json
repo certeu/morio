@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Connect, Stream, Observe, Respond",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "preprod": "npm run reconfigure",
     "dev": "./core/run-dev-container.sh",
     "prod": "./core/run-prod-container.sh",
-    "dev:clean": "docker rm -fv core api ui proxy ca broker console",
+    "dev:clean": "docker rm -fv core api ui proxy ca broker console connector",
     "destroy": "./scripts/destroy.sh",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "reconfigure": "node scripts/reconfigure.mjs",

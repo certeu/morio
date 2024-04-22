@@ -1,6 +1,6 @@
 {
   "name": "@morio/schema",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Morio schema",
   "private": true,
   "scripts": {
