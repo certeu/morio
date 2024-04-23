@@ -28,6 +28,17 @@ const presetGetters = {
       MORIO_CORE_LOG_LEVEL: 'trace',
     }
   }),
+  test: (key, opts) => getPreset(key, {
+    ...opts,
+    force: {
+      MORIO_CONFIG_ROOT: `${MORIO_REPO_ROOT}/data/config`,
+      MORIO_DATA_ROOT: `${MORIO_REPO_ROOT}/data/data`,
+      MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
+      NODE_ENV: 'test',
+      MORIO_REPO_ROOT,
+      MORIO_CORE_LOG_LEVEL: 'trace',
+    }
+  }),
   prod: getPreset
 }
 
@@ -43,6 +54,15 @@ const config = {
     config: {},
   }),
   /*
+   * Resolve the test configuration
+   */
+  test: await resolveServiceConfiguration('core', {
+    getPreset: presetGetters.dev,
+    inProduction: () => false,
+    config: {},
+    testing: true
+  }),
+  /*
    * Resolve the production configuration
    */
   prod: await resolveServiceConfiguration('core', {
@@ -56,6 +76,7 @@ const config = {
  * Generate run files for development
  */
 const cliOptions = (name, env) => `\\
+  ${env === 'test' ? '-it --rm' : '-d'} \\
   --name=${config[env].container.container_name} \\
   --hostname=${config[env].container.container_name} \\
   --label morio.service=core \\
@@ -64,6 +85,7 @@ const cliOptions = (name, env) => `\\
   --network=morionet \\
   --network-alias ${name} \\
   ${config[env].container.init ? '--init' : ''} \\
+${(config[env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
 ${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
   -e MORIO_DOCKER_SOCKET=${presetGetters[env]('MORIO_DOCKER_SOCKET')} \\
   -e MORIO_CONFIG_ROOT=${presetGetters[env]('MORIO_CONFIG_ROOT')} \\
@@ -71,10 +93,10 @@ ${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\
   -e MORIO_LOGS_ROOT=${presetGetters[env]('MORIO_LOGS_ROOT')} \\
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
-  ${env === 'dev'
+  ${env !== 'prod'
     ? '-e MORIO_REPO_ROOT='+MORIO_REPO_ROOT+" \\\n  "
     : ''
-  }${config[env].container.image}:${pkg.version}
+  }${config[env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/core/tests/run-unit-tests.sh' : ''}
 `
 
 const script = (env) => `#!/bin/bash
@@ -87,9 +109,9 @@ const script = (env) => `#!/bin/bash
 docker network create morionet 2> /dev/null
 docker stop core 2> /dev/null
 docker rm core 2> /dev/null
-docker run -d ${cliOptions('core', env)}
+docker run ${cliOptions('core', env)}
 `
-for (const env of ['dev', 'prod']) {
+for (const env of ['dev', 'test', 'prod']) {
   await writeFile(`core/run-${env}-container.sh`, script(env), false, 0o755)
 }
 

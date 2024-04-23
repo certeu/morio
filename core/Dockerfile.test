@@ -1,0 +1,11 @@
+## Run in NodeJS v20
+FROM node:20-slim
+
+# Make this folder our working directory
+WORKDIR /morio/core
+
+# Install curl
+RUN apt-get update && apt-get install -y curl
+
+## Run NodeJS code wrapped in c8 for coverage
+CMD ["npm", "run", "devtests"]

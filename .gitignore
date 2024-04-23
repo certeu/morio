@@ -25,6 +25,9 @@ moriod/etc/morio/moriod/version.env
 core/run-dev-container.sh
 core/run-prod-container.sh
 
+# Test artifacts
+core/coverage
+
 # dependencies
 node_modules
 

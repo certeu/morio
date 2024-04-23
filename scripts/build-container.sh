@@ -17,6 +17,13 @@ else
     echo ""
     TARGET="prod"
     SUFFIX=""
+  elif [ "test" == $2 ]
+  then
+    echo ""
+    echo "Building container for Morio testing environment."
+    echo ""
+    TARGET="test"
+    SUFFIX="-test"
   else
     echo ""
     echo "Building container for Morio development environment."
