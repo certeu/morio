@@ -114,10 +114,14 @@ Controller.prototype.streamServiceLogs = async (req, res) => {
  */
 Controller.prototype.jwks = async (req, res) => {
   /*
+   * Return an empty array if we are in epehemeral mode
+   */
+  if (store.info.ephemeral) return res.status(200).send({ keys: [] }).end()
+
+  /*
    * Get JWKS info from public key
    */
   const jwks = await keypairAsJwk({ public: store.keys.public })
-  console.log({ jwks })
 
   return res
     .status(200)

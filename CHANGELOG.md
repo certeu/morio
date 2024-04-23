@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [core] Setup unit testing for core
 
+### Fixed
+
+- [core] /jwks endpoint in ephemeral mode
+
 ## [0.1.6] - 2014-04-22
 
 # Added
