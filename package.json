@@ -19,12 +19,14 @@
     "prod": "./core/run-prod-container.sh",
     "dev:clean": "docker rm -fv core api ui proxy ca broker console connector",
     "destroy": "./scripts/destroy.sh",
+    "redev": "./scripts/destroy.sh && ./core/run-dev-container.sh",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "reconfigure": "node scripts/reconfigure.mjs",
     "reversion": "node scripts/reversion.mjs && npm run reconfigure",
     "rev": "npm run reversion",
     "prebuild": "npm run reconfigure",
     "prettier": "npx prettier --write .",
+    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
