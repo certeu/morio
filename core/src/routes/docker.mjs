@@ -41,29 +41,29 @@ export function routes(app) {
    * API routes to make create Docker resources
    */
   app.post(`/docker/container`, (req, res) => Docker.createResource(req, res, 'createContainer'))
-  app.post(`/docker/secret`,    (req, res) => Docker.createResource(req, res, 'createSecret'))
-  app.post(`/docker/plugin`,    (req, res) => Docker.createResource(req, res, 'createPlugin'))
-  app.post(`/docker/volume`,    (req, res) => Docker.createResource(req, res, 'createVolume'))
-  app.post(`/docker/service`,   (req, res) => Docker.createResource(req, res, 'createService'))
+  //app.post(`/docker/secret`,    (req, res) => Docker.createResource(req, res, 'createSecret'))
+  //app.post(`/docker/plugin`,    (req, res) => Docker.createResource(req, res, 'createPlugin'))
+  //app.post(`/docker/volume`,    (req, res) => Docker.createResource(req, res, 'createVolume'))
+  //app.post(`/docker/service`,   (req, res) => Docker.createResource(req, res, 'createService'))
   app.post(`/docker/network`,   (req, res) => Docker.createResource(req, res, 'createNetwork'))
-  app.post(`/docker/image`,     (req, res) => Docker.createResource(req, res, 'createImage'))
+  //app.post(`/docker/image`,     (req, res) => Docker.createResource(req, res, 'createImage'))
 
   /*
    * API routes to get data from Docker
    */
-  app.get(`/docker/configs`,            (req, res) => Docker.getDockerData(req, res, 'listConfigs'))
+ // app.get(`/docker/configs`,            (req, res) => Docker.getDockerData(req, res, 'listConfigs'))
   app.get(`/docker/containers`,         (req, res) => Docker.getDockerData(req, res, 'listContainers'))
   app.get(`/docker/df`,                 (req, res) => Docker.getDockerData(req, res, 'df'))
   app.get(`/docker/all-containers`,     (req, res) => Docker.getDockerData(req, res, 'listContainers', { all: true }))
   app.get(`/docker/images`,             (req, res) => Docker.getDockerData(req, res, 'listImages'))
   app.get(`/docker/info`,               (req, res) => Docker.getDockerData(req, res, 'info'))
   app.get(`/docker/networks`,           (req, res) => Docker.getDockerData(req, res, 'listNetworks'))
-  app.get(`/docker/nodes`,              (req, res) => Docker.getDockerData(req, res, 'listNodes'))
-  app.get(`/docker/plugins`,            (req, res) => Docker.getDockerData(req, res, 'listPlugins'))
+  //app.get(`/docker/nodes`,              (req, res) => Docker.getDockerData(req, res, 'listNodes'))
+  //app.get(`/docker/plugins`,            (req, res) => Docker.getDockerData(req, res, 'listPlugins'))
   app.get(`/docker/running-containers`, (req, res) => Docker.getDockerData(req, res, 'listContainers'))
-  app.get(`/docker/secrets`,            (req, res) => Docker.getDockerData(req, res, 'listSecrets'))
-  app.get(`/docker/services`,           (req, res) => Docker.getDockerData(req, res, 'listServices'))
-  app.get(`/docker/tasks`,              (req, res) => Docker.getDockerData(req, res, 'listTasks'))
+  //app.get(`/docker/secrets`,            (req, res) => Docker.getDockerData(req, res, 'listSecrets'))
+  //app.get(`/docker/services`,           (req, res) => Docker.getDockerData(req, res, 'listServices'))
+  //app.get(`/docker/tasks`,              (req, res) => Docker.getDockerData(req, res, 'listTasks'))
   app.get(`/docker/version`,            (req, res) => Docker.getDockerData(req, res, 'version'))
   app.get(`/docker/volumes`,            (req, res) => Docker.getDockerData(req, res, 'listVolumes'))
 
