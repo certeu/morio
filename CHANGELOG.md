@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Do not attempt to load config from core in ephemeral mode
 - [core] /jwks endpoint in ephemeral mode
+- [core] Typo in returned body
 - [ui] MRT login was sending incorrect data
 
 ## [0.1.6] - 2014-04-22

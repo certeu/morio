@@ -248,7 +248,7 @@ Controller.prototype.setup = async (req, res) => {
     },
     root_token: {
       about:
-        'This is the Morio root token. You can use it to authenticate before any authentication providers have been configured. Store it in safe space, as it will never be show again.',
+        'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
       value: keys.mrt,
     },
   }
