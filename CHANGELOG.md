@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [core] Setup unit testing for core
 
+## Changed
+
+- [core] Expose port when not in prod to allow serving coverage report
+
 ### Fixed
 
 - [api] Do not attempt to load config from core in ephemeral mode

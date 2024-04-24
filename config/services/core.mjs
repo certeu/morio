@@ -23,6 +23,8 @@ export const resolveServiceConfiguration = (store) => {
       tag: store.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
       networks: { default: null },
+      // Ports to export (not in production)
+      ports: PROD ? [] : [ `${store.getPreset('MORIO_CORE_PORT')}:${store.getPreset('MORIO_CORE_PORT')}` ],
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
