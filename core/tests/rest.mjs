@@ -80,8 +80,20 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
 
   /*
    * If we end up here, status code is 400 or higher so it's an error
+   * Try parsing the body as JSON, fallback to text
    */
-  return [response.status, false, response]
+  let body
+  try {
+    body = raw ? await response.text() : await response.json()
+  } catch (err) {
+    try {
+      body = await response.text()
+    } catch (err) {
+      body = false
+    }
+  }
+
+  return [response.status, body, response]
 }
 
 /**
@@ -92,7 +104,7 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
  */
 export const restClient = (api) => ({
   get: async (url) => get(api + url),
-  post: async (url, data) => __postput('POST', api + url, data),
-  put: async (url, data) => __postput('PUT', api + url, data),
+  post: async (url, data, raw=false) => __postput('POST', api + url, data, raw),
+  put: async (url, data, raw=false) => __postput('PUT', api + url, data, raw),
 })
 

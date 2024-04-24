@@ -13,9 +13,25 @@ const store = new Store().set('log', logger('trace'))
  */
 const core = restClient(`http://localhost:${getPreset('MORIO_CORE_PORT')}`)
 
+/*
+ * List of all Morio services
+ */
+const services = [
+  'core',
+  'ca',
+  'proxy',
+  'api',
+  'ui',
+  'broker',
+  'console',
+  'connector',
+  'dbuilder',
+]
+
 export {
   core,
   getPreset,
+  services,
   store,
 }
 
