@@ -5,6 +5,8 @@ import { wrapExpress } from '#shared/utils'
 import { startMorio } from './lib/services/index.mjs'
 // Routes
 import { routes } from '#routes/index'
+// Middleware
+import { guardEphemeralMode } from './middleware.mjs'
 // Load the store
 import { store } from './lib/store.mjs'
 
@@ -25,9 +27,19 @@ const app = express()
 app.use(express.json({ limit: '1mb' }))
 
 /*
+ * Add middleware to guard ephemeral mode
+ */
+app.use(guardEphemeralMode)
+
+/*
  * Load the API routes
  */
 for (const type in routes) routes[type](app)
+
+/*
+ * If not in production, allow access to coverage report
+ */
+app.use('/coverage', express.static('/morio/core/coverage'))
 
 /*
  * Add the wildcard route
