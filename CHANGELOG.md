@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Added `/jwks` route
 - [core] Generate node and deployment UUID
 - [core] Return UUIDS after setup
+- [core] Added support for setting aliases on containers
 
 ## Changed
 

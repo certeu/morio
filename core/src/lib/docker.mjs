@@ -95,6 +95,7 @@ export const generateContainerConfig = (srvConf) => {
    * Basic options
    */
   const name = srvConf.container.container_name
+  const aliases = srvConf.container.aliases || []
   store.log.stabug(`Generating container configuration: ${name}`)
   const tag = srvConf.container.tag ? `:${srvConf.container.tag}` : ''
   const opts = {
@@ -113,7 +114,7 @@ export const generateContainerConfig = (srvConf) => {
     },
   }
   opts.NetworkingConfig.EndpointsConfig[network] = {
-    Aliases: [name, `${name}_${store.config.core?.node_nr || 1}`],
+    Aliases: [name, `${name}_${store.config.core?.node_nr || 1}`, ...aliases],
   }
 
   /*
