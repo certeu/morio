@@ -9,7 +9,7 @@
     "dev": "nodemon src/index.mjs -w src -w config -w shared",
     "lint": "eslint --fix 'src/**' 'config/**' 'shared/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it core node --experimental-test-coverage --test"
+    "test": "docker exec -it core node --experimental-test-coverage --test-concurrency=1 --test"
   },
   "dependencies": {
     "axios": "^1.6.8",
