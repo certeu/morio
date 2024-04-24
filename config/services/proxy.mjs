@@ -17,6 +17,8 @@ export const resolveServiceConfiguration = (store) => {
     container: {
       // Name to use for the running container
       container_name: 'proxy',
+      // Aliases to use on the docker network (used to add unit test alias)
+      aliases: PROD ? [] : ['unit.test.morio.it'],
       // Image to run (different in dev)
       image: 'traefik',
       // Image tag (version) to run

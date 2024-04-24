@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - [core] Expose port when not in prod to allow serving coverage report
+- [proxy] Set alias in dev for unit tests
 
 ### Fixed
 
