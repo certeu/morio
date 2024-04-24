@@ -10,7 +10,7 @@ export const MrtProvider = ({ id, api, setLoadingStatus, setAccount, setError })
 
   const submit = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.login(id, { mrt, role })
+    const result = await api.login('mrt', { mrt, role })
     if (result?.[1] === 200 && result?.[0]?.jwt) {
       setLoadingStatus([true, 'Authentication Succeeded', true, true])
       setError(false)
