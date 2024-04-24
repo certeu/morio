@@ -73,9 +73,13 @@ export const bootstrapConfiguration = async () => {
     }
   } else {
     /*
-     * This is not good. Warn and return early
+     * If status is 503, we are in ephemeral mode.
+     * If not, things are not good, but in any case return early
      */
-    store.log.warn('Failed to load Morio config from core')
+    if (result[0] == 503) {
+      store.info.ephemeral = true
+      store.log.debug('Not loading Morio config in ephemeral mode')
+    } else store.log.warn('Failed to load Morio config from core')
     return
   }
 

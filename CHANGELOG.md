@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [api] Do not attempt to load config from core in ephemeral mode
 - [core] /jwks endpoint in ephemeral mode
 
 ## [0.1.6] - 2014-04-22
