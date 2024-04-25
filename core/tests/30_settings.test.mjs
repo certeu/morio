@@ -1,11 +1,8 @@
-import { store, core, getPreset } from './utils.mjs'
+import { store, core, getPreset, setup } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import setup from './test_setup.json' with { type: "json" }
-
 
 describe('Core Settings/Config/Status Tests', () => {
-
   /*
    * GET /config
    *
@@ -72,7 +69,6 @@ describe('Core Settings/Config/Status Tests', () => {
    * }
    */
   it('Should GET /config', async () => {
-
     const result = await core.get('/config')
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -143,7 +139,6 @@ describe('Core Settings/Config/Status Tests', () => {
     store.keys = d.keys
   })
 
-
   /*
    * GET /settings
    *
@@ -165,7 +160,6 @@ describe('Core Settings/Config/Status Tests', () => {
    * }
    */
   it('Should GET /settings', async () => {
-
     const result = await core.get('/settings')
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -193,7 +187,6 @@ describe('Core Settings/Config/Status Tests', () => {
     assert.equal(typeof s2.ct, 'string')
   })
 
-
   /*
    * GET /idps
    *
@@ -218,7 +211,6 @@ describe('Core Settings/Config/Status Tests', () => {
    * }
    */
   it('Should GET /idps', async () => {
-
     const result = await core.get('/idps')
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -231,15 +223,15 @@ describe('Core Settings/Config/Status Tests', () => {
         id: 'apikey',
         provider: 'apikey',
         label: 'API Key',
-        about: false
+        about: false,
       },
       mrt: { id: 'mrt', provider: 'mrt', about: false },
       local: {
         id: 'local',
         provider: 'local',
         label: 'Morio Account',
-        about: false
-      }
+        about: false,
+      },
     })
     // ui
     assert.deepEqual(d.ui, {})
@@ -313,7 +305,6 @@ describe('Core Settings/Config/Status Tests', () => {
     store.ephemeral = true
   })
 
-
   /*
    * GET /jwks
    *
@@ -345,5 +336,4 @@ describe('Core Settings/Config/Status Tests', () => {
     assert.equal(typeof key.n, 'string')
     assert.equal(typeof key.e, 'string')
   })
-
 })

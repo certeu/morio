@@ -1,7 +1,6 @@
-import { store, core, getPreset, services } from './utils.mjs'
+import { store, core, services } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import setup from './test_setup.json' with { type: "json" }
 
 describe('Core Docker GET Info Tests', () => {
   /*
@@ -42,7 +41,6 @@ describe('Core Docker GET Info Tests', () => {
        ]
    */
   it(`Should GET /docker/all-containers`, async () => {
-
     const result = await core.get(`/docker/all-containers`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -52,7 +50,6 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(d.length > 4, true)
     // This is not something we test in depth, as it's just the docker API output
   })
-
 
   /*
    * GET /docker/containers
@@ -92,7 +89,6 @@ describe('Core Docker GET Info Tests', () => {
        ]
    */
   it(`Should GET /docker/containers`, async () => {
-
     const result = await core.get(`/docker/containers`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -101,7 +97,6 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(Array.isArray(d), true)
     // This is not something we test in depth, as it's just the docker API output
   })
-
 
   /*
    * GET /docker/df
@@ -117,7 +112,6 @@ describe('Core Docker GET Info Tests', () => {
    *   }
    */
   it(`Should GET /docker/df`, async () => {
-
     const result = await core.get(`/docker/df`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -129,7 +123,6 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(Array.isArray(d.Volumes), true)
     // This is not something we test in depth, as it's just the docker API output
   })
-
 
   /*
    * GET /docker/images
@@ -152,7 +145,6 @@ describe('Core Docker GET Info Tests', () => {
    *  ]
    */
   it(`Should GET /docker/images`, async () => {
-
     const result = await core.get(`/docker/images`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -162,7 +154,6 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(typeof d[0].Id, 'string')
     // This is not something we test in depth, as it's just the docker API output
   })
-
 
   /*
    * GET /docker/info
@@ -177,7 +168,6 @@ describe('Core Docker GET Info Tests', () => {
    * }
    */
   it(`Should GET /docker/info`, async () => {
-
     const result = await core.get(`/docker/info`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -187,7 +177,6 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(typeof d.ID, 'string')
     // This is not something we test in depth, as it's just the docker API output
   })
-
 
   /*
    * GET /docker/networks
@@ -214,7 +203,6 @@ describe('Core Docker GET Info Tests', () => {
    *  ]
    */
   it(`Should GET /docker/networks`, async () => {
-
     const result = await core.get(`/docker/networks`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -227,7 +215,6 @@ describe('Core Docker GET Info Tests', () => {
     }
     assert.equal(store.container_networks.morionet.Name, 'morionet')
   })
-
 
   /*
    * GET /docker/running-containers
@@ -267,7 +254,6 @@ describe('Core Docker GET Info Tests', () => {
    *   ]
    */
   it(`Should GET /docker/running-containers`, async () => {
-
     const result = await core.get(`/docker/running-containers`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -285,7 +271,6 @@ describe('Core Docker GET Info Tests', () => {
       if (services.includes(name)) store.containers[name] = container
     }
   })
-
 
   /*
    * GET /docker/verion
@@ -311,7 +296,6 @@ describe('Core Docker GET Info Tests', () => {
    *  }
    */
   it(`Should GET /docker/version`, async () => {
-
     const result = await core.get(`/docker/version`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -341,7 +325,6 @@ describe('Core Docker GET Info Tests', () => {
      }
    */
   it(`Should GET /docker/volumes`, async () => {
-
     const result = await core.get(`/docker/volumes`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -350,18 +333,16 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(typeof d, 'object')
     assert.equal(Array.isArray(d.Volumes), true)
   })
-
 })
 
 describe('Core Docker Active Tests', () => {
-
   /*
    * POST /docker/pull
    *
    * This will return a streaming response, so NDJSON
    */
   it(`Should POST /docker/pull`, async () => {
-    const result = await core.post(`/docker/pull`, { tag: "google/pause:latest" }, true)
+    const result = await core.post(`/docker/pull`, { tag: 'google/pause:latest' }, true)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -369,7 +350,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(typeof d, 'string')
     assert.equal(d.includes('Image is up to date for google/pause:latest'), true)
   })
-
 
   /*
    * POST /docker/container
@@ -390,7 +370,7 @@ describe('Core Docker Active Tests', () => {
   it(`Should POST /docker/container`, async () => {
     const result = await core.post(`/docker/container`, {
       Hostname: 'morio_core_test',
-       Env: ['test=true', 'morio=true'],
+      Env: ['test=true', 'morio=true'],
       Image: 'google/pause:latest',
       Labels: {
         'eu.certeu.morio.test': 'yes',
@@ -404,7 +384,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(typeof d.id, 'string')
     store.test_container = d.id
   })
-
 
   /*
    * GET /docker/containers/:id
@@ -449,7 +428,6 @@ describe('Core Docker Active Tests', () => {
     store.test_image = d.Image
   })
 
-
   /*
    * GET /docker/containers/:id/stats
    *
@@ -480,7 +458,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(typeof d.name, 'string')
     assert.equal(typeof d.cpu_stats, 'object')
   })
-
 
   /*
    * GET /docker/images/:id
@@ -520,7 +497,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(d.Id, store.test_image)
   })
 
-
   /*
    * GET /docker/images/:id/history
    *
@@ -546,7 +522,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(Array.isArray(d), true)
   })
 
-
   /*
    * POST /docker/network
    *
@@ -567,11 +542,11 @@ describe('Core Docker Active Tests', () => {
       Name: 'morio_test_network',
       Internal: true,
       Options: {
-        "com.docker.network.driver.mtu": "1500"
+        'com.docker.network.driver.mtu': '1500',
       },
       Labels: {
-        "it.morio.example.label": "test"
-      }
+        'it.morio.example.label': 'test',
+      },
     })
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -581,7 +556,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(typeof d.id, 'string')
     store.test_network = d.id
   })
-
 
   /*
    * GET /docker/networks/:id
@@ -618,11 +592,9 @@ describe('Core Docker Active Tests', () => {
     assert.equal(d.Options['com.docker.network.driver.mtu'], '1500')
     assert.equal(d.Labels['it.morio.example.label'], 'test')
   })
-
 })
 
 describe('Core Docker Container State Tests', () => {
-
   for (const state of ['start', 'pause', 'unpause', 'stop', 'restart', 'kill']) {
     /*
      * POST /docker/containers/:id/start
@@ -639,6 +611,4 @@ describe('Core Docker Container State Tests', () => {
       assert.equal(typeof d, 'object')
     })
   }
-
 })
-

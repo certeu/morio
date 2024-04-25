@@ -2,3 +2,4 @@
 json-loader.mjs
 Dockerfile.*
 bin/*
+run-unit-tests.sh

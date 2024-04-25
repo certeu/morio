@@ -1,11 +1,8 @@
-import { store, core, getPreset } from './utils.mjs'
+import { store, core, setup } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import setup from './test_setup.json' with { type: "json" }
-
 
 describe('Core Setup Tests', () => {
-
   /*
    * POST /setup
    *
@@ -15,7 +12,6 @@ describe('Core Setup Tests', () => {
    * }
    */
   it('Should not initiate setup if we do not send data', async () => {
-
     const result = await core.post('/setup', {})
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -26,7 +22,6 @@ describe('Core Setup Tests', () => {
     assert.equal(d.errors.length, 1)
     assert.equal(d.errors[0], 'Settings are not valid')
   })
-
 
   /*
    * POST /setup
@@ -45,7 +40,6 @@ describe('Core Setup Tests', () => {
    * }
    */
   it('Should initiate setup if we do send valid data', async () => {
-
     const result = await core.post('/setup', setup)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -68,12 +62,11 @@ describe('Core Setup Tests', () => {
     assert.equal(typeof d.root_token.value, 'string')
     assert.equal(d.root_token.about.includes('never be shown'), true)
     assert.equal(d.root_token.value.length, 68)
-    assert.equal(d.root_token.value.slice(0,4), 'mrt.')
+    assert.equal(d.root_token.value.slice(0, 4), 'mrt.')
 
     /*
      * Keep root token in store
      */
     store.mrt = d.root_token.value
   })
-
 })
