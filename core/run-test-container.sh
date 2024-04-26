@@ -20,6 +20,7 @@ docker run \
   -v /home/jdecock/git/morio/data/config:/etc/morio  \
   -v /home/jdecock/git/morio/data/data:/morio/data  \
   -v /home/jdecock/git/morio/data/logs:/var/log/morio  \
+ \
   -e MORIO_DOCKER_SOCKET=/var/run/docker.sock \
   -e MORIO_CONFIG_ROOT=/home/jdecock/git/morio/data/config \
   -e MORIO_DATA_ROOT=/home/jdecock/git/morio/data/data \

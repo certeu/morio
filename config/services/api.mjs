@@ -12,6 +12,40 @@ export const resolveServiceConfiguration = (store) => {
     dl: store.getPreset('MORIO_DOWNLOADS_FOLDER'),
   }
 
+  const labels = [
+    // Tell traefik to watch this container
+    'traefik.enable=true',
+    // Attach to the morio docker network
+    `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
+    // Match requests going to the API prefix
+    `traefik.http.routers.api.rule=(PathPrefix(\`${store.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`))`,
+    // Set priority to avoid rule conflicts
+    `traefik.http.routers.api.priority=100`,
+    // Forward to api service
+    `traefik.http.routers.api.service=api`,
+    // Only match requests on the https endpoint
+    `traefik.http.routers.api.entrypoints=https`,
+    // Forward to port on container
+    `traefik.http.services.api.loadbalancer.server.port=${store.getPreset('MORIO_API_PORT')}`,
+    // Enable TLS
+    `traefik.http.routers.api.tls=true`,
+    // Enable authentication
+    `traefik.http.middlewares.auth.forwardauth.address=http://api:${store.getPreset('MORIO_API_PORT')}/auth`,
+    `traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-`,
+    `traefik.http.routers.api.middlewares=auth@docker`,
+  ]
+  /*
+   * To run unit tests, we need to add these labels manually
+   */
+  if (store.testing) labels.push(
+    "traefik.http.routers.api.tls=true",
+    "traefik.http.routers.api.tls.certresolver=ca",
+    "traefik.http.services.api.loadbalancer.server.port=3000",
+    "traefik.tls.stores.default.defaultgeneratedcert.domain.main=unit.test.morio.it",
+    "traefik.tls.stores.default.defaultgeneratedcert.domain.sans=unit.test.morio.it",
+    "traefik.tls.stores.default.defaultgeneratedcert.resolver=ca"
+  )
+
   return {
     /**
      * Container configuration
@@ -23,7 +57,7 @@ export const resolveServiceConfiguration = (store) => {
       // Name to use for the running container
       container_name: 'api',
       // Image to run (different in dev)
-      image: PROD ? 'morio/api' : 'morio/api-dev',
+      image: PROD ? 'morio/api' : store.testing ? 'morio/api-test' : 'morio/api-dev',
       // Image tag (version) to run
       tag: store.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
@@ -47,28 +81,7 @@ export const resolveServiceConfiguration = (store) => {
         `KAFKAJS_NO_PARTITIONER_WARNING=1`,
       ],
       // Configure Traefik with container labels
-      labels: [
-        // Tell traefik to watch this container
-        'traefik.enable=true',
-        // Attach to the morio docker network
-        `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
-        // Match requests going to the API prefix
-        `traefik.http.routers.api.rule=(PathPrefix(\`${store.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`))`,
-        // Set priority to avoid rule conflicts
-        `traefik.http.routers.api.priority=100`,
-        // Forward to api service
-        `traefik.http.routers.api.service=api`,
-        // Only match requests on the https endpoint
-        `traefik.http.routers.api.entrypoints=https`,
-        // Forward to port on container
-        `traefik.http.services.api.loadbalancer.server.port=${store.getPreset('MORIO_API_PORT')}`,
-        // Enable TLS
-        `traefik.http.routers.api.tls=true`,
-        // Enable authentication
-        `traefik.http.middlewares.auth.forwardauth.address=http://api:${store.getPreset('MORIO_API_PORT')}/auth`,
-        `traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-`,
-        `traefik.http.routers.api.middlewares=auth@docker`,
-      ],
+      labels,
     },
   }
 }

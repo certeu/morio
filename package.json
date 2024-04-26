@@ -27,6 +27,7 @@
     "prebuild": "npm run reconfigure",
     "prettier": "npx prettier --write .",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run dev",
+    "test:api": "npm run redev && ./api/run-test-container.sh && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

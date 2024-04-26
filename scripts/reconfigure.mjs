@@ -45,31 +45,44 @@ const presetGetters = {
 
 
 const config = {
-  /*
-   * Resolve the development configuration
-   */
-  dev: await resolveServiceConfiguration('core', {
-    getPreset: presetGetters.dev,
-    inProduction: () => false,
-    config: {},
-  }),
-  /*
-   * Resolve the test configuration
-   */
-  test: await resolveServiceConfiguration('core', {
-    getPreset: presetGetters.dev,
-    inProduction: () => false,
-    config: {},
-    testing: true
-  }),
-  /*
-   * Resolve the production configuration
-   */
-  prod: await resolveServiceConfiguration('core', {
-    getPreset: presetGetters.prod,
-    inProduction: () => true,
-    config: {},
-  }),
+  core: {
+    /*
+     * Resolve the development configuration
+     */
+    dev: await resolveServiceConfiguration('core', {
+      getPreset: presetGetters.dev,
+      inProduction: () => false,
+      config: {},
+    }),
+    /*
+     * Resolve the test configuration
+     */
+    test: await resolveServiceConfiguration('core', {
+      getPreset: presetGetters.dev,
+      inProduction: () => false,
+      config: {},
+      testing: true
+    }),
+    /*
+     * Resolve the production configuration
+     */
+    prod: await resolveServiceConfiguration('core', {
+      getPreset: presetGetters.prod,
+      inProduction: () => true,
+      config: {},
+    }),
+  },
+  api: {
+    /*
+     * Resolve the test configuration
+     */
+    test: await resolveServiceConfiguration('api', {
+      getPreset: presetGetters.dev,
+      inProduction: () => false,
+      config: {},
+      testing: true
+    }),
+  }
 }
 
 /*
@@ -77,15 +90,16 @@ const config = {
  */
 const cliOptions = (name, env) => `\\
   ${env === 'test' ? '-it --rm' : '-d'} \\
-  --name=${config[env].container.container_name} \\
-  --hostname=${config[env].container.container_name} \\
-  --label morio.service=core \\
+  --name=${config[name][env].container.container_name} \\
+  --hostname=${config[name][env].container.container_name} \\
+  --label morio.service=${name} \\
   --log-driver=journald \\
   --log-opt labels=morio.service \\
   --network-alias ${name} \\
-  ${config[env].container.init ? '--init' : ''} \\
-${(config[env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
-${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
+  ${config[name][env].container.init ? '--init' : ''} \\
+${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
+${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
+${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab}" `).join(" \\\n")} \\
   -e MORIO_DOCKER_SOCKET=${presetGetters[env]('MORIO_DOCKER_SOCKET')} \\
   -e MORIO_CONFIG_ROOT=${presetGetters[env]('MORIO_CONFIG_ROOT')} \\
   -e MORIO_DATA_ROOT=${presetGetters[env]('MORIO_DATA_ROOT')} \\
@@ -95,21 +109,22 @@ ${(config[env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\
   ${env !== 'prod'
     ? '-e MORIO_REPO_ROOT='+MORIO_REPO_ROOT+" \\\n  "
     : ''
-  }${config[env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/core/tests/run-unit-tests.sh' : ''}
+  }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/'+name+'/tests/run-unit-tests.sh' : ''}
 `
 
-const script = (env) => `#!/bin/bash
+const script = (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
 #
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
-docker run ${cliOptions('core', env)}
+docker run ${cliOptions(name, env)}
 `
 for (const env of ['dev', 'test', 'prod']) {
-  await writeFile(`core/run-${env}-container.sh`, script(env), false, 0o755)
+  await writeFile(`core/run-${env}-container.sh`, script('core', env), false, 0o755)
 }
+await writeFile(`api/run-test-container.sh`, script('api', 'test'), false, 0o755)
 
 await writeFile(`VERSION`, pkg.version)
 await writeFile('moriod/etc/morio/moriod/version.env', `#
@@ -122,4 +137,6 @@ await writeFile('moriod/etc/morio/moriod/version.env', `#
 
 MORIO_VERSION=${pkg.version}
 `)
+
+
 

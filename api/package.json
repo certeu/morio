@@ -10,7 +10,7 @@
     "dev": "nodemon src/index.mjs",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "npx mocha tests/index.mjs"
+    "test": "docker exec -it api node --experimental-test-coverage --test-concurrency=1 --test"
   },
   "imports": {
     "#config": "./config/index.mjs",

@@ -44,7 +44,7 @@ const __getdel = async function (method = 'GET', url, raw = false) {
  * @param {raw} string - Set this to something truthy to not parse the result as JSON
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-const __postput = async function (method = 'POST', url, data, raw = false) {
+const __patchpostput = async function (method = 'POST', url, data, raw = false) {
   /*
    * Construct the request object with or without a request body
    */
@@ -106,6 +106,7 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
 export const restClient = (api) => ({
   delete: async (url, raw = false) => __getdel('DELETE', api + url, raw),
   get: async (url, raw = false) => __getdel('GET', api + url, raw),
-  post: async (url, data, raw = false) => __postput('POST', api + url, data, raw),
-  put: async (url, data, raw = false) => __postput('PUT', api + url, data, raw),
+  patch: async (url, data, raw = false) => __patchpostput('PATCH', api + url, data, raw),
+  post: async (url, data, raw = false) => __patchpostput('POST', api + url, data, raw),
+  put: async (url, data, raw = false) => __patchpostput('PUT', api + url, data, raw),
 })

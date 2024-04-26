@@ -15,6 +15,12 @@ const store = new Store().set('log', logger('trace'))
 const core = restClient(`http://localhost:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
+ * Client for the management API
+ * This file is used by API unit tests too, that is why this is here
+ */
+const api = restClient(`http://localhost:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`)
+
+/*
  * List of all Morio services
  */
 const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'connector', 'dbuilder']
@@ -67,4 +73,4 @@ const equalIgnoreSpaces = (orig, check) => {
   return assert.equal(orig.replace(/\s/g, ''), check.replace(/\s/g, ''))
 }
 
-export { core, equalIgnoreSpaces, getPreset, services, setup, store }
+export { api, core, equalIgnoreSpaces, getPreset, services, setup, store }
