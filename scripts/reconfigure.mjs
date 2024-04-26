@@ -82,7 +82,6 @@ const cliOptions = (name, env) => `\\
   --label morio.service=core \\
   --log-driver=journald \\
   --log-opt labels=morio.service \\
-  --network=morionet \\
   --network-alias ${name} \\
   ${config[env].container.init ? '--init' : ''} \\
 ${(config[env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
@@ -106,9 +105,6 @@ const script = (env) => `#!/bin/bash
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
-docker network create morionet 2> /dev/null
-docker stop core 2> /dev/null
-docker rm core 2> /dev/null
 docker run ${cliOptions('core', env)}
 `
 for (const env of ['dev', 'test', 'prod']) {
