@@ -43,6 +43,7 @@ describe('Core Docker GET Info Tests', () => {
   it(`Should GET /docker/all-containers`, async () => {
     const result = await core.get(`/docker/all-containers`)
     const d = result[1]
+    console.log(d)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -611,4 +612,26 @@ describe('Core Docker Container State Tests', () => {
       assert.equal(typeof d, 'object')
     })
   }
+})
+
+describe('Core Docker Clearnup Tests', () => {
+  /*
+   * DELETE /docker/network/:id
+   *
+   * Example response:
+   * {
+   *   result: 'success',
+   *   settings: {
+   *     deployment: { node_count: 1, display_name: 'Morio Unit Tests', nodes: [Array] },
+   *     tokens: { flags: [Object], secrets: [Object] },
+   *     iam: { providers: [Object] }
+   *   }
+   * }
+   */
+  it('Should DELETE /docker/network/:id', async () => {
+    const result = await core.delete(`/docker/network/${store.test_network}`)
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 204)
+  })
 })

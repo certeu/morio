@@ -5,7 +5,7 @@ cd /morio/core
 
 # Start the core instance, as background job
 # Also wrap it in c8 to generate a coverage report
-../node_modules/.bin/c8 --reporter=html -- node src/index.mjs & #> /dev/null &
+../node_modules/.bin/c8 --reporter=html -- node src/index.mjs &> /dev/null &
 
 # Wait for core to come up by checking the status endpoint
 TRIES=0

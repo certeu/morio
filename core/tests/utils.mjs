@@ -2,6 +2,7 @@ import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
+import { strict as assert } from 'node:assert'
 
 /*
  * Setup the store
@@ -54,4 +55,16 @@ const setup = {
   },
 }
 
-export { core, getPreset, services, setup, store }
+/*
+ * Helper method to assert strings are equal ignoring spaces
+ */
+const equalIgnoreSpaces = (orig, check) => {
+  if (typeof orig !== 'string')
+    return assert.equal(orig, 'Not a string - Cannot run equalIgnoreSpaces assertion')
+  if (typeof check !== 'string')
+    return assert.equal('Not a string - Cannot run equalIgnoreSpaces assertion', check)
+
+  return assert.equal(orig.replace(/\s/g, ''), check.replace(/\s/g, ''))
+}
+
+export { core, equalIgnoreSpaces, getPreset, services, setup, store }

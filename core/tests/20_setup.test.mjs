@@ -11,7 +11,7 @@ describe('Core Setup Tests', () => {
    *   "errors": [ "Settings are not valid" ]
    * }
    */
-  it('Should not initiate setup if we do not send data', async () => {
+  it('Should POST /setup (invalid data)', async () => {
     const result = await core.post('/setup', {})
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -39,7 +39,7 @@ describe('Core Setup Tests', () => {
    *   }
    * }
    */
-  it('Should initiate setup if we do send valid data', async () => {
+  it('Should POST /setup', async () => {
     const result = await core.post('/setup', setup)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)

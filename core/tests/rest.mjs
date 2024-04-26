@@ -6,13 +6,14 @@
  * @param {raw} string - Set this to something truthy to not parse the result as JSON
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-const get = async function (url, raw = false) {
+const __getdel = async function (method = 'GET', url, raw = false) {
+  const request = { method }
   /*
    * Send the request to the API
    */
   let response
   try {
-    response = await fetch(url)
+    response = await fetch(url, request)
   } catch (err) {
     // Return error
     return [false, err, response]
@@ -73,10 +74,10 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
   if ([204].includes(response.status)) return [response.status, {}, response]
   /*
    * Handle all other status codes
-   */
-  else if (response.status < 400) return raw
-    ? [response.status, await response.text(), response]
-    : [response.status, await response.json(), response]
+   */ else if (response.status < 400)
+    return raw
+      ? [response.status, await response.text(), response]
+      : [response.status, await response.json(), response]
 
   /*
    * If we end up here, status code is 400 or higher so it's an error
@@ -103,8 +104,8 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
  * @return {object] client - The API client
  */
 export const restClient = (api) => ({
-  get: async (url) => get(api + url),
-  post: async (url, data, raw=false) => __postput('POST', api + url, data, raw),
-  put: async (url, data, raw=false) => __postput('PUT', api + url, data, raw),
+  delete: async (url, raw = false) => __getdel('DELETE', api + url, raw),
+  get: async (url, raw = false) => __getdel('GET', api + url, raw),
+  post: async (url, data, raw = false) => __postput('POST', api + url, data, raw),
+  put: async (url, data, raw = false) => __postput('PUT', api + url, data, raw),
 })
-
