@@ -1,4 +1,3 @@
-import { streamContainerLogs } from '#lib/docker'
 import { keypairAsJwk } from '#shared/crypto'
 // Store
 import { store } from '../lib/store.mjs'
@@ -74,34 +73,14 @@ Controller.prototype.status = async (req, res) => {
   }
 
   /*
-   * If MORIO is not setup, return limited info
+   * Return adding whether MORIO is setup or not
    */
-  if (!store.config.deployment) return res.send({ ...base, setup: false })
-
-  return res.send({
-    ...base,
-    setup: true,
-    fixme: 'Handle post-setup status',
-  })
-}
-
-/**
- * Stream service logs
- *
- * This will stream the service logs from its container
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.streamServiceLogs = async (req, res) => {
-  res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.setHeader('Transfer-Encoding', 'chunked')
-
-  return streamContainerLogs(
-    req.params.service,
-    (data) => res.write(data),
-    () => res.end()
-  )
+  return res
+    .send({
+      ...base,
+      setup: store.config.deployment ? true : false,
+    })
+    .end()
 }
 
 /**
@@ -113,11 +92,6 @@ Controller.prototype.streamServiceLogs = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.jwks = async (req, res) => {
-  /*
-   * Return an empty array if we are in epehemeral mode
-   */
-  if (store.info.ephemeral) return res.status(200).send({ keys: [] }).end()
-
   /*
    * Get JWKS info from public key
    */
