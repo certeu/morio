@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # Added
 
+- [api] Added middleware to guard routes in ephemeral mode
 - [core] Setup unit testing for core
 - [core] Added middleware to guard routes in ephemeral mode
 - [core] Added endpoint to remove Docker network

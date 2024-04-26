@@ -12,6 +12,8 @@ import { bootstrapConfiguration } from './bootstrap.mjs'
 // Swagger
 import swaggerUi from 'swagger-ui-express'
 import { openapi } from '../openapi/index.mjs'
+// Middleware
+import { guardEphemeralMode } from './middleware.mjs'
 // Load the store
 import { store } from './lib/store.mjs'
 
@@ -24,6 +26,11 @@ const app = express()
  * Add support for JSON with a limit to the request body
  */
 app.use(express.json({ limit: '1mb' }))
+
+/*
+ * Add middleware to guard ephemeral mode
+ */
+app.use(guardEphemeralMode)
 
 /*
  * Add support for cookies with a limit to the request body
