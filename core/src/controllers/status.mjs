@@ -9,52 +9,6 @@ import { store } from '../lib/store.mjs'
  */
 export function Controller() {}
 
-const timeSince = (timestamp) => {
-  let uptime
-  /*
-   * Calculate time delta as a number of seconds
-   */
-  const delta = (Date.now() - timestamp) / 1000
-
-  /*
-   * Report in seconds if it is below 120 seconds
-   */
-  if (delta < 120) uptime = `${Math.floor(delta * 10) / 10} seconds`
-  /*
-   * Report in minutes + seconds if it is below 10 minutes
-   */ else if (delta < 600) {
-    const minutes = Math.floor(delta / 60)
-    const seconds = Math.floor(delta - 60 * minutes)
-    uptime = `${minutes} minutes and ${seconds} seconds`
-  } else if (delta < 120 * 60) {
-    /*
-     * Report in minutes if it is below 120 minutes
-     */
-    uptime = `${Math.floor(delta / 60)} minutes`
-  } else if (delta < 6 * 60 * 60) {
-    /*
-     * Report in hours + minutes if it is below 6 hours
-     */
-    const hours = Math.floor(delta / 3600)
-    const minutes = Math.floor(delta - (3600 * hours) / 60)
-    uptime = `${hours} hours and ${minutes} minutes`
-  } else if (delta < 75 * 60 * 60) {
-    /*
-     * Report in hours if it is below 75 hours
-     */
-    const hours = Math.floor(delta / 3600)
-    uptime = `${hours} hours`
-  } else {
-    /*
-     * Report in days
-     */
-    const days = Math.floor(delta / (3600 * 24))
-    uptime = `${days} days`
-  }
-
-  return { uptime, uptime_seconds: delta }
-}
-
 /**
  * Status
  *
@@ -69,7 +23,7 @@ Controller.prototype.status = async (req, res) => {
    */
   const base = {
     ...store.info,
-    ...timeSince(store.start_time),
+    update: (Date.now() - store.start_time) / 1000,
   }
 
   /*

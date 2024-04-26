@@ -177,14 +177,6 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Make sure we have a keypair
-   */
-  if (!keys.public || !keys.private) {
-    store.log.debug(`Configuration lacks key pair`)
-    return res.status(400).send({ errors: ['Configuration lacks key pair'] })
-  }
-
-  /*
    * Update the settings with the defaults that are configured
    */
   for (const [key, val] of store.config.services.core.default_settings) {

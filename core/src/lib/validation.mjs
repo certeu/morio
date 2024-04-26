@@ -21,13 +21,14 @@ import get from 'lodash.get'
  */
 export const validate = async (targetPath, input) => {
   const target = get(schema, targetPath, false)
-  if (target === false) throw `Validation schema path does not exist: ${targetPath}`
-  let valid
-  try {
-    valid = await target.validateAsync(input)
-  } catch (err) {
-    return [false, err]
-  }
+  if (target) {
+    let valid
+    try {
+      valid = await target.validateAsync(input)
+    } catch (err) {
+      return [false, err]
+    }
 
-  return [valid, null]
+    return [valid, null]
+  }
 }
