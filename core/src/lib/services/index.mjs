@@ -163,11 +163,6 @@ export const startMorio = async (hookProps = {}) => {
   if (typeof store.config.containers === 'undefined') store.config.containers = {}
 
   /*
-   * Create Docker network
-   */
-  await createDockerNetwork(store.getPreset('MORIO_NETWORK'))
-
-  /*
    * Load list or running containers because if it's running
    * and the config is not changed, we won't restart/recreate it
    */
@@ -281,6 +276,58 @@ export const ensureMorioService = async (service, running, hookProps = {}) => {
    * Last but not least, always run the reload lifecycle hook
    */
   await runHook('reload', service, { ...hookProps, recreate })
+}
+
+/**
+ * Ensures the morio network exists, and the container is attached to it
+ *
+ * @param {string} network = The name of the network to ensure
+ * @param {string} service = The name of the service/container to attach
+ * @return {bool} ok = Whether or not the service was started
+ */
+export const ensureMorioNetwork = async (
+  networkName = 'morionet',
+  service = 'core',
+  endpointConfig = {}
+) => {
+  /*
+   * Create Docker network
+   */
+  const network = await createDockerNetwork(networkName)
+
+  /*
+   * Attach to network. This will be an error if it's already attached.
+   */
+  if (network) {
+    try {
+      await network.connect({ Container: service, EndpointConfig: endpointConfig })
+    } catch (err) {
+      if (err?.json?.message && err.json.message.includes('already exists in network')) {
+        store.log.debug(`Container ${service} is already attached to network ${networkName}`)
+      } else store.log.warn(`Failed to attach container ${service} to network ${networkName}`)
+    }
+
+    /*
+     * Inspect containers in case it's (also) attached to the standard/other networks
+     */
+    const [success, result] = await runContainerApiCommand(service, 'inspect')
+    if (success) {
+      for (const netName in result.NetworkSettings.Networks) {
+        if (netName !== networkName) {
+          const netId = result.NetworkSettings.Networks[netName].NetworkID
+          const [ok, net] = await runDockerApiCommand('getNetwork', netId)
+          if (ok && net) {
+            store.log.debug(`Disconnecting container ${service} from network ${netName}`)
+            try {
+              await net.disconnect({ Container: service, Force: true })
+            } catch (err) {
+              store.log.warn(`Disconnecting container ${service} from network ${netName} failed`)
+            }
+          }
+        }
+      }
+    } else store.log(`Failed to inspect ${service} container`)
+  }
 }
 
 /**

@@ -68,15 +68,26 @@ export const createDockerNetwork = async (name) => {
   )
   if (success) {
     store.log.debug(`Network created: ${name}`)
-    return result.id
+    /*
+     * Return the network object
+     */
+    const [found, network] = await runDockerApiCommand('getNetwork', name)
+
+    return found ? network : false
   }
 
   if (
     result?.json?.message &&
     result.json.message.includes(`network with name ${name} already exists`)
-  )
+  ) {
     store.log.debug(`Network already exists: ${name}`)
-  else store.log.warn(result, `Failed to create network: ${name}`)
+    /*
+     * Return the network object
+     */
+    const [found, network] = await runDockerApiCommand('getNetwork', name)
+
+    return found ? network : false
+  } else store.log.warn(result, `Failed to create network: ${name}`)
 
   return false
 }
@@ -194,7 +205,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  * This helper method runs an async command against the container API
  *
  * @param {string} id - The container id
- * @param {string} cmd - A instance method to run
+ * @param {string} cmd - An instance method to run
  * @param {object} options - Options to pass to the Docker API
  * @param {boolean} silent - Set this to true to not log errors
  * @return {array} return - An array with a boolean indicating success or
@@ -215,6 +226,42 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
   try {
     store.log.stabug(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
+  } catch (err) {
+    if (err instanceof Error) {
+      if (!silent) store.log.warn(err.message)
+      return [false, err.message]
+    } else {
+      if (!silent) store.log.warn(err)
+      return [false, err]
+    }
+  }
+
+  return [true, result]
+}
+
+/**
+ * This helper method runs an async command against the network API
+ *
+ * @param {string} id - The network id
+ * @param {string} cmd - An instance method to run
+ * @param {object} options - Options to pass to the Docker API
+ * @param {boolean} silent - Set this to true to not log errors
+ * @return {array} return - An array with a boolean indicating success or
+ * failure, and the command return value
+ */
+export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false) => {
+  if (!id) {
+    store.log.debug(`Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
+    return [false]
+  }
+
+  const [ready, network] = await runDockerApiCommand('getNetwork', id)
+  if (!ready) return [false, false]
+
+  let result
+  try {
+    store.log.stabug(`Running \`${cmd}\` command on network \`${id.slice(0, 6)}\``)
+    result = await network[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
       if (!silent) store.log.warn(err.message)
@@ -327,28 +374,6 @@ export const runDockerCliCommand = async (cmd, ...params) => {
   let result
   try {
     result = await docker[cmd](...params)
-  } catch (err) {
-    return [false, err]
-  }
-
-  return [true, result]
-}
-
-/**
- * This helper method runs an async command against the docker network API
- *
- * @param {string} id - The container image id
- * @param {string} cmd - A instance method to run
- * @return {array} return - An array with a boolean indicating success or
- * failure, and the command return value
- */
-export const runNetworkApiCommand = async (id, cmd) => {
-  const [ready, network] = await runDockerApiCommand('getNetwork', id)
-  if (!ready) return [false, false]
-
-  let result
-  try {
-    result = await network[cmd]()
   } catch (err) {
     return [false, err]
   }

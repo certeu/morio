@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Setup unit testing for core
 - [core] Added middleware to guard routes in ephemeral mode
 - [core] Added endpoint to remove Docker network
+- [core] On startup, core now creates and attaches to its own Docker network, and then disconnects from all other networks
 
 ## Changed
 

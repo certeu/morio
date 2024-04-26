@@ -13,8 +13,8 @@ import axios from 'axios'
 import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
-// Default hooks
-import { alwaysWantedHook } from './index.mjs'
+// Default hooks & netork handler
+import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
 // Store
 import { store } from '../store.mjs'
 
@@ -78,8 +78,12 @@ export const service = {
        * the folder exists
        */
       store.presets = loadAllPresets()
-      await mkdir('/etc/morio/shared')
-      await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
+      try {
+        await mkdir('/etc/morio/shared')
+        await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
+      } catch (err) {
+        store.log.warn('Failed to write presets to disk')
+      }
 
       /*
        * Load existing settings and keys from disk
@@ -96,6 +100,21 @@ export const service = {
         store.settings = {}
         store.config = {}
 
+        /*
+         * If we are in epehemeral mode, this may very well be the first cold boot.
+         * As such, we need to ensure the docker network exists, and attach to it.
+         */
+        try {
+          await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
+            Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
+          })
+        } catch (err) {
+          store.log.warn('Failed to ensure morio network configuration')
+        }
+
+        /*
+         * Return here for ephemeral mode
+         */
         return true
       }
 

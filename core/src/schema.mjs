@@ -28,6 +28,9 @@ export const requestSchema = {
       inspect: Joi.object({
         id: Joi.string().required(),
       }),
+      remove: Joi.object({
+        id: Joi.string().required(),
+      }),
     },
   },
   decrypt: Joi.object({
