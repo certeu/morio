@@ -36,6 +36,11 @@ export const bootstrapConfiguration = async () => {
     }
 
   /*
+   * Set the prefix
+   */
+  store.prefix = store.getPreset('MORIO_API_PREFIX')
+
+  /*
    * Add core client to store
    */
   if (!store.core) store.core = coreClient(`http://core:${store.getPreset('MORIO_CORE_PORT')}`)
@@ -58,30 +63,20 @@ export const bootstrapConfiguration = async () => {
      * Also load the info from core
      * This will tell us whether we are running ephemeral or not
      */
-    const infoResult = await attempt({
-      every: 2,
-      timeout: 60,
-      run: async () => await store.core.get('/info'),
-      onFailedAttempt: (s) =>
-        store.log.debug(`Waited ${s} seconds for core/info, will continue waiting.`),
-      validate: coreFetchOk,
-    })
+    const [ok, infoResult] = await store.core.get('/info')
     if (coreFetchOk(infoResult)) {
       store.log.debug(`Loaded info from core.`)
       store.info.production = infoResult[1].production
       store.info.ephemeral = infoResult[1].ephemeral
-    }
-  } else {
-    /*
-     * If status is 503, we are in ephemeral mode.
-     * If not, things are not good, but in any case return early
-     */
-    if (result[0] == 503) {
+    } else if (
+      ok === 503 &&
+      Array.isArray(infoResult.errors) &&
+      infoResult.errors[0].includes('Not available in ephemeral mode')
+    ) {
       store.info.ephemeral = true
-      store.log.debug('Not loading Morio config in ephemeral mode')
-    } else store.log.warn('Failed to load Morio config from core')
-    return
-  }
+      store.log.debug('Not loading Morio info in ephemeral mode')
+    }
+  } else store.log.warn('Failed to load Morio config from core')
 
   /*
    * If we are in ephemeral mode, return early
@@ -133,4 +128,5 @@ export const bootstrapConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (result) => result && Array.isArray(result) && result[0] === 200 && result[1]
+const coreFetchOk = (result, okStatus = [200]) =>
+  result && Array.isArray(result) && okStatus.includes(result[0]) && result[1]
