@@ -8,24 +8,37 @@ cd /morio/api
 ../node_modules/.bin/c8 --reporter=html -- node src/index.mjs & #> /dev/null &
 
 # Wait for the api to come up by checking the status endpoint
-TRIES=0
-while [ $TRIES -le 9 ] && [ -z "$UP" ]
+TRIES1=0
+while [ $TRIES1 -le 9 ] && [ -z "$UP" ]
 do
-  TRIES=$((TRIES+1))
-  RESULT=$(curl -o /dev/null -f -s -w "%{http_code}\n" http://localhost:3000/status)
+  TRIES1=$((TRIES1+1))
+  RESULT=$(curl -o /dev/null -f -s -w "%{http_code}\n" http://localhost:3000/-/api/status)
   if [ "$RESULT" -eq 200 ]; then
     UP=1
   else
-    echo "Waiting for api to come up [$TRIES/10]"
+    echo "Waiting for api to come up [$TRIES1/10]"
+    sleep 1
+  fi
+done
+
+# Wait for the proxy to come up
+TRIES2=0
+while [ $TRIES2 -le 9 ] && [ -z "$UP2" ]
+do
+  TRIES2=$((TRIES2+1))
+  RESULT=$(curl --insecure -o /dev/null -f -s -w "%{http_code}\n" https://proxy/)
+  if [ "$RESULT" -eq 200 ]; then
+    UP2=1
+  else
+    echo "Waiting for proxy to come up [$TRIES2/10]"
     sleep 1
   fi
 done
 
 # Run unit tests
-node -v
 node --test-concurrency=1 --test
 
-# Stop core container
+# Stop api container
 kill -1 %1
 
 # Generate report

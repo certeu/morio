@@ -54,6 +54,12 @@ const docs = swaggerUi.setup(openapi)
 app.use(`${store.prefix}/docs`, swaggerUi.serve, docs)
 
 /*
+ * If not in production, allow access to coverage reports
+ */
+app.use(`/coverage/api`, express.static('/morio/api/coverage'))
+app.use(`/coverage/core`, express.static('/morio/core/coverage'))
+
+/*
  * Add the root route
  */
 app.get('/', async (req, res) =>

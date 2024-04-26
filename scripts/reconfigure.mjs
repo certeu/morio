@@ -95,11 +95,12 @@ const cliOptions = (name, env) => `\\
   --label morio.service=${name} \\
   --log-driver=journald \\
   --log-opt labels=morio.service \\
+${name === 'api' ? '  --network morionet' : ''} \\
   --network-alias ${name} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\
-${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab}" `).join(" \\\n")} \\
+${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('\`').join("\\`")}" `).join(" \\\n")} \\
   -e MORIO_DOCKER_SOCKET=${presetGetters[env]('MORIO_DOCKER_SOCKET')} \\
   -e MORIO_CONFIG_ROOT=${presetGetters[env]('MORIO_CONFIG_ROOT')} \\
   -e MORIO_DATA_ROOT=${presetGetters[env]('MORIO_DATA_ROOT')} \\
@@ -112,6 +113,20 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab}" `).joi
   }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/'+name+'/tests/run-unit-tests.sh' : ''}
 `
 
+const preApiTest = `
+#
+# Need some extra work to ensure that:
+#   - There is no API container running
+#   - The morionet network is available so we can attach to it
+#   - The reporter inside our test container has permissions to write coverage output
+#
+docker rm -f api
+docker network create morionet
+sudo rm -rf ./api/coverage/*
+mkdir ./api/coverage/tmp
+sudo chown 2112:2112 ./api/coverage/tmp
+
+`
 const script = (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
@@ -119,6 +134,7 @@ const script = (name, env) => `#!/bin/bash
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
+${name === 'api' ? preApiTest : ''}
 docker run ${cliOptions(name, env)}
 `
 for (const env of ['dev', 'test', 'prod']) {

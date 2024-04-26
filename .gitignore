@@ -27,6 +27,7 @@ core/run-prod-container.sh
 
 # Test artifacts
 core/coverage
+api/coverage
 
 # dependencies
 node_modules

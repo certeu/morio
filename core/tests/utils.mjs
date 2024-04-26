@@ -32,7 +32,7 @@ const setup = {
   deployment: {
     node_count: 1,
     display_name: 'Morio Unit Tests',
-    nodes: ['unit.test.morio.it'],
+    nodes: ['proxy'],
   },
   tokens: {
     flags: {

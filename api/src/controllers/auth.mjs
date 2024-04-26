@@ -24,7 +24,10 @@ const allowedUris = [
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [/^\/downloads\//]
+const allowedUriPatterns = [
+  /^\/downloads\//,
+  /^\/coverage\//,
+]
 
 /**
  * List of allowListed URLs in epeheral mode
@@ -70,15 +73,6 @@ Controller.prototype.authenticate = async (req, res) => {
    * Get the requested URL from the headers
    */
   const uri = req.headers['x-forwarded-uri']
-
-  /*
-   * In ephemeral mode, there is not auhentication yet
-   * But we only allow certain routes
-   */
-  if (store.info?.ephemeral === true) {
-    if (allowedEphemeralUris.includes(uri)) return res.status(200).end()
-    else return deny(res, { status: 'Unauthorized', reason: 'Not allowed in ephemeral mode' })
-  }
 
   /*
    * Is the URL allow-listed?

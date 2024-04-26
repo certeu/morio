@@ -152,24 +152,29 @@ export const validateSettings = async (newSettings) => {
 
     /*
      * Try contacting nodes over HTTPS, ignore certificate
+     * We bypass this when it's the unit test node
      */
-    const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' })
-    if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
-    else {
-      report.info.push(`Validation failed for node ${i}`)
-      report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+    if (node !== store.getPreset('MORIO_UNIT_TEST_HOST')) {
+      const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' }, store)
+      if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
+      else {
+        report.info.push(`Validation failed for node ${i}`)
+        report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
 
-      return abort()
-    }
+        return abort()
+      }
 
-    /*
-     * Try contacting nodes over HTTPS, also validate certificate
-     */
-    const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
-    if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
-    else {
-      report.info.push(`Certificate validation failed for node ${i}`)
-      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
+      /*
+       * Try contacting nodes over HTTPS, also validate certificate
+       */
+      const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' }, store)
+      if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
+      else {
+        report.info.push(`Certificate validation failed for node ${i}`)
+        report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
+      }
+    } else {
+      report.info.push(`This is the unit test host, not validating HTTPS connection.`)
     }
 
     /*

@@ -37,11 +37,6 @@ app.use(guardEphemeralMode)
 for (const type in routes) routes[type](app)
 
 /*
- * If not in production, allow access to coverage report
- */
-app.use('/coverage', express.static('/morio/core/coverage'))
-
-/*
  * Add the wildcard route
  */
 app.get('/*', async (req, res) =>

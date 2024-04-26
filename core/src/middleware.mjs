@@ -12,7 +12,6 @@ const ephemeralRoutes = ['GET/status', 'GET/config', 'POST/setup']
 export const guardEphemeralMode = (req, res, next) => {
   if (
     store?.info?.ephemeral &&
-    req.url.slice(0, 10) !== '/coverage/' &&
     !ephemeralRoutes.includes(req.method + req.url)
   )
     return res

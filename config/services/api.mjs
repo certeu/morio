@@ -18,7 +18,7 @@ export const resolveServiceConfiguration = (store) => {
     // Attach to the morio docker network
     `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
     // Match requests going to the API prefix
-    `traefik.http.routers.api.rule=(PathPrefix(\`${store.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`))`,
+    `traefik.http.routers.api.rule=(PathPrefix(\`${store.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`, \`/coverage\`))`,
     // Set priority to avoid rule conflicts
     `traefik.http.routers.api.priority=100`,
     // Forward to api service

@@ -5,6 +5,7 @@
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
+
 docker run \
   -it --rm \
   --name=core \
@@ -12,6 +13,7 @@ docker run \
   --label morio.service=core \
   --log-driver=journald \
   --log-opt labels=morio.service \
+ \
   --network-alias core \
   --init \
   -p 3007:3007  \

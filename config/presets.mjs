@@ -48,6 +48,10 @@ export const presets = {
   // TCP port API should listen on
   MORIO_API_PORT: 3000,
 
+  // Hosts for which to forego the https validation check
+  // Used in unit tests only
+  MORIO_UNIT_TEST_HOST: 'unit.test.morio.it',
+
   /*
    * Broker presets
    */

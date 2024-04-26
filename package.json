@@ -26,8 +26,8 @@
     "rev": "npm run reversion",
     "prebuild": "npm run reconfigure",
     "prettier": "npx prettier --write .",
-    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run dev",
-    "test:api": "npm run redev && ./api/run-test-container.sh && npm run dev",
+    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
+    "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
