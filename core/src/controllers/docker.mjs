@@ -111,6 +111,30 @@ Controller.prototype.createResource = async (req, res, cmd) => {
 }
 
 /**
+ * Removes a Docker network
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.removeNetwork = async (req, res) => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`docker.network.remove`, req.params)
+  if (!valid) return schemaViolation(err, res)
+
+  /*
+   * Run the Docker command, with options if there are any
+   */
+  const [success, result] = await runNetworkApiCommand(valid.id, 'remove')
+
+  /*
+   * Return result
+   */
+  return success ? res.status(204).send(cloneAsPojo(result)) : dockerError(result, res)
+}
+
+/**
  * Updates a container resource
  *
  * This handles the following commands on the docker object:

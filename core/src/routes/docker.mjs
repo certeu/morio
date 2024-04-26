@@ -38,7 +38,7 @@ export function routes(app) {
   app.put(`/docker/containers/:id/unpause`, (req, res) => Docker.updateContainer(req, res, 'unpause'))
 
   /*
-   * API routes to make create Docker resources
+   * API routes to create Docker resources
    */
   app.post(`/docker/container`, (req, res) => Docker.createResource(req, res, 'createContainer'))
   //app.post(`/docker/secret`,    (req, res) => Docker.createResource(req, res, 'createSecret'))
@@ -47,6 +47,13 @@ export function routes(app) {
   //app.post(`/docker/service`,   (req, res) => Docker.createResource(req, res, 'createService'))
   app.post(`/docker/network`,   (req, res) => Docker.createResource(req, res, 'createNetwork'))
   //app.post(`/docker/image`,     (req, res) => Docker.createResource(req, res, 'createImage'))
+  //
+
+  /*
+   * API routes to remove Docker resources
+   */
+  app.delete(`/docker/network/:id`,   (req, res) => Docker.removeNetwork(req, res))
+
 
   /*
    * API routes to get data from Docker
