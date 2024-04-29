@@ -24,19 +24,7 @@ const allowedUris = [
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [
-  /^\/downloads\//,
-  /^\/coverage\//,
-]
-
-/**
- * List of allowListed URLs in epeheral mode
- */
-const allowedEphemeralUris = [
-  `${store.prefix}/status`,
-  `${store.prefix}/setup`,
-  `${store.prefix}/validate/settings`,
-]
+const allowedUriPatterns = [/^\/downloads\//, /^\/coverage\//]
 
 /**
  * Helper method to deny access
@@ -87,13 +75,16 @@ Controller.prototype.authenticate = async (req, res) => {
   }
 
   /*
+   * Don't bother in ephemeral mode
+   */
+  if (store.info?.ephemeral) return deny(res)
+
+  /*
    * Is there a cookie with a JSON Web Token we can check?
    */
-  const token = req.cookies?.morio
-  if (!token) return deny(res)
-  if (token)
+  if (req.cookies?.morio) {
     jwt.verify(
-      token,
+      req.cookies.morio,
       store.keys.public,
       {
         audience: 'morio',
@@ -115,6 +106,17 @@ Controller.prototype.authenticate = async (req, res) => {
           .end()
       }
     )
+  }
+
+  /*
+   * Is there an authorization header?
+   */
+
+  /*
+   * If we get here, we could not authenticate the user
+   * So return deny
+   */
+  return deny(res)
 }
 
 /**
