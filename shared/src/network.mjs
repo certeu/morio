@@ -185,8 +185,20 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
   if ([204].includes(response.status)) return [response.status, {}]
   /*
    * Handle all other status codes
-   */ else if (response.status < 400)
-    return raw ? [response.status, await response.text()] : [response.status, await response.json()]
+   */
+  else if (response.status < 400) {
+    let data
+    try {
+      data = raw ? await response.text() : await response.json()
+    }
+    catch (err) {
+      return raw
+        ? [response.status, {err}]
+        : [response.status, data]
+    }
+
+    return [response.status, data]
+  }
 
   /*
    * If we end up here, status code is 400 or higher so it's an error

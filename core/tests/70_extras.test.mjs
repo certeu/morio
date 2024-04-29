@@ -69,8 +69,6 @@ describe('Core Extra Tests', () => {
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
-    const d = result[1]
-    console.log(d)
   })
 
   /*

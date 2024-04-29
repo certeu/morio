@@ -43,7 +43,6 @@ describe('Core Docker GET Info Tests', () => {
   it(`Should GET /docker/all-containers`, async () => {
     const result = await core.get(`/docker/all-containers`)
     const d = result[1]
-    console.log(d)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -343,7 +342,7 @@ describe('Core Docker Active Tests', () => {
    * This will return a streaming response, so NDJSON
    */
   it(`Should POST /docker/pull`, async () => {
-    const result = await core.post(`/docker/pull`, { tag: 'google/pause:latest' }, true)
+    const result = await core.post(`/docker/pull`, { tag: 'google/pause:latest' }, {}, true)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -609,7 +608,7 @@ describe('Core Docker Container State Tests', () => {
       assert.equal(Array.isArray(result), true)
       assert.equal(result.length, 3)
       assert.equal(result[0], 204)
-      assert.equal(typeof d, 'object')
+      assert.equal(d, '')
     })
   }
 })
