@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { getPreset } from '#config'
 import Docker from 'dockerode'
 // Store
@@ -228,15 +229,21 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) store.log.warn(err.message)
-      return [false, err.message]
+      /*
+       * Deal with errors that aren'rt really errors
+       */
+      if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
+      else {
+        if (!silent) store.log.warn(err.message)
+        return [false, err.message]
+      }
     } else {
       if (!silent) store.log.warn(err)
       return [false, err]
     }
   }
 
-  return [true, result]
+  return [true, Buffer.isBuffer(result) ? result.toString() : result]
 }
 
 /**

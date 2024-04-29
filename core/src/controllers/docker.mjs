@@ -163,6 +163,8 @@ Controller.prototype.updateContainer = async (req, res, cmd) => {
   /*
    * Return result
    */
+  if ([200, 304].includes(success)) return res.status(success).send(result).end()
+
   return success ? res.status(204).send() : dockerError(result, res)
 }
 
