@@ -55,7 +55,7 @@ export const service = {
       /*
        * Now populate the store
        */
-      if (!store.info)
+      if (!store.info?.about)
         store.info = {
           about: 'Morio Core',
           name: '@morio/core',

@@ -31,6 +31,23 @@ describe('Core Extra Tests', () => {
   })
 
   /*
+   * GET /does-not-exist
+   *
+   * Example response:
+   * {
+   *   "url": "/does-not-exist",
+   *   "method":"GET",
+   *   "originalUrl": "/does-not-exist"
+   * }
+   */
+  it('Should GET /does-not-exist', async () => {
+    const result = await core.get('/does-not-exist')
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 404)
+  })
+
+  /*
    * POST /settings (missing deployment key)
    *
    * Example response:
@@ -104,7 +121,7 @@ describe('Core Extra Tests', () => {
   })
 
   /*
-   * GET /does-not-exist
+   * GET /status (after setup)
    *
    * Example response:
    * {
@@ -112,11 +129,11 @@ describe('Core Extra Tests', () => {
    *   "method":"GET",
    *   "originalUrl": "/does-not-exist"
    * }
-   */
-  it('Should GET /does-not-exist', async () => {
-    const result = await core.get('/does-not-exist')
+  it('Should GET /status (after initial setup)', async () => {
+    const result = await core.get('/status')
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
-    assert.equal(result[0], 404)
+    assert.equal(result[0], 200)
   })
+   */
 })

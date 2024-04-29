@@ -69,4 +69,30 @@ describe('Core Setup Tests', () => {
      */
     store.mrt = d.root_token.value
   })
+
+  /*
+   * POST /setup
+   *
+   * Example response:
+   * {
+   *   error: "Service Unavailable",
+   *   info: "Morio core is currently resolving the morio configuration. Please wait for the configuration to be resolved, then try again.",
+   *   tip: "You can poll the /status endpoint and check the config_resovled field."
+   * }
+   */
+  it('Should POST /setup (unavailable while reconfiguring)', async () => {
+    const result = await core.post('/setup', {})
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 503)
+    const d = result[1]
+    assert.equal(typeof d, 'object')
+    assert.equal(d.error, 'Service Unavailable')
+    assert.equal(
+      d.info,
+      'Morio core is currently resolving the morio configuration. Please wait for the configuration to be resolved, then try again.'
+    )
+    assert.equal(d.tip, 'You can poll the /status endpoint and check the config_resovled field.')
+    assert.equal(result[2].headers['retry-after'], '28')
+  })
 })

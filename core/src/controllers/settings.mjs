@@ -155,6 +155,11 @@ Controller.prototype.setup = async (req, res) => {
   } else store.log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
+   * Drop us in reconfigure mode
+   */
+  store.info.config_resolved = false
+
+  /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()

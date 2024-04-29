@@ -1,5 +1,6 @@
 import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
+import { attempt } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
@@ -75,4 +76,15 @@ const equalIgnoreSpaces = (orig, check) => {
   return assert.equal(orig.replace(/\s/g, ''), check.replace(/\s/g, ''))
 }
 
-export { api, core, equalIgnoreSpaces, getPreset, services, setup, store }
+/**
+ * Helper method to check whether core is ready (up and accepting requests)
+ *
+ * @return {bool} result - True if core is up, false if not
+ */
+const isCoreReady = async () => {
+  const [status, result] = await core.get('/status')
+
+  return status === 200 && result.config_resolved === true ? true : false
+}
+
+export { api, core, equalIgnoreSpaces, getPreset, services, setup, store, attempt, isCoreReady }

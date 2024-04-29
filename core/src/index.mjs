@@ -6,7 +6,7 @@ import { startMorio } from './lib/services/index.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Middleware
-import { guardEphemeralMode } from './middleware.mjs'
+import { guardRoutes } from './middleware.mjs'
 // Load the store
 import { store } from './lib/store.mjs'
 
@@ -27,9 +27,10 @@ const app = express()
 app.use(express.json({ limit: '1mb' }))
 
 /*
- * Add middleware to guard ephemeral mode
+ * Add middleware to guard routes while we are
+ * in ephemeral mode or reconfiguring
  */
-app.use(guardEphemeralMode)
+app.use(guardRoutes)
 
 /*
  * Load the API routes
@@ -70,6 +71,13 @@ wrapExpress(
  */
 export async function reconfigure(hookProps = {}) {
   log.status('(Re)Configuring Morio Core')
+
+  /*
+   * Drop us in config resolving mode
+   */
+  if (typeof store.info === 'undefined') store.info = {}
+  store.info.config_resolved = false
+
   /*
    * This will (re)start all services if that is needed
    */
@@ -83,5 +91,6 @@ export async function reconfigure(hookProps = {}) {
   /*
    * Let the world know we are ready
    */
+  store.info.config_resolved = true
   log.status('Morio Core ready - Configuration Resolved')
 }

@@ -23,7 +23,7 @@ Controller.prototype.status = async (req, res) => {
    */
   const base = {
     ...store.info,
-    update: (Date.now() - store.start_time) / 1000,
+    uptime: (Date.now() - store.start_time) / 1000,
   }
 
   /*

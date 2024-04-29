@@ -1,6 +1,27 @@
-import { store, core, getPreset, setup } from './utils.mjs'
+import { store, core, getPreset, setup, attempt, isCoreReady } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+
+describe('Ensure we are out of configuration mode', async () => {
+  /*
+   * When running tests, the previous tests just setup core
+   * so we are probably still resolving the configuration.
+   * That's why we wait here and give feedback so it's clear what is going on.
+   */
+  const up = await attempt({
+    every: 1,
+    timeout: 30,
+    run: async () => await isCoreReady(),
+    onFailedAttempt: () => describe('Core is not ready yet, will continue waiting', () => true),
+  })
+  if (up) describe('Core is ready, tests will continue', () => true)
+  else
+    describe('Core did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is core up?')
+      })
+    })
+})
 
 describe('Core Settings/Config/Status Tests', () => {
   /*

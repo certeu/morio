@@ -3,7 +3,6 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('Ephemeral Core: Status Routes', () => {
-
   /*
    * GET /status
    *
@@ -34,17 +33,16 @@ describe('Ephemeral Core: Status Routes', () => {
     assert.equal([true, false].includes(d.ephemeral), true)
     assert.equal(d.ephemeral, true)
     assert.equal(d.current_settings, false)
+    assert.equal(d.config_resolved, true)
 
     /*
      * Add to store for re-use in other tests
      */
     store.ephemeral = true
   })
-
 })
 
 describe('Ephemeral Core: Non-available Routes', () => {
-
   const test = {
     get: [
       '/status_logs',
@@ -145,6 +143,4 @@ describe('Ephemeral Core: Non-available Routes', () => {
       assert.equal(d.errors[0], 'Not available in ephemeral mode')
     })
   }
-
 })
-
