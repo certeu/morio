@@ -23,12 +23,6 @@ const api = restClient(
 )
 
 /*
- * Client for the proxy (required to test authentication to the API
- * This file is used by API unit tests too, that is why this is here
- */
-const proxy = restClient(`https://unit.test.morio.it${getPreset('MORIO_API_PREFIX')}`)
-
-/*
  * List of all Morio services
  */
 const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'connector', 'dbuilder']
@@ -81,4 +75,4 @@ const equalIgnoreSpaces = (orig, check) => {
   return assert.equal(orig.replace(/\s/g, ''), check.replace(/\s/g, ''))
 }
 
-export { api, core, proxy, equalIgnoreSpaces, getPreset, services, setup, store }
+export { api, core, equalIgnoreSpaces, getPreset, services, setup, store }

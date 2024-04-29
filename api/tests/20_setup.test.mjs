@@ -1,3 +1,4 @@
+import { Buffer } from 'node:buffer'
 import { store, api, setup } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
@@ -12,7 +13,7 @@ describe('API Setup Tests', () => {
    * }
    */
   it('Should POST /setup (invalid data)', async () => {
-    const result = await api.post('/setup', {})
+    const result = await api.post('/setup', { settings: 'are not valid' })
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 400)
@@ -40,6 +41,7 @@ describe('API Setup Tests', () => {
    * }
    */
   it('Should POST /setup', async () => {
+    console.log(setup)
     const result = await api.post('/setup', setup)
     console.log(JSON.stringify(result[1], null, 2))
     assert.equal(Array.isArray(result), true)
@@ -69,5 +71,8 @@ describe('API Setup Tests', () => {
      * Keep root token in store
      */
     store.mrt = d.root_token.value
+    store.mrtAuth = {
+      Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),
+    }
   })
 })
