@@ -15,7 +15,7 @@ export function routes(app) {
   /*
    * API routes to get data from a specific container
    */
-  app.get(`${PREFIX}/docker/containers/:id`,              Core.getContainerData)
+  app.get(`${PREFIX}/docker/containers/:id`,              (req, res) => Core.getContainerData(req, res))
   app.get(`${PREFIX}/docker/containers/:id/logs`,         (req, res) => Core.getContainerData(req, res, 'logs'))
   app.get(`${PREFIX}/docker/containers/:id/stats`,        (req, res) => Core.getContainerData(req, res, 'stats'))
   app.get(`${PREFIX}/docker/containers/:id/stream/logs`,  Core.getContainerData)
@@ -24,13 +24,13 @@ export function routes(app) {
   /*
    * API routes to get data from a specific image
    */
-  app.get(`${PREFIX}/docker/images/:id`,         Core.getDockerImageData)
+  app.get(`${PREFIX}/docker/images/:id`,         (req, res) => Core.getDockerImageData(req, res))
   app.get(`${PREFIX}/docker/images/:id/history`, (req, res) => Core.getDockerImageData(req, res, 'history'))
 
   /*
    * API routes to get data from a specific network
    */
-  app.get(`${PREFIX}/docker/networks/:id`, Core.getDockerNetworkData)
+  app.get(`${PREFIX}/docker/networks/:id`, (req, res) => Core.getDockerNetworkData(req, res))
 
   /*
    * API routes to make changes to a specific container
@@ -45,14 +45,14 @@ export function routes(app) {
   /*
    * API routes to make create Docker resources
    */
-  app.post(`${PREFIX}/docker/container`, (req, res) => Core.createDockerResource(req, res, 'container'))
-  app.post(`${PREFIX}/docker/secret`,    (req, res) => Core.createDockerResource(req, res, 'secret'))
-  app.post(`${PREFIX}/docker/config`,    (req, res) => Core.createDockerResource(req, res, 'config'))
-  app.post(`${PREFIX}/docker/plugin`,    (req, res) => Core.createDockerResource(req, res, 'plugin'))
-  app.post(`${PREFIX}/docker/volume`,    (req, res) => Core.createDockerResource(req, res, 'volume'))
-  app.post(`${PREFIX}/docker/service`,   (req, res) => Core.createDockerResource(req, res, 'service'))
-  app.post(`${PREFIX}/docker/network`,   (req, res) => Core.createDockerResource(req, res, 'network'))
-  app.post(`${PREFIX}/docker/image`,     (req, res) => Core.createDockerResource(req, res, 'image'))
+  //app.post(`${PREFIX}/docker/container`, (req, res) => Core.createDockerResource(req, res, 'container'))
+  //app.post(`${PREFIX}/docker/secret`,    (req, res) => Core.createDockerResource(req, res, 'secret'))
+  //app.post(`${PREFIX}/docker/config`,    (req, res) => Core.createDockerResource(req, res, 'config'))
+  //app.post(`${PREFIX}/docker/plugin`,    (req, res) => Core.createDockerResource(req, res, 'plugin'))
+  //app.post(`${PREFIX}/docker/volume`,    (req, res) => Core.createDockerResource(req, res, 'volume'))
+  //app.post(`${PREFIX}/docker/service`,   (req, res) => Core.createDockerResource(req, res, 'service'))
+  //app.post(`${PREFIX}/docker/network`,   (req, res) => Core.createDockerResource(req, res, 'network'))
+  //app.post(`${PREFIX}/docker/image`,     (req, res) => Core.createDockerResource(req, res, 'image'))
 
   /*
    * API routes to get data from Docker

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - [api] Do not attempt to authenticate in ephemeral mode
+- [api] Removed core routes that we do not want to expose
 - [core] Expose port when not in prod to allow serving coverage report
 - [core] Unused docker routes were removed
 - [proxy] Set alias in dev for unit tests
