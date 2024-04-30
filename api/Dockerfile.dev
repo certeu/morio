@@ -4,6 +4,9 @@ FROM node:20-slim
 # Make this folder our working directory
 WORKDIR /morio/api
 
+# Add curl as it's used in the test run to detect when the API comes up
+RUN apt-get update && apt install curl -y
+
 ## Add a morio user to run the NodeJS code
 RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio}

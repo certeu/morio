@@ -12,11 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Allow access to test coverage reports when not in production
 - [api] Added middleware to guard routes in ephemeral mode
+- [api] Add curl to dev container image
 - [core] Guard routes while reconfiguring
 - [core] Setup unit testing for core
 - [core] Added middleware to guard routes in ephemeral mode
 - [core] Added endpoint to remove Docker network
 - [core] On startup, core now creates and attaches to its own Docker network, and then disconnects from all other networks
+- [core] Add curl to dev container image
 
 ## Changed
 

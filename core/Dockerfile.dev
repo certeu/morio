@@ -4,5 +4,8 @@ FROM node:20-slim
 # Make this folder our working directory
 WORKDIR /morio/core
 
+# Add curl as it's used in the test run to detect when the API comes up
+RUN apt-get update && apt install curl -y
+
 ## Run NodeJS code via nodemon
 CMD ["npm", "run", "dev"]
