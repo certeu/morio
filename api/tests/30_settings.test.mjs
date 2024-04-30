@@ -2,7 +2,7 @@ import { api, setup, attempt, isCoreReady, isApiReady } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
-describe('Ensure we are out of configuration mode', async () => {
+describe('Wait for core to reconfigure itself', async () => {
   /*
    * When running tests, the previous tests just setup core
    * so we are probably still resolving the configuration.
@@ -14,7 +14,7 @@ describe('Ensure we are out of configuration mode', async () => {
     run: async () => await isCoreReady(),
     onFailedAttempt: () => describe('Core is not ready yet, will continue waiting', () => true),
   })
-  if (coreReady) describe('Core is ready, tests will continue', () => true)
+  if (coreReady) describe('Core is ready', () => true)
   else
     describe('Core did not become ready before timeout, failing test', () => {
       it('Should have been ready by now', async () => {
@@ -23,14 +23,14 @@ describe('Ensure we are out of configuration mode', async () => {
     })
 })
 
-describe('Ensure we have reloaded configuration from core', async () => {
+describe('Wait for API to reconfigure itself', async () => {
   const apiReady = await attempt({
     every: 1,
     timeout: 90,
     run: async () => await isApiReady(),
     onFailedAttempt: () => describe('API is not ready yet, will continue waiting', () => true),
   })
-  if (apiReady) describe('API is ready, tests will continue', () => true)
+  if (apiReady) describe('API is ready', () => true)
   else
     describe('API did not become ready before timeout, failing test', () => {
       it('Should have been ready by now', async () => {
@@ -39,7 +39,10 @@ describe('Ensure we have reloaded configuration from core', async () => {
     })
 })
 
-describe('Check status after coming back up', () => {
+/*
+ * Quick test to make sure we are back on track after reconfiguring
+ */
+describe('Ensure status after reconfigure', () => {
   it(`Should GET /status`, async () => {
     const result = await api.get('/status')
     const d = result[1]
@@ -47,7 +50,9 @@ describe('Check status after coming back up', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
     assert.equal(typeof d, 'object')
-    console.log(d)
+    assert.equal(d.ephemeral, false)
+    assert.equal(d.config_resolved, true)
+    assert.equal(d.setup, true)
   })
 })
 
@@ -75,7 +80,6 @@ describe('API Settings/Config/Status Tests', () => {
   it(`Should GET /settings`, async () => {
     const result = await api.get('/settings')
     const d = result[1]
-    console.log(d)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
