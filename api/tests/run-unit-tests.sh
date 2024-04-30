@@ -5,7 +5,7 @@ cd /morio/api
 
 # Start the api instance, as background job
 # Also wrap it in c8 to generate a coverage report
-../node_modules/.bin/c8 --reporter=html -- node src/index.mjs & #> /dev/null &
+../node_modules/.bin/c8 --reporter=html -- node src/index.mjs &> /dev/null &
 
 # Wait for the api to come up by checking the status endpoint
 TRIES1=0
