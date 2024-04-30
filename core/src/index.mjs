@@ -84,9 +84,9 @@ export async function reconfigure(hookProps = {}) {
   await startMorio(hookProps)
 
   /*
-   * Tell the API to refresh the config
+   * Tell the API to refresh the config, but don't wait for it
    */
-  await store.apiClient.get(`${store.getPreset('MORIO_API_PREFIX')}/reconfigure`)
+  store.apiClient.get(`${store.getPreset('MORIO_API_PREFIX')}/reconfigure`)
 
   /*
    * Let the world know we are ready

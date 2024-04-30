@@ -360,6 +360,18 @@ const shouldContainerBeRecreated = async (service, running, hookProps) => {
   }
 
   /*
+   * Don't restart the API container in the middle of a test run
+   */
+  if (
+    service === 'api' &&
+    store.getPreset('NODE_ENV') !== 'production' &&
+    store.config?.deployment?.nodes?.[0] === store.getPreset('MORIO_UNIT_TEST_HOST')
+  ) {
+    store.log.trace(`Not in production, and running tests, not creating API to add Traefik labels`)
+    return false
+  }
+
+  /*
    * If this is the initial setup, services that require TLS configuration should be recreated
    */
   if (hookProps.initialSetup && ['api', 'ui'].includes(service)) {
@@ -482,7 +494,10 @@ export function defaultRecreateContainerHook(service, hookProps) {
   /*
    * If the container is not currently running, recreate it
    */
-  if (!hookProps?.running?.[service]) return true
+  if (!hookProps?.running?.[service]) {
+    store.log.trace(`The ${service} is not running`)
+    return true
+  }
 
   /*
    * If container name or image changes, recreate it
@@ -491,8 +506,10 @@ export function defaultRecreateContainerHook(service, hookProps) {
   if (
     hookProps?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
     hookProps?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
-  )
+  ) {
+    store.log.trace(`The ${service} name or image has changed`)
     return true
+  }
 
   /*
    * Ensure Traefik TLS configuration
@@ -503,7 +520,10 @@ export function defaultRecreateContainerHook(service, hookProps) {
      * on the container, which will cause Traefik to use its default cert.
      * So if it is the initialSetup, we always recreate the container.
      */
-    if (hookProps.initialSetup) return true
+    if (hookProps.initialSetup) {
+      store.log.trace(`The ${service} needs Traefik TLS labels as this is the initial setup`)
+      return true
+    }
 
     /*
      * If, for whatever reason, the TLS labels are missing anyway, also recreate.
@@ -512,13 +532,16 @@ export function defaultRecreateContainerHook(service, hookProps) {
       !(store.config?.services?.[service]?.container?.labels || []).includes(
         'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'
       )
-    )
+    ) {
+      store.log.trace(`The ${service} needs Traefik TLS labels and they are not present`)
       return true
+    }
   }
 
   /*
    * If we make it this far, do not recreate the container
    */
+  store.log.trace(`The ${service} does not need to be recreated`)
   return false
 }
 
