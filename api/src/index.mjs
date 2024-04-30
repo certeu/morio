@@ -13,7 +13,7 @@ import { bootstrapConfiguration } from './bootstrap.mjs'
 import swaggerUi from 'swagger-ui-express'
 import { openapi } from '../openapi/index.mjs'
 // Middleware
-import { guardEphemeralMode } from './middleware.mjs'
+import { guardRoutes } from './middleware.mjs'
 // Load the store
 import { store } from './lib/store.mjs'
 
@@ -28,9 +28,10 @@ const app = express()
 app.use(express.json({ limit: '1mb' }))
 
 /*
- * Add middleware to guard ephemeral mode
+ * Add middleware to guard routes while we are
+ * in ephemeral mode or reconfiguring
  */
-app.use(guardEphemeralMode)
+app.use(guardRoutes)
 
 /*
  * Add support for cookies with a limit to the request body
@@ -60,20 +61,6 @@ app.use(`/coverage/api`, express.static('/morio/api/coverage'))
 app.use(`/coverage/core`, express.static('/morio/core/coverage'))
 
 /*
- * Add the root route
- */
-app.get('/', async (req, res) =>
-  res.send({
-    name: store.config.name,
-    about: store.config.about,
-    version: store.config.version,
-    setup: store.config.setup,
-    status: `${store.prefix}/status`,
-    docs: `${store.prefix}/docs`,
-  })
-)
-
-/*
  * Add the reconfigure route
  */
 app.get(`${store.prefix}/reconfigure`, async (req, res) => {
@@ -81,18 +68,6 @@ app.get(`${store.prefix}/reconfigure`, async (req, res) => {
 
   return res.send({ result: 'ok', info: store.info })
 })
-
-/*
- * Enable this wildcard route for debugging
-app.get(`${store.prefix}/*`, async (req, res) =>
-  res.set('Content-Type', 'application/json').status(404).send({
-    url: req.url,
-    method: req.method,
-    originalUrl: req.originalUrl,
-    prefix: store.prefix,
-  })
-)
- */
 
 /*
  * Add downloads folder for serving static files
@@ -125,6 +100,12 @@ wrapExpress(
  */
 export async function reconfigure() {
   /*
+   * Drop us in config resolving mode
+   */
+  if (typeof store.info === 'undefined') store.info = {}
+  store.info.config_resolved = false
+
+  /*
    * First of all, we bootstrap the API which will populate the store with what we need
    */
   await bootstrapConfiguration()
@@ -132,5 +113,6 @@ export async function reconfigure() {
   /*
    * Let the world know we are ready
    */
+  store.info.config_resolved = true
   store.log.debug('Morio API ready')
 }

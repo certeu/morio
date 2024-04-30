@@ -30,6 +30,7 @@ export const bootstrapConfiguration = async () => {
     store.info = {
       about: 'Morio Management API',
       name: '@morio/api',
+      config_resolved: false,
       ping: Date.now(),
       start_time: Date.now(),
       version: store.getPreset('MORIO_VERSION'),
@@ -63,15 +64,16 @@ export const bootstrapConfiguration = async () => {
      * Also load the info from core
      * This will tell us whether we are running ephemeral or not
      */
-    const [ok, infoResult] = await store.core.get('/info')
+    const infoResult = await store.core.get('/info')
     if (coreFetchOk(infoResult)) {
       store.log.debug(`Loaded info from core.`)
       store.info.production = infoResult[1].production
       store.info.ephemeral = infoResult[1].ephemeral
+      store.info.config_resolved = infoResult[1].config_resolved
     } else if (
-      ok === 503 &&
-      Array.isArray(infoResult.errors) &&
-      infoResult.errors[0].includes('Not available in ephemeral mode')
+      infoResult[0] === 503 &&
+      Array.isArray(infoResult[1].errors) &&
+      infoResult[1].errors[0].includes('Not available in ephemeral mode')
     ) {
       store.info.ephemeral = true
       store.log.debug('Not loading Morio info in ephemeral mode')
