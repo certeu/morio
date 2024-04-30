@@ -21,20 +21,6 @@ do
   fi
 done
 
-# Wait for the proxy to come up
-TRIES2=0
-while [ $TRIES2 -le 9 ] && [ -z "$UP2" ]
-do
-  TRIES2=$((TRIES2+1))
-  RESULT=$(curl --insecure -o /dev/null -f -s -w "%{http_code}\n" https://proxy/)
-  if [ "$RESULT" -eq 200 ]; then
-    UP2=1
-  else
-    echo "Waiting for proxy to come up [$TRIES2/10]"
-    sleep 1
-  fi
-done
-
 # Run unit tests
 node --test-concurrency=1 --test
 

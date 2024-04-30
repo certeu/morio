@@ -1,5 +1,5 @@
 import { Buffer } from 'node:buffer'
-import { store, api, setup } from './utils.mjs'
+import { store, api, setup, attempt, isCoreReady, isApiReady } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -41,9 +41,7 @@ describe('API Setup Tests', () => {
    * }
    */
   it('Should POST /setup', async () => {
-    console.log(setup)
     const result = await api.post('/setup', setup)
-    console.log(JSON.stringify(result[1], null, 2))
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -75,4 +73,44 @@ describe('API Setup Tests', () => {
       Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),
     }
   })
+
 })
+
+describe('Ensure we are out of configuration mode', async () => {
+  /*
+   * When running tests, the previous tests just setup core
+   * so we are probably still resolving the configuration.
+   * That's why we wait here and give feedback so it's clear what is going on.
+   */
+  const coreReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isCoreReady(),
+    onFailedAttempt: () => describe('Core is not ready yet, will continue waiting', () => true),
+  })
+  if (coreReady) describe('Core is ready, tests will continue', () => true)
+  else
+    describe('Core did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is core ready?')
+      })
+    })
+})
+
+describe('Ensure we have reloaded configuration from core', async () => {
+  const apiReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isApiReady(),
+    onFailedAttempt: () => describe('API is not ready yet, will continue waiting', () => true),
+  })
+  if (apiReady) describe('API is ready, tests will continue', () => true)
+  else
+    describe('API did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is API ready?')
+      })
+    })
+})
+
+

@@ -1,6 +1,6 @@
 import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
-import { attempt } from '#shared/utils'
+import { attempt, sleep } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
@@ -13,14 +13,14 @@ const store = new Store().set('log', logger('trace'))
 /*
  * Client for the core API (which we are testing)
  */
-const core = restClient(`http://localhost:${getPreset('MORIO_CORE_PORT')}`)
+const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
  * Client for the management API
  * This file is used by API unit tests too, that is why this is here
  */
 const api = restClient(
-  `http://localhost:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`
+  `http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`
 )
 
 /*
@@ -82,9 +82,26 @@ const equalIgnoreSpaces = (orig, check) => {
  * @return {bool} result - True if core is up, false if not
  */
 const isCoreReady = async () => {
-  const [status, result] = await core.get('/status')
+  const res = await core.get('/status')
+  const [status, result] = res
 
+  //console.log({ core: result })
   return status === 200 && result.config_resolved === true ? true : false
 }
 
-export { api, core, equalIgnoreSpaces, getPreset, services, setup, store, attempt, isCoreReady }
+/**
+ * Helper method to check whether the api is ready (up and accepting requests)
+ *
+ * @return {bool} result - True if api is up, false if not
+ */
+const isApiReady = async () => {
+  const [status, result] = await api.get('/status')
+
+  //console.log({ api: result })
+  return (
+    status === 200 &&
+    result.config_resolved === true
+  ) ? true : false
+}
+
+export { api, core, equalIgnoreSpaces, getPreset, services, setup, store, attempt, isCoreReady, isApiReady, sleep }

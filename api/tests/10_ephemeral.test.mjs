@@ -9,11 +9,12 @@ describe('Ephemeral API: Status Routes', () => {
    *
    * Example response:
    * {
-   *   about: 'Morio Core',
-   *   name: '@morio/core',
+   *   about: 'Morio API',
+   *   name: '@morio/api',
    *   production: false,
    *   version: '0.1.6',
    *   current_settings: false,
+   *   config_resolved: true,
    *   ephemeral: true,
    *   uptime: '113.8 seconds',
    *   uptime_seconds: 113.83,
@@ -27,10 +28,11 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(200, result[0], 200)
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.about, 'Morio Core')
-    assert.equal(d.name, '@morio/core')
+    assert.equal(d.about, 'Morio API')
+    assert.equal(d.name, '@morio/api')
     assert.equal(d.production, false)
     assert.equal(d.version, getPreset('MORIO_VERSION'))
+    assert.equal(d.config_resolved, true)
     assert.equal([true, false].includes(d.ephemeral), true)
     assert.equal(d.ephemeral, true)
     assert.equal(d.current_settings, false)

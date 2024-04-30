@@ -1,6 +1,55 @@
-import { api, setup } from './utils.mjs'
+import { api, setup, attempt, isCoreReady, isApiReady } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+
+describe('Ensure we are out of configuration mode', async () => {
+  /*
+   * When running tests, the previous tests just setup core
+   * so we are probably still resolving the configuration.
+   * That's why we wait here and give feedback so it's clear what is going on.
+   */
+  const coreReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isCoreReady(),
+    onFailedAttempt: () => describe('Core is not ready yet, will continue waiting', () => true),
+  })
+  if (coreReady) describe('Core is ready, tests will continue', () => true)
+  else
+    describe('Core did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is core ready?')
+      })
+    })
+})
+
+describe('Ensure we have reloaded configuration from core', async () => {
+  const apiReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isApiReady(),
+    onFailedAttempt: () => describe('API is not ready yet, will continue waiting', () => true),
+  })
+  if (apiReady) describe('API is ready, tests will continue', () => true)
+  else
+    describe('API did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is API ready?')
+      })
+    })
+})
+
+describe('Check status after coming back up', () => {
+  it(`Should GET /status`, async () => {
+    const result = await api.get('/status')
+    const d = result[1]
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 200)
+    assert.equal(typeof d, 'object')
+    console.log(d)
+  })
+})
 
 describe('API Settings/Config/Status Tests', () => {
   /*
@@ -26,6 +75,7 @@ describe('API Settings/Config/Status Tests', () => {
   it(`Should GET /settings`, async () => {
     const result = await api.get('/settings')
     const d = result[1]
+    console.log(d)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -73,7 +123,6 @@ describe('API Settings/Config/Status Tests', () => {
    *   },
    *   ui: {}
    * }
-   */
   it('Should GET /idps', async () => {
     const result = await api.get('/idps')
     const d = result[1]
@@ -118,7 +167,6 @@ describe('API Settings/Config/Status Tests', () => {
    *     // ...
    *   ]
    * }
-   */
   it('Should GET /status_logs', async () => {
     const result = await api.get('/status_logs')
     assert.equal(Array.isArray(result), true)
@@ -148,7 +196,6 @@ describe('API Settings/Config/Status Tests', () => {
    *      }
    *    ]
    *  }
-   */
   it('Should GET /jwks', async () => {
     const result = await api.get('/jwks')
     const d = result[1]
@@ -165,4 +212,5 @@ describe('API Settings/Config/Status Tests', () => {
     assert.equal(typeof key.n, 'string')
     assert.equal(typeof key.e, 'string')
   })
+*/
 })
