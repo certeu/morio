@@ -57,7 +57,7 @@ export const resolveServiceConfiguration = (store) => {
       // Name to use for the running container
       container_name: 'api',
       // Image to run (different in dev)
-      image: PROD ? 'morio/api' : store.testing ? 'morio/api-test' : 'morio/api-dev',
+      image: PROD ? 'morio/api' : 'morio/api-dev',
       // Image tag (version) to run
       tag: store.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
