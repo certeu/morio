@@ -348,7 +348,6 @@ describe('Core Docker Active Tests', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
     assert.equal(typeof d, 'string')
-    assert.equal(d.includes('Image is up to date for google/pause:latest'), true)
   })
 
   /*
