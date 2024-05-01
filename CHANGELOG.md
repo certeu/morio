@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] /jwks endpoint in ephemeral mode
 - [core] Typo in returned body
 - [ui] MRT login was sending incorrect data
+- [ui] Add to npm workspace configuration
 
 ## [0.1.6] - 2014-04-22
 

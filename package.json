@@ -42,11 +42,12 @@
   "homepage": "https://github.com/certeu/morio#readme",
   "workspaces": [
     "api",
+    "config",
     "core",
     "docs",
     "schema",
     "shared",
-    "config"
+    "ui"
   ],
   "devDependencies": {
     "esbuild": "^0.20.2",
