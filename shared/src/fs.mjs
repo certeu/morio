@@ -5,6 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import yaml from 'js-yaml'
 import { glob } from 'glob'
+import { spawn } from 'node:child_process'
 
 /**
  * The morio root folder
@@ -197,6 +198,88 @@ export const readYamlFile = async (
   }
 
   return content
+}
+
+/**
+ * Creates an (empty) file
+ *
+ * We use NodeJS's filesystem API to write files.
+ * However, we run the core container as a non-privileged user, and
+ * rely on 'sudo' to elevate privileges when we need to write to a
+ * file our regular user has no access to.
+ * Since NodeJS' API does not support sudo, we exec a child process
+ * here with sudo.
+ *
+ * @param {string} cmd = command to run with sudo privileges
+ * @return {object} output = An object holding stdout and stderr
+ */
+export const sudo = (cmd) => {
+
+  /*
+   * Allow passing in multiple commands as an array
+   */
+  if (Array.isArray(cmd)) cmd = cmd.map(c => `/usr/bin/sudo ${c}`).join(" && ")
+  else cmd = `/usr/bin/sudo ${cmd}`
+
+  try {
+    /*
+     * Spawn a child process and exec the cmd in a shell
+     */
+    const shell = spawn(cmd, [], { shell: true })
+
+    /*
+     * Set up an object to store our output in
+     */
+    const output = { stdout: [], stderr: [] }
+
+    /*
+     * Helper method to gather the result
+     */
+    const gatherShellOutput = () => {
+      return {
+        stderr: output.stderr.join("\n"),
+        stdout: output.stdout.join("\n"),
+      }
+    }
+
+    /*
+     * Return promise so we can await this
+     */
+    return new Promise(resolve => {
+      /*
+       * Collect stdout
+       */
+      if (shell.stdout) shell.stdout.on(
+        'data',
+        data => output.stdout.push(Buffer.isBuffer(data)
+          ? data.toString()
+          : data
+        )
+      )
+
+      /*
+       * Collect stderr
+       */
+      if (shell.stderr) shell.stderr.on(
+        'data',
+        data => output.stderr.push(Buffer.isBuffer(data)
+          ? data.toString()
+          : data
+        )
+      )
+
+      /*
+       * Listen for close and error events
+       */
+      shell.on("error", error => {
+        return resolve({ ...gatherShellOutput(), error })
+      })
+      shell.on("close", status => resolve({ ...gatherShellOutput(), status }))
+    })
+  }
+  catch (err) {
+    return Promise.reject(err)
+  }
 }
 
 /**

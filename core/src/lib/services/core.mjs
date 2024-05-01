@@ -1,7 +1,7 @@
 // REST client for API
 import { restClient } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
+import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, sudo } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -66,6 +66,12 @@ export const service = {
       if (!store.inProduction) store.inProduction = inProduction
 
       /*
+       * Ensure we have rights on /etc/morio
+       * Note that this depends on the sudoers config
+       */
+      await sudo(`/usr/bin/chown -R morio /etc/morio`)
+
+      /*
        * Add the API client
        */
       if (!store.apiClient)
@@ -79,7 +85,12 @@ export const service = {
        */
       store.presets = loadAllPresets()
       try {
-        await mkdir('/etc/morio/shared')
+        await sudo([
+          `/usr/bin/mkdir -p /etc/morio/shared`,
+          `/usr/bin/chown morio /etc/morio/shared`,
+          `/usr/bin/touch /etc/morio/shared/presets.yaml`,
+          `/usr/bin/chown morio /etc/morio/shared/presets.yaml`,
+        ])
         await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
       } catch (err) {
         store.log.warn('Failed to write presets to disk')

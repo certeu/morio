@@ -4,8 +4,19 @@ FROM node:20-slim
 # Make this folder our working directory
 WORKDIR /morio/core
 
-# Add curl as it's used in the test run to detect when the API comes up
-RUN apt-get update && apt install curl -y
+## Add a morio user to run the NodeJS code
+RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
+  && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio} \
+  && groupadd -g ${DOCKER_GID:-137} -U morio docker
 
-## Run NodeJS code via nodemon
+# Add curl as it's used in the test run to detect when the API comes up
+# And add sudo so we can elevate privileges when needed
+RUN apt-get update && apt install curl sudo -y
+
+# Copy sudoers file in place
+COPY sudoers /etc/sudoers.d/morio
+RUN chown root:root /etc/sudoers.d/morio
+
+## Drop privleges and run NodeJS code
+USER ${USER:-morio}
 CMD ["npm", "run", "dev"]

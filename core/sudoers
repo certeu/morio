@@ -1,0 +1,30 @@
+# This is the susoers configuration for Morio core
+# It will be placed in /etc/sudoers.d/ in the Morio core container
+#
+# Morio requires elevated privileges to write files and change their
+# ownership for other containers (for example, Morio core writes the
+# CA configuration to disk, and needs to chown that so that it's owned
+# by the user running the CA container.
+#
+# The list below narrowly defines what core can do with elevated
+# privileges, thus allowing us to run with the least privileges required.
+#
+
+morio ALL=(ALL) NOPASSWD: \
+  /usr/bin/chmod 755 /morio/data/ca/certs/root_ca.crt, \
+  /usr/bin/chown morio /etc/morio/shared/presets.yaml, \
+  /usr/bin/chown morio /morio/data/ca/certs/root_ca.crt, \
+  /usr/bin/chown morio /morio/data/ca/certs/root_ca.crt, \
+  /usr/bin/chown morio /morio/data/proxy/entrypoint.sh, \
+  /usr/bin/chown -R morio /etc/morio, \
+  /usr/bin/mkdir -p /etc/morio/ca, \
+  /usr/bin/mkdir -p /etc/morio/ca/certs, \
+  /usr/bin/mkdir -p /etc/morio/proxy, \
+  /usr/bin/mkdir -p /etc/morio/shared, \
+  /usr/bin/mkdir -p /morio/data/ca/certs, \
+  /usr/bin/mkdir -p /morio/data/ca/certs, \
+  /usr/bin/mkdir -p /morio/data/proxy, \
+  /usr/bin/touch /etc/morio/shared/presets.yaml, \
+  /usr/bin/touch /morio/data/ca/certs/root_ca.crt, \
+  /usr/bin/touch /morio/data/ca/certs/root_ca.crt, \
+  /usr/bin/touch /morio/data/proxy/entrypoint.sh

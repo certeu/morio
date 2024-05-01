@@ -1,4 +1,5 @@
-import { readFile, writeFile, mkdir } from '#shared/fs'
+import { readFile, writeFile, sudo } from '#shared/fs'
+import path from 'node:path'
 // Default hooks
 import {
   alwaysWantedHook,
@@ -48,7 +49,11 @@ export const service = {
         store.log.debug('Proxy: Custom entrypoint exists, no action needed')
       } else {
         store.log.debug('Proxy: Creating custom entrypoint')
-        await mkdir('/etc/morio/proxy')
+        await sudo([
+          `/usr/bin/mkdir -p ${path.dirname(file)}`,
+          `/usr/bin/touch ${file}`,
+          `/usr/bin/chown morio ${file}`,
+        ])
         await writeFile(file, store.config.services.proxy.entrypoint, store.log, 0o755)
       }
 
@@ -69,7 +74,13 @@ export const service = {
         store.log.debug('Proxy: Root certificate file exists, no action needed')
       } else {
         store.log.debug('Proxy: Creating placeholder root certificate file')
-        await writeFile(file, '', store.log, 0o755)
+        await sudo([
+          `/usr/bin/mkdir -p ${path.dirname(file)}`,
+          `/usr/bin/touch ${file}`,
+          `/usr/bin/chown morio ${file}`,
+          `/usr/bin/chmod 755 ${file}`,
+        ])
+        //await writeFile(file, '', store.log, 0o755)
       }
 
       return true
