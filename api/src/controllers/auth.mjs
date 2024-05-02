@@ -65,13 +65,13 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * Is the URL allow-listed?
    */
-  if (allowedUris.includes(uri)) return res.status(200).end()
+  if (allowedUris.includes(uri)) return res.status(200).send().end()
 
   /*
    * Is the URL pattern allow-listed?
    */
   for (const regex of allowedUriPatterns) {
-    if (uri.match(regex)) return res.status(200).end()
+    if (uri.match(regex)) return res.status(200).send().end()
   }
 
   /*
@@ -81,31 +81,31 @@ Controller.prototype.authenticate = async (req, res) => {
 
   /*
    * Is there a cookie with a JSON Web Token we can check?
+   * (and make sure it does not hold the string 'null')
    */
-  if (req.cookies?.morio) {
-    jwt.verify(
-      req.cookies.morio,
-      store.keys.public,
-      {
+  if (typeof req.cookies?.morio === 'string' && req.cookies.morio.length > 64) {
+    let result
+    try {
+      result = jwt.verify(req.cookies.morio, store.keys.public, {
         audience: 'morio',
         issuer: 'morio',
         subject: 'morio',
-      },
-      (err, payload) => {
-        if (err) return deny(res)
-
-        /*
-         * All good, set roles in response header
-         * These will be injected by Traefik in the original request
-         */
-        return res
-          .set('X-Morio-Role', payload.role)
-          .set('X-Morio-User', payload.user)
-          .set('X-Morio-Provider', payload.provider)
-          .status(200)
-          .end()
-      }
-    )
+      })
+    } catch (err) {
+      // Swallow error
+    }
+    if (result && result.iss === 'morio') {
+      /*
+       * All good, set roles in response header
+       * These will be injected by Traefik in the original request
+       */
+      return res
+        .set('X-Morio-Role', result.role)
+        .set('X-Morio-User', result.user)
+        .set('X-Morio-Provider', result.provider)
+        .status(200)
+        .end()
+    }
   }
 
   /*
