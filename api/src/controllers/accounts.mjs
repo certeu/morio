@@ -343,11 +343,11 @@ Controller.prototype.activateAccount = async (req, res) => {
   })
 
   /*
-   * Return the QR code
+   * Return the QR code and other relevant data
    */
   return res.send({
     result: 'success',
-    data: { qrcode: result.qrcode },
+    data: result,
   })
 }
 
@@ -422,14 +422,16 @@ const schema = {
   createAccount: Joi.object({
     username: Joi.string().required(),
     about: Joi.string().optional().allow(''),
-    provider: Joi.string().valid('local'),
-    role: Joi.string().valid(...roles),
+    provider: Joi.string().valid('local').required(),
+    role: Joi.string()
+      .valid(...roles)
+      .required(),
     overwrite: Joi.boolean().valid(true, false).optional(),
   }),
   activateAccount: Joi.object({
     username: Joi.string().required().min(1),
     invite: Joi.string().required().length(48),
-    provider: Joi.string().valid('local'),
+    provider: Joi.string().required().valid('local'),
   }),
   activateMfa: Joi.object({
     username: Joi.string().required().min(1),

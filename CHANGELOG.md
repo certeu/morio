@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [api] Prevent RPKV lookups from hanging when there is no data
 - [api] Do not attempt to load config from core in ephemeral mode
 - [api] Fix loading of info from core in ephemeral mode
 - [api] Handle empty cookie in authentication route

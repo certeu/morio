@@ -61,14 +61,7 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
   /*
    * Create a consumer
    */
-  const consumer = this.store.kafka.client.consumer({
-    groupId: `api-${this.store.config.core.node_nr}-${Date.now()}`,
-  })
-
-  /*
-   * Connect consumer
-   */
-  await consumer.connect()
+  const consumer = await this.createConsumer()
 
   /*
    * Subscribe to topic (from beginning)
@@ -88,6 +81,18 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
     let latest = { timestamp: 0, msg: null }
 
     /*
+     * When there are no records at all, things tend to stall
+     * so we need to keep track of records found and fetches.
+     * The first fetch event arrives before the first message
+     * event, so we check at the second fetch event whether any
+     * messages were found, and if not terminate the consumer
+     */
+    const track = {
+      messages: 0,
+      fetches: 0,
+    }
+
+    /*
      * Add an even handler for the end of the fetch
      * This will resolve the promise
      */
@@ -95,6 +100,20 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
       consumer.disconnect()
 
       return latest.msg ? resolve(JSON.parse(latest.msg.value.toString())) : resolve(false)
+    })
+
+    /*
+     * Add an even handler for the end of the fetch
+     * This is how we detect when there's no records whatsoever
+     */
+    consumer.on(consumer.events.FETCH, () => {
+      track.fetches++
+      if (track.fetches > 1 && track.messages === 0) {
+        // No messages
+        consumer.disconnect()
+
+        return resolve(false)
+      }
     })
 
     /*
@@ -147,6 +166,18 @@ RpKvClient.prototype.find = async function (topic = false, regex = false) {
     const matches = {}
 
     /*
+     * When there are no records at all, things tend to stall
+     * so we need to keep track of records found and fetches.
+     * The first fetch event arrives before the first message
+     * event, so we check at the second fetch event whether any
+     * messages were found, and if not terminate the consumer
+     */
+    const track = {
+      messages: 0,
+      fetches: 0,
+    }
+
+    /*
      * Add an even handler for the end of the fetch
      * This will resolve the promise
      */
@@ -161,10 +192,25 @@ RpKvClient.prototype.find = async function (topic = false, regex = false) {
     })
 
     /*
+     * Add an even handler for the end of the fetch
+     * This is how we detect when there's no records whatsoever
+     */
+    consumer.on(consumer.events.FETCH, () => {
+      track.fetches++
+      if (track.fetches > 1 && track.messages === 0) {
+        // No messages
+        consumer.disconnect()
+
+        return resolve(false)
+      }
+    })
+
+    /*
      * Now walk the topic and find matches for the requested key
      */
     consumer.run({
       eachMessage: async ({ message }) => {
+        track.messages++
         if (message.key.toString().match(regex)) {
           const key = message.key.toString()
           if (typeof matches[key] === 'undefined') matches[key] = message
@@ -249,6 +295,8 @@ RpKvClient.prototype.createConsumer = async function () {
    */
   const consumer = this.store.kafka.client.consumer({
     groupId: `api-${this.store.config.core.node_nr}-${Date.now()}`,
+    // Do not wait more than 1.5 seconds between fetches
+    maxWaitTimeInMs: 1500,
   })
 
   /*
