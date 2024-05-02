@@ -42,7 +42,7 @@
     "#routes/*": "./src/routes/*.mjs",
     "#shared/*": "./shared/*.mjs"
   },
-  "main": "index.js",
+  "module": "src/index.mjs",
   "directories": {
     "test": "tests"
   },
@@ -50,8 +50,8 @@
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
   },
-  "author": "Joost De Cock <joost@joost.at>",
-  "license": "MIT",
+  "author": "CERT-EU <services@cert.europa.eu>",
+  "license": "EUPL",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },

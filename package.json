@@ -2,7 +2,7 @@
   "name": "morio",
   "version": "0.1.6",
   "description": "Connect, Stream, Observe, Respond",
-  "main": "index.js",
+  "private": true,
   "scripts": {
     "build": "npm run build:dev",
     "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder",
@@ -34,8 +34,8 @@
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
   },
-  "author": "Joost De Cock <joost@joost.at>",
-  "license": "MIT",
+  "author": "CERT-EU <services@cert.europa.eu>",
+  "license": "EUPL",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },

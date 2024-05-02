@@ -3,6 +3,8 @@
   "version": "0.1.6",
   "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
+  "author": "CERT-EU <services@cert.europa.eu>",
+  "license": "EUPL",
   "scripts": {
     "prettier": "npx prettier --write 'src/*.mjs'"
   },
@@ -10,8 +12,6 @@
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
   },
-  "author": "Joost De Cock <joost@joost.at>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },

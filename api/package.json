@@ -57,7 +57,7 @@
     "url": "git+https://github.com/certeu/morio.git"
   },
   "author": "Joost De Cock <joost@joost.at>",
-  "license": "MIT",
+  "license": "EUPL",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },
