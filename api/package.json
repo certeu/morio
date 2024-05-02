@@ -56,7 +56,7 @@
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
   },
-  "author": "Joost De Cock <joost@joost.at>",
+  "author": "CERT-EU <services@cert.europa.eu>",
   "license": "EUPL",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
