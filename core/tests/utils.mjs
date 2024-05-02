@@ -19,9 +19,7 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * Client for the management API
  * This file is used by API unit tests too, that is why this is here
  */
-const api = restClient(
-  `http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`
-)
+const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`)
 
 /*
  * List of all Morio services
@@ -77,6 +75,19 @@ const equalIgnoreSpaces = (orig, check) => {
 }
 
 /**
+ * Helper method to assert validation failed
+ *
+ * @param {Array} result = Result as returned by the REST client
+ */
+const validationShouldFail = (result) => {
+  assert.equal(result[0], 400)
+  const d = result[1]
+  assert.equal(typeof result[1], 'object')
+  assert.equal(Object.keys(result[1]).length, 1)
+  assert.equal(d.error, 'Validation failed')
+}
+
+/**
  * Helper method to check whether core is ready (up and accepting requests)
  *
  * @return {bool} result - True if core is up, false if not
@@ -98,10 +109,20 @@ const isApiReady = async () => {
   const [status, result] = await api.get('/status')
 
   //console.log({ api: result })
-  return (
-    status === 200 &&
-    result.config_resolved === true
-  ) ? true : false
+  return status === 200 && result.config_resolved === true ? true : false
 }
 
-export { api, core, equalIgnoreSpaces, getPreset, services, setup, store, attempt, isCoreReady, isApiReady, sleep }
+export {
+  api,
+  core,
+  equalIgnoreSpaces,
+  getPreset,
+  services,
+  setup,
+  store,
+  attempt,
+  isCoreReady,
+  isApiReady,
+  sleep,
+  validationShouldFail,
+}
