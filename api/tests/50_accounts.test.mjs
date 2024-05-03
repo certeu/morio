@@ -1,5 +1,5 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, api, apiAuth } from './utils.mjs'
+import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -20,6 +20,7 @@ describe('API Create Account Tests', () => {
    *
    * Example response:
    * [ ]
+   */
   it(`Should GET /accounts`, { timeout }, async () => {
     const result = await api.get(`/accounts`)
     const d = result[1]
@@ -29,7 +30,6 @@ describe('API Create Account Tests', () => {
     assert.equal(Array.isArray(d), true)
     //assert.equal(d.length === 0, true)
   })
-   */
 
   /*
    * POST /account (missing provider)
@@ -38,6 +38,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /account (missing provider)`, async () => {
     validationShouldFail(await api.post(`/account`, { username: 'test', role: 'user' }))
   })
@@ -49,6 +50,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /account (missing role)`, async () => {
     validationShouldFail(await api.post(`/account`, { username: 'test', provider: 'local' }))
   })
@@ -60,6 +62,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /account (missing username)`, async () => {
     validationShouldFail(await api.post(`/account`, { role: 'user', provider: 'local' }))
   })
@@ -109,6 +112,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Account exists'
    * }
+   */
   it(`Should POST /account (same account twice)`, { timeout }, async () => {
     const result = await api.post(`/account`, accounts.user1)
     const d = result[1]
@@ -116,7 +120,6 @@ describe('API Create Account Tests', () => {
     assert.equal(Object.keys(d).length, 1)
     assert.equal(d.error, 'Account exists')
   })
-   */
 
   /*
    * POST /activate-account (missing username)
@@ -125,6 +128,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /activate-account (missing username)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -141,6 +145,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /activate-account (missing invite)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -157,6 +162,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /activate-account (missing provider)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -207,6 +213,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
+   */
   it(`Should not POST /activate-mfa (missing provider)`, async () => {
     const data = {
       username: store.accounts.user1.username,
@@ -224,6 +231,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Invalid MFA token'
    * }
+   */
   it(`Should not POST /activate-mfa (invalid token)`, async () => {
     const data = {
       username: store.accounts.user1.username,
@@ -239,7 +247,6 @@ describe('API Create Account Tests', () => {
     assert.equal(Object.keys(d).length, 1)
     assert.equal(d.error, 'Invalid MFA token')
   })
-   */
 
   /*
    * POST /activate-mfa
@@ -292,6 +299,7 @@ describe('API Create Account Tests', () => {
    *     error: 'No such authentication provider'
    *   }
    * }
+   */
   it(`Should not POST /login (missing provider)`, async () => {
     const data = {
       data: {
@@ -319,6 +327,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
+   */
   it(`Should not POST /login (invalid password)`, async () => {
     const data = {
       provider: 'local',
@@ -346,6 +355,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
+   */
   it(`Should not POST /login (missing token)`, async () => {
     const data = {
       provider: 'local',
@@ -373,6 +383,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
+   */
   it(`Should not POST /login (missing role)`, async () => {
     const data = {
       provider: 'local',
@@ -401,6 +412,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Role not available to this user'
    * }
+   */
   it(`Should not POST /login (unavailable role)`, async () => {
     const data = {
       provider: 'local',
@@ -430,6 +442,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication requires MFA',
    *   error: 'Please provide your MFA token'
    * }
+   */
   it(`Should not POST /login (invalid MFA token)`, async () => {
     const data = {
       provider: 'local',
