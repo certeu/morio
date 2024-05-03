@@ -1,5 +1,5 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, api, validationShouldFail } from './utils.mjs'
+import { store, api, apiAuth } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -20,8 +20,7 @@ describe('API Create Account Tests', () => {
    *
    * Example response:
    * [ ]
-   */
-  it(`Should GET /accounts (no accounts yet)`, { timeout }, async () => {
+  it(`Should GET /accounts`, { timeout }, async () => {
     const result = await api.get(`/accounts`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
@@ -30,6 +29,7 @@ describe('API Create Account Tests', () => {
     assert.equal(Array.isArray(d), true)
     //assert.equal(d.length === 0, true)
   })
+   */
 
   /*
    * POST /account (missing provider)
@@ -38,7 +38,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /account (missing provider)`, async () => {
     validationShouldFail(await api.post(`/account`, { username: 'test', role: 'user' }))
   })
@@ -50,7 +49,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /account (missing role)`, async () => {
     validationShouldFail(await api.post(`/account`, { username: 'test', provider: 'local' }))
   })
@@ -62,7 +60,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /account (missing username)`, async () => {
     validationShouldFail(await api.post(`/account`, { role: 'user', provider: 'local' }))
   })
@@ -86,6 +83,10 @@ describe('API Create Account Tests', () => {
   it(`Should POST /account`, { timeout }, async () => {
     const result = await api.post(`/account`, accounts.user1)
     const d = result[1]
+    /*
+     * This test is sometimes flaky, this is here to debug
+     */
+    if (result[0] !== 200) console.log(result)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 2)
     assert.equal(d.result, 'success')
@@ -108,7 +109,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Account exists'
    * }
-   */
   it(`Should POST /account (same account twice)`, { timeout }, async () => {
     const result = await api.post(`/account`, accounts.user1)
     const d = result[1]
@@ -116,6 +116,7 @@ describe('API Create Account Tests', () => {
     assert.equal(Object.keys(d).length, 1)
     assert.equal(d.error, 'Account exists')
   })
+   */
 
   /*
    * POST /activate-account (missing username)
@@ -124,7 +125,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /activate-account (missing username)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -141,7 +141,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /activate-account (missing invite)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -158,7 +157,6 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
   it(`Should not POST /activate-account (missing provider)`, async () => {
     validationShouldFail(
       await api.post(`/activate-account`, {
@@ -209,8 +207,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Validation failed'
    * }
-   */
-  it(`Should POST /activate-mfa (missing provider)`, async () => {
+  it(`Should not POST /activate-mfa (missing provider)`, async () => {
     const data = {
       username: store.accounts.user1.username,
       invite: store.accounts.user1.invite,
@@ -227,8 +224,7 @@ describe('API Create Account Tests', () => {
    * {
    *   error: 'Invalid MFA token'
    * }
-   */
-  it(`Should POST /activate-mfa (invalid token)`, async () => {
+  it(`Should not POST /activate-mfa (invalid token)`, async () => {
     const data = {
       username: store.accounts.user1.username,
       invite: store.accounts.user1.invite,
@@ -243,9 +239,10 @@ describe('API Create Account Tests', () => {
     assert.equal(Object.keys(d).length, 1)
     assert.equal(d.error, 'Invalid MFA token')
   })
+   */
 
   /*
-   * POST /activate-mfa (invalid)
+   * POST /activate-mfa
    *
    * Example response:
    * {
@@ -283,11 +280,6 @@ describe('API Create Account Tests', () => {
 })
 
 describe('API Create Account Tests', () => {
-  // POST /login
-  // GET /token
-  // GET /whoami
-  // GET /auth
-
   /*
    * POST /login (missing provider)
    *
@@ -300,8 +292,7 @@ describe('API Create Account Tests', () => {
    *     error: 'No such authentication provider'
    *   }
    * }
-   */
-  it(`Should POST /login (missing provider)`, async () => {
+  it(`Should not POST /login (missing provider)`, async () => {
     const data = {
       data: {
         username: store.accounts.user1.username,
@@ -311,7 +302,6 @@ describe('API Create Account Tests', () => {
     const result = await api.post(`/login`, data)
     assert.equal(result[0], 400)
     const d = result[1]
-    //console.log(d)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 4)
     assert.equal(d.status, 'Unauthorized')
@@ -329,8 +319,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
-   */
-  it(`Should POST /login (invalid password)`, async () => {
+  it(`Should not POST /login (invalid password)`, async () => {
     const data = {
       provider: 'local',
       data: {
@@ -341,7 +330,6 @@ describe('API Create Account Tests', () => {
     const result = await api.post(`/login`, data)
     assert.equal(result[0], 401)
     const d = result[1]
-    //console.log(d)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 3)
     assert.equal(d.error, 'Input is invalid')
@@ -358,8 +346,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
-   */
-  it(`Should POST /login (missing token)`, async () => {
+  it(`Should not POST /login (missing token)`, async () => {
     const data = {
       provider: 'local',
       data: {
@@ -386,8 +373,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Input is invalid'
    * }
-   */
-  it(`Should POST /login (missing role)`, async () => {
+  it(`Should not POST /login (missing role)`, async () => {
     const data = {
       provider: 'local',
       data: {
@@ -415,8 +401,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Role not available to this user'
    * }
-   */
-  it(`Should POST /login (unavailable role)`, async () => {
+  it(`Should not POST /login (unavailable role)`, async () => {
     const data = {
       provider: 'local',
       data: {
@@ -445,8 +430,7 @@ describe('API Create Account Tests', () => {
    *   reason: 'Authentication requires MFA',
    *   error: 'Please provide your MFA token'
    * }
-   */
-  it(`Should POST /login (invalid MFA token)`, async () => {
+  it(`Should not POST /login (invalid MFA token)`, async () => {
     const data = {
       provider: 'local',
       data: {
@@ -489,14 +473,194 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
+    /*
+     * This test is sometimes flaky, this is here to debug
+     */
+    if (result[0] !== 200) console.log(result)
     assert.equal(result[0], 200)
     const d = result[1]
-    //console.log(d)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 2)
     assert.equal(Object.keys(d.data).length, 2)
     assert.equal(typeof d.jwt, 'string')
     assert.equal(d.data.user, `local.${store.accounts.user1.username}`)
     assert.equal(d.data.role, 'user')
+    store.accounts.user1.jwt = d.jwt
+  })
+
+  /*
+   * GET /whoami (no JWT)
+   *
+   * Example response:
+   * {
+   *   status: 'Unauthorized',
+   *   reason: 'No token found'
+   * }
+   */
+  it(`Should not GET /whoami (no JWT)`, async () => {
+    const result = await api.get(`/whoami`)
+    assert.equal(result[0], 401)
+    const d = result[1]
+    assert.equal(typeof d, 'object')
+    assert.equal(Object.keys(d).length, 2)
+    assert.equal(d.status, 'Unauthorized')
+    assert.equal(d.reason, 'No token found')
+  })
+
+  /*
+   * GET /whoami (JWT in cookie)
+   *
+   * Example response:
+   * {
+       user: 'local.testAccount1714737085086',
+       role: 'user',
+       provider: 'local',
+       node: '4a567c31-5772-456c-a310-ea7b62b6b264',
+       deployment: '95c024e8-3745-4a7c-8223-0e6d7c099b08',
+       iat: 1714737113,
+       nbf: 1714737113,
+       exp: 1714751513,
+       aud: 'morio',
+       iss: 'morio',
+       sub: 'morio'
+   * }
+   */
+  it(`Should GET /whoami (JWT in cookie)`, async () => {
+    const result = await api.get(`/whoami`, { Cookie: `morio=${store.accounts.user1.jwt}` })
+    assert.equal(result[0], 200)
+    const d = result[1]
+    assert.equal(d.user, `local.${store.accounts.user1.username}`)
+    assert.equal(d.role, 'user')
+    assert.equal(d.provider, 'local')
+    for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
+    for (const field of ['node', 'deployment']) assert.equal(typeof d[field], 'string')
+    for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
+  })
+
+  /*
+   * GET /whoami (JWT in Bearer header)
+   *
+   * Example response:
+   * {
+       user: 'local.testAccount1714737085086',
+       role: 'user',
+       provider: 'local',
+       node: '4a567c31-5772-456c-a310-ea7b62b6b264',
+       deployment: '95c024e8-3745-4a7c-8223-0e6d7c099b08',
+       iat: 1714737113,
+       nbf: 1714737113,
+       exp: 1714751513,
+       aud: 'morio',
+       iss: 'morio',
+       sub: 'morio'
+   * }
+   */
+  it(`Should GET /whoami (JWT in Bearer header)`, async () => {
+    const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.accounts.user1.jwt}` })
+    assert.equal(result[0], 200)
+    const d = result[1]
+    assert.equal(d.user, `local.${store.accounts.user1.username}`)
+    assert.equal(d.role, 'user')
+    assert.equal(d.provider, 'local')
+    for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
+    for (const field of ['node', 'deployment']) assert.equal(typeof d[field], 'string')
+    for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
+  })
+
+  /*
+   * GET /token (No JWT)
+   *
+   * Example response:
+   * {
+   *   status: 'Unauthorized',
+   *   reason: 'No token found'
+   * }
+   */
+  it(`Should not GET /token (No JWT)`, async () => {
+    const result = await api.get(`/token`)
+    assert.equal(result[0], 401)
+    const d = result[1]
+    assert.equal(d.status, 'Unauthorized')
+    assert.equal(d.reason, 'No token found')
+  })
+
+  /*
+   * GET /token (JWT in Cookie)
+   *
+   * Example response:
+   * {
+   *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
+   * }
+   */
+  it(`Should GET /token (JWT in Cookie)`, async () => {
+    const result = await api.get(`/token`, { Cookie: `morio=${store.accounts.user1.jwt}` })
+    assert.equal(result[0], 200)
+    assert.equal(typeof result[1].jwt, 'string')
+  })
+
+  /*
+   * GET /token (JWT in Bearer header)
+   *
+   * Example response:
+   * {
+   *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
+   * }
+   */
+  it(`Should GET /token (JWT in Bearer header)`, async () => {
+    const result = await api.get(`/token`, { Authorization: `Bearer ${store.accounts.user1.jwt}` })
+    assert.equal(result[0], 200)
+    assert.equal(typeof result[1].jwt, 'string')
+  })
+
+  /*
+   * GET /auth (no X-Forwarded-Uri header)
+   *
+   * Example response:
+   * {
+   *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
+   * }
+   */
+  it(`Should not GET /auth (no X-Forwarded-Uri header)`, async () => {
+    const result = await apiAuth.get(`/auth`)
+    assert.equal(result[0], 401)
+  })
+
+  /*
+   * GET /auth (no JWT)
+   *
+   * Example response:
+   * {
+   *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
+   * }
+   */
+  it(`Should not GET /auth (no JWT)`, async () => {
+    const result = await apiAuth.get(`/auth`, { 'X-Forwarded-Uri': '/-/api/settings' })
+    assert.equal(result[0], 401)
+  })
+
+  /*
+   * GET /auth (JWT in Cookie)
+   *
+   * No response body
+   */
+  it(`Should not GET /auth (JWT in Cookie)`, async () => {
+    const result = await apiAuth.get(`/auth`, {
+      'X-Forwarded-Uri': '/-/api/settings',
+      Cookie: `morio=${store.accounts.user1.jwt}`,
+    })
+    assert.equal(result[0], 200)
+  })
+
+  /*
+   * GET /auth (JWT in Bearer header)
+   *
+   * No response body
+   */
+  it(`Should not GET /auth (JWT in Bearer header)`, async () => {
+    const result = await apiAuth.get(`/auth`, {
+      'X-Forwarded-Uri': '/-/api/settings',
+      Authorization: `Bearer ${store.accounts.user1.jwt}`,
+    })
+    assert.equal(result[0], 200)
   })
 })

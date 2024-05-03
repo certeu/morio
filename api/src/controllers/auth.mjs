@@ -61,6 +61,7 @@ Controller.prototype.authenticate = async (req, res) => {
    * Get the requested URL from the headers
    */
   const uri = req.headers['x-forwarded-uri']
+  if (!uri) return deny(res)
 
   /*
    * Is the URL allow-listed?
@@ -80,43 +81,40 @@ Controller.prototype.authenticate = async (req, res) => {
   if (store.info?.ephemeral) return deny(res)
 
   /*
-   * Is there a cookie with a JSON Web Token we can check?
-   * (and make sure it does not hold the string 'null')
+   * Keep track of the token payload
    */
-  if (typeof req.cookies?.morio === 'string' && req.cookies.morio.length > 64) {
-    let result
-    try {
-      result = jwt.verify(req.cookies.morio, store.keys.public, {
-        audience: 'morio',
-        issuer: 'morio',
-        subject: 'morio',
-      })
-    } catch (err) {
-      // Swallow error
-    }
-    if (result && result.iss === 'morio') {
-      /*
-       * All good, set roles in response header
-       * These will be injected by Traefik in the original request
-       */
-      return res
-        .set('X-Morio-Role', result.role)
-        .set('X-Morio-User', result.user)
-        .set('X-Morio-Provider', result.provider)
-        .status(200)
-        .end()
-    }
+  let payload = false
+
+  /*
+   * Is there a cookie with a JSON Web Token we can check?
+   */
+  const token = req.cookies?.morio
+  if (token) {
+    const valid = await verifyToken(token)
+    if (valid) payload = valid
   }
 
   /*
-   * Is there an authorization header?
+   * If the JWT is not in the cookie, check the Authorization header
    */
+  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+    const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
+    if (valid) payload = valid
+  }
 
   /*
-   * If we get here, we could not authenticate the user
-   * So return deny
+   * If we have the payload, set roles in response header
+   * These will be injected by Traefik in the original request
+   * If not, deny access
    */
-  return deny(res)
+  return payload
+    ? res
+        .set('X-Morio-Role', payload.role)
+        .set('X-Morio-User', payload.user)
+        .set('X-Morio-Provider', payload.provider)
+        .status(200)
+        .end()
+    : deny(res)
 }
 
 /**
@@ -191,28 +189,49 @@ Controller.prototype.login = async (req, res) => {
  */
 Controller.prototype.renewToken = async (req, res) => {
   /*
+   * Keep track of the token payload
+   */
+  let payload = false
+
+  /*
    * Is there a cookie with a JSON Web Token we can check?
    */
   const token = req.cookies?.morio
-  if (token)
-    verifyToken(token, res, async (payload) => {
-      /*
-       * Generate JSON Web Token
-       */
-      const jwt = await generateJwt({
-        data: {
-          user: payload.user,
-          role: payload.role,
-          maxRole: payload.maxRole,
-          provider: payload.provider,
-        },
-        key: store.keys.private,
-        passphrase: store.keys.mrt,
-      })
+  if (token) {
+    const valid = await verifyToken(token)
+    if (valid) payload = valid
+  }
 
-      return res.send({ jwt })
+  /*
+   * If the JWT is not in the cookie, check the Authorization header
+   */
+  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+    const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
+    if (valid) payload = valid
+  }
+
+  /*
+   * If we found a token, verify its there a cookie with a JSON Web Token we can check?
+   */
+  if (payload) {
+    /*
+     * Generate JSON Web Token
+     */
+    const jwt = await generateJwt({
+      data: {
+        user: payload.user,
+        role: payload.role,
+        maxRole: payload.maxRole,
+        provider: payload.provider,
+      },
+      key: store.keys.private,
+      passphrase: store.keys.mrt,
     })
-  else return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+
+    return res.send({ jwt })
+  }
+
+  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
 }
 
 /**
@@ -230,35 +249,37 @@ Controller.prototype.whoami = async (req, res) => {
    * Is there a cookie with a JSON Web Token we can check?
    */
   const token = req.cookies?.morio
-  if (token) verifyToken(token, res, async (payload) => res.send(payload).end())
-  else return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+  if (token) {
+    const payload = await verifyToken(token)
+    if (payload) return res.send(payload).end()
+  }
+
+  /*
+   * If the JWT is not in the cookie, check the Authorization header
+   */
+  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+    const payload = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
+    if (payload) return res.send(payload).end()
+  }
+
+  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
 }
 
 /**
  * Helper method to verify the token
  *
  * @param {object} token - The token to verify
- * @param {object} res - The response object, needed to send an error response
- * @param {function} callback - The callback to call after verifying the token
  */
-const verifyToken = async (token, res, callback) =>
-  jwt.verify(
-    token,
-    store.keys.public,
-    {
-      audience: 'morio',
-      issuer: 'morio',
-      subject: 'morio',
-    },
-    async (err, payload) => {
-      if (err)
-        return deny(res, {
-          status: 'Unauthorized',
-          reason: 'Request failed all efforts at authentication',
-        })
-      /*
-       * Looks good, run callback
-       */
-      return callback(payload)
-    }
+const verifyToken = (token) =>
+  new Promise((resolve) =>
+    jwt.verify(
+      token,
+      store.keys.public,
+      {
+        audience: 'morio',
+        issuer: 'morio',
+        subject: 'morio',
+      },
+      (err, payload) => resolve(err ? false : payload)
+    )
   )

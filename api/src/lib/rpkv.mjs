@@ -61,12 +61,7 @@ RpKvClient.prototype.get = async function (topic = false, key = false) {
   /*
    * Create a consumer
    */
-  const consumer = await this.createConsumer()
-
-  /*
-   * Subscribe to topic (from beginning)
-   */
-  await consumer.subscribe({ topics: [topic], fromBeginning: true })
+  const consumer = await this.createConsumer(topic)
 
   /*
    * We can't simply await the consumer, instead we return a
@@ -145,12 +140,7 @@ RpKvClient.prototype.find = async function (topic = false, regex = false) {
   /*
    * Create a consumer
    */
-  const consumer = await this.createConsumer()
-
-  /*
-   * Subscribe to topic (from beginning)
-   */
-  await consumer.subscribe({ topics: [topic], fromBeginning: true })
+  const consumer = await this.createConsumer(topic)
 
   /*
    * We can't simply await the consumer, instead we return a
@@ -234,12 +224,7 @@ RpKvClient.prototype.filter = async function (topic = false, regex = false, filt
   /*
    * Create a consumer
    */
-  const consumer = await this.createConsumer()
-
-  /*
-   * Subscribe to topic (from beginning)
-   */
-  await consumer.subscribe({ topics: [topic], fromBeginning: true })
+  const consumer = await this.createConsumer(topic)
 
   /*
    * We can't simply await the consumer, instead we return a
@@ -289,7 +274,7 @@ RpKvClient.prototype.filter = async function (topic = false, regex = false, filt
 /*
  * Helper method to create a consumer
  */
-RpKvClient.prototype.createConsumer = async function () {
+RpKvClient.prototype.createConsumer = async function (topic) {
   /*
    * Create the consumer
    */
@@ -303,6 +288,11 @@ RpKvClient.prototype.createConsumer = async function () {
    * Connect the consumer
    */
   await consumer.connect()
+
+  /*
+   * Subscribe to topic (from beginning)
+   */
+  await consumer.subscribe({ topics: [topic], fromBeginning: true })
 
   /*
    * Return the connected consumer

@@ -476,7 +476,7 @@ export function verifyPassword(userInput, storedPassword) {
   /*
    * Verify password
    */
-  if (data.hash && data.salt) {
+  if (data?.hash && data?.salt) {
     const verify = hashPassword(userInput, data.salt)
     if (data.hash === verify.hash && data.salt === verify.salt) {
       /*

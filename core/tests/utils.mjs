@@ -22,6 +22,12 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`)
 
 /*
+ * Client for the management API
+ * This allows access to the internal auth route
+ */
+const apiAuth = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+
+/*
  * List of all Morio services
  */
 const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'connector', 'dbuilder']
@@ -114,6 +120,7 @@ const isApiReady = async () => {
 
 export {
   api,
+  apiAuth,
   core,
   equalIgnoreSpaces,
   getPreset,
