@@ -54,11 +54,11 @@ export const mfa = {
      *  If it fails, it could be a scratch code if we have any
      */
     if (hashedScratchCodes && Array.isArray(hashedScratchCodes) && hashedScratchCodes.length > 0) {
-      const hashed = await hash(token)
+      const hashed = await hash(`${token}`) // Force to string
       if (hashedScratchCodes.includes(hashed))
         return [true, hashedScratchCodes.filter((val) => val !== hashed)]
     }
 
-    return hashedScratchCodes ? [false, hashedScratchCodes] : false
+    return false
   },
 }

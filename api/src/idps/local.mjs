@@ -26,7 +26,7 @@ export const local = async (id, data) => {
    * A user could, intentionally or by accident, create a different
    * authentication provider and give it the ID 'local'. In that case,
    * the UI would submit a login request where the ID 'local' would be used
-   * on a provider that is differnet from the local provider.
+   * on a provider that is different from the local provider.
    *
    * So while that is an unlikely scenario, best to guard against it and give
    * a meaningful error message.
@@ -45,7 +45,7 @@ export const local = async (id, data) => {
   /*
    * Now authenticate
    */
-  if (data.username && data.password && data.token && data.role) {
+  if (data?.username && data?.password && data?.token && data?.role) {
     /*
      * Look up the account
      */

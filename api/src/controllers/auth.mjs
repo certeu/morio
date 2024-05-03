@@ -136,7 +136,6 @@ Controller.prototype.login = async (req, res) => {
     providerId === 'mrt'
       ? 'mrt' // Don't allow anything but mrt for a provider with id mrt
       : store.config?.iam?.providers?.[providerId]?.provider || false
-
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request

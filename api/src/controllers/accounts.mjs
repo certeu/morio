@@ -438,7 +438,7 @@ const schema = {
     invite: Joi.string().required().length(48),
     token: Joi.string().required(),
     password: Joi.string().required(),
-    provider: Joi.string().valid('local'),
+    provider: Joi.string().valid('local').required(),
   }),
   createApikey: Joi.object({
     name: Joi.string().required().min(2),
