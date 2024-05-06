@@ -1,6 +1,7 @@
 // Services
 import { service as coreService } from './core.mjs'
 import { service as apiService } from './api.mjs'
+import { service as dbService } from './db.mjs'
 import { service as uiService } from './ui.mjs'
 import { service as caService } from './ca.mjs'
 import { service as brokerService } from './broker.mjs'
@@ -30,6 +31,7 @@ import { store } from '../store.mjs'
 store.services = {
   core: coreService,
   api: apiService,
+  db: dbService,
   ui: uiService,
   ca: caService,
   broker: brokerService,
@@ -44,6 +46,7 @@ store.services = {
  */
 store.serviceOrder = [
   'core',
+  'db',
   'ca',
   'proxy',
   'api',

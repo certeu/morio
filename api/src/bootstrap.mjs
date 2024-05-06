@@ -3,7 +3,6 @@ import { coreClient } from '#lib/core'
 import { attempt } from '#shared/utils'
 import { store } from './lib/store.mjs'
 import { KafkaClient } from './lib/kafka.mjs'
-import { RpKvClient } from './lib/rpkv.mjs'
 import { encryptionMethods } from '#shared/crypto'
 
 /**
@@ -118,11 +117,6 @@ export const bootstrapConfiguration = async () => {
    * The consumer needs to be connected on-demand.
    */
   await store.kafka.connect()
-
-  /*
-   * Initialize RpKv client
-   */
-  store.rpkv = await new RpKvClient(store)
 
   return
 }
