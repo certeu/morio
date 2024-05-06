@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] On startup, core now creates and attaches to its own Docker network, and then disconnects from all other networks
 - [core] Add curl to dev container image
 - [core] Carve out exception to not restart API during tests
+- [db] Added database service, using Rqlite as database
 
 ## Changed
 
@@ -48,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Added `/whoami` route
 - [api] Added `/jwks` route
+- [core] Added support for the db service
 - [core] Added `/jwks` route
 - [core] Generate node and deployment UUID
 - [core] Return UUIDS after setup
@@ -55,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
+- [api] Migrated accounts and apikeys from rpkv to db
 - [client] No pager when invoking systemctl
 - [core] Dropped BSON dependency
 - [core] Changes to the connector config generators
@@ -72,7 +75,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Login form when only MRT is available
 - [ui] Always redirect to home page in epehemeral mode
 
+### Removed
 
+- [api] Dropped rpkv functionality in favor of the new database service
+- [core] Dropped creation of KV topics in favor of the new database service
 
 ## [0.1.5] - 2014-04-16
 

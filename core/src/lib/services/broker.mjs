@@ -189,24 +189,6 @@ const ensureTopicsExist = async () => {
     store.log.debug(`Topic ${topic} not present, creating now.`)
     await execContainerCommand('broker', ['rpk', 'topic', 'create', topic])
   }
-
-  for (const topic of store
-    .getPreset('MORIO_BROKER_KV_TOPICS')
-    .filter((topic) => !topics.includes(topic))) {
-    store.log.debug(`Topic ${topic} not present, creating now.`)
-    await execContainerCommand('broker', [
-      'rpk',
-      'topic',
-      'create',
-      '--topic-config',
-      'cleanup.policy=compact',
-      '--topic-config',
-      'retention.ms=-1',
-      '--topic-config',
-      'retention.bytes=1073741824',
-      topic,
-    ])
-  }
 }
 
 /**

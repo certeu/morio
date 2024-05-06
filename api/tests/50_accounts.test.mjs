@@ -486,9 +486,9 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    /*
-     * This test is sometimes flaky, this is here to debug
-     */
+    //
+    // This test is sometimes flaky, this is here to debug
+    //
     if (result[0] !== 200) console.log(result)
     assert.equal(result[0], 200)
     const d = result[1]

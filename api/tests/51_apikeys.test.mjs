@@ -4,7 +4,7 @@ import { strict as assert } from 'node:assert'
 
 const keys = {
   key1: {
-    name: `testKey${Date.now()}`,
+    name: `testKey${new Date().toISOString()}`,
     expires: 1,
     role: 'user',
   },
@@ -58,14 +58,15 @@ describe('API Key Tests', () => {
    * {
    *   result: 'success',
    *   data: {
-   *     name: 'testKey1714746612328',
-   *     secret: '06277082368bba4ebafa6a6d106ada802c55dfd98b5fe1b9e08d581443bcfd3deaa5dfedb0a42d7b4f9d6f2bb07d2706',
+   *     name: 'testKey2024-05-06T14:55:35.767Z',
+   *     secret: '0ef8161b5c7dc551f230443555389f1c6d4ca97cea4c7d91ef708ea6b0400da889254145af42082ab32538123b98b6d3',
    *     status: 'active',
    *     createdBy: 'local.test_user',
    *     role: 'user',
-   *     createdAt: 1714746612602,
-   *     expiresAt: 1715005812602,
-   *     key: 'ea26a692940e451733ffdc8a73cc19fc'
+   *     createdAt: '2024-05-06T14:55:36.081Z',
+   *     expiresAt: '2024-05-07T14:55:36.081Z',
+   *     id: '57c779fd0f918b7bbd6e98a78f4baa71',
+   *     key: '57c779fd0f918b7bbd6e98a78f4baa71'
    *   }
    * }
    */
@@ -76,9 +77,12 @@ describe('API Key Tests', () => {
     assert.equal(typeof d.data.name, 'string')
     assert.equal(typeof d.data.secret, 'string')
     assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'number')
-    assert.equal(typeof d.data.expiresAt, 'number')
-    assert.equal(d.data.expiresAt - d.data.createdAt - 24 * 60 * 60 * 1000 < 1000, true)
+    assert.equal(typeof d.data.createdAt, 'string')
+    assert.equal(typeof d.data.expiresAt, 'string')
+    assert.equal(
+      new Date(d.data.expiresAt) - new Date(d.data.createdAt) - 24 * 60 * 60 * 1000 < 1000,
+      true
+    )
     if (typeof store.keys === 'undefined') store.keys = {}
     store.keys.key1 = d.data
   })
@@ -103,16 +107,18 @@ describe('API Key Tests', () => {
    * {
    *   result: 'success',
    *   data: {
-   *     name: 'testKey1714746612328',
-   *     secret: '06277082368bba4ebafa6a6d106ada802c55dfd98b5fe1b9e08d581443bcfd3deaa5dfedb0a42d7b4f9d6f2bb07d2706',
+   *     id: '7ec14d8f16d3468d9c393a4cb5df68cb',
+   *     name: 'testKey1715006754551',
    *     status: 'active',
-   *     createdBy: 'local.test_user',
    *     role: 'user',
-   *     createdAt: 1714746612602,
-   *     expiresAt: 1715005812602,
-   *     key: 'ea26a692940e451733ffdc8a73cc19fc',
+   *     createdBy: 'local.test_user',
+   *     createdAt: '2024-05-06T14:45:54.82Z',
+   *     expiresAt: '2024-05-07T14:45:54.82Z',
    *     updatedBy: 'local.test_user',
-   *     updatedAt: 1714749588334
+   *     updatedAt: '2024-05-06T14:45:54.82Z',
+   *     secret: '8ac2c61d275149b0bf57927fd58926ef7fe53573db2282c065a6e8bb814eccc680a528e8932c0a1dfd06be8e957ec78a',
+   *     lastLogin: null,
+   *     key: '7ec14d8f16d3468d9c393a4cb5df68cb'
    *   }
    * }
    */
@@ -123,14 +129,14 @@ describe('API Key Tests', () => {
     assert.equal(typeof d.data.name, 'string')
     assert.equal(typeof d.data.secret, 'string')
     assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'number')
-    assert.equal(typeof d.data.expiresAt, 'number')
-    for (const field of ['name', 'status', 'createdBy', 'role', 'createdAd', 'expiresAt', 'key']) {
+    assert.equal(typeof d.data.createdAt, 'string')
+    assert.equal(typeof d.data.expiresAt, 'string')
+    for (const field of ['name', 'status', 'createdBy', 'role', 'key', 'createdAt', 'expiresAt']) {
       assert.equal(d.data[field], store.keys.key1[field])
     }
     assert.equal(d.data.secret === store.keys.key1.secret, false)
     assert.equal(d.data.updatedBy, `local.test_user`)
-    assert.equal(Date.now() - d.data.updatedAt < 1000, true)
+    assert.equal(Date.now() - new Date(d.data.updatedAt) < 1000, true)
     store.keys.key1.secret = d.data.secret
   })
 
@@ -160,13 +166,13 @@ describe('API Key Tests', () => {
     const d = result[1]
     assert.equal(typeof d.data.name, 'string')
     assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'number')
-    assert.equal(typeof d.data.expiresAt, 'number')
+    assert.equal(typeof d.data.createdAt, 'string')
+    assert.equal(typeof d.data.expiresAt, 'string')
     for (const field of ['name', 'createdBy', 'role', 'createdAd', 'expiresAt', 'key']) {
       assert.equal(d.data[field], store.keys.key1[field])
     }
     assert.equal(d.data.updatedBy, `local.test_user`)
-    assert.equal(Date.now() - d.data.updatedAt < 1000, true)
+    assert.equal(Date.now() - new Date(d.data.updatedAt) < 1000, true)
     assert.equal(d.data.status, `disabled`)
   })
 
@@ -196,13 +202,13 @@ describe('API Key Tests', () => {
     const d = result[1]
     assert.equal(typeof d.data.name, 'string')
     assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'number')
-    assert.equal(typeof d.data.expiresAt, 'number')
+    assert.equal(typeof d.data.createdAt, 'string')
+    assert.equal(typeof d.data.expiresAt, 'string')
     for (const field of ['name', 'createdBy', 'role', 'createdAd', 'expiresAt', 'key']) {
       assert.equal(d.data[field], store.keys.key1[field])
     }
     assert.equal(d.data.updatedBy, `local.test_user`)
-    assert.equal(Date.now() - d.data.updatedAt < 1000, true)
+    assert.equal(Date.now() - new Date(d.data.updatedAt) < 1000, true)
     assert.equal(d.data.status, `active`)
   })
 
@@ -228,8 +234,8 @@ describe('API Key Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 200)
     const d = result[1]
+    assert.equal(result[0], 200)
     assert.equal(typeof d.jwt, 'string')
     assert.equal(d.data.role, 'user')
     assert.equal(d.data.user, `apikey.${store.keys.key1.key}`)
@@ -286,7 +292,6 @@ describe('API Key Tests', () => {
    */
   it(`Should DELETE /apikeys/:key`, async () => {
     const result = await api.delete(`/apikeys/${store.keys.key1.key}`, headers)
-    console.log(result)
     assert.equal(result[0], 204)
   })
 
@@ -297,18 +302,6 @@ describe('API Key Tests', () => {
    */
   it(`Should not POST /apikeys/:key/enable (key was removed)`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/enable`, {}, headers)
-    console.log(result)
-    assert.equal(result[0], 200)
-    const d = result[1]
-    assert.equal(typeof d.data.name, 'string')
-    assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'number')
-    assert.equal(typeof d.data.expiresAt, 'number')
-    for (const field of ['name', 'createdBy', 'role', 'createdAd', 'expiresAt', 'key']) {
-      assert.equal(d.data[field], store.keys.key1[field])
-    }
-    assert.equal(d.data.updatedBy, `local.test_user`)
-    assert.equal(Date.now() - d.data.updatedAt < 1000, true)
-    assert.equal(d.data.status, `active`)
+    assert.equal(result[0], 404)
   })
 })

@@ -7,6 +7,7 @@ import { idps } from '../idps/index.mjs'
  * List of allowListed URLs that do not require authentication
  */
 const allowedUris = [
+  `${store.prefix}/setup`,
   `${store.prefix}/status`,
   `${store.prefix}/status/`,
   `${store.prefix}/login`,
