@@ -223,32 +223,38 @@ Controller.prototype.updateApikey = async (req, res) => {
   }
 
   /*
+   * Keep track of what was updated
+   */
+  const updated = {
+    key: valid.key,
+    updatedBy: user,
+    updatedAt: Date.now(),
+  }
+
+  /*
    * Sounds good, handle the action
    */
   let secret
   if (valid.action === 'rotate') {
     secret = randomString(48)
-    key.secret = hashPassword(secret)
+    updated.secret = hashPassword(secret)
   } else if (['disable', 'enable'].includes(valid.action)) {
-    key.status = valid.action === 'enable' ? 'active' : 'disabled'
+    updated.status = valid.action === 'enable' ? 'active' : 'disabled'
   }
 
   /*
    * Store update key
    */
-  await saveAccount('apikey', valid.key, {
-    ...key,
-    updatedBy: user,
-    updatedAt: Date.now(),
-  })
+  await saveAccount('apikey', valid.key, { ...key, ...updated })
 
   /*
    * Keep the secret out of the returned data unless we just created it
    */
-  if (valid.action !== 'rotate') delete key.secret
-  else key.secret = secret
+  const data = { ...key, ...updated }
+  if (updated.secret) data.secret = secret
+  else delete data.secret
 
-  return res.send({ result: 'success', data: { ...key, key: valid.key } })
+  return res.send({ result: 'success', data })
 }
 
 /**

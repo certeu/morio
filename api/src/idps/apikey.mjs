@@ -42,7 +42,7 @@ export const apikey = async (id, data) => {
   /*
    * Now authenticate
    */
-  if (data.username && data.password && data.role) {
+  if (data?.username && data?.password && data?.role) {
     /*
      * Look up the account
      */
@@ -82,7 +82,7 @@ export const apikey = async (id, data) => {
     return [
       true,
       {
-        user: `local.${data.username}`,
+        user: `apikey.${data.username}`,
         role: data.role || 'user',
       },
     ]

@@ -101,7 +101,7 @@ describe('API Create Account Tests', () => {
     assert.equal(typeof d.data.invite, 'string')
     assert.equal(d.data.inviteUrl.includes(d.data.invite), true)
 
-    store.accounts = {}
+    if (typeof store.accounts === 'undefined') store.accounts = {}
     store.accounts.user1 = d.data
   })
 
@@ -656,7 +656,7 @@ describe('API Create Account Tests', () => {
    *
    * No response body
    */
-  it(`Should not GET /auth (JWT in Cookie)`, async () => {
+  it(`Should GET /auth (JWT in Cookie)`, async () => {
     const result = await apiAuth.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
       Cookie: `morio=${store.accounts.user1.jwt}`,
@@ -669,7 +669,7 @@ describe('API Create Account Tests', () => {
    *
    * No response body
    */
-  it(`Should not GET /auth (JWT in Bearer header)`, async () => {
+  it(`Should GET /auth (JWT in Bearer header)`, async () => {
     const result = await apiAuth.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
       Authorization: `Bearer ${store.accounts.user1.jwt}`,
