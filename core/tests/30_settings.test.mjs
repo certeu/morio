@@ -128,7 +128,7 @@ describe('Core Settings/Config/Status Tests', () => {
     assert.deepEqual(d.config.iam.providers.local, setup.iam.providers.local)
     assert.deepEqual(d.config.iam.providers.mrt, setup.iam.providers.mrt)
     // config.services
-    const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console']
+    const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'db']
     for (const service of services) {
       assert.equal(typeof d.config.services[service], 'object')
     }
