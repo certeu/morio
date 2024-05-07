@@ -128,13 +128,21 @@ Controller.prototype.authenticate = async (req, res) => {
  */
 Controller.prototype.login = async (req, res) => {
   /*
-   * Get the provider ID & type
+   * Get the provider ID
    */
   const providerId = req.body?.provider || false
-  const providerType =
-    providerId === 'mrt'
-      ? 'mrt' // Don't allow anything but mrt for a provider with id mrt
-      : store.config?.iam?.providers?.[providerId]?.provider || false
+  /*
+   * The mrt, local, and apikey provider types cannot be instantiated
+   * more than once. If anything, doing so would open up a bag of bugs.
+   * So when the ID is one of those, we lock the provider type.
+   *
+   * This is in contrast with other providers such as ldap, where the user
+   * can setup different providers (with their unique ID) that will all
+   * be of type 'ldap'.
+   */
+  const providerType = ['mrt', 'local', 'apikey'].includes(providerId)
+    ? providerId
+    : store.config?.iam?.providers?.[providerId]?.provider || false
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request

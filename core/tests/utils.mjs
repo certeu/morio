@@ -49,6 +49,7 @@ const setup = {
     secrets: {
       TEST_SECRET_1: 'banana',
       TEST_SECRET_2: 'bandana',
+      LDAP_BIND_SECRET: 'secret',
     },
   },
   iam: {
@@ -64,6 +65,31 @@ const setup = {
         id: 'mrt',
         label: 'Morio Account',
       },
+      ldap: {
+        provider: 'ldap',
+        verify_certificate: false,
+        id: 'ldap',
+        label: 'LDAP',
+        about: 'Test LDAP server',
+        server: {
+          url: 'ldap://ldap:10389',
+          bindDN: 'uid=admin,ou=system',
+          bindCredentials: "{{{ LDAP_BIND_SECRET }}}",
+          searchBase: 'ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
+          searchFilter: '(&(objectclass=person)(uid={{username}}))',
+        },
+        username_field: 'uid',
+        rbac: {
+          manager: {
+            attribute: 'employeetype',
+            regex: '^manager$'
+          },
+          operator: {
+            attribute: 'employeetype',
+            regex: '^admin$'
+          },
+        }
+      }
     },
   },
 }

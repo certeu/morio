@@ -18,6 +18,9 @@ sudo rm -rf ./api/coverage/*
 mkdir ./api/coverage/tmp
 sudo chown 2112:2112 ./api/coverage/tmp
 
+# Start an ephemeral LDAP instance so we can test IDP/LDAP
+echo "Starting ephemeral LDAP server"
+./api/tests/start-ldap-server.sh
 
 docker run \
   -it --rm \
@@ -58,4 +61,9 @@ docker run \
   -e NODE_ENV=test \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
   morio/api-dev:0.1.6 bash /morio/api/tests/run-unit-tests.sh
+
+
+# Stop an ephemeral LDAP instance
+echo "Stopping ephemeral LDAP server"
+./api/tests/stop-ldap-server.sh
 

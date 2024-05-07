@@ -126,7 +126,16 @@ sudo rm -rf ./api/coverage/*
 mkdir ./api/coverage/tmp
 sudo chown 2112:2112 ./api/coverage/tmp
 
+# Start an ephemeral LDAP instance so we can test IDP/LDAP
+echo "Starting ephemeral LDAP server"
+./api/tests/start-ldap-server.sh
 `
+const postApiTest = `
+# Stop an ephemeral LDAP instance
+echo "Stopping ephemeral LDAP server"
+./api/tests/stop-ldap-server.sh
+`
+
 const script = (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
@@ -136,6 +145,7 @@ const script = (name, env) => `#!/bin/bash
 #
 ${name === 'api' ? preApiTest : ''}
 docker run ${cliOptions(name, env)}
+${name === 'api' ? postApiTest : ''}
 `
 for (const env of ['dev', 'test', 'prod']) {
   await writeFile(`core/run-${env}-container.sh`, script('core', env), false, 0o755)

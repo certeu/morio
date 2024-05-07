@@ -246,6 +246,12 @@ describe('Core Settings/Config/Status Tests', () => {
         label: 'API Key',
         about: false,
       },
+      ldap: {
+        about: 'Test LDAP server',
+        id: 'ldap',
+        label: 'LDAP',
+        provider: 'ldap'
+      },
       mrt: { id: 'mrt', provider: 'mrt', about: false },
       local: {
         id: 'local',

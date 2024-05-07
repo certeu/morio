@@ -27,6 +27,9 @@ node --test-concurrency=1 --test
 # Stop api container
 kill -1 %1
 
+# Stop the test LDAP server
+stop-ldap-server.sh
+
 # Generate report
 ../node_modules/.bin/c8 report --format=html
 
