@@ -1,6 +1,6 @@
 {
   "name": "@morio/shared",
-  "version": "0.1.6",
+  "version": "0.2.0",
   "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
   "author": "CERT-EU <services@cert.europa.eu>",

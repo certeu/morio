@@ -8,8 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2014-05-07
+
 # Added
 
+- [api] Start ephemeral LDAP instance for running tests
 - [api] Added reconfigure route
 - [api] Allow access to test coverage reports when not in production
 - [api] Added middleware to guard routes in ephemeral mode
