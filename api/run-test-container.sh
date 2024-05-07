@@ -60,7 +60,7 @@ docker run \
   -e MORIO_CORE_LOG_LEVEL=trace \
   -e NODE_ENV=test \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
-  morio/api-dev:0.1.6 bash /morio/api/tests/run-unit-tests.sh
+  morio/api-dev:0.2.0 bash /morio/api/tests/run-unit-tests.sh
 
 
 # Stop an ephemeral LDAP instance
