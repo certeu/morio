@@ -18,34 +18,9 @@ import { store } from '../lib/store.mjs'
  */
 export const local = async (id, data) => {
   /*
-   * The frontend UI will pass us the provider ID, which we then use
-   * to lookup the provider config in the settings.
-   * However, the local provider does not need to be configured
-   * by the user in the settings.
-   *
-   * A user could, intentionally or by accident, create a different
-   * authentication provider and give it the ID 'local'. In that case,
-   * the UI would submit a login request where the ID 'local' would be used
-   * on a provider that is different from the local provider.
-   *
-   * So while that is an unlikely scenario, best to guard against it and give
-   * a meaningful error message.
+   * Authenticate
    */
-  if (id !== 'local') {
-    return [
-      false,
-      {
-        success: false,
-        reason: 'Authentication failed',
-        error: 'Called the local provider with an id that is not `local`',
-      },
-    ]
-  }
-
-  /*
-   * Now authenticate
-   */
-  if (data?.username && data?.password && data?.token && data?.role) {
+  if (id === 'local' && data?.username && data?.password && data?.token && data?.role) {
     /*
      * Look up the account
      */

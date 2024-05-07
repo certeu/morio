@@ -84,7 +84,7 @@ export const ldap = (id, data, req) => {
           {
             success: false,
             reason: 'Authentication failed',
-            error: 'Computer says no',
+            error: 'Invalid LDAP credentials',
           },
         ])
 
@@ -144,7 +144,7 @@ const checkRole = (requestedRole = false, config = false, data = false) => {
    * Make sure we have everything to check the role
    * And if not, deny access
    */
-  if (!config || !data || !roles.includes(requestedRole)) return false
+  if (!config || !data || !roles.includes(requestedRole)) return [false, null]
 
   /*
    * Higher roles can assume lower roles so we need to check

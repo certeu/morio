@@ -32,3 +32,4 @@ docker run \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
   morio/core-test:0.1.6 bash /morio/core/tests/run-unit-tests.sh
 
+

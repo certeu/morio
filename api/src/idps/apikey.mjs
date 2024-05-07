@@ -15,34 +15,9 @@ import { isRoleAvailable } from '../rbac.mjs'
  */
 export const apikey = async (id, data) => {
   /*
-   * The frontend UI will pass us the provider ID, which we then use
-   * to lookup the provider config in the settings.
-   * However, the apikey provider does not need to be configured
-   * by the user in the settings.
-   *
-   * A user could, intentionally or by accident, create a different
-   * authentication provider and give it the ID 'apikey'. In that case,
-   * the UI would submit a login request where the ID 'apikey' would be used
-   * on a provider that is different from the local provider.
-   *
-   * So while that is an unlikely scenario, best to guard against it and give
-   * a meaningful error message.
+   * Authenticate
    */
-  if (id !== 'apikey') {
-    return [
-      false,
-      {
-        success: false,
-        reason: 'Authentication failed',
-        error: 'Called the apikey provider with an id that is not `apikey`',
-      },
-    ]
-  }
-
-  /*
-   * Now authenticate
-   */
-  if (data?.username && data?.password && data?.role) {
+  if (id === 'apikey' && data?.username && data?.password && data?.role) {
     /*
      * Look up the apikey
      */

@@ -1,0 +1,42 @@
+version: 1
+
+dn: dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+dc: ldap
+objectClass: top
+objectClass: domain
+
+dn: ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+dn: uid=user1,ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+cn: Test User 1
+sn: Tony
+uid: user1
+userPassword: password1
+employeeType: user
+
+dn: uid=user2,ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+cn: Test User 2
+sn: Gwen
+uid: user2
+userPassword: password2
+employeeType: manager
+
+dn: uid=user3,ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+objectClass: top
+objectClass: person
+objectClass: inetOrgPerson
+cn: Test User 3
+sn: Mike
+uid: user3
+userPassword: password3
+employeeType: admin
+

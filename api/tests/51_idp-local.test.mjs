@@ -286,6 +286,62 @@ describe('API Key Tests', () => {
   })
 
   /*
+   * POST /login (ask for a role not available)
+   *
+   * Example response:
+   * {
+   *   success: false,
+   *   reason: 'Authentication failed',
+   *   error: 'Role not available to this API key'
+   * }
+   */
+  it(`Should POST /login (ask for role above our level)`, async () => {
+    const data = {
+      provider: 'apikey',
+      data: {
+        username: store.keys.key1.key,
+        password: store.keys.key1.secret,
+        role: 'root',
+      },
+    }
+    const result = await api.post(`/login`, data)
+    const d = result[1]
+    assert.equal(result[0], 401)
+    assert.equal(typeof d, 'object')
+    assert.equal(d.success, false)
+    assert.equal(d.reason, `Authentication failed`)
+    assert.equal(d.error, `Role not available to this API key`)
+  })
+
+  /*
+   * POST /login (ask for a role that does not exist)
+   *
+   * Example response:
+   * {
+   *   success: false,
+   *   reason: 'Authentication failed',
+   *   error: 'Role not available to this API key'
+   * }
+   */
+  it(`Should POST /login (ask for role that does not exist)`, async () => {
+    const data = {
+      provider: 'apikey',
+      data: {
+        username: store.keys.key1.key,
+        password: store.keys.key1.secret,
+        role: 'schmuser',
+      },
+    }
+    const result = await api.post(`/login`, data)
+    const d = result[1]
+    assert.equal(result[0], 401)
+    assert.equal(typeof d, 'object')
+    assert.equal(d.success, false)
+    assert.equal(d.reason, `Authentication failed`)
+    assert.equal(d.error, `Role not available to this API key`)
+  })
+
+  /*
    * DELETE /apikey/:key
    *
    * No response body
