@@ -20,7 +20,7 @@ export const resolveServiceConfiguration = (store) => {
       // Image to run (different in dev)
       image: 'smallstep/step-ca',
       // Image tag (version) to run
-      tag: '0.25.2',
+      tag: '0.26.1',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

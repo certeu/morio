@@ -17,10 +17,10 @@ export const resolveServiceConfiguration = (store) => {
     container: {
       // Name to use for the running container
       container_name: 'broker',
-      // Image to run (different in dev)
+      // Image to run
       image: 'docker.redpanda.com/redpandadata/redpanda',
       // Image tag (version) to run
-      tag: 'v23.3.4',
+      tag: 'v23.3.15',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
