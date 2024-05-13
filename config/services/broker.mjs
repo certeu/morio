@@ -166,7 +166,7 @@ export const resolveServiceConfiguration = (store) => {
             name: 'internal',
           },
           {
-            address: store.config.core.names.external,
+            address: store.config.core?.names?.external,
             // Advertise the mapped port
             port: 9092,
             name: 'external',
@@ -242,7 +242,7 @@ export const resolveServiceConfiguration = (store) => {
          */
         advertised_pandaproxy_api: [
           {
-            address: store.config.core.names.external,
+            address: store.config.core?.names?.external,
             name: 'external',
             port: 443,
           },

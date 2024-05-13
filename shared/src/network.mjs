@@ -40,7 +40,7 @@ export const resolveHost = async (host) => {
  */
 export const testUrl = async (url, customOptions = {}) => {
   /*
-   * Merge default and custom optioos
+   * Merge default and custom options
    */
   const options = {
     method: 'GET',
@@ -49,6 +49,7 @@ export const testUrl = async (url, customOptions = {}) => {
     ignoreCertificate: false,
     timeout: 3000,
     returnAs: false,
+    returnError: false,
     ...customOptions,
   }
 
@@ -67,7 +68,8 @@ export const testUrl = async (url, customOptions = {}) => {
   try {
     result = await axios(url, options)
   } catch (err) {
-    return false
+    // Swallow error?
+    return options.returnError ? err : false
   }
 
   if (options.returnAs === 'status') return result.status
@@ -95,7 +97,8 @@ export const get = async function (url, raw = false) {
   try {
     response = await fetch(url)
   } catch (err) {
-    // Swallow error
+    // Swallow error?
+    // console.log(err)
   }
 
   /*

@@ -23,17 +23,14 @@ export const bootstrapConfiguration = async () => {
   }
 
   /*
-   * Now info to store
+   * Add info to store
    */
-  if (!store.info)
-    store.info = {
-      about: 'Morio Management API',
-      name: '@morio/api',
-      config_resolved: false,
-      ping: Date.now(),
-      start_time: Date.now(),
-      version: store.getPreset('MORIO_VERSION'),
-    }
+  store.info.about = 'Morio Management API'
+  store.info.name = '@morio/api'
+  store.info.config_resolved = false
+  store.info.ping = Date.now()
+  store.info.start_time = Date.now()
+  store.info.version = store.getPreset('MORIO_VERSION')
 
   /*
    * Set the prefix
@@ -60,19 +57,17 @@ export const bootstrapConfiguration = async () => {
     store.config = result[1].config
     store.log.debug(`Loaded configuration from core.`)
     /*
-     * Also load the info from core
+     * Also load the status from core
      * This will tell us whether we are running ephemeral or not
      */
-    const infoResult = await store.core.get('/info')
-    if (coreFetchOk(infoResult)) {
-      store.log.debug(`Loaded info from core.`)
-      store.info.production = infoResult[1].production
-      store.info.ephemeral = infoResult[1].ephemeral
-      store.info.config_resolved = infoResult[1].config_resolved
+    const coreStatus = await store.core.get('/status')
+    if (coreFetchOk(coreStatus)) {
+      store.log.debug(`Loaded status from core.`)
+      store.info = {...store.info, ...coreStatus[1] }
     } else if (
-      infoResult[0] === 503 &&
-      Array.isArray(infoResult[1].errors) &&
-      infoResult[1].errors[0].includes('Not available in ephemeral mode')
+      coreStatus[0] === 503 &&
+      Array.isArray(coreStatus[1].errors) &&
+      coreStatus[1].errors[0].includes('Not available in ephemeral mode')
     ) {
       store.info.ephemeral = true
       store.log.debug('Not loading Morio info in ephemeral mode')

@@ -1,4 +1,5 @@
 import { setTimeout } from 'node:timers/promises'
+
 /**
  * Capitalize the first character of a string
  *

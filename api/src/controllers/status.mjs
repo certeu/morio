@@ -42,6 +42,8 @@ Controller.prototype.status = async (req, res) => {
    */
   const [status, result] = await store.core.get(`/status`)
 
+  if (!status) return res.status(500).send({status, result}).end()
+
   /*
    * Override name,
    */
@@ -52,6 +54,19 @@ Controller.prototype.status = async (req, res) => {
   if ([200, 503].includes(status)) return res.status(status).send(result)
   else return res.status(500).send({})
 }
+
+/**
+ * Info
+ *
+ * This returns the current info
+ *
+ * Unlike the status endpoint, this does not reach out to core
+ * but instead returns the most recent info from the store.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.info = async (req, res) => res.send(store.info)
 
 /**
  * Status logs

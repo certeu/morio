@@ -10,6 +10,8 @@ const allowedUris = [
   `${store.prefix}/setup`,
   `${store.prefix}/status`,
   `${store.prefix}/status/`,
+  `${store.prefix}/info`,
+  `${store.prefix}/info/`,
   `${store.prefix}/login`,
   `${store.prefix}/login/`,
   `${store.prefix}/idps`,

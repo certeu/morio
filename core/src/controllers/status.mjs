@@ -26,6 +26,9 @@ Controller.prototype.status = async (req, res) => {
     uptime: (Date.now() - store.start_time) / 1000,
   }
 
+  if (store.keys?.deployment) base.deployment = store.keys.deployment
+  if (store.keys?.node) base.node = store.keys.node
+
   /*
    * Return adding whether MORIO is setup or not
    */
