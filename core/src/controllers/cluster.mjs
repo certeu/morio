@@ -15,6 +15,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.join = async (req, res) => {
+  store.log.info('Received request to join cluster')
 
   /*
    * Return something for now

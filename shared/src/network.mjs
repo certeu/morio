@@ -186,7 +186,6 @@ const __postput = async function (method = 'POST', url, data, raw = false, log=f
   } catch (err) {
     if (log) log(err)
   }
-  console.log({response})
 
   /*
    * Handle status codes that have no response body
