@@ -129,15 +129,19 @@ export const addTraefikTlsConfiguration = (service) => {
 
   /*
    * Update rule with hostname(s)
-   * FIXME: This does not yet support clustering
+   * This will also add the leader_ip and fqdn when Morio is clustered
    */
+  const names = [...store.config.deployment.nodes]
+  for (const name of ['leader_ip', 'fqdn']) {
+    if (store.config.deployment[name]) names.push(store.config.deployment[name])
+  }
   for (const i in store.config.services[service].container?.labels || []) {
     if (store.config.services[service].container.labels[i].toLowerCase().indexOf('rule=(') !== -1) {
       const chunks = store.config.services[service].container.labels[i].split('rule=(')
       store.config.services[service].container.labels[i] =
         chunks[0] +
         'rule=(Host(' +
-        store.config.deployment.nodes.map((node) => `\`${node}\``).join(',') +
+        names.map((node) => `\`${node}\``).join(',') +
         ')) && (' +
         chunks[1]
     }

@@ -50,6 +50,7 @@ export const testUrl = async (url, customOptions = {}) => {
     timeout: 3000,
     returnAs: false,
     returnError: false,
+    log: false,
     ...customOptions,
   }
 
@@ -69,6 +70,7 @@ export const testUrl = async (url, customOptions = {}) => {
     result = await axios(url, options)
   } catch (err) {
     // Swallow error?
+    if (customOptions.log) customOptions.log(err)
     return options.returnError ? err : false
   }
 
@@ -84,12 +86,13 @@ export const testUrl = async (url, customOptions = {}) => {
 /*
  * General purpose method to call the core API with a GET request
  *
- * @param {url} string - The URL to call
- * @param {data} string - The data to send
- * @param {raw} string - Set this to something truthy to not parse the result as JSON
+ * @param {string} url - The URL to call
+ * @param {object} data - The data to send
+ * @param {bool} raw - Set this to something truthy to not parse the result as JSON
+ * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export const get = async function (url, raw = false) {
+export const get = async function (url, raw = false, log=false) {
   /*
    * Send the request to core
    */
@@ -97,8 +100,8 @@ export const get = async function (url, raw = false) {
   try {
     response = await fetch(url)
   } catch (err) {
-    // Swallow error?
-    // console.log(err)
+    // Log error if requested
+    if (log) log(err)
   }
 
   /*
@@ -138,7 +141,8 @@ export const streamGet = async function (url, res) {
   try {
     response = await fetch(url)
   } catch (err) {
-    console.log(err)
+    // Swallow error
+    //console.log(err)
   }
 
   if (!response) {
@@ -157,9 +161,10 @@ export const streamGet = async function (url, res) {
  * @param {url} string - The URL to call
  * @param {data} string - The data to send
  * @param {raw} string - Set this to something truthy to not parse the result as JSON
+ * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-const __postput = async function (method = 'POST', url, data, raw = false) {
+const __postput = async function (method = 'POST', url, data, raw = false, log=false) {
   /*
    * Construct the request object with or without a request body
    */
@@ -179,8 +184,9 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
   try {
     response = await fetch(url, request)
   } catch (err) {
-    console.log(err, response)
+    if (log) log(err)
   }
+  console.log({response})
 
   /*
    * Handle status codes that have no response body
@@ -195,6 +201,7 @@ const __postput = async function (method = 'POST', url, data, raw = false) {
       data = raw ? await response.text() : await response.json()
     }
     catch (err) {
+      if (log) log(err)
       return raw
         ? [response.status, {err}]
         : [response.status, data]
@@ -219,8 +226,8 @@ export const put = async (url, data) => __postput('PUT', url, data)
  * @return {object] client - The API client
  */
 export const restClient = (api) => ({
-  get: async (url) => get(api + url),
-  post: async (url, data) => __postput('POST', api + url, data),
-  put: async (url, data) => __postput('PUT', api + url, data),
+  get: async (url, raw, log) => get(api + url),
+  post: async (url, data, raw, log) => __postput('POST', api + url, data),
+  put: async (url, data, raw, log) => __postput('PUT', api + url, data),
   streamGet: async (url, res) => streamGet(api + url, res),
 })

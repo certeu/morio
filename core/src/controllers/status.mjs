@@ -36,6 +36,7 @@ Controller.prototype.status = async (req, res) => {
     .send({
       ...base,
       setup: store.config.deployment ? true : false,
+      ephemeral: store.config.deployment ? false : true,
     })
     .end()
 }

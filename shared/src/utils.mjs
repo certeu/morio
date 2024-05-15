@@ -40,6 +40,7 @@ export const sleep = async (seconds) => await setTimeout(seconds * 1000)
  * @param {function} opts.validate - Optional method to run to see whether the
  *  result is successfull (if no message is passed, it will just see whether
  *  it's truthy)
+ * @param {function} opts.log - Optional methods to log errors
  *
  * @return {promise} result - The promise
  */
@@ -49,6 +50,7 @@ export const attempt = async ({
   run,
   onFailedAttempt = false,
   validate = false,
+  log = false,
 }) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve))
 
 /*
@@ -64,7 +66,8 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, v
     ok = await run()
   }
   catch (err) {
-    console.log(err)
+    // Log error if error was passed in
+    if (log) log(err)
   }
 
   if (
@@ -83,7 +86,8 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, v
       ok = await run()
     }
     catch (err) {
-      console.log.debug(err)
+      // Log error if error was passed in
+      if (log) log(err)
     }
     if (ok) {
       clearInterval(interval)

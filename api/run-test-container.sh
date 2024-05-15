@@ -57,7 +57,7 @@ docker run \
   -e MORIO_CONFIG_ROOT=/home/jdecock/git/morio/data/config \
   -e MORIO_DATA_ROOT=/home/jdecock/git/morio/data/data \
   -e MORIO_LOGS_ROOT=/home/jdecock/git/morio/data/logs \
-  -e MORIO_CORE_LOG_LEVEL=trace \
+  -e MORIO_CORE_LOG_LEVEL=info \
   -e NODE_ENV=test \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
   morio/api-dev:0.2.0 bash /morio/api/tests/run-unit-tests.sh

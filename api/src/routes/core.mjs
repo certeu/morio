@@ -141,4 +141,9 @@ export function routes(app) {
    * Hit this route to get the running presets
    */
   app.get(`${PREFIX}/jwks`, (req, res) => Core.getJwks(req, res))
+
+  /*
+   * Route to join a cluster swarm
+   */
+  app.get(`${PREFIX}/join`, (req, res) => Core.joinCluster(req, res))
 }

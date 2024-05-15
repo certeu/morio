@@ -40,21 +40,24 @@ export const bootstrapConfiguration = async () => {
   /*
    * Add core client to store
    */
-  if (!store.core) store.core = coreClient(`http://core:${store.getPreset('MORIO_CORE_PORT')}`)
+  if (!store.core) store.core = coreClient(`http://local_core:${store.getPreset('MORIO_CORE_PORT')}`)
 
   /*
    * Attempt to load the config from CORE
    */
   const result = await attempt({
-    every: 2,
-    timeout: 60,
-    run: async () => await store.core.get('/config'),
-    onFailedAttempt: (s) =>
-      store.log.debug(`Waited ${s} seconds for core/config, will continue waiting.`),
-    validate: coreFetchOk,
+    every: 5,
+    timeout: 3600,
+    run: async (s) => await store.core.get('/config'),
+    onFailedAttempt: () => {
+      store.log.debug(`Waited ${s} seconds for core/config, will continue waiting.`)
+    },
+    validate: (res) => coreFetchOk,
+    log: store.log.warn,
   })
   if (coreFetchOk(result)) {
     store.config = result[1].config
+    if (result[1].keys) store.keys = result[1].keys
     store.log.debug(`Loaded configuration from core.`)
     /*
      * Also load the status from core
@@ -77,12 +80,11 @@ export const bootstrapConfiguration = async () => {
   /*
    * If we are in ephemeral mode, return early
    */
-  if (store.info.ephemeral) return
+  if (store.info.ephemeral || !store.keys?.mrt) return
 
   /*
    * Add encryption methods
    */
-  store.keys = result[1].keys
   const { encrypt, decrypt, isEncrypted } = encryptionMethods(
     store.keys.mrt,
     'Morio by CERT-EU',
@@ -119,5 +121,13 @@ export const bootstrapConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (result, okStatus = [200]) =>
-  result && Array.isArray(result) && okStatus.includes(result[0]) && result[1]
+const coreFetchOk = (result, okStatus = [200]) => {
+  if (
+    result &&
+    Array.isArray(result) &&
+    okStatus.includes(result[0]) &&
+    result[1]
+  ) return true
+
+  return false
+}

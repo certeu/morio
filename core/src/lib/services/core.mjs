@@ -15,8 +15,10 @@ import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shar
 import mustache from 'mustache'
 // Default hooks & netork handler
 import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
+// Cluster
+import { startCluster } from '#lib/cluster'
 // Docker
-import { runDockerApiCommand } from '#lib/docker'
+import { runDockerApiCommand, storeRunningContainers } from '#lib/docker'
 // Store
 import { store } from '../store.mjs'
 
@@ -39,8 +41,12 @@ export const service = {
     restartContainer: () => false,
     /*
      * This runs only when core is cold-started.
+     *
+     * @params {object} hookProps - Props to pass info to the hook
+     * @params {object} hookProps.initialSetup - True if this is the initial setup
+     * @params {object} hookProps.coldStart - True if this is a cold start
      */
-    beforeAll: async () => {
+    beforeAll: async (hookProps) => {
       /*
        * Add a getPreset() wrapper that will output trace logs about how presets are resolved
        * This is surprisingly helpful during debugging
@@ -100,26 +106,47 @@ export const service = {
       if (!timestamp) {
         store.info.current_settings = false
         store.info.ephemeral = true
-        store.settings = {}
-        store.config = {}
 
         /*
          * If we are in epehemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
          */
-        try {
-          await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
-            Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
-          })
-        } catch (err) {
-          store.log.warn('Failed to ensure morio network configuration')
+        if (hookProps.coldStart) {
+          try {
+            await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
+              Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
+            })
+          } catch (err) {
+            store.log.warn('Failed to ensure morio network configuration')
+          }
         }
+
+        /*
+         * Now update the list of running containers
+         */
+        await storeRunningContainers()
+
+        /*
+         * Add our internal IP address to the config
+         * (needed to wait until after the network is created)
+         */
+        store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
 
         /*
          * Return here for ephemeral mode
          */
         return true
       }
+
+      /*
+       * Update the list of running containers
+       */
+      await storeRunningContainers()
+
+      /*
+       * Add our internal IP address to the config
+       */
+      store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
 
       /*
        * Add encryption methods
@@ -146,14 +173,6 @@ export const service = {
       store.keys = keys
 
       /*
-       * Make sure we have the proper structure in the store
-       */
-      if (typeof store.config === 'undefined') store.config = {}
-      if (typeof store.config.services === 'undefined') store.config.services = {}
-      if (typeof store.config.containers === 'undefined') store.config.containers = {}
-      if (typeof store.config.core === 'undefined') store.config.core = {}
-
-      /*
        * One node makes this easy
        */
       if (store.config.deployment?.node_count === 1) {
@@ -163,13 +182,16 @@ export const service = {
           external: store.config.deployment.nodes[0],
         }
         store.config.deployment.fqdn = store.config.deployment.nodes[0]
+
+        return true
       }
       /*
        * Clustering is a bit more work, so it's abstracted in this method
        */
-      else if (store.config.deployment?.node_count > 1) await startCluster()
-
-      return true
+      else if (store.config.deployment?.node_count > 1) {
+        await startCluster(hookProps)
+        return false
+      }
     },
   },
 }
@@ -310,135 +332,4 @@ export const templateSettings = (settings) => {
   }
 
   return newSettings
-}
-
-/**
- * This is called from the beforeAll lifecycle hook
- * when we are in a clusterd depoyment. Clustering
- * requires a bit more work, because we don't just have
- * to resolve the configuration, we also need to make
- * sure we have the latest config, and start Docker in
- * swarm mode.
- */
-const startCluster = async () => {
-  await whoAreWe()
-  return
-  try {
-    await ensureSwarm()
-  }
-  catch (err) {
-    console.log({err})
-  }
-
-  return
-
-
-  console.log({info})
-  let i = 0
-  store.cluster = {}
-  const state = []
-  for (const node of store.config.deployment.nodes.sort()) {
-    i++
-    const id = `candidate_node_${i}`
-    const url = `https://${node}${store.getPreset('MORIO_API_PREFIX')}/status`
-    console.log({url})
-    state.push((await testUrl(url, { ignoreCertificate: true, returnAs: 'json' })))
-  }
-  console.log({state})
-  //store.config.core.node_nr = 1
-  //store.config.core.names = {
-  //  internal: 'core_1',
-  //  external: store.config.deployment.nodes[0],
-  //}
-  //store.config.deployment.fqdn = store.config.deployment.nodes[0]
-}
-
-export const ensureSwarm = async () => {
-  if (typeof store.swarm === 'undefined') store.swarm = {}
-  const [ok, nodes] = await runDockerApiCommand('listNodes')
-  if (ok) store.swarm.nodes = nodes
-
-  if (store.swarm.nodes.length === 1) {
-    /*
-     * Only 1 node in the swarm. Is it us?
-     */
-  }
-
-  console.log({ok, nodes: JSON.stringify(nodes, null ,2)})
-  let [result, swarm] = await runDockerApiCommand('swarmInspect')
-  console.log({cmd: 'swarmInspect', result, swarm})
-
-  /*
-   * Is a Swarm running?
-   */
-  if (result && swarm.JoinTokens) {
-    store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
-  }
-  else if (!result && swarm.toString().includes('not a swarm manager')) {
-    store.log.debug('Initializing Docker Swarm')
-    /*
-     * Docker swarm is not setup. So let's do so.
-     */
-    [result, swarm] = await runDockerApiCommand('swarmInit', {
-      ListenAddr: store.settings.deployment.leader_ip,
-      AdvertiseAddr: store.settings.deployment.leader_ip,
-      ForceNewCluster: false,
-      //Spec: {
-      //  Name: 'morio',
-      //}
-    })
-    console.log({cmd: 'swarmInit', result, swarm, tokens: swarm.JoinTokens})
-  }
-  else store.log.warn(`Could not determine the state of the Docker Swarm.`)
-}
-
-/*
- * This helper method will attempt to figure out which
- * of the various cluster nodes is this node by connecting
- * to the API and requesting the status, then comparing the
- * node ID to the local ID
- */
-const whoAreWe = async () => {
-  const state = await clusterState()
-  //const ephemeral = state.filter(node => node.ephemeral === true)
-  //const down = state.filter(node => node.ephemeral === true)
-
-  /*
-   * If one node failed and all others are epehemeral, it means
-   * that we are the leader, and this is the initial cluster setup.
-   */
-  //if Object.values(state).filter(val => val
-  console.log(state)
-}
-
-/**
- * Helper method to attempt to connect to all cluster nodes
- *
- * This Express instance runs as a single-threaded app.
- * If we call our own endpoint from ourselves, the request will fail
- * as it the same thread will be responsible for both request and
- * response.
- *
- * So, if something fails we cannot really be sure, but if it works
- * we do know it is not this node.
- *
- * @return {object} state - The cluster state
- */
-const clusterState = async () => {
-  const state = []
-
-  /*
-   * Attempt to reach core instances over the docker network
-   */
-  let i = 0
-  for (const node of store.config.deployment.nodes.sort()) {
-    i++
-    const data = await testUrl(
-      `https://${node}${store.getPreset('MORIO_API_PREFIX')}/info`,
-      { returnAs: 'json', ignoreCertificate: true, returnError: true }
-    )
-    state.push({...data, node })
-  }
-
-  return state
 }
