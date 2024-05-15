@@ -14,4 +14,9 @@ export function routes(app) {
    */
   app.post('/cluster/ping', (req, res) => Cluster.ping(req, res))
 
+  /*
+   * This route invites this node to join a swarm
+   */
+  app.post('/cluster/join', (req, res) => Cluster.join(req, res))
+
 }

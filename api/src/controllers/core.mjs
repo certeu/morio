@@ -330,7 +330,7 @@ Controller.prototype.getJwks = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.joinCluster = async (req, res, path) => {
-  const [status, result] = await store.core.post(`/join`, req.body)
+  const [status, result] = await store.core.post(`/cluster/join`, req.body)
 
   return res.status(status).send(result)
 }
