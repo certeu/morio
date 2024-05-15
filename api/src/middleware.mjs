@@ -4,7 +4,13 @@ import { store } from './lib/store.mjs'
 /*
  * List of routes allowed in ephemeral mode
  */
-const ephemeralRoutes = ['GET/status', 'POST/setup', 'GET/reconfigure', 'GET/info']
+const ephemeralRoutes = [
+  'GET/status',
+  'POST/setup',
+  'GET/reconfigure',
+  'GET/info',
+  'POST/cluster/join',
+]
 
 /*
  * List of routes allowed while reconfiguring
