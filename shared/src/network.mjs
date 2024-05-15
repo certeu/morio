@@ -191,11 +191,11 @@ const __postput = async function (method = 'POST', url, data, raw = false, log=f
   /*
    * Handle status codes that have no response body
    */
-  if ([204].includes(response.status)) return [response.status, {}]
+  if (response?.status && [204].includes(response.status)) return [response.status, {}]
   /*
    * Handle all other status codes
    */
-  else if (response.status < 400) {
+  else if (response?.status && response.status < 400) {
     let data
     try {
       data = raw ? await response.text() : await response.json()
@@ -213,7 +213,7 @@ const __postput = async function (method = 'POST', url, data, raw = false, log=f
   /*
    * If we end up here, status code is 400 or higher so it's an error
    */
-  return [response.status, false]
+  return [response?.status || 500, false]
 }
 
 export const post = async (url, data) => __postput('POST', url, data)

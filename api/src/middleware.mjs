@@ -5,11 +5,11 @@ import { store } from './lib/store.mjs'
  * List of routes allowed in ephemeral mode
  */
 const ephemeralRoutes = [
-  'GET/status',
-  'POST/setup',
-  'GET/reconfigure',
-  'GET/info',
-  'POST/cluster/join',
+  'GET:/status',
+  'POST:/setup',
+  'GET:/reconfigure',
+  'GET:/info',
+  'POST:/cluster/join',
 ]
 
 /*
@@ -27,7 +27,7 @@ export const guardRoutes = (req, res, next) => {
    */
   const allowedEphemeral = [
     'GET/auth', // Internal pre-auth route used by Traefik
-    ...ephemeralRoutes.map((url) => url.split('/').join(`${store.prefix}/`)),
+    ...ephemeralRoutes.map((url) => url.split(':').join(`${store.prefix}`)),
   ]
 
   /*

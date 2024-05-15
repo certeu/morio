@@ -120,7 +120,7 @@ const ensureSwarm = async ({
   for (const id of store.cluster.sets.all) {
     try {
       store.log.debug(`Asking ${store.cluster.nodes[id].node_fqdn} to join the cluster`)
-      const result = await testUrl(`https://${store.cluster.nodes[id].node_fqdn}${store.getPreset('MORIO_API_PREFIX')}/join`, {
+      const result = await testUrl(`https://${store.cluster.nodes[id].node_fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`, {
         method: 'POST',
         data: {
           swarm_nodes: store.swarm.nodes,
@@ -129,7 +129,7 @@ const ensureSwarm = async ({
         ignoreCertificate: true,
         returnError: true,
       })
-      console.log({result})
+      console.log({d: result.response.data})
     }
     catch (err) {
       console.log(err)
