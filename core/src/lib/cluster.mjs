@@ -1,5 +1,6 @@
 // Networking
 import { testUrl } from '#shared/network'
+import { sleep } from '#shared/utils'
 // Docker
 import { runDockerApiCommand } from '#lib/docker'
 // Store
@@ -11,8 +12,6 @@ import { store } from './store.mjs'
  * We connect to the API here, requesting the /info endpoint.
  * This should work for all nodes, ephemeral or not, unless
  * there's connection problems, or notes are down.
- *
- * @return {object} state - The cluster state
  */
 const storeClusterState = async () => {
   /*
@@ -58,11 +57,17 @@ const storeClusterState = async () => {
     i++
     const data = await testUrl(
       `https://${node}${store.getPreset('MORIO_API_PREFIX')}/info`,
-      { returnAs: 'json', ignoreCertificate: true, returnError: true }
+      { returnAs: 'json', ignoreCertificate: true, returnError: true },
     )
+    const add = {
+      fqdn: node,
+      hostname: node.split('.')[0],
+      node_id: i
+    }
+
     nodes[i] = data?.about
-      ? { ...data, node_fqdn: node, node_id: i, up: true }
-      : { node_fqdn: node, node_id: i, up: false }
+      ? { ...data, ...add, up: true }
+      : { ...add, up: false }
   }
 
   /*
@@ -76,16 +81,14 @@ const storeClusterState = async () => {
   /*
    * Store data
    */
-  store.cluster = {
-    nodes,
-    leader: leader.node_id ? leader : false,
-    sets: {
-      all: Object.values(nodes).map(node => node.node_id),
-      ephemeral: Object.values(nodes).filter(node => node.ephemeral ? true : false).map(node => node.node_id),
-      up: Object.values(nodes).filter(node => node.up ? true : false).map(node => node.node_id),
-      swarm: Object.keys(store.swarm.nodes)
-    }
-  }
+  store.set('cluster.nodes', nodes)
+  store.set('cluster.leader', leader.node_id ? leader : false)
+  store.set('cluster.sets', {
+    all: Object.values(nodes).map(node => node.node_id),
+    ephemeral: Object.values(nodes).filter(node => node.ephemeral ? true : false).map(node => node.node_id),
+    up: Object.values(nodes).filter(node => node.up ? true : false).map(node => node.node_id),
+  })
+  if (store.swarm?.nodes) store.cluster.sets.swarm =  Object.keys(store.swarm.nodes)
 }
 
 /**
@@ -115,24 +118,30 @@ const ensureSwarm = async ({
   }
 
   /*
-   * Now compare cluster nodes to swarm nodes, and ask them to join if needed
+   * Now compare cluster nodes to swarm nodes,
+   * and ask missing nodes to join the cluster
    */
+  //console.log(JSON.stringify(store.cluster, null ,2))
   for (const id of store.cluster.sets.all) {
-    try {
-      store.log.debug(`Asking ${store.cluster.nodes[id].node_fqdn} to join the cluster`)
-      const result = await testUrl(`https://${store.cluster.nodes[id].node_fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`, {
-        method: 'POST',
-        data: {
-          swarm_nodes: store.swarm.nodes,
-        },
-        returnAs: 'JSON',
-        ignoreCertificate: true,
-        returnError: true,
-      })
-      console.log({d: result.response.data})
-    }
-    catch (err) {
-      console.log(err)
+    const node = store.cluster.nodes[id]
+    const fqdn = store.cluster.nodes[id].fqdn
+    const host = store.cluster.nodes[id].node_hostname
+    if (!store.cluster.sets.swarm || !store.cluster.sets.swarm.includes(node.hostname)) {
+      try {
+        store.log.debug(`Asking ${fqdn} to join the cluster`)
+        const result = await testUrl(`https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`, {
+          method: 'POST',
+          data: {
+            swarm_nodes: store.swarm.nodes,
+          },
+          returnAs: 'json',
+          ignoreCertificate: true,
+          returnError: true,
+        }, store.log.warn)
+      }
+      catch (err) {
+        //console.log(err)
+      }
     }
   }
 
@@ -151,13 +160,24 @@ export const startCluster = async ({
   initialSetup=false,
   coldStart=false
 }) => {
-  /*
-   * Refresh the cluster state
-   */
-  await storeClusterState()
 
-  // FIXME: Remove this here
+  store.set('cluster.swarmReady', false)
+  let tries = 0
+  while (store.cluster.swarmReady === false && tries < store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')) {
+    tries++
+    if (store.cluster.swarmReady) store.log.info('Cluster Swarm is ready')
+    else store.log.warn(`Cluster Swarm is not ready. Will attempt to bring it up (${tries}/${store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`)
+    /*
+     * Refresh the cluster state
+     */
+    await storeClusterState()
+
+    // FIXME: Remove this here
     await ensureSwarm({ initialSetup: true })
+    if (!store.cluster.swarmReady) await sleep(store.getPreset('MORIO_CORE_SWARM_SLEEP'))
+  }
+
+
 
 
 
@@ -166,7 +186,7 @@ export const startCluster = async ({
    * If this is the initial setup, make sure we have epehemeral nodes
    */
   if (initialSetup) {
-    if (state.sets.ephemeral.length < 2) {
+    if (store.cluster.sets.ephemeral.length < 2) {
       store.log.error(`Initial cluster setup, but not enough ephemeral nodes found. Cannot continue`)
       return
     }
@@ -179,33 +199,35 @@ export const startCluster = async ({
     return
   }
 
+  return
+
 
   /*
    * Are we able to identity ourselves?
    */
-  state.me = Object.values(state.nodes)
+  store.set('cluster.me', Object.values(store.cluster.nodes))
     .filter(node => node.node === store.keys.node)
     .map(node => node.node_id)
     .pop()
-  if (Array.isArray(state.me)) state.me = state.me.pop().toString()
-  else state.me = false
+  if (Array.isArray(store.cluster.me)) store.cluster.me = store.cluster.me.pop().toString()
+  else store.cluster.me = false
 
   /*
    * Store the leader node and whether or not we are leading
    */
-  if (state.leader?.node) state.leader = state.leader.node
+  if (store.cluster.leader?.node) store.cluster.leader = store.cluster.leader.node
   else {
     /*
      * Is the leader unreachable (could be us)
      */
     let sawUs = false
-    for (const [id, node] of Object.entries(state.nodes)) {
+    for (const [id, node] of Object.entries(store.cluster.nodes)) {
       if (node.node && node.node === store.config.deployment.node) {
-        state.leader = node.node
+        store.cluster.leader = node.node
         sawUs = true
       }
     }
-    if (!state.leader && !sawUs && state.ephemeral.length > 0) {
+    if (!store.cluster.leader && !sawUs && store.cluster.sets.ephemeral.length > 0) {
       /*
        * We did not see ourselves, nor
        */
@@ -214,15 +236,10 @@ export const startCluster = async ({
   //state.leading = state.nodes[state.me].node === state.leader
 
   /*
-   * Update the store with the info we have
-   */
-  store.cluster = state
-
-  /*
    * If we are not leading, attempt to reach the leader and ask to
    * reconfigure.
    */
-  if (!state.leader) {
+  if (!store.cluster.leader) {
     store.log.debug('We are not leading this cluster')
     store.log.error('FIXME: Need to ask leader to reconfigure the cluster')
     return
@@ -234,12 +251,12 @@ export const startCluster = async ({
    * There's a variety of possible states the cluster can be in.
    * Let's deal with the ones we expect, and handle the unexpected later.
    */
-  if (state.sets.all.length === state.sets.up.length) {
+  if (store.cluster.sets.all.length === store.cluster.sets.up.length) {
     /*
      * All nodes are up. This is nice.
      */
     store.log.debug('All cluster nodes appear to be up')
-    if (state.sets.all.length - 1 === state.sets.ephemeral.length) {
+    if (store.cluster.sets.all.length - 1 === store.cluster.sets.ephemeral.length) {
       /*
        * We are the only non-ephemral mode.
        * This is the initial cluster bootstrap, so we setup Docker
@@ -248,7 +265,7 @@ export const startCluster = async ({
       store.log.info('We are leading and all other nodes are ephemeral. Creating cluster.')
       await ensureSwarm()
     }
-    else if (state.sets.ephemeral.length > 0) {
+    else if (store.cluster.sets.ephemeral.length > 0) {
       store.log.warn('We are leading, some nodes are ephemeral, some or not. Not sure how to handle this (yet).')
       throw('Cannot handle mixed ephemeral and instantiated nodes')
     }

@@ -130,6 +130,12 @@ export const presets = {
   // TCP port core should listen on
   MORIO_CORE_PORT: 3007,
 
+  // Amount of times to attempt to establish a Swarm
+  MORIO_CORE_SWARM_ATTEMPTS: 30,
+
+  // Amount of seconds to wait between attempts to establish a Swarm
+  MORIO_CORE_SWARM_SLEEP: 10,
+
   /*
    * Proxy presets
    */

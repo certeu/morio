@@ -38,7 +38,7 @@ export const resolveHost = async (host) => {
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
  */
-export const testUrl = async (url, customOptions = {}) => {
+export const testUrl = async (url, customOptions = {}, log = false) => {
   /*
    * Merge default and custom options
    */
@@ -50,7 +50,6 @@ export const testUrl = async (url, customOptions = {}) => {
     timeout: 3000,
     returnAs: false,
     returnError: false,
-    log: false,
     ...customOptions,
   }
 
@@ -70,7 +69,7 @@ export const testUrl = async (url, customOptions = {}) => {
     result = await axios(url, options)
   } catch (err) {
     // Swallow error?
-    if (customOptions.log) customOptions.log(err)
+    if (log) log(`${err.toString()} (${url})`)
     return options.returnError ? err : false
   }
 

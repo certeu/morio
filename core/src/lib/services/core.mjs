@@ -189,7 +189,9 @@ export const service = {
        * Clustering is a bit more work, so it's abstracted in this method
        */
       else if (store.config.deployment?.node_count > 1) {
+        console.log('STARTING CLUSTER')
         await startCluster(hookProps)
+        console.log('RETURNING FROM BEFOREALL')
         return false
       }
     },
