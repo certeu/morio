@@ -1,3 +1,4 @@
+import { resolveHostAsIp } from '#shared/network'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import {
   generateJwtKey,
@@ -145,10 +146,20 @@ Controller.prototype.setup = async (req, res) => {
     })
 
   /*
+   * Check whether we can figure out who we are
+   */
+  const node = await localNodeInfo(req.body)
+  if (!node) {
+    store.log.warn(`Ingoring request to setup with unmatched FQDN`)
+    return res.status(400).send({ errors: ['Request host not listed as Morio node'] })
+  }
+
+  /*
    * Note that input validation is handled by the API
    * Here, we just do a basic check
    */
   const mSettings = req.body
+  delete mSettings.headers
   if (!mSettings.deployment) {
     store.log.warn(`Ingoring request to setup with invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
@@ -177,7 +188,6 @@ Controller.prototype.setup = async (req, res) => {
     mrt: morioRootToken,
     public: publicKey,
     private: privateKey,
-    node: uuid(),
     deployment: uuid(),
   }
 
@@ -229,9 +239,16 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Also write the keys to disk
    */
-  store.log.debug(`Writing key data to .keys`)
+  store.log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
+
+  /*
+   * Finally write the node info to disk
+   */
+  store.log.debug(`Writing node data to node.json`)
+  result = await writeJsonFile(`/etc/morio/node.json`, node)
+  if (!result) return res.status(500).send({ errors: ['Failed to write node info to disk'] })
 
   /*
    * Prepare data to return
@@ -257,4 +274,43 @@ Controller.prototype.setup = async (req, res) => {
   reconfigure({ initialSetup: true })
 
   return res.send(data)
+}
+
+/**
+ * This is a helper method to figure who we are.
+ * This is most relevant when we have a cluster.
+ *
+ * @param {object} body - The request body
+ * @return {object} data - Data about the local node
+ */
+const localNodeInfo = async (body) => {
+  console.log(body)
+  /*
+   * The API injects the headers into the body
+   * so we will look at the X-Forwarded-Host header
+   * and hope that it matches one of the cluster nodes
+   */
+  let fqdn = false
+  const nodes = body.deployment.nodes.map(node => node.toLowerCase())
+  for (const header of ['x-forwarded-host', 'host']) {
+    if (nodes.includes(body.headers[header].toLowerCase())) {
+      fqdn = body.headers[header].toLowerCase()
+    }
+  }
+
+  /*
+   * If we cannot figure it out, return false
+   */
+  if (!fqdn) return false
+
+  /*
+   * Else return uuid, hostname, and IP
+   */
+  return {
+    node: uuid(),
+    fqdn,
+    hostname: fqdn.split('.')[0],
+    ip: (await resolveHostAsIp(fqdn)),
+    serial: nodes.indexOf(fqdn) + 1,
+  }
 }

@@ -1,5 +1,5 @@
 // Networking
-import { testUrl } from '#shared/network'
+import { testUrl, resolveHost } from '#shared/network'
 import { sleep } from '#shared/utils'
 // Docker
 import { runDockerApiCommand } from '#lib/docker'
@@ -7,18 +7,17 @@ import { runDockerApiCommand } from '#lib/docker'
 import { store } from './store.mjs'
 
 /**
- * Helper method to attempt to connect to all cluster nodes
- *
- * We connect to the API here, requesting the /info endpoint.
- * This should work for all nodes, ephemeral or not, unless
- * there's connection problems, or notes are down.
+ * Helper method to update the cluster state
  */
 const storeClusterState = async () => {
-  /*
-   * Make sure we have a place to keep swarm state
-   */
-  if (typeof store.swarm === 'undefined') store.swarm = false
+  await storeClusterSwarmState()
+  await storeClusterMorioState()
+}
 
+/**
+ * Helper method to gather the swarm state
+ */
+const storeClusterSwarmState = async () => {
   /*
    * Start by inspecting the local swarm
    */
@@ -29,26 +28,24 @@ const storeClusterState = async () => {
    */
   if (result && swarm.JoinTokens) {
     store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
-    store.swarm = {
-      nodes: {},
-      tokens: swarm.JoinTokens
-    }
+    store.set('swarm.tokens', swarm.JoinTokens)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
     if (ok) {
       let i = 1
       for (const node of nodes) {
-        store.swarm.nodes[node.Description.Hostname] = node
+        store.set(['swarm', 'nodes', node.Description.Hostname], node)
         store.log.debug(`Swarm member ${i} is ${node.Description.Hostname}`)
         i++
       }
     }
   }
+}
 
-  /*
-   * Also get cluster state from Morio
-   */
+/**
+ * Helper method to gather the morio cluster state
+ */
+const storeClusterMorioState = async () => {
   const nodes = {}
-
   /*
    * Attempt to reach API instances via their public names
    */
@@ -59,8 +56,17 @@ const storeClusterState = async () => {
       `https://${node}${store.getPreset('MORIO_API_PREFIX')}/info`,
       { returnAs: 'json', ignoreCertificate: true, returnError: true },
     )
+    let [ok, ip] = await resolveHost(node)
+    if (Array.isArray(ip)) {
+      if (ip.length > 0) ip = ip[0]
+      else if (ip.length > 1) store.log.warn(`Node ${node} resolves to multiple IP addresses. This should be avoided. (${ip.join()})`)
+      else store.log.error(`Unable to resolve node ${node}. No addresses found.`)
+    }
+    else store.log.error(`Unable to resolve node ${node}. Lookup failed.`)
+
     const add = {
       fqdn: node,
+      ip: Array.isArray(ip),
       hostname: node.split('.')[0],
       node_id: i
     }
@@ -69,14 +75,6 @@ const storeClusterState = async () => {
       ? { ...data, ...add, up: true }
       : { ...add, up: false }
   }
-
-  /*
-   * Attempt to reach API instances via the leader IP address
-   */
-  const leader = await testUrl(
-    `https://${store.settings.deployment.leader_ip}${store.getPreset('MORIO_API_PREFIX')}/info`,
-    { returnAs: 'json', ignoreCertificate: true, returnError: true }
-  )
 
   /*
    * Store data
@@ -89,6 +87,22 @@ const storeClusterState = async () => {
     up: Object.values(nodes).filter(node => node.up ? true : false).map(node => node.node_id),
   })
   if (store.swarm?.nodes) store.cluster.sets.swarm =  Object.keys(store.swarm.nodes)
+  console.log(store.cluster.nodes)
+}
+
+/**
+ * Helper method to join a node to the swarm
+ *
+ * @param {string} ip - The IP address to advertise
+ * @param {string} token - The Join Token
+ */
+const joinSwarm = async (ip, token, managers=[]) => {
+  const [result, swarm] = await runDockerApiCommand('swarmJoin', {
+    ListenAddr: ip,
+    AdvertiseAddr: ip,
+    REmoteAddres: managers,
+    JoinToken: token,
+  })
 }
 
 /**

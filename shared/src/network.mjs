@@ -16,7 +16,6 @@ const dnsOptions = {
  * a local host file for example.
  *
  * @param {string} host - The hostname to resolve
- * @param {object} log - A logger object so this thing can log
  */
 export const resolveHost = async (host) => {
   let result
@@ -27,6 +26,23 @@ export const resolveHost = async (host) => {
   }
 
   return [true, result.map((record) => record.address)]
+}
+
+/**
+ * Helper method to resolve a hostname as a single IP (or false)
+ *
+ * This will use whatever the OS provides.
+ * So it could be using DNS, but it could also resolve based on
+ * a local host file for example.
+ *
+ * @param {string} host - The hostname to resolve
+ */
+export const resolveHostAsIp = async (host) => {
+  const result = (await resolveHost(host))[1]
+
+  return (Array.isArray(result) && result.length > 0)
+    ? result[0]
+    : false
 }
 
 /**

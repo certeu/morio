@@ -95,9 +95,14 @@ export const service = {
       }
 
       /*
-       * Load existing settings and keys from disk
+       * Load existing settings, keys, node info and timestamp from disk
        */
-      const { settings, keys, timestamp } = await loadSettingsAndKeys()
+      const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
+
+      /*
+       * Keep node info in the store
+       */
+      store.node = node
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -199,9 +204,9 @@ export const service = {
 }
 
 /**
- * Loads the most recent  Morio settings  file(s) from disk
+ * Loads the most recent Morio settings  file(s) from disk
  */
-const loadSettingsAndKeys = async () => {
+const loadSettingsFromDisk = async () => {
   /*
    * Find the most recent timestamp file that exists on disk
    */
@@ -223,8 +228,9 @@ const loadSettingsAndKeys = async () => {
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
+  const node = await readJsonFile(`/etc/morio/node.json`)
 
-  return { settings, keys, timestamp }
+  return { settings, keys, node, timestamp }
 }
 
 export const createX509Certificate = async (data) => {
