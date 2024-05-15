@@ -145,5 +145,5 @@ export function routes(app) {
   /*
    * Route to join a cluster swarm
    */
-  app.get(`${PREFIX}/cluster/join`, (req, res) => Core.joinCluster(req, res))
+  app.post(`${PREFIX}/cluster/join`, (req, res) => Core.joinCluster(req, res))
 }
