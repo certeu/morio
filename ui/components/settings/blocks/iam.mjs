@@ -138,7 +138,7 @@ export const AuthProviders = (props) => {
               )
             }
           />
-          {Object.keys(data?.iam?.providers)
+          {Object.keys(data?.iam?.providers || {})
             .filter((id) => id !== 'mrt')
             .map((id) => (
               <ProviderButton

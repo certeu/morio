@@ -85,13 +85,13 @@ export const service = {
        * pipelines that are on disk
        */
       const currentPipelines = await loadPipelinesFromDisk()
-      const wantedPipelines = (Object.keys(store.settings.connector?.pipelines) || []).filter(
-        (id) => {
-          if (!store.settings?.connector?.pipelines?.[id]) return false
-          if (store.settings?.connector?.pipelines?.[id].disabled) return false
-          return true
-        }
-      )
+      const wantedPipelines = Object.keys(
+        store.get('store.settings.connector.pipelines', {})
+      ).filter((id) => {
+        if (!store.settings?.connector?.pipelines?.[id]) return false
+        if (store.settings?.connector?.pipelines?.[id].disabled) return false
+        return true
+      })
 
       await createWantedPipelines(wantedPipelines)
       await removeUnwantedPipelines(currentPipelines, wantedPipelines)

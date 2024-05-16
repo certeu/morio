@@ -99,7 +99,7 @@ const UpdateXput = (props) => {
       plugin: props.id,
       type: props.type,
     },
-    formProps.form
+    formProps?.form
   )
 
   const removeLocal = props.pipelines
