@@ -112,6 +112,13 @@ const storeClusterMorioState = async () => {
  * @param {string} token - The Join Token
  */
 export const joinSwarm = async (ip, token, managers=[]) => {
+  console.log('Joining swarm with', {
+    ListenAddr: ip,
+    AdvertiseAddr: ip,
+    RemoteAddr: managers,
+    JoinToken: token,
+  })
+
   const [result, swarm] = await runDockerApiCommand('swarmJoin', {
     ListenAddr: ip,
     AdvertiseAddr: ip,

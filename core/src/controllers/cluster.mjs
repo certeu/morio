@@ -53,6 +53,11 @@ Controller.prototype.join = async (req, res) => {
 */
   if (req.body.as?.ip && req.body.token && req.body.join?.ip) {
     let result
+    console.log('attempting to join with', {
+      a: req.body.as.ip,
+      b: req.body.token,
+      c: [req.body.join.ip]
+    })
     try {
       result = await joinSwarm(req.body.as.ip, req.body.token, [req.body.join.ip])
     }
