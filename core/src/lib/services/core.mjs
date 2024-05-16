@@ -1,7 +1,7 @@
 // REST client for API
 import { restClient, testUrl } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
+import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir, writeJsonFile } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -10,7 +10,7 @@ import { getPreset, inProduction, loadAllPresets } from '#config'
 import https from 'https'
 import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
+import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods, uuid } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
@@ -112,6 +112,7 @@ export const service = {
         store.info.current_settings = false
         store.info.ephemeral = true
 
+        console.log({ node: store.node })
         /*
          * If we are in epehemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
@@ -136,6 +137,16 @@ export const service = {
          * (needed to wait until after the network is created)
          */
         store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
+
+        /*
+         * If this is the very first boot, generate an UUID for the node
+         * and store it on disk
+         */
+        if (!store.node) {
+          store.log.debug(`Generating node UUID`)
+          store.node = { node: uuid() }
+          await writeJsonFile(`/etc/morio/node.json`, store.node)
+        }
 
         /*
          * Return here for ephemeral mode
@@ -216,6 +227,11 @@ const loadSettingsFromDisk = async () => {
     .sort()
     .pop()
 
+  /*
+   * Node data is created even in epehemeral mode
+   */
+  const node = await readJsonFile(`/etc/morio/node.json`)
+
   if (!timestamp)
     return {
       settings: {},
@@ -228,7 +244,6 @@ const loadSettingsFromDisk = async () => {
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
-  const node = await readJsonFile(`/etc/morio/node.json`)
 
   return { settings, keys, node, timestamp }
 }

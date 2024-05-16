@@ -80,7 +80,7 @@ const storeClusterMorioState = async () => {
    * Store data
    */
   store.set('cluster.nodes', nodes)
-  store.set('cluster.leader', leader.node_id ? leader : false)
+  //store.set('cluster.leader', leader.node_id ? leader : false)
   store.set('cluster.sets', {
     all: Object.values(nodes).map(node => node.node_id),
     ephemeral: Object.values(nodes).filter(node => node.ephemeral ? true : false).map(node => node.node_id),

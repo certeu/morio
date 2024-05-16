@@ -284,7 +284,6 @@ Controller.prototype.setup = async (req, res) => {
  * @return {object} data - Data about the local node
  */
 const localNodeInfo = async (body) => {
-  console.log(body)
   /*
    * The API injects the headers into the body
    * so we will look at the X-Forwarded-Host header
@@ -307,7 +306,7 @@ const localNodeInfo = async (body) => {
    * Else return uuid, hostname, and IP
    */
   return {
-    node: uuid(),
+    ...store.node,
     fqdn,
     hostname: fqdn.split('.')[0],
     ip: (await resolveHostAsIp(fqdn)),
