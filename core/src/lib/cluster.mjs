@@ -160,8 +160,8 @@ const ensureSwarm = async ({
           `https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`,
           {
             join: store.node,
-            as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) }
-            tokens: swarm.tokens.Manager
+            as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) },
+            token: swarm.tokens.Manager
           },
           {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })

@@ -51,10 +51,17 @@ Controller.prototype.join = async (req, res) => {
   }
 }
 */
-  //if (req.body?.as?.ip &&
-  //const result = await joinSwarm(req.body.as.{
-  //})
-  console.log({join: req.body.join, as: req.body.as})
+  if (req.body.as?.ip && req.body.token && req.body.join?.ip) {
+    let result
+    try {
+      result = await joinSwarm(req.body.as.ip, req.body.token, [req.body.join.ip])
+    }
+    catch (err) {
+      console.log(err)
+    }
+    console.log({ joinResult: result })
+  }
+  //console.log({join: req.body.join, as: req.body.as})
 
   /*
    * Return something for now
