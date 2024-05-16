@@ -115,7 +115,7 @@ export const joinSwarm = async (ip, token, managers=[]) => {
   console.log('Joining swarm with', {
     ListenAddr: ip,
     AdvertiseAddr: ip,
-    RemoteAddrs: managers,
+    RemoteAddrs: managers.map(m => `${m}:2377`),
     JoinToken: token,
   })
 
