@@ -115,7 +115,7 @@ export const joinSwarm = async (ip, token, managers=[]) => {
   const [result, swarm] = await runDockerApiCommand('swarmJoin', {
     ListenAddr: ip,
     AdvertiseAddr: ip,
-    RemoteAddres: managers,
+    RemoteAddr: managers,
     JoinToken: token,
   })
 }
