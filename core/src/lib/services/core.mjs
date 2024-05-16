@@ -1,7 +1,7 @@
 // REST client for API
-import { restClient } from '#shared/network'
+import { restClient, testUrl } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir } from '#shared/fs'
+import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir, writeJsonFile } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -10,11 +10,15 @@ import { getPreset, inProduction, loadAllPresets } from '#config'
 import https from 'https'
 import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
+import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods, uuid } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
 import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
+// Cluster
+import { startCluster } from '#lib/cluster'
+// Docker
+import { runDockerApiCommand, storeRunningContainers } from '#lib/docker'
 // Store
 import { store } from '../store.mjs'
 
@@ -37,13 +41,17 @@ export const service = {
     restartContainer: () => false,
     /*
      * This runs only when core is cold-started.
+     *
+     * @params {object} hookProps - Props to pass info to the hook
+     * @params {object} hookProps.initialSetup - True if this is the initial setup
+     * @params {object} hookProps.coldStart - True if this is a cold start
      */
-    beforeAll: async () => {
+    beforeAll: async (hookProps) => {
       /*
        * Add a getPreset() wrapper that will output trace logs about how presets are resolved
        * This is surprisingly helpful during debugging
        */
-      if (!store.getPreset)
+      if (!store.getPreset) {
         store.getPreset = (key, dflt, opts) => {
           const result = getPreset(key, dflt, opts)
           if (result === undefined) store.log.warn(`Preset ${key} is undefined`)
@@ -51,6 +59,7 @@ export const service = {
 
           return result
         }
+      }
 
       /*
        * Now populate the store
@@ -86,9 +95,14 @@ export const service = {
       }
 
       /*
-       * Load existing settings and keys from disk
+       * Load existing settings, keys, node info and timestamp from disk
        */
-      const { settings, keys, timestamp } = await loadSettingsAndKeys()
+      const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
+
+      /*
+       * Keep node info in the store
+       */
+      store.node = node
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -97,19 +111,41 @@ export const service = {
       if (!timestamp) {
         store.info.current_settings = false
         store.info.ephemeral = true
-        store.settings = {}
-        store.config = {}
 
+        console.log({ node: store.node })
         /*
          * If we are in epehemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
          */
-        try {
-          await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
-            Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
-          })
-        } catch (err) {
-          store.log.warn('Failed to ensure morio network configuration')
+        if (hookProps.coldStart) {
+          try {
+            await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
+              Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
+            })
+          } catch (err) {
+            store.log.warn('Failed to ensure morio network configuration')
+          }
+        }
+
+        /*
+         * Now update the list of running containers
+         */
+        await storeRunningContainers()
+
+        /*
+         * Add our internal IP address to the config
+         * (needed to wait until after the network is created)
+         */
+        store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
+
+        /*
+         * If this is the very first boot, generate an UUID for the node
+         * and store it on disk
+         */
+        if (!store.node) {
+          store.log.debug(`Generating node UUID`)
+          store.node = { node: uuid() }
+          await writeJsonFile(`/etc/morio/node.json`, store.node)
         }
 
         /*
@@ -117,6 +153,16 @@ export const service = {
          */
         return true
       }
+
+      /*
+       * Update the list of running containers
+       */
+      await storeRunningContainers()
+
+      /*
+       * Add our internal IP address to the config
+       */
+      store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
 
       /*
        * Add encryption methods
@@ -143,31 +189,35 @@ export const service = {
       store.keys = keys
 
       /*
-       * Only one node makes this easy
-       * FIXME: Handle clustering
+       * One node makes this easy
        */
-      if (typeof store.config === 'undefined') store.config = {}
-      if (typeof store.config.services === 'undefined') store.config.services = {}
-      if (typeof store.config.containers === 'undefined') store.config.containers = {}
-      if (typeof store.config.core === 'undefined') store.config.core = {}
-      if (store.config.deployment && store.config.deployment.node_count === 1) {
+      if (store.config.deployment?.node_count === 1) {
         store.config.core.node_nr = 1
         store.config.core.names = {
           internal: 'core_1',
           external: store.config.deployment.nodes[0],
         }
         store.config.deployment.fqdn = store.config.deployment.nodes[0]
-      }
 
-      return true
+        return true
+      }
+      /*
+       * Clustering is a bit more work, so it's abstracted in this method
+       */
+      else if (store.config.deployment?.node_count > 1) {
+        console.log('STARTING CLUSTER')
+        await startCluster(hookProps)
+        console.log('RETURNING FROM BEFOREALL')
+        return false
+      }
     },
   },
 }
 
 /**
- * Loads the most recent  Morio settings  file(s) from disk
+ * Loads the most recent Morio settings  file(s) from disk
  */
-const loadSettingsAndKeys = async () => {
+const loadSettingsFromDisk = async () => {
   /*
    * Find the most recent timestamp file that exists on disk
    */
@@ -176,6 +226,11 @@ const loadSettingsAndKeys = async () => {
     .map((file) => file.split('.')[1])
     .sort()
     .pop()
+
+  /*
+   * Node data is created even in epehemeral mode
+   */
+  const node = await readJsonFile(`/etc/morio/node.json`)
 
   if (!timestamp)
     return {
@@ -190,7 +245,7 @@ const loadSettingsAndKeys = async () => {
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
 
-  return { settings, keys, timestamp }
+  return { settings, keys, node, timestamp }
 }
 
 export const createX509Certificate = async (data) => {

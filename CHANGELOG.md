@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- [broker] Upgraded RedPanda Broker from  23.3.4 to 23.3.15
+- [ca] Upgraded SmallStep CA from 0.25.2 to 0.26.1
+- [connector] Upgraded Elastic Logstash from 8.12.1 to 8.13.3
+- [console] Upgraded RedPanda Console from 2.4.0 to 2.5.2
+- [proxy] Upgraded Traefik Application Proxy from 2.10.7 to 2.11.2
+
 ## [0.2.2] - 2014-05-07
 
 # Added

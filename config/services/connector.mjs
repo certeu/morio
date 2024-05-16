@@ -20,7 +20,7 @@ export const resolveServiceConfiguration = (store) => {
       // Image to run
       image: 'docker.elastic.co/logstash/logstash',
       // Image tag (version) to run
-      tag: '8.12.1',
+      tag: '8.13.3',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

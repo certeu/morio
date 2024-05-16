@@ -170,6 +170,13 @@ export const generateContainerConfig = (srvConf) => {
   }
 
   /*
+   * Hosts
+   */
+  if (srvConf.container.hosts) {
+      opts.HostConfig.ExtraHosts = srvConf.container.hosts
+  }
+
+  /*
    * Command
    */
   if (srvConf.container.command) opts.Cmd = srvConf.container.command
@@ -193,8 +200,8 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
     result = await docker[cmd](options)
   } catch (err) {
     if (!silent) {
-      if (err instanceof Error) store.log.warn(err.message)
-      else store.log.warn(err)
+      if (err instanceof Error) store.log.info(err.message)
+      else store.log.info(err)
     }
     return [false, err]
   }
@@ -234,11 +241,11 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
        */
       if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
       else {
-        if (!silent) store.log.warn(err.message)
+        if (!silent) store.log.info(err.message)
         return [false, err.message]
       }
     } else {
-      if (!silent) store.log.warn(err)
+      if (!silent) store.log.info(err)
       return [false, err]
     }
   }
@@ -271,10 +278,10 @@ export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false
     result = await network[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) store.log.warn(err.message)
+      if (!silent) store.log.info(err.message)
       return [false, err.message]
     } else {
-      if (!silent) store.log.warn(err)
+      if (!silent) store.log.info(err)
       return [false, err]
     }
   }
@@ -352,10 +359,10 @@ export const runContainerImageApiCommand = async (id, cmd, silent = false) => {
     result = await image[cmd]()
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) store.log.warn(err.message)
+      if (!silent) store.log.info(err.message)
       return [false, err.message]
     } else {
-      if (!silent) store.log.warn(err)
+      if (!silent) store.log.info(err)
       return [false, err]
     }
   }
@@ -387,3 +394,17 @@ export const runDockerCliCommand = async (cmd, ...params) => {
 
   return [true, result]
 }
+
+/**
+ * This helper method stores a list of running containers in the store
+ */
+export const storeRunningContainers = async () => {
+  store.running = {}
+  const [success, runningContainers] = await runDockerApiCommand('listContainers')
+  if (success) {
+    for (const container of runningContainers) {
+      store.running[container.Names[0].split('/').pop()] = container
+    }
+  }
+}
+

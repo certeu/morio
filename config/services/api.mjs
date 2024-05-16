@@ -80,6 +80,10 @@ export const resolveServiceConfiguration = (store) => {
         // Silence this message from the Kafka JS client
         `KAFKAJS_NO_PARTITIONER_WARNING=1`,
       ],
+      // Add extra hosts
+      hosts: [
+        `local_core:${store.local_core_ip}`,
+      ],
       // Configure Traefik with container labels
       labels,
     },

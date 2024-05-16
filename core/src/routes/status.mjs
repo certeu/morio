@@ -24,11 +24,6 @@ export function routes(app) {
   )
 
   /*
-   * Hit this route to get the info object
-   */
-  app.get('/info', (req, res) => res.send(store.get('info', {})))
-
-  /*
    * Hit this route to get the JWKS info
    */
   app.get('/jwks', (req, res) => Status.jwks(req, res))

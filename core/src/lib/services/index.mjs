@@ -149,9 +149,27 @@ export const logStartedConfig = () => {
  */
 export const startMorio = async (hookProps = {}) => {
   /*
+   * Ensure we have a place to store resolved service and container configurations
+   */
+  if (typeof store.config === 'undefined') store.config = {
+    services: {},
+    containers: {},
+    core: {}
+  }
+  if (typeof store.settings === 'undefined') store.settings = {}
+
+  /*
    * Run beforeAll lifecycle hook on the core service
    */
-  await runHook('beforeAll', 'core', hookProps)
+  const go = await runHook('beforeAll', 'core', hookProps)
+
+  /*
+   * If we can't figure out how to start, don't
+   */
+  if (!go) {
+    store.log.error('The beforeAll lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.')
+    return
+  }
 
   /*
    * Log info about the config we'll start
@@ -159,28 +177,11 @@ export const startMorio = async (hookProps = {}) => {
   logStartedConfig()
 
   /*
-   * Ensure we have a place to store resolved service and container configurations
-   */
-  if (typeof store.config === 'undefined') store.config = {}
-  if (typeof store.config.services === 'undefined') store.config.services = {}
-  if (typeof store.config.containers === 'undefined') store.config.containers = {}
-
-  /*
-   * Load list or running containers because if it's running
-   * and the config is not changed, we won't restart/recreate it
-   */
-  const running = {}
-  const [success, runningContainers] = await runDockerApiCommand('listContainers')
-  if (success)
-    for (const container of runningContainers)
-      running[container.Names[0].split('/').pop()] = container
-
-  /*
    * Create services (in parallel)
    */
   const promises = []
   for (const service of store.serviceOrder)
-    promises.push(ensureMorioService(service, running, hookProps))
+    promises.push(ensureMorioService(service, store.running, hookProps))
 
   return await Promise.all(promises)
 }
