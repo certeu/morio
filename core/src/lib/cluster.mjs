@@ -161,6 +161,7 @@ const ensureSwarm = async ({
           {
             join: store.node,
             as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) }
+            tokens: swarm.tokens.Manager
           },
           {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })
