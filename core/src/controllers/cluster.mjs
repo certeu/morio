@@ -17,7 +17,7 @@ export function Controller() {}
  */
 Controller.prototype.join = async (req, res) => {
   store.log.info('Received request to join cluster')
-  console.log({body: req.body})
+  console.log({join: req.body.join, as: req.body.as})
 
   /*
    * Return something for now
