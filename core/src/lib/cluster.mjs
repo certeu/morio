@@ -1,4 +1,6 @@
 // Networking
+import axios from 'axios'
+import https from 'https'
 import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
 import { sleep } from '#shared/utils'
 // Docker
@@ -154,19 +156,19 @@ const ensureSwarm = async ({
     if (!store.cluster.sets.swarm || !store.cluster.sets.swarm.includes(node.hostname)) {
       try {
         store.log.debug(`Asking ${fqdn} to join the cluster`)
-        const result = await testUrl(`https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`, {
-          method: 'POST',
-          data: {
+        await axios.post(
+          `https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`,
+          {
             join: store.node,
             as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) }
           },
-          returnAs: 'json',
-          ignoreCertificate: true,
-          returnError: true,
-        }, store.log.warn)
+          {
+            httpsAgent: new https.Agent({ rejectUnauthorized: false })
+          }
+        )
       }
       catch (err) {
-        //console.log(err)
+        console.log(err)
       }
     }
   }
