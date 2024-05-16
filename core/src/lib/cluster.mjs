@@ -1,5 +1,5 @@
 // Networking
-import { testUrl, resolveHost } from '#shared/network'
+import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
 import { sleep } from '#shared/utils'
 // Docker
 import { runDockerApiCommand } from '#lib/docker'
@@ -146,7 +146,8 @@ const ensureSwarm = async ({
         const result = await testUrl(`https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`, {
           method: 'POST',
           data: {
-            swarm_nodes: store.swarm.nodes,
+            join: store.node,
+            as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) }
           },
           returnAs: 'json',
           ignoreCertificate: true,

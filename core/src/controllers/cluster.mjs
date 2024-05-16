@@ -1,5 +1,6 @@
 // Store
 import { store } from '../lib/store.mjs'
+import { joinSwarm } from '../lib/cluster.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -16,6 +17,7 @@ export function Controller() {}
  */
 Controller.prototype.join = async (req, res) => {
   store.log.info('Received request to join cluster')
+  console.log(req.body)
 
   /*
    * Return something for now
