@@ -16,62 +16,19 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.join = async (req, res) => {
-  store.log.info('Received request to join cluster')
-  /*
-   * {
-  join: {
-    node: '61ba045a-3835-4259-b42c-9acd59a894a9',
-    fqdn: 'poc-morio-node1.cert.europa.eu',
-    hostname: 'poc-morio-node1',
-    ip: '10.1.1.175',
-    serial: 1
-  },
-  as: {
-    node: {
-      config_resolved: true,
-      about: 'Morio Core',
-      name: '@morio/core',
-      ping: 1715849950229,
-      start_time: 1715849950229,
-      version: '0.2.0',
-      production: false,
-      current_settings: false,
-      ephemeral: true,
-      uptime: 4.458,
-      core: [Object],
-      setup: false,
-      fqdn: 'poc-morio-node3.cert.europa.eu',
-      ip: false,
-      hostname: 'poc-morio-node3',
-      node_id: 3,
-      up: true
-    },
-    fqdn: 'poc-morio-node3.cert.europa.eu',
-    ip: '10.1.1.177'
-  }
-}
-*/
+  store.log.debug('Received request to join cluster')
   if (req.body.as?.ip && req.body.token && req.body.join?.ip) {
-    let result
-    console.log('attempting to join with', {
-      a: req.body.as.ip,
-      b: req.body.token,
-      c: [req.body.join.ip]
-    })
     try {
-      result = await joinSwarm(req.body.as.ip, req.body.token, [req.body.join.ip])
+      await joinSwarm(req.body.as.ip, req.body.token, [req.body.join.ip])
+    } catch (err) {
+      store.log.debug(err)
     }
-    catch (err) {
-      console.log(err)
-    }
-    console.log({ joinResult: result })
   }
-  //console.log({join: req.body.join, as: req.body.as})
 
   /*
-   * Return something for now
+   * Return something (for now)
    */
-  return res.status(200).send({ ping: 'join pong' }).end()
+  return res.status(200).send({ join: 'requested' }).end()
 }
 
 /**
@@ -83,7 +40,6 @@ Controller.prototype.join = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.ping = async (req, res) => {
-
   /*
    * Return something for now
    */

@@ -62,7 +62,7 @@ export const asRole = (data) => {
  */
 const asProvider = (data) => {
   const p = String(data).toLowerCase()
-  if ((Object.keys(store.config?.iam?.providers) || []).includes(p)) return p
+  if (Object.keys(store.get('config.iam.providers', {})).includes(p)) return p
   else {
     store.log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
     return ''
@@ -210,7 +210,7 @@ export const storeLastLoginTime = async (provider, id) =>
  * Helper method to parse results into an array of objects
  */
 const accountsAsList = (result) => {
-  const cols = result.results[0].columns
+  const cols = result.results?.[0].columns
   const list = (result.results?.[0]?.values || []).map((entry) => {
     const account = {}
     for (const i in cols)

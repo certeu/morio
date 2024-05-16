@@ -59,9 +59,9 @@ export const local = async (id, data) => {
     )
     if (mfaOk[0]) {
       /*
-       * Update scratchcodes in case they were used
+       * FIXME: Update scratchcodes in case they were used
        */
-      storeLastLoginTime('local', data.username, { scratchCodes: mfaOk[1] })
+      storeLastLoginTime('local', data.username) //, { scratchCodes: mfaOk[1] })
 
       /*
        * All good, return

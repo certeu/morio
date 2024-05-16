@@ -40,7 +40,8 @@ export const bootstrapConfiguration = async () => {
   /*
    * Add core client to store
    */
-  if (!store.core) store.core = coreClient(`http://local_core:${store.getPreset('MORIO_CORE_PORT')}`)
+  if (!store.core)
+    store.core = coreClient(`http://local_core:${store.getPreset('MORIO_CORE_PORT')}`)
 
   /*
    * Attempt to load the config from CORE
@@ -48,11 +49,11 @@ export const bootstrapConfiguration = async () => {
   const result = await attempt({
     every: 5,
     timeout: 3600,
-    run: async (s) => await store.core.get('/config'),
-    onFailedAttempt: () => {
+    run: async () => await store.core.get('/config'),
+    onFailedAttempt: (s) => {
       store.log.debug(`Waited ${s} seconds for core/config, will continue waiting.`)
     },
-    validate: (res) => coreFetchOk,
+    validate: coreFetchOk,
     log: store.log.warn,
   })
   if (coreFetchOk(result)) {
@@ -66,7 +67,7 @@ export const bootstrapConfiguration = async () => {
     const coreStatus = await store.core.get('/status')
     if (coreFetchOk(coreStatus)) {
       store.log.debug(`Loaded status from core.`)
-      store.info = {...store.info, ...coreStatus[1] }
+      store.info = { ...store.info, ...coreStatus[1] }
     } else if (
       coreStatus[0] === 503 &&
       Array.isArray(coreStatus[1].errors) &&
@@ -122,12 +123,7 @@ export const bootstrapConfiguration = async () => {
  * Helper method to verify that a fetch to the core API was successful
  */
 const coreFetchOk = (result, okStatus = [200]) => {
-  if (
-    result &&
-    Array.isArray(result) &&
-    okStatus.includes(result[0]) &&
-    result[1]
-  ) return true
+  if (result && Array.isArray(result) && okStatus.includes(result[0]) && result[1]) return true
 
   return false
 }

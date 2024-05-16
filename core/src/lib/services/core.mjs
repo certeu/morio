@@ -1,7 +1,14 @@
 // REST client for API
-import { restClient, testUrl } from '#shared/network'
+import { restClient } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir, writeJsonFile } from '#shared/fs'
+import {
+  readYamlFile,
+  readJsonFile,
+  readDirectory,
+  writeYamlFile,
+  mkdir,
+  writeJsonFile,
+} from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -18,7 +25,7 @@ import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
 // Cluster
 import { startCluster } from '#lib/cluster'
 // Docker
-import { runDockerApiCommand, storeRunningContainers } from '#lib/docker'
+import { storeRunningContainers } from '#lib/docker'
 // Store
 import { store } from '../store.mjs'
 
@@ -111,8 +118,6 @@ export const service = {
       if (!timestamp) {
         store.info.current_settings = false
         store.info.ephemeral = true
-
-        console.log({ node: store.node })
         /*
          * If we are in epehemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
@@ -200,15 +205,12 @@ export const service = {
         store.config.deployment.fqdn = store.config.deployment.nodes[0]
 
         return true
-      }
-      /*
-       * Clustering is a bit more work, so it's abstracted in this method
-       */
-      else if (store.config.deployment?.node_count > 1) {
-        console.log('STARTING CLUSTER')
+      } else if (store.config.deployment?.node_count > 1) {
+        /*
+         * Clustering is a bit more work, so it's abstracted in this method
+         */
         await startCluster(hookProps)
-        console.log('RETURNING FROM BEFOREALL')
-        return false
+        return true
       }
     },
   },

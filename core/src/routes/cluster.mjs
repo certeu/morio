@@ -1,4 +1,3 @@
-import { store } from '../lib/store.mjs'
 import { Controller } from '#controllers/cluster'
 
 const Cluster = new Controller()
@@ -18,5 +17,4 @@ export function routes(app) {
    * This route invites this node to join a swarm
    */
   app.post('/cluster/join', (req, res) => Cluster.join(req, res))
-
 }
