@@ -31,10 +31,6 @@ const storeClusterSwarmState = async () => {
   if (result && swarm.JoinTokens) {
     store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('swarm.tokens', swarm.JoinTokens)
-    console.log({
-      JoinTokens: swarm?.JoinTokens,
-      ourTokens: store.swarm?.tokens
-    })
     const [ok, nodes] = await runDockerApiCommand('listNodes')
     if (ok) {
       let i = 1
@@ -122,7 +118,7 @@ export const joinSwarm = async (ip, token, managers=[]) => {
   const [result, swarm] = await runDockerApiCommand('swarmJoin', {
     ListenAddr: ip,
     AdvertiseAddr: ip,
-    RemoteAddr: managers,
+    RemoteAddrs: managers,
     JoinToken: token,
   })
 }
@@ -174,7 +170,8 @@ const ensureSwarm = async ({
           {
             join: store.node,
             as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) },
-            token: store.swarm.tokens.Manager
+            managers: swarmManagers(),
+            token: store.swarm.tokens.Manager,
           },
           {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })
@@ -319,6 +316,12 @@ export const startCluster = async ({
 
 
   return
-
-
 }
+
+/**
+ * Helper method to get the list of Swarm managers
+ * formatted for use in a joinSwarm call
+ */
+const swarmManagers = () => store.swarm.nodes
+  .filter(node => node.ManagerStatus.Reachability === 'reachable')
+  .map(node => node.ManagerStatus.Addr)
