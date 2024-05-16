@@ -31,6 +31,10 @@ const storeClusterSwarmState = async () => {
   if (result && swarm.JoinTokens) {
     store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('swarm.tokens', swarm.JoinTokens)
+    console.log({
+      JoinTokens: swarm?.JoinTokens,
+      ourTokens: store.swarm?.tokens
+    })
     const [ok, nodes] = await runDockerApiCommand('listNodes')
     if (ok) {
       let i = 1
@@ -40,6 +44,9 @@ const storeClusterSwarmState = async () => {
         i++
       }
     }
+  } else {
+    store.log.warn(`No swarm`)
+    console.log({result, swarm})
   }
 }
 
@@ -96,7 +103,6 @@ const storeClusterMorioState = async () => {
     up: Object.values(nodes).filter(node => node.up ? true : false).map(node => node.node_id),
   })
   if (store.swarm?.nodes) store.cluster.sets.swarm =  Object.keys(store.swarm.nodes)
-  console.log(store.cluster)
 }
 
 /**
@@ -109,7 +115,7 @@ export const joinSwarm = async (ip, token, managers=[]) => {
   const [result, swarm] = await runDockerApiCommand('swarmJoin', {
     ListenAddr: ip,
     AdvertiseAddr: ip,
-    REmoteAddres: managers,
+    RemoteAddres: managers,
     JoinToken: token,
   })
 }
@@ -123,15 +129,19 @@ export const joinSwarm = async (ip, token, managers=[]) => {
 const ensureSwarm = async ({
   initialSetup=false,
 }) => {
+  /*
+   * Find our feet
+   */
+  await storeClusterState()
 
   /*
    * Does a swarm need to be created?
    */
-  if (store.swarm === false) {
+  if (!store.swarm?.tokens?.Manager) {
     store.log.debug('Initializing Docker Swarm')
     const [result, swarm] = await runDockerApiCommand('swarmInit', {
-      ListenAddr: store.settings.deployment.leader_ip,
-      AdvertiseAddr: store.settings.deployment.leader_ip,
+      ListenAddr: store.node.ip,
+      AdvertiseAddr: store.node.ip,
       ForceNewCluster: false,
     })
     /*
@@ -145,10 +155,6 @@ const ensureSwarm = async ({
    * and ask missing nodes to join the cluster
    */
   //console.log(JSON.stringify(store.cluster, null ,2))
-  console.log({
-    join_candidates: store.cluster.sets.all,
-    me: store.cluster.local_node
-  })
   for (const id of store.cluster.sets.all.filter(serial => `${serial}` !== `${store.cluster.local_node}`)) {
     const node = store.cluster.nodes[id]
     const fqdn = store.cluster.nodes[id].fqdn
@@ -161,7 +167,7 @@ const ensureSwarm = async ({
           {
             join: store.node,
             as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) },
-            token: swarm.tokens.Manager
+            token: store.swarm.tokens.Manager
           },
           {
             httpsAgent: new https.Agent({ rejectUnauthorized: false })
