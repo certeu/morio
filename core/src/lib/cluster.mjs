@@ -77,6 +77,13 @@ const storeClusterMorioState = async () => {
   }
 
   /*
+   * Find out which of these nodes we are
+   */
+  for (const [serial, node] of Object.entries(nodes)) {
+    if (node.core?.node && node.core.node === store.node.node) store.set('cluster.local_node', serial)
+  }
+
+  /*
    * Store data
    */
   store.set('cluster.nodes', nodes)
@@ -87,7 +94,7 @@ const storeClusterMorioState = async () => {
     up: Object.values(nodes).filter(node => node.up ? true : false).map(node => node.node_id),
   })
   if (store.swarm?.nodes) store.cluster.sets.swarm =  Object.keys(store.swarm.nodes)
-  console.log(store.cluster.nodes)
+  console.log(store.cluster)
 }
 
 /**
@@ -136,7 +143,11 @@ const ensureSwarm = async ({
    * and ask missing nodes to join the cluster
    */
   //console.log(JSON.stringify(store.cluster, null ,2))
-  for (const id of store.cluster.sets.all) {
+  console.log({
+    join_candidates: store.cluster.sets.all,
+    me: store.cluster.local_node
+  })
+  for (const id of store.cluster.sets.all.filter(serial => `${serial}` !== `${store.cluster.local_node}`)) {
     const node = store.cluster.nodes[id]
     const fqdn = store.cluster.nodes[id].fqdn
     const host = store.cluster.nodes[id].node_hostname
