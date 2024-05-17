@@ -1,12 +1,10 @@
 import { AuthLayout } from './layout.mjs'
 import { Login } from './login.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
-import { LogoSpinner, CountdownCircle } from 'components/animations.mjs'
-import { Arrows } from './layout.mjs'
+import { MorioIcon } from 'components/icons.mjs'
+import { LogoSpinner } from 'components/animations.mjs'
 import { roles } from 'config/roles.mjs'
 
 const OneMomentPlease = () => (

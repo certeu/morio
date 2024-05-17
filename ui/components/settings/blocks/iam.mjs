@@ -1,24 +1,20 @@
 import Joi from 'joi'
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
-import orderBy from 'lodash.orderby'
 // Templates
 import { mrt as mrtTemplate } from '../templates/iam/mrt.mjs'
 import {
   FingerprintIcon,
-  ClosedLockIcon,
   KeyIcon,
   MorioIcon,
   StorageIcon,
   UserIcon,
-  TrashIcon,
   PlayIcon,
 } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { FormWrapper, loadFormDefaults } from './form.mjs'
 
-const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
 
 const brands = {
@@ -110,13 +106,11 @@ export const AuthProviders = (props) => {
   const { blocks, data } = props
   const { pushModal, popModal } = useContext(ModalContext)
 
-  const mrt = mrtTemplate().form({ data: data.iam?.mrt })
-
   return (
     <>
       <h3>{props.viewConfig.title ? props.viewConfig.title : props.viewConfig.label}</h3>
       <Markdown>{props.viewConfig.about}</Markdown>
-      {data?.iam?.providers ? (
+      {data.iam?.providers ? (
         <div className="grid grid-cols-2 gap-4 mt-4">
           <ProviderButton
             available
@@ -138,7 +132,7 @@ export const AuthProviders = (props) => {
               )
             }
           />
-          {Object.keys(data?.iam?.providers || {})
+          {Object.keys(data.iam?.providers || {})
             .filter((id) => id !== 'mrt')
             .map((id) => (
               <ProviderButton
@@ -209,7 +203,7 @@ const ProviderOrder = ({ data, update }) => {
 
   //  data.iam?.ui?.order || orderBy(Object.keys(data.iam?.providers) || {}, 'label', 'asc')
 
-  for (const id of data.iam?.ui?.order || []) {
+  for (const id of data.iam.ui?.order || []) {
     if (data.iam.providers[id]) order.add(id)
   }
   for (const id in data.iam.providers) {
@@ -224,7 +218,6 @@ const ProviderOrder = ({ data, update }) => {
     newOrder[i] = hold
     update('iam.ui.order', newOrder)
   }
-  const moveDown = (i) => {}
 
   return (
     <div className="flex flex-col gap-1">

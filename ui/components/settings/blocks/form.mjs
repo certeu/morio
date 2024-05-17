@@ -70,7 +70,7 @@ export const FormBlock = (props) => {
   /*
    * Local update handles some extra checks and passes in data object
    */
-  const _update = (val, path, transform = false, fel) => {
+  const _update = (val, path, transform = false) => {
     if (typeof transform === 'function') update(path, transform(val), props.data)
     else update(path, val, props.data)
   }

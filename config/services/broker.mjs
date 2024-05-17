@@ -186,7 +186,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Cluster ID helps differentiate different Morio deployments
          */
-        cluster_id: store.config.deployment?.fqdn || Date.now(),
+        cluster_id: store.config.deployment.fqdn || Date.now(),
 
         /*
          * Enable audit log FIXME

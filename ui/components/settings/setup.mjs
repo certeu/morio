@@ -5,15 +5,14 @@ import { deployment } from './templates/deployment.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useContext, useEffect } from 'react'
+import { useState, useContext } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { SettingsReport } from './report.mjs'
 import { FormBlock } from './blocks/form.mjs'
-import { Spinner, LogoSpinner } from 'components/animations.mjs'
+import { LogoSpinner } from 'components/animations.mjs'
 import { Box } from 'components/box.mjs'
-import { Markdown } from 'components/markdown.mjs'
 import { OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -97,7 +96,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
           <Box color={deployResult.root_token?.value ? 'success' : 'accent'}>
             <div className={`flex flex-row items-center gap-2 ${text}`}>
               <div className="w-6 h-6">
-                {deployResult?.root_token?.value ? (
+                {deployResult.root_token?.value ? (
                   <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                 ) : (
                   <LogoSpinner />
@@ -110,7 +109,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
               )}
             </div>
           </Box>
-          {deployResult?.root_token?.value ? (
+          {deployResult.root_token?.value ? (
             <>
               <Popout important>
                 <h5>Store the Morio Root Token in a safe place</h5>

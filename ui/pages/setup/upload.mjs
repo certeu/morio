@@ -157,7 +157,7 @@ const SettingsUploadPage = (props) => {
                     One moment please
                   </div>
                 ) : null}
-                {!loading && !deployResult && report ? (
+                {!loading && report ? (
                   <>
                     <SettingsReport report={report} />
                     <p className="text-center mt-4">

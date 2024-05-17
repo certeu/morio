@@ -32,9 +32,6 @@ import { AccountStatus } from './accounts.mjs'
 export const AccountOverview = () => {
   const { account } = useAccount()
 
-  const level = roles.indexOf(account.role)
-  const maxLevel = roles.indexOf(account.maxRole)
-
   return account ? (
     <table className="table">
       <thead>
@@ -100,7 +97,6 @@ export const LogoutButton = () => {
 
 export const ShowTokenButton = () => {
   const { pushModal } = useContext(ModalContext)
-  const { account } = useAccount()
 
   return (
     <button
