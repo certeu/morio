@@ -1,15 +1,8 @@
-import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
+import { store, api, apiAuth } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
-const mrt = 'mrt.bb584f50505a7a25c13dddb4f6efd6e6cccf1ee1b4414c243ab664d844bdce45'
-
 describe('API IDP/LDAP Tests', () => {
-  const headers = {
-    'X-Morio-Role': 'engineer',
-    'X-Morio-User': 'test_user',
-    'X-Morio-Provider': 'local',
-  }
 
   /*
    * POST /login (valid LDAP user but no access)

@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { providerMeta } from './index.mjs'
 import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
 import { PageLink } from 'components/link.mjs'

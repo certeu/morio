@@ -90,11 +90,11 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   }
 
   if (deploymentOngoing) {
-    const text = `text-${deployResult?.root_token?.value ? 'success' : 'accent'}-content`
+    const text = `text-${deployResult.root_token?.value ? 'success' : 'accent'}-content`
     return (
       <div className="flex flex-wrap flex-row gap-8 justify-center">
         <div className="w-full max-w-xl">
-          <Box color={deployResult?.root_token?.value ? 'success' : 'accent'}>
+          <Box color={deployResult.root_token?.value ? 'success' : 'accent'}>
             <div className={`flex flex-row items-center gap-2 ${text}`}>
               <div className="w-6 h-6">
                 {deployResult?.root_token?.value ? (

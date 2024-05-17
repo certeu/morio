@@ -85,13 +85,13 @@ export const service = {
        * pipelines that are on disk
        */
       const currentPipelines = await loadPipelinesFromDisk()
-      const wantedPipelines = (Object.keys(store.settings.connector?.pipelines) || []).filter(
-        (id) => {
-          if (!store.settings?.connector?.pipelines?.[id]) return false
-          if (store.settings?.connector?.pipelines?.[id].disabled) return false
-          return true
-        }
-      )
+      const wantedPipelines = Object.keys(
+        store.get('store.settings.connector.pipelines', {})
+      ).filter((id) => {
+        if (!store.settings?.connector?.pipelines?.[id]) return false
+        if (store.settings?.connector?.pipelines?.[id].disabled) return false
+        return true
+      })
 
       await createWantedPipelines(wantedPipelines)
       await removeUnwantedPipelines(currentPipelines, wantedPipelines)
@@ -276,7 +276,7 @@ output {
   elasticsearch {
     action => "create"
     compression_level => ${xput.compression_level}
-    ecs_compatibility => "${['disabled', 'v1', 'v8'].includes(pipeline.output?.enforce_ecs) ? pipeline.output.enforce_ecs : 'v8'}"
+    ecs_compatibility => "${['disabled', 'v1', 'v8'].includes(pipeline.output.enforce_ecs) ? pipeline.output.enforce_ecs : 'v8'}"
     index => "${pipeline.output.index}"
     api_key => "${xput.api_key}"`
       if (xput.environment === 'cloud')

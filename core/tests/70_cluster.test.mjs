@@ -1,6 +1,6 @@
 import { core } from './utils.mjs'
 import { describe, it } from 'node:test'
-import { strict as assert } from 'node:assert'
+//import { strict as assert } from 'node:assert'
 
 describe('Core Cluster Tests', () => {
   /*
@@ -10,7 +10,6 @@ describe('Core Cluster Tests', () => {
    */
   it('Should POST /cluster/ping', async () => {
     const [status, d] = await core.post('/cluster/ping', {})
-    console.log({ status, d})
+    console.log({ status, d })
   })
-
 })

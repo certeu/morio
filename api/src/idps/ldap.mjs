@@ -88,53 +88,51 @@ export const ldap = (id, data, req) => {
           },
         ])
 
-      if (user) {
-        /*
-         * Can we find the username?
-         */
-        const username = caseInsensitiveGet(store.config.iam.providers[id].username_field, user)
-        if (!username)
-          return resolve([
-            false,
-            {
-              success: false,
-              reason: 'Authentication failed',
-              error: 'Unable to retrieve username based on configured username_field',
-            },
-          ])
-
-        /*
-         * Can we assign the requested role?
-         */
-        const [allowed, maxLevel] = checkRole(
-          req.body?.data?.role,
-          store.config.iam.providers[id].rbac,
-          user
-        )
-        if (!allowed)
-          return resolve([
-            false,
-            {
-              success: false,
-              reason: 'Authentication failed',
-              error: 'This role is not available to you',
-            },
-          ])
-
-        /*
-         * Store the latest login time, but don't wait for it
-         */
-        storeLastLoginTime(id, username)
-
+      /*
+       * Can we find the username?
+       */
+      const username = caseInsensitiveGet(store.config.iam.providers[id].username_field, user)
+      if (!username)
         return resolve([
-          true,
+          false,
           {
-            user: username,
-            role: req.body.data.role,
-            maxRole: roles[maxLevel],
+            success: false,
+            reason: 'Authentication failed',
+            error: 'Unable to retrieve username based on configured username_field',
           },
         ])
-      }
+
+      /*
+       * Can we assign the requested role?
+       */
+      const [allowed, maxLevel] = checkRole(
+        req.body?.data?.role,
+        store.config.iam.providers[id].rbac,
+        user
+      )
+      if (!allowed)
+        return resolve([
+          false,
+          {
+            success: false,
+            reason: 'Authentication failed',
+            error: 'This role is not available to you',
+          },
+        ])
+
+      /*
+       * Store the latest login time, but don't wait for it
+       */
+      storeLastLoginTime(id, username)
+
+      return resolve([
+        true,
+        {
+          user: username,
+          role: req.body.data.role,
+          maxRole: roles[maxLevel],
+        },
+      ])
     })(req)
   })
 }

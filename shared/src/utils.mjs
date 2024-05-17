@@ -51,13 +51,13 @@ export const attempt = async ({
   onFailedAttempt = false,
   validate = false,
   log = false,
-}) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve))
+}) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate, log }, resolve))
 
 /*
  * Promise resolver functions should not be async
  * so this method is here to side-step that
  */
-const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, validate }, resolve) => {
+const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, validate, log }, resolve) => {
   /*
    * Quick check
    */

@@ -32,7 +32,7 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the IDPs configured by the user
    */
-  if (store.settings?.iam?.providers) {
+  if (store.settings.iam?.providers) {
     for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
       idps[id] = {
         id,

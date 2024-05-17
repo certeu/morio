@@ -1,5 +1,3 @@
-import Joi from 'joi'
-import { providerMeta } from './index.mjs'
 import { Popout } from 'components/popout.mjs'
 
 /*

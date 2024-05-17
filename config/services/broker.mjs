@@ -87,7 +87,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Set the node ID to the node number
          */
-        node_id: store.config?.core?.node_nr || 1,
+        node_id: store.config.core.node_nr || 1,
 
         /*
          * The IP address and port for the admin server.
@@ -166,7 +166,7 @@ export const resolveServiceConfiguration = (store) => {
             name: 'internal',
           },
           {
-            address: store.config.core?.names?.external,
+            address: store.config.core.names?.external,
             // Advertise the mapped port
             port: 9092,
             name: 'external',
@@ -186,7 +186,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Cluster ID helps differentiate different Morio deployments
          */
-        cluster_id: store.config?.deployment?.fqdn || Date.now(),
+        cluster_id: store.config.deployment?.fqdn || Date.now(),
 
         /*
          * Enable audit log FIXME
@@ -242,7 +242,7 @@ export const resolveServiceConfiguration = (store) => {
          */
         advertised_pandaproxy_api: [
           {
-            address: store.config.core?.names?.external,
+            address: store.config.core.names?.external,
             name: 'external',
             port: 443,
           },

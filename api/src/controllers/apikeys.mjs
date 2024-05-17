@@ -90,17 +90,20 @@ Controller.prototype.list = async (req, res) => {
   /*
    * Parse them into a nice list
    */
-  const list = (Object.keys(keys) || [])
-    .filter((id) => keys[id].status !== 'deleted')
-    .map((id) => {
-      const data = {
-        key: id.slice(7),
-        ...keys[id],
-      }
-      delete data.secret
+  const list =
+    typeof keys === 'object'
+      ? Object.keys(keys)
+      : []
+          .filter((id) => keys[id].status !== 'deleted')
+          .map((id) => {
+            const data = {
+              key: id.slice(7),
+              ...keys[id],
+            }
+            delete data.secret
 
-      return data
-    })
+            return data
+          })
 
   return res.send({
     result: 'success',

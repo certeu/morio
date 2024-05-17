@@ -9,7 +9,6 @@ import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import {
-  CertificateIcon,
   PlusIcon,
   PlusCircleIcon,
   TrashIcon,

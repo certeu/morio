@@ -1,5 +1,4 @@
 import Joi from 'joi'
-import { Popout } from 'components/popout.mjs'
 
 export const connect = {
   inputs: {

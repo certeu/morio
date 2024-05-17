@@ -4,12 +4,6 @@
  */
 
 /*
- * Are we running in development, or is this a production
- * build requiring a static export?
- */
-const EXPORT = process.env.STATIC_EXORT
-
-/*
  * NodeJS path is used to resolve local path to full path
  */
 import path from 'path'
@@ -25,7 +19,6 @@ import createMDX from '@next/mdx'
 import remarkFrontmatter from 'remark-frontmatter'
 import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import remarkGfm from 'remark-gfm'
-import remarkCopyLinkedFiles from 'remark-copy-linked-files'
 import remarkSmartypants from 'remark-smartypants'
 /*
  * Recma plugin to ensure we can detect MDX components

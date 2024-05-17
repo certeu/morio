@@ -306,7 +306,10 @@ Controller.prototype.encrypt = async (req, res) => {
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async (req, res, type) => {
-  const [status, result] = await store.core.post(`/pkgs/clients/${type}/build`, bodyPlusHeaders(req))
+  const [status, result] = await store.core.post(
+    `/pkgs/clients/${type}/build`,
+    bodyPlusHeaders(req)
+  )
 
   return res.status(status).send(result)
 }
@@ -329,9 +332,8 @@ Controller.prototype.getJwks = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.joinCluster = async (req, res, path) => {
-  store.log.info('Received request to join cluster')
-  console.log({ apiBody: req.body })
+Controller.prototype.joinCluster = async (req, res) => {
+  store.log.debug('Received request to join cluster')
   const [status, result] = await store.core.post(`/cluster/join`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
