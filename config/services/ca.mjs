@@ -9,11 +9,11 @@ export const resolveServiceConfiguration = (store) => {
 
   return {
     /**
-    * Container configuration
-    *
-    * @param {object} config - The high-level Morio configuration
-    * @return {object} container - The container configuration
-    */
+     * Container configuration
+     *
+     * @param {object} config - The high-level Morio configuration
+     * @return {object} container - The container configuration
+     */
     container: {
       // Name to use for the running container
       container_name: 'ca',
@@ -28,17 +28,19 @@ export const resolveServiceConfiguration = (store) => {
       // Ports to export
       ports: ['9000:9000'],
       // Volumes
-      volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
-      ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
-      ],
+      volumes: PROD
+        ? [
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
+            `${store.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
+            `${store.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
+            `${store.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
+          ]
+        : [
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
+          ],
       // Configure Traefik with container labels
       labels: [
         // Tell traefik to watch this container
@@ -60,8 +62,8 @@ export const resolveServiceConfiguration = (store) => {
       ],
     },
     /*
-    * Step-CA server configuration
-    */
+     * Step-CA server configuration
+     */
     server: {
       root: '/home/step/certs/root_ca.crt',
       federatedRoots: null,

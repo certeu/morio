@@ -5,12 +5,12 @@ import { Popout } from 'components/popout.mjs'
  *
  * Note that this cannot be remove, although it can be disabled
  */
-export const mrt = (context) => ({
+export const mrt = {
   title: 'Morio Root Token',
   about: 'Provides authentication using the Morio Root Token',
   desc: 'fixme',
-  local: (data) => `iam.providers.mrt`,
-  form: ({ data }) => [
+  local: () => `iam.providers.mrt`,
+  form: () => [
     {
       key: 'id',
       current: 'mrt',
@@ -40,4 +40,4 @@ export const mrt = (context) => ({
       </Popout>
     </>,
   ],
-})
+}

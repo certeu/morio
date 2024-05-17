@@ -42,7 +42,7 @@ Controller.prototype.status = async (req, res) => {
    */
   const [status, result] = await store.core.get(`/status`)
 
-  if (!status) return res.status(500).send({status, result}).end()
+  if (!status) return res.status(500).send({ status, result }).end()
 
   /*
    * Override name,

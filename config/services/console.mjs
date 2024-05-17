@@ -27,9 +27,7 @@ export const resolveServiceConfiguration = (store) => ({
       CONFIG_FILEPATH: '/etc/morio/console/config.yaml',
     },
     // Volumes
-    volumes: [
-      `${store.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
-    ],
+    volumes: [`${store.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`],
     // Configure Traefik with container labels
     labels: [
       // Tell traefik to watch this container

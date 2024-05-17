@@ -26,26 +26,22 @@ export const resolveServiceConfiguration = (store) => {
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Ports to export
-      ports: [
-        '18081:18081',
-        '18082:18082',
-        '19082:19082',
-        '19644:19644',
-        '9092:19092'
-      ],
+      ports: ['18081:18081', '18082:18082', '19082:19082', '19644:19644', '9092:19092'],
       // Environment
       environment: {
         // Node ID
         NODE_ID: store.config?.core?.node_nr || 1,
       },
       // Volumes
-      volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
-      ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
-      ],
+      volumes: PROD
+        ? [
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
+            `${store.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
+          ]
+        : [
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
+          ],
       // Command
       command: [
         'redpanda',
@@ -56,8 +52,7 @@ export const resolveServiceConfiguration = (store) => {
               // Mode dev-container uses well-known configuration properties for development in containers.
               '--mode dev-container',
             ]
-          : []
-            ),
+          : []),
       ],
     },
     /*
@@ -134,7 +129,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Kafka API TLS
          *
-          */
+         */
         kafka_api_tls: [
           {
             name: 'internal',

@@ -50,7 +50,7 @@ export const providerVisibility = ({ name }) => ({
     {
       val: 'tab',
       label: 'Display as any other provider',
-      about: `Include the ${narm} provider in the list of availble identity providers`,
+      about: `Include the ${name} provider in the list of availble identity providers`,
     },
     {
       val: 'icon',
@@ -68,7 +68,7 @@ export const providerVisibility = ({ name }) => ({
 /*
  * Identity and Access Management (IAM)
  */
-export const iam = (context) => ({
+export const iam = () => ({
   about: (
     <>
       IAM covers <b>Identity and Access Management</b>. It allows you to setup various
@@ -86,12 +86,7 @@ export const iam = (context) => ({
       type: 'authProviders',
       title: 'Identity Providers',
       about: 'Identity providers are services that allow users to prove their identity',
-      blocks: {
-        apikey: apikey(context),
-        ldap: ldap(context),
-        local: local(context),
-        mrt: mrt(context),
-      },
+      blocks: { apikey, ldap, local, mrt },
     },
     /*
      * Login form

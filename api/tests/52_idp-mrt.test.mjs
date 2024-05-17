@@ -1,23 +1,11 @@
 import { store, api, apiAuth } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-/*
- * Load the MRT straight from disk, so that these tests can
- * run without having to go through the setup each time.
- * Note that this is only possible when running the dev container.
- */
-// eslint-disbable-next-line
-import keys from '../../data/config/keys.json' assert { type: 'json' }
+import { keys } from './json-loader.mjs'
 
 const { mrt } = keys
 
 describe('API MRT Tests', () => {
-  const headers = {
-    'X-Morio-Role': 'engineer',
-    'X-Morio-User': 'test_user',
-    'X-Morio-Provider': 'local',
-  }
-
   /*
    * POST /login
    *
@@ -115,5 +103,4 @@ describe('API MRT Tests', () => {
     })
     assert.equal(result[0], 200)
   })
-
 })

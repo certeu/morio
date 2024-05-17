@@ -73,7 +73,6 @@ describe('API Setup Tests', () => {
       Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),
     }
   })
-
 })
 
 describe('Ensure we are out of configuration mode', async () => {
@@ -112,5 +111,3 @@ describe('Ensure we have reloaded configuration from core', async () => {
       })
     })
 })
-
-

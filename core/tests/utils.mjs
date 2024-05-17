@@ -74,7 +74,7 @@ const setup = {
         server: {
           url: 'ldap://ldap:10389',
           bindDN: 'uid=admin,ou=system',
-          bindCredentials: "{{{ LDAP_BIND_SECRET }}}",
+          bindCredentials: '{{{ LDAP_BIND_SECRET }}}',
           searchBase: 'ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
           searchFilter: '(&(objectclass=person)(uid={{username}}))',
         },
@@ -82,14 +82,14 @@ const setup = {
         rbac: {
           manager: {
             attribute: 'employeetype',
-            regex: '^manager$'
+            regex: '^manager$',
           },
           operator: {
             attribute: 'employeetype',
-            regex: '^admin$'
+            regex: '^admin$',
           },
-        }
-      }
+        },
+      },
     },
   },
 }

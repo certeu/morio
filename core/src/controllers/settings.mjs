@@ -290,7 +290,7 @@ const localNodeInfo = async (body) => {
    * and hope that it matches one of the cluster nodes
    */
   let fqdn = false
-  const nodes = body.deployment.nodes.map(node => node.toLowerCase())
+  const nodes = body.deployment.nodes.map((node) => node.toLowerCase())
   for (const header of ['x-forwarded-host', 'host']) {
     if (nodes.includes(body.headers[header].toLowerCase())) {
       fqdn = body.headers[header].toLowerCase()
@@ -309,7 +309,7 @@ const localNodeInfo = async (body) => {
     ...store.node,
     fqdn,
     hostname: fqdn.split('.')[0],
-    ip: (await resolveHostAsIp(fqdn)),
+    ip: await resolveHostAsIp(fqdn),
     serial: nodes.indexOf(fqdn) + 1,
   }
 }

@@ -3,7 +3,6 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('Ephemeral API: Status Routes', () => {
-
   /*
    * GET /status
    *
@@ -42,12 +41,9 @@ describe('Ephemeral API: Status Routes', () => {
      */
     store.ephemeral = true
   })
-
 })
 
-
 describe('Ephemeral API: Non-available Routes', () => {
-
   const test = {
     get: [
       '/accounts',
@@ -88,9 +84,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/downloads',
       '/validate/ping',
     ],
-    patch: [
-      '/apikeys/key/action',
-    ],
+    patch: ['/apikeys/key/action'],
     post: [
       '/account',
       '/activate-account',
@@ -121,9 +115,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/docker/containers/id/stop',
       '/docker/containers/id/unpause',
     ],
-    delete: [
-      '/apikeys/key'
-    ],
+    delete: ['/apikeys/key'],
   }
 
   /*
@@ -210,6 +202,4 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
    */
-
 })
-

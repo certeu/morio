@@ -33,13 +33,15 @@ export const resolveServiceConfiguration = (store) => {
         NODE_ID: store.config?.core?.node_nr || 1,
       },
       // Volumes
-      volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
-      ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
-      ],
+      volumes: PROD
+        ? [
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
+            `${store.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
+          ]
+        : [
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+          ],
     },
     /**
      * This is the schema, or more accurately, the SQL commands to create the

@@ -18,6 +18,8 @@
     "dev": "./core/run-dev-container.sh",
     "prod": "./core/run-prod-container.sh",
     "dev:clean": "docker rm -fv core api ui proxy ca broker console connector && docker network rm morionet",
+    "lint": "./scripts/lint.sh",
+    "prettier": "npx prettier --ignore-unknown --write ./core ./ui ./api ./shared ./schema ./scripts ./config",
     "destroy": "./scripts/destroy.sh",
     "redev": "npm run destroy && npm run dev",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
@@ -25,7 +27,6 @@
     "reversion": "node scripts/reversion.mjs && npm run reconfigure",
     "rev": "npm run reversion",
     "prebuild": "npm run reconfigure",
-    "prettier": "npx prettier --write .",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test": "echo \"Error: no test specified\" && exit 1"

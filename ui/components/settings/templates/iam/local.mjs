@@ -5,7 +5,7 @@ import { PageLink } from 'components/link.mjs'
 
 const Roles = [
   { tabs: {}, navs: false },
-  <Popout tip>
+  <Popout tip key="p1">
     <h5>Role-Based Access Control</h5>
     <p>
       For each role, you can set an <b>attribute</b>, and a <b>regular expression</b> (regex) to
@@ -14,7 +14,7 @@ const Roles = [
       When the regex matches the value of the attribute, the role will be assigned.
     </p>
   </Popout>,
-  <Popout note>
+  <Popout note key="p2">
     <h5>No attribute needed</h5>
     <p>
       On local accounts, the only attribute you can match against is the <code>username</code>, so
@@ -35,18 +35,18 @@ for (const role of roles)
       label: 'Username Regex',
       labelBL: `The regex to match against the username`,
       key: `rbac.${role}.regex`,
-      placeholder: `^(?:jdecock|stellene|lbazille)\$`,
+      placeholder: `^(?:jdecock|stellene|lbazille)$`,
     },
   ]
 
 /*
  * Local Identity Provider template
  */
-export const local = (context) => ({
+export const local = {
   title: 'Local Accounts',
   about: 'Provides authentication with username and password',
-  local: (data) => 'iam.providers.local',
-  form: ({ data }) => [
+  local: () => 'iam.providers.local',
+  form: () => [
     {
       key: 'id',
       current: 'mrt',
@@ -57,7 +57,7 @@ export const local = (context) => ({
       current: 'Morio Account',
       hidden: true,
     },
-    <Popout note>
+    <Popout note key="note">
       <h5>No settings required</h5>
       <p>
         The <b>Local Accounts</b> provider does not require any settings.
@@ -68,4 +68,4 @@ export const local = (context) => ({
       </p>
     </Popout>,
   ],
-})
+}

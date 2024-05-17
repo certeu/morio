@@ -1,4 +1,13 @@
-import { createHash, randomBytes, generateKeyPairSync, createCipheriv, createDecipheriv, scryptSync, createPrivateKey, randomUUID } from 'crypto'
+import {
+  createHash,
+  randomBytes,
+  generateKeyPairSync,
+  createCipheriv,
+  createDecipheriv,
+  scryptSync,
+  createPrivateKey,
+  randomUUID,
+} from 'crypto'
 import forge from 'node-forge'
 import jose from 'node-jose'
 import { getPreset } from '#config'
@@ -18,7 +27,6 @@ export const uuid = randomUUID
 export function hash(string) {
   return createHash('sha256').update(string).digest('hex')
 }
-
 
 /**
  * Generate a certificate signing request (csr)
@@ -90,7 +98,13 @@ export const generateCsr = async (data) => {
  * @param {object} data - Data to encode in the token
  * @return {object} jwt - The JSON web token
  */
-export const generateJwt = ({ data, key, passphrase=false, options = {}, noDefaults = false }) => {
+export const generateJwt = ({
+  data,
+  key,
+  passphrase = false,
+  options = {},
+  noDefaults = false,
+}) => {
   const dfltOptions = {
     expiresIn: '4h',
     notBefore: 0,
@@ -103,8 +117,10 @@ export const generateJwt = ({ data, key, passphrase=false, options = {}, noDefau
   return jwt.sign(
     data,
     passphrase
-      ? createPrivateKey({ key, passphrase, format: 'pem'})
-        .export({ type: 'pkcs8', format: 'pem' })
+      ? createPrivateKey({ key, passphrase, format: 'pem' }).export({
+          type: 'pkcs8',
+          format: 'pem',
+        })
       : key,
     noDefaults ? options : { ...dfltOptions, ...options }
   )
@@ -425,8 +441,7 @@ export function encryptionMethods(stringKey, salt, logger) {
       if (typeof data === 'string') {
         try {
           data = JSON.parse(data)
-        }
-        catch (err) {
+        } catch (err) {
           // noop
         }
       }
@@ -437,18 +452,18 @@ export function encryptionMethods(stringKey, salt, logger) {
         typeof data.iv === 'string' &&
         typeof data.ct === 'string' &&
         Object.keys(data).length === 2
-      ) return true
+      )
+        return true
 
       return false
     },
   }
 }
 
-
 /*
  * Salts and hashes a password
  */
-export function hashPassword(userInput, salt=false) {
+export function hashPassword(userInput, salt = false) {
   if (salt === false) salt = randomString(32)
   const hash = scryptSync(userInput, salt, 64)
 
@@ -466,9 +481,7 @@ export function hashPassword(userInput, salt=false) {
 export function verifyPassword(userInput, storedPassword) {
   let data
   try {
-    data = typeof storedPassword === 'string'
-      ? JSON.parse(storedPassword)
-      : storedPassword
+    data = typeof storedPassword === 'string' ? JSON.parse(storedPassword) : storedPassword
   } catch {
     return false
   }
@@ -488,4 +501,3 @@ export function verifyPassword(userInput, storedPassword) {
 
   return false
 }
-

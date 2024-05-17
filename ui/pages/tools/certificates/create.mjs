@@ -8,12 +8,7 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import {
-  PlusIcon,
-  PlusCircleIcon,
-  TrashIcon,
-  WarningIcon,
-} from 'components/icons.mjs'
+import { PlusIcon, PlusCircleIcon, TrashIcon, WarningIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { Popout } from 'components/popout.mjs'

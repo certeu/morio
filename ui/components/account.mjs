@@ -124,7 +124,7 @@ export const RenewTokenButton = () => {
   )
 }
 
-const NoKeysForYou = ({ provider }) => (
+const NoKeysForYou = () => (
   <button className="btn btn-error" isabled>
     <div className="flex flex-row gap-1">
       <WarningIcon />

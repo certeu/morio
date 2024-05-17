@@ -20,7 +20,6 @@ const avoid = ['set', 'setIfUnset', 'push', 'unset', 'get', 'extend']
  * @return {Store} this - The Store instance
  */
 export function Store(methods = []) {
-
   /*
    * The store is typically extended with a logger
    * but we will start off with a default one just in case
@@ -97,7 +96,8 @@ Store.prototype.push = function (path, ...values) {
  * @return {Store} this - The Store instance
  */
 Store.prototype.set = function (path, value) {
-  if (typeof value === 'undefined') this.log.warn(`Store.set(value) on key \`${path}\`, but value is undefined`)
+  if (typeof value === 'undefined')
+    this.log.warn(`Store.set(value) on key \`${path}\`, but value is undefined`)
   set(this, path, value)
 
   return this
@@ -111,7 +111,8 @@ Store.prototype.set = function (path, value) {
  * @return {Store} this - The Store instance
  */
 Store.prototype.setIfUnset = function (path, value) {
-  if (typeof value === 'undefined') this.log.warn(`Store.setIfUnset(value) on key \`${path}\`, but value is undefined`)
+  if (typeof value === 'undefined')
+    this.log.warn(`Store.setIfUnset(value) on key \`${path}\`, but value is undefined`)
   if (typeof get(this, path) === 'undefined') return set(this, path, value)
 
   return this
@@ -129,4 +130,3 @@ Store.prototype.unset = function (path) {
 
   return this
 }
-

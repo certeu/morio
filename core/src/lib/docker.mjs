@@ -173,7 +173,7 @@ export const generateContainerConfig = (srvConf) => {
    * Hosts
    */
   if (srvConf.container.hosts) {
-      opts.HostConfig.ExtraHosts = srvConf.container.hosts
+    opts.HostConfig.ExtraHosts = srvConf.container.hosts
   }
 
   /*
@@ -407,4 +407,3 @@ export const storeRunningContainers = async () => {
     }
   }
 }
-

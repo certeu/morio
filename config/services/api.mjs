@@ -37,14 +37,15 @@ export const resolveServiceConfiguration = (store) => {
   /*
    * To run unit tests, we need to add these labels manually
    */
-  if (store.testing) labels.push(
-    "traefik.http.routers.api.tls=true",
-    "traefik.http.routers.api.tls.certresolver=ca",
-    "traefik.http.services.api.loadbalancer.server.port=3000",
-    "traefik.tls.stores.default.defaultgeneratedcert.domain.main=unit.test.morio.it",
-    "traefik.tls.stores.default.defaultgeneratedcert.domain.sans=unit.test.morio.it",
-    "traefik.tls.stores.default.defaultgeneratedcert.resolver=ca"
-  )
+  if (store.testing)
+    labels.push(
+      'traefik.http.routers.api.tls=true',
+      'traefik.http.routers.api.tls.certresolver=ca',
+      'traefik.http.services.api.loadbalancer.server.port=3000',
+      'traefik.tls.stores.default.defaultgeneratedcert.domain.main=unit.test.morio.it',
+      'traefik.tls.stores.default.defaultgeneratedcert.domain.sans=unit.test.morio.it',
+      'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'
+    )
 
   return {
     /**
@@ -65,14 +66,13 @@ export const resolveServiceConfiguration = (store) => {
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD ? [
-        `${DIRS.conf}/shared:/etc/morio/shared`,
-        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-      ] : [
-        `${DIRS.conf}/shared:/etc/morio/shared`,
-        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
-      ],
+      volumes: PROD
+        ? [`${DIRS.conf}/shared:/etc/morio/shared`, `${DIRS.data}/${DIRS.dl}:/morio/downloads`]
+        : [
+            `${DIRS.conf}/shared:/etc/morio/shared`,
+            `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
+            `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+          ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment
@@ -81,9 +81,7 @@ export const resolveServiceConfiguration = (store) => {
         `KAFKAJS_NO_PARTITIONER_WARNING=1`,
       ],
       // Add extra hosts
-      hosts: [
-        `local_core:${store.local_core_ip}`,
-      ],
+      hosts: [`local_core:${store.local_core_ip}`],
       // Configure Traefik with container labels
       labels,
     },

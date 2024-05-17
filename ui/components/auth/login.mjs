@@ -8,7 +8,6 @@ import { ModalContext } from 'context/modal.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Term } from 'components/term.mjs'
-import { RoleInput } from '../inputs.mjs'
 import { CloseIcon, QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'components/icons.mjs'
 // Providers
 import { BaseProvider } from './base-provider.mjs'
@@ -281,7 +280,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
           </>
         )
       ) : tabList.length > 0 ? (
-        <Tabs tabs={tabList.map((id) => idps[id].label || id)} children={tabs} />
+        <Tabs tabs={tabList.map((id) => idps[id].label || id)}>{tabs}</Tabs>
       ) : (
         <Popout warning>Failed to load identity providers</Popout>
       )}

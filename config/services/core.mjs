@@ -24,22 +24,26 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Ports to export (not in production)
-      ports: PROD ? [] : [ `${store.getPreset('MORIO_CORE_PORT')}:${store.getPreset('MORIO_CORE_PORT')}` ],
+      ports: PROD
+        ? []
+        : [`${store.getPreset('MORIO_CORE_PORT')}:${store.getPreset('MORIO_CORE_PORT')}`],
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD ? [
-        `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}:/etc/morio`,
-        `${store.getPreset('MORIO_DATA_ROOT')}:/morio/data`,
-        `${store.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
-      ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
-        `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config:/etc/morio`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data:/morio/data`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-      ],
+      volumes: PROD
+        ? [
+            `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
+            `${store.getPreset('MORIO_CONFIG_ROOT')}:/etc/morio`,
+            `${store.getPreset('MORIO_DATA_ROOT')}:/morio/data`,
+            `${store.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
+          ]
+        : [
+            `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${store.getPreset('MORIO_DOCKER_SOCKET')}:${store.getPreset('MORIO_DOCKER_SOCKET')}`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config:/etc/morio`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data:/morio/data`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+          ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment

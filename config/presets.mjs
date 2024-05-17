@@ -6,7 +6,7 @@ export const presets = {
    */
 
   //Node environment
-  NODE_ENV: "production",
+  NODE_ENV: 'production',
 
   // Version number
   MORIO_VERSION: pkg.version,
@@ -15,19 +15,19 @@ export const presets = {
   MORIO_DOCKER_SOCKET: '/var/run/docker.sock',
 
   // Location of the Morio configuration folder
-  MORIO_CONFIG_ROOT: "/etc/morio/moriod",
+  MORIO_CONFIG_ROOT: '/etc/morio/moriod',
 
   // Location of the Morio data folder
-  MORIO_DATA_ROOT: "/var/lib/morio/moriod",
+  MORIO_DATA_ROOT: '/var/lib/morio/moriod',
 
   // Location of the Morio logs folder
-  MORIO_LOGS_ROOT: "/var/log/morio/moriod",
+  MORIO_LOGS_ROOT: '/var/log/morio/moriod',
 
   // Name of the Morio public downloads folder
-  MORIO_DOWNLOADS_FOLDER: "downloads",
+  MORIO_DOWNLOADS_FOLDER: 'downloads',
 
   // Name of the Morio public repositories folder
-  MORIO_REPOS_FOLDER: "repos",
+  MORIO_REPOS_FOLDER: 'repos',
 
   // Network name. Change at your own peril.
   MORIO_NETWORK: 'morionet',
@@ -240,7 +240,7 @@ export const getPreset = (key, opts = {}) => {
 export const inProduction = () => {
   const env = getPreset('NODE_ENV', { dflt: 'production', as: 'string' })
 
-  return (env === 'production')
+  return env === 'production'
 }
 
 /**
@@ -249,8 +249,6 @@ export const inProduction = () => {
 export const loadAllPresets = () => {
   const all = {}
   for (const key of Object.keys(presets).sort()) all[key] = getPreset(key)
-
-
 
   return all
 }
