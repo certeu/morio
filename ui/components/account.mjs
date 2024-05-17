@@ -1,5 +1,4 @@
 // Dependencies
-import { roles } from 'config/roles.mjs'
 import { shortDate } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext, useEffect } from 'react'

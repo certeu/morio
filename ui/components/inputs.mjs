@@ -1,8 +1,6 @@
 import { roles } from 'config/roles.mjs'
-// Context
-import { ModalContext } from 'context/modal.mjs'
 // Hooks
-import { useCallback, useState, useContext } from 'react'
+import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'

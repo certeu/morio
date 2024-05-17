@@ -3,7 +3,6 @@ import { Login } from './login.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { MorioIcon } from 'components/icons.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { roles } from 'config/roles.mjs'
 

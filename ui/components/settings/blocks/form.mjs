@@ -110,7 +110,7 @@ export const FormBlock = (props) => {
               <FormElement
                 key={i}
                 {...formEl}
-                update={(val) => _update(val, formEl.key, formEl.transform, formEl)}
+                update={(val) => _update(val, formEl.key, formEl.transform)}
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}
                 {...{ formValidation, updateFormValidation, freeze }}

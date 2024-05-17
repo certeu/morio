@@ -1,8 +1,6 @@
 import Joi from 'joi'
 import { useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
-// Templates
-import { mrt as mrtTemplate } from '../templates/iam/mrt.mjs'
 import {
   FingerprintIcon,
   KeyIcon,
