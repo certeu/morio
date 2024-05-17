@@ -35,7 +35,7 @@ export const service = {
      *
      * Generate and write control file for the build
      */
-    prebuild: async ({ customSettings = {} }) => {
+    preBuild: async ({ customSettings = {} }) => {
       /*
        * Resolve settings and control file
        */
