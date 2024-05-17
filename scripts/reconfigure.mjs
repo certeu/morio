@@ -1,6 +1,6 @@
 import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
-import pkg from '../package.json' assert { type: 'json' }
+import { root as pkg } from './json-loader.mjs'
 import path from 'path'
 
 /*

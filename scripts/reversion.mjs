@@ -2,13 +2,7 @@ import { writeFile } from '@morio/shared/fs'
 import chalk from 'chalk'
 import readline from 'node:readline'
 // Load various package.json files
-import root from '../package.json' assert { type: 'json' }
-import api from '../api/package.json' assert { type: 'json' }
-import config from '../config/package.json' assert { type: 'json' }
-import core from '../core/package.json' assert { type: 'json' }
-import schema from '../schema/package.json' assert { type: 'json' }
-import shared from '../shared/package.json' assert { type: 'json' }
-import ui from '../ui/package.json' assert { type: 'json' }
+import { root, api, config, core, schema, shared, ui }  from './json-loader.mjs'
 
 /*
  * Object holding all files we need to update and their folder
