@@ -149,16 +149,7 @@ const UpdateXput = (props) => {
   )
 }
 
-const XputButton = ({
-  title,
-  about,
-  id,
-  type,
-  onClick,
-  plugin = false,
-  available = false,
-  pipelines = false,
-}) => (
+const XputButton = ({ title, about, id, onClick, plugin = false, pipelines = false }) => (
   <div className="indicator w-full">
     {pipelines.length > 0 ? (
       <span className="indicator-item badge badge-success mr-6">{pipelines.length}</span>

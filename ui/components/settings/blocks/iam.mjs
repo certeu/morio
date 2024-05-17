@@ -84,7 +84,7 @@ const UpdateProvider = (props) => {
   )
 }
 
-const ProviderButton = ({ title, about, id, type, onClick, plugin = false, available = false }) => (
+const ProviderButton = ({ title, about, id, type, onClick }) => (
   <div className="indicator w-full">
     <button
       className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer w-full

@@ -50,7 +50,7 @@ export const providerVisibility = ({ name }) => ({
     {
       val: 'tab',
       label: 'Display as any other provider',
-      about: `Include the ${narm} provider in the list of availble identity providers`,
+      about: `Include the ${name} provider in the list of availble identity providers`,
     },
     {
       val: 'icon',

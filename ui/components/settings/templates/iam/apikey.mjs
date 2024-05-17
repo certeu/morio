@@ -3,11 +3,11 @@ import { Popout } from 'components/popout.mjs'
 /*
  * API Key Identity Provider template
  */
-export const apikey = (context) => ({
+export const apikey = () => ({
   title: 'API Keys',
   about: 'Provides authentication with API key/secret',
-  local: (data) => 'iam.providers.apikey',
-  form: ({ data }) => [
+  local: () => 'iam.providers.apikey',
+  form: () => [
     {
       key: 'id',
       current: 'apikey',
@@ -18,7 +18,7 @@ export const apikey = (context) => ({
       current: 'API Key',
       hidden: true,
     },
-    <Popout note>
+    <Popout note key="note">
       <h5>No settings required</h5>
       <p>
         The <b>API Keys</b> provider does not require any settings.

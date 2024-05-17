@@ -331,7 +331,6 @@ export const PrimedSettingsWizard = (props) => {
    * React state
    */
   const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings this wizard builds
-  const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview

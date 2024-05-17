@@ -61,7 +61,6 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   const [deployResult, setDeployResult] = useState(false)
   const [deploymentOngoing, setDeploymentOngoing] = useState(false)
   const [validateView, setValidateView] = useState(validate)
-  const [lastLogLine, setLastLogLine] = useState(false)
 
   /*
    * API client
