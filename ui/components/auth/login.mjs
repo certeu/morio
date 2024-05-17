@@ -280,7 +280,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
           </>
         )
       ) : tabList.length > 0 ? (
-        <Tabs tabs={tabList.map((id) => idps[id].label || id)} children={tabs} />
+        <Tabs tabs={tabList.map((id) => idps[id].label || id)}>{tabs}</Tabs>
       ) : (
         <Popout warning>Failed to load identity providers</Popout>
       )}
