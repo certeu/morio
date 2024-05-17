@@ -40,7 +40,7 @@ for (const role of roles)
 /*
  * LDAP Authenticator Provider template
  */
-export const ldap = () => ({
+export const ldap = {
   title: 'LDAP / Active Directory',
   about: 'Provides authentication against an LDAP service',
   desc: 'Use this to read content from a website feed',
@@ -124,4 +124,4 @@ export const ldap = () => ({
       },
     },
   ],
-})
+}

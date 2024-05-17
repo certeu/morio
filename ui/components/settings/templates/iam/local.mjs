@@ -42,7 +42,7 @@ for (const role of roles)
 /*
  * Local Identity Provider template
  */
-export const local = () => ({
+export const local = {
   title: 'Local Accounts',
   about: 'Provides authentication with username and password',
   local: () => 'iam.providers.local',
@@ -68,4 +68,4 @@ export const local = () => ({
       </p>
     </Popout>,
   ],
-})
+}

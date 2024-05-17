@@ -3,7 +3,7 @@ import { Popout } from 'components/popout.mjs'
 /*
  * API Key Identity Provider template
  */
-export const apikey = () => ({
+export const apikey = {
   title: 'API Keys',
   about: 'Provides authentication with API key/secret',
   local: () => 'iam.providers.apikey',
@@ -31,4 +31,4 @@ export const apikey = () => ({
       </p>
     </Popout>,
   ],
-})
+}

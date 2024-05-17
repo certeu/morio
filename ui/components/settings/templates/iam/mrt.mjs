@@ -5,7 +5,7 @@ import { Popout } from 'components/popout.mjs'
  *
  * Note that this cannot be remove, although it can be disabled
  */
-export const mrt = () => ({
+export const mrt = {
   title: 'Morio Root Token',
   about: 'Provides authentication using the Morio Root Token',
   desc: 'fixme',
@@ -40,4 +40,4 @@ export const mrt = () => ({
       </Popout>
     </>,
   ],
-})
+}
