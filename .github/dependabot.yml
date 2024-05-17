@@ -4,9 +4,9 @@
     - joostdecock
   commit-message: &msg
     prefix: '[deps]'
-    prefix-development: '[dev-devps]'
+    prefix-development: '[dev-deps]'
   open-pull-requests-limit: &limit 25
-  schedule.interval: &interval weekly
+  schedule.interval: &interval daily
 
 - package-ecosystem: npm
   directory: '/api'

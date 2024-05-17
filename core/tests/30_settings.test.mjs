@@ -250,7 +250,7 @@ describe('Core Settings/Config/Status Tests', () => {
         about: 'Test LDAP server',
         id: 'ldap',
         label: 'LDAP',
-        provider: 'ldap'
+        provider: 'ldap',
       },
       mrt: { id: 'mrt', provider: 'mrt', about: false },
       local: {

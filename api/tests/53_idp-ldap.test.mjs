@@ -3,7 +3,6 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('API IDP/LDAP Tests', () => {
-
   /*
    * POST /login (valid LDAP user but no access)
    *
@@ -182,7 +181,6 @@ describe('API IDP/LDAP Tests', () => {
     assert.equal(d.error, 'This role is not available to you')
   })
 
-
   /*
    * POST /login (non-existing role)
    *
@@ -254,5 +252,4 @@ describe('API IDP/LDAP Tests', () => {
     })
     assert.equal(result[0], 200)
   })
-
 })

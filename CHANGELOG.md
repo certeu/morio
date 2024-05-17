@@ -5,12 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
 ## [Unreleased]
 
 ## Changed
 
-- [broker] Upgraded RedPanda Broker from  23.3.4 to 23.3.15
+- [broker] Upgraded RedPanda Broker from 23.3.4 to 23.3.15
 - [ca] Upgraded SmallStep CA from 0.25.2 to 0.26.1
 - [connector] Upgraded Elastic Logstash from 8.12.1 to 8.13.3
 - [console] Upgraded RedPanda Console from 2.4.0 to 2.5.2
@@ -121,8 +120,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Conditionally check hookprops rather than assume they are set
 - [core] Fix location of client source files inside container
 
-
-
 ## [0.1.4] - 2014-04-12
 
 ### Added
@@ -202,8 +199,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [client] Remove option to add Elastic repo as it's a requirement for installation
 - [shared] Removed getRevision and verion epoch
 
-
-
 ## [0.1.3] - 2014-04-09
 
 ### Added
@@ -229,12 +224,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Fix broken link to downloads page in .deb builder output
 - [ui] Ensure input background respects light/dark color scheme
 
-
-
 ## [0.1.2] - 2024-04-03
 
 ### Added
 
 - This is the first Morio version where we included a changelog
 - Changes will be tracked from this version onwards
-

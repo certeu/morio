@@ -6,7 +6,8 @@
   "author": "CERT-EU <services@cert.europa.eu>",
   "license": "EUPL",
   "scripts": {
-    "prettier": "npx prettier --write 'src/*.mjs'"
+    "lint": "eslint --fix 'src/**'",
+    "prettier": "npx prettier --ignore-unknown --write 'src/'"
   },
   "repository": {
     "type": "git",

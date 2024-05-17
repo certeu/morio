@@ -1,3 +1,17 @@
+
+> [!Warning]
+> Morio is currently early-access alpha code. 
+>
+> We are building this in the open, so feel free to look around, 
+> try it out, or [leave feedback](https://github.com/certeu/morio/discussions).
+
+<p align='center'><a 
+  href="https://deepscan.io/dashboard#view=project&tid=24001&pid=27249&bid=869644"
+  ><img src="https://deepscan.io/api/teams/24001/projects/27249/branches/869644/badge/grade.svg" 
+  alt="DeepScan grade"
+  ></a></p>
+
+
 # Morio
 ![image](https://github.com/certeu/morio/assets/1708494/91892e94-0cb5-4c94-8845-ffe52c19c417)
 

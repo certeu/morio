@@ -13,7 +13,6 @@ import { isRoleAvailable } from '../rbac.mjs'
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
 export const mrt = async (id, data) => {
-
   /*
    * Authenticate
    */

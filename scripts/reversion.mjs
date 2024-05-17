@@ -20,7 +20,7 @@ const files = {
   core,
   schema,
   shared,
-  ui
+  ui,
 }
 
 console.log(`
@@ -36,10 +36,10 @@ rl.question(`Enter a new version number: `, async (version) => {
   console.log(`Setting version to ${version}`)
   const promises = []
   for (const [folder, config] of Object.entries(files)) {
-    promises.push(writeFile(`${folder}/package.json`, JSON.stringify({...config, version}, null, 2)+"\n"))
+    promises.push(
+      writeFile(`${folder}/package.json`, JSON.stringify({ ...config, version }, null, 2) + '\n')
+    )
   }
   await Promise.all(promises)
   rl.close()
 })
-
-

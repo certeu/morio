@@ -49,7 +49,7 @@ export const chown = async (
  * @param {object} options - Options for the fs.cp call in NodeJS
  *
  */
-export const cp = async (src, dst, options={} ) => {
+export const cp = async (src, dst, options = {}) => {
   try {
     await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst), options)
   } catch (err) {
@@ -66,7 +66,7 @@ export const cp = async (src, dst, options={} ) => {
  * @param {object} options - Options for NodeJS' rm method
  *
  */
-export const rm = async (file, options={ force: true }) => {
+export const rm = async (file, options = { force: true }) => {
   try {
     await fs.promises.rm(path.resolve(root, file), options)
   } catch (err) {
@@ -85,14 +85,13 @@ export const rm = async (file, options={ force: true }) => {
  * @return {string} File contents, or false in case of trouble
  */
 export const globDir = async (
-  folderPath='/morio/downloads', // The (relative) path to the folder
-  pattern='**/*', // Glob pattern to match
+  folderPath = '/morio/downloads', // The (relative) path to the folder
+  pattern = '**/*' // Glob pattern to match
 ) => {
   let list = []
   try {
-    list = await glob(path.resolve(folderPath)+'/'+pattern)
-  }
-  catch (err) {
+    list = await glob(path.resolve(folderPath) + '/' + pattern)
+  } catch (err) {
     if (err) console.log(err)
     return false
   }
@@ -213,7 +212,7 @@ export const writeFile = async (
   filePath, // The (relative) path to the file
   data, // The data to write to disk
   log = false,
-  mode = 0o666,
+  mode = 0o666
 ) => {
   let file
   try {
@@ -239,7 +238,8 @@ export const writeFile = async (
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeYamlFile = async (filePath, data, log=false, mode=0o666) => await writeFile(filePath, yaml.dump(data), log, mode)
+export const writeYamlFile = async (filePath, data, log = false, mode = 0o666) =>
+  await writeFile(filePath, yaml.dump(data), log, mode)
 
 /**
  * Writes a JSON file to disk

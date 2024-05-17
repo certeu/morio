@@ -26,37 +26,36 @@ export const resolveServiceConfiguration = (store) => {
       // Instead, attach to the morio network
       network: store.getPreset('MORIO_NETWORK'),
       // Ports to export
-      ports: [
-        '9600:9600',
-      ],
+      ports: ['9600:9600'],
       // Environment
       environment: {
         // Node ID
-        LOGSTASH_HOME: "/usr/share/logstash",
+        LOGSTASH_HOME: '/usr/share/logstash',
       },
       // Volumes
-      volumes: PROD ? [
-        `${store.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
-        `${store.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
-        //`${store.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
-      ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
-        //`${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
-      ],
+      volumes: PROD
+        ? [
+            `${store.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
+            `${store.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+            `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
+            //`${store.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+          ]
+        : [
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
+            //`${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+          ],
     },
 
     /*
      * Logstash configuration file
      */
     logstash: {
-
       /*
        * NOTE: Do not configure paths as doing so will make Logstash ignore pipelines.yml
        */
@@ -99,25 +98,24 @@ export const resolveServiceConfiguration = (store) => {
        * See: https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html
        */
       monitoring: {
-        enabled: false
+        enabled: false,
       },
       xpack: {
         management: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       api: {
         enabled: true,
         environment: store.config?.deployment?.nodes[(store.config?.deployment?.node_nr || 1) - 1],
         http: {
-          host: '0.0.0.0'
+          host: '0.0.0.0',
         },
         ssl: {
           enabled: false,
-        }
+        },
       },
       allow_superuser: false,
     },
   }
 }
-

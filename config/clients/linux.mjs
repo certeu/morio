@@ -21,7 +21,7 @@ const beatConfig = (type, store) => {
     features: {
       fqdn: {
         enabled: true,
-      }
+      },
     },
     /*
      * Paths
@@ -43,7 +43,7 @@ const beatConfig = (type, store) => {
         drop_fields: {
           fields: ['agent'],
           ignore_missing: true,
-        }
+        },
       },
     ],
   }
@@ -68,33 +68,34 @@ const beatConfig = (type, store) => {
          * if you want to update the configuration.
          */
         reload: {
-          enabled: false
-        }
-      }
-    }
+          enabled: false,
+        },
+      },
+    },
   }
 
   /*
    * Filebeat not only has modules, but also inputs
    */
-  if (type === 'logs') config[beats[type]].config.inputs = {
-    /*
-     * Inputs are disabled by default
-     */
-    enabled: true,
-    /*
-     * Where to find the inputs
-     */
-    path: `/etc/morio/${type}/inputs.d/*.yml`,
-    /*
-     * Unless MORIO_DEBUG is set, do not reload when the config
-     * changes on disk as that leads to unpredictable behaviour.
-     * Instead, be explicit if you want to update the configuration.
-     */
-    reload: {
-      enabled: `{{#MORIO_DEBUG}}true{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}false{{/MORIO_DEBUG}}`
+  if (type === 'logs')
+    config[beats[type]].config.inputs = {
+      /*
+       * Inputs are disabled by default
+       */
+      enabled: true,
+      /*
+       * Where to find the inputs
+       */
+      path: `/etc/morio/${type}/inputs.d/*.yml`,
+      /*
+       * Unless MORIO_DEBUG is set, do not reload when the config
+       * changes on disk as that leads to unpredictable behaviour.
+       * Instead, be explicit if you want to update the configuration.
+       */
+      reload: {
+        enabled: `{{#MORIO_DEBUG}}true{{/MORIO_DEBUG}}{{^MORIO_DEBUG}}false{{/MORIO_DEBUG}}`,
+      },
     }
-  }
 
   /*
    * Output config
@@ -162,7 +163,7 @@ const outputConfig = (type, store) => ({
     /*
      * Kafka brokers
      */
-    hosts: store.config.deployment.nodes.map(name => `${name}:9092`),
+    hosts: store.config.deployment.nodes.map((name) => `${name}:9092`),
     /*
      * Never give up, keep trying to publish data
      */
@@ -181,7 +182,7 @@ const outputConfig = (type, store) => ({
       // Encrypt traffic
       enabled: true,
       // Trust the Morio CA
-      certificate_authorities: [ '/etc/morio/ca.pem' ],
+      certificate_authorities: ['/etc/morio/ca.pem'],
       // Verify certificates
       verification_mode: 'full',
       // Certificate to use for mTLS
@@ -197,7 +198,7 @@ const outputConfig = (type, store) => ({
      * Kafka API version
      */
     version: '2.0.0',
-  }
+  },
 })
 
 const resolvers = {
@@ -208,4 +209,3 @@ const resolvers = {
 
 export const resolveClientConfiguration = (type, store) =>
   resolvers[type] ? resolvers[type](store) : false
-

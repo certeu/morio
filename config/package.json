@@ -4,7 +4,8 @@
   "description": "Morio Configuration",
   "private": true,
   "scripts": {
-    "prettier": "npx prettier --write './*.mjs'"
+    "lint": "eslint --fix './**'",
+    "prettier": "npx prettier --ignore-unknown --write ."
   },
   "repository": {
     "type": "git",
