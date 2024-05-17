@@ -2,7 +2,6 @@
 import { capitalize, pageChildren } from 'lib/utils.mjs'
 // Components
 import {
-  BookIcon,
   CertificateIcon,
   CheckCircleIcon,
   ClosedLockIcon,

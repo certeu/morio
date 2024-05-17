@@ -144,7 +144,7 @@ export const storeLastLoginTime = async (id) => await saveApikey(id, { lastLogin
  */
 const apikeysAsList = (result) => {
   const cols = result.results[0].columns
-  const list = (result.results?.[0]?.values || []).map((entry) => {
+  const list = (result.results[0].values || []).map((entry) => {
     const apikey = {}
     for (const i in cols)
       apikey[cols[i]] =

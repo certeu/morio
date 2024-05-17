@@ -14,7 +14,7 @@ export const MDXWrapper = ({ pageProps, filePath, children }) => {
   const [wide, setWide] = useState(false)
 
   return (
-    <PageWrapper page={crumbs} title={`Documentation - ${pageProps.frontmatter?.title}}`}>
+    <PageWrapper page={crumbs} title={`Documentation - ${pageProps.frontmatter.title}}`}>
       <ContentWrapper
         page={crumbs}
         title={pageProps.frontmatter.title}

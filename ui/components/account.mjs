@@ -1,5 +1,4 @@
 // Dependencies
-import { roles } from 'config/roles.mjs'
 import { shortDate } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext, useEffect } from 'react'
@@ -31,9 +30,6 @@ import { AccountStatus } from './accounts.mjs'
 
 export const AccountOverview = () => {
   const { account } = useAccount()
-
-  const level = roles.indexOf(account.role)
-  const maxLevel = roles.indexOf(account.maxRole)
 
   return account ? (
     <table className="table">
@@ -100,7 +96,6 @@ export const LogoutButton = () => {
 
 export const ShowTokenButton = () => {
   const { pushModal } = useContext(ModalContext)
-  const { account } = useAccount()
 
   return (
     <button

@@ -38,7 +38,7 @@ export const morio = {
           key: 'output.topic',
           dflt: context.pipelineSettings?.output?.topic || '',
           current: pipelineContext.data.output.topic,
-          update: pipelineContext.data.output?.topic,
+          update: pipelineContext.data.output.topic,
         },
       ],
     }),

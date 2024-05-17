@@ -5,14 +5,7 @@ import { useScrollPosition } from '@n8tb1t/use-scroll-position'
 import { useRouter } from 'next/router'
 // Components
 import Link from 'next/link'
-import {
-  WarningIcon,
-  MorioIcon,
-  UserIcon,
-  LogoutIcon,
-  LightThemeIcon,
-  DarkThemeIcon,
-} from 'components/icons.mjs'
+import { WarningIcon, MorioIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { GitHub } from 'components/brands.mjs'
 import pkg from 'ui/package.json'
 
@@ -48,16 +41,15 @@ export const NavButton = ({
   )
 }
 
-const bannerMsg = (
-  <div className="flex flex-row gap-2 items-center justify-center w-full">
-    <WarningIcon className="w-5 h-5 text-warning" />
-    <span>Morio v{pkg.version} — this is alpha code</span>
-    <WarningIcon className="w-5 h-5 text-warning" />
+const BannerMessage = () => (
+  <div className="mt-14 -mb-12 text-center p-0.5">
+    <div className="flex flex-row gap-2 items-center justify-center w-full">
+      <WarningIcon className="w-5 h-5 text-warning" />
+      <span>Morio v{pkg.version} Ã¢ÂÂ this is alpha code</span>
+      <WarningIcon className="w-5 h-5 text-warning" />
+    </div>
   </div>
 )
-
-const BannerMessage = () =>
-  bannerMsg ? <div className="mt-14 -mb-12 text-center p-0.5">{bannerMsg}</div> : null
 
 const isActive = (page, path) => path.slice(0, page.length) === page
 
@@ -65,7 +57,7 @@ export const Header = ({
   theme, // Name of the current theme (light or dark)
   toggleTheme, // Method to change the theme
 }) => {
-  const { account, logout } = useAccount()
+  const { account } = useAccount()
   const [user, setUser] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { asPath } = useRouter()

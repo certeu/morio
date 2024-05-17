@@ -1,5 +1,4 @@
 import orderBy from 'lodash.orderby'
-import { roles } from 'config/roles.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -13,7 +12,7 @@ import { PlayIcon } from 'components/icons.mjs'
 import { MsAgo } from 'components/time-ago.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
-import { StringInput, TextInput, SecretInput, RoleInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, RoleInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Role } from 'components/role.mjs'
@@ -224,7 +223,7 @@ const AddLocalAccountModal = () => {
   const { api } = useApi()
   const { role } = useAccount()
   const { setLoadingStatus } = useContext(LoadingStatusContext)
-  const { pushModal, popModal } = useContext(ModalContext)
+  const { pushModal } = useContext(ModalContext)
 
   const createAccount = async (overwrite = false) => {
     setLoadingStatus([true, 'Contacting the Morio API'])
@@ -302,7 +301,6 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
   const [inviteCode, setInviteCode] = useState(invite)
   const [username, setUsername] = useState(user)
   const { api } = useApi()
-  const { pushModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
   const [data, setData] = useState(false)
   const [mfa, setMfa] = useState('')

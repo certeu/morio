@@ -70,7 +70,7 @@ export const FormBlock = (props) => {
   /*
    * Local update handles some extra checks and passes in data object
    */
-  const _update = (val, path, transform = false, fel) => {
+  const _update = (val, path, transform = false) => {
     if (typeof transform === 'function') update(path, transform(val), props.data)
     else update(path, val, props.data)
   }
@@ -110,7 +110,7 @@ export const FormBlock = (props) => {
               <FormElement
                 key={i}
                 {...formEl}
-                update={(val) => _update(val, formEl.key, formEl.transform, formEl)}
+                update={(val) => _update(val, formEl.key, formEl.transform)}
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}
                 {...{ formValidation, updateFormValidation, freeze }}

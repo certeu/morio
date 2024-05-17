@@ -745,7 +745,7 @@ export const DisplayDockerImage = ({ data }) => {
    * Split image into namespace, name, and tag
    */
   const image = []
-  if (data?.RepoTags && data.RepoTags.length > 0) {
+  if (data.RepoTags && data.RepoTags.length > 0) {
     image.push(...data.RepoTags[0].split(':'))
     image.push(...image[0].split('/'))
   } else image.push(data.Id.slice(7, 13))

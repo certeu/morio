@@ -1,8 +1,6 @@
 import { roles } from 'config/roles.mjs'
-// Context
-import { ModalContext } from 'context/modal.mjs'
 // Hooks
-import { useCallback, useState, useContext } from 'react'
+import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
@@ -386,7 +384,6 @@ export const ListInput = ({
               dense={dense}
               active={item.val === current}
               onClick={() => update(item.val)}
-              disabled={disabled}
               dir={dir}
               disabled={item.disabled}
             >
@@ -507,29 +504,19 @@ export const RoleInput = ({
   labelBL,
   labelBR,
   labelTR,
-}) => {
-  const { pushModal } = useContext(ModalContext)
-
-  /*
-   * If there's a maxrole set, we need to know it's i value
-   * Let's assume we'll never have more than 100 roles :)
-   */
-  const maxLevel = maxRole ? roles.indexOf(maxRole) : 100
-
-  return (
-    <ListInput
-      label={label}
-      {...{ labelBL, labelBR, labelTR }}
-      dense
-      dir="row"
-      update={(val) => (role === val ? setRole(false) : setRole(val))}
-      current={role}
-      list={roles.map((role, i) => ({
-        val: role,
-        label: <span className="text-center block">{role}</span>,
-        disabled: maxRole ? i > roles.indexOf(maxRole) : false,
-      }))}
-      dflt="user"
-    />
-  )
-}
+}) => (
+  <ListInput
+    label={label}
+    {...{ labelBL, labelBR, labelTR }}
+    dense
+    dir="row"
+    update={(val) => (role === val ? setRole(false) : setRole(val))}
+    current={role}
+    list={roles.map((role, i) => ({
+      val: role,
+      label: <span className="text-center block">{role}</span>,
+      disabled: maxRole ? i > roles.indexOf(maxRole) : false,
+    }))}
+    dflt="user"
+  />
+)
