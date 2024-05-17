@@ -16,12 +16,4 @@ import schema from '../schema/package.json' assert { type: 'json' }
 import shared from '../shared/package.json' assert { type: 'json' }
 import ui from '../ui/package.json' assert { type: 'json' }
 
-export {
-  root,
-  api,
-  config,
-  core,
-  schema,
-  shared,
-  ui
-}
+export { root, api, config, core, schema, shared, ui }
