@@ -1,4 +1,4 @@
-name: ESLint (changed Files)
+name: ESLint (changed files)
 
 on:
   pull_request:

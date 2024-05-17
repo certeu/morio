@@ -20,5 +20,5 @@ jobs:
       - name: Run Prettier
         uses: creyD/prettier_action@v4.3
         with:
-          prettier_options: &opts --ignore-unknown --write ./core ./ui ./api ./shared ./schema ./scripts ./config
+          prettier_options: --ignore-unknown --write ./core ./ui ./api ./shared ./schema ./scripts ./config
           only_changed: True
