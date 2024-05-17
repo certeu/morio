@@ -14,17 +14,6 @@ export const header = `/*
 `
 
 /*
- * Strips quotes from the start/end of a string
- */
-const stripQuotes = (str) => {
-  str = str.trim()
-  if (str.slice(0, 1) === '"') str = str.slice(1)
-  if (str.slice(-1) === '"') str = str.slice(0, -1)
-
-  return str.trim()
-}
-
-/*
  * This is the fast and low-tech way to some frontmatter from all files in a folder
  */
 const loadFolderFrontmatter = async (key, cwd, pages = {}) => {

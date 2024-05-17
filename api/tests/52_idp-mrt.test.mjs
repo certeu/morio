@@ -1,4 +1,4 @@
-import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
+import { store, api, apiAuth } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 /*
@@ -6,6 +6,7 @@ import { strict as assert } from 'node:assert'
  * run without having to go through the setup each time.
  * Note that this is only possible when running the dev container.
  */
+// eslint-disbable-next-line
 import keys from '../../data/config/keys.json' assert { type: 'json' }
 
 const { mrt } = keys

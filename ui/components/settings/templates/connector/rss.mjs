@@ -18,7 +18,7 @@ export const rss = {
     form: [
       {
         tabs: {
-          Metadata: xputMeta('input', 'rss'),
+          Metadata: xputMeta('input'),
           Settings: [
             {
               schema: Joi.string()

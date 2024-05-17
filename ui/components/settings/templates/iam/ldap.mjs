@@ -43,7 +43,6 @@ for (const role of roles)
 export const ldap = (context) => ({
   title: 'LDAP / Active Directory',
   about: 'Provides authentication against an LDAP service',
-  desc: 'fixme',
   desc: 'Use this to read content from a website feed',
   local: (data) => `iam.providers.${data.id}`,
   form: ({ data }) => [

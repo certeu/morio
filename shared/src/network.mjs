@@ -133,7 +133,7 @@ export const get = async function (url, raw = false, log=false) {
     }
   }
 
-  return [response?.status, body]
+  return [response.status, body]
 }
 
 /*
@@ -167,7 +167,7 @@ export const streamGet = async function (url, res) {
   /*
    * Try parsing the body as JSON, fallback to text
    */
-  await pipeline(response.body, res)
+  await pipeline(response?.body, res)
 }
 
 /*

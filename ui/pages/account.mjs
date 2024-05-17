@@ -15,7 +15,7 @@ import {
 } from 'components/account.mjs'
 
 const AccountPage = (props) => {
-  const { account, logout, renewToken } = useAccount()
+  const { account } = useAccount()
   const [showToken, setShowToken] = useState(false)
 
   return (

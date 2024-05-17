@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { MorioIcon } from 'components/icons.mjs'

@@ -119,7 +119,7 @@ export const ShowTokenButton = () => {
 }
 
 export const RenewTokenButton = () => {
-  const { logout, renewToken } = useAccount()
+  const { renewToken } = useAccount()
 
   return (
     <button className="btn btn-primary flex flex-row justify-between gap-4" onClick={renewToken}>

@@ -1,4 +1,4 @@
-import { readFile, writeFile } from '@morio/shared/fs'
+import { writeFile } from '@morio/shared/fs'
 import path from 'path'
 import chalk from 'chalk'
 import readline from 'node:readline'

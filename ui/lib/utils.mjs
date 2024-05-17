@@ -2,7 +2,6 @@
  * Unlike what is in @morio/lib all of these methods work in the browser
  */
 import mustache from 'mustache'
-import { config as configSchema } from '#schema/config'
 import Joi from 'joi'
 import _slugify from 'slugify'
 import { jwtDecode } from 'jwt-decode'

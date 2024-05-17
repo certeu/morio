@@ -1,7 +1,6 @@
 import Joi from 'joi'
 import { xputMeta } from './index.mjs'
 import { Popout } from 'components/popout.mjs'
-import { slugify } from 'lib/utils.mjs'
 
 /*
  * Elasticsearch input & output Connector templates
@@ -20,7 +19,7 @@ export const elasticsearch = {
           schema: Joi.string().required().valid('stream', 'docs').label('Index Type'),
           key: 'output.index_type',
           dflt: 'stream',
-          current: pipelineContext.data?.output?.index_type,
+          current: pipelineContext.data.output.index_type,
           inputType: 'buttonList',
           list: [
             {
@@ -53,7 +52,7 @@ export const elasticsearch = {
           key: 'output.index',
           dflt: pipelineContext.pipelineSettings?.outut?.index || '',
           current: pipelineContext.data.output.index,
-          update: pipelineContext.data.output?.index,
+          update: pipelineContext.data.output.index,
         },
         {
           label: 'Enforce ECS Compatibility',
@@ -62,7 +61,7 @@ export const elasticsearch = {
           schema: Joi.string().required().valid('disabled', 'v1', 'v8').label('Enforce ECS'),
           key: 'output.enforce_ecs',
           dflt: 'v8',
-          current: pipelineContext.data?.output?.enforce_ecs,
+          current: pipelineContext.data.output.enforce_ecs,
           inputType: 'buttonList',
           list: [
             { val: 'disabled', label: 'Disabled' },
@@ -81,7 +80,7 @@ export const elasticsearch = {
       `##### Create a new Elasticsearch connector output`,
       {
         tabs: {
-          Metadata: xputMeta('output', 'elasticsearch'),
+          Metadata: xputMeta('output'),
           Environment: [
             {
               label: 'Environment',

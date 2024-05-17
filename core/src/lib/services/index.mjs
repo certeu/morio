@@ -533,7 +533,7 @@ export function defaultRecreateContainerHook(service, hookProps) {
      * If, for whatever reason, the TLS labels are missing anyway, also recreate.
      */
     if (
-      !(store.config?.services?.[service]?.container?.labels || []).includes(
+      !(store.config.services[service]?.container?.labels || []).includes(
         'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'
       )
     ) {

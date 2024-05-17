@@ -56,7 +56,7 @@ const ContainerPage = ({ page, id }) => {
         side={side}
         sideTitle="Container actions"
         page={page}
-        Icon={data.Name ? ContainerIcon : <Spinner className="w-16 h-16 animate-spin" />}
+        Icon={data?.Name ? ContainerIcon : <Spinner className="w-16 h-16 animate-spin" />}
         title={data ? formatContainerName(data.Name) : 'One moment please...'}
       >
         <DockerContainer {...{ id, callback: setData, reload }} />

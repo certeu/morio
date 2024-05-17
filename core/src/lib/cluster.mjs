@@ -62,11 +62,11 @@ const storeClusterMorioState = async () => {
     let [ok, ip] = await resolveHost(node)
     if (ok && Array.isArray(ip)) {
       if (ip.length > 0) ip = ip[0]
-      else if (ip.length > 1)
+      else store.log.error(`Unable to resolve node ${node}. No addresses found.`)
+      if (ip.length > 1)
         store.log.warn(
           `Node ${node} resolves to multiple IP addresses. This should be avoided. (${ip.join()})`
         )
-      else store.log.error(`Unable to resolve node ${node}. No addresses found.`)
     } else store.log.error(`Unable to resolve node ${node}. Lookup failed.`)
 
     const add = {
@@ -207,7 +207,7 @@ export const startCluster = async (hookProps) => {
     /*
      * Setup Docker Swarm
      */
-    await ensureSwarm()
+    await ensureSwarm(hookProps)
     if (!store.cluster.swarmReady) await sleep(store.getPreset('MORIO_CORE_SWARM_SLEEP'))
   }
 
