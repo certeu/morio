@@ -22,3 +22,6 @@ jobs:
         with:
           prettier_options: --ignore-unknown --write ./core ./ui ./api ./shared ./schema ./scripts ./config
           only_changed: True
+          commit_message: "[bot] Making the code prettier"
+          commit_description: "This commit applies auto-formatting to the code. It was added in a pipeline by a bot."
+
