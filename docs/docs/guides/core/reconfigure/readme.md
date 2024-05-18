@@ -5,10 +5,10 @@ sidebar_position: 20
 
 Core's `reconfigure()` method is responsible for (hot-re)loading the Morio configuration.
 
-It is called on [initial startup](/docs/guides/core/starup) to load the
+It is called on [initial startup](/docs/guides/core/startup) to load the
 configuration, as well as after [setup of the initial
 settings](/docs/guides/core/setup), [deployment of new
-settings](/docs/guides/core/deplow), or any scenario that requires a 
+settings](/docs/guides/core/deploy), or any scenario that requires a 
 reload of the settings.
 
 The `reconfigure()` method only does two things:
