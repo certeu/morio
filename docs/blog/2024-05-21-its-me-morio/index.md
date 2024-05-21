@@ -1,0 +1,40 @@
+---
+title: "Announcing Morio: Your Comprehensive Observability Solution"
+authors: [ stellene, jdecock ]
+tags: [ morio, announcement, alpha ]
+---
+
+Today we are delighted to introduce [Morio](https://github.com/certeu/morio),
+an end-to-end streaming data backbone designed to meet your observability
+needs. Morio will simplify the setup and management of a robust observability
+infrastructure, leveraging top-tier open-source technologies.
+
+Morio is currently **early-access alpha code**. We are building this in the
+open, so feel free to look around, try it out, or [leave
+feedback](https://github.com/certeu/morio/discussions).
+
+With Morio, you will be able to effortlessly collect, analyze, and respond to
+data from various endpoints, ensuring seamless data flow and comprehensive
+monitoring. Under the hood, Morio utilises [RedPanda](https://redpanda.com/)
+for its Kafka-compatible streaming API, [Smallstep
+Step-CA](https://smallstep.com/docs/step-ca/) for X.509 certificate
+provisioning and mTLS authentication, [Beats](https://www.elastic.co/beats) and
+[Logstash](https://www.elastic.co/logstash) from
+[Elastic](https://www.elastic.co/) for collecting/shipping and routing data
+respectively, and [Traefik](https://traefik.io/traefik/) as entrypoint proxy
+for all HTTP-based services.
+
+While anyone with sufficient expertise, time, and dedication can build a
+state-of-the-art streaming data infrastructure out of these components, with
+Morio you won't have to. It is designed to be as user-friendly as it is
+powerful: you will be able to configure and manage your observability setup
+through an intuitive web UI or a comprehensive REST API. This appliance-like
+experience will make it easy for teams of all sizes to deploy and manage their
+observability infrastructure without extensive setup time or complexity.
+
+Licensed under the European Union Public License (EUPL), Morio is built to
+ensure transparency, flexibility, and freedom in managing your data
+infrastructure. By contributing to Morio, you can help shape the future of
+observability tools and ensure that it meets the needs of a diverse range of
+users. We are pretty excited about it... and we hope that you will be, too!
+

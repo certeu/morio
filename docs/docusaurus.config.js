@@ -4,6 +4,10 @@
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
 import {themes as prismThemes} from 'prism-react-renderer';
+import smartyPants from 'remark-smartypants'
+
+// async import is a workaround for lack of ESM in docusaurus
+//const smartyPants = (await import("remark-smartypants")).default
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -35,6 +39,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          remarkPlugins: [ smartyPants ],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -106,6 +111,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ['yaml'],
       },
     }),
 };
