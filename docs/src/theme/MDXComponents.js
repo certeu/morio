@@ -14,6 +14,7 @@ import {
   Tldr,
   Warning,
 } from './components/popout.js'
+import { Mermaid } from './components/mermaid.js'
 
 /*
  * This seems to simple to put in a file on its own
@@ -33,6 +34,7 @@ export default {
   Error,
   Important,
   Fixme,
+  Mermaid,
   Note,
   Related,
   Scode,

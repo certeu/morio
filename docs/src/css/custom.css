@@ -229,3 +229,16 @@ div.theme-code-block {
 [data-theme='dark'] img[src$='#gh-light-mode-only'] {
   display: none;
 }
+
+/* Mermaid legend toggle button */
+div.with-caption a.toggle {
+  font-style: italic;
+  font-size: 90%;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+div.with-caption a.toggle:hover {
+  text-decoration-thickness: 4px;
+  cursor: pointer;
+}
+
