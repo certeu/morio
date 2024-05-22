@@ -36,7 +36,7 @@ it.  We are also open to contributions or ideas that can bring value to
 CERT-EU, our constituents, our partners, and our peers.
   
 For this reason, we have published the Morio documentation site, rather than
-wait.  It's like watching Morio being baked, through the oven window. It's
+wait.  It's like watching through the oven window as Morio is being baked. It's
 exciting to watch it rise, we'd love to hear your thoughts and opinions, but if
 you take out Morio now, it will not only cave in, you are also very likely to
 burn your hands.
