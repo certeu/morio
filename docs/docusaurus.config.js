@@ -71,6 +71,12 @@ const config = {
     ({
       // Replace with your project's social card
       image: 'img/docusaurus-social-card.jpg',
+      announcementBar: {
+        content: '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/05/15/oven-window">Learn more</a>',
+        isCloseable: false,
+        backgroundColor: '#EB6534',
+        textColor: '#fff',
+      },
       navbar: {
         title: 'Morio',
         logo: {
