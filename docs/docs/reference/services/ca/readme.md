@@ -1,5 +1,7 @@
 ---
 title: CA
+tags:
+  - ca
 ---
 
 The `ca` cervice provides a certificate authority (CA) to provision X-509 certificates.
@@ -15,4 +17,7 @@ protocol](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environ
 You can optionally use this service as your own internal CA
 </Tip>
 
+<Note>
+This service is __not available__ in [ephemeral state](/docs/reference/terminology/ephemeral-state/).
+</Note>
 

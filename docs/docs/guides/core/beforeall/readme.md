@@ -10,7 +10,7 @@ services.
 It will go through the following steps:
 
 - First, it will attempt to load the Morio settings from disk.
-- If no settings are stored on disk, this means Morio is running in __ephemeral mode__.
+- If no settings are stored on disk, this means Morio is running in [ephemeral state](/docs/reference/terminology/ephemeral-state/).
   - It will attempt to load the node data from disk.
   - If no node data is stored on disk, this means this is __the very first startup__.
     - It will create the Docker network, and ensure it is attached to this and no other networks

@@ -1,5 +1,7 @@
 ---
 title: Connector
+tags:
+  - connector
 ---
 
 The `connector` service is responsible for routing data from/to Morio.  It is
@@ -10,10 +12,8 @@ This services utilizes [Logstash](https://www.elastic.co/logstash), a
 Swiss army knife for data routing and transformation.
 
 <Note>
-##### Flanking service
-The `connector` service can be deployed on either a
-[data node](/docs/reference/nodes/#data-nodes) or a [flanking
-node](/docs/reference/nodes/#flanking-nodes).  
+- This service is __not available__ in [ephemeral state](/docs/reference/terminology/ephemeral-state/).
+- This service can be deployed on a [flanking node](/docs/reference/nodes/#flanking-nodes).  
 </Note>
 
 

@@ -1,5 +1,7 @@
 ---
 title: API
+tags:
+  - api
 ---
 
 The `api` service provides the __Morio Management API__, or __API__ for short.
@@ -12,9 +14,12 @@ specification](https://spec.openapis.org/oas/latest.html).
 The API itself includes the API reference documentation, available at `/-/api/docs`.
 
 <Note>
-The API service is available in epehemeral mode.
+This service __is available__ in [ephemeral state](/docs/reference/terminology/ephemeral-state/)
 </Note>
 
+<Scode>
+Source code for this service resides in [the `api` folder of our monorepo](https://github.com/certeu/morio/tree/develop/api).
+</Scode>
 <Fixme>
 
 Include API docs here when [this plugin](https://github.com/PaloAltoNetworks/docusaurus-openapi-docs) supports Docusaurus v3.

@@ -110,6 +110,18 @@ If you are new to MDX, you can check the documentation at [mdxjs.com](https://md
 </Related>
 ```
 
+### Scode
+
+<Scode>
+The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
+</Scode>
+
+```markup title="readme.md"
+<Scode>
+The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
+</Scode>
+```
+
 ### Tip
 
 <Tip>
@@ -144,6 +156,18 @@ Use this when a certain action is potentially descructive.
 <Warning>
 Use this when a certain action is potentially descructive.
 </Warning>
+```
+
+### WithCaption
+
+<WithCaption caption="This allows you to put a caption under anything">
+![Placeholder image](https://dummyimage.com/1200x400/3/a&text=It's-a%20me,%20Morio!)
+</WithCaption>
+
+```markup title="readme.md"
+<WithCaption caption="This allows you to put a caption under anything">
+![Placeholder image](https://dummyimage.com/1200x400/3/a&text=It's-a%20me,%20Morio!)
+</WithCaption>
 ```
 
 [netlify]: https://www.netlify.com/

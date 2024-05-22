@@ -3,8 +3,8 @@ title: Deployment types
 ---
 
 Morio can be set up as a [stand-alone][s] deployment, or as a [clustered][c]
-deployment. In addition, both for stand-alone deployments and clustered
-deployments, one or more flanking nodes can be added.
+deployment. In addition, one or more flanking nodes can be added to each of
+these deployment types.
 
 <Related>
 Refer to [node types](/docs/reference/nodes) to understand the role of flanking nodes.
@@ -17,7 +17,7 @@ The simplest Morio deployment is a single data node running all services.
 <WithCaption caption="Schematic overview of a stand-alone deployment">
 ```mermaid
 flowchart TD
-  subgraph Morio Deployment
+  subgraph Morio Stand-Alone Deployment
     m("Morio Stand-Alone Data Node")
   end
 ```
@@ -31,7 +31,7 @@ scaling of all services that can run on flanking nodes.
 <WithCaption caption="Schematic overview of a stand-alone deployment with flanking nodes">
 ```mermaid 
 flowchart TD
-  subgraph Morio Deployment
+  subgraph Morio Stand-Alone Deployment
     m("Morio Stand-Alone Data Node")
     f1("Flanking Node 1") --- m
     f2("Flanking Node 2") --- m
@@ -53,7 +53,7 @@ The cluster sizes we support are 3, 5, 7, or 9 nodes.
 <WithCaption caption="Schematic overview of a 3-node clustered deployment">
 ```mermaid
 flowchart TD
-  subgraph Morio Deployment
+  subgraph Morio Clustered Deployment
     subgraph Cluster
       d1("Morio Node Data Node 1")
       d2("Morio Node Data Node 2")
@@ -70,15 +70,15 @@ flowchart TD
 There is no reason that you cannot deploy a larger cluster, we just don't test for those scenarios.
 </Note>
 
-### Clustered deployment with flankin nodes
+### Clustered deployment with flanking nodes
 
 Flanking nodes can be added to a stand-alone deployment, allowing horizontal
 scaling of all services that can run on flanking nodes.
 
-<WithCaption caption="Schematic overview of a 3-node clustered deployment with flaning nodes">
+<WithCaption caption="Schematic overview of a 3-node clustered deployment with flanking nodes">
 ```mermaid
 flowchart TD
-  subgraph Morio Deployment
+  subgraph Morio Clustered Deployment
     subgraph Cluster
       d1("Morio Node Data Node 1")
       d2("Morio Node Data Node 2")

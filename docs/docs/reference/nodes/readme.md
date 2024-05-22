@@ -26,13 +26,14 @@ flowchart TD
 ```
 
 <Warning>
-##### Beware of spawn campers
+### Beware of spawn camping
 
-When you deploy a new Morio node, it will be ephemeral by default, and anybody
-who has HTTPS access to it will be able to set it up.
+When you deploy a new Morio node, it will be ephemeral by default, and __anybody
+who has HTTPS access to it will be able to set it up__.
 
 Either firewall off the HTTPS port until the node is configured, or make sure
 to keep the amount of time the node remains ephemeral to a minimum.
+Firewall ephemeral Morio node(s) to prevent this.
 </Warning>
 
 ## Data nodes
