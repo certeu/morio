@@ -4,6 +4,7 @@
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
 import {themes as prismThemes} from 'prism-react-renderer';
+import smartyPants from 'remark-smartypants'
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -35,6 +36,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          remarkPlugins: [ smartyPants ],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
@@ -64,8 +66,13 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/morio-social-card.jpg',
+      announcementBar: {
+        content: '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/05/15/oven-window">Learn more</a>',
+        isCloseable: false,
+        backgroundColor: '#EB6534',
+        textColor: '#fff',
+      },
       navbar: {
         title: 'Morio',
         logo: {
@@ -106,6 +113,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ['yaml'],
       },
     }),
 };

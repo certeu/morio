@@ -1,5 +1,0 @@
----
-title: Morio Core
----
-
-FIXME

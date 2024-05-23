@@ -1,3 +1,6 @@
 ---
 title: Guides
 ---
+
+<SubPages cards />
+

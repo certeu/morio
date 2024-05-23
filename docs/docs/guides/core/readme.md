@@ -2,7 +2,7 @@
 title: Understanding Morio Core
 ---
 
-Morio's [core service](/docs/reference/core) sits at the heart of Morio and is
+Morio's [core service](/docs/reference/services/core) sits at the heart of Morio and is
 one of its most crucial services.
 
 When you are responsible for a Morio deployment, you might benefit from a high-level
