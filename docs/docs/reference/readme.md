@@ -2,4 +2,6 @@
 title: Reference
 ---
 
-<SubPages cards />
+Reference documenation for Morio:
+
+<SubPages />

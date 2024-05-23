@@ -2,3 +2,5 @@
 title: Lifecycle hooks
 ---
 
+<SubPages />
+

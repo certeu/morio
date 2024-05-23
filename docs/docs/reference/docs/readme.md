@@ -50,6 +50,30 @@ They are typically various ways to engage the reader with the material.
 
 The full list is included below:
 
+### Architecture
+
+<Architecture caption="This is a customized Mermaid rendering that adds predefined styles and a legend for those styles">
+```
+flowchart LR
+  api("API<br /><small>(Morio)</small>")
+  core("Core<br /><small>(Morio)</small>")
+  broker[("Broker\n<small>(RedPanda)</small>")]
+  proxy("Proxy<br /><small>(Traefik)</small>")
+  dbuilder("Dbuilder<br /><small>(Morio)</small>")
+
+  api --> core
+  core --> broker
+  core --> dbuilder
+  proxy --> api
+
+  class core blue;
+  class api blue;
+  class proxy blue;
+  class dbuilder orange;
+  class broker green;
+```
+</Architecture>
+
 ### Comment
 
 <Comment by='joost'>

@@ -5,6 +5,26 @@ title: High-level design
 On this page we will go over the high-level design of Morio, as well as cover
 our design objectives, and outline why we made the choices we made.
 
+## Executive Summary
+
+Morio is an observability platform based on best-of-breed open source
+technologies that is powerful, yet easy to deploy, manage, maintain, and
+extend.
+
+Anyone with sufficient expertise, time, and dedication can build a
+state-of-the-art streaming data infrastructure out of the components we have
+chosen. But with Morio you don't have to as it provides an appliance-like
+experience where you can setup and configure the entire system through it's web
+UI or REST API.
+
+Without being dismissive of our own efforts, the hard work in Morio is
+done by off-the-shelf components with a proven track record.
+
+What we hope to accomplish with Morio is to bring these technologies together
+as a neat pre-made bundle so that everyone can enjoy them without the steep
+learning curve.
+
+
 ## History
 
 [CERT-EU](https://cert.europa.eu/) is the cybersecurity service for the
@@ -206,8 +226,9 @@ considerations into account:
 - __Speed__: We need to make sure that stream processing is fast enough to not
   be a throughput bottleneck.
 
-At CERT-EU, [Python](https://www.python.org/) is the de-facto standard programming language.
-However, it has two important disadvantages, one of them rather crucial:
+At CERT-EU, [Python](https://www.python.org/) is the de-facto standard
+programming language.  However, it has two important disadvantages, one of them
+rather crucial:
 
 - __Count__: There is no way around it, for the web interface, we rely on
   Javascript. Adding Python means dealing with two languages.
@@ -222,23 +243,86 @@ code in a modular way.
 
 ## Architecture
 
-<Mermaid caption="Schematic overview of a stand-alone Morio deployment">
+A single Morio node consists of a set of services running in Docker containers.
+To _start_ Morio, one needs to only start the __core__ service, as it will
+handle orchestration of all other services.
+
+When Morio is initially started, it has no configuration and will start in an
+[ephemeral state](/docs/reference/terminology/ephemeral-state/). As this is
+the simplest state Morio can be in, we will start there.
+
+### Ephemeral Node
+
+An [ephemeral Morio node](/docs/reference/terminology/ephemeral-node/) is a
+node running in [ephemeral
+state](/docs/reference/terminology/ephemeral-state/).   
+To bring Morio out of its ephemeral state, it needs to be set up. This can be
+done through the [UI][ui] or [API][api] service, both of which can only be
+accessed through the [Proxy][proxy] service.
+
+
+This is why -- in the absence of a configuration -- the [Core][core] service
+will start these three services on an ephemeral Morio node, and eagerly await
+setup instructions.
+
+<Architecture caption="Schematic overview of an ephemeral Morio node">
+```
+flowchart TD
+  subgraph Host OS
+    api("API<br /><small>(Morio)</small>")
+    core("Core<br /><small>(Morio)</small>")
+    proxy("Proxy<br /><small>(Traefik)</small>")
+    ui("UI<br /><small>(Morio)</small>")
+    net(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+    core --- net
+    net --- proxy
+    net --- api
+    net --- ui
+  end
+  user("Morio User")
+  proxy --- user
+  class core blue;
+  class api blue;
+  class ui blue;
+  class proxy blue;
+```
+</Architecture>
+
+### Stand-Alone Node
+
+When we provide a Morio node with its initial settings, it will come out of
+ephemeral state.  The [Core][core] service will resolve a configuration for all
+[wanted][wanted] services, and start them.
+
+Whether a service is _wanted_ or not depends on the settings.
+<br /><small>In practice, it
+depends on the outcome of the [wanted lifecycle hook][wanted] that is called 
+for each service.</small>  
+For example, the [Connector][connector] service will only be started if any
+pipelines have been configured. Because without any pipelines, it has no work
+to do.
+
+If we assume pipelines have been setup, and we are routing data both to some
+local storage, as well as an downstream Morio instance, the schematic overview
+looks like this:
+
+<Architecture caption="Schematic overview of a stand-alone Morio deployment">
 ```
 flowchart TD
 
   lake[("Local Data Lake")]
-  upstream[("Upstream Morio")]
+  downstream[("Downstream Morio")]
   subgraph Host OS
-    api("Morio API")
-    broker[("Broker")]
-    ca("CA")
-    connector("Connector")
-    console("Console")
-    core("Morio Core")
-    db[("&nbsp;DB&nbsp;")]
-    dbuilder("DBuilder")
-    proxy("Proxy")
-    ui("Morio UI")
+    dbuilder("[D|R|M|W]Builder<br /><small>(Morio)</small>")
+    api("API<br /><small>(Morio)</small>")
+    broker[("Broker\n<small>(RedPanda)</small>")]
+    ca("CA\n<small>(SmallStep)</small>")
+    connector("Connector<br/><small>(Logstash)</small>")
+    console("Console\n<small>(RedPanda)</small>")
+    core("Core<br /><small>(Morio)</small>")
+    db[("DB<br /><small>(Rqlite)</small>")]
+    proxy("Proxy<br /><small>(Traefik)</small>")
+    ui("UI<br /><small>(Morio)</small>")
 
     net(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
 
@@ -246,7 +330,6 @@ flowchart TD
     ca --- net
     connector --- net
     core --- net
-    dbuilder --- net
 
     net --- proxy
     net --- api
@@ -255,7 +338,7 @@ flowchart TD
     net --- broker
     
   end
-  upstream --- connector
+  downstream --- connector
   lake --- connector
   client("Morio Client System")
   user("Morio User")
@@ -274,6 +357,251 @@ flowchart TD
   class broker green;
   class dbuilder orange;
 ```
-</Mermaid>
+</Architecture>
 
+More services are started now, including the [DB][db] service for storing
+account data, the [CA][ca] service for generating X.509 certificates, and of
+course the [Broker][broker] service to handle streaming data, and it's
+[Console][console] admin service.
+
+Morio is now ready to start ingesting data. In our example, the
+[Connector][connector] service is configured with pipelines that will send the
+data to a local datastore (see list of [supported
+outputs](https://www.elastic.co/guide/en/logstash/current/output-plugins.html))
+as well as to a remote Morio instance. Based on the direction of the data
+stream, we call this a __downstream__ instance.
+
+The [Dbuilder][dbuilder], [Rbuilder][rbuilder], [Mbuilder][mbuilder], and
+[Wbuilder][wbuilder] services are represented by a single amber box in our
+diagram. They are the on-demand services that build the client packages.
+Dbuilder and Rbuilder build `.deb`, and `.rmp` packages for Linux, whereas
+Mbulder and Wbuilder build packages for MacOS and Windows respectively.
+
+### Flanking Nodes
+
+A [flanking Morio node](/docs/reference/nodes/#flanking-nodes) is a node that
+runs _flanking services_. These are services that act as a client to the Morio
+node(s) -- typiocally of the broker(s) -- and do not need to reside on them.
+
+In our example, the [Connector][connector] is a flanking service that we could
+run on a flanking node.  Such a setup is shown in the diagram below:
+
+<Architecture caption="Schematic overview of a stand-alone Morio deployment with a flanking node running the Connector service">
+```
+flowchart TD
+
+  lake[("Local Data Lake")]
+  downstream[("Downstream Morio")]
+  subgraph Host OS
+    dbuilder("[D|R|M|W]Builder<br /><small>(Morio)</small>")
+    api("API<br /><small>(Morio)</small>")
+    broker[("Broker\n<small>(RedPanda)</small>")]
+    ca("CA\n<small>(SmallStep)</small>")
+    console("Console\n<small>(RedPanda)</small>")
+    core("Core<br /><small>(Morio)</small>")
+    db[("DB<br /><small>(Rqlite)</small>")]
+    proxy("Proxy<br /><small>(Traefik)</small>")
+    ui("UI<br /><small>(Morio)</small>")
+
+    net(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+
+    db --- net
+    ca --- net
+    core --- net
+
+    net --- proxy
+    net --- api
+    net --- ui
+    net --- console
+    net --- broker
+    
+  end
+  subgraph Flanking Node
+    connector("Connector<br/><small>(Logstash)</small>")
+    core2("Core<br /><small>(Morio)</small>")
+    net2(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+    core2 --- net2
+    connector --- net2
+  end
+  downstream --- connector
+  lake --- connector
+  client("Morio Client System")
+  user("Morio User")
+
+  broker --- client
+  proxy --- user
+  net --- |IPSec|net2
+
+  class core blue;
+  class core2 blue;
+  class api blue;
+  class ui blue;
+  class proxy blue;
+  class ca green;
+  class connector green;
+  class console green;
+  class db green;
+  class broker green;
+  class dbuilder orange;
+```
+</Architecture>
+
+Flanking nodes can be scaled horizontally, independent of the sizing of other
+Morio nodes. They will be connected to the Morio node(s) using an
+[IPSec-encrypted](https://en.wikipedia.org/wiki/IPsec) Docker overlay network.
+
+The same overlay network is also how nodes communitate in a Morio cluster.
+
+### Clustered Nodes
+
+<Architecture caption="Schematic overview of a 3-node Morio cluster">
+```
+flowchart TD
+
+  lake[("Local Data Lake")]
+  downstream[("Downstream Morio")]
+  subgraph Node 1
+    dbuilder1("[D|R|M|W]Builder<br /><small>(Morio)</small>")
+    api1("API<br /><small>(Morio)</small>")
+    broker1[("Broker\n<small>(RedPanda)</small>")]
+    ca1("CA\n<small>(SmallStep)</small>")
+    connector1("Connector<br/><small>(Logstash)</small>")
+    console1("Console\n<small>(RedPanda)</small>")
+    core1("Core<br /><small>(Morio)</small>")
+    db1[("DB<br /><small>(Rqlite)</small>")]
+    proxy1("Proxy<br /><small>(Traefik)</small>")
+    ui1("UI<br /><small>(Morio)</small>")
+    net1(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+    db1 --- net1
+    ca1 --- net1
+    connector1 --- net1
+    core1 --- net1
+    net1 --- proxy1
+    net1 --- api1
+    net1 --- ui1
+    net1 --- console1
+    net1 --- broker1
+  end
+
+  subgraph Node 2
+    dbuilder2("[D|R|M|W]Builder<br /><small>(Morio)</small>")
+    api2("API<br /><small>(Morio)</small>")
+    broker2[("Broker\n<small>(RedPanda)</small>")]
+    ca2("CA\n<small>(SmallStep)</small>")
+    connector2("Connector<br/><small>(Logstash)</small>")
+    console2("Console\n<small>(RedPanda)</small>")
+    core2("Core<br /><small>(Morio)</small>")
+    db2[("DB<br /><small>(Rqlite)</small>")]
+    proxy2("Proxy<br /><small>(Traefik)</small>")
+    ui2("UI<br /><small>(Morio)</small>")
+    net2(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+    db2 --- net2
+    ca2 --- net2
+    connector2 --- net2
+    core2 --- net2
+    net2 --- proxy2
+    net2 --- api2
+    net2 --- ui2
+    net2 --- console2
+    net2 --- broker2
+  end
+
+  subgraph Node 3
+    dbuilder3("[D|R|M|W]Builder<br /><small>(Morio)</small>")
+    api3("API<br /><small>(Morio)</small>")
+    broker3[("Broker\n<small>(RedPanda)</small>")]
+    ca3("CA\n<small>(SmallStep)</small>")
+    connector3("Connector<br/><small>(Logstash)</small>")
+    console3("Console\n<small>(RedPanda)</small>")
+    core3("Core<br /><small>(Morio)</small>")
+    db3[("DB<br /><small>(Rqlite)</small>")]
+    proxy3("Proxy<br /><small>(Traefik)</small>")
+    ui3("UI<br /><small>(Morio)</small>")
+    net3(["&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Docker Network&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"])
+    db3 --- net3
+    ca3 --- net3
+    connector3 --- net3
+    core3 --- net3
+    net3 --- proxy3
+    net3 --- api3
+    net3 --- ui3
+    net3 --- console3
+    net3 --- broker3
+  end
+
+  downstream --- connector1
+  downstream --- connector2
+  downstream --- connector3
+  lake --- connector1
+  lake --- connector2
+  lake --- connector3
+  net1 --- |IPSec|net2
+  net1 --- |IPSec|net3
+  net2 --- |IPSec|net3
+  rrdns{Round\nRobin\nDNS\nrecord}
+  client("Morio Client System")
+  user("Morio User")
+
+  rrdns --- client
+  broker1 --- rrdns
+  broker2 --- rrdns
+  broker3 --- rrdns
+
+  class core1 blue;
+  class core2 blue;
+  class core3 blue;
+  class api1 blue;
+  class api2 blue;
+  class api3 blue;
+  class ui1 blue;
+  class ui2 blue;
+  class ui3 blue;
+  class proxy1 blue;
+  class proxy2 blue;
+  class proxy3 blue;
+  class ca1 green;
+  class ca2 green;
+  class ca3 green;
+  class connector1 green;
+  class connector2 green;
+  class connector3 green;
+  class console1 green;
+  class console2 green;
+  class console3 green;
+  class db1 green;
+  class db2 green;
+  class db3 green;
+  class broker1 green;
+  class broker2 green;
+  class broker3 green;
+  class dbuilder1 orange;
+  class dbuilder2 orange;
+  class dbuilder3 orange;
+```
+</Architecture>
+
+Things get a bit more complicated in a clustered deployment, but essentially it is more of the same.
+We have 3 Morio nodes in our example, each of them runs the same services as [our stand-alone example](##stand-alone-node).
+
+What's different is that we now have an IPSec tunnel connecting all the nodes, and the brokers work as a distributed system, sharing the load.
+
+The round-robin DNS record is important for cluster discovery, but once connected the brokers will tell clients where to connect to.
+This is important as it means that __you cannot run Morio behind a load balancer__, just like you cannor run Kafka behind a load balancer because it has load balancing on-board.
+
+
+
+[api]: /docs/reference/services/api/
+[broker]: /docs/reference/services/broker/
+[ca]: /docs/reference/services/ca/
+[connector]: /docs/reference/services/connector/
+[console]: /docs/reference/services/console/
+[core]: /docs/reference/services/core/
+[db]: /docs/reference/services/db/
+[proxy]: /docs/reference/services/proxy/
+[ui]: /docs/reference/services/ui/
+[dbuilder]: /docs/reference/services/dbuiler/
+[rbuilder]: /docs/reference/services/rbuiler/
+[mbuilder]: /docs/reference/services/mbuiler/
+[wbuilder]: /docs/reference/services/wbuiler/
+[wanted]: /docs/reference/core/hooks/wanted/
 

@@ -14,7 +14,7 @@ import {
   Tldr,
   Warning,
 } from './components/popout.js'
-import { Mermaid } from './components/mermaid.js'
+import { Architecture } from './components/mermaid.js'
 
 /*
  * This seems to simple to put in a file on its own
@@ -29,12 +29,12 @@ const WithCaption = ({ children, caption }) => (
 export default {
   ...MDXComponents,
   // Custom Morio scope
+  Architecture,
   WithCaption,
   Comment,
   Error,
   Important,
   Fixme,
-  Mermaid,
   Note,
   Related,
   Scode,

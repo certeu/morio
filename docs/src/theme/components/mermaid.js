@@ -1,13 +1,14 @@
 import BaseMermaid from '@theme/Mermaid'
 import { useState } from 'react'
 import { Popout } from './popout.js'
+import Link from '@docusaurus/Link'
 
 /*
- * Wrapper component to generate a Mermaid diagram.
+ * Wrapper component to generate a Mermaid architecture diagram.
  *
  * This injects node styles, and adds a button to show a legend.
  */
-export const Mermaid = ({ children, caption=false }) => {
+export const Architecture = ({ children, caption=false }) => {
   const [showLegend, setShowLegend] = useState(false)
 
   return (
@@ -31,16 +32,31 @@ export const Mermaid = ({ children, caption=false }) => {
 }
 
 /*
+ * Little helper to prevent repeating ourselves
+ */
+const Span = ({ bg, children }) => <span style={{
+  background: bg,
+    border: '2px solid #333',
+    color: '#000',
+    borderRadius: '0.2rem',
+    padding: '0.2rem'
+  }}>{children}</span>
+
+/*
+ * More DRY-ness
+ */
+const Eph = () => <Link href="/docs/reference/terminology/ephemeral-state/">ephemeral state</Link>
+
+/*
  * The legend for the node styles
  */
 const Legend = () => (
   <Popout type="note">
     <p style={{marginBottom: '1rem'}}>This diagram uses the following conventions:</p>
     <ul>
-      <li>A <span style={{background: '#23b1d3', border: '2px solid #333', color: '#000', borderRadius: '0.2rem', padding: '0.2rem'}}>blue-ish</span> box indicates a Morio service that <b>is available</b> in [ephemeral state](/docs/reference/terminology/ephemeral-state/).</li>
-      <li>A <span style={{background: '#09bc8a', border: '2px solid #333', color: '#000', borderRadius: '0.2rem', padding: '0.2rem'}}>green</span> box indicates a Morio service that <b>is not available</b> in [ephemeral state](/docs/reference/terminology/ephemeral-state/).</li>
-      <li>A <span style={{background: '#fb8500', border: '2px solid #333', color: '#000', borderRadius: '0.2rem', padding: '0.2rem'}}>amber</span> box indicates a Morio service that is <b>started on-demand</b>.</li>
-      <li>A <b><code>Morio </code></b>-prefix in the service name/box indicates the service is specific to Morio, rather than a bundled dependency (in other words, this is what we wrote ourselves, the rest we borrowed).</li>
+      <li>A <Span bg="#23b1d3">blue-ish</Span> box indicates a Morio service that <b>is available</b> in <Eph />.</li>
+      <li>A <Span bg="#09bc8a">green</Span> box indicates a Morio service that <b>is not available</b> in <Eph />.</li>
+      <li>A <Span bg="#fb8500">amber</Span> box indicates a Morio service that is <b>started on-demand</b>.</li>
     </ul>
   </Popout>
 )
