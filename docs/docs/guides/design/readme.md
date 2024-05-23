@@ -54,7 +54,7 @@ allowing us to ingest all the data we deem valuable.
 
 - Before Morio, the only data type we collected were logs.
 - With Morio, we wanted to support ingesting different data types, such as
-  metrics, audit info, events, heartbeats, and so on.
+  metrics, audit info, events, healthchecks, and so on.
 
 ### Streaming data
 
@@ -66,12 +66,12 @@ real-time as possible.
 ### Flexible ingestion
 
 - Before Morio, any data we ingested would make its way into our SIEM.
-- With Morio, we wanted the flexibility to note merely ingest data, but also
+- With Morio, we wanted the flexibility to not merely ingest data, but also
 route, filter, transform, or duplicate data streams along the way. 
 
 ### Single pane of glass
 
-- Before Morio, our log monitoring service was focuessed on on-prem
+- Before Morio, our log monitoring service was focussed on on-prem
 infrastructure, while we used the cloud providers' native tools to monitor
 cloud infrastructure. 
 - With Morio, we want a single pane of glass to monitor all infrastructure under
@@ -140,9 +140,10 @@ To collect data from on-prem systems, we need some sort of agent.
 
 Here, our choice for Morio is [Beats by Elastic](https://www.elastic.co/beats)
 because it is easy to install, configure, and manage, has native support
-pushing data to Kafka, and handles backpressure giving us extra redundancy.
+for pushing data to Kafka, and handles backpressure which makes for a
+resolient setup.
 
-As a foreshadowing bonus, it pumps out ECS compliant data by default.
+As a foreshadowing bonus, it generates ECS compliant data by default.
 
 ### Data structured according to the Elastic Common Schema
 
@@ -303,14 +304,14 @@ pipelines have been configured. Because without any pipelines, it has no work
 to do.
 
 If we assume pipelines have been setup, and we are routing data both to some
-local storage, as well as an downstream Morio instance, the schematic overview
+local data store, as well as an downstream Morio instance, the schematic overview
 looks like this:
 
 <Architecture caption="Schematic overview of a stand-alone Morio deployment">
 ```
 flowchart TD
 
-  lake[("Local Data Lake")]
+  lake[("Local Data Store")]
   downstream[("Downstream Morio")]
   subgraph Host OS
     dbuilder("[D|R|M|W]Builder<br /><small>(Morio)</small>")
@@ -366,7 +367,7 @@ course the [Broker][broker] service to handle streaming data, and it's
 
 Morio is now ready to start ingesting data. In our example, the
 [Connector][connector] service is configured with pipelines that will send the
-data to a local datastore (see list of [supported
+data to a local data store (see the list of [supported
 outputs](https://www.elastic.co/guide/en/logstash/current/output-plugins.html))
 as well as to a remote Morio instance. Based on the direction of the data
 stream, we call this a __downstream__ instance.
@@ -390,7 +391,7 @@ run on a flanking node.  Such a setup is shown in the diagram below:
 ```
 flowchart TD
 
-  lake[("Local Data Lake")]
+  lake[("Local Data Store")]
   downstream[("Downstream Morio")]
   subgraph Host OS
     dbuilder("[D|R|M|W]Builder<br /><small>(Morio)</small>")
@@ -458,7 +459,7 @@ The same overlay network is also how nodes communitate in a Morio cluster.
 ```
 flowchart TD
 
-  lake[("Local Data Lake")]
+  lake[("Local Data Store")]
   downstream[("Downstream Morio")]
   subgraph Node 1
     dbuilder1("[D|R|M|W]Builder<br /><small>(Morio)</small>")
