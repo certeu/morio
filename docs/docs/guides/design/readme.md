@@ -14,7 +14,7 @@ extend.
 Anyone with sufficient expertise, time, and dedication can build a
 state-of-the-art streaming data infrastructure out of the components we have
 chosen. But with Morio you don't have to as it provides an appliance-like
-experience where you can setup and configure the entire system through it's web
+experience where you can set up and configure the entire system through its web
 UI or REST API.
 
 Without being dismissive of our own efforts, the hard work in Morio is
@@ -28,7 +28,7 @@ learning curve.
 ## History
 
 [CERT-EU](https://cert.europa.eu/) is the cybersecurity service for the
-Instituties, Bodies, Agencies, and Offices of the European Union (EU Entities).
+Institutions, Bodies, Agencies, and Offices of the European Union (EU Entities).
 In this role, we are a _managed service provider_ to our constituents, with a
 specific focus on cybersecurity.
 
@@ -43,18 +43,18 @@ The design goals listed stem from our experience running such a service.
 
 ### Ingest at will
 
-- Before Morio, our log monitoring service was based on a commercial solution, 
-with a volume-based licensing model.
+- Before Morio, our log monitoring service was based on a commercial SIEM,
+which has a volume-based licensing model.
 This made cost a significant factor when making decisions about what data to
 ingest (or not to).
-- With Morio, we wanted to minimize the cost impact of ingesting additional data
+- With Morio, we wanted to minimise the cost impact of ingesting additional data
 allowing us to ingest all the data we deem valuable.
 
 ### More types of data
 
 - Before Morio, the only data type we collected were logs.
 - With Morio, we wanted to support ingesting different data types, such as
-  metrics, audit info, events, healthchecks, and so on.
+  metrics, audit info, events, health checks, and so on.
 
 ### Streaming data
 
@@ -92,9 +92,11 @@ we can process and store it much more efficiently.
 ### Automation friendly
 
 - Before Morio, deploying our log monitoring solution required a lot of manual
-work and clicking around in a web UI.
-- With Morio, we wanted to make it easy to automation the rollout and maintenance
-of our solution.
+  work, such as clicking around in a web UI, editing configuration files by
+  hand, restarting services, trial and error while trying to build custom event
+  log parsing expressions.
+- With Morio, we wanted to make it easy to automation the rollout and
+  maintenance of our solution.
 
 ## Technology choices
 
@@ -117,7 +119,7 @@ Given that we absolutely wanted to avoid forcing that level of complexity upon o
 constituents, and that RedPanda brokers [do no support auto-scaling](https://docs.redpanda.com/current/manage/kubernetes/k-scale-redpanda/#horizontal-scaling) anyway, we opted for a simpler solution:
 
 - Provide orchestration within Morio.
-- Utilize [Docker Swarm](https://docs.docker.com/engine/swarm/) for cluster networking.
+- Utilise [Docker Swarm](https://docs.docker.com/engine/swarm/) for cluster networking.
 
 
 ### RedPanda as our streaming backbone
@@ -127,8 +129,8 @@ Since we want [streaming data](#streaming-data) we considered
 However, it is also notoriously complex to run in production, which
 clashes with our [low maintenance](#low-maintenance) goal.
 
-This complexity has not gone unnoticed, and other players have stepped in
-provide simpler offerings with a Kafka-compatible API.
+This complexity has not gone unnoticed, and other players have stepped in,
+providing simpler offerings with a Kafka-compatible API.
 
 One of those is [RedPanda](https://redpanda.com/) which is our choice for
 Morio's streaming backbone due to it simple setup, configuration, and
@@ -140,8 +142,8 @@ To collect data from on-prem systems, we need some sort of agent.
 
 Here, our choice for Morio is [Beats by Elastic](https://www.elastic.co/beats)
 because it is easy to install, configure, and manage, has native support
-for pushing data to Kafka, and handles backpressure which makes for a
-resolient setup.
+for pushing data to Kafka, and handles back pressure which makes for a
+resilient setup.
 
 As a foreshadowing bonus, it generates ECS compliant data by default.
 
@@ -189,10 +191,10 @@ support.
 
 ### Rqlite as database
 
-Morio need a database to store user accounts and other data. Ideally we want
+Morio needs a database to store user accounts and other data. Ideally we want
 something simple like [SQLite](https://www.sqlite.org/), but as we support
 [clustered deployments](/docs/guides/deploy/#clustered-deployment) we need a
-database that itsels can be clustered too.
+database that itself can be clustered too.
 
 Setting up and maintaining a database cluster is typically non-trivial and
 seems hard to rhyme with our [low maintenance](#low-maintenance) goal.  What we
@@ -206,7 +208,7 @@ microservices.
 
 Morio provides several HTTP-based microservices, some of which are exposed to
 the user.  It's a common scenario to have a reverse proxy handle ingress
-traffic, which gives us a central place to enfore access control, setup
+traffic, which gives us a central place to enforce access control, setup
 certificates and so on.
 
 We chose [Traefik](https://traefik.io/traefik/) for this purpose as it is a
