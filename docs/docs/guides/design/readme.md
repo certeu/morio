@@ -43,8 +43,8 @@ The design goals listed stem from our experience running such a service.
 
 ### Ingest at will
 
-- Before Morio, our log monitoring service was based on
-[Splunk](https://www.splunk.com/), which has a volume-based licensing model.
+- Before Morio, our log monitoring service was based on a commercial solution, 
+with a volume-based licensing model.
 This made cost a significant factor when making decisions about what data to
 ingest (or not to).
 - With Morio, we wanted to minimize the cost impact of ingesting additional data
