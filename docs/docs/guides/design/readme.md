@@ -190,7 +190,7 @@ support.
 
 Morio need a database to store user accounts and other data. Ideally we want
 something simple like [SQLite](https://www.sqlite.org/), but as we support
-[clustered deployments](/docs/reference/deploy/#clustered-deployment) we need a
+[clustered deployments](/docs/guides/deploy/#clustered-deployment) we need a
 database that itsels can be clustered too.
 
 Setting up and maintaining a database cluster is typically non-trivial and
@@ -379,7 +379,7 @@ Mbulder and Wbuilder build packages for MacOS and Windows respectively.
 
 ### Flanking Nodes
 
-A [flanking Morio node](/docs/reference/nodes/#flanking-nodes) is a node that
+A [flanking Morio node](/docs/guides/nodes/#flanking-nodes) is a node that
 runs _flanking services_. These are services that act as a client to the Morio
 node(s) -- typiocally of the broker(s) -- and do not need to reside on them.
 
@@ -581,7 +581,7 @@ flowchart TD
 </Architecture>
 
 Things get a bit more complicated in a clustered deployment, but essentially it is more of the same.
-We have 3 Morio nodes in our example, each of them runs the same services as [our stand-alone example](##stand-alone-node).
+We have 3 Morio nodes in our example, each of them runs the same services as [our stand-alone example](#stand-alone-node).
 
 What's different is that we now have an IPSec tunnel connecting all the nodes, and the brokers work as a distributed system, sharing the load.
 
@@ -599,9 +599,9 @@ This is important as it means that __you cannot run Morio behind a load balancer
 [db]: /docs/reference/services/db/
 [proxy]: /docs/reference/services/proxy/
 [ui]: /docs/reference/services/ui/
-[dbuilder]: /docs/reference/services/dbuiler/
-[rbuilder]: /docs/reference/services/rbuiler/
-[mbuilder]: /docs/reference/services/mbuiler/
-[wbuilder]: /docs/reference/services/wbuiler/
-[wanted]: /docs/reference/core/hooks/wanted/
+[dbuilder]: /docs/reference/services/dbuilder/
+[rbuilder]: /docs/reference/services/rbuilder/
+[mbuilder]: /docs/reference/services/mbuilder/
+[wbuilder]: /docs/reference/services/wbuilder/
+[wanted]: /docs/reference/services/core/hooks/wanted/
 

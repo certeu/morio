@@ -78,7 +78,7 @@ footer.footer div.footer__copyright {
 }
 footer.footer div.footer__copyright div#tagline b {
   font-size: 1.25rem;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 footer.footer div.footer__copyright div#tagline span {
   font-size: 0.75rem;

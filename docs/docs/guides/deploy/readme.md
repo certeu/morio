@@ -7,7 +7,7 @@ deployment. In addition, one or more flanking nodes can be added to each of
 these deployment types.
 
 <Related>
-Refer to [node types](/docs/reference/nodes) to understand the role of flanking nodes.
+Refer to [node types](/docs/guides/nodes) to understand the role of flanking nodes.
 </Related>
 
 ## Stand-alone deployment

@@ -11,6 +11,6 @@ You can use the setup wizard of the ui service to do so, or use the API service
 directly.
 
 <Related>
-See [Ephemeral nodes](/docs/reference/nodes/#ephemeral-nodes) under [Node types](/docs/reference/nodes/) for more details.
+See [Ephemeral nodes](/docs/guides/nodes/#ephemeral-nodes) under [Node types](/docs/guides/nodes/) guide for more details.
 </Related>
 

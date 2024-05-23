@@ -4,7 +4,7 @@ tags:
   - dbuilder
 ---
 
-The `dbuilder` service provides on-demand builds for Debian client packages.
+The `dbuilder` service provides on-demand builds for Debian (deb) client packages.
 
 This service is not always running, but rather started on-demand by [the core
 service](/docs/reference/services/core) when a `.deb` client package needs to

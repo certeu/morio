@@ -13,7 +13,7 @@ Swiss army knife for data routing and transformation.
 
 <Note>
 - This service is __not available__ in [ephemeral state](/docs/reference/terminology/ephemeral-state/).
-- This service can be deployed on a [flanking node](/docs/reference/nodes/#flanking-nodes).  
+- This service can be deployed on a [flanking node](/docs/guides/nodes/#flanking-nodes).  
 </Note>
 
 
