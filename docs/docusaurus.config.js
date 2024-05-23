@@ -6,9 +6,6 @@
 import {themes as prismThemes} from 'prism-react-renderer';
 import smartyPants from 'remark-smartypants'
 
-// async import is a workaround for lack of ESM in docusaurus
-//const smartyPants = (await import("remark-smartypants")).default
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   // Metadata
