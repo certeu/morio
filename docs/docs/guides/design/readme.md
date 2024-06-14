@@ -58,7 +58,7 @@ allowing us to ingest all the data we deem valuable.
 
 ### Streaming data
 
-- Before Morio, our solution was based on batch-processing -- running a variety 
+- Before Morio, our solution was based on batch processing -- running a variety 
 of queries at regular intervals to monitor the incoming data.
 - With Morio, we wanted a streaming data solution, so we can get as close to
 real-time as possible.
@@ -142,7 +142,7 @@ To collect data from on-prem systems, we need some sort of agent.
 
 Here, our choice for Morio is [Beats by Elastic](https://www.elastic.co/beats)
 because it is easy to install, configure, and manage, has native support
-for pushing data to Kafka, and handles back pressure which makes for a
+for pushing data to Kafka(-compatible) systems, and handles back pressure which makes for a
 resilient setup.
 
 As a foreshadowing bonus, it generates ECS compliant data by default.
@@ -154,7 +154,7 @@ the first thing you need is a _schema_, a set of rules that defines how the
 data should be structured.
 
 We considered [OpenTelemetry](https://opentelemetry.io/) but found it to be a
-bit too uncooked for our needs.  Instead, we choice the [Elastic Common Schema
+bit too uncooked for our needs.  Instead, we chose the [Elastic Common Schema
 (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html) as it is more
 mature, well defined, and supported by variety of systems and vendors.
 
@@ -181,20 +181,19 @@ That is why Logstash is our choice for data routing in Morio.
 ### Step-ca as Certificate Authority
 
 For X.509 certificates, Morio needs an on-board Certificate Authority (CA) as a
-[low maintenance](#low-maintenance) solution should transparently handle the
+[low maintenance](#low-maintenance) solution that should transparently handle the
 complexity of generating and managing certificates.
 
 Here we chose [step-ca](https://smallstep.com/docs/step-ca/) because we had
-prior experience with it, has a small footprint, and
-[ACME](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment)
-support.
+prior experience with it, because it has a small footprint, and supports 
+[ACME](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment).
 
 ### Rqlite as database
 
 Morio needs a database to store user accounts and other data. Ideally we want
 something simple like [SQLite](https://www.sqlite.org/), but as we support
 [clustered deployments](/docs/guides/deploy/#clustered-deployment) we need a
-database that itself can be clustered too.
+database that can be clustered too.
 
 Setting up and maintaining a database cluster is typically non-trivial and
 seems hard to rhyme with our [low maintenance](#low-maintenance) goal.  What we
@@ -241,7 +240,7 @@ rather crucial:
 In the end, we chose
 [Javascript](https://www.javascript.com/)/[NodeJS](https://nodejs.org/en) as
 the programming language for Morio as it is fast, available both in the browser
-and backend, fit for purpose, and its interpreted nature makes it easy to load
+and backend, fit for purpose, and because its interpreted nature makes it easy to load
 code in a modular way.
 
 ## Architecture
@@ -259,10 +258,9 @@ the simplest state Morio can be in, we will start there.
 An [ephemeral Morio node](/docs/reference/terminology/ephemeral-node/) is a
 node running in [ephemeral
 state](/docs/reference/terminology/ephemeral-state/).   
-To bring Morio out of its ephemeral state, it needs to be set up. This can be
-done through the [UI][ui] or [API][api] service, both of which can only be
+To bring Morio out of its ephemeral state, it needs to be configured. This can be
+done through the [UI][ui] or [API][api] services, both of which can only be
 accessed through the [Proxy][proxy] service.
-
 
 This is why -- in the absence of a configuration -- the [Core][core] service
 will start these three services on an ephemeral Morio node, and eagerly await
@@ -294,7 +292,7 @@ flowchart TD
 ### Stand-Alone Node
 
 When we provide a Morio node with its initial settings, it will come out of
-ephemeral state.  The [Core][core] service will resolve a configuration for all
+ephemeral state. The [Core][core] service will resolve a configuration for all
 [wanted][wanted] services, and start them.
 
 Whether a service is _wanted_ or not depends on the settings.
@@ -306,7 +304,7 @@ pipelines have been configured. Because without any pipelines, it has no work
 to do.
 
 If we assume pipelines have been setup, and we are routing data both to some
-local data store, as well as an downstream Morio instance, the schematic overview
+local data store, as well as to a downstream Morio instance, the schematic overview
 looks like this:
 
 <Architecture caption="Schematic overview of a stand-alone Morio deployment">
@@ -364,7 +362,7 @@ flowchart TD
 
 More services are started now, including the [DB][db] service for storing
 account data, the [CA][ca] service for generating X.509 certificates, and of
-course the [Broker][broker] service to handle streaming data, and it's
+course the [Broker][broker] service to handle streaming data, together with the
 [Console][console] admin service.
 
 Morio is now ready to start ingesting data. In our example, the
@@ -384,7 +382,7 @@ Mbulder and Wbuilder build packages for MacOS and Windows respectively.
 
 A [flanking Morio node](/docs/guides/nodes/#flanking-nodes) is a node that
 runs _flanking services_. These are services that act as a client to the Morio
-node(s) -- typiocally of the broker(s) -- and do not need to reside on them.
+node(s) -- typically, the broker(s) -- and that do not need to reside on them.
 
 In our example, the [Connector][connector] is a flanking service that we could
 run on a flanking node.  Such a setup is shown in the diagram below:
@@ -449,11 +447,11 @@ flowchart TD
 ```
 </Architecture>
 
-Flanking nodes can be scaled horizontally, independent of the sizing of other
+Flanking nodes can be scaled horizontally, independently of the sizing of other
 Morio nodes. They will be connected to the Morio node(s) using an
 [IPSec-encrypted](https://en.wikipedia.org/wiki/IPsec) Docker overlay network.
 
-The same overlay network is also how nodes communitate in a Morio cluster.
+The same overlay network is also how nodes communicate in a Morio cluster.
 
 ### Clustered Nodes
 
@@ -586,11 +584,10 @@ flowchart TD
 Things get a bit more complicated in a clustered deployment, but essentially it is more of the same.
 We have 3 Morio nodes in our example, each of them runs the same services as [our stand-alone example](#stand-alone-node).
 
-What's different is that we now have an IPSec tunnel connecting all the nodes, and the brokers work as a distributed system, sharing the load.
+What is different this time is that we now have an IPSec tunnel connecting all the nodes, and the brokers work as a distributed system, sharing the load.
 
 The round-robin DNS record is important for cluster discovery, but once connected the brokers will tell clients where to connect to.
-This is important as it means that __you cannot run Morio behind a load balancer__, just like you cannor run Kafka behind a load balancer because it has load balancing on-board.
-
+This is important as it means that __you cannot run Morio behind a load balancer__, just like you cannot run Kafka behind a load balancer because it has load balancing on-board.
 
 
 [api]: /docs/reference/services/api/
