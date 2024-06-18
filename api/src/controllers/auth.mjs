@@ -22,6 +22,7 @@ const allowedUris = [
   `${store.prefix}/activate-mfa/`,
   `${store.prefix}/jwks`,
   `${store.prefix}/cluster/join`,
+  `${store.prefix}/validate/settings`,
 ]
 
 /**
