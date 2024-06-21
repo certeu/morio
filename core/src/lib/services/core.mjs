@@ -1,7 +1,14 @@
 // REST client for API
-import { restClient, testUrl } from '#shared/network'
+import { restClient } from '#shared/network'
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory, writeYamlFile, mkdir, writeJsonFile } from '#shared/fs'
+import {
+  readYamlFile,
+  readJsonFile,
+  readDirectory,
+  writeYamlFile,
+  mkdir,
+  writeJsonFile,
+} from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
@@ -18,7 +25,7 @@ import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
 // Cluster
 import { startCluster } from '#lib/cluster'
 // Docker
-import { runDockerApiCommand, storeRunningContainers } from '#lib/docker'
+import { storeRunningContainers } from '#lib/docker'
 // Store
 import { store } from '../store.mjs'
 
@@ -97,12 +104,13 @@ export const service = {
       /*
        * Load existing settings, keys, node info and timestamp from disk
        */
-      const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
+      const { settings, keys, node, cluster, timestamp } = await loadSettingsFromDisk()
 
       /*
-       * Keep node info in the store
+       * Keep node & cluster info in the store
        */
       store.node = node
+      store.cluster = cluster
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -112,7 +120,6 @@ export const service = {
         store.info.current_settings = false
         store.info.ephemeral = true
 
-        console.log({ node: store.node })
         /*
          * If we are in epehemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
@@ -140,12 +147,14 @@ export const service = {
 
         /*
          * If this is the very first boot, generate an UUID for the node
-         * and store it on disk
+         * and cluster and store it on disk
          */
         if (!store.node) {
           store.log.debug(`Generating node UUID`)
-          store.node = { node: uuid() }
+          store.set('node.uuid', uuid())
+          store.set('cluster.uuid', uuid())
           await writeJsonFile(`/etc/morio/node.json`, store.node)
+          await writeJsonFile(`/etc/morio/cluster.json`, store.cluster)
         }
 
         /*
@@ -182,34 +191,46 @@ export const service = {
       store.info.ephemeral = false
       store.info.current_settings = timestamp
       store.saveConfig = cloneAsPojo(settings)
-      // Take care of encrypted settings and store the save ones
+      /*
+       * Populate the store with a save version of the settings (no secrets)
+       * as well as a fully templated version for run-time use.
+       */
       store.saveSettings = cloneAsPojo(settings)
       store.settings = templateSettings(settings)
       store.config = cloneAsPojo(store.settings)
       store.keys = keys
 
       /*
+       * Morio always runs as a cluster, because even a stand-alone
+       * node can have flanking nodes for which we require inter-node
+       * communication. Thus, a Docker swarm is always created and all
+       * services are managed as swarm services.
+       */
+      await startCluster(hookProps)
+
+      return store.get('swarm.ready')
+
+      /*
        * One node makes this easy
        */
-      if (store.config.deployment?.node_count === 1) {
-        store.config.core.node_nr = 1
-        store.config.core.names = {
-          internal: 'core_1',
-          external: store.config.deployment.nodes[0],
-        }
-        store.config.deployment.fqdn = store.config.deployment.nodes[0]
+      //if (store.config.deployment?.node_count === 1) {
+      //  store.config.core.node_nr = 1
+      //  store.config.core.names = {
+      //    internal: 'core_1',
+      //    external: store.config.deployment.nodes[0],
+      //  }
+      //  store.config.deployment.fqdn = store.config.deployment.nodes[0]
 
-        return true
-      }
+      //  return true
+      //}
       /*
        * Clustering is a bit more work, so it's abstracted in this method
        */
-      else if (store.config.deployment?.node_count > 1) {
-        console.log('STARTING CLUSTER')
-        await startCluster(hookProps)
-        console.log('RETURNING FROM BEFOREALL')
-        return false
-      }
+      //else if (store.config.deployment?.node_count > 1) {
+      //  await startCluster(hookProps)
+
+      //  return store.get('swarm.ready')
+      //}
     },
   },
 }
@@ -228,9 +249,10 @@ const loadSettingsFromDisk = async () => {
     .pop()
 
   /*
-   * Node data is created even in epehemeral mode
+   * Node & cluster data is created even in epehemeral mode
    */
   const node = await readJsonFile(`/etc/morio/node.json`)
+  const cluster = await readJsonFile(`/etc/morio/cluster.json`)
 
   if (!timestamp)
     return {
@@ -245,7 +267,7 @@ const loadSettingsFromDisk = async () => {
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
 
-  return { settings, keys, node, timestamp }
+  return { settings, keys, node, cluster, timestamp }
 }
 
 export const createX509Certificate = async (data) => {

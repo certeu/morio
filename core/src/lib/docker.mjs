@@ -173,7 +173,7 @@ export const generateContainerConfig = (srvConf) => {
    * Hosts
    */
   if (srvConf.container.hosts) {
-      opts.HostConfig.ExtraHosts = srvConf.container.hosts
+    opts.HostConfig.ExtraHosts = srvConf.container.hosts
   }
 
   /*
@@ -238,6 +238,48 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
     if (err instanceof Error) {
       /*
        * Deal with errors that aren'rt really errors
+       */
+      if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
+      else {
+        if (!silent) store.log.info(err.message)
+        return [false, err.message]
+      }
+    } else {
+      if (!silent) store.log.info(err)
+      return [false, err]
+    }
+  }
+
+  return [true, Buffer.isBuffer(result) ? result.toString() : result]
+}
+
+/**
+ * This helper method runs an async command against the node API
+ *
+ * @param {string} id - The node id
+ * @param {string} cmd - An instance method to run
+ * @param {object} options - Options to pass to the Docker API
+ * @param {boolean} silent - Set this to true to not log errors
+ * @return {array} return - An array with a boolean indicating success or
+ * failure, and the command return value
+ */
+export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) => {
+  if (!id) {
+    store.log.stabug(`Attemted to run \`${cmd}\` command on a node but no node ID was passed`)
+    return [false]
+  }
+
+  const [ready, node] = await runDockerApiCommand('getNode', id)
+  if (!ready) return [false, false]
+
+  let result
+  try {
+    store.log.stabug(`Running \`${cmd}\` command on node \`${id.slice(0, 6)}\``)
+    result = await node[cmd](options)
+  } catch (err) {
+    if (err instanceof Error) {
+      /*
+       * Deal with errors that aren't really errors
        */
       if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
       else {
@@ -407,4 +449,3 @@ export const storeRunningContainers = async () => {
     }
   }
 }
-

@@ -151,11 +151,12 @@ export const startMorio = async (hookProps = {}) => {
   /*
    * Ensure we have a place to store resolved service and container configurations
    */
-  if (typeof store.config === 'undefined') store.config = {
-    services: {},
-    containers: {},
-    core: {}
-  }
+  if (typeof store.config === 'undefined')
+    store.config = {
+      services: {},
+      containers: {},
+      core: {},
+    }
   if (typeof store.settings === 'undefined') store.settings = {}
 
   /*
@@ -167,7 +168,9 @@ export const startMorio = async (hookProps = {}) => {
    * If we can't figure out how to start, don't
    */
   if (!go) {
-    store.log.error('The beforeAll lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.')
+    store.log.error(
+      'The beforeAll lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.'
+    )
     return
   }
 
@@ -219,8 +222,11 @@ export const ensureMorioService = async (service, running, hookProps = {}) => {
    * Generate service config
    * Container config will be generated after the preCreate lifecycle hook
    */
-  store.config.services[service] = resolveServiceConfiguration(service, store)
-  store.config.containers[service] = generateContainerConfig(store.config.services[service])
+  store.set(['config', 'services', service], resolveServiceConfiguration(service, store))
+  store.set(
+    ['config', 'containers', service],
+    generateContainerConfig(store.config.services[service])
+  )
 
   /*
    * (Re)create the container/service (if needed)
