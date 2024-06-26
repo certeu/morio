@@ -10,19 +10,22 @@ needs. Morio will simplify the setup and management of a robust observability
 infrastructure, leveraging top-tier open-source technologies.
 
 Morio is currently **early-access alpha code**. We are building this in the
-open, so feel free to look around, try it out, or [leave
+open, so feel free to look around, try it out, and [leave
 feedback](https://github.com/certeu/morio/discussions).
 
-With Morio, you will be able to effortlessly collect, analyze, and respond to
-data from various endpoints, ensuring seamless data flow and comprehensive
-monitoring. Under the hood, Morio utilises [RedPanda](https://redpanda.com/)
-for its Kafka-compatible streaming API, [Smallstep
-Step-CA](https://smallstep.com/docs/step-ca/) for X.509 certificate
-provisioning and mTLS authentication, [Beats](https://www.elastic.co/beats) and
-[Logstash](https://www.elastic.co/logstash) from
-[Elastic](https://www.elastic.co/) for collecting/shipping and routing data
-respectively, and [Traefik](https://traefik.io/traefik/) as entrypoint proxy
-for all HTTP-based services.
+With Morio, you will be able to effortlessly collect, analyse, and act on data
+from various endpoints, ensuring seamless data flow and comprehensive
+monitoring. Under the hood, Morio utilises:
+
+- [RedPanda](https://redpanda.com/) for its Kafka-compatible streaming API
+- [Smallstep Step-CA](https://smallstep.com/docs/step-ca/) for X.509
+  certificate provisioning and mTLS authentication
+- [Beats](https://www.elastic.co/beats) and
+  [Logstash](https://www.elastic.co/logstash) from
+  [Elastic](https://www.elastic.co/) for collecting/shipping and routing data
+  respectively
+- and [Traefik](https://traefik.io/traefik/) as the entrypoint proxy for all
+  HTTP-based services.
 
 While anyone with sufficient expertise, time, and dedication can build a
 state-of-the-art streaming data infrastructure out of these components, with

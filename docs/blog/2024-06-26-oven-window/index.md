@@ -21,7 +21,7 @@ But on the flip side, we need to be concious of
 raised expectations, and prevent people from getting dissapointed because their
 initial enthusiasm bumps into the still (very) rough edges of Morio.
 
-For this reason, we'd like to clarity what you can expect at this time (May 2024):
+For this reason, we'd like to clarity what you can expect at this time:
 
 - __Morio is not ready__<br />
   Morio exists in various more or less broken states. We do not have any published releases at this time. We do not even have a stable `main` branch. Use the current Morio only as a learning experience.
