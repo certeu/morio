@@ -1,4 +1,4 @@
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 import { Controller } from '#controllers/settings'
 
 const Settings = new Controller()

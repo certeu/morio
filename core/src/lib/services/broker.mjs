@@ -6,12 +6,12 @@ import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
 // Default hooks
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -23,27 +23,27 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('broker', hookProps),
+    recreate: (hookParams) => defaultRecreateServiceHook('broker', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('broker', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('broker', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * We make sure the `/etc/morio/broker` folder exists
      */
-    preCreate: async () => {
+    precreate: async () => {
       // 101 is the UID that redpanda runs under inside the container
-      const uid = store.getPreset('MORIO_BROKER_UID')
+      const uid = utils.getPreset('MORIO_BROKER_UID')
       const dir = '/etc/morio/broker'
       await mkdir(dir)
       await chown(dir, uid, uid)
@@ -55,7 +55,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    preStart: async () => {
+    prestart: async () => {
       /*
        * Location of the broker config file within the core container
        */
@@ -82,14 +82,14 @@ export const service = {
         timeout: 60,
         run: async () => await isCaUp(),
         onFailedAttempt: (s) =>
-          store.log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
+          log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
       })
       if (up)
-        store.log.debug(
+        log.debug(
           'CA is up, still waiting a few seconds before requesting broker certificate'
         )
       else {
-        store.log.err('CA did not come up before timeout. Bailing out')
+        log.err('CA did not come up before timeout. Bailing out')
         return false
       }
 
@@ -103,36 +103,36 @@ export const service = {
       /*
        * Generate X.509 certificate/key for the broker(s)
        */
-      store.log.debug('Requesting broker certificate from CA')
+      log.debug('Requesting broker certificate from CA')
       const certAndKey = await createX509Certificate({
         certificate: {
           cn: 'Morio Broker',
-          c: store.getPreset('MORIO_X509_C'),
-          st: store.getPreset('MORIO_X509_ST'),
-          l: store.getPreset('MORIO_X509_L'),
-          o: store.getPreset('MORIO_X509_O'),
-          ou: store.getPreset('MORIO_X509_OU'),
-          san: store.config.deployment.nodes,
+          c: utils.getPreset('MORIO_X509_C'),
+          st: utils.getPreset('MORIO_X509_ST'),
+          l: utils.getPreset('MORIO_X509_L'),
+          o: utils.getPreset('MORIO_X509_O'),
+          ou: utils.getPreset('MORIO_X509_OU'),
+          san: store.getSettings('deployment.nodes'),
         },
-        notAfter: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+        notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       })
 
       /*
        * Now generate the configuration file and write it to disk
        */
       // 101 is the UID that redpanda runs under inside the container
-      const uid = store.getPreset('MORIO_BROKER_UID')
-      store.log.debug('Storing inital broker configuration')
-      await writeYamlFile(brokerConfigFile, store.config.services.broker.broker, store.log)
+      const uid = utils.getPreset('MORIO_BROKER_UID')
+      log.debug('Storing inital broker configuration')
+      await writeYamlFile(brokerConfigFile, store.get('config.services.morio.broker.broker'), log)
       await chown(brokerConfigFile, uid, uid)
       await writeFile(
         '/etc/morio/broker/tls-cert.pem',
-        certAndKey.certificate.crt + '\n' + store.ca.intermediate
+        certAndKey.certificate.crt + '\n' + store.get('config.ca.intermediate')
       )
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
       await writeFile('/etc/morio/broker/tls-key.pem', certAndKey.key)
       await chown('/etc/morio/broker/tls-key.pem', uid, uid)
-      await writeFile('/etc/morio/broker/tls-ca.pem', store.ca.certificate)
+      await writeFile('/etc/morio/broker/tls-ca.pem', store.get('config.ca.certificate'))
       await chown('/etc/morio/broker/tls-ca.pem', uid, uid)
       await chown('/etc/morio/broker', uid, uid)
       await mkdir('/morio/data/broker')
@@ -150,7 +150,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    postStart: async () => {
+    poststart: async () => {
       /*
        * Make sure broker is up
        */
@@ -159,11 +159,11 @@ export const service = {
         timeout: 60,
         run: async () => await isBrokerUp(),
         onFailedAttempt: (s) =>
-          store.log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
+          log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
       })
-      if (up) store.log.debug(`Broker is up.`)
+      if (up) log.debug(`Broker is up.`)
       else {
-        store.log.warn(`Broker did not come up before timeout. Not creating topics.`)
+        log.warn(`Broker did not come up before timeout. Not creating topics.`)
         return
       }
 
@@ -186,7 +186,7 @@ const ensureTopicsExist = async () => {
   for (const topic of store
     .getPreset('MORIO_BROKER_TOPICS')
     .filter((topic) => !topics.includes(topic))) {
-    store.log.debug(`Topic ${topic} not present, creating now.`)
+    log.debug(`Topic ${topic} not present, creating now.`)
     await execContainerCommand('broker', ['rpk', 'topic', 'create', topic])
   }
 }
@@ -198,7 +198,7 @@ const ensureTopicsExist = async () => {
  */
 const isBrokerUp = async () => {
   const result = await testUrl(
-    `http://broker_${store.config.core.node_nr}:9644/v1/cluster/health_overview`,
+    `http://broker_${store.get('state.node.serial')}:9644/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
@@ -215,7 +215,7 @@ const isBrokerUp = async () => {
  * @return {object} result - The JSON output as a POJO
  */
 const getTopics = async () => {
-  const result = await testUrl(`http://broker_${store.config.core.node_nr}:8082/topics`, {
+  const result = await testUrl(`http://broker_${store.get('state.node.serial')}:8082/topics`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

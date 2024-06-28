@@ -17,7 +17,7 @@
     "tests": "./core/run-test-container.sh",
     "dev": "./core/run-dev-container.sh",
     "prod": "./core/run-prod-container.sh",
-    "dev:clean": "docker rm -fv core api ui proxy ca broker console connector && docker network rm morionet",
+    "dev:clean": "docker rm -fv core api ui proxy ca broker console connector db && docker network rm morionet",
     "destroy": "./scripts/destroy.sh",
     "redev": "npm run destroy && npm run dev",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",

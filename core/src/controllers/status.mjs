@@ -1,6 +1,6 @@
 import { keypairAsJwk } from '#shared/crypto'
 // Store
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -22,12 +22,12 @@ Controller.prototype.status = async (req, res) => {
    * Return this in any case
    */
   const base = {
-    ...store.info,
-    uptime: (Date.now() - store.start_time) / 1000,
+    ...store.get('info', {}),
+    uptime: (Date.now() - store.get('info.start_time')) / 1000,
   }
 
-  if (store.keys?.deployment) base.deployment = store.keys.deployment
-  if (store.keys?.node) base.node = store.keys.node
+  if (store.get('keys.deployment')) base.deployment = store.keys.deployment
+  if (store.get('keys.node')) base.node = store.keys.node
 
   /*
    * Return adding whether MORIO is setup or not
@@ -54,7 +54,7 @@ Controller.prototype.jwks = async (req, res) => {
   /*
    * Get JWKS info from public key
    */
-  const jwks = await keypairAsJwk({ public: store.keys.public })
+  const jwks = await keypairAsJwk({ public: store.get('keys.public') })
 
   return res
     .status(200)

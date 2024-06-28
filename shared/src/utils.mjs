@@ -126,6 +126,9 @@ export const wrapExpress = (log, server) => {
   const shutdown = (signal, value) => {
     log.info(`Received a ${signal} signal. Initiating shutdown.`)
     server.close(() => {
+      /*
+       * Wave goodbye
+       */
       log.info(`Shutdown finalized. Exiting.`)
       process.exit(128 + value) /* eslint-disable-line no-undef */
     })

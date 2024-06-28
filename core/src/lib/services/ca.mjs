@@ -5,12 +5,12 @@ import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 // Default hooks
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -22,19 +22,19 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('ca', hookProps),
+    recreate: (hookParams) => defaultRecreateServiceHook('ca', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('ca', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('ca', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to starting the container
      *
@@ -42,7 +42,7 @@ export const service = {
      * and secret, and even output the secret in the logs.
      * So instead, let's tell it what root certificate/keys/password it should use.
      */
-    preStart: async () => {
+    prestart: async () => {
       /*
        * We'll check if there's a default ca-cli config file on disk
        * If so, the CA has already been initialized
@@ -60,7 +60,7 @@ export const service = {
       /*
        * No config found, generate configuration, keys, certs, and secrets file
        */
-      store.log.debug('Generating inital CA config - This will take a couple of seconds')
+      log.debug('Generating inital CA config - This will take a couple of seconds')
 
       /*
        * Generate keys and certificates
@@ -78,13 +78,13 @@ export const service = {
       /*
        * Store root certificate and fingerprint in store
        */
-      store.ca = {
-        url: `https://ca_${store.config.core.node_nr}:9000`,
+      store.set('config.ca', {
+        url: `https://ca_${store.get('info.node.serial')}:9000`,
         fingerprint: init.root.fingerprint,
         jwk,
         certificate: init.root.certificate,
         intermediate: init.intermediate.certificate,
-      }
+      })
 
       /*
        * Also write root & intermediate certificates to the downloads folder
@@ -120,7 +120,7 @@ export const service = {
       /*
        * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
        */
-      const uid = store.getPreset('MORIO_CA_UID')
+      const uid = utils.getPreset('MORIO_CA_UID')
       await mkdir('/morio/data/ca')
       await chown('/morio/data/ca', uid, uid)
       await mkdir('/etc/morio/ca')
@@ -165,7 +165,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    postStart: async () => {
+    poststart: async () => {
       /*
        * Make sure CA is up
        */
@@ -174,10 +174,10 @@ export const service = {
         timeout: 60,
         run: async () => await isCaUp(),
         onFailedAttempt: (s) =>
-          store.log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
+          log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
       })
-      if (up) store.log.debug(`CA is up.`)
-      else store.log.warn(`CA did not come up before timeout. Moving on anyway.`)
+      if (up) log.debug(`CA is up.`)
+      else log.warn(`CA did not come up before timeout. Moving on anyway.`)
 
       return true
     },
@@ -241,13 +241,13 @@ const reloadCaConfiguration = async () => {
   /*
    * Store fingerprint, JWK, and root certificate in the store for easy access
    */
-  store.ca = {
-    url: `https://ca_${store.config.core.node_nr}:9000`,
+  store.set('config.ca', {
+    url: `https://ca_${store.get('node,serial').config.core.node_nr}:9000`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
     intermediate,
-  }
+  })
 
   return true
 }

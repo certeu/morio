@@ -1,5 +1,6 @@
 import { readFile, writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
+import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import mustache from 'mustache'
 import yaml from 'js-yaml'
@@ -42,46 +43,40 @@ const presetGetters = {
   prod: getPreset
 }
 
+/*
+ * Setup a store that we can pass to resolveServiceConfiguration
+ */
+const getHelpers = (env) => {
+  const store = new Store()
+  store.config = {}
+  store.info = { production: env === 'prod' }
+  store.testing = env === 'testing'
+  const utils = new Store()
+  utils.getPreset = presetGetters[env]
 
+  return { store, utils }
+}
 
 const config = {
   core: {
     /*
      * Resolve the development configuration
      */
-    dev: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-    }),
+    dev: await resolveServiceConfiguration('core', getHelpers('dev')),
     /*
      * Resolve the test configuration
      */
-    test: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-      testing: true
-    }),
+    test: await resolveServiceConfiguration('core', getHelpers('test')),
     /*
      * Resolve the production configuration
      */
-    prod: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.prod,
-      inProduction: () => true,
-      config: {},
-    }),
+    prod: await resolveServiceConfiguration('core', getHelpers('prod')),
   },
   api: {
     /*
      * Resolve the test configuration
      */
-    test: await resolveServiceConfiguration('api', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-      testing: true
-    }),
+    test: await resolveServiceConfiguration('api', getHelpers('test')),
   }
 }
 

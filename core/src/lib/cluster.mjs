@@ -5,13 +5,13 @@ import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
 import { sleep } from '#shared/utils'
 // Docker
 import { runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
-// Store
-import { store } from './store.mjs'
+// Utilities
+import { store, log, utils } from './utils.mjs'
 
 /**
  * Helper method to update the cluster state
  */
-const storeClusterState = async () => {
+export const storeClusterState = async () => {
   await storeClusterSwarmState()
   await storeClusterMorioState()
 }
@@ -29,15 +29,15 @@ const storeClusterSwarmState = async () => {
    * Is a Swarm running?
    */
   if (result && swarm.JoinTokens) {
-    store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
+    log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('swarm.tokens', swarm.JoinTokens)
-    store.set('swarm.ready', true)
+    store.set('info.swarm.ready', true)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
     if (ok) {
       let i = 1
       for (const node of nodes) {
-        store.set(['swarm', 'nodes', node.Description.Hostname], node)
-        store.log.debug(
+        store.set(['config', 'swarm', 'nodes', node.Description.Hostname], node)
+        log.debug(
           `Swarm member ${i} is ${node.Description.Hostname} with IP ${node.Status.Addr}${node.ManagerStatus.Leader ? ', this node is the swarm leader' : ''}`
         )
         i++
@@ -45,20 +45,20 @@ const storeClusterSwarmState = async () => {
       /*
        * Single node makes this easy
        */
-      if (store.config.deployment?.node_count === 1) {
-        store.set('config.core.node_nr', 1)
-        store.set('config.core.names', {
+      if (store.get("settings.resolved.deployment.node_count") === 1) {
+        store.set('info.node.serial', 1)
+        store.set('info.node.names', {
           internal: 'core_1',
-          external: store.config.deployment.nodes[0],
+          external: store.get(['settings', 'resolved', 'deployment', 'nodes', 0]),
         })
-        store.set('config.deployment.fqdn', store.config.deployment.nodes[0])
+        store.set('info.cluster.fqdn', store.get(['settings', 'resolved', 'deployment', 'nodes', 0]))
         if (nodes.length !== 1)
-          store.log.warn(
+          log.warn(
             `Swarm node count (${nodes.length}) differs from configured node count (${nodes.length})`
           )
       } else {
         // Fixme
-        store.log.warn('FIXME: Handle names here?')
+        log.warn('FIXME: Handle names here?')
       }
       /*
        * Are all deployment nodes found in the swarm?
@@ -66,8 +66,8 @@ const storeClusterSwarmState = async () => {
        */
     }
   } else {
-    store.log.warn(`There is no swarm on this host`)
-    store.set('swarm.ready', false)
+    log.warn(`There is no swarm on this host`)
+    store.set('info.swarm.ready', false)
   }
 }
 
@@ -80,9 +80,9 @@ const storeClusterMorioState = async () => {
    * Attempt to reach API instances via their public names
    */
   let i = 0
-  for (const node of store.config.deployment.nodes.sort()) {
+  for (const node of store.get('settings.sanitized.deployment.nodes').sort()) {
     i++
-    const data = await testUrl(`https://${node}${store.getPreset('MORIO_API_PREFIX')}/info`, {
+    const data = await testUrl(`https://${node}${utils.getPreset('MORIO_API_PREFIX')}/info`, {
       returnAs: 'json',
       ignoreCertificate: true,
       returnError: true,
@@ -91,17 +91,17 @@ const storeClusterMorioState = async () => {
     if (ok && Array.isArray(ip)) {
       if (ip.length > 0) ip = ip[0]
       else if (ip.length > 1)
-        store.log.warn(
+        log.warn(
           `Node ${node} resolves to multiple IP addresses. This should be avoided. (${ip.join()})`
         )
-      else store.log.error(`Unable to resolve node ${node}. No addresses found.`)
-    } else store.log.error(`Unable to resolve node ${node}. Lookup failed.`)
+      else log.error(`Unable to resolve node ${node}. No addresses found.`)
+    } else log.error(`Unable to resolve node ${node}. Lookup failed.`)
 
     const add = {
       fqdn: node,
       ip: Array.isArray(ip),
       hostname: node.split('.')[0],
-      node_id: i,
+      serial: i,
     }
 
     nodes[i] = data?.about ? { ...data, ...add, up: true } : { ...add, up: false }
@@ -112,24 +112,24 @@ const storeClusterMorioState = async () => {
    */
   for (const [serial, node] of Object.entries(nodes)) {
     if (node.core?.node && node.core.node === store.node.node)
-      store.set('cluster.local_node', serial)
+      store.set('info.cluster.local_node', serial)
   }
 
   /*
    * Store data
    */
-  store.set('cluster.nodes', nodes)
-  //store.set('cluster.leader', leader.node_id ? leader : false)
-  store.set('cluster.sets', {
-    all: Object.values(nodes).map((node) => node.node_id),
+  store.set('info.cluster.nodes', nodes)
+  //store.set('cluster.leader', leader.serial ? leader : false)
+  store.set('info.cluster.sets', {
+    all: Object.values(nodes).map((node) => node.serial),
     ephemeral: Object.values(nodes)
       .filter((node) => (node.ephemeral ? true : false))
-      .map((node) => node.node_id),
+      .map((node) => node.serial),
     up: Object.values(nodes)
       .filter((node) => (node.up ? true : false))
-      .map((node) => node.node_id),
+      .map((node) => node.serial),
   })
-  if (store.swarm?.nodes) store.cluster.sets.swarm = Object.keys(store.swarm.nodes)
+  if (store.get('config.swarm.nodes')) store.set('info.cluster.sets.swarm', Object.keys(store.get('config.swarm.nodes')))
 }
 
 /**
@@ -152,9 +152,7 @@ export const joinSwarm = async (ip, token, managers = []) =>
  * Does not take parameters, does not return,
  * but mutates the store.
  */
-const ensureSwarm = async () =>
-  //initialSetup=false,
-  {
+const ensureSwarm = async () => {
     /*
      * Find our feet
      */
@@ -164,7 +162,7 @@ const ensureSwarm = async () =>
      * Does a swarm need to be created?
      */
     if (!store.swarm?.tokens?.Manager) {
-      store.log.debug('Initializing Docker Swarm')
+      log.debug('Initializing Docker Swarm')
       const [swarmCreated] = await runDockerApiCommand('swarmInit', {
         ListenAddr: store.node.ip,
         AdvertiseAddr: store.node.ip,
@@ -177,49 +175,48 @@ const ensureSwarm = async () =>
       if (swarmCreated) {
         await storeClusterState()
         const node = Object.values(store.swarm.nodes).pop()
-        store.log.debug('Adding labels to local swarm node')
+        log.debug('Adding labels to local swarm node')
         const [labelsAdded] = await runNodeApiCommand(node.ID, 'update', {
           version: String(node.Version.Index),
           Labels: {
-            'morio.cluster.uuid': store.keys.deployment,
-            'morio.node.uuid': store.node.uuid,
-            'morio.node.fqdn': store.node.fqdn,
-            'morio.node.hostname': store.node.hostname,
-            'morio.node.ip': store.node.ip,
-            'morio.node.serial': String(store.node.serial),
+            'morio.cluster.uuid': store.get('keys.deployment'),
+            'morio.node.uuid': store.get('info.node.uuid'),
+            'morio.node.fqdn': store.get('info.node.fqdn'),
+            'morio.node.hostname': store.get('info.node.hostname'),
+            'morio.node.ip': store.get('info.node.ip'),
+            'morio.node.serial': String(store.get('info.node.serial')),
           },
           Role: 'manager',
           Availability: 'Active',
         })
-        if (!labelsAdded) store.log.warn('Unable to add labels to swarm node. This is unexpected.')
-      } else store.log.warn('Failed to ceated swarm. This is unexpected.')
+        if (!labelsAdded) log.warn('Unable to add labels to swarm node. This is unexpected.')
+      } else log.warn('Failed to ceated swarm. This is unexpected.')
     }
 
     /*
      * Now compare cluster nodes to swarm nodes,
      * and ask missing nodes to join the cluster
      */
-    for (const id of store.cluster.sets.all.filter(
+    console.log({cluster: store.get('info.cluster.nodes')})
+    for (const id of store.get('info.cluster.sets.all', []).filter(
       (serial) => `${serial}` !== `${store.cluster.local_node}`
     )) {
-      const node = store.cluster.nodes[id]
-      const fqdn = store.cluster.nodes[id].fqdn
-      const host = store.cluster.nodes[id].node_hostname
-      if (!store.cluster.sets.swarm || !store.cluster.sets.swarm.includes(node.hostname)) {
+      const { serial, fqdn, hostname } = store.get(['info', 'cluster', 'nodes', id])
+      if (!store.get('info.cluster.sets.swarm') || !store.get('info.cluster.sets.swarm').includes(fqdn)) {
         try {
-          store.log.debug(`Asking ${fqdn} to join the cluster`)
-          await axios.post(
-            `https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`,
-            {
-              join: store.node,
-              as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) },
-              managers: swarmManagers(),
-              token: store.swarm.tokens.Manager,
-            },
-            {
-              httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-            }
-          )
+          log.debug(`Asking ${fqdn} to join the cluster`)
+          //await axios.post(
+          //  `https://${fqdn}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
+          //  {
+          //    join: store.get('info.node'),
+          //    as: { serial, fqdn, hostname, ip: await resolveHostAsIp(fqdn) },
+          //    managers: swarmManagers(),
+          //    token: store.swarm.tokens.Manager,
+          //  },
+          //  {
+          //    httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+          //  }
+          //)
         } catch (err) {
           console.log(err)
         }
@@ -228,7 +225,7 @@ const ensureSwarm = async () =>
   }
 
 /**
- * This is called from the beforeAll lifecycle hook
+ * This is called from the beforeall lifecycle hook
  * when we are in a clusterd depoyment. Clustering
  * requires a bit more work, because we don't just have
  * to resolve the configuration, we also need to make
@@ -237,28 +234,26 @@ const ensureSwarm = async () =>
  */
 export const startCluster = async ({
   initialSetup = false,
-  //coldStart=false
 }) => {
-  store.set('swarm.ready', false)
+  store.set('state.swarm_ready', false)
   let tries = 0
-  while (store.swarm.ready === false && tries < store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')) {
+  while (store.get('state.swarm_ready') === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')) {
     tries++
-    if (store.swarm.ready) store.log.info('Cluster Swarm is ready')
-    else
-      store.log.warn(
-        `Cluster Swarm is not ready. Will attempt to bring it up (${tries}/${store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
-      )
-    await ensureSwarm({ initialSetup: true })
-    if (!store.swarm.ready) await sleep(store.getPreset('MORIO_CORE_SWARM_SLEEP'))
+    log.warn(
+      `Cluster Swarm is not ready. Will attempt to bring it up (${tries}/${utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
+    )
+    await ensureSwarm()
+    if (store.get('state.swarm_ready')) log.info('Cluster Swarm is ready')
+    else await sleep(utils.getPreset('MORIO_CORE_SWARM_SLEEP'))
   }
 
   /*
-   * If this is the initial setup, make sure we have epehemeral nodes
+   * If this is the initial setup, make sure we have ephemeral nodes
    */
   if (initialSetup) {
-    store.log.debug('Initial setup, we need ephemeral nodes')
+    log.debug('Initial setup, we need ephemeral nodes')
     //  if (store.cluster.sets.ephemeral.length < 2) {
-    //    store.log.error(
+    //    log.error(
     //      `Initial cluster setup, but not enough ephemeral nodes found. Cannot continue`
     //    )
     //    return
@@ -272,13 +267,16 @@ export const startCluster = async ({
     //  return
   }
 
-  return store.get('swarm.ready')
+  // FIXME: This needs to be set properly later
+  store.set('info.node.serial', 1)
+
+  return store.get('state.swarm_ready')
 
   /*
    * Are we able to identity ourselves?
   store.set('cluster.me', Object.values(store.cluster.nodes))
     .filter(node => node.node === store.keys.node)
-    .map(node => node.node_id)
+    .map(node => node.serial)
     .pop()
   if (Array.isArray(store.cluster.me)) store.cluster.me = store.cluster.me.pop().toString()
   else store.cluster.me = false
@@ -307,8 +305,8 @@ export const startCluster = async ({
    * If we are not leading, attempt to reach the leader and ask to
    * reconfigure.
   if (!store.cluster.leader) {
-    store.log.debug('We are not leading this cluster')
-    store.log.error('FIXME: Need to ask leader to reconfigure the cluster')
+    log.debug('We are not leading this cluster')
+    log.error('FIXME: Need to ask leader to reconfigure the cluster')
     return
   }
 
@@ -320,22 +318,22 @@ export const startCluster = async ({
   if (store.cluster.sets.all.length === store.cluster.sets.up.length) {
     /*
      * All nodes are up. This is nice.
-    store.log.debug('All cluster nodes appear to be up')
+    log.debug('All cluster nodes appear to be up')
     if (store.cluster.sets.all.length - 1 === store.cluster.sets.ephemeral.length) {
       /*
        * We are the only non-ephemral mode.
        * This is the initial cluster bootstrap, so we setup Docker
        * Swarm, and then join all other nodes to the cluster.
-      store.log.info('We are leading and all other nodes are ephemeral. Creating cluster.')
+      log.info('We are leading and all other nodes are ephemeral. Creating cluster.')
       await ensureSwarm()
     }
     else if (store.cluster.sets.ephemeral.length > 0) {
-      store.log.warn('We are leading, some nodes are ephemeral, some or not. Not sure how to handle this (yet).')
+      log.warn('We are leading, some nodes are ephemeral, some or not. Not sure how to handle this (yet).')
       throw('Cannot handle mixed ephemeral and instantiated nodes')
     }
   }
   else {
-    store.log.warn('Some nodes did not respond. Will attempt to create cluster with the nodes we have')
+    log.warn('Some nodes did not respond. Will attempt to create cluster with the nodes we have')
     throw('FIXME: Support bootstrapping partial cluster')
   }
 
@@ -350,6 +348,6 @@ export const startCluster = async ({
  * formatted for use in a joinSwarm call
  */
 const swarmManagers = () =>
-  Object.values(store.swarm.nodes)
+  Object.values(store.get('config.swarm.nodes'))
     .filter((node) => node.ManagerStatus.Reachability === 'reachable')
     .map((node) => node.ManagerStatus.Addr)

@@ -22,5 +22,32 @@ const resolvers = {
   ui,
 }
 
-export const resolveServiceConfiguration = (name, store) =>
-  resolvers[name] ? resolvers[name](store) : false
+export const resolveServiceConfiguration = (name, helpers) =>
+  resolvers[name] ? resolvers[name](helpers) : false
+
+/*
+ * This is the order in which services are started
+ */
+export const serviceOrder = [
+  'core',
+  'db',
+  'ca',
+  'proxy',
+  'api',
+  'ui',
+  'broker',
+  'console',
+  'connector',
+  'dbuilder',
+]
+
+/*
+ * This is the order in which services are started in ephemeral mode
+ */
+export const ephemeralServiceOrder = [
+  'core',
+  'proxy',
+  'api',
+  'ui',
+]
+

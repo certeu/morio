@@ -1,15 +1,15 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
   const DIRS = {
-    data: store.getPreset('MORIO_DATA_ROOT'),
-    dl: store.getPreset('MORIO_DOWNLOADS_FOLDER'),
-    repo: store.getPreset('MORIO_REPO_ROOT'),
+    data: utils.getPreset('MORIO_DATA_ROOT'),
+    dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),
+    repo: utils.getPreset('MORIO_REPO_ROOT'),
   }
 
   return {
@@ -25,11 +25,11 @@ export const resolveServiceConfiguration = (store) => {
       // Image to run (different in dev)
       image: 'morio/dbuilder',
       // Image tag (version) to run
-      tag: store.getPreset('MORIO_VERSION'),
+      tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${DIRS.data}/clients/linux:/morio/src`,

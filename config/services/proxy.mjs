@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
 
   return {
     /**
@@ -26,22 +26,22 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports
       ports: ['80:80', '443:443'],
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
-        `${store.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+        `${utils.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
+        `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
       ] : [
-        `${store.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+        `${utils.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
       ],
       // Command
       command: [
@@ -58,15 +58,15 @@ export const resolveServiceConfiguration = (store) => {
         //  Create HTTPS entrypoint
         '--entrypoints.https.address=:443',
         // Set the log level to debug in development
-        `--log.level=${store.inProduction() ? store.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
+        `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
         // Set the log destination
-        `--log.filePath=${store.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
+        `--log.filePath=${utils.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
         // Set the log format
-        `--log.format=${store.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
+        `--log.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Enable access logs
         '--accesslog=true',
         // Set the access log destination
-        `--accesslog.filePath=${store.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
+        `--accesslog.filePath=${utils.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
         // Do not verify backend certificates, just encrypt
         '--serversTransport.insecureSkipVerify=true',
         // Enable ACME certificate resolver (will only work after CA is initialized)
@@ -81,7 +81,7 @@ export const resolveServiceConfiguration = (store) => {
         // Tell traefik to watch itself (so meta)
         'traefik.enable=true',
         // Attach to the morio docker network
-        `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
+        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match rule for Traefik's internal dashboard
         'traefik.http.routers.traefik_dashboard.rule=(PathPrefix(`/api/`) || PathPrefix(`/dashboard/`))',
         //# Avoid rule conflicts by setting priority manually

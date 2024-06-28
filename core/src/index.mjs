@@ -7,14 +7,13 @@ import { startMorio } from './lib/services/index.mjs'
 import { routes } from '#routes/index'
 // Middleware
 import { guardRoutes } from './middleware.mjs'
-// Load the store
-import { store } from './lib/store.mjs'
+// Load the store, logger, and utils
+import { store, log, utils } from './lib/utils.mjs'
 
 /*
- * Get the logger from the store
+ * Say hello
  */
-const log = store.log
-log.status('Cold start of Morio Core')
+log.info('Cold start of Morio Core')
 
 /*
  * Instantiate the Express app
@@ -58,7 +57,7 @@ await reconfigure({ coldStart: true })
  */
 wrapExpress(
   log,
-  app.listen(store.getPreset('MORIO_CORE_PORT'), (err) => {
+  app.listen(utils.getPreset('MORIO_CORE_PORT'), (err) => {
     if (err) log.error(err, 'An error occured')
   })
 )
@@ -67,30 +66,27 @@ wrapExpress(
  * This method allows core to dynamically reload its
  * own configuration
  *
- * @param {object} hookProps = Optional data to pass to lifecycle hooks
+ * @param {object} hookParams = Optional data to pass to lifecycle hooks
  */
-export async function reconfigure(hookProps = {}) {
-  log.status('(Re)Configuring Morio Core')
+export async function reconfigure(hookParams = {}) {
 
   /*
    * Drop us in config resolving mode
    */
-  if (typeof store.info === 'undefined') store.info = {}
-  store.info.config_resolved = false
+  utils.beginReconfigure()
 
   /*
    * This will (re)start all services if that is needed
    */
-  await startMorio(hookProps)
+  await startMorio(hookParams)
 
   /*
    * Tell the API to refresh the config, but don't wait for it
    */
-  store.apiClient.get(`${store.getPreset('MORIO_API_PREFIX')}/reconfigure`, false, store.log.debug)
+  utils.apiClient.get(`${utils.getPreset('MORIO_API_PREFIX')}/reconfigure`, false, log.debug)
 
   /*
    * Let the world know we are ready
    */
-  store.info.config_resolved = true
-  log.status('Morio Core ready - Configuration Resolved')
+  utils.endReconfigure()
 }

@@ -1,4 +1,3 @@
-import { store } from '../lib/store.mjs'
 import { Controller } from '#controllers/cluster'
 
 const Cluster = new Controller()

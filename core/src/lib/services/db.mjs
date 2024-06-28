@@ -4,12 +4,12 @@ import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 // Default hooks
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log } from '../utils.mjs'
 
 const dbClient = restClient(`http://db:4001`)
 
@@ -23,25 +23,25 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('db', hookProps),
+    recreate: (hookParams) => defaultRecreateServiceHook('db', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('db', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('db', hookParams),
     /**
      * Lifecycle hook for anything to be done right after starting the container
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    postStart: async () => {
+    poststart: async () => {
       /*
        * Make sure database is up
        */
@@ -50,11 +50,11 @@ export const service = {
         timeout: 60,
         run: async () => await isDbUp(),
         onFailedAttempt: (s) =>
-          store.log.debug(`Waited ${s} seconds for databse, will continue waiting.`),
+          log.debug(`Waited ${s} seconds for databse, will continue waiting.`),
       })
-      if (up) store.log.debug(`Database is up.`)
+      if (up) log.debug(`Database is up.`)
       else {
-        store.log.warn(`Database did not come up before timeout. Not creating tables.`)
+        log.warn(`Database did not come up before timeout. Not creating tables.`)
         return
       }
 
@@ -90,7 +90,7 @@ const ensureTablesExist = async () => {
   for (const [table, q] of Object.entries(store.config?.services?.db?.schema || {})) {
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1].results.error && result[1].results.error.includes('already exists')) {
-      store.log.trace(`Table ${table} already exists`)
-    } else if (result[0] === 200) store.log.debug(`Table ${table} created`)
+      log.trace(`Table ${table} already exists`)
+    } else if (result[0] === 200) log.debug(`Table ${table} created`)
   }
 }

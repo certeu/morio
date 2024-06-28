@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => ({
+export const resolveServiceConfiguration = ({ store, utils }) => ({
   /**
    * Container configuration
    *
@@ -18,7 +18,7 @@ export const resolveServiceConfiguration = (store) => ({
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: store.getPreset('MORIO_NETWORK'),
+    network: utils.getPreset('MORIO_NETWORK'),
     // Command
     command: '/app/console -config.filepath /etc/morio/console/config.yaml',
     // Entrypoint
@@ -28,16 +28,16 @@ export const resolveServiceConfiguration = (store) => ({
     },
     // Volumes
     volumes: [
-      `${store.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
+      `${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
     ],
     // Configure Traefik with container labels
     labels: [
       // Tell traefik to watch this container
       'traefik.enable=true',
       // Attach to the morio docker network
-      `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
+      `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
       // Match requests going to the console prefix
-      `traefik.http.routers.console.rule=(PathPrefix(\`/${store.getPreset('MORIO_CONSOLE_PREFIX')}\`))`,
+      `traefik.http.routers.console.rule=(PathPrefix(\`/${utils.getPreset('MORIO_CONSOLE_PREFIX')}\`))`,
       // Set priority to avoid rule conflicts
       'traefik.http.routers.console.priority=120',
       // Forward to console service
@@ -70,7 +70,7 @@ export const resolveServiceConfiguration = (store) => ({
       },
     },
     server: {
-      basePath: store.getPreset('MORIO_CONSOLE_PREFIX'),
+      basePath: utils.getPreset('MORIO_CONSOLE_PREFIX'),
     },
   },
 })

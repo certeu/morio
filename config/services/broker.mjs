@@ -1,11 +1,16 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
+
+  /*
+   * We'll re-use this a bunch of times, so let's keep things DRY
+   */
+  const NODE = store.get('info.node.serial', 1)
 
   return {
     /**
@@ -24,7 +29,7 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export
       ports: [
         '18081:18081',
@@ -36,22 +41,22 @@ export const resolveServiceConfiguration = (store) => {
       // Environment
       environment: {
         // Node ID
-        NODE_ID: store.config?.core?.node_nr || 1,
+        NODE_ID: NODE,
       },
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
       ],
       // Command
       command: [
         'redpanda',
         'start',
         '--default-log-level=warn',
-        ...(store.inProduction()
+        ...(PROD
           ? [
               // Mode dev-container uses well-known configuration properties for development in containers.
               '--mode dev-container',
@@ -87,7 +92,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Set the node ID to the node number
          */
-        node_id: store.config?.core?.node_nr || 1,
+        node_id: NODE,
 
         /*
          * The IP address and port for the admin server.
@@ -103,7 +108,7 @@ export const resolveServiceConfiguration = (store) => {
          * The IP address and port for the internal RPC server.
          */
         rpc_server: {
-          address: `broker_${store.config.core.node_nr}`,
+          address: `broker_${NODE}`,
           port: 33145,
         },
 
@@ -111,7 +116,7 @@ export const resolveServiceConfiguration = (store) => {
          * Address of RPC endpoint published to other cluster members.
          */
         advertised_rpc_api: {
-          address: `broker_${store.config.core.node_nr}`,
+          address: `broker_${NODE}`,
           port: 33145,
         },
 
@@ -121,7 +126,7 @@ export const resolveServiceConfiguration = (store) => {
         kafka_api: [
           {
             name: 'internal',
-            address: `broker_${store.config.core.node_nr}`,
+            address: `broker_${NODE}`,
             port: 9092,
           },
           {
@@ -161,7 +166,7 @@ export const resolveServiceConfiguration = (store) => {
          */
         advertised_kafka_api: [
           {
-            address: `broker_${store.config.core.node_nr}`,
+            address: `broker_${NODE}`,
             port: 9092,
             name: 'internal',
           },
@@ -186,7 +191,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Cluster ID helps differentiate different Morio deployments
          */
-        cluster_id: store.config?.deployment?.fqdn || Date.now(),
+        cluster_id: store.get('info.cluster.uuid', Date.now()),
 
         /*
          * Enable audit log FIXME
@@ -206,7 +211,7 @@ export const resolveServiceConfiguration = (store) => {
         /*
          * Default replication for topics
          */
-        default_topic_replications: store.config.deployment.nodes.length < 4 ? 1 : 3,
+        default_topic_replications: store.get('settings.resolved.deployment.nodes', []).length < 4 ? 1 : 3,
 
         /*
          * These were auto-added, but might not be a good fit for production
@@ -229,7 +234,7 @@ export const resolveServiceConfiguration = (store) => {
          */
         pandaproxy_api: [
           {
-            address: `broker_${store.config.core.node_nr}`,
+            address: `broker_${NODE}`,
             port: 8082,
             name: 'internal',
           },
@@ -255,7 +260,7 @@ export const resolveServiceConfiguration = (store) => {
       schema_registry: {
         schema_registry_api: [
           {
-            address: `broker_${store.config.core.node_nr}`,
+            address: `broker_${NODE}`,
             port: 8081,
             name: 'internal',
           },

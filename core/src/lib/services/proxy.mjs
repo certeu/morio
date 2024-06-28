@@ -2,11 +2,11 @@ import { readFile, writeFile, mkdir } from '#shared/fs'
 // Default hooks
 import {
   alwaysWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -24,13 +24,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('proxy', hookProps),
+    recreate: (hookParams) => defaultRecreateServiceHook('proxy', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('proxy', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('proxy', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
@@ -38,18 +38,18 @@ export const service = {
      * This will be volume-mapped, so we need to write it to disk so it's available
      * when the container is created.
      */
-    preCreate: async () => {
+    precreate: async () => {
       /*
        * See if entrypoint.sh on the host OS is our custom version
        */
       let file = '/morio/data/proxy/entrypoint.sh'
       const entrypoint = await readFile(file)
       if (entrypoint && entrypoint.includes('update-ca-certificates')) {
-        store.log.debug('Proxy: Custom entrypoint exists, no action needed')
+        log.debug('Proxy: Custom entrypoint exists, no action needed')
       } else {
-        store.log.debug('Proxy: Creating custom entrypoint')
+        log.debug('Proxy: Creating custom entrypoint')
         await mkdir('/etc/morio/proxy')
-        await writeFile(file, store.config.services.proxy.entrypoint, store.log, 0o755)
+        await writeFile(file, store.get('config.services.morio.proxy.entrypoint'), log, 0o755)
       }
 
       /*
@@ -66,10 +66,10 @@ export const service = {
       file = '/morio/data/ca/certs/root_ca.crt'
       const ca = await readFile(file)
       if (ca) {
-        store.log.debug('Proxy: Root certificate file exists, no action needed')
+        log.debug('Proxy: Root certificate file exists, no action needed')
       } else {
-        store.log.debug('Proxy: Creating placeholder root certificate file')
-        await writeFile(file, '', store.log, 0o755)
+        log.debug('Proxy: Creating placeholder root certificate file')
+        await writeFile(file, '', log, 0o755)
       }
 
       return true
@@ -113,17 +113,17 @@ export const addTraefikTlsConfiguration = (service) => {
   /*
    * Don't bother if we are running in ephemeral mode
    */
-  if (store.info.ephemeral) return
+  if (utils.isEphemeral()) return
 
   /*
    * Add acme config to the router
    */
-  for (const router of getTraefikRouters(store.config.services[service])) {
-    store.config.services[service].container.labels.push(
+  for (const router of getTraefikRouters(store.getMorioServiceConfig(service))) {
+    store.config.services.morio[service].container.labels.push(
       `traefik.http.routers.${router}.tls.certresolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${store.config.deployment.nodes[0]}`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${store.config.deployment.nodes.join(', ')}`
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${store.getSettings(['deployment', 'nodes', 0])}`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${store.getSettings(['deployment', 'nodes']).join(', ')}`
     )
   }
 
@@ -131,19 +131,16 @@ export const addTraefikTlsConfiguration = (service) => {
    * Update rule with hostname(s)
    * This will also add the leader_ip and fqdn when Morio is clustered
    */
-  const names = [...store.config.deployment.nodes]
+  const names = store.get(['settings', 'current', 'deployment', 'nodes'])
   for (const name of ['leader_ip', 'fqdn']) {
-    if (store.config.deployment[name]) names.push(store.config.deployment[name])
+    const extra = store.get(['settings', 'current', 'deployment', name])
+    if (extra) names.push(extra)
   }
-  for (const i in store.config.services[service].container?.labels || []) {
-    if (store.config.services[service].container.labels[i].toLowerCase().indexOf('rule=(') !== -1) {
-      const chunks = store.config.services[service].container.labels[i].split('rule=(')
-      store.config.services[service].container.labels[i] =
-        chunks[0] +
-        'rule=(Host(' +
-        names.map((node) => `\`${node}\``).join(',') +
-        ')) && (' +
-        chunks[1]
+  const labelPath = [ 'services', 'morio', service, 'container', 'labels' ]
+  for (const [i, label] of Object.entries(store.get(labelPath, {}))) {
+    if (label.toLowerCase().indexOf('rule=(') !== -1) {
+      const chunks = label.split('rule=(')
+      store.set([...labelPath, i], chunks[0] + 'rule=(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1])
     }
   }
 }

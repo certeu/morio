@@ -1,4 +1,4 @@
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 /**
  * This method adds the config routes to Express

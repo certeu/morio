@@ -1,8 +1,8 @@
 // Default hooks
 import {
   alwaysWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Helper method to add Traefik labels to container for TLS
 import { addTraefikTlsConfiguration } from './proxy.mjs'
@@ -19,25 +19,25 @@ export const service = {
      */
     wanted: alwaysWantedHook,
     /*
-     * Lifecycle hook to determine whether to recreate the container
+     * Lifecycle hook to determine whether to recreate the service
      * We just reuse the default hook here, telling it we need TLS configured.
      */
-    recreateContainer: (hookProps = {}) =>
-      defaultRecreateContainerHook('api', { ...hookProps, traefikTLS: true }),
+    recreate: (hookParams = {}) =>
+      defaultRecreateServiceHook('api', { ...hookParams, traefikTLS: true }),
     /**
-     * Lifecycle hook to determine whether to restart the container
-     * We just reuse the default hook here, checking whether the container
+     * Lifecycle hook to determine whether to restart the service
+     * We just reuse the default hook here, checking whether the service
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('api', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('api', hookParams),
     /**
-     * Lifecycle hook for anything to be done prior to creating the container
+     * Lifecycle hook for anything to be done prior to creating the service
      *
      * We need to add the required labels to it to configure Traefik TLS.
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    preCreate: () => {
+    precreate: () => {
       /*
        * Add labels for Traefik TLS configuration
        */

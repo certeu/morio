@@ -1,5 +1,5 @@
 // Load the store
-import { store } from './lib/store.mjs'
+import { store } from './lib/utils.mjs'
 
 /*
  * List of routes allowed in ephemeral mode
@@ -16,13 +16,13 @@ const reconfigureRoutes = ['GET/status']
  * in ephemeral mode or while resolving the configuration
  */
 export const guardRoutes = (req, res, next) => {
-  if (store?.info?.ephemeral && !ephemeralRoutes.includes(req.method + req.url))
+  if (utils.isEphemeral() && !ephemeralRoutes.includes(req.method + req.url))
     return res
       .status(503)
       .send({ errors: ['Not available in ephemeral mode'] })
       .end()
 
-  if (store?.info?.config_resolved !== true && !reconfigureRoutes.includes(req.method + req.url))
+  if (store.get('info.config_resolved') !== true && !reconfigureRoutes.includes(req.method + req.url))
     return res
       .status(503)
       .set('Retry-After', 28)

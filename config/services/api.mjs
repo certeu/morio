@@ -1,24 +1,24 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
   const DIRS = {
-    conf: store.getPreset('MORIO_CONFIG_ROOT'),
-    data: store.getPreset('MORIO_DATA_ROOT'),
-    dl: store.getPreset('MORIO_DOWNLOADS_FOLDER'),
+    conf: utils.getPreset('MORIO_CONFIG_ROOT'),
+    data: utils.getPreset('MORIO_DATA_ROOT'),
+    dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),
   }
 
   const labels = [
     // Tell traefik to watch this container
     'traefik.enable=true',
     // Attach to the morio docker network
-    `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
+    `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
     // Match requests going to the API prefix
-    `traefik.http.routers.api.rule=(PathPrefix(\`${store.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`, \`/coverage\`))`,
+    `traefik.http.routers.api.rule=(PathPrefix(\`${utils.getPreset('MORIO_API_PREFIX')}\`, \`/downloads\`, \`/coverage\`))`,
     // Set priority to avoid rule conflicts
     `traefik.http.routers.api.priority=100`,
     // Forward to api service
@@ -26,11 +26,11 @@ export const resolveServiceConfiguration = (store) => {
     // Only match requests on the https endpoint
     `traefik.http.routers.api.entrypoints=https`,
     // Forward to port on container
-    `traefik.http.services.api.loadbalancer.server.port=${store.getPreset('MORIO_API_PORT')}`,
+    `traefik.http.services.api.loadbalancer.server.port=${utils.getPreset('MORIO_API_PORT')}`,
     // Enable TLS
     `traefik.http.routers.api.tls=true`,
     // Enable authentication
-    `traefik.http.middlewares.auth.forwardauth.address=http://api:${store.getPreset('MORIO_API_PORT')}/auth`,
+    `traefik.http.middlewares.auth.forwardauth.address=http://api:${utils.getPreset('MORIO_API_PORT')}/auth`,
     `traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-`,
     `traefik.http.routers.api.middlewares=auth@docker`,
   ]
@@ -49,9 +49,6 @@ export const resolveServiceConfiguration = (store) => {
   return {
     /**
      * Container configuration
-     *
-     * @param {object} config - The high-level Morio configuration
-     * @return {object} container - The container configuration
      */
     container: {
       // Name to use for the running container
@@ -59,11 +56,11 @@ export const resolveServiceConfiguration = (store) => {
       // Image to run (different in dev)
       image: PROD ? 'morio/api' : 'morio/api-dev',
       // Image tag (version) to run
-      tag: store.getPreset('MORIO_VERSION'),
+      tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${DIRS.conf}/shared:/etc/morio/shared`,
@@ -71,7 +68,7 @@ export const resolveServiceConfiguration = (store) => {
       ] : [
         `${DIRS.conf}/shared:/etc/morio/shared`,
         `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-        `${store.getPreset('MORIO_REPO_ROOT')}:/morio`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
       ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
@@ -87,5 +84,19 @@ export const resolveServiceConfiguration = (store) => {
       // Configure Traefik with container labels
       labels,
     },
+    /**
+     * Swarm Service configuration
+     */
+    swarm: {
+      //cmd:  PROD
+      //  ? ['pm2-runtime']
+      //  : ['npm'],
+      //args: PROD
+      //  ? [ "--name", "api", "--namespace", "morio", "--log-type", "json", "--max-memory-bytes", "250000000", "./dist/index.mjs" ]
+      //  : ['run', 'dev'],
+      //dir: '/morio/api',
+      //user: '2112',
+      //groups: ['2112'],
+    }
   }
 }

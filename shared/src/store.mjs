@@ -16,24 +16,22 @@ const avoid = ['set', 'setIfUnset', 'push', 'unset', 'get', 'extend']
  * Constructor for a Store
  *
  * @constructor
- * @param {Array} methods - Any methods to add to the store
+ * @param {Object} log - Logger instance
  * @return {Store} this - The Store instance
  */
-export function Store(methods = []) {
+export function Store(log = false) {
 
   /*
    * The store is typically extended with a logger
-   * but we will start off with a default one just in case
+   * Either one is passed in, or if not we attached a default one
+   * In each case, it's a non-enumerable property
    */
-  this.log = logger('store', 'info')
-
-  /*
-   * Attache passed-in methods
-   */
-  for (const [path, method] of methods) {
-    if (avoid.indexOf(path) !== -1) this.log.warn(`You cannot overwrite \`store.${path}()\``)
-    else set(this, path, method)
-  }
+  Object.defineProperty(this, 'log', {
+    value: log ? log : logger,
+    configurable: false,
+    enumerable: false,
+    writeable: false,
+  })
 
   return this
 }
@@ -68,6 +66,7 @@ Store.prototype.extend = function (methods) {
  * @return {mixed} value - The value stored under key
  */
 Store.prototype.get = function (path, dflt) {
+  console.log(`store.get: ${path}`)
   const val = get(this, path, dflt)
   if (val === undefined) this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
 
@@ -97,6 +96,7 @@ Store.prototype.push = function (path, ...values) {
  * @return {Store} this - The Store instance
  */
 Store.prototype.set = function (path, value) {
+  console.log(`store.set: ${path}, ${JSON.stringify(value)}`)
   if (typeof value === 'undefined') this.log.warn(`Store.set(value) on key \`${path}\`, but value is undefined`)
   set(this, path, value)
 

@@ -1,12 +1,12 @@
 import { readJsonFile, writeYamlFile } from '#shared/fs'
 // Default hooks
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -18,26 +18,26 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) =>
-      defaultRecreateContainerHook('console', { ...hookProps, traefikTLS: true }),
+    recreate: (hookParams) =>
+      defaultRecreateServiceHook('console', { ...hookParams, traefikTLS: true }),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('console', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('console', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    preCreate: async () => {
+    precreate: async () => {
       /*
        * We'll check if there's a config file on disk
        * If so, the console has already been initialized
@@ -48,7 +48,7 @@ export const service = {
        * If the Console is initialized, return early
        */
       if (bootstrapped && bootstrapped.redpanda) {
-        store.log.debug('Console already initialized')
+        log.debug('Console already initialized')
         return
       }
 

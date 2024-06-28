@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
 
   return {
     /**
@@ -24,27 +24,27 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export
       ports: ['9000:9000'],
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
       ],
       // Configure Traefik with container labels
       labels: [
         // Tell traefik to watch this container
         'traefik.enable=true',
         // Attach to the morio docker network
-        `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
+        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match requests going to the CA root certificate
         'traefik.http.routers.ca.rule=(PathPrefix(`/root`, `/acme`, `/provisioners`))',
         // Set priority to avoid rule conflicts
@@ -82,9 +82,9 @@ export const resolveServiceConfiguration = (store) => {
       },
       authority: {
         claims: {
-          minTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MIN'),
-          maxTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-          defaultTLSCertDuration: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_DFLT'),
+          minTLSCertDuration: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MIN'),
+          maxTLSCertDuration: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+          defaultTLSCertDuration: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_DFLT'),
           disableRenewal: false,
           allowRenewalAfterExpiry: true,
         },

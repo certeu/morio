@@ -1,4 +1,4 @@
-import { store } from '../lib/store.mjs'
+import { store, utils } from '../lib/utils.mjs'
 import { createX509Certificate } from '#lib/services/core'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
@@ -41,7 +41,7 @@ Controller.prototype.decrypt = async (req, res) => {
 
   let data
   try {
-    data = store.decrypt(JSON.stringify(valid))
+    data = utils.decrypt(JSON.stringify(valid))
   } catch (err) {
     return res.status(500).send({ errors: ['Failed to encrypt data'] })
   }

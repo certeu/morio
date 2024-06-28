@@ -1,9 +1,9 @@
 import { readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
 import { extname, basename } from 'node:path'
 // Default hooks
-import { defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // Store
-import { store } from '../store.mjs'
+import { store, log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -34,31 +34,31 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('connector', hookProps),
+    recreate: (hookParams) => defaultRecreateServiceHook('connector', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('connector', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('connector', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * Write out the logstash.yml file as it will be volume-mapped,
      * so we need to write it to disk first so it's available
      */
-    preCreate: async () => {
+    precreate: async () => {
       /*
        * Write out logstash.yml based on the settings
        */
       const file = '/etc/morio/connector/logstash.yml'
-      store.log.debug('Connector: Creating config file')
-      await writeYamlFile(file, store.config.services.connector.logstash, store.log, 0o644)
+      log.debug('Connector: Creating config file')
+      await writeYamlFile(file, store.config.services.connector.logstash, log, 0o644)
 
       /*
        * Make sure the data directory exists, and is writable
        */
-      const uid = store.getPreset('MORIO_CONNECTOR_UID')
+      const uid = utils.getPreset('MORIO_CONNECTOR_UID')
       await mkdir('/morio/data/connector')
       await chown('/morio/data/connector', uid, uid)
 
@@ -71,14 +71,14 @@ export const service = {
       /*
        * Make sure pipelines.yml file exists, so it can be mounted
        */
-      await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, store.log, 0o644)
+      await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
 
       return true
     },
     /**
      * Lifecycle hook for anything to be done prior to starting the container
      */
-    preStart: async () => {
+    prestart: async () => {
       /*
        * Need to write out pipelines, but also remove any that
        * may no longer be there, so we first need to load all
@@ -130,15 +130,15 @@ const createWantedPipelines = async (wantedPipelines) => {
     const config = generatePipelineConfiguration(store.settings.connector.pipelines[id], id)
     if (config) {
       const file = pipelineFilename(id)
-      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, store.log)
-      store.log.debug(`Created connector pipeline ${id}`)
+      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, log)
+      log.debug(`Created connector pipeline ${id}`)
       pipelines.push({
         'pipeline.id': id,
         'path.config': `/usr/share/logstash/config/pipeline/${file}`,
       })
     }
   }
-  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, store.log)
+  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, log)
 }
 
 /**
@@ -153,7 +153,7 @@ const createWantedPipelines = async (wantedPipelines) => {
 const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
-      store.log.debug(`Removing pipeline: ${id}`)
+      log.debug(`Removing pipeline: ${id}`)
       await rm(`/etc/morio/connector/pipelines/${id}.config`)
     }
   }

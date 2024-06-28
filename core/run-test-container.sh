@@ -30,6 +30,6 @@ docker run \
   -e MORIO_CORE_LOG_LEVEL=info \
   -e NODE_ENV=test \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
-  morio/core-test:0.2.0 bash /morio/core/tests/run-unit-tests.sh
+  morio/core-dev:0.2.0 bash /morio/core/tests/run-unit-tests.sh
 
 

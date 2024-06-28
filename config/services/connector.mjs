@@ -1,11 +1,16 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
+
+  /*
+   * We'll re-use this a bunch of times, so let's keep things DRY
+   */
+  const NODE = store.get('info.node.serial', 1)
 
   return {
     /**
@@ -24,7 +29,7 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export
       ports: [
         '9600:9600',
@@ -36,19 +41,19 @@ export const resolveServiceConfiguration = (store) => {
       },
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
-        `${store.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
-        //`${store.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
+        `${utils.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
+        //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
-        //`${store.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
+        //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
       ],
     },
 
@@ -62,10 +67,10 @@ export const resolveServiceConfiguration = (store) => {
        */
 
       /*
-       * Set node name based on the node_nr and nodes list
+       * Set node name based on the node serial and nodes list
        */
       node: {
-        name: store.config?.deployment?.nodes[(store.config?.deployment?.node_nr || 1) - 1],
+        name: store.config?.deployment?.nodes[NODE - 1],
       },
       /*
        * Set the log level and format
@@ -108,7 +113,7 @@ export const resolveServiceConfiguration = (store) => {
       },
       api: {
         enabled: true,
-        environment: store.config?.deployment?.nodes[(store.config?.deployment?.node_nr || 1) - 1],
+        environment: store.config?.deployment?.nodes[(NODE - 1)],
         http: {
           host: '0.0.0.0'
         },

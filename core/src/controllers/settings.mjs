@@ -11,7 +11,7 @@ import { reconfigure } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import set from 'lodash.set'
 // Store
-import { store } from '../lib/store.mjs'
+import { store, log, utils } from '../lib/utils.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -32,7 +32,7 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the IDPs configured by the user
    */
-  if (store.settings?.iam?.providers) {
+  if (store.get('settings.iam.providers')) {
     for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
       idps[id] = {
         id,
@@ -46,7 +46,7 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the root token idp, unless it's disabled by a feature flag
    */
-  if (store.settings.tokens?.flags?.DISABLE_ROOT_TOKEN !== true) {
+  if (!store.get('settings.tokens.flags.DISABLE_ROOT_TOKEN', false)) {
     //idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
   }
 
@@ -56,7 +56,7 @@ Controller.prototype.getIdps = async (req, res) => {
   return res
     .send({
       idps,
-      ui: store.settings.iam?.ui || {},
+      ui: store.get('settings.iam.ui', {}),
     })
     .end()
 }
@@ -84,22 +84,22 @@ Controller.prototype.deploy = async (req, res) => {
    */
   const mSettings = req.body
   if (!mSettings.deployment) {
-    store.log.warn(`Ingoring request to deploy invalid settings`)
+    log.warn(`Ingoring request to deploy invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
-  } else store.log.debug(`Processing request to deploy new settings`)
+  } else log.debug(`Processing request to deploy new settings`)
 
   /*
    * Keep previous settings so we can check the delta when figuring
    * out what services need restarting
    */
-  store.oldSettings = cloneAsPojo(store.settings)
-  store.oldConfig = cloneAsPojo(store.config)
+  store.set('previous.settings', cloneAsPojo(store.get('settings')))
+  store.set('previous.config', cloneAsPojo(store.get('config')))
 
   /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
-  store.log.debug(`New settings will be tracked as: ${time}`)
+  log.debug(`New settings will be tracked as: ${time}`)
 
   /*
    * Handle secrets
@@ -110,22 +110,22 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * Write the protected mSettings settings to disk
    */
-  store.log.debug(`Writing new settings to settings.${time}.yaml`)
+  log.debug(`Writing new settings to settings.${time}.yaml`)
   const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
    * Keep safe settings so we return them whenever settings are requested
    */
-  store.safeSettings = cloneAsPojo(mSettings)
+  store.set('safeSettings', cloneAsPojo(mSettings))
 
   /*
    * Don't await deployment, just return
    */
-  store.log.info(`Reconfiguring Morio`)
+  log.info(`Reconfiguring Morio`)
   reconfigure({ hotReload: true })
 
-  return res.send({ result: 'success', settings: store.saveSettings })
+  return res.send({ result: 'success', settings: store.get('saveSettings') })
 }
 
 /**
@@ -140,7 +140,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Only allow this endpoint when running in ephemeral mode
    */
-  if (!store.info?.ephemeral)
+  if (!store.get('info.ephemeral'))
     return res.status(400).send({
       errors: ['You can only use this endpoint on an ephemeral Morio node'],
     })
@@ -150,7 +150,7 @@ Controller.prototype.setup = async (req, res) => {
    */
   const node = await localNodeInfo(req.body)
   if (!node) {
-    store.log.warn(`Ingoring request to setup with unmatched FQDN`)
+    log.warn(`Ingoring request to setup with unmatched FQDN`)
     return res.status(400).send({ errors: ['Request host not listed as Morio node'] })
   }
 
@@ -161,27 +161,27 @@ Controller.prototype.setup = async (req, res) => {
   const mSettings = req.body
   delete mSettings.headers
   if (!mSettings.deployment) {
-    store.log.warn(`Ingoring request to setup with invalid settings`)
+    log.warn(`Ingoring request to setup with invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
-  } else store.log.debug(`Processing request to setup Morio with provided settings`)
+  } else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
    * Drop us in reconfigure mode
    */
-  store.info.config_resolved = false
+  store.set('info.config_resolved', false)
 
   /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
-  store.log.debug(`Initial settings will be tracked as: ${time}`)
+  log.debug(`Initial settings will be tracked as: ${time}`)
 
   /*
    * This is the initial deploy, there will be no key pair or UUID, so generate one.
    */
-  store.log.debug(`Generating root token`)
+  log.debug(`Generating root token`)
   const morioRootToken = 'mrt.' + (await randomString(32))
-  store.log.debug(`Generating key pair`)
+  log.debug(`Generating key pair`)
   const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
   const keys = {
     jwt: generateJwtKey(),
@@ -194,7 +194,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Update the settings with the defaults that are configured
    */
-  for (const [key, val] of store.config.services.core.default_settings) {
+  for (const [key, val] of store.get('config.services.core.default_settings', {})) {
     set(mSettings, key, val)
   }
 
@@ -217,11 +217,11 @@ Controller.prototype.setup = async (req, res) => {
     const { encrypt, decrypt, isEncrypted } = encryptionMethods(
       keys.mrt,
       'Morio by CERT-EU',
-      store.log
+      log
     )
-    store.encrypt = encrypt
-    store.decrypt = decrypt
-    store.isEncrypted = isEncrypted
+    utils.set('encrypt', encrypt)
+    utils.set('decrypt', decrypt)
+    store.set('isEncrypted', isEncrypted)
 
     /*
      * Now ensure token secrecy before we write to disk
@@ -232,21 +232,21 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Write the mSettings settings to disk
    */
-  store.log.debug(`Writing initial settings to settings.${time}.yaml`)
+  log.debug(`Writing initial settings to settings.${time}.yaml`)
   let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
   if (!result) return res.status(500).send({ errors: ['Failed to write initial settings to disk'] })
 
   /*
    * Also write the keys to disk
    */
-  store.log.debug(`Writing key data to keys.json`)
+  log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, keys)
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*
    * Finally write the node info to disk
    */
-  store.log.debug(`Writing node data to node.json`)
+  log.debug(`Writing node data to node.json`)
   result = await writeJsonFile(`/etc/morio/node.json`, node)
   if (!result) return res.status(500).send({ errors: ['Failed to write node info to disk'] })
 
@@ -270,7 +270,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Don't await deployment, just return
    */
-  store.log.info(`Bring Morio out of ephemeral mode`)
+  log.info(`Bring Morio out of ephemeral mode`)
   reconfigure({ initialSetup: true })
 
   return res.send(data)
@@ -306,7 +306,7 @@ const localNodeInfo = async (body) => {
    * Else return uuid, hostname, and IP
    */
   return {
-    ...store.node,
+    ...store.get('node', {}),
     fqdn,
     hostname: fqdn.split('.')[0],
     ip: (await resolveHostAsIp(fqdn)),

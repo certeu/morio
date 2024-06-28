@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = store.get('info.production', false)
 
   return {
     /**
@@ -24,21 +24,21 @@ export const resolveServiceConfiguration = (store) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export (none)
       ports: [],
       // Environment
       environment: {
         // Node ID
-        NODE_ID: store.config?.core?.node_nr || 1,
+        NODE_ID: store.get('info.node.serial'),
       },
       // Volumes
       volumes: PROD ? [
-        `${store.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
-        `${store.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
+        `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
       ] : [
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
-        `${store.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
       ],
     },
     /**

@@ -1,5 +1,5 @@
 // Store
-import { store } from '../lib/store.mjs'
+import { log } from '../lib/utils.mjs'
 import { joinSwarm } from '../lib/cluster.mjs'
 
 /**
@@ -16,7 +16,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.join = async (req, res) => {
-  store.log.info('Received request to join cluster')
+  log.info('Received request to join cluster')
   /*
    * {
   join: {

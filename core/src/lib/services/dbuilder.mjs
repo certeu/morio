@@ -11,18 +11,18 @@ export const service = {
      */
     wanted: ({ onDemandBuild = false }) => onDemandBuild,
     /*
-     * This is an epehemeral container
+     * This is an ephemeral container
      * It should only be recreated/restarted if this is an on-demand build request
      */
-    recreateContainer: ({ onDemandBuild = false }) => onDemandBuild,
-    restartContainer: ({ onDemandBuild = false }) => onDemandBuild,
+    recreate: ({ onDemandBuild = false }) => onDemandBuild,
+    restart: ({ onDemandBuild = false }) => onDemandBuild,
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * We need to make sure the client code is in the right place on the host OS
      * so that it will be mapped and available in the builder.
      */
-    preCreate: async () => {
+    precreate: async () => {
       /*
        * Recursively copy the client code in the data folder
        */
