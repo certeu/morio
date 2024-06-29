@@ -242,7 +242,6 @@ export const getPreset = (key, opts = {}) => {
  */
 export const inProduction = () => {
   const env = getPreset('NODE_ENV', { dflt: 'production', as: 'string' })
-  console.log({env})
 
   return (env === 'production')
 }

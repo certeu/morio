@@ -131,9 +131,9 @@ export const addTraefikTlsConfiguration = (service) => {
    * Update rule with hostname(s)
    * This will also add the leader_ip and fqdn when Morio is clustered
    */
-  const names = store.get(['settings', 'current', 'deployment', 'nodes'])
+  const names = store.getSettings('deployment.nodes')
   for (const name of ['leader_ip', 'fqdn']) {
-    const extra = store.get(['settings', 'current', 'deployment', name])
+    const extra = store.getSettings(['deployment', name])
     if (extra) names.push(extra)
   }
   const labelPath = [ 'services', 'morio', service, 'container', 'labels' ]

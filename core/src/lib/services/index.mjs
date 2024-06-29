@@ -15,7 +15,6 @@ import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder } from
 import {
   docker,
   createDockerContainer,
-  createDockerNetwork,
   createSwarmService,
   runDockerApiCommand,
   runContainerApiCommand,
@@ -126,14 +125,15 @@ export const logStartedConfig = () => {
      * It is, so we should have a config
      */
     log.info(`Using configuration ${store.get('state.settings_serial')}`)
-    if (store.config.deployment.nodes.length > 1) {
+    console.log({ resolved: store.get('settings.resolved')})
+    if (store.get('settings.resolved.deployment.nodes').length > 1) {
       log.debug(
         `This Morio instance is part of a ${store.settings.resolved.nodes.length}-node cluster`
       )
     } else {
       log.debug(`This Morio instance is a solitary node`)
       log.debug(
-        `We are ${store.get('settings.resolved.deployment.nodes.0')} (${store.get('settings.resolve.deployment.display_name')})`
+        `We are ${store.get('settings.resolved.deployment.nodes.0')} (${store.get('settings.resolved.deployment.display_name')})`
       )
     }
   }
@@ -272,58 +272,6 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * Last but not least, always run the reload lifecycle hook
    */
   await runHook('reload', serviceName, { ...hookParams, recreate })
-}
-
-/**
- * Ensures the morio network exists, and the container is attached to it
- *
- * @param {string} network = The name of the network to ensure
- * @param {string} service = The name of the service/container to attach
- * @return {bool} ok = Whether or not the service was started
- */
-export const ensureMorioNetwork = async (
-  networkName = 'morionet',
-  service = 'core',
-  endpointConfig = {}
-) => {
-  /*
-   * Create Docker network
-   */
-  const network = await createDockerNetwork(networkName)
-
-  /*
-   * Attach to network. This will be an error if it's already attached.
-   */
-  if (network) {
-    try {
-      await network.connect({ Container: service, EndpointConfig: endpointConfig })
-    } catch (err) {
-      if (err?.json?.message && err.json.message.includes('already exists in network')) {
-        log.debug(`Container ${service} is already attached to network ${networkName}`)
-      } else log.warn(`Failed to attach container ${service} to network ${networkName}`)
-    }
-
-    /*
-     * Inspect containers in case it's (also) attached to the standard/other networks
-     */
-    const [success, result] = await runContainerApiCommand(service, 'inspect')
-    if (success) {
-      for (const netName in result.NetworkSettings.Networks) {
-        if (netName !== networkName) {
-          const netId = result.NetworkSettings.Networks[netName].NetworkID
-          const [ok, net] = await runDockerApiCommand('getNetwork', netId)
-          if (ok && net) {
-            log.debug(`Disconnecting container ${service} from network ${netName}`)
-            try {
-              await net.disconnect({ Container: service, Force: true })
-            } catch (err) {
-              log.warn(`Disconnecting container ${service} from network ${netName} failed`)
-            }
-          }
-        }
-      }
-    } else log(`Failed to inspect ${service} container`)
-  }
 }
 
 /**
@@ -576,3 +524,9 @@ export function defaultRestartServiceHook(service, { running, recreate }) {
    */
   return false
 }
+
+const isSwarmService = (serviceName) => (
+  serviceName === 'core' ||
+  utils.isEphemeral() ||
+  store.getSettings('tokens.flags.NEVER_SWARM')
+) ? false : true

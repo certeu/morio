@@ -9,9 +9,8 @@ import {
 } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
-import set from 'lodash.set'
 // Store
-import { store, log, utils } from '../lib/utils.mjs'
+import { store, log, utils, setIfUnset } from '../lib/utils.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -63,7 +62,7 @@ Controller.prototype.getIdps = async (req, res) => {
 
 const ensureTokenSecrecy = (secrets) => {
   for (let [key, val] of Object.entries(secrets)) {
-    if (!store.isEncrypted(val)) secrets[key] = store.encrypt(val)
+    if (!utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
   }
 
   return secrets
@@ -140,7 +139,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Only allow this endpoint when running in ephemeral mode
    */
-  if (!store.get('info.ephemeral'))
+  if (!utils.isEphemeral())
     return res.status(400).send({
       errors: ['You can only use this endpoint on an ephemeral Morio node'],
     })
@@ -168,7 +167,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Drop us in reconfigure mode
    */
-  store.set('info.config_resolved', false)
+  utils.beginReconfigure()
 
   /*
    * Generate time-stamp for use in file names
@@ -188,14 +187,19 @@ Controller.prototype.setup = async (req, res) => {
     mrt: morioRootToken,
     public: publicKey,
     private: privateKey,
-    deployment: uuid(),
   }
+  log.debug(`Generating UUIIDs`)
+  const uuids = { node: uuid(), deployment: uuid() }
+  node.uuid = uuid()
+  keys.deployment = uuid()
+  log.debug(`Node UUID: ${node.uuid}`)
+  log.debug(`Deployment UUID: ${keys.deployment}`)
 
   /*
-   * Update the settings with the defaults that are configured
+   * Complete the settings with the defaults that are configured
    */
-  for (const [key, val] of store.get('config.services.core.default_settings', {})) {
-    set(mSettings, key, val)
+  for (const [key, val] of store.get('config.services.morio.core.default_settings', {})) {
+    setIfUnset(mSettings, key, val)
   }
 
   /*
@@ -221,7 +225,7 @@ Controller.prototype.setup = async (req, res) => {
     )
     utils.set('encrypt', encrypt)
     utils.set('decrypt', decrypt)
-    store.set('isEncrypted', isEncrypted)
+    utils.set('isEncrypted', isEncrypted)
 
     /*
      * Now ensure token secrecy before we write to disk
@@ -247,7 +251,7 @@ Controller.prototype.setup = async (req, res) => {
    * Finally write the node info to disk
    */
   log.debug(`Writing node data to node.json`)
-  result = await writeJsonFile(`/etc/morio/node.json`, node)
+  result = await writeJsonFile(`/etc/morio/node.json`, { ...node, uuid: keys.deployment })
   if (!result) return res.status(500).send({ errors: ['Failed to write node info to disk'] })
 
   /*

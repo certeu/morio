@@ -55,17 +55,14 @@ export const service = {
       /*
        * Load configuration base
        */
-      const base = { ...store.config.services.console.console }
+      const base = { ...store.get('config.services.morio.console.console') }
+      const nodes = store.getSettings('deployment.nodes')
       /*
        * Populate Kafka nodes, schema URLs, and RedPanda URLs
        */
-      base.kafka.brokers = store.config.deployment.nodes.map((n, i) => `broker_${i + 1}:9092`)
-      base.kafka.schemaRegistry.urls = store.config.deployment.nodes.map(
-        (n, i) => `http://broker_${i + 1}:8081`
-      )
-      base.redpanda.adminApi.urls = store.config.deployment.nodes.map(
-        (n, i) => `http://broker_${i + 1}:9644`
-      )
+      base.kafka.brokers = nodes.map((n, i) => `broker_${i + 1}:9092`)
+      base.kafka.schemaRegistry.urls = nodes.map((n, i) => `http://broker_${i + 1}:8081`)
+      base.redpanda.adminApi.urls = nodes.map((n, i) => `http://broker_${i + 1}:9644`)
       /*
        * Write configuration file
        */

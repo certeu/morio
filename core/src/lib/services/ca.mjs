@@ -66,14 +66,14 @@ export const service = {
        * Generate keys and certificates
        */
       const init = await generateCaRoot(
-        store.config.deployment.nodes,
-        store.config.deployment.display_name
+        store.getSettings('deployment.nodes'),
+        store.getSettings('deployment.display_name')
       )
 
       /*
        * Generate JWK
        */
-      const jwk = await keypairAsJwk(store.keys)
+      const jwk = await keypairAsJwk(store.get('keys'))
 
       /*
        * Store root certificate and fingerprint in store
@@ -97,11 +97,11 @@ export const service = {
        * Construct step-ca (server) configuration
        */
       const stepServerConfig = {
-        ...store.config.services.ca.server,
+        ...store.get('config.services.ca.server'),
         root: '/home/step/certs/root_ca.crt',
         crt: '/home/step/certs/intermediate_ca.crt',
         key: '/home/step/secrets/intermediate_ca.key',
-        dnsNames: [...store.config.services.ca.server.dnsNames, ...store.config.deployment.nodes],
+        dnsNames: [...store.get('config.services.ca.server.dnsNames'), ...store.getSettings('deployment.nodes')],
       }
 
       /*
@@ -194,7 +194,7 @@ export const service = {
  * @return {bool} result - True if the CA is up, false if not
  */
 export const isCaUp = async () => {
-  const result = await testUrl(`https://ca_${store.config.core.node_nr}:9000/health`, {
+  const result = await testUrl(`https://ca_${store.get('state.node.serial')}:9000/health`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

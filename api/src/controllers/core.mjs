@@ -1,5 +1,5 @@
 import { validateSettings } from '#lib/validation'
-import { store } from '../lib/utils.mjs'
+import { store, utils } from '../lib/utils.mjs'
 
 /**
  * This core controller provides access to morio core
@@ -126,7 +126,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * This route is only accessible when running in ephemeral mode
    */
-  if (!store.info?.ephemeral)
+  if (!utils.isEphemeral())
     return res.status(400).send({
       errors: ['You can only use this endpoint on an ephemeral Morio node'],
     })

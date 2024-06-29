@@ -1,5 +1,3 @@
-// REST client for API
-import { restClient } from '#shared/network'
 // Required for config file management
 import {
   readYamlFile,
@@ -21,13 +19,29 @@ import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods, uuid } from 
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
+import { alwaysWantedHook } from './index.mjs'
 // Cluster
-import { startCluster } from '#lib/cluster'
+import { ensureMorioCluster } from '#lib/cluster'
+// Standalone
+import { ensureMorioStandaloneNode } from '#lib/standalone'
 // Docker
 import { storeRunningServices } from '#lib/docker'
 // Store
 import { store, log, utils } from '../utils.mjs'
+
+/*
+ * Load all presets and write them to disk for other services to load
+ * Note that this path we write to is inside the container
+ * And since this is the first time we write to it, we cannot assume
+ * the folder exists
+ */
+store.presets = loadAllPresets()
+try {
+  await mkdir('/etc/morio/shared')
+  await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
+} catch (err) {
+  log.warn(err, 'Failed to write presets to disk')
+}
 
 /*
  * This service object holds the service name,
@@ -55,52 +69,6 @@ export const service = {
      * @params {object} hookParams.coldStart - True if this is a cold start
      */
     beforeall: async (hookParams) => {
-      /*
-       * Add a getPreset() wrapper that will output trace logs about how presets are resolved
-       * This is surprisingly helpful during debugging
-       */
-      if (!utils.getPreset) {
-        utils.getPreset = (key, dflt, opts) => {
-          const result = getPreset(key, dflt, opts)
-          if (result === undefined) log.warn(`Preset ${key} is undefined`)
-          else log.trace(`Preset ${key} = ${result}`)
-
-          return result
-        }
-      }
-
-      /*
-       * Now populate the store
-       */
-      store.set('info', {
-        about: 'Morio Core',
-        name: '@morio/core',
-        production: inProduction(),
-        version: getPreset('MORIO_VERSION'),
-      })
-      store.set('state.reload_time', Date.now())
-      store.set('state.production', inProduction())
-
-
-      /*
-       * Add the API client to utils
-       */
-      if (!utils.apiClient)
-        utils.apiClient = restClient(`http://api:${utils.getPreset('MORIO_API_PORT')}`)
-
-      /*
-       * Load all presets and write them to disk for other services to load
-       * Note that this path we write to is inside the container
-       * And since this is the first time we write to it, we cannot assume
-       * the folder exists
-       */
-      store.presets = loadAllPresets()
-      try {
-        if (hookParams.coldStart) await mkdir('/etc/morio/shared')
-        await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
-      } catch (err) {
-        log.warn(err, 'Failed to write presets to disk')
-      }
 
       /*
        * Load existing settings, keys, node info and timestamp from disk
@@ -112,6 +80,7 @@ export const service = {
        * are running in ephemeral mode. In which case we return early.
        */
       if (!timestamp) {
+        log.info('Morio is running in ephemeral mode')
         store.set('state.ephemeral', true)
         store.set('state.settings_serial', false)
 
@@ -119,17 +88,13 @@ export const service = {
          * If we are in ephemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
          */
-        await createMorionet(hookParams)
+        await ensureMorioStandaloneNode(hookParams)
 
         /*
          * Update the list of running containers & services
+         * (this is needed to be able to get the core ip below)
          */
-        await storeRunningServices()
-
-        /*
-         * Add our internal IP address to the store (API uses it)
-         */
-        storeCoreIp()
+        //await storeRunningServices()
 
         /*
          * Return here for ephemeral mode
@@ -138,17 +103,26 @@ export const service = {
       }
 
       /*
-       * If we reach this point, a timestamp exists,
-       * and we are not in ephemeral mode
+       * If we reach this point, a timestamp exists, and we are not in ephemeral mode
+       * Store data from disk in the store
        */
-      store.set('info.ephemeral', false)
+      store.set('state.ephemeral', false)
       store.set('state.node', node)
       store.set('state.cluster', cluster)
       store.set('config.keys', keys)
       store.set('state.settings_serial', timestamp)
+      store.set('settings.sanitized', cloneAsPojo(settings))
 
       /*
-       * Add encryption methods to utils
+       * Log some info, for debugging
+       */
+      log.debug(`Found settings with serial ${timestamp}`)
+      for (const [flagName, flagValue] of Object.entries(store.get('settings.sanitized.tokens.flags', {}))) {
+        if (flagValue) log.debug(`Enabled feature flag: ${flagName}`)
+      }
+
+      /*
+       * Add encryption methods to utils so we can template the settings
        */
       if (!utils.encrypt) {
         const { encrypt, decrypt, isEncrypted } = encryptionMethods(
@@ -162,49 +136,25 @@ export const service = {
       }
 
       /*
-       * Populate the store with a save version of the settings (no secrets)
-       * as well as a fully templated version for run-time use.
+       * Store fully templated version of the on-disk settings in the store
+       * (this includes decrypted secrets)
        */
-      store.set('settings.sanitized', cloneAsPojo(settings))
       store.set('settings.resolved', templateSettings(settings))
 
       /*
-       * If we are in ephemeral mode, this may very well be the first cold boot.
-       * As such, we need to ensure the docker network exists, and attach to it.
-       */
-      await createMorionet(hookParams)
-
-      /*
-       * Now update the list of running containers
-       */
-      await storeRunningServices()
-
-      /*
-       * If this is the very first boot, generate an UUID for the node
-       * and cluster and store it on disk
-       */
-      if (!store.node) {
-        log.debug(`Generating node UUID`)
-        store.set('state.node.uuid', uuid())
-        store.set('state.cluster.uuid', uuid())
-        await writeJsonFile(`/etc/morio/node.json`, store.get('state.node'))
-        await writeJsonFile(`/etc/morio/cluster.json`, store.get('state.cluster'))
-      }
-
-      /*
-       * Add our internal IP address to the store
-       */
-      storeCoreIp()
-
-      /*
-       * Morio always runs as a cluster, because even a stand-alone
+       * Morio (almost) always runs as a cluster, because even a stand-alone
        * node can have flanking nodes for which we require inter-node
        * communication. Thus, a Docker swarm is always created and all
        * services are managed as swarm services.
+       *
+       * The only times when Morio does not run in a cluster is when:
+       *   - We are in ephemeral mode (but then we never get to this point)
+       *   - The NEVER_SWARM flag is set
        */
-      await startCluster(hookParams)
+      if (store.getFlag('NEVER_SWARM'))  await ensureMorioStandaloneNode(hookParams)
+      else await ensureMorioCluster(hookParams)
 
-      return store.get('state.swarm_ready')
+      return store.get('state.core_ready')
     },
   },
 }
@@ -353,31 +303,8 @@ export const templateSettings = (settings) => {
   return newSettings
 }
 
-/**
- * Adds the internal core service IP address to store.state.node.core_ip
- */
-const storeCoreIp = () =>
-  store.set(
-    'state.node.core_ip',
-    store.get('state.services.core.NetworkSettings.Networks.morionet.IPAddress')
-  )
-
-const createMorionet = async (hookParams) => {
-  /*
-   * If we are in ephemeral mode, this may very well be the first cold boot.
-   * As such, we need to ensure the docker network exists, and attach to it.
-   */
-  let result = false
-  if (hookParams.coldStart) {
-    try {
-      await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
-        Aliases: ['core', `core_${store.get('info.node.serial', 1)}`],
-      })
-      result = true
-    } catch (err) {
-      log.error(err, 'Failed to ensure morio network configuration')
-    }
-  }
-
-  return result
+export const getCoreIp = async () => {
+  const [success, result] = await runContainerApiCommand('core', 'inspect')
+  if (success) return result.NetworkSettings.Networks.morionet.IP
+  else return false
 }

@@ -1,6 +1,9 @@
+// REST client for API
+import { restClient } from '#shared/network'
 import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
+import get from 'lodash.get'
 
 /*
  * Export a log object for logging via the logger
@@ -12,6 +15,15 @@ export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
  */
 export const store = new Store(log)
   /*
+   * Set some basic info
+   */
+  .set('info', {
+    about: 'Morio Core',
+    name: '@morio/core',
+    production: inProduction(),
+    version: getPreset('MORIO_VERSION'),
+  })
+  /*
    * Record the start time
    */
   .set('state.start_time', Date.now())
@@ -20,13 +32,17 @@ export const store = new Store(log)
    */
   .set('state.reconfigure_count', 0)
   /*
-   * Are we in production or not?
+   * Assume ephemeral by default
    */
-  .set('state.production', inProduction())
+  .set('state.ephemeral', true)
 /*
  * Helper method to facilitate getting resolved settings
  */
 store.set('getSettings', (path, dflt) => store.get(unshift(['settings', 'resolved'], path, dflt)))
+/*
+ * Helper method to get a flag from the settings
+ */
+store.set('getFlag', (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag]))
 /*
  * Helper method to get a Morio service configuration
  */
@@ -43,6 +59,7 @@ store.set('getDockerServiceConfig', (service) => store.get(['config', 'services'
  * Helper method to store a Docer service configuration
  */
 store.set('setDockerServiceConfig', (service, config) => store.set(['config', 'services', 'docker', service], config))
+
 
 
 /*
@@ -66,6 +83,7 @@ export const utils = new Store(log)
   .set('beginReconfigure', () => {
     log.debug('Resolving Morio Configuration')
     store.set('state.config_resolved', false)
+    store.set('state.reconfigure_time', Date.now())
   })
   /*
    * Helper method for ending a reload event
@@ -110,6 +128,10 @@ export const utils = new Store(log)
     // Only return hooks you can run
     return typeof hook === 'function' ? hook : false
   })
+  /*
+   * API client
+   */
+  .set('apiClient', restClient(`http://api:${getPreset('MORIO_API_PORT')}`))
 
 
 /**
@@ -126,3 +148,18 @@ function unshift(prefix, path) {
   if (Array.isArray(path)) return [...prefix, ...path]
   else return [...prefix, ...path.split('.')]
 }
+
+/**
+ * Set key at path to value, but only if it's not currently set
+ *
+ * @param {object} obj - The object to update
+ * @param {string|array} path - Path to the key
+ * @param {mixed} value - The value to set
+ * @return {object} obj - The mutated object
+ */
+export const setIfUnset = (obj, path, value) => {
+  if (typeof get(obj, path) === 'undefined') return set(obj, path, value)
+
+  return obj
+}
+
