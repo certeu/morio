@@ -1,6 +1,6 @@
 import { globDir } from '#shared/fs'
-import { store } from '../lib/store.mjs'
-import { reconfigure } from '../index.mjs'
+import { store, utils, log } from '../lib/utils.mjs'
+import { reload } from '../index.mjs'
 
 /**
  * This status controller handles the Morio status endpoint
@@ -21,9 +21,9 @@ Controller.prototype.reconfigure = async (req, res) => {
   /*
    * Just get the status from core and pass it with some tweaks
    */
-  store.log.debug('Reveived reconfigure signal from core')
-  await reconfigure()
-  store.log.debug('Reconfiguration complete')
+  log.debug('Reveived reconfigure signal from core')
+  await relaod()
+  log.debug('Reload complete')
 
   return res.status(200).send({})
 }
@@ -37,22 +37,59 @@ Controller.prototype.reconfigure = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.status = async (req, res) => {
+  console.log('in status')
   /*
-   * Just get the status from core and pass it with some tweaks
+   * Get the status from core to ensure we have the latest info
    */
-  const [status, result] = await store.core.get(`/status`)
+  const [status, result] = await utils.core.get(`/status`)
 
-  if (!status) return res.status(500).send({status, result}).end()
+  if (status !== 200) return utils.sendErrorResponse(res, {
+    type: `morio.api.status.core.fetch.${status}`,
+    title: 'Unable to load status data from Morio Core',
+    status: 503,
+    detail: 'When reaching out to Morio Core, we were unable to retrieve the data to complete this request'
+  })
 
   /*
-   * Override name,
+   * Update store with relevant data
    */
-  result.about = 'Morio API'
-  result.name = '@morio/api'
-  result.config_resolved = store.info.config_resolved
+  store.set('state.ephemeral', result.state.ephemeral)
+  store.set('state.core', result.state)
+  store.set('state.core.timestamp', Date.now())
+  store.set('info.core', result.info)
 
-  if ([200, 503].includes(status)) return res.status(status).send(result)
-  else return res.status(500).send({})
+  /*
+   * Now return data
+   */
+  return res.send({
+    info: {
+      name: store.get('info.name'),
+      about: store.get('info.about'),
+      version: store.get('info.version'),
+      production: store.get('info.production'),
+      core: {
+        name: store.get('info.core.name'),
+        about: store.get('info.core.about'),
+        version: store.get('info.core.version'),
+        production: store.get('info.core.production'),
+      },
+    },
+    state: {
+      ephemeral: utils.isEphemeral(),
+      uptime: Math.floor((Date.now() - store.get('state.start_time')) / 1000),
+      start_time: store.get('state.start_time'),
+      reload_count: store.get('state.reload_count'),
+      config_resolved: store.get('state.config_resolved'),
+      // config_resolved
+      // reload_time
+      // ephemeral
+      core:  store.get('state.core'),
+      //uptime
+      //ephemeral
+      //reconfigure_count
+      //timestamp
+    }
+  })
 }
 
 /**
@@ -80,7 +117,7 @@ Controller.prototype.statusLogs = async (req, res) => {
   /*
    * Just get the status from core and pass it
    */
-  const [status, result] = await store.core.get(`/status_logs`)
+  const [status, result] = await utils.core.get(`/status_logs`)
 
   return res.status(status).send(result)
 }

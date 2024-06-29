@@ -44,14 +44,27 @@ const presetGetters = {
 }
 
 /*
+ * An object to mock the production logger
+ */
+const logger = {
+  trace: (...data) => console.log(...data),
+  debug: (...data) => console.log(...data),
+  info: (...data) => console.log(...data),
+  warn: (...data) => console.log(...data),
+  error: (...data) => console.log(...data),
+  fatal: (...data) => console.log(...data),
+  silent: (...data) => console.log(...data),
+}
+
+/*
  * Setup a store that we can pass to resolveServiceConfiguration
  */
 const getHelpers = (env) => {
-  const store = new Store()
+  const store = new Store(logger)
   store.config = {}
   store.info = { production: env === 'prod' }
   store.testing = env === 'testing'
-  const utils = new Store()
+  const utils = new Store(logger)
   utils.getPreset = presetGetters[env]
 
   return { store, utils }
@@ -158,6 +171,5 @@ await writeFile('moriod/etc/morio/moriod/version.env', `#
 
 MORIO_VERSION=${pkg.version}
 `)
-
 
 

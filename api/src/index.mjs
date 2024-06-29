@@ -8,14 +8,14 @@ import { addRbacHeaders } from './rbac.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
-import { bootstrapConfiguration } from './bootstrap.mjs'
+import { reloadConfiguration } from './reload.mjs'
 // Swagger
 import swaggerUi from 'swagger-ui-express'
 import { openapi } from '../openapi/index.mjs'
 // Middleware
 import { guardRoutes } from './middleware.mjs'
-// Load the store
-import { store } from './lib/store.mjs'
+// Load store, logger, and utils
+import { store, log, utils } from './lib/utils.mjs'
 
 /*
  * Instantiate the Express app
@@ -29,7 +29,7 @@ app.use(express.json({ limit: '1mb' }))
 
 /*
  * Add middleware to guard routes while we are
- * in ephemeral mode or reconfiguring
+ * in ephemeral mode or reloading
  */
 app.use(guardRoutes)
 
@@ -52,7 +52,7 @@ for (const type in routes) routes[type](app)
  * Add the route for the Swagger (OpenAPI) docs
  */
 const docs = swaggerUi.setup(openapi)
-app.use(`${store.prefix}/docs`, swaggerUi.serve, docs)
+app.use(`${store.getPrefix()}/docs`, swaggerUi.serve, docs)
 
 /*
  * If not in production, allow access to coverage reports
@@ -61,10 +61,10 @@ app.use(`/coverage/api`, express.static('/morio/api/coverage'))
 app.use(`/coverage/core`, express.static('/morio/core/coverage'))
 
 /*
- * Add the reconfigure route
+ * Add the reload route
  */
-app.get(`${store.prefix}/reconfigure`, async (req, res) => {
-  await reconfigure()
+app.get(`${store.getPrefix()}/reload`, async (req, res) => {
+  await reload()
 
   return res.send({ result: 'ok', info: store.info })
 })
@@ -77,20 +77,20 @@ app.use(`/downloads`, express.static(`/morio/${getPreset('MORIO_DOWNLOADS_FOLDER
 /*
  * Add repos folder for serving repositories
  */
-app.use(`${store.prefix}/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
+app.use(`${store.getPrefix()}/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
 
 /*
  * (re)Configure the API
  */
-await reconfigure()
+await reload({ coldStart: true })
 
 /*
  * Start listening for requests
  */
 wrapExpress(
-  store.log,
+  log,
   app.listen(getPreset('MORIO_API_PORT'), (err) => {
-    if (err) store.log.error(err, 'An error occured')
+    if (err) log.error(err, 'An error occured')
   })
 )
 
@@ -98,21 +98,19 @@ wrapExpress(
  * This method allows the API to dynamically reload its
  * own configuration
  */
-export async function reconfigure() {
+export async function reload(params) {
   /*
    * Drop us in config resolving mode
    */
-  if (typeof store.info === 'undefined') store.info = {}
-  store.info.config_resolved = false
+  utils.beginReload()
 
   /*
-   * First of all, we bootstrap the API which will populate the store with what we need
+   * This does the actual reloading
    */
-  await bootstrapConfiguration()
+  await reloadConfiguration()
 
   /*
    * Let the world know we are ready
    */
-  store.info.config_resolved = true
-  store.log.debug('Morio API ready')
+  utils.endReload()
 }

@@ -1,6 +1,6 @@
 import { validate, validateSettings, validateNode } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 /**
  * This validation controller handles various validation tasks

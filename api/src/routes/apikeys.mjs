@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/apikeys'
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 const Apikeys = new Controller()
 
@@ -9,7 +9,7 @@ const Apikeys = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.prefix
+  const PREFIX = store.getPrefix()
 
   /*
    * Create an API key

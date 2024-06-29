@@ -2,7 +2,7 @@ import { storeLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
-import { store } from '../lib/store.mjs'
+import { store, log } from '../lib/utils.mjs'
 
 /**
  * local: Local Morio identity/authentication provider

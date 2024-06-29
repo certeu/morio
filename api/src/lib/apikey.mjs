@@ -1,5 +1,5 @@
 // Load the store
-import { store } from './store.mjs'
+import { store } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 // Load helper methods from accounts
@@ -46,7 +46,7 @@ export const loadApikey = async (id) => {
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
   else {
-    store.log.warn(`Found more than one apikey in loadApikeys. This is unexpected.`)
+    log.warn(`Found more than one apikey in loadApikeys. This is unexpected.`)
     return false
   }
 }
@@ -73,7 +73,7 @@ export const saveApikey = async (id = false, data) => {
    * We need at least an ID
    */
   if (!id) {
-    store.log.warn('saveApikey was called witout an id')
+    log.warn('saveApikey was called witout an id')
     return false
   }
 
@@ -108,7 +108,7 @@ export const removeApikey = async (id = false) => {
    * We need at least an ID
    */
   if (!id) {
-    store.log.warn('removeApikey was called witout an id')
+    log.warn('removeApikey was called witout an id')
     return false
   }
 

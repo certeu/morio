@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/core'
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 const Core = new Controller()
 
@@ -10,7 +10,7 @@ const Core = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.prefix
+  const PREFIX = store.getPrefix()
 
   /*
    * API routes to get data from a specific container

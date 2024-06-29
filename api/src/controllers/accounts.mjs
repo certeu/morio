@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
-import { store } from '../lib/store.mjs'
+import { store, log } from '../lib/utils.mjs'
 import { validateSchema } from '../lib/validation.mjs'
 import { listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
 import { mfa } from '../lib/mfa.mjs'
@@ -58,7 +58,7 @@ Controller.prototype.create = async (req, res) => {
      * A user with sufficient privileges can overwrite the account
      */
     if (valid.overwrite && isRoleAvailable(req, 'operator')) {
-      store.log.debug(`Overwriting ${valid.provider}.${valid.username}`)
+      log.debug(`Overwriting ${valid.provider}.${valid.username}`)
     } else return res.status(409).send({ error: 'Account exists' })
   }
 

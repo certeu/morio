@@ -146,7 +146,7 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
         </div>
       </PageWrapper>
     )
-  if (status.ephemeral === true) return <Setup pageProps={pageProps} />
+  if (status.state?.ephemeral === true) return <Setup pageProps={pageProps} />
 
   return children
 }

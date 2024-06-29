@@ -179,12 +179,12 @@ const ensureSwarm = async () => {
         const [labelsAdded] = await runNodeApiCommand(node.ID, 'update', {
           version: String(node.Version.Index),
           Labels: {
-            'morio.cluster.uuid': store.get('keys.deployment'),
-            'morio.node.uuid': store.get('info.node.uuid'),
-            'morio.node.fqdn': store.get('info.node.fqdn'),
-            'morio.node.hostname': store.get('info.node.hostname'),
-            'morio.node.ip': store.get('info.node.ip'),
-            'morio.node.serial': String(store.get('info.node.serial')),
+            'morio.cluster.uuid': store.get('state.cluster.uuid'),
+            'morio.node.uuid': store.get('state.node.uuid'),
+            'morio.node.fqdn': store.get('state.node.fqdn'),
+            'morio.node.hostname': store.get('state.node.hostname'),
+            'morio.node.ip': store.get('state.node.ip'),
+            'morio.node.serial': String(store.get('state.node.serial')),
           },
           Role: 'manager',
           Availability: 'Active',

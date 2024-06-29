@@ -1,7 +1,7 @@
 import { roles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 // Load the store
-import { store } from './store.mjs'
+import { store } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 
@@ -30,7 +30,7 @@ export const asStatus = (data) => {
   const s = String(data).toLowerCase()
   if (statuses.includes(s)) return s
   else {
-    store.log.warn(`The status '${s}' is not know. Forcing to 'disabled' instead.`)
+    log.warn(`The status '${s}' is not know. Forcing to 'disabled' instead.`)
     return 'disabled'
   }
 }
@@ -52,7 +52,7 @@ export const asRole = (data) => {
   const r = String(data).toLowerCase()
   if (roles.includes(r)) return r
   else {
-    store.log.warn(`The role '${r}' is not know. Forcing to 'user' instead.`)
+    log.warn(`The role '${r}' is not know. Forcing to 'user' instead.`)
     return 'user'
   }
 }
@@ -64,7 +64,7 @@ const asProvider = (data) => {
   const p = String(data).toLowerCase()
   if ((Object.keys(store.config?.iam?.providers) || []).includes(p)) return p
   else {
-    store.log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
+    log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
     return ''
   }
 }
@@ -132,7 +132,7 @@ export const loadAccount = async (provider, id) => {
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
   else {
-    store.log.warn(`Found more than one account in loadAccount. This is unexpected.`)
+    log.warn(`Found more than one account in loadAccount. This is unexpected.`)
     return false
   }
 }
@@ -159,7 +159,7 @@ export const saveAccount = async (provider = false, id = false, data) => {
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    store.log.warn('saveAccount was called witout an id or provider')
+    log.warn('saveAccount was called witout an id or provider')
     return false
   }
 

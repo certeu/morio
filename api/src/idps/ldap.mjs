@@ -1,4 +1,4 @@
-import { store } from '../lib/store.mjs'
+import { store, log} from '../lib/utils.mjs'
 import { roles } from '#config/roles'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
@@ -21,7 +21,7 @@ const strategy = (id) => {
 
   const options = {
     server: store.config.iam.providers[id].server,
-    log: store.log,
+    log: log,
     credentialsLookup: (req) => {
       return {
         username: req.body?.data?.username,
@@ -65,7 +65,7 @@ export const ldap = (id, data, req) => {
    * Add strategy to passport if it hasn't been used yet
    */
   if (passport._strategies[id] === undefined) {
-    store.log.debug('Loading ad authentication provider')
+    log.debug('Loading ad authentication provider')
     const handler = strategy(id)
     if (handler) passport.use(id, handler)
   }

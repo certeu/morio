@@ -1,7 +1,7 @@
 import qrcode from 'qrcode'
 import { authenticator } from '@otplib/preset-default'
 import { hash } from '#shared/crypto'
-import { store } from './store.mjs'
+import { store } from './utils.mjs'
 
 /*
  * Colors to replace in the generated SVG so that the SVG

@@ -1,28 +1,33 @@
-import { store } from '../lib/store.mjs'
+import { store, utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
+
+/*
+ * Keep prefix DRY
+ */
+const PREFIX = store.getPrefix()
 
 /**
  * List of allowListed URLs that do not require authentication
  */
 const allowedUris = [
-  `${store.prefix}/setup`,
-  `${store.prefix}/status`,
-  `${store.prefix}/status/`,
-  `${store.prefix}/info`,
-  `${store.prefix}/info/`,
-  `${store.prefix}/login`,
-  `${store.prefix}/login/`,
-  `${store.prefix}/idps`,
-  `${store.prefix}/idps/`,
-  `${store.prefix}/activate-account`,
-  `${store.prefix}/activate-account/`,
-  `${store.prefix}/activate-mfa`,
-  `${store.prefix}/activate-mfa/`,
-  `${store.prefix}/jwks`,
-  `${store.prefix}/cluster/join`,
-  `${store.prefix}/validate/settings`,
+  `${PREFIX}/setup`,
+  `${PREFIX}/status`,
+  `${PREFIX}/status/`,
+  `${PREFIX}/info`,
+  `${PREFIX}/info/`,
+  `${PREFIX}/login`,
+  `${PREFIX}/login/`,
+  `${PREFIX}/idps`,
+  `${PREFIX}/idps/`,
+  `${PREFIX}/activate-account`,
+  `${PREFIX}/activate-account/`,
+  `${PREFIX}/activate-mfa`,
+  `${PREFIX}/activate-mfa/`,
+  `${PREFIX}/jwks`,
+  `${PREFIX}/cluster/join`,
+  `${PREFIX}/validate/settings`,
 ]
 
 /**
@@ -83,7 +88,7 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * Don't bother in ephemeral mode
    */
-  if (store.info?.ephemeral) return deny(res)
+  if (utils.isEphemeral()) return deny(res)
 
   /*
    * Keep track of the token payload

@@ -78,7 +78,9 @@ export const service = {
         production: inProduction(),
         version: getPreset('MORIO_VERSION'),
       })
-      store.setIfUnset('state.start_time', Date.now())
+      store.set('state.reload_time', Date.now())
+      store.set('state.production', inProduction())
+
 
       /*
        * Add the API client to utils

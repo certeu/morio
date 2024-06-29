@@ -48,6 +48,9 @@ export const presets = {
   // TCP port API should listen on
   MORIO_API_PORT: 3000,
 
+  // Prefix for looking up API errors returned from the API
+  MORIO_API_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
+
   // Hosts for which to forego the https validation check
   // Used in unit tests only
   MORIO_UNIT_TEST_HOST: 'unit.test.morio.it',
@@ -239,6 +242,7 @@ export const getPreset = (key, opts = {}) => {
  */
 export const inProduction = () => {
   const env = getPreset('NODE_ENV', { dflt: 'production', as: 'string' })
+  console.log({env})
 
   return (env === 'production')
 }

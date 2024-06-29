@@ -1,6 +1,6 @@
 import { keypairAsJwk } from '#shared/crypto'
 // Store
-import { store } from '../lib/utils.mjs'
+import { store, utils } from '../lib/utils.mjs'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -17,30 +17,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.status = async (req, res) => {
-  /*
-   * Return this in any case
-   */
-  const base = {
-    ...store.get('info', {}),
-    uptime: (Date.now() - store.get('info.start_time')) / 1000,
-  }
-
-  if (store.get('keys.deployment')) base.deployment = store.keys.deployment
-  if (store.get('keys.node')) base.node = store.keys.node
-
-  /*
-   * Return adding whether MORIO is setup or not
-   */
-  return res
-    .send({
-      ...base,
-      core: store.node,
-      setup: store.config.deployment ? true : false,
-      ephemeral: store.config.deployment ? false : true,
-    })
-    .end()
-}
+Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
 
 /**
  * JWKS
@@ -61,3 +38,45 @@ Controller.prototype.jwks = async (req, res) => {
     .send({ keys: [jwks] })
     .end()
 }
+
+/**
+ * Get reload data / Used by API to bootstrap itself
+ *
+ * This returns the current status, config, settings, and so on.
+ * Everything required for the API to find its feet.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getReloadData = async (req, res) => {
+
+  const data = getStatus()
+  if (!utils.isEphemeral()) {
+    data.settings = store.get('settings.sanitized')
+    data.config = {
+      //services: store.get('config.services'),
+      swarm: store.get('config.swarm'),
+      keys: store.get('config.keys'),
+    }
+  }
+  data.presets = store.get('presets')
+
+  return res.status(200).send(data) .end()
+}
+
+/*
+ * Helper method to construct the status object
+ */
+const getStatus = () => ({
+  info: store.get('info', {}),
+  state: {
+    uptime: Math.floor((Date.now() - store.get('state.start_time')) / 1000),
+    deployment: utils.isEphemeral() ? undefined : store.get('state.cluster.uuid'),
+    node: utils.isEphemeral() ? undefined : store.get('state.node.uuid'),
+    core: store.node,
+    ephemeral: utils.isEphemeral(),
+    reconfigure_count: store.get('state.reconfigure_count'),
+    config_resolved: store.get('state.config_resolved'),
+  }
+})
+

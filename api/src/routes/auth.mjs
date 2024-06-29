@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/auth'
-import { store } from '../lib/store.mjs'
+import { store } from '../lib/utils.mjs'
 
 const Auth = new Controller()
 
@@ -9,6 +9,8 @@ const Auth = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
+  const PREFIX = store.getPrefix()
+
   /*
    * Internal authentication route for traefik forwardauth
    */
@@ -17,15 +19,15 @@ export function routes(app) {
   /*
    * Public authentication / login route
    */
-  app.post(`${store.prefix}/login`, Auth.login)
+  app.post(`${PREFIX}/login`, Auth.login)
 
   /*
    * Refresh token route
    */
-  app.get(`${store.prefix}/token`, Auth.renewToken)
+  app.get(`${PREFIX}/token`, Auth.renewToken)
 
   /*
    * Whoami/ping check
    */
-  app.get(`${store.prefix}/whoami`, Auth.whoami)
+  app.get(`${PREFIX}/whoami`, Auth.whoami)
 }
