@@ -21,6 +21,7 @@ export const network = getPreset('MORIO_NETWORK')
  */
 export const createDockerContainer = async (serviceName, config) => {
   log.debug(`Creating service: ${serviceName} (local container)`)
+  //console.log({config: JSON.stringify(config, null ,2)})
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
     log.debug(`Service created: ${serviceName}`)
@@ -105,7 +106,7 @@ export const createDockerNetwork = async (name) => {
       Driver: 'overlay', // Make it swarm compatible
       Attachable: true,
       Labels: {
-        'morio.foo.bar': 'bananas'
+        'morio.foo.bar': 'bananas',
       },
       //IPAM: {
       //  Config: [{
@@ -116,7 +117,7 @@ export const createDockerNetwork = async (name) => {
       // FIXME, dan't make this work
       Options: {
         encrypted: 'true',
-        "com.docker.network.mtu": '1333',
+        'com.docker.network.mtu': '1333',
       },
     },
     true
@@ -259,7 +260,7 @@ export const generateSwarmServiceConfig = (config) => {
   const opts = {
     Name: c.name,
     Labels: {
-      test: 'ikkkel'
+      test: 'ikkkel',
     },
     TaskTemplate: {
       ContainerSpec: {
@@ -272,10 +273,10 @@ export const generateSwarmServiceConfig = (config) => {
         //User: config.swarm.user,
         //Groups: config.swarm.groups,
         Mounts: c.HostConfig.Binds,
-      }
+      },
     },
     Mode: { Global: {} },
-    Networks: [{ Target: "morionet" }]
+    Networks: [{ Target: 'morionet' }],
   }
 
   return opts
@@ -318,9 +319,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  */
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    log.debug(
-      `Attemted to run \`${cmd}\` command on a container but no container ID was passed`
-    )
+    log.debug(`Attemted to run \`${cmd}\` command on a container but no container ID was passed`)
     return [false]
   }
 
@@ -551,4 +550,3 @@ export const storeRunningServices = async () => {
     }
   }
 }
-

@@ -21,7 +21,6 @@ import {
   runContainerApiCommand,
   generateContainerConfig,
   generateSwarmServiceConfig,
-  storeRunningServices,
 } from '#lib/docker'
 // Utilities
 import { store, log, utils } from '../utils.mjs'
@@ -83,9 +82,10 @@ const createMorioService = async (serviceName) => {
         if (stream) docker.modem.followProgress(stream, onFinished)
       })
     })
-  } else return utils.isEphemeral()
-    ? await createDockerContainer(serviceName, config)
-    : await createSwarmService(serviceName, config)
+  } else
+    return utils.isEphemeral()
+      ? await createDockerContainer(serviceName, config)
+      : await createSwarmService(serviceName, config)
 }
 
 /**
@@ -123,8 +123,8 @@ export const logStartedConfig = () => {
     log.info('This Morio instance is not deployed yet')
   } else {
     /*
-    * It is, so we should have a config
-    */
+     * It is, so we should have a config
+     */
     log.info(`Using configuration ${store.get('state.settings_serial')}`)
     if (store.config.deployment.nodes.length > 1) {
       log.debug(
@@ -146,7 +146,6 @@ export const logStartedConfig = () => {
  * @param {object} hookParams - Optional data to pass to lifecyle hooks
  */
 export const startMorio = async (hookParams = {}) => {
-
   /*
    * Run beforeall lifecycle hook on the core service
    */
@@ -171,7 +170,7 @@ export const startMorio = async (hookParams = {}) => {
    * Create services (in parallel)
    */
   const promises = []
-  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder))
+  for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)
     promises.push(ensureMorioService(service, hookParams))
 
   return await Promise.all(promises)
@@ -204,14 +203,16 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
 
     // Not wanted, return early
     return true
-  }
-  else log.debug(`Service ${serviceName} is wanted`)
+  } else log.debug(`Service ${serviceName} is wanted`)
 
   /*
    * Generate morio service config
    * Docker config will be generated after the preCreate lifecycle hook
    */
-  store.setMorioServiceConfig(serviceName, resolveServiceConfiguration(serviceName, { store, utils }))
+  store.setMorioServiceConfig(
+    serviceName,
+    resolveServiceConfiguration(serviceName, { store, utils })
+  )
 
   /*
    * (Re)create the service (if needed)
@@ -241,7 +242,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * Recreate the service if needed
    */
   //serviceId = await createMorioService(serviceName)
-  if (recreate) await createMorioService(serviceName)
+  const serviceId = recreate ? await createMorioService(serviceName) : false
 
   /*
    * (Re)start the container/service (if needed)
@@ -257,7 +258,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
     /*
      * (Re)Start the container
      */
-    await restartMorioService(serviceName, containerId)
+    await restartMorioService(serviceName, serviceId)
 
     /*
      * Run postStart lifecycle hook
@@ -350,12 +351,16 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    */
   console.log('FIXME is this the right store pat', {
     'config.services.swarm': store.get('config.services.swarm'),
-    'services.running.swarm': store.get('services.running.swarm')
+    'services.running.swarm': store.get('services.running.swarm'),
   })
-  if (store.get(['config', 'services', 'swarm', serviceName]).Image !== store.get(['services', 'running', 'swarm', serviceName]).Image) {
-    log.debug(
-      `Container image changed from ${running[service].Image} to ${store.config.containers[service].Image}`
-    )
+  const imgs = {
+    current: store.get(['state', 'services', serviceName]).Image,
+    next: store.get(['config', 'services', 'swarm', serviceName]).Image,
+  }
+  // FIXME : is this image comparison ok?
+  console.warn({ imgs })
+  if (imgs.next !== imgs.current) {
+    log.debug(`Container image changed from ${imgs.current} to ${imgs.next}`)
     return true
   }
 
@@ -363,7 +368,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Don't restart the API container in the middle of a test run
    */
   if (
-    service === 'api' &&
+    serviceName === 'api' &&
     utils.getPreset('NODE_ENV') !== 'production' &&
     store.config?.deployment?.nodes?.[0] === utils.getPreset('MORIO_UNIT_TEST_HOST')
   ) {
@@ -374,8 +379,8 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * If this is the initial setup, services that require TLS configuration should be recreated
    */
-  if (hookParams.initialSetup && ['api', 'ui'].includes(service)) {
-    log.debug(`Initial setup, recreating ${service} container to add TLS configuration`)
+  if (hookParams.initialSetup && ['api', 'ui'].includes(serviceName)) {
+    log.debug(`Initial setup, recreating ${serviceName} container to add TLS configuration`)
     return true
   }
 
@@ -386,7 +391,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * After from basic check, defer to the recreateContainer lifecycle hook
    */
-  const recreate = await runHook('recreatecontainer', service, { ...hookParams, running })
+  const recreate = await runHook('recreatecontainer', serviceName, hookParams)
 
   return recreate
 }
@@ -431,10 +436,9 @@ const stopService = async (service, id) => {
 }
 
 const isServiceUp = async (serviceName) => {
-  //await storeRunningServices()
   const details = store.get(['services', 'running', serviceName], false)
 
-  return [ details ? true : false, details]
+  return [details ? true : false, details]
 }
 
 /**
@@ -572,5 +576,3 @@ export function defaultRestartServiceHook(service, { running, recreate }) {
    */
   return false
 }
-
-

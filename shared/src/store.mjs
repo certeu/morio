@@ -66,7 +66,7 @@ Store.prototype.extend = function (methods) {
  * @return {mixed} value - The value stored under key
  */
 Store.prototype.get = function (path, dflt) {
-  console.log(`store.get: ${path}`)
+  //console.log(`store.get: ${path}`)
   const val = get(this, path, dflt)
   if (val === undefined) this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
 
@@ -96,7 +96,7 @@ Store.prototype.push = function (path, ...values) {
  * @return {Store} this - The Store instance
  */
 Store.prototype.set = function (path, value) {
-  console.log(`store.set: ${path}, ${JSON.stringify(value)}`)
+  //console.log(`store.set: ${path}, ${JSON.stringify(value)}`)
   if (typeof value === 'undefined') this.log.warn(`Store.set(value) on key \`${path}\`, but value is undefined`)
   set(this, path, value)
 

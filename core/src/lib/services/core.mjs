@@ -97,7 +97,7 @@ export const service = {
         if (hookParams.coldStart) await mkdir('/etc/morio/shared')
         await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
       } catch (err) {
-        log.warn(err,'Failed to write presets to disk')
+        log.warn(err, 'Failed to write presets to disk')
       }
 
       /*
@@ -114,9 +114,20 @@ export const service = {
         store.set('state.settings_serial', false)
 
         /*
+         * If we are in ephemeral mode, this may very well be the first cold boot.
+         * As such, we need to ensure the docker network exists, and attach to it.
+         */
+        await createMorionet(hookParams)
+
+        /*
          * Update the list of running containers & services
          */
-        if (timestamp) await storeRunningServices()
+        await storeRunningServices()
+
+        /*
+         * Add our internal IP address to the store (API uses it)
+         */
+        storeCoreIp()
 
         /*
          * Return here for ephemeral mode
@@ -159,15 +170,7 @@ export const service = {
        * If we are in ephemeral mode, this may very well be the first cold boot.
        * As such, we need to ensure the docker network exists, and attach to it.
        */
-      if (hookParams.coldStart) {
-        try {
-          await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
-            Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
-          })
-        } catch (err) {
-          log.warn('Failed to ensure morio network configuration')
-        }
-      }
+      await createMorionet(hookParams)
 
       /*
        * Now update the list of running containers
@@ -187,10 +190,9 @@ export const service = {
       }
 
       /*
-       * Add our internal IP address to store.state.core_ip
-       * (needed to wait until after the network is created)
+       * Add our internal IP address to the store
        */
-      store.set('state.core_ip', store.get('state.services.core.HostConfig.NetworkSettings.Networks.morionet.IPAddress'))
+      storeCoreIp()
 
       /*
        * Morio always runs as a cluster, because even a stand-alone
@@ -347,4 +349,33 @@ export const templateSettings = (settings) => {
   }
 
   return newSettings
+}
+
+/**
+ * Adds the internal core service IP address to store.state.node.core_ip
+ */
+const storeCoreIp = () =>
+  store.set(
+    'state.node.core_ip',
+    store.get('state.services.core.NetworkSettings.Networks.morionet.IPAddress')
+  )
+
+const createMorionet = async (hookParams) => {
+  /*
+   * If we are in ephemeral mode, this may very well be the first cold boot.
+   * As such, we need to ensure the docker network exists, and attach to it.
+   */
+  let result = false
+  if (hookParams.coldStart) {
+    try {
+      await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
+        Aliases: ['core', `core_${store.get('info.node.serial', 1)}`],
+      })
+      result = true
+    } catch (err) {
+      log.error(err, 'Failed to ensure morio network configuration')
+    }
+  }
+
+  return result
 }

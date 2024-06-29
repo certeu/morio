@@ -79,7 +79,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       ],
       // Add extra hosts
       hosts: [
-        `local_core:${store.local_core_ip}`,
+        `local_core:${store.get('state.node.core_ip')}`,
       ],
       // Configure Traefik with container labels
       labels,

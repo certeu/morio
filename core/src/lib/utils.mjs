@@ -27,10 +27,12 @@ store.getState = (path, dflt) => store.get(unshift(['state'], path, dflt))
 store.setState = (path, value) => store.set(unshift(['state'], path), value)
 store.getSettings = (path, dflt) => store.get(unshift(['settings', 'resolved'], path, dflt))
 store.setSettings = (path, value) => store.set(unshift(['settings', 'resolved'], path), value)
-store.getMorioServiceConfig = (service, dflt=false) => store.get(['config', 'services', 'morio', service])
-store.setMorioServiceConfig = (service, config) => store.set(['config', 'services', 'morio', service], config)
-store.getDockerServiceConfig = (service, dflt=false) => store.get(['config', 'services', 'docker', service])
-store.setDockerServiceConfig = (service, config) => store.set(['config', 'services', 'docker', service], config)
+store.getMorioServiceConfig = (service) => store.get(['config', 'services', 'morio', service])
+store.setMorioServiceConfig = (service, config) =>
+  store.set(['config', 'services', 'morio', service], config)
+store.getDockerServiceConfig = (service) => store.get(['config', 'services', 'docker', service])
+store.setDockerServiceConfig = (service, config) =>
+  store.set(['config', 'services', 'docker', service], config)
 
 /*
  * Extend utils with core-specific methods
@@ -40,24 +42,27 @@ utils.beginReconfigure = () => {
   store.set('state.config_resolved', false)
 }
 utils.endReconfigure = () => {
-  () => store.set('state.config_resolved', true)
+  ;() => store.set('state.config_resolved', true)
   log.info('Morio Core ready - Configuration Resolved')
 }
 utils.beginEphemeral = () => store.set('state.ephemeral', true)
 utils.endEphemeral = () => store.set('state.ephemeral', false)
 utils.isEphemeral = () => store.get('state.ephemeral', false)
-utils.setHooks = (service, hooks) => {
+utils.setHooks = (serviceName, hooks) => {
   const allhooks = {}
   for (const [name, method] of Object.entries(hooks)) {
     // Force hook names to lowercase
     allhooks[name.toLowerCase()] = method
   }
-  utils.set(['hooks', 'services', service.toLowerCase()], allhooks)
+  utils.set(['hooks', 'services', serviceName.toLowerCase()], allhooks)
 }
 utils.getHook = (serviceName, hookName) => {
-  const hook =utils.get(['hooks', 'services', serviceName.toLowerCase(), hookName.toLowerCase()], false)
+  const hook = utils.get(
+    ['hooks', 'services', serviceName.toLowerCase(), hookName.toLowerCase()],
+    false
+  )
   // Only return hooks you can run
-  return typeof hook === "function" ? hook : false
+  return typeof hook === 'function' ? hook : false
 }
 
 /**
