@@ -299,7 +299,6 @@ const localNodeInfo = async (body) => {
    */
   let fqdn = false
   const nodes = body.deployment.nodes.map(node => node.toLowerCase())
-  console.log({ nodes, headers: body.headers })
 
   for (const header of ['x-forwarded-host', 'host']) {
     const hval = (body.headers[header] || '').toLowerCase()

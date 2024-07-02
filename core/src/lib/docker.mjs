@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer'
 import { getPreset } from '#config'
 import Docker from 'dockerode'
 // Store
-import { store, log } from './utils.mjs'
+import { store, log, utils } from './utils.mjs'
 
 /**
  * This is the docker client as provided by dockerode
@@ -95,35 +95,33 @@ export const createSwarmService = async (serviceName, config) => {
  * @param {string} name - The name of the network
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
-export const createDockerNetwork = async (name) => {
+export const createDockerNetwork = async (name, type='swarm') => {
   log.debug(`Creating Docker network: ${name}`)
-  const [success, result] = await runDockerApiCommand(
-    'createNetwork',
-    {
-      Name: name,
-      CheckDuplicate: true,
-      EnableIPv6: false,
-      Driver: 'overlay', // Make it swarm compatible
-      Attachable: true,
-      Labels: {
-        'morio.foo.bar': 'bananas',
-      },
-      //IPAM: {
-      //  Config: [{
-      //    Subnet: "10.1.2.0/24",
-      //    IPRange: "10.1.2.0/25",
-      //  }]
-      //},
-      // FIXME, dan't make this work
-      Options: {
-        encrypted: 'true',
-        'com.docker.network.mtu': '1333',
-      },
+  const swarm = type === 'swarm' ? true : false
+  const config = {
+    Name: name,
+    CheckDuplicate: true,
+    EnableIPv6: false,
+    Driver: swarm ? 'overlay' : 'bridge',
+    Attachable: true,
+    // Fixme: allow adding labels?
+    Labels: {
+      'morio.foo.bar': 'bananas',
     },
-    true
-  )
+    //IPAM: {
+    //  Config: [{
+    //    Subnet: "10.1.2.0/24",
+    //    IPRange: "10.1.2.0/25",
+    //  }]
+    //},
+  }
+  if (swarm && !store.getFlag('DISABLE_SWARM_OVERLAY_ENCRYPTION')) config.Options = { encrypted: 'true' }
+  // FIXME: Support setting MTU perhaps? Something like
+  // if (whatever) config.Options['com.docker.network.mtu'] = '1333'
+
+  const [success, result] = await runDockerApiCommand('createNetwork', config, true)
   if (success) {
-    log.debug(`Network created: ${name}`)
+    log.debug(`${swarm ? 'Swarm' : 'Local'} network created: ${name}`)
     /*
      * Return the network object
      */
@@ -147,6 +145,51 @@ export const createDockerNetwork = async (name) => {
 
   return false
 }
+
+/**
+ * Attaches to a Docker network
+ *
+ * @param {string} service - The name of the service
+ * @param {object} network - The network object (from dockerode)
+ * @param {endpointConfig}
+ */
+export const attachToDockerNetwork = async (service, network, endpointConfig, exlusive=true) => {
+  if (!network) {
+    log.warn(`Attempt to attach ${service} to network ${network.id}, but no network object was passed`)
+    return false
+  }
+
+  try {
+    await network.connect({ Container: service, EndpointConfig: endpointConfig })
+  } catch (err) {
+    if (err?.json?.message && err.json.message.includes(' is already ')) {
+      log.debug(`Container ${service} is already attached to network ${network.id}`)
+    } else log.warn(err, `Failed to attach container ${service} to network ${network.id}`)
+  }
+
+  /*
+   * If exclusive is set, ensure the container is not attached
+   * to any other networks
+   */
+  const [success, result] = await runContainerApiCommand(service, 'inspect')
+  if (success) {
+    for (const netName in result.NetworkSettings.Networks) {
+      if (netName !== network.id) {
+        const netId = result.NetworkSettings.Networks[netName].NetworkID
+        const [ok, net] = await runDockerApiCommand('getNetwork', netId)
+        if (ok && net) {
+          log.debug(`Disconnecting container ${service} from network ${netName}`)
+          try {
+            await net.disconnect({ Container: service, Force: true })
+          } catch (err) {
+            log.warn(err, `Disconnecting container ${service} from network ${netName} failed`)
+          }
+        }
+      }
+    }
+  } else log(`Failed to inspect ${service} container`)
+}
+
 
 /**
  * Helper method to create the config for a Docker container

@@ -92,7 +92,8 @@ export const utils = new Store(log)
   .set('endReconfigure', () => {
     store.set('state.config_resolved', true)
     store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
-    log.info('Morio Core ready - Configuration Resolved')
+    const serial = store.get('state.settings_serial')
+    log.info(`Morio Core Ready - Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
   })
   /*
    * Helper method for starting ephemeral state

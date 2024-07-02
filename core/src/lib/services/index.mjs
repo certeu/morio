@@ -14,7 +14,9 @@ import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder } from
 // Docker
 import {
   docker,
+  attachToDockerNetwork,
   createDockerContainer,
+  createDockerNetwork,
   createSwarmService,
   runDockerApiCommand,
   runContainerApiCommand,
@@ -26,6 +28,7 @@ import {
 } from '#lib/docker'
 // Utilities
 import { store, log, utils } from '../utils.mjs'
+import { inProduction } from '#config'
 
 /**
  * This object holds all services, where each service has some
@@ -304,7 +307,6 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * Always recreate if the container image is different
    */
-  console.log(store.config.services.docker)
   const imgs = {
     current: serviceImageFromState(store.get(['state', 'services', serviceName])),
     next: serviceImageFromConfig(store.get(['config', 'services', 'morio', serviceName]))
@@ -319,10 +321,10 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    */
   if (
     serviceName === 'api' &&
-    utils.getPreset('NODE_ENV') !== 'production' &&
-    store.config?.deployment?.nodes?.[0] === utils.getPreset('MORIO_UNIT_TEST_HOST')
+    !inProduction() &&
+    store.getSettings(['deployment', 'nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
   ) {
-    log.trace(`Not in production, and running tests, not creating API to add Traefik labels`)
+    log.trace(`Not in production, and running tests, not recreating API to add Traefik labels`)
     return false
   }
 
@@ -338,6 +340,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Always recreate if the service configuration has changed
    */
   //if (JSON.stringify(store.config.services[service] !== JSON.stringify(store.
+
   /*
    * After from basic check, defer to the recreateContainer lifecycle hook
    */
@@ -528,6 +531,35 @@ export function defaultRestartServiceHook(service, { running, recreate }) {
    */
   return false
 }
+
+/**
+ * Ensures the morio network exists, and the container is attached to it
+ *
+ * @param {string} network = The name of the network to ensure
+ * @param {string} service = The name of the service/container to attach to the network
+ * @param {object} endpointConfig = The endpointConfig to attach to the network (see Docker API)
+ * @param {string} type = One of 'swarm' or 'local' to determine the type of network
+ * @param {bool} exclusive = Whether or not to disconnect the service's container from all other networks
+ * @return {bool} ok = Whether or not the service was started
+ */
+export const ensureMorioNetwork = async (
+  networkName = 'morionet',
+  service = 'core',
+  endpointConfig = {},
+  type='swarm',
+  exclusive=true
+) => {
+  /*
+   * Create Docker network
+   */
+  const network = await createDockerNetwork(networkName, type)
+
+  /*
+   * Attach to Docker network
+   */
+  if (network) await attachToDockerNetwork(service, network, endpointConfig)
+}
+
 
 //const isSwarmService = (serviceName) => (
 //  serviceName === 'core' ||
