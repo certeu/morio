@@ -10,7 +10,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
-  const NODE = store.get('info.node.serial', 1)
+  const NODE = store.get('state.node.serial', 1)
 
   return {
     /**

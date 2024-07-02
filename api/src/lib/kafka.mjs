@@ -1,4 +1,4 @@
-import { store } from './utils.mjs'
+import { store, log } from './utils.mjs'
 import { Kafka, logLevel } from 'kafkajs'
 
 export function KafkaClient() {
@@ -48,7 +48,7 @@ export function KafkaClient() {
   this.producer.on(this.producer.events.CONNECT, () => {
     log.debug('Kafka producer connected')
   })
-  this.kafka.consumer.on(this.consumer.events.CONNECT, () => {
+  this.consumer.on(this.consumer.events.CONNECT, () => {
     log.debug('Kafka consumer connected')
   })
 

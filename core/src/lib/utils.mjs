@@ -4,6 +4,7 @@ import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
 import get from 'lodash.get'
+import set from 'lodash.set'
 
 /*
  * Export a log object for logging via the logger
@@ -132,6 +133,11 @@ export const utils = new Store(log)
    * API client
    */
   .set('apiClient', restClient(`http://api:${getPreset('MORIO_API_PORT')}`))
+
+/*
+ * Helper method to determine whether to run a swarm or not
+ */
+utils.set('isSwarm', () => (utils.isEphemeral() || store.getFlag('NEVER_SWARM')) ? false : true)
 
 
 /**

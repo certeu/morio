@@ -1,9 +1,8 @@
-// Load the store
-import { store } from './utils.mjs'
+import { log } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 // Load helper methods from accounts
-import { clean, asTime, fullId, asString, asStatus, asRole, asJson, fromJson } from './account.mjs'
+import { clean, asTime, asString, asStatus, asRole, asJson, fromJson } from './account.mjs'
 
 /*
  * This maps the fields to a method to format the field
@@ -21,6 +20,21 @@ const fields = {
   secret: asJson,
   lastLogin: asTime,
 }
+
+/*
+ * Select everything but the secret (this is what we return)
+ */
+const nonSecretFields = [
+  'id',
+  'name',
+  'status',
+  'role',
+  'createdBy',
+  'createdAt',
+  'updatedBy',
+  'updatedAt',
+  'lastLogin',
+].join(',')
 
 /*
  * This maps the fields to a method to unserialize the value
@@ -54,14 +68,17 @@ export const loadApikey = async (id) => {
 /**
  * Helper method to load API keys for a given account
  *
- * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
+ * @param {string} id - The unique id (in provider.username format)
  * @return {object} keys - The API keys  stored for the account
  */
-export const loadAccountApikeys = async (provider, id) =>
-  await db.read(`SELECT id FROM apikeys WHERE createdBy=:username`, {
-    id: fields.id(fullId(provider, id)),
-  })
+export const loadAccountApikeys = async (id) => {
+  const [status, result] = await db.read(
+    `SELECT ${nonSecretFields} FROM apikeys WHERE createdBy=:id`,
+    { id: fields.id(id) }
+  )
+
+  return (status === 200) ? apikeysAsList(result) : false
+}
 
 /**
  * Helper method to create an API key
@@ -73,7 +90,7 @@ export const saveApikey = async (id = false, data) => {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('saveApikey was called witout an id')
+    log.debug('saveApikey was called witout an id')
     return false
   }
 

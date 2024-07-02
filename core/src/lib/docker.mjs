@@ -164,7 +164,6 @@ export const generateContainerConfig = (config) => {
   const name = config.container.container_name
   const aliases = config.container.aliases || []
   log.debug(`Generating container configuration: ${name}`)
-  const tag = config.container.tag ? `:${config.container.tag}` : ''
   const opts = {
     name,
     HostConfig: {
@@ -175,7 +174,7 @@ export const generateContainerConfig = (config) => {
       },
     },
     Hostname: name,
-    Image: config.container.image + tag,
+    Image: serviceImageFromConfig(config),
     NetworkingConfig: {
       EndpointsConfig: {},
     },
@@ -537,6 +536,11 @@ export const runDockerCliCommand = async (cmd, ...params) => {
  * This helper method stores a list of running services (both local and on the swarm)
  */
 export const storeRunningServices = async () => {
+  /*
+   * Clear state first, or services that went away would never be cleared
+   */
+  store.set('state.services', {})
+
   const [localOk, runningLocalServices] = await runDockerApiCommand('listContainers')
   if (localOk) {
     for (const service of runningLocalServices) {
@@ -550,3 +554,6 @@ export const storeRunningServices = async () => {
     }
   }
 }
+
+export const serviceImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
+export const serviceImageFromState = (state) => state.Image

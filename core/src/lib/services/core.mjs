@@ -5,17 +5,16 @@ import {
   readDirectory,
   writeYamlFile,
   mkdir,
-  writeJsonFile,
 } from '#shared/fs'
 // Avoid objects pointing to the same memory location
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
-import { getPreset, inProduction, loadAllPresets } from '#config'
+import { loadAllPresets } from '#config'
 // Axios is required to talk to the CA
 import https from 'https'
 import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods, uuid } from '#shared/crypto'
+import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
@@ -24,10 +23,10 @@ import { alwaysWantedHook } from './index.mjs'
 import { ensureMorioCluster } from '#lib/cluster'
 // Standalone
 import { ensureMorioStandaloneNode } from '#lib/standalone'
-// Docker
-import { storeRunningServices } from '#lib/docker'
 // Store
 import { store, log, utils } from '../utils.mjs'
+// Docker
+import { runContainerApiCommand } from '#lib/docker'
 
 /*
  * Load all presets and write them to disk for other services to load
@@ -91,12 +90,6 @@ export const service = {
         await ensureMorioStandaloneNode(hookParams)
 
         /*
-         * Update the list of running containers & services
-         * (this is needed to be able to get the core ip below)
-         */
-        //await storeRunningServices()
-
-        /*
          * Return here for ephemeral mode
          */
         return true
@@ -112,6 +105,13 @@ export const service = {
       store.set('config.keys', keys)
       store.set('state.settings_serial', timestamp)
       store.set('settings.sanitized', cloneAsPojo(settings))
+      /*
+       * The cluster UUID is stored in keys.deployment as that saves us from
+       * having to write a cluster.json to disk.
+       * However, since the node UUID is in state.node.uuid, we (also) store the
+       * cluster UUID under state.cluster.uuid as things are more intuitive that way
+       */
+      store.set('state.cluster.uuid', keys.deployment)
 
       /*
        * Log some info, for debugging
@@ -203,7 +203,7 @@ export const createX509Certificate = async (data) => {
   /*
    * Extract the key id (kid) from the public key
    */
-  const kid = (await keypairAsJwk({ public: store.keys.public })).kid
+  const kid = (await keypairAsJwk({ public: store.get('config.keys.public') })).kid
 
   /*
    * Generate the JSON web token to talk to the CA
@@ -237,8 +237,8 @@ export const createX509Certificate = async (data) => {
       algorithm: 'RS256',
     },
     noDefaults: true,
-    key: store.keys.private,
-    passphrase: store.keys.mrt,
+    key: store.get('config.keys.private'),
+    passphrase: store.get('config.keys.mrt'),
   })
 
   /*

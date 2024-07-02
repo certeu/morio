@@ -183,7 +183,7 @@ export const service = {
 const ensureTopicsExist = async () => {
   const topics = await getTopics()
 
-  for (const topic of store
+  for (const topic of utils
     .getPreset('MORIO_BROKER_TOPICS')
     .filter((topic) => !topics.includes(topic))) {
     log.debug(`Topic ${topic} not present, creating now.`)

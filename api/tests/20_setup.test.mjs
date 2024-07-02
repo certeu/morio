@@ -67,7 +67,7 @@ describe('API Setup Tests', () => {
 
     /*
      * Keep root token in store
-     */
+   */
     store.mrt = d.root_token.value
     store.mrtAuth = {
       Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),

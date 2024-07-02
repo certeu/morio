@@ -1,4 +1,4 @@
-import { api, setup, attempt, isCoreReady, isApiReady } from './utils.mjs'
+import { api, setup, attempt, isCoreReady, isApiReady, getPreset } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -46,13 +46,26 @@ describe('Ensure status after reconfigure', () => {
   it(`Should GET /status`, async () => {
     const result = await api.get('/status')
     const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
     assert.equal(typeof d, 'object')
-    assert.equal(d.ephemeral, false)
-    assert.equal(d.config_resolved, true)
-    assert.equal(d.setup, true)
+    assert.equal(d.info.name, '@morio/api')
+    assert.equal(d.info.about, 'Morio Management API')
+    assert.equal(d.info.version, getPreset('MORIO_VERSION'))
+    assert.equal(d.info.production, false)
+    assert.equal(d.info.core.name, '@morio/core')
+    assert.equal(d.info.core.about, 'Morio Core')
+    assert.equal(d.info.core.version, getPreset('MORIO_VERSION'))
+    assert.equal(d.info.core.production, false)
+    assert.equal(d.state.ephemeral, false)
+    assert.equal(typeof d.state.uptime, 'number')
+    assert.equal(typeof d.state.start_time, 'number')
+    assert.equal(typeof d.state.reload_count, 'number')
+    assert.equal(d.state.config_resolved, true)
+    assert.equal(d.state.core.ephemeral, false)
+    assert.equal(typeof d.state.core.uptime, 'number')
+    assert.equal(typeof d.state.core.reconfigure_count, 'number')
+    assert.equal(d.state.core.config_resolved, true)
+    assert.equal(typeof d.state.core.settings_serial, 'string')
+    assert.equal(typeof d.state.core.timestamp, 'number')
   })
 })
 

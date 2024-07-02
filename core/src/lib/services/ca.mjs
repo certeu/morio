@@ -73,13 +73,13 @@ export const service = {
       /*
        * Generate JWK
        */
-      const jwk = await keypairAsJwk(store.get('keys'))
+      const jwk = await keypairAsJwk(store.get('config.keys'))
 
       /*
        * Store root certificate and fingerprint in store
        */
       store.set('config.ca', {
-        url: `https://ca_${store.get('info.node.serial')}:9000`,
+        url: `https://ca_${store.get('state.node.serial')}:9000`,
         fingerprint: init.root.fingerprint,
         jwk,
         certificate: init.root.certificate,
@@ -97,11 +97,11 @@ export const service = {
        * Construct step-ca (server) configuration
        */
       const stepServerConfig = {
-        ...store.get('config.services.ca.server'),
+        ...store.get('config.services.morio.ca.server'),
         root: '/home/step/certs/root_ca.crt',
         crt: '/home/step/certs/intermediate_ca.crt',
         key: '/home/step/secrets/intermediate_ca.key',
-        dnsNames: [...store.get('config.services.ca.server.dnsNames'), ...store.getSettings('deployment.nodes')],
+        dnsNames: [...store.get('config.services.morio.ca.server.dnsNames'), ...store.getSettings('deployment.nodes')],
       }
 
       /*
@@ -113,7 +113,7 @@ export const service = {
        * Construct step (client) configuration
        */
       const stepClientConfig = {
-        ...store.config.services.ca.client,
+        ...store.get('config.services.morio.ca.client'),
         fingerprint: init.root.fingerprint,
       }
 
@@ -242,7 +242,7 @@ const reloadCaConfiguration = async () => {
    * Store fingerprint, JWK, and root certificate in the store for easy access
    */
   store.set('config.ca', {
-    url: `https://ca_${store.get('node,serial').config.core.node_nr}:9000`,
+    url: `https://ca_${store.get('state.node.serial')}:9000`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,

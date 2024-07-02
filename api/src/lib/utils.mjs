@@ -37,6 +37,10 @@ export const store = new Store(log)
     production: inProduction(),
     version: getPreset('MORIO_VERSION'),
   })
+/*
+ * Helper method to facilitate getting resolved settings
+ */
+store.set('getSettings', (path, dflt) => store.get(unshift(['settings', 'resolved'], path, dflt)))
 
 /*
  * Export a store instance to hold utility methods
@@ -97,4 +101,20 @@ utils.set('sendErrorResponse', (res, { type, title, status, detail, ...rest }) =
   })
   .end()
 )
+
+/**
+ * Helper method to push a prefix to a set path
+ *
+ * By 'set path' we mean a path to be passed to the
+ * store.set method, which uses lodash's set under the hood.
+ *
+ * @param {array} prefix - The prefix path to add
+ * @param {string|array} path - The path to prefix either as array or a string in dot notation
+ * @return {array} newPath - The prefixed path
+ */
+function unshift(prefix, path) {
+  if (Array.isArray(path)) return [...prefix, ...path]
+  else return [...prefix, ...path.split('.')]
+}
+
 

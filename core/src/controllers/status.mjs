@@ -52,10 +52,10 @@ Controller.prototype.getReloadData = async (req, res) => {
 
   const data = getStatus()
   if (!utils.isEphemeral()) {
-    data.settings = store.get('settings.sanitized')
+    data.settings = store.get('settings')
     data.config = {
       //services: store.get('config.services'),
-      swarm: store.get('config.swarm'),
+      swarm: utils.isSwarm() ? store.get('config.swarm') : false,
       keys: store.get('config.keys'),
     }
   }
@@ -73,10 +73,12 @@ const getStatus = () => ({
     uptime: Math.floor((Date.now() - store.get('state.start_time')) / 1000),
     deployment: utils.isEphemeral() ? undefined : store.get('state.cluster.uuid'),
     node: utils.isEphemeral() ? undefined : store.get('state.node.uuid'),
+    node_serial: utils.isEphemeral() ? undefined : store.get('state.node.serial'),
     core: store.node,
     ephemeral: utils.isEphemeral(),
     reconfigure_count: store.get('state.reconfigure_count'),
     config_resolved: store.get('state.config_resolved'),
+    settings_serial: store.get('state.settings_serial'),
   }
 })
 

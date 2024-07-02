@@ -1,5 +1,5 @@
 import { attempt } from '#shared/utils'
-import { KafkaClient } from './lib/kafka.mjs'
+//import { KafkaClient } from './lib/kafka.mjs'
 import { encryptionMethods } from '#shared/crypto'
 // Load store, logger, and utils
 import { store, log, utils } from './lib/utils.mjs'
@@ -17,8 +17,8 @@ export const reloadConfiguration = async () => {
   const result = await attempt({
     every: 5,
     timeout: 3600,
-    run: async (s) => await utils.core.get('/reload'),
-    onFailedAttempt: () => {
+    run: async () => await utils.core.get('/reload'),
+    onFailedAttempt: (s) => {
       log.debug(`Waited ${s} seconds for core/reload, will continue waiting.`)
     },
     validate: (res) => coreFetchOk,
@@ -33,10 +33,17 @@ export const reloadConfiguration = async () => {
     store.set('state.core.timestamp', Date.now())
     store.set('info.core', result[1].info)
     store.set('presets', result[1].presets)
-    store.config = result[1].config
-    if (result[1].config) {
-      // FIXME store keys
-      // store.keys = result[1].keys
+    if (!utils.isEphemeral()) {
+      /*
+       * This is only available outside of ephemeral mode
+       */
+      store.set('state.node.uuid', result[1].state.node)
+      store.set('state.cluster.uuid', result[1].state.deployment)
+      store.set('state.node.serial', result[1].state.node_serial)
+      store.set('state.settings_serial', result[1].state.settings_serial)
+      store.set('config', result[1].config)
+      store.set('settings', result[1].settings)
+      store.config = result[1].config
     }
     log.debug(`Reloaded data from core.`)
   } else log.warn('Failed to reload Morio data from core')
@@ -62,14 +69,17 @@ export const reloadConfiguration = async () => {
 
   /*
    * Initialize Kafka client
+   * FIXME: Do we (still) need a kafka client in the API now
+   * that we switched to rqlite?
+   * I believe not, so let's comment this out
    */
-  utils.set('kafka', await new KafkaClient())
+  //utils.set('kafka', await new KafkaClient())
 
   /*
    * This will connect the producer.
    * The consumer needs to be connected on-demand.
    */
-  await this.connect()
+  //await utils.kafka.connect()
 
   /*
    * All done

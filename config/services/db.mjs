@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Environment
       environment: {
         // Node ID
-        NODE_ID: store.get('info.node.serial'),
+        NODE_ID: store.get('state.node.serial'),
       },
       // Volumes
       volumes: PROD ? [

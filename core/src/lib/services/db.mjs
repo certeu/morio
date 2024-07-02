@@ -75,7 +75,7 @@ export const service = {
  * @return {bool} result - True if the database is up, false if not
  */
 const isDbUp = async () => {
-  const result = await testUrl(`http://db_${store.config.core.node_nr}:4001/readyz`, {
+  const result = await testUrl(`http://db_${store.get('state.node.serial')}:4001/readyz`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })
@@ -87,10 +87,11 @@ const isDbUp = async () => {
  * Helper method to create database tables
  */
 const ensureTablesExist = async () => {
-  for (const [table, q] of Object.entries(store.config?.services?.db?.schema || {})) {
+  for (const [table, q] of Object.entries(store.get('config.services.morio.db.schema', {}))) {
+    log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
-    if (result[1].results.error && result[1].results.error.includes('already exists')) {
-      log.trace(`Table ${table} already exists`)
+    if (result[1].results[0].error && result[1].results[0].error.includes('already exists')) {
+      log.debug(`Table ${table} already existed`)
     } else if (result[0] === 200) log.debug(`Table ${table} created`)
   }
 }

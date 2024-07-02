@@ -1,5 +1,5 @@
 import { validateSettings } from '#lib/validation'
-import { store, utils } from '../lib/utils.mjs'
+import { store, utils, log } from '../lib/utils.mjs'
 
 /**
  * This core controller provides access to morio core
@@ -233,21 +233,6 @@ Controller.prototype.getConfig = async (req, res) => {
 }
 
 /**
- * Loads the current settings from core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.getSettings = async (req, res) => {
-  const [status, result] = await utils.core.get(`/settings`)
-
-  if (result.deployment) {
-    store.settings = result
-    return res.status(status).send(result)
-  } else return res.status(500).send()
-}
-
-/**
  * Loads the available idenitity/authentication providers (IDPs)
  *
  * @param {object} req - The request object from Express
@@ -329,7 +314,7 @@ Controller.prototype.getJwks = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.joinCluster = async (req, res, path) => {
+Controller.prototype.joinCluster = async (req, res) => {
   log.info('Received request to join cluster')
   console.log({ apiBody: req.body })
   const [status, result] = await utils.core.post(`/cluster/join`, bodyPlusHeaders(req))

@@ -1,10 +1,5 @@
-// Networking
-import axios from 'axios'
-import https from 'https'
-import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
-import { sleep } from '#shared/utils'
 // Docker
-import { createDockerNetwork, runContainerApiCommand,  runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
+import { createDockerNetwork, runContainerApiCommand,  runDockerApiCommand } from '#lib/docker'
 // Utilities
 import { store, log, utils } from './utils.mjs'
 
@@ -18,15 +13,16 @@ import { store, log, utils } from './utils.mjs'
  */
 export const ensureMorioStandaloneNode = async () => {
   store.set('state.core_ready', false)
+  store.set('state.node.serial', 1)
   /*
    * If we are in ephemeral mode, ensure the local network exists, and attach to it.
    */
-  let result = false
+  //let result = false
   try {
     await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
       Aliases: ['core', `core_1`],
     })
-    result = true
+    //result = true
   } catch (err) {
     log.error(err, 'Failed to ensure morio network configuration')
   }
@@ -34,25 +30,25 @@ export const ensureMorioStandaloneNode = async () => {
   store.set('state.core_ready', true)
 }
 
-const createMorionet = async (hookParams) => {
-  /*
-   * If we are in ephemeral mode, this may very well be the first cold boot.
-   * As such, we need to ensure the docker network exists, and attach to it.
-   */
-  let result = false
-  if (hookParams.coldStart) {
-    try {
-      await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
-        Aliases: ['core', `core_${store.get('info.node.serial', 1)}`],
-      })
-      result = true
-    } catch (err) {
-      log.error(err, 'Failed to ensure morio network configuration')
-    }
-  }
-
-  return result
-}
+//const createMorionet = async (hookParams) => {
+//  /*
+//   * If we are in ephemeral mode, this may very well be the first cold boot.
+//   * As such, we need to ensure the docker network exists, and attach to it.
+//   */
+//  let result = false
+//  if (hookParams.coldStart) {
+//    try {
+//      await ensureMorioNetwork(utils.getPreset('MORIO_NETWORK'), 'core', {
+//        Aliases: ['core', `core_${store.get('state.node.serial', 1)}`],
+//      })
+//      result = true
+//    } catch (err) {
+//      log.error(err, 'Failed to ensure morio network configuration')
+//    }
+//  }
+//
+//  return result
+//}
 
 /**
  * Ensures the morio network exists, and the container is attached to it

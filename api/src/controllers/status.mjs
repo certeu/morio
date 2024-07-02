@@ -22,7 +22,7 @@ Controller.prototype.reconfigure = async (req, res) => {
    * Just get the status from core and pass it with some tweaks
    */
   log.debug('Reveived reconfigure signal from core')
-  await relaod()
+  await reload()
   log.debug('Reload complete')
 
   return res.status(200).send({})
@@ -80,6 +80,7 @@ Controller.prototype.status = async (req, res) => {
       start_time: store.get('state.start_time'),
       reload_count: store.get('state.reload_count'),
       config_resolved: store.get('state.config_resolved'),
+      settings_serial: store.get('state.settings_serial'),
       // config_resolved
       // reload_time
       // ephemeral
@@ -136,3 +137,12 @@ Controller.prototype.listDownloads = async (req, res) => {
   if (list) return res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))
   else return res.status(500).send({ errors: ['Failed to read file list'] })
 }
+
+/**
+ * Returns the current (sanitized) settings
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getSettings = async (req, res) => res.send(store.get('settings.sanitized')).end()
+

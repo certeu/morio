@@ -5,6 +5,7 @@ import { randomString, hashPassword } from '#shared/crypto'
 import { validateSchema } from '../lib/validation.mjs'
 import { loadApikey, saveApikey, removeApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This account controller handles apikeys in Morio
@@ -62,7 +63,8 @@ Controller.prototype.create = async (req, res) => {
     expiresAt: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
   }
 
-  await saveApikey(key, data)
+  const result = await saveApikey(key, data)
+  console.log(JSON.stringify(result, null ,2))
 
   return res.send({
     result: 'success',
@@ -87,25 +89,14 @@ Controller.prototype.list = async (req, res) => {
    */
   const keys = await loadAccountApikeys(currentUser(req))
 
-  /*
-   * Parse them into a nice list
-   */
-  const list = (Object.keys(keys) || [])
-    .filter((id) => keys[id].status !== 'deleted')
-    .map((id) => {
-      const data = {
-        key: id.slice(7),
-        ...keys[id],
-      }
-      delete data.secret
-
-      return data
+  return keys
+    ? res.send({ result: 'success', keys})
+    : utils.sendErrorResponse(res, {
+      type: `morio.api.apikeys.list.failed`,
+      title: 'Unable to load the list of API keys from the database',
+      status: 503,
+      detail: 'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request'
     })
-
-  return res.send({
-    result: 'success',
-    keys: list,
-  })
 }
 
 /**

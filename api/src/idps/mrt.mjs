@@ -17,7 +17,7 @@ export const mrt = async (id, data) => {
   /*
    * Authenticate
    */
-  if (id === 'mrt' && data.mrt === store.keys.mrt) {
+  if (id === 'mrt' && data.mrt === store.get('config.keys.mrt')) {
     /*
      * Store the latest login time, but don't wait for it
      */

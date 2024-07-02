@@ -31,7 +31,7 @@ const storeClusterSwarmState = async () => {
   if (result && swarm.JoinTokens) {
     log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('swarm.tokens', swarm.JoinTokens)
-    store.set('info.swarm.ready', true)
+    store.set('state.swarm.ready', true)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
     if (ok) {
       let i = 1
@@ -46,8 +46,8 @@ const storeClusterSwarmState = async () => {
        * Single node makes this easy
        */
       if (store.get("settings.resolved.deployment.node_count") === 1) {
-        store.set('info.node.serial', 1)
-        store.set('info.node.names', {
+        store.set('state.node.serial', 1)
+        store.set('state.node.names', {
           internal: 'core_1',
           external: store.get(['settings', 'resolved', 'deployment', 'nodes', 0]),
         })
@@ -67,7 +67,7 @@ const storeClusterSwarmState = async () => {
     }
   } else {
     log.warn(`There is no swarm on this host`)
-    store.set('info.swarm.ready', false)
+    store.set('state.swarm.ready', false)
   }
 }
 
@@ -203,14 +203,14 @@ const ensureSwarm = async () => {
   for (const id of store.get('state.cluster.sets.all', []).filter(
     (serial) => `${serial}` !== `${store.get('state.cluster.local_node')}`
   )) {
-    const { serial, fqdn, hostname, local_node } = store.get(['info', 'cluster', 'nodes', id])
+    const { serial, fqdn, hostname, local_node } = store.get(['state', 'cluster', 'nodes', id])
     if (!store.get('state.cluster.sets.swarm') || !store.get('state.cluster.sets.swarm').includes(fqdn)) {
       try {
         log.debug(`Asking ${fqdn} to join the cluster`)
         //await axios.post(
         //  `https://${fqdn}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
         //  {
-        //    join: store.get('info.node'),
+        //    join: store.get('state.node'),
         //    as: { serial, fqdn, hostname, ip: await resolveHostAsIp(fqdn) },
         //    managers: swarmManagers(),
         //    token: store.swarm.tokens.Manager,
@@ -220,7 +220,7 @@ const ensureSwarm = async () => {
         //  }
         //)
       } catch (err) {
-        console.log(err)
+        console.warn(err)
       }
     }
   }
@@ -253,7 +253,6 @@ export const ensureMorioCluster = async ({
    * We need to set the core IP before services are starting
    */
   const [success, result] = await runContainerApiCommand('core', 'inspect')
-  console.log(result)
   if (success) {
     store.set('state.services.core', result)
     store.set('state.node.core_ip', result.NetworkSettings.Networks.morionet.IPAddress)
@@ -280,7 +279,7 @@ export const ensureMorioCluster = async ({
   }
 
   // FIXME: This needs to be set properly later
-  store.set('info.node.serial', 1)
+  store.set('state.node.serial', 1)
 
   return store.get('state.core_ready')
 

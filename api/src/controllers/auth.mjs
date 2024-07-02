@@ -151,7 +151,7 @@ Controller.prototype.login = async (req, res) => {
    */
   const providerType = ['mrt', 'local', 'apikey'].includes(providerId)
     ? providerId
-    : store.config?.iam?.providers?.[providerId]?.provider || false
+    : store.getSettings(['iam', 'providers', providerId, 'provider'], false)
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request
@@ -187,11 +187,11 @@ Controller.prototype.login = async (req, res) => {
     data: {
       ...data,
       provider: req.body.provider,
-      node: store.keys.node,
-      deployment: store.keys.deployment,
+      node: store.get('state.node.uuid'),
+      deployment: store.get('state.cluster.uuid'),
     },
-    key: store.keys.private,
-    passphrase: store.keys.mrt,
+    key: store.get('config.keys.private'),
+    passphrase: store.get('config.keys.mrt'),
   })
 
   return res.send({ jwt, data })
@@ -242,8 +242,8 @@ Controller.prototype.renewToken = async (req, res) => {
         maxRole: payload.maxRole,
         provider: payload.provider,
       },
-      key: store.keys.private,
-      passphrase: store.keys.mrt,
+      key: store.get('config.keys.private'),
+      passphrase: store.get('config.keys.mrt'),
     })
 
     return res.send({ jwt })
@@ -292,7 +292,7 @@ const verifyToken = (token) =>
   new Promise((resolve) =>
     jwt.verify(
       token,
-      store.keys.public,
+      store.get('config.keys.public'),
       {
         audience: 'morio',
         issuer: 'morio',

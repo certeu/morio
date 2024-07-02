@@ -45,6 +45,7 @@ const setup = {
     flags: {
       HEADLESS_MORIO: false,
       DISABLE_ROOT_TOKEN: false,
+      NEVER_SWARM: true,
     },
     secrets: {
       TEST_SECRET_1: 'banana',
@@ -128,8 +129,7 @@ const isCoreReady = async () => {
   const res = await core.get('/status')
   const [status, result] = res
 
-  //console.log({ core: result })
-  return status === 200 && result.config_resolved === true ? true : false
+  return status === 200 && result.state.config_resolved === true ? true : false
 }
 
 /**
@@ -141,7 +141,7 @@ const isApiReady = async () => {
   const [status, result] = await api.get('/status')
 
   //console.log({ api: result })
-  return status === 200 && result.config_resolved === true ? true : false
+  return status === 200 && result.state.config_resolved === true ? true : false
 }
 
 export {

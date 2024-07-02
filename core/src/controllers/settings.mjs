@@ -31,8 +31,8 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the IDPs configured by the user
    */
-  if (store.get('settings.iam.providers')) {
-    for (const [id, conf] of Object.entries(store.settings.iam.providers)) {
+  if (store.getSettings('iam.providers')) {
+    for (const [id, conf] of Object.entries(store.getSettings('iam.providers'))) {
       idps[id] = {
         id,
         provider: id === 'mrt' ? 'mrt' : conf.provider,
@@ -55,7 +55,7 @@ Controller.prototype.getIdps = async (req, res) => {
   return res
     .send({
       idps,
-      ui: store.get('settings.iam.ui', {}),
+      ui: store.getSettings('iam.ui', {}),
     })
     .end()
 }
@@ -189,7 +189,9 @@ Controller.prototype.setup = async (req, res) => {
     private: privateKey,
   }
   log.debug(`Generating UUIIDs`)
-  const uuids = { node: uuid(), deployment: uuid() }
+  /*
+   * Generate UUIDs for node (local) and deployment (cluster)
+   */
   node.uuid = uuid()
   keys.deployment = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
@@ -248,10 +250,10 @@ Controller.prototype.setup = async (req, res) => {
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*
-   * Finally write the node info to disk
+   * Write the node info to disk
    */
   log.debug(`Writing node data to node.json`)
-  result = await writeJsonFile(`/etc/morio/node.json`, { ...node, uuid: keys.deployment })
+  result = await writeJsonFile(`/etc/morio/node.json`, node)
   if (!result) return res.status(500).send({ errors: ['Failed to write node info to disk'] })
 
   /*
@@ -261,7 +263,7 @@ Controller.prototype.setup = async (req, res) => {
   const data = {
     result: 'success',
     uuids: {
-      node: keys.node,
+      node: node.uuid,
       deployment: keys.deployment,
     },
     root_token: {
@@ -292,13 +294,22 @@ const localNodeInfo = async (body) => {
    * The API injects the headers into the body
    * so we will look at the X-Forwarded-Host header
    * and hope that it matches one of the cluster nodes
+   * Note that we carve out an exception here for unit tests
+   * but only if we're not in production
    */
   let fqdn = false
   const nodes = body.deployment.nodes.map(node => node.toLowerCase())
+  console.log({ nodes, headers: body.headers })
+
   for (const header of ['x-forwarded-host', 'host']) {
-    if (nodes.includes(body.headers[header].toLowerCase())) {
-      fqdn = body.headers[header].toLowerCase()
-    }
+    const hval = (body.headers[header] || '').toLowerCase()
+    if (nodes.includes(hval) || (
+      /*
+       * Note that we carve out an exception here to facilitate unit tests
+       * but only if we're not in production
+       */
+      !utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST')
+    )) fqdn = hval
   }
 
   /*

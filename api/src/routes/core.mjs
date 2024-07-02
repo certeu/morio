@@ -123,11 +123,6 @@ export function routes(app) {
   app.get(`${PREFIX}/config`, Core.getConfig)
 
   /*
-   * Hit this route to get the running settings
-   */
-  app.get(`${PREFIX}/settings`, Core.getSettings)
-
-  /*
    * Hit this route to get the available idenity/authentication providers (idps)
    */
   app.get(`${PREFIX}/idps`, Core.getIdps)

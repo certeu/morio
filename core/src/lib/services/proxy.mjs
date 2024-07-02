@@ -130,12 +130,10 @@ export const addTraefikTlsConfiguration = (service) => {
   /*
    * Update rule with hostname(s)
    * This will also add the leader_ip and fqdn when Morio is clustered
+   * FIXME: Removed leader_ip until clustering matures
    */
-  const names = store.getSettings('deployment.nodes')
-  for (const name of ['leader_ip', 'fqdn']) {
-    const extra = store.getSettings(['deployment', name])
-    if (extra) names.push(extra)
-  }
+  const names = [...store.getSettings('deployment.nodes')]
+  if (names.length > 1) names.push(store.getSettings('deployment.fqdn'))
   const labelPath = [ 'services', 'morio', service, 'container', 'labels' ]
   for (const [i, label] of Object.entries(store.get(labelPath, {}))) {
     if (label.toLowerCase().indexOf('rule=(') !== -1) {

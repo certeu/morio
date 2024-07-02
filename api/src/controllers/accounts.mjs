@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
-import { store, log } from '../lib/utils.mjs'
+import { store, log, utils } from '../lib/utils.mjs'
 import { validateSchema } from '../lib/validation.mjs'
 import { listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
 import { mfa } from '../lib/mfa.mjs'
@@ -81,7 +81,7 @@ Controller.prototype.create = async (req, res) => {
     data: {
       ...valid,
       invite,
-      inviteUrl: `https://${store.config.deployment.fqdn}/morio/invite/${valid.username}-${invite}`,
+      inviteUrl: `https://${store.getSettings('deployment.fqdn')}/morio/invite/${valid.username}-${invite}`,
     },
   })
 }
@@ -130,7 +130,7 @@ Controller.prototype.activate = async (req, res) => {
    */
   await saveAccount('local', valid.username, {
     ...pending,
-    mfa: await store.encrypt(result.secret),
+    mfa: await utils.encrypt(result.secret),
   })
 
   /*
@@ -179,7 +179,7 @@ Controller.prototype.activateMfa = async (req, res) => {
   /*
    * Verify MFA token
    */
-  const result = await mfa.verify(valid.token, await store.decrypt(pending.mfa), [])
+  const result = await mfa.verify(valid.token, await utils.decrypt(pending.mfa), [])
   if (!result) return res.status(400).send({ error: 'Invalid MFA token' })
 
   /*

@@ -10,7 +10,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
-  const NODE = store.get('info.node.serial', 1)
+  const NODE = store.get('state.node.serial', 1)
 
   return {
     /**
@@ -191,7 +191,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         /*
          * Cluster ID helps differentiate different Morio deployments
          */
-        cluster_id: store.get('info.cluster.uuid', Date.now()),
+        cluster_id: store.get('state.cluster.uuid', Date.now()),
 
         /*
          * Enable audit log FIXME

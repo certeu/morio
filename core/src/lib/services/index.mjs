@@ -20,6 +20,9 @@ import {
   runContainerApiCommand,
   generateContainerConfig,
   generateSwarmServiceConfig,
+  storeRunningServices,
+  serviceImageFromConfig,
+  serviceImageFromState,
 } from '#lib/docker'
 // Utilities
 import { store, log, utils } from '../utils.mjs'
@@ -125,7 +128,6 @@ export const logStartedConfig = () => {
      * It is, so we should have a config
      */
     log.info(`Using configuration ${store.get('state.settings_serial')}`)
-    console.log({ resolved: store.get('settings.resolved')})
     if (store.get('settings.resolved.deployment.nodes').length > 1) {
       log.debug(
         `This Morio instance is part of a ${store.settings.resolved.nodes.length}-node cluster`
@@ -165,6 +167,11 @@ export const startMorio = async (hookParams = {}) => {
    * Log info about the config we'll start
    */
   logStartedConfig()
+
+  /*
+   * Store info on what's running once so lifecycle hooks don't all have to
+   */
+  await storeRunningServices()
 
   /*
    * Create services (in parallel)
@@ -233,9 +240,9 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   store.setDockerServiceConfig(
     serviceName,
-    utils.isEphemeral()
-      ? generateContainerConfig(store.getMorioServiceConfig(serviceName))
-      : generateSwarmServiceConfig(store.getMorioServiceConfig(serviceName))
+    utils.isSwarm()
+      ? generateSwarmServiceConfig(store.getMorioServiceConfig(serviceName))
+      : generateContainerConfig(store.getMorioServiceConfig(serviceName))
   )
 
   /*
@@ -297,16 +304,11 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * Always recreate if the container image is different
    */
-  console.log('FIXME is this the right store pat', {
-    'config.services.swarm': store.get('config.services.swarm'),
-    'services.running.swarm': store.get('services.running.swarm'),
-  })
+  console.log(store.config.services.docker)
   const imgs = {
-    current: store.get(['state', 'services', serviceName]).Image,
-    next: store.get(['config', 'services', 'swarm', serviceName]).Image,
+    current: serviceImageFromState(store.get(['state', 'services', serviceName])),
+    next: serviceImageFromConfig(store.get(['config', 'services', 'morio', serviceName]))
   }
-  // FIXME : is this image comparison ok?
-  console.warn({ imgs })
   if (imgs.next !== imgs.current) {
     log.debug(`Container image changed from ${imgs.current} to ${imgs.next}`)
     return true
@@ -384,7 +386,7 @@ const stopService = async (service, id) => {
 }
 
 const isServiceUp = async (serviceName) => {
-  const details = store.get(['services', 'running', serviceName], false)
+  const details = store.get(['state', 'services', serviceName], false)
 
   return [details ? true : false, details]
 }
@@ -445,11 +447,12 @@ export function alwaysWantedHook() {
  * @param {bool} hookParams.coldStart - Whether or not this is a cold start
  * @retrun {boolean} result - True to recreate the container
  */
-export function defaultRecreateServiceHook(service, hookParams) {
+export async function defaultRecreateServiceHook(service, hookParams) {
   /*
    * If the container is not currently running, recreate it
    */
-  if (!hookParams?.running?.[service]) {
+  const [up] = await isServiceUp(serviceName)
+  if (!up) {
     log.trace(`The ${service} is not running`)
     return true
   }
@@ -457,7 +460,8 @@ export function defaultRecreateServiceHook(service, hookParams) {
   /*
    * If container name or image changes, recreate it
    */
-  const cConf = store.config.services[service].container // Save us some typing
+  const cConf = store.get(['config', 'services']) //, 'morio', service, 'container']) // Save us some typing
+  console.log({cConf})
   if (
     hookParams?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
     hookParams?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
@@ -525,8 +529,9 @@ export function defaultRestartServiceHook(service, { running, recreate }) {
   return false
 }
 
-const isSwarmService = (serviceName) => (
-  serviceName === 'core' ||
-  utils.isEphemeral() ||
-  store.getSettings('tokens.flags.NEVER_SWARM')
-) ? false : true
+//const isSwarmService = (serviceName) => (
+//  serviceName === 'core' ||
+//  utils.isEphemeral() ||
+//  store.getSettings('tokens.flags.NEVER_SWARM')
+//) ? false : true
+

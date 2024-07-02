@@ -1,7 +1,7 @@
 import { roles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 // Load the store
-import { store } from './utils.mjs'
+import { store, log } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 
@@ -62,7 +62,7 @@ export const asRole = (data) => {
  */
 const asProvider = (data) => {
   const p = String(data).toLowerCase()
-  if ((Object.keys(store.config?.iam?.providers) || []).includes(p)) return p
+  if (Object.keys(store.get('config.iam.providers', {})).includes(p)) return p
   else {
     log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
     return ''

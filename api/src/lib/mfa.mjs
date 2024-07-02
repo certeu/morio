@@ -24,7 +24,7 @@ export const mfa = {
     const secret = authenticator.generateSecret()
     const otpauth = authenticator.keyuri(
       username,
-      `Morio/${store.config.deployment.display_name}`,
+      `Morio/${store.getSettings('deployment.display_name')}`,
       secret
     )
     let svg

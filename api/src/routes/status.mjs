@@ -32,6 +32,11 @@ export function routes(app) {
   app.get(`${PREFIX}/downloads`, Status.listDownloads)
 
   /*
+   * Hit this route to get the running settings
+   */
+  app.get(`${PREFIX}/settings`, Status.getSettings)
+
+  /*
    * This route is called by core after reconfiguring itself
    */
   app.get(`${PREFIX}/reconfigure`, (req, res) => Status.reconfigure(req, res))

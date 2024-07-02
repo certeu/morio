@@ -17,10 +17,15 @@ import { storeLastLoginTime } from '../lib/account.mjs'
  * @return {function|bool} strategy - False if there is no such provider, or the strategy handler method when there is
  */
 const strategy = (id) => {
-  if (!store.config?.iam?.providers?.[id]) return false
+  /*
+   * Get provider from settings
+   */
+  const provider = store.getSettings(['iam', 'providers', id], false)
+
+  if (!provider) return false
 
   const options = {
-    server: store.config.iam.providers[id].server,
+    server: provider.server,
     log: log,
     credentialsLookup: (req) => {
       return {
@@ -33,15 +38,15 @@ const strategy = (id) => {
   /*
    * Bypass certificate validation?
    */
-  if (store.config.iam.providers[id].verify_certificate === false) {
+  if (provider.verify_certificate === false) {
     options.server.tlsOptions = { rejectUnauthorized: false }
-  } else if (store.config.iam.providers[id].trust_certificate) {
+  } else if (provider.trust_certificate) {
     /*
      * Or trust a specific certificate?
      */
     options.server.tlsOptions = {
       secureContext: tls.createSecureContext({
-        ca: store.config.iam.providers[id].trust_certificate,
+        ca: provider.trust_certificate,
       }),
     }
   }
@@ -71,14 +76,23 @@ export const ldap = (id, data, req) => {
   }
 
   /*
+   * Get provider from settings
+   */
+  const provider =  store.getSettings(['iam', 'providers', id])
+
+  /*
    * Passport uses callback style, so we'll wrap this in a Promise to support async
    */
   return new Promise((resolve) => {
     passport.authenticate(id, function (err, user) {
-      if (err)
+      if (err) {
+        log.warn(err, `Failed to authenticate user ${user} with provider ${id}`)
         return resolve([false, { success: false, reason: 'Authentication error', error: err }])
+      }
 
-      if (!user)
+      if (!user) {
+        log.warn(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
+        console.log({err})
         return resolve([
           false,
           {
@@ -87,12 +101,13 @@ export const ldap = (id, data, req) => {
             error: 'Invalid LDAP credentials',
           },
         ])
+      }
 
       if (user) {
         /*
          * Can we find the username?
          */
-        const username = caseInsensitiveGet(store.config.iam.providers[id].username_field, user)
+        const username = caseInsensitiveGet(provider.username_field, user)
         if (!username)
           return resolve([
             false,
@@ -108,7 +123,7 @@ export const ldap = (id, data, req) => {
          */
         const [allowed, maxLevel] = checkRole(
           req.body?.data?.role,
-          store.config.iam.providers[id].rbac,
+          provider.rbac,
           user
         )
         if (!allowed)
