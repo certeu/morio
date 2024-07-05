@@ -220,7 +220,6 @@ export const createX509Certificate = async (data) => {
    *   - The `sans` field should match the SAN records in the certificate
    *
    * And obviously we should sign it with the deployment-wide private key,
-   * which we'll need to decrypt first.
    */
   const jwt = generateJwt({
     data: {
@@ -246,7 +245,6 @@ export const createX509Certificate = async (data) => {
    */
   let result
   try {
-    log.trace('about ot make CA request')
     result = await axios.post(
       'https://ca:9000/1.0/sign',
       {
@@ -266,7 +264,7 @@ export const createX509Certificate = async (data) => {
     )
     log.trace('completed CA request')
   } catch (err) {
-    log.debug(err, 'Failed to get certificate signed by CA')
+    log.debug('Failed to get certificate signed by CA')
   }
 
   /*

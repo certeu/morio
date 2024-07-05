@@ -43,7 +43,7 @@ store.set('getSettings', (path, dflt) => store.get(unshift(['settings', 'resolve
 /*
  * Helper method to get a flag from the settings
  */
-store.set('getFlag', (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag]))
+store.set('getFlag', (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false))
 /*
  * Helper method to get a Morio service configuration
  */
@@ -67,7 +67,7 @@ store.set('setDockerServiceConfig', (service, config) => store.set(['config', 's
 /*
  * Helper method to get a cache entry (see utils.cacheHit)
  */
-.set('getCache', (path, dflt) => store.get(unshift(['cache'], path, dflt)))
+.set('getCache', (path) => store.get(unshift(['cache'], path), false))
 
 /*
  * Export an utils instance to hold utility methods

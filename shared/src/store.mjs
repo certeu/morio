@@ -70,9 +70,9 @@ Store.prototype.get = function (path, dflt) {
   const val = get(this, path, dflt)
   /*
    * Help debugging by logging when a store value is missing
-   * but do not include cache misses
+   * without providing a default faalback
    */
-  if (val === undefined && Array.isArray(path) && path[0] !== 'cache')
+  if (val === undefined && dflt === undefined)
     this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
 
   return val

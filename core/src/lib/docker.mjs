@@ -159,7 +159,10 @@ export const getSwarmServiceId = async (serviceName) => {
  */
 export const getSwarmService = async (serviceName) => {
   const id = await getSwarmServiceId(serviceName)
-  return await docker.getService(id)
+
+  return id
+    ? await docker.getService(id)
+    : false
 }
 
 /**
@@ -209,8 +212,13 @@ export const createDockerNetwork = async (name, type='swarm') => {
   // FIXME: Support setting MTU perhaps? Something like
   // if (whatever) config.Options['com.docker.network.mtu'] = '1333'
 
-  const [success, result] = await runDockerApiCommand('createNetwork', config, true)
-
+  let success, result
+  try {
+    [success, result] = await runDockerApiCommand('createNetwork', config, true)
+  }
+  catch (err) {
+    //log.warn({ err })
+  }
   /*
    * It will fail if the network exists, but in that case we need to make sure it's
    * the correct type (local vs swarm)

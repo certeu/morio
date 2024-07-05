@@ -208,12 +208,6 @@ const ensureSwarm = async () => {
    */
   if (!store.get('state.swarm.tokens.Manager', false)) {
     log.debug('Initializing Docker Swarm')
-    const config = {
-      ListenAddr: store.get('state.node.ip'),
-      AdvertiseAddr: store.get('state.node.ip'),
-      ForceNewCluster: false,
-    }
-    log.warn(config,  'Creating swarm with with config')
     const [swarmCreated] = await runDockerApiCommand('swarmInit', {
       ListenAddr: store.get('state.node.ip'),
       AdvertiseAddr: store.get('state.node.ip'),
@@ -240,14 +234,6 @@ const ensureSwarm = async () => {
         Role: 'manager',
         Availability: 'Active',
       })
-      console.log({added_labels: {
-          'morio.cluster.uuid': store.get('state.cluster.uuid'),
-          'morio.node.uuid': store.get('state.node.uuid'),
-          'morio.node.fqdn': store.get('state.node.fqdn'),
-          'morio.node.hostname': store.get('state.node.hostname'),
-          'morio.node.ip': store.get('state.node.ip'),
-          'morio.node.serial': String(store.get('state.node.serial')),
-      }})
       if (!labelsAdded) log.warn('Unable to add labels to swarm node. This is unexpected.')
       else await storeClusterState()
     } else log.warn('Failed to ceated swarm. This is unexpected.')
@@ -269,17 +255,6 @@ export const ensureMorioCluster = async ({
   store.set('state.swarm_ready', false)
 
   /*
-   * Ensure the swarm network exists, and we're attached to it.
-   */
-  await ensureMorioNetwork(
-    utils.getPreset('MORIO_NETWORK'), // Network name
-    'core', // Service name
-    { Aliases: ['core', `core_1`] }, // Endpoint config (FIXME: Node serial)
-    'swarm', // Network type
-    true // Disconnect from other networks
-  )
-
-  /*
    * Ensure the swarm is up
    */
   let tries = 0
@@ -295,6 +270,17 @@ export const ensureMorioCluster = async ({
     }
   }
   while (store.get('state.swarm_ready') === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS'))
+
+  /*
+   * Ensure the swarm network exists, and we're attached to it.
+   */
+  await ensureMorioNetwork(
+    utils.getPreset('MORIO_NETWORK'), // Network name
+    'core', // Service name
+    { Aliases: ['core', `core_1`] }, // Endpoint config (FIXME: Node serial)
+    'swarm', // Network type
+    true // Disconnect from other networks
+  )
 
   /*
    * Is the cluster healthy?

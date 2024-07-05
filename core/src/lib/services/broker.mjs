@@ -59,15 +59,10 @@ export const service = {
      */
     prestart: async () => {
       /*
-       * Location of the broker config file within the core container
-       */
-      const brokerConfigFile = `/etc/morio/broker/redpanda.yaml`
-
-      /*
-       * We'll check if there's a broker config file on disk
+       * We'll check if there's a TLS certificate on disk
        * If so, RedPanda has already been initialized
        */
-      const bootstrapped = await readYamlFile(brokerConfigFile)
+      const bootstrapped = await readYamlFile('/etc/morio/broker/tls-cert.pem')
 
       /*
        * If the broker is initialized, return early
@@ -79,45 +74,29 @@ export const service = {
        * but 9 times out of 10, this means the CA has just been started
        * by core. So let's give it time to come up
        */
-      const up = await attempt({
+      const certAndKey = await attempt({
         every: 5,
         timeout: 60,
-        run: async () => await isCaUp(),
+        run: async () => await createX509Certificate({
+          certificate: {
+            cn: 'Morio Broker',
+            c: utils.getPreset('MORIO_X509_C'),
+            st: utils.getPreset('MORIO_X509_ST'),
+            l: utils.getPreset('MORIO_X509_L'),
+            o: utils.getPreset('MORIO_X509_O'),
+            ou: utils.getPreset('MORIO_X509_OU'),
+            san: store.getSettings('deployment.nodes'),
+          },
+          notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+        }),
         onFailedAttempt: (s) =>
           log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
       })
-      if (up)
-        log.debug(
-          'CA is up, still waiting a few seconds before requesting broker certificate'
-        )
-      else {
-        log.error('CA did not come up before timeout. Bailing out')
+
+      if (!certAndKey?.certificate?.crt) {
+        log.error('broker: CA did not come up before timeout. Bailing out.')
         return false
       }
-
-      /*
-       * Even though the CA is up, requesting a certificate ASAP risk the error:
-       * token issued before the bootstrap of certificate authority
-       * So instead, we sleep for 2 seconds to sidestep this timing issue.
-       */
-      await sleep(2)
-
-      /*
-       * Generate X.509 certificate/key for the broker(s)
-       */
-      log.debug('Requesting broker certificate from CA')
-      const certAndKey = await createX509Certificate({
-        certificate: {
-          cn: 'Morio Broker',
-          c: utils.getPreset('MORIO_X509_C'),
-          st: utils.getPreset('MORIO_X509_ST'),
-          l: utils.getPreset('MORIO_X509_L'),
-          o: utils.getPreset('MORIO_X509_O'),
-          ou: utils.getPreset('MORIO_X509_OU'),
-          san: store.getSettings('deployment.nodes'),
-        },
-        notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-      })
 
       /*
        * Now generate the configuration file and write it to disk
@@ -125,8 +104,8 @@ export const service = {
       // 101 is the UID that redpanda runs under inside the container
       const uid = utils.getPreset('MORIO_BROKER_UID')
       log.debug('Storing inital broker configuration')
-      await writeYamlFile(brokerConfigFile, store.get('config.services.morio.broker.broker'), log)
-      await chown(brokerConfigFile, uid, uid)
+      await writeYamlFile('/etc/morio/broker/redpanda.yaml', store.get('config.services.morio.broker.broker'), log)
+      await chown('/etc/morio/broker/redpanda.yaml', uid, uid)
       await writeFile(
         '/etc/morio/broker/tls-cert.pem',
         certAndKey.certificate.crt + '\n' + store.get('config.ca.intermediate')

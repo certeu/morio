@@ -194,7 +194,6 @@ export const service = {
  * @return {bool} result - True if the CA is up, false if not
  */
 export const isCaUp = async () => {
-  //const result = await testUrl(`https://ca_${store.get('state.node.serial')}:9000/health`, {
   const result = await testUrl(`https://ca:9000/health`, {
     ignoreCertificate: true,
     returnAs: 'json',

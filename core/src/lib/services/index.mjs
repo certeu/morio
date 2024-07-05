@@ -267,13 +267,13 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
   if (recreate) {
-    log.debug(`${serviceName}: ${swarm ? 'Updating swarm service' : '(Re)Creating local container'}`)
+    log.debug(`${serviceName}: ${swarm ? 'Updating swarm service' : 'Updating local container'}`)
     /*
      * Run precreate lifecycle hook
      */
     runHook('precreate', serviceName, hookParams)
   } else {
-    log.debug(`${serviceName}: ${swarm ? 'Not updating swarm service' : 'Not rereating local container'}`)
+    log.debug(`${serviceName}: ${swarm ? 'Not updating swarm service' : 'Not updating local container'}`)
   }
 
   /*
@@ -296,7 +296,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.info(`${serviceName}: Starting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
+    log.debug(`${serviceName}: Starting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
     /*
      * Run preStart lifecycle hook
      */
@@ -345,11 +345,11 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Always recreate if the container image is different
    */
   const imgs = {
-    current: serviceImageFromState(store.get(['state', 'services', utils.isSwarm() ? 'swarm' : 'local', serviceName])),
-    next: serviceImageFromConfig(store.get(['config', 'services', 'morio', serviceName]))
+    current: serviceImageFromState(store.get(['state', 'services', utils.isSwarm() ? 'swarm' : 'local', serviceName], false)),
+    next: serviceImageFromConfig(store.get(['config', 'services', 'morio', serviceName], false))
   }
   if (imgs.next !== imgs.current) {
-    log.debug(`${serviceName}: Container image changed from ${imgs.current} to ${imgs.next}`)
+    if (imgs.current !== false) log.debug(`${serviceName}: Container image changed from ${imgs.current} to ${imgs.next}`)
     return true
   }
 
@@ -474,7 +474,7 @@ export const restartMorioService = async (serviceName, id) => {
       )
     }
     catch (err) {
-      log.warn(err, `Failed to create swarm service ${serviceName} (in restart handler)`)
+      log.warn(err, `${serviceName}: Failed to create swarm service (in restart handler)`)
       //console.log({ err, in: 'restartMorioService' })
     }
     //console.log({ result, in: 'restartMorioService' })

@@ -28,14 +28,10 @@ export const service = {
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
-     * We make sure the `/etc/morio/db` folder exists
+     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exists
      */
     precreate: async () => {
-      // 101 is the UID that redpanda runs under inside the container
-      //const uid = utils.getPreset('MORIO_BROKER_UID')
-      const dir = '/morio/data/db'
-      await mkdir(dir)
-      //await chown(dir, uid, uid)
+      for (const dir of ['/etc/morio/db', '/morio/data/db']) await mkdir(dir)
 
       return true
     },
@@ -61,11 +57,11 @@ export const service = {
        * Make sure database is up
        */
       const up = await attempt({
-        every: 2,
-        timeout: 60,
+        every: 5,
+        timeout: 150,
         run: async () => await isDbUp(),
         onFailedAttempt: (s) =>
-          log.debug(`Waited ${s} seconds for databse, will continue waiting.`),
+          log.debug(`Waited ${s} seconds for database, will continue waiting.`),
       })
       if (up) log.debug(`Database is up.`)
       else {
