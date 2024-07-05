@@ -13,7 +13,7 @@ import { store, log, utils } from './lib/utils.mjs'
 /*
  * Say hello
  */
-log.info('Cold start of Morio Core')
+log.info('core: Cold start of Morio Core')
 
 /*
  * Instantiate the Express app
@@ -58,7 +58,7 @@ await reconfigure({ coldStart: true })
 wrapExpress(
   log,
   app.listen(utils.getPreset('MORIO_CORE_PORT'), (err) => {
-    if (err) log.error(err, 'An error occured')
+    if (err) log.error(err, 'core: An error occured')
   })
 )
 

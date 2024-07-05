@@ -2,7 +2,7 @@ import { requestSchema as schema, settingsSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
-import { store, utils } from './utils.mjs'
+import { store, utils, log } from './utils.mjs'
 
 /*
  * Validation helpers
@@ -155,7 +155,7 @@ export const validateSettings = async (newSettings) => {
      * We bypass this when it's the unit test node
      */
     if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
-      const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' })
+      const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' }, log.debug)
       if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
       else {
         report.info.push(`Validation failed for node ${i}`)

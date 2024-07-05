@@ -39,7 +39,7 @@ try {
   await mkdir('/etc/morio/shared')
   await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
 } catch (err) {
-  log.warn(err, 'Failed to write presets to disk')
+  log.warn(err, 'core: Failed to write presets to disk')
 }
 
 /*
@@ -79,7 +79,7 @@ export const service = {
        * are running in ephemeral mode. In which case we return early.
        */
       if (!timestamp) {
-        log.info('Morio is running in ephemeral mode')
+        log.info('core: Morio is running in ephemeral mode')
         store.set('state.ephemeral', true)
         store.set('state.settings_serial', false)
 
@@ -116,9 +116,9 @@ export const service = {
       /*
        * Log some info, for debugging
        */
-      log.debug(`Found settings with serial ${timestamp}`)
-      for (const [flagName, flagValue] of Object.entries(store.get('settings.sanitized.tokens.flags', {}))) {
-        if (flagValue) log.debug(`Enabled feature flag: ${flagName}`)
+      log.debug(`core: Found settings with serial ${timestamp}`)
+      for (const [flagName, flagValue] of Object.entries(store.getSettings('tokens.flags', {}))) {
+        if (flagValue) log.info(`core: Enabled feature flag: ${flagName}`)
       }
 
       /*

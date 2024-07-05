@@ -139,6 +139,12 @@ export const presets = {
   // Amount of seconds to wait between attempts to establish a Swarm
   MORIO_CORE_SWARM_SLEEP: 10,
 
+  // Amount of seconds to wait between polling attempts (in Traefik)
+  MORIO_CORE_SWARM_POLLING_INTERVAL: 15,
+
+  // Timeout of the Traefik HTTP client
+  MORIO_CORE_SWARM_HTTP_TIMEOUT: 150,
+
   /*
    * Proxy presets
    */

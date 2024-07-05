@@ -18,6 +18,7 @@ import {
   createDockerContainer,
   createDockerNetwork,
   createSwarmService,
+  getService,
   runDockerApiCommand,
   runContainerApiCommand,
   generateContainerConfig,
@@ -56,41 +57,47 @@ for (const [serviceName, service] of Object.entries(services)) {
 }
 
 /**
- * Creates (a container/swarm service for) a morio service
+ * Creates a container for a morio service, does nothing (successfully) for Swarm services
  *
  * @param {string} serviceNme = Name of the service
  * @returm {object|bool} options - The id of the created container/service or false if no container/service could be created
  */
 const createMorioService = async (serviceName) => {
   /*
+   * Note that if it's a swarm service, this will just return.
+   * That is because for containers, the flow is: create container / start container
+   * However, for swarm services, create & start are 1 atomic operation
+   * For this reason, this createMorioService method does nothing for Swarm services
+   * while restartMorioService will both create and start them
+   * (technically, the service itself will start the tasks)
+   */
+  if (utils.isSwarm()) return true
+
+  /*
    * Save us some typing
    */
   const config = store.getDockerServiceConfig(serviceName)
 
   /*
-   * It's unlikely, but possible that we need to pull this image first
+   * For Docker, it's unlikely, but possible that we need to pull this image first
    */
   const [ok, list] = await runDockerApiCommand('listImages')
-  if (!ok) log.warn('Unable to load list of docker images')
+  if (!ok) log.warn(`${serviceName}: Unable to load list of docker images`)
   if (list.filter((img) => img.RepoTags.includes(config.Image)).length < 1) {
-    log.info(`Image ${config.Image} is not available locally. Attempting pull.`)
+    log.info(`${serviceName}: Image ${config.Image} is not available locally. Attempting pull.`)
 
     return new Promise((resolve) => {
       docker.pull(config.Image, (err, stream) => {
         async function onFinished() {
-          log.debug(`Image pulled: ${config.Image}`)
-          const id = utils.isEphemeral()
-            ? await createDockerContainer(serviceName, config)
-            : await createSwarmService(serviceName, config)
+          log.debug(`${serviceName}: Local image pulled: ${config.Image}`)
+          const id = await createDockerContainer(serviceName, config)
           resolve(id)
         }
         if (stream) docker.modem.followProgress(stream, onFinished)
       })
     })
-  } else
-    return utils.isEphemeral()
-      ? await createDockerContainer(serviceName, config)
-      : await createSwarmService(serviceName, config)
+  }
+  else return await createDockerContainer(serviceName, config)
 }
 
 /**
@@ -105,7 +112,7 @@ export const logStartedConfig = () => {
   /*
    * Log version and environment
    */
-  log.info(`Morio v${store.info.version} - ${store.get('info.production') ? 'NON_' : ''}PRODUCTION`)
+  log.info(`core: Morio v${store.info.version}`)
 
   /*
    * Log mount locations, useful for debugging
@@ -116,7 +123,7 @@ export const logStartedConfig = () => {
     'MORIO_LOGS_ROOT',
     'MORIO_DOCKER_SOCKET',
   ])
-    log.debug(`${mount} = ${utils.getPreset(mount)}`)
+    log.debug(`core: ${mount} = ${utils.getPreset(mount)}`)
 
   /*
    * Has MORIO been setup?
@@ -125,22 +132,19 @@ export const logStartedConfig = () => {
     /*
      * It is not, running in ephemeral mode
      */
-    log.info('This Morio instance is not deployed yet')
+    log.info('core: This Morio node is not deployed yet')
   } else {
     /*
      * It is, so we should have a config
      */
-    log.info(`Using configuration ${store.get('state.settings_serial')}`)
-    if (store.get('settings.resolved.deployment.nodes').length > 1) {
-      log.debug(
-        `This Morio instance is part of a ${store.settings.resolved.nodes.length}-node cluster`
-      )
-    } else {
-      log.debug(`This Morio instance is a solitary node`)
-      log.debug(
-        `We are ${store.get('settings.resolved.deployment.nodes.0')} (${store.get('settings.resolved.deployment.display_name')})`
-      )
-    }
+    log.info(`core: Using configuration ${store.get('state.settings_serial')}`)
+    if (utils.isSwarm()) log.debug(
+      `core: This Morio node is part of a ${store.getSettings('deployment.nodes').length}-node cluster`
+    )
+    else log.debug(`core: CLustering is disabled on this Morio node`)
+    log.debug(
+      `core: We are ${store.getSettings(['deployment', 'nodes', 0])} (${store.getSettings('deployment.display_name')})`
+    )
   }
 }
 
@@ -161,7 +165,7 @@ export const startMorio = async (hookParams = {}) => {
    */
   if (!go) {
     log.fatal(
-      'The beforeall lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.'
+      'core: The beforeall lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.'
     )
     return
   }
@@ -177,10 +181,32 @@ export const startMorio = async (hookParams = {}) => {
   await storeRunningServices()
 
   /*
+   * When we leave ephemeral mode and set up a Swarm, local services
+   * will still be running. So before anything else, let's make sure
+   * they are shut down if we're now in swarm mode
+   */
+  if (utils.isSwarm()) {
+    const remove = ephemeralServiceOrder.filter(name => name !== 'core')
+    for (const serviceName in store.get('state.services.local')) {
+      if (remove.includes(serviceName)) {
+        const state = store.get(`state.services.local.${serviceName}`)
+        const [removed] = await runContainerApiCommand(state.Id, 'remove', { force: true, v: true })
+        if (removed) log.debug(`${serviceName}: Removed local container (${state.Id})`)
+        else log.warn(`${serviceName}: Unable to remove local container (${state.Id})`)
+      }
+    }
+  }
+
+  /*
+   * Before we create services, let's populate the Docker cache for a speed boost
+   */
+  await runDockerApiCommand('listImages')
+
+  /*
    * Create services (in parallel)
    */
   const promises = []
-  for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)
+  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder).filter(name => name !== 'core'))
     promises.push(ensureMorioService(service, hookParams))
 
   return await Promise.all(promises)
@@ -199,21 +225,21 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const wanted = await runHook('wanted', serviceName, hookParams)
   if (!wanted) {
-    log.debug(`Service ${serviceName} is not wanted`)
+    log.debug(`${serviceName}: Service is not wanted`)
     /*
      * Service is not wanted.
      * If the service is up, stop it.
      */
     const [up] = await isServiceUp(serviceName)
     if (up) {
-      log.info(`Service ${serviceName} is not wanted, yet running. Stopping now.`)
+      log.info(`${serviceName}: Service is not wanted, yet running. Stopping now.`)
       // Do not wait for service to stop, let this run its course async
       stopService(serviceName)
     }
 
     // Not wanted, return early
     return true
-  } else log.debug(`Service ${serviceName} is wanted`)
+  } else log.debug(`${serviceName}: Service is wanted`)
 
   /*
    * Generate morio service config
@@ -225,17 +251,17 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   )
 
   /*
-   * (Re)create the service (if needed)
+   * Does the service need to be recreated?
    */
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
   if (recreate) {
-    log.debug(`(Re)creating ${serviceName} service`)
+    log.debug(`${serviceName}: ${utils.isSwarm() ? 'Updating swarm service' : '(Re)Creating local container'}`)
     /*
      * Run precreate lifecycle hook
      */
     runHook('precreate', serviceName, hookParams)
   } else {
-    log.debug(`Not (re)creating ${serviceName} container`)
+    log.debug(`${serviceName}: ${utils.isSwarm() ? 'Not ipdating swarm service' : 'Not rereating local container'}`)
   }
 
   /*
@@ -251,22 +277,21 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   /*
    * Recreate the service if needed
    */
-  //serviceId = await createMorioService(serviceName)
   const serviceId = recreate ? await createMorioService(serviceName) : false
 
   /*
-   * (Re)start the container/service (if needed)
+   * (Re)start the service (if needed)
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.info(`(Re)Starting \`${serviceName}\` container`)
+    log.info(`${serviceName}: Starting ${utils.isSwarm() ? 'local' : 'swarm'} service`)
     /*
      * Run preStart lifecycle hook
      */
     runHook('prestart', serviceName, { ...hookParams, recreate })
 
     /*
-     * (Re)Start the container
+     * (Re)Start the service
      */
     await restartMorioService(serviceName, serviceId)
 
@@ -275,7 +300,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
      */
     runHook('poststart', serviceName, { ...hookParams, recreate })
   } else {
-    log.debug(`Not restarting \`${serviceName}\` container`)
+    log.debug(`${serviceName}: Not restarting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
   }
 
   /*
@@ -308,11 +333,11 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Always recreate if the container image is different
    */
   const imgs = {
-    current: serviceImageFromState(store.get(['state', 'services', serviceName])),
+    current: serviceImageFromState(store.get(['state', 'services', utils.isSwarm() ? 'swarm' : 'local', serviceName])),
     next: serviceImageFromConfig(store.get(['config', 'services', 'morio', serviceName]))
   }
   if (imgs.next !== imgs.current) {
-    log.debug(`Container image changed from ${imgs.current} to ${imgs.next}`)
+    log.debug(`${serviceName}: Container image changed from ${imgs.current} to ${imgs.next}`)
     return true
   }
 
@@ -321,7 +346,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    */
   if (
     serviceName === 'api' &&
-    !inProduction() &&
+    !utils.isEphemeral() &&
     store.getSettings(['deployment', 'nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
   ) {
     log.trace(`Not in production, and running tests, not recreating API to add Traefik labels`)
@@ -332,7 +357,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * If this is the initial setup, services that require TLS configuration should be recreated
    */
   if (hookParams.initialSetup && ['api', 'ui'].includes(serviceName)) {
-    log.debug(`Initial setup, recreating ${serviceName} container to add TLS configuration`)
+    log.debug(`${serviceName}: Initial setup, recreating container to add TLS configuration`)
     return true
   }
 
@@ -368,7 +393,7 @@ export const runHook = async (hookName, serviceName, hookParams) => {
   if (!hookMethod) return result
 
   try {
-    log.debug(`Running ${hookName} lifecycke hook on service ${serviceName}`)
+    log.trace(`Running ${hookName} lifecycke hook on service ${serviceName}`)
     result = await hookMethod(hookParams)
   } catch (err) {
     log.warn(err, `Error in the ${hookName} lifecycle hook on service ${serviceName}`)
@@ -381,34 +406,62 @@ export const runHook = async (hookName, serviceName, hookParams) => {
   return result
 }
 
-const stopService = async (service, id) => {
-  await runHook('prestop', service)
-  log.debug(`Stopping service ${service}`)
+const stopService = async (serviceName, id) => {
+  await runHook('prestop', serviceName)
+  log.debug(`${serviceName}: Stopping service`)
   await runContainerApiCommand(id, 'stop', {}, true)
-  await runHook('poststop', service)
+  await runHook('poststop', serviceName)
 }
 
-const isServiceUp = async (serviceName) => {
-  const details = store.get(['state', 'services', serviceName], false)
+export const isServiceUp = async (serviceName) => {
+  const details = {
+    local: store.get(['state', 'services', 'local', serviceName], false),
+    swarm: store.get(['state', 'services', 'swarm', serviceName], false)
+  }
 
-  return [details ? true : false, details]
+  return [details.local || details.swarm ? true : false, details]
+
 }
 
 /**
- * (re)Starts a morio service
+ * (re)Starts a local morio service, creates & starts a swarm service
  *
  * @param {string} service = The service name
- * @param {string} containerId = The ID of the container object
+ * @param {string} containerId = The ID of the container or swarm service object
  * @return {bool} ok = Whether or not the service was started
  */
-export const restartMorioService = async (service, containerId) => {
-  const [ok, err] = await runContainerApiCommand(containerId, 'restart')
+export const restartMorioService = async (serviceName, id) => {
 
-  if (ok) log.info(`Service started: ${service}`)
-  else log.warn(err, `Failed to start ${service}`)
+  if (utils.isSwarm()) {
+    /*
+     * Create & start is one atomic operation for Swarm services
+     * So while createMorioService does nothing for swarm services,
+     * here we make the magic happen by calling createSwarmService
+     */
+    let result
+    try {
+      result = await createSwarmService(
+        serviceName,
+        store.getDockerServiceConfig(serviceName)
+      )
+    }
+    catch (err) {
+      log.warn(err, `Failed to create swarm service ${serviceName} (in restart handler)`)
+      //console.log({ err, in: 'restartMorioService' })
+    }
+    //console.log({ result, in: 'restartMorioService' })
 
-  return ok
+    return result
+  } else {
+    const [ok, err] = await runContainerApiCommand(id, 'restart')
+    if (ok) log.info(`Local service started: ${serviceName}`)
+    else log.warn(err, `Failed to start local service: ${serviceName}`)
+
+    return ok
+  }
 }
+
+
 
 /**
  * The default wanted lifecycle hook
@@ -464,7 +517,6 @@ export async function defaultRecreateServiceHook(service, hookParams) {
    * If container name or image changes, recreate it
    */
   const cConf = store.get(['config', 'services']) //, 'morio', service, 'container']) // Save us some typing
-  console.log({cConf})
   if (
     hookParams?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
     hookParams?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
@@ -490,6 +542,7 @@ export async function defaultRecreateServiceHook(service, hookParams) {
     /*
      * If, for whatever reason, the TLS labels are missing anyway, also recreate.
      */
+    console.log({config: store.config, in: 'defaultRecreateServiceHook' })
     if (
       !(store.config?.services?.[service]?.container?.labels || []).includes(
         'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'

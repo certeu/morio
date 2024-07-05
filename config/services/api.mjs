@@ -84,19 +84,5 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Configure Traefik with container labels
       labels,
     },
-    /**
-     * Swarm Service configuration
-     */
-    swarm: {
-      //cmd:  PROD
-      //  ? ['pm2-runtime']
-      //  : ['npm'],
-      //args: PROD
-      //  ? [ "--name", "api", "--namespace", "morio", "--log-type", "json", "--max-memory-bytes", "250000000", "./dist/index.mjs" ]
-      //  : ['run', 'dev'],
-      //dir: '/morio/api',
-      //user: '2112',
-      //groups: ['2112'],
-    }
   }
 }

@@ -12,49 +12,67 @@ import { store, log, utils } from './lib/utils.mjs'
 export const reloadConfiguration = async () => {
 
   /*
-   * Attempt to load the date we need from Morio Core
+   * Load data from core
    */
-  const result = await attempt({
+  const data = await attempt({
     every: 5,
     timeout: 3600,
-    run: async () => await utils.core.get('/reload'),
+    run: async () => {
+      const [status, body] = await utils.core.get('/reload')
+      if (status === 200) return body
+      else return false
+    },
     onFailedAttempt: (s) => {
       log.debug(`Waited ${s} seconds for core/reload, will continue waiting.`)
     },
-    validate: (res) => coreFetchOk,
+    validate: coreFetchOk,
     log: log.warn,
   })
-  if (coreFetchOk(result)) {
-    /*
-     * Update the store with relevant info
-     */
-    store.set('state.ephemeral', result[1].state.ephemeral)
-    store.set('state.core', result[1].state)
-    store.set('state.core.timestamp', Date.now())
-    store.set('info.core', result[1].info)
-    store.set('presets', result[1].presets)
-    if (!utils.isEphemeral()) {
-      /*
-       * This is only available outside of ephemeral mode
-       */
-      store.set('state.node.uuid', result[1].state.node)
-      store.set('state.cluster.uuid', result[1].state.deployment)
-      store.set('state.node.serial', result[1].state.node_serial)
-      store.set('state.settings_serial', result[1].state.settings_serial)
-      store.set('config', result[1].config)
-      store.set('settings', result[1].settings)
-      store.config = result[1].config
-    }
-    log.debug(`Reloaded data from core.`)
-  } else log.warn('Failed to reload Morio data from core')
 
   /*
-   * If we are in ephemeral mode, return early
+   * Or die trying
+   */
+  if (!coreFetchOk(data)) {
+    log.fatal('Failed to reload Morio data from core. Cannot continue.')
+    process.exit()
+  }
+
+  /*
+   * Update the store with relevant info
+   */
+  log.debug(`Reloaded data from core.`)
+  store.set('state.ephemeral', data.state.ephemeral)
+  store.set('state.core', data.state)
+  store.set('state.core.timestamp', Date.now())
+  store.set('info.core', data.info)
+  store.set('presets', data.presets)
+  if (!utils.isEphemeral()) {
+    /*
+     * This data is only available if Morio is already set up
+     */
+    store.set('state.node.uuid', data.state.node)
+    store.set('state.cluster.uuid', data.state.deployment)
+    store.set('state.node.serial', data.state.node_serial)
+    store.set('state.settings_serial', data.state.settings_serial)
+    store.set('config', data.config)
+    store.set('settings', data.settings)
+    store.config = data.config
+    /*
+     * If there's more than 1 node, switch core client to stay localk
+     */
+    if (store.get('settings.deployments.node_count') > 1) {
+      utils.set('core', coreClient(`http://core_${store.get('state.node.serial')}:${getPreset('MORIO_CORE_PORT')}`))
+    }
+  }
+
+  /*
+   * If we are in ephemeral mode, we're done so return here
    */
   if (utils.isEphemeral()) return
 
   /*
-   * Add encryption methods to utils (if not yet added)
+   * If set up, add the encryption methods to utils now that we have the keys.
+   * On a hot-reload we'll already have done this so only do it if needed.
    */
   if (!utils.encrypt) {
     const { encrypt, decrypt, isEncrypted } = encryptionMethods(
@@ -68,21 +86,7 @@ export const reloadConfiguration = async () => {
   }
 
   /*
-   * Initialize Kafka client
-   * FIXME: Do we (still) need a kafka client in the API now
-   * that we switched to rqlite?
-   * I believe not, so let's comment this out
-   */
-  //utils.set('kafka', await new KafkaClient())
-
-  /*
-   * This will connect the producer.
-   * The consumer needs to be connected on-demand.
-   */
-  //await utils.kafka.connect()
-
-  /*
-   * All done
+   * That's it, reload done
    */
   return
 }
@@ -90,13 +94,4 @@ export const reloadConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (result, okStatus = [200]) => {
-  if (
-    result &&
-    Array.isArray(result) &&
-    okStatus.includes(result[0]) &&
-    result[1]
-  ) return true
-
-  return false
-}
+const coreFetchOk = (data) => (data && data.state && data.info && data.presets)

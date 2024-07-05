@@ -20,7 +20,10 @@ export const resolveServiceConfiguration = ({ store, utils }) => ({
     // Instead, attach to the morio network
     network: utils.getPreset('MORIO_NETWORK'),
     // Command
-    command: '/app/console -config.filepath /etc/morio/console/config.yaml',
+    command: [
+      '/app/console',
+      '-config.filepath /etc/morio/console/config.yaml'
+    ],
     // Entrypoint
     entrypoint: '/bin/sh',
     environment: {

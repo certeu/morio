@@ -68,7 +68,12 @@ Store.prototype.extend = function (methods) {
 Store.prototype.get = function (path, dflt) {
   //console.log(`store.get: ${path}`)
   const val = get(this, path, dflt)
-  if (val === undefined) this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
+  /*
+   * Help debugging by logging when a store value is missing
+   * but do not include cache misses
+   */
+  if (val === undefined && Array.isArray(path) && path[0] !== 'cache')
+    this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
 
   return val
 }

@@ -37,7 +37,6 @@ Controller.prototype.reconfigure = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.status = async (req, res) => {
-  console.log('in status')
   /*
    * Get the status from core to ensure we have the latest info
    */

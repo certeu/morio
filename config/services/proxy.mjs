@@ -48,11 +48,8 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         'traefik',
         // Enable the Traefik API (required for dashboard) and Dashboard
         '--api=true',
+        // Enable the Traefik Dashboard
         '--api.dashboard=true',
-        // Use Docker as provider
-        '--providers.docker=true',
-        // Only export containers when we explicitly configure it
-        '--providers.docker.exposedbydefault=false',
         // Create HTTP entrypoint (only to redirect to HTTPS)
         '--entrypoints.http.address=:80',
         //  Create HTTPS entrypoint
@@ -75,7 +72,29 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
         // Point to root CA (will only work after CA is initialized)
         '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
-      ],
+      ].concat(utils.isSwarm()
+        ? [
+            // Use Docker Swarm as a provider
+            '--providers.docker.swarmMode=true',
+            // Only export containers when we explicitly configure it
+            '--providers.docker.exposedbydefault=false',
+            // Set the default network
+            `--providers.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+            // Set swarm polling interval
+            `--providers.docker.swarmModeRefreshSeconds=${utils.getPreset('MORIO_CORE_SWARM_POLLING_INTERVAL')}`,
+            // Set HTTP client timeout
+            `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
+          ]
+        : [
+            // Use Docker as a provider
+            '--providers.docker=true',
+            // Only export containers when we explicitly configure it
+            '--providers.docker.exposedbydefault=false',
+            // Set the default network
+            `--providers.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+            // Set HTTP client timeout
+            `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
+        ]),
       // Configure Traefik with container labels
       labels: [
         // Tell traefik to watch itself (so meta)
@@ -84,13 +103,13 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match rule for Traefik's internal dashboard
         'traefik.http.routers.traefik_dashboard.rule=(PathPrefix(`/api/`) || PathPrefix(`/dashboard/`))',
-        //# Avoid rule conflicts by setting priority manually
+        // Avoid rule conflicts by setting priority manually
         'traefik.http.routers.traefik_dashboard.priority=199',
-        //# Route it to Traefik's internal API
+        // Route it to Traefik's internal API
         'traefik.http.routers.traefik_dashboard.service=api@internal',
-        //# Enable TLS
+        // Enable TLS
         'traefik.http.routers.traefik_dashboard.tls=true',
-        //# Only listen on the https endpoint
+        // Only listen on the https endpoint
         'traefik.http.routers.traefik_dashboard.entrypoints=https',
       ],
     },

@@ -55,7 +55,7 @@ Controller.prototype.getReloadData = async (req, res) => {
     data.settings = store.get('settings')
     data.config = {
       //services: store.get('config.services'),
-      swarm: utils.isSwarm() ? store.get('config.swarm') : false,
+      //swarm: utils.isSwarm() ? store.get('config.swarm') : false,
       keys: store.get('config.keys'),
     }
   }

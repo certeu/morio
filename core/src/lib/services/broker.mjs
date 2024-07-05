@@ -44,9 +44,11 @@ export const service = {
     precreate: async () => {
       // 101 is the UID that redpanda runs under inside the container
       const uid = utils.getPreset('MORIO_BROKER_UID')
-      const dir = '/etc/morio/broker'
-      await mkdir(dir)
-      await chown(dir, uid, uid)
+      const dirs = ['/etc/morio/broker', '/morio/data/broker']
+      for (const dir of dirs) {
+        await mkdir(dir)
+        await chown(dir, uid, uid)
+      }
 
       return true
     },
@@ -78,7 +80,7 @@ export const service = {
        * by core. So let's give it time to come up
        */
       const up = await attempt({
-        every: 2,
+        every: 5,
         timeout: 60,
         run: async () => await isCaUp(),
         onFailedAttempt: (s) =>
@@ -89,7 +91,7 @@ export const service = {
           'CA is up, still waiting a few seconds before requesting broker certificate'
         )
       else {
-        log.err('CA did not come up before timeout. Bailing out')
+        log.error('CA did not come up before timeout. Bailing out')
         return false
       }
 
@@ -155,7 +157,7 @@ export const service = {
        * Make sure broker is up
        */
       const up = await attempt({
-        every: 2,
+        every: 5,
         timeout: 60,
         run: async () => await isBrokerUp(),
         onFailedAttempt: (s) =>
@@ -198,7 +200,8 @@ const ensureTopicsExist = async () => {
  */
 const isBrokerUp = async () => {
   const result = await testUrl(
-    `http://broker_${store.get('state.node.serial')}:9644/v1/cluster/health_overview`,
+    //`http://broker_${store.get('state.node.serial')}:9644/v1/cluster/health_overview`,
+    `http://broker:9644/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',

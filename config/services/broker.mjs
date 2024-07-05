@@ -55,14 +55,11 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       command: [
         'redpanda',
         'start',
-        '--default-log-level=warn',
-        ...(PROD
-          ? [
-              // Mode dev-container uses well-known configuration properties for development in containers.
-              '--mode dev-container',
-            ]
-          : []
-            ),
+        //'--default-log-level=debug',
+        //'--mode dev-container',
+        //'-v',
+        // Mode dev-container uses well-known configuration properties for development in containers.
+        //PROD ? '' : '--mode dev-container',
       ],
     },
     /*

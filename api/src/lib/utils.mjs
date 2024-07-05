@@ -77,7 +77,7 @@ export const utils = new Store(log)
   /*
    * Add core client
    */
-  .set('core', coreClient(`http://local_core:${getPreset('MORIO_CORE_PORT')}`))
+  .set('core', coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`))
   /*
    * Add helper for ephemeral state
    */

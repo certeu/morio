@@ -60,8 +60,14 @@ store.set('getDockerServiceConfig', (service) => store.get(['config', 'services'
  * Helper method to store a Docer service configuration
  */
 store.set('setDockerServiceConfig', (service, config) => store.set(['config', 'services', 'docker', service], config))
-
-
+/*
+ * Helper method to set a cache entry
+ */
+.set('setCache', (path, value) => store.set(unshift(['cache'], path), { value, time: Date.now() }))
+/*
+ * Helper method to get a cache entry (see utils.cacheHit)
+ */
+.set('getCache', (path, dflt) => store.get(unshift(['cache'], path, dflt)))
 
 /*
  * Export an utils instance to hold utility methods
@@ -73,8 +79,8 @@ export const utils = new Store(log)
    */
   .set('getPreset', (key, dflt, opts) => {
     const result = getPreset(key, dflt, opts)
-    if (result === undefined) log.warn(`Preset ${key} is undefined`)
-    else log.trace(`Preset ${key} = ${result}`)
+    if (result === undefined) log.warn(`core: Preset ${key} is undefined`)
+    else log.trace(`core: Preset ${key} = ${result}`)
 
     return result
   })
@@ -82,7 +88,7 @@ export const utils = new Store(log)
    * Helper method for starting a reconfigure event
    */
   .set('beginReconfigure', () => {
-    log.debug('Resolving Morio Configuration')
+    log.debug('core: Start reconfigure')
     store.set('state.config_resolved', false)
     store.set('state.reconfigure_time', Date.now())
   })
@@ -93,7 +99,7 @@ export const utils = new Store(log)
     store.set('state.config_resolved', true)
     store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
     const serial = store.get('state.settings_serial')
-    log.info(`Morio Core Ready - Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
+    log.info(`core: Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
   })
   /*
    * Helper method for starting ephemeral state
@@ -134,6 +140,17 @@ export const utils = new Store(log)
    * API client
    */
   .set('apiClient', restClient(`http://api:${getPreset('MORIO_API_PORT')}`))
+  /*
+   * Retrieve a cache entry but only if it's fresh
+   */
+  .set('cacheHit', (key) => {
+    const hit = store.getCache(key)
+    return (hit && (Date.now() - hit.time  < 15000))
+      ? hit.value
+      : false
+  })
+
+
 
 /*
  * Helper method to determine whether to run a swarm or not

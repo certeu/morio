@@ -2,6 +2,7 @@
 import { restClient } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
+import { mkdir } from '#shared/fs'
 // Default hooks
 import {
   defaultServiceWantedHook,
@@ -24,6 +25,20 @@ export const service = {
      * We just reuse the default hook here, checking for ephemeral state
      */
     wanted: defaultServiceWantedHook,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * We make sure the `/etc/morio/db` folder exists
+     */
+    precreate: async () => {
+      // 101 is the UID that redpanda runs under inside the container
+      //const uid = utils.getPreset('MORIO_BROKER_UID')
+      const dir = '/morio/data/db'
+      await mkdir(dir)
+      //await chown(dir, uid, uid)
+
+      return true
+    },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
@@ -75,7 +90,8 @@ export const service = {
  * @return {bool} result - True if the database is up, false if not
  */
 const isDbUp = async () => {
-  const result = await testUrl(`http://db_${store.get('state.node.serial')}:4001/readyz`, {
+  //const result = await testUrl(`http://db_${store.get('state.node.serial')}:4001/readyz`, {
+  const result = await testUrl(`http://db:4001/readyz`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

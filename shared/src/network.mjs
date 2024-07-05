@@ -85,7 +85,7 @@ export const testUrl = async (url, customOptions = {}, log = false) => {
     result = await axios(url, options)
   } catch (err) {
     // Swallow error?
-    if (log) log(`${err.toString()} (${url})`)
+    //console.log(err, `${url}`)
     return options.returnError ? err : false
   }
 

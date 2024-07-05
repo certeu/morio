@@ -4,6 +4,7 @@ import https from 'https'
 import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
 import { sleep } from '#shared/utils'
 import { ensureMorioNetwork } from './services/index.mjs'
+import { getCoreIpAddress } from './services/core.mjs'
 // Docker
 import { runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
 // Utilities
@@ -22,6 +23,11 @@ export const storeClusterState = async () => {
  */
 const storeClusterSwarmState = async () => {
   /*
+   * Don't bother unless there's a swarm
+   */
+  if (!utils.isSwarm()) return
+
+  /*
    * Start by inspecting the local swarm
    */
   const [result, swarm] = await runDockerApiCommand('swarmInspect', {}, true)
@@ -33,62 +39,78 @@ const storeClusterSwarmState = async () => {
     log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('state.swarm.tokens', swarm.JoinTokens)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) {
-      let i = 1
-      /*
-       * Clear follower list
-       */
-      store.set('state.swarm.followers', [])
-      for (const node of nodes) {
-        if (node.Spec.Labels['morio.cluster.uuid']) {
-          /*
-           * If cluster UUIDs are different, that's a problem
-           */
-          if (node.Spec.Labels['morio.cluster.uuid'] !== store.get('state.cluster.uuid')) {
-            store.log.warn(
-              `Swarm node ${node.Description.Hostname} reports cluster UUID ${
-              node.Spec.Labels['morio.cluster.uuid']} but we are in cluster ${
-              store.get('state.cluster.uuid')}.`)
-            store.log.warn('Mixing nodes from different clusters in the same swarm can lead to unexpected results.')
-          } else {
-            /*
-             * Is it the local node?
-             */
-            const local = node.Spec.Labels['morio.node.uuid'] === store.get('state.node.uuid')
-            if (local) store.set('state.cluster.local_node', node)
-            /*
-             * Is it the leader?
-             */
-            if (node.ManagerStatus.Leader === true) {
-              store.set('state.swarm.leader', node)
-              if (local)  store.set('state.cluster.leading', true)
-            }
-            else {
-              store.push('state.swarm.followers', node)
-              if (local)  store.set('state.cluster.leading', false)
-            }
-          }
-          /*
-           * If the cluster UUID is not set, that's a problem
-           */
-          store.log.warn(`Swarm node ${node.Description.Hostname} does not reports a cluster UUID.`)
-          store.log.warn('Mixing Morio and non-Morio nodes in the same swarm can lead to unexpected results.')
-        }
-        store.set(['state', 'swarm', 'nodes', node.Description.Hostname], node)
-        log.debug(
-          `Swarm member ${i} is ${node.Description.Hostname} with IP ${node.Status.Addr}${node.ManagerStatus.Leader ? ', this node is the swarm leader' : ''}`
-        )
-        i++
-      }
-
-      /*
-       * Swarm is up, reflect this in the state
-       */
-      store.set('state.swarm.ready', true)
-    }
+    if (ok) storeClusterSwarmNodesState(nodes)
+    else log.warn(`Unable to retrieve swarm node info from Docker API`)
   } else {
-    log.error(`There is no swarm on this host`)
-    store.set('state.swarm.ready', false)
+    log.debug(`Docker swarm is not configured`)
+    store.set('state.swarm_ready', false)
+  }
+}
+
+const storeClusterSwarmNodesState = (nodes) => {
+  /*
+   * Clear follower list
+   */
+  store.set('state.swarm.followers', [])
+
+  /*
+   * Iterate over swarm nodes
+   */
+  let i = 1
+  for (const node of nodes) {
+    /*
+     * Store node state in any case
+     */
+    store.set(['state', 'swarm', 'nodes', node.Description.Hostname], node)
+
+    /*
+     * If the cluster UUID is not set, that's a problem
+     */
+    if (!node.Spec.Labels['morio.cluster.uuid']) {
+      store.log.warn(`Swarm node ${node.Description.Hostname} with IP ${node.Status.Addr} does not report a cluster UUID.`)
+      store.log.warn('Mixing Morio and non-Morio nodes in the same swarm can lead to unexpected results.')
+    }
+
+    /*
+     * If cluster UUIDs are different, that's a problem
+     */
+    else if (node.Spec.Labels['morio.cluster.uuid'] !== store.get('state.cluster.uuid')) {
+      store.log.warn(
+        `Swarm node ${node.Description.Hostname} with IP ${node.Status.Addr} reports cluster UUID ${
+        node.Spec.Labels['morio.cluster.uuid']} but we are in cluster ${
+        store.get('state.cluster.uuid')}.`)
+      store.log.warn('Mixing nodes from different clusters in the same swarm can lead to unexpected results.')
+    }
+
+    /*
+     * Is it the local or leading node?
+     */
+    const local = node.Spec.Labels['morio.node.uuid'] === store.get('state.node.uuid')
+    const leading = node.ManagerStatus.Leader === true
+    if (local) {
+      store.set('state.cluster.local_node', node)
+      store.set('state.cluster.leading', leading)
+    }
+    if (leading) {
+      store.set('state.swarm.leader', node)
+      /*
+       * Swarm has a leader, so it's up. Reflect this in the state
+       */
+      store.set('state.swarm_ready', true)
+    }
+    else store.push('state.swarm.followers', node)
+
+    /*
+     * Announce what we've found
+     */
+    log.debug([
+      local ? `We are Swarm member ${i}` : `Swarm member ${i}`,
+      `with IP ${node.Status.Addr},`,
+      local ? `and we are` : `is`,
+      leading ? `leading the swarm` : `a follower in the swarm`,
+    ].join(' '))
+
+    i++
   }
 }
 
@@ -96,7 +118,7 @@ const storeClusterSwarmState = async () => {
  * Helper method to gather the morio cluster state
  */
 const storeClusterMorioState = async () => {
-  console.log(JSON.stringify(store.state.swarm, null ,2))
+  //console.log(JSON.stringify(store.state.swarm, null ,2))
     return // FIXME
   const nodes = {}
   /*
@@ -186,9 +208,15 @@ const ensureSwarm = async () => {
    */
   if (!store.get('state.swarm.tokens.Manager', false)) {
     log.debug('Initializing Docker Swarm')
+    const config = {
+      ListenAddr: store.get('state.node.ip'),
+      AdvertiseAddr: store.get('state.node.ip'),
+      ForceNewCluster: false,
+    }
+    log.warn(config,  'Creating swarm with with config')
     const [swarmCreated] = await runDockerApiCommand('swarmInit', {
       ListenAddr: store.get('state.node.ip'),
-      AdvertiseAddr: store.get('state.nomde.ip'),
+      AdvertiseAddr: store.get('state.node.ip'),
       ForceNewCluster: false,
     })
     /*
@@ -212,6 +240,14 @@ const ensureSwarm = async () => {
         Role: 'manager',
         Availability: 'Active',
       })
+      console.log({added_labels: {
+          'morio.cluster.uuid': store.get('state.cluster.uuid'),
+          'morio.node.uuid': store.get('state.node.uuid'),
+          'morio.node.fqdn': store.get('state.node.fqdn'),
+          'morio.node.hostname': store.get('state.node.hostname'),
+          'morio.node.ip': store.get('state.node.ip'),
+          'morio.node.serial': String(store.get('state.node.serial')),
+      }})
       if (!labelsAdded) log.warn('Unable to add labels to swarm node. This is unexpected.')
       else await storeClusterState()
     } else log.warn('Failed to ceated swarm. This is unexpected.')
@@ -247,29 +283,28 @@ export const ensureMorioCluster = async ({
    * Ensure the swarm is up
    */
   let tries = 0
-  while (store.get('state.swarm_ready') === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')) {
+  do {
     tries++
-    log.warn(
-      `Cluster Swarm is not ready. Will attempt to bring it up (${tries}/${utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
-    )
     await ensureSwarm()
-    if (store.get('state.core_ready')) log.info('Cluster Swarm is ready')
-    else await sleep(utils.getPreset('MORIO_CORE_SWARM_SLEEP'))
+    if (store.get('state.swarm_ready')) log.info('Docker Swarm is ready')
+    else {
+      log.info(
+        `Swarm state indicates we are not ready. Will attempt to bring up the swarm (${tries}/${utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
+      )
+      await sleep(utils.getPreset('MORIO_CORE_SWARM_SLEEP'))
+    }
   }
+  while (store.get('state.swarm_ready') === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS'))
 
   /*
    * Is the cluster healthy?
    */
-  const healthy = await isClusterHealthy()
+  store.set('state.core_ready', await isClusterHealthy())
 
   /*
    * Store the core IP address too
    */
   store.set('state.node.core_ip', await getCoreIpAddress())
-
-
-  return store.get('state.core_ready')
-
 }
 
 /**
@@ -283,6 +318,21 @@ const swarmManagers = () =>
 
 
 const isClusterHealthy = async () => {
+
+  /*
+   * If the local node is leading, then the cluster is always ready
+   * even if some nodes might not be ok, we have a swarm and can deploy
+   */
+  if (store.get('state.cluster.leading')) return true
+
+  /*
+   * If we are not leading, than we should be following, and the leader
+   * should be one of our nodes
+   */
+  // FIXME: TODO
+
+  // Let's just say yes
+  return true
 
       /*
        * Single node makes this easy
@@ -327,7 +377,7 @@ const isClusterHealthy = async () => {
   //   */
   //    log.debug(`The swarm is managed by ${swarmManager}, not buy us`)
   //  }
-  //  store.set('state.swarm.ready', true)
+  //  store.set('state.swarm_ready', true)
   //}
 
   /*
