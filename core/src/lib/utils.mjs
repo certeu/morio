@@ -2,7 +2,7 @@
 import { restClient } from '#shared/network'
 import { Store } from '#shared/store'
 import { logger } from '#shared/logger'
-import { getPreset, inProduction } from '#config'
+import { getPreset, inProduction, neverSwarmServices } from '#config'
 import get from 'lodash.get'
 import set from 'lodash.set'
 
@@ -157,6 +157,11 @@ export const utils = new Store(log)
  */
 utils.set('isSwarm', () => (utils.isEphemeral() || store.getFlag('NEVER_SWARM')) ? false : true)
 
+
+/*
+ * Determined whether a service is swarm (true) or local (false)
+ */
+utils.set('isSwarmService', (serviceName) => (!utils.isSwarm() || neverSwarmServices.includes(serviceName) || store.getFlag('NEVER_SWARM')) ? false : true)
 
 /**
  * Helper method to push a prefix to a set path

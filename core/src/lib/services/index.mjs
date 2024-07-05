@@ -10,7 +10,7 @@ import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService } from './proxy.mjs'
 // Dependencies
-import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder } from '#config'
+import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder, neverSwarmServices } from '#config'
 // Docker
 import {
   docker,
@@ -18,7 +18,6 @@ import {
   createDockerContainer,
   createDockerNetwork,
   createSwarmService,
-  getService,
   runDockerApiCommand,
   runContainerApiCommand,
   generateContainerConfig,
@@ -26,6 +25,8 @@ import {
   storeRunningServices,
   serviceImageFromConfig,
   serviceImageFromState,
+  stopLocalService,
+  stopSwarmService,
 } from '#lib/docker'
 // Utilities
 import { store, log, utils } from '../utils.mjs'
@@ -71,7 +72,7 @@ const createMorioService = async (serviceName) => {
    * while restartMorioService will both create and start them
    * (technically, the service itself will start the tasks)
    */
-  if (utils.isSwarm()) return true
+  if (utils.isSwarmService(serviceName)) return true
 
   /*
    * Save us some typing
@@ -170,7 +171,6 @@ export const startMorio = async (hookParams = {}) => {
     return
   }
 
-  console.log({settings: store.settings})
   /*
    * Log info about the config we'll start
    */
@@ -207,7 +207,7 @@ export const startMorio = async (hookParams = {}) => {
    * Create services (in parallel)
    */
   const promises = []
-  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder).filter(name => name !== 'core'))
+  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder))
     promises.push(ensureMorioService(service, hookParams))
 
   return await Promise.all(promises)
@@ -222,20 +222,31 @@ export const startMorio = async (hookParams = {}) => {
  */
 export const ensureMorioService = async (serviceName, hookParams = {}) => {
   /*
-   * Is the service wanted?
+   * Is this a local or swarm service?
+   */
+  const swarm = utils.isSwarmService(serviceName)
+
+  /*
+   * If the service wanted and running, stop it
    */
   const wanted = await runHook('wanted', serviceName, hookParams)
   if (!wanted) {
-    log.debug(`${serviceName}: Service is not wanted`)
-    /*
-     * Service is not wanted.
-     * If the service is up, stop it.
-     */
-    const [up] = await isServiceUp(serviceName)
+    log.debug(`${serviceName}: ${swarm ? 'Swarm' : 'Local'} service is not wanted`)
+    const [up] = swarm
+      ? await isSwarmServiceUp(serviceName)
+      : await isLocalServiceUp(serviceName)
     if (up) {
-      log.info(`${serviceName}: Service is not wanted, yet running. Stopping now.`)
-      // Do not wait for service to stop, let this run its course async
-      stopService(serviceName)
+      log.debug(`${serviceName}: Stopping ${swarm ? 'swarm' : 'local'} service`)
+      await runHook('prestop', serviceName)
+      /*
+       * Stopping services can take a long time.
+       * No need to wait for that, we can continue with other services.
+       * So we're letting this run its course async, rather than waiting for it.
+       * Then again, we do need to make sure the poststop lifecycle hook only runs
+       * after the service stop is complete. So we're .then()-ing this.
+       */
+      if (swarm) stopSwarmService(serviceName).then(() => runHook('poststop', serviceName))
+      else stopLocalService(serviceName).then(() => runHook('poststop', serviceName))
     }
 
     // Not wanted, return early
@@ -256,13 +267,13 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
   if (recreate) {
-    log.debug(`${serviceName}: ${utils.isSwarm() ? 'Updating swarm service' : '(Re)Creating local container'}`)
+    log.debug(`${serviceName}: ${swarm ? 'Updating swarm service' : '(Re)Creating local container'}`)
     /*
      * Run precreate lifecycle hook
      */
     runHook('precreate', serviceName, hookParams)
   } else {
-    log.debug(`${serviceName}: ${utils.isSwarm() ? 'Not ipdating swarm service' : 'Not rereating local container'}`)
+    log.debug(`${serviceName}: ${swarm ? 'Not updating swarm service' : 'Not rereating local container'}`)
   }
 
   /*
@@ -270,7 +281,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   store.setDockerServiceConfig(
     serviceName,
-    utils.isSwarm()
+    swarm
       ? generateSwarmServiceConfig(store.getMorioServiceConfig(serviceName))
       : generateContainerConfig(store.getMorioServiceConfig(serviceName))
   )
@@ -285,7 +296,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.info(`${serviceName}: Starting ${utils.isSwarm() ? 'local' : 'swarm'} service`)
+    log.info(`${serviceName}: Starting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
     /*
      * Run preStart lifecycle hook
      */
@@ -407,10 +418,12 @@ export const runHook = async (hookName, serviceName, hookParams) => {
   return result
 }
 
-const stopService = async (serviceName, id) => {
+const stopMorioService = async (serviceName) => {
   await runHook('prestop', serviceName)
-  log.debug(`${serviceName}: Stopping service`)
-  await runContainerApiCommand(id, 'stop', {}, true)
+  const swarm = utils.isSwarmService(serviceName)
+  log.debug(`${serviceName}: Stopping ${swarm ? 'swarm' : 'local'} service`)
+  if (swarm) await stopSwarmService(serviceName)
+  else await stopLocalService(serviceName)
   await runHook('poststop', serviceName)
 }
 
@@ -424,6 +437,20 @@ export const isServiceUp = async (serviceName) => {
 
 }
 
+export const isLocalServiceUp = async (serviceName) => {
+  const details = store.get(['state', 'services', 'local', serviceName], false)
+
+  return [details ? true : false, details]
+
+}
+
+export const isSwarmServiceUp = async (serviceName) => {
+  const details = store.get(['state', 'services', 'swarm', serviceName], false)
+
+  return [details ? true : false, details]
+
+}
+
 /**
  * (re)Starts a local morio service, creates & starts a swarm service
  *
@@ -433,7 +460,7 @@ export const isServiceUp = async (serviceName) => {
  */
 export const restartMorioService = async (serviceName, id) => {
 
-  if (utils.isSwarm()) {
+  if (utils.isSwarmService(serviceName)) {
     /*
      * Create & start is one atomic operation for Swarm services
      * So while createMorioService does nothing for swarm services,
@@ -461,7 +488,6 @@ export const restartMorioService = async (serviceName, id) => {
     return ok
   }
 }
-
 
 
 /**

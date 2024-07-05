@@ -73,7 +73,7 @@ export const createSwarmService = async (serviceName, config) => {
   /*
    * If the service already exists, we update it
    */
-  const existingService = await getService(serviceName)
+  const existingService = await getSwarmService(serviceName)
   if (existingService) {
     log.debug(`${serviceName}: Swarm service exists, will updated rather than create it`)
     const info = await existingService.inspect()
@@ -120,40 +120,65 @@ export const createSwarmService = async (serviceName, config) => {
 }
 
 /**
- * Gets a service object, either local or swarm, based on its name
+ * Gets a local service id, based on its name
  */
-export const getService = async (serviceName) => {
+export const getLocalServiceId = async (serviceName) => {
+  /*
+   * Update store with currently running local services
+   */
+  await storeLocalSwarmRunningServices()
+
+  /*
+   * Return the ID or false if it's not found
+   */
+  return store.get(['state', 'services', 'local', serviceName, 'ID'], false)
+}
+
+/**
+ * Gets a service ID for a swarm service, based on its name
+ */
+export const getSwarmServiceId = async (serviceName) => {
   /*
    * Only bother in swarm mode
    */
   if (!utils.isSwarm()) return false
 
   /*
-   * We cannot get a service by its name, we need an ID
-   * So we need to list services first to get their IDs
+   * Update store with currently running swarm services
    */
-  const [ok, services] = await runDockerApiCommand('listServices')
-  if (!ok) return false
+  await storeSwarmRunningServices()
 
   /*
-   * Since we have this info from the Docker API,
-   * let's also keep it in state
+   * Return the ID or false if it's not found
    */
-  let id = false
-  for (const service of services) {
-    store.set(['state', 'services', 'swarm', service.Spec.Name], service)
-    if (service.Spec.Name === serviceName) id = service.ID
-  }
-
-  /*
-   * If we have the ID, we can get and return the service object
-   */
-  if (!id) return false
-  const [found, service] = await runDockerApiCommand('getService', serviceName, true)
-
-  return found ? service : false
+  return store.get(['state', 'services', 'swarm', serviceName, 'ID'], false)
 }
 
+/**
+ * Gets a service object, either local or swarm, based on its name
+ */
+export const getSwarmService = async (serviceName) => {
+  const id = await getSwarmServiceId(serviceName)
+  return await docker.getService(id)
+}
+
+/**
+ * Stops a local service. which just means it stops a container
+ */
+export const stopLocalService = async (serviceName) => {
+  const id = getLocalServiceId(serviceName)
+  return await runContainerApiCommand(id, 'stop', {}, true)
+}
+
+/**
+ * Stops a swarm service. Or rather, removes the service.
+ */
+export const stopSwarmService = async (serviceName) => await getSwarmService(serviceName).remove()
+
+/**
+ * Restarts a local service. which just means it restarts a container
+ */
+export const restartLocalService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
 /**
  * Creates a docker network
  *
@@ -738,10 +763,18 @@ export const runDockerCliCommand = async (cmd, ...params) => {
  * This helper method stores a list of running services (both local and on the swarm)
  */
 export const storeRunningServices = async () => {
+  await storeLocalRunningServices()
+  await storeSwarmRunningServices()
+}
+
+/**
+ * This helper method stores a list of running local services
+ */
+export const storeLocalRunningServices = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */
-  store.set('state.services', {})
+  store.set('state.services.local', {})
 
   const [localOk, runningLocalServices] = await runDockerApiCommand('listContainers')
   if (localOk) {
@@ -749,6 +782,17 @@ export const storeRunningServices = async () => {
       store.set(['state', 'services', 'local', service.Names[0].split('/').pop()], service)
     }
   }
+}
+
+/**
+ * This helper method stores a list of running swarm services
+ */
+export const storeSwarmRunningServices = async () => {
+  /*
+   * Clear state first, or services that went away would never be cleared
+   */
+  store.set('state.services.swarm', {})
+
   if (utils.isSwarm()) {
     const [swarmOk, runningSwarmServices] = await runDockerApiCommand('listServices')
     if (swarmOk) {
@@ -758,6 +802,8 @@ export const storeRunningServices = async () => {
     }
   }
 }
+
+
 
 export const serviceImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
 export const serviceImageFromState = (state) => state?.Image ? state.Image : false

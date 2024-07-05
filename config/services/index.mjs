@@ -29,7 +29,6 @@ export const resolveServiceConfiguration = (name, helpers) =>
  * This is the order in which services are started
  */
 export const serviceOrder = [
-  'core',
   'db',
   'ca',
   'proxy',
@@ -45,9 +44,16 @@ export const serviceOrder = [
  * This is the order in which services are started in ephemeral mode
  */
 export const ephemeralServiceOrder = [
-  'core',
   'proxy',
   'api',
   'ui',
 ]
 
+/*
+ * This defined which services will never be created as swarm
+ * services, but instead run as a local container.
+ */
+export const neverSwarmServices = [
+  'broker',
+  'console',
+]

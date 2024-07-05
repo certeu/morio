@@ -52,17 +52,21 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
      */
     const whoAmI = async () => {
       const result = await api.whoAmI()
+      if (result[1] === 401)  logout()
+    }
+    const ephemeral = async () => {
+      const result = await api.getStatus()
       /*
        * If we are running in ephemeral mode, always load homepage
        * unless it's one of the allow-listed URLs
        */
-      if (result[1] === 401) {
-        logout()
-        if (result[0]?.reason.includes('ephemeral') && !ephemeralUrlList.includes(router.pathname))
-          router.push('/')
-      }
+      if (
+        result[0]?.state?.ephemeral &&
+        !ephemeralUrlList.includes(router.pathname)
+      ) router.push('/')
     }
     whoAmI()
+    ephemeral()
   }, [user])
 
   /*
