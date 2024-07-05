@@ -117,7 +117,7 @@ export const service = {
        * Log some info, for debugging
        */
       log.debug(`core: Found settings with serial ${timestamp}`)
-      for (const [flagName, flagValue] of Object.entries(store.getSettings('tokens.flags', {}))) {
+      for (const [flagName, flagValue] of Object.entries(settings.tokens?.flags || {})) {
         if (flagValue) log.info(`core: Enabled feature flag: ${flagName}`)
       }
 

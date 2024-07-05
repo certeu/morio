@@ -200,7 +200,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Complete the settings with the defaults that are configured
    */
-  for (const [key, val] of store.get('config.services.morio.core.default_settings', {})) {
+  for (const [key, val] of Object.entries(store.get('config.services.morio.core.default_settings', {}))) {
     setIfUnset(mSettings, key, val)
   }
 

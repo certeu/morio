@@ -113,7 +113,7 @@ export const logStartedConfig = () => {
    * Log version and environment
    */
   log.info(`core: Morio v${store.info.version}`)
-
+return
   /*
    * Log mount locations, useful for debugging
    */
@@ -170,6 +170,7 @@ export const startMorio = async (hookParams = {}) => {
     return
   }
 
+  console.log({settings: store.settings})
   /*
    * Log info about the config we'll start
    */
