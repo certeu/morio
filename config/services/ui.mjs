@@ -49,7 +49,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         // Attach to the morio docker network
         `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match requests going to the UI prefix (triple curly braces are required here)
-        'traefik.http.routers.ui.rule=(PathPrefix(`/`))',
+        'traefik.http.routers.ui.rule=( PathPrefix(`/`) )',
         // Since UI matches / we should give it the lowest priority so other rules match first
         'traefik.http.routers.ui.priority=1',
         // Forward to ui service

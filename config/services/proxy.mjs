@@ -22,7 +22,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Image to run
       image: 'traefik',
       // Image tag (version) to run
-      tag: '2.11.2',
+      tag: 'v3.0.4',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -67,21 +67,32 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         // Do not verify backend certificates, just encrypt
         '--serversTransport.insecureSkipVerify=true',
         // Enable ACME certificate resolver (will only work after CA is initialized)
+        //'--certificatesresolvers.ca.acme.email=acme@morio.it',
         '--certificatesresolvers.ca.acme.storage=acme.json',
         '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory',
+        //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
         '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
+
         // Point to root CA (will only work after CA is initialized)
         '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
       ].concat(utils.isSwarm()
         ? [
-            // Use Docker Swarm as a provider
-            '--providers.docker.swarmMode=true',
+            // Setup provider for Swarm services
+            '--providers.swarm.endpoint=unix:///var/run/docker.sock',
+            // Only export containers when we explicitly configure it
+            '--providers.swarm.exposedbydefault=false',
+            // Set the default network
+            `--providers.swarm.network=${utils.getPreset('MORIO_NETWORK')}`,
+            // Set swarm polling interval
+            `--providers.swarm.refreshSeconds=${utils.getPreset('MORIO_CORE_SWARM_POLLING_INTERVAL')}`,
+            // Set HTTP client timeout
+            `--providers.swarm.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
+            // Setup provider for local services
+            '--providers.docker=true',
             // Only export containers when we explicitly configure it
             '--providers.docker.exposedbydefault=false',
             // Set the default network
             `--providers.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-            // Set swarm polling interval
-            `--providers.docker.swarmModeRefreshSeconds=${utils.getPreset('MORIO_CORE_SWARM_POLLING_INTERVAL')}`,
             // Set HTTP client timeout
             `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
           ]
@@ -102,16 +113,18 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         // Attach to the morio docker network
         `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match rule for Traefik's internal dashboard
-        'traefik.http.routers.traefik_dashboard.rule=(PathPrefix(`/api/`) || PathPrefix(`/dashboard/`))',
+        'traefik.http.routers.dashboard.rule=( PathPrefix(`/api`) || PathPrefix(`/dashboard`) )',
         // Avoid rule conflicts by setting priority manually
-        'traefik.http.routers.traefik_dashboard.priority=199',
+        'traefik.http.routers.dashboard.priority=199',
         // Route it to Traefik's internal API
-        'traefik.http.routers.traefik_dashboard.service=api@internal',
+        'traefik.http.routers.dashboard.service=api@internal',
         // Enable TLS
-        'traefik.http.routers.traefik_dashboard.tls=true',
+        'traefik.http.routers.dashboard.tls=true',
         // Only listen on the https endpoint
-        'traefik.http.routers.traefik_dashboard.entrypoints=https',
-      ],
+        'traefik.http.routers.dashboard.entrypoints=https',
+        // Enable authentication
+        `traefik.http.routers.dashboard.middlewares=auth@docker`,
+      ]
     },
     entrypoint: `#!/bin/sh
 set -e

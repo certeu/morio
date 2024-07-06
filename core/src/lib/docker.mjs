@@ -475,7 +475,7 @@ export const generateSwarmServiceConfig = (config) => {
   if (config.container.labels) {
     for (const label of config.container.labels) {
       const [key, val] = label.split('=')
-      opts.Labels[key] = val
+      opts.TaskTemplate.ContainerSpec.Labels[key] = val
     }
   }
 
@@ -501,7 +501,7 @@ export const generateSwarmServiceConfig = (config) => {
     opts.TaskTemplate.ContainerSpec.Hosts = config.container.hosts
   }
 
-  if (name === 'broker') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
+  if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
   return opts
 }
 

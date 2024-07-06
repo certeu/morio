@@ -51,6 +51,8 @@ export const resolveServiceConfiguration = ({ store, utils }) => ({
       'traefik.http.services.console.loadbalancer.server.port=8080',
       // Enable TLS
       'traefik.http.routers.console.tls=true',
+      // Enable authentication
+      `traefik.http.routers.console.middlewares=auth@docker`,
     ],
   },
   /*

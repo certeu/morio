@@ -134,11 +134,11 @@ export const addTraefikTlsConfiguration = (service) => {
    */
   const names = [...store.getSettings('deployment.nodes')]
   if (names.length > 1) names.push(store.getSettings('deployment.fqdn'))
-  const labelPath = [ 'services', 'morio', service, 'container', 'labels' ]
-  for (const [i, label] of Object.entries(store.get(labelPath, {}))) {
+  const labelPath = [ 'config', 'services', 'morio', service, 'container', 'labels' ]
+  for (const label of store.get(labelPath, [])) {
     if (label.toLowerCase().indexOf('rule=(') !== -1) {
       const chunks = label.split('rule=(')
-      store.set([...labelPath, i], chunks[0] + 'rule=(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1])
+      store.push(labelPath, chunks[0] + 'rule=(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1])
     }
   }
 }
