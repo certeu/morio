@@ -38,7 +38,7 @@ docker run \
   -v /home/jdecock/git/morio:/morio  \
   -l "traefik.enable=true"  \
   -l "traefik.docker.network=morionet"  \
-  -l "traefik.http.routers.api.rule=(PathPrefix(\`/-/api\`, \`/downloads\`, \`/coverage\`))"  \
+  -l "traefik.http.routers.api.rule=( PathPrefix(\`/-/api\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`) )"  \
   -l "traefik.http.routers.api.priority=100"  \
   -l "traefik.http.routers.api.service=api"  \
   -l "traefik.http.routers.api.entrypoints=https"  \

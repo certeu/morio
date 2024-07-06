@@ -3,9 +3,13 @@ import { store, utils, log } from './lib/utils.mjs'
 
 /*
  * List of routes allowed in ephemeral mode
+ * Some we also match with trailing slash.
+ * Strictly speaking, we don't have to, but let's be kind
+ * and safe us some support requests.
  */
 const ephemeralRoutes = [
   'GET:/status',
+  'GET:/status/',
   'POST:/setup',
   'GET:/reload',
   'GET:/info',

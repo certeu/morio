@@ -501,7 +501,7 @@ export const generateSwarmServiceConfig = (config) => {
     opts.TaskTemplate.ContainerSpec.Hosts = config.container.hosts
   }
 
-  if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
+  //if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
   return opts
 }
 

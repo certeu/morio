@@ -15,6 +15,7 @@ export function routes(app) {
    * Hit this route to get the Morio status
    */
   app.get(`${PREFIX}/status`, Status.status)
+  app.get(`${PREFIX}/status/`, Status.status)
 
   /*
    * Hit this route to get the Morio info (no core outreach)
