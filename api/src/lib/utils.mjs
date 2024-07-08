@@ -94,7 +94,7 @@ utils.set('sendErrorResponse', (res, { type, title, status, detail, ...rest }) =
   .type('application/problem+json')
   .status(status)
   .send({
-    type: utils.getPreset('MORIO_API_ERRORS_WEB_PREFIX')+type,
+    type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+type,
     title,
     status,
     detail,

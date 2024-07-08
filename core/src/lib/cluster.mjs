@@ -93,6 +93,7 @@ const storeClusterSwarmNodesState = (nodes) => {
     }
     if (leading) {
       store.set('state.swarm.leader', node)
+      console.log(JSON.stringify(node, null ,2))
       /*
        * Swarm has a leader, so it's up. Reflect this in the state
        */
@@ -118,7 +119,18 @@ const storeClusterSwarmNodesState = (nodes) => {
  * Helper method to gather the morio cluster state
  */
 const storeClusterMorioState = async () => {
-  //console.log(JSON.stringify(store.state.swarm, null ,2))
+      //deployment: store.get('state.cluster.uuid'),
+      //node: store.get('state.node.uuid'),
+      //node_serial: store.get('state.node.serial'),
+      //version: store.get('info.version'),
+      //...base,
+      //action: 'apply'
+      //current: {
+      //  cluster: store.get('state.cluster', cluster),
+      //  keys: store.set('config.keys', keys),
+      //  serial: serial.local,
+      //  settings: store.get('settings.sanitized'),
+      //},
     return // FIXME
   const nodes = {}
   /*
@@ -212,6 +224,11 @@ const ensureSwarm = async () => {
       ListenAddr: store.get('state.node.ip'),
       AdvertiseAddr: store.get('state.node.ip'),
       ForceNewCluster: false,
+      Spec: {
+        Labels: {
+          'morio.cluster.uuid': store.get('state.cluster.uuid'),
+        }
+      }
     })
     /*
      * If the swarm was created, refresh the cluster state
@@ -237,6 +254,67 @@ const ensureSwarm = async () => {
       if (!labelsAdded) log.warn('Unable to add labels to swarm node. This is unexpected.')
       else await storeClusterState()
     } else log.warn('Failed to ceated swarm. This is unexpected.')
+  }
+  /*
+   * There is a swarm. If there is only 1 node, we can just start.
+   * But if there are multiple nodes we need to reach consensus first.
+   */
+  else if (utils.isDistributed()) await ensureMorioClusterConsensus()
+}
+
+/**
+ * Ensure that the Morio cluster reaches consensus about what config to run
+ *
+ * Consensus building typically falls apart in 2 main parts:
+ *   - Figuring out who is the leader of the cluster
+ *   - Figuring out what config to run
+ * For the first part, since Swarm uses the RAFT consensus protocol, we do not
+ * need to re-implement this. We just make the swarm leader the Morio cluster leader
+ * because it does not matter who leads, all we need is consensus.
+ * Then, there are two options:
+ *   - If we are leader, we reach out to all nodes asking them to sync
+ *   - If we are not leader, we reach out to the lader asking them to initiate a sync
+ */
+export const ensureMorioClusterConsensus = async () => {
+  console.log({ do: 'ENSURE_MORIO_CLUSTER_CONSENSUS', in: ensureMorioClusterConsensus })
+  /*
+   * Are we leading the cluster?
+   */
+  if (store.get('state.cluster.leading')) {
+    /*
+     * Do we have a heartbeat on the go?
+     */
+    const interval = store.get('state.cluster.heartbeat.interval')
+    if (interval) clearInterval(interval)
+    /*
+     * Create the new heartbeat
+     */
+    console.debug('Starting cluster heartbeat')
+    store.set('state.cluster.heartbeat', {
+      client: restCient('http://'),
+      interval: setInterval(() => {
+        console.log('CLUSTER HEARTBEAT', { uuid: store.get('state.cluster.uuid') })
+      }, 3000, store)
+    })
+  } else {
+    /*
+     * We are not leading the cluster
+     * Send our config to the leader and await instructions
+     */
+    const leader = store.getClusterLeaderLabels()
+    const client = restClient(`http://core_${leader['morio.node.serial']}:${getPreset('MORIO_CORE_PORT')}`)
+    const [result, data] = await client.post('/cluster/sync', {
+      deployment: store.get('state.cluster.uuid'),
+      node: store.get('state.node.uuid'),
+      node_serial: store.get('state.node.serial'),
+      version: store.get('info.version'),
+      current: {
+        keys: store.set('config.keys', keys),
+        serial: serial.local,
+        settings: store.get('settings.sanitized'),
+      },
+    })
+    console.log({result, data, in: ensureMorioClusterConsensus, at: 111 })
   }
 }
 

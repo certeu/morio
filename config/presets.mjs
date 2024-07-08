@@ -32,6 +32,9 @@ export const presets = {
   // Network name. Change at your own peril.
   MORIO_NETWORK: 'morionet',
 
+  // Prefix for looking up errors
+  MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
+
   /*
    * API presets
    */
@@ -47,9 +50,6 @@ export const presets = {
 
   // TCP port API should listen on
   MORIO_API_PORT: 3000,
-
-  // Prefix for looking up API errors returned from the API
-  MORIO_API_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
 
   // Hosts for which to forego the https validation check
   // Used in unit tests only

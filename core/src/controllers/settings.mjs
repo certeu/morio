@@ -88,13 +88,6 @@ Controller.prototype.deploy = async (req, res) => {
   } else log.debug(`Processing request to deploy new settings`)
 
   /*
-   * Keep previous settings so we can check the delta when figuring
-   * out what services need restarting
-   */
-  store.set('previous.settings', cloneAsPojo(store.get('settings')))
-  store.set('previous.config', cloneAsPojo(store.get('config')))
-
-  /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
@@ -114,14 +107,8 @@ Controller.prototype.deploy = async (req, res) => {
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
-   * Keep safe settings so we return them whenever settings are requested
-   */
-  store.set('safeSettings', cloneAsPojo(mSettings))
-
-  /*
    * Don't await deployment, just return
    */
-  log.info(`Reconfiguring Morio`)
   reconfigure({ hotReload: true })
 
   return res.send({ result: 'success', settings: store.get('saveSettings') })

@@ -39,7 +39,7 @@ export const store = new Store(log)
 /*
  * Helper method to facilitate getting resolved settings
  */
-store.set('getSettings', (path, dflt) => store.get(unshift(['settings', 'resolved'], path, dflt)))
+store.set('getSettings', (path, dflt) => store.get(unshift(['settings', 'resolved'], path), dflt))
 /*
  * Helper method to get a flag from the settings
  */
@@ -68,6 +68,10 @@ store.set('setDockerServiceConfig', (service, config) => store.set(['config', 's
  * Helper method to get a cache entry (see utils.cacheHit)
  */
 .set('getCache', (path) => store.get(unshift(['cache'], path), false))
+/*
+ * Helper method to get labels for the cluster leader node
+ */
+.set('getClusterLeaderLabels', () => store.get(['state', 'cluster', 'leader', 'Spec', 'Labels']))
 
 /*
  * Export an utils instance to hold utility methods
@@ -150,18 +154,39 @@ export const utils = new Store(log)
       : false
   })
 
-
-
 /*
  * Helper method to determine whether to run a swarm or not
  */
 utils.set('isSwarm', () => (utils.isEphemeral() || store.getFlag('NEVER_SWARM')) ? false : true)
 
+/*
+ * Helper method to see if brokers are distributed
+ */
+utils.set('isDistributed', () => (utils.isSwarm() && [
+  ...store.getSettings('deployment.nodes', []),
+  ...store.getSettings('deployment.flanking_nodes', [])
+].length) > 1)
 
 /*
  * Determined whether a service is swarm (true) or local (false)
  */
 utils.set('isSwarmService', (serviceName) => (!utils.isSwarm() || neverSwarmServices.includes(serviceName) || store.getFlag('NEVER_SWARM')) ? false : true)
+
+/*
+ * Add helper method for sending RFC7807 error responses
+ */
+utils.set('sendErrorResponse', (res, { type, title, status, detail, ...rest }) => res
+  .type('application/problem+json')
+  .status(status)
+  .send({
+    type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+type,
+    title,
+    status,
+    detail,
+    ...rest,
+  })
+  .end()
+)
 
 /**
  * Helper method to push a prefix to a set path

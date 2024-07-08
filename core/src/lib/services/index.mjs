@@ -569,7 +569,7 @@ export async function defaultRecreateServiceHook(service, hookParams) {
     /*
      * If, for whatever reason, the TLS labels are missing anyway, also recreate.
      */
-    console.log({config: store.config, in: 'defaultRecreateServiceHook' })
+    //console.log({config: store.config, in: 'defaultRecreateServiceHook' })
     if (
       !(store.config?.services?.[service]?.container?.labels || []).includes(
         'traefik.tls.stores.default.defaultgeneratedcert.resolver=ca'
