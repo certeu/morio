@@ -27,7 +27,9 @@
     "prettier": "npx prettier --write .",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "logs:core": "docker logs -f core | pino-pretty -i pid,time,name,hostname",
+    "logs:api": "docker logs -f -n 10 api | pino-pretty -i pid,time,name,hostname"
   },
   "repository": {
     "type": "git",
