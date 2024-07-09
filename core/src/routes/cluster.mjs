@@ -22,7 +22,7 @@ export function routes(app) {
   app.post('/cluster/sync', (req, res) => Cluster.sync(req, res))
 
   /*
-   * This route invites this node to join a swarm
+   * This route invites this node to join a Morio cluster
    */
   app.post('/cluster/join', (req, res) => Cluster.join(req, res))
 

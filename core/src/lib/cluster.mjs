@@ -93,7 +93,6 @@ const storeClusterSwarmNodesState = (nodes) => {
     }
     if (leading) {
       store.set('state.swarm.leader', node)
-      console.log(JSON.stringify(node, null ,2))
       /*
        * Swarm has a leader, so it's up. Reflect this in the state
        */

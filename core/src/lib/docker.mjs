@@ -107,7 +107,7 @@ export const createSwarmService = async (serviceName, config) => {
     catch (err) {
       log.warn(err, `${serviceName}: Unable to create swarm service`)
     }
-    console.log({success, result})
+    //console.log({success, result})
     if (success) {
       log.debug(`${serviceName}: Swarm service created`)
       return result.id

@@ -8,7 +8,8 @@ import {
   uuid,
 } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
-import { cloneAsPojo } from '#shared/utils'
+import { cloneAsPojo, attempt } from '#shared/utils'
+import { testUrl } from '#shared/network'
 // Store
 import { store, log, utils, setIfUnset } from '../lib/utils.mjs'
 
@@ -261,12 +262,71 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Don't await deployment, just return
+   * Finalize the response
+   */
+  res.send(data)
+
+  /*
+   * If there is more than 1 node, we need to invite the others
+   * to join the cluster. Since other nodes are ephemeral, there
+   * is no swarm yet and thus we cannot reach the core service on
+   * those other nodes. So instead, we reach out to the API via
+   * the node's FQDN like as if it was a public request.
+   * Furthermore, we can't keep this request hanging while we wait
+   * so instead we'll launch an interval for each node, and cancel
+   * it when the request is 200.
+   */
+  const allNodes = [
+    ...body.deployment.nodes,
+    ...(body.deployment.flankin_nodes || [])
+  ].map(node => node.toLowerCase())
+  for (const node of allNodes) {
+    const key = ['state', 'cluster', 'joins', node]
+    const flanking = !body.deployment.nodes.includes(node)
+    store.set(key, {
+      attempts: 1,
+      interval: setInterval(async () => {
+        log.info(`Sending Join Request #${store.get([...key, 'attempts'], 1)} to ${node}`)
+        const result = await testUrl(
+          `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
+          {
+            method: 'POST',
+            data: {
+              you: node,
+              join: {
+                node: store.get('state.node.uuid'),
+                fqdn: store.get('state.node.fqdn'),
+                hostname: store.get('state.node.hostname'),
+                ip: store.get('state.node.ip'),
+                serial: store.get('state.node.serial'),
+                version: store.get('info.version'),
+                token: store.get(`state.swarm.tokens.${flanking ? 'Worker' :'Manager'}`)
+              },
+              as: flanking ? 'flanking_node' : 'node',
+            },
+            ignoreCertificate: true,
+            timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*0.9,
+            returnAs: 'json',
+            returnError: false,
+          }
+        )
+        if (result) {
+          store.set([...key, 'result'], result)
+          console.log({joinOk: result})
+          clearInterval(store.get([...key, 'interval']))
+        } else {
+          store.set([...key, 'attempt'], store.get([...key, 'attempts'], 1) + 1)
+          console.log({joinNOTok: result})
+        }
+      })
+    })
+  }
+
+  /*
+   * Trigger a reconfigure, but don't await it.
    */
   log.info(`Bring Morio out of ephemeral mode`)
-  reconfigure({ initialSetup: true })
-
-  return res.send(data)
+  return reconfigure({ initialSetup: true })
 }
 
 /**

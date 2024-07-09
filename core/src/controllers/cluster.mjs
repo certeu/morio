@@ -171,40 +171,23 @@ Controller.prototype.sync = async (req, res) => {
 Controller.prototype.join = async (req, res) => {
   log.info('Received request to join cluster')
   /*
-   * {
-  join: {
-    node: '61ba045a-3835-4259-b42c-9acd59a894a9',
-    fqdn: 'poc-morio-node1.cert.europa.eu',
-    hostname: 'poc-morio-node1',
-    ip: '10.1.1.175',
-    serial: 1
-  },
-  as: {
-    node: {
-      config_resolved: true,
-      about: 'Morio Core',
-      name: '@morio/core',
-      ping: 1715849950229,
-      start_time: 1715849950229,
-      version: '0.2.0',
-      production: false,
-      current_settings: false,
-      ephemeral: true,
-      uptime: 4.458,
-      core: [Object],
-      setup: false,
-      fqdn: 'poc-morio-node3.cert.europa.eu',
-      ip: false,
-      hostname: 'poc-morio-node3',
-      node_id: 3,
-      up: true
-    },
-    fqdn: 'poc-morio-node3.cert.europa.eu',
-    ip: '10.1.1.177'
-  }
+            data: {
+              you: node,
+              join: {
+                node: store.get('state.node.uuid'),
+                fqdn: store.get('state.node.fqdn'),
+                hostname: store.get('state.node.hostname'),
+                ip: store.get('state.node.ip'),
+                serial: store.get('state.node.serial'),
+                version: store.get('info.version'),
+              },
+              as: !body.deployment.nodes.includes(node) ? 'flanking_node' : 'node',
+            },
+   *
+   *
 }
 */
-  if (req.body.as?.ip && req.body.token && req.body.join?.ip) {
+  if (req.body.join?.ip && req.body.token && req.body.join?.ip) {
     let result
     console.log('attempting to join with', {
       a: req.body.as.ip,

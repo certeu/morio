@@ -145,6 +145,8 @@ export const presets = {
   // Timeout of the Traefik HTTP client
   MORIO_CORE_SWARM_HTTP_TIMEOUT: 150,
 
+  // Amount of seconds to wait between cluster heartbeats
+  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 25,
   /*
    * Proxy presets
    */
