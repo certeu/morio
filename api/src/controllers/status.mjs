@@ -79,15 +79,8 @@ Controller.prototype.status = async (req, res) => {
       start_time: store.get('state.start_time'),
       reload_count: store.get('state.reload_count'),
       config_resolved: store.get('state.config_resolved'),
-      settings_serial: store.get('state.settings_serial'),
-      // config_resolved
-      // reload_time
-      // ephemeral
+      settings_serial: result.state.ephemeral ? undefined : store.get('state.settings_serial'),
       core:  store.get('state.core'),
-      //uptime
-      //ephemeral
-      //reconfigure_count
-      //timestamp
     }
   })
 }

@@ -281,7 +281,6 @@ export const ensureMorioClusterConsensus = async () => {
   /*
    * Are we leading the cluster?
    */
-  process.exit()
   if (store.get('state.swarm.leading')) {
     /*
      * Did all nodes join the cluster?
