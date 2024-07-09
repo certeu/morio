@@ -521,7 +521,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
     const hit = utils.cacheHit(cache)
     if (hit) return [true, hit]
   }
-  log.debug(`core: Running Docker command: ${cmd}`)
+  log.trace(`core: Running Docker command: ${cmd}`)
   let result
   try {
     result = await docker[cmd](options)
@@ -562,7 +562,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
 
   let result
   try {
-    log.debug(`core: Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
+    log.trace(`core: Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {

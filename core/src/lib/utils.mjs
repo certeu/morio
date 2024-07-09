@@ -71,7 +71,7 @@ store.set('setDockerServiceConfig', (service, config) => store.set(['config', 's
 /*
  * Helper method to get labels for the cluster leader node
  */
-.set('getClusterLeaderLabels', () => store.get(['state', 'cluster', 'leader', 'Spec', 'Labels']))
+.set('getClusterLeaderLabels', () => store.get(['state', 'cluster', 'leader', 'Spec', 'Labels'], {}))
 
 /*
  * Export an utils instance to hold utility methods
@@ -161,11 +161,15 @@ utils.set('isSwarm', () => (utils.isEphemeral() || store.getFlag('NEVER_SWARM'))
 
 /*
  * Helper method to see if brokers are distributed
+ * @param {object} deployment - Pass this in when using this in ephemeral mode
  */
-utils.set('isDistributed', () => (utils.isSwarm() && [
-  ...store.getSettings('deployment.nodes', []),
-  ...store.getSettings('deployment.flanking_nodes', [])
-].length) > 1)
+utils.set('isDistributed', () => utils.isSwarm() && store.getSettings('deployment.nodes', []).concat(store.getSettings('deployment.flanking_nodes', [])).length > 1
+)
+
+/*
+ * Helper method to count the number of nodes in the cluster
+ */
+utils.set('nodeCount', () => store.getSettings('deployment.nodes', []).concat(store.getSettings('deployment.flanking_nodes', [])).length)
 
 /*
  * Determined whether a service is swarm (true) or local (false)
@@ -187,6 +191,14 @@ utils.set('sendErrorResponse', (res, { type, title, status, detail, ...rest }) =
   })
   .end()
 )
+
+/*
+ * Determined whether a swarm node is the local node
+ */
+utils.set('isLocalSwarmNode', (node) => (
+  node.Spec.Labels?.['morio.node.uuid'] === store.get('state.node.uuid') ||
+  node.Description.Hostname === store.get('state.node.hostname')
+))
 
 /**
  * Helper method to push a prefix to a set path

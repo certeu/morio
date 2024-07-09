@@ -27,6 +27,8 @@ import { ensureMorioStandaloneNode } from '#lib/standalone'
 import { store, log, utils } from '../utils.mjs'
 // Docker
 import { runContainerApiCommand } from '#lib/docker'
+// UUID
+import { uuid } from '#shared/crypto'
 
 /*
  * Load all presets and write them to disk for other services to load
@@ -81,6 +83,7 @@ export const service = {
       if (!timestamp) {
         log.info('core: Morio is running in ephemeral mode')
         store.set('state.ephemeral', true)
+        store.set('state.ephemeral_uuid', uuid())
         store.set('state.settings_serial', false)
 
         /*

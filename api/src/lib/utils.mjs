@@ -71,7 +71,7 @@ export const utils = new Store(log)
   .set('endReload', () => {
     store.set('state.config_resolved', true)
     store.set('state.reload_count', Number(store.get('state.reload_count')) + 1)
-    const serial = store.get('state.settings_serial')
+    const serial = store.get('state.settings_serial', false)
     log.info(`Morio API Ready - Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
   })
   /*

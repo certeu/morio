@@ -169,45 +169,33 @@ Controller.prototype.sync = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.join = async (req, res) => {
-  log.info('Received request to join cluster')
-  /*
-            data: {
-              you: node,
-              join: {
-                node: store.get('state.node.uuid'),
-                fqdn: store.get('state.node.fqdn'),
-                hostname: store.get('state.node.hostname'),
-                ip: store.get('state.node.ip'),
-                serial: store.get('state.node.serial'),
-                version: store.get('info.version'),
-              },
-              as: !body.deployment.nodes.includes(node) ? 'flanking_node' : 'node',
-            },
-   *
-   *
-}
-*/
-  if (req.body.join?.ip && req.body.token && req.body.join?.ip) {
-    let result
-    console.log('attempting to join with', {
-      a: req.body.as.ip,
-      b: req.body.token,
-      c: [req.body.join.ip]
+  log.info(`Received request to join cluster ${req.body.join.cluster} as ${req.body.as} node`)
+  if (!req.body.join?.ip || !req.body.join?.fadn || !req.body.token) return res.status(400).send()
+
+  let result, data
+  console.log('attempting to join with', {
+    ip: req.body.join.ip,
+    token: req.body.token,
+    managers: [req.body.join.fqdn, req.body.join.ip ]
+  })
+  try {
+    [result, data] = await joinSwarm({
+      ip: req.body.join.ip,
+      token: req.body.token,
+      managers: [req.body.join.fqdn, req.body.join.ip ]
     })
-    try {
-      result = await joinSwarm(req.body.as.ip, req.body.token, [req.body.join.ip])
-    }
-    catch (err) {
-      console.log(err)
-    }
-    console.log({ joinResult: result })
   }
-  //console.log({join: req.body.join, as: req.body.as})
+  catch (err) {
+    console.log(err)
+  }
+  console.log({ joinResult: result, data })
 
   /*
    * Return something for now
    */
-  return res.status(200).send({ ping: 'join pong' }).end()
+  return result
+   ? res.status(200).send({ ping: 'join pong' }).end()
+   : res.status(500).send({ ping: 'join booo' }).end()
 }
 
 

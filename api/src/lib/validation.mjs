@@ -155,7 +155,11 @@ export const validateSettings = async (newSettings) => {
      * We bypass this when it's the unit test node
      */
     if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
-      const https = await testUrl(`https://${node}/`, { ignoreCertificate: true, returnAs: 'check' }, log.debug)
+      const https = await testUrl(
+        `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
+        { ignoreCertificate: true, returnAs: 'check' },
+        log.debug
+      )
       if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
       else {
         report.info.push(`Validation failed for node ${i}`)

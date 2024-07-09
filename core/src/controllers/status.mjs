@@ -76,6 +76,7 @@ const getStatus = () => ({
     node_serial: utils.isEphemeral() ? undefined : store.get('state.node.serial'),
     core: store.node,
     ephemeral: utils.isEphemeral(),
+    ephemeral_uuid: store.get('state.ephemeral_uuid'),
     reconfigure_count: store.get('state.reconfigure_count'),
     config_resolved: store.get('state.config_resolved'),
     settings_serial: store.get('state.settings_serial'),
