@@ -15,5 +15,13 @@ export const errors = {
     title: 'Unable to write to filesystem',
     detail: 'An attempt to write to the filesystem failed unexpectedly. This warrants escalation.',
   },
+  /*
+   * Specific error for schema violations
+   */
+  'morio.core.schema.violation': {
+    status: 400,
+    title: 'This requires violates the data schema',
+    detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+  },
 }
 
