@@ -624,7 +624,7 @@ const inviteClusterNode = async (remote) => {
      * Yes, async in setInterval can cause issues if the await is sortern than the interval
      * But we are letting this timeout before the interval re-fires.
      */
-    store.set(key, setInterval(async () => await inviteClusterNodeAttempt(localFqdn, fqdn)))
+    store.set(key, setInterval(async () => await inviteClusterNodeAttempt(local, remote)))
   }
 }
 

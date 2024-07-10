@@ -184,10 +184,6 @@ Controller.prototype.join = async (req, res) => {
    * Attempt to join the swarm
    */
   let result, data
-  console.log('attempting to join with', {
-    token: valid.token,
-    managers: [valid.join ]
-  })
   try {
     [result] = await joinSwarm({
       token: valid.token,
