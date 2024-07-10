@@ -52,6 +52,14 @@ export const requestSchema = {
         serial: Joi.number().required().min(172e10).max(199e10),
         data: Joi.object().required(),
       }),
+      keys: Joi.object({
+        jwt: Joi.string().required(),
+        mrt: Joi.string().required(),
+        public: Joi.string().required(),
+        private: Joi.string().required(),
+        deployment: Joi.string().required(),
+      }),
+      headers: Joi.object(),
     })
   },
 }
