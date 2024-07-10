@@ -13,15 +13,15 @@ import { store, log, utils } from './utils.mjs'
 /**
  * Helper method to update the cluster state
  */
-export const storeClusterState = async () => {
-  await storeClusterSwarmState()
-  await storeClusterMorioState()
+export const storeClusterState = async (silent) => {
+  await storeClusterSwarmState(silent)
+  await storeClusterMorioState(silent)
 }
 
 /**
  * Helper method to gather the swarm state
  */
-const storeClusterSwarmState = async () => {
+const storeClusterSwarmState = async (silent=false) => {
   /*
    * Don't bother unless there's a swarm
    */
@@ -36,10 +36,10 @@ const storeClusterSwarmState = async () => {
    * Is a Swarm running?
    */
   if (result && swarm.JoinTokens) {
-    log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
+    if (!silent) log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     store.set('state.swarm.tokens', swarm.JoinTokens)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) storeClusterSwarmNodesState(nodes)
+    if (ok) storeClusterSwarmNodesState(nodes, silent)
     else log.warn(`Unable to retrieve swarm node info from Docker API`)
   } else {
     log.debug(`Docker swarm is not configured`)
@@ -47,11 +47,11 @@ const storeClusterSwarmState = async () => {
   }
 }
 
-const storeClusterSwarmNodesState = (nodes) => {
+const storeClusterSwarmNodesState = (nodes, silent=false) => {
   /*
    * Clear follower list
    */
-  store.set('state.swarm.followers', {})
+  store.set('state.swarm.followers', [])
 
   /*
    * Iterate over swarm nodes
@@ -93,12 +93,12 @@ const storeClusterSwarmNodesState = (nodes) => {
        */
       store.set('state.swarm_ready', true)
     }
-    else store.set(`state.swarm.followers.${node.Description.Hostname}`, node)
+    else store.push(`state.swarm.followers`, node.Description.Hostname)
 
     /*
      * Announce what we've found
      */
-    log.debug([
+    if (!silent) log.debug([
       local ? `We are Swarm member ${i}` : `Swarm member ${i}`,
       `with IP ${node.Status.Addr},`,
       local ? `and we are` : `is`,
@@ -206,7 +206,7 @@ const ensureSwarm = async () => {
   /*
    * Find our feet
    */
-  await storeClusterState()
+  await storeClusterState(true)
 
   /*
    * Create the swarm if it does not exist yet
@@ -293,20 +293,9 @@ export const ensureMorioClusterConsensus = async () => {
 
 
     /*
-     * Do we have a heartbeat on the go?
+     * Ensure a cluster heartbeat is running
      */
-    //const interval = store.get('state.cluster.heartbeat.interval')
-    //if (interval) clearInterval(interval)
-    /*
-     * Create the new heartbeat
-     */
-    //console.debug('Starting cluster heartbeat')
-    //store.set('state.cluster.heartbeat', {
-    //  client: restCient('http://'),
-    //  interval: setInterval(() => {
-    //    console.log('CLUSTER HEARTBEAT', { uuid: store.get('state.cluster.uuid') })
-    //  }, 3000, store)
-    //})
+    ensureClusterHeartbeat()
   } else {
     /*
      * We are not leading the cluster
@@ -323,7 +312,45 @@ export const ensureMorioClusterConsensus = async () => {
     })
     console.log({result, data, in: 'ensureMorioClusterConsensus' })
   }
+
 }
+
+/**
+ * Ensure a cluster heartbeat
+ */
+const ensureClusterHeartbeat = async () => {
+  console.log("ENSUREING HEARBTLE")
+  /*
+   * Only the leader sends cluster heartbeats
+   */
+  if (!store.get('state.swarm.leading')) return
+
+  /*
+   * Using setInterval is the most obvious choice here
+   * But when nodes are down or there are network issues
+   * the response may take longer than the interval.
+   * So instead, we'll use setTimeout here which is more robust.
+   */
+  const beat = store.get('state.cluster.heartbeat')
+  for (const node of store.get('state.swarm.followers')) {
+    console.log(node)
+  }
+
+
+    //const interval = store.get('state.cluster.heartbeat.interval')
+    //if (interval) clearInterval(interval)
+    /*
+     * Create the new heartbeat
+     */
+    //console.debug('Starting cluster heartbeat')
+    //store.set('state.cluster.heartbeat', {
+    //  client: restCient('http://'),
+    //  interval: setInterval(() => {
+    //    console.log('CLUSTER HEARTBEAT', { uuid: store.get('state.cluster.uuid') })
+    //  }, 3000, store)
+    //})
+}
+
 
 /**
  * Ensure a Morio Swarm cluster is ready to deploy services on

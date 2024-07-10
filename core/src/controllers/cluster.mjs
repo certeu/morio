@@ -149,7 +149,7 @@ Controller.prototype.sync = async (req, res) => {
     if (leader['morio.node.serial']) return res.redirect(
       307,
       `http://core_${leader['morio.node.serial']}:${port}/cluster/sync`
-    ).end()
+    )
     /*
      * We do not have a leader serial. This is bad.
      */
