@@ -320,7 +320,7 @@ export const ensureMorioClusterConsensus = async () => {
       version: store.get('info.version'),
       current: {
         keys: store.get('config.keys'),
-        serial: serial.local,
+        serial: store.get('state.settings_serial'),
         settings: store.get('settings.sanitized'),
       },
     })
@@ -670,7 +670,7 @@ const inviteClusterNodeAttempt = async (local, remote) => {
       ignoreCertificate: true,
       timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
       returnAs: 'json',
-      returnError: true,
+      returnError: false,
     }
   )
   if (result) {
