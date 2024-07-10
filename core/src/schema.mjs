@@ -40,12 +40,8 @@ export const requestSchema = {
   cluster: {
     join: Joi.object({
       you: Joi.string().required().hostname(),
+      join: Joi.string().required().hostname(),
       cluster: Joi.string().required(),
-      join: Joi.object({
-        fqdn: Joi.string().required().hostname(),
-        ip: Joi.string().required().ip({ version: ['ipv4'], cidr: 'forbidden' }),
-        node: Joi.string().required(),
-      }),
       as: Joi.string().required().valid('node', 'flanking_node'),
       token: Joi.string().required(),
       settings: Joi.object({

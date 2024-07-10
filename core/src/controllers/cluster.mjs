@@ -191,15 +191,13 @@ Controller.prototype.join = async (req, res) => {
    */
   let result, data
   console.log('attempting to join with', {
-    ip: valid.ip,
     token: valid.token,
     managers: [valid.join.fqdn, valid.join.ip ]
   })
   try {
     [result, data] = await joinSwarm({
-      ip: valid.join.ip,
       token: valid.token,
-      managers: [valid.join.fqdn, valid.join.ip ]
+      managers: [valid.join.fqdn]
     })
   }
   catch (err) {

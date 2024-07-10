@@ -186,13 +186,12 @@ const storeClusterMorioState = async () => {
 /**
  * Helper method to join a node to the swarm
  *
- * @param {string} ip - The IP address to advertise
  * @param {string} token - The Join Token
+ * @param {array} managers - Pre-existing swarm manager nodes
  */
-export const joinSwarm = async ({ ip, token, managers = []}) =>
+export const joinSwarm = async ({ token, managers = []}) =>
   await runDockerApiCommand('swarmJoin', {
-    ListenAddr: ip,
-    AdvertiseAddr: ip,
+    ListenAddr: "0.0.0.0:2377",
     RemoteAddrs: managers,
     JoinToken: token,
   })
@@ -647,14 +646,9 @@ const inviteClusterNodeAttempt = async (local, remote) => {
       method: 'POST',
       data: {
         you: remote,
-        cluster: store.get('state.cluster.uuid'),
-        join: {
-          fqdn: local,
-          ip: store.getSettings('deployment.leader_ip'),
-          node: store.get('state.node.uuid'),
-          //serial,
-        },
+        join: local,
         as: flanking ? 'flanking_node' : 'node',
+        cluster: store.get('state.cluster.uuid'),
         token: store.get(`state.swarm.tokens.${flanking ? 'Worker' :'Manager'}`),
         settings: {
           serial: Number(store.get('state.settings_serial')),
