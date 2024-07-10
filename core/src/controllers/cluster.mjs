@@ -3,6 +3,7 @@ import { log, utils, store } from '../lib/utils.mjs'
 import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
+import { resolveHostAsIp } from '#shared/network'
 
 /**
  * This status controller handles the MORIO cluster endpoints
