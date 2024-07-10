@@ -219,22 +219,20 @@ Controller.prototype.join = async (req, res) => {
     })
 
     /*
-     * Now reconfigure
-     */
-    reconfigure({ hotReload: true })
-
-    /*
      * Don't forget to finalize the request
      */
-    return res.status(200).send()
+    res.status(200).send()
+
+    /*
+     * Now return as reconfigure
+     */
+    return reconfigure({ joinCluster: true })
   }
 
   /*
-   * Return something for now
+   * Return error
    */
-  return result
-   ? res.status(200).send({ ping: 'join pong' }).end()
-   : res.status(500).send({ ping: 'join booo' }).end()
+  return res.status(500).send({ ping: 'join booo' }).end()
 }
 
 
