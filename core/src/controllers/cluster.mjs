@@ -63,7 +63,7 @@ Controller.prototype.sync = async (req, res) => {
   /*
    * Are we leading the cluster?
    */
-  if (store.get('state.cluster.leading')) {
+  if (store.get('state.swarm.leading')) {
     /*
      * Keep this DRY
      */
