@@ -218,7 +218,7 @@ Controller.prototype.join = async (req, res) => {
       fqdn: valid.you,
       hostname: valid.you.split('.')[0],
       ip: (await resolveHostAsIp(valid.you)),
-      serial: valid.settings.deployment.nodes.concat(valid.settings.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
+      serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
     })
 
     /*
