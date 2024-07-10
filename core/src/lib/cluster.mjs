@@ -279,7 +279,7 @@ export const ensureMorioClusterConsensus = async () => {
   //console.log({ do: 'ENSURE_MORIO_CLUSTER_CONSENSUS', in: 'ensureMorioClusterConsensus'  })
   //console.log(JSON.stringify(store.get('state.swarm')))
   //console.log(JSON.stringify(Object.keys(store.get('state.swarm')), null ,2))
-  return // FIXME
+
   /*
    * Are we leading the cluster?
    */
@@ -314,19 +314,19 @@ export const ensureMorioClusterConsensus = async () => {
      */
     const leader = store.getClusterLeaderLabels()
     console.log({leader, in: 'ensureMorioClusterConsensus' })
-    const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
-    const [result, data] = await client.post('/cluster/sync', {
-      deployment: store.get('state.cluster.uuid'),
-      node: store.get('state.node.uuid'),
-      node_serial: store.get('state.node.serial'),
-      version: store.get('info.version'),
-      current: {
-        keys: store.get('config.keys'),
-        serial: store.get('state.settings_serial'),
-        settings: store.get('settings.sanitized'),
-      },
-    })
-    console.log({result, data, in: 'ensureMorioClusterConsensus', at: 111 })
+    //const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
+    //const [result, data] = await client.post('/cluster/sync', {
+    //  deployment: store.get('state.cluster.uuid'),
+    //  node: store.get('state.node.uuid'),
+    //  node_serial: store.get('state.node.serial'),
+    //  version: store.get('info.version'),
+    //  current: {
+    //    keys: store.get('config.keys'),
+    //    serial: store.get('state.settings_serial'),
+    //    settings: store.get('settings.sanitized'),
+    //  },
+    //})
+    //console.log({result, data, in: 'ensureMorioClusterConsensus', at: 111 })
   }
 }
 
@@ -616,7 +616,8 @@ const inviteClusterNode = async (remote) => {
    * We will await this one because typically this works, and it
    * prevents us from having to run this in the background.
    */
-  const opportunisticJoin = await false //FIXME testing attempt inviteClusterNodeAttempt(local, remote)
+  //const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
+  const opportunisticJoin = false
 
   /*
    * If that didn't work, keep trying, but don't block the request
