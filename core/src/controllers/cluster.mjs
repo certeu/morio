@@ -179,7 +179,7 @@ Controller.prototype.join = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await validate(`cluster.join`, req.body)
-  console.log({valid})
+  console.log({valid, err})
   if (!valid) {
     log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
