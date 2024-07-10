@@ -6,7 +6,6 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = store.get('info.production', false)
-  console.log(utils)
 
   return {
     /**

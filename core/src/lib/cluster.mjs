@@ -583,9 +583,17 @@ const isClusterHealthy = async () => {
 }
 
 export const inviteClusterNodes = async () => {
+  /*
+   * Don't just await one after the other or cluster nodes will
+   * be asked to join one after the other. Instead allow them
+   * to run in parallel
+   */
+  const promises = []
   for (const fqdn of store.getSettings('deployment.nodes').concat(store.getSettings('deployment.flanking_nodes', []))) {
-    await inviteClusterNode(fqdn)
+    promises.push(inviteClusterNode(fqdn))
   }
+
+  return Promise.all(promises)
 }
 
 /*
