@@ -2,7 +2,7 @@
 import axios from 'axios'
 import https from 'https'
 import { restClient, testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
-import { sleep } from '#shared/utils'
+import { attempt, sleep } from '#shared/utils'
 import { ensureMorioNetwork } from './services/index.mjs'
 import { getCoreIpAddress } from './services/core.mjs'
 // Docker
