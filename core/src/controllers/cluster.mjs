@@ -2,6 +2,7 @@
 import { log, utils } from '../lib/utils.mjs'
 import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
+import { writeYamlFile, writeJsonFile } from '#shared/fs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -118,15 +119,7 @@ Controller.prototype.sync = async (req, res) => {
       res.send({
         ...base,
         action: false,
-        current: { serial: req.body.current.settings._serial },
-        deployment: store.get('state.cluster.uuid'),
-        node: store.get('state.node.uuid'),
-        node_serial: store.get('state.node.serial'),
-        version: store.get('info.version'),
-        current: {
-          serial: store.get('state.settings_serial'),
-        },
-        action: 'apply'
+        current: { serial: serial.remote },
       })
 
       /*
@@ -214,8 +207,19 @@ Controller.prototype.join = async (req, res) => {
      */
     const serial = Number(valid.settings.serial)
     log.debug(`Joined swarm, writing new settings to settings.${serial}.yaml`)
-    const result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
+    let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
     if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+    log.debug(`Writing key data to keys.json`)
+    result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
+    if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+    log.debug(`Writing node data to node.json`)
+    result = await writeJsonFile(`/etc/morio/node.json`, {
+      ...store.get('node', {}),
+      fqdn: valid.you,
+      hostname: valid.you.split('.')[0],
+      ip: (await resolveHostAsIp(valid.you)),
+      serial: valid.settings.deployment.nodes.concat(valid.settings.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
+    })
 
     /*
      * Now reconfigure
