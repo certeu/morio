@@ -4,6 +4,7 @@ import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
+import { reconfigure } from '../index.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -173,7 +174,6 @@ Controller.prototype.join = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await validate(`cluster.join`, req.body)
-  console.log({valid, err})
   if (!valid) {
     log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
@@ -189,7 +189,7 @@ Controller.prototype.join = async (req, res) => {
     managers: [valid.join ]
   })
   try {
-    [result, data] = await joinSwarm({
+    [result] = await joinSwarm({
       token: valid.token,
       managers: [valid.join]
     })
@@ -197,7 +197,6 @@ Controller.prototype.join = async (req, res) => {
   catch (err) {
     console.log(err)
   }
-  console.log({ joinResult: result, data })
 
   if (result) {
     /*
