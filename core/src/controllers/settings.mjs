@@ -12,7 +12,6 @@ import { cloneAsPojo, attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 // Store
 import { store, log, utils, setIfUnset } from '../lib/utils.mjs'
-import { inviteClusterNodes } from '../lib/cluster.mjs'
 
 /**
  * This settings controller handles settings routes

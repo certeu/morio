@@ -581,86 +581,103 @@ const isClusterHealthy = async () => {
 }
 
 export const inviteClusterNodes = async () => {
-  let i = 0
   for (const fqdn of store.getSettings('deployment.nodes').concat(store.getSettings('deployment.flanking_nodes', []))) {
-    i++
-    await inviteClusterNode(fqdn, i)
+    await inviteClusterNode(fqdn)
   }
 }
 
 /*
  * Helpoer method to invite a single node to join the cluster
  *
- * @param {string} fqdn - The fqdn of a node
- * @param {number} serial - The node serial
+ * @param {string} fqdn - The fqdn of the remote node
  */
-const inviteClusterNode = async (fqdn, serial) => {
+const inviteClusterNode = async (remote) => {
   /*
    * Don't ask the local node to join
    */
   const localSwarm = store.get('state.swarm.local_node')
-  const localFqdn = store.getSettings('deployment.nodes').filter(fqdn => fqdn.slice(0, localSwarm.length) === localSwarm).pop()
-  if (localFqdn === fqdn) return
+  const local = store.getSettings('deployment.nodes').filter(fqdn => fqdn.slice(0, localSwarm.length) === localSwarm).pop()
+  if (local === remote) return
 
   /*
-   * Keep this DRY
+   * First, attempt a single call to join the cluster.
+   * If that works, we can avoid setting up the interval
    */
-  const key = ['state', 'cluster', 'joins', fqdn]
-  const flanking = store.getSettings('deployment.flanking_nodes', []).includes(fqdn)
+  const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
+
+  console.log({ opportunisticJoin })
 
   /*
-   * Do not overwrite an interval without clearing it
+   * If that didn't work, set up an interval to keep on trying
    */
-  if (store.get([...key, 'interval'], false)) clearInterval(store.get([...key, 'interval']))
+  if (!opportunisticJoin) {
+    const key = ['state', 'cluster', 'join', remote, 'interval']
+    /*
+     * Do not overwrite an interval without clearing it
+     */
+    const interval = store.get(key, false)
+    if (interval) clearInterval(interval)
 
-  /*
-   * Set interval to invite the node
-   */
-  store.set(key, {
-    attempts: 1,
-    interval: setInterval(async () => {
-      /*
-       * Yes, async in setInterval can cause issues if the await is sortern than the interval
-       * But we are letting this timeout before the interval re-fires.
-       */
-      log.info(`Sending Join Request #${store.get([...key, 'attempts'], 1)} to ${fqdn}`)
-      const result = await testUrl(
-        `https://${fqdn}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
-        {
-          method: 'POST',
-          data: {
-            you: fqdn,
-            cluster: store.get('state.cluster.uuid'),
-            join: {
-              fqdn: localFqdn,
-              ip: store.getSettings('depoyment.leader_ip'),
-              node: store.get('state.node.uuid'),
-              serial: serial,
-            },
-            as: flanking ? 'flanking_node' : 'node',
-            token: store.get(`state.swarm.tokens.${flanking ? 'Worker' :'Manager'}`),
-            settings: {
-              serial: store.get('state.settings_serial'),
-              data: store.get('settings.sanitized'),
-            },
-            keys: store.get('config.keys'),
-          },
-          ignoreCertificate: true,
-          timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
-          returnAs: 'json',
-          returnError: true,
-        }
-      )
-      if (result) {
-        store.set([...key, 'result'], result)
-        console.log({joinOk: result})
-        clearInterval(store.get([...key, 'interval']))
-      } else {
-        store.set([...key, 'attempt'], store.get([...key, 'attempts'], 1) + 1)
-        console.log({joinNOTok: result, store: store.get(key) })
-      }
-    })
-  })
+    /*
+     * Set interval to continue sending invites to the remote node
+     * Yes, async in setInterval can cause issues if the await is sortern than the interval
+     * But we are letting this timeout before the interval re-fires.
+     */
+    store.set(key, setInterval(async () => await inviteClusterNodeAttempt(localFqdn, fqdn)))
+  }
+}
+
+/**
+ * Helper method to attempt inviting a remote cluster node
+ *
+ * @params {string} local - The FQDN of the local node (this one)
+ * @params {string} remote - The FQDN of the remote node
+ */
+const inviteClusterNodeAttempt = async (local, remote) => {
+  const key = ['state', 'cluster', 'joins', remote]
+  const akey = [...key, 'attempts']
+  const attempt = store.get(akey, 0) + 1
+  log.info(`Sending Join Request #${attempt} to ${remote}`)
+  store.set(akey, attempt)
+  const flanking = store.getSettings('deployment.flanking_nodes', []).includes(remote)
+
+  const result = await testUrl(
+    `https://${remote}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
+    {
+      method: 'POST',
+      data: {
+        you: remote,
+        cluster: store.get('state.cluster.uuid'),
+        join: {
+          fqdn: local,
+          ip: store.getSettings('deployment.leader_ip'),
+          node: store.get('state.node.uuid'),
+          //serial,
+        },
+        as: flanking ? 'flanking_node' : 'node',
+        token: store.get(`state.swarm.tokens.${flanking ? 'Worker' :'Manager'}`),
+        settings: {
+          serial: Number(store.get('state.settings_serial')),
+          data: store.get('settings.sanitized'),
+        },
+        keys: store.get('config.keys'),
+      },
+      ignoreCertificate: true,
+      timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
+      returnAs: 'json',
+      returnError: true,
+    }
+  )
+  if (result) {
+    store.set([...key, 'result'], result)
+    console.log({joinOk: result})
+    if (store.get([...key, 'interval'], false)) clearInterval(store.get([...key, 'interval']))
+    return true
+  } else {
+    store.set([...key, 'attempt'], store.get([...key, 'attempts'], 1) + 1)
+    console.log({joinNOTok: result, store: store.get(key) })
+    return false
+  }
 }
 
 /*

@@ -155,8 +155,7 @@ Controller.prototype.sync = async (req, res) => {
       title: 'Unable to redirect to the cluster leader',
       status: 503,
       detail: 'We are not the cluster leader, but we also do not know the serial of the cluster leader. This prevents us from redirecting this request to the cluster leader.',
-      detail: 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.',
-      instance: `http://core_${store.get('state.node.serial')}:${port}/cluster/sync`,
+      route: `/cluster/sync`,
       leader,
     })
   }
@@ -167,11 +166,26 @@ Controller.prototype.sync = async (req, res) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * FIXME: Add schema validation
  */
 Controller.prototype.join = async (req, res) => {
-  log.info(`Received request to join cluster ${req.body.join.cluster} as ${req.body.as} node`)
-  if (!req.body.join?.ip || !req.body.join?.fadn || !req.body.token) return res.status(400).send()
+  /*
+   * Only allow this in ephemeral mode
+   */
+  if (!utils.ephemeral()) return utils.sendErrorReponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
+  /*
+   * Do we have what it takes?
+   */
+  if (!req.body.join?.ip || !req.body.join?.fadn || !req.body.token) {
+    log.info(`Refused invalid request to join cluster ${req.body.cluster} as ${req.body.as}`)
+    return res.status(400).send()
+  }
+  else log.info(`Accepted request to join cluster ${req.body.cluster} as ${req.body.as}`)
+
+  /*
+   * Attempt to join the swarm
+   */
   let result, data
   console.log('attempting to join with', {
     ip: req.body.join.ip,
@@ -189,6 +203,29 @@ Controller.prototype.join = async (req, res) => {
     console.log(err)
   }
   console.log({ joinResult: result, data })
+
+  if (result) {
+    /*
+     * Joined the swam, write settings to disk and reconfigure
+     * But first make sure to cast the serial to a number as we'll use it to
+     * construct teh path to write to disk, and join cluster is an unauthenticated
+     * request. So can't trust this input.
+     */
+    const serial = Number(req.body.settings.serial)
+    log.debug(`Joined swarm, writing new settings to settings.${serial}.yaml`)
+    const result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, req.body.settings.data)
+    if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+
+    /*
+     * Now reconfigure
+     */
+    reconfigure({ hotReload: true })
+
+    /*
+     * Don't forget to finalize the request
+     */
+    return res.status(200).send()
+  }
 
   /*
    * Return something for now

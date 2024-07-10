@@ -5,6 +5,7 @@ import { logger } from '#shared/logger'
 import { getPreset, inProduction, neverSwarmServices } from '#config'
 import get from 'lodash.get'
 import set from 'lodash.set'
+import { errors } from './errors.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -179,18 +180,27 @@ utils.set('isSwarmService', (serviceName) => (!utils.isSwarm() || neverSwarmServ
 /*
  * Add helper method for sending RFC7807 error responses
  */
-utils.set('sendErrorResponse', (res, { type, title, status, detail, ...rest }) => res
-  .type('application/problem+json')
-  .status(status)
-  .send({
-    type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+type,
-    title,
-    status,
-    detail,
-    ...rest,
-  })
-  .end()
-)
+utils.set('sendErrorResponse', (res, template, route=false) => {
+  let data = {}
+  /*
+   * Allow passing in an error template name
+   */
+  if (typeof template === 'string') {
+    if (errors[template]) data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+template }
+    else {
+      store.log.error(`The sendErrorResponse method was alled with a template string that is not a known error template: ${template}`)
+      return res.status(500).send().end()
+    }
+  }
+
+  /*
+   * Add the instance
+   */
+  data.instance = `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_CORE_PORT')}/` +
+    data.route ? data.route : route ? route : ''
+
+  return res.type('application/problem+json').status(data.status).send(data).end()
+})
 
 /*
  * Determined whether a swarm node is the local node
