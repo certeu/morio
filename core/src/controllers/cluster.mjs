@@ -1,5 +1,5 @@
 // Store
-import { log } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
 
 /**
@@ -172,7 +172,7 @@ Controller.prototype.join = async (req, res) => {
   /*
    * Only allow this in ephemeral mode
    */
-  if (!utils.ephemeral()) return utils.sendErrorReponse(res, 'morio.core.ephemeral.required', '/cluster/join')
+  if (!utils.isEphemeral()) return utils.sendErrorReponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
   /*
    * Do we have what it takes?
