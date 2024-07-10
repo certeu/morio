@@ -611,29 +611,23 @@ const inviteClusterNode = async (remote) => {
 
   /*
    * First, attempt a single call to join the cluster.
-   * If that works, we can avoid setting up the interval
+   * We will await this one because typically this works, and it
+   * prevents us from having to run this in the background.
    */
-  const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
-
-  console.log({ opportunisticJoin })
+  const opportunisticJoin = await false //FIXME testing attempt inviteClusterNodeAttempt(local, remote)
 
   /*
-   * If that didn't work, set up an interval to keep on trying
+   * If that didn't work, keep trying, but don't block the request
    */
   if (!opportunisticJoin) {
-    const key = ['state', 'cluster', 'join', remote, 'interval']
-    /*
-     * Do not overwrite an interval without clearing it
-     */
-    const interval = store.get(key, false)
-    if (interval) clearInterval(interval)
-
-    /*
-     * Set interval to continue sending invites to the remote node
-     * Yes, async in setInterval can cause issues if the await is sortern than the interval
-     * But we are letting this timeout before the interval re-fires.
-     */
-    store.set(key, setInterval(async () => await inviteClusterNodeAttempt(local, remote)))
+    const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+    attempt({
+      every: interval,
+      timeout: interval*0.9,
+      run: async () => await inviteClusterNodeAttempt(local, remote),
+      onFailedAttempt: (s) =>
+        log.info(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
+    })
   }
 }
 
@@ -675,12 +669,10 @@ const inviteClusterNodeAttempt = async (local, remote) => {
   )
   if (result) {
     store.set([...key, 'result'], result)
-    console.log({joinOk: result})
     if (store.get([...key, 'interval'], false)) clearInterval(store.get([...key, 'interval']))
     return true
   } else {
     store.set([...key, 'attempt'], store.get([...key, 'attempts'], 1) + 1)
-    console.log({joinNOTok: result, store: store.get(key) })
     return false
   }
 }
