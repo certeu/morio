@@ -630,7 +630,7 @@ const inviteClusterNode = async (remote) => {
       run: async () => await inviteClusterNodeAttempt(local, remote),
       onFailedAttempt: (s) =>
         log.debug(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
-    }).then(() => log.info(`Node ${remote} has now joined the cluster`)
+    }).then(() => log.info(`Node ${remote} has now joined the cluster`))
   }
   else log.info(`Node ${remote} has joined the cluster`)
 }
