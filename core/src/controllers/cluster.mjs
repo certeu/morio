@@ -52,7 +52,7 @@ Controller.prototype.sync = async (req, res) => {
    */
   const serial = {
     local: Number(store.get('state.settings_serial')),
-    remote: Number(req.body.settings_serial)
+    remote: Number(req.body.serial)
   }
       //deployment: store.get('state.cluster.uuid'),
       //node: store.get('state.node.uuid'),

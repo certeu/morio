@@ -82,9 +82,9 @@ const storeClusterSwarmNodesState = (nodes, silent=false) => {
      */
     const local = utils.isLocalSwarmNode(node)
     const leading = node.ManagerStatus.Leader === true
-    store.set('state.swarm.leading', leading)
     if (local) {
       store.set('state.swarm.local_node', node.Description.Hostname)
+      if (leading) store.set('state.swarm.leading', leading)
     }
     if (leading) {
       store.set('state.swarm.leader', node.Description.Hostname)
@@ -264,6 +264,7 @@ const ensureLocalSwarmNodeLabels = async () => {
  *   - If we are not leader, we reach out to the lader asking them to initiate a sync
  */
 export const ensureMorioClusterConsensus = async () => {
+  await storeClusterState(true)
   //console.log({ do: 'ENSURE_MORIO_CLUSTER_CONSENSUS', in: 'ensureMorioClusterConsensus'  })
   //console.log(JSON.stringify(store.get('state.swarm')))
   //console.log(JSON.stringify(Object.keys(store.get('state.swarm')), null ,2))
@@ -307,36 +308,55 @@ export const ensureMorioClusterConsensus = async () => {
  * Ensure a cluster heartbeat
  */
 const ensureClusterHeartbeat = async () => {
-  console.log("ENSUREING HEARBTLE")
+  console.log("ENSURING HEARTBEAT")
   /*
-   * Only the leader sends cluster heartbeats
+   * Followers send heartbeats to the leader, not the other way around
    */
-  if (!store.get('state.swarm.leading')) return
+  if (store.get('state.swarm.leading')) return
 
   /*
-   * Using setInterval is the most obvious choice here
-   * But when nodes are down or there are network issues
-   * the response may take longer than the interval.
-   * So instead, we'll use setTimeout here which is more robust.
+   * Find out who is leading
    */
-  const beat = store.get('state.cluster.heartbeat')
-  for (const node of store.get('state.swarm.followers')) {
-    console.log(node)
+  const hb = store.get('state.cluster.heartbeat', { id: false })
+  if (!hb.id) {
+    const leader = store.getClusterLeaderLabels()
+    const serial = leader?.['morio.node.serial']
+    if (leader && serial) {
+      log.debug(`Starting cluster hearbeat`)
+      store.set('state.cluster.heartbeat', {
+        url: `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/sync`,
+        id: heartbeat(),
+        ping: hb.ping || 0,
+        pong: hb.pong || 0
+      })
+    }
+    else log.error(`Unable to determine leader serial, cannot start heartbeat`)
   }
+}
 
+const heartbeat = async (base) => {
+  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
 
-    //const interval = store.get('state.cluster.heartbeat.interval')
-    //if (interval) clearInterval(interval)
-    /*
-     * Create the new heartbeat
-     */
-    //console.debug('Starting cluster heartbeat')
-    //store.set('state.cluster.heartbeat', {
-    //  client: restCient('http://'),
-    //  interval: setInterval(() => {
-    //    console.log('CLUSTER HEARTBEAT', { uuid: store.get('state.cluster.uuid') })
-    //  }, 3000, store)
-    //})
+  /*
+   * We are returning the setTimout ID here, so this can be cancelled
+   */
+  return setTimeout(async () => {
+    const hb = store.get('state.cluster.heartbeat')
+    console.log({ hb })
+    const result = await testUrl(hb.url, {
+      method: 'POST',
+      data: {
+        deployment: store.get('state.cluster.uuid'),
+        leader: store.get('state.node.uuid'),
+        version: store.get('info.version'),
+        serial: store.get('state.settings_serial')
+      },
+      timeout: interval*250,
+      returnAs: 'json',
+      returnError: true,
+    })
+    console.log({ hbresult: result })
+  }, interval*1000)
 }
 
 
