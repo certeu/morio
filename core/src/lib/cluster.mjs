@@ -313,21 +313,20 @@ export const ensureMorioClusterConsensus = async () => {
      * Send our config to the leader and await instructions
      */
     const leader = store.getClusterLeaderLabels()
-    console.log(JSON.stringify(store.get('state.swarm'), null ,2))
     console.log({leader, in: 'ensureMorioClusterConsensus' })
-    //const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
-    //const [result, data] = await client.post('/cluster/sync', {
-    //  deployment: store.get('state.cluster.uuid'),
-    //  node: store.get('state.node.uuid'),
-    //  node_serial: store.get('state.node.serial'),
-    //  version: store.get('info.version'),
-    //  current: {
-    //    keys: store.get('config.keys'),
-    //    serial: store.get('state.settings_serial'),
-    //    settings: store.get('settings.sanitized'),
-    //  },
-    //})
-    //console.log({result, data, in: 'ensureMorioClusterConsensus', at: 111 })
+    const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
+    const [result, data] = await client.post('/cluster/sync', {
+      deployment: store.get('state.cluster.uuid'),
+      node: store.get('state.node.uuid'),
+      node_serial: store.get('state.node.serial'),
+      version: store.get('info.version'),
+      current: {
+        keys: store.get('config.keys'),
+        serial: store.get('state.settings_serial'),
+        settings: store.get('settings.sanitized'),
+      },
+    })
+    console.log({result, data, in: 'ensureMorioClusterConsensus', at: 111 })
   }
 }
 
