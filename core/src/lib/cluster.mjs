@@ -620,6 +620,7 @@ const inviteClusterNode = async (remote) => {
    * If that didn't work, keep trying, but don't block the request
    */
   if (!opportunisticJoin) {
+    log.warn(`Initial cluster join failed for node ${remote}. Will continue trying, but this is not a good omen.`)
     const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
     attempt({
       every: interval,
