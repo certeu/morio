@@ -210,18 +210,19 @@ Controller.prototype.join = async (req, res) => {
     result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
     if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
     log.debug(`Writing node data to node.json`)
+    const nodeUuid: uuid()
     result = await writeJsonFile(`/etc/morio/node.json`, {
       fqdn: valid.you,
       hostname: valid.you.split('.')[0],
       ip: (await resolveHostAsIp(valid.you)),
       serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
-      uuid: uuid()
+      uuid: nodeUuid
     })
 
     /*
      * Don't forget to finalize the request
      */
-    res.status(200).send()
+    res.status(200).send({ cluster: valid.keys.deployment, node: nodeUuid, serial })
 
     /*
      * Now return as reconfigure
