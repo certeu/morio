@@ -175,28 +175,30 @@ Controller.prototype.join = async (req, res) => {
   if (!utils.isEphemeral()) return utils.sendErrorReponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
   /*
-   * Do we have what it takes?
+   * Validate request against schema
    */
-  if (!req.body.join?.ip || !req.body.join?.fadn || !req.body.token) {
-    log.info(`Refused invalid request to join cluster ${req.body.cluster} as ${req.body.as}`)
-    return res.status(400).send()
+  const [valid, err] = await validate(`cluster.join`, req.body)
+  console.log({valid})
+  if (!valid) {
+    log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
   }
-  else log.info(`Accepted request to join cluster ${req.body.cluster} as ${req.body.as}`)
+  else log.info(`Accepted request to join cluster ${valid.cluster} as ${valid.as}`)
 
   /*
    * Attempt to join the swarm
    */
   let result, data
   console.log('attempting to join with', {
-    ip: req.body.join.ip,
-    token: req.body.token,
-    managers: [req.body.join.fqdn, req.body.join.ip ]
+    ip: valid.ip,
+    token: valid.token,
+    managers: [valid.join.fqdn, valid.join.ip ]
   })
   try {
     [result, data] = await joinSwarm({
-      ip: req.body.join.ip,
-      token: req.body.token,
-      managers: [req.body.join.fqdn, req.body.join.ip ]
+      ip: valid.join.ip,
+      token: valid.token,
+      managers: [valid.join.fqdn, valid.join.ip ]
     })
   }
   catch (err) {
@@ -211,9 +213,9 @@ Controller.prototype.join = async (req, res) => {
      * construct teh path to write to disk, and join cluster is an unauthenticated
      * request. So can't trust this input.
      */
-    const serial = Number(req.body.settings.serial)
+    const serial = Number(valid.settings.serial)
     log.debug(`Joined swarm, writing new settings to settings.${serial}.yaml`)
-    const result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, req.body.settings.data)
+    const result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
     if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
 
     /*

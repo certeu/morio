@@ -37,6 +37,23 @@ export const requestSchema = {
     iv: Joi.string().required(),
     ct: Joi.string().required(),
   }),
+  cluster: {
+    join: Joi.object({
+      you: Joi.string().required().hostname(),
+      cluster: Joi.string().required(),
+      join: Joi.object({
+        fqdn: Joi.string().required().hostname(),
+        ip: Joi.string().required().ip({ version: ['ipv4'], cidr: 'forbidden' }),
+        node: Joi.string().required(),
+      }),
+      as: Joi.string().required().valid('node', 'flanking_node'),
+      token: Joi.string().required(),
+      settings: Joi.object({
+        serial: Joi.number().required().min(172e10).max(199e10),
+        data: Joi.object().required(),
+      }),
+    })
+  },
 }
 
 /*
