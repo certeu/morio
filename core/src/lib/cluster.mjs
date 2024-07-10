@@ -279,6 +279,7 @@ export const ensureMorioClusterConsensus = async () => {
   //console.log({ do: 'ENSURE_MORIO_CLUSTER_CONSENSUS', in: 'ensureMorioClusterConsensus'  })
   //console.log(JSON.stringify(store.get('state.swarm')))
   //console.log(JSON.stringify(Object.keys(store.get('state.swarm')), null ,2))
+  return // FIXME
   /*
    * Are we leading the cluster?
    */
@@ -628,9 +629,10 @@ const inviteClusterNode = async (remote) => {
       timeout: interval*0.9,
       run: async () => await inviteClusterNodeAttempt(local, remote),
       onFailedAttempt: (s) =>
-        log.info(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
-    })
+        log.debug(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
+    }).then(() => log.info(`Node ${remote} has now joined the cluster`)
   }
+  else log.info(`Node ${remote} has joined the cluster`)
 }
 
 /**
