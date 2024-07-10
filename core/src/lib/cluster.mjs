@@ -312,6 +312,7 @@ export const ensureMorioClusterConsensus = async () => {
      * Send our config to the leader and await instructions
      */
     const leader = store.getClusterLeaderLabels()
+    console.log({leader, in: 'ensureMorioClusterConsensus' })
     const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
     const [result, data] = await client.post('/cluster/sync', {
       deployment: store.get('state.cluster.uuid'),
@@ -324,7 +325,7 @@ export const ensureMorioClusterConsensus = async () => {
         settings: store.get('settings.sanitized'),
       },
     })
-    console.log({result, data, in: ensureMorioClusterConsensus, at: 111 })
+    console.log({result, data, in: 'ensureMorioClusterConsensus', at: 111 })
   }
 }
 
