@@ -40,6 +40,7 @@ Controller.prototype.ping = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.sync = async (req, res) => {
+  log.info(req.body, 'IN CLUSTER SYNC REQUEST HANDLER')
   /*
    * Before we make any decision, make sure have access
    * to the latest cluster state.
@@ -51,8 +52,13 @@ Controller.prototype.sync = async (req, res) => {
    */
   const serial = {
     local: Number(store.get('state.settings_serial')),
-    remove: Number(req.body.current.serial)
+    remote: Number(req.body.settings_serial)
   }
+      //deployment: store.get('state.cluster.uuid'),
+      //node: store.get('state.node.uuid'),
+      //node_serial: store.get('state.node.serial'),
+      //version: store.get('info.version'),
+      //settings_serial: store.get('state.settings_serial'),
 
   /*
    * Are we leading the cluster?
@@ -233,7 +239,7 @@ Controller.prototype.join = async (req, res) => {
   /*
    * Return error
    */
-  return res.status(500).send({ ping: 'join booo' }).end()
+  return res.status(500).send({ join: failed }).end()
 }
 
 

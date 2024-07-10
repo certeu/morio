@@ -163,6 +163,10 @@ export const service = {
  */
 const ensureTopicsExist = async () => {
   const topics = await getTopics()
+  if (!topics) {
+    log.warn(`Failed to ensure broker topics: Unable to fetch list of current topics from broker.`)
+    return false
+  }
 
   for (const topic of utils
     .getPreset('MORIO_BROKER_TOPICS')
