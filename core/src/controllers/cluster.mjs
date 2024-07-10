@@ -1,6 +1,7 @@
 // Store
 import { log, utils } from '../lib/utils.mjs'
 import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
+import { validate } from '#lib/validation'
 
 /**
  * This status controller handles the MORIO cluster endpoints
