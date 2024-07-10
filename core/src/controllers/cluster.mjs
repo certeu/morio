@@ -1,5 +1,5 @@
 // Store
-import { log, utils } from '../lib/utils.mjs'
+import { log, utils, store } from '../lib/utils.mjs'
 import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
@@ -214,7 +214,6 @@ Controller.prototype.join = async (req, res) => {
     if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
     log.debug(`Writing node data to node.json`)
     result = await writeJsonFile(`/etc/morio/node.json`, {
-      ...store.get('node', {}),
       fqdn: valid.you,
       hostname: valid.you.split('.')[0],
       ip: (await resolveHostAsIp(valid.you)),

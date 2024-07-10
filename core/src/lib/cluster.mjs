@@ -243,6 +243,8 @@ const createSwarm = async () => {
 const ensureLocalSwarmNodeLabels = async () => {
 
   const [ok, nodes] = await runDockerApiCommand('listNodes')
+  if (!ok) return
+
   const local = nodes.filter(node => utils.isLocalSwarmNode(node)).pop()
   log.debug('Adding labels to local swarm node')
   await runNodeApiCommand(local.ID, 'update', {
