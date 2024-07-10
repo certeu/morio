@@ -11,7 +11,6 @@ import { isServiceUp } from './services/index.mjs'
  * before core is configured.
  */
 export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') })
-export const network = getPreset('MORIO_NETWORK')
 
 /*
  * This is the list of API commands we cache
@@ -232,7 +231,7 @@ export const createDockerNetwork = async (name, type='swarm') => {
         (existingNetworkConfig.Driver !== 'bridge' && !utils.isSwarm())
       ) {
         /*
-         * This morionet is the wrong type of network
+         * This network is the wrong type of network
          * First disconnect all containers, then remove it
          */
         log.debug(`core: Network ${name} is of type ${existingNetworkConfig.Driver
@@ -330,7 +329,7 @@ export const generateContainerConfig = (config) => {
   const opts = {
     name,
     HostConfig: {
-      NetworkMode: network,
+      NetworkMode: utils.getNetworkName(),
       Binds: config.container.volumes,
       LogConfig: {
         Type: 'journald', // All Morio services log via journald
@@ -342,7 +341,7 @@ export const generateContainerConfig = (config) => {
       EndpointsConfig: {},
     },
   }
-  opts.NetworkingConfig.EndpointsConfig[network] = {
+  opts.NetworkingConfig.EndpointsConfig[utils.getNetworkName()] = {
     Aliases: [name, `${name}_${store.get('node.serial', 1)}`, ...aliases],
   }
 
@@ -433,7 +432,7 @@ export const generateSwarmServiceConfig = (config) => {
       }
     },
     Mode: { Global: {} },
-    Networks: [{ Target: 'morionet' }],
+    Networks: [{ Target: utils.getNetworkName() }],
     EndpointSpec: { Mode: "vip" },
   }
 

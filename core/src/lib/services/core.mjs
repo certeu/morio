@@ -306,16 +306,19 @@ export const templateSettings = (settings) => {
 
 export const getCoreIpAddress = async () => {
   const [success, result] = await runContainerApiCommand('core', 'inspect')
-  if (success) {
-    store.set('state.services.core', result)
-    if (result.NetworkSettings.Networks.morionet.IP)
-      return result.NetworkSettings.Networks.morionet.IP
-    else if  (result.NetworkSettings.Networks.morionet.IPAddress)
-      return result.NetworkSettings.Networks.morionet.IPAddress
-    else {
-      log.warn(`Unable to determine Core IP address`)
-      return false
-    }
+  if (!success) return false
+
+  store.set('state.services.core', result)
+  const networks = Object.keys(result.NetworkSettings.Networks || {})
+  const network = utils.getNetworkName()
+  if (!networks.includes(network)) return false
+
+  if (result.NetworkSettings.Networks[network].IP)
+    return result.NetworkSettings.Networks[network].IP
+  else if  (result.NetworkSettings.Networks[network].IPAddress)
+    return result.NetworkSettings.Networks[network].IPAddress
+  else {
+    log.warn(`Unable to determine Core IP address`)
+    return false
   }
-  else return false
 }

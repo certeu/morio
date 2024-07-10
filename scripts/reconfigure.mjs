@@ -66,6 +66,7 @@ const getHelpers = (env) => {
   store.testing = env === 'testing'
   const utils = new Store(logger)
   utils.getPreset = presetGetters[env]
+  utils.isEphemeral = () => true
 
   return { store, utils }
 }

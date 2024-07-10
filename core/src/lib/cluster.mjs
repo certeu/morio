@@ -358,11 +358,12 @@ export const ensureMorioCluster = async ({
     }
   }
   while (store.get('state.swarm_ready') === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS'))
+
   /*
    * Ensure the swarm network exists, and we're attached to it.
    */
   await ensureMorioNetwork(
-    utils.getPreset('MORIO_NETWORK'), // Network name
+    utils.getNetworkName(), // Network name
     'core', // Service name
     { Aliases: ['core', `core_${store.get('state.node.serial', 1)}`] }, // Endpoint config (FIXME: Node serial)
     'swarm', // Network type

@@ -16,7 +16,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
     // Tell traefik to watch this container
     'traefik.enable=true',
     // Attach to the morio docker network
-    `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+    `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
     // Match requests going to the API prefix
     `traefik.http.routers.api.rule=( PathPrefix(\`${utils.getPreset('MORIO_API_PREFIX')}\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`) )`,
     // Set priority to avoid rule conflicts
@@ -60,7 +60,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: utils.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${DIRS.conf}/shared:/etc/morio/shared`,

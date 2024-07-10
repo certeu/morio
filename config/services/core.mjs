@@ -6,6 +6,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = store.get('info.production', false)
+  console.log(utils)
 
   return {
     /**
@@ -26,7 +27,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Ports to export (not in production)
       ports: PROD ? [] : [ `${utils.getPreset('MORIO_CORE_PORT')}:${utils.getPreset('MORIO_CORE_PORT')}` ],
       // Instead, attach to the morio network
-      network: utils.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_DOCKER_SOCKET')}:${utils.getPreset('MORIO_DOCKER_SOCKET')}`,

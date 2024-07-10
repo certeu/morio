@@ -156,6 +156,11 @@ export const utils = new Store(log)
   })
 
 /*
+ * Helper method to get the correct network name from presets
+ */
+utils.set('getNetworkName', () => utils.getPreset(`MORIO_NETWORK${utils.isEphemeral() ? '_EPHEMERAL' : ''}`))
+
+/*
  * Helper method to determine whether to run a swarm or not
  */
 utils.set('isSwarm', () => (utils.isEphemeral() || store.getFlag('NEVER_SWARM')) ? false : true)

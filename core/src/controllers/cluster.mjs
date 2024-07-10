@@ -5,6 +5,7 @@ import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
 import { reconfigure } from '../index.mjs'
+import { uuid } from '#shared/crypto'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -214,6 +215,7 @@ Controller.prototype.join = async (req, res) => {
       hostname: valid.you.split('.')[0],
       ip: (await resolveHostAsIp(valid.you)),
       serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
+      uuid: uuid()
     })
 
     /*

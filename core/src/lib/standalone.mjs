@@ -20,7 +20,7 @@ export const ensureMorioStandaloneNode = async () => {
    */
   try {
     await ensureMorioNetwork(
-      utils.getPreset('MORIO_NETWORK'), // Network name
+      utils.getNetworkName(), // Network name
       'core', // Service name
       { Aliases: ['core', `core_1`] }, // Endpoint config
       'local', // Network type
@@ -33,8 +33,9 @@ export const ensureMorioStandaloneNode = async () => {
   /*
    * Store the core IP address too
    */
-  store.set('state.node.core_ip', await getCoreIpAddress())
-
+  const ip = await getCoreIpAddress()
+  log.debug(`Local core IP address: ${ip}`)
+  store.set('state.node.core_ip', ip)
   store.set('state.core_ready', true)
 }
 

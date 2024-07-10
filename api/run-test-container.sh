@@ -37,7 +37,7 @@ docker run \
   -v /home/jdecock/git/morio/data/data/downloads:/morio/downloads  \
   -v /home/jdecock/git/morio:/morio  \
   -l "traefik.enable=true"  \
-  -l "traefik.docker.network=morionet"  \
+  -l "traefik.docker.network=morionet_ephemeral"  \
   -l "traefik.http.routers.api.rule=( PathPrefix(\`/-/api\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`) )"  \
   -l "traefik.http.routers.api.priority=100"  \
   -l "traefik.http.routers.api.service=api"  \

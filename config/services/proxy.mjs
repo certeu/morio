@@ -26,7 +26,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: utils.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK'),
       // Ports
       ports: ['80:80', '443:443'],
       // Volumes
