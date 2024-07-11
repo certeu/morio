@@ -812,5 +812,5 @@ export const storeSwarmRunningServices = async () => {
 
 
 
-export const serviceImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
-export const serviceImageFromState = (state) => state?.Image ? state.Image : false
+//export const serviceImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
+//export const serviceImageFromState = (state) => state?.Image ? state.Image : false

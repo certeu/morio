@@ -10,8 +10,8 @@ import {
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store, log, utils } from '../utils.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -85,7 +85,7 @@ export const service = {
             l: utils.getPreset('MORIO_X509_L'),
             o: utils.getPreset('MORIO_X509_O'),
             ou: utils.getPreset('MORIO_X509_OU'),
-            san: store.getSettings('deployment.nodes'),
+            san: utils.getSettings('deployment.nodes'),
           },
           notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
         }),
@@ -104,16 +104,16 @@ export const service = {
       // 101 is the UID that redpanda runs under inside the container
       const uid = utils.getPreset('MORIO_BROKER_UID')
       log.debug('Storing inital broker configuration')
-      await writeYamlFile('/etc/morio/broker/redpanda.yaml', store.get('config.services.morio.broker.broker'), log)
+      await writeYamlFile('/etc/morio/broker/redpanda.yaml', utils.getMorioServiceConfig('broker').broker, log)
       await chown('/etc/morio/broker/redpanda.yaml', uid, uid)
       await writeFile(
         '/etc/morio/broker/tls-cert.pem',
-        certAndKey.certificate.crt + '\n' + store.get('config.ca.intermediate')
+        certAndKey.certificate.crt + '\n' + utils.getCaConfig().intermediate
       )
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
       await writeFile('/etc/morio/broker/tls-key.pem', certAndKey.key)
       await chown('/etc/morio/broker/tls-key.pem', uid, uid)
-      await writeFile('/etc/morio/broker/tls-ca.pem', store.get('config.ca.certificate'))
+      await writeFile('/etc/morio/broker/tls-ca.pem', utils.getCaConfig().certificate)
       await chown('/etc/morio/broker/tls-ca.pem', uid, uid)
       await chown('/etc/morio/broker', uid, uid)
       await mkdir('/morio/data/broker')
@@ -183,7 +183,7 @@ const ensureTopicsExist = async () => {
  */
 const isBrokerUp = async () => {
   const result = await testUrl(
-    //`http://broker_${store.get('state.node.serial')}:9644/v1/cluster/health_overview`,
+    //`http://broker_${utils.getNodeSerial()}:9644/v1/cluster/health_overview`,
     `http://broker:9644/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
@@ -201,7 +201,7 @@ const isBrokerUp = async () => {
  * @return {object} result - The JSON output as a POJO
  */
 const getTopics = async () => {
-  const result = await testUrl(`http://broker_${store.get('state.node.serial')}:8082/topics`, {
+  const result = await testUrl(`http://broker_${utils.getNodeSerial()}:8082/topics`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

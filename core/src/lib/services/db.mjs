@@ -9,8 +9,8 @@ import {
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store, log } from '../utils.mjs'
+// log & utils
+import { log } from '../utils.mjs'
 
 const dbClient = restClient(`http://db:4001`)
 
@@ -86,7 +86,7 @@ export const service = {
  * @return {bool} result - True if the database is up, false if not
  */
 const isDbUp = async () => {
-  //const result = await testUrl(`http://db_${store.get('state.node.serial')}:4001/readyz`, {
+  //const result = await testUrl(`http://db_${utils.getNodeSerial()}:4001/readyz`, {
   const result = await testUrl(`http://db:4001/readyz`, {
     ignoreCertificate: true,
     returnAs: 'json',
@@ -99,7 +99,7 @@ const isDbUp = async () => {
  * Helper method to create database tables
  */
 const ensureTablesExist = async () => {
-  for (const [table, q] of Object.entries(store.get('config.services.morio.db.schema', {}))) {
+  for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema, {}))) {
     log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1].results[0].error && result[1].results[0].error.includes('already exists')) {

@@ -5,8 +5,8 @@ import {
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store, log, utils } from '../utils.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -49,7 +49,7 @@ export const service = {
       } else {
         log.debug('Proxy: Creating custom entrypoint')
         await mkdir('/etc/morio/proxy')
-        await writeFile(file, store.get('config.services.morio.proxy.entrypoint'), log, 0o755)
+        await writeFile(file, utils.getMorioServiceConfig('proxy').entrypoint, log, 0o755)
       }
 
       /*
@@ -105,7 +105,7 @@ const getTraefikRouters = (srvConf) => {
 
 /**
  * Adds/Adapts container labels to configure TLS on Traefik
- * Note that this mutates the config in store
+ * Note that this mutates the config in memory
  *
  * @param {string} service - The name of the service
  */
@@ -118,13 +118,13 @@ export const addTraefikTlsConfiguration = (service) => {
   /*
    * Add acme config to the router
    */
-  for (const router of getTraefikRouters(store.getMorioServiceConfig(service))) {
-    store.config.services.morio[service].container.labels.push(
-      `traefik.http.routers.${router}.tls.certresolver=ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${store.getSettings(['deployment', 'nodes', 0])}`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${store.getSettings(['deployment', 'nodes']).join(', ')}`
-    )
+  for (const router of getTraefikRouters(utils.getMorioServiceConfig(service))) {
+    for (const [key, val] of [
+      [`traefik.http.routers.${router}.tls.certresolver`, `ca`],
+      [`traefik.tls.stores.default.defaultgeneratedcert.resolver`, `ca`],
+      [`traefik.tls.stores.default.defaultgeneratedcert.domain.main`, utils.getSettings(['deployment', 'nodes', 0])],
+      [`traefik.tls.stores.default.defaultgeneratedcert.domain.sans`, utils.getSettings(['deployment', 'nodes']).join(', ')],
+    ]) utils.setMorioServiceConfigContainerLabel(service, key, val)
   }
 
   /*
@@ -132,13 +132,18 @@ export const addTraefikTlsConfiguration = (service) => {
    * This will also add the leader_ip and fqdn when Morio is clustered
    * FIXME: Removed leader_ip until clustering matures
    */
-  const names = [...store.getSettings('deployment.nodes')]
-  if (names.length > 1) names.push(store.getSettings('deployment.fqdn'))
+  const names = [...utils.getSettings('deployment.nodes')]
+  if (names.length > 1) names.push(utils.getSettings('deployment.fqdn'))
   const labelPath = [ 'config', 'services', 'morio', service, 'container', 'labels' ]
-  for (const label of store.get(labelPath, [])) {
+  const labels = utils.getMorioServiceConfig(service)?.container?.labels || []
+  for (const label of labels)) {
     if (label.toLowerCase().indexOf('rule=(') !== -1) {
       const chunks = label.split('rule=(')
-      store.push(labelPath, chunks[0] + 'rule=(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1])
+      utils.setMorioServiceConfigContainerLabel(
+        service,
+        chunks[0] + 'rule',
+        '(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1]
+      )
     }
   }
 }

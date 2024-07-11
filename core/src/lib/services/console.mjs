@@ -5,8 +5,8 @@ import {
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store, log } from '../utils.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -55,8 +55,8 @@ export const service = {
       /*
        * Load configuration base
        */
-      const base = { ...store.get('config.services.morio.console.console') }
-      const nodes = store.getSettings('deployment.nodes')
+      const base = { ...utils.getMorioServiceConfig('console').console }
+      const nodes = utils.getSettings('deployment.nodes')
       /*
        * Populate Kafka nodes, schema URLs, and RedPanda URLs
        */

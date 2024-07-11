@@ -23,26 +23,12 @@ import { alwaysWantedHook } from './index.mjs'
 import { ensureMorioCluster } from '#lib/cluster'
 // Standalone
 import { ensureMorioStandaloneNode } from '#lib/standalone'
-// Store
-import { store, log, utils } from '../utils.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 // Docker
 import { runContainerApiCommand } from '#lib/docker'
 // UUID
 import { uuid } from '#shared/crypto'
-
-/*
- * Load all presets and write them to disk for other services to load
- * Note that this path we write to is inside the container
- * And since this is the first time we write to it, we cannot assume
- * the folder exists
- */
-store.presets = loadAllPresets()
-try {
-  await mkdir('/etc/morio/shared')
-  await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
-} catch (err) {
-  log.warn(err, 'core: Failed to write presets to disk')
-}
 
 /*
  * This service object holds the service name,
@@ -74,7 +60,7 @@ export const service = {
       /*
        * Load existing settings, keys, node info and timestamp from disk
        */
-      const { settings, keys, node, cluster, timestamp } = await loadSettingsFromDisk()
+      const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
 
       /*
        * If timestamp is false, no on-disk settings exist and we
@@ -82,9 +68,9 @@ export const service = {
        */
       if (!timestamp) {
         log.info('core: Morio is running in ephemeral mode')
-        store.set('state.ephemeral', true)
-        store.set('state.ephemeral_uuid', uuid())
-        store.set('state.settings_serial', false)
+        utils.setEphemeral(true)
+        utils.setEphemeralUuid(uuid())
+        utils.setSettingsSerial(false)
 
         /*
          * If we are in ephemeral mode, this may very well be the first cold boot.
@@ -100,21 +86,21 @@ export const service = {
 
       /*
        * If we reach this point, a timestamp exists, and we are not in ephemeral mode
-       * Store data from disk in the store
+       * Save data from disk in memory
        */
-      store.set('state.ephemeral', false)
-      store.set('state.node', node)
-      store.set('state.cluster', cluster)
-      store.set('config.keys', keys)
-      store.set('state.settings_serial', Number(timestamp))
-      store.set('settings.sanitized', cloneAsPojo(settings))
+      utils.setEphemeral(false)
+      utils.setNode(node)
+      utils.setKeys(keys)
+      utils.setSettingsSerial(Number(timestamp))
+      utils.setSanitizedSettings(cloneAsPojo(settings))
+
       /*
-       * The cluster UUID is stored in keys.deployment as that saves us from
+       * The cluster UUID is saved in keys.deployment as that saves us from
        * having to write a cluster.json to disk.
-       * However, since the node UUID is in state.node.uuid, we (also) store the
-       * cluster UUID under state.cluster.uuid as things are more intuitive that way
+       * However, we (also) save the cluster UUID in the same way as the node UUID
+       * as things are more intuitive that way
        */
-      store.set('state.cluster.uuid', keys.deployment)
+      utils.setClusterUuid(keys.deployment)
 
       /*
        * Log some info, for debugging
@@ -139,10 +125,10 @@ export const service = {
       }
 
       /*
-       * Store fully templated version of the on-disk settings in the store
+       * Keep a fully templated version of the on-disk settings in memory
        * (this includes decrypted secrets)
        */
-      store.set('settings.resolved', templateSettings(settings))
+      utils.setSettings(templateSettings(settings))
 
       /*
        * Morio (almost) always runs as a cluster, because even a stand-alone
@@ -154,10 +140,10 @@ export const service = {
        *   - We are in ephemeral mode (but then we never get to this point)
        *   - The NEVER_SWARM flag is set
        */
-      if (store.getFlag('NEVER_SWARM'))  await ensureMorioStandaloneNode(hookParams)
+      if (utils.getFlag('NEVER_SWARM'))  await ensureMorioStandaloneNode(hookParams)
       else await ensureMorioCluster(hookParams)
 
-      return store.get('state.core_ready')
+      return utils.getCoreReady()
     },
   },
 }
@@ -176,10 +162,9 @@ const loadSettingsFromDisk = async () => {
     .pop()
 
   /*
-   * Node & cluster data is created even in ephemeral mode
+   * Node data is created even in ephemeral mode
    */
   const node = await readJsonFile(`/etc/morio/node.json`)
-  const cluster = await readJsonFile(`/etc/morio/cluster.json`)
 
   if (!timestamp)
     return {
@@ -194,7 +179,7 @@ const loadSettingsFromDisk = async () => {
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
 
-  return { settings, keys, node, cluster, timestamp }
+  return { settings, keys, node, timestamp }
 }
 
 export const createX509Certificate = async (data) => {
@@ -206,7 +191,7 @@ export const createX509Certificate = async (data) => {
   /*
    * Extract the key id (kid) from the public key
    */
-  const kid = (await keypairAsJwk({ public: store.get('config.keys.public') })).kid
+  const kid = (await keypairAsJwk({ public: utils.getKeys().public })).kid
 
   /*
    * Generate the JSON web token to talk to the CA
@@ -239,8 +224,8 @@ export const createX509Certificate = async (data) => {
       algorithm: 'RS256',
     },
     noDefaults: true,
-    key: store.get('config.keys.private'),
-    passphrase: store.get('config.keys.mrt'),
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().mrt,
   })
 
   /*
@@ -259,7 +244,7 @@ export const createX509Certificate = async (data) => {
       },
       {
         httpsAgent: new https.Agent({
-          ca: store.get('config.ca.certificate'),
+          ca: utils.getCaConfig().certificate,
           keepAlive: false,
           //rejectUnauthorized: false,
         }),
@@ -308,7 +293,7 @@ export const getCoreIpAddress = async () => {
   const [success, result] = await runContainerApiCommand('core', 'inspect')
   if (!success) return false
 
-  store.set('state.services.core', result)
+  utils.setLocalServiceState('core', result)
   const networks = Object.keys(result.NetworkSettings.Networks || {})
   const network = utils.getNetworkName()
   if (!networks.includes(network)) return false

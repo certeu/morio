@@ -9,8 +9,8 @@ import {
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store, log, utils } from '../utils.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -66,25 +66,26 @@ export const service = {
        * Generate keys and certificates
        */
       const init = await generateCaRoot(
-        store.getSettings('deployment.nodes'),
-        store.getSettings('deployment.display_name')
+        utils.getSettings('deployment.nodes'),
+        utils.getSettings('deployment.display_name')
       )
 
       /*
        * Generate JWK
        */
-      const jwk = await keypairAsJwk(store.get('config.keys'))
+      const jwk = await keypairAsJwk(utils.getKeys())
 
       /*
-       * Store root certificate and fingerprint in store
+       * Save root certificate and fingerprint in memory
        */
-      store.set('config.ca', {
-        url: `https://ca_${store.get('state.node.serial')}:9000`,
+      const caConfig = {
+        url: `https://ca_${utils.getNodeSerial()}:9000`,
         fingerprint: init.root.fingerprint,
         jwk,
         certificate: init.root.certificate,
         intermediate: init.intermediate.certificate,
-      })
+      }
+      utils.setCaConfig(caConfig)
 
       /*
        * Also write root & intermediate certificates to the downloads folder
@@ -97,11 +98,11 @@ export const service = {
        * Construct step-ca (server) configuration
        */
       const stepServerConfig = {
-        ...store.get('config.services.morio.ca.server'),
+        ...caConfig.server,
         root: '/home/step/certs/root_ca.crt',
         crt: '/home/step/certs/intermediate_ca.crt',
         key: '/home/step/secrets/intermediate_ca.key',
-        dnsNames: [...store.get('config.services.morio.ca.server.dnsNames'), ...store.getSettings('deployment.nodes')],
+        dnsNames: [caConfig.server.dnsNames, ...utils.getSettings('deployment.nodes')],
       }
 
       /*
@@ -113,7 +114,7 @@ export const service = {
        * Construct step (client) configuration
        */
       const stepClientConfig = {
-        ...store.get('config.services.morio.ca.client'),
+        ...caConfig.client,
         fingerprint: init.root.fingerprint,
       }
 
@@ -204,7 +205,7 @@ export const isCaUp = async () => {
 }
 
 /**
- * Helper method to reload the configuration, and populate store
+ * Helper method to reload the configuration, and update state
  *
  */
 const reloadCaConfiguration = async () => {
@@ -239,10 +240,10 @@ const reloadCaConfiguration = async () => {
   const intermediate = await readFile('/etc/morio/shared/intermediate_ca.crt')
 
   /*
-   * Store fingerprint, JWK, and root certificate in the store for easy access
+   * Save fingerprint, JWK, and root certificate in memory for easy access
    */
-  store.set('config.ca', {
-    url: `https://ca_${store.get('state.node.serial')}:9000`,
+  utils.setCaConfig({
+    url: `https://ca_${utils.getNodeSerial()}:9000`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
