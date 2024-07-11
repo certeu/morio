@@ -298,6 +298,10 @@ const ensureClusterHeartbeat = async () => store.get('state.swarm.leading')
  * Start a cluster heartbeat
  */
 const runHeartbeat = (init=false) => {
+  /*
+   * Ensure we are comparing to up to date cluster state
+   */
+  await storeClusterState(true)
 
   /*
    * This won't change
@@ -335,7 +339,7 @@ const runHeartbeat = (init=false) => {
         method: 'POST',
         data: {
           deployment: store.get('state.cluster.uuid'),
-          leader: store.get('state.node.uuid'),
+          leader: store.getClusterLeaderUuid(),
           version: store.get('info.version'),
           settings_serial: Number(store.get('state.settings_serial')),
           node_serial: store.get('state.node.serial'),
@@ -414,6 +418,7 @@ const verifyHeartbeatNode = (node, result) => {
 }
 
 export const verifyHeartbeatRequest = async (data) => {
+  log.info(data, 'heartbeat request data')
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -470,6 +475,9 @@ export const verifyHeartbeatRequest = async (data) => {
     report.errors.push(err)
     report.action = 'ELECT'
     log.debug(`Heartbeat leader mismatch from node ${data.node}: ${err}`)
+    log.info({
+      data, leader: store.getClusterLeaderUuid(), uuid: store.get('state.node.uuid') })
+
   }
 
   /*

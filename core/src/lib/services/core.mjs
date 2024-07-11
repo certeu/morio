@@ -106,7 +106,7 @@ export const service = {
       store.set('state.node', node)
       store.set('state.cluster', cluster)
       store.set('config.keys', keys)
-      store.set('state.settings_serial', timestamp)
+      store.set('state.settings_serial', Number(timestamp))
       store.set('settings.sanitized', cloneAsPojo(settings))
       /*
        * The cluster UUID is stored in keys.deployment as that saves us from
