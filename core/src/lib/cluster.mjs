@@ -303,7 +303,7 @@ const runHeartbeat = (init=false) => {
    * This won't change
    */
   const key = 'state.cluster.heartbeat.out'
-  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/10
+  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/5
 
   /*
    * Is this the initialisation of a new heartbeat?
@@ -326,10 +326,6 @@ const runHeartbeat = (init=false) => {
      */
     const serial = store.getClusterLeaderNodeSerial()
     /*
-     * Help the debug party
-     */
-    log.debug(`Outgoing heartbeat: Node ${serial}`)
-    /*
      * Send heartbeat request and store the result
      */
     const start = Date.now()
@@ -349,9 +345,14 @@ const runHeartbeat = (init=false) => {
         returnError: true,
     })
     /*
+     * Help the debug party
+     */
+    const rtt = Date.now() - start
+    log.debug(`Heartbeat to node ${serial} took ${rtt}ms`)
+    /*
      * Verify the response
      */
-    verifyHeartbeatResponse(result, Date.now() - start)
+    verifyHeartbeatResponse(result, rtt)
     /*
      * Trigger a new heatbeat
      */
@@ -361,7 +362,6 @@ const runHeartbeat = (init=false) => {
 
 
 const verifyHeartbeatResponse = (result={}, rtt) => {
-    log.debug(`Heartbeat round trip time: ${rtt}`)
   console.log({result, in: 'verifyHeartbeatResponse' })
   return
   // Response:
@@ -417,7 +417,7 @@ export const verifyHeartbeatRequest = async (data) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await storeClusterState()
+  await storeClusterState(true)
 
   /*
    * This will hold our findings

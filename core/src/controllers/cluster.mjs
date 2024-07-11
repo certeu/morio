@@ -55,8 +55,8 @@ Controller.prototype.heartbeat = async (req, res) => {
   return res.status(200).send({
     deployment: store.get('state.cluster.uuid'),
     node: store.get('state.node.uuid'),
-    node_serial: store.get('state.node.serial'),
-    settings_serial: store.get('state.settings_serial'),
+    node_serial: Number(store.get('state.node.serial')),
+    settings_serial: Number(store.get('state.settings_serial')),
     version: store.get('info.version'),
     report,
   })
