@@ -6,7 +6,7 @@ import Joi from 'joi'
 const id = Joi.string().alphanum().required()
 const hostname = Joi.string().hostname().required()
 const timestamp = Joi.number().required().min(172e10).max(199e10)
-const uuid = Joi.string().guid({ version: 'uuidv5', separator: '-' }).required()
+const uuid = Joi.string().guid({ version: 'uuidv4', separator: '-' }).required()
 const keys = Joi.object({
   jwt: Joi.string().base64().min(96).max(2048).required(),
   mrt: Joi.string().alphanum().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
