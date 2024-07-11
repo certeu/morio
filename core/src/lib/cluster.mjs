@@ -281,25 +281,25 @@ export const ensureMorioClusterConsensus = async () => {
     } else log.warn('utils nodecount thingie not ok FIXME')
 
 
+  } else {
     /*
      * Ensure a cluster heartbeat is running
      */
     ensureClusterHeartbeat()
-  } else {
     /*
      * We are not leading the cluster
      * Send our config to the leader and await instructions
      */
-    const leader = store.getClusterLeaderLabels()
-    const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
-    const [result, data] = await client.post('/cluster/sync', {
-      deployment: store.get('state.cluster.uuid'),
-      node: store.get('state.node.uuid'),
-      node_serial: store.get('state.node.serial'),
-      version: store.get('info.version'),
-      current: { serial: store.get('state.settings_serial') },
-    })
-    console.log({result, data, in: 'ensureMorioClusterConsensus' })
+    //const leader = store.getClusterLeaderLabels()
+    //const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
+    //const [result, data] = await client.post('/cluster/sync', {
+    //  deployment: store.get('state.cluster.uuid'),
+    //  node: store.get('state.node.uuid'),
+    //  node_serial: store.get('state.node.serial'),
+    //  version: store.get('info.version'),
+    //  current: { serial: store.get('state.settings_serial') },
+    //})
+    //console.log({result, data, in: 'ensureMorioClusterConsensus' })
   }
 
 }
