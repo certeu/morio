@@ -46,6 +46,7 @@ Controller.prototype.sync = async (req, res) => {
    * to the latest cluster state.
    */
   await storeClusterState()
+      log.debug(req.body, `Incoming heartbeat: Node`)
 
   /*
    * Load this once
@@ -77,11 +78,13 @@ Controller.prototype.sync = async (req, res) => {
      * If the serial running on the remote node is the same as our own
      * settings serial, we are in sync
      */
-    if (serial.remote === serial.local) return res.send({
-      ...base,
-      action: false,
-      current: { serial: serial.local },
-    })
+    if (serial.remote === serial.local) {
+        res.send({
+        ...base,
+        action: false,
+        current: { serial: serial.local },
+      })
+    }
     /*
      * If the serial running on the remote node is lower, it should
      * apply the settings we provide in this response.

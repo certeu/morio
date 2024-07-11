@@ -334,31 +334,45 @@ const ensureClusterHeartbeat = async () => {
   }
 }
 
-const heartbeat = async (base) => {
-  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+const heartbeat = (base) => {
+  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/10
 
   /*
    * We are returning the setTimout ID here, so this can be cancelled
    */
   return setTimeout(async () => {
     const hb = store.get('state.cluster.heartbeat')
-    console.log({ hb })
+    //console.log({ hb })
+      log.debug(req.body, `Outgoing heartbeat: Node ${base}`)
     const result = await testUrl(hb.url, {
       method: 'POST',
       data: {
         deployment: store.get('state.cluster.uuid'),
         leader: store.get('state.node.uuid'),
         version: store.get('info.version'),
-        serial: store.get('state.settings_serial')
+        serial: store.get('state.settings_serial'),
+        node: store.get('state.node_serial'),
       },
       timeout: interval*250,
       returnAs: 'json',
       returnError: true,
     })
-    console.log({ hbresult: result })
+    verifyHeartbeat(result)
+    //console.log({ hbresult: result, in: 'heartbeat' })
   }, interval*1000)
 }
 
+const verifyHeartbeat = (result) => {
+  console.log({ result, in: 'verifyHEartbeat' })
+  //if (result.node) {
+  //  store.get(['state', 'cluster', 'nodes',
+  //if (
+  //  result.deployment === store.get('state.cluster.uuid') &&
+  //  result.node === store.get('state.cluster.uuid') &&
+
+
+
+}
 
 /**
  * Ensure a Morio Swarm cluster is ready to deploy services on
