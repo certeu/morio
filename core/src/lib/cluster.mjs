@@ -324,7 +324,7 @@ const startHeartbeat = (init=false) => {
     /*
      * By grabbing the serial here, the hearbeat will follow the leader
      */
-    const serial = await utils.getClusterLeaderNodeSerial()
+    const serial = store.getClusterLeaderNodeSerial()
     /*
      * Help the debug party
      */
@@ -463,7 +463,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * If there's a mismatch, ask to re-elect the cluster.
    */
   if (
-    (data.leader !== utils.getClusterLeaderUuid()) ||
+    (data.leader !== store.getClusterLeaderUuid()) ||
     (data.leader !== store.get('state.node.uuid'))
   ) {
     const err = 'LEADER_CHANGE'
