@@ -343,7 +343,7 @@ const heartbeat = (base) => {
   return setTimeout(async () => {
     const hb = store.get('state.cluster.heartbeat')
     //console.log({ hb })
-      log.debug(req.body, `Outgoing heartbeat: Node ${base}`)
+      log.debug(`Outgoing heartbeat: Node ${base}`)
     const result = await testUrl(hb.url, {
       method: 'POST',
       data: {
