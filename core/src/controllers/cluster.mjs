@@ -1,6 +1,6 @@
 // Store
 import { log, utils, store } from '../lib/utils.mjs'
-import { joinSwarm, storeClusterState } from '../lib/cluster.mjs'
+import { joinSwarm, storeClusterState, verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
@@ -23,136 +23,43 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.sync = async (req, res) => {
-  log.info(req.body, 'IN CLUSTER SYNC REQUEST HANDLER')
+Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`req.cluster.sync`, req.body)
+  const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
   if (!valid) {
-    log.info(err, `Received invalid heartbat that violates the schema from ${req.body.node}`)
+    log.info(err, `Received invalid heartbeat from ${req.body.node}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
   }
-  else log.info(`Incoming heartbeat from node ${valid.node_serial}`)
+  else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
 
   /*
-   * Before we make any decision, make sure have access
-   * to the latest cluster state.
+   * Verify the heartbeat request which will determin the action to take
    */
-  await storeClusterState()
+  const report = await verifyHeartbeatRequest(req.body)
 
-  /*
-   * Load this once
-   */
-  const serial = {
-    local: Number(store.get('state.settings_serial')),
-    remote: Number(valid.serial)
+
+  if (report.action === 'SYNC') {
+    // FIXME
+    log.warn('FIXME: Handle SYNC action')
+  }
+  if (report.action === 'ELECT') {
+    // FIXME
+    log.warn('FIXME: Handle ELECT action')
   }
 
   /*
-   * Are we leading the cluster?
+   * Always return status 200, be specific in the data
    */
-  if (store.get('state.swarm.leading')) {
-    /*
-     * Keep this DRY
-     */
-    const base = {
-      deployment: store.get('state.cluster.uuid'),
-      node: store.get('state.node.uuid'),
-      node_serial: store.get('state.node.serial'),
-      version: store.get('info.version'),
-    }
-    /*
-     * If the serial running on the remote node is the same as our own
-     * settings serial, we are in sync
-     */
-    if (serial.remote === serial.local) {
-        res.send({
-        ...base,
-        action: false,
-        current: { serial: serial.local },
-      })
-    }
-    /*
-     * If the serial running on the remote node is lower, it should
-     * apply the settings we provide in this response.
-     */
-    else if (serial.remote < serial.local) return res.send({
-      ...base,
-      action: 'apply',
-      current: {
-        keys: store.set('config.keys', keys),
-        serial: serial.local,
-        settings: store.get('settings.sanitized'),
-      },
-    })
-    /*
-     * If the serial running on the remote node is higher, we need to update
-     * This should be the exception rather than the rule as a following node
-     * has a more recent serialt hatn the leader node. Still, no biggie.
-     * Just write the latest data to disk, and then reload ourselves.
-     * However, we need to take care to properly finishe the response.
-     */
-    else if (serial.remote > serial.local) {
-      log.info(`Follower node ${valid.node_serial} has settings serial ${
-        serial.remote} which is more recent than our own serial ${serial.local
-        }. Updating to settings ${serial.remote} now.`)
-      /*
-       * Write the most current settings to disk
-       */
-      log.debug(`Writing new settings to settings.${serial.remote}.yaml`)
-      await writeYamlFile(`/etc/morio/settings.${serial.remote}.yaml`, valid.current.settings)
-      /*
-       * Only replace keys if there's a need for that
-       */
-      let keychange = false
-      for (const key in valid.current.keys) {
-        if (valid.current.keys[key] !== store.get(['config', 'keys', key])) keychange = true
-      }
-      if (keychange) {
-        log.warn(`Keychange detected, writing new keys to disk.`)
-        await writeJsonFile(`/etc/morio/keys.json`, valid.current.keys)
-      }
-      /*
-       * Terminate the request
-       */
-      res.send({
-        ...base,
-        action: false,
-        current: { serial: serial.remote },
-      })
-
-      /*
-       * Then reconfigure
-       */
-      return reconfigure({ hotReload: true })
-    }
-    else {
-      log.warn('Comparing serials did not yield an actionably outcoe. This is unexpected.')
-    }
-  }
-  else {
-    const leader = store.getClusterLeaderLabels()
-    const port = utils.getPreset('MORIO_CORE_PORT')
-    /*
-     * If we are not leading the cluster, redirect to the cluster leader
-     */
-    if (leader['morio.node.serial']) return res.redirect(
-      307,
-      `http://core_${leader['morio.node.serial']}:${port}/cluster/sync`
-    )
-    /*
-     * We do not have a leader serial. This is bad.
-     */
-    else return utils.sendErrorResponse(res, {
-      type: `morio.core.cluster.missing-leader-serial`,
-      title: 'Unable to redirect to the cluster leader',
-      status: 503,
-      detail: 'We are not the cluster leader, but we also do not know the serial of the cluster leader. This prevents us from redirecting this request to the cluster leader.',
-      route: `/cluster/sync`,
-      leader,
-    })
-  }
+  return res.status(200).send({
+    deployment: store.get('state.cluster.uuid'),
+    node: store.get('state.node.uuid'),
+    node_serial: store.get('state.node.serial'),
+    settings_serial: store.get('state.settings_serial'),
+    version: store.get('info.version'),
+    report,
+  })
 }
 
 /**

@@ -73,6 +73,10 @@ store.set('setDockerServiceConfig', (service, config) => store.set(['config', 's
  * Helper method to get labels for the cluster leader node
  */
 .set('getClusterLeaderLabels', () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels)
+/*
+ * Helper method to get labels for the cluster leader node
+ */
+.set('getClusterLeaderUuid', () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid'])
 
 /*
  * Export an utils instance to hold utility methods

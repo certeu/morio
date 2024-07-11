@@ -264,10 +264,10 @@ const ensureLocalSwarmNodeLabels = async () => {
  *   - If we are not leader, we reach out to the lader asking them to initiate a sync
  */
 export const ensureMorioClusterConsensus = async () => {
+  /*
+   * Make sure we use the latest cluster state
+   */
   await storeClusterState(true)
-  //console.log({ do: 'ENSURE_MORIO_CLUSTER_CONSENSUS', in: 'ensureMorioClusterConsensus'  })
-  //console.log(JSON.stringify(store.get('state.swarm')))
-  //console.log(JSON.stringify(Object.keys(store.get('state.swarm')), null ,2))
 
   /*
    * Are we leading the cluster?
@@ -278,30 +278,13 @@ export const ensureMorioClusterConsensus = async () => {
      */
     if (utils.nodeCount() > Object.keys(store.get('state.swarm.followers', {})).length + 1) {
       await inviteClusterNodes()
-    } else log.warn('utils nodecount thingie not ok FIXME')
-
-
+    }
   } else {
     /*
      * Ensure a cluster heartbeat is running
      */
     ensureClusterHeartbeat()
-    /*
-     * We are not leading the cluster
-     * Send our config to the leader and await instructions
-     */
-    //const leader = store.getClusterLeaderLabels()
-    //const client = restClient(`http://core_${leader['morio.node.serial']}:${utils.getPreset('MORIO_CORE_PORT')}`)
-    //const [result, data] = await client.post('/cluster/sync', {
-    //  deployment: store.get('state.cluster.uuid'),
-    //  node: store.get('state.node.uuid'),
-    //  node_serial: store.get('state.node.serial'),
-    //  version: store.get('info.version'),
-    //  current: { serial: store.get('state.settings_serial') },
-    //})
-    //console.log({result, data, in: 'ensureMorioClusterConsensus' })
   }
-
 }
 
 /**
@@ -324,7 +307,7 @@ const ensureClusterHeartbeat = async () => {
     if (leader && serial) {
       log.debug(`Starting cluster hearbeat`)
       store.set('state.cluster.heartbeat', {
-        url: `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/sync`,
+        url: `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
         id: heartbeat(),
         ping: hb.ping || 0,
         pong: hb.pong || 0
@@ -357,10 +340,96 @@ const heartbeat = (base) => {
       returnAs: 'json',
       returnError: true,
     })
-    verifyHeartbeat(result)
+    verifyHeartbeatResponse(result)
     //console.log({ hbresult: result, in: 'heartbeat' })
   }, interval*1000)
 }
+
+export const verifyHeartbeatRequest = async (data) => {
+  /*
+   * Ensure we are comparing to up to date cluster state
+   */
+  await storeClusterState()
+
+  /*
+   * This will hold our findings
+   * We end with the most problematic action
+   */
+  const report = { action: false, errors: [] }
+
+  /*
+   * Verify version.
+   * If there's a mismatch there is nothing we can do so this is lowest priority.
+   */
+  if (data.version === store.get('info.version')) report.conflicts.version = 0
+  else {
+    const err = 'VERSION_MISMATCH'
+    report.errors.push(err)
+    report.actions.push('RESYNC')
+    log.info(`Heartbeat version mismatch from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Verify settings_serial
+   * If there's a mismatch, ask to re-sync the cluster.
+   */
+  if (data.settings_serial === store.get('state.settings_serial')) report.conflicts.settings_serial = 0
+  else {
+    const err = 'SETTINGS_SERIAL_MISMATCH'
+    report.errors.push(err)
+    report.action = 'SYNC'
+    log.debug(`Heartbeat settings serial mismatch from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Verify settings_serial
+   * If there's a mismatch, ask to re-sync the cluster.
+   */
+  if (data.node_serial === getNodeDataFromUuid(data.node)) report.conflicts.node_serial = 0
+  else {
+    const err = 'NODE_SERIAL_MISMATCH'
+    report.errors.push(err)
+    report.action = 'SYNC'
+    log.debug(`Heartbeat node serial mismatch from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Verify leader
+   * If there's a mismatch, ask to re-elect the cluster.
+   */
+  if (data.leader === utils.getClusterLeaderUuid()  === store.get('state.node.uuid')) report.conflicts.leader = 0
+  else {
+    const err = 'LEADER_CHANGE'
+    report.errors.push(err)
+    report.action = 'ELECT'
+    log.debug(`Heartbeat leader mismatch from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Verify deployment
+   * If there's a mismatch, log an error because we can't fix this without human intervention.
+   */
+  if (data.deployment === store.get('state.cluster.uuid')) report.conflicts.deployment = 0
+  else {
+    const err = 'DEPLOYMENT_MISMATCH'
+    report.errors.push(err)
+    report.actions.push('RESYNC')
+    log.error(`Heartbeat deployment mismatch from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Store heartbeat result
+   */
+  store.set(['cluster', 'heartbeat', 'in', data.node], { data, report })
+
+  return report
+}
+
+const getNodeDataFromUuid = (uuid, label=false) => Object.values(store.get('state.swarm.nodes'))
+  .filter(node => node.Spec.Labels['morio.node.uuid'] === uuid)
+  .map(node => label ? node.Spec.Labels[label] : node)
+  .pop()
+
 
 const verifyHeartbeatResponse = (result={}) => {
   // Response:
