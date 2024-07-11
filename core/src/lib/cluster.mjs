@@ -283,66 +283,134 @@ export const ensureMorioClusterConsensus = async () => {
     /*
      * Ensure a cluster heartbeat is running
      */
-    ensureClusterHeartbeat()
+    ensureClusterHeartbeat(true)
   }
 }
 
 /**
  * Ensure a cluster heartbeat
  */
-const ensureClusterHeartbeat = async () => {
-  console.log("ENSURING HEARTBEAT")
-  /*
-   * Followers send heartbeats to the leader, not the other way around
-   */
-  if (store.get('state.swarm.leading')) return
+const ensureClusterHeartbeat = async () => store.get('state.swarm.leading')
+  ? false
+  : startHeartbeat()
+
+/**
+ * Start a cluster heartbeat
+ */
+const startHeartbeat = (init=false) => {
 
   /*
-   * Find out who is leading
+   * This won't change
    */
-  const hb = store.get('state.cluster.heartbeat.out', { id: false })
-  if (!hb.id) {
-    const leader = store.getClusterLeaderLabels()
-    const serial = leader?.['morio.node.serial']
-    if (leader && serial) {
-      log.debug(`Starting cluster hearbeat`)
-      store.set('state.cluster.heartbeat', {
-        url: `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
-        id: heartbeat(),
-        ping: hb.ping || 0,
-        pong: hb.pong || 0
-      })
-    }
-    else log.error(`Unable to determine leader serial, cannot start heartbeat`)
-  }
-}
-
-const heartbeat = (base) => {
+  const key = 'state.cluster.heartbeat.out'
   const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/10
 
   /*
-   * We are returning the setTimout ID here, so this can be cancelled
+   * Is this the initialisation of a new heartbeat?
    */
-  return setTimeout(async () => {
-    const hb = store.get('state.cluster.heartbeat')
-    //console.log({ hb })
-      log.debug(`Outgoing heartbeat: Node ${base}`)
-    const result = await testUrl(hb.url, {
-      method: 'POST',
-      data: {
-        deployment: store.get('state.cluster.uuid'),
-        leader: store.get('state.node.uuid'),
-        version: store.get('info.version'),
-        settings_serial: Number(store.get('state.settings_serial')),
-        node_serial: store.get('state.node.serial'),
-      },
-      timeout: interval*250,
-      returnAs: 'json',
-      returnError: true,
+  if (init) {
+    /*
+     * Help the debug party
+     */
+    log.debug(`Instantiating heartbeat to cluster leader`)
+    const running = store.get(key+'.id')
+    if (running) clearTimeout(running)
+  }
+
+  /*
+   * Create the heartbeat
+   */
+  store.set(`${key}.id`, setTimeout(async () => {
+    /*
+     * By grabbing the serial here, the hearbeat will follow the leader
+     */
+    const serial = await utils.getClusterLeaderNodeSerial()
+    /*
+     * Help the debug party
+     */
+    log.debug(`Outgoing heartbeat: Node ${serial}`)
+    /*
+     * Send heartbeat request and store the result
+     */
+    const start = Date.now()
+    const result = await testUrl(
+      `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
+      {
+        method: 'POST',
+        data: {
+          deployment: store.get('state.cluster.uuid'),
+          leader: store.get('state.node.uuid'),
+          version: store.get('info.version'),
+          settings_serial: Number(store.get('state.settings_serial')),
+          node_serial: store.get('state.node.serial'),
+        },
+        timeout: interval*250,
+        returnAs: 'json',
+        returnError: true,
     })
-    verifyHeartbeatResponse(result)
-    //console.log({ hbresult: result, in: 'heartbeat' })
-  }, interval*1000)
+    /*
+     * Verify the response
+     */
+    verifyHeartbeatResponse(result, Date.now() - start)
+    /*
+     * Trigger a new heatbeat
+     */
+    heartbeat()
+  }, interval*1000))
+}
+
+
+const verifyHeartbeatResponse = (result={}, rtt) => {
+    log.debug(`Heartbeat round trip time: ${rtt}`)
+  console.log({result, in: 'verifyHeartbeatResponse' })
+  return
+  // Response:
+      //deployment: store.get('state.cluster.uuid'),
+      //node: store.get('state.node.uuid'),
+      //node_serial: store.get('state.node.serial'),
+      //version: store.get('info.version'),
+      //current.serial
+  /*
+   * Short-circuit any shenanigans
+   */
+
+  /*
+   * Save us some typing
+   */
+  const hbin = ['state', 'cluster', 'heartbeat', 'in']
+
+  /*
+   * We'll use this to prepare the data to store
+   */
+  const data = (typeof result.node === 'string')
+    ? store.get([...hbin, result.node], {})
+    : {}
+
+  /*
+   * Have we seen this node before?
+   */
+  if (typeof result.node === 'string') {
+    data = store.get(key, false)
+    if (data === false) {
+      log.debug(`Received first heartbeat response from ${result.node}`)
+    }
+  }
+
+  const node = result.node
+    ? store.get(`state.cluster.nodes.${result.node}`)
+    : false
+  if (!node) return false
+  console.log({ result, in: 'verifyHEartbeat' })
+  //if (result.node) {
+  //  store.get(['state', 'cluster', 'nodes',
+  //if (
+  //  result.deployment === store.get('state.cluster.uuid') &&
+  //  result.node === store.get('state.cluster.uuid') &&
+      //store.set(key, { ...result, pong: Date.now()})
+}
+
+const verifyHeartbeatNode = (node, result) => {
+
 }
 
 export const verifyHeartbeatRequest = async (data) => {
@@ -428,56 +496,6 @@ const getNodeDataFromUuid = (uuid, label=false) => Object.values(store.get('stat
   .map(node => label ? node.Spec.Labels[label] : node)
   .pop()
 
-
-const verifyHeartbeatResponse = (result={}) => {
-  // Response:
-      //deployment: store.get('state.cluster.uuid'),
-      //node: store.get('state.node.uuid'),
-      //node_serial: store.get('state.node.serial'),
-      //version: store.get('info.version'),
-      //current.serial
-  /*
-   * Short-circuit any shenanigans
-   */
-
-  /*
-   * Save us some typing
-   */
-  const hbin = ['state', 'cluster', 'heartbeat', 'in']
-
-  /*
-   * We'll use this to prepare the data to store
-   */
-  const data = (typeof result.node === 'string')
-    ? store.get([...hbin, result.node], {})
-    : {}
-
-  /*
-   * Have we seen this node before?
-   */
-  if (typeof result.node === 'string') {
-    data = store.get(key, false)
-    if (data === false) {
-      log.debug(`Received first heartbeat response from ${result.node}`)
-    }
-  }
-
-  const node = result.node
-    ? store.get(`state.cluster.nodes.${result.node}`)
-    : false
-  if (!node) return false
-  console.log({ result, in: 'verifyHEartbeat' })
-  //if (result.node) {
-  //  store.get(['state', 'cluster', 'nodes',
-  //if (
-  //  result.deployment === store.get('state.cluster.uuid') &&
-  //  result.node === store.get('state.cluster.uuid') &&
-      //store.set(key, { ...result, pong: Date.now()})
-}
-
-const verifyHeartbeatNode = (node, result) => {
-
-}
 
 /**
  * Ensure a Morio Swarm cluster is ready to deploy services on
