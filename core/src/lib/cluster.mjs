@@ -292,12 +292,12 @@ export const ensureMorioClusterConsensus = async () => {
  */
 const ensureClusterHeartbeat = async () => store.get('state.swarm.leading')
   ? false
-  : startHeartbeat()
+  : runHeartbeat()
 
 /**
  * Start a cluster heartbeat
  */
-const startHeartbeat = (init=false) => {
+const runHeartbeat = (init=false) => {
 
   /*
    * This won't change
@@ -355,7 +355,7 @@ const startHeartbeat = (init=false) => {
     /*
      * Trigger a new heatbeat
      */
-    heartbeat()
+    runHeartbeat()
   }, interval*1000))
 }
 
