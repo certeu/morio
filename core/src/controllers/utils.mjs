@@ -36,7 +36,7 @@ Controller.prototype.decrypt = async (req, res) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`decrypt`, req.body)
+  const [valid, err] = await validate(`req.decrypt`, req.body)
   if (!valid) return schemaViolation(err, res)
 
   let data

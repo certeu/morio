@@ -1,4 +1,4 @@
-import { requestSchema as schema } from '../schema.mjs'
+import { schema } from '../schema.mjs'
 import get from 'lodash.get'
 
 /*

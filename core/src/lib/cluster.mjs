@@ -317,7 +317,7 @@ const ensureClusterHeartbeat = async () => {
   /*
    * Find out who is leading
    */
-  const hb = store.get('state.cluster.heartbeat', { id: false })
+  const hb = store.get('state.cluster.heartbeat.out', { id: false })
   if (!hb.id) {
     const leader = store.getClusterLeaderLabels()
     const serial = leader?.['morio.node.serial']
@@ -350,8 +350,8 @@ const heartbeat = (base) => {
         deployment: store.get('state.cluster.uuid'),
         leader: store.get('state.node.uuid'),
         version: store.get('info.version'),
-        serial: store.get('state.settings_serial'),
-        node: store.get('state.node_serial'),
+        settings_serial: Number(store.get('state.settings_serial')),
+        node_serial: store.get('state.node_serial'),
       },
       timeout: interval*250,
       returnAs: 'json',
@@ -362,15 +362,53 @@ const heartbeat = (base) => {
   }, interval*1000)
 }
 
-const verifyHeartbeat = (result) => {
+const verifyHeartbeatResponse = (result={}) => {
+  // Response:
+      //deployment: store.get('state.cluster.uuid'),
+      //node: store.get('state.node.uuid'),
+      //node_serial: store.get('state.node.serial'),
+      //version: store.get('info.version'),
+      //current.serial
+  /*
+   * Short-circuit any shenanigans
+   */
+
+  /*
+   * Save us some typing
+   */
+  const hbin = ['state', 'cluster', 'heartbeat', 'in']
+
+  /*
+   * We'll use this to prepare the data to store
+   */
+  const data = (typeof result.node === 'string')
+    ? store.get([...hbin, result.node], {})
+    : {}
+
+  /*
+   * Have we seen this node before?
+   */
+  if (typeof result.node === 'string') {
+    data = store.get(key, false)
+    if (data === false) {
+      log.debug(`Received first heartbeat response from ${result.node}`)
+    }
+  }
+
+  const node = result.node
+    ? store.get(`state.cluster.nodes.${result.node}`)
+    : false
+  if (!node) return false
   console.log({ result, in: 'verifyHEartbeat' })
   //if (result.node) {
   //  store.get(['state', 'cluster', 'nodes',
   //if (
   //  result.deployment === store.get('state.cluster.uuid') &&
   //  result.node === store.get('state.cluster.uuid') &&
+      //store.set(key, { ...result, pong: Date.now()})
+}
 
-
+const verifyHeartbeatNode = (node, result) => {
 
 }
 

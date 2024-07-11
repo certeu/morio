@@ -15,23 +15,7 @@ import { uuid } from '#shared/crypto'
 export function Controller() {}
 
 /**
- * Ping (heartbeat)
- *
- * This handles the heartbeat between cluster members
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.ping = async (req, res) => {
-
-  /*
-   * Return something for now
-   */
-  return res.status(200).send({ ping: 'pong' }).end()
-}
-
-/**
- * Sync (re-sync cluster when a node gets out of sync)
+ * Sync (heartbeat or re-sync cluster when a node gets out of sync)
  *
  * This gets send to the leader by by any node that
  * wakes up and find itself a follower in the cluster
@@ -42,24 +26,28 @@ Controller.prototype.ping = async (req, res) => {
 Controller.prototype.sync = async (req, res) => {
   log.info(req.body, 'IN CLUSTER SYNC REQUEST HANDLER')
   /*
+   * Validate request against schema
+   */
+  const [valid, err] = await validate(`req.cluster.sync`, req.body)
+  if (!valid) {
+    log.info(err, `Received invalid heartbat that violates the schema from ${req.body.node}`)
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
+  }
+  else log.info(`Incoming heartbeat from node ${valid.node_serial}`)
+
+  /*
    * Before we make any decision, make sure have access
    * to the latest cluster state.
    */
   await storeClusterState()
-      log.debug(req.body, `Incoming heartbeat: Node`)
 
   /*
    * Load this once
    */
   const serial = {
     local: Number(store.get('state.settings_serial')),
-    remote: Number(req.body.serial)
+    remote: Number(valid.serial)
   }
-      //deployment: store.get('state.cluster.uuid'),
-      //node: store.get('state.node.uuid'),
-      //node_serial: store.get('state.node.serial'),
-      //version: store.get('info.version'),
-      //settings_serial: store.get('state.settings_serial'),
 
   /*
    * Are we leading the cluster?
@@ -106,24 +94,24 @@ Controller.prototype.sync = async (req, res) => {
      * However, we need to take care to properly finishe the response.
      */
     else if (serial.remote > serial.local) {
-      log.info(`Follower node ${req.body.node_serial} has settings serial ${
+      log.info(`Follower node ${valid.node_serial} has settings serial ${
         serial.remote} which is more recent than our own serial ${serial.local
         }. Updating to settings ${serial.remote} now.`)
       /*
        * Write the most current settings to disk
        */
       log.debug(`Writing new settings to settings.${serial.remote}.yaml`)
-      await writeYamlFile(`/etc/morio/settings.${serial.remote}.yaml`, req.body.current.settings)
+      await writeYamlFile(`/etc/morio/settings.${serial.remote}.yaml`, valid.current.settings)
       /*
        * Only replace keys if there's a need for that
        */
       let keychange = false
-      for (const key in req.body.current.keys) {
-        if (req.body.current.keys[key] !== store.get(['config', 'keys', key])) keychange = true
+      for (const key in valid.current.keys) {
+        if (valid.current.keys[key] !== store.get(['config', 'keys', key])) keychange = true
       }
       if (keychange) {
         log.warn(`Keychange detected, writing new keys to disk.`)
-        await writeJsonFile(`/etc/morio/keys.json`, req.body.current.keys)
+        await writeJsonFile(`/etc/morio/keys.json`, valid.current.keys)
       }
       /*
        * Terminate the request
@@ -183,7 +171,7 @@ Controller.prototype.join = async (req, res) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`cluster.join`, req.body)
+  const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
     log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')

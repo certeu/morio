@@ -68,7 +68,7 @@ Controller.prototype.getContainerData = async (req, res, cmd = 'inspect', option
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.container.${cmd}`, req.params)
+  const [valid, err] = await validate(`req.docker.container.${cmd}`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
@@ -120,7 +120,7 @@ Controller.prototype.removeNetwork = async (req, res) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.network.remove`, req.params)
+  const [valid, err] = await validate(`req.docker.network.remove`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
@@ -152,7 +152,7 @@ Controller.prototype.updateContainer = async (req, res, cmd) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.container.inspect`, req.params)
+  const [valid, err] = await validate(`req.docker.container.inspect`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
@@ -183,7 +183,7 @@ Controller.prototype.getImageData = async (req, res, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.image.inspect`, req.params)
+  const [valid, err] = await validate(`req.docker.image.inspect`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
@@ -211,7 +211,7 @@ Controller.prototype.getNetworkData = async (req, res, cmd = 'inspect') => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate(`docker.network.${cmd}`, req.params)
+  const [valid, err] = await validate(`req.docker.network.${cmd}`, req.params)
   if (!valid) return schemaViolation(err, res)
 
   /*
@@ -237,7 +237,7 @@ Controller.prototype.pull = async (req, res) => {
   /*
    * Validate request against schema
    */
-  const [valid, err] = await validate('docker.pull', req.body)
+  const [valid, err] = await validate('req.docker.pull', req.body)
   if (!valid) return schemaViolation(err, res)
 
   /*
