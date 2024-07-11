@@ -361,8 +361,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
    */
-  if (data.version === store.get('info.version')) report.conflicts.version = 0
-  else {
+  if (data.version !== store.get('info.version')) {
     const err = 'VERSION_MISMATCH'
     report.errors.push(err)
     report.actions.push('RESYNC')
@@ -373,8 +372,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify settings_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  if (data.settings_serial === store.get('state.settings_serial')) report.conflicts.settings_serial = 0
-  else {
+  if (data.settings_serial !== store.get('state.settings_serial')) {
     const err = 'SETTINGS_SERIAL_MISMATCH'
     report.errors.push(err)
     report.action = 'SYNC'
@@ -385,8 +383,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify settings_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  if (data.node_serial === getNodeDataFromUuid(data.node)) report.conflicts.node_serial = 0
-  else {
+  if (data.node_serial === getNodeDataFromUuid(data.node)) {
     const err = 'NODE_SERIAL_MISMATCH'
     report.errors.push(err)
     report.action = 'SYNC'
@@ -397,8 +394,10 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify leader
    * If there's a mismatch, ask to re-elect the cluster.
    */
-  if (data.leader === utils.getClusterLeaderUuid()  === store.get('state.node.uuid')) report.conflicts.leader = 0
-  else {
+  if (
+    (data.leader !== utils.getClusterLeaderUuid()) ||
+    (data.leader !== store.get('state.node.uuid'))
+  ) {
     const err = 'LEADER_CHANGE'
     report.errors.push(err)
     report.action = 'ELECT'
@@ -409,8 +408,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify deployment
    * If there's a mismatch, log an error because we can't fix this without human intervention.
    */
-  if (data.deployment === store.get('state.cluster.uuid')) report.conflicts.deployment = 0
-  else {
+  if (data.deployment !== store.get('state.cluster.uuid')) {
     const err = 'DEPLOYMENT_MISMATCH'
     report.errors.push(err)
     report.actions.push('RESYNC')
