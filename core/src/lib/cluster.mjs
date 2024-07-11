@@ -334,7 +334,7 @@ const heartbeat = (base) => {
         leader: store.get('state.node.uuid'),
         version: store.get('info.version'),
         settings_serial: Number(store.get('state.settings_serial')),
-        node_serial: store.get('state.node_serial'),
+        node_serial: store.get('state.node.serial'),
       },
       timeout: interval*250,
       returnAs: 'json',
