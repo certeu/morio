@@ -395,6 +395,7 @@ const verifyHeartbeatResponse = (result={}, rtt, serial) => {
     else {
       log.warn(`Unspecified error when sending heartbeat to node ${serial}.`)
     }
+    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false, error })
   } else {
     /*
      * Warn when things are too slow
@@ -403,8 +404,8 @@ const verifyHeartbeatResponse = (result={}, rtt, serial) => {
       log.warn(`Heartbeat latency from node ${serial} was ${
         rtt}ms which is above the treshold for optimal cluster performance`)
     }
+    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false })
   }
-  console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false })
   return
   // Response:
       //deployment: store.get('state.cluster.uuid'),
