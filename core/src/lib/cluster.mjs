@@ -340,21 +340,33 @@ const runHeartbeat = async (init=false) => {
      * Send heartbeat request and verify the result
      */
     const start = Date.now()
-    const result = await testUrl(
-      `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
-      {
-        method: 'POST',
-        data: {
-          deployment: utils.getClusterUuid(),
-          leader: utils.getClusterLeaderUuid(),
-          version: utils.getVersion(),
-          settings_serial: Number(utils.getSettingsSerial()),
-          node_serial: Number(utils.getNodeSerial()),
-        },
-        timeout: interval*500, // 25% of the interval
-        returnAs: 'json',
-        returnError: true,
-    })
+    let result
+    try {
+      result = await testUrl(
+        `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
+        {
+          method: 'POST',
+          data: {
+            deployment: utils.getClusterUuid(),
+            leader: utils.getClusterLeaderUuid(),
+            version: utils.getVersion(),
+            settings_serial: Number(utils.getSettingsSerial()),
+            node_serial: Number(utils.getNodeSerial()),
+          },
+          timeout: interval*500, // 25% of the interval
+          returnAs: 'json',
+          returnError: true,
+      })
+    }
+    catch (err) {
+      // Help the debug party
+      const rtt = Date.now() - start
+      log.debug(`Heartbeat to node ${serial} took ${rtt}ms and resulted in an error.`)
+      // Verify heartbeat (this will log a warning for the error)
+      verifyHeartbeatResponse(result, rtt, serial)
+      // And trigger a new heartbeat
+      runHeartbeat()
+    }
     /*
      * Help the debug party
      */
