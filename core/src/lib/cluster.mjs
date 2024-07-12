@@ -404,7 +404,7 @@ const verifyHeartbeatResponse = (result={}, rtt, serial) => {
       log.warn(`Heartbeat latency from node ${serial} was ${
         rtt}ms which is above the treshold for optimal cluster performance`)
     }
-    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false })
+    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false, keys: Object.keys(result) })
   }
   return
   // Response:
