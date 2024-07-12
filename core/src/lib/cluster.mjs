@@ -383,7 +383,6 @@ const runHeartbeat = async (init=false) => {
   }, interval*1000))
 }
 
-nrasdbreakme
 const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
   /*
    * Is this an error>
