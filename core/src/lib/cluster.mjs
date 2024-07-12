@@ -363,7 +363,7 @@ const runHeartbeat = async (init=false) => {
       const rtt = Date.now() - start
       log.debug(`Heartbeat to node ${serial} took ${rtt}ms and resulted in an error.`)
       // Verify heartbeat (this will log a warning for the error)
-      verifyHeartbeatResponse(result, rtt, serial)
+      verifyHeartbeatResponse({ error: result, rtt, serial })
       // And trigger a new heartbeat
       runHeartbeat()
     }
@@ -375,7 +375,7 @@ const runHeartbeat = async (init=false) => {
     /*
      * Verify the response
      */
-    verifyHeartbeatResponse(result, rtt, serial)
+    verifyHeartbeatResponse({ result, rtt, serial })
     /*
      * Trigger a new heatbeat
      */
@@ -383,11 +383,11 @@ const runHeartbeat = async (init=false) => {
   }, interval*1000))
 }
 
-const verifyHeartbeatResponse = (result={}, rtt, serial) => {
+nrasdbreakme
+const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
   /*
    * Is this an error>
    */
-  const error = result.AxiosError || false
   if (error) {
     if (error.code === 'ECONNREFUSED') {
       log.warn(`Connection refused when sending heartbeat to node ${serial}. Is this node up?`)
@@ -395,7 +395,7 @@ const verifyHeartbeatResponse = (result={}, rtt, serial) => {
     else {
       log.warn(`Unspecified error when sending heartbeat to node ${serial}.`)
     }
-    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false, error })
+    console.log({error, in: 'verifyHeartbeatResponse' })
   } else {
     /*
      * Warn when things are too slow
@@ -404,7 +404,7 @@ const verifyHeartbeatResponse = (result={}, rtt, serial) => {
       log.warn(`Heartbeat latency from node ${serial} was ${
         rtt}ms which is above the treshold for optimal cluster performance`)
     }
-    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false, keys: Object.keys(result) })
+    console.log({result, in: 'verifyHeartbeatResponse' })
   }
   return
   // Response:
