@@ -371,13 +371,12 @@ const runHeartbeat = async (init=false) => {
   }, interval*1000))
 }
 
-
 const verifyHeartbeatResponse = (result={}, rtt, serial) => {
   if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
     log.warn(`Heartbeat latency from node ${serial} was ${
       rtt}ms which is above the treshold for optimal cluster performance`)
   }
-    console.log({result, in: 'verifyHeartbeatResponse', type: typeof result })
+    console.log({result, in: 'verifyHeartbeatResponse', isError: result.AxiosError ? true : false })
   return
   // Response:
       //deployment: store.get('state.cluster.uuid'),

@@ -151,6 +151,9 @@ export const presets = {
   // Amount of seconds to wait between cluster heartbeats
   MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 25,
 
+  // Amount of milliseconds above which we'll complain about hearbeat latency
+  MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT: 150,
+
   // Amount of seconds to cache the cluster state
   MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20,
 
