@@ -25,3 +25,8 @@ export const errors = {
   },
 }
 
+export const statusCodes = {
+  0: 'Everything is ok',
+  1: 'Morio is running in ephemeral mode',
+  2: 'Morio is resolving the configuration',
+}

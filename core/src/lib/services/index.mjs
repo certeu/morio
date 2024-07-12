@@ -22,7 +22,7 @@ import {
   runContainerApiCommand,
   generateContainerConfig,
   generateSwarmServiceConfig,
-  storeRunningServices,
+  refreshRunningServicesState,
   stopLocalService,
   stopSwarmService,
   serviceContainerImageFromConfig,
@@ -180,7 +180,7 @@ export const startMorio = async (hookParams = {}) => {
   /*
    * Save info on what's running once so lifecycle hooks don't all have to
    */
-  await storeRunningServices()
+  await refreshRunningServicesState()
 
   /*
    * When we leave ephemeral mode and set up a Swarm, local services

@@ -124,7 +124,7 @@ export const getLocalServiceId = async (serviceName) => {
   /*
    * Update state with currently running local services
    */
-  await storeLocalSwarmRunningServices()
+  await refreshLocalSwarmRunningServicesState()
 
   /*
    * Return the ID or false if it's not found
@@ -142,9 +142,9 @@ export const getSwarmServiceId = async (serviceName) => {
   if (!utils.isSwarm()) return false
 
   /*
-   * Update store with currently running swarm services
+   * Update state with currently running swarm services
    */
-  await storeSwarmRunningServices()
+  await refreshSwarmRunningServicesState()
 
   /*
    * Return the ID or false if it's not found
@@ -769,15 +769,15 @@ export const runDockerCliCommand = async (cmd, ...params) => {
 /**
  * This helper method saves a list of running services (both local and on the swarm) to state
  */
-export const storeRunningServices = async () => {
-  await storeLocalRunningServices()
-  await storeSwarmRunningServices()
+export const refreshRunningServicesState = async () => {
+  await refreshLocalRunningServicesState()
+  await refreshSwarmRunningServicesState()
 }
 
 /**
  * This helper method saves a list of running local services to state
  */
-export const storeLocalRunningServices = async () => {
+export const refreshLocalRunningServicesState = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */
@@ -794,7 +794,7 @@ export const storeLocalRunningServices = async () => {
 /**
  * This helper method saves a list of running swarm services
  */
-export const storeSwarmRunningServices = async () => {
+export const refreshSwarmRunningServicesState = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */

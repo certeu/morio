@@ -38,7 +38,6 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   const report = await verifyHeartbeatRequest(req.body)
 
-
   if (report.action === 'SYNC') {
     // FIXME
     log.warn('FIXME: Handle SYNC action')

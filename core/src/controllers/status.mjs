@@ -66,6 +66,7 @@ Controller.prototype.getReloadData = async (req, res) => {
  */
 const getStatus = () => ({
   info: utils.getInfo(),
+  status: utils.getStatus(true),
   state: {
     uptime: Math.floor((Date.now() - utils.getStartTime()) / 1000),
     deployment: utils.isEphemeral() ? undefined : utils.getClusterUuid(),

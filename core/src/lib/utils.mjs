@@ -77,6 +77,11 @@ utils.getCaConfig = () => store.get('config.ca')
 utils.getClusterStateAge = () => Date.now() - store.get('state.swarm.updated')
 
 /**
+ * Helper method to get the cluster state age (time it was last refreshed)
+ */
+utils.getStatus = () => store.get('state.status')
+
+/**
  * Helper method to get the cluster uuid
  */
 utils.getClusterUuid = () => store.get('state.cluster.uuid')
@@ -501,6 +506,18 @@ utils.setEphemeralUuid = (uuid) => {
 }
 
 /**
+ * Helper method to store the incoming heartbeat data
+ *
+ * @param {string} uuid - The remote node's UUID
+ * @param {bool} success - Whether the heartbeat was a success, or not
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setHeartbeatIn = (uuid, report) => {
+  store.set(['state', 'cluster', 'heartbeat', 'in', uuid], { ...report, time: Date().now() })
+  return utils
+}
+
+/**
  * Helper method to store the outgoing heartbeat data
  *
  * @param {object} id - The heartbeat setTimeout id
@@ -576,6 +593,18 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
   const labels = store.get(at, false)
   if (!labels) store.set(at, [label])
   else if (!labels.includes(label)) store.push(at, label)
+  return utils
+}
+
+/**
+ * Helper method to store the status code and color
+ *
+ * @param {number} code - The status code, 0 means all ok
+ * @param {object} color - The status color, one of green, amber, or red
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setStatus = (code, color) => {
+  store.set(['state', 'status'], { code, color, time: Math.floor(Date.now()/1000) })
   return utils
 }
 
@@ -910,6 +939,16 @@ utils.endReconfigure = () => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.resetClusterStateAge = () => {
+  store.set('state.swarm.updated', Date.now())
+  return utils
+}
+
+/**
+ * Reset the cluster status based on the current state
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.resetClusterStatus = () => {
   store.set('state.swarm.updated', Date.now())
   return utils
 }

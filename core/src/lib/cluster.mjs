@@ -15,23 +15,22 @@ import { log, utils } from './utils.mjs'
  */
 export const refreshClusterState = async (silent) => {
   const age = utils.getClusterStateAge()
-  log.info(`Cluster state age is ${age}ms`)
-  if (age > utils.getPreset('MORIO_CORE_CLUSTER_STATE_CACHE_TTL')) await storeClusterState(silent)
+  if (!age || age > utils.getPreset('MORIO_CORE_CLUSTER_STATE_CACHE_TTL')) await forceRefreshClusterState(silent)
 }
 
 /**
  * Helper method to update the cluster state
  */
-export const storeClusterState = async (silent) => {
-  await storeClusterSwarmState(silent)
-  await storeClusterMorioState(silent)
+export const forceRefreshClusterState = async (silent) => {
+  await refreshClusterSwarmState(silent)
+  await refreshClusterMorioState(silent)
   utils.resetClusterStateAge()
 }
 
 /**
  * Helper method to gather the swarm state
  */
-const storeClusterSwarmState = async (silent=false) => {
+const refreshClusterSwarmState = async (silent=false) => {
   /*
    * Don't bother unless there's a swarm
    */
@@ -49,7 +48,7 @@ const storeClusterSwarmState = async (silent=false) => {
     if (!silent) log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     utils.setSwarmTokens(swarm.JoinTokens)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) storeClusterSwarmNodesState(nodes, silent)
+    if (ok) refreshClusterSwarmNodesState(nodes, silent)
     else log.warn(`Unable to retrieve swarm node info from Docker API`)
   } else {
     log.debug(`Docker swarm is not configured`)
@@ -57,7 +56,7 @@ const storeClusterSwarmState = async (silent=false) => {
   }
 }
 
-const storeClusterSwarmNodesState = (nodes, silent=false) => {
+const refreshClusterSwarmNodesState = (nodes, silent=false) => {
   /*
    * Clear follower list
    */
@@ -122,7 +121,7 @@ const storeClusterSwarmNodesState = (nodes, silent=false) => {
 /**
  * Helper method to gather the morio cluster state
  */
-const storeClusterMorioState = async () => {
+const refreshClusterMorioState = async () => {
     return // FIXME
   /*
   const nodes = {}
@@ -202,7 +201,7 @@ const ensureSwarm = async () => {
   /*
    * Find our feet
    */
-  await storeClusterState(true)
+  await refreshClusterState(true)
 
   /*
    * Create the swarm if it does not exist yet
@@ -217,7 +216,7 @@ const ensureSwarm = async () => {
   /*
    * Refresh cluster state
    */
-  await storeClusterState()
+  await refreshClusterState()
 }
 
 
@@ -275,7 +274,7 @@ export const ensureMorioClusterConsensus = async () => {
   /*
    * Make sure we use the latest cluster state
    */
-  await storeClusterState(true)
+  await refreshClusterState(true)
 
   /*
    * Are we leading the cluster?
@@ -309,7 +308,7 @@ const runHeartbeat = async (init=false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await storeClusterState(true)
+  await refreshClusterState(true)
 
   /*
    * This won't change
@@ -394,18 +393,43 @@ const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
     else {
       log.warn(`Unspecified error when sending heartbeat to node ${serial}.`)
     }
-    console.log({error, in: 'verifyHeartbeatResponse' })
+
     return
-  } else {
-    /*
-     * Warn when things are too slow
-     */
-    if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')/100) {
-      log.warn(`Heartbeat RTT to node ${serial} was above the warning mark at ${rtt}ms`)
-    }
-    console.log({result, in: 'verifyHeartbeatResponse' })
   }
-  return
+
+  /*
+   * Warn when things are too slow
+   */
+  if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
+    log.warn(`Heartbeat RTT to node ${serial} was ${rtt}ms which is above the warning mark`)
+  }
+
+  /*
+   * Check the report from the leader node
+   */
+  console.log({report: result, in: 'verifyHeartbeatResponse' }) // FIXME
+  if (result.report && result.node) {
+    utils.setHeartbeatIn(result.node, result.report)
+
+
+
+  }
+
+  if (report.errors.length > 0) {
+    for (const err of report.errors) {
+      log.error(`Heartbeat error from node ${serial}: ${err}`)
+    }
+  }
+
+  if (!result.report.action) {
+
+  }
+  else if (!result.report.action) {
+
+  }
+
+
+  let failed = false
   // Response:
       //deployment: store.get('state.cluster.uuid'),
       //node: store.get('state.node.uuid'),
@@ -454,11 +478,10 @@ const verifyHeartbeatNode = (node, result) => {
 }
 
 export const verifyHeartbeatRequest = async (data) => {
-  log.info(data, 'heartbeat request data')
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await storeClusterState(true)
+  await refreshClusterState(true)
 
   /*
    * This will hold our findings
@@ -473,7 +496,6 @@ export const verifyHeartbeatRequest = async (data) => {
   if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     report.errors.push(err)
-    report.actions.push('RESYNC')
     log.info(`Heartbeat version mismatch from node ${data.node}: ${err}`)
   }
 
@@ -489,7 +511,7 @@ export const verifyHeartbeatRequest = async (data) => {
   }
 
   /*
-   * Verify settings_serial
+   * Verify node_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
   if (data.node_serial === getNodeDataFromUuid(data.node)) {
@@ -523,14 +545,8 @@ export const verifyHeartbeatRequest = async (data) => {
   if (data.deployment !== utils.getClusterUuid()) {
     const err = 'DEPLOYMENT_MISMATCH'
     report.errors.push(err)
-    report.actions.push('RESYNC')
     log.error(`Heartbeat deployment mismatch from node ${data.node}: ${err}`)
   }
-
-  /*
-   * Save heartbeat result
-   */
-  //s__tore.set(['cluster', 'heartbeat', 'in', data.node], { data, report })
 
   return report
 }

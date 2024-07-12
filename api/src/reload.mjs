@@ -60,7 +60,7 @@ export const reloadConfiguration = async () => {
     /*
      * If there's more than 1 node, switch core client to stay localk
      */
-    if (store.get('settings.deployments.node_count') > 1) {
+    if (store.get('settings.deployment.node_count') > 1) {
       utils.set('core', coreClient(`http://core_${store.get('state.node.serial')}:${getPreset('MORIO_CORE_PORT')}`))
     }
   }
