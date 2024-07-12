@@ -395,13 +395,13 @@ const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
       log.warn(`Unspecified error when sending heartbeat to node ${serial}.`)
     }
     console.log({error, in: 'verifyHeartbeatResponse' })
+    return
   } else {
     /*
      * Warn when things are too slow
      */
     if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')/100) {
-      log.warn(`Heartbeat latency from node ${serial} was ${
-        rtt}ms which is above the treshold for optimal cluster performance`)
+      log.warn(`Heartbeat RTT to node ${serial} was above the warning mark at ${rtt}ms`)
     }
     console.log({result, in: 'verifyHeartbeatResponse' })
   }
