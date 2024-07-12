@@ -385,7 +385,7 @@ const runHeartbeat = async (init=false) => {
 
 const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
   /*
-   * Is this an error>
+   * Is this an error?
    */
   if (error) {
     if (error.code === 'ECONNREFUSED') {
@@ -399,7 +399,7 @@ const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
     /*
      * Warn when things are too slow
      */
-    if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
+    if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')/100) {
       log.warn(`Heartbeat latency from node ${serial} was ${
         rtt}ms which is above the treshold for optimal cluster performance`)
     }
