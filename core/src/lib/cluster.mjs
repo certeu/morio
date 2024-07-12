@@ -351,7 +351,7 @@ const runHeartbeat = async (init=false) => {
           settings_serial: Number(utils.getSettingsSerial()),
           node_serial: Number(utils.getNodeSerial()),
         },
-        timeout: interval*250,
+        timeout: interval*500, // 25% of the interval
         returnAs: 'json',
         returnError: true,
     })
@@ -363,7 +363,7 @@ const runHeartbeat = async (init=false) => {
     /*
      * Verify the response
      */
-    verifyHeartbeatResponse(result, rtt)
+    verifyHeartbeatResponse(result, rtt, serial)
     /*
      * Trigger a new heatbeat
      */
@@ -372,8 +372,12 @@ const runHeartbeat = async (init=false) => {
 }
 
 
-const verifyHeartbeatResponse = (result={}, rtt) => {
-  console.log({result, in: 'verifyHeartbeatResponse' })
+const verifyHeartbeatResponse = (result={}, rtt, serial) => {
+  if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
+    log.warn(`Heartbeat latency from node ${serial} was ${
+      rtt}ms which is above the treshold for optimal cluster performance`)
+  }
+    console.log({result, in: 'verifyHeartbeatResponse', type: typeof result })
   return
   // Response:
       //deployment: store.get('state.cluster.uuid'),
