@@ -10,8 +10,7 @@ import {
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo, attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
-// Store
-import { store, log, utils, setIfUnset } from '../lib/utils.mjs'
+import { log, utils, setIfUnset } from '../lib/utils.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -32,8 +31,8 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the IDPs configured by the user
    */
-  if (store.getSettings('iam.providers')) {
-    for (const [id, conf] of Object.entries(store.getSettings('iam.providers'))) {
+  if (utils.getSettings('iam.providers')) {
+    for (const [id, conf] of Object.entries(utils.getSettings('iam.providers'))) {
       idps[id] = {
         id,
         provider: id === 'mrt' ? 'mrt' : conf.provider,
@@ -46,7 +45,7 @@ Controller.prototype.getIdps = async (req, res) => {
   /*
    * Add the root token idp, unless it's disabled by a feature flag
    */
-  if (!store.get('settings.tokens.flags.DISABLE_ROOT_TOKEN', false)) {
+  if (!utils.getFlag('DISABLE_ROOT_TOKEN')) {
     //idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
   }
 
@@ -56,7 +55,7 @@ Controller.prototype.getIdps = async (req, res) => {
   return res
     .send({
       idps,
-      ui: store.getSettings('iam.ui', {}),
+      ui: utils.getSettings('iam.ui', {}),
     })
     .end()
 }
@@ -112,7 +111,7 @@ Controller.prototype.deploy = async (req, res) => {
    */
   reconfigure({ hotReload: true })
 
-  return res.send({ result: 'success', settings: store.get('saveSettings') })
+  return res.send({ result: 'success', settings: utils.getSanitizedSettings() })
 }
 
 /**
@@ -188,13 +187,13 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Complete the settings with the defaults that are configured
    */
-  for (const [key, val] of Object.entries(store.get('config.services.morio.core.default_settings', {}))) {
+  for (const [key, val] of Object.entries(utils.getMorioServiceConfig('core').default_settings)) {
     setIfUnset(mSettings, key, val)
   }
 
   /*
    * Handle secrets - Which requires some extra work
-   * At this point, the store does not (yet) hold our encryption methods.
+   * At this point, utils does not (yet) hold our encryption methods.
    * So we need to add them prior to calling ensureTokenSecrecy.
    * However, all of this is only required if/when the initial settings
    * contain secrets. Soemthing which is not supported in the UI but can
@@ -311,7 +310,7 @@ const localNodeInfo = async (body) => {
    * Else return uuid, hostname, and IP
    */
   return {
-    ...store.get('node', {}),
+    ...utils.getNode(),
     fqdn,
     hostname: fqdn.split('.')[0],
     ip: (await resolveHostAsIp(fqdn)),

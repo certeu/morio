@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.get('info.production', false)
+  const PROD = utils.isProduction()
   const DIRS = {
     conf: utils.getPreset('MORIO_CONFIG_ROOT'),
     data: utils.getPreset('MORIO_DATA_ROOT'),
@@ -37,7 +37,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
   /*
    * To run unit tests, we need to add these labels manually
    */
-  if (store.testing) labels.push(
+  if (utils.isUnitTest()) labels.push(
     "traefik.http.routers.api.tls=true",
     "traefik.http.routers.api.tls.certresolver=ca",
     "traefik.http.services.api.loadbalancer.server.port=3000",
@@ -79,7 +79,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       ],
       // Add extra hosts
       hosts: [
-        `local_core:${store.get('state.node.core_ip')}`,
+        `local_core:${utils.getNodeCoreIp()}`,
       ],
       // Configure Traefik with container labels
       labels,

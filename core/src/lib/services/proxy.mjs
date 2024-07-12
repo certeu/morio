@@ -136,7 +136,7 @@ export const addTraefikTlsConfiguration = (service) => {
   if (names.length > 1) names.push(utils.getSettings('deployment.fqdn'))
   const labelPath = [ 'config', 'services', 'morio', service, 'container', 'labels' ]
   const labels = utils.getMorioServiceConfig(service)?.container?.labels || []
-  for (const label of labels)) {
+  for (const label of labels) {
     if (label.toLowerCase().indexOf('rule=(') !== -1) {
       const chunks = label.split('rule=(')
       utils.setMorioServiceConfigContainerLabel(

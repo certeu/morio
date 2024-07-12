@@ -1,6 +1,5 @@
 import { keypairAsJwk } from '#shared/crypto'
-// Store
-import { store, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -31,7 +30,7 @@ Controller.prototype.jwks = async (req, res) => {
   /*
    * Get JWKS info from public key
    */
-  const jwks = await keypairAsJwk({ public: store.get('keys.public') })
+  const jwks = await keypairAsJwk({ public: utils.getKeys().public })
 
   return res
     .status(200)
@@ -52,14 +51,12 @@ Controller.prototype.getReloadData = async (req, res) => {
 
   const data = getStatus()
   if (!utils.isEphemeral()) {
-    data.settings = store.get('settings')
+    data.settings = utils.getSettings()
     data.config = {
-      //services: store.get('config.services'),
-      //swarm: utils.isSwarm() ? store.get('config.swarm') : false,
-      keys: store.get('config.keys'),
+      keys: utils.getKeys(),
     }
   }
-  data.presets = store.get('presets')
+  data.presets = utils.getPresets()
 
   return res.status(200).send(data) .end()
 }
@@ -68,18 +65,18 @@ Controller.prototype.getReloadData = async (req, res) => {
  * Helper method to construct the status object
  */
 const getStatus = () => ({
-  info: store.get('info', {}),
+  info: utils.getInfo(),
   state: {
-    uptime: Math.floor((Date.now() - store.get('state.start_time')) / 1000),
-    deployment: utils.isEphemeral() ? undefined : store.get('state.cluster.uuid'),
-    node: utils.isEphemeral() ? undefined : store.get('state.node.uuid'),
-    node_serial: utils.isEphemeral() ? undefined : store.get('state.node.serial'),
-    core: store.node,
+    uptime: Math.floor((Date.now() - utils.getStartTime()) / 1000),
+    deployment: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
+    node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
+    node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
+    core: utils.getNode(),
     ephemeral: utils.isEphemeral(),
-    ephemeral_uuid: utils.isEphemeral() ? undefined : store.get('state.ephemeral_uuid'),
-    reconfigure_count: store.get('state.reconfigure_count'),
-    config_resolved: store.get('state.config_resolved'),
-    settings_serial: store.get('state.settings_serial'),
+    ephemeral_uuid: utils.isEphemeral() ? undefined : utils.getEphemeralUuid(),
+    reconfigure_count: utils.getReconfigureCount(),
+    config_resolved: utils.isConfigResolved(),
+    settings_serial: utils.getSettingsSerial(),
   }
 })
 

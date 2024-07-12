@@ -1,5 +1,4 @@
-// Store
-import { log, utils, store } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { joinSwarm, verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
@@ -53,11 +52,11 @@ Controller.prototype.heartbeat = async (req, res) => {
    * Always return status 200, be specific in the data
    */
   return res.status(200).send({
-    deployment: store.get('state.cluster.uuid'),
-    node: store.get('state.node.uuid'),
-    node_serial: Number(store.get('state.node.serial')),
-    settings_serial: Number(store.get('state.settings_serial')),
-    version: store.get('info.version'),
+    deployment: utils.getClusterUuid(),
+    node: utils.getNodeUuid(),
+    node_serial: Number(utils.getNodeSerial()),
+    settings_serial: Number(utils.getSettingsSerial()),
+    version: utils.getVersion(),
     report,
   })
 }

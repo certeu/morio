@@ -23,10 +23,10 @@ import {
   generateContainerConfig,
   generateSwarmServiceConfig,
   storeRunningServices,
-  //serviceImageFromConfig,
-  //serviceImageFromState,
   stopLocalService,
   stopSwarmService,
+  serviceContainerImageFromConfig,
+  serviceContainerImageFromState,
 } from '#lib/docker'
 // log & utils
 import { log, utils } from '../utils.mjs'
@@ -284,8 +284,8 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   utils.setDockerServiceConfig(
     serviceName,
     swarm
-      ? generateSwarmServiceConfig(utils.getMorioServiceConfig(serviceName))
-      : generateContainerConfig(utils.getMorioServiceConfig(serviceName))
+      ? generateSwarmServiceConfig(serviceName)
+      : generateContainerConfig(serviceName)
   )
 
   /*
@@ -347,8 +347,11 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Always recreate if the container image is different
    */
   const imgs = {
-    current: utils.getServiceContainerImageFromState(serviceName),
-    next: utils.getServiceContainerImageFromConfig(serviceName),
+    current: serviceContainerImageFromState(utils.isSwarmService(serviceName)
+      ? utils.getSwarmServiceState(serviceName)
+      : utils.getLocalServiceState(serviceName)
+    ),
+    next: serviceContainerImageFromConfig(utils.getMorioServiceConfig(serviceName)),
   }
   if (imgs.next !== imgs.current) {
     if (imgs.current !== false) log.debug(`${serviceName}: Container image changed from ${imgs.current} to ${imgs.next}`)
@@ -546,6 +549,7 @@ export async function defaultRecreateServiceHook(service, hookParams) {
    * If container name or image changes, recreate it
    */
   const cConf = utils.getMorioServiceConfig(service).container
+  console.log({cConf})
   if (
     hookParams?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
     hookParams?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`

@@ -1,16 +1,24 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.get('info.production', false)
+  const PROD = utils.isProduction()
+
+  /*
+   * Name to advertise
+   */
+  const NAME = utils.isDistributed()
+    ? utils.getSettings('deployment.fqdn')
+    : utils.getSettings('deployment.nodes')[0]
+
 
   /*
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
-  const NODE = store.get('state.node.serial', 1)
+  const NODE = utils.getNodeSerial() || 1
 
   return {
     /**
@@ -79,7 +87,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
          * Flag to enable developer mode,
          * which skips most of the checks performed at startup.
          */
-        developer_mode: store.info.production ? false : true,
+        developer_mode: PROD ? false : true,
 
         /*
          * Broker won't start without a data directory
@@ -168,7 +176,8 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
             name: 'internal',
           },
           {
-            address: store.config.core?.names?.external,
+            // FIXME - Is this the correct name?
+            address: NAME,
             // Advertise the mapped port
             port: 9092,
             name: 'external',
@@ -183,12 +192,12 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
          * Organisation name helps identify this as a Morio system
          */
         // This breaks, not expected here?
-        //organization: store.config?.core?.display_name || 'Nameless Morio',
+        //organization: utils.getSettings('deployment.display_name') || 'Nameless Morio',
 
         /*
          * Cluster ID helps differentiate different Morio deployments
          */
-        cluster_id: store.get('state.cluster.uuid', Date.now()),
+        cluster_id: utils.getClusterUuid(),
 
         /*
          * Enable audit log FIXME
@@ -208,7 +217,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
         /*
          * Default replication for topics
          */
-        default_topic_replications: store.get('settings.resolved.deployment.nodes', []).length < 4 ? 1 : 3,
+        default_topic_replications: utils.getSettings('deployment.nodes').length < 4 ? 1 : 3,
 
         /*
          * These were auto-added, but might not be a good fit for production
@@ -244,7 +253,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
          */
         advertised_pandaproxy_api: [
           {
-            address: store.config.core?.names?.external,
+            address: NAME,
             name: 'external',
             port: 443,
           },

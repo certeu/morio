@@ -1,4 +1,4 @@
-import { store } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { Controller } from '#controllers/settings'
 
 const Settings = new Controller()
@@ -20,11 +20,10 @@ export function routes(app) {
   app.post('/settings', Settings.deploy)
 
   /*
-   * Load the current (running) settings
-   * This will return the saveSettings as stored in the store
-   * Save settings means secrets are not decrypted
+   * Load (the sanitized version of) the current settings.
+   * Which means they are not decrypted (no secrets).
    */
-  app.get('/settings', (req, res) => res.send(store.get('saveSettings', {})))
+  app.get('/settings', (req, res) => res.send(utils.getSanitizedSettings()))
 
   /*
    * Load the available authentication/identity providers (IDPs)

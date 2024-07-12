@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.get('info.production', false)
+  const PROD = utils.isProduction()
   const DIRS = {
     data: utils.getPreset('MORIO_DATA_ROOT'),
     dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),

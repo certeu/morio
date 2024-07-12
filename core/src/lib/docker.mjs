@@ -1,13 +1,12 @@
 import { Buffer } from 'node:buffer'
 import { getPreset } from '#config'
 import Docker from 'dockerode'
-// Store
-import { store, log, utils } from './utils.mjs'
+import { log, utils } from './utils.mjs'
 import { isServiceUp } from './services/index.mjs'
 
 /**
  * This is the docker client as provided by dockerode
- * We cannot use the getPreset attached to store here as this runs
+ * We cannot use the getPreset attached to utils here as this runs
  * before core is configured.
  */
 export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') })
@@ -123,14 +122,14 @@ export const createSwarmService = async (serviceName, config) => {
  */
 export const getLocalServiceId = async (serviceName) => {
   /*
-   * Update store with currently running local services
+   * Update state with currently running local services
    */
   await storeLocalSwarmRunningServices()
 
   /*
    * Return the ID or false if it's not found
    */
-  return store.get(['state', 'services', 'local', serviceName, 'ID'], false)
+  return utils.getLocalServiceState(serviceName)?.ID || false
 }
 
 /**
@@ -150,7 +149,7 @@ export const getSwarmServiceId = async (serviceName) => {
   /*
    * Return the ID or false if it's not found
    */
-  return store.get(['state', 'services', 'swarm', serviceName, 'ID'], false)
+  return utils.getSwarmServiceState(serviceName).ID || false
 }
 
 /**
@@ -207,7 +206,7 @@ export const createDockerNetwork = async (name, type='swarm') => {
     //  }]
     //},
   }
-  if (swarm && !store.getFlag('DISABLE_SWARM_OVERLAY_ENCRYPTION')) config.Options = { encrypted: 'true' }
+  if (swarm && !utils.getFlag('DISABLE_SWARM_OVERLAY_ENCRYPTION')) config.Options = { encrypted: 'true' }
   // FIXME: Support setting MTU perhaps? Something like
   // if (whatever) config.Options['com.docker.network.mtu'] = '1333'
 
@@ -319,7 +318,8 @@ export const attachToDockerNetwork = async (serviceName, network, endpointConfig
  * @param {object} config - The resolved service configuration
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateContainerConfig = (config) => {
+export const generateContainerConfig = (serviceName) => {
+  const config = utils.getMorioServiceConfig(serviceName)
   /*
    * Basic options
    */
@@ -336,13 +336,13 @@ export const generateContainerConfig = (config) => {
       },
     },
     Hostname: name,
-    Image: serviceImageFromConfig(config),
+    Image: serviceContainerImageFromConfig(config),
     NetworkingConfig: {
       EndpointsConfig: {},
     },
   }
   opts.NetworkingConfig.EndpointsConfig[utils.getNetworkName()] = {
-    Aliases: [name, `${name}_${store.get('node.serial', 1)}`, ...aliases],
+    Aliases: [name, `${name}_${utils.getNodeSerial() || 1}`, ...aliases],
   }
 
   /*
@@ -406,15 +406,15 @@ export const generateContainerConfig = (config) => {
  * This will take the service configuration and build an options
  * object to configure the service as listed in this file
  *
- * @param {object} config - The resolved service configuration
+ * @param {string} serviceName - The name of the service
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateSwarmServiceConfig = (config) => {
+export const generateSwarmServiceConfig = (serviceName) => {
 
+  const config = utils.getMorioServiceConfig(serviceName)
   const name = config.container.container_name
   const aliases = config.container.aliases || []
   log.debug(`${name}: Generating swarm service configuration`)
-
   /*
    * Basic options
    */
@@ -422,11 +422,11 @@ export const generateSwarmServiceConfig = (config) => {
     Name: name,
     Labels: {
       'morio.service': name,
-      'morio.cluster.uuid': store.get('state.cluster.uuid'),
+      'morio.cluster.uuid': utils.getClusterUuid(),
     },
     TaskTemplate: {
       ContainerSpec: {
-        Image: serviceImageFromConfig(config),
+        Image: serviceContainerImageFromConfig(config),
         Labels: {},
         Hostname: name,
       }
@@ -517,7 +517,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
   let cache = false
   if (apiCache.api.includes(cmd)) {
     cache = `docker.api.${cmd}`
-    const hit = utils.cacheHit(cache)
+    const hit = utils.getCacheHit(cache)
     if (hit) return [true, hit]
   }
   log.trace(`core: Running Docker command: ${cmd}`)
@@ -535,7 +535,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
   /*
    * Cache the result if cacheable
    */
-  if (cache) store.setCache(cache, result)
+  if (cache) utils.setCache(cache, result)
 
   return [true, result]
 }
@@ -767,7 +767,7 @@ export const runDockerCliCommand = async (cmd, ...params) => {
 }
 
 /**
- * This helper method stores a list of running services (both local and on the swarm)
+ * This helper method saves a list of running services (both local and on the swarm) to state
  */
 export const storeRunningServices = async () => {
   await storeLocalRunningServices()
@@ -775,42 +775,54 @@ export const storeRunningServices = async () => {
 }
 
 /**
- * This helper method stores a list of running local services
+ * This helper method saves a list of running local services to state
  */
 export const storeLocalRunningServices = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */
-  store.set('state.services.local', {})
+  utils.clearLocalServicesState()
 
   const [localOk, runningLocalServices] = await runDockerApiCommand('listContainers')
   if (localOk) {
     for (const service of runningLocalServices) {
-      store.set(['state', 'services', 'local', service.Names[0].split('/').pop()], service)
+      utils.setLocalServiceState(service.Names[0].split('/').pop(), service)
     }
   }
 }
 
 /**
- * This helper method stores a list of running swarm services
+ * This helper method saves a list of running swarm services
  */
 export const storeSwarmRunningServices = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */
-  store.set('state.services.swarm', {})
+  utils.clearSwarmServicesState()
 
   if (utils.isSwarm()) {
     const [swarmOk, runningSwarmServices] = await runDockerApiCommand('listServices')
     if (swarmOk) {
       for (const service of runningSwarmServices) {
-        store.set(['state', 'services', 'swarm', service.Spec.Name], service)
+        utils.setSwarmServiceState(service.Spec.Name, service)
       }
     }
   }
 }
 
+/**
+ * Helper method to get the container image for a service from the config
+ *
+ * @param {object} config - The service config object
+ * @return {string} imagee - The container image for this service
+ */
+export const serviceContainerImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
 
+/**
+ * Helper method to get the container image for a service from the state
+ *
+ * @param {object} state - The service state object
+ * @return {string} imagee - The container image for this service
+ */
+export const serviceContainerImageFromState = (state) => state?.Image ? state.Image : false
 
-//export const serviceImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
-//export const serviceImageFromState = (state) => state?.Image ? state.Image : false

@@ -1,7 +1,7 @@
 import { ensureMorioNetwork } from './services/index.mjs'
 import { getCoreIpAddress } from './services/core.mjs'
 // Utilities
-import { store, log, utils } from './utils.mjs'
+import { log, utils } from './utils.mjs'
 
 /**
  * Ensure the local Docker node is ready to deploy services on
@@ -12,8 +12,8 @@ import { store, log, utils } from './utils.mjs'
  * to ensure we can reach flanking nodes whne they are added.
  */
 export const ensureMorioStandaloneNode = async () => {
-  store.set('state.core_ready', false)
-  store.set('state.node.serial', 1)
+  utils.setCoreReady(false)
+  utils.setNodeSerial(1)
 
   /*
    * Ensure the local network exists, and we're attached to it.
@@ -31,11 +31,11 @@ export const ensureMorioStandaloneNode = async () => {
   }
 
   /*
-   * Store the core IP address too
+   * Save the core IP address too
    */
   const ip = await getCoreIpAddress()
   log.debug(`Local core IP address: ${ip}`)
-  store.set('state.node.core_ip', ip)
-  store.set('state.core_ready', true)
+  utils.setNodeIp(ip)
+  utils.setCoreReady(true)
 }
 

@@ -1,16 +1,16 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.get('info.production', false)
+  const PROD = utils.isProduction()
 
   /*
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
-  const NODE = store.get('state.node.serial', 1)
+  const NODE = utils.getNodeSerial()
 
   return {
     /**
@@ -70,7 +70,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
        * Set node name based on the node serial and nodes list
        */
       node: {
-        name: store.config?.deployment?.nodes[NODE - 1],
+        name: utils.getSettings('deployment.nodes')[(NODE - 1)],
       },
       /*
        * Set the log level and format
@@ -113,7 +113,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       },
       api: {
         enabled: true,
-        environment: store.config?.deployment?.nodes[(NODE - 1)],
+        environment: utils.getSettings('deployment.nodes')[(NODE - 1)],
         http: {
           host: '0.0.0.0'
         },

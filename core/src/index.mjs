@@ -7,8 +7,8 @@ import { startMorio } from './lib/services/index.mjs'
 import { routes } from '#routes/index'
 // Middleware
 import { guardRoutes } from './middleware.mjs'
-// Load the store, logger, and utils
-import { store, log, utils } from './lib/utils.mjs'
+// Load the logger and utils
+import { log, utils } from './lib/utils.mjs'
 
 /*
  * Say hello

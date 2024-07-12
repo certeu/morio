@@ -33,20 +33,6 @@ try {
 }
 
 /*
- * Add some basic info to the store
- */
-store
-  .set('state.start_time', Date.now())
-  .set('state.reconfigure_count', 0)
-  .set('state.ephemeral', true)
-  .set('info', {
-    about: 'Morio Core',
-    name: '@morio/core',
-    production: inProduction(),
-    version: getPreset('MORIO_VERSION'),
-  })
-
-/*
  * Export an utils instance to hold utility methods
  */
 export const utils = new Store(log)
@@ -72,7 +58,7 @@ utils.getCache = (path) => store.get(unshift(['cache'], path), false)
  * @param {string|array} key - Path to the key in the cache, as an array or dot.notation.tring
  */
 utils.getCacheHit = (key) => {
-  const hit = store.getCache(key)
+  const hit = utils.getCache(key)
   return (hit && (Date.now() - hit.time  < 15000))
     ? hit.value
     : false
@@ -100,14 +86,14 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getClusterLeaderSerial = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial'])
+utils.getClusterLeaderSerial = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial']
 
 /**
  * Helper method to get the uuid of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getClusterLeaderUuid = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid'])
+utils.getClusterLeaderUuid = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
 
 /**
  * Helper method to get the state.core_ready value
@@ -117,10 +103,18 @@ utils.getCoreReady = () => store.get('state.core_ready')
 /**
  * Helper method to get a Docer service configuration
  *
- * @param {string} service - The name of the service for which to retrieve the docker service configuration
+ * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
  * @return {object} config - The docker service configuration
  */
-utils.getDockerServiceConfig = (service) => store.get(['config', 'services', 'docker', service])
+utils.getDockerServiceConfig = (serviceName) => store.get(['config', 'services', 'docker', serviceName])
+
+/**
+ * Helper method to get a Docer service configuration
+ *
+ * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
+ * @return {object} config - The docker service configuration
+ */
+utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 
 /**
  * Helper method to get a flag from the settings
@@ -136,6 +130,13 @@ utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', 
  * @return {number} id - The setTimeout id which allows clearing the timetout
  */
 utils.getHeartbeatOut = () => store.get('state.cluster.heartbeat.out')
+
+/**
+ * Helper method to get the info data
+ *
+ * @return {object} info - The info object
+ */
+utils.getInfo = () => store.get('info')
 
 /**
  * Helper method to get the keys configuration
@@ -157,15 +158,29 @@ utils.getLocalServicesState = () => store.get(['state', 'services', 'local'])
  * @param {string} service - The name of the local service for which to retrieve the sate
  * @return {object} state - The service state
  */
-utils.getLocalServiceState = (service) => store.get(['state', 'services', 'local', service])
+utils.getLocalServiceState = (service) => store.get(['state', 'services', 'local', service], false)
 
 /**
  * Helper method to get a Morio service configuration
  *
- * @param {string} service - The name of the service for which to retrieve the configuration
+ * @param {string} serviceName - The name of the service for which to retrieve the configuration
  * @return {object} config - The service configuration
  */
-utils.getMorioServiceConfig = (service) => store.get(['config', 'services', 'morio', service])
+utils.getMorioServiceConfig = (serviceName) => store.get(['config', 'services', 'morio', serviceName])
+
+/**
+ * Helper method to get the local node
+ *
+ * @return {object} node - The local node
+ */
+utils.getNode = () => store.get('state.node')
+
+/**
+ * Helper method to get the IP of the local core container
+ *
+ * @return {string} ip - The IP address of core
+ */
+utils.getNodeCoreIp = () => store.get('state.node.core_ip')
 
 /**
  * Helper method to count the number of nodes in the deployment
@@ -210,6 +225,23 @@ utils.getNodeSerial = () => store.get('state.node.serial')
 utils.getNodeUuid = () => store.get('state.node.uuid')
 
 /**
+ * Helper method to get the reconfigure_count
+ *
+ * @return {number} count - The reconfigure count
+ */
+utils.getReconfigureCount = () => store.get('state.reconfigure_count')
+
+/**
+ * Helper method to get the sanitized settings
+ *
+ * Node that unlike getSettings, this always returns the entire object
+ * as it's only used in the route to provide this object to the API
+ *
+ * @return {object} settings - The sanitized settings object
+ */
+utils.getSanitizedSettings = () => store.get('settings.sanitized')
+
+/**
  * Helper method to facilitate getting resolved settings
  *
  * Note that not providing a dflt fallback value will log a WARN message
@@ -219,7 +251,9 @@ utils.getNodeUuid = () => store.get('state.node.uuid')
  * @param {mixed} dflt - A default value to return if none is found
  * @return {object} settings - The settings object
  */
-utils.getSettings = (path, dflt) => store.get(unshift(['settings', 'resolved'], path), dflt)
+utils.getSettings = (path, dflt) => path === undefined
+  ? store.get('settings.resolved', dflt)
+  : store.get(unshift(['settings', 'resolved'], path), dflt)
 
 /**
  * Helper method to get the settings_serial
@@ -229,32 +263,11 @@ utils.getSettings = (path, dflt) => store.get(unshift(['settings', 'resolved'], 
 utils.getSettingsSerial = () => store.get('state.settings_serial')
 
 /**
- * Helper method to get the container image for a service from the config
+ * Helper method to get the start_time
  *
- * @param {string} service - The name of the service
- * @return {string} imagee - The container image for this service
+ * @return {number} time - The timestamp of when core was started
  */
-utils.getServiceContainerImageFromConfig = (service) => {
-  const config = store.get(['config', 'services', 'morio', serviceName])
-
-  return config?.container?.image
-    ? config.container.image
-    : false
-}
-
-/**
- * Helper method to get the container image for a service from the state
- *
- * @param {string} service - The name of the service
- * @return {string} imagee - The container image for this service
- */
-utils.getServiceContainerImageFromState = (service) => {
-  const state = store.get(['state', 'services', utils.isSwarmService(service) ? 'swarm' : 'local', serviceName])
-
-  return state?.Image
-    ? state.Image
-    : false
-}
+utils.getStartTime = () => store.get('state.start_time')
 
 /**
  * Helper method to get the list of swarm followers
@@ -316,7 +329,7 @@ utils.getSwarmServicesState = () => store.get(['state', 'services', 'swarm'])
  * @param {string} service - The name of the swarm service for which to retrieve the sate
  * @return {object} state - The service state
  */
-utils.getSwarmServiceState = (service) => store.get(['state', 'services', 'swarm', service])
+utils.getSwarmServiceState = (service) => store.get(['state', 'services', 'swarm', service], false)
 
 /**
  * Helper method to get the swarm tokens
@@ -368,6 +381,13 @@ utils.getPreset = (key, dflt, opts) => {
   return result
 }
 
+/**
+ * Helper method to get all presets
+ *
+ * @return {object} presets - The object holding all presets
+ */
+utils.getPresets = () => store.get('presets')
+
 /*
  *
  * get[SomethingFromUtils] - Return data from utils
@@ -397,9 +417,337 @@ utils.getHook = (serviceName, hookName) => {
 
 /*
  *
+ * set[SomethingInStore] - Saves data to the store
+ *
+ */
+
+/**
+ * Helper method to set a cache entry
+ *
+ * @param {string|array} path - Path to the key in settings, as an array or dot.notation.triung
+ * @param {mixed} value - The value to store
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setCache = (path, value) => {
+  store.set(unshift(['cache'], path), { value, time: Date.now() })
+  return utils
+}
+
+/**
+ * Helper method to set the CA configuration
+ *
+ * @param {oject} config - The CA configuration to store
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setCaConfig = (config) => {
+  store.set('config.ca', config)
+  return utils
+}
+
+/**
+ * Helper method to set the cluster UUID
+ *
+ * @param {string} uuid - The cluster UUID
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setClusterUuid = (uuid) => {
+  store.set('state.cluster.uuid', uuid)
+  return utils
+}
+
+/**
+ * Helper method to set the core_ready state
+ *
+ * @param {bool} ready - Ready or not
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setCoreReady = (ready) => {
+  store.set('state.core_ready', ready ? true : false)
+  return utils
+}
+
+/**
+ * Helper method to store a Docer service configuration
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} config - The docker configuration object to store
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setDockerServiceConfig = (serviceName, config) => {
+  store.set(['config', 'services', 'docker', serviceName], config)
+  return utils
+}
+
+/**
+ * Helper method to store the epehemral state value
+ *
+ * @param {bool} val - Truthy or falsy value to detemine the ephemeral state
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setEphemeral = (val) => {
+  store.set('state.ephemeral', val ? true : false)
+  return utils
+}
+
+/**
+ * Helper method to store the epehemral uuid
+ *
+ * @param {string} uuid - The ephemeral UUID
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setEphemeralUuid = (uuid) => {
+  store.set('state.ephemeral_uuid', uuid)
+  return utils
+}
+
+/**
+ * Helper method to store the outgoing heartbeat data
+ *
+ * @param {object} id - The heartbeat setTimeout id
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setHeartbeatOut = (id) => {
+  store.set('state.cluster.heartbeat.out', id)
+  return utils
+}
+
+/**
+ * Helper method for setting all the hooks while making sure they are lowercased
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} hooks - An object holding lifecycle hooks
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setHooks = (serviceName, hooks) => {
+  const allhooks = {}
+  for (const [name, method] of Object.entries(hooks)) {
+    // Force hook names to lowercase
+    allhooks[name.toLowerCase()] = method
+  }
+  utils.set(['hooks', 'services', serviceName.toLowerCase()], allhooks)
+  return utils
+}
+
+/**
+ * Helper method to store the keys config
+ *
+ * @param {object} keys - The keys object as read from disk
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setKeys = (keys) => {
+  store.set('config.keys', keys)
+  return utils
+}
+
+/**
+ * Helper method to store a local service state
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} state - The service state from the Docker API
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLocalServiceState = (serviceName, state) => {
+  store.set(['state', 'services', 'local', serviceName], state)
+  return utils
+}
+
+/**
+ * Helper method to store a Morio service configuration
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} config - The configuration object to store
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setMorioServiceConfig = (serviceName, config) => {
+  store.set(['config', 'services', 'morio', serviceName], config)
+  return utils
+}
+
+/**
+ * Helper method to set a label on the container section of a Morio service configuration
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} key - The key/name of the label
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
+  const at = ['config', 'services', 'morio', serviceName, 'container', 'labels']
+  const label = `${key}=${value}`
+  const labels = store.get(at, false)
+  if (!labels) store.set(at, [label])
+  else if (!labels.includes(label)) store.push(at, label)
+  return utils
+}
+
+/**
+ * Helper method to store a swarm node state
+ *
+ * @param {string} node - The name of the node
+ * @param {object} state - The node state from the Docker API
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmNodeState = (node, state) => {
+  store.set(['state', 'swarm', 'nodes', node], state)
+  return utils
+}
+
+/**
+ * Helper method to store a swarm service state
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} state - The service state from the Docker API
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmServiceState = (serviceName, state) => {
+  store.set(['state', 'services', 'swarm', serviceName], state)
+  return utils
+}
+
+/**
+ * Helper method to store the state.node object
+ *
+ * @param {object} node - The node object, as read from node.json on disk
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setNode = (node) => {
+  store.set('state.node', node)
+  return utils
+}
+
+/**
+ * Helper method to store the core IP in the state
+ *
+ * @param {string} ip - The IP address of the core container
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setNodeCoreIp = (ip) => {
+  store.set('state.node.core_ip', ip)
+  return utils
+}
+
+/**
+ * Helper method to store the node IP in the state
+ *
+ * @param {string} ip - The IP address of the local node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setNodeIp = (ip) => {
+  store.set('state.node.ip', ip)
+  return utils
+}
+
+/**
+ * Helper method to store the save (unresolved) settings object
+ *
+ * @param {object} settings - The settings object, not resolved
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSanitizedSettings = (settings) => {
+  store.set('settings.sanitized', settings)
+  return utils
+}
+
+/**
+ * Helper method to store the full settings object
+ *
+ * @param {object} settings - The settings object, fully resolved
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSettings = (settings) => {
+  store.set('settings.resolved', settings)
+  return utils
+}
+
+/**
+ * Helper method to store the settings serial
+ *
+ * @param {number|bool} serial - The settings serial, or false in ephemeral mode
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSettingsSerial = (serial) => {
+  store.set('state.settings_serial', Number(serial))
+  return utils
+}
+
+/**
+ * Helper method to set the swarm's leading node name in state
+ *
+ * @param {string} name - Name/Id of the leading node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmLeadingNode = (name) => {
+  store.set('state.swarm.leader', name)
+  return utils
+}
+
+/**
+ * Helper method to set the swarm's local_node name in state
+ *
+ * @param {string} name - Name/Id of the local node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmLocalNode = (name) => {
+  store.set('state.swarm.local_node', name)
+  return utils
+}
+
+/**
+ * Helper method to set whether the local node is leading the swarm in state
+ *
+ * @param {string} leading - Whether we are loeading or not
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmLocalNodeLeading = (leading) => {
+  store.set('state.swarm.leading', leading ? true : false)
+  return utils
+}
+
+/**
+ * Helper method to set the swarm_ready state
+ *
+ * @param {bool} ready - Ready or not
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmReady = (ready) => {
+  store.set('state.swarm_ready', ready ? true : false)
+  return utils
+}
+
+/**
+ * Helper method to set the swarm tokens
+ *
+ * @param {string} tokens - The swrm tokens
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setSwarmTokens = (tokens) => {
+  store.set('state.swarm.tokens', tokens)
+  return utils
+}
+
+/**
+ * Helper method to set the Morio version
+ *
+ * @param {string} version - The version number/string
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setVersion = (version) => {
+  store.set('info.version', version)
+  return utils
+}
+
+/*
+ *
  * is[Something] - Checks for things, returns true or false only
  *
  */
+store.set('state.config_resolved', false)
+
+/**
+ * Helper method to see whether the config is resolved
+ *
+ * @return {bool} resolved - True if the config is resolved, false if not
+ */
+utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
 
 /**
  * Helper method to see if brokers are distributed
@@ -436,6 +784,13 @@ utils.isLocalSwarmNode = (node) => (
   node.Description.Hostname === store.get('state.node.hostname')
 )
 
+/*
+ * Determined whether we are running in production or not
+ *
+ * @return {bool} leading - True if the local swarm node is leading, false if not
+ */
+utils.isProduction = () => inProduction() ? true : false
+
 /**
  * Helper method to determine whether to run a swarm or not
  *
@@ -451,226 +806,12 @@ utils.isSwarm = () => (utils.isEphemeral() || utils.getFlag('NEVER_SWARM')) ? fa
  */
 utils.isSwarmService = (serviceName) => (!utils.isSwarm() || neverSwarmServices.includes(serviceName) || utils.getFlag('NEVER_SWARM')) ? false : true
 
-/*
- *
- * set[SomethingInStore] - Saves data to the store
- *
- */
-
 /**
- * Helper method to set a cache entry
+ * Helper method to determine whether we are inside a unit test
  *
- * @param {string|array} path - Path to the key in settings, as an array or dot.notation.triung
- * @param {mixed} value - The value to store
- * @return {object} store - The store instance
+ * @return {bool} swarm - True if Morio should swarm, or false if not
  */
-utils.setCache = (path, value) => store.set(unshift(['cache'], path), { value, time: Date.now() })
-
-/**
- * Helper method to set the CA configuration
- *
- * @param {oject} config - The CA configuration to store
- * @return {object} store - The store instance
- */
-utils.setCaConfig = (config) => store.set('config.ca', config)
-
-/**
- * Helper method to set the core_ready state
- *
- * @param {bool} ready - Ready or not
- * @return {object} store - The store instance
- */
-utils.setCoreReady = (ready) => store.set('state.core_ready', ready ? true : false)
-
-/**
- * Helper method to store a Docer service configuration
- *
- * @param {string} service - The name of the service
- * @param {object} config - The docker configuration object to store
- * @return {object} store - The store instance
- */
-utils.setDockerServiceConfig = (service, config) => store.set(['config', 'services', 'docker', service], config)
-
-/**
- * Helper method to store the epehemral state value
- *
- * @param {bool} val - Truthy or falsy value to detemine the ephemeral state
- * @return {object} store - The store instance
- */
-utils.setEphemeral = (val) => store.set('state.ephemeral', val ? true : false)
-
-/**
- * Helper method to store the epehemral uuid
- *
- * @param {string} uuid - The ephemeral UUID
- * @return {object} store - The store instance
- */
-utils.setEphemeralUuid = (uuid) => store.set('state.ephemeral_uuid', uuid)
-
-/**
- * Helper method to store the outgoing heartbeat data
- *
- * @param {object} id - The heartbeat setTimeout id
- * @return {object} store - The store instance
- */
-utils.setHeartbeatOut = (id) => store.set('state.cluster.heartbeat.out', id)
-
-
-
-/**
- * Helper method for setting all the hooks while making sure they are lowercased
- *
- * @param {string} serviceName - The name of the service
- * @param {object} hooks - An object holding lifecycle hooks
- */
-utils.setHooks = (serviceName, hooks) => {
-  const allhooks = {}
-  for (const [name, method] of Object.entries(hooks)) {
-    // Force hook names to lowercase
-    allhooks[name.toLowerCase()] = method
-  }
-  utils.set(['hooks', 'services', serviceName.toLowerCase()], allhooks)
-}
-
-/**
- * Helper method to store a local service state
- *
- * @param {string} service - The name of the service
- * @param {object} state - The service state from the Docker API
- * @return {object} store - The store instance
- */
-utils.setLocalServiceState = (service, state) => store.set(['state', 'services', 'local', service], state)
-
-/**
- * Helper method to store a Morio service configuration
- *
- * @param {string} service - The name of the service
- * @param {object} config - The configuration object to store
- * @return {object} store - The store instance
- */
-utils.setMorioServiceConfig = (service, config) => store.set(['config', 'services', 'morio', service], config)
-
-/**
- * Helper method to set a label on the container section of a Morio service configuration
- *
- * @param {string} service - The name of the service
- * @param {object} name - The name of the label
- * @param {object} value - The value of the label
- */
-utils.setMorioServiceConfigContainerLabel = (service, name, value) => {
-  const key = ['config', 'services', 'morio', service, 'container', 'labels']
-  const label = `${name}=${value}`
-  const labels = store.get(key, false)
-  if (!labels) store.set(key, [label])
-  else if (!labels.include(label)) store.push(key, label)
-}
-
-/**
- * Helper method to store a swarm node state
- *
- * @param {string} node - The name of the node
- * @param {object} state - The node state from the Docker API
- * @return {object} store - The store instance
- */
-utils.setSwarmNodeState = (node, state) => store.set(['state', 'swarm', 'nodes', node], state)
-
-/**
- * Helper method to store a swarm service state
- *
- * @param {string} service - The name of the service
- * @param {object} state - The service state from the Docker API
- * @return {object} store - The store instance
- */
-utils.setSwarmServiceState = (service, state) => store.set(['state', 'services', 'swarm', service], state)
-
-/**
- * Helper method to store the state.node object
- *
- * @param {object} node - The node object, as read from node.json on disk
- * @return {object} store - The store instance
- */
-utils.setNode = (node) => store.set('state.node', node)
-
-/**
- * Helper method to store the node IP in the state
- *
- * @param {string} ip - The IP address of the local node
- * @return {object} store - The store instance
- */
-utils.setNodeIp = (ip) => store.set('state.node.ip', ip)
-
-/**
- * Helper method to store the save (unresolved) settings object
- *
- * @param {object} settings - The settings object, not resolved
- * @return {object} store - The store instance
- */
-utils.setSanitizedSettings = (settings) => store.set('settings.sanitized', settings)
-
-/**
- * Helper method to store the full settings object
- *
- * @param {object} settings - The settings object, fully resolved
- * @return {object} store - The store instance
- */
-utils.setSettings = (settings) => store.set('settings.resolved', settings)
-
-/**
- * Helper method to store the settings serial
- *
- * @param {number|bool} serial - The settings serial, or false in ephemeral mode
- * @return {object} store - The store instance
- */
-utils.setSettingsSerial = (serial) => store.set('state.settings_serial', Number(serial))
-
-/**
- * Helper method to set the swarm's leading node name in state
- *
- * @param {string} name - Name/Id of the leading node
- * @return {object} store - The store instance
- */
-utils.setSwarmLeadingNode = (name) => store.set('state.swarm.leader', name)
-
-/**
- * Helper method to set the swarm's local_node name in state
- *
- * @param {string} name - Name/Id of the local node
- * @return {object} store - The store instance
- */
-utils.setSwarmLocalNode = (name) => store.set('state.swarm.local_node', name)
-
-/**
- * Helper method to set whether the local node is leading the swarm in state
- *
- * @param {string} leading - Whether we are loeading or not
- * @return {object} store - The store instance
- */
-utils.setSwarmLocalNodeLeading = (leading) => store.set('state.swarm.leading', leading ? true : false)
-
-/**
- * Helper method to set the swarm_ready state
- *
- * @param {bool} ready - Ready or not
- * @return {object} store - The store instance
- */
-utils.setSwarmReady = (ready) => store.set('state.swarm_ready', ready ? true : false)
-
-/**
- * Helper method to set the swarm tokens
- *
- * @param {string} tokens - The swrm tokens
- * @return {object} store - The store instance
- */
-utils.setSwarmTokens = (tokens) => store.set('state.swarm.tokens', tokens)
-
-/**
- * Helper method to set the Morio version
- *
- * @param {string} version - The version number/string
- * @return {object} store - The store instance
- */
-utils.setVersion = (version) => store.set('info.version', version)
-
+utils.isUnitTest = () => store.get('testing', false) ? true : false
 
 /*
  *
@@ -681,56 +822,97 @@ utils.setVersion = (version) => store.set('info.version', version)
 /**
  * Helper method add an entry the list of swarm followers in the state
  *
- * @return {object} store - The store instance
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.addSwarmFollower = (follower) => store.push('state.swarm.followers', follower)
+utils.addSwarmFollower = (follower) => {
+  store.push('state.swarm.followers', follower)
+  return utils
+}
 
 /**
  * Helper method for starting ephemeral state
  *
- * @return {object} store - The store instance
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.beginEphemeral = () => store.set('state.ephemeral', true)
+utils.beginEphemeral = () => {
+  store.set('state.ephemeral', true)
+  return utils
+}
 
 /**
  * Helper method for starting a reconfigure event
+ *
+ * @return {object} utils - The utils instance, making this method chainable
  */
 utils.beginReconfigure = () => {
   log.debug('core: Start reconfigure')
   store.set('state.config_resolved', false)
   store.set('state.reconfigure_time', Date.now())
+  return utils
+}
+
+/**
+ * Helper method clear the list of local services
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.clearLocalServicesState = () => {
+  store.set('state.services.local', {})
+  return utils
 }
 
 /**
  * Helper method clear the list of swarm followers in the state
  *
- * @return {object} store - The store instance
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.clearSwarmFollowers = () => store.set('state.swarm.followers', [])
+utils.clearSwarmFollowers = () => {
+  store.set('state.swarm.followers', [])
+  return utils
+}
+
+/**
+ * Helper method clear the list of swarm services
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.clearSwarmServicesState = () => {
+  store.set('state.services.swarm', {})
+  return utils
+}
 
 /**
  * Helper method for ending ephemeral state
  *
- * @return {object} store - The store instance
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.endEphemeral = () => store.set('state.ephemeral', false)
+utils.endEphemeral = () => {
+  store.set('state.ephemeral', false)
+  return utils
+}
 
 /**
  * Helper method for ending a reload event
+ *
+ * @return {object} utils - The utils instance, making this method chainable
  */
 utils.endReconfigure = () => {
   store.set('state.config_resolved', true)
   store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
   const serial = store.get('state.settings_serial')
   log.info(`core: Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
+  return utils
 }
 
 /**
  * Store the cluster state age (time it was last refreshed)
  *
- * @return {object} store - The store instance
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.resetClusterStateAge = () => store.set('state.swarm.updated', Date.now())
+utils.resetClusterStateAge = () => {
+  store.set('state.swarm.updated', Date.now())
+  return utils
+}
 
 /*
  *
@@ -771,6 +953,20 @@ utils.sendErrorResponse = (res, template, route=false) => {
 
   return res.type('application/problem+json').status(data.status).send(data).end()
 }
+
+/**
+ * Add some basic info to the store at start time
+ */
+store
+  .set('state.start_time', Date.now())
+  .set('state.reconfigure_count', 0)
+  .set('state.ephemeral', true)
+  .set('info', {
+    about: 'Morio Core',
+    name: '@morio/core',
+    production: inProduction(),
+    version: getPreset('MORIO_VERSION'),
+  })
 
 /**
  * Helper method to push a prefix to a set path

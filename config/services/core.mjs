@@ -1,11 +1,11 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.get('info.production', false)
+  const PROD = isProduction()
 
   return {
     /**
@@ -18,7 +18,7 @@ export const resolveServiceConfiguration = ({ store, utils }) => {
       // Name to use for the running container
       container_name: 'core',
       // Image to run (different in dev)
-      image: PROD ? 'morio/core' : store.testing ? 'morio/core-test' : 'morio/core-dev',
+      image: PROD ? 'morio/core' : utils.isUnitTest() ? 'morio/core-test' : 'morio/core-dev',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network

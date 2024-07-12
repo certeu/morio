@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ store, utils }) => ({
+export const resolveServiceConfiguration = ({ utils }) => ({
   /**
    * Container configuration
    *

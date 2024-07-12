@@ -284,7 +284,7 @@ export const ensureMorioClusterConsensus = async () => {
     /*
      * Did all nodes join the cluster?
      */
-    if (utils.nodeCount() > utils.getSwarmFollowers().length + 1) {
+    if (utils.getNodeCount() > utils.getSwarmFollowers().length + 1) {
       await inviteClusterNodes()
     }
   } else {
@@ -439,7 +439,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
    */
-  if (data.version !== utils.getVersion() {
+  if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     report.errors.push(err)
     report.actions.push('RESYNC')
@@ -450,7 +450,7 @@ export const verifyHeartbeatRequest = async (data) => {
    * Verify settings_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  if (data.settings_serial !== utils.getSettingsSerial() {
+  if (data.settings_serial !== utils.getSettingsSerial()) {
     const err = 'SETTINGS_SERIAL_MISMATCH'
     report.errors.push(err)
     report.action = 'SYNC'
@@ -561,12 +561,12 @@ export const ensureMorioCluster = async ({
   /*
    * Is the cluster healthy?
    */
-  store.set('state.core_ready', await isClusterHealthy())
+  utils.setCoreReady((await isClusterHealthy()))
 
   /*
    * Store the core IP address too
    */
-  store.set('state.node.core_ip', await getCoreIpAddress())
+  utils.setNodeCoreIp((await getCoreIpAddress()))
 }
 
 /**
@@ -656,12 +656,8 @@ const inviteClusterNode = async (remote) => {
  * @params {string} remote - The FQDN of the remote node
  */
 const inviteClusterNodeAttempt = async (local, remote) => {
-  const key = ['state', 'cluster', 'joins', remote]
-  const akey = [...key, 'attempts']
-  const attempt = store.get(akey, 0) + 1
-  log.info(`Sending Join Request #${attempt} to ${remote}`)
-  store.set(akey, attempt)
-  const flanking = store.getSettings('deployment.flanking_nodes', []).includes(remote)
+  log.info(`Sending Join Request to ${remote}`)
+  const flanking = utils.getSettings('deployment.flanking_nodes', []).includes(remote)
 
   const result = await testUrl(
     `https://${remote}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
@@ -671,13 +667,13 @@ const inviteClusterNodeAttempt = async (local, remote) => {
         you: remote,
         join: local,
         as: flanking ? 'flanking_node' : 'node',
-        cluster: store.get('state.cluster.uuid'),
-        token: store.get(`state.swarm.tokens.${flanking ? 'Worker' :'Manager'}`),
+        cluster: utils.getClusterUuid(),
+        token: utils.getSwarmTokens()[flanking ? 'Worker' :'Manager'],
         settings: {
-          serial: Number(store.get('state.settings_serial')),
-          data: store.get('settings.sanitized'),
+          serial: Number(utils.getSettingsSerial()),
+          data: utils.getSanitizedSettings(),
         },
-        keys: store.get('config.keys'),
+        keys: utils.getKeys(),
       },
       ignoreCertificate: true,
       timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
@@ -686,11 +682,10 @@ const inviteClusterNodeAttempt = async (local, remote) => {
     }
   )
   if (result) {
-    store.set([...key, 'result'], result)
-    if (store.get([...key, 'interval'], false)) clearInterval(store.get([...key, 'interval']))
+    // FIXME
     return true
   } else {
-    store.set([...key, 'attempt'], store.get([...key, 'attempts'], 1) + 1)
+    // FIXME
     return false
   }
 }

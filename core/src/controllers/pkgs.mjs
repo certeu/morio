@@ -5,7 +5,7 @@ import { writeFile, writeYamlFile } from '#shared/fs'
 import { resolveClientConfiguration } from '#config/clients/linux'
 import { createX509Certificate } from '#lib/services/core'
 // Utilities
-import { store, log, utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 
 /**
  * This pkgs controller handles the Morio client packages  endpoints
@@ -27,7 +27,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
    */
   const rev = await loadRevision()
 
-  return res.send({ ...debDefaults, Version: store.get('info.version'), Revision: rev + 1 })
+  return res.send({ ...debDefaults, Version: utils.getVersion(), Revision: rev + 1 })
 }
 
 /**
@@ -71,7 +71,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
    * into /morio/dbuilder by the dbuilder precreate hook
    */
   await writeFile('/morio/core/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
-  await writeFile('/morio/core/clients/linux/etc/morio/ca.pem', store.get('ca.certificate'))
+  await writeFile('/morio/core/clients/linux/etc/morio/ca.pem', utils.getCaConfig().certificate)
   await writeFile('/morio/core/clients/linux/etc/morio/key.pem', certAndKey.key)
 
   /*
@@ -92,7 +92,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   for (const type of ['audit', 'logs', 'metrics']) {
     await writeYamlFile(
       `/morio/data/clients/linux/etc/morio/${type}/config-template.yml`,
-      resolveClientConfiguration(type, store),
+      resolveClientConfiguration(type, utils),
       log
     )
   }
