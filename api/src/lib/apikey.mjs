@@ -47,7 +47,7 @@ const values = {
  * Helper method to load an apikey (or rather its data)
  *
  * @param {string} id - The unique id (the key)
- * @return {object} data - The data stored for the API key
+ * @return {object} data - The data saved for the API key
  */
 export const loadApikey = async (id) => {
   const [status, result] = await db.read(`SELECT * FROM apikeys WHERE id=:id`, {
@@ -69,7 +69,7 @@ export const loadApikey = async (id) => {
  * Helper method to load API keys for a given account
  *
  * @param {string} id - The unique id (in provider.username format)
- * @return {object} keys - The API keys  stored for the account
+ * @return {object} keys - The API keys saved for the account
  */
 export const loadAccountApikeys = async (id) => {
   const [status, result] = await db.read(
@@ -83,7 +83,7 @@ export const loadAccountApikeys = async (id) => {
 /**
  * Helper method to create an API key
  *
- * @param {object} data - The data to store for the API key
+ * @param {object} data - The data to save for the API key
  */
 export const saveApikey = async (id = false, data) => {
   /*
@@ -150,11 +150,11 @@ export const listApikeys = async () => {
 }
 
 /**
- * Helper method to store the last login time in the apikey data
+ * Helper method to save the last login time in the apikey data
  *
  * @param {string} id - The id of the apikey (the key)
  */
-export const storeLastLoginTime = async (id) => await saveApikey(id, { lastLogin: asTime() })
+export const updateLastLoginTime = async (id) => await saveApikey(id, { lastLogin: asTime() })
 
 /**
  * Helper method to parse results into an array of objects

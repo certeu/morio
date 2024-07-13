@@ -1,9 +1,9 @@
-import { store, log} from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { roles } from '#config/roles'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'
-import { storeLastLoginTime } from '../lib/account.mjs'
+import { updateLastLoginTime } from '../lib/account.mjs'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -20,7 +20,7 @@ const strategy = (id) => {
   /*
    * Get provider from settings
    */
-  const provider = store.getSettings(['iam', 'providers', id], false)
+  const provider = utils.getSettings(['iam', 'providers', id], false)
 
   if (!provider) return false
 
@@ -78,7 +78,7 @@ export const ldap = (id, data, req) => {
   /*
    * Get provider from settings
    */
-  const provider =  store.getSettings(['iam', 'providers', id])
+  const provider =  utils.getSettings(['iam', 'providers', id])
 
   /*
    * Passport uses callback style, so we'll wrap this in a Promise to support async
@@ -137,9 +137,9 @@ export const ldap = (id, data, req) => {
           ])
 
         /*
-         * Store the latest login time, but don't wait for it
+         * Update the latest login time, but don't wait for it
          */
-        storeLastLoginTime(id, username)
+        updateLastLoginTime(id, username)
 
         return resolve([
           true,

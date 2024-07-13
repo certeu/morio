@@ -1,5 +1,5 @@
-import { store } from '../lib/utils.mjs'
-import { storeLastLoginTime } from '../lib/account.mjs'
+import { utils } from '../lib/utils.mjs'
+import { updateLastLoginTime } from '../lib/account.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
 
 /**
@@ -17,11 +17,11 @@ export const mrt = async (id, data) => {
   /*
    * Authenticate
    */
-  if (id === 'mrt' && data.mrt === store.get('config.keys.mrt')) {
+  if (id === 'mrt' && data.mrt === utils.getKeys().mrt) {
     /*
-     * Store the latest login time, but don't wait for it
+     * Update the latest login time, but don't wait for it
      */
-    storeLastLoginTime('mrt', 'root')
+    updateLastLoginTime('mrt', 'root')
 
     /*
      * Is the role available? Since this is the root token,

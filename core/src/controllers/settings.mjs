@@ -1,4 +1,5 @@
 import { resolveHostAsIp } from '#shared/network'
+import { setIfUnset } from '#shared/store'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import {
   generateJwtKey,
@@ -10,7 +11,7 @@ import {
 import { reconfigure } from '../index.mjs'
 import { cloneAsPojo, attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
-import { log, utils, setIfUnset } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 
 /**
  * This settings controller handles settings routes

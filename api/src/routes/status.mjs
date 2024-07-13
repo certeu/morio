@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/status'
-import { store } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 const Status = new Controller()
 
@@ -9,7 +9,7 @@ const Status = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.getPrefix()
+  const PREFIX = utils.getPrefix()
 
   /*
    * Hit this route to get the Morio status

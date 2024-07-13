@@ -1,7 +1,6 @@
 import { roles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
-// Load the store
-import { store, log } from './utils.mjs'
+import { utils, log } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 
@@ -62,7 +61,7 @@ export const asRole = (data) => {
  */
 const asProvider = (data) => {
   const p = String(data).toLowerCase()
-  if (Object.keys(store.get('config.iam.providers', {})).includes(p)) return p
+  if (Object.keys(utils.getSettings('iam.providers', {})).includes(p)) return p
   else {
     log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
     return ''
@@ -119,7 +118,7 @@ const values = {
  *
  * @param {string} provider - The ID of the identity provider
  * @param {string} id - The unique id (the username)
- * @return {object} data - The data stored for the account
+ * @return {object} data - The data saved for the account
  */
 export const loadAccount = async (provider, id) => {
   const [status, result] = await db.read(`SELECT * FROM accounts WHERE id=:id`, {
@@ -142,7 +141,7 @@ export const loadAccount = async (provider, id) => {
  *
  * @param {string} provider - The ID of the identity provider
  * @param {string} id - The unique id (the username)
- * @return {object} keys - The API keys  stored for the account
+ * @return {object} keys - The API keys saved for the account
  */
 export const loadAccountApikeys = async (provider, id) =>
   await db.read(`SELECT id FROM apikeys WHERE createdBy=:username`, {
@@ -152,7 +151,7 @@ export const loadAccountApikeys = async (provider, id) =>
 /**
  * Helper method to create an account
  *
- * @param {object} data - The data to store for the account
+ * @param {object} data - The data to save for the account
  */
 export const saveAccount = async (provider = false, id = false, data) => {
   /*
@@ -188,7 +187,7 @@ export const saveAccount = async (provider = false, id = false, data) => {
 /**
  * Helper method to list accounts
  *
- * @return {object} keys - The API keys  stored for the account
+ * @return {object} keys - The API keys saved for the account
  */
 export const listAccounts = async () => {
   const query = `SELECT id, about, status, role, createdBy, createdAt, updatedBy, updatedAt, lastLogin, provider FROM accounts`
@@ -198,12 +197,12 @@ export const listAccounts = async () => {
 }
 
 /**
- * Helper method to store the last login time in the account data
+ * Helper method to save the last login time in the account data
  *
  * @param {string} provider - The ID of the identity provider
  * @param {string} id - The id of the account (the username)
  */
-export const storeLastLoginTime = async (provider, id) =>
+export const updateLastLoginTime = async (provider, id) =>
   await saveAccount(provider, id, { lastLogin: 'datetime()' })
 
 /**

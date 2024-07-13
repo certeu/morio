@@ -1,5 +1,5 @@
 import { validateSettings } from '#lib/validation'
-import { store, utils, log } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
 
 /**
  * This core controller provides access to morio core
@@ -16,7 +16,7 @@ export function Controller() {}
  * @param {string} path - The core api path
  */
 Controller.prototype.getDockerData = async (req, res, path) => {
-  const [status, result] = await utils.core.get(`/docker/${path}`)
+  const [status, result] = await utils.coreClient.get(`/docker/${path}`)
 
   return res.status(status).send(result)
 }
@@ -29,7 +29,7 @@ Controller.prototype.getDockerData = async (req, res, path) => {
  * @param {string} path - The core api path
  */
 Controller.prototype.getContainerData = async (req, res, path = false) => {
-  const [status, result] = await utils.core.get(
+  const [status, result] = await utils.coreClient.get(
     `/docker/containers/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -44,7 +44,7 @@ Controller.prototype.getContainerData = async (req, res, path = false) => {
  * @param {string} path - The core api path
  */
 Controller.prototype.updateContainer = async (req, res, path) => {
-  const [status, result] = await utils.core.put(`/docker/containers/${req.params.id}/${path}`)
+  const [status, result] = await utils.coreClient.put(`/docker/containers/${req.params.id}/${path}`)
 
   return res.status(status).send(result)
 }
@@ -57,7 +57,7 @@ Controller.prototype.updateContainer = async (req, res, path) => {
  * @param {string} path - The core api path
  */
 Controller.prototype.createDockerResource = async (req, res, path) => {
-  const [status, result] = await utils.core.post(`/docker/${path}`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/docker/${path}`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -69,7 +69,7 @@ Controller.prototype.createDockerResource = async (req, res, path) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getCaRoot = async (req, res) => {
-  const [status, result] = await utils.core.get(`/ca/root`)
+  const [status, result] = await utils.coreClient.get(`/ca/root`)
 
   return res.status(status).send(result)
 }
@@ -81,7 +81,7 @@ Controller.prototype.getCaRoot = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.createCertificate = async (req, res) => {
-  const [status, result] = await utils.core.post(`/ca/certificate`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/ca/certificate`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -94,7 +94,7 @@ Controller.prototype.createCertificate = async (req, res) => {
  * @param {string} path - The core api path
  */
 Controller.prototype.getDockerImageData = async (req, res, path = false) => {
-  const [status, result] = await utils.core.get(
+  const [status, result] = await utils.coreClient.get(
     `/docker/images/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -109,7 +109,7 @@ Controller.prototype.getDockerImageData = async (req, res, path = false) => {
  * @param {string} path - The core api path
  */
 Controller.prototype.getDockerNetworkData = async (req, res, path = false) => {
-  const [status, result] = await utils.core.get(
+  const [status, result] = await utils.coreClient.get(
     `/docker/networks/${req.params.id}${path ? '/' + path : ''}`
   )
 
@@ -150,7 +150,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await utils.core.post(`/setup`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -165,7 +165,7 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * This route is not accessible when running in ephemeral mode
    */
-  if (store.info?.ephemeral)
+  if (utils.isEphemeral())
     return res.status(400).send({
       errors: ['You can not use this endpoint on an ephemeral Morio node'],
     })
@@ -189,7 +189,7 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
-  const [status, result] = await utils.core.post(`/settings`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/settings`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -201,7 +201,7 @@ Controller.prototype.deploy = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.streamServiceLogs = async (req, res) => {
-  return await utils.core.streamGet(`/logs/${req.params.service}`, res)
+  return await utils.coreClient.streamGet(`/logs/${req.params.service}`, res)
 }
 
 /**
@@ -212,7 +212,7 @@ Controller.prototype.streamServiceLogs = async (req, res) => {
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
-  const [status, result] = await utils.core.get(`/pkgs/clients/${type}/defaults`)
+  const [status, result] = await utils.coreClient.get(`/pkgs/clients/${type}/defaults`)
 
   return res.status(status).send(result)
 }
@@ -224,10 +224,10 @@ Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getConfig = async (req, res) => {
-  const [status, result] = await utils.core.get(`/config`)
+  const [status, result] = await utils.coreClient.get(`/config`)
 
   if (result.deployment) {
-    store.config = result
+    utils.setConfig(result)
     return res.status(status).send(result)
   } else return res.status(500).send()
 }
@@ -239,7 +239,7 @@ Controller.prototype.getConfig = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getIdps = async (req, res) => {
-  const [status, result] = await utils.core.get(`/idps`)
+  const [status, result] = await utils.coreClient.get(`/idps`)
 
   return res.status(status).send(result)
 }
@@ -251,10 +251,10 @@ Controller.prototype.getIdps = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getPresets = async (req, res) => {
-  const [status, result] = await utils.core.get(`/presets`)
+  const [status, result] = await utils.coreClient.get(`/presets`)
 
   if (status === 200) {
-    store.presets = result
+    utils.setPresets(result)
     return res.status(status).send(result)
   } else return res.status(500).send()
 }
@@ -266,7 +266,7 @@ Controller.prototype.getPresets = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.decrypt = async (req, res) => {
-  const [status, result] = await utils.core.post(`/decrypt`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/decrypt`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -278,7 +278,7 @@ Controller.prototype.decrypt = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.encrypt = async (req, res) => {
-  const [status, result] = await utils.core.post(`/encrypt`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/encrypt`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -291,7 +291,7 @@ Controller.prototype.encrypt = async (req, res) => {
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async (req, res, type) => {
-  const [status, result] = await utils.core.post(`/pkgs/clients/${type}/build`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/pkgs/clients/${type}/build`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
@@ -303,7 +303,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getJwks = async (req, res) => {
-  const [status, result] = await utils.core.get(`/jwks`)
+  const [status, result] = await utils.coreClient.get(`/jwks`)
 
   return res.status(status).send(result)
 }
@@ -317,7 +317,7 @@ Controller.prototype.getJwks = async (req, res) => {
 Controller.prototype.joinCluster = async (req, res) => {
   log.info('Received request to join cluster')
   console.log({ apiBody: req.body })
-  const [status, result] = await utils.core.post(`/cluster/join`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/cluster/join`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }

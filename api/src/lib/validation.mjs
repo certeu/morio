@@ -2,7 +2,7 @@ import { requestSchema as schema, settingsSchema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
-import { store, utils, log } from './utils.mjs'
+import { utils, log } from './utils.mjs'
 
 /*
  * Validation helpers
@@ -233,8 +233,9 @@ export const validateNode = async (hostname) => {
 
   /*
    * Generate a random ping challenge
+   * FIXME: Is this used?
    */
-  store.info.ping = randomString(8)
+  const ping = randomString(8)
 
   /*
    * Try contacting node over HTTPS, ignore certificate
@@ -247,7 +248,7 @@ export const validateNode = async (hostname) => {
     data.https = true
     if (https.morio_node) data.morio_node = true
     else data.morio_node = false
-    if (https.pong === store.info.ping) data.this_morio_node = true
+    if (https.pong === ping) data.this_morio_node = true
     else data.this_morio_node = false
   }
 

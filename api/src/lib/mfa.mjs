@@ -1,7 +1,7 @@
 import qrcode from 'qrcode'
 import { authenticator } from '@otplib/preset-default'
 import { hash } from '#shared/crypto'
-import { store } from './utils.mjs'
+import { utils } from './utils.mjs'
 
 /*
  * Colors to replace in the generated SVG so that the SVG
@@ -24,7 +24,7 @@ export const mfa = {
     const secret = authenticator.generateSecret()
     const otpauth = authenticator.keyuri(
       username,
-      `Morio/${store.getSettings('deployment.display_name')}`,
+      `Morio/${utils.getSettings('deployment.display_name')}`,
       secret
     )
     let svg

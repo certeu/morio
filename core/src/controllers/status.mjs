@@ -52,9 +52,7 @@ Controller.prototype.getReloadData = async (req, res) => {
   const data = getStatus()
   if (!utils.isEphemeral()) {
     data.settings = utils.getSettings()
-    data.config = {
-      keys: utils.getKeys(),
-    }
+    data.keys = utils.getKeys()
   }
   data.presets = utils.getPresets()
 

@@ -1,18 +1,18 @@
-import { store, log } from './utils.mjs'
+import { utils, log } from './utils.mjs'
 import { Kafka, logLevel } from 'kafkajs'
 
 export function KafkaClient() {
   /*
    * This ID tells the client apart in a clustered Morio deployment
    */
-  this.id = `api-${store.get('state.node.serial')}`
+  this.id = `api-${utils.getNodeSerial()}`
 
   /*
    * Attach the client
    */
   this.client = new Kafka({
     clientId: this.id,
-    brokers: store.getSettings('deployment.nodes').map((node, i) => `broker_${Number(i) + 1}:9092`),
+    brokers: utils.getSettings('deployment.nodes').map((node, i) => `broker_${Number(i) + 1}:9092`),
     logLevel: logLevel.ERROR,
   })
 

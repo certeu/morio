@@ -1,4 +1,4 @@
-import { store, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
@@ -6,7 +6,7 @@ import { idps } from '../idps/index.mjs'
 /*
  * Keep prefix DRY
  */
-const PREFIX = store.getPrefix()
+const PREFIX = utils.getPrefix()
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -151,7 +151,7 @@ Controller.prototype.login = async (req, res) => {
    */
   const providerType = ['mrt', 'local', 'apikey'].includes(providerId)
     ? providerId
-    : store.getSettings(['iam', 'providers', providerId, 'provider'], false)
+    : utils.getSettings(['iam', 'providers', providerId, 'provider'], false)
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request
@@ -187,11 +187,11 @@ Controller.prototype.login = async (req, res) => {
     data: {
       ...data,
       provider: req.body.provider,
-      node: store.get('state.node.uuid'),
-      deployment: store.get('state.cluster.uuid'),
+      node: utils.getNodeUuid(),
+      deployment: utils.getClusterUuid(),
     },
-    key: store.get('config.keys.private'),
-    passphrase: store.get('config.keys.mrt'),
+    key: utils.getKeys().private,
+    passphrase: utils.getKey().mrt,
   })
 
   return res.send({ jwt, data })
@@ -242,8 +242,8 @@ Controller.prototype.renewToken = async (req, res) => {
         maxRole: payload.maxRole,
         provider: payload.provider,
       },
-      key: store.get('config.keys.private'),
-      passphrase: store.get('config.keys.mrt'),
+      key: utils.getKeys().private,
+      passphrase: utils.getKeys().mrt,
     })
 
     return res.send({ jwt })
@@ -292,7 +292,7 @@ const verifyToken = (token) =>
   new Promise((resolve) =>
     jwt.verify(
       token,
-      store.get('config.keys.public'),
+      utils.getKeys().public,
       {
         audience: 'morio',
         issuer: 'morio',

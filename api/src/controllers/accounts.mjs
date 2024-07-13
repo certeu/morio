@@ -2,7 +2,7 @@ import Joi from 'joi'
 import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
-import { store, log, utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { validateSchema } from '../lib/validation.mjs'
 import { listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
 import { mfa } from '../lib/mfa.mjs'
@@ -81,7 +81,7 @@ Controller.prototype.create = async (req, res) => {
     data: {
       ...valid,
       invite,
-      inviteUrl: `https://${store.getSettings('deployment.fqdn')}/morio/invite/${valid.username}-${invite}`,
+      inviteUrl: `https://${utils.getSettings('deployment.fqdn')}/morio/invite/${valid.username}-${invite}`,
     },
   })
 }

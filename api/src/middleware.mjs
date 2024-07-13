@@ -1,5 +1,4 @@
-// Load store
-import { store, utils, log } from './lib/utils.mjs'
+import { log, utils } from './lib/utils.mjs'
 
 /*
  * List of routes allowed in ephemeral mode
@@ -33,7 +32,7 @@ export const guardRoutes = (req, res, next) => {
    */
   const allowedEphemeral = [
     'GET/auth', // Internal pre-auth route used by Traefik
-    ...ephemeralRoutes.map((url) => url.split(':').join(`${store.getPrefix()}`)),
+    ...ephemeralRoutes.map((url) => url.split(':').join(`${utils.getPrefix()}`)),
   ]
 
   /*
@@ -56,8 +55,8 @@ export const guardRoutes = (req, res, next) => {
   /*
    * Map list of ephemeral routes to inject the prefix
    */
-  const allowedReload = reloadRoutes.map((url) => url.split('/').join(`${store.getPrefix()}/`))
-  if (!store.get('state.config_resolved') && !allowedReload.includes(req.method + req.url)) {
+  const allowedReload = reloadRoutes.map((url) => url.split('/').join(`${utils.getPrefix()}/`))
+  if (!utils.isConfigResolved() && !allowedReload.includes(req.method + req.url)) {
     log.debug(`Blocked in reloading state: ${req.method} ${req.url}`)
     return utils.sendErrorResponse(res, {
       type: `morio.api.middleware.guard.reloading`,

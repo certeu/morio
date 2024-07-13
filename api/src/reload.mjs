@@ -1,8 +1,7 @@
 import { attempt } from '#shared/utils'
-//import { KafkaClient } from './lib/kafka.mjs'
 import { encryptionMethods } from '#shared/crypto'
-// Load store, logger, and utils
-import { store, log, utils } from './lib/utils.mjs'
+import { log, utils } from './lib/utils.mjs'
+import { coreClient } from '#lib/core'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -18,7 +17,7 @@ export const reloadConfiguration = async () => {
     every: 5,
     timeout: 3600,
     run: async () => {
-      const [status, body] = await utils.core.get('/reload')
+      const [status, body] = await utils.coreClient.get('/reload')
       if (status === 200) return body
       else return false
     },
@@ -38,30 +37,31 @@ export const reloadConfiguration = async () => {
   }
 
   /*
-   * Update the store with relevant info
+   * Update the state with relevant info
    */
-  log.debug(`Reloaded data from core.`)
-  store.set('state.ephemeral', data.state.ephemeral)
-  store.set('state.core', data.state)
-  store.set('state.core.timestamp', Date.now())
-  store.set('info.core', data.info)
-  store.set('presets', data.presets)
+  log.debug(`Reloaded data from core`)
+  utils.setEphemeral(data.state.ephemeral)
+  utils.setCoreState({
+    ...data.state,
+    timestamp: Date.now() // FIXME: Rename to time
+  })
+  utils.setCoreInfo(data.info)
+  utils.setPresets(data.presets)
   if (!utils.isEphemeral()) {
     /*
      * This data is only available if Morio is already set up
      */
-    store.set('state.node.uuid', data.state.node)
-    store.set('state.cluster.uuid', data.state.deployment)
-    store.set('state.node.serial', data.state.node_serial)
-    store.set('state.settings_serial', data.state.settings_serial)
-    store.set('config', data.config)
-    store.set('settings', data.settings)
-    store.config = data.config
+    utils.setNodeUuid(data.state.node)
+    utils.setNodeSerial(data.state.node_serial)
+    utils.setClusterUuid(data.state.deployment)
+    utils.setSettingsSerial(data.state.settings_serial)
+    utils.setKeys(data.keys)
+    utils.setSettings(data.settings)
     /*
-     * If there's more than 1 node, switch core client to stay localk
+     * If there's more than 1 node, switch core client to stay local
      */
-    if (store.get('settings.deployment.node_count') > 1) {
-      utils.set('core', coreClient(`http://core_${store.get('state.node.serial')}:${getPreset('MORIO_CORE_PORT')}`))
+    if (utils.getSettings('deployment.node_count') > 1) {
+      utils.coreClient = coreClient(`http://core_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CORE_PORT')}`)
     }
   }
 
@@ -76,13 +76,13 @@ export const reloadConfiguration = async () => {
    */
   if (!utils.encrypt) {
     const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-      store.get('config.keys.mrt'),
+      utils.getKeys().mrt,
       'Morio by CERT-EU',
       log
     )
-    utils.set('encrypt', encrypt)
-    utils.set('decrypt', decrypt)
-    utils.set('isEncrypted', isEncrypted)
+    utils.encrypt = encrypt
+    utils.decrypt = decrypt
+    utils.isEncrypted = isEncrypted
   }
 
   /*

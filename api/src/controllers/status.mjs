@@ -1,5 +1,5 @@
 import { globDir } from '#shared/fs'
-import { store, utils, log } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
 
 /**
@@ -40,7 +40,7 @@ Controller.prototype.status = async (req, res) => {
   /*
    * Get the status from core to ensure we have the latest info
    */
-  const [status, result] = await utils.core.get(`/status`)
+  const [status, result] = await utils.coreClient.get(`/status`)
 
   if (status !== 200) return utils.sendErrorResponse(res, {
     type: `morio.api.status.core.fetch.${status}`,
@@ -50,37 +50,28 @@ Controller.prototype.status = async (req, res) => {
   })
 
   /*
-   * Update store with relevant data
+   * Update relevant data
    */
-  store.set('state.ephemeral', result.state.ephemeral)
-  store.set('state.core', result.state)
-  store.set('state.core.timestamp', Date.now())
-  store.set('info.core', result.info)
+  utils.setEphemeral(result.state.ephemeral)
+  utils.setCoreState({
+    ...result.state,
+    timestamp: Date.now(), // FIXME: Rename to time
+  })
+  utils.setCoreInfo(result.info)
 
   /*
    * Now return data
    */
   return res.send({
-    info: {
-      name: store.get('info.name'),
-      about: store.get('info.about'),
-      version: store.get('info.version'),
-      production: store.get('info.production'),
-      core: {
-        name: store.get('info.core.name'),
-        about: store.get('info.core.about'),
-        version: store.get('info.core.version'),
-        production: store.get('info.core.production'),
-      },
-    },
+    info: utils.getInfo(),
     state: {
       ephemeral: utils.isEphemeral(),
-      uptime: Math.floor((Date.now() - store.get('state.start_time')) / 1000),
-      start_time: store.get('state.start_time'),
-      reload_count: store.get('state.reload_count'),
-      config_resolved: store.get('state.config_resolved'),
-      settings_serial: result.state.ephemeral ? undefined : store.get('state.settings_serial'),
-      core:  store.get('state.core'),
+      uptime: Math.floor((Date.now() - utils.getStartTime()) / 1000),
+      start_time: utils.getStartTime(),
+      reload_count: utils.getReloadCount(),
+      config_resolved: utils.isConfigResolved(),
+      settings_serial: utils.getSettingsSerial(),
+      core: utils.getCoreState(),
     }
   })
 }
@@ -91,12 +82,12 @@ Controller.prototype.status = async (req, res) => {
  * This returns the current info
  *
  * Unlike the status endpoint, this does not reach out to core
- * but instead returns the most recent info from the store.
+ * but instead returns the most recent info from memory
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.info = async (req, res) => res.send(store.info)
+Controller.prototype.info = async (req, res) => res.send(utils.getInfo())
 
 /**
  * Status logs
@@ -110,7 +101,7 @@ Controller.prototype.statusLogs = async (req, res) => {
   /*
    * Just get the status from core and pass it
    */
-  const [status, result] = await utils.core.get(`/status_logs`)
+  const [status, result] = await utils.coreClient.get(`/status_logs`)
 
   return res.status(status).send(result)
 }
@@ -136,5 +127,5 @@ Controller.prototype.listDownloads = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getSettings = async (req, res) => res.send(store.get('settings.sanitized')).end()
+Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitizedSettings()).end()
 

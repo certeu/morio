@@ -1,4 +1,4 @@
-import { storeLastLoginTime, loadApikey } from '../lib/apikey.mjs'
+import { updateLastLoginTime, loadApikey } from '../lib/apikey.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { isRoleAvailable } from '../rbac.mjs'
 
@@ -49,7 +49,7 @@ export const apikey = async (id, data) => {
     /*
      * Update apikey with last login time
      */
-    storeLastLoginTime(data.username)
+    updateLastLoginTime(data.username)
 
     /*
      * All good, return

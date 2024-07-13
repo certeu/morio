@@ -1,6 +1,5 @@
 import { validate, validateSettings, validateNode } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
-import { store } from '../lib/utils.mjs'
 
 /**
  * This validation controller handles various validation tasks
@@ -58,13 +57,3 @@ Controller.prototype.node = async (req, res) => {
   return res.send(report).end()
 }
 
-/**
- * Validate a Morio node ping
- *
- * This answers with the ping response code stored in info
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.pong = async (req, res) =>
-  res.send({ pong: store.info.ping, info: store.info, morio_node: true })

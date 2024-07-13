@@ -1,4 +1,4 @@
-import { storeLastLoginTime, loadAccount } from '../lib/account.mjs'
+import { updateLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
@@ -61,7 +61,7 @@ export const local = async (id, data) => {
       /*
        * Update scratchcodes in case they were used
        */
-      storeLastLoginTime('local', data.username, { scratchCodes: mfaOk[1] })
+      updateLastLoginTime('local', data.username, { scratchCodes: mfaOk[1] })
 
       /*
        * All good, return

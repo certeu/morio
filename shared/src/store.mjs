@@ -135,3 +135,32 @@ Store.prototype.unset = function (path) {
   return this
 }
 
+/**
+ * Helper method to push a prefix to a set path
+ *
+ * By 'set path' we mean a path to be passed to the
+ * store.set method, which uses lodash's set under the hood.
+ *
+ * @param {array} prefix - The prefix path to add
+ * @param {string|array} path - The path to prefix either as array or a string in dot notation
+ * @return {array} newPath - The prefixed path
+ */
+export const unshift = (prefix, path) => {
+  if (Array.isArray(path)) return [...prefix, ...path]
+  else return [...prefix, ...path.split('.')]
+}
+
+/**
+ * Set key at path to value, but only if it's not currently set
+ *
+ * @param {object} obj - The object to update
+ * @param {string|array} path - Path to the key
+ * @param {mixed} value - The value to set
+ * @return {object} obj - The mutated object
+ */
+export const setIfUnset = (obj, path, value) => {
+  if (typeof get(obj, path) === 'undefined') return set(obj, path, value)
+
+  return obj
+}
+

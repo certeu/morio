@@ -1,5 +1,5 @@
 import { restClient } from '#shared/network'
-import { Store } from '#shared/store'
+import { Store, unshift, setIfUnset } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction, neverSwarmServices } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
@@ -14,9 +14,21 @@ import { loadAllPresets } from '#config'
 export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
 
 /*
- * Export a store instance to hold state
+ * This store instance will hold our state, but won't be exported.
+ * Only through the utility methods below will we allow changing state.
+ * We're also initializing it with some data at start time.
  */
-export const store = new Store(log)
+const store = new Store(log)
+  .set('state.start_time', Date.now())
+  .set('state.config_resolved', false)
+  .set('state.reconfigure_count', 0)
+  .set('state.ephemeral', true)
+  .set('info', {
+    about: 'Morio Core',
+    name: '@morio/core',
+    production: inProduction(),
+    version: getPreset('MORIO_VERSION'),
+  })
 
 /*
  * Load all presets and write them to disk for other services to load
@@ -33,14 +45,16 @@ try {
 }
 
 /*
- * Export an utils instance to hold utility methods
+ * Export an utils object to hold utility methods
  */
-export const utils = new Store(log)
+export const utils = { hooks: { services: {} } }
 
-/*
- *
- * get[SomethingFromStore] - Return data from the store
- *
+/*           _   _
+ *  __ _ ___| |_| |_ ___ _ _ ___
+ * / _` / -_)  _|  _/ -_) '_(_-<
+ * \__, \___|\__|\__\___|_| /__/
+ * |___/
+ * Methods to get data from the store (aka state)
  */
 
 /**
@@ -393,17 +407,6 @@ utils.getPreset = (key, dflt, opts) => {
  */
 utils.getPresets = () => store.get('presets')
 
-/*
- *
- * get[SomethingFromUtils] - Return data from utils
- *
- * Note that we're not storing methods in (top-level properties of) the store
- * because they can't be serialized and we may one day want to dump the store
- * as part of a debug proce3ss.
- * So we store these in utils instead (which is also a store instance).
- *
- */
-
 /**
  * Helper method for getting a lifecycle hookk for a service
  *
@@ -412,18 +415,16 @@ utils.getPresets = () => store.get('presets')
  * @return {function} hook - The lifecycle hook method
  */
 utils.getHook = (serviceName, hookName) => {
-  const hook = utils.get(
-    ['hooks', 'services', serviceName.toLowerCase(), hookName.toLowerCase()],
-    false
-  )
+  const hook = utils.hooks.services[serviceName.toLowerCase()]?.[hookName.toLowerCase()]
   // Only return hooks you can run
   return typeof hook === 'function' ? hook : false
 }
 
-/*
- *
- * set[SomethingInStore] - Saves data to the store
- *
+/*          _   _
+ *  ___ ___| |_| |_ ___ _ _ ___
+ * (_-</ -_)  _|  _/ -_) '_(_-<
+ * /__/\___|\__|\__\___|_| /__/
+ * Methods to set/save data in/to the store (aka state)
  */
 
 /**
@@ -541,7 +542,7 @@ utils.setHooks = (serviceName, hooks) => {
     // Force hook names to lowercase
     allhooks[name.toLowerCase()] = method
   }
-  utils.set(['hooks', 'services', serviceName.toLowerCase()], allhooks)
+  utils.hooks.services[serviceName.toLowerCase()] = allhooks
   return utils
 }
 
@@ -764,12 +765,12 @@ utils.setVersion = (version) => {
   return utils
 }
 
-/*
- *
- * is[Something] - Checks for things, returns true or false only
- *
+/*     _           _
+ *  __| |_  ___ __| |__ ___
+ * / _| ' \/ -_) _| / /(_-<
+ * \__|_||_\___\__|_\_\/__/
+ * Checks for things, returns true or false only
  */
-store.set('state.config_resolved', false)
 
 /**
  * Helper method to see whether the config is resolved
@@ -842,10 +843,11 @@ utils.isSwarmService = (serviceName) => (!utils.isSwarm() || neverSwarmServices.
  */
 utils.isUnitTest = () => store.get('testing', false) ? true : false
 
-/*
- *
- * TRANSFORMERS - Mutate data in the store
- *
+/*  _                     __
+ * | |_ _ _ __ _ _ _  ___/ _|___ _ _ _ __  ___ _ _ ___
+ * |  _| '_/ _` | ' \(_-<  _/ _ \ '_| '  \/ -_) '_(_-<
+ *  \__|_| \__,_|_||_/__/_| \___/_| |_|_|_\___|_| /__/
+ * Mutate data in the store/state
  */
 
 /**
@@ -953,10 +955,11 @@ utils.resetClusterStatus = () => {
   return utils
 }
 
-/*
- *
- * VARIOUS - Utility methods that do not hook into the store, or presets, but use their data
- *
+/*      _   _
+ *  ___| |_| |_  ___ _ _
+ * / _ \  _| ' \/ -_) '_|
+ * \___/\__|_||_\___|_|
+ * Utility methods that do not use store data or presets
  */
 
 /**
@@ -991,48 +994,5 @@ utils.sendErrorResponse = (res, template, route=false) => {
     data.route ? data.route : route ? route : ''
 
   return res.type('application/problem+json').status(data.status).send(data).end()
-}
-
-/**
- * Add some basic info to the store at start time
- */
-store
-  .set('state.start_time', Date.now())
-  .set('state.reconfigure_count', 0)
-  .set('state.ephemeral', true)
-  .set('info', {
-    about: 'Morio Core',
-    name: '@morio/core',
-    production: inProduction(),
-    version: getPreset('MORIO_VERSION'),
-  })
-
-/**
- * Helper method to push a prefix to a set path
- *
- * By 'set path' we mean a path to be passed to the
- * store.set method, which uses lodash's set under the hood.
- *
- * @param {array} prefix - The prefix path to add
- * @param {string|array} path - The path to prefix either as array or a string in dot notation
- * @return {array} newPath - The prefixed path
- */
-function unshift(prefix, path) {
-  if (Array.isArray(path)) return [...prefix, ...path]
-  else return [...prefix, ...path.split('.')]
-}
-
-/**
- * Set key at path to value, but only if it's not currently set
- *
- * @param {object} obj - The object to update
- * @param {string|array} path - Path to the key
- * @param {mixed} value - The value to set
- * @return {object} obj - The mutated object
- */
-export const setIfUnset = (obj, path, value) => {
-  if (typeof get(obj, path) === 'undefined') return set(obj, path, value)
-
-  return obj
 }
 

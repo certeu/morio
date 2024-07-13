@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/validate'
-import { store } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 const Validate = new Controller()
 
@@ -9,7 +9,7 @@ const Validate = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.getPrefix()
+  const PREFIX = utils.getPrefix()
 
   /*
    * Validates Morio settings
@@ -20,9 +20,4 @@ export function routes(app) {
    * Validates a (potential) Morio node
    */
   app.post(`${PREFIX}/validate/node`, Validate.node)
-
-  /*
-   * Validates a ping (responding with the ping response code kept in state)
-   */
-  app.get(`${PREFIX}/validate/ping`, Validate.pong)
 }
