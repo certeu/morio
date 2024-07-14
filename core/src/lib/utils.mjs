@@ -1007,6 +1007,11 @@ utils.updateStatus = async () => {
   if (utils.isDistributed()) {
     // FIXME
   }
+
+  /*
+   * FIXME: this is just here to update the status for now
+   */
+  return utils.setStatus(0)
 }
 
 /*      _   _
