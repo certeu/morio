@@ -835,9 +835,6 @@ utils.isProduction = () => inProduction() ? true : false
  */
 utils.isStatusStale = () => {
   const data = utils.getStatus()
-  const delta = ((Date.now() - data.time)/1000)
-  const limit = getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2
-  log.warn({data, delta, limit})
   return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 }
 
@@ -986,17 +983,12 @@ utils.updateStatus = async () => {
    * But on a leader node, especially on a large cluster, this would scale poorly.
    * So we Debounce this by checking the age of the last time the status was updated
    */
-  if (!utils.isStatusStale()) {
-    log.error('Status is NOT stale')
-    return utils
-  }
-  else log.error('Status IS stale')
-
+  if (!utils.isStatusStale()) return utils
 
   /*
-   * Check all services
+   * Check all services (including core)
    */
-  for (const serviceName of serviceOrder) {
+  for (const serviceName of ['core', ...serviceOrder]) {
     const wanted = await runHook('wanted', serviceName, { statusCheck: true })
     if (wanted) await runHook('status', serviceName)
   }
