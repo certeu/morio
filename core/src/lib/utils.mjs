@@ -509,12 +509,17 @@ utils.setEphemeralUuid = (uuid) => {
 /**
  * Helper method to store the incoming heartbeat data
  *
+ * @param {bool} up - Whether the node is up (reachable) or not
+ * @param {bool} ok - Whether the heartbeat was a (complete) success, or not
  * @param {string} uuid - The remote node's UUID
- * @param {bool} success - Whether the heartbeat was a success, or not
+ * @param {object} data - Heartbet data (from the remote node)
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setHeartbeatIn = (uuid, report) => {
-  store.set(['state', 'cluster', 'heartbeat', 'in', uuid], { ...report, time: Date().now() })
+utils.setHeartbeatIn = ({ up, ok, uuid, data }) => {
+  store.set(
+    ['state', 'cluster', 'heartbeat', 'in', uuid],
+    { up, ok, data, time: Date.now() }
+  )
   return utils
 }
 

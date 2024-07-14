@@ -333,21 +333,23 @@ const runHeartbeat = async (init=false) => {
   utils.setHeartbeatOut(setTimeout(async () => {
     /*
      * By grabbing the serial here, the hearbeat will follow the leader
+     * To ensure serial meets UUID, we grab that here too
      */
     const serial = utils.getClusterLeaderSerial()
+    const uuid = utils.getClusterLeaderUuid()
     /*
      * Send heartbeat request and verify the result
      */
     const start = Date.now()
-    let result
+    let data
     try {
-      result = await testUrl(
+      data = await testUrl(
         `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
         {
           method: 'POST',
           data: {
             deployment: utils.getClusterUuid(),
-            leader: utils.getClusterLeaderUuid(),
+            leader: uuid,
             version: utils.getVersion(),
             settings_serial: Number(utils.getSettingsSerial()),
             node_serial: Number(utils.getNodeSerial()),
@@ -357,12 +359,12 @@ const runHeartbeat = async (init=false) => {
           returnError: true,
       })
     }
-    catch (err) {
+    catch (error) {
       // Help the debug party
       const rtt = Date.now() - start
       log.debug(`Heartbeat to node ${serial} took ${rtt}ms and resulted in an error.`)
       // Verify heartbeat (this will log a warning for the error)
-      verifyHeartbeatResponse({ error: result, rtt, serial })
+      verifyHeartbeatResponse({ uuid, serial, error })
       // And trigger a new heartbeat
       runHeartbeat()
     }
@@ -374,7 +376,7 @@ const runHeartbeat = async (init=false) => {
     /*
      * Verify the response
      */
-    verifyHeartbeatResponse({ result, rtt, serial })
+    verifyHeartbeatResponse({ uuid, serial, data, rtt })
     /*
      * Trigger a new heatbeat
      */
@@ -382,95 +384,64 @@ const runHeartbeat = async (init=false) => {
   }, interval*1000))
 }
 
-const verifyHeartbeatResponse = ({ result, rtt, serial, error=false }) => {
+/**
+ * This verifies a heartbeat response and saves the result
+ *
+ * Note that this will run on a FOLLOWER node only.
+ *
+ * @param {string} uuid - The UUID of the remote node (LEADER)
+ * @param {number} serial - The node_serial of the remote node (LEADER)
+ * @param {object} data - The data (body) from a successful heartbeat request
+ * @param {number} rtt - The request's round-trip-time (RTT) in ms
+ * @param {object} error - If the request errored out, this will hold the Axios error
+ */
+const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => {
   /*
    * Is this an error?
    */
   if (error) {
+    /*
+     * Storing the result of a failed hearbteat will influence the cluster state
+     */
+    utils.setHeartbeatIn({ up: false, ok: false, uuid: remote, data: { error: error.code } })
+    /*
+     * Also log something an error-specific message
+     */
     if (error.code === 'ECONNREFUSED') {
-      log.warn(`Connection refused when sending heartbeat to node ${serial}. Is this node up?`)
+      log.warn(`Connection refused when sending heartbeat to node ${serial} (${uuid}). Is this node up?`)
     }
     else {
-      log.warn(`Unspecified error when sending heartbeat to node ${serial}.`)
+      log.warn(`Unspecified error when sending heartbeat to node ${uuid} (${uuid}).`)
     }
 
     return
   }
 
   /*
+   * Just because the request didn't error doesn't mean all is ok
+   */
+  if (report.errors.length > 0) {
+    utils.setHeartbeatIn({ up: true, ok: false, uuid, data })
+    for (const err of report.errors) {
+      log.error(`Heartbeat error from node ${serial}: ${err}`)
+    }
+  } else {
+    utils.setHeartbeatIn({ up: true, ok: true, uuid, data })
+  }
+
+  /*
    * Warn when things are too slow
    */
-  if (rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
+  if (rtt && rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
     log.warn(`Heartbeat RTT to node ${serial} was ${rtt}ms which is above the warning mark`)
   }
 
   /*
-   * Check the report from the leader node
+   * Do we need to take any action?
    */
-  console.log({report: result, in: 'verifyHeartbeatResponse' }) // FIXME
-  if (result.report && result.node) {
-    utils.setHeartbeatIn(result.node, result.report)
-
-
-
+  if (result.report.action) {
+    log.warn(`FIXME: implement ${result.report.action} action in verifyHeartbeatResponse`) //FIXME
   }
-
-  if (report.errors.length > 0) {
-    for (const err of report.errors) {
-      log.error(`Heartbeat error from node ${serial}: ${err}`)
-    }
-  }
-
-  if (!result.report.action) {
-
-  }
-  else if (!result.report.action) {
-
-  }
-
-
-  let failed = false
-  // Response:
-      //deployment: store.get('state.cluster.uuid'),
-      //node: store.get('state.node.uuid'),
-      //node_serial: store.get('state.node.serial'),
-      //version: store.get('info.version'),
-      //current.serial
-  /*
-   * Short-circuit any shenanigans
-   */
-
-  /*
-   * Save us some typing
-  const hbin = ['state', 'cluster', 'heartbeat', 'in']
-
-  /*
-   * We'll use this to prepare the data to save
-  const data = (typeof result.node === 'string')
-    ? store.get([...hbin, result.node], {})
-    : {}
-
-  /*
-   * Have we seen this node before?
-  if (typeof result.node === 'string') {
-    data = store.get(key, false)
-    if (data === false) {
-      log.debug(`Received first heartbeat response from ${result.node}`)
-    }
-  }
-
-  const node = result.node
-    ? store.get(`state.cluster.nodes.${result.node}`)
-    : false
-  if (!node) return false
-  console.log({ result, in: 'verifyHEartbeat' })
-  //if (result.node) {
-  //  store.get(['state', 'cluster', 'nodes',
-  //if (
-  //  result.deployment === store.get('state.cluster.uuid') &&
-  //  result.node === store.get('state.cluster.uuid') &&
-      //store.set(key, { ...result, pong: Date.now()})
-   */
 }
 
 const verifyHeartbeatNode = (node, result) => {
