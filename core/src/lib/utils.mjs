@@ -86,12 +86,12 @@ utils.getCacheHit = (key) => {
 utils.getCaConfig = () => store.get('config.ca')
 
 /**
- * Helper method to get the cluster state age (time it was last refreshed)
+ * Helper method to get the cluster state age (time it was last updated)
  */
 utils.getClusterStateAge = () => Date.now() - store.get('state.swarm.updated')
 
 /**
- * Helper method to get the cluster state age (time it was last refreshed)
+ * Helper method to get the cluster state age (time it was last updated)
  */
 utils.getStatus = () => store.get('state.status')
 
@@ -941,7 +941,7 @@ utils.endReconfigure = () => {
 }
 
 /**
- * Store the cluster state age (time it was last refreshed)
+ * Store the cluster state age (time it was last updated)
  *
  * @return {object} utils - The utils instance, making this method chainable
  */

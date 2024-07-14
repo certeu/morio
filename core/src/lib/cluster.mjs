@@ -11,26 +11,26 @@ import { getCoreIpAddress } from './services/core.mjs'
 import { log, utils } from './utils.mjs'
 
 /*
- * Helper method to refresh the cluster state
+ * Helper method to update the cluster state
  */
-export const refreshClusterState = async (silent) => {
+export const updateClusterState = async (silent) => {
   const age = utils.getClusterStateAge()
-  if (!age || age > utils.getPreset('MORIO_CORE_CLUSTER_STATE_CACHE_TTL')) await forceRefreshClusterState(silent)
+  if (!age || age > utils.getPreset('MORIO_CORE_CLUSTER_STATE_CACHE_TTL')) await forceUpdateClusterState(silent)
 }
 
 /**
  * Helper method to update the cluster state
  */
-export const forceRefreshClusterState = async (silent) => {
-  await refreshClusterSwarmState(silent)
-  await refreshClusterMorioState(silent)
+export const forceUpdateClusterState = async (silent) => {
+  await updateClusterSwarmState(silent)
+  await updateClusterMorioState(silent)
   utils.resetClusterStateAge()
 }
 
 /**
  * Helper method to gather the swarm state
  */
-const refreshClusterSwarmState = async (silent=false) => {
+const updateClusterSwarmState = async (silent=false) => {
   /*
    * Don't bother unless there's a swarm
    */
@@ -48,7 +48,7 @@ const refreshClusterSwarmState = async (silent=false) => {
     if (!silent) log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
     utils.setSwarmTokens(swarm.JoinTokens)
     const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) refreshClusterSwarmNodesState(nodes, silent)
+    if (ok) updateClusterSwarmNodesState(nodes, silent)
     else log.warn(`Unable to retrieve swarm node info from Docker API`)
   } else {
     log.debug(`Docker swarm is not configured`)
@@ -56,7 +56,7 @@ const refreshClusterSwarmState = async (silent=false) => {
   }
 }
 
-const refreshClusterSwarmNodesState = (nodes, silent=false) => {
+const updateClusterSwarmNodesState = (nodes, silent=false) => {
   /*
    * Clear follower list
    */
@@ -121,7 +121,7 @@ const refreshClusterSwarmNodesState = (nodes, silent=false) => {
 /**
  * Helper method to gather the morio cluster state
  */
-const refreshClusterMorioState = async () => {
+const updateClusterMorioState = async () => {
     return // FIXME
   /*
   const nodes = {}
@@ -201,7 +201,7 @@ const ensureSwarm = async () => {
   /*
    * Find our feet
    */
-  await refreshClusterState(true)
+  await updateClusterState(true)
 
   /*
    * Create the swarm if it does not exist yet
@@ -214,9 +214,9 @@ const ensureSwarm = async () => {
   await ensureLocalSwarmNodeLabels()
 
   /*
-   * Refresh cluster state
+   * Update cluster state
    */
-  await refreshClusterState()
+  await updateClusterState()
 }
 
 
@@ -274,7 +274,7 @@ export const ensureMorioClusterConsensus = async () => {
   /*
    * Make sure we use the latest cluster state
    */
-  await refreshClusterState(true)
+  await updateClusterState(true)
 
   /*
    * Are we leading the cluster?
@@ -308,7 +308,7 @@ const runHeartbeat = async (init=false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await refreshClusterState(true)
+  await updateClusterState(true)
 
   /*
    * This won't change
@@ -454,7 +454,7 @@ export const verifyHeartbeatRequest = async (data) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await refreshClusterState(true)
+  await updateClusterState(true)
 
   /*
    * This will hold our findings
