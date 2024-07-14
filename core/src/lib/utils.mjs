@@ -990,14 +990,18 @@ utils.updateStatus = async () => {
    */
   for (const serviceName of ['core', ...serviceOrder]) {
     const wanted = await runHook('wanted', serviceName, { statusCheck: true })
-    if (wanted) await runHook('status', serviceName)
+    if (wanted) {
+      const status = runHook('status', serviceName)
+      // Short-circuit any issues
+      if (status !== 0) return utils.setStatus(status)
+    }
   }
 
   /*
    * Do we need to run additional cluster checks?
    */
   if (utils.isDistributed()) {
-    // FIXME
+    // FIXME: handle cluster stuff
   }
 
   /*

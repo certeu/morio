@@ -14,6 +14,12 @@ export const service = {
   name: 'api',
   hooks: {
     /*
+     * Lifecycle hook to determine the service status
+     */
+    status: () => {
+      return 0 // FIXME: Do proper introspection about service health
+    },
+    /*
      * Lifecycle hook to determine whether the container is wanted
      * We reuse the always method here, since this should always be running
      */

@@ -416,7 +416,7 @@ export const runHook = async (hookName, serviceName, hookParams) => {
     log.warn(err, `Error in the ${hookName} lifecycle hook on service ${serviceName}`)
   }
 
-  if (!result && !['wanted', 'recreate', 'restart'].includes(hookName)) {
+  if (!result && !['wanted', 'recreate', 'restart', 'status'].includes(hookName)) {
     log.warn(`The ${hookName} lifecycle hook failed for service ${serviceName}`)
   }
 

@@ -41,10 +41,8 @@ export const service = {
      * Lifecycle hook to determine the service status
      */
     status: () => {
-      log.warn('In core status hook')
-      return 0 // FIXMD
+      return 0 // FIXME: Do proper introspection about service health
     },
-
     /*
      * Lifecycle hook to determine whether the container is wanted
      * We reuse the always method here, since this should always be running
