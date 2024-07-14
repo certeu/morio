@@ -416,13 +416,13 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
 
     return
   }
+  log.info({ uuid, serial, data, err, error})
 
   /*
    * Just because the request didn't error doesn't mean all is ok
-   */
-  if (report.errors.length > 0) {
+  if (data.errors.length > 0) {
     utils.setHeartbeatIn({ up: true, ok: false, uuid, data })
-    for (const err of report.errors) {
+    for (const err of data.errors) {
       log.error(`Heartbeat error from node ${serial}: ${err}`)
     }
   } else {
@@ -431,17 +431,16 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
 
   /*
    * Warn when things are too slow
-   */
   if (rtt && rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
     log.warn(`Heartbeat RTT to node ${serial} was ${rtt}ms which is above the warning mark`)
   }
 
   /*
    * Do we need to take any action?
-   */
-  if (result.report.action) {
-    log.warn(`FIXME: implement ${result.report.action} action in verifyHeartbeatResponse`) //FIXME
+  if (data.data.action) {
+    log.warn(`FIXME: implement ${data.report.action} action in verifyHeartbeatResponse`) //FIXME
   }
+   */
 }
 
 const verifyHeartbeatNode = (node, result) => {
