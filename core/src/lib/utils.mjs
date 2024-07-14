@@ -979,8 +979,9 @@ utils.updateStatus = async () => {
   if (!utils.isConfigResolved() || !utils.isCoreReady()) return utils.setStatus(2)
 
   /*
-   * Debounce the following updates because running this on each hearbeat
-   * would scale badly when running a large cluster
+   * On follower nodes, running this on each heartbeat is ok.
+   * But on a leader node, especially on a large cluster, this would scale poorly.
+   * So we Debounce this by checking the age of the last time the status was updated
    */
   if (!utils.isStatusStale()) {
     log.error('Status is NOT stale')

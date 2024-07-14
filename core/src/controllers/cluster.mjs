@@ -38,6 +38,9 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   const { action, errors } = await verifyHeartbeatRequest(req.body)
 
+  /*
+   * (potentially) take action
+   */
   if (action === 'SYNC') {
     // FIXME
     log.warn('FIXME: Handle SYNC action in heartbeat controller on leaader')
@@ -46,6 +49,11 @@ Controller.prototype.heartbeat = async (req, res) => {
     // FIXME
     log.warn('FIXME: Handle ELECT action in heartbeat controller on leader')
   }
+
+  /*
+   * Update status (but don't wait for it)
+   */
+  utils.updateStatus()
 
   /*
    * Always return status 200, be specific in the data
