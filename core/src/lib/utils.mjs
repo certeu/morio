@@ -1,12 +1,13 @@
 import { restClient } from '#shared/network'
 import { Store, unshift, setIfUnset } from '#shared/store'
 import { logger } from '#shared/logger'
-import { getPreset, inProduction, neverSwarmServices } from '#config'
+import { getPreset, inProduction, neverSwarmServices,serviceOrder } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
 import get from 'lodash.get'
 import set from 'lodash.set'
-import { errors } from './errors.mjs'
+import { errors, statusCodes, statusCodeAsColor } from './errors.mjs'
 import { loadAllPresets } from '#config'
+import { runHook } from './services/index.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -23,6 +24,7 @@ const store = new Store(log)
   .set('state.config_resolved', false)
   .set('state.reconfigure_count', 0)
   .set('state.ephemeral', true)
+  .set('state.status', { code: 499, time: Date.now() })
   .set('info', {
     about: 'Morio Core',
     name: '@morio/core',
@@ -88,12 +90,12 @@ utils.getCaConfig = () => store.get('config.ca')
 /**
  * Helper method to get the cluster state age (time it was last updated)
  */
-utils.getClusterStateAge = () => Date.now() - store.get('state.swarm.updated')
+utils.getClusterStateAge = () => Date.now() - store.get('state.swarm.updated', 172e10)
 
 /**
- * Helper method to get the cluster state age (time it was last updated)
+ * Helper method to get the cluster status
  */
-utils.getStatus = () => store.get('state.status')
+utils.getStatus = () => store.get('state.status', { code: 499, time: 172e10 })
 
 /**
  * Helper method to get the cluster uuid
@@ -113,11 +115,6 @@ utils.getClusterLeaderSerial = () => store.get(['state', 'swarm', 'nodes', store
  * @return {string} uuid - The UUID of the cluster leader
  */
 utils.getClusterLeaderUuid = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
-
-/**
- * Helper method to get the state.core_ready value
- */
-utils.getCoreReady = () => store.get('state.core_ready')
 
 /**
  * Helper method to get a Docer service configuration
@@ -610,11 +607,7 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setStatus = (code) => {
-  store.set(['state', 'status'], {
-    code,
-    color: code === 0 ? 'green' : code < 100 ? 'amber' : 'red',
-    time: Math.floor(Date.now()/1000)
-  })
+  store.set(['state', 'status'], { code, time: Date.now() })
   return utils
 }
 
@@ -799,6 +792,11 @@ utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
 utils.isDistributed = () => utils.isSwarm() && utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length > 1
 
 /**
+ * Helper method to determine whether core is ready
+ */
+utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
+
+/**
  * Helper method for returning ephemeral state
  *
  * @return {bool} ephemeral - True if ephemeral, false if not
@@ -810,7 +808,7 @@ utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
  *
  * @return {bool} leading - True if the local swarm node is leading, false if not
  */
-utils.isLeading = () => store.get('state.swarm.leading') ? true : false
+utils.isLeading = () => store.get('state.swarm.leading', false) ? true : false
 
 /*
  * Determined whether a swarm node is the local node
@@ -829,6 +827,16 @@ utils.isLocalSwarmNode = (node) => (
  * @return {bool} leading - True if the local swarm node is leading, false if not
  */
 utils.isProduction = () => inProduction() ? true : false
+
+/**
+ * Helper method to determine whether the status is stale
+ *
+ * @return {bool} stale - True if the status is stale, false if not
+ */
+utils.isStatusStale = () => {
+  const data = utils.getStatus()
+  return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
+}
 
 /**
  * Helper method to determine whether to run a swarm or not
@@ -955,56 +963,45 @@ utils.resetClusterStateAge = () => {
 }
 
 /**
- * Reset the cluster status based on the current state
- *
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.resetClusterStatus = () => {
-  store.set('state.swarm.updated', Date.now())
-  return utils
-}
-
-/**
  * Updates the status code and color based on current state
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.updateStatus = () => {
-  console.log(JSON.stringify({ state: store.state, info: store.info }, null, 2)) // FIXME
+utils.updateStatus = async () => {
   /*
    * Ephemeral is easy
    */
-  if (utils.isEphemeral()) {
-    setStatus(1)
-    return utils
-  }
+  if (utils.isEphemeral()) return utils.setStatus(1)
 
   /*
    * If we're mid-reload, reflect that
    */
-  if (!utils.isConfigResolved() || !utils.isCoreReady()) {
-    setStatus(2)
+  if (!utils.isConfigResolved() || !utils.isCoreReady()) return utils.setStatus(2)
+
+  /*
+   * Debounce the following updates because running this on each hearbeat
+   * would scale badly when running a large cluster
+   */
+  if (!utils.isStatusStale()) {
+    log.error('Status is NOT stale')
     return utils
+  }
+  else log.error('Status IS stale')
+
+
+  /*
+   * Check all services
+   */
+  for (const serviceName of serviceOrder) {
+    const wanted = await runHook('wanted', serviceName, { statusCheck: true })
+    if (wanted) await runHook('status', serviceName)
   }
 
   /*
-   * Single node or swarm?
+   * Do we need to run additional cluster checks?
    */
-  if (!distributed) {
-    /*
-     * Single node (no swarm)
-     */
-    if (!utils.isConfigResolved() || !utils.isCoreReady()) setStatus(2)
+  if (utils.isDistributed()) {
     // FIXME
-     setStatus(0)
-    return utils
-  } else {
-    /*
-     * Swarm deployment
-     */
-    // FIXME
-     setStatus(0)
-    return utils
   }
 }
 

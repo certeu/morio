@@ -143,7 +143,7 @@ export const service = {
       if (utils.getFlag('NEVER_SWARM'))  await ensureMorioStandaloneNode(hookParams)
       else await ensureMorioCluster(hookParams)
 
-      return utils.getCoreReady()
+      return utils.isCoreReady()
     },
   },
 }

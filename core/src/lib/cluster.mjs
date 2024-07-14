@@ -276,6 +276,7 @@ export const ensureMorioClusterConsensus = async () => {
    */
   await updateClusterState(true)
 
+
   /*
    * Are we leading the cluster?
    */
