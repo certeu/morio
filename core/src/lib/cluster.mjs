@@ -416,7 +416,7 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
 
     return
   }
-  log.info({ uuid, serial, data, err, error})
+  log.info({ uuid, serial, data, rtt, error})
 
   /*
    * Just because the request didn't error doesn't mean all is ok
