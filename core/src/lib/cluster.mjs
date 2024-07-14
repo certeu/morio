@@ -416,11 +416,13 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
 
     return
   }
+
   log.info({ uuid, serial, data, rtt, error})
 
   /*
    * Just because the request didn't error doesn't mean all is ok
-  if (data.errors.length > 0) {
+   */
+  if (Array.isArray(data?.errors) && data.errors.length > 0) {
     utils.setHeartbeatIn({ up: true, ok: false, uuid, data })
     for (const err of data.errors) {
       log.error(`Heartbeat error from node ${serial}: ${err}`)
@@ -431,16 +433,17 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
 
   /*
    * Warn when things are too slow
+   */
   if (rtt && rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
     log.warn(`Heartbeat RTT to node ${serial} was ${rtt}ms which is above the warning mark`)
   }
 
   /*
    * Do we need to take any action?
-  if (data.data.action) {
-    log.warn(`FIXME: implement ${data.report.action} action in verifyHeartbeatResponse`) //FIXME
-  }
    */
+  if (data.action) {
+    log.warn(`FIXME: implement ${data.action} action in verifyHeartbeatResponse`) //FIXME
+  }
 }
 
 const verifyHeartbeatNode = (node, result) => {
@@ -457,7 +460,8 @@ export const verifyHeartbeatRequest = async (data) => {
    * This will hold our findings
    * We end with the most problematic action
    */
-  const report = { action: false, errors: [] }
+  let action = false
+  const errors = []
 
   /*
    * Verify version.
@@ -465,7 +469,7 @@ export const verifyHeartbeatRequest = async (data) => {
    */
   if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
-    report.errors.push(err)
+    errors.push(err)
     log.info(`Heartbeat version mismatch from node ${data.node}: ${err}`)
   }
 
@@ -475,8 +479,8 @@ export const verifyHeartbeatRequest = async (data) => {
    */
   if (data.settings_serial !== utils.getSettingsSerial()) {
     const err = 'SETTINGS_SERIAL_MISMATCH'
-    report.errors.push(err)
-    report.action = 'SYNC'
+    errors.push(err)
+    action = 'SYNC'
     log.debug(`Heartbeat settings serial mismatch from node ${data.node}: ${err}`)
   }
 
@@ -486,8 +490,8 @@ export const verifyHeartbeatRequest = async (data) => {
    */
   if (data.node_serial === getNodeDataFromUuid(data.node)) {
     const err = 'NODE_SERIAL_MISMATCH'
-    report.errors.push(err)
-    report.action = 'SYNC'
+    errors.push(err)
+    action = 'SYNC'
     log.debug(`Heartbeat node serial mismatch from node ${data.node}: ${err}`)
   }
 
@@ -500,8 +504,8 @@ export const verifyHeartbeatRequest = async (data) => {
     (data.leader !== utils.getNodeUuid())
   ) {
     const err = 'LEADER_CHANGE'
-    report.errors.push(err)
-    report.action = 'ELECT'
+    errors.push(err)
+    action = 'ELECT'
     log.debug(`Heartbeat leader mismatch from node ${data.node}: ${err}`)
     log.info({
       data, leader: utils.getClusterLeaderUuid(), uuid: utils.getNodeUuid()
@@ -514,11 +518,11 @@ export const verifyHeartbeatRequest = async (data) => {
    */
   if (data.deployment !== utils.getClusterUuid()) {
     const err = 'DEPLOYMENT_MISMATCH'
-    report.errors.push(err)
+    errors.push(err)
     log.error(`Heartbeat deployment mismatch from node ${data.node}: ${err}`)
   }
 
-  return report
+  return { action, errors }
 }
 
 const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getSwarmNodes())

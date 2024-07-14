@@ -36,27 +36,28 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Verify the heartbeat request which will determin the action to take
    */
-  const report = await verifyHeartbeatRequest(req.body)
+  const { action, errors } = await verifyHeartbeatRequest(req.body)
 
-  if (report.action === 'SYNC') {
+  if (action === 'SYNC') {
     // FIXME
-    log.warn('FIXME: Handle SYNC action')
+    log.warn('FIXME: Handle SYNC action in heartbeat controller on leaader')
   }
-  if (report.action === 'ELECT') {
+  if (action === 'ELECT') {
     // FIXME
-    log.warn('FIXME: Handle ELECT action')
+    log.warn('FIXME: Handle ELECT action in heartbeat controller on leader')
   }
 
   /*
    * Always return status 200, be specific in the data
    */
   return res.status(200).send({
+    action,
+    errors,
     deployment: utils.getClusterUuid(),
     node: utils.getNodeUuid(),
     node_serial: Number(utils.getNodeSerial()),
     settings_serial: Number(utils.getSettingsSerial()),
     version: utils.getVersion(),
-    report,
   })
 }
 
