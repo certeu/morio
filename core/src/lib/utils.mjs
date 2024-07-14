@@ -605,12 +605,16 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
 /**
  * Helper method to store the status code and color
  *
- * @param {number} code - The status code, 0 means all ok
+ * @param {number} code - The status code, 0 means all ok, 1-99 issue (amber), 100+ = big problem (red)
  * @param {object} color - The status color, one of green, amber, or red
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setStatus = (code, color) => {
-  store.set(['state', 'status'], { code, color, time: Math.floor(Date.now()/1000) })
+utils.setStatus = (code) => {
+  store.set(['state', 'status'], {
+    code,
+    color: code === 0 ? 'green' : code < 100 ? 'amber' : 'red',
+    time: Math.floor(Date.now()/1000)
+  })
   return utils
 }
 
@@ -958,6 +962,50 @@ utils.resetClusterStateAge = () => {
 utils.resetClusterStatus = () => {
   store.set('state.swarm.updated', Date.now())
   return utils
+}
+
+/**
+ * Updates the status code and color based on current state
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.updateStatus = () => {
+  console.log(JSON.stringify({ state: store.state, info: store.info }, null, 2)) // FIXME
+  /*
+   * Ephemeral is easy
+   */
+  if (utils.isEphemeral()) {
+    setStatus(1)
+    return utils
+  }
+
+  /*
+   * If we're mid-reload, reflect that
+   */
+  if (!utils.isConfigResolved() || !utils.isCoreReady()) {
+    setStatus(2)
+    return utils
+  }
+
+  /*
+   * Single node or swarm?
+   */
+  if (!distributed) {
+    /*
+     * Single node (no swarm)
+     */
+    if (!utils.isConfigResolved() || !utils.isCoreReady()) setStatus(2)
+    // FIXME
+     setStatus(0)
+    return utils
+  } else {
+    /*
+     * Swarm deployment
+     */
+    // FIXME
+     setStatus(0)
+    return utils
+  }
 }
 
 /*      _   _

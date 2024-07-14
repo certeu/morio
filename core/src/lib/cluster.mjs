@@ -417,8 +417,6 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
     return
   }
 
-  log.info({ uuid, serial, data, rtt, error})
-
   /*
    * Just because the request didn't error doesn't mean all is ok
    */
@@ -444,6 +442,11 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
   if (data.action) {
     log.warn(`FIXME: implement ${data.action} action in verifyHeartbeatResponse`) //FIXME
   }
+
+  /*
+   * Update status on each heartbeat
+   */
+  utils.updateStatus()
 }
 
 const verifyHeartbeatNode = (node, result) => {
