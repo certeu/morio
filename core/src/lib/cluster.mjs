@@ -314,7 +314,7 @@ const runHeartbeat = async (init=false) => {
   /*
    * This won't change
    */
-  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/10 // FIXME: do not divide
 
   /*
    * Is this the initialisation of a new heartbeat?

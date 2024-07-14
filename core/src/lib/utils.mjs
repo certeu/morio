@@ -835,6 +835,9 @@ utils.isProduction = () => inProduction() ? true : false
  */
 utils.isStatusStale = () => {
   const data = utils.getStatus()
+  const delta = ((Date.now() - data.time)/1000)
+  const limit = getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2
+  log.warn({data, delta, limit})
   return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 }
 
