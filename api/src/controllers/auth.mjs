@@ -191,7 +191,7 @@ Controller.prototype.login = async (req, res) => {
       deployment: utils.getClusterUuid(),
     },
     key: utils.getKeys().private,
-    passphrase: utils.getKey().mrt,
+    passphrase: utils.getKeys().mrt,
   })
 
   return res.send({ jwt, data })
