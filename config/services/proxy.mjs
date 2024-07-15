@@ -1,4 +1,4 @@
-import { generateTraefikLabels } from './index.mjs'
+import { traefikHostRulePrefix } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -8,42 +8,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
-
-  /*
-   * Make it easy to figure out whether we're running in Swarm mode
-   */
-  const SWARM = utils.isSwarm()
-
-  /*
-   * Labels need to be aded to:
-   *  - The container when NOT using swarm
-   *  - The service when we DO use swarm
-   * But apart from that, they are mostly the same.
-   * So we create them here and add them below depending on SWARM
-   */
-  const labels = generateTraefikLabels(utils, {
-    service: 'proxy',
-    prefixes: [ '/api', '/dashboard' ],
-    priority: 66,
-  })
-  /*
-        // Tell traefik to watch itself (so meta)
-        'traefik.enable=true',
-        // Attach to the morio docker network
-        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-        // Match rule for Traefik's internal dashboard
-        'traefik.http.routers.dashboard.rule=( PathPrefix(`/api`) || PathPrefix(`/dashboard`) )',
-        // Avoid rule conflicts by setting priority manually
-        'traefik.http.routers.dashboard.priority=199',
-        // Route it to Traefik's internal API
-        'traefik.http.routers.dashboard.service=api@internal',
-        // Enable TLS
-        'traefik.http.routers.dashboard.tls=true',
-        // Only listen on the https endpoint
-        'traefik.http.routers.dashboard.entrypoints=https',
-        // Enable authentication
-        `traefik.http.routers.dashboard.middlewares=auth@docker`,
-        */
 
   return {
     /**
@@ -144,13 +108,26 @@ export const resolveServiceConfiguration = ({ utils }) => {
             // Set HTTP client timeout
             `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
         ]),
-      // Configure Traefik with container labels, only if we're not using swarm
-      labels: SWARM ? [] : labels,
+      // Configure Traefik with container labels
+      labels: [
+        // Tell traefik to watch itself (so meta)
+        'traefik.enable=true',
+        // Attach to the morio docker network
+        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+        // Match rule for Traefik's internal dashboard
+        `${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
+        // Avoid rule conflicts by setting priority manually
+        'traefik.http.routers.dashboard.priority=199',
+        // Route it to Traefik's internal API
+        'traefik.http.routers.dashboard.service=api@internal',
+        // Enable TLS
+        'traefik.http.routers.dashboard.tls=true',
+        // Only listen on the https endpoint
+        'traefik.http.routers.dashboard.entrypoints=https',
+        // Enable authentication
+        `traefik.http.routers.dashboard.middlewares=auth@docker`,
+      ]
     },
-    // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: SWARM
-      ? { labels }
-      : {},
     entrypoint: `#!/bin/sh
 set -e
 

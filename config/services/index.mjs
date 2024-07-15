@@ -81,12 +81,8 @@ export const generateTraefikLabels = (utils, {
   backendTls=false,
 }) => {
   const port = getServicePort(service, utils)
-  const nodes = [
-    ...utils.getSettings('deployment.nodes'),
-    ...utils.getSettings('deployment.flanking_nodes', []),
-  ]
+  const nodes = utils.getAllFqdns()
   const clusterFqdn = utils.getSettings('deployment.fqdn', false)
-  if (clusterFqdn) nodes.push(clusterFqdn)
   const labels = [
     `traefik.enable=true`,
     `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
@@ -103,13 +99,21 @@ export const generateTraefikLabels = (utils, {
     `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
   ]
   if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-  const hostRule = `traefik.http.routers.${service}.rule=(${nodes.map(n => "Host(`"+n+"`)").join(' || ')})`
+  const hostRule = traefikHostRulePrefix(service, nodes)
   if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
   if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
 
   return labels
 }
 
+/**
+ * Helper method to construct the 'Host' part of a traefik rule
+ *
+ * @param {string} router - The router name, typically the service name
+ * @param {array} nodes - The nodes to include in the rule
+ * @param {string} rule - The (part of a) Traefik rule matching the nodes on the router
+ */
+export const traefikHostRulePrefix = (router, nodes) => `traefik.http.routers.${router}.rule=(${nodes.map(n => "Host(`"+n+"`)").join(' || ')})`
 
 const getServicePort = (service, utils) => {
   if (service === 'api') return utils.getPreset('MORIO_API_PORT')

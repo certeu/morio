@@ -60,6 +60,20 @@ export const utils = { hooks: { services: {} } }
  */
 
 /**
+ * Helper method to get a list of all FQDNS used in the settings
+ *
+ * @return {array} list - The list of all FQDNs
+ *
+ */
+utils.getAllFqdns = () => ([
+  ...utils.getSettings('deployment.nodes'),
+  ...utils.getSettings('deployment.flanking_nodes', []),
+  ...utils.getSettings('deployment.fqdn')
+    ? [ utils.getSettings('deployment.fqdn') ]
+    : []
+])
+
+/**
  * Helper method to get a cache entry (see utils.cacheHit)
  *
  * @param {string|array} path - Path to the key in the cache, as an array or dot.notation.triung
