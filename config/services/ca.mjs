@@ -1,3 +1,5 @@
+import { generateTraefikLabels } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */
@@ -6,6 +8,46 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
+
+  /*
+   * Make it easy to figure out whether we're running in Swarm mode
+   */
+  const SWARM = utils.isSwarm()
+
+  /*
+   * Labels need to be aded to:
+   *  - The container when NOT using swarm
+   *  - The service when we DO use swarm
+   * But apart from that, they are mostly the same.
+   * So we create them here and add them below depending on SWARM
+   */
+  const labels = [
+    ...generateTraefikLabels(utils, {
+      service: 'ca',
+      prefixes: [
+        '/root',
+        '/acme',
+        '/provisioners'
+      ],
+      backendTls: true,
+    }),
+    // Tell traefik to watch this container
+    //'traefik.enable=true',
+    // Attach to the morio docker network
+    //`traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+    // Match requests going to the CA root certificate
+    //'traefik.http.routers.ca.rule=( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )',
+    // Set priority to avoid rule conflicts
+    //'traefik.http.routers.ca.priority=120',
+    // Forward to the CA api
+    //'traefik.http.routers.ca.service=ca',
+    // Forward to port on container
+    //'traefik.http.services.ca.loadbalancer.server.port=9000',
+    // Enable TLS
+    //'traefik.http.routers.ca.tls=true',
+    // Enable backend TLS
+    //'traefik.http.services.ca.loadbalancer.server.scheme=https',
+  ]
 
   return {
     /**
@@ -39,26 +81,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
       ],
-      // Configure Traefik with container labels
-      labels: [
-        // Tell traefik to watch this container
-        'traefik.enable=true',
-        // Attach to the morio docker network
-        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-        // Match requests going to the CA root certificate
-        'traefik.http.routers.ca.rule=( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )',
-        // Set priority to avoid rule conflicts
-        'traefik.http.routers.ca.priority=120',
-        // Forward to the CA api
-        'traefik.http.routers.ca.service=ca',
-        // Forward to port on container
-        'traefik.http.services.ca.loadbalancer.server.port=9000',
-        // Enable TLS
-        'traefik.http.routers.ca.tls=true',
-        // Enable backend TLS
-        'traefik.http.services.ca.loadbalancer.server.scheme=https',
-      ],
+      // Configure Traefik with container labels, only if we're not using swarm
+      labels: SWARM ? [] : labels,
     },
+    // If we're using Swarm, configure Traefik with swarm service labels
+    swarm: SWARM
+      ? { labels }
+      : {},
     /*
     * Step-CA server configuration
     */

@@ -116,6 +116,10 @@ const getTraefikRouters = (srvConf) => {
  * @param {string} service - The name of the service
  */
 export const addTraefikTlsConfiguration = (service) => {
+  //FIXME: Remove this function and where it's called from when we confirm labels are ok
+  log.warn(`Called addTraefikTlsConfiguration but this should be removed and unneeded`)
+  return
+
   /*
    * Don't bother if we are running in ephemeral mode
    */

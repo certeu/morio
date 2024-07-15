@@ -58,3 +58,59 @@ export const neverSwarmServices = [
   'console',
   'proxy',
 ]
+
+/**
+ * Helper method to generate the lables to configure Traefik
+ *
+ * @param {object} utils - The utils object
+ * @param {object} params - The other parameters
+ * @param {string} params.name - The name of the service
+ * @param {array} params.prefixes - An optional array of prefixes to match when routing requests to the service
+ * @param {number} priority - The priority when matching the rules to incoming requests
+ * @return {array} labels - An array of labels for the container/service
+ */
+export const generateTraefikLabels = (utils, {
+  service,
+  prefixes=[],
+  priority=666,
+  backendTls=false,
+}) => {
+  const port = getServicePort(service, utils)
+  const nodes = [
+    ...utils.getSettings('deployment.nodes'),
+    ...utils.getSettings('deployment.flanking_nodes', []),
+  ]
+  const clusterFqdn = utils.getSettings('deployment.fqdn', false)
+  if (clusterFqdn) nodes.push(clusterFqdn)
+  const labels = [
+    `traefik.enable=true`,
+    `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
+    `traefik.http.routers.${service}.priority=${priority}`,
+    `traefik.http.routers.${service}.service=${service}`,
+    `traefik.http.routers.${service}.entrypoints=https`,
+    `traefik.http.routers.${service}.tls.certresolver=ca`,
+    `traefik.http.services.${service}.loadbalancer.server.port=${port}`,
+    `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
+    `traefik.http.routers.${service}.tls=true`,
+    `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+      ? clusterFqdn
+      : utils.getSettings(['deployment', 'nodes', 0])}`,
+    `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
+  ]
+  if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
+  if (prefixes.length > 0) labels.push(
+    `traefik.http.routers.${service}.rule=(`
+    + nodes.map((node) => `Host(\`${node}\`)`).join(' || ')
+    + ') && ('
+    + prefixes.map(prefix => `PathPrefix(\`${prefix}\`)`).join(' || ')
+    + ')'
+  )
+  return labels
+}
+
+const getServicePort = (service, utils) => {
+  if (service === 'api') return utils.getPreset('MORIO_API_PORT')
+  if (service === 'core') return utils.getPreset('MORIO_CORE_PORT')
+  if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
+  if (service === 'ca') return 9000
+}

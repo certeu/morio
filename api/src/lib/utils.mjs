@@ -109,6 +109,13 @@ utils.getSettings = (path, dflt) => path === undefined
   : store.get(unshift(['settings', 'resolved'], path), dflt)
 
 /**
+ * Helper method to get the settings_serial
+ *
+ * @return {number} data - The settings_serial
+ */
+utils.getSettingsSerial = () => store.get('state.settings_serial')
+
+/**
  * Helper method to get the start_time
  *
  * @return {number} time - The start_time timestamp

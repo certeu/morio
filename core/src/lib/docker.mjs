@@ -478,6 +478,13 @@ export const generateSwarmServiceConfig = (serviceName) => {
     }
   }
 
+  if (config.swarm?.labels) {
+    for (const label of config.swarm.labels) {
+      const [key, val] = label.split('=')
+      opts.Labels[key] = val
+    }
+  }
+
   /*
    * Mounts
    */
