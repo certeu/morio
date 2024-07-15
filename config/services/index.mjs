@@ -62,6 +62,10 @@ export const neverSwarmServices = [
 /**
  * Helper method to generate the lables to configure Traefik
  *
+ * This will be hard to understand without knowing the syntax
+ * of Traefik label-based configuration. So see:
+ * https://doc.traefik.io/traefik/providers/docker/#routing-configuration-with-labels
+ *
  * @param {object} utils - The utils object
  * @param {object} params - The other parameters
  * @param {string} params.name - The name of the service
@@ -72,6 +76,7 @@ export const neverSwarmServices = [
 export const generateTraefikLabels = (utils, {
   service,
   prefixes=[],
+  paths=[],
   priority=666,
   backendTls=false,
 }) => {
@@ -98,19 +103,18 @@ export const generateTraefikLabels = (utils, {
     `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
   ]
   if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-  if (prefixes.length > 0) labels.push(
-    `traefik.http.routers.${service}.rule=(`
-    + nodes.map((node) => `Host(\`${node}\`)`).join(' || ')
-    + ') && ('
-    + prefixes.map(prefix => `PathPrefix(\`${prefix}\`)`).join(' || ')
-    + ')'
-  )
+  const hostRule = `traefik.http.routers.${service}.rule=(${nodes.map(n => "Host(`"+n+"`)").join(' || ')})`
+  if (prefixes.length > 0) labels.push(`${hostRule} (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+  if (paths.length > 0) labels.push(`${hostRule} (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
+
   return labels
 }
+
 
 const getServicePort = (service, utils) => {
   if (service === 'api') return utils.getPreset('MORIO_API_PORT')
   if (service === 'core') return utils.getPreset('MORIO_CORE_PORT')
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
   if (service === 'ca') return 9000
+  if (service === 'db') return 4001
 }
