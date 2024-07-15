@@ -38,6 +38,13 @@ export const utils = new Store(log)
  */
 
 /**
+ * Helper method to get the cluster UUID
+ *
+ * @return {string} uuid - The cluster's uuid
+ */
+utils.getClusterUuid = () => store.get('state.cluster.uuid')
+
+/**
  * Helper method to get the core state
  *
  * @return {object} state - The core state
