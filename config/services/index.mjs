@@ -104,8 +104,8 @@ export const generateTraefikLabels = (utils, {
   ]
   if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
   const hostRule = `traefik.http.routers.${service}.rule=(${nodes.map(n => "Host(`"+n+"`)").join(' || ')})`
-  if (prefixes.length > 0) labels.push(`${hostRule} (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
-  if (paths.length > 0) labels.push(`${hostRule} (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
+  if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+  if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
 
   return labels
 }
