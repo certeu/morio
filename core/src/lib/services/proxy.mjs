@@ -148,7 +148,7 @@ export const addTraefikTlsConfiguration = (service) => {
       utils.setMorioServiceConfigContainerLabel(
         service,
         chunks[0] + 'rule',
-        '(Host(' + names.map((node) => `\`${node}\``).join(',') + ')) && (' + chunks[1]
+        '(' + names.map((node) => `Host(\`${node}\`)`).join(' || ') + ') && (' + chunks[1]
       )
     }
   }
