@@ -66,6 +66,13 @@ utils.getKeys = () => store.get('keys')
 utils.getNodeSerial = () => store.get('state.node.serial')
 
 /**
+ * Helper method to get the node UUID
+ *
+ * @return {string} uuid - The local node's uuid
+ */
+utils.getNodeUuid = () => store.get('state.node.uuid')
+
+/**
  * Helper method to get the API prefix
  *
  * @return {string} prefix - The API prefix
@@ -127,7 +134,7 @@ utils.getSettingsSerial = () => store.get('state.settings_serial')
  *
  * @return {number} time - The start_time timestamp
  */
-utils.getStartTime = () => store.get('state.start_tiome')
+utils.getStartTime = () => store.get('state.start_time')
 
 /*          _   _
  *  ___ ___| |_| |_ ___ _ _ ___
