@@ -38,6 +38,13 @@ export const utils = new Store(log)
  */
 
 /**
+ * Helper method to get the core state
+ *
+ * @return {object} state - The core state
+ */
+utils.getCoreState = () => store.get('state.core')
+
+/**
  * Helper method to get the info from the store
  *
  * @return {string} prefix - The API prefix
