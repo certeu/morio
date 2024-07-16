@@ -336,7 +336,9 @@ export const generateLocalCaConfig = async () => {
     root: '/home/step/certs/root_ca.crt',
     crt: '/home/step/certs/intermediate_ca.crt',
     key: '/home/step/secrets/intermediate_ca.key',
-    dnsNames: [ ...caConfig.server.dnsNames, ...utils.getCentralFqdns() ],
+    // Adding FQDNs to the CA prohibits it from responding to ACME requests
+    // from Traefik as those use the same FQDNs
+    //dnsNames: [ ...caConfig.server.dnsNames, ...utils.getCentralFqdns() ],
   }
 
   /*
