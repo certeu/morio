@@ -307,7 +307,7 @@ export const generateCaConfig = async () => {
   await generateLocalCaConfig()
 }
 
-const generateLocalCaConfig = async () => {
+export const generateLocalCaConfig = async () => {
   /*
    * Save root certificate and fingerprint in memory
    */
