@@ -35,9 +35,9 @@ export const schema = {
   'req.cluster.join': Joi.object({
     you: hostname,
     join: hostname,
-    cluster: id,
+    cluster: uuid,
     as: Joi.string().required().valid('node', 'flanking_node'),
-    token: id,
+    token: Joi.string().max(99).required(),
     settings: Joi.object({
       serial: timestamp,
       data: Joi.object().required(),
