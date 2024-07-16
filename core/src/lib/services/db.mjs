@@ -108,7 +108,7 @@ const ensureTablesExist = async () => {
   for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema, {})) {
     log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
-    if (result[1].results[0].error && result[1].results[0].error.includes('already exists')) {
+    if (result[1]?.results?.[0]?.error && result[1].results[0].error.includes('already exists')) {
       log.debug(`Table ${table} already existed`)
     } else if (result[0] === 200) log.debug(`Table ${table} created`)
   }

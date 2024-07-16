@@ -5,6 +5,7 @@ import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
+import { generateLocalCaConfig } from '../lib/services/ca.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -86,7 +87,6 @@ Controller.prototype.join = async (req, res) => {
    */
   const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
-    console.log({ err, body: JSON.stringify(req.body, null, 2)})
     log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
   }
@@ -129,6 +129,11 @@ Controller.prototype.join = async (req, res) => {
       serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
       uuid: nodeUuid
     })
+
+    /*
+     * We need to run the local CA config before we trigger a reconfigured
+     */
+    await generateLocalCaConfig()
 
     /*
      * Don't forget to finalize the request
