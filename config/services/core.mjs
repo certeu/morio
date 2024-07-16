@@ -5,7 +5,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = isProduction()
+  const PROD = utils.isProduction()
 
   return {
     /**
