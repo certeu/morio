@@ -683,6 +683,17 @@ utils.setNodeIp = (ip) => {
 }
 
 /**
+ * Helper method to store the node serial in the state
+ *
+ * @param {number} serial - The node's serial
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setNodeSerial = (serial) => {
+  store.set('state.node.serial', serial)
+  return utils
+}
+
+/**
  * Helper method to store the save (unresolved) settings object
  *
  * @param {object} settings - The settings object, not resolved

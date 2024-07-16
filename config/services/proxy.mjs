@@ -120,8 +120,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             // Set HTTP client timeout
             `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
         ]),
-      // Configure Traefik with container labels
-      labels: [
+      // Configure Traefik with container labels (not in ephemeral mode)
+      labels: utils.isEphemeral() ? [] : [
         // Tell traefik to watch itself (so meta)
         'traefik.enable=true',
         // Attach to the morio docker network

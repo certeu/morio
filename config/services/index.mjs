@@ -81,7 +81,6 @@ export const generateTraefikLabels = (utils, {
   backendTls=false,
 }) => {
   const port = getServicePort(service, utils)
-  const nodes = utils.getAllFqdns()
   const labels = [
     `traefik.enable=true`,
     `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
@@ -91,7 +90,12 @@ export const generateTraefikLabels = (utils, {
     `traefik.http.routers.${service}.tls.certresolver=ca`,
     `traefik.http.services.${service}.loadbalancer.server.port=${port}`,
   ]
-  if (!utils.isEphemeral()) {
+  if (utils.isEphemeral()) {
+    // Traefik rules for ephemeral state do not include host matches
+    if (prefixes.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+  } else {
+    // Include rules and config using the deployment's FQDNs/nodes
+    const nodes = utils.getAllFqdns()
     const clusterFqdn = utils.getSettings('deployment.fqdn', false)
     labels.push(
       `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
@@ -101,11 +105,11 @@ export const generateTraefikLabels = (utils, {
         : utils.getSettings(['deployment', 'nodes', 0])}`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
     )
+    if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
+    if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
+    const hostRule = traefikHostRulePrefix(service, nodes)
+    if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
   }
-  if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-  const hostRule = traefikHostRulePrefix(service, nodes)
-  if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
-  if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
 
   return labels
 }
