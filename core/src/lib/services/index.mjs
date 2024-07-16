@@ -209,10 +209,14 @@ export const startMorio = async (hookParams = {}) => {
    * Create services (in parallel)
    */
   const promises = []
-  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder))
-    promises.push(ensureMorioService(service, hookParams))
-
-  return await Promise.all(promises)
+  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
+    //promises.push(ensureMorioService(service, hookParams))//
+    // FIXME: Doing this in serial for now, might change later
+    await ensureMorioService(service, hookParams)
+  }
+                                                          //
+  //return await Promise.all(promises)
+  return
 }
 
 /**
