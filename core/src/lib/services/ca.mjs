@@ -336,7 +336,7 @@ export const generateLocalCaConfig = async () => {
     root: '/home/step/certs/root_ca.crt',
     crt: '/home/step/certs/intermediate_ca.crt',
     key: '/home/step/secrets/intermediate_ca.key',
-    dnsNames: ['ca'], // utils.getCentralFqdns(),
+    dnsNames: [ ...caConfig.server.dnsNames, ...utils.getCentralFqdns() ],
   }
 
   /*
