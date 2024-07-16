@@ -10,10 +10,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Name to advertise
    */
-  const NAME = utils.isDistributed()
-    ? utils.getSettings('deployment.fqdn')
-    : utils.getSettings('deployment.nodes')[0]
-
+  const NAME = utils.getNodeFqdn()
 
   /*
    * We'll re-use this a bunch of times, so let's keep things DRY
@@ -81,7 +78,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * FIXME: add cluster support
          */
-        seed_servers: [],
+        seed_servers: utils.getBrokerFqdns(),
+
+        /*
+         * Do not start a cluster when seed_servers is empty
+         */
+        empty_seed_starts_cluster: false,
 
         /*
          * Flag to enable developer mode,
