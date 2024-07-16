@@ -13,6 +13,18 @@ const keys = Joi.object({
   public: Joi.string().required(),
   private: Joi.string().required(),
   deployment: uuid,
+  jwk: Joi.object({
+    kty: Joi.string().required(),
+    kid: Joi.string().required(),
+    n: Joi.string().required(),
+    e: Joi.string().required(),
+  }),
+  rfpr: Joi.string().base64().required(),
+  rcrt: Joi.string().required(),
+  rkey: Joi.string().required(),
+  rpwd: Joi.string().required(),
+  icrt: Joi.string().required(),
+  ikey: Joi.string().required(),
 })
 const version = Joi.string().min(2).max(64).required()
 const nodeSerial = Joi.number().min(1).max(36).required()
