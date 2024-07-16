@@ -67,6 +67,10 @@ const getHelpers = (env) => {
   const utils = new Store(logger)
   utils.getPreset = presetGetters[env]
   utils.isEphemeral = () => true
+  utils.isProduction = () => false
+  utils.isUnitTest = () => false
+  utils.isSwarm = () => false
+  utils.getAllFqdns = () => []
 
   return { store, utils }
 }

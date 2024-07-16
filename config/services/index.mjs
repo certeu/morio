@@ -82,7 +82,6 @@ export const generateTraefikLabels = (utils, {
 }) => {
   const port = getServicePort(service, utils)
   const nodes = utils.getAllFqdns()
-  const clusterFqdn = utils.getSettings('deployment.fqdn', false)
   const labels = [
     `traefik.enable=true`,
     `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
@@ -91,13 +90,18 @@ export const generateTraefikLabels = (utils, {
     `traefik.http.routers.${service}.entrypoints=https`,
     `traefik.http.routers.${service}.tls.certresolver=ca`,
     `traefik.http.services.${service}.loadbalancer.server.port=${port}`,
-    `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-    `traefik.http.routers.${service}.tls=true`,
-    `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
-      ? clusterFqdn
-      : utils.getSettings(['deployment', 'nodes', 0])}`,
-    `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
   ]
+  if (!utils.isEphemeral()) {
+    const clusterFqdn = utils.getSettings('deployment.fqdn', false)
+    labels.push(
+      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
+      `traefik.http.routers.${service}.tls=true`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+        ? clusterFqdn
+        : utils.getSettings(['deployment', 'nodes', 0])}`,
+      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
+    )
+  }
   if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
   const hostRule = traefikHostRulePrefix(service, nodes)
   if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)

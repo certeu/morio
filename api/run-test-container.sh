@@ -38,12 +38,12 @@ docker run \
   -v /home/jdecock/git/morio:/morio  \
   -l "traefik.enable=true"  \
   -l "traefik.docker.network=morionet_ephemeral"  \
-  -l "traefik.http.routers.api.rule=( PathPrefix(\`/-/api\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`) )"  \
-  -l "traefik.http.routers.api.priority=100"  \
+  -l "traefik.http.routers.api.priority=666666"  \
   -l "traefik.http.routers.api.service=api"  \
   -l "traefik.http.routers.api.entrypoints=https"  \
+  -l "traefik.http.routers.api.tls.certresolver=ca"  \
   -l "traefik.http.services.api.loadbalancer.server.port=3000"  \
-  -l "traefik.http.routers.api.tls=true"  \
+  -l "traefik.http.routers.api.rule=() && (PathPrefix(\`/-/api\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`))"  \
   -l "traefik.http.middlewares.auth.forwardauth.address=http://api:3000/auth"  \
   -l "traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-"  \
   -l "traefik.http.routers.api.middlewares=auth@docker"  \

@@ -105,9 +105,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `KAFKAJS_NO_PARTITIONER_WARNING=1`,
       ],
       // Add extra hosts
-      hosts: [
-        `local_core:${utils.getNodeCoreIp()}`,
-      ],
+      hosts: utils.isEphemeral()
+        ? []
+        : [ `local_core:${utils.getNodeCoreIp()}` ],
       // Configure Traefik with container labels, only if we're not using swarm
       labels: SWARM ? [] : labels,
     },
