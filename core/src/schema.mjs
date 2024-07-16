@@ -10,8 +10,8 @@ const uuid = Joi.string().guid({ version: 'uuidv4', separator: '-' }).required()
 const keys = Joi.object({
   jwt: Joi.string().base64().min(96).max(2048).required(),
   mrt: Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
-  public: Joi.string().pattern(/-----BEGIN PUBLIC KEY-----\n[a-zA-Z0-9+\n]+\n-----END PUBLIC KEY-----\n/).required(),
-  private: Joi.string().pattern(/-----BEGIN ENCRYPTED PRIVATE KEY-----\n[a-zA-Z0-9+\n]+\n-----END ENCRYPTED PRIVATE KEY-----\n/).required(),
+  public: Joi.string().required(),
+  private: Joi.string().required(),
   deployment: uuid,
 })
 const version = Joi.string().min(2).max(64).required()
