@@ -74,7 +74,17 @@ utils.getAllFqdns = () => ([
 ])
 
 /**
+ * Helper method to get a list of all FQDNS for broker nodes
+ *
+ * @return {array} list - The list of all broker node FQDNs
+ *
+ */
+utils.getBrokerFqdns = () => utils.getSettings('deployment.nodes')
+
+/**
  * Helper method to get a list of all FQDNS for central nodes
+ *
+ * This means broker nodes + cluster FQDN
  *
  * @return {array} list - The list of all central node FQDNs
  *
