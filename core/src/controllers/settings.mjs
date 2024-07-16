@@ -12,6 +12,7 @@ import { reconfigure } from '../index.mjs'
 import { cloneAsPojo, attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 import { log, utils } from '../lib/utils.mjs'
+import { generateCaConfig } from '../lib/services/ca.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -176,10 +177,11 @@ Controller.prototype.setup = async (req, res) => {
     public: publicKey,
     private: privateKey,
   }
-  log.debug(`Generating UUIIDs`)
+
   /*
    * Generate UUIDs for node (local) and deployment (cluster)
    */
+  log.debug(`Generating UUIIDs`)
   node.uuid = uuid()
   keys.deployment = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
@@ -191,6 +193,18 @@ Controller.prototype.setup = async (req, res) => {
   for (const [key, val] of Object.entries(utils.getMorioServiceConfig('core').default_settings)) {
     setIfUnset(mSettings, key, val)
   }
+
+  /*
+   * Make sure keys & settings exists in memory store so later steps can get them
+   */
+  utils.setKeys(keys)
+  utils.setSettings(cloneAsPojo(mSettings))
+
+  /*
+   * We need to generate the CA config & certificates early so that
+   * we can pass them along the join invite in clustered deployments
+   */
+  await generateCaConfig()
 
   /*
    * Handle secrets - Which requires some extra work
@@ -232,9 +246,10 @@ Controller.prototype.setup = async (req, res) => {
 
   /*
    * Also write the keys to disk
+   * Note that we're loading from the store, which was updated by generateCaConfig()
    */
   log.debug(`Writing key data to keys.json`)
-  result = await writeJsonFile(`/etc/morio/keys.json`, keys)
+  result = await writeJsonFile(`/etc/morio/keys.json`, utils.getKeys())
   if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
 
   /*

@@ -52,6 +52,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--api=true',
         // Enable the Traefik Dashboard
         '--api.dashboard=true',
+        // This removes the advertising for Traefik Lab's paid offerings
+        // Problem is that the big 'Upgrade' button which makes people think Traefik needs to be updated
+        // Furthermore, people running Morio can't upgrade even if they wanted to.
+        '--api.disabledashboardad',
+        // Same reasoning here
+        '--global.checknewversion=false',
+        // Disable telemetry
+        '--global.sendanonymoususage=false',
         // Create HTTP entrypoint (only to redirect to HTTPS)
         '--entrypoints.http.address=:80',
         //  Create HTTPS entrypoint
@@ -64,8 +72,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `--log.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Enable access logs
         '--accesslog=true',
+        // Enable access logs for internal services
+        '--accesslog.addinternals=true',
         // Set the access log destination
         `--accesslog.filePath=${utils.getPreset('MORIO_PROXY_ACCESS_LOG_FILEPATH')}`,
+        // Log in JSON
+        `--accesslog.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Do not verify backend certificates, just encrypt
         '--serversTransport.insecureSkipVerify=true',
         // Enable ACME certificate resolver (will only work after CA is initialized)
@@ -74,9 +86,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory',
         //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
         '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
-
         // Point to root CA (will only work after CA is initialized)
         '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+        // FIXME: Enable metrics
       ].concat(utils.isSwarm()
         ? [
             // Setup provider for Swarm services
@@ -117,15 +129,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Match rule for Traefik's internal dashboard
         `${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
         // Avoid rule conflicts by setting priority manually
-        'traefik.http.routers.dashboard.priority=199',
+        'traefik.http.routers.dashboard.priority=666',
         // Route it to Traefik's internal API
         'traefik.http.routers.dashboard.service=api@internal',
         // Enable TLS
         'traefik.http.routers.dashboard.tls=true',
         // Only listen on the https endpoint
         'traefik.http.routers.dashboard.entrypoints=https',
-        // Enable authentication
-        `traefik.http.routers.dashboard.middlewares=auth@docker`,
+        // Enable authentication (provider is swarm unless we're not swarming)
+        `traefik.http.routers.dashboard.middlewares=auth@${utils.isSwarm() ? 'swarm' : 'docker'}`,
       ]
     },
     entrypoint: `#!/bin/sh

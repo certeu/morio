@@ -25,7 +25,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     ...generateTraefikLabels(utils, {
       service: 'ui',
       prefixes: [ '/' ],
-      priority: 1,
+      priority: 6,
     }),
     // Tell traefik to watch this container
     //`traefik.enable=true`,

@@ -30,6 +30,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/provisioners'
       ],
       backendTls: true,
+      priority: 6666,
     }),
     // Tell traefik to watch this container
     //'traefik.enable=true',

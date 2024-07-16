@@ -110,7 +110,7 @@ Controller.prototype.join = async (req, res) => {
     /*
      * Joined the swam, write settings to disk and reconfigure
      * But first make sure to cast the serial to a number as we'll use it to
-     * construct teh path to write to disk, and join cluster is an unauthenticated
+     * construct the path to write to disk, and join cluster is an unauthenticated
      * request. So can't trust this input.
      */
     const serial = Number(valid.settings.serial)
