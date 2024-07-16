@@ -2,6 +2,7 @@
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
+
   /*
    * Make it easy to test production containers in a dev environment
    */
@@ -41,7 +42,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '18082:18082',
         '19082:19082',
         '19644:19644',
-        '9092:19092'
+        '9092:19092',
+        //'33145:33145', // FIXME: Do not expose this port, used for troubleshooting only
       ],
       // Environment
       environment: {
@@ -76,12 +78,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
        */
       redpanda: {
         /*
-         * FIXME: add cluster support
+         * Seed services is crucial for the cluster bootstrap
          */
-        seed_servers: utils.getBrokerFqdns(),
+        seed_servers: utils.getSettings('deployment.nodes')
+          .map((node, i) => ({ host: { address: `broker_${Number(i) + 1}`, port: 33145 } })),
 
         /*
          * Do not start a cluster when seed_servers is empty
+         * This is important since RedPadna version 22.3
          */
         empty_seed_starts_cluster: false,
 
@@ -165,8 +169,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Other TLS configuration
          */
-        admin_api_tls: [],
-        rpc_server_tls: {},
+        //admin_api_tls: [],
+        //rpc_server_tls: {},
 
         /*
          * Addresses of Kafka API published to clients.

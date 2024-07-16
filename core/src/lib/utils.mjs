@@ -1,4 +1,4 @@
-import { restClient } from '#shared/network'
+import { restClient, resolveHostAsIp } from '#shared/network'
 import { Store, unshift, setIfUnset } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction, neverSwarmServices,serviceOrder } from '#config'
@@ -1069,6 +1069,11 @@ utils.updateStatus = async () => {
  * Returns a pre-configured API client, itself on object
  */
 utils.apiClient = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+
+/**
+ * Used in resolveServiceConfiguration
+ */
+utils.resolveHostAsIp = resolveHostAsIp
 
 /**
  * Add helper method for sending RFC7807 error responses

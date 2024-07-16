@@ -172,7 +172,7 @@ export const service = {
       /*
        * Make sure CA is up
        */
-      const up = await attempt({
+      return await attempt({
         every: 5,
         timeout: 60,
         run: async () => await isCaUp(),
@@ -182,7 +182,7 @@ export const service = {
       if (up) log.debug(`CA is up.`)
       else log.warn(`CA did not come up before timeout. Moving on anyway.`)
 
-      return true
+      return up
     },
     /**
      * Lifecycle hook that always runs when core reloads the configuration

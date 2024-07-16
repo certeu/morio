@@ -265,7 +265,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   utils.setMorioServiceConfig(
     serviceName,
-    resolveServiceConfiguration(serviceName, { utils })
+    (await resolveServiceConfiguration(serviceName, { utils }))
   )
 
   /*
@@ -277,7 +277,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
     /*
      * Run precreate lifecycle hook
      */
-    runHook('precreate', serviceName, hookParams)
+    await runHook('precreate', serviceName, hookParams)
   } else {
     log.debug(`${serviceName}: ${swarm ? 'Not updating swarm service' : 'Not updating local container'}`)
   }
@@ -302,11 +302,11 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.debug(`${serviceName}: Starting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
+    log.debug(`${serviceName}: Starting ${swarm ? 'swarm' : 'local'} service`)
     /*
      * Run preStart lifecycle hook
      */
-    runHook('prestart', serviceName, { ...hookParams, recreate })
+    await runHook('prestart', serviceName, { ...hookParams, recreate })
 
     /*
      * (Re)Start the service
@@ -316,9 +316,9 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
     /*
      * Run postStart lifecycle hook
      */
-    runHook('poststart', serviceName, { ...hookParams, recreate })
+    await runHook('poststart', serviceName, { ...hookParams, recreate })
   } else {
-    log.debug(`${serviceName}: Not restarting ${utils.isSwarm() ? 'swarm' : 'local'} service`)
+    log.debug(`${serviceName}: Not restarting ${swarm ? 'swarm' : 'local'} service`)
   }
 
   /*
