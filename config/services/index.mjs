@@ -105,9 +105,9 @@ export const generateTraefikLabels = (utils, {
         : utils.getSettings(['deployment', 'nodes', 0])}`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
     )
+    const hostRule = traefikHostRulePrefix(service, nodes)
     if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
     if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-    const hostRule = traefikHostRulePrefix(service, nodes)
     if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
   }
 

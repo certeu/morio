@@ -74,7 +74,6 @@ Controller.prototype.heartbeat = async (req, res) => {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * FIXME: Add schema validation
  */
 Controller.prototype.join = async (req, res) => {
   /*
@@ -87,6 +86,7 @@ Controller.prototype.join = async (req, res) => {
    */
   const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
+    console.log({ err, body: JSON.stringify(req.body, null, 2)})
     log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
   }

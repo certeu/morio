@@ -13,6 +13,7 @@ import { cloneAsPojo, attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
+import { resolveServiceConfiguration } from '#config'
 
 /**
  * This settings controller handles settings routes
@@ -190,7 +191,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Complete the settings with the defaults that are configured
    */
-  for (const [key, val] of Object.entries(utils.getMorioServiceConfig('core').default_settings)) {
+  for (const [key, val] of resolveServiceConfiguration('core', { utils }).default_settings) {
     setIfUnset(mSettings, key, val)
   }
 
@@ -227,9 +228,9 @@ Controller.prototype.setup = async (req, res) => {
       'Morio by CERT-EU',
       log
     )
-    utils.set('encrypt', encrypt)
-    utils.set('decrypt', decrypt)
-    utils.set('isEncrypted', isEncrypted)
+    utils.encrypt =  encrypt
+    utils.decrypt = decrypt
+    utils.isEncrypted = isEncrypted
 
     /*
      * Now ensure token secrecy before we write to disk

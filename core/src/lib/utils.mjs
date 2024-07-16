@@ -74,6 +74,19 @@ utils.getAllFqdns = () => ([
 ])
 
 /**
+ * Helper method to get a list of all FQDNS for central nodes
+ *
+ * @return {array} list - The list of all central node FQDNs
+ *
+ */
+utils.getCentralFqdns = () => ([
+  ...utils.getSettings('deployment.nodes'),
+  ...utils.getSettings('deployment.fqdn')
+    ? [ utils.getSettings('deployment.fqdn') ]
+    : []
+])
+
+/**
  * Helper method to get a cache entry (see utils.cacheHit)
  *
  * @param {string|array} path - Path to the key in the cache, as an array or dot.notation.triung
@@ -366,7 +379,7 @@ utils.getSwarmServiceState = (service) => store.get(['state', 'services', 'swarm
  *
  * @return {object} tokens - The swarm tokens
  */
-utils.getSwarmTokens = () => store.get('state.swarm.tokens')
+utils.getSwarmTokens = () => store.get('state.swarm.tokens', {})
 
 /**
  * Helper method to get the Morio version string

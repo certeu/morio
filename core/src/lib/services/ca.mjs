@@ -3,6 +3,7 @@ import { generateCaRoot, keypairAsJwk } from '#shared/crypto'
 import { cp, readJsonFile, readFile, writeFile, chown, mkdir } from '#shared/fs'
 import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
+import { resolveServiceConfiguration } from '#config'
 // Default hooks
 import {
   defaultServiceWantedHook,
@@ -64,13 +65,15 @@ export const service = {
       }
 
       /*
-       * No config found, generate configuration, keys, certs, and secrets file
+       * No config found, generate local configuration
        */
+      await generateLocalCaConfig()
+
+      /*
       log.debug('Generating inital CA config - This will take a couple of seconds')
 
       /*
        * Generate keys and certificates
-       */
       const init = await generateCaRoot(
         utils.getSettings('deployment.nodes'),
         utils.getSettings('deployment.display_name')
@@ -78,12 +81,10 @@ export const service = {
 
       /*
        * Generate JWK
-       */
       const jwk = await keypairAsJwk(utils.getKeys())
 
       /*
        * Save root certificate and fingerprint in memory
-       */
       const caConfig = {
         url: `https://ca_${utils.getNodeSerial()}:9000`,
         fingerprint: init.root.fingerprint,
@@ -95,14 +96,12 @@ export const service = {
 
       /*
        * Also write root & intermediate certificates to the downloads folder
-       */
       await mkdir('/morio/data/downloads/certs/')
       await writeFile('/morio/data/downloads/certs/root.pem', init.root.certificate)
       await writeFile('/morio/data/downloads/certs/intermediate.pem', init.intermediate.certificate)
 
       /*
        * Construct step-ca (server) configuration
-       */
       const stepServerConfig = {
         ...caConfig.server,
         root: '/home/step/certs/root_ca.crt',
@@ -113,12 +112,10 @@ export const service = {
 
       /*
        * Add key to jwk provisioner config
-       */
       stepServerConfig.authority.provisioners[0].key = jwk
 
       /*
        * Construct step (client) configuration
-       */
       const stepClientConfig = {
         ...caConfig.client,
         fingerprint: init.root.fingerprint,
@@ -126,7 +123,6 @@ export const service = {
 
       /*
        * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
-       */
       const uid = utils.getPreset('MORIO_CA_UID')
       await mkdir('/morio/data/ca')
       await chown('/morio/data/ca', uid, uid)
@@ -139,7 +135,6 @@ export const service = {
 
       /*
        * Write certificates, keys, and configuration to disk, and let CA own them
-       */
       for (const [target, content] of [
         ['/morio/data/ca/certs/root_ca.crt', init.root.certificate],
         ['/morio/data/ca/certs/intermediate_ca.crt', init.intermediate.certificate],
@@ -158,9 +153,10 @@ export const service = {
       /*
        * Copy the CA root & intermediate certificates to a shared config folder
        * from where other containers will load it
-       */
       await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
       await cp(`/morio/data/ca/certs/intermediate_ca.crt`, `/etc/morio/shared/intermediate_ca.crt`)
+
+       */
 
       return true
     },
@@ -279,6 +275,21 @@ export const generateCaConfig = async () => {
   const jwk = await keypairAsJwk(utils.getKeys())
 
   /*
+   * Also store root, intermediate, and fingerprint in keys
+   * so it gets distributed accros the cluster (broker) nodes
+   */
+  utils.setKeys({
+    ...utils.getKeys(),
+    jwk,
+    rfpr: init.root.fingerprint,
+    rcrt: init.root.certificate,
+    rkey: init.root.keys.private,
+    rpwd: init.password,
+    icrt: init.intermediate.certificate,
+    ikey: init.intermediate.keys.private,
+  })
+
+  /*
    * Save root certificate and fingerprint in memory
    */
   const caConfig = {
@@ -291,47 +302,52 @@ export const generateCaConfig = async () => {
   utils.setCaConfig(caConfig)
 
   /*
-   * Also store root, intermediate, and fingerprint in keys
-   * so it gets distributed accros the cluster (broker) nodes
+   * Generate local portion of the config
    */
-  utils.setKeys({
-    ...utils.getKeys(),
-    fingerprint: init.root.fingerprint,
-    jwk,
-    certificate: init.root.certificate,
-    intermediate: init.intermediate.certificate,
+  await generateLocalCaConfig()
+}
+
+const generateLocalCaConfig = async () => {
+  /*
+   * Save root certificate and fingerprint in memory
+   */
+  const keys = utils.getKeys()
+  utils.setCaConfig({
+    url: `https://ca_${utils.getNodeSerial()}:9000`,
+    fingerprint: keys.rfpr,
+    jwk: keys.jwk,
+    certificate: keys.rcrt,
+    intermediate: keys.icrt,
   })
 
   /*
    * Also write root & intermediate certificates to the downloads folder
    */
   await mkdir('/morio/data/downloads/certs/')
-  await writeFile('/morio/data/downloads/certs/root.pem', init.root.certificate)
-  await writeFile('/morio/data/downloads/certs/intermediate.pem', init.intermediate.certificate)
+  await writeFile('/morio/data/downloads/certs/root.pem', keys.rcrt)
+  await writeFile('/morio/data/downloads/certs/intermediate.pem', keys.icrt)
 
   /*
    * Construct step-ca (server) configuration
    */
+  const caConfig = resolveServiceConfiguration('ca', { utils })
   const stepServerConfig = {
-    ...caConfig.server,
+    ...caConfig.server, // FIXME: What is stored in the server key, if anything?
     root: '/home/step/certs/root_ca.crt',
     crt: '/home/step/certs/intermediate_ca.crt',
     key: '/home/step/secrets/intermediate_ca.key',
-    dnsNames: [caConfig.server.dnsNames, ...utils.getSettings('deployment.nodes')],
+    dnsNames: utils.getCentralFqdns(),
   }
 
   /*
    * Add key to jwk provisioner config
    */
-  stepServerConfig.authority.provisioners[0].key = jwk
+  stepServerConfig.authority.provisioners[0].key = keys.jwk
 
   /*
    * Construct step (client) configuration
    */
-  const stepClientConfig = {
-    ...caConfig.client,
-    fingerprint: init.root.fingerprint,
-  }
+  const stepClientConfig = { ...caConfig.client, fingerprint: keys.rfpr }
 
   /*
    * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
@@ -350,11 +366,11 @@ export const generateCaConfig = async () => {
    * Write certificates, keys, and configuration to disk, and let CA own them
    */
   for (const [target, content] of [
-    ['/morio/data/ca/certs/root_ca.crt', init.root.certificate],
-    ['/morio/data/ca/certs/intermediate_ca.crt', init.intermediate.certificate],
-    ['/morio/data/ca/secrets/root_ca.key', init.root.keys.private],
-    ['/morio/data/ca/secrets/intermediate_ca.key', init.intermediate.keys.private],
-    ['/morio/data/ca/secrets/password', init.password],
+    ['/morio/data/ca/certs/root_ca.crt', keys.rcrt],
+    ['/morio/data/ca/certs/intermediate_ca.crt', keys.icrt],
+    ['/morio/data/ca/secrets/root_ca.key', keys.rkey],
+    ['/morio/data/ca/secrets/intermediate_ca.key', keys.ikey],
+    ['/morio/data/ca/secrets/password', keys.rpwd],
     ['/etc/morio/ca/ca.json', JSON.stringify(stepServerConfig, null, 2)],
     ['/etc/morio/ca/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
   ]) {
@@ -370,5 +386,6 @@ export const generateCaConfig = async () => {
    */
   await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
   await cp(`/morio/data/ca/certs/intermediate_ca.crt`, `/etc/morio/shared/intermediate_ca.crt`)
-
 }
+
+
