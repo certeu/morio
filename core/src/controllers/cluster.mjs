@@ -132,7 +132,9 @@ Controller.prototype.join = async (req, res) => {
 
     /*
      * We need to run the local CA config before we trigger a reconfigured
+     * It also needs access to the keys, so save those first
      */
+    utils.setKeys(valid.keys)
     await generateLocalCaConfig()
 
     /*
