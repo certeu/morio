@@ -450,7 +450,9 @@ export const generateSwarmServiceConfig = (serviceName) => {
     Networks: [{ Target: utils.getNetworkName() }],
     //EndpointSpec: { Mode: "vip" },
     // FIXME: vip or dnsrr? Depends so let's test both
-    EndpointSpec: { Mode: "dnsrr" },
+    EndpointSpec: {
+      Mode: config.swarm?.dnsrr ? "dnsrr" : "vip"
+    },
   }
 
   /*

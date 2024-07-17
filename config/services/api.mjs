@@ -112,8 +112,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       labels: SWARM ? [] : labels,
     },
     // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: SWARM
-      ? { labels }
-      : {}
+    swarm: {
+      labels: SWARM ? labels : [],
+      dnsrr: true,
+    }
   }
 }

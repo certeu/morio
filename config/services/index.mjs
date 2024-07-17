@@ -58,6 +58,7 @@ export const neverSwarmServices = [
   'console',
   'proxy',
   'ca',
+  'api',
 ]
 
 /**
