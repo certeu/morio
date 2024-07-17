@@ -129,6 +129,7 @@ export const getLocalServiceId = async (serviceName) => {
   /*
    * Make sure to log a warning if the Id is not found as that should not happen
    */
+  log.warn(utils.getLocalServiceState(serviceName)?.Id, 'REMOVEME also')
   const id = utils.getLocalServiceState(serviceName)?.Id || false
   if (!id) log.warn(`Running getLocalServiceId failed for local service ${serviceName}`)
 
