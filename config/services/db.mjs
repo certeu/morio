@@ -28,7 +28,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/-/db/status',
         '/-/db/nodes',
       ],
-      priority: 66,
+      priority: 666,
     }),
     // Need to rewrite the path for the backend connection to the rqlite API
     "traefik.http.middlewares.db-replacepathregex.replacepathregex.regex=^/-/db/(.*)",

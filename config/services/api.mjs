@@ -38,7 +38,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/downloads',
         '/coverage'
       ],
-      priority: 666666,
+      priority: 666,
     }),
     // Tell traefik to watch this container
     //'traefik.enable=true',
