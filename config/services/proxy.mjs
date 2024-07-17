@@ -9,8 +9,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
-  const nodes = utils.getAllFqdns()
-  const clusterFqdn = utils.getSettings('deployment.fqdn', false)
+  const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
+  const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('deployment.fqdn', false)
 
   return {
     /**
