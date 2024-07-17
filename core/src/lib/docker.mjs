@@ -129,6 +129,7 @@ export const getLocalServiceId = async (serviceName) => {
   /*
    * Return the ID or false if it's not found
    */
+  log.error(utils.getLocalServiceState(serviceName), 'REMOVEME')
   return utils.getLocalServiceState(serviceName)?.ID || false
 }
 
@@ -168,6 +169,7 @@ export const getSwarmService = async (serviceName) => {
  */
 export const stopLocalService = async (serviceName) => {
   const id = getLocalServiceId(serviceName)
+  log.warn({id})
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
