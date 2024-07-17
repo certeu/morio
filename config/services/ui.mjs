@@ -84,8 +84,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       labels: SWARM ? [] : labels,
     },
     // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: SWARM
-      ? { labels }
-      : {}
+    swarm: {
+      mode: 'replicated',
+      replicas: 1,
+      constraints: [ "node.role==manager" ],
+      labels: SWARM ? labels : [],
+    }
   }
 }

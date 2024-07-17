@@ -33,7 +33,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK'),
       // Ports
-      ports: ['80:80', '443:443'],
+      ports: ['80:80', '443:443', '9000:9000'],
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
@@ -67,6 +67,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--entrypoints.http.address=:80',
         //  Create HTTPS entrypoint
         '--entrypoints.https.address=:443',
+        // Create STEP-CA entrypoint (for access to the CA)
+        '--entrypoints.stepca.address=:9000',
         // Set the log level to info in development
         `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'info'}`,
         // Set the log destination

@@ -187,7 +187,6 @@ export const stopLocalService = async (serviceName) => {
  */
 export const stopSwarmService = async (serviceName) => {
   const service = await getSwarmService(serviceName)
-  console.log({service, REMOVEME: 'please' })
   if (service) await service.remove()
   else log.warn(`Failed to remove swarm service: ${serviceName}`)
 }
@@ -524,10 +523,17 @@ export const generateSwarmServiceConfig = (serviceName) => {
   }
 
   /*
-   * Constraints
+   * Swarm mode
+   */
+  if (config.swarm.replicas) {
+    opts.Mode = { Replicated: { Replicas: config.swarm.replicas } }
+  }
+
+  /*
+   * Swarm constraints
    */
   if (config.swarm.constraints) {
-    opts.Placement = { Constraints: config.swarm.constraints }
+    opts.TaskTemplate.Placement = { Constraints: config.swarm.constraints }
   }
 
   //if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })

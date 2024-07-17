@@ -72,9 +72,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
       labels: SWARM ? [] : labels,
     },
     // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: SWARM
-      ? { labels }
-      : {},
+    swarm: {
+      constraints: [ "node.role==manager" ],
+      labels: SWARM ? labels : [],
+    },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
      * various tables. Will run in the postStart lifecycle hook first time
