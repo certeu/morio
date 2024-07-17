@@ -185,7 +185,12 @@ export const stopLocalService = async (serviceName) => {
 /**
  * Stops a swarm service. Or rather, removes the service.
  */
-export const stopSwarmService = async (serviceName) => await getSwarmService(serviceName).remove()
+export const stopSwarmService = async (serviceName) => {
+  const service = await getSwarmService(serviceName)
+  console.log({service, REMOVEME: 'please' }
+  if (service) await service.remove()
+  else log.warn(`Failed to remove swarm service: ${serviceName}`)
+}
 
 /**
  * Restarts a local service. which just means it restarts a container
