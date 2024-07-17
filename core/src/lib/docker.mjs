@@ -187,7 +187,7 @@ export const stopLocalService = async (serviceName) => {
  */
 export const stopSwarmService = async (serviceName) => {
   const service = await getSwarmService(serviceName)
-  console.log({service, REMOVEME: 'please' }
+  console.log({service, REMOVEME: 'please' })
   if (service) await service.remove()
   else log.warn(`Failed to remove swarm service: ${serviceName}`)
 }
