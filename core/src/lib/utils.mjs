@@ -409,7 +409,7 @@ utils.getVersion = () => store.get('info.version')
  *
  * @return {string} name - Name of the network
  */
-utils.getNetworkName = () => utils.getPreset(`MORIO_NETWORK${utils.isEphemeral() ? '_EPHEMERAL' : ''}`)
+utils.getNetworkName = () => utils.getPreset(`MORIO_NETWORK${utils.isEphemeral() ? '_LOCAL' : ''}`)
 
 /**
  * Helper method to get a preset

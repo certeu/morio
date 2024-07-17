@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     // Tell traefik to watch this container
     //`traefik.enable=true`,
     // Attach to the morio docker network
-    //`traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK')}`,
+    //`traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK')}`,
     // Match requests going to the UI prefix (triple curly braces are required here)
     //'traefik.http.routers.ui.rule=( PathPrefix(`/`) )',
     // Since UI matches / we should give it the lowest priority so other rules match first
@@ -62,7 +62,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_EPHEMERAL' : 'MORIO_NETWORK'),
+      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK'),
       // Volumes
       volumes: PROD
         ? [

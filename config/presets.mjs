@@ -33,7 +33,7 @@ export const presets = {
   MORIO_NETWORK: 'morionet',
 
   // Network name for ehemeral state. Change at your own peril.
-  MORIO_NETWORK_EPHEMERAL: 'morionet_ephemeral',
+  MORIO_NETWORK_LOCAL: 'moriolocal',
 
   // Prefix for looking up errors
   MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
