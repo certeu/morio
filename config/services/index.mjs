@@ -100,11 +100,11 @@ export const generateTraefikLabels = (utils, {
     const clusterFqdn = utils.getSettings('deployment.fqdn', false)
     labels.push(
       `traefik.http.routers.${service}.tls=true`,
-      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
-        ? clusterFqdn
-        : utils.getSettings(['deployment', 'nodes', 0])}`,
-      `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
+      //`traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
+      //`traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+      //  ? clusterFqdn
+      //  : utils.getSettings(['deployment', 'nodes', 0])}`,
+      //`traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
     )
     const hostRule = traefikHostRulePrefix(service, nodes)
     if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
