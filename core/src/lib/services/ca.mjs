@@ -27,9 +27,17 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We just reuse the default hook here, checking for ephemeral state
+     * FIXME:
+     * For a true highly-available CA, we need to hook it up to our
+     * distributed database. See: https://github.com/smallstep/nosql/issues/64
+     * Until then, we can get by with a single CA, so we'll make sure this
+     * will only spin up on the loader.
+     * When the leader changes, the CA service will 'follow' it.
+     * This will cause renewal of existing certs to break, but should
+     * not be a problem to generate new ones.
+     * Until we hear back from smallstep, thi will have to do.
      */
-    wanted: defaultServiceWantedHook,
+    wanted: () => utils.isLeading() ? true : false,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

@@ -99,8 +99,8 @@ export const generateTraefikLabels = (utils, {
     const nodes = utils.getAllFqdns()
     const clusterFqdn = utils.getSettings('deployment.fqdn', false)
     labels.push(
-      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
       `traefik.http.routers.${service}.tls=true`,
+      `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
       `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
         ? clusterFqdn
         : utils.getSettings(['deployment', 'nodes', 0])}`,
@@ -130,4 +130,5 @@ const getServicePort = (service, utils) => {
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
   if (service === 'ca') return 9000
   if (service === 'db') return 4001
+  if (service === 'console') return 8080
 }
