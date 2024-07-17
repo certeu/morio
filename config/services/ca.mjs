@@ -39,7 +39,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     // Enable backend TLS
     'traefik.http.services.ca.loadbalancer.server.scheme=https',
     // Limit requests going to Step CA port 9000 to that entrypoing
-    'traefik.http.routers.stepca.entryPoints=[stepca]',
+    'traefik.http.routers.stepca.entryPoints=stepca',
     // Match anything on this router
     'traefik.http.routers.stepca.rule=PathPrefix(`/`)',
     // Match anything on this router
