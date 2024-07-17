@@ -172,7 +172,7 @@ export const stopLocalService = async (serviceName) => {
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
   }
-  if (err) {
+  catch (err) {
     log.warn(err, `Failed to stop local service: ${serviceName}`)
   }
 
