@@ -107,9 +107,11 @@ export const generateTraefikLabels = (utils, {
       //`traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
     )
     const hostRule = traefikHostRulePrefix(service, nodes)
-    if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
+    //if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
+    if (paths.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
     if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-    if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+    //if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+    if (prefixes.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
   }
 
   return labels

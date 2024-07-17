@@ -9,6 +9,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  const nodes = utils.getAllFqdns()
+  const clusterFqdn = utils.getSettings('deployment.fqdn', false)
+
   return {
     /**
      * Container configuration
@@ -138,6 +141,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         'traefik.http.routers.dashboard.entrypoints=https',
         // Enable authentication (provider is swarm unless we're not swarming)
         `traefik.http.routers.dashboard.middlewares=auth@${utils.isSwarm() ? 'swarm' : 'docker'}`,
+        // DEBUG
+        `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
+        `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+          ? clusterFqdn
+          : utils.getSettings(['deployment', 'nodes', 0])}`,
+        `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
       ]
     },
     entrypoint: `#!/bin/sh

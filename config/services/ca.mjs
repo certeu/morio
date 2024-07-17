@@ -83,12 +83,25 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
       ],
       // Configure Traefik with container labels, only if we're not using swarm
-      labels: SWARM ? [] : labels,
+      labels: [
+        // Tell traefik to watch this container
+        'traefik.enable=true',
+        // Attach to the morio docker network
+        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+        // Match requests going to the CA root certificate
+        'traefik.http.routers.ca.rule=( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )',
+        // Set priority to avoid rule conflicts
+        'traefik.http.routers.ca.priority=120',
+        // Forward to the CA api
+        'traefik.http.routers.ca.service=ca',
+        // Forward to port on container
+        'traefik.http.services.ca.loadbalancer.server.port=9000',
+        // Enable TLS
+        'traefik.http.routers.ca.tls=true',
+        // Enable backend TLS
+        'traefik.http.services.ca.loadbalancer.server.scheme=https',
+      ]
     },
-    // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: SWARM
-      ? { labels }
-      : {},
     /*
     * Step-CA server configuration
     */
