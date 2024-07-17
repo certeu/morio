@@ -34,13 +34,15 @@ export const service = {
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
-     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exists
+     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on the local node
      */
-    precreate: async () => {
-      for (const dir of ['/etc/morio/db', '/morio/data/db']) await mkdir(dir)
-
-      return true
-    },
+    precreate: ensureLocalPrerequisites,
+    /**
+     * Lifecycle hook for anything to be done prior to deferring to the swarm leader
+     *
+     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on the local node
+     */
+    predefer: ensureLocalPrerequisites,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
@@ -84,6 +86,12 @@ export const service = {
       return true
     },
   },
+}
+
+async function ensureLocalPrerequisites() {
+  for (const dir of ['/etc/morio/db', '/morio/data/db']) await mkdir(dir)
+
+  return true
 }
 
 /**

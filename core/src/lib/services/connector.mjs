@@ -43,37 +43,14 @@ export const service = {
      * Write out the logstash.yml file as it will be volume-mapped,
      * so we need to write it to disk first so it's available
      */
-    precreate: async () => {
-      /*
-       * Write out logstash.yml based on the settings
-       */
-      const file = '/etc/morio/connector/logstash.yml'
-      log.debug('Connector: Creating config file')
-      await writeYamlFile(file, utils.getMorioServiceConfig('connector').logstash, log, 0o644)
-
-      /*
-       * Make sure the data directory exists, and is writable
-       */
-      const uid = utils.getPreset('MORIO_CONNECTOR_UID')
-      await mkdir('/morio/data/connector')
-      await chown('/morio/data/connector', uid, uid)
-
-      /*
-       * Make sure the pipelines directory exists, and is writable
-       */
-      await mkdir('/etc/morio/connector/pipelines')
-      await chown('/etc/morio/connector/pipelines', uid, uid)
-
-      /*
-       * Make sure pipelines.yml file exists, so it can be mounted
-       */
-      await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
-
-      return true
-    },
+    precreate: ensureLocalPrerequisites,
     /**
-     * Lifecycle hook for anything to be done prior to starting the container
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * Write out the logstash.yml file as it will be volume-mapped,
+     * so we need to write it to disk first so it's available
      */
+    predefer: ensureLocalPrerequisites,
     prestart: async () => {
       /*
        * Need to write out pipelines, but also remove any that
@@ -95,6 +72,35 @@ export const service = {
       return true
     },
   },
+}
+
+async function ensureLocalPrerequisites() {
+  /*
+   * Write out logstash.yml based on the settings
+   */
+  const file = '/etc/morio/connector/logstash.yml'
+  log.debug('Connector: Creating config file')
+  await writeYamlFile(file, utils.getMorioServiceConfig('connector').logstash, log, 0o644)
+
+  /*
+   * Make sure the data directory exists, and is writable
+   */
+  const uid = utils.getPreset('MORIO_CONNECTOR_UID')
+  await mkdir('/morio/data/connector')
+  await chown('/morio/data/connector', uid, uid)
+
+  /*
+   * Make sure the pipelines directory exists, and is writable
+   */
+  await mkdir('/etc/morio/connector/pipelines')
+  await chown('/etc/morio/connector/pipelines', uid, uid)
+
+  /*
+   * Make sure pipelines.yml file exists, so it can be mounted
+   */
+  await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
+
+  return true
 }
 
 /**
