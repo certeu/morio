@@ -124,7 +124,7 @@ export const getLocalServiceId = async (serviceName) => {
   /*
    * Update state with currently running local services
    */
-  await updateLocalSwarmRunningServicesState()
+  await updateLocalRunningServicesState()
 
   /*
    * Return the ID or false if it's not found
