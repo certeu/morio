@@ -235,11 +235,11 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   /*
    * If it is a swarm service, only the swarm leader should worry about it
    */
-  if (swarm && !utils.isLeading()) {
-    await runHook('predefer', serviceName)
-    log.debug(`${serviceName}: Is a swarm service, leaving it to leader node`)
-    return
-  }
+  //if (swarm && !utils.isLeading()) {
+  //  await runHook('predefer', serviceName)
+  //  log.debug(`${serviceName}: Is a swarm service, leaving it to leader node`)
+  //  return
+  //}
 
   /*
    * If the service wanted and running, stop it

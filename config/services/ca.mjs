@@ -105,7 +105,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       key: '/home/step/secrets/intermediate_ca_key',
       address: ':9000',
       insecureAddress: '',
-      dnsNames: ['localhost', 'ca'],
+      dnsNames: ['ca.internal.morio.it', 'localhost', 'ca'],
       logger: {
         format: 'json',
       },
