@@ -53,13 +53,15 @@ export const ephemeralServiceOrder = [
  * This defined which services will never be created as swarm
  * services, but instead run as a local container.
  */
-export const neverSwarmServices = [
-  'broker',
-  'console',
-  'proxy',
-  'ca',
-  'api',
-]
+export const neverSwarmServices = serviceOrder
+//[
+//  'broker',
+//  'console',
+//  'proxy',
+//  'ca',
+//  'api',
+//  'db',
+//]
 
 /**
  * Helper method to generate the lables to configure Traefik
