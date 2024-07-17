@@ -130,7 +130,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Attach to the morio docker network
         `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
         // Match rule for Traefik's internal dashboard
-        `${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
+        //`${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
+        `traefik.http.routers.dashboard.rule=( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
         // Avoid rule conflicts by setting priority manually
         'traefik.http.routers.dashboard.priority=666',
         // Route it to Traefik's internal API
