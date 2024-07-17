@@ -56,7 +56,7 @@ export const ephemeralServiceOrder = [
 export const neverSwarmServices = [
   'broker',
   'console',
-  'proxy',
+  //'proxy',
   //'ca',
 ]
 

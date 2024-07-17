@@ -9,8 +9,40 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  /*
+   * Make it easy to figure out whether we're running in Swarm mode
+   */
+  const SWARM = utils.isSwarm()
+
   const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
   const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('deployment.fqdn', false)
+
+  // Configure Traefik with container labels (not in ephemeral mode)
+  const labels = utils.isEphemeral() ? [] : [
+    // Tell traefik to watch itself (so meta)
+    'traefik.enable=true',
+    // Attach to the morio docker network
+    `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
+    // Match rule for Traefik's internal dashboard
+    //`${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
+    `traefik.http.routers.dashboard.rule=( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
+    // Avoid rule conflicts by setting priority manually
+    'traefik.http.routers.dashboard.priority=666',
+    // Route it to Traefik's internal API
+    'traefik.http.routers.dashboard.service=api@internal',
+    // Enable TLS
+    'traefik.http.routers.dashboard.tls=true',
+    // Only listen on the https endpoint
+    'traefik.http.routers.dashboard.entrypoints=https',
+    // Enable authentication (provider is swarm unless we're not swarming)
+    `traefik.http.routers.dashboard.middlewares=auth@${utils.isSwarm() ? 'swarm' : 'docker'}`,
+    // DEBUG
+    `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
+    `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+      ? clusterFqdn
+      : utils.getSettings(['deployment', 'nodes', 0])}`,
+    `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
+  ]
 
   return {
     /**
@@ -126,31 +158,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
         ]),
       // Configure Traefik with container labels (not in ephemeral mode)
-      labels: utils.isEphemeral() ? [] : [
-        // Tell traefik to watch itself (so meta)
-        'traefik.enable=true',
-        // Attach to the morio docker network
-        `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-        // Match rule for Traefik's internal dashboard
-        //`${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
-        `traefik.http.routers.dashboard.rule=( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
-        // Avoid rule conflicts by setting priority manually
-        'traefik.http.routers.dashboard.priority=666',
-        // Route it to Traefik's internal API
-        'traefik.http.routers.dashboard.service=api@internal',
-        // Enable TLS
-        'traefik.http.routers.dashboard.tls=true',
-        // Only listen on the https endpoint
-        'traefik.http.routers.dashboard.entrypoints=https',
-        // Enable authentication (provider is swarm unless we're not swarming)
-        `traefik.http.routers.dashboard.middlewares=auth@${utils.isSwarm() ? 'swarm' : 'docker'}`,
-        // DEBUG
-        `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-        `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
-          ? clusterFqdn
-          : utils.getSettings(['deployment', 'nodes', 0])}`,
-        `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
-      ]
+      labels: SWARM ? [] : labels,
+    },
+    swarm: {
+      labels: SWARM ? labels : []
     },
     entrypoint: `#!/bin/sh
 set -e
