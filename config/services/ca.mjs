@@ -29,7 +29,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     // Match requests going to the CA root certificate
     'traefik.http.routers.ca.rule=( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )',
     // Set priority to avoid rule conflicts
-    'traefik.http.routers.ca.priority=120',
+    'traefik.http.routers.ca.priority=666',
     // Forward to the CA api
     'traefik.http.routers.ca.service=ca',
     // Forward to port on container
@@ -38,6 +38,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
     'traefik.http.routers.ca.tls=true',
     // Enable backend TLS
     'traefik.http.services.ca.loadbalancer.server.scheme=https',
+    // Limit requests going to Step CA port 9000 to that entrypoing
+    'traefik.http.routers.stepca.entryPoints=[stepca]',
+    // Match anything on this router
+    'traefik.http.routers.stepca.rule=PathPrefix(`/`)',
+    // Match anything on this router
+    'traefik.http.routers.stepca.priority=120',
+    // Set priority
+    'traefik.http.routers.stepca.priority=666',
+    // Set port
+    'traefik.http.services.stepca.loadbalancer.server.port=9000',
+    // Enable TLS
+    'traefik.http.routers.stepca.tls=true',
+    // Enable backend TLS
+    'traefik.http.services.stepca.loadbalancer.server.scheme=https',
   ]
 
   return {
