@@ -78,9 +78,12 @@ async function ensureLocalPrerequisites() {
   /*
    * Write out logstash.yml based on the settings
    */
-  const file = '/etc/morio/connector/logstash.yml'
-  log.debug('Connector: Creating config file')
-  await writeYamlFile(file, utils.getMorioServiceConfig('connector').logstash, log, 0o644)
+  const config = utils.getMorioServiceConfig('connector', false)
+  if (config) {
+    const file = '/etc/morio/connector/logstash.yml'
+    log.debug('Connector: Creating config file')
+    await writeYamlFile(file, config.logstash, log, 0o644)
+  }
 
   /*
    * Make sure the data directory exists, and is writable
