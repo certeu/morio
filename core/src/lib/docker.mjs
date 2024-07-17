@@ -448,7 +448,9 @@ export const generateSwarmServiceConfig = (serviceName) => {
     },
     Mode: { Global: {} },
     Networks: [{ Target: utils.getNetworkName() }],
-    EndpointSpec: { Mode: "vip" },
+    //EndpointSpec: { Mode: "vip" },
+    // FIXME: vip or dnsrr? Depends so let's test both
+    EndpointSpec: { Mode: "dnsrr" },
   }
 
   /*
