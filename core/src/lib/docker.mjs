@@ -175,6 +175,7 @@ export const stopLocalService = async (serviceName) => {
   catch (err) {
     log.warn(err, `Failed to stop local service: ${serviceName}`)
   }
+  log.warn(result, `Stopped local service: ${serviceName}`)
 
   return result
 }
