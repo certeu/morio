@@ -19,7 +19,10 @@ export const reloadConfiguration = async () => {
     run: async () => {
       const [status, body] = await utils.coreClient.get('/reload')
       if (status === 200) return body
-      else return false
+      else {
+        console.log({result, status})
+        return false
+      }
     },
     onFailedAttempt: (s) => {
       log.debug(`Waited ${s} seconds for core/reload, will continue waiting.`)
