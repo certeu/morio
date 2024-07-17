@@ -168,7 +168,15 @@ export const getSwarmService = async (serviceName) => {
  */
 export const stopLocalService = async (serviceName) => {
   const id = getLocalServiceId(serviceName)
-  return await runContainerApiCommand(id, 'stop', {}, true)
+  let result
+  try {
+    result = await runContainerApiCommand(id, 'stop', {}, true)
+  }
+  if (err) {
+    log.warn(err, `Failed to stop local service: ${serviceName}`)
+  }
+
+  return result
 }
 
 /**
