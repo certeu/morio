@@ -20,7 +20,7 @@ export const reloadConfiguration = async () => {
       const [status, body] = await utils.coreClient.get('/reload')
       if (status === 200) return body
       else {
-        console.log({result, status})
+        console.log({body, status})
         return false
       }
     },
