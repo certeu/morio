@@ -518,6 +518,13 @@ export const generateSwarmServiceConfig = (serviceName) => {
     opts.TaskTemplate.ContainerSpec.Hosts = config.container.hosts
   }
 
+  /*
+   * Constraints
+   */
+  if (config.swarm.constraints) {
+    opts.Placement = { Constraints: config.swarm.constraints }
+  }
+
   //if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
   return opts
 }

@@ -51,11 +51,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
   ]
 
   return {
-    /**
+    /*
     * Container configuration
-    *
-    * @param {object} config - The high-level Morio configuration
-    * @return {object} container - The container configuration
     */
     container: {
       // Name to use for the running container
@@ -83,6 +80,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
       ],
       // Configure Traefik with container labels, only if we're not using swarm
+      labels: [
+      ]
+    },
+    /*
+    * Swarm configuration
+    */
+    swarm: {
+      constraints: [
+        "status.managerstatus.leader=true",,
+      ],
       labels: [
         // Tell traefik to watch this container
         'traefik.enable=true',
