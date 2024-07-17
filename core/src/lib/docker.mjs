@@ -129,7 +129,6 @@ export const getLocalServiceId = async (serviceName) => {
   /*
    * Make sure to log a warning if the Id is not found as that should not happen
    */
-  log.warn(utils.getLocalServiceState(serviceName)?.Id, 'REMOVEME also')
   const id = utils.getLocalServiceState(serviceName)?.Id || false
   if (!id) log.warn(`Running getLocalServiceId failed for local service ${serviceName}`)
 
@@ -171,8 +170,7 @@ export const getSwarmService = async (serviceName) => {
  * Stops a local service. which just means it stops a container
  */
 export const stopLocalService = async (serviceName) => {
-  const id = getLocalServiceId(serviceName)
-  log.warn({id})
+  const id = await getLocalServiceId(serviceName)
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
@@ -180,7 +178,6 @@ export const stopLocalService = async (serviceName) => {
   catch (err) {
     log.warn(err, `Failed to stop local service: ${serviceName}`)
   }
-  log.warn(result, `Stopped local service: ${serviceName}`)
 
   return result
 }
