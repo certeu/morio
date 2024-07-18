@@ -1,4 +1,4 @@
-import { generateTraefikLabels } from './index.mjs'
+import { generateTraefikConfig } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -8,32 +8,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
-
-  /*
-   * Make it easy to figure out whether we're running in Swarm mode
-   */
-  const SWARM = utils.isSwarm()
-
-  /*
-   * Labels need to be aded to:
-   *  - The container when NOT using swarm
-   *  - The service when we DO use swarm
-   * But apart from that, they are mostly the same.
-   * So we create them here and add them below depending on SWARM
-   */
-  const labels = [
-    ...generateTraefikLabels(utils, {
-      service: 'db',
-      paths: [
-        '/-/db/status',
-        '/-/db/nodes',
-      ],
-      priority: 666,
-    }),
-    // Need to rewrite the path for the backend connection to the rqlite API
-    "traefik.http.middlewares.db-replacepathregex.replacepathregex.regex=^/-/db/(.*)",
-    "traefik.http.middlewares.db-replacepathregex.replacepathregex.replacement=/$$1",
-  ]
 
   return {
     /**
@@ -71,11 +45,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Configure Traefik with container labels, only if we're not using swarm
       labels: SWARM ? [] : labels,
     },
-    // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: {
-      constraints: [ "node.role==manager" ],
-      labels: SWARM ? labels : [],
-    },
+    /*
+     * Traefik (proxy) configuration for the API service
+     */
+    traefik: generateTraefikConfig(utils, {
+      service: 'db',
+      paths: [
+        '/-/db/status',
+        '/-/db/nodes',
+      ],
+      priority: 666,
+    }).set("http.middlewares.db-replacepathregex.replacepathregex.regex", "^/-/db/(.*)")
+      .set("http.middlewares.db-replacepathregex.replacepathregex.replacement", "/$$1"),
     /**
      * This is the schema, or more accurately, the SQL commands to create the
      * various tables. Will run in the postStart lifecycle hook first time

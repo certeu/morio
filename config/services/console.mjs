@@ -1,4 +1,4 @@
-import { generateTraefikLabels } from './index.mjs'
+import { generateTraefikConfig } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -36,12 +36,12 @@ export const resolveServiceConfiguration = ({ utils }) => ({
       `${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
     ],
     // Configure Traefik with container labels
-    labels: generateTraefikLabels(utils, {
-      service: 'console',
-      prefixes: [ `/${utils.getPreset('MORIO_CONSOLE_PREFIX')}` ],
-      priority: 666,
-    })
   },
+  traefik: generateTraefikConfig(utils, {
+    service: 'console',
+    prefixes: [ `/${utils.getPreset('MORIO_CONSOLE_PREFIX')}` ],
+    priority: 666,
+  }),
   /*
    * Console configuration
    */

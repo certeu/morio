@@ -1,4 +1,4 @@
-import { generateTraefikLabels } from './index.mjs'
+import { generateTraefikConfig } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -10,11 +10,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const PROD = utils.isProduction()
 
   /*
-   * Make it easy to figure out whether we're running in Swarm mode
-   */
-  const SWARM = utils.isSwarm()
-
-  /*
    * Grab directories here to keep this DRY
    */
   const DIRS = {
@@ -24,14 +19,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
   }
 
   /*
-   * Labels need to be aded to:
-   *  - The container when NOT using swarm
-   *  - The service when we DO use swarm
-   * But apart from that, they are mostly the same.
-   * So we create them here and add them below depending on SWARM
+   * Traefik config
    */
-  const labels = [
-    ...generateTraefikLabels(utils, {
+  const traefik = generateTraefikConfig(utils, {
       service: 'api',
       prefixes: [
         utils.getPreset('MORIO_API_PREFIX'),
@@ -39,39 +29,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/coverage'
       ],
       priority: 666,
-    }),
-    // Tell traefik to watch this container
-    //'traefik.enable=true',
-    // Attach to the morio docker network
-    //`traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK')}`,
-    // Match requests going to the API prefix
-    //`traefik.http.routers.api.rule=( PathPrefix(\`${utils.getPreset('MORIO_API_PREFIX')}\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`) )`,
-    // Set priority to avoid rule conflicts
-    //`traefik.http.routers.api.priority=100`,
-    // Forward to api service
-    //`traefik.http.routers.api.service=api`,
-    // Only match requests on the https endpoint
-    //`traefik.http.routers.api.entrypoints=https`,
-    // Forward to port on container
-    //`traefik.http.services.api.loadbalancer.server.port=${utils.getPreset('MORIO_API_PORT')}`,
-    // Enable TLS
-    //`traefik.http.routers.api.tls=true`,
-    // Enable authentication
-    `traefik.http.middlewares.auth.forwardauth.address=http://api:${utils.getPreset('MORIO_API_PORT')}/auth`,
-    `traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-`,
-    `traefik.http.routers.api.middlewares=auth@${SWARM ? 'swarm' : 'docker'}`,
-  ]
+    })
+
   /*
-   * To run unit tests, we need to add these labels manually
+   * To run unit tests, we need to modify the config slightly
    */
-  if (utils.isUnitTest()) labels.push(
-    "traefik.http.routers.api.tls=true",
-    "traefik.http.routers.api.tls.certresolver=ca",
-    "traefik.http.services.api.loadbalancer.server.port=3000",
-    "traefik.tls.stores.default.defaultgeneratedcert.domain.main=unit.test.morio.it",
-    "traefik.tls.stores.default.defaultgeneratedcert.domain.sans=unit.test.morio.it",
-    "traefik.tls.stores.default.defaultgeneratedcert.resolver=ca"
-  )
+  if (!PROD && utils.isUnitTest()) {
+    traefik.set("http.routers.api.tls", true)
+    traefik.set("http.routers.api.tls.certresolver", "ca")
+    traefik.set("tls.stores.default.defaultgeneratedcert.domain.main", "unit.test.morio.it")
+    traefik.set("tls.stores.default.defaultgeneratedcert.domain.sans", "unit.test.morio.it")
+    traefik.set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
+  }
 
   return {
     /**
@@ -108,13 +77,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
       hosts: utils.isEphemeral()
         ? []
         : [ `local_core:${utils.getNodeCoreIp()}` ],
-      // Configure Traefik with container labels, only if we're not using swarm
-      labels: SWARM ? [] : labels,
     },
-    // If we're using Swarm, configure Traefik with swarm service labels
-    swarm: {
-      labels: SWARM ? labels : [],
-      dnsrr: true,
-    }
+    /*
+     * Traefik (proxy) configuration for the API service
+     */
+    traefik,
   }
 }

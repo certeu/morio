@@ -1,3 +1,5 @@
+import { generateTraefikConfig } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */

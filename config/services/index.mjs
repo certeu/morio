@@ -1,7 +1,8 @@
+import { YamlConfig } from '../yaml-config.mjs'
 import { resolveServiceConfiguration as api } from './api.mjs'
 import { resolveServiceConfiguration as broker } from './broker.mjs'
 import { resolveServiceConfiguration as ca } from './ca.mjs'
-import { resolveServiceConfiguration as console } from './console.mjs'
+import { resolveServiceConfiguration as _console } from './console.mjs'
 import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as db } from './db.mjs'
@@ -13,7 +14,7 @@ const resolvers = {
   api,
   broker,
   ca,
-  console,
+  console: _console,
   connector,
   core,
   db,
@@ -54,21 +55,9 @@ export const ephemeralServiceOrder = [
  * services, but instead run as a local container.
  */
 export const neverSwarmServices = serviceOrder
-//[
-//  'broker',
-//  'console',
-//  'proxy',
-//  'ca',
-//  'api',
-//  'db',
-//]
 
 /**
- * Helper method to generate the lables to configure Traefik
- *
- * This will be hard to understand without knowing the syntax
- * of Traefik label-based configuration. So see:
- * https://doc.traefik.io/traefik/providers/docker/#routing-configuration-with-labels
+ * Helper method to generate the Traefik configuration
  *
  * @param {object} utils - The utils object
  * @param {object} params - The other parameters
@@ -77,47 +66,51 @@ export const neverSwarmServices = serviceOrder
  * @param {number} priority - The priority when matching the rules to incoming requests
  * @return {array} labels - An array of labels for the container/service
  */
-export const generateTraefikLabels = (utils, {
+export const generateTraefikConfig = (utils, {
   service,
   prefixes=[],
   paths=[],
   priority=666,
   backendTls=false,
 }) => {
+
   const port = getServicePort(service, utils)
-  const labels = [
-    `traefik.enable=true`,
-    `traefik.docker.network=${utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK')}`,
-    `traefik.http.routers.${service}.priority=${priority}`,
-    `traefik.http.routers.${service}.service=${service}`,
-    `traefik.http.routers.${service}.entrypoints=https`,
-    `traefik.http.routers.${service}.tls.certresolver=ca`,
-    `traefik.http.services.${service}.loadbalancer.server.port=${port}`,
-  ]
-  if (utils.isEphemeral()) {
-    // Traefik rules for ephemeral state do not include host matches
-    if (prefixes.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
-  } else {
+  // Paths to save us from typing them too often
+  const ROUTER = ['http', 'routers', service]
+  const RULE = [...ROUTER, 'rule']
+  const SERVICE = ['http', 'services', service]
+  /*
+   * Initial configuration object (tc = Traefik config)
+   */
+  const tc = new YamlConfig()
+    .set(ROUTER, {
+      priority,
+      service,
+      entrypoints: 'https',
+      tls: true,
+    })
+    .set(SERVICE, {
+      loadBalancer: {
+        servers: [
+          { url: `http://${service}:${port}` }
+        ]
+      }
+    })
+  if (utils.isEphemeral()) tc.set(RULE, prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || '))
+  else {
+    // Set certificate resolver
+    tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
     // Include rules and config using the deployment's FQDNs/nodes
     const nodes = utils.getAllFqdns()
     const clusterFqdn = utils.getSettings('deployment.fqdn', false)
-    labels.push(
-      `traefik.http.routers.${service}.tls=true`,
-      //`traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-      //`traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
-      //  ? clusterFqdn
-      //  : utils.getSettings(['deployment', 'nodes', 0])}`,
-      //`traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
-    )
-    const hostRule = traefikHostRulePrefix(service, nodes)
-    //if (paths.length > 0) labels.push(`${hostRule} && (${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
-    if (paths.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${paths.map(p => "Path(`"+p+"`)").join(' || ')})`)
-    if (backendTls) labels.push(`traefik.http.services.${service}.loadbalancer.server.scheme=https`)
-    //if (prefixes.length > 0) labels.push(`${hostRule} && (${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
-    if (prefixes.length > 0) labels.push(`traefik.http.routers.${service}.rule=(${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')})`)
+    tc.set([...ROUTER, 'tls'], true)
+    //const hostRule = traefikHostRulePrefix(service, nodes)
+    if (paths.length > 0) tc.set(RULE, paths.map(p => "Path(`"+p+"`)").join(' || '))
+    else if (prefixes.length > 0) tc.set(RULE, prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || '))
+    if (backendTls) tc.set([...SERVICE, 'loadBalancer', 'server', 'scheme'], 'https')
   }
 
-  return labels
+  return tc
 }
 
 /**

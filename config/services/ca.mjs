@@ -1,4 +1,4 @@
-import { generateTraefikLabels } from './index.mjs'
+import { YamlConfig } from '../yaml-config.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -8,51 +8,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
-
-  /*
-   * Make it easy to figure out whether we're running in Swarm mode
-   */
-  const SWARM = utils.isSwarm()
-
-  /*
-   * Labels need to be aded to:
-   *  - The container when NOT using swarm
-   *  - The service when we DO use swarm
-   * But apart from that, they are mostly the same.
-   * So we create them here and add them below depending on SWARM
-   */
-  const labels = [
-    // Tell traefik to watch this container
-    'traefik.enable=true',
-    // Attach to the morio docker network
-    `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-    // Match requests going to the CA root certificate
-    'traefik.http.routers.ca.rule=( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )',
-    // Set priority to avoid rule conflicts
-    'traefik.http.routers.ca.priority=666',
-    // Forward to the CA api
-    'traefik.http.routers.ca.service=ca',
-    // Forward to port on container
-    'traefik.http.services.ca.loadbalancer.server.port=9000',
-    // Enable TLS
-    'traefik.http.routers.ca.tls=true',
-    // Enable backend TLS
-    'traefik.http.services.ca.loadbalancer.server.scheme=https',
-    // Limit requests going to Step CA port 9000 to that entrypoing
-    'traefik.http.routers.stepca.entryPoints=stepca',
-    // Match anything on this router
-    'traefik.http.routers.stepca.rule=PathPrefix(`/`)',
-    // Match anything on this router
-    'traefik.http.routers.stepca.priority=120',
-    // Set priority
-    'traefik.http.routers.stepca.priority=666',
-    // Set port
-    'traefik.http.services.stepca.loadbalancer.server.port=9000',
-    // Enable TLS
-    'traefik.http.routers.stepca.tls=true',
-    // Enable backend TLS
-    'traefik.http.services.stepca.loadbalancer.server.scheme=https',
-  ]
 
   return {
     /*
@@ -83,18 +38,21 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
       ],
-      // Configure Traefik with container labels, only if we're not using swarm
-      labels: SWARM ? [] : labels,
     },
     /*
-    * Swarm configuration
-    */
-    swarm: {
-      mode: 'replicated',
-      replicas: 1,
-      constraints: [ "node.role==manager" ],
-      labels: SWARM ? labels : [],
-    },
+     * Traefik (proxy) configuration for the CA service
+     */
+    traefik:new YamlConfig()
+      .set('http.routers.ca.rule', '( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )')
+      .set('http.routers.ca.priority', 666)
+      .set('http.routers.ca.service', 'ca')
+      .set('http.services.ca.loadBalancer.servers', { url: `https://ca:9000/` })
+      .set('http.routers.ca.tls', true)
+      .set('http.routers.stepca.entryPoints', 'stepca')
+      .set('http.routers.stepca.rule', 'PathPrefix(`/`)')
+      .set('http.routers.stepca.priority', 666)
+      .set('http.routers.stepca.tls', true)
+      .set('http.services.stepca.loadBalancer.servers', { url: `https://ca:9000/` }),
     /*
     * Step-CA server configuration
     */

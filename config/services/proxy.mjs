@@ -1,3 +1,4 @@
+import { YamlConfig } from '../yaml-config.mjs'
 import { traefikHostRulePrefix } from './index.mjs'
 
 /*
@@ -9,40 +10,26 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
-  /*
-   * Make it easy to figure out whether we're running in Swarm mode
-   */
-  const SWARM = utils.isSwarm()
-
   const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
   const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('deployment.fqdn', false)
 
-  // Configure Traefik with container labels (not in ephemeral mode)
-  const labels = utils.isEphemeral() ? [] : [
-    // Tell traefik to watch itself (so meta)
-    'traefik.enable=true',
-    // Attach to the morio docker network
-    `traefik.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-    // Match rule for Traefik's internal dashboard
-    //`${traefikHostRulePrefix('dashboard', utils.getAllFqdns())} && ( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
-    `traefik.http.routers.dashboard.rule=( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )`,
-    // Avoid rule conflicts by setting priority manually
-    'traefik.http.routers.dashboard.priority=666',
-    // Route it to Traefik's internal API
-    'traefik.http.routers.dashboard.service=api@internal',
-    // Enable TLS
-    'traefik.http.routers.dashboard.tls=true',
-    // Only listen on the https endpoint
-    'traefik.http.routers.dashboard.entrypoints=https',
-    // Enable authentication (provider is swarm unless we're not swarming)
-    `traefik.http.routers.dashboard.middlewares=auth@${utils.isSwarm() ? 'swarm' : 'docker'}`,
-    // DEBUG
-    `traefik.tls.stores.default.defaultgeneratedcert.resolver=ca`,
-    `traefik.tls.stores.default.defaultgeneratedcert.domain.main=${clusterFqdn
+  /*
+   * Traefik (proxy) dynamic configuration for the proxy service
+   */
+  const traefik = new YamlConfig()
+    .set("http.routers.dashboard.rule", "( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )")
+    .set("http.routers.dashboard.priority", 666)
+    .set("http.routers.dashboard.service", "api@internal")
+    .set("http.routers.dashboard.tls", true)
+    .set("http.routers.dashboard.entrypoints", "https")
+  if (!utils.isEphemeral()) traefik
+    .set("http.routers.dashboard.middlewares", "auth@file")
+    .set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
+    .set("tls.stores.default.defaultgeneratedcert.domain.main", clusterFqdn
       ? clusterFqdn
-      : utils.getSettings(['deployment', 'nodes', 0])}`,
-    `traefik.tls.stores.default.defaultgeneratedcert.domain.sans=${nodes.join(', ')}`,
-  ]
+      : utils.getSettings(['deployment', 'nodes', 0])
+    )
+    .set("tls.stores.default.defaultgeneratedcert.domain.sans", nodes.join(', '))
 
   return {
     /**
@@ -68,15 +55,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ports: ['80:80', '443:443', '9000:9000'],
       // Volumes
       volumes: PROD ? [
-        `${utils.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
         `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+        //`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+        `${utils.getPreset('MORIO_CONFIG_ROOT')}/proxy:/etc/morio/proxy`,
         `${utils.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
         `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
       ] : [
-        `${utils.getPreset('MORIO_DOCKER_SOCKET')}:/var/run/docker.sock`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
+        //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/proxy:/etc/morio/proxy`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
       ],
@@ -99,8 +86,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--entrypoints.http.address=:80',
         //  Create HTTPS entrypoint
         '--entrypoints.https.address=:443',
-        // Create STEP-CA entrypoint (for access to the CA)
-        '--entrypoints.stepca.address=:9000',
         // Set the log level to info in development
         `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'info'}`,
         // Set the log destination
@@ -117,52 +102,30 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `--accesslog.format=${utils.getPreset('MORIO_PROXY_LOG_FORMAT')}`,
         // Do not verify backend certificates, just encrypt
         '--serversTransport.insecureSkipVerify=true',
-        // Enable ACME certificate resolver (will only work after CA is initialized)
-        //'--certificatesresolvers.ca.acme.email=acme@morio.it',
-        '--certificatesresolvers.ca.acme.storage=acme.json',
-        '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory',
-        //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
-        '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
-        // Point to root CA (will only work after CA is initialized)
-        '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+        // Use directory as provider
+        '--providers.file.directory=/etc/morio/proxy',
+        // Watch for changes
+        '--providers.file.watch=true',
         // FIXME: Enable metrics
-      ].concat(utils.isSwarm()
-        ? [
-            // Setup provider for Swarm services
-            '--providers.swarm.endpoint=unix:///var/run/docker.sock',
-            // Only export containers when we explicitly configure it
-            '--providers.swarm.exposedbydefault=false',
-            // Set the default network
-            `--providers.swarm.network=${utils.getPreset('MORIO_NETWORK')}`,
-            // Set swarm polling interval
-            `--providers.swarm.refreshSeconds=${utils.getPreset('MORIO_CORE_SWARM_POLLING_INTERVAL')}`,
-            // Set HTTP client timeout
-            `--providers.swarm.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
-            // Setup provider for local services
-            '--providers.docker=true',
-            // Only export containers when we explicitly configure it
-            '--providers.docker.exposedbydefault=false',
-            // Set the default network
-            `--providers.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-            // Set HTTP client timeout
-            `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
-          ]
+      ].concat(utils.isEphemeral()
+        ? []
         : [
-            // Use Docker as a provider
-            '--providers.docker=true',
-            // Only export containers when we explicitly configure it
-            '--providers.docker.exposedbydefault=false',
-            // Set the default network
-            `--providers.docker.network=${utils.getPreset('MORIO_NETWORK')}`,
-            // Set HTTP client timeout
-            `--providers.docker.httpClientTimeout=${utils.getPreset('MORIO_CORE_SWARM_HTTP_TIMEOUT')}`,
+          // Create STEP-CA entrypoint (for access to the CA)
+          '--entrypoints.stepca.address=:9000',
+          // Enable ACME certificate resolver
+          '--certificatesresolvers.ca.acme.storage=acme.json',
+          // Set CA server
+          '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory',
+          //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
+          '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
+          // Point to root CA (will only work after CA is initialized)
+          '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
         ]),
-      // Configure Traefik with container labels (not in ephemeral mode)
-      labels: SWARM ? [] : labels,
     },
-    swarm: {
-      labels: SWARM ? labels : []
-    },
+    /*
+     * Traefik (proxy) configuration for the proxy service
+     */
+    traefik,
     entrypoint: `#!/bin/sh
 set -e
 

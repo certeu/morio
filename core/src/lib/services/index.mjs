@@ -11,6 +11,7 @@ import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService } from './proxy.mjs'
 // Dependencies
 import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder, neverSwarmServices } from '#config'
+import { writeYamlFile } from '#shared/fs'
 // Docker
 import {
   docker,
@@ -72,7 +73,7 @@ const createMorioService = async (serviceName) => {
    * while restartMorioService will both create and start them
    * (technically, the service itself will start the tasks)
    */
-  if (utils.isSwarmService(serviceName)) return true
+  //if (utils.isSwarmService(serviceName)) return true
 
   /*
    * Save us some typing
@@ -618,16 +619,23 @@ export async function defaultRecreateServiceHook(service, hookParams) {
  * @param {boolean} hookParams.recreate - Whether the container was just (re)created
  * @retrun {boolean} result - True to restart the container
  */
-export function defaultRestartServiceHook(service, { running, recreate }) {
+export async function defaultRestartServiceHook(service, { running, recreate }) {
   /*
-   * If the service was recreated, or is not running, always start it
+   * If there is a traefik config to be generated, do it here
    */
-  if (recreate || !running[service]) return true
+  const config = utils.getMorioServiceConfig(service)
+  if (config.traefik?.http) {
+    log.debug(`${service}: Writing traefik dynamic config to disk`)
+    await writeYamlFile(`/etc/morio/proxy/${service}.yaml`, config.traefik)
+  }
 
   /*
+   * If the service was recreated, or is not running, always start it
    * In all other cases, leave it as is
    */
-  return false
+  return (recreate || !running[service])
+    ? true
+    : false
 }
 
 /**

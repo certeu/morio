@@ -84,6 +84,25 @@ export const service = {
 }
 
 /**
+ * Ensures the traefik configuration is on disk for Traefik to pick up
+ *
+ * @param {object} srvConf - The service configuration
+ */
+export const ensureTraefikConfiguration = (config) => {
+
+console.log(config)
+}
+
+
+
+
+
+
+
+
+
+
+/**
  * Returns an array populated with Traefik routers that are
  * configured on a container via labels.
  *
