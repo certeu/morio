@@ -1,5 +1,5 @@
 import { log, utils } from '../lib/utils.mjs'
-import { joinSwarm, verifyHeartbeatRequest } from '../lib/cluster.mjs'
+import { joinCluster, verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
@@ -97,7 +97,7 @@ Controller.prototype.join = async (req, res) => {
    */
   let result, data
   try {
-    [result] = await joinSwarm({
+    [result] = await joinCluster({
       token: valid.token,
       managers: [valid.join]
     })
