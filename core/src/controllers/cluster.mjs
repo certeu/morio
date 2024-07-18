@@ -39,8 +39,6 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   return res.status(200).send({
     action: 'INVITE',
-    errors: [],
-    node: utils.getNodeUuid(),
     version: utils.getVersion(),
   })
 
