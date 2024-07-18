@@ -40,7 +40,7 @@ const updateClusterMorioState = async () => {
       {
         method: 'POST',
         data: {
-          deployment: utils.getClusterUuid(),
+          cluster: utils.getClusterUuid(),
           node: utils.getNodeUuid(),
           version: utils.getVersion(),
           settings_serial: Number(utils.getSettingsSerial()),
@@ -218,7 +218,8 @@ const runHeartbeat = async (init=false) => {
         {
           method: 'POST',
           data: {
-            deployment: utils.getClusterUuid(),
+            cluster: utils.getClusterUuid(),
+            node: uuid,
             leader: uuid,
             version: utils.getVersion(),
             settings_serial: Number(utils.getSettingsSerial()),
@@ -386,13 +387,13 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   }
 
   /*
-   * Verify deployment
+   * Verify cluster
    * If there's a mismatch, log an error because we can't fix this without human intervention.
    */
-  if (data.deployment !== utils.getClusterUuid()) {
-    const err = 'DEPLOYMENT_MISMATCH'
+  if (data.cluster !== utils.getClusterUuid()) {
+    const err = 'CLUSTER_MISMATCH'
     errors.push(err)
-    log.debug(`Deployment mismatch in ${type} from node ${data.node}: ${err}`)
+    log.debug(`Cluster mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   return { action, errors }

@@ -12,7 +12,7 @@ const keys = Joi.object({
   mrt: Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
   public: Joi.string().required(),
   private: Joi.string().required(),
-  deployment: uuid,
+  cluster: uuid,
   jwk: Joi.object({
     kty: Joi.string().required(),
     kid: Joi.string().required(),
@@ -38,7 +38,7 @@ export const schema = {
    * Requests
    */
   'req.cluster.heartbeat': Joi.object({
-    deployment: uuid,
+    cluster: uuid,
     leader: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
     version: version,
     settings_serial: timestamp,
@@ -72,7 +72,7 @@ export const schema = {
    * Responses
    */
   'res.cluster.heartbeat': Joi.object({
-    deployment: uuid,
+    cluster: uuid,
     node: uuid,
     node_serial: timestamp,
     current: Joi.object({ keys, serial: timestamp, settings }),
