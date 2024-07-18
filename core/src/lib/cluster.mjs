@@ -33,7 +33,7 @@ const updateClusterMorioState = async () => {
   /*
    * Reach out to each node to see what's up
    */
-  for (const fqdn of utils.getNodeFqdns()) {
+  for (const fqdn of utils.getNodeFqdns().filter(fqdn => fqdn !== utils.getNodeFqdn())) {
     log.warn(`Reaching out to ${fqdn}`)
     const data = await testUrl(
       `https://${fqdn}/-/core/cluster/heartbeat`,
@@ -46,7 +46,7 @@ const updateClusterMorioState = async () => {
           settings_serial: Number(utils.getSettingsSerial()),
           node_serial: Number(utils.getNodeSerial()),
         },
-        timeout: 1500,
+        timeout: 3500,
         returnAs: 'json',
         returnError: true,
         ignoreCertificate: true,
@@ -56,9 +56,12 @@ const updateClusterMorioState = async () => {
       name: data.name,
       code: data.code,
       response: {
-        status: data.response.status,
-        text: data.response.statusText
-      }
+        //status: data.response.status,
+        //text: data.response.statusText,
+        response: data.response,
+      },
+      fqdn,
+      data,
     }, 'This is ithe result data')
   }
 

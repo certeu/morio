@@ -3,7 +3,7 @@ import { log, utils } from './lib/utils.mjs'
 /*
  * List of routes allowed in ephemeral mode
  */
-const ephemeralRoutes = ['GET/status', 'GET/config', 'GET/reload', 'POST/setup', 'POST/cluster/join']
+const ephemeralRoutes = ['GET/status', 'GET/config', 'GET/reload', 'POST/setup', 'POST/cluster/join', 'POST/cluster/heartbeat']
 
 /*
  * List of routes allowed while reconfiguring
