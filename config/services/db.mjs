@@ -42,8 +42,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
       ],
-      // Configure Traefik with container labels, only if we're not using swarm
-      labels: SWARM ? [] : labels,
     },
     /*
      * Traefik (proxy) configuration for the API service

@@ -56,7 +56,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${DIRS.conf}/shared:/etc/morio/shared`,

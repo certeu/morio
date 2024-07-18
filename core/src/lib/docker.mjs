@@ -210,16 +210,12 @@ export const createDockerNetwork = async (name, type='swarm') => {
     EnableIPv6: false,
     Driver: swarm ? 'overlay' : 'bridge',
     Attachable: true,
-    // Fixme: allow adding labels?
     Labels: {
-      'morio.foo.bar': 'bananas',
+      'morio.network.description': 'Bridge docker network for morio services',
     },
-    //IPAM: {
-    //  Config: [{
-    //    Subnet: "10.1.2.0/24",
-    //    IPRange: "10.1.2.0/25",
-    //  }]
-    //},
+    IPAM: {
+      Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }]
+    },
   }
   if (swarm && !utils.getFlag('DISABLE_SWARM_OVERLAY_ENCRYPTION')) config.Options = { encrypted: 'true' }
   // FIXME: Support setting MTU perhaps? Something like

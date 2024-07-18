@@ -29,11 +29,11 @@ export const presets = {
   // Name of the Morio public repositories folder
   MORIO_REPOS_FOLDER: "repos",
 
-  // Network name. Change at your own peril.
+  // Network name
   MORIO_NETWORK: 'morionet',
 
-  // Network name for ehemeral state. Change at your own peril.
-  MORIO_NETWORK_LOCAL: 'moriolocal',
+  // Network subnet.
+  MORIO_NETWORK_SUBNET: '192.168.144.32/28',
 
   // Prefix for looking up errors
   MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',

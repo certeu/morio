@@ -36,17 +36,7 @@ docker run \
   -v /home/jdecock/git/morio/data/config/shared:/etc/morio/shared  \
   -v /home/jdecock/git/morio/data/data/downloads:/morio/downloads  \
   -v /home/jdecock/git/morio:/morio  \
-  -l "traefik.enable=true"  \
-  -l "traefik.docker.network=moriolocal"  \
-  -l "traefik.http.routers.api.priority=666"  \
-  -l "traefik.http.routers.api.service=api"  \
-  -l "traefik.http.routers.api.entrypoints=https"  \
-  -l "traefik.http.routers.api.tls.certresolver=ca"  \
-  -l "traefik.http.services.api.loadbalancer.server.port=3000"  \
-  -l "traefik.http.routers.api.rule=(PathPrefix(\`/-/api\`) || PathPrefix(\`/downloads\`) || PathPrefix(\`/coverage\`))"  \
-  -l "traefik.http.middlewares.auth.forwardauth.address=http://api:3000/auth"  \
-  -l "traefik.http.middlewares.auth.forwardauth.authResponseHeadersRegex=^X-Morio-"  \
-  -l "traefik.http.routers.api.middlewares=auth@docker"  \
+ \
   -e MORIO_DOCKER_SOCKET=/var/run/docker.sock \
   -e MORIO_CONFIG_ROOT=/home/jdecock/git/morio/data/config \
   -e MORIO_DATA_ROOT=/home/jdecock/git/morio/data/data \

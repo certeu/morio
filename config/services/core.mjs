@@ -26,7 +26,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Ports to export (not in production)
       ports: PROD ? [] : [ `${utils.getPreset('MORIO_CORE_PORT')}:${utils.getPreset('MORIO_CORE_PORT')}` ],
       // Instead, attach to the morio network
-      network: utils.getPreset(utils.isEphemeral() ? 'MORIO_NETWORK_LOCAL' : 'MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_DOCKER_SOCKET')}:${utils.getPreset('MORIO_DOCKER_SOCKET')}`,
