@@ -35,6 +35,16 @@ Controller.prototype.heartbeat = async (req, res) => {
   else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
 
   /*
+   * If we are in ephemeral state, ask for a cluster invite
+   */
+  return res.status(200).send({
+    action: 'INVITE',
+    errors: [],
+    node: utils.getNodeUuid(),
+    version: utils.getVersion(),
+  })
+
+  /*
    * Verify the heartbeat request which will determin the action to take
    */
   const { action, errors } = await verifyHeartbeatRequest(req.body)
