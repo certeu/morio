@@ -23,13 +23,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
     .set("http.routers.dashboard.tls", true)
     .set("http.routers.dashboard.entrypoints", "https")
   if (!utils.isEphemeral()) traefik
-    .set("http.routers.dashboard.middlewares", "auth@file")
     .set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
     .set("tls.stores.default.defaultgeneratedcert.domain.main", clusterFqdn
       ? clusterFqdn
       : utils.getSettings(['deployment', 'nodes', 0])
     )
     .set("tls.stores.default.defaultgeneratedcert.domain.sans", nodes.join(', '))
+    .set('http.middlewares.api-auth.forwardAuth.address', `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`)
+    .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+    .set('http.routers.api.middlewares', ['api-auth@file'])
 
   return {
     /**

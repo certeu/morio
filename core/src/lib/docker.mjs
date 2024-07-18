@@ -2,7 +2,6 @@ import { Buffer } from 'node:buffer'
 import { getPreset } from '#config'
 import Docker from 'dockerode'
 import { log, utils } from './utils.mjs'
-import { isServiceUp } from './services/index.mjs'
 
 /**
  * This is the docker client as provided by dockerode
@@ -30,7 +29,6 @@ const apiCache = {
  */
 export const createDockerContainer = async (serviceName, config) => {
   log.debug(`${serviceName}: Creating local service`)
-  //console.log({config: JSON.stringify(config, null ,2)})
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
     log.debug(`${serviceName}: Local service created`)
@@ -55,66 +53,9 @@ export const createDockerContainer = async (serviceName, config) => {
       } else log.warn(`${serviceName}: Failed to recreate container`)
     } else log.warn(`${serviceName}: Failed to remove container - Not creating new container`)
   }
-  else log.warn(result, `${serviceName}: Failed to create local service`)
+  else log.warn({result, config, serviceName }, `${serviceName}: Failed to create local service`)
 
   return false
-}
-
-/**
- * Creates a swarm service for a morio service
- *
- * @param {string} serviceName = Name of the service
- * @param {object} config = The container config to pass to the Docker API
- * @returm {object|bool} options - The id of the created container or false if no container could be created
- */
-export const createSwarmService = async (serviceName, config) => {
-  /*
-   * If the service already exists, we update it
-   */
-  const existingService = await getSwarmService(serviceName)
-  if (existingService) {
-    log.debug(`${serviceName}: Swarm service exists, will updated rather than create it`)
-    const info = await existingService.inspect()
-    let result
-    try {
-      result = await existingService.update({
-        ...config,
-        TaskTemplate: {
-          ...config.TaskTemplate,
-          ForceUpdate: info.Version.Index
-        },
-        version: info.Version.Index
-      })
-    }
-    catch (err) {
-      log.warn(err, `${serviceName}: Unable to update swarm service`)
-    }
-    log.debug(`${serviceName}: Swarm service updated`)
-    //console.log({result})
-
-    return true
-  } else {
-    /*
-     * If the service does not exist, let's create it now
-     */
-    log.debug(`${serviceName}: Swarm service does not exists, will create it now`)
-    let success, result
-    try {
-      [success, result] = await runDockerApiCommand('createService', config, true)
-    }
-    catch (err) {
-      log.warn(err, `${serviceName}: Unable to create swarm service`)
-    }
-    //console.log({success, result})
-    if (success) {
-      log.debug(`${serviceName}: Swarm service created`)
-      return result.id
-    }
-    else {
-      log.warn(result, `${serviceName}: Unable to create swarm service`)
-      return false
-    }
-  }
 }
 
 /**
@@ -136,37 +77,6 @@ export const getLocalServiceId = async (serviceName) => {
 }
 
 /**
- * Gets a service ID for a swarm service, based on its name
- */
-export const getSwarmServiceId = async (serviceName) => {
-  /*
-   * Only bother in swarm mode
-   */
-  if (!utils.isSwarm()) return false
-
-  /*
-   * Update state with currently running swarm services
-   */
-  await updateSwarmRunningServicesState()
-
-  /*
-   * Return the ID or false if it's not found
-   */
-  return utils.getSwarmServiceState(serviceName).ID || false
-}
-
-/**
- * Gets a service object, either local or swarm, based on its name
- */
-export const getSwarmService = async (serviceName) => {
-  const id = await getSwarmServiceId(serviceName)
-
-  return id
-    ? await docker.getService(id)
-    : false
-}
-
-/**
  * Stops a local service. which just means it stops a container
  */
 export const stopLocalService = async (serviceName) => {
@@ -183,15 +93,6 @@ export const stopLocalService = async (serviceName) => {
 }
 
 /**
- * Stops a swarm service. Or rather, removes the service.
- */
-export const stopSwarmService = async (serviceName) => {
-  const service = await getSwarmService(serviceName)
-  if (service) await service.remove()
-  else log.warn(`Failed to remove swarm service: ${serviceName}`)
-}
-
-/**
  * Restarts a local service. which just means it restarts a container
  */
 export const restartLocalService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
@@ -201,14 +102,13 @@ export const restartLocalService = async (id) => await runContainerApiCommand(id
  * @param {string} name - The name of the network
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
-export const createDockerNetwork = async (name, type='swarm') => {
+export const createDockerNetwork = async (name) => {
   log.debug(`core: Creating Docker network: ${name}`)
-  const swarm = type === 'swarm' ? true : false
   const config = {
     Name: name,
     CheckDuplicate: true,
     EnableIPv6: false,
-    Driver: swarm ? 'overlay' : 'bridge',
+    Driver: 'bridge',
     Attachable: true,
     Labels: {
       'morio.network.description': 'Bridge docker network for morio services',
@@ -217,7 +117,6 @@ export const createDockerNetwork = async (name, type='swarm') => {
       Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }]
     },
   }
-  if (swarm && !utils.getFlag('DISABLE_SWARM_OVERLAY_ENCRYPTION')) config.Options = { encrypted: 'true' }
   // FIXME: Support setting MTU perhaps? Something like
   // if (whatever) config.Options['com.docker.network.mtu'] = '1333'
 
@@ -230,23 +129,19 @@ export const createDockerNetwork = async (name, type='swarm') => {
   }
   /*
    * It will fail if the network exists, but in that case we need to make sure it's
-   * the correct type (local vs swarm)
+   * the correct type
    */
   if (!success) {
     const [found, network] = await runDockerApiCommand('getNetwork', name)
     if (found && network) {
       const existingNetworkConfig = await network.inspect()
-      if (
-        (existingNetworkConfig.Driver !== 'overlay' && utils.isSwarm()) ||
-        (existingNetworkConfig.Driver !== 'bridge' && !utils.isSwarm())
-      ) {
+      if (existingNetworkConfig.Driver !== 'bridge') {
         /*
          * This network is the wrong type of network
          * First disconnect all containers, then remove it
          */
         log.debug(`core: Network ${name} is of type ${existingNetworkConfig.Driver
-          }, which is not suitable for running ${utils.isSwarm()
-          ? 'swarm' : 'local'} services.`
+          }, which is not suitable for running local services.`
         )
         log.debug(`core: Disconnecting all containers from network ${name}`)
         for (const id in existingNetworkConfig.Containers) {
@@ -266,7 +161,7 @@ export const createDockerNetwork = async (name, type='swarm') => {
     log.warn(`core; Unable to get info on the ${name} Docker network`)
   }
 
-  log.debug(`core: ${swarm ? 'Swarm' : 'Local'} network created: ${name}`)
+  log.debug(`core: Local network created: ${name}`)
   /*
    * Return the network object
    */
@@ -408,135 +303,6 @@ export const generateContainerConfig = (serviceName) => {
    */
   if (config.container.command) opts.Cmd = config.container.command
 
-  return opts
-}
-
-/**
- * Helper method to create the config for a Docker Swarm service
- *
- * This will take the service configuration and build an options
- * object to configure the service as listed in this file
- *
- * @param {string} serviceName - The name of the service
- * @retun {object} opts - The options object for the Docker API
- */
-export const generateSwarmServiceConfig = (serviceName) => {
-
-  const config = utils.getMorioServiceConfig(serviceName)
-  const name = config.container.container_name
-  const aliases = config.container.aliases || []
-  log.debug(`${name}: Generating swarm service configuration`)
-  /*
-   * Basic options
-   */
-  const opts = {
-    Name: name,
-    Labels: {
-      'morio.service': name,
-      'morio.cluster.uuid': utils.getClusterUuid(),
-    },
-    TaskTemplate: {
-      ContainerSpec: {
-        Image: serviceContainerImageFromConfig(config),
-        Labels: {},
-        Hostname: name,
-      }
-    },
-    Mode: { Global: {} },
-    Networks: [{ Target: utils.getNetworkName() }],
-    //EndpointSpec: { Mode: "vip" },
-    // FIXME: vip or dnsrr? Depends so let's test both
-    EndpointSpec: {
-      Mode: config.swarm?.dnsrr ? "dnsrr" : "vip"
-    },
-  }
-
-  /*
-   * Command
-   */
-  if (config.container.command) {
-    opts.TaskTemplate.ContainerSpec.Command = config.container.command
-    //console.log({ ccmd: config.container.command, scmd: opts.TaskTemplate.ContainerSpec.Command, in: 'generateSwarmServiceConfig' })
-  }
-
-  /*
-   * Exposed ports
-   */
-  if (config.container.ports) {
-    opts.EndpointSpec.Ports = []
-    for (const portConfig of config.container.ports) {
-      const [cport, pport=false] = portConfig.split(':')
-      opts.EndpointSpec.Ports.push({
-        Protocol: 'tcp',
-        TargetPort: Number(cport),
-        PublishedPort: Number(pport || cport),
-        PublishMode: 'ingress'
-      })
-    }
-    //console.log({ name, cports: config.container.ports, sports: opts.EndpointSpec.Ports, in: 'generateSwarmServiceConfig' })
-  }
-
-  /*
-   * Environment variables
-   */
-  if (config.container.environment) {
-    opts.Env = Object.entries(config.container.environment).map(([key, val]) => `${key}=${val}`)
-  }
-
-  /*
-   * Labels
-   */
-  if (config.container.labels) {
-    for (const label of config.container.labels) {
-      const [key, val] = label.split('=')
-      opts.TaskTemplate.ContainerSpec.Labels[key] = val
-    }
-  }
-
-  if (config.swarm?.labels) {
-    for (const label of config.swarm.labels) {
-      const [key, val] = label.split('=')
-      opts.Labels[key] = val
-    }
-  }
-
-  /*
-   * Mounts
-   */
-  if (config.container.volumes) {
-    opts.TaskTemplate.ContainerSpec.Mounts = []
-    for (const mnt of config.container.volumes) {
-      const chunks = mnt.split(':')
-      opts.TaskTemplate.ContainerSpec.Mounts.push({
-        Target: chunks[1],
-        Source: chunks[0],
-        Type: 'bind',
-      })
-    }
-  }
-
-  /*
-   * Hosts
-   */
-  if (config.container.hosts) {
-    opts.TaskTemplate.ContainerSpec.Hosts = config.container.hosts
-  }
-
-  /*
-   * Swarm mode
-   */
-  if (config.swarm.replicas) {
-    opts.Mode = { Replicated: { Replicas: config.swarm.replicas } }
-  }
-
-  /*
-   * Swarm constraints
-   */
-  if (config.swarm.constraints) {
-    opts.TaskTemplate.Placement = { Constraints: config.swarm.constraints }
-  }
-
-  //if (name === 'api') console.log({ name, opts: JSON.stringify(opts, null ,2), in: 'generateSwarmServiceConfig' })
   return opts
 }
 
@@ -803,11 +569,10 @@ export const runDockerCliCommand = async (cmd, ...params) => {
 }
 
 /**
- * This helper method saves a list of running services (both local and on the swarm) to state
+ * This helper method saves a list of running services (local)
  */
 export const updateRunningServicesState = async () => {
   await updateLocalRunningServicesState()
-  await updateSwarmRunningServicesState()
 }
 
 /**
@@ -823,25 +588,6 @@ export const updateLocalRunningServicesState = async () => {
   if (localOk) {
     for (const service of runningLocalServices) {
       utils.setLocalServiceState(service.Names[0].split('/').pop(), service)
-    }
-  }
-}
-
-/**
- * This helper method saves a list of running swarm services
- */
-export const updateSwarmRunningServicesState = async () => {
-  /*
-   * Clear state first, or services that went away would never be cleared
-   */
-  utils.clearSwarmServicesState()
-
-  if (utils.isSwarm()) {
-    const [swarmOk, runningSwarmServices] = await runDockerApiCommand('listServices')
-    if (swarmOk) {
-      for (const service of runningSwarmServices) {
-        utils.setSwarmServiceState(service.Spec.Name, service)
-      }
     }
   }
 }

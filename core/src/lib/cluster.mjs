@@ -22,96 +22,46 @@ export const updateClusterState = async (silent) => {
  * Helper method to update the cluster state
  */
 export const forceUpdateClusterState = async (silent) => {
-  //await updateClusterSwarmState(silent)
   await updateClusterMorioState(silent)
   utils.resetClusterStateAge()
-}
-
-/**
- * Helper method to gather the swarm state
-const updateClusterSwarmState = async (silent=false) => {
-  /*
-   * Don't bother unless there's a swarm
-  if (!utils.isSwarm()) return
-
-  /*
-   * Start by inspecting the local swarm
-  const [result, swarm] = await runDockerApiCommand('swarmInspect', {}, true)
-
-  /*
-   * Is a Swarm running?
-  if (result && swarm.JoinTokens) {
-    if (!silent) log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
-    utils.setSwarmTokens(swarm.JoinTokens)
-    const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) updateClusterSwarmNodesState(nodes, silent)
-    else log.warn(`Unable to retrieve swarm node info from Docker API`)
-  } else {
-    log.debug(`Docker swarm is not configured`)
-    utils.setSwarmReady(false)
-  }
-}
-
-const updateClusterSwarmNodesState = (nodes, silent=false) => {
-  /*
-   * Clear follower list
-  utils.clearSwarmFollowers()
-
-  /*
-   * Iterate over swarm nodes
-  let i = 1
-  for (const node of nodes) {
-    /*
-     * Update node state in any case
-    utils.setSwarmNodeState(node.Description.Hostname, node)
-
-    /*
-     * If cluster UUIDs are different, that's a problem
-    if (
-      node.Spec.Labels['morio.cluster.uuid'] &&
-      node.Spec.Labels['morio.cluster.uuid'] !== utils.getClusterUuid()
-    ) {
-      log.warn(
-        `Swarm node ${node.Description.Hostname} with IP ${node.Status.Addr} reports cluster UUID ${
-        node.Spec.Labels['morio.cluster.uuid']} but we are in cluster ${
-        utils.getClusterUuir()}.`)
-      log.warn('Mixing nodes from different clusters in the same swarm can lead to unexpected results.')
-    }
-
-    /*
-     * Is it the local or leading node?
-    const local = utils.isLocalSwarmNode(node)
-    const leading = node.ManagerStatus.Leader === true
-    if (local) {
-      utils.setSwarmLocalNode(node.Description.Hostname)
-      if (leading) utils.setSwarmLocalNodeLeading(leading)
-    }
-    if (leading) {
-      utils.setSwarmLeadingNode(node.Description.Hostname)
-      /*
-       * Swarm has a leader, so it's up. Reflect this in the state
-      utils.setSwarmReady(true)
-    }
-    else utils.addSwarmFollower(node.Description.Hostname)
-
-    /*
-     * Announce what we've found
-    if (!silent) log.debug([
-      local ? `We are Swarm member ${i}` : `Swarm member ${i}`,
-      `with IP ${node.Status.Addr},`,
-      local ? `and we are` : `is`,
-      leading ? `leading the swarm` : `a follower in the swarm`,
-    ].join(' '))
-
-    i++
-  }
 }
 
 /**
  * Helper method to gather the morio cluster state
  */
 const updateClusterMorioState = async () => {
-    return // FIXME
+  /*
+   * Reach out to each node to see what's up
+   */
+  for (const fqdn of utils.getNodeFqdns()) {
+    log.warn(`Reaching out to ${fqdn}`)
+    const data = await testUrl(
+      `https://${fqdn}/-/core/cluster/heartbeat`,
+      {
+        method: 'POST',
+        data: {
+          deployment: utils.getClusterUuid(),
+          node: utils.getNodeUuid(),
+          version: utils.getVersion(),
+          settings_serial: Number(utils.getSettingsSerial()),
+          node_serial: Number(utils.getNodeSerial()),
+        },
+        timeout: 1500,
+        returnAs: 'json',
+        returnError: true,
+        ignoreCertificate: true,
+    })
+    log.warn({
+      message: data.message,
+      name: data.name,
+      code: data.code,
+      response: {
+        status: data.response.status,
+        text: data.response.statusText
+      }
+    }, 'This is ithe result data')
+  }
+
   /*
   const nodes = {}
    * Attempt to reach API instances via their public names
@@ -163,93 +113,16 @@ const updateClusterMorioState = async () => {
       .filter((node) => (node.up ? true : false))
       .map((node) => node.serial),
   })
-  //if (store.get('state.swarm.nodes')) store.set('state.cluster.sets.swarm', Object.keys(store.get('config.swarm.nodes')))
    */
 }
 
 /**
  * Helper method to join a node to the cluster
- *
- * @param {string} token - The Join Token
- * @param {array} managers - Pre-existing swarm manager nodes
  */
-export const joinCluster = async ({ token, managers = []}) => {
+export const joinCluster = async () => {
   log.warn('FIXME: Implement koinCluster')
 
   return
-}
-
-/**
- * Helper method to join a node to the swarm
- *
- * @param {string} token - The Join Token
- * @param {array} managers - Pre-existing swarm manager nodes
-export const joinSwarm = async ({ token, managers = []}) =>
-  await runDockerApiCommand('swarmJoin', {
-    ListenAddr: "0.0.0.0:2377",
-    RemoteAddrs: managers,
-    JoinToken: token,
-  })
-
-/**
- * Ensures the Docker Swarm is up and configured
- *
- * Does not take parameters, does not return,
- * but mutates the state.
-const ensureSwarm = async () => {
-  /*
-   * Find our feet
-  await updateClusterState(true)
-
-  /*
-   * Create the swarm if it does not exist yet
-  if (!utils.getSwarmTokens().Manager) await createSwarm()
-
-  /*
-   * Ensure it is properly labelled
-  await ensureLocalSwarmNodeLabels()
-
-  /*
-   * Update cluster state
-  await updateClusterState()
-}
-
-
-const createSwarm = async () => {
-  log.debug('Initializing Docker Swarm')
-  const [swarmCreated] = await runDockerApiCommand('swarmInit', {
-    ListenAddr: utils.getNodeIp(),
-    AdvertiseAddr: utils.getNodeIp(),
-    ForceNewCluster: false,
-    Spec: {
-      Labels: {
-        'morio.cluster.uuid': utils.getClusterUuid(),
-      }
-    }
-  })
-  if (!swarmCreated) log.warn('Failed to ceated swarm. This is unexpected.')
-}
-
-const ensureLocalSwarmNodeLabels = async () => {
-
-  const [ok, nodes] = await runDockerApiCommand('listNodes')
-  if (!ok) return
-
-  const local = nodes.filter(node => utils.isLocalSwarmNode(node)).pop()
-  log.debug('Adding labels to local swarm node')
-  await runNodeApiCommand(local.ID, 'update', {
-    version: String(local.Version.Index),
-    Labels: {
-      'morio.cluster.uuid': utils.getClusterUuid(),
-      'morio.node.uuid': utils.getNodeUuid(),
-      'morio.node.fqdn': utils.getNodeFqdn(),
-      'morio.node.hostname': utils.getNodeHostname(),
-      'morio.node.ip': utils.getNodeIp(),
-      'morio.node.serial': String(utils.getNodeSerial()),
-    },
-    Role: local.Spec.Role,
-    Availability: local.Spec.Availability,
-  })
 }
 
 /**
@@ -258,8 +131,8 @@ const ensureLocalSwarmNodeLabels = async () => {
  * Consensus building typically falls apart in 2 main parts:
  *   - Figuring out who is the leader of the cluster
  *   - Figuring out what config to run
- * For the first part, since Swarm uses the RAFT consensus protocol, we do not
- * need to re-implement this. We just make the swarm leader the Morio cluster leader
+ * For the first part, since rqlite uses the RAFT consensus protocol, we do not
+ * need to re-implement this. We just make the db service leader the Morio cluster leader
  * because it does not matter who leads, all we need is consensus.
  * Then, there are two options:
  *   - If we are leader, we reach out to all nodes asking them to sync
@@ -271,29 +144,28 @@ export const ensureMorioClusterConsensus = async () => {
    */
   await updateClusterState(true)
 
-
   /*
-   * Are we leading the cluster?
-  if (utils.isLeading()) {
-    /*
-     * Did all nodes join the cluster?
-    if (utils.getNodeCount() > utils.getSwarmFollowers().length + 1) {
-      await inviteClusterNodes()
-    }
-  } else {
-    /*
-     * Ensure a cluster heartbeat is running
-    ensureClusterHeartbeat(true)
-  }
-     */
+   * Ensure a cluster heartbeat is running
+   */
+  ensureClusterHeartbeat(true)
+
 }
 
 /**
  * Ensure a cluster heartbeat
  */
-const ensureClusterHeartbeat = async () => utils.isLeading()
-  ? false
-  : runHeartbeat()
+const ensureClusterHeartbeat = async () => {
+  /*
+   * If we are leading the cluster, don't bother
+   */
+  if (utils.isLeading()) return false
+
+  /*
+   * Let people know w're staring the heartbeat
+   */
+  log.debug(`Starting cluster heartbeat`)
+  runHeartbeat(true)
+}
 
 /**
  * Start a cluster heartbeat
@@ -331,6 +203,7 @@ const runHeartbeat = async (init=false) => {
      */
     const serial = utils.getClusterLeaderSerial()
     const uuid = utils.getClusterLeaderUuid()
+    log.warn({serial, uuid}, 'test')
     /*
      * Send heartbeat request and verify the result
      */
@@ -447,7 +320,7 @@ const verifyHeartbeatNode = (node, result) => {
 
 }
 
-export const verifyHeartbeatRequest = async (data) => {
+export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -467,7 +340,7 @@ export const verifyHeartbeatRequest = async (data) => {
   if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     errors.push(err)
-    log.info(`Heartbeat version mismatch from node ${data.node}: ${err}`)
+    log.info(`Version mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   /*
@@ -478,7 +351,7 @@ export const verifyHeartbeatRequest = async (data) => {
     const err = 'SETTINGS_SERIAL_MISMATCH'
     errors.push(err)
     action = 'SYNC'
-    log.debug(`Heartbeat settings serial mismatch from node ${data.node}: ${err}`)
+    log.debug(`Settings serial mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   /*
@@ -489,21 +362,21 @@ export const verifyHeartbeatRequest = async (data) => {
     const err = 'NODE_SERIAL_MISMATCH'
     errors.push(err)
     action = 'SYNC'
-    log.debug(`Heartbeat node serial mismatch from node ${data.node}: ${err}`)
+    log.debug(`Node serial mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   /*
-   * Verify leader
+   * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster.
    */
-  if (
+  if (data.leader && (
     (data.leader !== utils.getClusterLeaderUuid()) ||
     (data.leader !== utils.getNodeUuid())
-  ) {
+  )) {
     const err = 'LEADER_CHANGE'
     errors.push(err)
     action = 'ELECT'
-    log.debug(`Heartbeat leader mismatch from node ${data.node}: ${err}`)
+    log.debug(`Leader mismatch in ${type} from node ${data.node}: ${err}`)
     log.info({
       data, leader: utils.getClusterLeaderUuid(), uuid: utils.getNodeUuid()
     })
@@ -516,62 +389,53 @@ export const verifyHeartbeatRequest = async (data) => {
   if (data.deployment !== utils.getClusterUuid()) {
     const err = 'DEPLOYMENT_MISMATCH'
     errors.push(err)
-    log.error(`Heartbeat deployment mismatch from node ${data.node}: ${err}`)
+    log.debug(`Deployment mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   return { action, errors }
 }
 
-const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getSwarmNodes())
+const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getNodes())
   .filter(node => node.Spec.Labels['morio.node.uuid'] === uuid)
   .map(node => label ? node.Spec.Labels[label] : node)
   .pop()
 
 
 /**
- * Ensure a Morio Swarm cluster is ready to deploy services on
+ * Ensure the Morio luster is ready
  *
  * This is called from the beforeall lifecycle hook
- * when we are in a clusterd depoyment.
- * Note that Morio (almost) always runs in cluster mode
+ * Note that Morio always runs in cluster mode
  * to ensure we can reach flanking nodes whne they are added.
  */
 export const ensureMorioCluster = async ({
   initialSetup = false,
 }) => {
   utils.setCoreReady(false)
-  //utils.setSwarmReady(false)
 
   /*
-   * Ensure the swarm is up
+   * Ensure the local network exists, and we're attached to it.
    */
-  //let tries = 0
-  //do {
-  //  tries++
-  //  await ensureSwarm()
-  //  if (utils.getSwarmReady()) log.info('Docker Swarm is ready')
-  //  else {
-  //    log.info(
-  //      `Swarm state indicates we are not ready. Will attempt to bring up the swarm (${tries}/${utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
-  //    )
-  //    await sleep(utils.getPreset('MORIO_CORE_SWARM_SLEEP'))
-  //  }
-  //}
-  //while (utils.getSwarmReady() === false && tries < utils.getPreset('MORIO_CORE_SWARM_ATTEMPTS'))
+  try {
+    await ensureMorioNetwork(
+      utils.getNetworkName(), // Network name
+      'core', // Service name
+      { Aliases: ['core', utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`] }, // Endpoint config
+      true // Disconnect from other networks
+    )
+  } catch (err) {
+    log.error(err, 'Failed to ensure morio network configuration')
+  }
 
   /*
-   * Ensure the swarm network exists, and we're attached to it.
+   * Save the core IP address too
    */
-  //await ensureMorioNetwork(
-  //  utils.getNetworkName(), // Network name
-  //  'core', // Service name
-  //  { Aliases: ['core', `core_${utils.getNodeSerial()}`] },
-  //  'swarm', // Network type
-  //  true // Disconnect from other networks
-  //)
+  const ip = await getCoreIpAddress()
+  log.debug(`Local core IP address: ${ip}`)
+  utils.setNodeIp(ip)
 
   /*
-   * There is a swarm. If there is only 1 node, we can just start.
+   * If there is only 1 node, we can just start.
    * But if there are multiple nodes we need to reach consensus first.
    */
   if (utils.isDistributed()) await ensureMorioClusterConsensus()
@@ -587,28 +451,8 @@ export const ensureMorioCluster = async ({
   utils.setNodeCoreIp((await getCoreIpAddress()))
 }
 
-/**
- * Helper method to get the list of Swarm managers
- * formatted for use in a joinSwarm call
-const swarmManagers = () =>
-  Object.values(utils.getSwarmNodes())
-    .filter((node) => node.ManagerStatus.Reachability === 'reachable')
-    .map((node) => node.ManagerStatus.Addr)
- */
-
-
 const isClusterHealthy = async () => {
 
-  /*
-   * If the local node is leading, then the cluster is always ready
-   * even if some nodes might not be ok, we have a swarm and can deploy
-   */
-  //if (utils.isLeading()) return true
-
-  /*
-   * If we are not leading, than we should be following, and the leader
-   * should be one of our nodes
-   */
   // FIXME: TODO
 
   // Let's just say yes
@@ -638,9 +482,9 @@ const inviteClusterNode = async (remote) => {
   /*
    * Don't ask the local node to join
    */
-  const localSwarm = utils.getSwarmLocalNode()
-  const local = utils.getSettings('deployment.nodes').filter(fqdn => fqdn.slice(0, localSwarm.length) === localSwarm).pop()
-  if (local === remote) return
+  // FIXME
+  //const local = utils.getSettings('deployment.nodes').filter(fqdn => fqdn.slice(0, localSquirm.length) === localSquirm).pop()
+  //if (local === remote) return
 
   /*
    * First, attempt a single call to join the cluster.
@@ -686,7 +530,6 @@ const inviteClusterNodeAttempt = async (local, remote) => {
         join: local,
         as: flanking ? 'flanking_node' : 'node',
         cluster: utils.getClusterUuid(),
-        token: utils.getSwarmTokens()[flanking ? 'Worker' :'Manager'],
         settings: {
           serial: Number(utils.getSettingsSerial()),
           data: utils.getSanitizedSettings(),

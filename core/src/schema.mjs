@@ -39,7 +39,7 @@ export const schema = {
    */
   'req.cluster.heartbeat': Joi.object({
     deployment: uuid,
-    leader: uuid,
+    leader: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
     version: version,
     settings_serial: timestamp,
     node_serial: nodeSerial,

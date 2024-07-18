@@ -22,7 +22,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Image to run
       image: 'rqlite/rqlite',
       // Image tag (version) to run
-      tag: '8.24.2',
+      tag: '8.26.7',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -42,6 +42,21 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
       ],
+      // Command
+      command: [
+        `rqlite`,
+        `-node-id`,
+        String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
+        `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+        `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        `-bootstrap-expect`,
+        String(utils.getBrokerCount()),
+        `-join`,
+        utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`).join(','),
+        'data',
+      ].concat(utils.getNodeSerial() === 1 ? [] : ['data']),
     },
     /*
      * Traefik (proxy) configuration for the API service
@@ -53,8 +68,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/-/db/nodes',
       ],
       priority: 666,
-    }).set("http.middlewares.db-replacepathregex.replacepathregex.regex", "^/-/db/(.*)")
-      .set("http.middlewares.db-replacepathregex.replacepathregex.replacement", "/$$1"),
+    }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
+      .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$$1")
+      .set('http.routers.db.middlewares', ['db-prefix@file']),
     /**
      * This is the schema, or more accurately, the SQL commands to create the
      * various tables. Will run in the postStart lifecycle hook first time

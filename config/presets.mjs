@@ -136,17 +136,8 @@ export const presets = {
   // TCP port core should listen on
   MORIO_CORE_PORT: 3007,
 
-  // Amount of times to attempt to establish a Swarm
-  MORIO_CORE_SWARM_ATTEMPTS: 30,
-
-  // Amount of seconds to wait between attempts to establish a Swarm
-  MORIO_CORE_SWARM_SLEEP: 10,
-
-  // Amount of seconds to wait between polling attempts (in Traefik)
-  MORIO_CORE_SWARM_POLLING_INTERVAL: 15,
-
-  // Timeout of the Traefik HTTP client
-  MORIO_CORE_SWARM_HTTP_TIMEOUT: 150,
+  // API prefix (since the API is behind Traefik)
+  MORIO_CORE_PREFIX: '/-/core',
 
   // Amount of seconds to wait between cluster heartbeats
   MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 25,
@@ -156,6 +147,16 @@ export const presets = {
 
   // Amount of seconds to cache the cluster state
   MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20,
+
+  /*
+   * Database presets
+   */
+
+  // Port to use for the REST API
+  MORIO_DB_HTTP_PORT: 4001,
+
+  // Port to use for the Raft consensus protocol
+  MORIO_DB_RAFT_PORT: 4002,
 
   /*
    * Proxy presets

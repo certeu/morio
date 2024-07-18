@@ -1,3 +1,5 @@
+import { generateTraefikConfig } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */
@@ -6,6 +8,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
+
+  /*
+   * The allowerd paths differ between ephemeral and regular mode
+   */
+  const paths = utils.isEphemeral() ? [
+    '/status',
+    '/cluster/join',
+    '/cluster/heartbeat',
+  ] : [
+    '/status',
+    '/cluster/sync',
+    '/cluster/elect',
+    '/cluster/heartbeat',
+  ]
 
   return {
     /**
@@ -48,6 +64,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `MORIO_CORE_LOG_LEVEL=${PROD ? utils.getPreset('MORIO_CORE_LOG_LEVEL') : 'debug'}`,
       ],
     },
+    /*
+     * Traefik (proxy) configuration for the API service
+     */
+    traefik: generateTraefikConfig(utils, {
+      service: 'core',
+      paths: paths.map(path => `${utils.getPreset('MORIO_CORE_PREFIX')}${path}`),
+      priority: 666,
+    }).set("http.middlewares.core-prefix.replacepathregex.regex", `^/-/core/(.*)`)
+      .set("http.middlewares.core-prefix.replacepathregex.replacement", "/$1")
+      .set('http.routers.core.middlewares', ['core-prefix@file']),
     /*
      * When the initial settings are created, these values will be merged in
      */

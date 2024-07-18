@@ -138,7 +138,7 @@ export function routes(app) {
   app.get(`${PREFIX}/jwks`, (req, res) => Core.getJwks(req, res))
 
   /*
-   * Route to join a cluster swarm
+   * Route to join a cluster
    */
   app.post(`${PREFIX}/cluster/join`, (req, res) => Core.joinCluster(req, res))
 }

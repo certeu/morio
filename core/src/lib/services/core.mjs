@@ -19,16 +19,18 @@ import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shar
 import mustache from 'mustache'
 // Default hooks & netork handler
 import { alwaysWantedHook } from './index.mjs'
-// Cluster
+// Cluster code
 import { ensureMorioCluster } from '#lib/cluster'
-// Standalone
-import { ensureMorioStandaloneNode } from '#lib/standalone'
 // log & utils
 import { log, utils } from '../utils.mjs'
 // Docker
 import { runContainerApiCommand } from '#lib/docker'
 // UUID
 import { uuid } from '#shared/crypto'
+// Traefic config
+import { ensureTraefikDynamicConfiguration } from './proxy.mjs'
+// Load core config
+import { resolveServiceConfiguration } from '#config'
 
 /*
  * This service object holds the service name,
@@ -77,12 +79,21 @@ export const service = {
         utils.setEphemeral(true)
         utils.setEphemeralUuid(uuid())
         utils.setSettingsSerial(false)
+        utils.setNodeSerial(0)
+
+        /*
+         * Configure the proxy for core access
+         * We do this here because it happens in the restart lifecycle hook
+         * but core is never restarted
+         */
+        const coreConfig = resolveServiceConfiguration('core', { utils })
+        ensureTraefikDynamicConfiguration('core', coreConfig.traefik)
 
         /*
          * If we are in ephemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
          */
-        await ensureMorioStandaloneNode(hookParams)
+        await ensureMorioCluster(hookParams)
 
         /*
          * Return here for ephemeral mode
@@ -137,17 +148,20 @@ export const service = {
       utils.setSettings(templateSettings(settings))
 
       /*
-       * Morio (almost) always runs as a cluster, because even a stand-alone
-       * node can have flanking nodes for which we require inter-node
-       * communication. Thus, a Docker swarm is always created and all
-       * services are managed as swarm services.
-       *
-       * The only times when Morio does not run in a cluster is when:
-       *   - We are in ephemeral mode (but then we never get to this point)
-       *   - The NEVER_SWARM flag is set
+       * Configure the proxy for core access
+       * We do this here because it happens in the restart lifecycle hook
+       * but core is never restarted
        */
-      if (utils.getFlag('NEVER_SWARM'))  await ensureMorioStandaloneNode(hookParams)
-      else await ensureMorioCluster(hookParams)
+      const coreConfig = resolveServiceConfiguration('core', { utils })
+      ensureTraefikDynamicConfiguration('core', coreConfig.traefik)
+
+      /*
+       * Morio always runs as a cluster, because even a stand-alone
+       * node can have flanking nodes for which we require inter-node
+       * communication.
+       * So we always run a cluster, even if it's a 1-node cluster.
+       */
+      await ensureMorioCluster(hookParams)
 
       return utils.isCoreReady()
     },

@@ -51,6 +51,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.stepca.entryPoints', 'stepca')
       .set('http.routers.stepca.rule', 'PathPrefix(`/`)')
       .set('http.routers.stepca.priority', 666)
+      .set('http.routers.stepca.service', 'ca')
       .set('http.routers.stepca.tls', true)
       .set('http.services.stepca.loadBalancer.servers', { url: `https://ca:9000/` }),
     /*

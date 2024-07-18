@@ -37,12 +37,6 @@ export const service = {
      * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on the local node
      */
     precreate: ensureLocalPrerequisites,
-    /**
-     * Lifecycle hook for anything to be done prior to deferring to the swarm leader
-     *
-     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on the local node
-     */
-    predefer: ensureLocalPrerequisites,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

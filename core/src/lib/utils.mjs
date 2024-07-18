@@ -1,7 +1,7 @@
 import { restClient, resolveHostAsIp } from '#shared/network'
 import { Store, unshift, setIfUnset } from '#shared/store'
 import { logger } from '#shared/logger'
-import { getPreset, inProduction, neverSwarmServices,serviceOrder } from '#config'
+import { getPreset, inProduction, serviceOrder } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
 import get from 'lodash.get'
 import set from 'lodash.set'
@@ -74,6 +74,14 @@ utils.getAllFqdns = () => ([
 ])
 
 /**
+ * Helper method to number of broker nodes
+ *
+ * @return {number} count - The number of broker nodes
+ *
+ */
+utils.getBrokerCount = () => utils.getSettings('deployment.nodes').length
+
+/**
  * Helper method to get a list of all FQDNS for broker nodes
  *
  * @return {array} list - The list of all broker node FQDNs
@@ -127,7 +135,7 @@ utils.getCaConfig = () => store.get('config.ca')
 /**
  * Helper method to get the cluster state age (time it was last updated)
  */
-utils.getClusterStateAge = () => Date.now() - store.get('state.swarm.updated', 172e10)
+utils.getClusterStateAge = () => Date.now() - store.get('state.cluster.updated', 172e10)
 
 /**
  * Helper method to get the cluster status
@@ -144,14 +152,14 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getClusterLeaderSerial = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial']
+utils.getClusterLeaderSerial = () => store.get(['state', 'cluster', 'nodes', store.get(['state', 'cluster', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial']
 
 /**
  * Helper method to get the uuid of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getClusterLeaderUuid = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
+utils.getClusterLeaderUuid = () => store.get(['state', 'cluster', 'nodes', store.get(['state', 'cluster', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
 
 /**
  * Helper method to get a Docer service configuration
@@ -250,6 +258,17 @@ utils.getNodeCount = () => utils.getSettings('deployment.nodes', []).concat(util
 utils.getNodeFqdn = () => store.get('state.node.fqdn')
 
 /**
+ * Helper method to get a list of all node FQDNS used in the settings
+ *
+ * @return {array} list - The list of all node FQDNs
+ *
+ */
+utils.getNodeFqdns = () => ([
+  ...utils.getSettings('deployment.nodes'),
+  ...utils.getSettings('deployment.flanking_nodes', []),
+])
+
+/**
  * Helper method to get the (short) hostname of the local node
  *
  * @return {string} hostname - The local node's hostname
@@ -321,75 +340,6 @@ utils.getSettingsSerial = () => store.get('state.settings_serial')
  * @return {number} time - The timestamp of when core was started
  */
 utils.getStartTime = () => store.get('state.start_time')
-
-/**
- * Helper method to get the list of swarm followers
- *
- * @return {object} followers - The list of nodes following in the swarm
- */
-utils.getSwarmFollowers = () => store.get('state.swarm.followers')
-
-/**
- * Helper method to get labels from the swarm leader node
- *
- * @return {object} labels - The labels on the swarm leader node
- */
-utils.getSwarmLeaderLabels = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels
-
-/**
- * Helper method to get the node_serial from the swarm leader node
- *
- * @return {string} node_serial - The node_serial of the swarm leader node
- */
-utils.getSwarmLeaderNodeSerial =  () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial']
-
-/**
- * Helper method to get the uuid from the swarm leader node
- *
- * @return {string} uuid - The uuid of the swarm leader node
- */
-utils.getSwarmLeaderUuid = () => store.get(['state', 'swarm', 'nodes', store.get(['state', 'swarm', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
-
-/**
- * Helper method to get the local sarm node from state
- *
- * @return {string} name - The name/id of the locale swarm node
- */
-utils.getSwarmLocalNode = () => store.get('state.swarm.local_node')
-
-/**
- * Helper method to get the sarm nodes from state
- *
- * @return {object} nodes - The swarm nodes from state
- */
-utils.getSwarmNodes = () => store.get('state.swarm.nodes')
-
-/**
- * Helper method to get the state.swarm_ready value
- */
-utils.getSwarmReady = () => store.get('state.swarm_ready')
-
-/**
- * Helper method to get the swarm services from state
- *
- * @return {object} services - The swarm service as stored in state
- */
-utils.getSwarmServicesState = () => store.get(['state', 'services', 'swarm'])
-
-/**
- * Helper method to get the state of a swarm service
- *
- * @param {string} service - The name of the swarm service for which to retrieve the sate
- * @return {object} state - The service state
- */
-utils.getSwarmServiceState = (service) => store.get(['state', 'services', 'swarm', service], false)
-
-/**
- * Helper method to get the swarm tokens
- *
- * @return {object} tokens - The swarm tokens
- */
-utils.getSwarmTokens = () => store.get('state.swarm.tokens', {})
 
 /**
  * Helper method to get the Morio version string
@@ -649,30 +599,6 @@ utils.setStatus = (code) => {
 }
 
 /**
- * Helper method to store a swarm node state
- *
- * @param {string} node - The name of the node
- * @param {object} state - The node state from the Docker API
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmNodeState = (node, state) => {
-  store.set(['state', 'swarm', 'nodes', node], state)
-  return utils
-}
-
-/**
- * Helper method to store a swarm service state
- *
- * @param {string} serviceName - The name of the service
- * @param {object} state - The service state from the Docker API
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmServiceState = (serviceName, state) => {
-  store.set(['state', 'services', 'swarm', serviceName], state)
-  return utils
-}
-
-/**
  * Helper method to store the state.node object
  *
  * @param {object} node - The node object, as read from node.json on disk
@@ -750,61 +676,6 @@ utils.setSettingsSerial = (serial) => {
 }
 
 /**
- * Helper method to set the swarm's leading node name in state
- *
- * @param {string} name - Name/Id of the leading node
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmLeadingNode = (name) => {
-  store.set('state.swarm.leader', name)
-  return utils
-}
-
-/**
- * Helper method to set the swarm's local_node name in state
- *
- * @param {string} name - Name/Id of the local node
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmLocalNode = (name) => {
-  store.set('state.swarm.local_node', name)
-  return utils
-}
-
-/**
- * Helper method to set whether the local node is leading the swarm in state
- *
- * @param {string} leading - Whether we are loeading or not
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmLocalNodeLeading = (leading) => {
-  store.set('state.swarm.leading', leading ? true : false)
-  return utils
-}
-
-/**
- * Helper method to set the swarm_ready state
- *
- * @param {bool} ready - Ready or not
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmReady = (ready) => {
-  store.set('state.swarm_ready', ready ? true : false)
-  return utils
-}
-
-/**
- * Helper method to set the swarm tokens
- *
- * @param {string} tokens - The swrm tokens
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setSwarmTokens = (tokens) => {
-  store.set('state.swarm.tokens', tokens)
-  return utils
-}
-
-/**
  * Helper method to set the Morio version
  *
  * @param {string} version - The version number/string
@@ -827,23 +698,30 @@ utils.setVersion = (version) => {
  *
  * @return {bool} resolved - True if the config is resolved, false if not
  */
-utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
+utils.isBrokerNode = () => utils.getNodeSerial() < 100 ? true : false
 
 /**
- * Helper method to see if brokers are distributed
+ * Helper method to see whether the config is resolved
  *
- * Just because Morio is a swarm does not mean we have a 1+-node broken cluster.
- * This checks for that and will return true of there's a multi-node broker cluster.
- *
- * @return {bool} distritbuted - True if brokers are distributed, false if not
+ * @return {bool} resolved - True if the config is resolved, false if not
  */
-utils.isDistributed = () => utils.isSwarm() && utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length > 1
+utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
 
 /**
  * Helper method to determine whether core is ready
  */
 utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
 
+/**
+ * Helper method to see if brokers are distributed
+ *
+ * Just because Morio is a cluster does not mean we have a 1+-node broken cluster.
+ * This checks for that and will return true of there's a multi-node broker cluster.
+ *
+ * @return {bool} distritbuted - True if brokers are distributed, false if not
+ */
+
+utils.isDistributed = () => utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length > 1
 /**
  * Helper method for returning ephemeral state
  *
@@ -852,27 +730,16 @@ utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
 utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
 
 /*
- * Determined whether the local node is leading the swarm
+ * Determined whether the local node is leading the cluster
  *
- * @return {bool} leading - True if the local swarm node is leading, false if not
+ * @return {bool} leading - True if the local cluster node is leading, false if not
  */
-utils.isLeading = () => store.get('state.swarm.leading', false) ? true : false
-
-/*
- * Determined whether a swarm node is the local node
- *
- * @params{object} node - Swarm node object
- * @return {bool} local - True if it is the local swarm node, false if not
- */
-utils.isLocalSwarmNode = (node) => (
-  node.Spec.Labels?.['morio.node.uuid'] === store.get('state.node.uuid') ||
-  node.Description.Hostname === store.get('state.node.hostname')
-)
+utils.isLeading = () => store.get('state.cluster.leading', false) ? true : false
 
 /*
  * Determined whether we are running in production or not
  *
- * @return {bool} leading - True if the local swarm node is leading, false if not
+ * @return {bool} leading - True if NODE_ENV is production
  */
 utils.isProduction = () => inProduction() ? true : false
 
@@ -887,24 +754,9 @@ utils.isStatusStale = () => {
 }
 
 /**
- * Helper method to determine whether to run a swarm or not
- *
- * @return {bool} swarm - True if Morio should swarm, or false if not
- */
-utils.isSwarm = () => (utils.isEphemeral() || utils.getFlag('NEVER_SWARM')) ? false : true
-
-/**
- * Helper method to determined whether a service is swarm (true) or local (false)
- *
- * @param {string} serviceName - Name of the service
- * @return {bool} swarm - True if it is a swarm service, false if it is a local service
- */
-utils.isSwarmService = (serviceName) => (!utils.isSwarm() || neverSwarmServices.includes(serviceName) || utils.getFlag('NEVER_SWARM')) ? false : true
-
-/**
  * Helper method to determine whether we are inside a unit test
  *
- * @return {bool} swarm - True if Morio should swarm, or false if not
+ * @return {bool} test - True if is a unit test, or false if not
  */
 utils.isUnitTest = () => store.get('testing', false) ? true : false
 
@@ -914,16 +766,6 @@ utils.isUnitTest = () => store.get('testing', false) ? true : false
  *  \__|_| \__,_|_||_/__/_| \___/_| |_|_|_\___|_| /__/
  * Mutate data in the store/state
  */
-
-/**
- * Helper method add an entry the list of swarm followers in the state
- *
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.addSwarmFollower = (follower) => {
-  store.push('state.swarm.followers', follower)
-  return utils
-}
 
 /**
  * Helper method for starting ephemeral state
@@ -958,26 +800,6 @@ utils.clearLocalServicesState = () => {
 }
 
 /**
- * Helper method clear the list of swarm followers in the state
- *
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.clearSwarmFollowers = () => {
-  store.set('state.swarm.followers', [])
-  return utils
-}
-
-/**
- * Helper method clear the list of swarm services
- *
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.clearSwarmServicesState = () => {
-  store.set('state.services.swarm', {})
-  return utils
-}
-
-/**
  * Helper method for ending ephemeral state
  *
  * @return {object} utils - The utils instance, making this method chainable
@@ -1006,7 +828,7 @@ utils.endReconfigure = () => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.resetClusterStateAge = () => {
-  store.set('state.swarm.updated', Date.now())
+  store.set('state.cluster.updated', Date.now())
   return utils
 }
 

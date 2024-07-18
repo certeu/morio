@@ -37,7 +37,7 @@ export const service = {
      * not be a problem to generate new ones.
      * Until we hear back from smallstep, thi will have to do.
      */
-    wanted: () => utils.isLeading() ? true : false,
+    wanted: () => utils.isBrokerNode() ? true : false,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
@@ -76,95 +76,6 @@ export const service = {
        * No config found, generate local configuration
        */
       await generateLocalCaConfig()
-
-      /*
-      log.debug('Generating inital CA config - This will take a couple of seconds')
-
-      /*
-       * Generate keys and certificates
-      const init = await generateCaRoot(
-        utils.getSettings('deployment.nodes'),
-        utils.getSettings('deployment.display_name')
-      )
-
-      /*
-       * Generate JWK
-      const jwk = await keypairAsJwk(utils.getKeys())
-
-      /*
-       * Save root certificate and fingerprint in memory
-      const caConfig = {
-        url: `https://ca_${utils.getNodeSerial()}:9000`,
-        fingerprint: init.root.fingerprint,
-        jwk,
-        certificate: init.root.certificate,
-        intermediate: init.intermediate.certificate,
-      }
-      utils.setCaConfig(caConfig)
-
-      /*
-       * Also write root & intermediate certificates to the downloads folder
-      await mkdir('/morio/data/downloads/certs/')
-      await writeFile('/morio/data/downloads/certs/root.pem', init.root.certificate)
-      await writeFile('/morio/data/downloads/certs/intermediate.pem', init.intermediate.certificate)
-
-      /*
-       * Construct step-ca (server) configuration
-      const stepServerConfig = {
-        ...caConfig.server,
-        root: '/home/step/certs/root_ca.crt',
-        crt: '/home/step/certs/intermediate_ca.crt',
-        key: '/home/step/secrets/intermediate_ca.key',
-        dnsNames: [caConfig.server.dnsNames, ...utils.getSettings('deployment.nodes')],
-      }
-
-      /*
-       * Add key to jwk provisioner config
-      stepServerConfig.authority.provisioners[0].key = jwk
-
-      /*
-       * Construct step (client) configuration
-      const stepClientConfig = {
-        ...caConfig.client,
-        fingerprint: init.root.fingerprint,
-      }
-
-      /*
-       * Create data folder & subfolders and change ownership to user running CA container (UID 1000)
-      const uid = utils.getPreset('MORIO_CA_UID')
-      await mkdir('/morio/data/ca')
-      await chown('/morio/data/ca', uid, uid)
-      await mkdir('/etc/morio/ca')
-      await chown('/etc/morio/ca', uid, uid)
-      for (const sub of ['secrets', 'certs', 'keys', 'db']) {
-        await mkdir(`/morio/data/ca/${sub}`)
-        await chown(`/morio/data/ca/${sub}`, uid, uid)
-      }
-
-      /*
-       * Write certificates, keys, and configuration to disk, and let CA own them
-      for (const [target, content] of [
-        ['/morio/data/ca/certs/root_ca.crt', init.root.certificate],
-        ['/morio/data/ca/certs/intermediate_ca.crt', init.intermediate.certificate],
-        ['/morio/data/ca/secrets/root_ca.key', init.root.keys.private],
-        ['/morio/data/ca/secrets/intermediate_ca.key', init.intermediate.keys.private],
-        ['/morio/data/ca/secrets/password', init.password],
-        ['/etc/morio/ca/ca.json', JSON.stringify(stepServerConfig, null, 2)],
-        ['/etc/morio/ca/defaults.json', JSON.stringify(stepClientConfig, null, 2)],
-      ]) {
-        // Chown the folder prior to writing, because it's typically volume-mapped
-        await chown(path.dirname(target), uid, uid)
-        await writeFile(target, content)
-        await chown(target, uid, uid)
-      }
-
-      /*
-       * Copy the CA root & intermediate certificates to a shared config folder
-       * from where other containers will load it
-      await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
-      await cp(`/morio/data/ca/certs/intermediate_ca.crt`, `/etc/morio/shared/intermediate_ca.crt`)
-
-       */
 
       return true
     },

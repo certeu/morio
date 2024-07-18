@@ -71,7 +71,7 @@ Controller.prototype.heartbeat = async (req, res) => {
 }
 
 /**
- * Join (invite to join a swarm)
+ * Join (invite to join a cluster)
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -93,66 +93,45 @@ Controller.prototype.join = async (req, res) => {
   else log.info(`Accepted request to join cluster ${valid.cluster} as ${valid.as}`)
 
   /*
-   * Attempt to join the swarm
+   * To join the cluster, we write settings to disk and reconfigure
+   * But first make sure to cast the serial to a number as we'll use it to
+   * construct the path to write to disk, and join cluster is an unauthenticated
+   * request. So can't trust this input.
    */
-  let result, data
-  try {
-    [result] = await joinCluster({
-      token: valid.token,
-      managers: [valid.join]
-    })
-  }
-  catch (err) {
-    console.log(err)
-  }
-
-  if (result) {
-    /*
-     * Joined the swam, write settings to disk and reconfigure
-     * But first make sure to cast the serial to a number as we'll use it to
-     * construct the path to write to disk, and join cluster is an unauthenticated
-     * request. So can't trust this input.
-     */
-    const serial = Number(valid.settings.serial)
-    log.debug(`Joined swarm, writing new settings to settings.${serial}.yaml`)
-    let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
-    if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
-    log.debug(`Writing key data to keys.json`)
-    result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
-    if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
-    log.debug(`Writing node data to node.json`)
-    const nodeUuid = uuid()
-    result = await writeJsonFile(`/etc/morio/node.json`, {
-      fqdn: valid.you,
-      hostname: valid.you.split('.')[0],
-      ip: (await resolveHostAsIp(valid.you)),
-      serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
-      uuid: nodeUuid
-    })
-
-    /*
-     * We need to run the local CA config before we trigger a reconfigured
-     * It also needs access to the settings & keys, so save those first
-     */
-    utils.setKeys(valid.keys)
-    utils.setSettings(valid.settings.data)
-    await generateLocalCaConfig()
-
-    /*
-     * Don't forget to finalize the request
-     */
-    res.status(200).send({ cluster: valid.keys.deployment, node: nodeUuid, serial })
-
-    /*
-     * Now return as reconfigure
-     */
-    return reconfigure({ joinCluster: true })
-  }
+  const serial = Number(valid.settings.serial)
+  log.debug(`Joining cluster, writing new settings to settings.${serial}.yaml`)
+  let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+  log.debug(`Writing key data to keys.json`)
+  result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+  log.debug(`Writing node data to node.json`)
+  const nodeUuid = uuid()
+  result = await writeJsonFile(`/etc/morio/node.json`, {
+    fqdn: valid.you,
+    hostname: valid.you.split('.')[0],
+    //ip: (await resolveHostAsIp(valid.you)),
+    serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
+    uuid: nodeUuid
+  })
 
   /*
-   * Return error
+   * We need to run the local CA config before we trigger a reconfigured
+   * It also needs access to the settings & keys, so save those first
    */
-  return res.status(500).send({ join: failed }).end()
+  utils.setKeys(valid.keys)
+  utils.setSettings(valid.settings.data)
+  await generateLocalCaConfig()
+
+  /*
+   * Don't forget to finalize the request
+   */
+  res.status(200).send({ cluster: valid.keys.deployment, node: nodeUuid, serial })
+
+  /*
+   * Now return as reconfigure
+   */
+  return reconfigure({ joinCluster: true })
 }
 
 

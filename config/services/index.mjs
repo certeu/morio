@@ -2,7 +2,7 @@ import { YamlConfig } from '../yaml-config.mjs'
 import { resolveServiceConfiguration as api } from './api.mjs'
 import { resolveServiceConfiguration as broker } from './broker.mjs'
 import { resolveServiceConfiguration as ca } from './ca.mjs'
-import { resolveServiceConfiguration as _console } from './console.mjs'
+import { resolveServiceConfiguration as console } from './console.mjs'
 import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as db } from './db.mjs'
@@ -14,7 +14,7 @@ const resolvers = {
   api,
   broker,
   ca,
-  console: _console,
+  console,
   connector,
   core,
   db,
@@ -30,8 +30,8 @@ export const resolveServiceConfiguration = (name, helpers) =>
  * This is the order in which services are started
  */
 export const serviceOrder = [
-  'db',
   'ca',
+  'db',
   'proxy',
   'api',
   'ui',
@@ -49,12 +49,6 @@ export const ephemeralServiceOrder = [
   'api',
   'ui',
 ]
-
-/*
- * This defined which services will never be created as swarm
- * services, but instead run as a local container.
- */
-export const neverSwarmServices = serviceOrder
 
 /**
  * Helper method to generate the Traefik configuration
@@ -96,7 +90,10 @@ export const generateTraefikConfig = (utils, {
         ]
       }
     })
-  if (utils.isEphemeral()) tc.set(RULE, prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || '))
+  if (utils.isEphemeral()) {
+    if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
+    else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
+  }
   else {
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
@@ -105,8 +102,8 @@ export const generateTraefikConfig = (utils, {
     const clusterFqdn = utils.getSettings('deployment.fqdn', false)
     tc.set([...ROUTER, 'tls'], true)
     //const hostRule = traefikHostRulePrefix(service, nodes)
-    if (paths.length > 0) tc.set(RULE, paths.map(p => "Path(`"+p+"`)").join(' || '))
-    else if (prefixes.length > 0) tc.set(RULE, prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || '))
+    if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
+    else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
     if (backendTls) tc.set([...SERVICE, 'loadBalancer', 'server', 'scheme'], 'https')
   }
 
