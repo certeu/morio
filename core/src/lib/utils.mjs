@@ -542,10 +542,10 @@ utils.setEphemeralUuid = (uuid) => {
  * @param {object} data - Heartbet data (from the remote node)
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setHeartbeatIn = ({ up, ok, uuid, data }) => {
+utils.setHeartbeatIn = (fqdn, data) => {
   store.set(
-    ['state', 'cluster', 'heartbeats', 'in', uuid],
-    { up, ok, data, time: Date.now() }
+    ['state', 'cluster', 'heartbeats', 'in', fqdn],
+    { ...data, time: Date.now() }
   )
   return utils
 }

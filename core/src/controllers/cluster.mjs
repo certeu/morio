@@ -1,5 +1,5 @@
 import { log, utils } from '../lib/utils.mjs'
-import { joinCluster, verifyHeartbeatRequest } from '../lib/cluster.mjs'
+import { joinCluster, verifyHeartbeatRequest, inviteClusterNode } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
@@ -96,7 +96,7 @@ Controller.prototype.join = async (req, res) => {
    */
   const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
-    log.info(`Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
+    log.info(err, `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
   }
   else log.info(`Accepted request to join cluster ${valid.cluster} as ${valid.as}`)

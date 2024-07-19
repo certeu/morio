@@ -141,12 +141,12 @@ const ensureClusterHeartbeat = async () => {
 /**
  * Start a cluster heartbeat
  */
-const runHeartbeat = async (init=false) => {
+const runHeartbeat = async (leaderless=false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
    */
-  if (!init) await updateClusterState(true)
+  if (!leaderless) await updateClusterState(true)
 
   /*
    * This won't change
@@ -154,21 +154,14 @@ const runHeartbeat = async (init=false) => {
   const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
 
   /*
-   * Is this the initialisation of a new heartbeat?
+   * Are we still trying to figure out who is leading the cluster?
    */
-  if (init) {
-    /*
-     * Help the debug party
-     */
-    log.debug('Sending broadcast heartbeat to all cluster nodes')
-    const running = utils.getHeartbeatOut()
-    if (running) clearTimeout(running)
-  }
+  if (leaderless) log.debug('Leaderless cluster, sending broadcast heartbeat to all cluster nodes to find leader')
 
   /*
    * Who are we sending heartbeats to?
    */
-  const targets = init
+  const targets = leaderless
     ? utils.getNodeFqdns()
     : [utils.getClusterLeaderFqdn()]
 
@@ -176,6 +169,14 @@ const runHeartbeat = async (init=false) => {
    * Create a heartbeat for each target
    */
   for (const fqdn of targets) {
+    /*
+     * Do not stack timeouts
+     */
+    const running = utils.getHeartbeatOut(fqdn)
+    if (running) clearTimeout(running)
+    /*
+     * Store timeout ID so we can cancel it later
+     */
     utils.setHeartbeatOut(fqdn, setTimeout(async () => {
       /*
        * Send heartbeat request and verify the result
@@ -183,7 +184,7 @@ const runHeartbeat = async (init=false) => {
       const start = Date.now()
       let data
       try {
-        if (init) log.debug(`Initial heartbeat to ${fqdn}`)
+        if (leaderless) log.debug(`Leaderless heartbeat to ${fqdn}`)
         data = await testUrl(
           `https://${fqdn}/-/core/cluster/heartbeat`,
           {
@@ -207,9 +208,9 @@ const runHeartbeat = async (init=false) => {
       catch (error) {
         // Help the debug party
         const rtt = Date.now() - start
-        log.debug(`Heartbeat to ${fqdn} took ${rtt}ms and resulted in an error.`)
+        log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`)
         // Verify heartbeat (this will log a warning for the error)
-        verifyHeartbeatResponse({ uuid, serial, error })
+        verifyHeartbeatResponse({ fqdn, error })
         // And trigger a new heartbeat
         runHeartbeat()
       }
@@ -218,7 +219,7 @@ const runHeartbeat = async (init=false) => {
        * Help the debug party
        */
       const rtt = Date.now() - start
-      log.debug(`Heartbeat to ${fqdn} took ${rtt}ms`)
+      log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
 
       /*
        * Verify the response
@@ -229,7 +230,7 @@ const runHeartbeat = async (init=false) => {
        * Trigger a new heatbeat
        */
       runHeartbeat()
-    }, interval*1000))
+    }, leaderless ? 0 : interval*1000))
   }
 }
 
@@ -238,14 +239,12 @@ const runHeartbeat = async (init=false) => {
  *
  * Note that this will run on a FOLLOWER node only.
  *
- * @param {string} uuid - The UUID of the remote node (LEADER)
- * @param {number} serial - The node_serial of the remote node (LEADER)
- * @param {object} data - The data (body) from a successful heartbeat request
+ * @param {string} fqdn - The FQDN of the remote node
+ * @param {object} data - The data (body) from the heartbeat response
  * @param {number} rtt - The request's round-trip-time (RTT) in ms
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
-const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => {
-  log.info(data, 'heartbet response')
+const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   /*
    * Is this an error?
    */
@@ -253,12 +252,12 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
     /*
      * Storing the result of a failed hearbteat will influence the cluster state
      */
-    utils.setHeartbeatIn({ up: false, ok: false, uuid: remote, data: { error: error.code } })
+    utils.setHeartbeatIn(fqdn, { up: false, ok: false, error: error.code })
     /*
      * Also log something an error-specific message
      */
     if (error.code === 'ECONNREFUSED') {
-      log.warn(`Connection refused when sending heartbeat to node ${serial} (${uuid}). Is this node up?`)
+      log.warn(`Connection refused when sending heartbeat to ${uuid}. Is this node up?`)
     }
     else {
       log.warn(`Unspecified error when sending heartbeat to node ${uuid} (${uuid}).`)
@@ -271,26 +270,26 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
    * Just because the request didn't error doesn't mean all is ok
    */
   if (Array.isArray(data?.errors) && data.errors.length > 0) {
-    utils.setHeartbeatIn({ up: true, ok: false, uuid, data })
+    utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
     for (const err of data.errors) {
-      log.error(`Heartbeat error from node ${serial}: ${err}`)
+      log.error(`Heartbeat error from ${fqdn}: ${err}`)
     }
   } else {
-    utils.setHeartbeatIn({ up: true, ok: true, uuid, data })
+    utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
   }
 
   /*
    * Warn when things are too slow
    */
   if (rtt && rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
-    log.warn(`Heartbeat RTT to node ${serial} was ${rtt}ms which is above the warning mark`)
+    log.warn(`Heartbeat RTT to ${fqdn} was ${rtt}ms which is above the warning mark`)
   }
 
   /*
    * Do we need to take any action?
    */
   if (data.action) {
-    log.fixme(`Implement ${data.action} action`)
+    if (data.action === 'INVITE') inviteClusterNode(fqdn)
   }
 
   /*
@@ -467,7 +466,7 @@ export const inviteClusterNode = async (remote) => {
    * We will await this one because typically this works, and it
    * prevents us from having to run this in the background.
    */
-  const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
+  const opportunisticJoin = await inviteClusterNodeAttempt(remote)
   //const opportunisticJoin = false
 
   /*
@@ -479,7 +478,7 @@ export const inviteClusterNode = async (remote) => {
     attempt({
       every: interval,
       timeout: interval*0.9,
-      run: async () => await inviteClusterNodeAttempt(local, remote),
+      run: async () => await inviteClusterNodeAttempt(remote),
       onFailedAttempt: (s) =>
         log.debug(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
     }).then(() => log.info(`Node ${remote} has now joined the cluster`))
@@ -490,20 +489,19 @@ export const inviteClusterNode = async (remote) => {
 /**
  * Helper method to attempt inviting a remote cluster node
  *
- * @params {string} local - The FQDN of the local node (this one)
  * @params {string} remote - The FQDN of the remote node
  */
-const inviteClusterNodeAttempt = async (local, remote) => {
+const inviteClusterNodeAttempt = async (remote) => {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
   const result = await testUrl(
-    `https://${remote}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
+    `https://${remote}/-/core/cluster/join`,
     {
       method: 'POST',
       data: {
         you: remote,
-        join: local,
+        join: utils.getNodeFqdn(),
         as: flanking ? 'flanking_node' : 'broker_node',
         cluster: utils.getClusterUuid(),
         settings: {
