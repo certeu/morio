@@ -59,7 +59,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `-join`,
         utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`).join(','),
         'data',
-      ].concat(utils.getNodeSerial() === 1 ? [] : ['data']),
+      ], //.concat(utils.getNodeSerial() === 1 ? [] : ['data']),
     },
     /*
      * Traefik (proxy) configuration for the API service
