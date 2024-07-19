@@ -2,6 +2,8 @@ import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
 import { coreClient } from '#lib/core'
+import { errors, statusCodes, statusCodeAsColor } from '#shared/errors'
+import { validate as validateMethod } from '../schema.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -373,3 +375,7 @@ utils.sendErrorResponse = (res, template, route=false) => {
   return res.type('application/problem+json').status(data.status).send(data).end()
 }
 
+/**
+ * Add validate method for eacy access
+ */
+utils.validate = validateMethod

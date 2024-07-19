@@ -1,5 +1,39 @@
-import Joi from 'joi'
+import {
+  Joi,
+  validate as sharedValidate,
+  id,
+  fqdn,
+  jsTime,
+  uuid,
+  keys,
+  version,
+  nodeSerial,
+  settings
+} from '#shared/schema'
 
+/*
+ * This describes the schema of requests and responses in the Core API
+ */
+export const schema = {
+  /*
+   * Requests
+   */
+  'req.setup': settings,
+}
+
+/*
+ * Validation method to check data against the schema
+ *
+ * @param {string} key - The key in the schema obhject
+ * @param {object} input - The input to validate
+ * @retrn {object} result - The validation result
+ */
+export const validate = (key, input) => sharedValidate(key, input, schema)
+
+
+// FIXME: Legacy validation below
+//
+// FIXME: what is this token again?
 const shared = {
   setup: {
     /*
@@ -10,17 +44,24 @@ const shared = {
   },
 }
 
+
 /*
  * This describes the schema of the cluster settings
  */
 export const clusterSchema = Joi.object({
   name: Joi.string().required().min(2).max(255),
-  broker_nodes: Joi.array().length(Joi.number().required().valid(1,3,5,7,9)).items(Joi.string().hostname()).min(1).required(),
+  broker_nodes: Joi.array()
+    .items(Joi.string().hostname())
+    .length(1)
+    .length(3)
+    .length(6)
+    .length(7)
+    .length(9),
   flanking_nodes: Joi.array().items(Joi.string().hostname()),
   fqdn: Joi.string()
     .hostname()
     .when('broker_nodes', {
-      is: Joi.array.length(Joi,number().valid(1)),
+      is: Joi.array().max(1),
       then: Joi.optional(),
       otherwise: Joi.required(),
     }),
@@ -116,3 +157,5 @@ export const responseSchema = {
  * This describes the schema of error responses
  */
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
+
+

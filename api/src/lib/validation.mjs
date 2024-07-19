@@ -81,6 +81,11 @@ export const validateSettings = async (newSettings) => {
   }
 
   /*
+   * Schema validation successful (was done in the request handler)
+   */
+  report.info.push('Settings passed schema validation')
+
+  /*
    * We define this here to keep things DRY
    */
   const abort = () => {
@@ -90,50 +95,40 @@ export const validateSettings = async (newSettings) => {
   }
 
   /*
-   * Nodes will check that there are as many as node_count
-   * But if the entire settings object is empty, this will pass validation
-   * So let's guard against that here
+   * Broker nodes
    */
   if (
     !newSettings?.cluster ||
-    !newSettings.cluster.node_count ||
     !newSettings.cluster.broker_nodes ||
     !Array.isArray(newSettings.cluster.broker_nodes) ||
-    newSettings.cluster.broker_nodes.length !== newSettings.cluster.node_count
+    ![1,3,5,7,9].includes(newSettings.cluster.broker_nodes.length)
   ) {
     report.info.push(`Settings are not valid`)
-    report.errors.push(`Node count and nodes do not match`)
+    report.errors.push(`Broker node count is not supported`)
 
     return abort()
   }
 
   /*
-   * Validate settings against the settings schema
+   * Broker nodes
    */
-  let settings
-  try {
-    settings = await settingsSchema.validateAsync(newSettings)
-  } catch (err) {
-    /*
-     * Validate failed, bail out here
-     */
-    report.info.push(`Settings did not pass schema validation`)
-    for (const msg of err.details) report.errors.push(msg.message)
+  if (newSettings.cluster.flanking_nodes && (
+      !Array.isArray(newSettings.cluster.flanking_nodes) ||
+      newSettings.cluster.flanking_nodes.length < 0 ||
+      newSettings.cluster.flanking_nodes.length < 36
+  )) {
+    report.info.push(`Settings are not valid`)
+    report.errors.push(`Flanking node count is not supported`)
 
     return abort()
   }
-
-  /*
-   * Schema validation successful
-   */
-  report.info.push('Settings passed schema validation')
 
   /*
    * Verify nodes
    */
   let i = 0
   const ips = []
-  for (const node of settings.cluster.broker_nodes) {
+  for (const node of newSettings.cluster.broker_nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
     /*

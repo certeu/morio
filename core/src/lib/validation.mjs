@@ -1,9 +1,4 @@
 import { schema } from '../schema.mjs'
-import get from 'lodash.get'
-
-/*
- * Validation helpers
- */
 
 /**
  * Validates input
@@ -15,12 +10,12 @@ import get from 'lodash.get'
  *
  * This is why this wrapper function provides a try...catch block for validation
  *
- * @param {string} targetPath - The location of the target object in the schema, in dot notation
+ * @param {string} key - The key in the schema object holding the Joi schema
  * @param {object] input - The input to validate
  * @return {object} valid - The result of the Joi validation
  */
-export const validate = async (targetPath, input) => {
-  const target = get(schema, targetPath, false)
+export const validate = async (key, input) => {
+  const target = schema[key]
   if (target) {
     let valid
     try {

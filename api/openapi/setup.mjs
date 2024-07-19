@@ -62,7 +62,7 @@ export const paths = {
       `,
       ...request(
         'Post an array of hostnames to setup Morio.<br>A single hostname for a stand-alone instance, or an odd number of nodes for a cluster setup',
-        'deployment',
+        'cluster',
         {
           'Morio Stand-alone Instance': {
             value: { nodes: ['morio.cert.europa.eu'] },

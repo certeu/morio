@@ -132,9 +132,19 @@ Controller.prototype.setup = async (req, res) => {
     })
 
   /*
-   * Validate settings
+   * Validate request against schema
+   */
+  const [valid, err] = await utils.validate(`req.setup`, req.body)
+  if (!valid) {
+    log.warn(err)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/setup')
+  }
+
+  /*
+   * Validate settings are deployable
    */
   const report = await validateSettings(req.body)
+  log.info(report)
 
   /*
    * Make sure setting are valid

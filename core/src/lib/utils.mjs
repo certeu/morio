@@ -5,7 +5,7 @@ import { getPreset, inProduction, serviceOrder } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
 import get from 'lodash.get'
 import set from 'lodash.set'
-import { errors, statusCodes, statusCodeAsColor } from './errors.mjs'
+import { errors, statusCodes, statusCodeAsColor } from '#shared/errors'
 import { loadAllPresets } from '#config'
 import { runHook } from './services/index.mjs'
 
