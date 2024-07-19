@@ -66,13 +66,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     traefik: generateTraefikConfig(utils, {
       service: 'db',
-      paths: [
+      prefixes: [
         '/-/db/status',
         '/-/db/nodes',
       ],
       priority: 666,
     }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
-      .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$$1")
+      .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$1")
       .set('http.routers.db.middlewares', ['db-prefix@file']),
     /**
      * This is the schema, or more accurately, the SQL commands to create the

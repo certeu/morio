@@ -156,10 +156,10 @@ export const presets = {
    */
 
   // Port to use for the REST API
-  MORIO_DB_HTTP_PORT: 4001,
+  MORIO_DB_HTTP_PORT: 9001,
 
   // Port to use for the Raft consensus protocol
-  MORIO_DB_RAFT_PORT: 4002,
+  MORIO_DB_RAFT_PORT: 9002,
 
   /*
    * Proxy presets
