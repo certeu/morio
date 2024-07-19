@@ -144,7 +144,6 @@ Controller.prototype.setup = async (req, res) => {
    * Validate settings are deployable
    */
   const report = await validateSettings(req.body)
-  log.info(report)
 
   /*
    * Make sure setting are valid

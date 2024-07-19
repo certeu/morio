@@ -205,7 +205,7 @@ export const validateSettings = async (newSettings) => {
    */
   report.valid = true
   report.deployable = true
-  report.validated_settings = settings
+  report.validated_settings = newSettings
 
   return report
 }
