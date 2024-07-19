@@ -15,6 +15,17 @@ import { runHook } from './services/index.mjs'
 export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
 
 /*
+ * Add a fixme log method to make it easy to spot things still to be done
+ */
+log.fixme = (a,b) => {
+  const location = new Error().stack.split("\n")[2]
+
+  return typeof a === 'object'
+    ? log.warn(a, `FIX THIS ⚠️ ${b}${location}`)
+    : log.warn(`FIX THIS ⚠️ ${a}${location}`)
+}
+
+/*
  * This store instance will hold our state, but won't be exported.
  * Only through the utility methods below will we allow changing state.
  * We're also initializing it with some data at start time.
@@ -148,18 +159,50 @@ utils.getStatus = () => store.get('state.status', { code: 499, time: 172e10 })
 utils.getClusterUuid = () => store.get('state.cluster.uuid')
 
 /**
+ * Helper method to get the cluster leader fqdn
+ *
+ * @return {string} fqdn - The FQDN of the cluster leader node
+ */
+utils.getClusterLeaderFqdn = () => {
+  const fqdn = utils.getClusterLeaderState()?.fqdn
+
+  return fqdn ? fqdn : false
+}
+
+/**
  * Helper method to get the node_serial of the node leading the cluster
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getClusterLeaderSerial = () => store.get(['state', 'cluster', 'nodes', store.get(['state', 'cluster', 'leader'])], {})?.Spec?.Labels?.['morio.node.serial']
+utils.getClusterLeaderSerial = () => {
+  const serial = utils.getClusterLeaderState()?.serial
+
+  return serial ? serial : false
+}
+
+/**
+ * Helper method to get the state of the cluster leader
+ *
+ * @return {object} state - State of the cluster leader
+ */
+utils.getClusterLeaderState = () => {
+  const leader = store.get('state.cluster.leader', false)
+  if (!leader) return false
+  const state = store.get(['state', 'cluster', 'nodes', leader], false)
+
+  return state ? state : false
+}
 
 /**
  * Helper method to get the uuid of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getClusterLeaderUuid = () => store.get(['state', 'cluster', 'nodes', store.get(['state', 'cluster', 'leader'])], {})?.Spec?.Labels?.['morio.node.uuid']
+utils.getClusterLeaderUuid = () => {
+  const uuid = utils.getClusterLeaderState()?.uuid
+
+  return uuid ? uuid : false
+}
 
 /**
  * Helper method to get a Docer service configuration
@@ -190,7 +233,7 @@ utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', 
  *
  * @return {number} id - The setTimeout id which allows clearing the timetout
  */
-utils.getHeartbeatOut = () => store.get('state.cluster.heartbeat.out')
+utils.getHeartbeatOut = (fqdn) => store.get(['state', 'cluster', 'heartbeats', 'out', fqdn], false)
 
 /**
  * Helper method to get the info data
@@ -501,7 +544,7 @@ utils.setEphemeralUuid = (uuid) => {
  */
 utils.setHeartbeatIn = ({ up, ok, uuid, data }) => {
   store.set(
-    ['state', 'cluster', 'heartbeat', 'in', uuid],
+    ['state', 'cluster', 'heartbeats', 'in', uuid],
     { up, ok, data, time: Date.now() }
   )
   return utils
@@ -510,11 +553,12 @@ utils.setHeartbeatIn = ({ up, ok, uuid, data }) => {
 /**
  * Helper method to store the outgoing heartbeat data
  *
+ * @param {string} fqdn - The FQDN of the heartbeat target
  * @param {object} id - The heartbeat setTimeout id
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setHeartbeatOut = (id) => {
-  store.set('state.cluster.heartbeat.out', id)
+utils.setHeartbeatOut = (fqdn, id) => {
+  store.set(['state', 'cluster', 'heartbeats', 'out', fqdn], id)
   return utils
 }
 
@@ -720,8 +764,8 @@ utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
  *
  * @return {bool} distritbuted - True if brokers are distributed, false if not
  */
-
 utils.isDistributed = () => utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length > 1
+
 /**
  * Helper method for returning ephemeral state
  *
@@ -751,6 +795,22 @@ utils.isProduction = () => inProduction() ? true : false
 utils.isStatusStale = () => {
   const data = utils.getStatus()
   return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
+}
+
+/**
+ * Helper method to determine whether a node (any node) is a flanking node
+ *
+ * @param {object} params - An object with node info
+ * @param {string} params.fqdn - The node's FQDN
+ * @param {number} params.serial - The node's serial
+ * @return {bool} flanking - True if the node is a flanking node, false if not
+ */
+utils.isThisAFlankingNode = ({ fqdn=false, serial=0 }) => {
+  if (serial) return serial < 100 ? false : true
+  if (fqdn) return utils.getSettings('deployment.flanking_nodes', []).includes(fqdn) ? true : false
+  log.warn(`Called isThisAFlankingNode() but neither fqdn or serial were provided`)
+
+  return null
 }
 
 /**
@@ -871,12 +931,9 @@ utils.updateStatus = async () => {
    * Do we need to run additional cluster checks?
    */
   if (utils.isDistributed()) {
-    // FIXME: handle cluster stuff
+    log.fixme('Implement cluster state consolidation')
   }
 
-  /*
-   * FIXME: this is just here to update the status for now
-   */
   return utils.setStatus(0)
 }
 
@@ -925,4 +982,6 @@ utils.sendErrorResponse = (res, template, route=false) => {
 
   return res.type('application/problem+json').status(data.status).send(data).end()
 }
+
+
 

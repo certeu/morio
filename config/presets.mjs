@@ -35,6 +35,9 @@ export const presets = {
   // Network subnet.
   MORIO_NETWORK_SUBNET: '192.168.144.32/28',
 
+  // Network subnet.
+  MORIO_NETWORK_MTU: 1450,
+
   // Prefix for looking up errors
   MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
 

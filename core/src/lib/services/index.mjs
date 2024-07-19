@@ -89,51 +89,6 @@ const createMorioService = async (serviceName) => {
 }
 
 /**
- * Logs messages on start based on configuration values
- *
- * This is just a little helper method to keep this out of the main method
- *
- * @param {object} configs - An object holding all the configs on diskk
- * @param {object} log - The logger instance
- */
-export const logStartedConfig = () => {
-  /*
-   * Log version and environment
-   */
-  log.info(`core: Morio v${utils.getVersion()}`)
-
-  /*
-   * Log mount locations, useful for debugging
-   */
-  for (const mount of [
-    'MORIO_CONFIG_ROOT',
-    'MORIO_DATA_ROOT',
-    'MORIO_LOGS_ROOT',
-    'MORIO_DOCKER_SOCKET',
-  ])
-    log.debug(`core: ${mount} = ${utils.getPreset(mount)}`)
-return // FIXME
-
-  /*
-   * Has MORIO been setup?
-   */
-  if (utils.isEphemeral()) {
-    /*
-     * It is not, running in ephemeral mode
-     */
-    log.info('core: This Morio node is not deployed yet')
-  } else {
-    /*
-     * It is, so we should have a config
-     */
-    log.info(`core: Using configuration ${utils.getSettingsSerial()}`)
-    log.debug(
-      `core: We are ${utils.getSettings(['deployment', 'nodes', 0])} (${utils.getSettings('deployment.display_name')})`
-    )
-  }
-}
-
-/**
  * Ensures morio services are up
  *
  * @param {array} services = A list of services that should be up
@@ -156,9 +111,21 @@ export const startMorio = async (hookParams = {}) => {
   }
 
   /*
-   * Log info about the config we'll start
+   * Log version and environment
    */
-  logStartedConfig()
+  log.info(`core: Morio v${utils.getVersion()}`)
+
+  /*
+   * Log mount locations, useful for debugging
+   */
+  if (!utils.isProduction()) {
+    for (const mount of [
+      'MORIO_CONFIG_ROOT',
+      'MORIO_DATA_ROOT',
+      'MORIO_LOGS_ROOT',
+      'MORIO_DOCKER_SOCKET',
+    ]) log.debug(`core: ${mount} = ${utils.getPreset(mount)}`)
+  }
 
   /*
    * Save info on what's running once so lifecycle hooks don't all have to

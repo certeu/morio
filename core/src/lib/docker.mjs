@@ -116,9 +116,10 @@ export const createDockerNetwork = async (name) => {
     IPAM: {
       Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }]
     },
+    Options: {
+      "com.docker.network.mtu": utils.getPreset('MORIO_NETWORK_MTU')
+    }
   }
-  // FIXME: Support setting MTU perhaps? Something like
-  // if (whatever) config.Options['com.docker.network.mtu'] = '1333'
 
   let success, result
   try {

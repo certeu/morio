@@ -51,12 +51,13 @@ Controller.prototype.heartbeat = async (req, res) => {
    * (potentially) take action
    */
   if (action === 'SYNC') {
-    // FIXME
-    log.warn('FIXME: Handle SYNC action in heartbeat controller on leaader')
+    log.fixme('Handle heartbeat SYNC action')
   }
-  if (action === 'ELECT') {
-    // FIXME
-    log.warn('FIXME: Handle ELECT action in heartbeat controller on leader')
+  else if (action === 'INVITE') {
+    log.fixme('Handle heartbeat INVITE action')
+  }
+  else if (action === 'ELECT') {
+    log.fixme('Handle hearbeat ELECT action')
   }
 
   /*

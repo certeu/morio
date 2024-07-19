@@ -38,6 +38,8 @@ export const schema = {
    * Requests
    */
   'req.cluster.heartbeat': Joi.object({
+    from: hostname,
+    to: hostname,
     cluster: uuid,
     node: uuid,
     leader: Joi.string().guid({ version: 'uuidv4', separator: '-' }),

@@ -22,48 +22,17 @@ export const updateClusterState = async (silent) => {
  * Helper method to update the cluster state
  */
 export const forceUpdateClusterState = async (silent) => {
-  await updateClusterMorioState(silent)
+  await updateLocalNodeState(silent)
   utils.resetClusterStateAge()
 }
 
 /**
  * Helper method to gather the morio cluster state
  */
-const updateClusterMorioState = async () => {
-  /*
-   * Reach out to each node to see what's up
-   */
-  for (const fqdn of utils.getNodeFqdns().filter(fqdn => fqdn !== utils.getNodeFqdn())) {
-    log.warn(`Reaching out to ${fqdn}`)
-    const data = await testUrl(
-      `https://${fqdn}/-/core/cluster/heartbeat`,
-      {
-        method: 'POST',
-        data: {
-          cluster: utils.getClusterUuid(),
-          node: utils.getNodeUuid(),
-          version: utils.getVersion(),
-          settings_serial: Number(utils.getSettingsSerial()),
-          node_serial: Number(utils.getNodeSerial()),
-        },
-        timeout: 3500,
-        returnAs: 'json',
-        returnError: true,
-        ignoreCertificate: true,
-    })
-    log.warn({
-      message: data.message,
-      name: data.name,
-      code: data.code,
-      response: {
-        //status: data.response.status,
-        //text: data.response.statusText,
-        response: data.response,
-      },
-      fqdn,
-      data,
-    }, 'This is ithe result data')
-  }
+const updateLocalNodeState = async () => {
+
+  log.fixme(`Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+  return
 
   /*
   const nodes = {}
@@ -123,7 +92,7 @@ const updateClusterMorioState = async () => {
  * Helper method to join a node to the cluster
  */
 export const joinCluster = async () => {
-  log.warn('FIXME: Implement koinCluster')
+  log.fixme('Implement joinCluster')
 
   return
 }
@@ -150,8 +119,7 @@ export const ensureMorioClusterConsensus = async () => {
   /*
    * Ensure a cluster heartbeat is running
    */
-  ensureClusterHeartbeat(true)
-
+  ensureClusterHeartbeat()
 }
 
 /**
@@ -176,8 +144,9 @@ const ensureClusterHeartbeat = async () => {
 const runHeartbeat = async (init=false) => {
   /*
    * Ensure we are comparing to up to date cluster state
+   * Unless this is the initial setup in which case we just updated the state
    */
-  await updateClusterState(true)
+  if (!init) await updateClusterState(true)
 
   /*
    * This won't change
@@ -191,68 +160,77 @@ const runHeartbeat = async (init=false) => {
     /*
      * Help the debug party
      */
-    log.debug(`Instantiating heartbeat to cluster leader`)
+    log.debug('Sending broadcast heartbeat to all cluster nodes')
     const running = utils.getHeartbeatOut()
     if (running) clearTimeout(running)
   }
 
   /*
-   * Create the heartbeat
+   * Who are we sending heartbeats to?
    */
-  utils.setHeartbeatOut(setTimeout(async () => {
-    /*
-     * By grabbing the serial here, the hearbeat will follow the leader
-     * To ensure serial meets UUID, we grab that here too
-     */
-    const serial = utils.getClusterLeaderSerial()
-    const uuid = utils.getClusterLeaderUuid()
-    log.warn({serial, uuid}, 'test')
-    /*
-     * Send heartbeat request and verify the result
-     */
-    const start = Date.now()
-    let data
-    try {
-      data = await testUrl(
-        `http://core_${serial}:${utils.getPreset('MORIO_CORE_PORT')}/cluster/heartbeat`,
-        {
-          method: 'POST',
-          data: {
-            cluster: utils.getClusterUuid(),
-            node: uuid,
-            leader: uuid,
-            version: utils.getVersion(),
-            settings_serial: Number(utils.getSettingsSerial()),
-            node_serial: Number(utils.getNodeSerial()),
-          },
-          timeout: interval*500, // 25% of the interval
-          returnAs: 'json',
-          returnError: true,
-      })
-    }
-    catch (error) {
-      // Help the debug party
+  const targets = init
+    ? utils.getNodeFqdns()
+    : [utils.getClusterLeaderFqdn()]
+
+  /*
+   * Create a heartbeat for each target
+   */
+  for (const fqdn of targets) {
+    utils.setHeartbeatOut(fqdn, setTimeout(async () => {
+      /*
+       * Send heartbeat request and verify the result
+       */
+      const start = Date.now()
+      let data
+      try {
+        if (init) log.debug(`Initial heartbeat to ${fqdn}`)
+        data = await testUrl(
+          `https://${fqdn}/-/core/cluster/heartbeat`,
+          {
+            method: 'POST',
+            data: {
+              from: utils.getNodeFqdn(),
+              to: fqdn,
+              cluster: utils.getClusterUuid(),
+              node: utils.getNodeUuid(),
+              leader: utils.getClusterLeaderUuid() || undefined,
+              version: utils.getVersion(),
+              settings_serial: Number(utils.getSettingsSerial()),
+              node_serial: Number(utils.getNodeSerial()),
+            },
+            timeout: interval*500, // 25% of the interval
+            returnAs: 'json',
+            returnError: true,
+            ignoreCertificate: true,
+        })
+      }
+      catch (error) {
+        // Help the debug party
+        const rtt = Date.now() - start
+        log.debug(`Heartbeat to ${fqdn} took ${rtt}ms and resulted in an error.`)
+        // Verify heartbeat (this will log a warning for the error)
+        verifyHeartbeatResponse({ uuid, serial, error })
+        // And trigger a new heartbeat
+        runHeartbeat()
+      }
+
+      /*
+       * Help the debug party
+       */
       const rtt = Date.now() - start
-      log.debug(`Heartbeat to node ${serial} took ${rtt}ms and resulted in an error.`)
-      // Verify heartbeat (this will log a warning for the error)
-      verifyHeartbeatResponse({ uuid, serial, error })
-      // And trigger a new heartbeat
+      log.debug(`Heartbeat to ${fqdn} took ${rtt}ms`)
+
+      /*
+       * Verify the response
+       */
+      verifyHeartbeatResponse({ fqdn, data, rtt })
+
+      /*
+       * Trigger a new heatbeat
+       */
       runHeartbeat()
-    }
-    /*
-     * Help the debug party
-     */
-    const rtt = Date.now() - start
-    log.debug(`Heartbeat to node ${serial} took ${rtt}ms`)
-    /*
-     * Verify the response
-     */
-    verifyHeartbeatResponse({ uuid, serial, data, rtt })
-    /*
-     * Trigger a new heatbeat
-     */
-    runHeartbeat()
-  }, interval*1000))
+    }, interval*1000))
+  }
 }
 
 /**
@@ -267,6 +245,7 @@ const runHeartbeat = async (init=false) => {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => {
+  log.info(data, 'heartbet response')
   /*
    * Is this an error?
    */
@@ -311,7 +290,7 @@ const verifyHeartbeatResponse = ({ uuid, serial, data, rtt=0, error=false }) => 
    * Do we need to take any action?
    */
   if (data.action) {
-    log.warn(`FIXME: implement ${data.action} action in verifyHeartbeatResponse`) //FIXME
+    log.fixme(`Implement ${data.action} action`)
   }
 
   /*
@@ -457,46 +436,39 @@ export const ensureMorioCluster = async ({
 
 const isClusterHealthy = async () => {
 
-  // FIXME: TODO
+  log.fixme('Implement cluster health status check')
 
   // Let's just say yes
   return true
 }
 
-export const inviteClusterNodes = async () => {
-  /*
-   * Don't just await one after the other or cluster nodes will
-   * be asked to join one after the other. Instead allow them
-   * to run in parallel
-   */
-  const promises = []
-  for (const fqdn of utils.getSettings('deployment.nodes').concat(utils.getSettings('deployment.flanking_nodes', []))) {
-    promises.push(inviteClusterNode(fqdn))
-  }
-
-  return Promise.all(promises)
-}
+//export const inviteClusterNodes = async () => {
+//  /*
+//   * Don't just await one after the other or cluster nodes will
+//   * be asked to join one after the other. Instead allow them
+//   * to run in parallel
+//   */
+//  const promises = []
+//  for (const fqdn of utils.getSettings('deployment.nodes').concat(utils.getSettings('deployment.flanking_nodes', []))) {
+//    promises.push(inviteClusterNode(fqdn))
+//  }
+//
+//  return Promise.all(promises)
+//}
 
 /*
  * Helpoer method to invite a single node to join the cluster
  *
  * @param {string} fqdn - The fqdn of the remote node
  */
-const inviteClusterNode = async (remote) => {
-  /*
-   * Don't ask the local node to join
-   */
-  // FIXME
-  //const local = utils.getSettings('deployment.nodes').filter(fqdn => fqdn.slice(0, localSquirm.length) === localSquirm).pop()
-  //if (local === remote) return
-
+export const inviteClusterNode = async (remote) => {
   /*
    * First, attempt a single call to join the cluster.
    * We will await this one because typically this works, and it
    * prevents us from having to run this in the background.
    */
-  //const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
-  const opportunisticJoin = false
+  const opportunisticJoin = await inviteClusterNodeAttempt(local, remote)
+  //const opportunisticJoin = false
 
   /*
    * If that didn't work, keep trying, but don't block the request
@@ -522,8 +494,8 @@ const inviteClusterNode = async (remote) => {
  * @params {string} remote - The FQDN of the remote node
  */
 const inviteClusterNodeAttempt = async (local, remote) => {
-  log.info(`Sending Join Request to ${remote}`)
-  const flanking = utils.getSettings('deployment.flanking_nodes', []).includes(remote)
+  log.debug(`Inviting ${remote} to join the cluster`)
+  const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
   const result = await testUrl(
     `https://${remote}${utils.getPreset('MORIO_API_PREFIX')}/cluster/join`,
@@ -532,7 +504,7 @@ const inviteClusterNodeAttempt = async (local, remote) => {
       data: {
         you: remote,
         join: local,
-        as: flanking ? 'flanking_node' : 'node',
+        as: flanking ? 'flanking_node' : 'broker_node',
         cluster: utils.getClusterUuid(),
         settings: {
           serial: Number(utils.getSettingsSerial()),
@@ -547,10 +519,10 @@ const inviteClusterNodeAttempt = async (local, remote) => {
     }
   )
   if (result) {
-    // FIXME
+    log.fixme('Implement cluster join result')
     return true
   } else {
-    // FIXME
+    log.fixme('Implement cluster join problem')
     return false
   }
 }
