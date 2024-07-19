@@ -57,6 +57,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
         `-node-cert=/etc/rqlite/tls-cert.pem`,
         `-node-key=/etc/rqlite/tls-key.pem`,
+        `-node-verify-client`,
         `-bootstrap-expect`,
         String(utils.getBrokerCount()),
         `-join`,
