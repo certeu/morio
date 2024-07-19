@@ -114,7 +114,7 @@ const runHeartbeat = async (leaderless=false) => {
    * Who are we sending heartbeats to?
    */
   const targets = leaderless
-    ? utils.getNodeFqdns()
+    ? utils.getNodeFqdns().filter(fqdn => fqdn !== utils.getNodeFqdn())
     : [utils.getClusterLeaderFqdn()]
 
   /*
