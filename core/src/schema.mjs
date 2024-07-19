@@ -52,7 +52,6 @@ export const schema = {
     join: hostname,
     cluster: uuid,
     as: Joi.string().required().valid('broker_node', 'flanking_node'),
-    token: Joi.string().max(99).required(),
     settings: Joi.object({
       serial: timestamp,
       data: Joi.object().required(),

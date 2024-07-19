@@ -154,6 +154,11 @@ const runHeartbeat = async (leaderless=false) => {
   const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
 
   /*
+   * Just because we're not excplicitle leaderless doesn't mean we have a leader
+   */
+  //if (utils.getClusterLeaderFqdn() === false) leaderless = true
+
+  /*
    * Are we still trying to figure out who is leading the cluster?
    */
   if (leaderless) log.debug('Leaderless cluster, sending broadcast heartbeat to all cluster nodes to find leader')
