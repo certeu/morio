@@ -327,3 +327,16 @@ export const getCoreIpAddress = async () => {
     return false
   }
 }
+
+export const certificateLifetimeInMs = (lifetime) => {
+  if (typeof lifetime !== 'string') return false
+  const unit = lifetime.slice(-1)
+  const count = lifetime.slice(0, -1)
+
+  if (unit === 'm') return Number(count) * 60000
+  if (unit === 'h') return Number(count) * 3600000
+
+  return false
+}
+
+

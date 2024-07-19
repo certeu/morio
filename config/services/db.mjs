@@ -42,7 +42,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
         `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
       ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
+        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
       ],
       // Command
@@ -54,6 +54,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
         `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+        `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
+        `-node-cert=/etc/rqlite/tls-cert.pem`,
+        `-node-key=/etc/rqlite/tls-key.pem`,
         `-bootstrap-expect`,
         String(utils.getBrokerCount()),
         `-join`,
@@ -69,6 +72,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       prefixes: [
         '/-/db/status',
         '/-/db/nodes',
+        '/-/db/readyz',
       ],
       priority: 666,
     }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
