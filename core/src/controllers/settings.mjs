@@ -85,7 +85,7 @@ Controller.prototype.deploy = async (req, res) => {
    * Here, we just do a basic check
    */
   const mSettings = req.body
-  if (!mSettings.deployment) {
+  if (!mSettings.cluster) {
     log.warn(`Ingoring request to deploy invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
   } else log.debug(`Processing request to deploy new settings`)
@@ -110,7 +110,7 @@ Controller.prototype.deploy = async (req, res) => {
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
-   * Don't await deployment, just return
+   * Don't await reconfigure, just return
    */
   reconfigure({ hotReload: true })
 
@@ -149,7 +149,7 @@ Controller.prototype.setup = async (req, res) => {
    */
   const mSettings = req.body
   delete mSettings.headers
-  if (!mSettings.deployment) {
+  if (!mSettings.cluster) {
     log.warn(`Ingoring request to setup with invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
   } else log.debug(`Processing request to setup Morio with provided settings`)
@@ -180,13 +180,13 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Generate UUIDs for node (local) and deployment (cluster)
+   * Generate UUIDs for node and cluster
    */
   log.debug(`Generating UUIIDs`)
   node.uuid = uuid()
-  keys.deployment = uuid()
+  keys.cluster = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
-  log.debug(`Deployment UUID: ${keys.deployment}`)
+  log.debug(`Cluster UUID: ${keys.cluster}`)
 
   /*
    * Complete the settings with the defaults that are configured
@@ -203,7 +203,7 @@ Controller.prototype.setup = async (req, res) => {
 
   /*
    * We need to generate the CA config & certificates early so that
-   * we can pass them along the join invite in clustered deployments
+   * we can pass them along the join invite to cluster nodes
    */
   await generateCaConfig()
 
@@ -268,7 +268,7 @@ Controller.prototype.setup = async (req, res) => {
     result: 'success',
     uuids: {
       node: node.uuid,
-      deployment: keys.deployment,
+      cluster: keys.cluster,
     },
     root_token: {
       about:
@@ -305,7 +305,7 @@ const localNodeInfo = async (body) => {
    * but only if we're not in production
    */
   let fqdn = false
-  const nodes = body.deployment.nodes.map(node => node.toLowerCase())
+  const nodes = body.cluster.broker_nodes.map(node => node.toLowerCase())
 
   for (const header of ['x-forwarded-host', 'host']) {
     const hval = (body.headers[header] || '').toLowerCase()

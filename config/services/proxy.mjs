@@ -11,7 +11,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const PROD = utils.isProduction()
 
   const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
-  const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('deployment.fqdn', false)
+  const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('cluster.fqdn', false)
 
   /*
    * Traefik (proxy) dynamic configuration for the proxy service
@@ -26,7 +26,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     .set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
     .set("tls.stores.default.defaultgeneratedcert.domain.main", clusterFqdn
       ? clusterFqdn
-      : utils.getSettings(['deployment', 'nodes', 0])
+      : utils.getSettings(['cluster', 'broker_nodes', 0])
     )
     .set("tls.stores.default.defaultgeneratedcert.domain.sans", nodes.join(', '))
     .set('http.middlewares.api-auth.forwardAuth.address', `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`)

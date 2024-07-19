@@ -261,7 +261,7 @@ input {
   kafka {
     codec => json
     topics => ["${pipeline.input.topic}"]
-    bootstrap_servers => "${utils.getSettings('deployment.nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils.getSettings('cluster.broker_nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
     client_id => "morio_connector_input"
     id => "${pipelineId}_${xput.id}"
   }
@@ -308,7 +308,7 @@ output {
   kafka {
     codec => json
     topic_id => "${pipeline.output.topic}"
-    bootstrap_servers => "${utils.getSettings('deployment.nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils.getSettings('cluster.broker_nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
     client_id => "morio_connector_output"
     id => "${pipelineId}_${xput.id}"
   }

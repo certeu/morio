@@ -226,7 +226,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
 Controller.prototype.getConfig = async (req, res) => {
   const [status, result] = await utils.coreClient.get(`/config`)
 
-  if (result.deployment) {
+  if (result.cluster) {
     utils.setConfig(result)
     return res.status(status).send(result)
   } else return res.status(500).send()

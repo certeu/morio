@@ -77,10 +77,10 @@ export const utils = { hooks: { services: {} } }
  *
  */
 utils.getAllFqdns = () => ([
-  ...utils.getSettings('deployment.nodes'),
-  ...utils.getSettings('deployment.flanking_nodes', []),
-  ...utils.getSettings('deployment.fqdn')
-    ? [ utils.getSettings('deployment.fqdn') ]
+  ...utils.getSettings('cluster.broker_nodes'),
+  ...utils.getSettings('cluster.flanking_nodes', []),
+  ...utils.getSettings('cluster.fqdn')
+    ? [ utils.getSettings('cluster.fqdn') ]
     : []
 ])
 
@@ -90,7 +90,7 @@ utils.getAllFqdns = () => ([
  * @return {number} count - The number of broker nodes
  *
  */
-utils.getBrokerCount = () => utils.getSettings('deployment.nodes').length
+utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes').length
 
 /**
  * Helper method to get a list of all FQDNS for broker nodes
@@ -98,7 +98,7 @@ utils.getBrokerCount = () => utils.getSettings('deployment.nodes').length
  * @return {array} list - The list of all broker node FQDNs
  *
  */
-utils.getBrokerFqdns = () => utils.getSettings('deployment.nodes')
+utils.getBrokerFqdns = () => utils.getSettings('cluster.broker_nodes')
 
 /**
  * Helper method to get a list of all FQDNS for central nodes
@@ -109,9 +109,9 @@ utils.getBrokerFqdns = () => utils.getSettings('deployment.nodes')
  *
  */
 utils.getCentralFqdns = () => ([
-  ...utils.getSettings('deployment.nodes'),
-  ...utils.getSettings('deployment.fqdn')
-    ? [ utils.getSettings('deployment.fqdn') ]
+  ...utils.getSettings('cluster.broker_nodes'),
+  ...utils.getSettings('cluster.fqdn')
+    ? [ utils.getSettings('cluster.fqdn') ]
     : []
 ])
 
@@ -287,11 +287,11 @@ utils.getNode = () => store.get('state.node')
 utils.getNodeCoreIp = () => store.get('state.node.core_ip')
 
 /**
- * Helper method to count the number of nodes in the deployment
+ * Helper method to count the number of nodes in the cluster
  *
- * @return {number} count - Number of nodes in the deployment
+ * @return {number} count - Number of nodes in the cluster
  */
-utils.getNodeCount = () => utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length
+utils.getNodeCount = () => utils.getSettings('cluster.broker_nodes', []).concat(utils.getSettings('cluster.flanking_nodes', [])).length
 
 /**
  * Helper method to get the FQDN of the local node
@@ -307,8 +307,8 @@ utils.getNodeFqdn = () => store.get('state.node.fqdn')
  *
  */
 utils.getNodeFqdns = () => ([
-  ...utils.getSettings('deployment.nodes'),
-  ...utils.getSettings('deployment.flanking_nodes', []),
+  ...utils.getSettings('cluster.broker_nodes'),
+  ...utils.getSettings('cluster.flanking_nodes', []),
 ])
 
 /**
@@ -764,7 +764,7 @@ utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
  *
  * @return {bool} distritbuted - True if brokers are distributed, false if not
  */
-utils.isDistributed = () => utils.getSettings('deployment.nodes', []).concat(utils.getSettings('deployment.flanking_nodes', [])).length > 1
+utils.isDistributed = () => utils.getSettings('cluster.broker_nodes', []).concat(utils.getSettings('cluster.flanking_nodes', [])).length > 1
 
 /**
  * Helper method for returning ephemeral state
@@ -807,7 +807,7 @@ utils.isStatusStale = () => {
  */
 utils.isThisAFlankingNode = ({ fqdn=false, serial=0 }) => {
   if (serial) return serial < 100 ? false : true
-  if (fqdn) return utils.getSettings('deployment.flanking_nodes', []).includes(fqdn) ? true : false
+  if (fqdn) return utils.getSettings('cluster.flanking_nodes', []).includes(fqdn) ? true : false
   log.warn(`Called isThisAFlankingNode() but neither fqdn or serial were provided`)
 
   return null

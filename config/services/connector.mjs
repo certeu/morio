@@ -70,7 +70,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
        * Set node name based on the node serial and nodes list
        */
       node: {
-        name: utils.getSettings('deployment.nodes')[(NODE - 1)],
+        name: utils.getSettings('cluster.broker_nodes')[(NODE - 1)],
       },
       /*
        * Set the log level and format
@@ -113,7 +113,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       },
       api: {
         enabled: true,
-        environment: utils.getSettings('deployment.nodes')[(NODE - 1)],
+        environment: utils.getSettings('cluster.broker_nodes')[(NODE - 1)],
         http: {
           host: '0.0.0.0'
         },

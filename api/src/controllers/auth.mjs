@@ -188,7 +188,7 @@ Controller.prototype.login = async (req, res) => {
       ...data,
       provider: req.body.provider,
       node: utils.getNodeUuid(),
-      deployment: utils.getClusterUuid(),
+      cluster: utils.getClusterUuid(),
     },
     key: utils.getKeys().private,
     passphrase: utils.getKeys().mrt,

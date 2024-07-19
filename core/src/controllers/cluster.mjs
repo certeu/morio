@@ -71,7 +71,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   return res.status(200).send({
     action,
     errors,
-    deployment: utils.getClusterUuid(),
+    cluster: utils.getClusterUuid(),
     node: utils.getNodeUuid(),
     node_serial: Number(utils.getNodeSerial()),
     settings_serial: Number(utils.getSettingsSerial()),
@@ -120,7 +120,7 @@ Controller.prototype.join = async (req, res) => {
     fqdn: valid.you,
     hostname: valid.you.split('.')[0],
     //ip: (await resolveHostAsIp(valid.you)),
-    serial: valid.settings.data.deployment.nodes.concat(valid.settings.data.deployment.flanking_nodes || []).indexOf(valid.you) + 1,
+    serial: valid.settings.data.cluster.broker_nodes.concat(valid.settings.data.cluster.flanking_nodes || []).indexOf(valid.you) + 1,
     uuid: nodeUuid
   })
 
@@ -135,7 +135,7 @@ Controller.prototype.join = async (req, res) => {
   /*
    * Don't forget to finalize the request
    */
-  res.status(200).send({ cluster: valid.keys.deployment, node: nodeUuid, serial })
+  res.status(200).send({ cluster: valid.keys.cluster, node: nodeUuid, serial })
 
   /*
    * Now return as reconfigure

@@ -81,7 +81,7 @@ Controller.prototype.create = async (req, res) => {
     data: {
       ...valid,
       invite,
-      inviteUrl: `https://${utils.getSettings('deployment.fqdn')}/morio/invite/${valid.username}-${invite}`,
+      inviteUrl: `https://${utils.getSettings('cluster.fqdn')}/morio/invite/${valid.username}-${invite}`,
     },
   })
 }

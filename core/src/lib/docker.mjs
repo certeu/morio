@@ -103,7 +103,7 @@ export const restartLocalService = async (id) => await runContainerApiCommand(id
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
 export const createDockerNetwork = async (name) => {
-  log.debug(`core: Creating Docker network: ${name}`)
+  log.debug(`Creating Docker network: ${name}`)
   const config = {
     Name: name,
     CheckDuplicate: true,
@@ -117,7 +117,7 @@ export const createDockerNetwork = async (name) => {
       Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }]
     },
     Options: {
-      "com.docker.network.mtu": utils.getPreset('MORIO_NETWORK_MTU')
+      "com.docker.network.mtu": String(utils.getPreset('MORIO_NETWORK_MTU'))
     }
   }
 
@@ -126,8 +126,9 @@ export const createDockerNetwork = async (name) => {
     [success, result] = await runDockerApiCommand('createNetwork', config, true)
   }
   catch (err) {
-    //log.warn({ err })
+    log.warn({ err })
   }
+
   /*
    * It will fail if the network exists, but in that case we need to make sure it's
    * the correct type

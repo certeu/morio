@@ -62,7 +62,7 @@ export const service = {
        * Load configuration base
        */
       const base = { ...utils.getMorioServiceConfig('console').console }
-      const nodes = utils.getSettings('deployment.nodes')
+      const nodes = utils.getSettings('cluster.broker_nodes')
       /*
        * Populate Kafka nodes, schema URLs, and RedPanda URLs
        */

@@ -91,7 +91,7 @@ export const service = {
             l: utils.getPreset('MORIO_X509_L'),
             o: utils.getPreset('MORIO_X509_O'),
             ou: utils.getPreset('MORIO_X509_OU'),
-            san: utils.getSettings('deployment.nodes'),
+            san: utils.getSettings('cluster.broker_nodes'),
           },
           notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
         }),

@@ -60,7 +60,7 @@ export const validateSchema = async (input, schema) => {
 }
 
 /**
- * Validates deployment settings
+ * Validates cluster settings
  *
  * This will not catch all problems, but it should at least catch some common
  * settings issues, in particular for people writing their own settings.
@@ -95,11 +95,11 @@ export const validateSettings = async (newSettings) => {
    * So let's guard against that here
    */
   if (
-    !newSettings?.deployment ||
-    !newSettings.deployment.node_count ||
-    !newSettings.deployment.nodes ||
-    !Array.isArray(newSettings.deployment.nodes) ||
-    newSettings.deployment.nodes.length !== newSettings.deployment.node_count
+    !newSettings?.cluster ||
+    !newSettings.cluster.node_count ||
+    !newSettings.cluster.broker_nodes ||
+    !Array.isArray(newSettings.cluster.broker_nodes) ||
+    newSettings.cluster.broker_nodes.length !== newSettings.cluster.node_count
   ) {
     report.info.push(`Settings are not valid`)
     report.errors.push(`Node count and nodes do not match`)
@@ -133,7 +133,7 @@ export const validateSettings = async (newSettings) => {
    */
   let i = 0
   const ips = []
-  for (const node of settings.deployment.nodes) {
+  for (const node of settings.cluster.broker_nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
     /*

@@ -33,59 +33,6 @@ const updateLocalNodeState = async () => {
 
   log.fixme(`Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
   return
-
-  /*
-  const nodes = {}
-   * Attempt to reach API instances via their public names
-  let i = 0
-  for (const node of utils.getSettings('deployment.nodes').sort()) {
-    i++
-    const data = await testUrl(`https://${node}${utils.getPreset('MORIO_API_PREFIX')}/info`, {
-      returnAs: 'json',
-      ignoreCertificate: true,
-      returnError: true,
-    })
-    let [ok, ip] = await resolveHost(node)
-    if (ok && Array.isArray(ip)) {
-      if (ip.length > 0) ip = ip[0]
-      else if (ip.length > 1)
-        log.warn(
-          `Node ${node} resolves to multiple IP addresses. This should be avoided. (${ip.join()})`
-        )
-      else log.error(`Unable to resolve node ${node}. No addresses found.`)
-    } else log.error(`Unable to resolve node ${node}. Lookup failed.`)
-
-    const add = {
-      fqdn: node,
-      ip,
-      hostname: node.split('.')[0],
-      serial: i,
-    }
-
-    nodes[i] = data?.about ? { ...data, ...add, up: true } : { ...add, up: false }
-  }
-
-  /*
-   * Find out which of these nodes we are
-  for (const [serial, node] of Object.entries(nodes)) {
-    if (node.serial === utils.getNodeSerial())
-      store.set('state.cluster.local_node', serial)
-  }
-
-  /*
-   * Store data
-  store.set('state.cluster.nodes', nodes)
-  //store.set('cluster.leader', leader.serial ? leader : false)
-  store.set('state.cluster.sets', {
-    all: Object.values(nodes).map((node) => node.serial),
-    ephemeral: Object.values(nodes)
-      .filter((node) => (node.ephemeral ? true : false))
-      .map((node) => node.serial),
-    up: Object.values(nodes)
-      .filter((node) => (node.up ? true : false))
-      .map((node) => node.serial),
-  })
-   */
 }
 
 /**
@@ -445,20 +392,6 @@ const isClusterHealthy = async () => {
   // Let's just say yes
   return true
 }
-
-//export const inviteClusterNodes = async () => {
-//  /*
-//   * Don't just await one after the other or cluster nodes will
-//   * be asked to join one after the other. Instead allow them
-//   * to run in parallel
-//   */
-//  const promises = []
-//  for (const fqdn of utils.getSettings('deployment.nodes').concat(utils.getSettings('deployment.flanking_nodes', []))) {
-//    promises.push(inviteClusterNode(fqdn))
-//  }
-//
-//  return Promise.all(promises)
-//}
 
 /*
  * Helpoer method to invite a single node to join the cluster

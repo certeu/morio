@@ -283,7 +283,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   if (
     serviceName === 'api' &&
     !utils.isEphemeral() &&
-    utils.getSettings(['deployment', 'nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
+    utils.getSettings(['cluster', 'broker_nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
   ) {
     log.trace(`Not in production, and running tests, not recreating API`)
     return false

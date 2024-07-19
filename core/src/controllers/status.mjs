@@ -67,7 +67,7 @@ const getStatus = () => ({
   status: utils.getStatus(true),
   state: {
     uptime: Math.floor((Date.now() - utils.getStartTime()) / 1000),
-    deployment: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
+    cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
     node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
     node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
     core: utils.getNode(),

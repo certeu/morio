@@ -162,7 +162,7 @@ const outputConfig = (type, utils) => ({
     /*
      * Kafka brokers
      */
-    hosts: utils.getSettings('deployment.nodes').map(name => `${name}:9092`),
+    hosts: utils.getSettings('cluster.broker_nodes').map(name => `${name}:9092`),
     /*
      * Never give up, keep trying to publish data
      */

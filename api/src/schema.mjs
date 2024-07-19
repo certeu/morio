@@ -11,33 +11,26 @@ const shared = {
 }
 
 /*
- * This describes the schema of the deployment settings
+ * This describes the schema of the cluster settings
  */
-export const deploymentSchema = Joi.object({
-  display_name: Joi.string().required().min(2).max(255),
-  node_count: Joi.number().required().valid(1, 3, 5, 7, 9, 11, 13, 15),
-  nodes: Joi.array().length(Joi.ref('node_count')).items(Joi.string().hostname()).min(1).required(),
+export const clusterSchema = Joi.object({
+  name: Joi.string().required().min(2).max(255),
+  broker_nodes: Joi.array().length(Joi.number().required().valid(1,3,5,7,9)).items(Joi.string().hostname()).min(1).required(),
+  flanking_nodes: Joi.array().items(Joi.string().hostname()),
   fqdn: Joi.string()
     .hostname()
-    .when('node_count', {
-      is: Joi.number().max(1),
-      then: Joi.optional(),
-      otherwise: Joi.required(),
-    }),
-  leader_ip: Joi.string()
-    .ip({ version: ['ipv4'] })
-    .when('node_count', {
-      is: Joi.number().max(1),
+    .when('broker_nodes', {
+      is: Joi.array.length(Joi,number().valid(1)),
       then: Joi.optional(),
       otherwise: Joi.required(),
     }),
 })
 
 /*
- * This describes the schema of the deployment settings
+ * This describes the schema of the cluster settings
  */
 export const settingsSchema = Joi.object({
-  deployment: deploymentSchema,
+  cluster: clusterSchema,
   metadata: Joi.object({
     version: Joi.number(),
     comment: Joi.string(),
@@ -63,8 +56,8 @@ export const settingsSchema = Joi.object({
  */
 export const requestSchema = {
   setup: {
-    deployment: Joi.object({
-      nodes: Joi.array().items(Joi.string()).min(1).max(15).unique().required(),
+    cluster: Joi.object({
+      broker_nodes: Joi.array().items(Joi.string()).min(1).max(15).unique().required(),
     }),
     jwtkey: Joi.object({
       setup_token: shared.setup.setup_token,

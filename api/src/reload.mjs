@@ -56,14 +56,14 @@ export const reloadConfiguration = async () => {
      */
     utils.setNodeUuid(data.state.node)
     utils.setNodeSerial(data.state.node_serial)
-    utils.setClusterUuid(data.state.deployment)
+    utils.setClusterUuid(data.state.cluster)
     utils.setSettingsSerial(data.state.settings_serial)
     utils.setKeys(data.keys)
     utils.setSettings(data.settings)
     /*
      * If there's more than 1 node, switch core client to stay local
      */
-    if (utils.getSettings('deployment.node_count') > 1) {
+    if (utils.getSettings('cluster.broker_nodes', []).length > 1) {
       utils.coreClient = coreClient(`http://core_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CORE_PORT')}`)
     }
   }

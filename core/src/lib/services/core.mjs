@@ -112,12 +112,12 @@ export const service = {
       utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
-       * The cluster UUID is saved in keys.deployment as that saves us from
+       * The cluster UUID is saved in keys.cluster as that saves us from
        * having to write a cluster.json to disk.
        * However, we (also) save the cluster UUID in the same way as the node UUID
        * as things are more intuitive that way
        */
-      utils.setClusterUuid(keys.deployment)
+      utils.setClusterUuid(keys.cluster)
 
       /*
        * Log some info, for debugging
@@ -227,7 +227,7 @@ export const createX509Certificate = async (data) => {
    *   - The `aud` field should be set to the URL of the Step CA API endpoint (https://ca:9000/1.0/sign)
    *   - The `sans` field should match the SAN records in the certificate
    *
-   * And obviously we should sign it with the deployment-wide private key,
+   * And obviously we should sign it with the cluster-wide private key,
    */
   const jwt = generateJwt({
     data: {

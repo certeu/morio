@@ -184,8 +184,8 @@ export const generateCaConfig = async () => {
    * Generate keys and certificates
    */
   const init = await generateCaRoot(
-    utils.getSettings('deployment.nodes'),
-    utils.getSettings('deployment.display_name')
+    utils.getSettings('cluster.broker_nodes'),
+    utils.getSettings('cluster.name')
   )
 
   /*

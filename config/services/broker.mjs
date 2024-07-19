@@ -82,7 +82,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Seed services is crucial for the cluster bootstrap
          */
-        seed_servers: utils.getSettings('deployment.nodes')
+        seed_servers: utils.getSettings('cluster.broker_nodes')
           .map((node, i) => ({ host: { address: `broker_${Number(i) + 1}`, port: 33145 } })),
 
         /*
@@ -200,10 +200,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Organisation name helps identify this as a Morio system
          */
         // This breaks, not expected here?
-        //organization: utils.getSettings('deployment.display_name') || 'Nameless Morio',
+        //organization: utils.getSettings('cluster.name') || 'Nameless Morio',
 
         /*
-         * Cluster ID helps differentiate different Morio deployments
+         * Cluster ID helps differentiate different Morio clusters
          */
         cluster_id: utils.getClusterUuid(),
 
@@ -225,7 +225,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Default replication for topics
          */
-        default_topic_replications: utils.getSettings('deployment.nodes').length < 4 ? 1 : 3,
+        default_topic_replications: utils.getSettings('cluster.broker_nodes').length < 4 ? 1 : 3,
 
         /*
          * These were auto-added, but might not be a good fit for production
