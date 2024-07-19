@@ -29,6 +29,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export (none)
       ports: [
+        `${utils.getPreset('MORIO_DB_HTTP_PORT')}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`
       ],
       // Environment
@@ -46,7 +47,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ],
       // Command
       command: [
-        `rqlite`,
+        `/bin/rqlited`,
         `-node-id`,
         String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
         `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
