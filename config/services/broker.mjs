@@ -64,6 +64,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
+        '--kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092',
+        `--advertise-kafka-addr internal://broker_${NODE}:9092,external://localhost:19092`,
+        `--rpc-addr broker_${NODE}:33145`,
         //'--default-log-level=debug',
         //'--mode dev-container',
         //'-v',
