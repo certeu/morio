@@ -68,17 +68,19 @@ export const resolveServiceConfiguration = ({ utils }) => {
     /*
      * Traefik (proxy) configuration for the API service
      */
-    traefik: generateTraefikConfig(utils, {
-      service: 'db',
-      prefixes: [
-        '/-/db/status',
-        '/-/db/nodes',
-        '/-/db/readyz',
-      ],
-      priority: 666,
-    }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
-      .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$1")
-      .set('http.routers.db.middlewares', ['db-prefix@file']),
+    traefik: {
+      db: generateTraefikConfig(utils, {
+        service: 'db',
+        prefixes: [
+          '/-/db/status',
+          '/-/db/nodes',
+          '/-/db/readyz',
+        ],
+        priority: 666,
+      }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
+        .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$1")
+        .set('http.routers.db.middlewares', ['db-prefix@file']),
+    },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
      * various tables. Will run in the postStart lifecycle hook first time

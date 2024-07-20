@@ -45,10 +45,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         HOSTNAME: '0.0.0.0',
       },
     },
-    traefik: generateTraefikConfig(utils, {
-      service: 'ui',
-      prefixes: [ '/' ],
-      priority: 6,
-    }),
+    traefik: {
+      ui: generateTraefikConfig(utils, {
+        service: 'ui',
+        prefixes: [ '/' ],
+        priority: 6,
+      }),
+    },
   }
 }

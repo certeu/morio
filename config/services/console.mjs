@@ -37,11 +37,15 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     ],
     // Configure Traefik with container labels
   },
-  traefik: generateTraefikConfig(utils, {
-    service: 'console',
-    prefixes: [ `/${utils.getPreset('MORIO_CONSOLE_PREFIX')}` ],
-    priority: 666,
-  }),
+  traefik: {
+    console: generateTraefikConfig(utils, {
+      service: 'console',
+      prefixes: [
+        `/${utils.getPreset('MORIO_CONSOLE_PREFIX')}`
+      ],
+      priority: 666,
+    }),
+  },
   /*
    * Console configuration
    */
@@ -61,7 +65,14 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: [ `http://broker_${utils.getNodeSerial() || 1}:9644` ],
+        urls: [ `https://${utils.getNodeFqdn()}:443` ],
+        tls: {
+          enabled: true,
+          caFilepath: '/etc/morio/console/tls-ca.pem',
+          certFilepath: '/etc/morio/console/tls-cert.pem',
+          keyFilepath: '/etc/morio/console/tls-key.pem',
+          insecureSkipTlsVerify: true, // FIXME when traefik certificate is ok
+        },
       },
     },
     server: {

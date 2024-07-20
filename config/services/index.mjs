@@ -126,4 +126,5 @@ const getServicePort = (service, utils) => {
   if (service === 'ca') return 9000
   if (service === 'db') return utils.getPreset('MORIO_DB_HTTP_PORT')
   if (service === 'console') return 8080
+  if (service === 'rpadmin') return 9644
 }

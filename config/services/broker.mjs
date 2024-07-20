@@ -78,6 +78,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
         //PROD ? '' : '--mode dev-container',
       ],
     },
+    traefik: {
+      rpadmin: generateTraefikConfig(utils, {
+        service: 'rpadmin',
+        prefixes: [ `/v1/` ],
+        priority: 666,
+      }),
+    },
     /*
      * RedPanda configuration file
      */
