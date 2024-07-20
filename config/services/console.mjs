@@ -65,7 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: [ `https://${utils.getNodeFqdn()}:443` ],
+        urls: utils.getBrokerFqdns().map(fqdn => `https://${fqdn}:443`),
         tls: {
           enabled: true,
           caFilepath: '/etc/morio/console/tls-ca.pem',

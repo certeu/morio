@@ -64,6 +64,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
       ],
+      // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
+      aliases: ['rpadmin'],
       // Command
       command: [
         'redpanda',
@@ -188,7 +190,24 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Other TLS configuration
          */
-        //admin_api_tls: [],
+        admin_api_tls: [
+          {
+            name: 'internal',
+            enabled: true,
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            key_file: '/etc/redpanda/tls-key.pem',
+            truststore_file: '/etc/redpanda/tls-ca.pem',
+            require_client_auth: false,
+          },
+          {
+            name: 'external',
+            enabled: true,
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            key_file: '/etc/redpanda/tls-key.pem',
+            truststore_file: '/etc/redpanda/tls-ca.pem',
+            require_client_auth: false,
+          },
+        ],
         //rpc_server_tls: {},
 
         /*
