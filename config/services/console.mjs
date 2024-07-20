@@ -48,7 +48,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
   console: {
     kafka: {
       // brokers & urls will be populated by core
-      brokers: [ `broker_${utils.getNodeSerial() || 1}:9092` ],
+      brokers: utils.getBrokerFqdns().map(fqdn => `${fqdn}:9092`),
       clientId: 'console',
       schemaRegistry: { enabled: false },
     },
