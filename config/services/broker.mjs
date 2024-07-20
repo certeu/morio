@@ -145,8 +145,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
           },
           {
             name: 'external',
-            address: '0.0.0.0', // Is this needed?
-            //address: utils.getNodeFqdn(),
+            //address: '0.0.0.0', // Is this needed?
+            address: utils.getNodeFqdn(),
             port: 19092, // Will be exposed by the container as 9092
           },
         ],
