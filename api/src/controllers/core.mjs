@@ -123,6 +123,7 @@ Controller.prototype.getDockerNetworkData = async (req, res, path = false) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.setup = async (req, res) => {
+  const start = Date.now()
   /*
    * This route is only accessible when running in ephemeral mode
    */
@@ -159,6 +160,8 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Settings are valid and deployable, pass them to core
    */
+  const time = Date.now() - start
+  log.fixme(`Time before passing setup request to core was ${time}ms`)
   const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)

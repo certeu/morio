@@ -3,7 +3,6 @@
 DIR=`pwd`
 
 docker rm -fv core api ui proxy ca broker console connector db
-docker swarm leave --force
 docker network rm morionet
 sudo rm -rf ${DIR}/data/* &> /dev/null
 # Also remove auto-generated files

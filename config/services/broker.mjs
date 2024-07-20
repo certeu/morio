@@ -19,6 +19,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1
+  const RPC = { address: utils.getNodeFqdn(), port: 33145 }
+
 
   return {
     /**
@@ -82,8 +84,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Seed services is crucial for the cluster bootstrap
          */
-        seed_servers: utils.getSettings('cluster.broker_nodes')
-          .map((node, i) => ({ host: { address: `broker_${Number(i) + 1}`, port: 33145 } })),
+        seed_servers: utils.getBrokerFqdns().map(address => ({ host: { address, port: 33145 } })),
 
         /*
          * Do not start a cluster when seed_servers is empty
@@ -120,18 +121,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * The IP address and port for the internal RPC server.
          */
-        rpc_server: {
-          address: `broker_${NODE}`,
-          port: 33145,
-        },
+        rpc_server: RPC,
 
         /*
          * Address of RPC endpoint published to other cluster members.
          */
-        advertised_rpc_api: {
-          address: `broker_${NODE}`,
-          port: 33145,
-        },
+        advertised_rpc_api: RPC,
 
         /*
          * Kafka API addresses
@@ -144,8 +139,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           },
           {
             name: 'external',
-            address: '0.0.0.0',
-            port: 19092,
+            //address: '0.0.0.0', // Is this needed?
+            address: utils.getNodeFqdn(),
+            port: 19092, // Will be exposed by the container as 9092
           },
         ],
 
@@ -184,10 +180,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             name: 'internal',
           },
           {
-            // FIXME - Is this the correct name?
-            address: NAME,
-            // Advertise the mapped port
-            port: 9092,
+            address: utils.getNodeFqdn(),
+            port: 9092, // Advertise the mapped port
             name: 'external',
           },
         ],

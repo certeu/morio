@@ -11,6 +11,17 @@ import { validate as validateMethod } from '../schema.mjs'
 export const log = logger(getPreset('MORIO_API_LOG_LEVEL'), 'api')
 
 /*
+ * Add a fixme log method to make it easy to spot things still to be done
+ */
+log.fixme = (a,b) => {
+  const location = new Error().stack.split("\n")[2]
+
+  return typeof a === 'object'
+    ? log.warn(a, `FIX THIS ⚠️ ${b}${location}`)
+    : log.warn(`FIX THIS ⚠️ ${a}${location}`)
+}
+
+/*
  * This store instance will hold our state, but won't be exported.
  * Only through the utility methods below will we allow changing state.
  * We're also initializing it with some data at start time.
