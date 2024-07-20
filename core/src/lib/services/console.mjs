@@ -43,38 +43,9 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    precreate: async () => {
-      /*
-       * We'll check if there's a config file on disk
-       * If so, the console has already been initialized
-       */
-      const bootstrapped = await readJsonFile('/etc/morio/console/config.yaml')
-
-      /*
-       * If the Console is initialized, return early
-       */
-      if (bootstrapped && bootstrapped.redpanda) {
-        log.debug('Console already initialized')
-        return
-      }
-
-      /*
-       * Load configuration base
-       */
-      const base = { ...utils.getMorioServiceConfig('console').console }
-      const nodes = utils.getSettings('cluster.broker_nodes')
-      /*
-       * Populate Kafka nodes, schema URLs, and RedPanda URLs
-       */
-      base.kafka.brokers = nodes.map((n, i) => `broker_${i + 1}:9092`)
-      base.kafka.schemaRegistry.urls = nodes.map((n, i) => `http://broker_${i + 1}:8081`)
-      base.redpanda.adminApi.urls = nodes.map((n, i) => `http://broker_${i + 1}:9644`)
-      /*
-       * Write configuration file
-       */
-      await writeYamlFile(`/etc/morio/console/config.yaml`, base)
-
-      return true
-    },
+    precreate: () => writeYamlFile(
+      `/etc/morio/console/config.yaml`,
+      utils.getMorioServiceConfig('console').console
+    ),
   },
 }
