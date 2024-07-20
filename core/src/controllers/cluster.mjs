@@ -89,7 +89,7 @@ Controller.prototype.join = async (req, res) => {
   /*
    * Only allow this in ephemeral mode
    */
-  if (!utils.isEphemeral()) return utils.sendErrorReponse(res, 'morio.core.ephemeral.required', '/cluster/join')
+  if (!utils.isEphemeral()) return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
   /*
    * Validate request against schema

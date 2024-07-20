@@ -892,7 +892,7 @@ utils.endReconfigure = () => {
   store.set('state.config_resolved', true)
   store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
   const serial = store.get('state.settings_serial')
-  log.info(`core: Configuration Resolved - Settings: ${serial ? serial : 'Ephemeral'}`)
+  log.info(`Configuration Resolved - ${serial ? 'Running settings serial '+serial : 'Running in ephemeral mode'}`)
   return utils
 }
 
