@@ -87,7 +87,7 @@ export const service = {
          * but core is never restarted
          */
         const coreConfig = resolveServiceConfiguration('core', { utils })
-        ensureTraefikDynamicConfiguration('core', coreConfig.traefik)
+        ensureTraefikDynamicConfiguration(coreConfig)
 
         /*
          * If we are in ephemeral mode, this may very well be the first cold boot.

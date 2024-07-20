@@ -16,13 +16,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Traefik (proxy) dynamic configuration for the proxy service
    */
-  const traefik = new YamlConfig()
-    .set("http.routers.dashboard.rule", "( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )")
-    .set("http.routers.dashboard.priority", 666)
-    .set("http.routers.dashboard.service", "api@internal")
-    .set("http.routers.dashboard.tls", true)
-    .set("http.routers.dashboard.entrypoints", "https")
-  if (!utils.isEphemeral()) traefik
+  const traefik = {
+    proxy: new YamlConfig()
+      .set("http.routers.dashboard.rule", "( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )")
+      .set("http.routers.dashboard.priority", 666)
+      .set("http.routers.dashboard.service", "api@internal")
+      .set("http.routers.dashboard.tls", true)
+      .set("http.routers.dashboard.entrypoints", "https")
+  }
+  if (!utils.isEphemeral()) traefik.proxy
     .set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
     .set("tls.stores.default.defaultgeneratedcert.domain.main", clusterFqdn
       ? clusterFqdn

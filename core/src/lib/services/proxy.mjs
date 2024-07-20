@@ -86,10 +86,12 @@ export const service = {
 /**
  * Ensures the traefik configuration is on disk for Traefik to pick up
  *
- * @param {string} service- the service name
- * @param {object} config - The traefik dynamic configuration for the service
+ * @param {object} config - The service configuration
  */
-export const ensureTraefikDynamicConfiguration = async (service, config) => {
-  log.debug(`${service}: Writing traefik dynamic config to disk`)
-  await writeYamlFile(`/etc/morio/proxy/${service}.yaml`, config)
+export const ensureTraefikDynamicConfiguration = async (config) => {
+  if (typeof config?.traefik !== 'object') return
+  for (const [name, tconf] of Object.entries(config.traefik)) {
+    log.debug(`Writing traefik dynamic config for ${name}`)
+    await writeYamlFile(`/etc/morio/proxy/${name}.yaml`, tconf)
+  }
 }

@@ -458,12 +458,7 @@ export async function defaultRestartServiceHook(service, { running, recreate }) 
   /*
    * If there is a traefik config to be generated, do it here
    */
-  const config = utils.getMorioServiceConfig(service)
-  if (typeof config.traefik === 'object') {
-    for (const [name, tconfig] of Object.entries(config.traefik)) {
-      await ensureTraefikDynamicConfiguration(name, tconfig)
-    }
-  }
+  await ensureTraefikDynamicConfiguration(utils.getMorioServiceConfig(service))
 
   /*
    * If the service was recreated, or is not running, always start it
