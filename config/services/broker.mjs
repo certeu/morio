@@ -19,6 +19,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1
+  const PORTS = {
+    EXT: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
+    INT: utils.getPreset('MORIO_BROKER_KAFKA_API_INTERNAL_PORT'),
+  }
 
   return {
     /**
@@ -44,7 +48,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '18082:18082',
         '19082:19082',
         '19644:19644',
-        '9092:19092',
+        `${PORTS.EXT}:${PORTS.INT}`,
         '33145:33145',
       ],
       // Environment
@@ -64,8 +68,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        '--kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092',
-        `--advertise-kafka-addr internal://broker_${NODE}:9092,external://${utils.getNodeFqdn()}:9092`,
+        `--kafka-addr internal://0.0.0.0:${PORTS.INT},external://0.0.0.0:${PORTS.EXT}`,
+        `--advertise-kafka-addr internal://broker_${NODE}:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
         `--rpc-addr broker_${NODE}:33145`,
         //'--default-log-level=debug',
         //'--mode dev-container',
@@ -141,13 +145,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
           {
             name: 'internal',
             address: '0.0.0.0', //`broker_${NODE}`,
-            port: 9092,
+            port: PORTS.INT,
           },
           {
             name: 'external',
             //address: '0.0.0.0', // Is this needed?
             address: utils.getNodeFqdn(),
-            port: 19092, // Will be exposed by the container as 9092
+            port: PORTS.EXT,
           },
         ],
 
@@ -182,12 +186,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         advertised_kafka_api: [
           {
             address: `broker_${NODE}`,
-            port: 9092,
+            port: PORTS.INT,
             name: 'internal',
           },
           {
-            address: 'localhost', //utils.getNodeFqdn(),
-            port: 9092, // Advertise the mapped port
+            address: utils.getNodeFqdn(),
+            port: PORTS.EXT,
             name: 'external',
           },
         ],

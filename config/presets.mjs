@@ -88,6 +88,12 @@ export const presets = {
   // Broker UID inside container
   MORIO_BROKER_UID: 101,
 
+  // Internal port for the Kafka API
+  MORIO_BROKER_KAFKA_API_INTERNAL_PORT: 19092,
+
+  // External port for the Kafka API
+  MORIO_BROKER_KAFKA_API_EXTERNAL_PORT: 9092,
+
   /*
    * CA presets
    */

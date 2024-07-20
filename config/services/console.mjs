@@ -47,7 +47,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
    */
   console: {
     kafka: {
-      brokers: utils.getBrokerFqdns().map(fqdn => `${fqdn}:9092`),
+      brokers: utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
       clientId: `console_${utils.getNodeSerial()}`,
       schemaRegistry: { enabled: false },
       tls: {
