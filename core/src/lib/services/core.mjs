@@ -202,85 +202,6 @@ const loadSettingsFromDisk = async () => {
   return { settings, keys, node, timestamp }
 }
 
-export const createX509Certificate = async (data) => {
-  /*
-   * Generate the CSR (and private key)
-   */
-  const csr = await generateCsr(data.certificate)
-
-  /*
-   * Extract the key id (kid) from the public key
-   */
-  const kid = (await keypairAsJwk({ public: utils.getKeys().public })).kid
-
-  /*
-   * Generate the JSON web token to talk to the CA
-   *
-   * This JSON web token will be used for authenticating to Step-CA
-   * so it needs to be exactly as step-ca expects it, which means:
-   *
-   * - Header:
-   *   - The key algorithm must match (RS256)
-   *   - The key ID must match
-   * - Data:
-   *   - The `iss` field should be set to the Step CA provisioner name (admin)
-   *   - The `aud` field should be set to the URL of the Step CA API endpoint (https://ca:9000/1.0/sign)
-   *   - The `sans` field should match the SAN records in the certificate
-   *
-   * And obviously we should sign it with the cluster-wide private key,
-   */
-  const jwt = generateJwt({
-    data: {
-      sans: data.certificate.san,
-      sub: data.certificate.cn,
-      iat: Math.floor(Date.now() / 1000) - 1,
-      iss: 'admin',
-      aud: 'https://ca:9000/1.0/sign',
-      nbf: Math.floor(Date.now() / 1000) - 1,
-      exp: Number(Date.now()) + 300000,
-    },
-    options: {
-      keyid: kid,
-      algorithm: 'RS256',
-    },
-    noDefaults: true,
-    key: utils.getKeys().private,
-    passphrase: utils.getKeys().mrt,
-  })
-
-  /*
-   * Now ask the CA to sign the CSR
-   */
-  let result
-  try {
-    result = await axios.post(
-      'https://ca:9000/1.0/sign',
-      {
-        csr: csr.csr,
-        ott: jwt,
-        notAfter: data.notAfter
-          ? data.notAfter
-          : utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-      },
-      {
-        httpsAgent: new https.Agent({
-          ca: utils.getCaConfig().certificate,
-          keepAlive: false,
-          //rejectUnauthorized: false,
-        }),
-      }
-    )
-    log.trace('completed CA request')
-  } catch (err) {
-    log.debug('Failed to get certificate signed by CA')
-  }
-
-  /*
-   * If it went well, return certificate and the private key
-   */
-  return result?.data ? { certificate: result.data, key: csr.key } : false
-}
-
 export const templateSettings = (settings) => {
   const tokens = {}
   // Build the tokens object
@@ -327,16 +248,3 @@ export const getCoreIpAddress = async () => {
     return false
   }
 }
-
-export const certificateLifetimeInMs = (lifetime) => {
-  if (typeof lifetime !== 'string') return false
-  const unit = lifetime.slice(-1)
-  const count = lifetime.slice(0, -1)
-
-  if (unit === 'm') return Number(count) * 60000
-  if (unit === 'h') return Number(count) * 3600000
-
-  return false
-}
-
-

@@ -73,12 +73,16 @@ export const presets = {
     '_redpanda.audit_log', // For RedPanda internal audit logging,
     //'alarms', // For alarms
     'audit', // For audit info/logs (think auditbeat)
-    //'checks', // For healthchecks
-    //'events', // For events (typically generated from other sources)
+    'checks', // For healthchecks
+    'events', // For events (typically generated from other sources)
     'logs', // For logs
     'metrics', // For metrics
-    //'notifications', // For notifications
+    'notifications', // For notifications
     //'traces', // For distributed tracing / spans
+    'cron.hourly', // For roughly hourly triggers
+    'cron.daily', // For roughly daily triggers
+    'cron.weekly', // For roughly daily triggers
+    'cron.monthly', // For roughly daily triggers
   ],
 
   // Broker UID inside container
@@ -142,11 +146,26 @@ export const presets = {
   // API prefix (since the API is behind Traefik)
   MORIO_CORE_PREFIX: '/-/core',
 
+  // Amount of days before expiry to renew service certificates
+  MORIO_CORE_SERVICE_CERTIFICATE_RENEWAL_DAYS: 135,
+
   // Amount of seconds to wait between cluster heartbeats
-  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 25,
+  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 30,
 
   // Amount of milliseconds above which we'll complain about hearbeat latency
   MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT: 150,
+
+  // Amount of hours between triggering cron's hourly schedule (not real cron)
+  MORIO_CORE_CRON_HOURLY: 1,
+
+  // Amount of hours between triggering cron's daily schedule (not real cron)
+  MORIO_CORE_CRON_HOURLY: 24,
+
+  // Amount of hours between triggering cron's weekly schedule (not real cron)
+  MORIO_CORE_CRON_HOURLY: 720,
+
+  // Amount of hours between triggering cron's monthly schedule (not real cron)
+  MORIO_CORE_CRON_MONTHLY: 720,
 
   // Amount of seconds to cache the cluster state
   MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20,

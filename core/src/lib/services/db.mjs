@@ -1,8 +1,7 @@
-import { restClient } from '#shared/network'
+import { mkdir } from '#shared/fs'
+import { restClient, testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
-import { testUrl } from '#shared/network'
-import { readJsonFile, writeJsonFile, writeFile, chown, mkdir } from '#shared/fs'
-import { createX509Certificate, certificateLifetimeInMs } from './core.mjs'
+import { ensureServiceCertificate } from '#lib/tls'
 import {
   defaultServiceWantedHook,
   defaultRecreateServiceHook,
@@ -52,76 +51,9 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    prestart: async () => {
-      /*
-       * We'll check for this file on disk.
-       * If it is missing, we need to generate the certificates.
-       * If it is there, we need to verify the cerificate expiry and renew if needed.
-       */
-      const bootstrapped = await readJsonFile('/etc/morio/db/certs.json')
-
-      /*
-       * If the database is initialized, return early
-       * unless the certificate needs to be renewed
-       */
-      if (bootstrapped) {
-        const days = Math.floor((new Date(bootstrapped.expires).getTime() - Date.now()) / (1000 * 3600 * 24))
-        if (days > 66) return true
-        else log.info(`Database TLS certificate will expire in ${days}. Renewing now.`)
-      }
-
-      /*
-       * Database is not initialized, we need to get a certitificate.
-       * However, 9 times out of 10, this means the CA has just been started
-       * by core. So let's give it time to come up
-       */
-      const certAndKey = await attempt({
-        every: 5,
-        timeout: 60,
-        run: async () => await createX509Certificate({
-          certificate: {
-            cn: 'Morio Database',
-            c: utils.getPreset('MORIO_X509_C'),
-            st: utils.getPreset('MORIO_X509_ST'),
-            l: utils.getPreset('MORIO_X509_L'),
-            o: utils.getPreset('MORIO_X509_O'),
-            ou: utils.getPreset('MORIO_X509_OU'),
-            san: utils.getBrokerFqdns(),
-          },
-          notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-        }),
-        onFailedAttempt: (s) =>
-          log.debug(`Database waited ${s} seconds for CA, will continue waiting.`),
-      })
-
-      if (!certAndKey?.certificate?.crt) {
-        log.error('db: CA did not come up before timeout. Bailing out.')
-        return false
-      }
-
-      /*
-       * Now write the certificates to disk
-       */
-      log.debug('Storing database certificates for inter-node TLS')
-      await writeFile(
-        '/etc/morio/db/tls-cert.pem',
-        certAndKey.certificate.crt + '\n' + utils.getCaConfig().intermediate
-      )
-      await writeFile('/etc/morio/db/tls-key.pem', certAndKey.key)
-      await writeFile('/etc/morio/db/tls-ca.pem', utils.getCaConfig().certificate)
-
-      /*
-       * And finally, write a JSON file to keep track of certificate expiry
-       */
-      await writeJsonFile('/etc/morio/db/certs.json', {
-        created: new Date(),
-        expires: new Date(Date.now() + certificateLifetimeInMs(utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'))),
-      })
-
-      return true
-    },
+    prestart: async () => await ensureServiceCertificate('db'),
     /**
-     * Lifecycle hook for anything to be done right after starting the container
+     * Lifecycle hook for anything to be done after starting the container
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */

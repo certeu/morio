@@ -1,10 +1,13 @@
-import { readJsonFile, writeYamlFile } from '#shared/fs'
+import { ensureServiceCertificate } from '#lib/tls'
+import { attempt } from '#shared/utils'
+import { readJsonFile, writeJsonFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
 // Default hooks
 import {
   defaultServiceWantedHook,
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
+import { createX509Certificate, certificateLifetimeInMs } from '#lib/tls'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -32,6 +35,12 @@ export const service = {
      */
     recreate: (hookParams) =>
       defaultRecreateServiceHook('console', { ...hookParams, traefikTLS: true }),
+    /**
+     * Lifecycle hook for anything to be done prior to starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
+    prestart: async () => await ensureServiceCertificate('console'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container

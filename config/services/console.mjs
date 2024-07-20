@@ -47,15 +47,21 @@ export const resolveServiceConfiguration = ({ utils }) => ({
    */
   console: {
     kafka: {
-      // brokers & urls will be populated by core
       brokers: utils.getBrokerFqdns().map(fqdn => `${fqdn}:9092`),
-      clientId: 'console',
+      clientId: `console_${utils.getNodeSerial()}`,
       schemaRegistry: { enabled: false },
+      tls: {
+        enabled: true,
+        caFilepath: '/etc/morio/console/tls-ca.pem',
+        certFilepath: '/etc/morio/console/tls-cert.pem',
+        keyFilepath: '/etc/morio/console/tls-key.pem',
+        insecureSkipTlsVerify: false,
+      }
     },
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: [ `broker_${utils.getNodeSerial() || 1}:9644` ],
+        urls: [ `http://broker_${utils.getNodeSerial() || 1}:9644` ],
       },
     },
     server: {

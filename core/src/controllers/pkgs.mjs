@@ -3,9 +3,9 @@ import { loadRevision } from '#lib/services/dbuilder'
 import { ensureMorioService, runHook } from '#lib/services/index'
 import { writeFile, writeYamlFile } from '#shared/fs'
 import { resolveClientConfiguration } from '#config/clients/linux'
-import { createX509Certificate } from '#lib/services/core'
+import { createX509Certificate } from '#lib/tls'
 // Utilities
-import { log, utils } from '../lib/utils.mjs'
+import { log, utils } from '#lib/utils'
 
 /**
  * This pkgs controller handles the Morio client packages  endpoints

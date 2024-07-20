@@ -1,6 +1,6 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
 import { attempt, sleep } from '#shared/utils'
-import { createX509Certificate } from './core.mjs'
+import { createX509Certificate } from '#lib/tls'
 import { isCaUp } from './ca.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'

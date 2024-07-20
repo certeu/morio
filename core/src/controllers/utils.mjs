@@ -1,5 +1,5 @@
 import { utils } from '../lib/utils.mjs'
-import { createX509Certificate } from '#lib/services/core'
+import { createX509Certificate } from '#lib/tls'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
 
