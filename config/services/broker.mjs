@@ -33,7 +33,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Image to run
       image: 'docker.redpanda.com/redpandadata/redpanda',
       // Image tag (version) to run
-      tag: 'v23.3.15',
+      tag: 'v24.1.11',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
