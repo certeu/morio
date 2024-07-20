@@ -45,7 +45,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '19082:19082',
         '19644:19644',
         '9092:19092',
-        '19092:19092',
         '33145:33145',
       ],
       // Environment
