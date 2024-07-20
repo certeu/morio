@@ -99,7 +99,9 @@ Controller.prototype.join = async (req, res) => {
     log.info(err, `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
   }
-  else log.info(`Accepted request to join cluster ${valid.cluster} as ${valid.as}`)
+  else log.info(`Accepted request to join cluster ${
+    valid.cluster.slice(0, utils.getPrefix('MORIO_CORE_UUID_FINGERPRINT_LENGTH')
+    } as ${valid.as}`)
 
   /*
    * To join the cluster, we write settings to disk and reconfigure

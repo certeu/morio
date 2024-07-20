@@ -151,6 +151,9 @@ export const presets = {
   // Amount of seconds to cache the cluster state
   MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20,
 
+  // Amount of characters to use for the short version of a UUID (aka fingerprint)
+  MORIO_CORE_UUID_FINGERPRINT_LENGTH: 6,
+
   /*
    * Database presets
    */

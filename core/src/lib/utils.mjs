@@ -340,6 +340,13 @@ utils.getNodeSerial = () => store.get('state.node.serial')
 utils.getNodeUuid = () => store.get('state.node.uuid')
 
 /**
+ * Helper method to get the uuid fingerprint of the local node
+ *
+ * @return {string} uuid - The local node's UUID
+ */
+utils.getNodeFingerprint = () => store.get('state.node.uuid','').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
+
+/**
  * Helper method to get the reconfigure_count
  *
  * @return {number} count - The reconfigure count
@@ -476,6 +483,13 @@ utils.setCaConfig = (config) => {
   store.set('config.ca', config)
   return utils
 }
+
+/**
+ * Helper method to get the uuid fingerprint of the cluster
+ *
+ * @return {string} uuid - The cluster's UUID fingerprint
+ */
+utils.getClusterFingerprint = () => store.get('state.cluster.uuid','').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
 /**
  * Helper method to set the cluster UUID
