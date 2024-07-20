@@ -16,7 +16,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     // Image to run
     image: 'docker.redpanda.com/redpandadata/console',
     // Image tag (version) to run
-    tag: 'v2.5.2',
+    tag: 'v2.6.1',
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
