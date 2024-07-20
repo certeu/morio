@@ -162,7 +162,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
         kafka_api_tls: [
           {
             name: 'internal',
-            enabled: false,
+            enabled: true,
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            key_file: '/etc/redpanda/tls-key.pem',
+            truststore_file: '/etc/redpanda/tls-ca.pem',
+            require_client_auth: false,
           },
           {
             name: 'external',
