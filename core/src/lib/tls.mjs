@@ -180,7 +180,7 @@ export const ensureServiceCertificate = async (service) => {
     timeout: 60,
     run: async () => await createX509Certificate({
       certificate: {
-        cn: `Morio ${service}`,
+        cn: `${service}.${utils.getClusterUuid()}.morio`,
         c: utils.getPreset('MORIO_X509_C'),
         st: utils.getPreset('MORIO_X509_ST'),
         l: utils.getPreset('MORIO_X509_L'),
