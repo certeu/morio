@@ -19,8 +19,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1
-  const RPC = { address: utils.getNodeFqdn(), port: 33145 }
-
 
   return {
     /**
@@ -121,12 +119,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * The IP address and port for the internal RPC server.
          */
-        rpc_server: RPC,
+        rpc_server: {
+          address: `broker_${NODE}`,
+          port: 33145
+        },
 
         /*
          * Address of RPC endpoint published to other cluster members.
          */
-        advertised_rpc_api: RPC,
+        advertised_rpc_api: {
+          address: utils.getNodeFqdn(),
+          port: 33145
+        },
 
         /*
          * Kafka API addresses
