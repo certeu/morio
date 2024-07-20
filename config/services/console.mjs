@@ -48,17 +48,14 @@ export const resolveServiceConfiguration = ({ utils }) => ({
   console: {
     kafka: {
       // brokers & urls will be populated by core
-      brokers: [],
+      brokers: [ `broker_${utils.getNodeSerial() || 1}:9092` ],
       clientId: 'console',
-      schemaRegistry: {
-        enabled: true,
-        urls: [],
-      },
+      schemaRegistry: { enabled: false },
     },
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: [],
+        urls: [ `broker_${utils.getNodeSerial() || 1}:9644` ],
       },
     },
     server: {
