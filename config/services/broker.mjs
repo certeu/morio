@@ -130,7 +130,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Address of RPC endpoint published to other cluster members.
          */
         advertised_rpc_api: {
-          address: '0.0.0.0',
+          address: utils.getNodeFqdn(),
           port: 33145
         },
 
