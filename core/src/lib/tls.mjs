@@ -211,6 +211,11 @@ export const ensureServiceCertificate = async (service) => {
   await writeFile(`/etc/morio/${service}/tls-ca.pem`, utils.getCaConfig().certificate)
 
   /*
+   * Also write broker certificates to the downloads folder
+   */
+  await writeFile(`/morio/data/downloads/certs/${service}.pem`, certAndKey.certificate.crt)
+
+  /*
    * And finally, write a JSON file to keep track of certificate expiry
    */
   await writeJsonFile('/etc/morio/db/certs.json', {

@@ -1,6 +1,6 @@
 import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
 import { attempt, sleep } from '#shared/utils'
-import { createX509Certificate } from '#lib/tls'
+import { ensureServiceCertificate } from '#lib/tls'
 import { isCaUp } from './ca.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
@@ -64,46 +64,7 @@ export const service = {
      * @return {boolean} success - Indicates lifecycle hook success
      */
     prestart: async () => {
-      /*
-       * We'll check if there's a TLS certificate on disk
-       * If so, RedPanda has already been initialized
-       */
-      const bootstrapped = await readYamlFile('/etc/morio/broker/tls-cert.pem')
-
-      /*
-       * If the broker is initialized, return early
-       */
-      if (bootstrapped) return true
-
-      /*
-       * Broker is not initialized, we need to get a certitificate,
-       * but 9 times out of 10, this means the CA has just been started
-       * by core. So let's give it time to come up
-       */
-      const certAndKey = await attempt({
-        every: 5,
-        timeout: 60,
-        run: async () => await createX509Certificate({
-          certificate: {
-            cn: 'Morio Broker',
-            c: utils.getPreset('MORIO_X509_C'),
-            st: utils.getPreset('MORIO_X509_ST'),
-            l: utils.getPreset('MORIO_X509_L'),
-            o: utils.getPreset('MORIO_X509_O'),
-            ou: utils.getPreset('MORIO_X509_OU'),
-            san: utils.getSettings('cluster.broker_nodes'),
-          },
-          notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-        }),
-        onFailedAttempt: (s) =>
-          log.debug(`Broker waited ${s} seconds for CA, will continue waiting.`),
-      })
-
-      if (!certAndKey?.certificate?.crt) {
-        log.error('broker: CA did not come up before timeout. Bailing out.')
-        return false
-      }
-
+      await ensureServiceCertificate('broker')
       /*
        * Now generate the configuration file and write it to disk
        */
@@ -112,23 +73,12 @@ export const service = {
       log.debug('Storing inital broker configuration')
       await writeYamlFile('/etc/morio/broker/redpanda.yaml', utils.getMorioServiceConfig('broker').broker, log)
       await chown('/etc/morio/broker/redpanda.yaml', uid, uid)
-      await writeFile(
-        '/etc/morio/broker/tls-cert.pem',
-        certAndKey.certificate.crt + '\n' + utils.getCaConfig().intermediate
-      )
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
-      await writeFile('/etc/morio/broker/tls-key.pem', certAndKey.key)
       await chown('/etc/morio/broker/tls-key.pem', uid, uid)
-      await writeFile('/etc/morio/broker/tls-ca.pem', utils.getCaConfig().certificate)
       await chown('/etc/morio/broker/tls-ca.pem', uid, uid)
       await chown('/etc/morio/broker', uid, uid)
       await mkdir('/morio/data/broker')
       await chown('/morio/data/broker', uid, uid)
-
-      /*
-       * Also write broker certificates to the downloads folder
-       */
-      await writeFile('/morio/data/downloads/certs/broker.pem', certAndKey.certificate.crt)
 
       return true
     },
