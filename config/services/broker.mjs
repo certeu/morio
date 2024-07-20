@@ -45,7 +45,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '19082:19082',
         '19644:19644',
         '9092:19092',
-        //'33145:33145', // FIXME: Do not expose this port, used for troubleshooting only
+        '33145:33145',
       ],
       // Environment
       environment: {
