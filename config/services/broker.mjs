@@ -91,10 +91,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         empty_seed_starts_cluster: false,
 
         /*
-         * Flag to enable developer mode,
-         * which skips most of the checks performed at startup.
+         * Disable developer mode, which skips most of the checks performed at startup.
          */
-        developer_mode: PROD ? false : true,
+        developer_mode: false,
 
         /*
          * Broker won't start without a data directory
