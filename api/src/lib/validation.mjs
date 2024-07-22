@@ -128,68 +128,26 @@ export const validateSettings = async (newSettings) => {
    */
   let i = 0
   const ips = []
+  const ipPromises = []
   for (const node of newSettings.cluster.broker_nodes) {
     i++
     report.info.push(`Validating node ${i}: ${node}`)
     /*
      * Verify node name resolution
      */
-    const [resolved, ipsOrError] = await resolveHost(node)
-    if (resolved) {
-      report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
-      ips.push(...ipsOrError)
-    } else {
-      report.info.push(`Validation failed for node ${i}`)
-      report.errors.push(ipsOrError)
-
-      return abort()
-    }
-
-    /*
-     * Try contacting nodes over HTTPS, ignore certificate
-     * We bypass this when it's the unit test node
-     */
-    if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
-      const https = await testUrl(
-        `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
-        { ignoreCertificate: true, returnAs: 'check' },
-        log.debug
-      )
-      if (https) report.info.push(`Node ${i} is reachable over HTTPS`)
-      else {
+    ipPromises.push(resolveHost(node).then(([resolved, ipsOrError]) => {
+      if (resolved) {
+        report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
+        ips.push(...ipsOrError)
+      } else {
         report.info.push(`Validation failed for node ${i}`)
-        report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+        report.errors.push(ipsOrError)
 
         return abort()
       }
-
-      /*
-       * Try contacting nodes over HTTPS, also validate certificate
-       */
-      const validCert = await testUrl(`https://${node}/`, { returnAs: 'check' })
-      if (validCert) report.info.push(`Node ${i} uses a valid TLS certificate`)
-      else {
-        report.info.push(`Certificate validation failed for node ${i}`)
-        report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
-      }
-    } else {
-      report.info.push(`This is the unit test host, not validating HTTPS connection.`)
-    }
-
-    /*
-     * Does the node run Morio and is it not setup?
-    const runsMorio = await testUrl(`https://${node}/api/status`, { returnAs: 'json' })
-    if (runsMorio) {
-      // FIXME: Handle api return data
-      report.info.push(`Node ${i} runs Morio and is ready for setup`)
-    } else {
-      report.info.push(`Node ${i} does not run Morio`)
-      report.warnings.push(`Node ${node} uses an untrusted TLS certificate`)
-      report.errors.push(`All nodes need to run Morio, but node ${i} does not`)
-      abort()
-    }
-     */
+    }))
   }
+  await Promise.all(ipPromises)
 
   /*
    * If some of the nodes resolve to the same IP, that is probably going to be a problem
@@ -199,6 +157,44 @@ export const validateSettings = async (newSettings) => {
 
     return abort()
   }
+
+  const httpPromises = []
+  for (const node of newSettings.cluster.broker_nodes) {
+    /*
+     * Try contacting nodes over HTTPS, ignore certificate
+     * We bypass this when it's the unit test node
+     */
+    const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
+    if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
+      httpPromises.push(await testUrl(
+        url,
+        { ignoreCertificate: true, returnAs: 'json' },
+        log.debug
+      ).then(status => {
+        if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
+        else {
+          report.info.push(`Validation failed for node ${i}`)
+          report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+
+          return abort()
+        }
+
+        if (status.state?.ephemeral) {
+          report.info.push(`Node ${i} runs Morio and is ready for setup`)
+        } else {
+          if (status.info?.name === '@morio/api') {
+            report.errors.push(`Node ${i} is not in ephemeral mode, which is required for setup`)
+          } else {
+            report.errors.push(`Node ${i} does not seem to run Morio`)
+          }
+          abort()
+        }
+      }))
+    } else {
+      report.info.push(`This is the unit test host, not validating HTTPS connection.`)
+    }
+  }
+  await Promise.all(httpPromises)
 
   /*
    * Looks good
