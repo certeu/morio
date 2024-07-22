@@ -139,7 +139,7 @@ const ensureTopicsExist = async () => {
  */
 const isBrokerUp = async () => {
   const result = await testUrl(
-    `https://broker:9644/v1/cluster/health_overview`,
+    `http://broker:9644/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
