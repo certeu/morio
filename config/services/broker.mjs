@@ -135,7 +135,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * The IP address and port for the internal RPC server.
          */
         rpc_server: {
-          address: `broker_${NODE}`,
+          address: '0.0.0.0', //`broker_${NODE}`,
           port: 33145
         },
 
@@ -214,11 +214,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Addresses of Kafka API published to clients.
          */
         advertised_kafka_api: [
-          {
-            address: `broker_${NODE}`,
-            port: PORTS.INT,
-            name: 'internal',
-          },
+          //{
+          //  address: `broker_${NODE}`,
+          //  port: PORTS.INT,
+          //  name: 'internal',
+          //},
           {
             address: utils.getNodeFqdn(),
             port: PORTS.EXT,
