@@ -48,7 +48,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '18082:18082',
         '19082:19082',
         '19644:19644',
-        `${PORTS.EXT}:${PORTS.INT}`,
+        `${PORTS.EXT}:${PORTS.EXT}`,
         '33145:33145',
       ],
       // Environment
