@@ -46,10 +46,10 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
+      /*
     poststart: async () => {
 
       // FIXME: Create deny-all ACL entry here for the console api:
-      /*
          // Topics
          POST /console/api/acls", {
           "headers": {
@@ -109,11 +109,10 @@ export const service = {
             "operation":"All",
             "permissionType":"Deny"
           }
-       */
-});
 
       return true
     },
+       */
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
