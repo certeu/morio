@@ -42,6 +42,79 @@ export const service = {
      */
     prestart: async () => await ensureServiceCertificate('console'),
     /**
+     * Lifecycle hook for anything to be done after to starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
+    poststart: async () => {
+
+      // FIXME: Create deny-all ACL entry here for the console api:
+      /*
+         // Topics
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Topic",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // Groups
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Group",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // TransactionalIDs
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"TransactionalID",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // Cluster
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Cluster",
+            "resourceName":"kafka-cluster",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+       */
+});
+
+      return true
+    },
+    /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
