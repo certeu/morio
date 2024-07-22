@@ -97,7 +97,7 @@ async function ensureLocalPrerequisites() {
  * @return {bool} result - True if the database is up, false if not
  */
 const isDbUp = async () => {
-  const result = await testUrl(`http://db:4001/readyz`, {
+  const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
     ignoreCertificate: true,
     // This endpoint does not return JSON
     returnAs: 'text',

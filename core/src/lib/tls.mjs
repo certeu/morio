@@ -1,5 +1,5 @@
 // Abstractions to read/write JSON files
-import { readJsonFile, writeJsonFile, writeFile } from '#shared/fs'
+import { readJsonFile, writeJsonFile, writeFile, readDirectory } from '#shared/fs'
 // Axios is used to talk to the CA
 import https from 'https'
 import axios from 'axios'
@@ -155,20 +155,31 @@ export const createX509Certificate = async (data) => {
  */
 export const ensureServiceCertificate = async (service) => {
   /*
-   * We'll check for this file on disk.
-   * If it is missing, we need to generate the certificates.
-   * If it is there, we need to verify the cerificate expiry and renew if needed.
+   * We'll check for the required files on disk.
+   * If at least one is missing, we need to generate the certificates.
+   * If all are there, we need to verify the cerificate expiry and renew if needed.
    */
-  const bootstrapped = await readJsonFile(`/etc/morio/${service}/certs.json`)
+  const files = await readDirectory(`/etc/morio/${service}`)
+  let missing = 0
+  let jsonMissing = false
+  for (const file of ["tls-ca.pem", "tls-cert.pem", "tls-key.pem", "certs.json"]) {
+    if (!Object.values(files).includes(file)) {
+      missing++
+      if (file === "certs.json") jsonMissing = true
+    }
+  }
+
+  const json = jsonMissing ? false : await readJsonFile(`/etc/morio/${service}/certs.json`)
 
   /*
-   * If the certificates are on disk, return early unless they need to be renewed
+   * If all files are on disk, return early unless the certificates need to be renewed
    */
-  if (bootstrapped) {
-    const days = Math.floor((new Date(bootstrapped.expires).getTime() - Date.now()) / (1000 * 3600 * 24))
+  if (json && missing < 1) {
+    const days = Math.floor((new Date(json.expires).getTime() - Date.now()) / (1000 * 3600 * 24))
     if (days > 66) return true
     else log.info(`Database TLS certificate will expire in ${days}. Renewing now.`)
   }
+
   /*
    * This method is typically called at startup,
    * which means the CA has just been started.
