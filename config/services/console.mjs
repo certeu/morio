@@ -55,7 +55,6 @@ export const resolveServiceConfiguration = ({ utils }) => ({
       clientId: `console_${utils.getNodeSerial()}`,
       schemaRegistry: { enabled: false },
       tls: {
-        //enabled: false,
         enabled: true,
         caFilepath: '/etc/morio/console/tls-ca.pem',
         certFilepath: '/etc/morio/console/tls-cert.pem',
@@ -65,10 +64,9 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     },
     redpanda: {
       adminApi: {
-        enabled: false,
+        enabled: true,
         urls: utils.getBrokerFqdns().map(fqdn => `https://${fqdn}:443`),
         tls: {
-          //enabled: false,
           enabled: true,
           caFilepath: '/etc/morio/console/tls-ca.pem',
           certFilepath: '/etc/morio/console/tls-cert.pem',
