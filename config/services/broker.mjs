@@ -73,7 +73,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `--kafka-addr external://0.0.0.0:${PORTS.EXT}`,
         `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
         `--rpc-addr 0.0.0.0:33145`,
-        //'--default-log-level=error',
+        //'--default-log-level=debug',
       ],
     },
     traefik: {
@@ -81,7 +81,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpadmin',
         prefixes: [ `/v1/` ],
         priority: 666,
-      }).set('http.services.rpadmin.loadBalancer.servers', { url: `https://rpadmin:9644/` }),
+        backendTls = true,
+      }),
     },
     /*
      * RedPanda configuration file

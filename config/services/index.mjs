@@ -86,7 +86,7 @@ export const generateTraefikConfig = (utils, {
     .set(SERVICE, {
       loadBalancer: {
         servers: [
-          { url: `http://${service}:${port}` }
+          { url: `${backendTls ? 'https' : 'http'}://${service}:${port}` }
         ]
       }
     })
