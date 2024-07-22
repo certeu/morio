@@ -70,7 +70,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        `--kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        `--kafka-addr external://0.0.0.0:${PORTS.EXT}`,
         `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
         `--rpc-addr 0.0.0.0:33145`,
         //`--kafka-addr internal://0.0.0.0:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
