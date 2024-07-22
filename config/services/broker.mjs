@@ -166,7 +166,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             //address: utils.getNodeFqdn(),
             port: PORTS.EXT,
             advertise_address: utils.getNodeFqdn(),
-            advertise_port: ${PORTS.EXT},
+            advertise_port: PORTS.EXT,
           },
         ],
 
