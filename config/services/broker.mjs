@@ -183,14 +183,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Other TLS configuration
          */
         admin_api_tls: [
-        //  {
-        //    name: 'internal',
-        //    enabled: true,
-        //    cert_file: '/etc/redpanda/tls-cert.pem',
-        //    key_file: '/etc/redpanda/tls-key.pem',
-        //    truststore_file: '/etc/redpanda/tls-ca.pem',
-        //    require_client_auth: false,
-        //  },
           {
             name: 'external',
             enabled: true,
@@ -200,7 +192,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
             require_client_auth: false,
           },
         ],
-        //rpc_server_tls: {},
+        rpc_server_tls: [{
+            name: 'external',
+            enabled: true,
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            key_file: '/etc/redpanda/tls-key.pem',
+            truststore_file: '/etc/redpanda/tls-ca.pem',
+            require_client_auth: false,
+        }],
 
         /*
          * Addresses of Kafka API published to clients.
