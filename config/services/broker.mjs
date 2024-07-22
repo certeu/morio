@@ -297,43 +297,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
       },
 
       /*
-       * RPK configuration
-       */
-      rpk: {
-        version: 4,
-        globals: {
-          prompt: "",
-          no_default_cluster: false,
-          command_timeout: '10s',
-          dial_timeout: '10s',
-          request_timeout_overhead: '10s',
-          retry_timeout: '0s',
-          fetch_max_wait: '0s',
-          kafka_protocol_request_client_id: ""
-        },
-        current_profile: 'morio',
-        current_cloud_auth_org_id: "",
-        current_cloud_auth_kind: "",
-        profiles: [{
-          name: 'morio',
-          description: 'rpk profile for Morio',
-          prompt: "",
-          from_cloud: false,
-          kafka_api: {
-            brokers: [ `${utils.getNodeFqdn()}:${PORTS.EXT}` ],
-            tls: {
-              key_file: '/etc/redpanda/tls-key.pem',
-              cert_file: '/etc/redpanda/tls-cert.pem',
-              ca_file: '/etc/redpanda/tls-ca.pem',
-            },
-          },
-          admin_api: {},
-          schema_registry: {},
-          cloud_auth: [],
-        }],
-      },
-
-      /*
        * Schema registry section
        */
       //schema_registry: {
@@ -346,6 +309,42 @@ export const resolveServiceConfiguration = ({ utils }) => {
       //  ],
       //  schema_registry_api_tls: [],
       //},
+    },
+    /*
+     * RPK configuration
+     */
+    rpk: {
+      version: 4,
+      globals: {
+        prompt: "",
+        no_default_cluster: false,
+        command_timeout: '10s',
+        dial_timeout: '10s',
+        request_timeout_overhead: '10s',
+        retry_timeout: '0s',
+        fetch_max_wait: '0s',
+        kafka_protocol_request_client_id: ""
+      },
+      current_profile: 'morio',
+      current_cloud_auth_org_id: "",
+      current_cloud_auth_kind: "",
+      profiles: [{
+        name: 'morio',
+        description: 'rpk profile for Morio',
+        prompt: "",
+        from_cloud: false,
+        kafka_api: {
+          brokers: [ `${utils.getNodeFqdn()}:${PORTS.EXT}` ],
+          tls: {
+            key_file: '/etc/redpanda/tls-key.pem',
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            ca_file: '/etc/redpanda/tls-ca.pem',
+          },
+        },
+        admin_api: {},
+        schema_registry: {},
+        cloud_auth: [],
+      }],
     },
   }
 }
