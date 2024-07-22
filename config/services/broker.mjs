@@ -87,7 +87,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpproxy',
         prefixes: [ `/-/rpproxy/` ],
         priority: 666,
-      }),
+      }).set("http.middlewares.rpproxy-prefix.replacepathregex.regex", `^/-/rpproxy/(.*)`)
+        .set("http.middlewares.rpproxy-prefix.replacepathregex.replacement", "/$1")
+        .set('http.routers.rpproxy.middlewares', ['rpproxy-prefix@file']),
     },
     /*
      * RedPanda configuration file
