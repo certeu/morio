@@ -56,7 +56,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: ['80:80', '443:443', `${utils.getPreset('MORIO_CA_PORT')}${utils.getPreset('MORIO_CA_PORT')}`],
+      ports: ['80:80', '443:443', `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`],
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
