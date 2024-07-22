@@ -16,7 +16,7 @@ docker run \
  \
   --network-alias core \
   --init \
-  -p 3007:3007  \
+ \
   -v /home/jdecock/git/morio:/morio  \
   -v /var/run/docker.sock:/var/run/docker.sock  \
   -v /home/jdecock/git/morio/data/config:/etc/morio  \

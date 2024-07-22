@@ -135,7 +135,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * The IP address and port for the internal RPC server.
          */
         rpc_server: {
-          address: '0.0.0.0', //`broker_${NODE}`,
+          address: `broker_${NODE}`,
           port: 33145
         },
 
