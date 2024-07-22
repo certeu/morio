@@ -81,7 +81,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpadmin',
         prefixes: [ `/v1/` ],
         priority: 666,
-        backendTls = true,
+        backendTls: true,
       }),
     },
     /*

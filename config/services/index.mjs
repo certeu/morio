@@ -104,7 +104,6 @@ export const generateTraefikConfig = (utils, {
     //const hostRule = traefikHostRulePrefix(service, nodes)
     if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
     else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
-    if (backendTls) tc.set([...SERVICE, 'loadBalancer', 'server', 'scheme'], 'https')
   }
 
   return tc
