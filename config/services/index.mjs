@@ -122,8 +122,9 @@ const getServicePort = (service, utils) => {
   if (service === 'api') return utils.getPreset('MORIO_API_PORT')
   if (service === 'core') return utils.getPreset('MORIO_CORE_PORT')
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
-  if (service === 'ca') return 9000
+  if (service === 'ca') return utils.getPreset('MORIO_CA_PORT')
   if (service === 'db') return utils.getPreset('MORIO_DB_HTTP_PORT')
-  if (service === 'console') return 8080
-  if (service === 'rpadmin') return 9644
+  if (service === 'console') return utils.getPreset('MORIO_CONSOLE_PORT')
+  if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
+  if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')
 }

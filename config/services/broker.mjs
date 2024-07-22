@@ -83,6 +83,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
         priority: 666,
         backendTls: true,
       }),
+      rpadmin: generateTraefikConfig(utils, {
+        service: 'rpproxy',
+        prefixes: [ `/-/rpproxy/` ],
+        priority: 666,
+      }),
     },
     /*
      * RedPanda configuration file
@@ -262,54 +267,30 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * PandaProxy section
        */
-      //pandaproxy: {
-      //  /*
-      //   * A list of address and port to listen for Kafka REST API requests.
-      //   * Note that we only listen internally, we'll proxy this via Traefik.
-      //   */
-      //  pandaproxy_api: [
-      //    {
-      //      address: `broker_${NODE}`,
-      //      port: 8082,
-      //      name: 'internal',
-      //    },
-      //    {
-      //      address: '0.0.0.0', //utils.getNodeFqdn(),
-      //      port: 8082,
-      //      name: 'external',
-      //    },
-      //  ],
+      pandaproxy: {
+        /*
+         * A list of address and port to listen for Kafka REST API requests.
+         * Note that we only listen internally, we'll proxy this via Traefik.
+         */
+        pandaproxy_api: [
+          {
+            address: `broker_${NODE}`,
+            port: 8082,
+            name: 'internal',
+          },
+        ],
 
-      //  pandaproxy_api_tls: [
-      //    {
-      //      name: 'internal',
-      //      enabled: true,
-      //      cert_file: '/etc/redpanda/tls-cert.pem',
-      //      key_file: '/etc/redpanda/tls-key.pem',
-      //      truststore_file: '/etc/redpanda/tls-ca.pem',
-      //      require_client_auth: false,
-      //    },
-      //    {
-      //      name: 'external',
-      //      enabled: true,
-      //      cert_file: '/etc/redpanda/tls-cert.pem',
-      //      key_file: '/etc/redpanda/tls-key.pem',
-      //      truststore_file: '/etc/redpanda/tls-ca.pem',
-      //      require_client_auth: false,
-      //    },
-      //  ],
-
-      //  /*
-      //   * A list of address and port of the REST API to publish to clients.
-      //   */
-      //  advertised_pandaproxy_api: [
-      //    {
-      //      address: utils.getNodeFqdn(),
-      //      name: 'external',
-      //      port: 443,
-      //    },
-      //  ],
-      //},
+        /*
+         * A list of address and port of the REST API to publish to clients.
+         */
+        //advertised_pandaproxy_api: [
+        //  {
+        //    address: utils.getNodeFqdn(),
+        //    name: 'external',
+        //    port: 443,
+        //  },
+        //],
+      },
 
       /*
        * Schema registry section

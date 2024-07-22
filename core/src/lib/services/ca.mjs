@@ -116,7 +116,7 @@ export const service = {
  * @return {bool} result - True if the CA is up, false if not
  */
 export const isCaUp = async () => {
-  const result = await testUrl(`https://ca:9000/health`, {
+  const result = await testUrl(`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })
@@ -164,7 +164,7 @@ const reloadCaConfiguration = async () => {
    * Save fingerprint, JWK, and root certificate in memory for easy access
    */
   utils.setCaConfig({
-    url: `https://ca_${utils.getNodeSerial()}:9000`,
+    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
@@ -212,7 +212,7 @@ export const generateCaConfig = async () => {
    * Save root certificate and fingerprint in memory
    */
   const caConfig = {
-    url: `https://ca_${utils.getNodeSerial()}:9000`,
+    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: init.root.fingerprint,
     jwk,
     certificate: init.root.certificate,
@@ -232,7 +232,7 @@ export const generateLocalCaConfig = async () => {
    */
   const keys = utils.getKeys()
   utils.setCaConfig({
-    url: `https://ca_${utils.getNodeSerial()}:9000`,
+    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: keys.rfpr,
     jwk: keys.jwk,
     certificate: keys.rcrt,

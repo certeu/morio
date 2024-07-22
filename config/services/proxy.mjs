@@ -56,7 +56,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: ['80:80', '443:443', '9000:9000'],
+      ports: ['80:80', '443:443', `${utils.getPreset('MORIO_CA_PORT')}${utils.getPreset('MORIO_CA_PORT')}`],
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
@@ -115,11 +115,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? []
         : [
           // Create STEP-CA entrypoint (for access to the CA)
-          '--entrypoints.stepca.address=:9000',
+          `--entrypoints.stepca.address=:${utils.getPreset('MORIO_CA_PORT')}`,
           // Enable ACME certificate resolver
           '--certificatesresolvers.ca.acme.storage=acme.json',
           // Set CA server
-          '--certificatesresolvers.ca.acme.caserver=https://ca:9000/acme/acme/directory',
+          `--certificatesresolvers.ca.acme.caserver=https://ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
           //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
           '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
           // Point to root CA (will only work after CA is initialized)

@@ -9,6 +9,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  /*
+   * Port the service will listen on
+   */
+  const PORT = utils.getPreset('MORIO_CA_PORT')
+
   return {
     /*
     * Container configuration
@@ -24,8 +29,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
       networks: { default: null },
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
-      // Ports to export
-      //ports: ['9000:9000'],
       // Volumes
       volumes: PROD ? [
         `${utils.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
@@ -46,14 +49,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.ca.rule', '( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )')
       .set('http.routers.ca.priority', 666)
       .set('http.routers.ca.service', 'ca')
-      .set('http.services.ca.loadBalancer.servers', { url: `https://ca:9000/` })
+      .set('http.services.ca.loadBalancer.servers', { url: `https://ca:${PORT}/` })
       .set('http.routers.ca.tls', true)
       .set('http.routers.stepca.entryPoints', 'stepca')
       .set('http.routers.stepca.rule', 'PathPrefix(`/`)')
       .set('http.routers.stepca.priority', 666)
       .set('http.routers.stepca.service', 'ca')
       .set('http.routers.stepca.tls', true)
-      .set('http.services.stepca.loadBalancer.servers', { url: `https://ca:9000/` }),
+      .set('http.services.stepca.loadBalancer.servers', { url: `https://ca:${PORT}/` }),
     /*
     * Step-CA server configuration
     */
@@ -62,7 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       federatedRoots: null,
       crt: '/home/step/certs/intermediate_ca.crt',
       key: '/home/step/secrets/intermediate_ca_key',
-      address: ':9000',
+      address: `:${PORT}`,
       insecureAddress: '',
       dnsNames: ['ca.internal.morio.it', 'localhost', 'ca'],
       logger: {
@@ -112,7 +115,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * Step-CA client configuration
      */
     client: {
-      'ca-url': 'https://localhost:9000',
+      'ca-url': `https://localhost:${PORT}`,
       'ca-config': '/home/step/config/ca.json',
       fingerprint: null, // Will be set by core
       root: '/home/step/certs/root_ca.crt',

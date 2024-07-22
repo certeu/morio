@@ -94,6 +94,12 @@ export const presets = {
   // External port for the Kafka API
   MORIO_BROKER_KAFKA_API_EXTERNAL_PORT: 9092,
 
+  // External port for the RedPanda Admin API
+  MORIO_BROKER_ADMIN_API_PORT: 9644,
+
+  // External port for the RedPadna proxy (http-rest) API
+  MORIO_BROKER_REST_API_PORT: 8082,
+
   /*
    * CA presets
    */
@@ -103,6 +109,7 @@ export const presets = {
 
   // Common Name of the Morio Intermediate CA
   MORIO_INTERMEDIATE_CA_COMMON_NAME: 'Morio Intermediate Certificate Authority',
+
 
   // Lifetime of the root CA certificate in years
   MORIO_ROOT_CA_VALID_YEARS: 20,
@@ -118,6 +125,9 @@ export const presets = {
 
   // Default certificate lifetime
   MORIO_CA_CERTIFICATE_LIFETIME_DFLT: '750h',
+
+  // (http) Port the CA will listen on
+  MORIO_CA_PORT: 9000,
 
   // CA UID inside container
   MORIO_CA_UID: 1000,
@@ -135,6 +145,9 @@ export const presets = {
 
   // Console log level
   MORIO_CONSOLE_PREFIX: 'console',
+
+  // Console port
+  MORIO_CONSOLE_PORT: 8080,
 
   /*
    * Core presets

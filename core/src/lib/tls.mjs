@@ -94,7 +94,7 @@ export const createX509Certificate = async (data) => {
       sub: config.cn,
       iat: Math.floor(Date.now() / 1000) - 1,
       iss: 'admin',
-      aud: 'https://ca:9000/1.0/sign',
+      aud: `https://ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
       nbf: Math.floor(Date.now() / 1000) - 1,
       exp: Number(Date.now()) + 300000,
     },
@@ -113,7 +113,7 @@ export const createX509Certificate = async (data) => {
   let result
   try {
     result = await axios.post(
-      'https://ca:9000/1.0/sign',
+      `https://ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
       {
         csr: csr.csr,
         ott: jwt,
