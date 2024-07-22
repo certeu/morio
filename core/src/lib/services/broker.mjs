@@ -55,6 +55,12 @@ export const service = {
         await mkdir(dir)
         await chown(dir, uid, uid)
       }
+      /*
+       * Write RPK file as it is mapped into the container,
+       * so it must exist before we create the container
+       */
+      await writeYamlFile('/etc/morio/broker/rpk.yaml', utils.getMorioServiceConfig('broker').rpk, log)
+      await chown('/etc/morio/broker/rpk.yaml', uid, uid)
 
       return true
     },
