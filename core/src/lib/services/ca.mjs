@@ -20,10 +20,23 @@ export const service = {
   name: 'ca',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(
+        `https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`,
+        {
+          method: 'GET',
+          timeout: 500,
+          returnAs: 'json',
+          returnError: true,
+          ignoreCertificate: true,
+        }
+      )
+      const status = result?.status === "ok" ? 0 : 1
+      utils.setLocalServiceStatus('ca', { status })
+
+      return status
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

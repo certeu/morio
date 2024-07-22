@@ -617,6 +617,18 @@ utils.setLocalServiceState = (serviceName, state) => {
 }
 
 /**
+ * Helper method to store a local service status
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} state - The service state from the Docker API
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLocalServiceStatus = (serviceName, status) => {
+  store.set(['status', 'services', 'local', serviceName], status)
+  return utils
+}
+
+/**
  * Helper method to store a Morio service configuration
  *
  * @param {string} serviceName - The name of the service

@@ -21,6 +21,8 @@ export function routes(app) {
    * Hit this route to get the Morio info (no core outreach)
    */
   app.get(`${PREFIX}/info`, Status.info)
+  // FIXME: Until we rewrite on proxy, added these
+  app.get(`/info`, Status.info)
 
   /*
    * Hit this route to get the Morio status logs

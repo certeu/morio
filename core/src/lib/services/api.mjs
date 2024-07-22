@@ -1,4 +1,5 @@
-import { utils } from '../utils.mjs'
+import { utils, log } from '../utils.mjs'
+import { testUrl } from '#shared/network'
 
 // Default hooks
 import {
@@ -14,10 +15,23 @@ export const service = {
   name: 'api',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(
+        `http://api:${utils.getPreset('MORIO_API_PORT')}/info`,
+        {
+          method: 'GET',
+          timeout: 500,
+          returnAs: 'json',
+          returnError: true,
+          ignoreCertificate: true,
+        }
+      )
+      const status = result?.core?.verion ? 0 : 1
+      utils.setLocalServiceStatus('api', { status })
+
+      return status
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

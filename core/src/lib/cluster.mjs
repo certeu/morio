@@ -4,9 +4,10 @@ import https from 'https'
 // Shared imports
 import { restClient, testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
 import { attempt, sleep } from '#shared/utils'
+import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
 import { runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
-import { ensureMorioNetwork } from './services/index.mjs'
+import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { getCoreIpAddress } from './services/core.mjs'
 import { log, utils } from './utils.mjs'
 
@@ -31,7 +32,28 @@ export const forceUpdateClusterState = async (silent) => {
  */
 const updateLocalNodeState = async () => {
 
+  const promises = []
+  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
+    promises.push(runHook('heartbeat', service))
+  }
   log.fixme(`Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+  /*
+   * Reach out to broker to see if we're leading
+   */
+  //const result = await testUrl(
+  //  `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+  //  {
+  //    method: 'GET',
+  //    timeout: 500,
+  //    returnAs: 'json',
+  //    returnError: true,
+  //    ignoreCertificate: true,
+  //  }
+  //)
+  //log.fixme(result)
+
+
+
   return
 }
 
