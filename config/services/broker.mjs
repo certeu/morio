@@ -81,7 +81,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpadmin',
         prefixes: [ `/v1/` ],
         priority: 666,
-      }),
+      }).set('http.services.rpadmin.loadBalancer.servers', { url: `https://rdadmin:9644/` }),
     },
     /*
      * RedPanda configuration file
