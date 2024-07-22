@@ -83,7 +83,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         priority: 666,
         backendTls: true,
       }),
-      rpadmin: generateTraefikConfig(utils, {
+      rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
         prefixes: [ `/-/rpproxy/` ],
         priority: 666,
