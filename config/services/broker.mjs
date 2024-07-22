@@ -81,7 +81,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpadmin',
         prefixes: [ `/v1/` ],
         priority: 666,
-        backendTls: true,
+        //backendTls: true,
       }),
       rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
@@ -193,11 +193,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
         admin_api_tls: [
           {
             name: 'external',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
+            enabled: false,
+            //cert_file: '/etc/redpanda/tls-cert.pem',
+            //key_file: '/etc/redpanda/tls-key.pem',
+            //truststore_file: '/etc/redpanda/tls-ca.pem',
+            //require_client_auth: false,
           },
         ],
         rpc_server_tls: {
