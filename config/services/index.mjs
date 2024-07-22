@@ -31,12 +31,12 @@ export const resolveServiceConfiguration = (name, helpers) =>
  */
 export const serviceOrder = [
   'ca',
+  'broker',
   'db',
-  'proxy',
+  'console',
   'api',
   'ui',
-  'broker',
-  'console',
+  'proxy',
   'connector',
   'dbuilder',
 ]
