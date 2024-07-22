@@ -142,10 +142,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Address of RPC endpoint published to other cluster members.
          */
-        advertised_rpc_api: {
-          address: utils.getNodeFqdn(),
-          port: 33145
-        },
+        //advertised_rpc_api: {
+        //  address: utils.getNodeFqdn(),
+        //  port: 33145
+        //},
 
         /*
          * Kafka API addresses
@@ -327,16 +327,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Schema registry section
        */
-      schema_registry: {
-        schema_registry_api: [
-          {
-            address: `broker_${NODE}`,
-            port: 8081,
-            name: 'internal',
-          },
-        ],
-        schema_registry_api_tls: [],
-      },
+      //schema_registry: {
+      //  schema_registry_api: [
+      //    {
+      //      address: `broker_${NODE}`,
+      //      port: 8081,
+      //      name: 'internal',
+      //    },
+      //  ],
+      //  schema_registry_api_tls: [],
+      //},
     },
   }
 }
