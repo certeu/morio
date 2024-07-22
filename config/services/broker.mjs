@@ -70,9 +70,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        `--kafka-addr internal://0.0.0.0:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
-        `--advertise-kafka-addr internal://broker_${NODE}:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
-        `--rpc-addr broker_${NODE}:33145`,
+        `--kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        `--rpc-addr 0.0.0.0:33145`,
+        //`--kafka-addr internal://0.0.0.0:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        //`--advertise-kafka-addr internal://broker_${NODE}:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        //`--rpc-addr broker_${NODE}:33145`,
         //'--default-log-level=debug',
         //'--mode dev-container',
         //'-v',
@@ -135,32 +138,35 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * The IP address and port for the internal RPC server.
          */
         rpc_server: {
-          address: `broker_${NODE}`,
-          port: 33145
+          address: '0.0.0.0', // `broker_${NODE}`,
+          port: 33145,
+          name: 'external',
         },
 
         /*
          * Address of RPC endpoint published to other cluster members.
          */
-        //advertised_rpc_api: {
-        //  address: utils.getNodeFqdn(),
-        //  port: 33145
-        //},
+        advertised_rpc_api: {
+          address: utils.getNodeFqdn(),
+          port: 33145
+        },
 
         /*
          * Kafka API addresses
          */
         kafka_api: [
-          {
-            name: 'internal',
-            address: '0.0.0.0', //`broker_${NODE}`,
-            port: PORTS.INT,
-          },
+          //{
+          //  name: 'internal',
+          //  address: '0.0.0.0', //`broker_${NODE}`,
+          //  port: PORTS.INT,
+          //},
           {
             name: 'external',
-            //address: '0.0.0.0', // Is this needed?
-            address: utils.getNodeFqdn(),
+            address: '0.0.0.0', // Is this needed?
+            //address: utils.getNodeFqdn(),
             port: PORTS.EXT,
+            advertise_address: utils.getNodeFqdn(),
+            advertise_port: ${PORTS.EXT},
           },
         ],
 
@@ -168,46 +174,46 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Kafka API TLS
          *
           */
-        kafka_api_tls: [
-          {
-            name: 'internal',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
-          },
-          {
-            name: 'external',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
-          },
-        ],
+        //kafka_api_tls: [
+        //  {
+        //    name: 'internal',
+        //    enabled: true,
+        //    cert_file: '/etc/redpanda/tls-cert.pem',
+        //    key_file: '/etc/redpanda/tls-key.pem',
+        //    truststore_file: '/etc/redpanda/tls-ca.pem',
+        //    require_client_auth: false,
+        //  },
+        //  {
+        //    name: 'external',
+        //    enabled: true,
+        //    cert_file: '/etc/redpanda/tls-cert.pem',
+        //    key_file: '/etc/redpanda/tls-key.pem',
+        //    truststore_file: '/etc/redpanda/tls-ca.pem',
+        //    require_client_auth: false,
+        //  },
+        //],
 
         /*
          * Other TLS configuration
          */
-        admin_api_tls: [
-          {
-            name: 'internal',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
-          },
-          {
-            name: 'external',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
-          },
-        ],
+        //admin_api_tls: [
+        //  {
+        //    name: 'internal',
+        //    enabled: true,
+        //    cert_file: '/etc/redpanda/tls-cert.pem',
+        //    key_file: '/etc/redpanda/tls-key.pem',
+        //    truststore_file: '/etc/redpanda/tls-ca.pem',
+        //    require_client_auth: false,
+        //  },
+        //  {
+        //    name: 'external',
+        //    enabled: true,
+        //    cert_file: '/etc/redpanda/tls-cert.pem',
+        //    key_file: '/etc/redpanda/tls-key.pem',
+        //    truststore_file: '/etc/redpanda/tls-ca.pem',
+        //    require_client_auth: false,
+        //  },
+        //],
         //rpc_server_tls: {},
 
         /*
