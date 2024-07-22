@@ -126,6 +126,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
           {
             address: '0.0.0.0',
             port: 9644,
+            name: 'external',
+            advertise_address: utils.getNodeFqdn(),
           },
         ],
 
@@ -167,6 +169,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
          *
           */
         kafka_api_tls: [
+          {
+            name: 'external',
+            enabled: true,
+            cert_file: '/etc/redpanda/tls-cert.pem',
+            key_file: '/etc/redpanda/tls-key.pem',
+            truststore_file: '/etc/redpanda/tls-ca.pem',
+            require_client_auth: false,
+          },
+        ],
+
+        /*
+         * Other TLS configuration
+         */
+        admin_api_tls: [
         //  {
         //    name: 'internal',
         //    enabled: true,
@@ -184,28 +200,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
             require_client_auth: false,
           },
         ],
-
-        /*
-         * Other TLS configuration
-         */
-        //admin_api_tls: [
-        //  {
-        //    name: 'internal',
-        //    enabled: true,
-        //    cert_file: '/etc/redpanda/tls-cert.pem',
-        //    key_file: '/etc/redpanda/tls-key.pem',
-        //    truststore_file: '/etc/redpanda/tls-ca.pem',
-        //    require_client_auth: false,
-        //  },
-        //  {
-        //    name: 'external',
-        //    enabled: true,
-        //    cert_file: '/etc/redpanda/tls-cert.pem',
-        //    key_file: '/etc/redpanda/tls-key.pem',
-        //    truststore_file: '/etc/redpanda/tls-ca.pem',
-        //    require_client_auth: false,
-        //  },
-        //],
         //rpc_server_tls: {},
 
         /*
