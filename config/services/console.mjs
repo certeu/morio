@@ -55,23 +55,29 @@ export const resolveServiceConfiguration = ({ utils }) => ({
       clientId: `console_${utils.getNodeSerial()}`,
       schemaRegistry: { enabled: false },
       tls: {
-        enabled: true,
-        caFilepath: '/etc/morio/console/tls-ca.pem',
-        certFilepath: '/etc/morio/console/tls-cert.pem',
-        keyFilepath: '/etc/morio/console/tls-key.pem',
-        insecureSkipTlsVerify: false,
+        enabled: false,
+        //enabled: true,
+        //caFilepath: '/etc/morio/console/tls-ca.pem',
+        //certFilepath: '/etc/morio/console/tls-cert.pem',
+        //keyFilepath: '/etc/morio/console/tls-key.pem',
+        //insecureSkipTlsVerify: false,
       }
     },
     redpanda: {
       adminApi: {
-        enabled: true,
+        enabled: false,
         urls: utils.getBrokerFqdns().map(fqdn => `https://${fqdn}:443`),
         tls: {
-          enabled: true,
-          caFilepath: '/etc/morio/console/tls-ca.pem',
-          certFilepath: '/etc/morio/console/tls-cert.pem',
-          keyFilepath: '/etc/morio/console/tls-key.pem',
-          insecureSkipTlsVerify: true, // FIXME when traefik certificate is ok
+          enabled: false,
+          //caFilepath: '/etc/morio/console/tls-ca.pem',
+          //certFilepath: '/etc/morio/console/tls-cert.pem',
+          //keyFilepath: '/etc/morio/console/tls-key.pem',
+          //insecureSkipTlsVerify: true, // FIXME when traefik certificate is ok
+          //enabled: true,
+          //caFilepath: '/etc/morio/console/tls-ca.pem',
+          //certFilepath: '/etc/morio/console/tls-cert.pem',
+          //keyFilepath: '/etc/morio/console/tls-key.pem',
+          //insecureSkipTlsVerify: true, // FIXME when traefik certificate is ok
         },
       },
     },
