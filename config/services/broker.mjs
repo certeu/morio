@@ -73,14 +73,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `--kafka-addr external://0.0.0.0:${PORTS.EXT}`,
         `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
         `--rpc-addr 0.0.0.0:33145`,
-        //`--kafka-addr internal://0.0.0.0:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
-        //`--advertise-kafka-addr internal://broker_${NODE}:${PORTS.INT},external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
-        //`--rpc-addr broker_${NODE}:33145`,
-        //'--default-log-level=debug',
-        //'--mode dev-container',
-        //'-v',
-        // Mode dev-container uses well-known configuration properties for development in containers.
-        //PROD ? '' : '--mode dev-container',
+        //'--default-log-level=error',
       ],
     },
     traefik: {
@@ -126,6 +119,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
         /*
          * The IP address and port for the admin server.
+         * This needs to be an IP that RedPanda can bind to, which is why we use 0.0.0.0
+         * as we do not know at this time what the IP of the container will be.
          */
         admin: [
           {
@@ -136,15 +131,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
         /*
          * The IP address and port for the internal RPC server.
+         * This needs to be an IP that RedPanda can bind to, which is why we use 0.0.0.0
+         * as we do not know at this time what the IP of the container will be.
          */
         rpc_server: {
-          address: '0.0.0.0', // `broker_${NODE}`,
+          address: '0.0.0.0',
           port: 33145,
           name: 'external',
         },
 
         /*
          * Address of RPC endpoint published to other cluster members.
+         * This needs to be an IP that clients can reach, so we use the node's FQDN.
          */
         advertised_rpc_api: {
           address: utils.getNodeFqdn(),
@@ -155,15 +153,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Kafka API addresses
          */
         kafka_api: [
-          //{
-          //  name: 'internal',
-          //  address: '0.0.0.0', //`broker_${NODE}`,
-          //  port: PORTS.INT,
-          //},
           {
             name: 'external',
-            address: '0.0.0.0', // Is this needed?
-            //address: utils.getNodeFqdn(),
+            address: '0.0.0.0',
             port: PORTS.EXT,
             advertise_address: utils.getNodeFqdn(),
             advertise_port: PORTS.EXT,
@@ -220,11 +212,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Addresses of Kafka API published to clients.
          */
         advertised_kafka_api: [
-          //{
-          //  address: `broker_${NODE}`,
-          //  port: PORTS.INT,
-          //  name: 'internal',
-          //},
           {
             address: utils.getNodeFqdn(),
             port: PORTS.EXT,
