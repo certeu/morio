@@ -107,7 +107,7 @@ export const service = {
        */
       utils.setEphemeral(false)
       utils.setNode(node)
-      utils.setClusterNode(node.serial, node)
+      utils.setClusterNode(node.uuid, node)
       utils.setKeys(keys)
       utils.setSettingsSerial(Number(timestamp))
       utils.setSanitizedSettings(cloneAsPojo(settings))
@@ -229,23 +229,4 @@ export const templateSettings = (settings) => {
   }
 
   return newSettings
-}
-
-export const getCoreIpAddress = async () => {
-  const [success, result] = await runContainerApiCommand('core', 'inspect')
-  if (!success) return false
-
-  utils.setLocalServiceState('core', result)
-  const networks = Object.keys(result.NetworkSettings.Networks || {})
-  const network = utils.getNetworkName()
-  if (!networks.includes(network)) return false
-
-  if (result.NetworkSettings.Networks[network].IP)
-    return result.NetworkSettings.Networks[network].IP
-  else if  (result.NetworkSettings.Networks[network].IPAddress)
-    return result.NetworkSettings.Networks[network].IPAddress
-  else {
-    log.warn(`Unable to determine Core IP address`)
-    return false
-  }
 }

@@ -146,7 +146,12 @@ utils.getCaConfig = () => store.get('config.ca')
 /**
  * Helper method to get the data for a cluster rnode
  */
-utils.getClusterNode = (serial) => store.get(['state', 'cluster', 'nodes', `node_${serial}`], false)
+utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], false)
+
+/**
+ * Helper method to get the data for a cluster rnode based on its serial
+ */
+utils.getClusterNodeFromSerial = (serial) => Object.values(store.get(['state', 'cluster', 'nodes'], {})).filter(node => node.serial === serial).pop()
 
 /**
  * Helper method to get the data of the cluster nodes
@@ -291,13 +296,6 @@ utils.getMorioServiceConfig = (serviceName) => store.get(['config', 'services', 
  * @return {object} node - The local node
  */
 utils.getNode = () => store.get('state.node')
-
-/**
- * Helper method to get the IP of the local core container
- *
- * @return {string} ip - The IP address of core
- */
-utils.getNodeCoreIp = () => store.get('state.node.core_ip')
 
 /**
  * Helper method to count the number of nodes in the cluster
@@ -528,8 +526,8 @@ utils.setClusterUuid = (uuid) => {
  * @param {object} data - The cluster node data
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setClusterNode = (serial, data) => {
-  store.set(['state', 'cluster', 'nodes', `node_${serial}`], data)
+utils.setClusterNode = (uuid, data) => {
+  store.set(['state', 'cluster', 'nodes', uuid], data)
   return utils
 }
 
@@ -729,17 +727,6 @@ utils.setClusterStatus = (code, color) => {
  */
 utils.setNode = (node) => {
   store.set('state.node', node)
-  return utils
-}
-
-/**
- * Helper method to store the core IP in the state
- *
- * @param {string} ip - The IP address of the core container
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setNodeCoreIp = (ip) => {
-  store.set('state.node.core_ip', ip)
   return utils
 }
 

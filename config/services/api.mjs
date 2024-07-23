@@ -61,9 +61,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `KAFKAJS_NO_PARTITIONER_WARNING=1`,
       ],
       // Add extra hosts
-      hosts: utils.isEphemeral()
-        ? []
-        : [ `local_core:${utils.getNodeCoreIp()}` ],
+      hosts: [],
     },
     /*
      * Traefik (proxy) configuration for the API service

@@ -8,7 +8,6 @@ import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
 import { runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
-import { getCoreIpAddress } from './services/core.mjs'
 import { log, utils } from './utils.mjs'
 
 /*
@@ -389,13 +388,6 @@ export const ensureMorioCluster = async ({
   }
 
   /*
-   * Save the core IP address too
-   */
-  const ip = await getCoreIpAddress()
-  log.debug(`Local core IP address: ${ip}`)
-  utils.setNodeIp(ip)
-
-  /*
    * If there is only 1 node, we can just start.
    * But if there are multiple nodes we need to reach consensus first.
    */
@@ -405,11 +397,6 @@ export const ensureMorioCluster = async ({
    * Is the cluster healthy?
    */
   utils.setCoreReady((await isClusterHealthy()))
-
-  /*
-   * Store the core IP address too
-   */
-  utils.setNodeCoreIp((await getCoreIpAddress()))
 }
 
 const isClusterHealthy = async () => {
