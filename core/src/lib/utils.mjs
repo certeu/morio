@@ -151,7 +151,7 @@ utils.getClusterNode = (serial) => store.get(['state', 'cluster', 'nodes', seria
 /**
  * Helper method to get the data of the cluster nodes
  */
-utils.getClusterNodes = (serial) => store.get(['state', 'cluster', 'nodes'], false)
+utils.getClusterNodes = (serial) => store.get(['state', 'cluster', 'nodes'], {})
 
 /**
  * Helper method to get the cluster state age (time it was last updated)

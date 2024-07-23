@@ -107,6 +107,7 @@ export const service = {
        */
       utils.setEphemeral(false)
       utils.setNode(node)
+      utils.setClusterNode(node.serial, node)
       utils.setKeys(keys)
       utils.setSettingsSerial(Number(timestamp))
       utils.setSanitizedSettings(cloneAsPojo(settings))
