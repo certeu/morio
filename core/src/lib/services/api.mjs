@@ -29,7 +29,7 @@ export const service = {
         }
       )
       const status = result?.core?.version ? 0 : 1
-      log.fixme({stattus, from: 'api'}, 'What givces?')
+      log.fixme({status, from: 'api'}, 'What givces?')
       utils.setLocalServiceStatus('api', { status })
 
       return status
