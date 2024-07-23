@@ -294,7 +294,7 @@ Controller.prototype.setup = async (req, res) => {
  * This is most relevant when we have a cluster.
  *
  * @param {object} body - The request body
- * @return {object} data - Data about the local node
+ * @return {object} data - Data about this node
  */
 const localNodeInfo = async (body) => {
   /*

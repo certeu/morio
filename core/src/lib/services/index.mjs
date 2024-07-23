@@ -21,7 +21,7 @@ import {
   runContainerApiCommand,
   generateContainerConfig,
   updateRunningServicesState,
-  stopLocalService,
+  stopService,
   serviceContainerImageFromConfig,
   serviceContainerImageFromState,
 } from '#lib/docker'
@@ -72,12 +72,12 @@ const createMorioService = async (serviceName) => {
   const [ok, list] = await runDockerApiCommand('listImages')
   if (!ok) log.warn(`${serviceName}: Unable to load list of docker images`)
   if (list.filter((img) => img.RepoTags.includes(config.Image)).length < 1) {
-    log.info(`${serviceName}: Image ${config.Image} is not available locally. Attempting pull.`)
+    log.info(`${serviceName}: Image ${config.Image} is not available on disk. Attempting pull.`)
 
     return new Promise((resolve) => {
       docker.pull(config.Image, (err, stream) => {
         async function onFinished() {
-          log.debug(`${serviceName}: Local image pulled: ${config.Image}`)
+          log.debug(`${serviceName}: Image pulled: ${config.Image}`)
           const id = await createDockerContainer(serviceName, config)
           resolve(id)
         }
@@ -162,8 +162,8 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   const wanted = await runHook('wanted', serviceName, hookParams)
   if (!wanted) {
     log.debug(`${serviceName}: Service is not wanted`)
-    const [up] = await isLocalServiceUp(serviceName)
-    if (up) {
+    const running = isContainerRunning(serviceName)
+    if (running) {
       log.debug(`${serviceName}: Stopping service`)
       await runHook('prestop', serviceName)
       /*
@@ -173,7 +173,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
        * Then again, we do need to make sure the poststop lifecycle hook only runs
        * after the service stop is complete. So we're .then()-ing this.
        */
-      stopLocalService(serviceName).then(() => runHook('poststop', serviceName))
+      stopService(serviceName).then(() => runHook('poststop', serviceName))
     }
 
     // Not wanted, return early
@@ -219,7 +219,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.debug(`${serviceName}: Starting local service`)
+    log.debug(`${serviceName}: Restarting service`)
     /*
      * Run preStart lifecycle hook
      */
@@ -235,7 +235,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
      */
     await runHook('poststart', serviceName, { ...hookParams, recreate })
   } else {
-    log.debug(`${serviceName}: Not restarting local service`)
+    log.debug(`${serviceName}: Not restarting service`)
   }
 
   /*
@@ -258,19 +258,19 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   if (serviceName === 'core') return false
 
   /*
-   * Always recreate if the service is not up
+   * Always recreate if the service is not ok
    */
-  const [up] = await isLocalServiceUp(serviceName)
-  log.todo({up, serviceName})
-  // FIXME
-  return false
-  if (!up) return true
+  const running = isContainerRunning(serviceName)
+  if (!running) {
+    log.debug(`${serviceName}: Recreating service`)
+    return true
+  }
 
   /*
    * Always recreate if the container image is different
    */
   const imgs = {
-    current: serviceContainerImageFromState(utils.getLocalServiceState(serviceName)),
+    current: serviceContainerImageFromState(utils.getServiceState(serviceName)),
     next: serviceContainerImageFromConfig(utils.getMorioServiceConfig(serviceName)),
   }
   if (imgs.next !== imgs.current) {
@@ -321,10 +321,8 @@ const shouldServiceBeRestarted = async (serviceName, hookParams) => {
   /*
    * Defer to the restart lifecycle hook
    */
-  // FIXME
   const restart = await runHook('restart', serviceName, hookParams)
-  log.todo({restart, serviceName})
-  return false
+  //log.todo({restart, serviceName, status: utils.getStatus() })
   return await runHook('restart', serviceName, hookParams)
 }
 
@@ -340,7 +338,7 @@ export const runHook = async (hookName, serviceName, hookParams) => {
     log.warn(err, `Error in the ${hookName} lifecycle hook on service ${serviceName}`)
   }
 
-  if (!result && !['wanted', 'recreate', 'restart', 'status'].includes(hookName)) {
+  if (!result && !['wanted', 'recreate', 'restart', 'heartbeat'].includes(hookName)) {
     log.warn(`The ${hookName} lifecycle hook failed for service ${serviceName}`)
   }
 
@@ -349,20 +347,21 @@ export const runHook = async (hookName, serviceName, hookParams) => {
 
 const stopMorioService = async (serviceName) => {
   await runHook('prestop', serviceName)
-  log.debug(`${serviceName}: Stopping local service`)
-  await stopLocalService(serviceName)
+  log.debug(`${serviceName}: Stopping service`)
+  await stopService(serviceName)
   await runHook('poststop', serviceName)
 }
 
-export const isLocalServiceUp = async (serviceName) => {
-  const details = utils.getLocalServiceState(serviceName, false)
+const isContainerRunning = (serviceName) => {
+  const details = utils.getServiceState(serviceName, false)
 
-  return [details ? true : false, details]
-
+  return (typeof details.state === 'string' && details.state.toLowerCase() === 'running')
+    ? true
+    : false
 }
 
 /**
- * (re)Starts a local morio service
+ * (re)Starts a morio service
  *
  * @param {string} service = The service name
  * @param {string} containerId = The ID of the container object
@@ -371,8 +370,8 @@ export const isLocalServiceUp = async (serviceName) => {
 export const restartMorioService = async (serviceName, id) => {
 
   const [ok, err] = await runContainerApiCommand(id, 'restart')
-  if (ok) log.info(`Local service started: ${serviceName}`)
-  else log.warn(err, `Failed to start local service: ${serviceName}`)
+  if (ok) log.info(`Service started: ${serviceName}`)
+  else log.warn(err, `Failed to start service: ${serviceName}`)
 
   return ok
 }
@@ -419,11 +418,12 @@ export function alwaysWantedHook() {
  */
 export async function defaultRecreateServiceHook(service, hookParams) {
   /*
-   * If the container is not currently running, recreate it
+   * If the container is not currently running, create it
    */
-  const [up] = await isLocalServiceUp(serviceName)
-  if (!up) {
+  const running = isContainerRunning(serviceName)
+  if (!running) {
     log.trace(`The ${service} is not running`)
+    //log.todo({running, service, in: 'dfltrecreate' })
     return true
   }
 
@@ -431,18 +431,20 @@ export async function defaultRecreateServiceHook(service, hookParams) {
    * If container name or image changes, recreate it
    */
   const cConf = utils.getMorioServiceConfig(service).container
+  const state = utils.getServiceState(serviceName, false)
+  //log.todo({state, serviceName, in: 'fefaultRecreate'})
   if (
     hookParams?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
     hookParams?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
   ) {
-    log.trace(`The ${service} name or image has changed`)
+    log.trace(`${service}: The service name or image has changed`)
     return true
   }
 
   /*
    * If we make it this far, do not recreate the container
    */
-  log.trace(`The ${service} does not need to be recreated`)
+  log.trace(`${service}: The service does not need to be recreated`)
   return false
 }
 
@@ -455,23 +457,27 @@ export async function defaultRecreateServiceHook(service, hookParams) {
  * So rather than create that hook for each service, we reuse this method.
  *
  * @param {string} service - Name of the service
- * @param {object} hookParams.running - Holds info on running services
  * @param {boolean} hookParams.recreate - Whether the container was just (re)created
  * @retrun {boolean} result - True to restart the container
  */
-export async function defaultRestartServiceHook(service, { running, recreate }) {
+export async function defaultRestartServiceHook(service, { recreate }) {
+  //return false //FIXME
   /*
    * If there is a traefik config to be generated, do it here
    */
   await ensureTraefikDynamicConfiguration(utils.getMorioServiceConfig(service))
 
   /*
-   * If the service was recreated, or is not running, always start it
-   * In all other cases, leave it as is
+   * If the service was recreated, or its status is not ok,
+   * always restart it. In all other cases, leave it as is.
    */
-  return (recreate || !running[service])
+  const running = isContainerRunning(service)
+  const restart = (recreate || !running)
     ? true
     : false
+  log.debug(`${service}: ${restart ? 'Re' : 'Not re'}starting service`)
+
+  return restart
 }
 
 /**

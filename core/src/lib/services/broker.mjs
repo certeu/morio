@@ -34,12 +34,14 @@ export const service = {
       )
         ? 0
         : 1
-      utils.setLocalServiceStatus('broker', status)
+      utils.setServiceStatus('broker', status)
       /*
        * Also track the leader stqte
        */
-      utils.setLeaderSerial(result.controller_id)
-      utils.setLeading(result.controller_id === local)
+      if (result.controller_id) {
+        utils.setLeaderSerial(result.controller_id)
+        utils.setLeading(result.controller_id === local)
+      }
 
       return status === 0 ? true : false
     },

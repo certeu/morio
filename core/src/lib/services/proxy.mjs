@@ -24,7 +24,7 @@ export const service = {
         { returnAs: 'json', ignoreCertificate: true }
       )
       const status = result?.http ? 0 : 1
-      utils.setLocalServiceStatus('proxy', status)
+      utils.setServiceStatus('proxy', status)
 
       return status === 0 ? true : false
     },

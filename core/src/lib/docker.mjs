@@ -21,17 +21,17 @@ const apiCache = {
 }
 
 /**
- * Creates a container for a local morio service
+ * Creates a container for a morio service
  *
  * @param {string} serviceName = Name of the service
  * @param {object} config = The container config to pass to the Docker API
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
 export const createDockerContainer = async (serviceName, config) => {
-  log.debug(`${serviceName}: Creating local service`)
+  log.debug(`${serviceName}: Creating service container`)
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
-    log.debug(`${serviceName}: Local service created`)
+    log.debug(`${serviceName}: Service container created`)
     return result.id
   }
   else if (result?.json?.message && result.json.message.includes('is already in use by container')) {
@@ -48,54 +48,54 @@ export const createDockerContainer = async (serviceName, config) => {
       log.debug(`${serviceName}: Removed existing container`)
       const [ok, created] = await runDockerApiCommand('createContainer', config, true)
       if (ok) {
-        log.debug(`${serviceName} Service recreated`)
+        log.debug(`${serviceName} Service container recreated`)
         return created.id
-      } else log.warn(`${serviceName}: Failed to recreate container`)
-    } else log.warn(`${serviceName}: Failed to remove container - Not creating new container`)
+      } else log.warn(`${serviceName}: Failed to recreate service container`)
+    } else log.warn(`${serviceName}: Failed to remove service container - Not creating new container`)
   }
-  else log.warn({result, config, serviceName }, `${serviceName}: Failed to create local service`)
+  else log.warn({result, config, serviceName }, `${serviceName}: Failed to create service container`)
 
   return false
 }
 
 /**
- * Gets a local service id, based on its name
+ * Gets a service id, based on its name
  */
-export const getLocalServiceId = async (serviceName) => {
+export const getServiceId = async (serviceName) => {
   /*
-   * Update state with currently running local services
+   * Update state with currently running services
    */
-  await updateLocalRunningServicesState()
+  await updateRunningServicesState()
 
   /*
    * Make sure to log a warning if the Id is not found as that should not happen
    */
-  const id = utils.getLocalServiceState(serviceName)?.Id || false
-  if (!id) log.warn(`Running getLocalServiceId failed for local service ${serviceName}`)
+  const id = utils.getServiceState(serviceName)?.Id || false
+  if (!id) log.warn(`Running getServiceId failed for service ${serviceName}`)
 
   return id
 }
 
 /**
- * Stops a local service. which just means it stops a container
+ * Stops a service. which just means it stops a container
  */
-export const stopLocalService = async (serviceName) => {
-  const id = await getLocalServiceId(serviceName)
+export const stopService = async (serviceName) => {
+  const id = await getServiceId(serviceName)
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
   }
   catch (err) {
-    log.warn(err, `Failed to stop local service: ${serviceName}`)
+    log.warn(err, `Failed to stop service: ${serviceName}`)
   }
 
   return result
 }
 
 /**
- * Restarts a local service. which just means it restarts a container
+ * Restarts a service. which just means it restarts a container
  */
-export const restartLocalService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
+export const restartService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
 /**
  * Creates a docker network
  *
@@ -143,7 +143,7 @@ export const createDockerNetwork = async (name) => {
          * First disconnect all containers, then remove it
          */
         log.debug(`core: Network ${name} is of type ${existingNetworkConfig.Driver
-          }, which is not suitable for running local services.`
+          }, which is not suitable for running services.`
         )
         log.debug(`core: Disconnecting all containers from network ${name}`)
         for (const id in existingNetworkConfig.Containers) {
@@ -163,7 +163,7 @@ export const createDockerNetwork = async (name) => {
     log.warn(`core; Unable to get info on the ${name} Docker network`)
   }
 
-  log.debug(`core: Local network created: ${name}`)
+  log.debug(`core: Network created: ${name}`)
   /*
    * Return the network object
    */
@@ -570,29 +570,54 @@ export const runDockerCliCommand = async (cmd, ...params) => {
   return [true, result]
 }
 
-/**
- * This helper method saves a list of running services (local)
+/*
+ * This helper method saves a list of running services
  */
 export const updateRunningServicesState = async () => {
-  await updateLocalRunningServicesState()
+  /*
+   * On follower nodes, running this on each heartbeat is ok.
+   * But on a leader node, especially on a large cluster, this would scale poorly.
+   * So we Debounce this by checking the age of the last time the status was updated
+   */
+  if (!utils.isServicesStateStale()) return
+
+  await forceUpdateRunningServicesState()
 }
 
+
 /**
- * This helper method saves a list of running local services to state
+ * This helper method saves a list of running services
  */
-export const updateLocalRunningServicesState = async () => {
+const forceUpdateRunningServicesState = async () => {
   /*
    * Clear state first, or services that went away would never be cleared
    */
-  utils.clearLocalServicesState()
+  utils.clearServicesState()
 
-  const [localOk, runningLocalServices] = await runDockerApiCommand('listContainers')
-  if (localOk) {
-    for (const service of runningLocalServices) {
-      utils.setLocalServiceState(service.Names[0].split('/').pop(), service)
+  const [ok, runningServices] = await runDockerApiCommand('listContainers')
+  if (ok) {
+    for (const service of runningServices) {
+      utils.setServiceState(
+        service.Names[0].split('/').pop(),
+        dockerStateToServiceState(service)
+      )
     }
   }
 }
+
+/**
+ * Strip a docker state to what is valuable to keep as service state
+ *
+ * @param {object} ds - Object returned from docker
+ * @return {object} serviceState - Object we'll keep in state
+ */
+const dockerStateToServiceState = (ds) => ({
+  name: ds.Names.pop(),
+  image: ds.Image,
+  labels: ds.Labels,
+  state: ds.State,
+  status: ds.Status,
+})
 
 /**
  * Helper method to get the container image for a service from the config

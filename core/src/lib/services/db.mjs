@@ -27,7 +27,7 @@ export const service = {
       )
 
       const status = (result && result.indexOf('node ok')) ? 0 : 1
-      utils.setLocalServiceStatus('db', status)
+      utils.setServiceStatus('db', status)
 
       return status === 0 ? true : false
     },
@@ -39,7 +39,7 @@ export const service = {
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
-     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on the local node
+     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on this node
      */
     precreate: ensureLocalPrerequisites,
     /*

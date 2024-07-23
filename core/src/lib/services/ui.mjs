@@ -19,7 +19,7 @@ export const service = {
     heartbeat: async () => {
       const result = await testUrl(`http://ui:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`)
       const status = result ? 0 : 1
-      utils.setLocalServiceStatus('ui', status)
+      utils.setServiceStatus('ui', status)
 
       return status === 0 ? true : false
     },

@@ -28,14 +28,14 @@ export const updateClusterState = async (silent) => {
  * Helper method to update the cluster state
  */
 export const forceUpdateClusterState = async (silent) => {
-  await updateLocalNodeState(silent)
+  await updateNodeState(silent)
   utils.resetClusterStatusAge()
 }
 
 /**
  * Helper method to gather the morio cluster state
  */
-const updateLocalNodeState = async () => {
+const updateNodeState = async () => {
 
   /*
    * Run heartbeat hook on all services
@@ -54,7 +54,7 @@ const updateLocalNodeState = async () => {
    * we should also update the consolidated cluster status
    */
   if (utils.isLeading()) {
-    log.todo(utils.getStatus(), `Update overalllocal node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+    log.todo(utils.getStatus(), `Update cluster state in updateNodeState / src/lib/cluster.mjs`)
   }
 }
 
@@ -271,7 +271,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   else {
     for (const uuid in data.nodes) {
       /*
-       * It it's a valid hearbeat, add the node info to the local state
+       * It it's a valid hearbeat, add the node info to the state
        */
       if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
     }
@@ -357,7 +357,7 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   }
 
   /*
-   * It it's a valid hearbeat, add the node info to the local state
+   * It it's a valid hearbeat, add the node info to the state
    */
   if (errors.length === 0) {
     if (data.nodes[data.node]) utils.setClusterNode(data.node, data.nodes[data.node])
@@ -385,7 +385,7 @@ export const ensureMorioCluster = async ({
   utils.setCoreReady(false)
 
   /*
-   * Ensure the local network exists, and we're attached to it.
+   * Ensure the network exists, and we're attached to it.
    */
   try {
     await ensureMorioNetwork(
@@ -489,10 +489,7 @@ const inviteClusterNodeAttempt = async (remote) => {
 }
 
 /*
- * This loads the status from the local API
- * It relies on the fact that in ephemeral mode the local
- * API is the only one available over the local docker network
- * so it allows us to know which of all the nodes is ourselves.
+ * This loads the status from the API
  */
 const getLocalEphemeralUuid = async () => {
   /*
@@ -502,7 +499,7 @@ const getLocalEphemeralUuid = async () => {
 
 
   /*
-   * Reach out to 'api' in cleartext, which can only be access on the local docker network
+   * Reach out to 'api' in cleartext, which can only be access on the docker network
    */
   const result = await testUrl(
     `http://api:${utils.getPreset('MORIO_API_PORT')}${utils.getPreset('MORIO_API_PREFIX')}/status`,
@@ -522,10 +519,10 @@ const getLocalEphemeralUuid = async () => {
 }
 
 /*
- * Finds out the (fqdn of the) local node
+ * Finds out the fqdn of this node
  *
  * @param {array[string]} nodes - The list of node FQDNs
- * @return {string|bool} local - The local FQDN or false if it wasn't found
+ * @return {string|bool} local - The FQDN or false if it wasn't found
  */
 const getLocalNode = async (nodes) => {
   const localEphUuid = await getLocalEphemeralUuid()

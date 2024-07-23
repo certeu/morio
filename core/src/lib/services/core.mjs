@@ -6,7 +6,7 @@ import {
   writeYamlFile,
   mkdir,
 } from '#shared/fs'
-// Avoid objects pointing to the same memory location
+// Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
 // Used to setup the core service
 import { loadAllPresets } from '#config'
@@ -45,7 +45,7 @@ export const service = {
     status: () => {
       /*
        * If core was not ok, this code would not get called
-       * So local status is 0 in any case. The only thing to
+       * So the status is 0 in any case. The only thing to
        * check is whether we are leading the custer and if so
        * update the consolidated state.
        */
@@ -55,7 +55,7 @@ export const service = {
         //  // Do cluster stuff
         //}
       }
-      utils.setLocalServiceStatus('core', 0)
+      utils.setServiceStatus('core', 0)
 
       return true
     },

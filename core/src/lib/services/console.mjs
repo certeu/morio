@@ -27,7 +27,7 @@ export const service = {
         { returnAs: 'json' }
       )
       const status = result?.distribution ? 0 : 1
-      utils.setLocalServiceStatus('console', status)
+      utils.setServiceStatus('console', status)
 
       return status === 0 ? true : false
     },

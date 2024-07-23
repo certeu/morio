@@ -263,24 +263,29 @@ utils.getKeys = () => store.get('config.keys')
 /**
  * Helper method to get the node_serial of the leading node
  *
- * @return {object} services - The local service as stored in state
+ * @return {object} services - The service as stored in state
  */
 utils.getLeaderSerial = () => store.get('status.cluster.leader_serial', false)
 
 /**
- * Helper method to get the local services from state
+ * Helper method to get the services from state
  *
- * @return {object} services - The local service as stored in state
+ * @return {object} services - The service as stored in state
  */
-utils.getLocalServicesState = () => store.get(['state', 'services', 'local'])
+utils.getServicesState = () => store.get(['state', 'services'])
 
 /**
- * Helper method to get the state of a local service
+ * Helper method to get the state of a service
  *
- * @param {string} service - The name of the local service for which to retrieve the sate
+ * @param {string} service - The name of the service for which to retrieve the state
  * @return {object} state - The service state
  */
-utils.getLocalServiceState = (service) => store.get(['state', 'services', 'local', service], false)
+utils.getServiceState = (service) => store.get(['state', 'services', service], false)
+
+/**
+ * Helper method to get the services state age (time it was last updated)
+ */
+utils.getServicesStateAge = () => store.get('state.services.updated', 172e10)
 
 /**
  * Helper method to get a Morio service configuration
@@ -291,9 +296,9 @@ utils.getLocalServiceState = (service) => store.get(['state', 'services', 'local
 utils.getMorioServiceConfig = (serviceName) => store.get(['config', 'services', 'morio', serviceName])
 
 /**
- * Helper method to get the local node
+ * Helper method to get info on this node
  *
- * @return {object} node - The local node
+ * @return {object} node - The info on this node
  */
 utils.getNode = () => store.get('state.node')
 
@@ -305,9 +310,9 @@ utils.getNode = () => store.get('state.node')
 utils.getNodeCount = () => utils.getSettings('cluster.broker_nodes', []).concat(utils.getSettings('cluster.flanking_nodes', [])).length
 
 /**
- * Helper method to get the FQDN of the local node
+ * Helper method to get the FQDN of this node
  *
- * @return {string} ip - The local node's fully quqlified domain name (FQDN)
+ * @return {string} ip - This node's fully quqlified domain name (FQDN)
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn')
 
@@ -323,37 +328,37 @@ utils.getNodeFqdns = () => ([
 ])
 
 /**
- * Helper method to get the (short) hostname of the local node
+ * Helper method to get the (short) hostname of this node
  *
- * @return {string} hostname - The local node's hostname
+ * @return {string} hostname - This node's hostname
  */
 utils.getNodeHostname = () => store.get('state.node.hostname')
 
 /**
- * Helper method to get the IP address of the local node
+ * Helper method to get the IP address of this node
  *
- * @return {string} ip - The local node's IP address
+ * @return {string} ip - This node's IP address
  */
 utils.getNodeIp = () => store.get('state.node.ip')
 
 /**
- * Helper method to get the node_serial of the local node
+ * Helper method to get the node_serial of this node
  *
- * @return {number} node_serial - The local node's serial
+ * @return {number} node_serial - This node's serial
  */
 utils.getNodeSerial = () => store.get('state.node.serial')
 
 /**
- * Helper method to get the uuid of the local node
+ * Helper method to get the uuid of this node
  *
- * @return {string} uuid - The local node's UUID
+ * @return {string} uuid - This node's UUID
  */
 utils.getNodeUuid = () => store.get('state.node.uuid')
 
 /**
- * Helper method to get the uuid fingerprint of the local node
+ * Helper method to get the uuid fingerprint of this node
  *
- * @return {string} uuid - The local node's UUID
+ * @return {string} uuid - This node's UUID
  */
 utils.getNodeFingerprint = () => store.get('state.node.uuid','').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
@@ -408,6 +413,13 @@ utils.getStartTime = () => store.get('state.start_time')
  * @return {number} time - The timestamp of when core was started
  */
 utils.getStatus = () => store.get('status')
+
+/**
+ * Helper method to get the Morio uptime (in seconds)
+ *
+ * @return {number} uptime - The number of seconds core has been up
+ */
+utils.getUptime = () => Math.floor((Date.now() - utils.getStartTime()) / 1000)
 
 /**
  * Helper method to get the Morio version string
@@ -645,7 +657,7 @@ utils.setLeaderSerial = (node_serial) => {
 }
 
 /**
- * Helper method to store the leading state of the local node
+ * Helper method to store the leading state of this node
  *
  * @param {bool} leading - Whether or not the node is leading
  * @return {object} utils - The utils instance, making this method chainable
@@ -656,25 +668,25 @@ utils.setLeading = (leading) => {
 }
 
 /**
- * Helper method to store a local service state
+ * Helper method to store a service state
  *
  * @param {string} serviceName - The name of the service
  * @param {object} state - The service state from the Docker API
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setLocalServiceState = (serviceName, state) => {
-  store.set(['state', 'services', 'local', serviceName], state)
+utils.setServiceState = (serviceName, state) => {
+  store.set(['state', 'services', serviceName], state)
   return utils
 }
 
 /**
- * Helper method to store a local service status
+ * Helper method to store a service status
  *
  * @param {string} serviceName - The name of the service
  * @param {object} state - The service state from the Docker API
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setLocalServiceStatus = (serviceName, status) => {
+utils.setServiceStatus = (serviceName, status) => {
   store.set(['status', 'services', serviceName], status)
   return utils
 }
@@ -733,7 +745,7 @@ utils.setNode = (node) => {
 /**
  * Helper method to store the node IP in the state
  *
- * @param {string} ip - The IP address of the local node
+ * @param {string} ip - The IP address of this node
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setNodeIp = (ip) => {
@@ -840,9 +852,9 @@ utils.isDistributed = () => utils.getSettings('cluster.broker_nodes', []).concat
 utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
 
 /*
- * Determined whether the local node is leading the cluster
+ * Determined whether this node is leading the cluster
  *
- * @return {bool} leading - True if the local cluster node is leading, false if not
+ * @return {bool} leading - True if this cluster node is leading, false if not
  */
 utils.isLeading = () => store.get('status.cluster.leading', false) ? true : false
 
@@ -852,6 +864,20 @@ utils.isLeading = () => store.get('status.cluster.leading', false) ? true : fals
  * @return {bool} leading - True if NODE_ENV is production
  */
 utils.isProduction = () => inProduction() ? true : false
+
+/**
+ * Helper method to determine the status of a service is ok
+ *
+ * @return {bool} ok - True if the status is ok, false if not
+ */
+utils.isServiceOk = (serviceName) => store.get(['status', 'services', serviceName], 1) === 0 ? true : false
+
+/**
+ * Helper method to determine whether the services state is stale
+ *
+ * @return {bool} stale - True if the services state is stale, false if not
+ */
+utils.isServicesStateStale = () => Math.floor((Date.now() - utils.getServicesStateAge())/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 
 /**
  * Helper method to determine whether the status is stale
@@ -913,12 +939,12 @@ utils.beginReconfigure = () => {
 }
 
 /**
- * Helper method clear the list of local services
+ * Helper method clear the list of services
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.clearLocalServicesState = () => {
-  store.set('state.services.local', {})
+utils.clearServicesState = () => {
+  store.set('state.services', {})
   return utils
 }
 
@@ -952,6 +978,16 @@ utils.endReconfigure = () => {
  */
 utils.resetClusterStatusAge = () => {
   store.set('status.cluster.updated', Date.now())
+  return utils
+}
+
+/**
+ * Store the services state age (time it was last updated)
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.resetServicesStateAge = () => {
+  store.set('state.services.updated', Date.now())
   return utils
 }
 

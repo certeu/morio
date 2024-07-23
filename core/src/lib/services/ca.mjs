@@ -28,7 +28,7 @@ export const service = {
         { returnAs: 'json', ignoreCertificate: true }
       )
       const status = result?.status === "ok" ? 0 : 1
-      utils.setLocalServiceStatus('ca', status)
+      utils.setServiceStatus('ca', status)
 
       return status === 0 ? true : false
     },
@@ -80,9 +80,9 @@ export const service = {
       }
 
       /*
-       * No config found, generate local configuration
+       * No config found, generate configuration
        */
-      await generateLocalCaConfig()
+      await generateCaConfig()
 
       return true
     },
@@ -228,12 +228,12 @@ export const generateCaConfig = async () => {
   utils.setCaConfig(caConfig)
 
   /*
-   * Generate local portion of the config
+   * Ensure the config is on disk
    */
-  await generateLocalCaConfig()
+  await ensureCaConfig()
 }
 
-export const generateLocalCaConfig = async () => {
+export const ensureCaConfig = async () => {
   /*
    * Save root certificate and fingerprint in memory
    */

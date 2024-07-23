@@ -5,7 +5,7 @@ import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { resolveHostAsIp } from '#shared/network'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
-import { generateLocalCaConfig } from '../lib/services/ca.mjs'
+import { generateCaConfig } from '../lib/services/ca.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -130,12 +130,12 @@ Controller.prototype.join = async (req, res) => {
   })
 
   /*
-   * We need to run the local CA config before we trigger a reconfigured
+   * We need to generate the CA config before we trigger a reconfigured
    * It also needs access to the settings & keys, so save those first
    */
   utils.setKeys(valid.keys)
   utils.setSettings(valid.settings.data)
-  await generateLocalCaConfig()
+  await generateCaConfig()
 
   /*
    * Don't forget to finalize the request
