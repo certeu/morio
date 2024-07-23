@@ -675,7 +675,7 @@ utils.setLocalServiceState = (serviceName, state) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLocalServiceStatus = (serviceName, status) => {
-  store.set(['status', 'services', 'local', serviceName], status)
+  store.set(['status', 'services', serviceName], status)
   return utils
 }
 
