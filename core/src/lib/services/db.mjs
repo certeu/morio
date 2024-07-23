@@ -23,13 +23,11 @@ export const service = {
     heartbeat: async () => {
       const result = await testUrl(
         `http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
-        { returnAs: 'json', ignoreCertificate: true }
+        { returnAs: 'text', ignoreCertificate: true }
       )
-      log.info(result)
-      return true
 
-      const status = result?.core?.version ? 0 : 1
-      utils.setLocalServiceStatus('api', status)
+      const status = result.indexOf('node ok') ? 0 : 1
+      utils.setLocalServiceStatus('db', status)
 
       return status === 0 ? true : false
     },

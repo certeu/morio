@@ -18,10 +18,17 @@ export const service = {
   name: 'console',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(
+        `http://console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/api/console/endpoints`,
+        { returnAs: 'json', ignoreCertificate: true }
+      )
+      const status = result?.distribution ? 0 : 1
+      utils.setLocalServiceStatus('console', status)
+
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
