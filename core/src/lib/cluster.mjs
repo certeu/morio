@@ -326,8 +326,8 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   /*
    * Verify the 'to' is really us as a mismatch here can indicate fault DNS configuration
    */
-  if (!utils.getNodeFqdn() !== data.to) {
-    const err = 'iHEARTBEAT_TARGET_FQDN_MISMATCH'
+  if (utils.getNodeFqdn() !== data.to) {
+    const err = 'HEARTBEAT_TARGET_FQDN_MISMATCH'
     errors.push(err)
     log.warn(`Heartbeat target FQDN mismatch. We are not ${data.to}: ${err}`)
   }
