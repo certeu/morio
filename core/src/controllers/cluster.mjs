@@ -51,13 +51,13 @@ Controller.prototype.heartbeat = async (req, res) => {
    * (potentially) take action
    */
   if (action === 'SYNC') {
-    log.fixme('Handle heartbeat SYNC action')
+    log.todo('Handle heartbeat SYNC action')
   }
   else if (action === 'INVITE') {
-    log.fixme('Handle heartbeat INVITE action')
+    log.todo('Handle heartbeat INVITE action')
   }
   else if (action === 'ELECT') {
-    log.fixme('Handle hearbeat ELECT action')
+    log.todo('Handle hearbeat ELECT action')
   }
 
   /*

@@ -15,14 +15,14 @@ import { runHook } from './services/index.mjs'
 export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
 
 /*
- * Add a fixme log method to make it easy to spot things still to be done
+ * Add a log method to make it easy to spot things still to be done
  */
-log.fixme = (a,b) => {
+log.todo = (a,b) => {
   const location = new Error().stack.split("\n")[2]
 
   return typeof a === 'object'
-    ? log.warn(a, `FIX THIS ⚠️ ${b}${location}`)
-    : log.warn(`FIX THIS ⚠️ ${a}${location}`)
+    ? log.warn(a, `TODO 🟠 ${b}${locaton}`)
+    : log.warn(`TODO 🟠 ${a}${location}`)
 }
 
 /*
@@ -954,51 +954,6 @@ utils.resetClusterStatusAge = () => {
   store.set('status.cluster.updated', Date.now())
   return utils
 }
-
-/**
- * Updates the status code and color based on current state
- *
- * @return {object} utils - The utils instance, making this method chainable
- */
-//utils.updateStatus = async () => {
-//  /*
-//   * Ephemeral is easy
-//   */
-//  if (utils.isEphemeral()) return utils.setClusterStatus(1, 'amber')
-//
-//  /*
-//   * If we're mid-reload, reflect that
-//   */
-//  if (!utils.isConfigResolved() || !utils.isCoreReady()) return utils.setClusterStatus(2, 'amber')
-//
-//  /*
-//   * On follower nodes, running this on each heartbeat is ok.
-//   * But on a leader node, especially on a large cluster, this would scale poorly.
-//   * So we Debounce this by checking the age of the last time the status was updated
-//   */
-//  if (!utils.isStatusStale()) return utils
-//
-//  /*
-//   * Check all services (including core)
-//   */
-//  for (const serviceName of ['core', ...serviceOrder]) {
-//    const wanted = await runHook('wanted', serviceName, { statusCheck: true })
-//    if (wanted) {
-//      const status = runHook('heartbeat', serviceName)
-//      // Short-circuit any issues
-//      if (status !== 0) return utils.setClusterStatus(status)
-//    }
-//  }
-//
-//  /*
-//   * Do we need to run additional cluster checks?
-//   */
-//  if (utils.isDistributed()) {
-//    log.fixme('Implement cluster state consolidation')
-//  }
-//
-//  return utils.setClusterStatus(0, 'green')
-//}
 
 /*      _   _
  *  ___| |_| |_  ___ _ _

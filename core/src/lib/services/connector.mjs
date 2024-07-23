@@ -289,7 +289,7 @@ output {
     cloud_id => "${xput.cloud_id}"`
       else
         config += `
-    # FIXME: Handle non-cloud settings`
+    # TODO: Handle non-cloud settings`
 
       return (
         config +

@@ -142,13 +142,10 @@ export const startMorio = async (hookParams = {}) => {
    */
   const promises = []
   for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
-    //promises.push(ensureMorioService(service, hookParams))//
-    // FIXME: Doing this in serial for now, might change later
-    await ensureMorioService(service, hookParams)
+    promises.push(ensureMorioService(service, hookParams))
   }
-                                                          //
-  //return await Promise.all(promises)
-  return
+
+  return await Promise.all(promises)
 }
 
 /**
@@ -196,8 +193,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * Does the service need to be recreated?
    */
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
-  // FIXME: remove this
-  return false
+
   if (recreate) {
     log.debug(`${serviceName}: Updating container`)
     /*
@@ -302,7 +298,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * Always recreate if the service configuration has changed
    */
-  // FIXME
+  // TODO
 
   /*
    * After from basic check, defer to the recreateContainer lifecycle hook
@@ -319,8 +315,6 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
  * @param {object} hookParams - Optional parameters to pass to the lifecycle hook
  */
 const shouldServiceBeRestarted = async (serviceName, hookParams) => {
-  // FIXME: remove this
-  return false
   /*
    * Defer to the restart lifecycle hook
    */

@@ -43,19 +43,27 @@ export const service = {
      * Lifecycle hook to determine the service status
      */
     status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+      /*
+       * If core was not ok, this code would not get called
+       * So local status is 0 in any case. The only thing to
+       * check is whether we are leading the custer and if so
+       * update the consolidated state.
+       */
+      if (utils.isLeading()) {
+        log.todo('Implement cluster state consolidation')
+        //if (utils.isDistributed()) {
+        //  // Do cluster stuff
+        //}
+      }
+      utils.setLocalServiceStatus('core', 0)
+
+      return true
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
      * We reuse the always method here, since this should always be running
      */
     wanted: alwaysWantedHook,
-    /*
-     * Core cannot/should not recreate or restart itself
-     * FIXME: Surely we can just remove these?
-     */
-    recreate: () => false,
-    restart: () => false,
     /*
      * This runs only when core is cold-started.
      *

@@ -34,7 +34,7 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * FIXME:
+     * TODO:
      * For a true highly-available CA, we need to hook it up to our
      * distributed database. See: https://github.com/smallstep/nosql/issues/64
      * Until then, we can get by with a single CA, so we'll make sure this
@@ -258,7 +258,7 @@ export const generateLocalCaConfig = async () => {
    */
   const caConfig = resolveServiceConfiguration('ca', { utils })
   const stepServerConfig = {
-    ...caConfig.server, // FIXME: What is stored in the server key, if anything?
+    ...caConfig.server,
     root: '/home/step/certs/root_ca.crt',
     crt: '/home/step/certs/intermediate_ca.crt',
     key: '/home/step/secrets/intermediate_ca.key',

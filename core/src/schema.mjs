@@ -27,8 +27,8 @@ export const schema = {
     version: version.required(),
     settings_serial: jsTime.required(),
     node_serial: nodeSerial.required(),
-    status: Joi.object(), // FIXME: Make this more detailed
-    nodes: Joi.object(), // FIXME: Make this more detailed
+    status: Joi.object(), // TODO: Make this more detailed
+    nodes: Joi.object(), // TODO: Make this more detailed
   }),
   'req.cluster.join': Joi.object({
     you: fqdn.required(),

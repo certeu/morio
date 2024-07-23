@@ -29,13 +29,6 @@ export const updateClusterState = async (silent) => {
  */
 export const forceUpdateClusterState = async (silent) => {
   await updateLocalNodeState(silent)
-  /*
-   * Do we need to run additional cluster checks?
-   */
-  if (utils.isDistributed()) {
-    log.fixme('Implement cluster state consolidation')
-  }
-
   utils.resetClusterStatusAge()
 }
 
@@ -61,7 +54,7 @@ const updateLocalNodeState = async () => {
    * we should also update the consolidated cluster status
    */
   if (utils.isLeading()) {
-    log.fixme(utils.getStatus(), `Update overalllocal node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+    log.todo(utils.getStatus(), `Update overalllocal node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
   }
 }
 
@@ -69,7 +62,7 @@ const updateLocalNodeState = async () => {
  * Helper method to join a node to the cluster
  */
 export const joinCluster = async () => {
-  log.fixme('Implement joinCluster')
+  log.todo('Implement joinCluster')
 
   return
 }
@@ -419,7 +412,7 @@ export const ensureMorioCluster = async ({
 
 const isClusterHealthy = async () => {
 
-  log.fixme('Implement cluster health status check')
+  log.todo('Implement cluster health status check')
 
   // Let's just say yes
   return true
@@ -431,7 +424,6 @@ const isClusterHealthy = async () => {
  * @param {string} fqdn - The fqdn of the remote node
  */
 export const inviteClusterNode = async (remote) => {
-  log.fixme(`Inviting cluster node ${remote}`)
   /*
    * First, attempt a single call to join the cluster.
    * We will await this one because typically this works, and it
@@ -491,7 +483,7 @@ const inviteClusterNodeAttempt = async (remote) => {
     log.info(`Node ${result.node} will join the cluster`)
     return true
   } else {
-    log.fixme(Object.keys(result), 'Implement cluster join problem')
+    log.todo('Implement cluster join problem')
     return false
   }
 }
