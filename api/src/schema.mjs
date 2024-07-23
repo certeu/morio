@@ -1,15 +1,4 @@
-import {
-  Joi,
-  validate as sharedValidate,
-  id,
-  fqdn,
-  jsTime,
-  uuid,
-  keys,
-  version,
-  nodeSerial,
-  settings
-} from '#shared/schema'
+import { Joi, validate as sharedValidate, settings } from '#shared/schema'
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -30,7 +19,6 @@ export const schema = {
  */
 export const validate = (key, input) => sharedValidate(key, input, schema)
 
-
 // FIXME: Legacy validation below
 //
 // FIXME: what is this token again?
@@ -43,7 +31,6 @@ const shared = {
     setup_token: Joi.string().trim().min(16).max(128),
   },
 }
-
 
 /*
  * This describes the schema of the cluster settings
@@ -157,5 +144,3 @@ export const responseSchema = {
  * This describes the schema of error responses
  */
 export const errorsSchema = Joi.object({ errors: Joi.array().items(Joi.string()) })
-
-

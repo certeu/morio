@@ -2,7 +2,7 @@ import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
 import { coreClient } from '#lib/core'
-import { errors, statusCodes, statusCodeAsColor } from '#shared/errors'
+import { errors } from '#shared/errors'
 import { validate as validateMethod } from '../schema.mjs'
 
 /*
@@ -13,8 +13,8 @@ export const log = logger(getPreset('MORIO_API_LOG_LEVEL'), 'api')
 /*
  * Add a fixme log method to make it easy to spot things still to be done
  */
-log.fixme = (a,b) => {
-  const location = new Error().stack.split("\n")[2]
+log.fixme = (a, b) => {
+  const location = new Error().stack.split('\n')[2]
 
   return typeof a === 'object'
     ? log.warn(a, `FIX THIS ⚠️ ${b}${location}`)
@@ -138,9 +138,10 @@ utils.getReloadCount = () => store.get('state.reload_count')
  * @param {mixed} dflt - A default value to return if none is found
  * @return {mixed} data - The requested settings data
  */
-utils.getSettings = (path, dflt) => path === undefined
-  ? store.get('settings.resolved', dflt)
-  : store.get(unshift(['settings', 'resolved'], path), dflt)
+utils.getSettings = (path, dflt) =>
+  path === undefined
+    ? store.get('settings.resolved', dflt)
+    : store.get(unshift(['settings', 'resolved'], path), dflt)
 
 /**
  * Helper method to get the settings_serial
@@ -295,21 +296,21 @@ utils.setSettings = (settings) => {
  *
  * @return {bool} resolved - True if the config is resolved, false if not
  */
-utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
+utils.isConfigResolved = () => (store.get('state.config_resolved') ? true : false)
 
 /**
  * Helper method for returning ephemeral state
  *
  * @return {bool} ephemeral - True if ephemeral, false if not
  */
-utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
+utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
 
 /**
  * Helper method for returning reloading state
  *
  * @return {bool} reloading - True if reloading, false if not
  */
-utils.isReloading = () => store.get('state.reloading', false) ? true : false
+utils.isReloading = () => (store.get('state.reloading', false) ? true : false)
 
 /*  _                     __
  * | |_ _ _ __ _ _ _  ___/ _|___ _ _ _ __  ___ _ _ ___
@@ -364,15 +365,18 @@ utils.coreClient = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * @param {string|object} tempalte - Either a string for a know tempate, or a customg object holding the response data
  * @param {bool|string} route - The API route to construct the instance string, or false if there is none
  */
-utils.sendErrorResponse = (res, template, route=false) => {
+utils.sendErrorResponse = (res, template, route = false) => {
   let data = {}
   /*
    * Allow passing in an error template name
    */
   if (typeof template === 'string') {
-    if (errors[template]) data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+template }
+    if (errors[template])
+      data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX') + template }
     else {
-      store.log.error(`The sendErrorResponse method was alled with a template string that is not a known error template: ${template}`)
+      store.log.error(
+        `The sendErrorResponse method was alled with a template string that is not a known error template: ${template}`
+      )
       return res.status(500).send().end()
     }
   }
@@ -380,8 +384,13 @@ utils.sendErrorResponse = (res, template, route=false) => {
   /*
    * Add the instance
    */
-  data.instance = `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_API_PORT')}/` +
-    data.route ? data.route : route ? route : ''
+  data.instance =
+    `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_API_PORT')}/` +
+    data.route
+      ? data.route
+      : route
+        ? route
+        : ''
 
   return res.type('application/problem+json').status(data.status).send(data).end()
 }

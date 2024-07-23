@@ -2,6 +2,7 @@ import { attempt } from '#shared/utils'
 import { encryptionMethods } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
 import { coreClient } from '#lib/core'
+import process from 'node:process'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -9,7 +10,6 @@ import { coreClient } from '#lib/core'
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
 export const reloadConfiguration = async () => {
-
   /*
    * Load data from core
    */
@@ -18,7 +18,7 @@ export const reloadConfiguration = async () => {
     timeout: 3600,
     run: async () => {
       const [status, body] = await utils.coreClient.get('/reload')
-      return (status === 200) ? body : false
+      return status === 200 ? body : false
     },
     onFailedAttempt: (s) => {
       log.debug(`Waited ${s} seconds for core/reload, will continue waiting.`)
@@ -42,7 +42,7 @@ export const reloadConfiguration = async () => {
   utils.setEphemeral(data.node.ephemeral)
   utils.setCoreState({
     ...data.status,
-    timestamp: Date.now() // FIXME: Rename to time
+    timestamp: Date.now(), // FIXME: Rename to time
   })
   utils.setCoreInfo(data.info)
   utils.setPresets(data.presets)
@@ -60,7 +60,9 @@ export const reloadConfiguration = async () => {
      * If there's more than 1 node, switch core client to stay local
      */
     if (utils.getSettings('cluster.broker_nodes', []).length > 1) {
-      utils.coreClient = coreClient(`http://core_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CORE_PORT')}`)
+      utils.coreClient = coreClient(
+        `http://core_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CORE_PORT')}`
+      )
     }
   }
 
@@ -93,11 +95,5 @@ export const reloadConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (data) => (
-  data &&
-  data.info &&
-  data.nodes &&
-  data.presets &&
-  data.settings &&
-  data.keys
-)
+const coreFetchOk = (data) =>
+  data && data.info && data.nodes && data.presets && data.settings && data.keys

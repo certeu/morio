@@ -80,9 +80,9 @@ app.use(`/downloads`, express.static(`/morio/${getPreset('MORIO_DOWNLOADS_FOLDER
 app.use(`${utils.getPrefix()}/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
 
 /*
- * (re)Configure the API
+ * (Re)Load the API
  */
-await reload({ coldStart: true })
+await reload()
 
 /*
  * Start listening for requests
@@ -98,7 +98,7 @@ wrapExpress(
  * This method allows the API to dynamically reload its
  * own configuration
  */
-export async function reload(params) {
+export async function reload() {
   /*
    * Drop us in config resolving mode
    */

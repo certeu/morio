@@ -1,4 +1,4 @@
-import { requestSchema as schema, settingsSchema } from '../schema.mjs'
+import { requestSchema as schema } from '../schema.mjs'
 import { resolveHost, testUrl } from '#shared/network'
 import { randomString } from '#shared/crypto'
 import get from 'lodash.get'
@@ -101,7 +101,7 @@ export const validateSettings = async (newSettings) => {
     !newSettings?.cluster ||
     !newSettings.cluster.broker_nodes ||
     !Array.isArray(newSettings.cluster.broker_nodes) ||
-    ![1,3,5,7,9].includes(newSettings.cluster.broker_nodes.length)
+    ![1, 3, 5, 7, 9].includes(newSettings.cluster.broker_nodes.length)
   ) {
     report.info.push(`Settings are not valid`)
     report.errors.push(`Broker node count is not supported`)
@@ -112,11 +112,12 @@ export const validateSettings = async (newSettings) => {
   /*
    * Broker nodes
    */
-  if (newSettings.cluster.flanking_nodes && (
-      !Array.isArray(newSettings.cluster.flanking_nodes) ||
+  if (
+    newSettings.cluster.flanking_nodes &&
+    (!Array.isArray(newSettings.cluster.flanking_nodes) ||
       newSettings.cluster.flanking_nodes.length < 0 ||
-      newSettings.cluster.flanking_nodes.length < 36
-  )) {
+      newSettings.cluster.flanking_nodes.length < 36)
+  ) {
     report.info.push(`Settings are not valid`)
     report.errors.push(`Flanking node count is not supported`)
 
@@ -135,17 +136,19 @@ export const validateSettings = async (newSettings) => {
     /*
      * Verify node name resolution
      */
-    ipPromises.push(resolveHost(node).then(([resolved, ipsOrError]) => {
-      if (resolved) {
-        report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
-        ips.push(...ipsOrError)
-      } else {
-        report.info.push(`Validation failed for node ${i}`)
-        report.errors.push(ipsOrError)
+    ipPromises.push(
+      resolveHost(node).then(([resolved, ipsOrError]) => {
+        if (resolved) {
+          report.info.push(`Node ${i} resolves to: ${ipsOrError.join()}`)
+          ips.push(...ipsOrError)
+        } else {
+          report.info.push(`Validation failed for node ${i}`)
+          report.errors.push(ipsOrError)
 
-        return abort()
-      }
-    }))
+          return abort()
+        }
+      })
+    )
   }
   await Promise.all(ipPromises)
 
@@ -166,30 +169,32 @@ export const validateSettings = async (newSettings) => {
      */
     const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
     if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
-      httpPromises.push(await testUrl(
-        url,
-        { ignoreCertificate: true, returnAs: 'json' },
-        log.debug
-      ).then(status => {
-        if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
-        else {
-          report.info.push(`Validation failed for node ${i}`)
-          report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+      httpPromises.push(
+        await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
+          (status) => {
+            if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
+            else {
+              report.info.push(`Validation failed for node ${i}`)
+              report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
 
-          return abort()
-        }
+              return abort()
+            }
 
-        if (status.state?.ephemeral) {
-          report.info.push(`Node ${i} runs Morio and is ready for setup`)
-        } else {
-          if (status.info?.name === '@morio/api') {
-            report.errors.push(`Node ${i} is not in ephemeral mode, which is required for setup`)
-          } else {
-            report.errors.push(`Node ${i} does not seem to run Morio`)
+            if (status.state?.ephemeral) {
+              report.info.push(`Node ${i} runs Morio and is ready for setup`)
+            } else {
+              if (status.info?.name === '@morio/api') {
+                report.errors.push(
+                  `Node ${i} is not in ephemeral mode, which is required for setup`
+                )
+              } else {
+                report.errors.push(`Node ${i} does not seem to run Morio`)
+              }
+              abort()
+            }
           }
-          abort()
-        }
-      }))
+        )
+      )
     } else {
       report.info.push(`This is the unit test host, not validating HTTPS connection.`)
     }
