@@ -26,7 +26,7 @@ export const service = {
       const result = await testUrl(
         //`http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/status/ready`,
         `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
-        { returnAs: 'json', ignoreCertificate: true }
+        { returnAs: 'json' }
       )
       const local = utils.getNodeSerial()
       const status = (result.is_healthy || !result.nodes_down.includes(local))

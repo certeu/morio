@@ -24,7 +24,7 @@ export const service = {
     heartbeat: async () => {
       const result = await testUrl(
         `http://console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/api/console/endpoints`,
-        { returnAs: 'json', ignoreCertificate: true }
+        { returnAs: 'json' }
       )
       const status = result?.distribution ? 0 : 1
       utils.setLocalServiceStatus('console', status)

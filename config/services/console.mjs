@@ -71,7 +71,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
           caFilepath: '/etc/morio/console/tls-ca.pem',
           certFilepath: '/etc/morio/console/tls-cert.pem',
           keyFilepath: '/etc/morio/console/tls-key.pem',
-          insecureSkipTlsVerify: true, // FIXME when traefik certificate is ok
+          insecureSkipTlsVerify: true,
         },
       },
     },

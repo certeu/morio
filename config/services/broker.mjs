@@ -238,7 +238,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         cluster_id: utils.getClusterUuid(),
 
         /*
-         * Enable audit log FIXME
+         * Enable audit log TODO
          */
         audit_enabled: false,
 

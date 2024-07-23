@@ -110,7 +110,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '--providers.file.directory=/etc/morio/proxy',
         // Watch for changes
         '--providers.file.watch=true',
-        // FIXME: Enable metrics
+        // TODO: Enable metrics
       ].concat(utils.isEphemeral()
         ? []
         : [

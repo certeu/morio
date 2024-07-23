@@ -12,10 +12,14 @@ export const service = {
   name: 'ui',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(`http://ui:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`)
+      const status = result ? 0 : 1
+      utils.setLocalServiceStatus('ui', status)
+
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

@@ -1,4 +1,5 @@
 import { readFile, writeFile, writeYamlFile, mkdir } from '#shared/fs'
+import { testUrl } from '#shared/network'
 // Default hooks
 import {
   alwaysWantedHook,
@@ -15,10 +16,17 @@ export const service = {
   name: 'proxy',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(
+        `https://proxy/api/overview`,
+        { returnAs: 'json', ignoreCertificate: true }
+      )
+      const status = result?.http ? 0 : 1
+      utils.setLocalServiceStatus('proxy', status)
+
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

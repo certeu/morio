@@ -31,6 +31,7 @@ export const resolveServiceConfiguration = (name, helpers) =>
  */
 export const serviceOrder = [
   'ca',
+  'broker',
   'db',
   'console',
   'api',
@@ -38,7 +39,6 @@ export const serviceOrder = [
   'proxy',
   'connector',
   'dbuilder',
-  'broker',// FIXME: move to after ca
 ]
 
 /*

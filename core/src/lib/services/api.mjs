@@ -20,7 +20,7 @@ export const service = {
     heartbeat: async () => {
       const result = await testUrl(
         `http://api:${utils.getPreset('MORIO_API_PORT')}/info`,
-        { returnAs: 'json', ignoreCertificate: true }
+        { returnAs: 'json' }
       )
       const status = result?.core?.version ? 0 : 1
       utils.setLocalServiceStatus('api', status)
