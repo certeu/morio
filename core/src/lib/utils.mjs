@@ -161,7 +161,7 @@ utils.getClusterNodes = (serial) => store.get(['state', 'cluster', 'nodes'], {})
 /**
  * Helper method to get the cluster state age (time it was last updated)
  */
-utils.getClusterStateAge = () => Date.now() - store.get('state.cluster.updated', 172e10)
+utils.getClusterStatusAge = () => store.get('status.cluster.updated', 172e10)
 
 /**
  * Helper method to get the cluster status
@@ -859,8 +859,10 @@ utils.isProduction = () => inProduction() ? true : false
  * @return {bool} stale - True if the status is stale, false if not
  */
 utils.isStatusStale = () => {
-  const data = utils.getClusterStatus()
-  return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
+  const time = utils.getClusterStatusAge()
+  const seconds = Math.floor((Date.now() - time)/1000)
+  console.log({time, seconds})
+  return Math.floor((Date.now() - time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 }
 
 /**
@@ -949,12 +951,12 @@ utils.endReconfigure = () => {
 }
 
 /**
- * Store the cluster state age (time it was last updated)
+ * Store the cluster status age (time it was last updated)
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.resetClusterStateAge = () => {
-  store.set('state.cluster.updated', Date.now())
+utils.resetClusterStatusAge = () => {
+  store.set('status.cluster.updated', Date.now())
   return utils
 }
 
