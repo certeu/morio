@@ -20,11 +20,24 @@ export const service = {
   name: 'broker',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
-    },
+    //heartbeat: async () => {
+    //  const result = await testUrl(
+    //    `http://api:${utils.getPreset('MORIO_API_PORT')}/info`,
+    //    {
+    //      method: 'GET',
+    //      timeout: 500,
+    //      returnAs: 'json',
+    //      returnError: true,
+    //      ignoreCertificate: true,
+    //    }
+    //  )
+    //  const status = result?.core?.version ? 0 : 1
+    //  utils.setLocalServiceStatus('api', { status })
+
+    //  return status
+    //},
     /*
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state

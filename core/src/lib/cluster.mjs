@@ -15,8 +15,14 @@ import { log, utils } from './utils.mjs'
  * Helper method to update the cluster state
  */
 export const updateClusterState = async (silent) => {
-  const age = utils.getClusterStateAge()
-  if (!age || age > utils.getPreset('MORIO_CORE_CLUSTER_STATE_CACHE_TTL')) await forceUpdateClusterState(silent)
+  /*
+   * On follower nodes, running this on each heartbeat is ok.
+   * But on a leader node, especially on a large cluster, this would scale poorly.
+   * So we Debounce this by checking the age of the last time the status was updated
+   */
+  if (!utils.isStatusStale()) return
+
+  await forceUpdateClusterState(silent)
 }
 
 /**
@@ -24,6 +30,13 @@ export const updateClusterState = async (silent) => {
  */
 export const forceUpdateClusterState = async (silent) => {
   await updateLocalNodeState(silent)
+  /*
+   * Do we need to run additional cluster checks?
+   */
+  if (utils.isDistributed()) {
+    log.fixme('Implement cluster state consolidation')
+  }
+
   utils.resetClusterStateAge()
 }
 
@@ -36,7 +49,7 @@ const updateLocalNodeState = async () => {
   for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
     promises.push(runHook('heartbeat', service))
   }
-  log.fixme(`Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+  log.fixme(utils.getStatus(), `Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
   /*
    * Reach out to broker to see if we're leading
    */
@@ -269,7 +282,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   /*
    * Update status on each heartbeat
    */
-  utils.updateStatus()
+  //utils.updateStatus()
 }
 
 const verifyHeartbeatNode = (node, result) => {

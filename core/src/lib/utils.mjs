@@ -151,7 +151,7 @@ utils.getClusterStateAge = () => Date.now() - store.get('state.cluster.updated',
 /**
  * Helper method to get the cluster status
  */
-utils.getStatus = () => store.get('state.status', { code: 499, time: 172e10 })
+utils.getClusterStatus = () => store.get('status.cluster', { code: 499, time: 172e10 })
 
 /**
  * Helper method to get the cluster uuid
@@ -390,6 +390,13 @@ utils.getSettingsSerial = () => store.get('state.settings_serial')
  * @return {number} time - The timestamp of when core was started
  */
 utils.getStartTime = () => store.get('state.start_time')
+
+/**
+ * Helper method to get the status
+ *
+ * @return {number} time - The timestamp of when core was started
+ */
+utils.getStatus = () => store.get('status')
 
 /**
  * Helper method to get the Morio version string
@@ -663,8 +670,8 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
  * @param {object} color - The status color, one of green, amber, or red
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setStatus = (code) => {
-  store.set(['state', 'status'], { code, time: Date.now() })
+utils.setClusterStatus = (code, color) => {
+  store.set(['status', 'cluster'], { code, coor, time: Date.now() })
   return utils
 }
 
@@ -819,7 +826,7 @@ utils.isProduction = () => inProduction() ? true : false
  * @return {bool} stale - True if the status is stale, false if not
  */
 utils.isStatusStale = () => {
-  const data = utils.getStatus()
+  const data = utils.getClusterStatus()
   return Math.floor((Date.now() - data.time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 }
 
@@ -923,45 +930,45 @@ utils.resetClusterStateAge = () => {
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.updateStatus = async () => {
-  /*
-   * Ephemeral is easy
-   */
-  if (utils.isEphemeral()) return utils.setStatus(1)
-
-  /*
-   * If we're mid-reload, reflect that
-   */
-  if (!utils.isConfigResolved() || !utils.isCoreReady()) return utils.setStatus(2)
-
-  /*
-   * On follower nodes, running this on each heartbeat is ok.
-   * But on a leader node, especially on a large cluster, this would scale poorly.
-   * So we Debounce this by checking the age of the last time the status was updated
-   */
-  if (!utils.isStatusStale()) return utils
-
-  /*
-   * Check all services (including core)
-   */
-  for (const serviceName of ['core', ...serviceOrder]) {
-    const wanted = await runHook('wanted', serviceName, { statusCheck: true })
-    if (wanted) {
-      const status = runHook('status', serviceName)
-      // Short-circuit any issues
-      if (status !== 0) return utils.setStatus(status)
-    }
-  }
-
-  /*
-   * Do we need to run additional cluster checks?
-   */
-  if (utils.isDistributed()) {
-    log.fixme('Implement cluster state consolidation')
-  }
-
-  return utils.setStatus(0)
-}
+//utils.updateStatus = async () => {
+//  /*
+//   * Ephemeral is easy
+//   */
+//  if (utils.isEphemeral()) return utils.setClusterStatus(1, 'amber')
+//
+//  /*
+//   * If we're mid-reload, reflect that
+//   */
+//  if (!utils.isConfigResolved() || !utils.isCoreReady()) return utils.setClusterStatus(2, 'amber')
+//
+//  /*
+//   * On follower nodes, running this on each heartbeat is ok.
+//   * But on a leader node, especially on a large cluster, this would scale poorly.
+//   * So we Debounce this by checking the age of the last time the status was updated
+//   */
+//  if (!utils.isStatusStale()) return utils
+//
+//  /*
+//   * Check all services (including core)
+//   */
+//  for (const serviceName of ['core', ...serviceOrder]) {
+//    const wanted = await runHook('wanted', serviceName, { statusCheck: true })
+//    if (wanted) {
+//      const status = runHook('heartbeat', serviceName)
+//      // Short-circuit any issues
+//      if (status !== 0) return utils.setClusterStatus(status)
+//    }
+//  }
+//
+//  /*
+//   * Do we need to run additional cluster checks?
+//   */
+//  if (utils.isDistributed()) {
+//    log.fixme('Implement cluster state consolidation')
+//  }
+//
+//  return utils.setClusterStatus(0, 'green')
+//}
 
 /*      _   _
  *  ___| |_| |_  ___ _ _

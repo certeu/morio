@@ -28,7 +28,8 @@ export const service = {
           ignoreCertificate: true,
         }
       )
-      const status = result?.core?.verion ? 0 : 1
+      const status = result?.core?.version ? 0 : 1
+      log.fixme({stattus, from: 'api'}, 'What givces?')
       utils.setLocalServiceStatus('api', { status })
 
       return status

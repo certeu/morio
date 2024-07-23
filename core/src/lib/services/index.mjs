@@ -196,6 +196,8 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * Does the service need to be recreated?
    */
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
+  // FIXME: remove this
+  return false
   if (recreate) {
     log.debug(`${serviceName}: Updating container`)
     /*
@@ -317,6 +319,8 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
  * @param {object} hookParams - Optional parameters to pass to the lifecycle hook
  */
 const shouldServiceBeRestarted = async (serviceName, hookParams) => {
+  // FIXME: remove this
+  return false
   /*
    * Defer to the restart lifecycle hook
    */
