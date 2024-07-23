@@ -144,6 +144,16 @@ utils.getCacheHit = (key) => {
 utils.getCaConfig = () => store.get('config.ca')
 
 /**
+ * Helper method to get the data for a cluster rnode
+ */
+utils.getClusterNode = (serial) => store.get(['state', 'cluster', 'nodes', serial], false)
+
+/**
+ * Helper method to get the data of the cluster nodes
+ */
+utils.getClusterNodes = (serial) => store.get(['state', 'cluster', 'nodes'], false)
+
+/**
  * Helper method to get the cluster state age (time it was last updated)
  */
 utils.getClusterStateAge = () => Date.now() - store.get('state.cluster.updated', 172e10)
@@ -509,6 +519,17 @@ utils.getClusterFingerprint = () => store.get('state.cluster.uuid','').slice(0, 
  */
 utils.setClusterUuid = (uuid) => {
   store.set('state.cluster.uuid', uuid)
+  return utils
+}
+
+/**
+ * Helper method to set data for a cluster node
+ *
+ * @param {object} data - The cluster node data
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setClusterNode = (serial, data) => {
+  store.set(['state', 'cluster', 'nodes', serial], data)
   return utils
 }
 

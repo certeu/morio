@@ -181,11 +181,12 @@ const runHeartbeat = async (leaderless=false) => {
               to: fqdn,
               cluster: utils.getClusterUuid(),
               node: utils.getNodeUuid(),
-              leader: utils.getClusterLeaderUuid() || undefined,
+              leader: utils.getClusterLeaderSerial() || undefined,
               version: utils.getVersion(),
               settings_serial: Number(utils.getSettingsSerial()),
               node_serial: Number(utils.getNodeSerial()),
               status: utils.getStatus(),
+              nodes: utils.getClusterNodes(),
             },
             timeout: interval*500, // 25% of the interval
             returnAs: 'json',
