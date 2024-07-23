@@ -146,7 +146,7 @@ utils.getCaConfig = () => store.get('config.ca')
 /**
  * Helper method to get the data for a cluster rnode
  */
-utils.getClusterNode = (serial) => store.get(['state', 'cluster', 'nodes', serial], false)
+utils.getClusterNode = (serial) => store.get(['state', 'cluster', 'nodes', String(serial)], false)
 
 /**
  * Helper method to get the data of the cluster nodes
