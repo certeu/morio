@@ -9,13 +9,13 @@ export const service = {
      *
      * We simply return the passed in value here
      */
-    wanted: ({ onDemandBuild = false }) => onDemandBuild,
+    wanted: (hookParams) => hookParams?.onDemandBuild ? true : false,
     /*
      * This is an ephemeral container
      * It should only be recreated/restarted if this is an on-demand build request
      */
-    recreate: ({ onDemandBuild = false }) => onDemandBuild,
-    restart: ({ onDemandBuild = false }) => onDemandBuild,
+    recreate: (hookParams) => hookParams?.onDemandBuild ? true : false,
+    restart: (hookParams) => hookParams?.onDemandBuild ? true : false,
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *

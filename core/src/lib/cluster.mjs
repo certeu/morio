@@ -56,6 +56,8 @@ const updateLocalNodeState = async () => {
    */
   promises.push(runHook('heartbeat', 'core'))
 
+  log.info({ status: utils.getStatus() })
+
   /*
    * If we are leading the cluster,
    * we should also update the consolidated cluster status
