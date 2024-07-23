@@ -65,12 +65,12 @@ Controller.prototype.getReloadData = async (req, res) => {
 const getStatus = () => ({
   info: utils.getInfo(),
   status: utils.getStatus(true),
-  state: {
+  nodes: utils.getClusterNodes(),
+  node: {
     uptime: Math.floor((Date.now() - utils.getStartTime()) / 1000),
     cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
     node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
     node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
-    core: utils.getNode(),
     ephemeral: utils.isEphemeral(),
     ephemeral_uuid: utils.isEphemeral() ? undefined : utils.getEphemeralUuid(),
     reconfigure_count: utils.getReconfigureCount(),

@@ -364,6 +364,13 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
     log.debug(`Cluster mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
+  /*
+   * It it's a valid hearbeat, add the node info to the local state
+   */
+  if (errors.length === 0) {
+    log.fixme(data)
+  }
+
   return { action, errors }
 }
 
