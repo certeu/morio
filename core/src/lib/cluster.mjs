@@ -302,6 +302,7 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   let action = false
   const errors = []
 
+  log.warn(data)
   /*
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
@@ -327,12 +328,12 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
    * Verify node_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  if (data.node_serial === getNodeDataFromUuid(data.node)) {
-    const err = 'NODE_SERIAL_MISMATCH'
-    errors.push(err)
-    action = 'SYNC'
-    log.debug(`Node serial mismatch in ${type} from node ${data.node}: ${err}`)
-  }
+  //if (data.node_serial === getNodeDataFromUuid(data.node)) {
+  //  const err = 'NODE_SERIAL_MISMATCH'
+  //  errors.push(err)
+  //  action = 'SYNC'
+  //  log.debug(`Node serial mismatch in ${type} from node ${data.node}: ${err}`)
+  //}
 
   /*
    * Verify leader (only for heatbeats)
