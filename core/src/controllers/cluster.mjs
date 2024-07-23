@@ -96,7 +96,7 @@ Controller.prototype.join = async (req, res) => {
      * If it's a known cluster node, it's alll good
      */
     if (
-      req.body.you === utils.getNodeFqnd() &&
+      req.body.you === utils.getNodeFqdn() &&
       req.body.cluster === utils.getClusterUuid()
     ) res.status(200).send({ cluster: getClusterUuid(), node: nodeUuid, serial: getSettingsSerial() })
     return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
