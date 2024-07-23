@@ -434,6 +434,7 @@ const isClusterHealthy = async () => {
  * @param {string} fqdn - The fqdn of the remote node
  */
 export const inviteClusterNode = async (remote) => {
+  log.fixme(`Inviting cluster node ${remote}`)
   /*
    * First, attempt a single call to join the cluster.
    * We will await this one because typically this works, and it
@@ -490,7 +491,7 @@ const inviteClusterNodeAttempt = async (remote) => {
     }
   )
   if (result) {
-    log.fixme(Object.keys(result), 'Implement cluster join result')
+    log.info(`Node ${result.node} will join the cluster`)
     return true
   } else {
     log.fixme(Object.keys(result), 'Implement cluster join problem')

@@ -37,7 +37,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * If we are in ephemeral state, ask for a cluster invite
    */
-  return res.status(200).send({
+  if (utils.isEphemeral()) return res.status(200).send({
     action: 'INVITE',
     version: utils.getVersion(),
   })
