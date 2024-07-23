@@ -1,3 +1,4 @@
+import { testUrl } from '#shared/network'
 // Default hooks
 import {
   alwaysWantedHook,
