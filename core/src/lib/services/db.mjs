@@ -63,7 +63,7 @@ export const service = {
        */
       const up = await attempt({
         every: 5,
-        timeout: 150,
+        timeout: 1500,
         run: async () => await isDbUp(),
         onFailedAttempt: (s) =>
           log.debug(`Waited ${s} seconds for database, will continue waiting.`),

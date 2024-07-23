@@ -44,12 +44,7 @@ export const guardRoutes = (req, res, next) => {
     !allowedEphemeral.includes(req.method + req.url)
   ) {
     log.debug(`Blocked in ephemeral state: ${req.method} ${req.url}`)
-    return utils.sendErrorResponse(res, {
-      type: `morio.api.middleware.guard.ephemeral`,
-      title: 'This endpoint is not available when Morio is in ephemeral state',
-      status: 503,
-      detail: 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.'
-    })
+    return utils.sendErrorResponse(res, 'morio.api.middleware.routeguard.ephemeral', req.url)
   }
 
   /*
@@ -58,12 +53,7 @@ export const guardRoutes = (req, res, next) => {
   const allowedReload = reloadRoutes.map((url) => url.split('/').join(`${utils.getPrefix()}/`))
   if (!utils.isConfigResolved() && !allowedReload.includes(req.method + req.url)) {
     log.debug(`Blocked in reloading state: ${req.method} ${req.url}`)
-    return utils.sendErrorResponse(res, {
-      type: `morio.api.middleware.guard.reloading`,
-      title: 'This endpoint is not available while the Morio API is reloading',
-      status: 503,
-      detail: 'While the Morio API is reloading, only a subset of endpoints are available.'
-    })
+    return utils.sendErrorResponse(res, 'morio.api.middleware.routeguard.reloading', req.url)
   }
 
   /*

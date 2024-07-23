@@ -42,12 +42,7 @@ Controller.prototype.status = async (req, res) => {
    */
   const [status, result] = await utils.coreClient.get(`/status`)
 
-  if (status !== 200) return utils.sendErrorResponse(res, {
-    type: `morio.api.status.core.fetch.${status}`,
-    title: 'Unable to load status data from Morio Core',
-    status: 503,
-    detail: 'When reaching out to Morio Core, we were unable to retrieve the data to complete this request'
-  })
+  if (status !== 200) return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, '/status')
 
   /*
    * Update relevant data
@@ -87,7 +82,13 @@ Controller.prototype.status = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.info = async (req, res) => res.send(utils.getInfo())
+Controller.prototype.info = (req, res) => {
+  const info = utils.getInfo()
+
+  return info.about
+    ? res.send(info)
+    : utils.sendErrorResponse(res, 'morio.api.info.unavailable', '/info')
+}
 
 /**
  * Status logs

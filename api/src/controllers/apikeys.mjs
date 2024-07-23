@@ -91,12 +91,7 @@ Controller.prototype.list = async (req, res) => {
 
   return keys
     ? res.send({ result: 'success', keys})
-    : utils.sendErrorResponse(res, {
-      type: `morio.api.apikeys.list.failed`,
-      title: 'Unable to load the list of API keys from the database',
-      status: 503,
-      detail: 'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request'
-    })
+    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, '/apikey')
 }
 
 /**

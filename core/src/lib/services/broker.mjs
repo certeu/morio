@@ -22,22 +22,25 @@ export const service = {
     /*
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    //heartbeat: async () => {
-    //  const result = await testUrl(
-    //    `http://api:${utils.getPreset('MORIO_API_PORT')}/info`,
-    //    {
-    //      method: 'GET',
-    //      timeout: 500,
-    //      returnAs: 'json',
-    //      returnError: true,
-    //      ignoreCertificate: true,
-    //    }
-    //  )
-    //  const status = result?.core?.version ? 0 : 1
-    //  utils.setLocalServiceStatus('api', { status })
+    heartbeat: async () => {
+      const result = await testUrl(
+        //`http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/status/ready`,
+        `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+        { returnAs: 'json', ignoreCertificate: true }
+      )
+      const local = utils.getNodeSerial()
+      const status = (result.is_healthy || !result.nodes_down.includes(local))
+        ? 0
+        : 1
+      utils.setLocalServiceStatus('broker', status)
+      /*
+       * Also track the leader stqte
+       */
+      utils.setLeaderSerial(result.controller_id)
+      utils.setLeading(result.controller_id === local)
 
-    //  return status
-    //},
+      return status
+    },
     /*
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state

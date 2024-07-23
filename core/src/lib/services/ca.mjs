@@ -25,13 +25,7 @@ export const service = {
     heartbeat: async () => {
       const result = await testUrl(
         `https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`,
-        {
-          method: 'GET',
-          timeout: 500,
-          returnAs: 'json',
-          returnError: true,
-          ignoreCertificate: true,
-        }
+        { returnAs: 'json', ignoreCertificate: true }
       )
       const status = result?.status === "ok" ? 0 : 1
       utils.setLocalServiceStatus('ca', { status })

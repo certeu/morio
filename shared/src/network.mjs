@@ -63,7 +63,7 @@ export const testUrl = async (url, customOptions = {}, log = false) => {
     headers: {},
     data: undefined,
     ignoreCertificate: false,
-    timeout: 3000,
+    timeout: 1500,
     returnAs: false,
     returnError: false,
     ...customOptions,

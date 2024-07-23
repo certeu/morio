@@ -612,6 +612,28 @@ utils.setKeys = (keys) => {
 }
 
 /**
+ * Helper method to store the cluster leader's node_serial
+ *
+ * @param {number} node_serial - The node_serial of the leading node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLeaderSerial = (node_serial) => {
+  store.set('status.cluster.leader_serial', node_serial)
+  return utils
+}
+
+/**
+ * Helper method to store the leading state of the local node
+ *
+ * @param {bool} leading - Whether or not the node is leading
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLeading = (leading) => {
+  store.set('status.cluster.leading', leading ? true : false)
+  return utils
+}
+
+/**
  * Helper method to store a local service state
  *
  * @param {string} serviceName - The name of the service
@@ -811,7 +833,7 @@ utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
  *
  * @return {bool} leading - True if the local cluster node is leading, false if not
  */
-utils.isLeading = () => store.get('state.cluster.leading', false) ? true : false
+utils.isLeading = () => store.get('status.cluster.leading', false) ? true : false
 
 /*
  * Determined whether we are running in production or not
