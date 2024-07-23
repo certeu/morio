@@ -30,7 +30,7 @@ export const service = {
       const status = result?.status === "ok" ? 0 : 1
       utils.setLocalServiceStatus('ca', status)
 
-      return status
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

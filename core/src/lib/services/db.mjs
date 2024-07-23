@@ -22,7 +22,7 @@ export const service = {
      */
     heartbeat: async () => {
       const result = await testUrl(
-        `http://db:${utils.getPreset('MORIO_DB_PORT')}/readyz`,
+        `http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
         { returnAs: 'json', ignoreCertificate: true }
       )
       log.info(result)
