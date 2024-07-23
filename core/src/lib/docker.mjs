@@ -15,9 +15,10 @@ export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') 
  */
 const apiCache = {
   stale: 15, // Amount of seconds before the cache is considered stale
-  api: [ // Docker API commands to cache
-    'listImages'
-  ]
+  api: [
+    // Docker API commands to cache
+    'listImages',
+  ],
 }
 
 /**
@@ -33,8 +34,10 @@ export const createDockerContainer = async (serviceName, config) => {
   if (success) {
     log.debug(`${serviceName}: Service container created`)
     return result.id
-  }
-  else if (result?.json?.message && result.json.message.includes('is already in use by container')) {
+  } else if (
+    result?.json?.message &&
+    result.json.message.includes('is already in use by container')
+  ) {
     /*
      * Container already exists, so let's just recreate it
      */
@@ -51,9 +54,10 @@ export const createDockerContainer = async (serviceName, config) => {
         log.debug(`${serviceName} Service container recreated`)
         return created.id
       } else log.warn(`${serviceName}: Failed to recreate service container`)
-    } else log.warn(`${serviceName}: Failed to remove service container - Not creating new container`)
-  }
-  else log.warn({result, config, serviceName }, `${serviceName}: Failed to create service container`)
+    } else
+      log.warn(`${serviceName}: Failed to remove service container - Not creating new container`)
+  } else
+    log.warn({ result, config, serviceName }, `${serviceName}: Failed to create service container`)
 
   return false
 }
@@ -84,8 +88,7 @@ export const stopService = async (serviceName) => {
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
-  }
-  catch (err) {
+  } catch (err) {
     log.warn(err, `Failed to stop service: ${serviceName}`)
   }
 
@@ -114,18 +117,17 @@ export const createDockerNetwork = async (name) => {
       'morio.network.description': 'Bridge docker network for morio services',
     },
     IPAM: {
-      Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }]
+      Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }],
     },
     Options: {
-      "com.docker.network.mtu": String(utils.getPreset('MORIO_NETWORK_MTU'))
-    }
+      'com.docker.network.mtu': String(utils.getPreset('MORIO_NETWORK_MTU')),
+    },
   }
 
-  let success, result
+  let success
   try {
-    [success, result] = await runDockerApiCommand('createNetwork', config, true)
-  }
-  catch (err) {
+    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+  } catch (err) {
     log.warn({ err })
   }
 
@@ -142,23 +144,22 @@ export const createDockerNetwork = async (name) => {
          * This network is the wrong type of network
          * First disconnect all containers, then remove it
          */
-        log.debug(`core: Network ${name} is of type ${existingNetworkConfig.Driver
-          }, which is not suitable for running services.`
+        log.debug(
+          `core: Network ${name} is of type ${existingNetworkConfig.Driver}, which is not suitable for running services.`
         )
         log.debug(`core: Disconnecting all containers from network ${name}`)
         for (const id in existingNetworkConfig.Containers) {
-          await network.disconnect({Container: id, Force: true })
+          await network.disconnect({ Container: id, Force: true })
           log.debug(`core: Disconnected ${id}`)
         }
         log.debug(`core: Removing network ${name}`)
         await network.remove()
         log.debug(`core: Removed network ${name}`)
-        return createDockerNetwork(name, type)
-      }
+        return createDockerNetwork(name)
+      } else return network
       /*
        * Network already exists, no need to recreate it
        */
-      else return network
     }
     log.warn(`core; Unable to get info on the ${name} Docker network`)
   }
@@ -179,9 +180,11 @@ export const createDockerNetwork = async (name) => {
  * @param {object} network - The network object (from dockerode)
  * @param {endpointConfig}
  */
-export const attachToDockerNetwork = async (serviceName, network, endpointConfig, exlusive=true) => {
+export const attachToDockerNetwork = async (serviceName, network, endpointConfig) => {
   if (!network) {
-    log.warn(`${serviceName}: Attempt to attach to network ${network.id}, but no network object was passed`)
+    log.warn(
+      `${serviceName}: Attempt to attach to network ${network.id}, but no network object was passed`
+    )
     return false
   }
 
@@ -215,7 +218,6 @@ export const attachToDockerNetwork = async (serviceName, network, endpointConfig
     }
   } else log(`Failed to inspect ${serviceName} container`)
 }
-
 
 /**
  * Helper method to create the config for a Docker container
@@ -356,7 +358,9 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  */
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    log.debug(`core: Attemted to run \`${cmd}\` command on a container but no container ID was passed`)
+    log.debug(
+      `core: Attemted to run \`${cmd}\` command on a container but no container ID was passed`
+    )
     return [false]
   }
 
@@ -584,7 +588,6 @@ export const updateRunningServicesState = async () => {
   await forceUpdateRunningServicesState()
 }
 
-
 /**
  * This helper method saves a list of running services
  */
@@ -597,10 +600,7 @@ const forceUpdateRunningServicesState = async () => {
   const [ok, runningServices] = await runDockerApiCommand('listContainers')
   if (ok) {
     for (const service of runningServices) {
-      utils.setServiceState(
-        service.Names[0].split('/').pop(),
-        dockerStateToServiceState(service)
-      )
+      utils.setServiceState(service.Names[0].split('/').pop(), dockerStateToServiceState(service))
     }
   }
 }
@@ -625,7 +625,8 @@ const dockerStateToServiceState = (ds) => ({
  * @param {object} config - The service config object
  * @return {string} imagee - The container image for this service
  */
-export const serviceContainerImageFromConfig = (config) => config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
+export const serviceContainerImageFromConfig = (config) =>
+  config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
 
 /**
  * Helper method to get the container image for a service from the state
@@ -633,5 +634,4 @@ export const serviceContainerImageFromConfig = (config) => config.container.imag
  * @param {object} state - The service state object
  * @return {string} imagee - The container image for this service
  */
-export const serviceContainerImageFromState = (state) => state?.Image ? state.Image : false
-
+export const serviceContainerImageFromState = (state) => (state?.Image ? state.Image : false)

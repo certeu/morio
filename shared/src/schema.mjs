@@ -77,7 +77,7 @@ const keys = Joi.object({
  */
 const settings = Joi.object({
   cluster: Joi.object({
-    name: Joi.string().required().min(2).max(255).pattern(/^[A-Za-z0-9\s\-_,\.;:()]+$/),
+    name: Joi.string().required().min(2).max(255).pattern(/^[A-Za-z0-9\s-_,.;:()]+$/),
     broker_nodes: brokerNodes,
     flanking_nodes: flankingNodes,
     fqdn: fqdn.when('broker_nodes', {

@@ -1,8 +1,7 @@
 import { log, utils } from '../lib/utils.mjs'
-import { joinCluster, verifyHeartbeatRequest, inviteClusterNode } from '../lib/cluster.mjs'
+import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
-import { resolveHostAsIp } from '#shared/network'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { generateCaConfig } from '../lib/services/ca.mjs'
@@ -31,16 +30,16 @@ Controller.prototype.heartbeat = async (req, res) => {
   if (!valid) {
     log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
-  }
-  else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
+  } else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
 
   /*
    * If we are in ephemeral state, ask for a cluster invite
    */
-  if (utils.isEphemeral()) return res.status(200).send({
-    action: 'INVITE',
-    version: utils.getVersion(),
-  })
+  if (utils.isEphemeral())
+    return res.status(200).send({
+      action: 'INVITE',
+      version: utils.getVersion(),
+    })
 
   /*
    * Verify the heartbeat request which will determin the action to take
@@ -52,11 +51,9 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   if (action === 'SYNC') {
     log.todo('Handle heartbeat SYNC action')
-  }
-  else if (action === 'INVITE') {
+  } else if (action === 'INVITE') {
     log.todo('Handle heartbeat INVITE action')
-  }
-  else if (action === 'ELECT') {
+  } else if (action === 'ELECT') {
     log.todo('Handle hearbeat ELECT action')
   }
 
@@ -87,11 +84,15 @@ Controller.prototype.join = async (req, res) => {
    * However, we have to deal with a cluster node that restarted
    * and is trying to find its feet
    */
-  if (!utils.isEphemeral()) return (
-      req.body.you === utils.getNodeFqdn() &&
-      req.body.cluster === utils.getClusterUuid()
-    )
-      ? res.status(200).send({ cluster: utils.getClusterUuid(), node: utils.getNodeUuid(), serial: utils.getSettingsSerial() })
+  if (!utils.isEphemeral())
+    return req.body.you === utils.getNodeFqdn() && req.body.cluster === utils.getClusterUuid()
+      ? res
+          .status(200)
+          .send({
+            cluster: utils.getClusterUuid(),
+            node: utils.getNodeUuid(),
+            serial: utils.getSettingsSerial(),
+          })
       : utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
   /*
@@ -99,12 +100,18 @@ Controller.prototype.join = async (req, res) => {
    */
   const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
-    log.info(err, `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`)
+    log.info(
+      err,
+      `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`
+    )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
-  }
-  else log.info(`Accepted request to join cluster ${
-    valid.cluster.slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
-    } as ${valid.as}`)
+  } else
+    log.info(
+      `Accepted request to join cluster ${valid.cluster.slice(
+        0,
+        utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH')
+      )} as ${valid.as}`
+    )
 
   /*
    * To join the cluster, we write settings to disk and reconfigure
@@ -125,8 +132,11 @@ Controller.prototype.join = async (req, res) => {
     fqdn: valid.you,
     hostname: valid.you.split('.')[0],
     //ip: (await resolveHostAsIp(valid.you)),
-    serial: valid.settings.data.cluster.broker_nodes.concat(valid.settings.data.cluster.flanking_nodes || []).indexOf(valid.you) + 1,
-    uuid: nodeUuid
+    serial:
+      valid.settings.data.cluster.broker_nodes
+        .concat(valid.settings.data.cluster.flanking_nodes || [])
+        .indexOf(valid.you) + 1,
+    uuid: nodeUuid,
   })
 
   /*
@@ -147,5 +157,3 @@ Controller.prototype.join = async (req, res) => {
    */
   return reconfigure({ joinCluster: true })
 }
-
-

@@ -9,8 +9,7 @@ import {
   uuid,
 } from '#shared/crypto'
 import { reconfigure } from '../index.mjs'
-import { cloneAsPojo, attempt } from '#shared/utils'
-import { testUrl } from '#shared/network'
+import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { resolveServiceConfiguration } from '#config'
@@ -223,12 +222,8 @@ Controller.prototype.setup = async (req, res) => {
     /*
      * Add encryption methods
      */
-    const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-      keys.mrt,
-      'Morio by CERT-EU',
-      log
-    )
-    utils.encrypt =  encrypt
+    const { encrypt, decrypt, isEncrypted } = encryptionMethods(keys.mrt, 'Morio by CERT-EU', log)
+    utils.encrypt = encrypt
     utils.decrypt = decrypt
     utils.isEncrypted = isEncrypted
 
@@ -305,17 +300,19 @@ const localNodeInfo = async (body) => {
    * but only if we're not in production
    */
   let fqdn = false
-  const nodes = body.cluster.broker_nodes.map(node => node.toLowerCase())
+  const nodes = body.cluster.broker_nodes.map((node) => node.toLowerCase())
 
   for (const header of ['x-forwarded-host', 'host']) {
     const hval = (body.headers[header] || '').toLowerCase()
-    if (nodes.includes(hval) || (
+    if (
+      nodes.includes(hval) ||
       /*
        * Note that we carve out an exception here to facilitate unit tests
        * but only if we're not in production
        */
-      !utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST')
-    )) fqdn = hval
+      (!utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST'))
+    )
+      fqdn = hval
   }
 
   /*
@@ -330,8 +327,7 @@ const localNodeInfo = async (body) => {
     ...utils.getNode(),
     fqdn,
     hostname: fqdn.split('.')[0],
-    ip: (await resolveHostAsIp(fqdn)),
+    ip: await resolveHostAsIp(fqdn),
     serial: nodes.indexOf(fqdn) + 1,
   }
 }
-

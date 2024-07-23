@@ -1,7 +1,6 @@
-import { readYamlFile, writeYamlFile, writeFile, chown, mkdir } from '#shared/fs'
-import { attempt, sleep } from '#shared/utils'
+import { writeYamlFile, chown, mkdir } from '#shared/fs'
+import { attempt } from '#shared/utils'
 import { ensureServiceCertificate } from '#lib/tls'
-import { isCaUp } from './ca.mjs'
 import { execContainerCommand } from '#lib/docker'
 import { testUrl } from '#shared/network'
 // Default hooks
@@ -29,11 +28,7 @@ export const service = {
         { returnAs: 'json' }
       )
       const local = utils.getNodeSerial()
-      const status = (result && (
-        result.is_healthy || !result.nodes_down.includes(local))
-      )
-        ? 0
-        : 1
+      const status = result && (result.is_healthy || !result.nodes_down.includes(local)) ? 0 : 1
       utils.setServiceStatus('broker', status)
       /*
        * Also track the leader stqte
@@ -79,7 +74,11 @@ export const service = {
        * Write RPK file as it is mapped into the container,
        * so it must exist before we create the container
        */
-      await writeYamlFile('/etc/morio/broker/rpk.yaml', utils.getMorioServiceConfig('broker').rpk, log)
+      await writeYamlFile(
+        '/etc/morio/broker/rpk.yaml',
+        utils.getMorioServiceConfig('broker').rpk,
+        log
+      )
       await chown('/etc/morio/broker/rpk.yaml', uid, uid)
 
       return true
@@ -97,7 +96,11 @@ export const service = {
       // 101 is the UID that redpanda runs under inside the container
       const uid = utils.getPreset('MORIO_BROKER_UID')
       log.debug('Storing inital broker configuration')
-      await writeYamlFile('/etc/morio/broker/redpanda.yaml', utils.getMorioServiceConfig('broker').broker, log)
+      await writeYamlFile(
+        '/etc/morio/broker/redpanda.yaml',
+        utils.getMorioServiceConfig('broker').broker,
+        log
+      )
       await chown('/etc/morio/broker/redpanda.yaml', uid, uid)
       await chown('/etc/morio/broker/tls-cert.pem', uid, uid)
       await chown('/etc/morio/broker/tls-key.pem', uid, uid)
@@ -121,8 +124,7 @@ export const service = {
         every: 5,
         timeout: 60,
         run: async () => await isBrokerUp(),
-        onFailedAttempt: (s) =>
-          log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
+        onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for broker, will continue waiting.`),
       })
       if (up) log.debug(`Broker is up.`)
       else {
@@ -164,13 +166,10 @@ const ensureTopicsExist = async () => {
  * @return {bool} result - True if the broker is up, false if not
  */
 const isBrokerUp = async () => {
-  const result = await testUrl(
-    `http://broker:9644/v1/cluster/health_overview`,
-    {
-      ignoreCertificate: true,
-      returnAs: 'json',
-    }
-  )
+  const result = await testUrl(`http://broker:9644/v1/cluster/health_overview`, {
+    ignoreCertificate: true,
+    returnAs: 'json',
+  })
   if (result && result.is_healthy) return true
 
   return false

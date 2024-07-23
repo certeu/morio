@@ -1,9 +1,8 @@
 // Shared imports
-import { testUrl, resolveHost } from '#shared/network'
+import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
-import { runDockerApiCommand } from '#lib/docker'
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { log, utils } from './utils.mjs'
 
@@ -33,13 +32,12 @@ export const forceUpdateClusterState = async (silent) => {
  * Helper method to gather the morio cluster state
  */
 const updateNodeState = async () => {
-
   /*
    * Run heartbeat hook on all services
    */
   const promises = []
-  for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
-    if ((await runHook('wanted', service))) promises.push(runHook('heartbeat', service))
+  for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
+    if (await runHook('wanted', service)) promises.push(runHook('heartbeat', service))
   }
   /*
    * Do the same for core as the final service
@@ -109,7 +107,7 @@ const ensureClusterHeartbeat = async () => {
 /**
  * Start a cluster heartbeat
  */
-const runHeartbeat = async (leaderless=false) => {
+const runHeartbeat = async (leaderless = false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
@@ -129,19 +127,18 @@ const runHeartbeat = async (leaderless=false) => {
   /*
    * Are we still trying to figure out who is leading the cluster?
    */
-  if (leaderless) log.debug('Leaderless cluster, sending broadcast heartbeat to all cluster nodes to find leader')
+  if (leaderless)
+    log.debug('Leaderless cluster, sending broadcast heartbeat to all cluster nodes to find leader')
 
   /*
    * Who are we sending heartbeats to?
    */
-  const targets = leaderless
-    ? utils.getNodeFqdns()
-    : [utils.getClusterLeaderFqdn()]
+  const targets = leaderless ? utils.getNodeFqdns() : [utils.getClusterLeaderFqdn()]
 
   /*
    * Create a heartbeat for each target
    */
-  for (const fqdn of targets.filter(fqdn => fqdn !== utils.getNodeFqdn())) {
+  for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
     /*
      * Do not stack timeouts
      */
@@ -150,62 +147,67 @@ const runHeartbeat = async (leaderless=false) => {
     /*
      * Store timeout ID so we can cancel it later
      */
-    utils.setHeartbeatOut(fqdn, setTimeout(async () => {
-      /*
-       * Send heartbeat request and verify the result
-       */
-      const start = Date.now()
-      let data
-      try {
-        if (leaderless) log.debug(`Leaderless heartbeat to ${fqdn}`)
-        data = await testUrl(
-          `https://${fqdn}/-/core/cluster/heartbeat`,
-          {
-            method: 'POST',
-            data: {
-              from: utils.getNodeFqdn(),
-              to: fqdn,
-              cluster: utils.getClusterUuid(),
-              node: utils.getNodeUuid(),
-              leader: utils.getClusterLeaderSerial() || undefined,
-              version: utils.getVersion(),
-              settings_serial: Number(utils.getSettingsSerial()),
-              node_serial: Number(utils.getNodeSerial()),
-              status: utils.getStatus(),
-              nodes: utils.getClusterNodes(),
-            },
-            timeout: interval*500, // 25% of the interval
-            returnAs: 'json',
-            returnError: true,
-            ignoreCertificate: true,
-        })
-      }
-      catch (error) {
-        // Help the debug party
-        const rtt = Date.now() - start
-        log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`)
-        // Verify heartbeat (this will log a warning for the error)
-        verifyHeartbeatResponse({ fqdn, error })
-        // And trigger a new heartbeat
-        runHeartbeat()
-      }
+    utils.setHeartbeatOut(
+      fqdn,
+      setTimeout(
+        async () => {
+          /*
+           * Send heartbeat request and verify the result
+           */
+          const start = Date.now()
+          let data
+          try {
+            if (leaderless) log.debug(`Leaderless heartbeat to ${fqdn}`)
+            data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
+              method: 'POST',
+              data: {
+                from: utils.getNodeFqdn(),
+                to: fqdn,
+                cluster: utils.getClusterUuid(),
+                node: utils.getNodeUuid(),
+                leader: utils.getClusterLeaderSerial() || undefined,
+                version: utils.getVersion(),
+                settings_serial: Number(utils.getSettingsSerial()),
+                node_serial: Number(utils.getNodeSerial()),
+                status: utils.getStatus(),
+                nodes: utils.getClusterNodes(),
+              },
+              timeout: interval * 500, // 25% of the interval
+              returnAs: 'json',
+              returnError: true,
+              ignoreCertificate: true,
+            })
+          } catch (error) {
+            // Help the debug party
+            const rtt = Date.now() - start
+            log.debug(
+              `${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
+            )
+            // Verify heartbeat (this will log a warning for the error)
+            verifyHeartbeatResponse({ fqdn, error })
+            // And trigger a new heartbeat
+            runHeartbeat()
+          }
 
-      /*
-       * Help the debug party
-       */
-      const rtt = Date.now() - start
-      log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
+          /*
+           * Help the debug party
+           */
+          const rtt = Date.now() - start
+          log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
 
-      /*
-       * Verify the response
-       */
-      verifyHeartbeatResponse({ fqdn, data, rtt })
+          /*
+           * Verify the response
+           */
+          verifyHeartbeatResponse({ fqdn, data, rtt })
 
-      /*
-       * Trigger a new heatbeat
-       */
-      runHeartbeat()
-    }, leaderless ? 0 : interval*1000))
+          /*
+           * Trigger a new heatbeat
+           */
+          runHeartbeat()
+        },
+        leaderless ? 0 : interval * 1000
+      )
+    )
   }
 }
 
@@ -219,7 +221,7 @@ const runHeartbeat = async (leaderless=false) => {
  * @param {number} rtt - The request's round-trip-time (RTT) in ms
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
-const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
+const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Is this an error?
    */
@@ -233,8 +235,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
      */
     if (error.code === 'ECONNREFUSED') {
       log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
-    }
-    else {
+    } else {
       log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
     }
 
@@ -265,8 +266,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
    */
   if (data.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
-  }
-  else {
+  } else {
     for (const uuid in data.nodes) {
       /*
        * It it's a valid hearbeat, add the node info to the state
@@ -280,7 +280,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
 //
 //}
 
-export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
+export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -310,7 +310,9 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   if (!utils.getNodeFqdns().includes(data.from)) {
     const err = 'ROGUE_CLUSTER_MEMBER'
     errors.push(err)
-    log.warn(`Rogue cluster member. Received heartbeat from ${data.from} which is not a node of this cluster: ${err}`)
+    log.warn(
+      `Rogue cluster member. Received heartbeat from ${data.from} which is not a node of this cluster: ${err}`
+    )
   }
 
   /*
@@ -337,7 +339,10 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster leader.
    */
-  if (!data.status?.cluster?.leader_serial || data.status.cluster.leader_serial !== utils.getLeaderSerial()) {
+  if (
+    !data.status?.cluster?.leader_serial ||
+    data.status.cluster.leader_serial !== utils.getLeaderSerial()
+  ) {
     const err = 'LEADER_MISMATCH'
     errors.push(err)
     action = 'ELECT'
@@ -369,7 +374,6 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
 //  .map(node => label ? node.Spec.Labels[label] : node)
 //  .pop()
 
-
 /**
  * Ensure the Morio luster is ready
  *
@@ -387,7 +391,9 @@ export const ensureMorioCluster = async () => {
     await ensureMorioNetwork(
       utils.getNetworkName(), // Network name
       'core', // Service name
-      { Aliases: ['core', utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`] }, // Endpoint config
+      {
+        Aliases: ['core', utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`],
+      }, // Endpoint config
       true // Disconnect from other networks
     )
   } catch (err) {
@@ -403,11 +409,10 @@ export const ensureMorioCluster = async () => {
   /*
    * Is the cluster healthy?
    */
-  utils.setCoreReady((await isClusterHealthy()))
+  utils.setCoreReady(await isClusterHealthy())
 }
 
 const isClusterHealthy = async () => {
-
   log.todo('Implement cluster health status check')
 
   // Let's just say yes
@@ -432,17 +437,18 @@ export const inviteClusterNode = async (remote) => {
    * If that didn't work, keep trying, but don't block the request
    */
   if (!opportunisticJoin) {
-    log.warn(`Initial cluster join failed for node ${remote}. Will continue trying, but this is not a good omen.`)
+    log.warn(
+      `Initial cluster join failed for node ${remote}. Will continue trying, but this is not a good omen.`
+    )
     const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
     attempt({
       every: interval,
-      timeout: interval*0.9,
+      timeout: interval * 0.9,
       run: async () => await inviteClusterNodeAttempt(remote),
       onFailedAttempt: (s) =>
         log.debug(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
     }).then(() => log.info(`Node ${remote} has now joined the cluster`))
-  }
-  else log.info(`Node ${remote} has joined the cluster`)
+  } else log.info(`Node ${remote} has joined the cluster`)
 }
 
 /**
@@ -454,27 +460,24 @@ const inviteClusterNodeAttempt = async (remote) => {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
-  const result = await testUrl(
-    `https://${remote}/-/core/cluster/join`,
-    {
-      method: 'POST',
-      data: {
-        you: remote,
-        join: utils.getNodeFqdn(),
-        as: flanking ? 'flanking_node' : 'broker_node',
-        cluster: utils.getClusterUuid(),
-        settings: {
-          serial: Number(utils.getSettingsSerial()),
-          data: utils.getSanitizedSettings(),
-        },
-        keys: utils.getKeys(),
+  const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
+    method: 'POST',
+    data: {
+      you: remote,
+      join: utils.getNodeFqdn(),
+      as: flanking ? 'flanking_node' : 'broker_node',
+      cluster: utils.getClusterUuid(),
+      settings: {
+        serial: Number(utils.getSettingsSerial()),
+        data: utils.getSanitizedSettings(),
       },
-      ignoreCertificate: true,
-      timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
-      returnAs: 'json',
-      returnError: true,
-    }
-  )
+      keys: utils.getKeys(),
+    },
+    ignoreCertificate: true,
+    timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')) * 900, // *0.9 * 1000 to go from ms to s
+    returnAs: 'json',
+    returnError: true,
+  })
   if (result) {
     log.info(`Node ${result.node} will join the cluster`)
     return true
@@ -487,32 +490,32 @@ const inviteClusterNodeAttempt = async (remote) => {
 /*
  * This loads the status from the API
  */
-const getLocalEphemeralUuid = async () => {
-  /*
-   * This should only ever be used in ephemeral mode
-   */
-  if (!utils.isEphemeral()) return false
-
-
-  /*
-   * Reach out to 'api' in cleartext, which can only be access on the docker network
-   */
-  const result = await testUrl(
-    `http://api:${utils.getPreset('MORIO_API_PORT')}${utils.getPreset('MORIO_API_PREFIX')}/status`,
-    {
-      method: 'GET',
-      returnAs: 'json',
-      returnError: true,
-    }
-  )
-
-  /*
-   * Return local ephemeral UIUD if we found it
-   */
-  return result?.state?.core?.ephemeral_uuid
-    ?  result.state.core.ephemeral_uuid
-    : false
-}
+// const getLocalEphemeralUuid = async () => {
+//   /*
+//    * This should only ever be used in ephemeral mode
+//    */
+//   if (!utils.isEphemeral()) return false
+//
+//
+//   /*
+//    * Reach out to 'api' in cleartext, which can only be access on the docker network
+//    */
+//   const result = await testUrl(
+//     `http://api:${utils.getPreset('MORIO_API_PORT')}${utils.getPreset('MORIO_API_PREFIX')}/status`,
+//     {
+//       method: 'GET',
+//       returnAs: 'json',
+//       returnError: true,
+//     }
+//   )
+//
+//   /*
+//    * Return local ephemeral UIUD if we found it
+//    */
+//   return result?.state?.core?.ephemeral_uuid
+//     ?  result.state.core.ephemeral_uuid
+//     : false
+// }
 
 /*
  * Finds out the fqdn of this node
@@ -540,4 +543,3 @@ const getLocalEphemeralUuid = async () => {
 //
 //  return local
 //}
-
