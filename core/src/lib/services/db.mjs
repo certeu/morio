@@ -26,7 +26,7 @@ export const service = {
         { returnAs: 'json' }
       )
 
-      const status = result.indexOf('node ok') ? 0 : 1
+      const status = (result && result.indexOf('node ok')) ? 0 : 1
       utils.setLocalServiceStatus('db', status)
 
       return status === 0 ? true : false
