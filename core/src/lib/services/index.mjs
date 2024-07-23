@@ -261,7 +261,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    * Always recreate if the service is not up
    */
   const [up] = await isLocalServiceUp(serviceName)
-  log.todo({up, service})
+  log.todo({up, serviceName})
   // FIXME
   return false
   if (!up) return true
@@ -323,7 +323,7 @@ const shouldServiceBeRestarted = async (serviceName, hookParams) => {
    */
   // FIXME
   const restart = await runHook('restart', serviceName, hookParams)
-  log.todo({restart, service})
+  log.todo({restart, serviceName})
   return false
   return await runHook('restart', serviceName, hookParams)
 }
