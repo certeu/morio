@@ -1,5 +1,5 @@
 import { testUrl } from '#shared/network'
-import { utils, log } from '../utils.mjs'
+import { utils } from '../utils.mjs'
 // Default hooks
 import {
   alwaysWantedHook,

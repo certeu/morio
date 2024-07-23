@@ -3,18 +3,11 @@ import {
   readYamlFile,
   readJsonFile,
   readDirectory,
-  writeYamlFile,
-  mkdir,
 } from '#shared/fs'
 // Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
-// Used to setup the core service
-import { loadAllPresets } from '#config'
-// Axios is required to talk to the CA
-import https from 'https'
-import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
+import { encryptionMethods } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
@@ -23,8 +16,6 @@ import { alwaysWantedHook } from './index.mjs'
 import { ensureMorioCluster } from '#lib/cluster'
 // log & utils
 import { log, utils } from '../utils.mjs'
-// Docker
-import { runContainerApiCommand } from '#lib/docker'
 // UUID
 import { uuid } from '#shared/crypto'
 // Traefic config

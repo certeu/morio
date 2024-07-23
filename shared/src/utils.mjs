@@ -50,7 +50,6 @@ export const attempt = async ({
   run,
   onFailedAttempt = false,
   validate = false,
-  log = false,
 }) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve))
 
 /*

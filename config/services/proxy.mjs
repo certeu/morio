@@ -1,5 +1,4 @@
 import { YamlConfig } from '../yaml-config.mjs'
-import { traefikHostRulePrefix } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -18,7 +17,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const traefik = {
     proxy: new YamlConfig()
-      .set("http.routers.dashboard.rule", "( PathPrefix(\`/api\`) || PathPrefix(\`/dashboard\`) )")
+      .set("http.routers.dashboard.rule", "( PathPrefix(`/api`) || PathPrefix(`/dashboard`) )")
       .set("http.routers.dashboard.priority", 666)
       .set("http.routers.dashboard.service", "api@internal")
       .set("http.routers.dashboard.tls", true)

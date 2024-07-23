@@ -6,7 +6,6 @@ import { testUrl } from '#shared/network'
 import { resolveServiceConfiguration } from '#config'
 // Default hooks
 import {
-  defaultServiceWantedHook,
   defaultRecreateServiceHook,
   defaultRestartServiceHook,
 } from './index.mjs'
@@ -98,7 +97,7 @@ export const service = {
       /*
        * Make sure CA is up
        */
-      return await attempt({
+      const up = await attempt({
         every: 5,
         timeout: 60,
         run: async () => await isCaUp(),

@@ -1,12 +1,9 @@
-// External dependencies
-import axios from 'axios'
-import https from 'https'
 // Shared imports
-import { restClient, testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
-import { attempt, sleep } from '#shared/utils'
+import { testUrl, resolveHost } from '#shared/network'
+import { attempt } from '#shared/utils'
 import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
-import { runDockerApiCommand, runNodeApiCommand } from '#lib/docker'
+import { runDockerApiCommand } from '#lib/docker'
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { log, utils } from './utils.mjs'
 
@@ -235,10 +232,10 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
      * Also log something an error-specific message
      */
     if (error.code === 'ECONNREFUSED') {
-      log.warn(`Connection refused when sending heartbeat to ${uuid}. Is this node up?`)
+      log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
     }
     else {
-      log.warn(`Unspecified error when sending heartbeat to node ${uuid} (${uuid}).`)
+      log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
     }
 
     return
@@ -279,9 +276,9 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   }
 }
 
-const verifyHeartbeatNode = (node, result) => {
-
-}
+//const verifyHeartbeatNode = (node, result) => {
+//
+//}
 
 export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   /*
@@ -367,10 +364,10 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   return { action, errors }
 }
 
-const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getNodes())
-  .filter(node => node.Spec.Labels['morio.node.uuid'] === uuid)
-  .map(node => label ? node.Spec.Labels[label] : node)
-  .pop()
+//const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getNodes())
+//  .filter(node => node.Spec.Labels['morio.node.uuid'] === uuid)
+//  .map(node => label ? node.Spec.Labels[label] : node)
+//  .pop()
 
 
 /**
@@ -380,9 +377,7 @@ const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getNodes(
  * Note that Morio always runs in cluster mode
  * to ensure we can reach flanking nodes whne they are added.
  */
-export const ensureMorioCluster = async ({
-  initialSetup = false,
-}) => {
+export const ensureMorioCluster = async () => {
   utils.setCoreReady(false)
 
   /*
@@ -525,24 +520,24 @@ const getLocalEphemeralUuid = async () => {
  * @param {array[string]} nodes - The list of node FQDNs
  * @return {string|bool} local - The FQDN or false if it wasn't found
  */
-const getLocalNode = async (nodes) => {
-  const localEphUuid = await getLocalEphemeralUuid()
-
-  let local = false
-  for (const node of nodes) {
-    const reachable = await testUrl(
-      `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
-      {
-        method: 'GET',
-        ignoreCertificate: true,
-        timeout: 1500,
-        returnAs: 'json',
-        returnError: false,
-      }
-    )
-    if (reachable?.state?.core?.ephemeral_uuid === localEphUuid) local = node
-  }
-
-  return local
-}
+//const getLocalNode = async (nodes) => {
+//  const localEphUuid = await getLocalEphemeralUuid()
+//
+//  let local = false
+//  for (const node of nodes) {
+//    const reachable = await testUrl(
+//      `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
+//      {
+//        method: 'GET',
+//        ignoreCertificate: true,
+//        timeout: 1500,
+//        returnAs: 'json',
+//        returnError: false,
+//      }
+//    )
+//    if (reachable?.state?.core?.ephemeral_uuid === localEphUuid) local = node
+//  }
+//
+//  return local
+//}
 

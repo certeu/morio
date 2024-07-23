@@ -19,6 +19,23 @@ export const resolveServiceConfiguration = ({ utils }) => {
   }
 
   /*
+   * Traefik (proxy) configuration for the API service
+   */
+  const traefik = {
+    api: generateTraefikConfig(utils, {
+      service: 'api',
+      prefixes: [
+        utils.getPreset('MORIO_API_PREFIX'),
+        '/downloads',
+        '/coverage'
+      ],
+      priority: 666,
+    }).set("http.middlewares.api-prefix.replacepathregex.regex", `^/-/api/(.*)`)
+      .set("http.middlewares.api-prefix.replacepathregex.replacement", "/$1")
+      .set('http.routers.api.middlewares', ['api-prefix@file'])
+      .set('http.routers.api.middlewares', utils.isEphemeral() ? [] : ['api-auth@file']),
+  }
+  /*
    * To run unit tests, we need to modify the config slightly
    */
   if (!PROD && utils.isUnitTest()) {
@@ -66,19 +83,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
     /*
      * Traefik (proxy) configuration for the API service
      */
-    traefik: {
-      api: generateTraefikConfig(utils, {
-        service: 'api',
-        prefixes: [
-          utils.getPreset('MORIO_API_PREFIX'),
-          '/downloads',
-          '/coverage'
-        ],
-        priority: 666,
-      }).set("http.middlewares.api-prefix.replacepathregex.regex", `^/-/api/(.*)`)
-        .set("http.middlewares.api-prefix.replacepathregex.replacement", "/$1")
-        .set('http.routers.api.middlewares', ['api-prefix@file'])
-        .set('http.routers.api.middlewares', utils.isEphemeral() ? [] : ['api-auth@file']),
-    }
+    traefik,
   }
 }

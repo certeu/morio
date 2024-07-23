@@ -5,7 +5,7 @@ import https from 'https'
 import axios from 'axios'
 import { attempt } from '#shared/utils'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods } from '#shared/crypto'
+import { generateJwt, generateCsr, keypairAsJwk } from '#shared/crypto'
 // Log & utils
 import { log, utils } from '#lib/utils'
 

@@ -1,13 +1,10 @@
 import { restClient, resolveHostAsIp } from '#shared/network'
-import { Store, unshift, setIfUnset } from '#shared/store'
+import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
-import { getPreset, inProduction, serviceOrder } from '#config'
+import { getPreset, inProduction } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
-import get from 'lodash.get'
-import set from 'lodash.set'
-import { errors, statusCodes, statusCodeAsColor } from '#shared/errors'
+import { errors } from '#shared/errors'
 import { loadAllPresets } from '#config'
-import { runHook } from './services/index.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -156,7 +153,7 @@ utils.getClusterNodeFromSerial = (serial) => Object.values(store.get(['state', '
 /**
  * Helper method to get the data of the cluster nodes
  */
-utils.getClusterNodes = (serial) => store.get(['state', 'cluster', 'nodes'], {})
+utils.getClusterNodes = () => store.get(['state', 'cluster', 'nodes'], {})
 
 /**
  * Helper method to get the cluster state age (time it was last updated)
@@ -727,7 +724,7 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setClusterStatus = (code, color) => {
-  store.set(['status', 'cluster'], { code, coor, time: Date.now() })
+  store.set(['status', 'cluster'], { code, color, time: Date.now() })
   return utils
 }
 
@@ -832,7 +829,7 @@ utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
 /**
  * Helper method to determine whether core is ready
  */
-utils.isCoreReady = () => store.get('state.core_ready') ? true : flase
+utils.isCoreReady = () => store.get('state.core_ready') ? true : false
 
 /**
  * Helper method to see if brokers are distributed

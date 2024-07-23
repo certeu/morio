@@ -54,7 +54,7 @@ export const resolveHostAsIp = async (host) => {
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
  */
-export const testUrl = async (url, customOptions = {}, log = false) => {
+export const testUrl = async (url, customOptions = {}) => {
   /*
    * Merge default and custom options
    */
@@ -240,8 +240,8 @@ export const put = async (url, data) => __postput('PUT', url, data)
  * @return {object] client - The API client
  */
 export const restClient = (api) => ({
-  get: async (url, raw, log) => get(api + url),
-  post: async (url, data, raw, log) => __postput('POST', api + url, data),
-  put: async (url, data, raw, log) => __postput('PUT', api + url, data),
+  get: async (url, raw, log) => get(api + url, raw, log),
+  post: async (url, data, raw, log) => __postput('POST', api + url, data, raw, log),
+  put: async (url, data, raw, log) => __postput('PUT', api + url, data, raw, log),
   streamGet: async (url, res) => streamGet(api + url, res),
 })

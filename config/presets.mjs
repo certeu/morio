@@ -178,10 +178,10 @@ export const presets = {
   MORIO_CORE_CRON_HOURLY: 1,
 
   // Amount of hours between triggering cron's daily schedule (not real cron)
-  MORIO_CORE_CRON_HOURLY: 24,
+  MORIO_CORE_CRON_DAILY: 24,
 
   // Amount of hours between triggering cron's weekly schedule (not real cron)
-  MORIO_CORE_CRON_HOURLY: 720,
+  MORIO_CORE_CRON_WEEKLY: 720,
 
   // Amount of hours between triggering cron's monthly schedule (not real cron)
   MORIO_CORE_CRON_MONTHLY: 720,

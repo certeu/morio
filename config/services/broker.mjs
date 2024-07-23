@@ -11,11 +11,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const PROD = utils.isProduction()
 
   /*
-   * Name to advertise
-   */
-  const NAME = utils.getNodeFqdn()
-
-  /*
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1

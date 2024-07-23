@@ -98,10 +98,7 @@ export const generateTraefikConfig = (utils, {
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
     // Include rules and config using the cluster's FQDNs/nodes
-    const nodes = utils.getAllFqdns()
-    const clusterFqdn = utils.getSettings('cluster.fqdn', false)
     tc.set([...ROUTER, 'tls'], true)
-    //const hostRule = traefikHostRulePrefix(service, nodes)
     if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
     else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
   }

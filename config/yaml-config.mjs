@@ -1,11 +1,6 @@
 import set from 'lodash.set'
 import yaml from 'js-yaml'
 
-/*
- * Don't allow setting of these top-level keys in the store
- */
-const avoid = ['set', 'asYaml']
-
 //////////////////////////////////////////////
 //               CONSTRUCTOR                //
 //////////////////////////////////////////////
@@ -16,7 +11,7 @@ const avoid = ['set', 'asYaml']
  * @constructor
  * @return {YamlConfig} this - The YamlConfig instance
  */
-export function YamlConfig(log = false) {
+export function YamlConfig() {
   return this
 }
 
