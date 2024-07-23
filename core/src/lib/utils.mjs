@@ -21,8 +21,8 @@ log.todo = (a,b) => {
   const location = new Error().stack.split("\n")[2]
 
   return typeof a === 'object'
-    ? log.warn(a, `TODO 🟠 ${b}${locaton}`)
-    : log.warn(`TODO 🟠 ${a}${location}`)
+    ? log.debug(a, `TODO 🟠 ${b}${location}`)
+    : log.debug(`TODO 🟠 ${a}${location}`)
 }
 
 /*

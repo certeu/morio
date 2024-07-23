@@ -29,7 +29,9 @@ export const service = {
         { returnAs: 'json' }
       )
       const local = utils.getNodeSerial()
-      const status = (result.is_healthy || !result.nodes_down.includes(local))
+      const status = (result && (
+        result.is_healthy || !result.nodes_down.includes(local))
+      )
         ? 0
         : 1
       utils.setLocalServiceStatus('broker', status)
