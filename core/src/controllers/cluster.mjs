@@ -92,7 +92,9 @@ Controller.prototype.join = async (req, res) => {
    * and is trying to find its feet
    */
   if (!utils.isEphemeral()) {
-    log.fixme(req.body, 'Implement cluster join here')
+    /*
+     * If it's a known cluster node, it's alll good
+     */
     if (
       req.body.you === utils.getNodeFqnd() &&
       req.body.cluster === utils.getClusterUuid()
