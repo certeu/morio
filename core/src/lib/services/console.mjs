@@ -8,6 +8,7 @@ import {
   defaultRestartServiceHook,
 } from './index.mjs'
 import { createX509Certificate, certificateLifetimeInMs } from '#lib/tls'
+import { testUrl } from '#shared/network'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
