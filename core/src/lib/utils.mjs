@@ -858,12 +858,7 @@ utils.isProduction = () => inProduction() ? true : false
  *
  * @return {bool} stale - True if the status is stale, false if not
  */
-utils.isStatusStale = () => {
-  const time = utils.getClusterStatusAge()
-  const seconds = Math.floor((Date.now() - time)/1000)
-  console.log({time, seconds})
-  return Math.floor((Date.now() - time)/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
-}
+utils.isStatusStale = () => Math.floor((Date.now() - utils.getClusterStatusAge())/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
 
 /**
  * Helper method to determine whether a node (any node) is a flanking node

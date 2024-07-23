@@ -18,10 +18,20 @@ export const service = {
   name: 'db',
   hooks: {
     /*
-     * Lifecycle hook to determine the service status
+     * Lifecycle hook to determine the service status (runs every heartbeat)
      */
-    status: () => {
-      return 0 // FIXME: Do proper introspection about service health
+    heartbeat: async () => {
+      const result = await testUrl(
+        `http://db:${utils.getPreset('MORIO_DB_PORT')}/readyz`,
+        { returnAs: 'json', ignoreCertificate: true }
+      )
+      log.info(result)
+      return true
+
+      const status = result?.core?.version ? 0 : 1
+      utils.setLocalServiceStatus('api', status)
+
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

@@ -39,7 +39,7 @@ export const service = {
       utils.setLeaderSerial(result.controller_id)
       utils.setLeading(result.controller_id === local)
 
-      return status
+      return status === 0 ? true : false
     },
     /*
      * Lifecycle hook to determine whether the container is wanted

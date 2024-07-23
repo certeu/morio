@@ -19,7 +19,6 @@ export const updateClusterState = async (silent) => {
    * But on a leader node, especially on a large cluster, this would scale poorly.
    * So we Debounce this by checking the age of the last time the status was updated
    */
-  log.info({ stale: utils.isStatusStale() }, 'in update thingie')
   if (!utils.isStatusStale()) return
 
   await forceUpdateClusterState(silent)
@@ -29,7 +28,6 @@ export const updateClusterState = async (silent) => {
  * Helper method to update the cluster state
  */
 export const forceUpdateClusterState = async (silent) => {
-  log.info('in force thingie')
   await updateLocalNodeState(silent)
   /*
    * Do we need to run additional cluster checks?
