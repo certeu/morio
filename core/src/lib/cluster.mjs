@@ -185,6 +185,7 @@ const runHeartbeat = async (leaderless=false) => {
               version: utils.getVersion(),
               settings_serial: Number(utils.getSettingsSerial()),
               node_serial: Number(utils.getNodeSerial()),
+              status: utils.getStatus(),
             },
             timeout: interval*500, // 25% of the interval
             returnAs: 'json',
