@@ -260,7 +260,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   if (Array.isArray(data?.errors) && data.errors.length > 0) {
     utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
     for (const err of data.errors) {
-      log.error(`Heartbeat error from ${fqdn}: ${err}`)
+      log.warn(`Heartbeat error from ${fqdn}: ${err}`)
     }
   } else {
     utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
@@ -280,7 +280,6 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
   }
   else {
-    log.info(data)
     for (const uuid in data.nodes) {
       /*
        * It it's a valid hearbeat, add the node info to the local state

@@ -169,7 +169,7 @@ export const presets = {
   MORIO_CORE_SERVICE_CERTIFICATE_RENEWAL_DAYS: 135,
 
   // Amount of seconds to wait between cluster heartbeats
-  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 5,
+  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 30,
 
   // Amount of milliseconds above which we'll complain about hearbeat latency
   MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT: 150,
