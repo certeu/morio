@@ -28,7 +28,7 @@ export const service = {
         { returnAs: 'json', ignoreCertificate: true }
       )
       const status = result?.status === "ok" ? 0 : 1
-      utils.setLocalServiceStatus('ca', { status })
+      utils.setLocalServiceStatus('ca', status)
 
       return status
     },

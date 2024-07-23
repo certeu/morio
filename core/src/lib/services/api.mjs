@@ -23,7 +23,7 @@ export const service = {
         { returnAs: 'json', ignoreCertificate: true }
       )
       const status = result?.core?.version ? 0 : 1
-      utils.setLocalServiceStatus('api', { status })
+      utils.setLocalServiceStatus('api', status)
 
       return status
     },
