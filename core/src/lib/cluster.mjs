@@ -490,10 +490,10 @@ const inviteClusterNodeAttempt = async (remote) => {
     }
   )
   if (result) {
-    log.fixme(result, 'Implement cluster join result')
+    log.fixme(Object.keys(result), 'Implement cluster join result')
     return true
   } else {
-    log.fixme(result, 'Implement cluster join problem')
+    log.fixme(Object.keys(result), 'Implement cluster join problem')
     return false
   }
 }
