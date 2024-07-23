@@ -91,16 +91,12 @@ Controller.prototype.join = async (req, res) => {
    * However, we have to deal with a cluster node that restarted
    * and is trying to find its feet
    */
-  if (!utils.isEphemeral()) {
-    /*
-     * If it's a known cluster node, it's alll good
-     */
-    if (
+  if (!utils.isEphemeral()) return (
       req.body.you === utils.getNodeFqdn() &&
       req.body.cluster === utils.getClusterUuid()
-    ) res.status(200).send({ cluster: utils.getClusterUuid(), node: utils.getNodeUuid(), serial: utils.getSettingsSerial() })
-    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
-  }
+    )
+      ? res.status(200).send({ cluster: utils.getClusterUuid(), node: utils.getNodeUuid(), serial: utils.getSettingsSerial() })
+      : utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
 
   /*
    * Validate request against schema
