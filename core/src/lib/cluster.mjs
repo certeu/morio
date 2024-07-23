@@ -303,7 +303,6 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
   let action = false
   const errors = []
 
-  log.warn(data)
   /*
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
@@ -312,6 +311,25 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
     const err = 'VERSION_MISMATCH'
     errors.push(err)
     log.info(`Version mismatch in ${type} from node ${data.node}: ${err}`)
+  }
+
+  /*
+   * Verify we know this node
+   * If there's a mismatch there is nothing we can do so this is lowest priority.
+   */
+  if (!utils.getNodeFqdns().includes(data.from)) {
+    const err = 'ROGUE_CLUSTER_MEMBER'
+    errors.push(err)
+    log.warn(`Rogue cluster member. Received heartbeat from ${data.from} which is not a node of this cluster: ${err}`)
+  }
+
+  /*
+   * Verify the 'to' is really us as a mismatch here can indicate fault DNS configuration
+   */
+  if (!utils.getNodeFqdn() !== data.to) {
+    const err = 'iHEARTBEAT_TARGET_FQDN_MISMATCH'
+    errors.push(err)
+    log.warn(`Heartbeat target FQDN mismatch. We are not ${data.to}: ${err}`)
   }
 
   /*
@@ -329,17 +347,11 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster.
    */
-  if (data.leader && (
-    (data.leader !== utils.getClusterLeaderUuid()) ||
-    (data.leader !== utils.getNodeUuid())
-  )) {
-    const err = 'LEADER_CHANGE'
+  if (!data.status?.cluster?.leader_serial || data.status.cluster.leader_serial !== utils.getLeaderSerial()) {
+    const err = 'LEADER_MISMATCH'
     errors.push(err)
     action = 'ELECT'
     log.debug(`Leader mismatch in ${type} from node ${data.node}: ${err}`)
-    log.info({
-      data, leader: utils.getClusterLeaderUuid(), uuid: utils.getNodeUuid()
-    })
   }
 
   /*
