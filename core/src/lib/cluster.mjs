@@ -44,29 +44,25 @@ export const forceUpdateClusterState = async (silent) => {
  */
 const updateLocalNodeState = async () => {
 
+  /*
+   * Run heartbeat hook on all services
+   */
   const promises = []
   for (const service of (utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder)) {
-    promises.push(runHook('heartbeat', service))
+    if ((await runHook('wanted', service))) promises.push(runHook('heartbeat', service))
   }
-  log.fixme(utils.getStatus(), `Update local node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
   /*
-   * Reach out to broker to see if we're leading
+   * Do the same for core as the final service
    */
-  //const result = await testUrl(
-  //  `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
-  //  {
-  //    method: 'GET',
-  //    timeout: 500,
-  //    returnAs: 'json',
-  //    returnError: true,
-  //    ignoreCertificate: true,
-  //  }
-  //)
-  //log.fixme(result)
+  promises.push(runHook('heartbeat', 'core'))
 
-
-
-  return
+  /*
+   * If we are leading the cluster,
+   * we should also update the consolidated cluster status
+   */
+  if (utils.isLeading()) {
+    log.fixme(utils.getStatus(), `Update overalllocal node cluster state in updateLocalNodeState / src/lib/cluster.mjs`)
+  }
 }
 
 /**
@@ -348,7 +344,7 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
 
   /*
    * Verify leader (only for heatbeats)
-   * If there's a mismatch, ask to re-elect the cluster.
+   * If there's a mismatch, ask to re-elect the cluster leader.
    */
   if (!data.status?.cluster?.leader_serial || data.status.cluster.leader_serial !== utils.getLeaderSerial()) {
     const err = 'LEADER_MISMATCH'
