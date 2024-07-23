@@ -61,11 +61,6 @@ Controller.prototype.heartbeat = async (req, res) => {
   }
 
   /*
-   * Update status (but don't wait for it)
-   */
-  utils.updateStatus()
-
-  /*
    * Always return status 200, be specific in the data
    */
   return res.status(200).send({
