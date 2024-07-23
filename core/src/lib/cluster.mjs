@@ -368,7 +368,7 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
    * It it's a valid hearbeat, add the node info to the local state
    */
   if (errors.length === 0) {
-    if (data.nodes[data.node]) setClusterNode(data.node, data.nodes[data.node])
+    if (data.nodes[data.node]) utils.setClusterNode(data.node, data.nodes[data.node])
   }
 
   return { action, errors }
