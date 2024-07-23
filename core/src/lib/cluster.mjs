@@ -279,11 +279,15 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt=0, error=false }) => {
   if (data.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
   }
-
-  /*
-   * Update status on each heartbeat
-   */
-  //utils.updateStatus()
+  else {
+    log.info(data)
+    for (const uuid in data.nodes) {
+      /*
+       * It it's a valid hearbeat, add the node info to the local state
+       */
+      if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
+    }
+  }
 }
 
 const verifyHeartbeatNode = (node, result) => {
