@@ -163,11 +163,7 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  *
  * @return {string} fqdn - The FQDN of the cluster leader node
  */
-utils.getClusterLeaderFqdn = () => {
-  const fqdn = utils.getClusterLeaderState()?.fqdn
-
-  return fqdn ? fqdn : false
-}
+utils.getClusterLeaderFqdn = () => utils.getSettings('cluster.broker_nodes', [])[Number(utils.getLeaderSerial()) - 1] || false
 
 /**
  * Helper method to get the node_serial of the node leading the cluster
@@ -248,6 +244,13 @@ utils.getInfo = () => store.get('info')
  * @return {object} keys - The keys configuration as loaded from disk
  */
 utils.getKeys = () => store.get('config.keys')
+
+/**
+ * Helper method to get the node_serial of the leading node
+ *
+ * @return {object} services - The local service as stored in state
+ */
+utils.getLeaderSerial = () => store.get('status.cluster.leader_serial', false)
 
 /**
  * Helper method to get the local services from state

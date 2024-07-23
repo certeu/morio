@@ -486,14 +486,14 @@ const inviteClusterNodeAttempt = async (remote) => {
       ignoreCertificate: true,
       timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL'))*900, // *0.9 * 1000 to go from ms to s
       returnAs: 'json',
-      returnError: false,
+      returnError: true,
     }
   )
   if (result) {
-    log.fixme('Implement cluster join result')
+    log.fixme(result, 'Implement cluster join result')
     return true
   } else {
-    log.fixme('Implement cluster join problem')
+    log.fixme(result, 'Implement cluster join problem')
     return false
   }
 }

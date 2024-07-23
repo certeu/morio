@@ -87,9 +87,14 @@ Controller.prototype.heartbeat = async (req, res) => {
  */
 Controller.prototype.join = async (req, res) => {
   /*
-   * Only allow this in ephemeral mode
+   * We only allow this in ephemeral mode
+   * However, we have to deal with a cluster node that restarted
+   * and is trying to find its feet
    */
-  if (!utils.isEphemeral()) return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
+  if (!utils.isEphemeral()) {
+    log.fixme(req.body, 'Implement cluster join here')
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
+  }
 
   /*
    * Validate request against schema
