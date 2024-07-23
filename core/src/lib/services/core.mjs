@@ -106,7 +106,7 @@ export const service = {
        * Save data from disk in memory
        */
       utils.setEphemeral(false)
-      utils.setNode(node)
+      utils.setNode({ ...node, settings: Number(timestamp) })
       utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
       utils.setKeys(keys)
       utils.setSettingsSerial(Number(timestamp))

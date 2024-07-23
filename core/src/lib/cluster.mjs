@@ -148,13 +148,13 @@ const runHeartbeat = async (leaderless=false) => {
    * Who are we sending heartbeats to?
    */
   const targets = leaderless
-    ? utils.getNodeFqdns().filter(fqdn => fqdn !== utils.getNodeFqdn())
+    ? utils.getNodeFqdns()
     : [utils.getClusterLeaderFqdn()]
 
   /*
    * Create a heartbeat for each target
    */
-  for (const fqdn of targets) {
+  for (const fqdn of targets.filter(fqdn => fqdn !== utils.getNodeFqdn())) {
     /*
      * Do not stack timeouts
      */
@@ -368,7 +368,7 @@ export const verifyHeartbeatRequest = async (data, type='heartbeat') => {
    * It it's a valid hearbeat, add the node info to the local state
    */
   if (errors.length === 0) {
-    log.fixme(data)
+    if (data.nodes[data.node]) setClusterNode(data.node, data.nodes[data.node])
   }
 
   return { action, errors }
