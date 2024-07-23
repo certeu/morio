@@ -56,7 +56,7 @@ Controller.prototype.getReloadData = async (req, res) => {
   }
   data.presets = utils.getPresets()
 
-  return res.status(200).send(data) .end()
+  return res.status(200).send(data)
 }
 
 /*

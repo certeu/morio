@@ -18,11 +18,7 @@ export const reloadConfiguration = async () => {
     timeout: 3600,
     run: async () => {
       const [status, body] = await utils.coreClient.get('/reload')
-      if (status === 200) return body
-      else {
-        console.log({body, status})
-        return false
-      }
+      return (status === 200) ? body : false
     },
     onFailedAttempt: (s) => {
       log.debug(`Waited ${s} seconds for core/reload, will continue waiting.`)
@@ -43,9 +39,9 @@ export const reloadConfiguration = async () => {
    * Update the state with relevant info
    */
   log.debug(`Reloaded data from core`)
-  utils.setEphemeral(data.state.ephemeral)
+  utils.setEphemeral(data.node.ephemeral)
   utils.setCoreState({
-    ...data.state,
+    ...data.status,
     timestamp: Date.now() // FIXME: Rename to time
   })
   utils.setCoreInfo(data.info)
@@ -54,10 +50,10 @@ export const reloadConfiguration = async () => {
     /*
      * This data is only available if Morio is already set up
      */
-    utils.setNodeUuid(data.state.node)
-    utils.setNodeSerial(data.state.node_serial)
-    utils.setClusterUuid(data.state.cluster)
-    utils.setSettingsSerial(data.state.settings_serial)
+    utils.setNodeUuid(data.node.node)
+    utils.setNodeSerial(data.node.node_serial)
+    utils.setClusterUuid(data.node.cluster)
+    utils.setSettingsSerial(data.node.settings_serial)
     utils.setKeys(data.keys)
     utils.setSettings(data.settings)
     /*
@@ -97,4 +93,11 @@ export const reloadConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (data) => (data && data.state && data.info && data.presets)
+const coreFetchOk = (data) => (
+  data &&
+  data.info &&
+  data.nodes &&
+  data.presets &&
+  data.settings &&
+  data.keys
+)
