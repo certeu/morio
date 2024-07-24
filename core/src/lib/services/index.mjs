@@ -211,6 +211,9 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * (Re)start the service (if needed)
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
+  // FIXME: remove this
+  if (['broker', 'console'].includes(serviceName)) return false
+
   if (restart) {
     log.debug(`${serviceName}: Restarting service`)
     /*
@@ -244,6 +247,8 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
  * @param {object} hookParams - Optional props to pass to the lifecycle hook
  */
 const shouldServiceBeRecreated = async (serviceName, hookParams) => {
+  // FIXME: remove this
+  if (['broker', 'console'].includes(serviceName)) return false
   /*
    * Never recreate core from within core as the container will be destroyed
    * and then core will exit before it can recreate itself.
