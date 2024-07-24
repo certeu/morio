@@ -179,7 +179,7 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
     // Verify heartbeat (this will log a warning for the error)
     verifyHeartbeatResponse({ fqdn, error })
     // And trigger a new heartbeat
-    runHeartbeat()
+    runHeartbeat(false, false)
   }
 
   /*
