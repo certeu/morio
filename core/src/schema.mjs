@@ -29,6 +29,7 @@ export const schema = {
     node_serial: nodeSerial.required(),
     status: Joi.object(), // TODO: Make this more detailed
     nodes: Joi.object(), // TODO: Make this more detailed
+    broadcast: Joi.bool().required(),
   }),
   'req.cluster.join': Joi.object({
     you: fqdn.required(),
