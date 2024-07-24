@@ -208,7 +208,7 @@ const heartbeatDelay = () => {
   const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
   if (next > max) return max*1000
   else {
-    log.debug(`Increasing heartbeat interval to ${now}s to ${next}s`)
+    log.debug(`Slowing heartbeat rate from ${now}s to ${next}s between heartbeats`)
     utils.setHeartbeatInterval(next)
     return next*1000
   }
