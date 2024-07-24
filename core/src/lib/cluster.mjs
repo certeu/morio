@@ -215,7 +215,7 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
   /*
    * Verify the response
    */
-  log.todo(data, 'test')
+  log.todo(Object.keys(data), 'test')
   verifyHeartbeatResponse({ fqdn, data, rtt })
 
   /*
