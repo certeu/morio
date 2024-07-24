@@ -215,7 +215,6 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
   /*
    * Verify the response
    */
-  log.todo(Object.keys(data), 'test')
   verifyHeartbeatResponse({ fqdn, data, rtt })
 
   /*
@@ -253,7 +252,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Is this an error?
    */
-  if (error) {
+  if (error || data.code) {
     /*
      * Storing the result of a failed hearbteat will influence the cluster state
      */
