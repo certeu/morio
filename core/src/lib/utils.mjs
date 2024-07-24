@@ -592,13 +592,13 @@ utils.setEphemeralUuid = (uuid) => {
 }
 
 /**
- * Helper method to store the status of a follower node
+ * Helper method to store the status of a peer cluster node
  *
- * @param {string} fqdn - The FQDN of the remote node
+ * @param {string} fqdn - The FQDN of the peer node
  * @param {object} status - The status from the node
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setFollowerStatus = (fqdn, status) => {
+utils.setPeerStatus = (fqdn, status) => {
   store.set(['status', 'nodes', fqdn], status)
   return utils
 }

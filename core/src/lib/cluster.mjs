@@ -300,6 +300,13 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
       if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
     }
   }
+
+  /*
+   * Update status of cluster nodes
+   */
+    for (const fqdn of Object.keys(data.status.nodes).filter(fqdn => fqdn !== utils.getNodeFqdn())) {
+      utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
+    }
 }
 
 //const verifyHeartbeatNode = (node, result) => {
