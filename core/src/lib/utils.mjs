@@ -592,6 +592,18 @@ utils.setEphemeralUuid = (uuid) => {
 }
 
 /**
+ * Helper method to store the status of a follower node
+ *
+ * @param {string} fqdn - The FQDN of the remote node
+ * @param {object} status - The status from the node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setFollowerStatus = (fqdn, status) => {
+  store.set(['status', 'nodes', fqdn], status)
+  return utils
+}
+
+/**
  * Helper method to store the incoming heartbeat data
  *
  * @param {bool} up - Whether the node is up (reachable) or not
@@ -701,7 +713,7 @@ utils.setServiceState = (serviceName, state) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setServiceStatus = (serviceName, status) => {
-  store.set(['status', utils.getNodeFqdn(), serviceName], status)
+  store.set(['status', 'nodes', utils.getNodeFqdn(), serviceName], status)
   return utils
 }
 

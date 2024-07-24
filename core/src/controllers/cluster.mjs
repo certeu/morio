@@ -53,6 +53,14 @@ Controller.prototype.heartbeat = async (req, res) => {
     })
 
   /*
+   * If we are leading, update the follower status
+   */
+  //if (utils.isLeading()) {
+  //  for (const fqdn in valid.status) {
+  //  }
+  //}
+
+  /*
    * Verify the heartbeat request which will determin the action to take
    */
   log.todo(valid, 'in controller')
