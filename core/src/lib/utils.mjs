@@ -237,6 +237,13 @@ utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
+ * Helper method to get the heartbeat interval
+ *
+ * @return {number} seconds - The number of seconds between heartbeats
+ */
+utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 0),
+
+/**
  * Helper method to get outgoing heartbeat setTimeout id
  *
  * @return {number} id - The setTimeout id which allows clearing the timetout
@@ -599,6 +606,17 @@ utils.setHeartbeatIn = (fqdn, data) => {
     ['state', 'cluster', 'heartbeats', 'in', fqdn],
     { ...data, time: Date.now() }
   )
+  return utils
+}
+
+/**
+ * Helper method to set the hearbeat interval (in seconds)
+ *
+ * @param {number} seconds - Number of seconds between heartbeats
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setHeartbeatInterval = (seconds) => {
+  store.set('state.cluster.heartbeats.interval', seconds)
   return utils
 }
 

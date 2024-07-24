@@ -205,9 +205,23 @@ const runHeartbeat = async (leaderless = false) => {
            */
           runHeartbeat()
         },
-        leaderless ? 0 : interval * 1000
+        heartbeatDelay()
       )
     )
+  }
+}
+
+/*
+ * A method to get (and slowly increase) the heartbeat delay
+ */
+const heartbeatDelay = () => {
+  const next = Number(utils.getHeartbeatInterval()) + 1
+  const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+  if (next > max) return max*1000
+  else {
+    log.debug(`Increasing heartbeat interval to ${next}s`)
+    utils.setHeartbeatInterval(next)
+    return next*1000
   }
 }
 
@@ -231,12 +245,14 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
      */
     utils.setHeartbeatIn(fqdn, { up: false, ok: false, error: error.code })
     /*
-     * Also log something an error-specific message
+     * Also log something an error-specific message, but not when we're still finding our feet
      */
-    if (error.code === 'ECONNREFUSED') {
-      log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
-    } else {
-      log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
+    if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') *2) {
+      if (error.code === 'ECONNREFUSED') {
+        log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
+      } else {
+        log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
+      }
     }
 
     return
