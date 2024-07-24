@@ -30,7 +30,13 @@ Controller.prototype.heartbeat = async (req, res) => {
   if (!valid) {
     log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
-  } else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
+  }
+  else {
+    log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
+    if (!utils.isLeading()) {
+      log.info(valid, `Received incoming hearbteat, but we are not leading the cluster.`)
+    }
+  }
 
   /*
    * If we are in ephemeral state, ask for a cluster invite

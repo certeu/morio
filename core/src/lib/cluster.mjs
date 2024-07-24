@@ -49,8 +49,7 @@ const updateNodeState = async () => {
    * we should also update the consolidated cluster status
    */
   if (utils.isLeading()) {
-    //log.todo(utils.getStatus(), `Update cluster state in updateNodeState / src/lib/cluster.mjs`)
-    log.todo(`Update cluster state in updateNodeState / src/lib/cluster.mjs`)
+    log.todo(utils.getStatus(), `Update cluster state`)
   }
 }
 
