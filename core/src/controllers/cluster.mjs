@@ -51,7 +51,7 @@ Controller.prototype.heartbeat = async (req, res) => {
    * as we'll be leaderless and need a few hearbeats for things to
    * clink into place.
    */
-  if (utils.getUptime() > utils.getPreset('MORIO_CORE_HEARTBEAT_INTERVAL') *2) {
+  if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') *2) {
     if (action === 'SYNC') {
       log.todo('Handle heartbeat SYNC action')
     } else if (action === 'INVITE') {

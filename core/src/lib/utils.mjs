@@ -241,7 +241,7 @@ utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', 
  *
  * @return {number} seconds - The number of seconds between heartbeats
  */
-utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 0),
+utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 1),
 
 /**
  * Helper method to get outgoing heartbeat setTimeout id
