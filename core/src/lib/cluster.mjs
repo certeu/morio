@@ -53,7 +53,7 @@ const updateNodeState = async () => {
 }
 
 const consolidateClusterStatus = () => {
-  const status = utils.getStatus()?.nodes?.[utils.getNodeFqnd()]
+  const status = utils.getStatus()?.nodes?.[utils.getNodeFqdn()]
   const warnings = []
   let code = 0
   for (const service of [...serviceOrder]) {
