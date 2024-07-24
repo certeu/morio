@@ -106,33 +106,19 @@ const ensureClusterHeartbeat = async () => {
 /**
  * Start a cluster heartbeat
  */
-const runHeartbeat = async (leaderless = false) => {
+const runHeartbeat = async (broadcast = false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
+   * and should perhaps let the world knoww we just work up
    */
-  if (!leaderless) await updateClusterState(true)
-
-  /*
-   * This won't change
-   */
-  const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
-
-  /*
-   * Just because we're not excplicitle leaderless doesn't mean we have a leader
-   */
-  //if (utils.getClusterLeaderFqdn() === false) leaderless = true
-
-  /*
-   * Are we still trying to figure out who is leading the cluster?
-   */
-  if (leaderless)
-    log.debug('Leaderless cluster, sending broadcast heartbeat to all cluster nodes to find leader')
+  if (broadcast) log.debug('New core, who dis? Sending broadcast heartbeat to find leader')
+  else await updateClusterState(true)
 
   /*
    * Who are we sending heartbeats to?
    */
-  const targets = leaderless ? utils.getNodeFqdns() : [utils.getClusterLeaderFqdn()]
+  const targets = broadcast ? utils.getNodeFqdns() : [utils.getClusterLeaderFqdn()]
 
   /*
    * Create a heartbeat for each target
@@ -156,7 +142,7 @@ const runHeartbeat = async (leaderless = false) => {
           const start = Date.now()
           let data
           try {
-            if (leaderless) log.debug(`Leaderless heartbeat to ${fqdn}`)
+            if (broadcast) log.debug(`Broadcast heartbeat to ${fqdn}`)
             data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
               method: 'POST',
               data: {
@@ -170,8 +156,9 @@ const runHeartbeat = async (leaderless = false) => {
                 node_serial: Number(utils.getNodeSerial()),
                 status: utils.getStatus(),
                 nodes: utils.getClusterNodes(),
+                broadcast,
               },
-              timeout: interval * 500, // 25% of the interval
+              timeout: 1666,
               returnAs: 'json',
               returnError: true,
               ignoreCertificate: true,
@@ -180,7 +167,7 @@ const runHeartbeat = async (leaderless = false) => {
             // Help the debug party
             const rtt = Date.now() - start
             log.debug(
-              `${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
+              `${broadvast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
             )
             // Verify heartbeat (this will log a warning for the error)
             verifyHeartbeatResponse({ fqdn, error })
@@ -192,7 +179,7 @@ const runHeartbeat = async (leaderless = false) => {
            * Help the debug party
            */
           const rtt = Date.now() - start
-          log.debug(`${leaderless ? 'Leaderless heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
+          log.debug(`${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
 
           /*
            * Verify the response
