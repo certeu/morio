@@ -215,7 +215,7 @@ const runHeartbeat = async (leaderless = false) => {
  * A method to get (and slowly increase) the heartbeat delay
  */
 const heartbeatDelay = () => {
-  const next = Number(utils.getHeartbeatInterval()) + 1
+  const next = (Number(utils.getHeartbeatInterval()) + 1) * 2
   const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
   if (next > max) return max*1000
   else {
