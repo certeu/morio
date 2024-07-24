@@ -30,11 +30,11 @@ export const resolveServiceConfiguration = (name, helpers) =>
  * This is the order in which services are started
  */
 export const serviceOrder = [
+  'api',
   'ca',
   'broker',
   'db',
   'console',
-  'api',
   'ui',
   'proxy',
   'connector',

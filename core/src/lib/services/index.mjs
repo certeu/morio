@@ -137,11 +137,21 @@ export const startMorio = async (hookParams = {}) => {
   await runDockerApiCommand('listImages')
 
   /*
-   * Create services
+   * Create services, awaiting those that need to be waited for
+   * and handling the others in parallel
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    promises.push(ensureMorioService(service, hookParams))
+    if (resolveServiceConfiguration(service, { utils }).await) {
+      /*
+       * Wait for service to come up before we continue
+       */
+      await ensureMorioService(service, hookParams)
+    }
+    /*
+     * Or handle it in parallel
+     */
+    else promises.push(ensureMorioService(service, hookParams))
   }
 
   return await Promise.all(promises)
@@ -179,7 +189,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   utils.setMorioServiceConfig(
     serviceName,
-    await resolveServiceConfiguration(serviceName, { utils })
+    resolveServiceConfiguration(serviceName, { utils })
   )
 
   /*

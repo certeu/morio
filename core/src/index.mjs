@@ -3,6 +3,8 @@ import express from 'express'
 import { wrapExpress } from '#shared/utils'
 // Start Morio method
 import { startMorio } from './lib/services/index.mjs'
+// reconfigureApi method
+import { reconfigureApi } from './lib/services/api.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Middleware
@@ -88,5 +90,5 @@ export async function reconfigure(hookParams = {}) {
   /*
    * Tell the API to update the config, but don't wait for it
    */
-  utils.apiClient.get(`${utils.getPreset('MORIO_API_PREFIX')}/reconfigure`, false, log.debug)
+  reconfigureApi()
 }

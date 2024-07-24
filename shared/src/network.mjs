@@ -116,7 +116,7 @@ export const get = async function (url, raw = false, log=false) {
     response = await fetch(url)
   } catch (err) {
     // Log error if requested
-    if (log) console.log(err)
+    if (log) console.log({ url, err})
   }
 
   /*

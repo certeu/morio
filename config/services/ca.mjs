@@ -16,6 +16,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
   return {
     /*
+     * Wait for this service to come up before continue
+     */
+    await: true,
+    /*
     * Container configuration
     */
     container: {

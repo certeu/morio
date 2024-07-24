@@ -1,5 +1,6 @@
-import { utils } from '../utils.mjs'
+import { utils, log } from '../utils.mjs'
 import { testUrl } from '#shared/network'
+import { attempt } from '#shared/utils'
 
 // Default hooks
 import {
@@ -43,4 +44,25 @@ export const service = {
      */
     restart: (hookParams) => defaultRestartServiceHook('api', hookParams),
   },
+}
+
+/**
+ * Reach out to the API to reconfigure itself
+ *
+ * Once core has been reconfigured, the API (which is stateless) should
+ * reload the data to also reconfigure itself. This message reaches out
+ * to the API, asking it to reconfigure itself.
+ */
+export const reconfigureApi = async () => {
+  /*
+   * Since the API might still be starting up, we'll attempt this until it works
+   */
+  const up = await attempt({
+    every: 5,
+    timeout: 60,
+    run: async () => await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/info`),
+    onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for API, will continue waiting.`),
+  })
+  if (up) log.debug(`API notified of reconfigure event.`)
+  else log.warn(`API did not come up before timeout`)
 }
