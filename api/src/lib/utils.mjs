@@ -2,7 +2,7 @@ import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
 import { coreClient } from '#lib/core'
-import { errors } from '#shared/errors'
+import { errors } from '../errors.mjs'
 import { validate as validateMethod } from '../schema.mjs'
 
 /*
@@ -11,14 +11,14 @@ import { validate as validateMethod } from '../schema.mjs'
 export const log = logger(getPreset('MORIO_API_LOG_LEVEL'), 'api')
 
 /*
- * Add a fixme log method to make it easy to spot things still to be done
+ * Add a todo log method to make it easy to spot things still to be done
  */
-log.fixme = (a, b) => {
+log.todo = (a, b) => {
   const location = new Error().stack.split('\n')[2]
 
   return typeof a === 'object'
-    ? log.warn(a, `FIX THIS ⚠️ ${b}${location}`)
-    : log.warn(`FIX THIS ⚠️ ${a}${location}`)
+    ? log.debug(a, `🟠 ${b}${location}`)
+    : log.debug(`🟠 ${a}${location}`)
 }
 
 /*

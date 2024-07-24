@@ -3,7 +3,7 @@ import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
-import { errors } from '#shared/errors'
+import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 
 /*
@@ -236,11 +236,26 @@ utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
+ * Helper method to number of flanking nodes
+ *
+ * @return {number} count - The number of flanking nodes
+ *
+ */
+utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).length
+
+/**
  * Helper method to get the heartbeat interval
  *
  * @return {number} seconds - The number of seconds between heartbeats
  */
 utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 1),
+
+/**
+ * Helper method to get local heartbeat setTimeout id
+ *
+ * @return {number} id - The setTimeout id which allows clearing the timetout
+ */
+utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false)
 
 /**
  * Helper method to get outgoing heartbeat setTimeout id
@@ -628,6 +643,17 @@ utils.setHeartbeatIn = (fqdn, data) => {
  */
 utils.setHeartbeatInterval = (seconds) => {
   store.set('state.cluster.heartbeats.interval', seconds)
+  return utils
+}
+
+/**
+ * Helper method to store the local heartbeat data
+ *
+ * @param {object} id - The heartbeat setTimeout id
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setHeartbeatLocal = (id) => {
+  store.set(['state', 'cluster', 'heartbeats', 'local'], id)
   return utils
 }
 

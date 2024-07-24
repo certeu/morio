@@ -95,5 +95,7 @@ export const reloadConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (data) =>
-  data && data.info && data.nodes && data.presets && data.settings && data.keys
+const coreFetchOk = (data) => {
+  if (data.node?.ephemeral) return true
+  else return data && data.info && data.nodes && data.presets && data.settings && data.keys
+}

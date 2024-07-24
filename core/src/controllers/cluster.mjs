@@ -64,7 +64,6 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Verify the heartbeat request which will determin the action to take
    */
-  //log.todo(valid, 'in controller')
   const { action, errors } = await verifyHeartbeatRequest(valid)
 
   /*

@@ -19,13 +19,19 @@ export function Controller() {}
  */
 Controller.prototype.reconfigure = async (req, res) => {
   /*
-   * Just get the status from core and pass it with some tweaks
+   * We will not wait for the reload event here as doing so can
+   * introduce a deadlock where core is waiting for the response to
+   * this request, while api (inside reload) is trying to load the
+   * data from core. Since NodeJS is single-threaded, this will
+   * de-facto be a deadlock.
    */
   log.debug('Reveived reconfigure signal from core')
-  await reload()
-  log.debug('Reload complete')
+  res.status(200).send({})
 
-  return res.status(200).send({})
+  /*
+   * Reload, but don't wait for it.
+   */
+  return reload()
 }
 
 /**
@@ -47,7 +53,7 @@ Controller.prototype.status = async (req, res) => {
   /*
    * Update relevant data
    */
-  utils.setEphemeral(result.state.ephemeral)
+  utils.setEphemeral(result.node?.ephemeral ? true : false)
   utils.setCoreState({
     ...result.state,
     timestamp: Date.now(), // FIXME: Rename to time

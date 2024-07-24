@@ -129,6 +129,17 @@ const ensureClusterHeartbeat = async () => {
  */
 export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   /*
+   * Run heartbeats locally if there's only 1 node
+   */
+  if (utils.getBrokerCount() === 1) runLocalHeartbeat()
+
+  /*
+   * Continue, unless there's no flanking nodes
+   */
+  if (utils.getFlankingCount() < 1) return
+
+  /*
+   *
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
    * and should perhaps let the world knoww we just work up
@@ -160,6 +171,44 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
       )
     }
   }
+}
+
+/**
+ * Start a local heartbeat
+ *
+ * When Morio has only 1 node. Or when Morio has only 1 broker node,
+ * we will run a local heartbeat. This will not reach out over the network
+ * but merely trigger the heartbeat lifecycle event locally, as that is what
+ * used to keep things up to date.
+ *
+ * The reason we also run it when there is only 1 broker node is that
+ * in a scenario where we have 1 broker node + 1 flanking node, the flanking
+ * node going down would mean there is no long a heartbeat, and thus the cluster
+ * will start to decay.
+ *
+ */
+export const runLocalHeartbeat = async (init=false) => {
+  /*
+   * Ensure we are comparing to up to date cluster state
+   */
+  if (!init) await updateClusterState(true)
+
+  /*
+   * Do not stack timeouts
+   */
+  const running = utils.getHeartbeatLocal()
+  if (running) clearTimeout(running)
+  /*
+   * Store timeout ID so we can cancel it later
+   */
+  utils.setHeartbeatLocal(
+    setTimeout(async () => triggerLocalHeartbeat(), heartbeatDelay())
+  )
+}
+
+const triggerLocalHeartbeat = async () => {
+  log.debug(`Running local heartbeat`)
+  runLocalHeartbeat(false)
 }
 
 const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
@@ -399,13 +448,8 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   return { action, errors }
 }
 
-//const getNodeDataFromUuid = (uuid, label=false) => Object.values(utils.getNodes())
-//  .filter(node => node.Spec.Labels['morio.node.uuid'] === uuid)
-//  .map(node => label ? node.Spec.Labels[label] : node)
-//  .pop()
-
 /**
- * Ensure the Morio luster is ready
+ * Ensure the Morio cluster is ready
  *
  * This is called from the beforeall lifecycle hook
  * Note that Morio always runs in cluster mode
@@ -431,10 +475,10 @@ export const ensureMorioCluster = async () => {
   }
 
   /*
-   * If there is only 1 node, we can just start.
-   * But if there are multiple nodes we need to reach consensus first.
+   * Morio is always (ready to be) a cluster.
+   * This needs to run, regardless of how many nodes we have.
    */
-  if (utils.isDistributed()) await ensureMorioClusterConsensus()
+  await ensureMorioClusterConsensus()
 
   /*
    * Is the cluster healthy?
