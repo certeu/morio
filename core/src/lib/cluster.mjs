@@ -100,7 +100,7 @@ const ensureClusterHeartbeat = async () => {
    * Let people know w're staring the heartbeat
    */
   log.debug(`Starting cluster heartbeat`)
-  runHeartbeat(true)
+  runHeartbeat(true, false)
 }
 
 /**
@@ -196,7 +196,7 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
   /*
    * Trigger a new heatbeat
    */
-  if (!justOnce) runHeartbeat()
+  if (!justOnce) runHeartbeat(false, false)
 }
 
 /*
