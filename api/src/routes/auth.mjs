@@ -1,5 +1,4 @@
 import { Controller } from '#controllers/auth'
-import { utils } from '../lib/utils.mjs'
 
 const Auth = new Controller()
 
@@ -9,7 +8,6 @@ const Auth = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = utils.getPrefix()
 
   /*
    * Internal authentication route for traefik forwardauth
@@ -19,15 +17,15 @@ export function routes(app) {
   /*
    * Public authentication / login route
    */
-  app.post(`${PREFIX}/login`, Auth.login)
+  app.post(`/login`, Auth.login)
 
   /*
    * Refresh token route
    */
-  app.get(`${PREFIX}/token`, Auth.renewToken)
+  app.get(`/token`, Auth.renewToken)
 
   /*
    * Whoami/ping check
    */
-  app.get(`${PREFIX}/whoami`, Auth.whoami)
+  app.get(`/whoami`, Auth.whoami)
 }

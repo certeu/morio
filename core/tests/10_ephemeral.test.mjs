@@ -26,14 +26,14 @@ describe('Ephemeral Core: Status Routes', () => {
     assert.equal(200, result[0], 200)
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.about, 'Morio Core')
-    assert.equal(d.name, '@morio/core')
-    assert.equal(d.production, false)
-    assert.equal(d.version, getPreset('MORIO_VERSION'))
-    assert.equal([true, false].includes(d.ephemeral), true)
-    assert.equal(d.ephemeral, true)
-    assert.equal(d.current_settings, false)
-    assert.equal(d.config_resolved, true)
+    assert.equal(d.info.about, 'Morio Core')
+    assert.equal(d.info.name, '@morio/core')
+    assert.equal(d.info.production, false)
+    assert.equal(d.info.version, getPreset('MORIO_VERSION'))
+    assert.equal([true, false].includes(d.node.ephemeral), true)
+    assert.equal(d.node.ephemeral, true)
+    assert.equal(d.node.settings_serial, 0)
+    assert.equal(d.node.config_resolved, true)
 
     /*
      * Add to store for re-use in other tests

@@ -80,6 +80,15 @@ const ensureTokenSecrecy = (secrets) => {
  */
 Controller.prototype.deploy = async (req, res) => {
   /*
+   * Validate request against schema
+   */
+  const [valid, err] = await utils.validate(`req.deploy`, req.body)
+  if (!valid) {
+    log.warn(err)
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/deploy')
+  }
+
+  /*
    * Note that input validation is handled by the API
    * Here, we just do a basic check
    */
@@ -300,10 +309,10 @@ const localNodeInfo = async (body) => {
    * but only if we're not in production
    */
   let fqdn = false
-  const nodes = body.cluster.broker_nodes.map((node) => node.toLowerCase())
+  const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
 
   for (const header of ['x-forwarded-host', 'host']) {
-    const hval = (body.headers[header] || '').toLowerCase()
+    const hval = (body.headers?.[header] || '').toLowerCase()
     if (
       nodes.includes(hval) ||
       /*

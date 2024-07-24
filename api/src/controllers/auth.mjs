@@ -3,31 +3,26 @@ import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
 
-/*
- * Keep prefix DRY
- */
-const PREFIX = utils.getPrefix()
-
 /**
  * List of allowListed URLs that do not require authentication
  */
 const allowedUris = [
-  `${PREFIX}/setup`,
-  `${PREFIX}/status`,
-  `${PREFIX}/status/`,
-  `${PREFIX}/info`,
-  `${PREFIX}/info/`,
-  `${PREFIX}/login`,
-  `${PREFIX}/login/`,
-  `${PREFIX}/idps`,
-  `${PREFIX}/idps/`,
-  `${PREFIX}/activate-account`,
-  `${PREFIX}/activate-account/`,
-  `${PREFIX}/activate-mfa`,
-  `${PREFIX}/activate-mfa/`,
-  `${PREFIX}/jwks`,
-  `${PREFIX}/cluster/join`,
-  `${PREFIX}/validate/settings`,
+  `/setup`,
+  `/status`,
+  `/status/`,
+  `/info`,
+  `/info/`,
+  `/login`,
+  `/login/`,
+  `/idps`,
+  `/idps/`,
+  `/activate-account`,
+  `/activate-account/`,
+  `/activate-mfa`,
+  `/activate-mfa/`,
+  `/jwks`,
+  `/cluster/join`,
+  `/validate/settings`,
 ]
 
 /**

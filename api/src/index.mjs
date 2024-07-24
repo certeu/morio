@@ -52,7 +52,7 @@ for (const type in routes) routes[type](app)
  * Add the route for the Swagger (OpenAPI) docs
  */
 const docs = swaggerUi.setup(openapi)
-app.use(`${utils.getPrefix()}/docs`, swaggerUi.serve, docs)
+app.use(`/docs`, swaggerUi.serve, docs)
 
 /*
  * If not in production, allow access to coverage reports
@@ -63,7 +63,7 @@ app.use(`/coverage/core`, express.static('/morio/core/coverage'))
 /*
  * Add the reload route
  */
-app.get(`${utils.getPrefix()}/reload`, async (req, res) => {
+app.get(`/reload`, async (req, res) => {
   await reload()
 
   return res.send({ result: 'ok', info: utils.getInfo() })
@@ -77,7 +77,7 @@ app.use(`/downloads`, express.static(`/morio/${getPreset('MORIO_DOWNLOADS_FOLDER
 /*
  * Add repos folder for serving repositories
  */
-app.use(`${utils.getPrefix()}/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
+app.use(`/repos`, express.static(`/morio/${getPreset('MORIO_REPOS_FOLDER')}`))
 
 /*
  * (Re)Load the API

@@ -15,7 +15,7 @@ import { log, utils } from './lib/utils.mjs'
 /*
  * Say hello
  */
-log.info('core: Cold start of Morio Core')
+log.info('core: Start of Morio Core')
 
 /*
  * Instantiate the Express app

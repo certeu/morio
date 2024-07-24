@@ -17,6 +17,7 @@ describe('Core Setup Tests', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 400)
     const d = result[1]
+    console.log(d)
     assert.equal(typeof d, 'object')
     assert.equal(Array.isArray(d.errors), true)
     assert.equal(d.errors.length, 1)

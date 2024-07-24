@@ -86,7 +86,7 @@ utils.getAllFqdns = () => ([
  * @return {number} count - The number of broker nodes
  *
  */
-utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes').length
+utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
 
 /**
  * Helper method to get a list of all FQDNS for broker nodes
@@ -332,7 +332,7 @@ utils.getNodeCount = () => utils.getSettings('cluster.broker_nodes', []).concat(
  *
  * @return {string} ip - This node's fully quqlified domain name (FQDN)
  */
-utils.getNodeFqdn = () => store.get('state.node.fqdn')
+utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
 
 /**
  * Helper method to get a list of all node FQDNS used in the settings

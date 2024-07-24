@@ -1,5 +1,4 @@
 import { Controller } from '#controllers/accounts'
-import { utils } from '../lib/utils.mjs'
 
 const Accounts = new Controller()
 
@@ -9,25 +8,24 @@ const Accounts = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = utils.getPrefix()
 
   /*
    * List accounts known to Morio
    */
-  app.get(`${PREFIX}/accounts`, Accounts.list)
+  app.get(`/accounts`, Accounts.list)
 
   /*
    * Create account
    */
-  app.post(`${PREFIX}/account`, Accounts.create)
+  app.post(`/account`, Accounts.create)
 
   /*
    * Activate account
    */
-  app.post(`${PREFIX}/activate-account`, Accounts.activate)
+  app.post(`/activate-account`, Accounts.activate)
 
   /*
    * Activate MFA
    */
-  app.post(`${PREFIX}/activate-mfa`, Accounts.activateMfa)
+  app.post(`/activate-mfa`, Accounts.activateMfa)
 }

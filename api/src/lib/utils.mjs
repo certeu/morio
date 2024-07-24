@@ -83,7 +83,7 @@ utils.getKeys = () => store.get('keys')
  *
  * @return {number} node_serial - The local node's serial
  */
-utils.getNodeSerial = () => store.get('state.node.serial')
+utils.getNodeSerial = () => store.get('state.node.serial', false)
 
 /**
  * Helper method to get the node UUID

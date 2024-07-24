@@ -60,7 +60,10 @@ export const reconfigureApi = async () => {
   const up = await attempt({
     every: 5,
     timeout: 60,
-    run: async () => await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/info`),
+    run: async () => {
+      const isup = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/info`)
+      return isup
+    },
     onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for API, will continue waiting.`),
   })
   if (up) log.debug(`API notified of reconfigure event.`)

@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '/coverage'
       ],
       priority: 666,
-    }).set("http.middlewares.api-prefix.replacepathregex.regex", `^/-/api/(.*)`)
+    }).set("http.middlewares.api-prefix.replacepathregex.regex", `^${utils.getPreset('MORIO_API_PREFIX')}/(.*)`)
       .set("http.middlewares.api-prefix.replacepathregex.replacement", "/$1")
       .set('http.routers.api.middlewares', ['api-prefix@file'])
       .set('http.routers.api.middlewares', utils.isEphemeral() ? [] : ['api-auth@file']),

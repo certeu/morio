@@ -1,5 +1,4 @@
 import { Controller } from '#controllers/apikeys'
-import { utils } from '../lib/utils.mjs'
 
 const Apikeys = new Controller()
 
@@ -9,25 +8,24 @@ const Apikeys = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = utils.getPrefix()
 
   /*
    * Create an API key
    */
-  app.post(`${PREFIX}/apikey`, Apikeys.create)
+  app.post(`/apikey`, Apikeys.create)
 
   /*
    * List API keys
    */
-  app.get(`${PREFIX}/apikeys`, Apikeys.list)
+  app.get(`/apikeys`, Apikeys.list)
 
   /*
    * Update an API key
    */
-  app.patch(`${PREFIX}/apikeys/:key/:action`, Apikeys.update)
+  app.patch(`/apikeys/:key/:action`, Apikeys.update)
 
   /*
    * Remove an API key
    */
-  app.delete(`${PREFIX}/apikeys/:key`, Apikeys.remove)
+  app.delete(`/apikeys/:key`, Apikeys.remove)
 }
