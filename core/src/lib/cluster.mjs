@@ -106,14 +106,13 @@ const ensureClusterHeartbeat = async () => {
 /**
  * Start a cluster heartbeat
  */
-const runHeartbeat = async (broadcast = false) => {
+export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
    * and should perhaps let the world knoww we just work up
    */
-  if (broadcast) log.debug('New core, who dis? Sending broadcast heartbeat to find leader')
-  else await updateClusterState(true)
+  if (!broadcast)await updateClusterState(true)
 
   /*
    * Who are we sending heartbeats to?
@@ -124,78 +123,80 @@ const runHeartbeat = async (broadcast = false) => {
    * Create a heartbeat for each target
    */
   for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
-    /*
-     * Do not stack timeouts
-     */
-    const running = utils.getHeartbeatOut(fqdn)
-    if (running) clearTimeout(running)
-    /*
-     * Store timeout ID so we can cancel it later
-     */
-    utils.setHeartbeatOut(
-      fqdn,
-      setTimeout(
-        async () => {
-          /*
-           * Send heartbeat request and verify the result
-           */
-          const start = Date.now()
-          let data
-          try {
-            if (broadcast) log.debug(`Broadcast heartbeat to ${fqdn}`)
-            data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
-              method: 'POST',
-              data: {
-                from: utils.getNodeFqdn(),
-                to: fqdn,
-                cluster: utils.getClusterUuid(),
-                node: utils.getNodeUuid(),
-                leader: utils.getClusterLeaderSerial() || undefined,
-                version: utils.getVersion(),
-                settings_serial: Number(utils.getSettingsSerial()),
-                node_serial: Number(utils.getNodeSerial()),
-                status: utils.getStatus(),
-                nodes: utils.getClusterNodes(),
-                broadcast,
-                uptime: utils.getUptime(),
-              },
-              timeout: 1666,
-              returnAs: 'json',
-              returnError: true,
-              ignoreCertificate: true,
-            })
-          } catch (error) {
-            // Help the debug party
-            const rtt = Date.now() - start
-            log.debug(
-              `${broadvast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
-            )
-            // Verify heartbeat (this will log a warning for the error)
-            verifyHeartbeatResponse({ fqdn, error })
-            // And trigger a new heartbeat
-            runHeartbeat()
-          }
-
-          /*
-           * Help the debug party
-           */
-          const rtt = Date.now() - start
-          log.debug(`${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
-
-          /*
-           * Verify the response
-           */
-          verifyHeartbeatResponse({ fqdn, data, rtt })
-
-          /*
-           * Trigger a new heatbeat
-           */
-          runHeartbeat()
-        },
-        heartbeatDelay()
+    if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
+    else {
+      /*
+       * Do not stack timeouts
+       */
+      const running = utils.getHeartbeatOut(fqdn)
+      if (running) clearTimeout(running)
+      /*
+       * Store timeout ID so we can cancel it later
+       */
+      utils.setHeartbeatOut(
+        fqdn,
+        setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
       )
-    )
+    }
   }
+}
+
+const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
+  /*
+   * Send heartbeat request and verify the result
+   */
+  const start = Date.now()
+  let data
+  try {
+    if (broadcast) log.debug(`Broadcast heartbeat to ${fqdn}`)
+    data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
+      method: 'POST',
+      data: {
+        from: utils.getNodeFqdn(),
+        to: fqdn,
+        cluster: utils.getClusterUuid(),
+        node: utils.getNodeUuid(),
+        leader: utils.getClusterLeaderSerial() || undefined,
+        version: utils.getVersion(),
+        settings_serial: Number(utils.getSettingsSerial()),
+        node_serial: Number(utils.getNodeSerial()),
+        status: utils.getStatus(),
+        nodes: utils.getClusterNodes(),
+        broadcast,
+        uptime: utils.getUptime(),
+      },
+      timeout: 1666,
+      returnAs: 'json',
+      returnError: true,
+      ignoreCertificate: true,
+    })
+  } catch (error) {
+    // Help the debug party
+    const rtt = Date.now() - start
+    log.debug(
+      `${broadvast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
+    )
+    // Verify heartbeat (this will log a warning for the error)
+    verifyHeartbeatResponse({ fqdn, error })
+    // And trigger a new heartbeat
+    runHeartbeat()
+  }
+
+  /*
+   * Help the debug party
+   */
+  const rtt = Date.now() - start
+  log.debug(`${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
+
+  /*
+   * Verify the response
+   */
+  verifyHeartbeatResponse({ fqdn, data, rtt })
+
+  /*
+   * Trigger a new heatbeat
+   */
+  if (!justOnce) runHeartbeat()
 }
 
 /*

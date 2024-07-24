@@ -1,5 +1,5 @@
 import { log, utils } from '../lib/utils.mjs'
-import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
+import { verifyHeartbeatRequest, runHeartbeat } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reconfigure } from '../index.mjs'
@@ -33,8 +33,24 @@ Controller.prototype.heartbeat = async (req, res) => {
   }
   else {
     if (valid.broadcast) {
-      log.info(`Received a broadcast heartbeat from node ${valid.node_serial}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
+      /*
+       * Increase the heartbeat rate in any case
+       */
       utils.setHeartbeatInterval(1)
+      if (utils.isLeading()) {
+        /*
+         * If we are leading, we need to make sure all followers are aware
+         */
+        log.info(`Received a broadcast heartbeat from node ${valid.node_serial
+        }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster, and informing follower nodes.`)
+        runHeartbeat(true, true)
+      } else {
+        /*
+         * If we are following, we just log
+         */
+        log.info(`Received a broadcast heartbeat from node ${valid.node_serial
+        }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
+      }
     }
     else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
