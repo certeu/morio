@@ -36,10 +36,12 @@ Controller.prototype.heartbeat = async (req, res) => {
       /*
        * Increase the heartbeat rate and log
        */
-      utils.setHeartbeatInterval(1)
       log.info(`Received a broadcast heartbeat from node ${valid.node_serial
       }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
-      if (!utils.isLeading()) runHeartbeat(true)
+      if (!utils.isLeading()) {
+        utils.setHeartbeatInterval(1)
+        runHeartbeat(true)
+      }
     }
     else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
