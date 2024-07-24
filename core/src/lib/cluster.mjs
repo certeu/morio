@@ -53,16 +53,13 @@ const updateNodeState = async () => {
 }
 
 const consolidateClusterStatus = () => {
-  const status = utils.getStatus()
+  const status = utils.getStatus()?.nodes?.[utils.getNodeFqnd()]
   const warnings = []
   let code = 0
   for (const service of [...serviceOrder]) {
-    if (
-      typeof status.services[service] !== 'undefined' &&
-      status.services[service] !== 0
-    ) {
+    if (typeof status[service] !== 'undefined' && status[service] !== 0) {
       if (code === 0) code = serviceCodes[service]
-      warnings.push(`The ${service} service has status code ${status.services[service]}`)
+      warnings.push(`The ${service} service has status code ${status[service]}`)
     }
   }
 
