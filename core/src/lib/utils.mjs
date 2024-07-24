@@ -32,7 +32,6 @@ const store = new Store(log)
   .set('state.config_resolved', false)
   .set('state.reconfigure_count', 0)
   .set('state.ephemeral', true)
-  .set('state.status', { code: 499, time: Date.now() })
   .set('info', {
     about: 'Morio Core',
     name: '@morio/core',
@@ -885,7 +884,7 @@ utils.isProduction = () => inProduction() ? true : false
  *
  * @return {bool} ok - True if the status is ok, false if not
  */
-utils.isServiceOk = (serviceName) => store.get(['status', 'services', serviceName], 1) === 0 ? true : false
+utils.isServiceOk = (serviceName) => store.get(['status', utils.getNodeFqdn(), serviceName], 1) === 0 ? true : false
 
 /**
  * Helper method to determine whether the services state is stale
