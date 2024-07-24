@@ -438,14 +438,7 @@ export const ensureMorioCluster = async () => {
   /*
    * Is the cluster healthy?
    */
-  utils.setCoreReady(await isClusterHealthy())
-}
-
-const isClusterHealthy = async () => {
-  log.todo('Implement cluster health status check')
-
-  // Let's just say yes
-  return true
+  utils.setCoreReady(true)
 }
 
 /*
