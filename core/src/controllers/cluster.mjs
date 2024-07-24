@@ -34,24 +34,12 @@ Controller.prototype.heartbeat = async (req, res) => {
   else {
     if (valid.broadcast) {
       /*
-       * Increase the heartbeat rate in any case
+       * Increase the heartbeat rate and log
        */
       utils.setHeartbeatInterval(1)
-      if (utils.isLeading()) {
-        /*
-         * If we are leading, we need to make sure all followers are aware
-         */
-        log.info(`Received a broadcast heartbeat from node ${valid.node_serial
-        }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster, and informing follower nodes.`)
-        runHeartbeat(true, true)
-      } else {
-        /*
-         * If we are following, we log and restart the heartbeat
-         */
-        log.info(`Received a broadcast heartbeat from node ${valid.node_serial
-        }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
-        runHeartbeat(true)
-      }
+      log.info(`Received a broadcast heartbeat from node ${valid.node_serial
+      }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
+      if (!utils.isLeading()) runHeartbeat(true)
     }
     else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
