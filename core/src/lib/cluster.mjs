@@ -304,14 +304,11 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Update status of cluster nodes
    */
-    for (const fqdn of Object.keys(data.status.nodes).filter(fqdn => fqdn !== utils.getNodeFqdn())) {
-      utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
-    }
+  for (const fqdn of Object.keys(data.status.nodes).filter(fqdn => fqdn !== utils.getNodeFqdn())) {
+    utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
+  }
+  utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)
 }
-
-//const verifyHeartbeatNode = (node, result) => {
-//
-//}
 
 export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   /*
