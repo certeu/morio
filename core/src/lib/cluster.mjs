@@ -203,11 +203,12 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
  * A method to get (and slowly increase) the heartbeat delay
  */
 const heartbeatDelay = () => {
-  const next = Math.ceil(Number(utils.getHeartbeatInterval()) * 1.5)
+  const now = Number(utils.getHeartbeatInterval())
+  const next = Math.ceil(now * 1.5)
   const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
   if (next > max) return max*1000
   else {
-    log.debug(`Increasing heartbeat interval to ${next}s`)
+    log.debug(`Increasing heartbeat interval to ${now}s to ${next}s`)
     utils.setHeartbeatInterval(next)
     return next*1000
   }
