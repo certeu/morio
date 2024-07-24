@@ -32,15 +32,11 @@ Controller.prototype.heartbeat = async (req, res) => {
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
   }
   else {
-    log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
-    if (!utils.isLeading()) {
-      if (valid.status.cluster?.leading) {
-        log.warn(valid, `Received a heartbeat, but we are not leading the cluster. This is unexpected.`)
-      } else {
-        log.info(`Received a leaderless heartbeat, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
-        utils.setHeartbeatInterval(1)
-      }
+    if (valid.broadcast) {
+      log.info(`Received a broadcast heartbeat from node ${valid.node_serial}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
+      utils.setHeartbeatInterval(1)
     }
+    else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
 
   /*

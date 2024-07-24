@@ -157,6 +157,7 @@ const runHeartbeat = async (broadcast = false) => {
                 status: utils.getStatus(),
                 nodes: utils.getClusterNodes(),
                 broadcast,
+                uptime: utils.getUptime(),
               },
               timeout: 1666,
               returnAs: 'json',

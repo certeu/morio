@@ -30,6 +30,7 @@ export const schema = {
     status: Joi.object(), // TODO: Make this more detailed
     nodes: Joi.object(), // TODO: Make this more detailed
     broadcast: Joi.bool().required(),
+    uptime: Joi.number().required(),
   }),
   'req.cluster.join': Joi.object({
     you: fqdn.required(),
