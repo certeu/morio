@@ -35,7 +35,7 @@ Controller.prototype.heartbeat = async (req, res) => {
     log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
     if (!utils.isLeading()) {
       if (valid.status.cluster?.leading) {
-        log.warn(`Received incoming hearbteat, but we are not leading the cluster. This is unexpected.`)
+        log.warn(valid, `Received incoming hearbteat, but we are not leading the cluster. This is unexpected.`)
       } else {
         log.info(`Received a leaderless incoming hearbteat, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
         utils.setHeartbeatInterval(1)
