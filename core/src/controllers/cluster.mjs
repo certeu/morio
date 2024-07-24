@@ -1,5 +1,5 @@
 import { log, utils } from '../lib/utils.mjs'
-import { verifyHeartbeatRequest, runHeartbeat } from '../lib/cluster.mjs'
+import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reconfigure } from '../index.mjs'
@@ -32,16 +32,13 @@ Controller.prototype.heartbeat = async (req, res) => {
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
   }
   else {
-    if (valid.broadcast) {
+    if (valid.broadcast && !utils.isLeading()) {
       /*
        * Increase the heartbeat rate and log
        */
+      utils.setHeartbeatInterval(1)
       log.info({ broadcast: valid.broadcast }, `Received a broadcast heartbeat from node ${valid.node_serial
       }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
-      if (!utils.isLeading()) {
-        utils.setHeartbeatInterval(1)
-        runHeartbeat(true)
-      }
     }
     else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
