@@ -23,7 +23,6 @@ import {
   updateRunningServicesState,
   stopService,
   serviceContainerImageFromConfig,
-  serviceContainerImageFromState,
 } from '#lib/docker'
 // log & utils
 import { log, utils } from '../utils.mjs'
@@ -408,11 +407,10 @@ export function alwaysWantedHook() {
  *
  * @param {string} service - Name of the service
  * @param {object} hookParams.running - Holds info of running containers
- * @param {bool} hookParams.initialSetup - Whether or not this is Morio's initial setup
  * @param {bool} hookParams.coldStart - Whether or not this is a cold start
  * @retrun {boolean} result - True to recreate the container
  */
-export function defaultRecreateServiceHook(service, hookParams) {
+export function defaultRecreateServiceHook(service) {
   /*
    * If the container is not currently running, create it
    */

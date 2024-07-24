@@ -126,7 +126,7 @@ export const createDockerNetwork = async (name) => {
 
   let success
   try {
-    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+    [success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
     log.warn({ err })
   }
@@ -627,11 +627,3 @@ const dockerStateToServiceState = (ds) => ({
  */
 export const serviceContainerImageFromConfig = (config) =>
   config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
-
-/**
- * Helper method to get the container image for a service from the state
- *
- * @param {object} state - The service state object
- * @return {string} imagee - The container image for this service
- */
-export const serviceContainerImageFromState = (state) => (state?.Image ? state.Image : false)

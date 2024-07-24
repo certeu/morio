@@ -198,7 +198,7 @@ const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
     // Help the debug party
     const rtt = Date.now() - start
     log.debug(
-      `${broadvast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
+      `${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
     )
     // Verify heartbeat (this will log a warning for the error)
     verifyHeartbeatResponse({ fqdn, error })
