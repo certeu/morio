@@ -47,8 +47,11 @@ Controller.prototype.heartbeat = async (req, res) => {
   const { action, errors } = await verifyHeartbeatRequest(req.body)
 
   /*
-   * (potentially) take action
+   * (potentially) take action, but not if we just got on our feet
+   * as we'll be leaderless and need a few hearbeats for things to
+   * clink into place.
    */
+  log.todo({uptime: utils.getUptime()}, 'in heartbeat control')
   if (action === 'SYNC') {
     log.todo('Handle heartbeat SYNC action')
   } else if (action === 'INVITE') {
