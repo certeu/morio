@@ -221,9 +221,6 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * (Re)start the service (if needed)
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
-  // FIXME: remove this
-  if (['broker', 'console'].includes(serviceName)) return false
-
   if (restart) {
     log.debug(`${serviceName}: Restarting service`)
     /*
@@ -257,8 +254,6 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
  * @param {object} hookParams - Optional props to pass to the lifecycle hook
  */
 const shouldServiceBeRecreated = async (serviceName, hookParams) => {
-  // FIXME: remove this
-  if (['broker', 'console'].includes(serviceName)) return false
   /*
    * Never recreate core from within core as the container will be destroyed
    * and then core will exit before it can recreate itself.
@@ -274,11 +269,13 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
     return true
   }
 
+  const container = utils.getServiceState(serviceName)
+
   /*
    * Always recreate if the container image is different
    */
   const imgs = {
-    current: serviceContainerImageFromState(utils.getServiceState(serviceName)),
+    current: container?.image,
     next: serviceContainerImageFromConfig(utils.getMorioServiceConfig(serviceName)),
   }
   if (imgs.next !== imgs.current) {
@@ -300,22 +297,14 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   }
 
   /*
-   * If this is the initial setup, always recreate UI and API
-   */
-  if (hookParams.initialSetup && ['api', 'ui'].includes(serviceName)) {
-    log.debug(`${serviceName}: Initial setup, recreating container to add TLS configuration`)
-    return true
-  }
-
-  /*
    * Always recreate if the service configuration has changed
    */
   // TODO
 
   /*
-   * After from basic check, defer to the recreateContainer lifecycle hook
+   * After from basic check, defer to the recreate lifecycle hook
    */
-  const recreate = await runHook('recreatecontainer', serviceName, hookParams)
+  const recreate = runHook('recreate', serviceName, hookParams)
 
   return recreate
 }
@@ -423,35 +412,33 @@ export function alwaysWantedHook() {
  * @param {bool} hookParams.coldStart - Whether or not this is a cold start
  * @retrun {boolean} result - True to recreate the container
  */
-export async function defaultRecreateServiceHook(service, hookParams) {
+export function defaultRecreateServiceHook(service, hookParams) {
   /*
    * If the container is not currently running, create it
    */
   const running = isContainerRunning(service)
   if (!running) {
     log.trace(`The ${service} is not running`)
-    //log.todo({running, service, in: 'dfltrecreate' })
     return true
   }
 
   /*
    * If container name or image changes, recreate it
    */
-  const cConf = utils.getMorioServiceConfig(service).container
-  //const state = utils.getServiceState(service, false)
-  //log.todo({state, serviceName, in: 'fefaultRecreate'})
+  const config = utils.getMorioServiceConfig(service).container
+  const container = utils.getServiceState(service, false)
   if (
-    hookParams?.running?.[service]?.Names?.[0] !== `/${cConf.container_name}` ||
-    hookParams?.running?.[service]?.Image !== `${cConf.image}:${cConf.tag}`
+    container.name !== `/${config.container_name}` ||
+    container.image !== `${config.image}:${config.tag}`
   ) {
-    log.trace(`${service}: The service name or image has changed`)
+    log.debug(`${service}: The service name or image has changed`)
     return true
   }
 
   /*
    * If we make it this far, do not recreate the container
    */
-  log.trace(`${service}: The service does not need to be recreated`)
+  log.debug(`${service}: The service does not need to be recreated`)
   return false
 }
 
@@ -468,7 +455,6 @@ export async function defaultRecreateServiceHook(service, hookParams) {
  * @retrun {boolean} result - True to restart the container
  */
 export async function defaultRestartServiceHook(service, { recreate }) {
-  //return false //FIXME
   /*
    * If there is a traefik config to be generated, do it here
    */

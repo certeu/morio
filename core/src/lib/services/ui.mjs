@@ -31,8 +31,7 @@ export const service = {
     /*
      * Lifecycle hook to determine whether to recreate the container
      */
-    recreate: (hookParams = {}) =>
-      defaultRecreateServiceHook('ui', hookParams),
+    recreate: (hookParams = {}) => defaultRecreateServiceHook('ui', hookParams),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
