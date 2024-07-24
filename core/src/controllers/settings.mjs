@@ -80,15 +80,6 @@ const ensureTokenSecrecy = (secrets) => {
  */
 Controller.prototype.deploy = async (req, res) => {
   /*
-   * Validate request against schema
-   */
-  const [valid, err] = await utils.validate(`req.deploy`, req.body)
-  if (!valid) {
-    log.warn(err)
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/deploy')
-  }
-
-  /*
    * Note that input validation is handled by the API
    * Here, we just do a basic check
    */
@@ -96,13 +87,13 @@ Controller.prototype.deploy = async (req, res) => {
   if (!mSettings.cluster) {
     log.warn(`Ingoring request to deploy invalid settings`)
     return res.status(400).send({ errors: ['Settings are not valid'] })
-  } else log.debug(`Processing request to deploy new settings`)
+  } else log.info(`Processing request to deploy new settings`)
 
   /*
    * Generate time-stamp for use in file names
    */
   const time = Date.now()
-  log.debug(`New settings will be tracked as: ${time}`)
+  log.info(`New settings will be tracked as: ${time}`)
 
   /*
    * Handle secrets
@@ -143,11 +134,21 @@ Controller.prototype.setup = async (req, res) => {
     })
 
   /*
+   * Validate request against schema, but strip headers from body first
+   */
+  const body = {...req.body}
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.settings.setup`, body)
+  if (!valid?.cluster) {
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/setup')
+  }
+
+  /*
    * Check whether we can figure out who we are
    */
   const node = await localNodeInfo(req.body)
   if (!node) {
-    log.warn(`Ingoring request to setup with unmatched FQDN`)
+    log.info(`Ingoring request to setup with unmatched FQDN`)
     return res.status(400).send({ errors: ['Request host not listed as Morio node'] })
   }
 
@@ -310,18 +311,17 @@ const localNodeInfo = async (body) => {
    */
   let fqdn = false
   const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
-
   for (const header of ['x-forwarded-host', 'host']) {
     const hval = (body.headers?.[header] || '').toLowerCase()
-    if (
-      nodes.includes(hval) ||
-      /*
-       * Note that we carve out an exception here to facilitate unit tests
-       * but only if we're not in production
-       */
-      (!utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST'))
-    )
-      fqdn = hval
+    //if (hval && (
+    //  nodes.includes(hval) ||
+    //  /*
+    //   * Note that we carve out an exception here to facilitate unit tests
+    //   * but only if we're not in production
+    //   */
+    //  (!utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST'))
+    //))
+    if (hval && nodes.includes(hval)) fqdn = hval
   }
 
   /*

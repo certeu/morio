@@ -286,14 +286,14 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   /*
    * Don't restart the API container in the middle of a test run
    */
-  if (
-    serviceName === 'api' &&
-    !utils.isEphemeral() &&
-    utils.getSettings(['cluster', 'broker_nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
-  ) {
-    log.trace(`Not in production, and running tests, not recreating API`)
-    return false
-  }
+  //if (
+  //  serviceName === 'api' &&
+  //  !utils.isEphemeral() &&
+  //  utils.getSettings(['cluster', 'broker_nodes', 0]) === utils.getPreset('MORIO_UNIT_TEST_HOST')
+  //) {
+  //  log.trace(`Not in production, and running tests, not recreating API`)
+  //  return false
+  //}
 
   /*
    * Always recreate if the service configuration has changed

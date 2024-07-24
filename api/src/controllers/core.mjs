@@ -136,7 +136,6 @@ Controller.prototype.setup = async (req, res) => {
    */
   const [valid, err] = await utils.validate(`req.setup`, req.body)
   if (!valid) {
-    log.warn(err)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/setup')
   }
 

@@ -5,6 +5,7 @@ import { getPreset, inProduction } from '#config'
 import { writeYamlFile, mkdir } from '#shared/fs'
 import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
+import { validate as validateMethod } from '../schema.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -75,7 +76,7 @@ export const utils = { hooks: { services: {} } }
 utils.getAllFqdns = () => ([
   ...utils.getSettings('cluster.broker_nodes'),
   ...utils.getSettings('cluster.flanking_nodes', []),
-  ...utils.getSettings('cluster.fqdn')
+  ...utils.getSettings('cluster.fqdn', false)
     ? [ utils.getSettings('cluster.fqdn') ]
     : []
 ])
@@ -1091,5 +1092,8 @@ utils.sendErrorResponse = (res, template, route=false) => {
   return res.type('application/problem+json').status(data.status).send(data).end()
 }
 
-
+/**
+ * Add validate method for eacy access
+ */
+utils.validate = validateMethod
 

@@ -106,7 +106,7 @@ const settings = Joi.object({
       order: Joi.array()
     }),
   }),
-})
+}).required()
 
 /**
  * Validates input
@@ -137,7 +137,7 @@ const validate = async (key, input, schema) => {
 }
 
 /*
- * Nmaes exports
+ * Named exports
  */
 export {
   Joi,

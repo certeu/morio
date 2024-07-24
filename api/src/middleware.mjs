@@ -23,6 +23,20 @@ const internalRoutes = ['GET:/auth']
 const reloadRoutes = ['GET:/status', 'GET:/info', 'GET:/reload']
 
 /*
+ * All routes that we allow
+ */
+const allowed = [
+  ...internalRoutes,
+  ...ephemeralRoutes,
+  /*
+   * Add them all again but with a trailing slash this time
+   * This will avoid head-scratching and support calls
+   */
+  ...internalRoutes.map(url => `${url}/`),
+  ...ephemeralRoutes.map(url => `${url}/`),
+]
+
+/*
  * Middleware to handle endpoints that are not available
  * in ephemeral mode or while resolving the configuration
  */
@@ -33,7 +47,7 @@ export const guardRoutes = (req, res, next) => {
   if (
     utils.isEphemeral() &&
     req.url.slice(0, 10) !== '/coverage/' &&
-    ![...internalRoutes, ...ephemeralRoutes].includes(`${req.method}:${req.url}`)
+    !allowed.includes(`${req.method}:${req.url}`)
   ) {
     log.debug({method: req.method, url: req.url}, `Blocked in ephemeral state: ${req.method} ${req.url}`)
     return utils.sendErrorResponse(res, 'morio.api.middleware.routeguard.ephemeral', req.url)

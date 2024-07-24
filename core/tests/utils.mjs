@@ -4,6 +4,7 @@ import { attempt, sleep } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 /*
  * Setup the store
@@ -36,16 +37,14 @@ const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'conn
  * Settings for the test setup
  */
 const setup = {
-  deployment: {
-    node_count: 1,
-    display_name: 'Morio Unit Tests',
-    nodes: ['unit.test.morio.it'],
+  cluster: {
+    name: 'Morio Unit Tests',
+    broker_nodes: ['unit.test.morio.it'],
   },
   tokens: {
     flags: {
       HEADLESS_MORIO: false,
-      DISABLE_ROOT_TOKEN: false,
-      NEVER_SWARM: true,
+      DISABLE_ROOT_TOKEN: false
     },
     secrets: {
       TEST_SECRET_1: 'banana',
@@ -128,6 +127,7 @@ const validationShouldFail = (result) => {
 const isCoreReady = async () => {
   const res = await core.get('/status')
   const [status, result] = res
+  console.log(result)
 
   return status === 200 && result.state.config_resolved === true ? true : false
 }
@@ -144,6 +144,20 @@ const isApiReady = async () => {
   return status === 200 && result.state.config_resolved === true ? true : false
 }
 
+const validateErrorResponse = (result, template) => {
+  const err = errors[template]
+  if (!err) assert.equal('This is not a known error template', template)
+  else {
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], err.status)
+    assert.equal(typeof result[1], 'object')
+    assert.equal(result[1].title, err.title)
+    assert.equal(result[1].type, `${getPreset('MORIO_ERRORS_WEB_PREFIX')}${template}`)
+    assert.equal(result[1].detail, err.detail)
+  }
+}
+
 export {
   api,
   apiAuth,
@@ -158,4 +172,5 @@ export {
   isApiReady,
   sleep,
   validationShouldFail,
+  validateErrorResponse,
 }

@@ -44,7 +44,7 @@ export const errors = {
    */
   'morio.api.schema.violation': {
     status: 400,
-    title: 'This requires violates the data schema',
+    title: 'This request violates the data schema',
     detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
   },
 }

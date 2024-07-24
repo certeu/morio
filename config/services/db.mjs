@@ -46,7 +46,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
       ],
       // Command
-      command: [
+      command: utils.isDistributed() ? [
         `/bin/rqlited`,
         `-node-id`,
         String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
@@ -63,7 +63,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `-join`,
         utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`).join(','),
         'data',
-      ], //.concat(utils.getNodeSerial() === 1 ? [] : ['data']),
+      ] : false,
     },
     /*
      * Traefik (proxy) configuration for the API service

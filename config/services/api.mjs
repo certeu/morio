@@ -32,8 +32,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       priority: 666,
     }).set("http.middlewares.api-prefix.replacepathregex.regex", `^${utils.getPreset('MORIO_API_PREFIX')}/(.*)`)
       .set("http.middlewares.api-prefix.replacepathregex.replacement", "/$1")
-      .set('http.routers.api.middlewares', ['api-prefix@file'])
-      .set('http.routers.api.middlewares', utils.isEphemeral() ? [] : ['api-auth@file']),
+      .set('http.routers.api.middlewares', utils.isEphemeral() ? ['api-prefix@file'] : ['api-prefix@file', 'api-auth@file']),
   }
   /*
    * To run unit tests, we need to modify the config slightly
