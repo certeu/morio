@@ -702,7 +702,7 @@ utils.setServiceState = (serviceName, state) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setServiceStatus = (serviceName, status) => {
-  store.set(['status', 'services', serviceName], status)
+  store.set(['status', utils.getNodeFqdn(), serviceName], status)
   return utils
 }
 

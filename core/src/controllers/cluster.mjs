@@ -55,7 +55,8 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Verify the heartbeat request which will determin the action to take
    */
-  const { action, errors } = await verifyHeartbeatRequest(req.body)
+  log.todo(valid, 'in controller')
+  const { action, errors } = await verifyHeartbeatRequest(valid)
 
   /*
    * (potentially) take action, but not if we just got on our feet
