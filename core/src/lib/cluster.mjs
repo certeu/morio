@@ -1,6 +1,7 @@
 // Shared imports
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
+import { serviceCodes } from '#shared/errors'
 import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
@@ -48,10 +49,33 @@ const updateNodeState = async () => {
    * If we are leading the cluster,
    * we should also update the consolidated cluster status
    */
-  if (utils.isLeading()) {
-    log.todo(utils.getStatus(), `Update cluster state`)
-  }
+  if (utils.isLeading()) consolidateClusterStatus()
 }
+
+const consolidateClusterStatus = () => {
+  const status = utils.getStatus()
+  const warnings = []
+  let code = 0
+  for (const service of [...serviceOrder]) {
+    if (
+      typeof status.services[service] !== 'undefined' &&
+      status.services[service] !== 0
+    ) {
+      if (code === 0) code = serviceCodes[service]
+      warnings.push(`The ${service} service has status code ${status.services[service]}`)
+    }
+  }
+
+  utils.setClusterStatus(code, statusColorFromCode(code))
+}
+
+const statusColorFromCode = (code) => {
+  if (code === 0) return 'green'
+  if (code < 10) return 'amber'
+  // TODO: handle more amber states
+  return 'red'
+}
+
 
 /**
  * Helper method to join a node to the cluster

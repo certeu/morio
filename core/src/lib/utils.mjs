@@ -938,6 +938,7 @@ utils.isUnitTest = () => store.get('testing', false) ? true : false
  */
 utils.beginEphemeral = () => {
   store.set('state.ephemeral', true)
+  utils.setClusterStatus(1, 'amber')
   return utils
 }
 
@@ -950,6 +951,7 @@ utils.beginReconfigure = () => {
   log.debug('core: Start reconfigure')
   store.set('state.config_resolved', false)
   store.set('state.reconfigure_time', Date.now())
+  utils.setClusterStatus(2, 'amber')
   return utils
 }
 
