@@ -112,7 +112,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * Unless this is the initial setup in which case we just updated the state
    * and should perhaps let the world knoww we just work up
    */
-  if (!broadcast)await updateClusterState(true)
+  if (!broadcast) await updateClusterState(true)
 
   /*
    * Who are we sending heartbeats to?

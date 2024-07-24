@@ -46,10 +46,11 @@ Controller.prototype.heartbeat = async (req, res) => {
         runHeartbeat(true, true)
       } else {
         /*
-         * If we are following, we just log
+         * If we are following, we log and restart the heartbeat
          */
         log.info(`Received a broadcast heartbeat from node ${valid.node_serial
         }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
+        runHeartbeat(true)
       }
     }
     else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
