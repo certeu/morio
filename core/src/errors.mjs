@@ -1,6 +1,14 @@
 export const errors = {
   /*
-   * Specific error for only in ephemeral mode' errors
+   * 404 error, API style
+   */
+  'morio.core.404': {
+    status: 404,
+    title: 'No such API endpoint',
+    detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
+  },
+  /*
+   * Error for only in ephemeral mode' errors
    */
   'morio.core.ephemeral.required': {
     status: 409,
@@ -8,7 +16,7 @@ export const errors = {
     detail: 'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
-   * Specific error for when writing to the filesystem fails
+   * Error for when writing to the filesystem fails
    */
   'morio.core.fs.write.failed': {
     status: 500,
@@ -16,11 +24,19 @@ export const errors = {
     detail: 'An attempt to write to the filesystem failed unexpectedly. This warrants escalation.',
   },
   /*
-   * Specific error for schema violations
+   * Error for schema violations
    */
   'morio.core.schema.violation': {
     status: 400,
     title: 'This request violates the data schema',
     detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+  },
+  /*
+   * Error for invalid settings
+   */
+  'morio.core.settings.invalid': {
+    status: 400,
+    title: 'These settings are invalid',
+    detail: 'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
   },
 }

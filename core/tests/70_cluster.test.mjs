@@ -1,14 +1,6 @@
 import { core } from './utils.mjs'
 import { describe, it } from 'node:test'
 
-describe('Core Cluster Tests', () => {
-  /*
-   * POST /cluster/ping
-   *
-   * Example response:
-   */
-  it('Should POST /cluster/ping', async () => {
-    const [status, d] = await core.post('/cluster/ping', {})
-    console.log({ status, d })
-  })
+describe('Core Cluster Tests (TODO)', () => {
+  // TODO: Not sure how much we can do in unit tests alone*
 })

@@ -83,58 +83,6 @@ Controller.prototype.getContainerData = async (req, res, cmd = 'inspect', option
 }
 
 /**
- * Creates a Docker resource
- *
- * This handles the following commands on the docker object:
- *   -  createContainer
- *   -  createSecret
- *   -  createConfig
- *   -  createPlugin
- *   -  createVolume
- *   -  createService
- *   -  createNetwork
- *   -  createImage
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.createResource = async (req, res, cmd) => {
-  /*
-   * Run the Docker command, with options if there are any
-   */
-  const [success, result] = await runDockerApiCommand(cmd, req.body)
-
-  /*
-   * Return result
-   */
-  return success ? res.status(201).send(cloneAsPojo(result)) : dockerError(result, res)
-}
-
-/**
- * Removes a Docker network
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.removeNetwork = async (req, res) => {
-  /*
-   * Validate request against schema
-   */
-  const [valid, err] = await validate(`req.docker.network.remove`, req.params)
-  if (!valid) return schemaViolation(err, res)
-
-  /*
-   * Run the Docker command, with options if there are any
-   */
-  const [success, result] = await runNetworkApiCommand(valid.id, 'remove')
-
-  /*
-   * Return result
-   */
-  return success ? res.status(204).send(cloneAsPojo(result)) : dockerError(result, res)
-}
-
-/**
  * Updates a container resource
  *
  * This handles the following commands on the docker object:
@@ -223,41 +171,4 @@ Controller.prototype.getNetworkData = async (req, res, cmd = 'inspect') => {
    * Return result
    */
   return success ? res.send(result) : dockerError(result, res)
-}
-
-/**
- * Docker pull - Behaves like the CLI
- *
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- * @param {string} cmd - The command to run (method on the docker client)
- */
-Controller.prototype.pull = async (req, res) => {
-  /*
-   * Validate request against schema
-   */
-  const [valid, err] = await validate('req.docker.pull', req.body)
-  if (!valid) return schemaViolation(err, res)
-
-  /*
-   * Running the docker CLI command
-   */
-  const stream = await docker.pull(valid.tag)
-
-  /*
-   * Set up streaming response
-   */
-  res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8')
-  res.setHeader('Transfer-Encoding', 'chunked')
-
-  /*
-   * Push out chunks as they come in
-   */
-  stream.on('data', (chunk) => res.write(chunk))
-
-  /*
-   * Close the response when the stream is complete
-   */
-  stream.on('end', () => res.end())
 }

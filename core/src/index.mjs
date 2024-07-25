@@ -39,15 +39,9 @@ app.use(guardRoutes)
 for (const type in routes) routes[type](app)
 
 /*
- * Add the wildcard route
+ * Add the wildcard route (returns a 404 error)
  */
-app.get('/*', async (req, res) =>
-  res.set('Content-Type', 'application/json').status(404).send({
-    url: req.url,
-    method: req.method,
-    originalUrl: req.originalUrl,
-  })
-)
+app.get('/*', async (req, res) => utils.sendErrorResponse(res, 'morio.core.404', req.url))
 
 /*
  * (re)Configure core

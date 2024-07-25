@@ -22,8 +22,10 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
+      /*
+       * Get the status from the broker admin API
+       */
       const result = await testUrl(
-        //`http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/status/ready`,
         `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
         { returnAs: 'json' }
       )
@@ -31,7 +33,7 @@ export const service = {
       const status = result && (result.is_healthy || !result.nodes_down.includes(local)) ? 0 : 1
       utils.setServiceStatus('broker', status)
       /*
-       * Also track the leader stqte
+       * Also track the leader state
        */
       if (result.controller_id) {
         utils.setLeaderSerial(result.controller_id)

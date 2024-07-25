@@ -82,8 +82,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
     default_settings: [
       ['tokens.flags.HEADLESS_MORIO', false],
       ['tokens.flags.DISABLE_ROOT_TOKEN', false],
-      ['tokens.flags.NEVER_SWARM', false],
-      ['tokens.flags.DISABLE_SWARM_OVERLAY_ENCRYPTION', false],
     ],
   }
 }

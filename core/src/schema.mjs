@@ -56,6 +56,7 @@ export const schema = {
   'req.docker.network.inspect': Joi.object({ id }),
   'req.docker.network.remove': Joi.object({ id }),
   'req.settings.setup': settings,
+  'req.settings.deploy': settings,
   /*
    * Responses
    */

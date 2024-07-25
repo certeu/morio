@@ -79,6 +79,7 @@ export const service = {
         utils.setEphemeralUuid(uuid())
         utils.setSettingsSerial(false)
         utils.setNodeSerial(0)
+        utils.setNode(false)
 
         /*
          * Configure the proxy for core access

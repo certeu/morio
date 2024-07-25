@@ -1,22 +1,28 @@
 import { store, core, getPreset } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import pkg from '../package.json' with { type: 'json' }
 
 describe('Ephemeral Core: Status Routes', () => {
   /*
-   * GET /status
-   *
+   * GET /status - Retrieve status data of an ephemeral node
    * Example response:
    * {
-   *   about: 'Morio Core',
-   *   name: '@morio/core',
-   *   production: false,
-   *   version: '0.1.6',
-   *   current_settings: false,
-   *   ephemeral: true,
-   *   uptime: '113.8 seconds',
-   *   uptime_seconds: 113.83,
-   *   setup: false
+   *   info: {
+   *     about: 'Morio Core',
+   *     name: '@morio/core',
+   *     production: false,
+   *     version: '0.2.0'
+   *   },
+   *   status: { cluster: { code: 2, color: 'amber', time: 1721887129046 } },
+   *   nodes: {},
+   *   node: {
+   *     uptime: 5,
+   *     ephemeral: true,
+   *     reconfigure_count: 1,
+   *     config_resolved: true,
+   *     settings_serial: 0
+   *   }
    * }
    */
   it('Should load /status', async () => {
@@ -26,15 +32,26 @@ describe('Ephemeral Core: Status Routes', () => {
     assert.equal(200, result[0], 200)
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.info.about, 'Morio Core')
-    assert.equal(d.info.name, '@morio/core')
+    // info
+    assert.equal(typeof d.info, 'object')
+    assert.equal(d.info.about, pkg.description)
+    assert.equal(d.info.name, pkg.name)
+    assert.equal(d.info.version, pkg.version)
     assert.equal(d.info.production, false)
-    assert.equal(d.info.version, getPreset('MORIO_VERSION'))
-    assert.equal([true, false].includes(d.node.ephemeral), true)
+    // status.cluster
+    assert.equal(typeof d.status.cluster, 'object')
+    assert.equal(d.status.cluster.code, 2)
+    assert.equal(d.status.cluster.color, "amber")
+    assert.equal(typeof d.status.cluster.time, 'number')
+    // nodes
+    assert.equal(typeof d.nodes, 'object')
+    // nodes
+    assert.equal(typeof d.node, 'object')
+    assert.equal(typeof d.node.uptime, 'number')
+    assert.equal(typeof d.node.reconfigure_count, 'number')
+    assert.equal(typeof d.node.settings_serial, 'number')
     assert.equal(d.node.ephemeral, true)
-    assert.equal(d.node.settings_serial, 0)
     assert.equal(d.node.config_resolved, true)
-
     /*
      * Add to store for re-use in other tests
      */

@@ -56,7 +56,10 @@ Controller.prototype.heartbeat = async (req, res) => {
    * If we are leading, update the follower status
    */
   if (utils.isLeading()) {
-    for (const fqdn of Object.keys(valid.status.nodes).filter(fqdn => fqdn !== utils.getNodeFqdn())) {
+    for (const fqdn of Object.keys(valid.status.nodes)
+      .filter(fqdn => fqdn !== utils.getNodeFqdn())
+      .filter(fqdn => utils.getNodeFqdns().includes(fqdn))
+    ) {
       utils.setPeerStatus(fqdn, valid.status.nodes[fqdn])
     }
   }

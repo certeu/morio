@@ -80,14 +80,15 @@ const ensureTokenSecrecy = (secrets) => {
  */
 Controller.prototype.deploy = async (req, res) => {
   /*
-   * Note that input validation is handled by the API
-   * Here, we just do a basic check
+   * Validate request against schema, but strip headers from body first
    */
-  const mSettings = req.body
-  if (!mSettings.cluster) {
-    log.warn(`Ingoring request to deploy invalid settings`)
-    return res.status(400).send({ errors: ['Settings are not valid'] })
-  } else log.info(`Processing request to deploy new settings`)
+  const body = {...req.body}
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.settings.deploy`, body)
+  if (!valid?.cluster) {
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/deploy')
+  }
+  else log.info(`Processing request to deploy new settings`)
 
   /*
    * Generate time-stamp for use in file names
@@ -98,14 +99,14 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * Handle secrets
    */
-  if (mSettings.tokens?.secrets)
-    mSettings.tokens.secrets = ensureTokenSecrecy(mSettings.tokens.secrets)
+  if (valid.tokens?.secrets)
+    valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
 
   /*
-   * Write the protected mSettings settings to disk
+   * Write the protected valid settings to disk
    */
   log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
@@ -129,9 +130,7 @@ Controller.prototype.setup = async (req, res) => {
    * Only allow this endpoint when running in ephemeral mode
    */
   if (!utils.isEphemeral())
-    return res.status(400).send({
-      errors: ['You can only use this endpoint on an ephemeral Morio node'],
-    })
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/setup')
 
   /*
    * Validate request against schema, but strip headers from body first
@@ -151,17 +150,7 @@ Controller.prototype.setup = async (req, res) => {
     log.info(`Ingoring request to setup with unmatched FQDN`)
     return res.status(400).send({ errors: ['Request host not listed as Morio node'] })
   }
-
-  /*
-   * Note that input validation is handled by the API
-   * Here, we just do a basic check
-   */
-  const mSettings = req.body
-  delete mSettings.headers
-  if (!mSettings.cluster) {
-    log.warn(`Ingoring request to setup with invalid settings`)
-    return res.status(400).send({ errors: ['Settings are not valid'] })
-  } else log.debug(`Processing request to setup Morio with provided settings`)
+  else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
    * Drop us in reconfigure mode
@@ -201,14 +190,14 @@ Controller.prototype.setup = async (req, res) => {
    * Complete the settings with the defaults that are configured
    */
   for (const [key, val] of resolveServiceConfiguration('core', { utils }).default_settings) {
-    setIfUnset(mSettings, key, val)
+    setIfUnset(valid, key, val)
   }
 
   /*
    * Make sure keys & settings exists in memory store so later steps can get them
    */
   utils.setKeys(keys)
-  utils.setSettings(cloneAsPojo(mSettings))
+  utils.setSettings(cloneAsPojo(valid))
 
   /*
    * We need to generate the CA config & certificates early so that
@@ -228,7 +217,7 @@ Controller.prototype.setup = async (req, res) => {
    * So let's first check whether there are any secrets, and if not just
    * bypass the entire secret handling.
    */
-  if (mSettings.tokens?.secrets) {
+  if (valid.tokens?.secrets) {
     /*
      * Add encryption methods
      */
@@ -240,14 +229,14 @@ Controller.prototype.setup = async (req, res) => {
     /*
      * Now ensure token secrecy before we write to disk
      */
-    mSettings.tokens.secrets = ensureTokenSecrecy(mSettings.tokens.secrets)
+    valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
   }
 
   /*
-   * Write the mSettings settings to disk
+   * Write the valid settings to disk
    */
   log.debug(`Writing initial settings to settings.${time}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, mSettings)
+  let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
   if (!result) return res.status(500).send({ errors: ['Failed to write initial settings to disk'] })
 
   /*

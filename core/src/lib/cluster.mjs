@@ -12,12 +12,20 @@ import { log, utils } from './utils.mjs'
  */
 export const updateClusterState = async (silent) => {
   /*
+   * Don't bother in ephemeral mode
+   */
+  if (utils.isEphemeral()) return
+
+  /*
    * On follower nodes, running this on each heartbeat is ok.
    * But on a leader node, especially on a large cluster, this would scale poorly.
    * So we Debounce this by checking the age of the last time the status was updated
    */
   if (!utils.isStatusStale()) return
 
+  /*
+   * Now get to work
+   */
   await forceUpdateClusterState(silent)
 }
 
@@ -353,7 +361,10 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Update status of cluster nodes
    */
-  for (const fqdn of Object.keys(data.status.nodes).filter(fqdn => fqdn !== utils.getNodeFqdn())) {
+  for (const fqdn of Object.keys(data.status.nodes)
+    .filter(fqdn => fqdn !== utils.getNodeFqdn())
+    .filter(fqdn => utils.getNodeFqdns().includes(fqdn))
+  ) {
     utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
   }
   utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)

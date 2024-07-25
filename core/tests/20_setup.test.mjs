@@ -5,6 +5,7 @@ import { strict as assert } from 'node:assert'
 describe('Core Setup Tests', () => {
   /*
    * POST /setup - no body
+   * Example response:
    * {
    *    status: 400,
    *    title: 'This request violates the data schema',
@@ -19,6 +20,7 @@ describe('Core Setup Tests', () => {
 
   /*
    * POST /setup - empty object as body
+   * Example response:
    * {
    *    status: 400,
    *    title: 'This request violates the data schema',
@@ -33,6 +35,7 @@ describe('Core Setup Tests', () => {
 
   /*
    * POST /setup - should work
+   * Example response:
    * {
    *   result: 'success',
    *   uuids: {
@@ -76,7 +79,6 @@ describe('Core Setup Tests', () => {
     assert.equal(d.root_token.about.includes('never be shown'), true)
     assert.equal(d.root_token.value.length, 68)
     assert.equal(d.root_token.value.slice(0, 4), 'mrt.')
-
     /*
      * Keep root token in store
      */
@@ -85,7 +87,6 @@ describe('Core Setup Tests', () => {
 
   /*
    * POST /setup
-   *
    * Example response:
    * {
    *   error: "Service Unavailable",

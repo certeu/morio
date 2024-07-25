@@ -127,9 +127,8 @@ const validationShouldFail = (result) => {
 const isCoreReady = async () => {
   const res = await core.get('/status')
   const [status, result] = res
-  console.log(result)
 
-  return status === 200 && result.state.config_resolved === true ? true : false
+  return status === 200 && result.node.config_resolved === true ? true : false
 }
 
 /**
