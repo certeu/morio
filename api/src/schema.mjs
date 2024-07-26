@@ -1,4 +1,4 @@
-import { Joi, validate as sharedValidate, settings, uuid } from '#shared/schema'
+import { Joi, validate as sharedValidate, settings, uuid, mrt } from '#shared/schema'
 import { roles } from '#config/roles'
 
 /*
@@ -57,19 +57,26 @@ export const schema = {
     data: Joi.object().required()
   }),
   'req.auth.login.apikey': Joi.object({
-    provider: provider.required(),
+    provider: provider.valid('apikey').required(),
     data: Joi.object({
       password: Joi.string().length(96),
       username: Joi.string().length(36).required(),
     }).required()
   }),
   'req.auth.login.local': Joi.object({
-    provider: provider.required(),
+    provider: provider.valid('local').required(),
     data: Joi.object({
       password: password.required(),
       username: username.required(),
       token: token.required(),
       role: role.required(),
+    }).required()
+  }),
+  'req.auth.login.mrt': Joi.object({
+    provider: provider.valid('mrt').required(),
+    data: Joi.object({
+      mrt: mrt.required(),
+      role: role.optional(),
     }).required()
   }),
 

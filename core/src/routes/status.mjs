@@ -14,11 +14,6 @@ export function routes(app) {
   app.get('/status', (req, res) => Status.status(req, res))
 
   /*
-   * Hit this route to get the JWKS info
-   */
-  app.get('/jwks', (req, res) => Status.jwks(req, res))
-
-  /*
    * Hit this route to get the MORIO status, settings, config
    * and everything required to bootstrap the API
    */

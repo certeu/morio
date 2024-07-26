@@ -4,6 +4,7 @@ import { attempt, sleep } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
+import axios from 'axios'
 
 /*
  * Setup the store
@@ -20,6 +21,44 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * This file is used by API unit tests too, that is why this is here
  */
 const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+
+/*
+ * Management AIP client based on axios, which allows us to add headers
+ */
+const hapi = {
+  get: async (route, headers) => {
+    let result
+    try {
+      result = await axios.get(`http://api:${getPreset('MORIO_API_PORT')}${route}`, { headers })
+      //console.log({result})
+    }
+    catch (err) {
+      //console.log({err})
+      if (err.response?.status) return [err.reponse.status, err.reponse.data, err]
+      return false
+    }
+
+    return result
+      ? [result.status, result.data, result]
+      : false
+  },
+  post: async (route, data, headers) => {
+    let result
+    try {
+      result = await axios.post(`http://api:${getPreset('MORIO_API_PORT')}${route}`, data, { headers })
+      //console.log({result})
+    }
+    catch (err) {
+      //console.log({err})
+      if (err?.response?.status) return [err.response.status, err.response.data, err]
+      return false
+    }
+
+    return result
+      ? [result.status, result.data, result]
+      : false
+  }
+}
 
 /*
  * Client for the management API
@@ -162,7 +201,7 @@ const validateErrorResponse = (result, errors, template) => {
 
 export {
   api,
-  apiAuth,
+  hapi,
   core,
   equalIgnoreSpaces,
   getPreset,

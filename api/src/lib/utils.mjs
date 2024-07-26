@@ -51,6 +51,26 @@ export const utils = new Store(log)
  */
 
 /**
+ * Helper method to get the broker count
+ *
+ * @return {number} count - The number of broker nodes
+ */
+ utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
+
+/**
+ * Helper method to get the cluster Fqdn
+ *
+ * @return {string} fqdn - The cluster's FQDN
+ */
+utils.getClusterFqdn = () => {
+  const nodes = utils.getBrokerCount()
+
+  return nodes > 1
+    ? utils.getSettings('cluster.fqdn')
+    : utils.getSettings(['cluster', 'broker_nodes', 0])
+}
+
+/**
  * Helper method to get the cluster UUID
  *
  * @return {string} uuid - The cluster's uuid
@@ -63,6 +83,14 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  * @return {object} state - The core status
  */
 utils.getCoreStatus = () => store.get('status.core')
+
+/**
+ * Helper method to get a flag from the settings
+ *
+ * @param {string} flag - The flag name to retrieve
+ * @return {mixed} data - Whatever is stored under the flag
+ */
+utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
  * Helper method to get the info from the store
@@ -120,6 +148,13 @@ utils.getPreset = (key, dflt, opts) => {
 
   return result
 }
+
+/**
+ * Helper method to get the provider IDs
+ *
+ * @return {array} ids - The list of provider IDs
+ */
+utils.getProviderIds = (path, dflt) => Object.keys(utils.getSettings('iam.providers', {}))
 
 /**
  * Helper method to get the reload_count

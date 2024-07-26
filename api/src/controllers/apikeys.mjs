@@ -5,7 +5,7 @@ import { uuid, randomString, hashPassword } from '#shared/crypto'
 import { validateSchema } from '../lib/validation.mjs'
 import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
 
 /**
  * This account controller handles apikeys in Morio
@@ -28,6 +28,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.create = async (req, res) => {
+
   /*
    * Validate input
    */
@@ -40,7 +41,7 @@ Controller.prototype.create = async (req, res) => {
    * an API key or the Morio Root Token, we say no
    */
   if (['mrt', 'apikey'].includes(currentProvider(req)))
-    return res.status(403).send({ error: 'Only nominative accounts can create API keys' })
+    return utils.sendErrorResponse(res, 'morio.api.nominative.account.required', '/apikey')
 
   /*
    * Does the user have permission to assign the requested role?
@@ -86,17 +87,20 @@ Controller.prototype.list = async (req, res) => {
   /*
    * Fetch all keys with a filter method
    */
+  const user = currentUser(req)
   const keys = await loadAccountApikeys(currentUser(req))
+
+  log.todo({ keys, user: currentUser(req) })
 
   return keys
     ? res.send({ result: 'success', keys})
-    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, '/apikey')
+    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, '/apikeys')
 }
 
 /**
  * Update an API key
  *
- * There are only four actions one can take:
+ * There are only three actions one can take:
  *   - rotate: Changes the key secret
  *   - disable: Sets status to 'disabled'
  *   - enable: Sets status to 'active'

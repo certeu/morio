@@ -1,4 +1,5 @@
 import { Controller } from '#controllers/core'
+import { rbac } from '../middleware.mjs'
 
 const Core = new Controller()
 
@@ -13,118 +14,96 @@ export function routes(app) {
   /*
    * API routes to get data from a specific container
    */
-  app.get(`/docker/containers/:id`,              (req, res) => Core.getContainerData(req, res))
-  app.get(`/docker/containers/:id/logs`,         (req, res) => Core.getContainerData(req, res, 'logs'))
-  app.get(`/docker/containers/:id/stats`,        (req, res) => Core.getContainerData(req, res, 'stats'))
-  app.get(`/docker/containers/:id/stream/logs`,  Core.getContainerData)
-  app.get(`/docker/containers/:id/stream/stats`, Core.getContainerData)
+  app.get(`/docker/containers/:id`,       rbac.operator, (req, res) => Core.getContainerData(req, res))
+  app.get(`/docker/containers/:id/logs`,  rbac.operator, (req, res) => Core.getContainerData(req, res, 'logs'))
+  app.get(`/docker/containers/:id/stats`, rbac.operator, (req, res) => Core.getContainerData(req, res, 'stats'))
 
   /*
    * API routes to get data from a specific image
    */
-  app.get(`/docker/images/:id`,         (req, res) => Core.getDockerImageData(req, res))
-  app.get(`/docker/images/:id/history`, (req, res) => Core.getDockerImageData(req, res, 'history'))
+  app.get(`/docker/images/:id`,           rbac.operator, (req, res) => Core.getDockerImageData(req, res))
+  app.get(`/docker/images/:id/history`,   rbac.operator, (req, res) => Core.getDockerImageData(req, res, 'history'))
 
   /*
    * API routes to get data from a specific network
    */
-  app.get(`/docker/networks/:id`, (req, res) => Core.getDockerNetworkData(req, res))
+  app.get(`/docker/networks/:id`, rbac.operator, (req, res) => Core.getDockerNetworkData(req, res))
 
   /*
    * API routes to make changes to a specific container
    */
-  app.put(`/docker/containers/:id/kill`,    (req, res) => Core.updateContainer(req, res, 'kill'))
-  app.put(`/docker/containers/:id/pause`,   (req, res) => Core.updateContainer(req, res, 'pause'))
-  app.put(`/docker/containers/:id/restart`, (req, res) => Core.updateContainer(req, res, 'restart'))
-  app.put(`/docker/containers/:id/start`,   (req, res) => Core.updateContainer(req, res, 'start'))
-  app.put(`/docker/containers/:id/stop`,    (req, res) => Core.updateContainer(req, res, 'stop'))
-  app.put(`/docker/containers/:id/unpause`, (req, res) => Core.updateContainer(req, res, 'unpause'))
+  app.put(`/docker/containers/:id/kill`,    rbac.operator, (req, res) => Core.updateContainer(req, res, 'kill'))
+  app.put(`/docker/containers/:id/pause`,   rbac.operator, (req, res) => Core.updateContainer(req, res, 'pause'))
+  app.put(`/docker/containers/:id/restart`, rbac.operator, (req, res) => Core.updateContainer(req, res, 'restart'))
+  app.put(`/docker/containers/:id/start`,   rbac.operator, (req, res) => Core.updateContainer(req, res, 'start'))
+  app.put(`/docker/containers/:id/stop`,    rbac.operator, (req, res) => Core.updateContainer(req, res, 'stop'))
+  app.put(`/docker/containers/:id/unpause`, rbac.operator, (req, res) => Core.updateContainer(req, res, 'unpause'))
 
   /*
    * API routes to get data from Docker
    */
-  app.get(`/docker/info`,               (req, res) => Core.getDockerData(req, res, 'info'))
-  app.get(`/docker/containers`,         (req, res) => Core.getDockerData(req, res, 'containers'))
-  app.get(`/docker/df`,                 (req, res) => Core.getDockerData(req, res, 'df'))
-  app.get(`/docker/all-containers`,     (req, res) => Core.getDockerData(req, res, 'all-containers'))
-  app.get(`/docker/images`,             (req, res) => Core.getDockerData(req, res, 'images'))
-  app.get(`/docker/networks`,           (req, res) => Core.getDockerData(req, res, 'networks'))
-  //app.get(`/docker/nodes`,              (req, res) => Core.getDockerData(req, res, 'nodes'))
-  //app.get(`/docker/plugins`,            (req, res) => Core.getDockerData(req, res, 'plugins'))
-  app.get(`/docker/running-containers`, (req, res) => Core.getDockerData(req, res, 'containers'))
-  //app.get(`/docker/secrets`,            (req, res) => Core.getDockerData(req, res, 'secrets'))
-  //app.get(`/docker/services`,           (req, res) => Core.getDockerData(req, res, 'services'))
-  //app.get(`/docker/tasks`,              (req, res) => Core.getDockerData(req, res, 'tasks'))
-  app.get(`/docker/version`,            (req, res) => Core.getDockerData(req, res, 'version'))
-  //app.get(`/docker/volumes`,            (req, res) => Core.getDockerData(req, res, 'volumes'))
+  app.get(`/docker/info`,               rbac.operator, (req, res) => Core.getDockerData(req, res, 'info'))
+  app.get(`/docker/containers`,         rbac.operator, (req, res) => Core.getDockerData(req, res, 'containers'))
+  app.get(`/docker/df`,                 rbac.operator, (req, res) => Core.getDockerData(req, res, 'df'))
+  app.get(`/docker/all-containers`,     rbac.operator, (req, res) => Core.getDockerData(req, res, 'all-containers'))
+  app.get(`/docker/images`,             rbac.operator, (req, res) => Core.getDockerData(req, res, 'images'))
+  app.get(`/docker/networks`,           rbac.operator, (req, res) => Core.getDockerData(req, res, 'networks'))
+  app.get(`/docker/running-containers`, rbac.operator, (req, res) => Core.getDockerData(req, res, 'containers'))
+  app.get(`/docker/version`,            rbac.operator, (req, res) => Core.getDockerData(req, res, 'version'))
 
   /*
    * API route for initial setup of a Morio instance
+   * Note: This is a public/anonymous route, but will only work in ephemeral state
    */
   app.post(`/setup`, Core.setup)
 
   /*
    * API route to update (replace) Morio settings
    */
-  app.post(`/settings`, Core.deploy)
-
-  /*
-   * Hit this route to get the ca root certificate and fingerprint
-   */
-  app.get(`/ca/root`, Core.getCaRoot)
+  app.post(`/settings`, rbac.operator, Core.deploy)
 
   /*
    * Create a certificate
    */
-  app.post(`/ca/certificate`, Core.createCertificate)
-
-  /*
-   * Stream service logs
-   */
-  app.get(`/logs/:service`, Core.streamServiceLogs)
+  app.post(`/ca/certificate`, rbac.user, Core.createCertificate)
 
   /*
    * Get the defaults for generating a .deb client package
    */
-  app.get(`/pkgs/clients/deb/defaults`, (req, res) => Core.getClientPackageDefaults(req, res, 'deb'))
+  app.get(`/pkgs/clients/deb/defaults`, rbac.operator, (req, res) => Core.getClientPackageDefaults(req, res, 'deb'))
 
   /*
    * Encrypt data
    */
-  app.post(`/encrypt`, Core.encrypt)
+  app.post(`/encrypt`, rbac.operator, Core.encrypt)
 
   /*
    * Decrypt data
    */
-  app.post(`/decrypt`, Core.decrypt)
+  app.post(`/decrypt`, rbac.engineer, Core.decrypt)
 
   /*
    * Build a .deb client package
    */
-  app.post(`/pkgs/clients/deb/build`, (req, res) => Core.buildClientPackage(req, res, 'deb'))
+  app.post(`/pkgs/clients/deb/build`, rbac.operator, (req, res) => Core.buildClientPackage(req, res, 'deb'))
+
+  /*
+   * Get the sanitized settings
+   */
+  app.get(`/settings`, rbac.operator, Core.getSettings)
 
   /*
    * Hit this route to get the running config
    */
-  app.get(`/config`, Core.getConfig)
-
-  /*
-   * Hit this route to get the available idenity/authentication providers (idps)
-   */
-  app.get(`/idps`, Core.getIdps)
+  app.get(`/config`, rbac.operator, Core.getConfig)
 
   /*
    * Hit this route to get the running presets
    */
-  app.get(`/presets`, Core.getPresets)
+  app.get(`/presets`, rbac.operator, Core.getPresets)
 
   /*
-   * Hit this route to get the running presets
+   * This route is called by core after reconfiguring itself
    */
-  app.get(`/jwks`, (req, res) => Core.getJwks(req, res))
-
-  /*
-   * Route to join a cluster
-   */
-  app.post(`/cluster/join`, (req, res) => Core.joinCluster(req, res))
+  app.get(`/reconfigure`, (req, res) => Core.reconfigure(req, res))
 }

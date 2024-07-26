@@ -24,9 +24,4 @@ export function routes(app) {
    * Which means they are not decrypted (no secrets).
    */
   app.get('/settings', (req, res) => res.send(utils.getSanitizedSettings()))
-
-  /*
-   * Load the available authentication/identity providers (IDPs)
-   */
-  app.get('/idps', Settings.getIdps)
 }

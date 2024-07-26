@@ -1,4 +1,6 @@
+import { roles } from '#config/roles'
 import { log, utils } from './lib/utils.mjs'
+import { currentRole, currentProvider, currentUser, isRoleAvailable } from './rbac.mjs'
 
 /*
  * List of routes allowed in ephemeral mode
@@ -71,3 +73,38 @@ export const guardRoutes = (req, res, next) => {
    */
   next()
 }
+
+/*
+ * Middleware to require a certain role for an endpoint
+ */
+const requireRole = (req, res, next, role) => {
+  const realRole = currentRole(req)
+  if (realRole) {
+    const isOk = isRoleAvailable(realRole, role)
+    if (isOk) next()
+  }
+  return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+}
+
+/*
+ * Helper RBAC middleware
+ */
+export const rbac = {}
+for (const role of roles) rbac[role] = (req, res, next) => requireRole(req, res, next, role)
+
+/*
+ * Add custom middleware to load roles from header
+ */
+export const addRbacHeaders = (req, res, next) => {
+  /*
+   * Attach forwardAuth headers to req.morio
+   */
+  req.morio = {
+    roles: req.headers['x-morio-roles'] ? req.headers['x-morio-roles'].split(',').map(role => role.trim()) : [],
+    user: currentUser(req),
+    provider: currentProvider(req),
+  }
+  next()
+}
+
+

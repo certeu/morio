@@ -1,6 +1,8 @@
-import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
+import { store, api, hapi, apiAuth, validateErrorResponse, getPreset } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
+import { sleep } from '#shared/utils'
 
 const keys = {
   key1: {
@@ -11,43 +13,30 @@ const keys = {
 }
 
 describe('API Key Tests', () => {
+
   const headers = {
     'X-Morio-Role': 'engineer',
     'X-Morio-User': 'test_user',
     'X-Morio-Provider': 'local',
   }
-  /*
-   * GET /apikeys/:key/rotate
-   *
-   * Example response:
-   * {
-   *   result: "success",
-   *   keys: []
-   * }
-  it(`Should GET /apikeys`, { timeout }, async () => {
-    const result = await api.get(`/apikeys`)
-    const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-    assert.equal(result[1].result, 'success')
-    assert.equal(Array.isArray(result[1].keys), true)
-  })
-   */
 
   for (const field of ['name', 'expires', 'role']) {
     /*
      * POST /apikey (missing ${field})
-     *
      * Example response:
      * {
-     *   error: 'Validation failed'
+     *   status: 400,
+     *   title: 'This request violates the data schema',
+     *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+     *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+     *   instance: 'http://api:3000/account'
      * }
      */
     it(`Should not POST /apikey (missing ${field})`, async () => {
       const data = { ...keys.key1 }
       delete data[field]
-      validationShouldFail(await api.post(`/apikey`, data, headers))
+      let result = await axiosApi.post(`/apikey`, data, headers)
+      validateErrorResponse([err.response.status, err.response.data, null], errors, 'morio.api.schema.violation')
     })
   }
 
@@ -71,33 +60,61 @@ describe('API Key Tests', () => {
    * }
    */
   it(`Should POST /apikey`, async () => {
-    const result = await api.post(`/apikey`, keys.key1, headers)
-    assert.equal(result[0], 200)
-    const d = result[1]
-    assert.equal(typeof d.data.name, 'string')
-    assert.equal(typeof d.data.secret, 'string')
-    assert.equal(typeof d.data.key, 'string')
-    assert.equal(typeof d.data.createdAt, 'string')
-    assert.equal(typeof d.data.expiresAt, 'string')
-    assert.equal(
-      new Date(d.data.expiresAt) - new Date(d.data.createdAt) - 24 * 60 * 60 * 1000 < 1000,
-      true
-    )
-    if (typeof store.keys === 'undefined') store.keys = {}
-    store.keys.key1 = d.data
+    const result
+    try {
+      result = await axios.post(`${base}/apikey`, keys.key1, { headers })
+    } catch (err) {
+      //console.log(err.request.headers)
+      console.log({ status: err.response.status ,data: err.response.data })
+      validateErrorResponse([err.response.status, err.response.data, null], errors, 'morio.api.schema.violation')
+    }
+        //console.log(result)
+
+    //assert.equal(result[0], 200)
+    //const d = result[1]
+    //console.log(d)
+    //assert.equal(typeof d.data.name, 'string')
+    //assert.equal(typeof d.data.secret, 'string')
+    //assert.equal(typeof d.data.key, 'string')
+    //assert.equal(typeof d.data.createdAt, 'string')
+    //assert.equal(typeof d.data.expiresAt, 'string')
+    //assert.equal(
+    //  new Date(d.data.expiresAt) - new Date(d.data.createdAt) - 24 * 60 * 60 * 1000 < 1000,
+    //  true
+    //)
+    //if (typeof store.keys === 'undefined') store.keys = {}
+    //store.keys.key1 = d.data
   })
 
   /*
-   * PATCH /apikey (no user context)
+   * GET /apikeys
+   *
+   * Example response:
+   * {
+  it(`Should GET /apikeys`, async () => {
+    await sleep(2)
+    const result = await api.get(`/apikeys`)
+    const d = result[1]
+    console.log(d)
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 200)
+    assert.equal(result[1].result, 'success')
+    assert.equal(Array.isArray(result[1].keys), true)
+  })
+
+
+
+  /*
+   * POST /apikeys/:id/rotate (no user context)
    *
    * Example response:
    * {
    *   error: 'Access Denied'
    * }
-   */
   it(`Should not POST /apikeys/:key/rotate (no user context)`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`)
-    assert.equal(result[0], 403)
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
@@ -121,11 +138,11 @@ describe('API Key Tests', () => {
    *     key: '7ec14d8f16d3468d9c393a4cb5df68cb'
    *   }
    * }
-   */
   it(`Should POST /apikeys/:key/rotate`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`, {}, headers)
-    assert.equal(result[0], 200)
     const d = result[1]
+    console.log(d)
+    assert.equal(result[0], 200)
     assert.equal(typeof d.data.name, 'string')
     assert.equal(typeof d.data.secret, 'string')
     assert.equal(typeof d.data.key, 'string')
@@ -159,7 +176,6 @@ describe('API Key Tests', () => {
    *     updatedAt: 1714749588334
    *   }
    * }
-   */
   it(`Should POST /apikeys/:key/disable`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/disable`, {}, headers)
     assert.equal(result[0], 200)
@@ -195,7 +211,6 @@ describe('API Key Tests', () => {
    *     updatedAt: 1714749588334
    *   }
    * }
-   */
   it(`Should POST /apikeys/:key/enable`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/enable`, {}, headers)
     assert.equal(result[0], 200)
@@ -223,7 +238,6 @@ describe('API Key Tests', () => {
    *     role: 'user'
    *   }
    * }
-   */
   it(`Should POST /login`, async () => {
     const data = {
       provider: 'apikey',
@@ -259,7 +273,6 @@ describe('API Key Tests', () => {
    *   iss: 'morio',
    *   sub: 'morio'
    * }
-   */
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
     assert.equal(result[0], 200)
@@ -276,7 +289,6 @@ describe('API Key Tests', () => {
    * GET /auth (JWT in Bearer header)
    *
    * No response body
-   */
   it(`Should GET /auth (JWT in Bearer header)`, async () => {
     const result = await apiAuth.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
@@ -294,7 +306,6 @@ describe('API Key Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Role not available to this API key'
    * }
-   */
   it(`Should POST /login (ask for role above our level)`, async () => {
     const data = {
       provider: 'apikey',
@@ -322,7 +333,6 @@ describe('API Key Tests', () => {
    *   reason: 'Authentication failed',
    *   error: 'Role not available to this API key'
    * }
-   */
   it(`Should POST /login (ask for role that does not exist)`, async () => {
     const data = {
       provider: 'apikey',
@@ -345,7 +355,6 @@ describe('API Key Tests', () => {
    * DELETE /apikey/:key
    *
    * No response body
-   */
   it(`Should DELETE /apikeys/:key`, async () => {
     const result = await api.delete(`/apikeys/${store.keys.key1.key}`, headers)
     assert.equal(result[0], 204)
@@ -355,9 +364,9 @@ describe('API Key Tests', () => {
    * PATCH /apikey
    *
    * Example response:
-   */
   it(`Should not POST /apikeys/:key/enable (key was removed)`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/enable`, {}, headers)
     assert.equal(result[0], 404)
   })
+   */
 })

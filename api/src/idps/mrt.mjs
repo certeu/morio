@@ -28,15 +28,7 @@ export const mrt = async (id, data) => {
      * this boils down to: Does the role exist?
      */
     const available = isRoleAvailable('root', data.role)
-    if (!available)
-      return [
-        false,
-        {
-          success: false,
-          reason: 'Authentication failed',
-          error: 'Role not available',
-        },
-      ]
+    if (!available) return [false, 'morio.api.account.role.unavailable']
 
     /*
      * Return result
@@ -53,5 +45,5 @@ export const mrt = async (id, data) => {
   /*
    * If we get here, it means authentication failed
    */
-  return [false, { success: false, reason: 'Authentication failed', error: 'Invalid token' }]
+  return [false, 'morio.api.account.credentials.mismatch']
 }

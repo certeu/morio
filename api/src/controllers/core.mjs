@@ -1,5 +1,6 @@
 import { validateSettings } from '#lib/validation'
 import { utils, log } from '../lib/utils.mjs'
+import { reload } from '../index.mjs'
 
 /**
  * This core controller provides access to morio core
@@ -58,18 +59,6 @@ Controller.prototype.updateContainer = async (req, res, path) => {
  */
 Controller.prototype.createDockerResource = async (req, res, path) => {
   const [status, result] = await utils.coreClient.post(`/docker/${path}`, bodyPlusHeaders(req))
-
-  return res.status(status).send(result)
-}
-
-/**
- * Gets CA root certificate and fingerprint from core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.getCaRoot = async (req, res) => {
-  const [status, result] = await utils.coreClient.get(`/ca/root`)
 
   return res.status(status).send(result)
 }
@@ -242,16 +231,12 @@ Controller.prototype.getConfig = async (req, res) => {
 }
 
 /**
- * Loads the available idenitity/authentication providers (IDPs)
+ * Loads the current settings
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getIdps = async (req, res) => {
-  const [status, result] = await utils.coreClient.get(`/idps`)
-
-  return res.status(status).send(result)
-}
+Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitizedSettings())
 
 /**
  * Loads the current presets from core
@@ -306,18 +291,6 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
 }
 
 /**
- * Gets the JWKS info from core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.getJwks = async (req, res) => {
-  const [status, result] = await utils.coreClient.get(`/jwks`)
-
-  return res.status(status).send(result)
-}
-
-/**
  * Request to join a cluster
  *
  * @param {object} req - The request object from Express
@@ -330,4 +303,31 @@ Controller.prototype.joinCluster = async (req, res) => {
   return res.status(status).send(result)
 }
 
+/**
+ * Reconfigure
+ *
+ * This route is called from core, it triggers a reload of the config
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.reconfigure = async (req, res) => {
+  /*
+   * We will not wait for the reload event here as doing so can
+   * introduce a deadlock where core is waiting for the response to
+   * this request, while api (inside reload) is trying to load the
+   * data from core. Since NodeJS is single-threaded, this will
+   * de-facto be a deadlock.
+   */
+  log.debug('Reveived reconfigure signal from core')
+  res.status(200).send({})
+
+  /*
+   * Reload, but don't wait for it.
+   */
+  return reload()
+}
+
 const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })
+
+

@@ -1,4 +1,3 @@
-import { keypairAsJwk } from '#shared/crypto'
 import { utils } from '../lib/utils.mjs'
 import { statusCodes } from '#shared/errors'
 
@@ -18,26 +17,6 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
-
-/**
- * JWKS
- *
- * This returns the JWKS info, used for Vault integration
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.jwks = async (req, res) => {
-  /*
-   * Get JWKS info from public key
-   */
-  const jwks = await keypairAsJwk({ public: utils.getKeys().public })
-
-  return res
-    .status(200)
-    .send({ keys: [jwks] })
-    .end()
-}
 
 /**
  * Get reload data / Used by API to bootstrap itself

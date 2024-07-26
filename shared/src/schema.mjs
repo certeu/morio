@@ -49,10 +49,15 @@ const brokerNodes = Joi.array().items(fqdn).min(1).max(9).required()
 const flankingNodes = Joi.array().items(fqdn).min(0).max(36)
 
 /*
+ * The morio root token (mrt)
+ */
+const mrt = Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/)
+
+/*
  * The contents of the keys file/object
  */
 const keys = Joi.object({
-  jwt: Joi.string().base64().min(96).max(2048).required(),
+  jwt: mrt.required(),
   mrt: Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
   public: Joi.string().required(),
   private: Joi.string().required(),
@@ -148,6 +153,7 @@ export {
   jsTime,
   uuid,
   keys,
+  mrt,
   version,
   nodeSerial,
   settings,

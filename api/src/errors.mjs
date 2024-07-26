@@ -44,8 +44,8 @@ export const errors = {
    */
   'morio.api.info.unavailable': {
     status: 503,
-    title: 'Unable to load info data from the internal API state',
-    detail: 'We were unable to retrieve the API info from the internal state.',
+    title: 'Unable to load the requested data',
+    detail: 'We were unable to retrieve the requested data from the internal state.',
   },
   /*
    * Failed to retrieve API list from database
@@ -127,6 +127,30 @@ export const errors = {
     status: 403,
     title: 'Role unavailable',
     detail: 'The requested role is not available to this account.',
+  },
+  /*
+   * Error for when a role is not sufficient to access and endpoint
+   */
+  'morio.api.rbac.denied': {
+    status: 403,
+    title: 'Denied by role-base access control',
+    detail: 'The request did not pass the role based access control check.',
+  },
+  /*
+   * Error for when a nominative account is required (no API key or MRT)
+   */
+  'morio.api.nominative.account.required': {
+    status: 403,
+    title: 'Nominative account required',
+    detail: 'This action is only available to nominative accounts.',
+  },
+  /*
+   * Error for when the required authentication headers aren't what we expected
+   */
+  'morio.api.authentication.required': {
+    status: 401,
+    title: 'Authentication required',
+    detail: 'The request was not properly authenticated.',
   },
 }
 

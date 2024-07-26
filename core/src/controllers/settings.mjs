@@ -21,47 +21,6 @@ import { resolveServiceConfiguration } from '#config'
  */
 export function Controller() {}
 
-/**
- * Returns a list of available identity/authentication providers
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.getIdps = async (req, res) => {
-  const idps = {}
-
-  /*
-   * Add the IDPs configured by the user
-   */
-  if (utils.getSettings('iam.providers')) {
-    for (const [id, conf] of Object.entries(utils.getSettings('iam.providers'))) {
-      idps[id] = {
-        id,
-        provider: id === 'mrt' ? 'mrt' : conf.provider,
-        label: conf.label,
-        about: conf.about || false,
-      }
-    }
-  }
-
-  /*
-   * Add the root token idp, unless it's disabled by a feature flag
-   */
-  if (!utils.getFlag('DISABLE_ROOT_TOKEN')) {
-    //idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
-  }
-
-  /*
-   * Return the list
-   */
-  return res
-    .send({
-      idps,
-      ui: utils.getSettings('iam.ui', {}),
-    })
-    .end()
-}
-
 const ensureTokenSecrecy = (secrets) => {
   for (let [key, val] of Object.entries(secrets)) {
     if (!utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
@@ -291,7 +250,6 @@ Controller.prototype.setup = async (req, res) => {
  * @return {object} data - Data about this node
  */
 const localNodeInfo = async (body) => {
-  log.todo(body)
   /*
    * The API injects the headers into the body
    * so we will look at the X-Forwarded-Host header

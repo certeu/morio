@@ -2,6 +2,7 @@ import { utils, log } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
+import { currentProvider } from '../rbac.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -23,6 +24,7 @@ const allowedUris = [
   `/jwks`,
   `/cluster/join`,
   `/validate/settings`,
+  `/cacerts`,
 ]
 
 /**
@@ -30,19 +32,6 @@ const allowedUris = [
  * Each is/can be a regex
  */
 const allowedUriPatterns = [/^\/downloads\//, /^\/coverage\//]
-
-/**
- * Helper method to deny access
- */
-const deny = (res, body = {}, status = 401) =>
-  res
-    .status(status)
-    .send({
-      status: 'Unauthorized',
-      reason: 'Request failed all efforts at authentication',
-      ...body,
-    })
-    .end()
 
 /**
  * This auth controller handles authentication in Morio
@@ -66,7 +55,7 @@ Controller.prototype.authenticate = async (req, res) => {
    * Get the requested URL from the headers
    */
   const uri = req.headers['x-forwarded-uri']
-  if (!uri) return deny(res)
+  if (!uri) return utils.sendErrorResponse(res, 'morio.api.rbac.denied')
 
   /*
    * Is the URL allow-listed?
@@ -83,7 +72,7 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * Don't bother in ephemeral mode
    */
-  if (utils.isEphemeral()) return deny(res)
+  if (utils.isEphemeral()) return utils.sendErrorResponse(res, 'morio.api.ephemeral.prohibited')
 
   /*
    * Keep track of the token payload
@@ -102,7 +91,9 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * If the JWT is not in the cookie, check the Authorization header
    */
+  let header = false
   if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+    header === true
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
   }
@@ -110,16 +101,21 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * If we have the payload, set roles in response header
    * These will be injected by Traefik in the original request
-   * If not, deny access
    */
-  return payload
-    ? res
-        .set('X-Morio-Role', payload.role)
-        .set('X-Morio-User', payload.user)
-        .set('X-Morio-Provider', payload.provider)
-        .status(200)
-        .end()
-    : deny(res)
+  if (payload) return res
+    .set('X-Morio-Role', payload.role)
+    .set('X-Morio-User', payload.user)
+    .set('X-Morio-Provider', payload.provider)
+    .status(200)
+    .end()
+
+  /*
+   * Is this just a bare request with no token, no headers, no nothing?
+   * If so, send a 401. If not, send a 403
+   */
+  return utils.sendErrorResponse(res, (!token && !header)
+    ? 'morio.api.authentication.required'
+    : 'morio.api.rbac.denied', uri)
 }
 
 /**
@@ -141,7 +137,6 @@ Controller.prototype.login = async (req, res) => {
    * Get the provider ID
    */
   const providerId = req.body?.provider || false
-
   /*
    * Validate identity provider input
    */
@@ -164,17 +159,8 @@ Controller.prototype.login = async (req, res) => {
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request
    */
-  if (!providerId || !providerType || typeof idps[providerType] !== 'function') {
-    return deny(
-      res,
-      {
-        success: false,
-        reason: 'Bad request',
-        error: 'No such authentication provider',
-      },
-      400
-    )
-  }
+  if (!providerId || !providerType || typeof idps[providerType] !== 'function')
+    return utils.sendErrorResponse(res, 'morio.api.ipd.unknown')
 
   /*
    * Looks good, hand over to provider
@@ -257,7 +243,7 @@ Controller.prototype.renewToken = async (req, res) => {
     return res.send({ jwt })
   }
 
-  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+  return utils.sendErrorResponse(res, 'morio.api.authentication.required')
 }
 
 /**
@@ -288,7 +274,7 @@ Controller.prototype.whoami = async (req, res) => {
     if (payload) return res.send(payload).end()
   }
 
-  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+  return utils.sendErrorResponse(res, 'morio.api.authentication.required')
 }
 
 /**

@@ -15,14 +15,20 @@ const accounts = {
   },
 }
 
+describe('Create Test Account', () => {
 describe('API Create Account Tests', () => {
+  const headers = {
+    'X-Morio-Role': 'engineer',
+    'X-Morio-User': 'test_user',
+    'X-Morio-Provider': 'local',
+  }
   /*
    * GET /accounts
    * Example response:
    * [ ]
    */
   it(`Should GET /accounts`, { timeout }, async () => {
-    const result = await api.get(`/accounts`)
+    const result = await apiAxios.get(`/accounts`, headers)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -42,7 +48,7 @@ describe('API Create Account Tests', () => {
    * }
    */
   it(`Should not POST /account (missing provider)`, async () => {
-    const result = await api.post(`/account`, { username: 'test', role: 'user' })
+    const result = await api.axiosPost(`/account`, { username: 'test', role: 'user' })
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
@@ -431,7 +437,6 @@ describe('API Create Account Tests', () => {
    *   type: 'https://morio.it/reference/errors/morio.api.account.credentials.mismatch',
    *   instance: 'http://api:3000/login'
    * }
-   */
   it(`Should not POST /login (invalid MFA token)`, async () => {
     const data = {
       provider: 'local',
@@ -457,7 +462,6 @@ describe('API Create Account Tests', () => {
    *     role: 'user'
    *   }
    * }
-   */
   it(`Should POST /login`, async () => {
     const data = {
       provider: 'local',
@@ -492,7 +496,6 @@ describe('API Create Account Tests', () => {
    *   status: 'Unauthorized',
    *   reason: 'No token found'
    * }
-   */
   it(`Should not GET /whoami (no JWT)`, async () => {
     const result = await api.get(`/whoami`)
     assert.equal(result[0], 401)
@@ -520,7 +523,6 @@ describe('API Create Account Tests', () => {
    *   iss: 'morio',
    *   sub: 'morio'
    * }
-   */
   it(`Should GET /whoami (JWT in cookie)`, async () => {
     const result = await api.get(`/whoami`, { Cookie: `morio=${store.accounts.user1.jwt}` })
     assert.equal(result[0], 200)
@@ -550,7 +552,6 @@ describe('API Create Account Tests', () => {
    *   iss: 'morio',
    *   sub: 'morio'
    * }
-   */
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.accounts.user1.jwt}` })
     assert.equal(result[0], 200)
@@ -571,7 +572,6 @@ describe('API Create Account Tests', () => {
    *   status: 'Unauthorized',
    *   reason: 'No token found'
    * }
-   */
   it(`Should not GET /token (No JWT)`, async () => {
     const result = await api.get(`/token`)
     assert.equal(result[0], 401)
@@ -587,7 +587,6 @@ describe('API Create Account Tests', () => {
    * {
    *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
    * }
-   */
   it(`Should GET /token (JWT in Cookie)`, async () => {
     const result = await api.get(`/token`, { Cookie: `morio=${store.accounts.user1.jwt}` })
     assert.equal(result[0], 200)
@@ -601,7 +600,6 @@ describe('API Create Account Tests', () => {
    * {
    *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
    * }
-   */
   it(`Should GET /token (JWT in Bearer header)`, async () => {
     const result = await api.get(`/token`, { Authorization: `Bearer ${store.accounts.user1.jwt}` })
     assert.equal(result[0], 200)
@@ -615,7 +613,6 @@ describe('API Create Account Tests', () => {
    * {
    *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
    * }
-   */
   it(`Should not GET /auth (no X-Forwarded-Uri header)`, async () => {
     const result = await apiAuth.get(`/auth`)
     assert.equal(result[0], 401)
@@ -628,7 +625,6 @@ describe('API Create Account Tests', () => {
    * {
    *   jwt: 'eyJhbGciOiJSUzI1NiIsInR5cCI6...
    * }
-   */
   it(`Should not GET /auth (no JWT)`, async () => {
     const result = await apiAuth.get(`/auth`, { 'X-Forwarded-Uri': '/-/api/settings' })
     assert.equal(result[0], 401)
@@ -638,7 +634,6 @@ describe('API Create Account Tests', () => {
    * GET /auth (JWT in Cookie)
    *
    * No response body
-   */
   it(`Should GET /auth (JWT in Cookie)`, async () => {
     const result = await apiAuth.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
@@ -650,7 +645,6 @@ describe('API Create Account Tests', () => {
   /*
    * GET /auth (JWT in Bearer header)
    * No response body
-   */
   it(`Should GET /auth (JWT in Bearer header)`, async () => {
     const result = await apiAuth.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
@@ -658,4 +652,5 @@ describe('API Create Account Tests', () => {
     })
     assert.equal(result[0], 200)
   })
+   */
 })

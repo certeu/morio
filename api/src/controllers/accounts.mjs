@@ -43,6 +43,12 @@ Controller.prototype.list = async (req, res) => {
  */
 Controller.prototype.create = async (req, res) => {
   /*
+   * Check user
+   */
+  const user = currentUser(req)
+  log.todo(user)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', '/account')
+  /*
    * Validate input
    */
   const [valid, err] = (await utils.validate(`req.account.create`, req.body))
@@ -77,12 +83,9 @@ Controller.prototype.create = async (req, res) => {
   })
 
   return res.send({
-    result: 'success',
-    data: {
-      ...valid,
-      invite,
-      inviteUrl: `https://${utils.getSettings('cluster.fqdn')}/morio/invite/${valid.username}-${invite}`,
-    },
+    ...valid,
+    invite,
+    inviteUrl: `https://${utils.getClusterFqdn()}/morio/invite/${valid.username}-${invite}`,
   })
 }
 
@@ -136,10 +139,7 @@ Controller.prototype.activate = async (req, res) => {
   /*
    * Return the QR code and other relevant data
    */
-  return res.send({
-    result: 'success',
-    data: result,
-  })
+  return res.send(result)
 }
 
 /**
@@ -202,9 +202,6 @@ Controller.prototype.activateMfa = async (req, res) => {
   /*
    * Return the scratch codes
    */
-  return res.send({
-    result: 'success',
-    data: { scratchCodes },
-  })
+  return res.send({ scratch_codes: scratchCodes })
 }
 

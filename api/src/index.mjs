@@ -3,8 +3,6 @@ import express from 'express'
 import { wrapExpress } from '#shared/utils'
 import { getPreset } from '#config'
 import cookieParser from 'cookie-parser'
-// Middleware for RBAC headers
-import { addRbacHeaders } from './rbac.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Bootstrap configuration
@@ -13,7 +11,7 @@ import { reloadConfiguration } from './reload.mjs'
 import swaggerUi from 'swagger-ui-express'
 import { openapi } from '../openapi/index.mjs'
 // Middleware
-import { guardRoutes } from './middleware.mjs'
+import { guardRoutes, addRbacHeaders } from './middleware.mjs'
 // Load logger and utils
 import { log, utils } from './lib/utils.mjs'
 
