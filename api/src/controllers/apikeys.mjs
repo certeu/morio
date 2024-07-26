@@ -1,9 +1,9 @@
 import Joi from 'joi'
 import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
-import { randomString, hashPassword } from '#shared/crypto'
+import { uuid, randomString, hashPassword } from '#shared/crypto'
 import { validateSchema } from '../lib/validation.mjs'
-import { loadApikey, saveApikey, removeApikey, loadAccountApikeys } from '../lib/apikey.mjs'
+import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { utils } from '../lib/utils.mjs'
 
@@ -31,8 +31,8 @@ Controller.prototype.create = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid] = await validateSchema(req.body, schema.create)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
+  const [valid, err] = (await utils.validate(`req.apikey.create`, req.body))
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
 
   /*
    * Only nominative accounts can create API keys
@@ -51,7 +51,7 @@ Controller.prototype.create = async (req, res) => {
   /*
    * Create the API key
    */
-  const key = randomString(16)
+  const key = uuid()
   const secret = randomString(48)
   const data = {
     name: valid.name,
@@ -64,7 +64,6 @@ Controller.prototype.create = async (req, res) => {
   }
 
   const result = await saveApikey(key, data)
-  console.log(JSON.stringify(result, null ,2))
 
   return res.send({
     result: 'success',
@@ -109,8 +108,8 @@ Controller.prototype.update = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid] = await validateSchema(req.params, schema.update)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
+  const [valid, err] = (await utils.validate(`req.apikey.update`, req.body))
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
 
   /*
    * Get the current user
@@ -171,17 +170,18 @@ Controller.prototype.update = async (req, res) => {
 }
 
 /**
- * Remove an API key
+ * Delete an API key
 
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.remove = async (req, res) => {
+Controller.prototype.delete = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid] = await validateSchema(req.params, schema.remove)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
+  const [valid, err] = (await utils.validate(`req.apikey.delete`, req.body))
+  if (!valid) log.todo({ body: req.body, err})
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
 
   /*
    * Load the key with a filter method
@@ -197,27 +197,10 @@ Controller.prototype.remove = async (req, res) => {
   }
 
   /*
-   * Sounds good, remove the API key
+   * Sounds good, delete the API key
    */
-  const gone = await removeApikey(valid.key)
+  const gone = await deleteApikey(valid.key)
 
   res.status(gone ? 204 : 500).send()
 }
 
-const schema = {
-  create: Joi.object({
-    name: Joi.string().required().min(2),
-    expires: Joi.number().required().min(1).max(730),
-    role: Joi.string()
-      .required()
-      .valid(...roles),
-    overwrite: Joi.boolean().valid(true, false).optional(),
-  }),
-  update: Joi.object({
-    key: Joi.string().required(),
-    action: Joi.number().required().valid('rotate', 'disable', 'enable'),
-  }),
-  remove: Joi.object({
-    key: Joi.string().required(),
-  }),
-}

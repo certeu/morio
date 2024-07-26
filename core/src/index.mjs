@@ -11,6 +11,7 @@ import { routes } from '#routes/index'
 import { guardRoutes } from './middleware.mjs'
 // Load the logger and utils
 import { log, utils } from './lib/utils.mjs'
+import { updateClusterState } from './lib/cluster.mjs'
 
 /*
  * Say hello
@@ -85,4 +86,12 @@ export async function reconfigure(hookParams = {}) {
    * Tell the API to update the config, but don't wait for it
    */
   reconfigureApi()
+
+  /*
+   * Give the API some time to settle, then update cluster state
+   */
+  setTimeout(() => {
+    log.debug('Triggering refresh of cluster status')
+    updateClusterState(true)
+  }, 2000)
 }

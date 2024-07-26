@@ -10,7 +10,7 @@ import { log, utils } from './utils.mjs'
 /*
  * Helper method to update the cluster state
  */
-export const updateClusterState = async (silent) => {
+export const updateClusterState = async (force=false) => {
   /*
    * Don't bother in ephemeral mode
    */
@@ -21,19 +21,19 @@ export const updateClusterState = async (silent) => {
    * But on a leader node, especially on a large cluster, this would scale poorly.
    * So we Debounce this by checking the age of the last time the status was updated
    */
-  if (!utils.isStatusStale()) return
+  if (!force && !utils.isStatusStale()) return
 
   /*
    * Now get to work
    */
-  await forceUpdateClusterState(silent)
+  await forceUpdateClusterState()
 }
 
 /**
  * Helper method to update the cluster state
  */
 export const forceUpdateClusterState = async (silent) => {
-  await updateNodeState(silent)
+  await updateNodeState()
   utils.resetClusterStatusAge()
 }
 
@@ -108,7 +108,7 @@ export const ensureMorioClusterConsensus = async () => {
   /*
    * Make sure we use the latest cluster state
    */
-  await updateClusterState(true)
+  await updateClusterState()
 
   /*
    * Ensure a cluster heartbeat is running
@@ -152,7 +152,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * Unless this is the initial setup in which case we just updated the state
    * and should perhaps let the world knoww we just work up
    */
-  if (!broadcast) await updateClusterState(true)
+  if (!broadcast) await updateClusterState()
 
   /*
    * Who are we sending heartbeats to?
@@ -199,7 +199,7 @@ export const runLocalHeartbeat = async (init=false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  if (!init) await updateClusterState(true)
+  if (!init) await updateClusterState()
 
   /*
    * Do not stack timeouts
@@ -374,7 +374,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
-  await updateClusterState(true)
+  await updateClusterState()
 
   /*
    * This will hold our findings

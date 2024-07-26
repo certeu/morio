@@ -12,7 +12,7 @@ export const errors = {
    */
   'morio.core.ephemeral.required': {
     status: 409,
-    title: 'Unavailable in ephemeral mode',
+    title: 'Only available in ephemeral mode',
     detail: 'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
@@ -38,5 +38,13 @@ export const errors = {
     status: 400,
     title: 'These settings are invalid',
     detail: 'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
+  },
+  /*
+   * Error for when the settings are deployed on a host that's not listed as a node
+   */
+  'morio.core.settings.fqdn.mismatch': {
+    status: 400,
+    title: 'Settings FQDN mismatch',
+    detail: 'The provided settings do not include the FQDN used to submit this request. This mismatch indicates the settings are unlikely to be correct.',
   },
 }

@@ -22,7 +22,7 @@ export const service = {
       const result = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/info`, {
         returnAs: 'json',
       })
-      const status = result?.core?.version ? 0 : 1
+      const status = result?.about ? 0 : 1
       utils.setServiceStatus('api', status)
 
       return status === 0 ? true : false

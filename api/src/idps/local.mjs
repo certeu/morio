@@ -26,28 +26,20 @@ export const local = async (id, data) => {
      */
     const account = await loadAccount('local', data.username)
     if (!account)
-      return [false, { success: false, reason: 'Authentication failed', error: 'No such account' }]
+      return [false, 'morio.api.account.unknown']
 
     /*
      * Verify the password
      */
     const passwordOk = verifyPassword(data.password, account.password)
     if (!passwordOk)
-      return [false, { success: false, reason: 'Authentication failed', error: 'Invalid password' }]
+      return [false, 'morio.api.account.credentials.mismatch']
 
     /*
      * Is the role accessible to this user?
      */
     const available = isRoleAvailable(account.role, data.role)
-    if (!available)
-      return [
-        false,
-        {
-          success: false,
-          reason: 'Authentication failed',
-          error: 'Role not available to this user',
-        },
-      ]
+    if (!available) return [false, 'morio.api.account.role.unavailable']
 
     /*
      * Verify MFA
@@ -73,19 +65,11 @@ export const local = async (id, data) => {
           role: data.role || 'user',
         },
       ]
-    } else
-      return [
-        false,
-        {
-          success: false,
-          reason: 'Authentication requires MFA',
-          error: 'Please provide your MFA token',
-        },
-      ]
+    }
   }
 
   /*
    * If we get here, it means authentication failed
    */
-  return [false, { success: false, reason: 'Authentication failed', error: 'Input is invalid' }]
+  return [false, 'morio.api.account.credentials.mismatch']
 }

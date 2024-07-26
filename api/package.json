@@ -1,7 +1,7 @@
 {
   "name": "@morio/api",
   "version": "0.2.0",
-  "description": "Morio Operator API (API)",
+  "description": "Morio Management API",
   "private": true,
   "scripts": {
     "build": "node build.mjs",
@@ -10,7 +10,7 @@
     "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it api node --no-warnings --experimental-test-coverage --test-concurrency=1 --test",
+    "test": "docker exec -it api node --no-warnings --test-concurrency=1 --test",
     "retest": "cd .. && npm run redev && cd - && sleep 8 && npm run test"
   },
   "imports": {

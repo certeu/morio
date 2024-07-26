@@ -58,11 +58,11 @@ export const utils = new Store(log)
 utils.getClusterUuid = () => store.get('state.cluster.uuid')
 
 /**
- * Helper method to get the core state
+ * Helper method to get the core status
  *
- * @return {object} state - The core state
+ * @return {object} state - The core status
  */
-utils.getCoreState = () => store.get('state.core')
+utils.getCoreStatus = () => store.get('status.core')
 
 /**
  * Helper method to get the info from the store
@@ -116,7 +116,7 @@ utils.getPrefix = () => getPreset('MORIO_API_PREFIX')
  */
 utils.getPreset = (key, dflt, opts) => {
   const result = getPreset(key, dflt, opts)
-  log.debug(`Preset ${key} = ${result}`)
+  log.trace(`Preset ${key} = ${result}`)
 
   return result
 }
@@ -127,6 +127,16 @@ utils.getPreset = (key, dflt, opts) => {
  * @return {number} time - The reload_count value
  */
 utils.getReloadCount = () => store.get('state.reload_count')
+
+/**
+ * Helper method to get the sanitized settings
+ *
+ * Node that unlike getSettings, this always returns the entire object
+ * as it's only used in the route to provide this object to the API
+ *
+ * @return {object} settings - The sanitized settings object
+ */
+utils.getSanitizedSettings = () => store.get('settings.sanitized')
 
 /**
  * Helper method to facilitate getting resolved settings
@@ -148,7 +158,7 @@ utils.getSettings = (path, dflt) =>
  *
  * @return {number} data - The settings_serial
  */
-utils.getSettingsSerial = () => store.get('state.settings_serial')
+utils.getSettingsSerial = () => store.get('state.settings_serial', 0)
 
 /**
  * Helper method to get the start_time
@@ -176,24 +186,13 @@ utils.setClusterUuid = (uuid) => {
 }
 
 /**
- * Helper method to store the core info
- *
- * @param {object} coreInfo - The core info
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setCoreInfo = (coreInfo) => {
-  store.set('info.core', coreInfo)
-  return utils
-}
-
-/**
- * Helper method to store the core state
+ * Helper method to store the core status
  *
  * @param {object} coreState - The core state
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setCoreState = (coreState) => {
-  store.set('state.core', coreState)
+utils.setCoreStatus = (coreStatus) => {
+  store.set('status.core', coreStatus)
   return utils
 }
 
@@ -264,14 +263,15 @@ utils.setSettingsSerial = (settings_serial) => {
 }
 
 /**
- * Helper method to get the sanitized settings
+ * Helper method to store the sanitized settings
  *
- * Node that unlike getSettings, this always returns the entire object
- * as it's only used in the route to provide this object to the API
- *
- * @return {object} settings - The sanitized settings object
+ * @param {object} settings - The sanitized settings
+ * @return {object} utils - The utils instance, making this method chainable
  */
-utils.getSanitizedSettings = () => store.get('settings.sanitized')
+utils.setSanitizedSettings = (sanitized_settings) => {
+  store.set('settings.sanitized', sanitized_settings)
+  return utils
+}
 
 /**
  * Helper method to store the settings
@@ -375,7 +375,7 @@ utils.sendErrorResponse = (res, template, route = false) => {
       data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX') + template }
     else {
       store.log.error(
-        `The sendErrorResponse method was alled with a template string that is not a known error template: ${template}`
+        `The sendErrorResponse method was called with a template string that is not a known error template: ${template}`
       )
       return res.status(500).send().end()
     }
@@ -385,12 +385,12 @@ utils.sendErrorResponse = (res, template, route = false) => {
    * Add the instance
    */
   data.instance =
-    `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_API_PORT')}/` +
-    data.route
+    `http://api:${utils.getPreset('MORIO_API_PORT')}` +
+    (data.route
       ? data.route
       : route
         ? route
-        : ''
+        : '')
 
   return res.type('application/problem+json').status(data.status).send(data).end()
 }

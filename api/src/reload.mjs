@@ -36,15 +36,16 @@ export const reloadConfiguration = async () => {
   }
 
   /*
+   * Since core is up, also grab the status
+   */
+  const status = await utils.coreClient.get('/status')
+  if (status[0] === 200) utils.setCoreStatus(status[1])
+
+  /*
    * Update the state with relevant info
    */
   log.debug(`Reloaded data from core`)
   utils.setEphemeral(data.node.ephemeral)
-  utils.setCoreState({
-    ...data.status,
-    timestamp: Date.now(), // FIXME: Rename to time
-  })
-  utils.setCoreInfo(data.info)
   utils.setPresets(data.presets)
   if (!utils.isEphemeral()) {
     /*
@@ -56,6 +57,7 @@ export const reloadConfiguration = async () => {
     utils.setSettingsSerial(data.node.settings_serial)
     utils.setKeys(data.keys)
     utils.setSettings(data.settings)
+    utils.setSanitizedSettings(data.sanitized_settings)
     /*
      * If there's more than 1 node, switch core client to stay local
      */

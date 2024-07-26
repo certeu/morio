@@ -54,11 +54,7 @@ Controller.prototype.status = async (req, res) => {
    * Update relevant data
    */
   utils.setEphemeral(result.node?.ephemeral ? true : false)
-  utils.setCoreState({
-    ...result.state,
-    timestamp: Date.now(), // FIXME: Rename to time
-  })
-  utils.setCoreInfo(result.info)
+  utils.setCoreStatus(result)
 
   /*
    * Now return data
@@ -72,8 +68,8 @@ Controller.prototype.status = async (req, res) => {
       reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
-      core: utils.getCoreState(),
-    }
+    },
+    core: utils.getCoreStatus()
   })
 }
 

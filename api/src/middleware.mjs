@@ -49,16 +49,16 @@ export const guardRoutes = (req, res, next) => {
     req.url.slice(0, 10) !== '/coverage/' &&
     !allowed.includes(`${req.method}:${req.url}`)
   ) {
-    log.debug({method: req.method, url: req.url}, `Blocked in ephemeral state: ${req.method} ${req.url}`)
-    return utils.sendErrorResponse(res, 'morio.api.middleware.routeguard.ephemeral', req.url)
+    log.debug(`Prohibited in ephemeral state: ${req.method} ${req.url}`)
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.prohibited', req.url)
   }
 
   /*
    * Map list of ephemeral routes to inject the prefix
    */
   if (!utils.isConfigResolved() && !reloadRoutes.includes(`${req.method}:${req.url}`)) {
-    log.debug(`Blocked in reloading state: ${req.method} ${req.url}`)
-    return utils.sendErrorResponse(res, 'morio.api.middleware.routeguard.reloading', req.url)
+    log.debug(`Prohibited in reloading state: ${req.method} ${req.url}`)
+    return utils.sendErrorResponse(res, 'morio.api.reloading.prohibited', req.url)
   }
 
   /*

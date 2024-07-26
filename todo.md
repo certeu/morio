@@ -9,3 +9,5 @@
 - Add skimmer (working title) service
 - Add support for external databases
 - Add Rqlite support to step-ca
+- Test preset overrides, and allow to do so via the UI
+- Support swizzling/branding of (at least) the UI

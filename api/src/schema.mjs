@@ -1,4 +1,16 @@
-import { Joi, validate as sharedValidate, settings } from '#shared/schema'
+import { Joi, validate as sharedValidate, settings, uuid } from '#shared/schema'
+import { roles } from '#config/roles'
+
+/*
+ * Some re-usable schema blocks
+ */
+const about = Joi.string().min(2).max(255)
+const provider = Joi.string().min(2).max(255)
+const role = Joi.string().allow(roles.join())
+const username = Joi.string().min(2).max(255)
+const overwrite = Joi.boolean().valid(true, false)
+const password = Joi.string().min(3).max(1024)
+const token = Joi.string().min(3).max(12)
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -8,6 +20,59 @@ export const schema = {
    * Requests
    */
   'req.setup': settings,
+  'req.account.create': Joi.object({
+    about,
+    provider: provider.required(),
+    role: role.required(),
+    username: username.required(),
+    overwrite: overwrite.optional(),
+  }),
+  'req.account.activate': Joi.object({
+    invite: Joi.string().length(48).required(),
+    provider: provider.required(),
+    username: username.required(),
+  }),
+  'req.account.activatemfa': Joi.object({
+    invite: Joi.string().length(48).required(),
+    provider: provider.required(),
+    token: token.required(),
+    password: password.required(),
+    username: username.required(),
+  }),
+  'req.apikey.create': Joi.object({
+    name: Joi.string().required().min(2),
+    expires: Joi.number().required().min(1).max(730),
+    role: role.required(),
+    overwrite: overwrite.optional(),
+  }),
+  'req.apikey.update': Joi.object({
+    key: uuid.required(),
+    action: Joi.number().required().valid('rotate', 'disable', 'enable'),
+  }),
+  'req.apikey.delete': Joi.object({
+    key: uuid.required(),
+  }),
+  'req.auth.login': Joi.object({
+    provider: provider.required(),
+    data: Joi.object().required()
+  }),
+  'req.auth.login.apikey': Joi.object({
+    provider: provider.required(),
+    data: Joi.object({
+      password: Joi.string().length(96),
+      username: Joi.string().length(36).required(),
+    }).required()
+  }),
+  'req.auth.login.local': Joi.object({
+    provider: provider.required(),
+    data: Joi.object({
+      password: password.required(),
+      username: username.required(),
+      token: token.required(),
+      role: role.required(),
+    }).required()
+  }),
+
 }
 
 /*
@@ -17,7 +82,7 @@ export const schema = {
  * @param {object} input - The input to validate
  * @retrn {object} result - The validation result
  */
-export const validate = (key, input) => sharedValidate(key, input, schema)
+export const validate = async (key, input) => await sharedValidate(key, input, schema)
 
 // FIXME: Legacy validation below
 //

@@ -1,7 +1,8 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
+import { store, api, apiAuth, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 const timeout = 80000
 
@@ -17,7 +18,6 @@ const accounts = {
 describe('API Create Account Tests', () => {
   /*
    * GET /accounts
-   *
    * Example response:
    * [ ]
    */
@@ -28,58 +28,68 @@ describe('API Create Account Tests', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
     assert.equal(Array.isArray(d), true)
-    //assert.equal(d.length === 0, true)
   })
 
   /*
    * POST /account (missing provider)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/account'
    * }
    */
   it(`Should not POST /account (missing provider)`, async () => {
-    validationShouldFail(await api.post(`/account`, { username: 'test', role: 'user' }))
+    const result = await api.post(`/account`, { username: 'test', role: 'user' })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /account (missing role)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/account'
    * }
    */
   it(`Should not POST /account (missing role)`, async () => {
-    validationShouldFail(await api.post(`/account`, { username: 'test', provider: 'local' }))
+    const result = await api.post(`/account`, { username: 'test', provider: 'local' })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /account (missing username)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/account'
    * }
    */
   it(`Should not POST /account (missing username)`, async () => {
-    validationShouldFail(await api.post(`/account`, { role: 'user', provider: 'local' }))
+    const result = await api.post(`/account`, { role: 'user', provider: 'local' })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /account
-   *
    * Example response:
    * {
    *   result: 'success',
    *   data: {
-   *     username: 'user1',
+   *     username: 'testAccount1721978895835',
    *     about: 'This account was created as part of a test',
    *     provider: 'local',
    *     role: 'user',
-   *     invite: '38a6b27ab9769b0a8cd83357bb0a3d3f09cc5a698d2f7297',
-   *     inviteUrl: 'https://unit.test.morio.it/morio/invite/user1-38a6b27ab9769b0a8cd83357bb0a3d3f09cc5a698d2f7297'
+   *     invite: 'ed9604c72de00eee14507e46cf51013cfdbfca297ba670f0',
+   *     inviteUrl: 'https://undefined/morio/invite/testAccount1721978895835-ed9604c72de00eee14507e46cf51013cfdbfca297ba670f0'
    *   }
    * }
    */
@@ -87,8 +97,8 @@ describe('API Create Account Tests', () => {
     const result = await api.post(`/account`, accounts.user1)
     const d = result[1]
     /*
-     * This test is sometimes flaky, this is here to debug
-     */
+     * TODO: This test is sometimes flaky, this is here to debug
+   */
     if (result[0] !== 200) console.log(result)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 2)
@@ -100,81 +110,84 @@ describe('API Create Account Tests', () => {
     assert.equal(d.data.role, accounts.user1.role)
     assert.equal(typeof d.data.invite, 'string')
     assert.equal(d.data.inviteUrl.includes(d.data.invite), true)
-
     if (typeof store.accounts === 'undefined') store.accounts = {}
     store.accounts.user1 = d.data
   })
 
   /*
    * POST /account (same account again)
-   *
    * Example response:
    * {
-   *   error: 'Account exists'
+   *   status: 409,
+   *   title: 'Conflict with an existing account',
+   *   detail: 'The provided data conflicts with an existing account.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.exists',
+   *   instance: 'http://api:3000/account'
    * }
    */
   it(`Should POST /account (same account twice)`, { timeout }, async () => {
     const result = await api.post(`/account`, accounts.user1)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 1)
-    assert.equal(d.error, 'Account exists')
+    validateErrorResponse(result, errors, 'morio.api.account.exists')
   })
 
   /*
    * POST /activate-account (missing username)
-   *
-   * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/activate-account'
    * }
    */
   it(`Should not POST /activate-account (missing username)`, async () => {
-    validationShouldFail(
-      await api.post(`/activate-account`, {
-        invite: store.accounts.user1.invite,
-        provider: store.accounts.user1.provider,
-      })
-    )
+    const result = await api.post(`/activate-account`, {
+      invite: store.accounts.user1.invite,
+      provider: store.accounts.user1.provider,
+    })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /activate-account (missing invite)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/activate-account'
    * }
    */
   it(`Should not POST /activate-account (missing invite)`, async () => {
-    validationShouldFail(
-      await api.post(`/activate-account`, {
-        username: store.accounts.user1.username,
-        provider: store.accounts.user1.provider,
-      })
-    )
+    const result = await api.post(`/activate-account`, {
+      username: store.accounts.user1.username,
+      provider: store.accounts.user1.provider,
+    })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /activate-account (missing invite)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/activate-account'
    * }
    */
   it(`Should not POST /activate-account (missing provider)`, async () => {
-    validationShouldFail(
-      await api.post(`/activate-account`, {
-        username: store.accounts.user1.username,
-        invite: store.accounts.user1.invite,
-      })
-    )
+    const result = await api.post(`/activate-account`, {
+      username: store.accounts.user1.username,
+      invite: store.accounts.user1.invite,
+    })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /activate-account
-   *
    * Example response:
    * {
    *   result: 'success',
@@ -208,10 +221,13 @@ describe('API Create Account Tests', () => {
 
   /*
    * POST /activate-mfa (missing provider)
-   *
    * Example response:
    * {
-   *   error: 'Validation failed'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/activate-account'
    * }
    */
   it(`Should not POST /activate-mfa (missing provider)`, async () => {
@@ -221,15 +237,19 @@ describe('API Create Account Tests', () => {
       token: authenticator.generate(store.accounts.user1.secret),
       password: 'password',
     }
-    validationShouldFail(await api.post(`/activate-mfa`, data))
+    const result = await api.post(`/activate-mfa`, data)
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /activate-mfa (invalid token)
-   *
    * Example response:
    * {
-   *   error: 'Invalid MFA token'
+   *   status: 403,
+   *   title: 'Account credentials mismatch',
+   *   detail: 'The provided account credentials are incorrect.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.credentials.mismatch',
+   *   instance: 'http://api:3000/activate-mfa'
    * }
    */
   it(`Should not POST /activate-mfa (invalid token)`, async () => {
@@ -237,20 +257,15 @@ describe('API Create Account Tests', () => {
       username: store.accounts.user1.username,
       invite: store.accounts.user1.invite,
       provider: store.accounts.user1.provider,
-      token: 'something invalid',
+      token: '666',
       password: 'password',
     }
     const result = await api.post(`/activate-mfa`, data)
-    assert.equal(result[0], 400)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 1)
-    assert.equal(d.error, 'Invalid MFA token')
+    validateErrorResponse(result, errors, 'morio.api.account.credentials.mismatch')
   })
 
   /*
    * POST /activate-mfa
-   *
    * Example response:
    * {
    *   result: 'success',
@@ -272,8 +287,8 @@ describe('API Create Account Tests', () => {
       password: 'password',
     }
     const result = await api.post(`/activate-mfa`, data)
-    assert.equal(result[0], 200)
     const d = result[1]
+    assert.equal(result[0], 200)
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 2)
     assert.equal(d.result, 'success')
@@ -289,15 +304,13 @@ describe('API Create Account Tests', () => {
 describe('API Create Account Tests', () => {
   /*
    * POST /login (missing provider)
-   *
    * Example response:
    * {
-   *   data: {
-   *     status: 'Unauthorized',
-   *     reason: 'Bad request',
-   *     success: false,
-   *     error: 'No such authentication provider'
-   *   }
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/activate-account'
    * }
    */
   it(`Should not POST /login (missing provider)`, async () => {
@@ -308,24 +321,18 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 400)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 4)
-    assert.equal(d.status, 'Unauthorized')
-    assert.equal(d.reason, 'Bad request')
-    assert.equal(d.success, false)
-    assert.equal(d.error, 'No such authentication provider')
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /login (invalid password)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication failed',
-   *   error: 'Input is invalid'
+   *   status: 403,
+   *   title: 'Account credentials mismatch',
+   *   detail: 'The provided account credentials are incorrect.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.credentials.mismatch',
+   *   instance: 'http://api:3000/login'
    * }
    */
   it(`Should not POST /login (invalid password)`, async () => {
@@ -334,26 +341,23 @@ describe('API Create Account Tests', () => {
       data: {
         username: store.accounts.user1.username,
         password: 'wrong',
+        role: 'user',
+        token: '666',
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 401)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 3)
-    assert.equal(d.error, 'Input is invalid')
-    assert.equal(d.reason, 'Authentication failed')
-    assert.equal(d.success, false)
+    validateErrorResponse(result, errors, 'morio.api.account.credentials.mismatch')
   })
 
   /*
    * POST /login (missing token)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication failed',
-   *   error: 'Input is invalid'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/login'
    * }
    */
   it(`Should not POST /login (missing token)`, async () => {
@@ -365,23 +369,18 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 401)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 3)
-    assert.equal(d.error, 'Input is invalid')
-    assert.equal(d.reason, 'Authentication failed')
-    assert.equal(d.success, false)
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /login (missing role)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication failed',
-   *   error: 'Input is invalid'
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
+   *   instance: 'http://api:3000/login'
    * }
    */
   it(`Should not POST /login (missing role)`, async () => {
@@ -394,23 +393,18 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 401)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 3)
-    assert.equal(d.error, 'Input is invalid')
-    assert.equal(d.reason, 'Authentication failed')
-    assert.equal(d.success, false)
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
   /*
    * POST /login (unavailable role)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication failed',
-   *   error: 'Role not available to this user'
+   *   status: 403,
+   *   title: 'Role unavailable',
+   *   detail: 'The requested role is not available to this account.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.role.unavailable',
+   *   instance: 'http://api:3000/login'
    * }
    */
   it(`Should not POST /login (unavailable role)`, async () => {
@@ -424,23 +418,18 @@ describe('API Create Account Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 401)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 3)
-    assert.equal(d.error, 'Role not available to this user')
-    assert.equal(d.reason, 'Authentication failed')
-    assert.equal(d.success, false)
+    validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
   })
 
   /*
    * POST /login (invalid MFA token)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication requires MFA',
-   *   error: 'Please provide your MFA token'
+   *   status: 403,
+   *   title: 'Account credentials mismatch',
+   *   detail: 'The provided account credentials are incorrect.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.credentials.mismatch',
+   *   instance: 'http://api:3000/login'
    * }
    */
   it(`Should not POST /login (invalid MFA token)`, async () => {
@@ -449,18 +438,12 @@ describe('API Create Account Tests', () => {
       data: {
         username: store.accounts.user1.username,
         password: 'password',
-        token: 1234,
+        token: '666',
         role: 'user',
       },
     }
     const result = await api.post(`/login`, data)
-    assert.equal(result[0], 401)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Object.keys(d).length, 3)
-    assert.equal(d.error, 'Please provide your MFA token')
-    assert.equal(d.reason, 'Authentication requires MFA')
-    assert.equal(d.success, false)
+    validateErrorResponse(result, errors, 'morio.api.account.credentials.mismatch')
   })
 
   /*
@@ -525,17 +508,17 @@ describe('API Create Account Tests', () => {
    *
    * Example response:
    * {
-       user: 'local.testAccount1714737085086',
-       role: 'user',
-       provider: 'local',
-       node: '4a567c31-5772-456c-a310-ea7b62b6b264',
-       deployment: '95c024e8-3745-4a7c-8223-0e6d7c099b08',
-       iat: 1714737113,
-       nbf: 1714737113,
-       exp: 1714751513,
-       aud: 'morio',
-       iss: 'morio',
-       sub: 'morio'
+   *   user: 'local.testAccount1721982381343',
+   *   role: 'user',
+   *   provider: 'local',
+   *   node: '448a7148-44c6-40b9-9605-5fa421619d79',
+   *   cluster: '4e431909-632a-48c4-9110-1a7ccf428da7',
+   *   iat: 1721982382,
+   *   nbf: 1721982382,
+   *   exp: 1721996782,
+   *   aud: 'morio',
+   *   iss: 'morio',
+   *   sub: 'morio'
    * }
    */
   it(`Should GET /whoami (JWT in cookie)`, async () => {
@@ -546,7 +529,7 @@ describe('API Create Account Tests', () => {
     assert.equal(d.role, 'user')
     assert.equal(d.provider, 'local')
     for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
-    for (const field of ['node', 'deployment']) assert.equal(typeof d[field], 'string')
+    for (const field of ['node', 'cluster']) assert.equal(typeof d[field], 'string')
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
   })
 
@@ -555,17 +538,17 @@ describe('API Create Account Tests', () => {
    *
    * Example response:
    * {
-       user: 'local.testAccount1714737085086',
-       role: 'user',
-       provider: 'local',
-       node: '4a567c31-5772-456c-a310-ea7b62b6b264',
-       deployment: '95c024e8-3745-4a7c-8223-0e6d7c099b08',
-       iat: 1714737113,
-       nbf: 1714737113,
-       exp: 1714751513,
-       aud: 'morio',
-       iss: 'morio',
-       sub: 'morio'
+   *   user: 'local.testAccount1714737085086',
+   *   role: 'user',
+   *   provider: 'local',
+   *   node: '4a567c31-5772-456c-a310-ea7b62b6b264',
+   *   cluster: '4e431909-632a-48c4-9110-1a7ccf428da7',
+   *   iat: 1714737113,
+   *   nbf: 1714737113,
+   *   exp: 1714751513,
+   *   aud: 'morio',
+   *   iss: 'morio',
+   *   sub: 'morio'
    * }
    */
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
@@ -576,7 +559,7 @@ describe('API Create Account Tests', () => {
     assert.equal(d.role, 'user')
     assert.equal(d.provider, 'local')
     for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
-    for (const field of ['node', 'deployment']) assert.equal(typeof d[field], 'string')
+    for (const field of ['node', 'cluster']) assert.equal(typeof d[field], 'string')
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
   })
 
@@ -666,7 +649,6 @@ describe('API Create Account Tests', () => {
 
   /*
    * GET /auth (JWT in Bearer header)
-   *
    * No response body
    */
   it(`Should GET /auth (JWT in Bearer header)`, async () => {

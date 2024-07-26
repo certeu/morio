@@ -1,6 +1,7 @@
 import { store, core, setup, getPreset, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 describe('Core Setup Tests', () => {
   /*
@@ -15,7 +16,7 @@ describe('Core Setup Tests', () => {
    */
   it('Should POST /setup (no body)', async () => {
     const result = await core.post('/setup')
-    validateErrorResponse(result, 'morio.core.schema.violation')
+    validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
   /*
@@ -30,7 +31,7 @@ describe('Core Setup Tests', () => {
    */
   it('Should POST /setup (empty object)', async () => {
     const result = await core.post('/setup', {})
-    validateErrorResponse(result, 'morio.core.schema.violation')
+    validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
   /*

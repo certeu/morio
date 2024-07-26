@@ -1086,8 +1086,8 @@ utils.sendErrorResponse = (res, template, route=false) => {
   /*
    * Add the instance
    */
-  data.instance = `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_CORE_PORT')}/` +
-    data.route ? data.route : route ? route : ''
+  data.instance = `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_CORE_PORT')}` +
+    (data.route ? data.route : route ? route : '')
 
   return res.type('application/problem+json').status(data.status).send(data).end()
 }

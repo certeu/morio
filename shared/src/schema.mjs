@@ -134,6 +134,7 @@ const validate = async (key, input, schema) => {
 
     return [valid, null]
   }
+  else return [false, `No such schema key: ${key}`]
 }
 
 /*

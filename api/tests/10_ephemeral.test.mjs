@@ -1,39 +1,48 @@
-import { store, api, getPreset } from './utils.mjs'
+import { store, api, getPreset, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import pkg from "../package.json" with { type: 'json' }
+import corePkg from "../../core/package.json" with { type: 'json' }
+import { errors } from '../src/errors.mjs'
 
 describe('Ephemeral API: Status Routes', () => {
 
   /*
    * GET /status
-   *
    * Example response:
    * {
-   *   "info":{
-   *     "name":"@morio/api",
-   *     "about":"Morio Management API",
-   *     "version":"0.2.0",
-   *     "production":false,
-   *     "core":{
-   *       "name":"@morio/core",
-   *       "about":"Morio Core",
-   *       "version":"0.2.0",
-   *       "production":false
-   *     }
+   *   info: {
+   *     about: 'Morio Management API',
+   *     name: '@morio/api',
+   *     production: false,
+   *     version: '0.2.0'
    *   },
-   *   "state":{
-   *     "ephemeral":true,
-   *     "uptime":33,
-   *     "start_time":1719845485561,
-   *     "reload_count":1,
-   *     "config_resolved":true,
-   *     "core":{
-   *       "uptime":38,
-   *       "ephemeral":true,
-   *       "reconfigure_count":1,
-   *       "config_resolved":true,
-   *       "settings_serial":false,
-   *       "timestamp":1719845518793
+   *   state: {
+   *     ephemeral: true,
+   *     uptime: 11,
+   *     start_time: 1721909714669,
+   *     reload_count: 1,
+   *     config_resolved: true,
+   *     settings_serial: 0
+   *   },
+   *   core: {
+   *     info: {
+   *       about: 'Morio Core',
+   *       name: '@morio/core',
+   *       production: false,
+   *       version: '0.2.0'
+   *     },
+   *     status: {
+   *       cluster: { code: 2, color: 'amber', time: 1721907766101 },
+   *     },
+   *     nodes: {},
+   *     node: {
+   *       uptime: 1960,
+   *       ephemeral: true,
+   *       ephemeral_uuid: '4a207d56-728b-472f-8d20-52326c118661',
+   *       reconfigure_count: 1,
+   *       config_resolved: true,
+   *       settings_serial: 0
    *     }
    *   }
    * }
@@ -44,35 +53,37 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(3, result.length, 3)
     assert.equal(200, result[0], 200)
     const d = result[1]
+    // core.status
     assert.equal(typeof d, 'object')
-    assert.equal(d.info.name, '@morio/api')
-    assert.equal(d.info.about, 'Morio Management API')
-    assert.equal(d.info.version, getPreset('MORIO_VERSION'))
+    // info
+    assert.equal(typeof d.info, 'object')
+    assert.equal(d.info.name, pkg.name)
+    assert.equal(d.info.about, pkg.description)
+    assert.equal(d.info.version, pkg.version)
     assert.equal(d.info.production, false)
-    assert.equal(d.info.core.name, '@morio/core')
-    assert.equal(d.info.core.about, 'Morio Core')
-    assert.equal(d.info.core.version, getPreset('MORIO_VERSION'))
-    assert.equal(d.info.core.production, false)
+    // state
+    assert.equal(typeof d.info, 'object')
     assert.equal(d.state.ephemeral, true)
     assert.equal(typeof d.state.uptime, 'number')
     assert.equal(typeof d.state.start_time, 'number')
     assert.equal(typeof d.state.reload_count, 'number')
     assert.equal(d.state.config_resolved, true)
-    assert.equal(d.state.core.ephemeral, true)
-    assert.equal(typeof d.state.core.uptime, 'number')
-    assert.equal(typeof d.state.core.reconfigure_count, 'number')
-    assert.equal(d.state.core.config_resolved, true)
-    assert.equal(d.state.core.settings_serial, false)
-    assert.equal(typeof d.state.core.timestamp, 'number')
-
-    /*
-     * Add to store for re-use in other tests
-     */
-    store.ephemeral = true
+    assert.equal(d.state.settings_serial, 0)
+    // core
+    assert.equal(typeof d.core, 'object')
+    // core.info
+    assert.equal(typeof d.core.info, 'object')
+    assert.equal(d.core.info.name, corePkg.name)
+    assert.equal(d.core.info.about, corePkg.description)
+    assert.equal(d.core.info.version, corePkg.version)
+    assert.equal(d.core.info.production, false)
+    // core.status
+    assert.equal(typeof d.core.status.cluster, 'object')
+    assert.equal(d.core.status.cluster.code, 2)
+    assert.equal(d.core.status.cluster.color, "amber")
+    assert.equal(typeof d.core.status.cluster.time, "number")
   })
-
 })
-
 
 describe('Ephemeral API: Non-available Routes', () => {
   const test = {
@@ -156,24 +167,17 @@ describe('Ephemeral API: Non-available Routes', () => {
    * Loop all GET endpoints that should not be available in ephemeral mode
    * Example return:
    * {
-   *   type: 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral',
-   *   title: 'This endpoint is not available when Morio is in ephemeral state',
-   *   status: 503,
-   *   detail: 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.'
+   *   status: 409,
+   *   title: 'Not available in ephemeral mode',
+   *   detail: 'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
+   *   type: 'https://morio.it/reference/errors/morio.api.ephemeral.prohibited',
+   *   instance: 'http://api:3000/idps'
    * }
    */
   for (const url of test.get) {
     it(`Should not GET ${url} in ephemeral mode`, async () => {
       const result = await api.get(url)
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(d.type, 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral')
-      assert.equal(d.title, 'This endpoint is not available when Morio is in ephemeral state')
-      assert.equal(d.status, 503)
-      assert.equal(d.detail, 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.')
+      validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
 
@@ -183,15 +187,7 @@ describe('Ephemeral API: Non-available Routes', () => {
   for (const url of test.post) {
     it(`Should not POST ${url} in ephemeral mode`, async () => {
       const result = await api.post(url, {})
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(d.type, 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral')
-      assert.equal(d.title, 'This endpoint is not available when Morio is in ephemeral state')
-      assert.equal(d.status, 503)
-      assert.equal(d.detail, 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.')
+      validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
 
@@ -201,15 +197,7 @@ describe('Ephemeral API: Non-available Routes', () => {
   for (const url of test.patch) {
     it(`Should not PATCH ${url} in ephemeral mode`, async () => {
       const result = await api.patch(url, {})
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(d.type, 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral')
-      assert.equal(d.title, 'This endpoint is not available when Morio is in ephemeral state')
-      assert.equal(d.status, 503)
-      assert.equal(d.detail, 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.')
+      validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
 
@@ -219,15 +207,7 @@ describe('Ephemeral API: Non-available Routes', () => {
   for (const url of test.delete) {
     it(`Should not DELETE ${url} in ephemeral mode`, async () => {
       const result = await api.delete(url)
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(d.type, 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral')
-      assert.equal(d.title, 'This endpoint is not available when Morio is in ephemeral state')
-      assert.equal(d.status, 503)
-      assert.equal(d.detail, 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.')
+      validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
 
@@ -237,17 +217,8 @@ describe('Ephemeral API: Non-available Routes', () => {
   for (const url of test.put) {
     it(`Should not PUT ${url} in ephemeral mode`, async () => {
       const result = await api.put(url, {})
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(d.type, 'https://morio.it/reference/errors/morio.api.middleware.guard.ephemeral')
-      assert.equal(d.title, 'This endpoint is not available when Morio is in ephemeral state')
-      assert.equal(d.status, 503)
-      assert.equal(d.detail, 'While Morio is not configured (ephemeral state) only a subset of endpoints are available.')
+      validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
-
 })
 

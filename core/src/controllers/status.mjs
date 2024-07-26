@@ -1,5 +1,6 @@
 import { keypairAsJwk } from '#shared/crypto'
 import { utils } from '../lib/utils.mjs'
+import { statusCodes } from '#shared/errors'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -51,6 +52,7 @@ Controller.prototype.getReloadData = async (req, res) => {
 
   const data = getStatus()
   if (!utils.isEphemeral()) {
+    data.sanitized_settings = utils.getSanitizedSettings()
     data.settings = utils.getSettings()
     data.keys = utils.getKeys()
   }
@@ -62,20 +64,25 @@ Controller.prototype.getReloadData = async (req, res) => {
 /*
  * Helper method to construct the status object
  */
-const getStatus = () => ({
-  info: utils.getInfo(),
-  status: utils.getStatus(true),
-  nodes: utils.getClusterNodes(),
-  node: {
-    uptime: utils.getUptime(),
-    cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
-    node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
-    node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
-    ephemeral: utils.isEphemeral(),
-    ephemeral_uuid: utils.isEphemeral() ? utils.getEphemeralUuid() : undefined,
-    reconfigure_count: utils.getReconfigureCount(),
-    config_resolved: utils.isConfigResolved(),
-    settings_serial: utils.getSettingsSerial(),
+const getStatus = () => {
+  const data = {
+    info: utils.getInfo(),
+    status: utils.getStatus(true),
+    nodes: utils.getClusterNodes(),
+    node: {
+      uptime: utils.getUptime(),
+      cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
+      node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
+      node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
+      ephemeral: utils.isEphemeral(),
+      ephemeral_uuid: utils.isEphemeral() ? utils.getEphemeralUuid() : undefined,
+      reconfigure_count: utils.getReconfigureCount(),
+      config_resolved: utils.isConfigResolved(),
+      settings_serial: utils.getSettingsSerial(),
+    }
   }
-})
+  if (statusCodes[data.status.cluster.code]) data.status.cluster.msg = statusCodes[data.status.cluster.code]
+
+  return data
+}
 

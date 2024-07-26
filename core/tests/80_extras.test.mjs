@@ -1,6 +1,7 @@
 import { core, setup, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 describe('Core Extra Tests', () => {
   /*
@@ -15,7 +16,7 @@ describe('Core Extra Tests', () => {
    */
   it('Should POST /setup (second time should not work)', async () => {
     const result = await core.post('/setup', setup)
-    validateErrorResponse(result, 'morio.core.ephemeral.required')
+    validateErrorResponse(result, errors, 'morio.core.ephemeral.required')
   })
 
   /*
@@ -30,7 +31,7 @@ describe('Core Extra Tests', () => {
    */
   it('Should GET /does-not-exist', async () => {
     const result = await core.get('/does-not-exist')
-    validateErrorResponse(result, 'morio.core.404')
+    validateErrorResponse(result, errors, 'morio.core.404')
   })
 
   /*
@@ -45,7 +46,7 @@ describe('Core Extra Tests', () => {
    */
   it('Should POST /settings (with missing cluster settings)', async () => {
     const result = await core.post('/settings', { ...setup, cluster: false })
-    validateErrorResponse(result, 'morio.core.schema.violation')
+    validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
   /*

@@ -4,7 +4,6 @@ import { attempt, sleep } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
-import { errors } from '../src/errors.mjs'
 
 /*
  * Setup the store
@@ -20,7 +19,7 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * Client for the management API
  * This file is used by API unit tests too, that is why this is here
  */
-const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`)
+const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
 
 /*
  * Client for the management API
@@ -139,11 +138,14 @@ const isCoreReady = async () => {
 const isApiReady = async () => {
   const [status, result] = await api.get('/status')
 
-  //console.log({ api: result })
   return status === 200 && result.state.config_resolved === true ? true : false
 }
 
-const validateErrorResponse = (result, template) => {
+/*
+ * You need to pass in the errors here because this file is
+ * symlinked, so a local import would not function as expected
+ */
+const validateErrorResponse = (result, errors, template) => {
   const err = errors[template]
   if (!err) assert.equal('This is not a known error template', template)
   else {
@@ -154,6 +156,7 @@ const validateErrorResponse = (result, template) => {
     assert.equal(result[1].title, err.title)
     assert.equal(result[1].type, `${getPreset('MORIO_ERRORS_WEB_PREFIX')}${template}`)
     assert.equal(result[1].detail, err.detail)
+    assert.equal(typeof result[1].instance, 'string')
   }
 }
 

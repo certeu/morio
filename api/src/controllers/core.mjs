@@ -127,14 +127,14 @@ Controller.prototype.setup = async (req, res) => {
    * This route is only accessible when running in ephemeral mode
    */
   if (!utils.isEphemeral())
-    return res.status(400).send({
-      errors: ['You can only use this endpoint on an ephemeral Morio node'],
-    })
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', '/setup')
 
   /*
-   * Validate request against schema
+   * Validate request against schema, but strip headers from body first
    */
-  const [valid, err] = await utils.validate(`req.setup`, req.body)
+  const body = {...req.body}
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.setup`, body)
   if (!valid) {
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/setup')
   }
@@ -147,13 +147,14 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Make sure setting are valid
    */
-  if (!report.valid) return res.status(400).send({ errors: ['Settings are not valid'], report })
+  if (!report.valid)
+    return utils.sendErrorResponse(res, 'morio.api.settings.invalid', '/setup')
 
   /*
    * Make sure settings are deployable
    */
   if (!report.deployable)
-    return res.status(400).send({ errors: ['Settings are not deployable'], report })
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', '/setup')
 
   /*
    * Settings are valid and deployable, pass them to core
@@ -324,7 +325,6 @@ Controller.prototype.getJwks = async (req, res) => {
  */
 Controller.prototype.joinCluster = async (req, res) => {
   log.info('Received request to join cluster')
-  console.log({ apiBody: req.body })
   const [status, result] = await utils.coreClient.post(`/cluster/join`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)

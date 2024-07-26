@@ -148,7 +148,7 @@ Controller.prototype.setup = async (req, res) => {
   const node = await localNodeInfo(req.body)
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
-    return res.status(400).send({ errors: ['Request host not listed as Morio node'] })
+    return utils.sendErrorResponse(res, 'morio.core.settings.fqdn.mismatch', '/setup')
   }
   else log.debug(`Processing request to setup Morio with provided settings`)
 
@@ -291,25 +291,16 @@ Controller.prototype.setup = async (req, res) => {
  * @return {object} data - Data about this node
  */
 const localNodeInfo = async (body) => {
+  log.todo(body)
   /*
    * The API injects the headers into the body
    * so we will look at the X-Forwarded-Host header
    * and hope that it matches one of the cluster nodes
-   * Note that we carve out an exception here for unit tests
-   * but only if we're not in production
    */
   let fqdn = false
   const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
   for (const header of ['x-forwarded-host', 'host']) {
     const hval = (body.headers?.[header] || '').toLowerCase()
-    //if (hval && (
-    //  nodes.includes(hval) ||
-    //  /*
-    //   * Note that we carve out an exception here to facilitate unit tests
-    //   * but only if we're not in production
-    //   */
-    //  (!utils.inProduction && nodes[0] === utils.getPreset('MORIO_UNIT_TEST_HOST'))
-    //))
     if (hval && nodes.includes(hval)) fqdn = hval
   }
 

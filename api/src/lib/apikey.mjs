@@ -116,16 +116,16 @@ export const saveApikey = async (id = false, data) => {
 }
 
 /**
- * Helper method to remove an API key
+ * Helper method to delete an API key
  *
  * @param {string} id - The apikey ID (key)
  */
-export const removeApikey = async (id = false) => {
+export const deleteApikey = async (id = false) => {
   /*
    * We need at least an ID
    */
   if (!id) {
-    log.warn('removeApikey was called witout an id')
+    log.warn('deleteApikey was called witout an id')
     return false
   }
 

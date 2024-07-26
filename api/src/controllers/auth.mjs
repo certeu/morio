@@ -1,4 +1,4 @@
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
@@ -132,9 +132,22 @@ Controller.prototype.authenticate = async (req, res) => {
  */
 Controller.prototype.login = async (req, res) => {
   /*
+   * Validate high-level input
+   */
+  const [valid1, err1] = (await utils.validate(`req.auth.login`, req.body))
+  if (!valid1) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/login')
+
+  /*
    * Get the provider ID
    */
   const providerId = req.body?.provider || false
+
+  /*
+   * Validate identity provider input
+   */
+  const [valid2, err2] = (await utils.validate(`req.auth.login.${providerId}`, req.body))
+  if (!valid2) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/login')
+
   /*
    * The mrt, local, and apikey provider types cannot be instantiated
    * more than once. If anything, doing so would open up a bag of bugs.
@@ -172,7 +185,7 @@ Controller.prototype.login = async (req, res) => {
     /*
      * Authentication failed. Return and end here.
      */
-    return res.status(401).send(data).end()
+    return utils.sendErrorResponse(res, data, '/login')
   }
 
   /*

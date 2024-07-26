@@ -25,7 +25,7 @@ export function routes(app) {
   app.patch(`/apikeys/:key/:action`, Apikeys.update)
 
   /*
-   * Remove an API key
+   * Delete an API key
    */
-  app.delete(`/apikeys/:key`, Apikeys.remove)
+  app.delete(`/apikeys/:key`, Apikeys.delete)
 }
