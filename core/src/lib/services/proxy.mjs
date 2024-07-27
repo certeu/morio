@@ -19,10 +19,10 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(
-        `https://proxy/api/overview`,
-        { returnAs: 'json', ignoreCertificate: true }
-      )
+      const result = await testUrl(`https://proxy/api/overview`, {
+        returnAs: 'json',
+        ignoreCertificate: true,
+      })
       const status = result?.http ? 0 : 1
       utils.setServiceStatus('proxy', status)
 

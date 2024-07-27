@@ -1,8 +1,7 @@
-import { api, setup, attempt, isCoreReady, isApiReady, getPreset } from './utils.mjs'
+import { api } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import pkg from '../package.json' with { type: 'json' }
-import corePkg from '../../core/package.json' with { type: 'json' }
+import { pkg, corePkg } from './json-loader.mjs'
 
 describe('Anonymous Routes Tests', () => {
   /*
@@ -95,17 +94,17 @@ describe('Anonymous Routes Tests', () => {
     // core.status.cluster
     assert.equal(typeof d.core.status.cluster, 'object')
     // Cluster can come up faster or slower, can't be sure
-    assert.equal([0,2].includes(d.core.status.cluster.code), true)
-    assert.equal(["amber","green"].includes(d.core.status.cluster.color), true)
-    assert.equal(typeof d.core.status.cluster.time, "number")
-    assert.equal(typeof d.core.status.cluster.updated, "number")
-    assert.equal(typeof d.core.status.cluster.leader_serial, "number")
-    assert.equal(typeof d.core.status.cluster.msg, "string")
-    assert.equal(typeof d.core.status.cluster.leading, "boolean")
+    assert.equal([0, 2].includes(d.core.status.cluster.code), true)
+    assert.equal(['amber', 'green'].includes(d.core.status.cluster.color), true)
+    assert.equal(typeof d.core.status.cluster.time, 'number')
+    assert.equal(typeof d.core.status.cluster.updated, 'number')
+    assert.equal(typeof d.core.status.cluster.leader_serial, 'number')
+    assert.equal(typeof d.core.status.cluster.msg, 'string')
+    assert.equal(typeof d.core.status.cluster.leading, 'boolean')
     // core.status.nodes
-    assert.equal(typeof d.core.status.nodes['unit.test.morio.it'], "object")
+    assert.equal(typeof d.core.status.nodes['unit.test.morio.it'], 'object')
     // core.nodes
-    assert.equal(typeof d.core.nodes, "object")
+    assert.equal(typeof d.core.nodes, 'object')
     const uuid = Object.keys(d.core.nodes).pop()
     assert.equal(d.core.nodes[uuid].fqdn, 'unit.test.morio.it')
     assert.equal(d.core.nodes[uuid].hostname, 'unit')
@@ -114,12 +113,12 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.core.nodes[uuid].uuid, uuid)
     assert.equal(typeof d.core.nodes[uuid].settings, 'number')
     // core.node
-    assert.equal(typeof d.core.node, "object")
-    assert.equal(typeof d.core.node.uptime, "number")
-    assert.equal(typeof d.core.node.node_serial, "number")
-    assert.equal(typeof d.core.node.reconfigure_count, "number")
-    assert.equal(typeof d.core.node.settings_serial, "number")
-    assert.equal(typeof d.core.node.cluster, "string")
+    assert.equal(typeof d.core.node, 'object')
+    assert.equal(typeof d.core.node.uptime, 'number')
+    assert.equal(typeof d.core.node.node_serial, 'number')
+    assert.equal(typeof d.core.node.reconfigure_count, 'number')
+    assert.equal(typeof d.core.node.settings_serial, 'number')
+    assert.equal(typeof d.core.node.cluster, 'string')
     assert.equal(d.core.node.node, uuid)
   })
 
@@ -186,8 +185,8 @@ describe('Anonymous Routes Tests', () => {
         id: 'ldap',
         provider: 'ldap',
         label: 'LDAP',
-        about: 'Test LDAP server'
-      }
+        about: 'Test LDAP server',
+      },
     })
     // ui
     assert.deepEqual(d.ui, {})
@@ -245,4 +244,3 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.intermediate_certificate.includes('--BEGIN CERTIFICATE--'), true)
   })
 })
-

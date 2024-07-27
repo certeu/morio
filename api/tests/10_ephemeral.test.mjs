@@ -1,12 +1,10 @@
-import { store, api, getPreset, validateErrorResponse } from './utils.mjs'
+import { api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import pkg from "../package.json" with { type: 'json' }
-import corePkg from "../../core/package.json" with { type: 'json' }
+import { pkg, corePkg } from './json-loader.mjs'
 import { errors } from '../src/errors.mjs'
 
 describe('Ephemeral API: Status Routes', () => {
-
   /*
    * GET /status
    * Example response:
@@ -80,8 +78,8 @@ describe('Ephemeral API: Status Routes', () => {
     // core.status
     assert.equal(typeof d.core.status.cluster, 'object')
     assert.equal(d.core.status.cluster.code, 2)
-    assert.equal(d.core.status.cluster.color, "amber")
-    assert.equal(typeof d.core.status.cluster.time, "number")
+    assert.equal(d.core.status.cluster.color, 'amber')
+    assert.equal(typeof d.core.status.cluster.time, 'number')
   })
 
   /*
@@ -130,9 +128,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/downloads',
       '/validate/ping',
     ],
-    patch: [
-      '/apikeys/key/action',
-    ],
+    patch: ['/apikeys/key/action'],
     post: [
       '/account',
       '/activate-account',
@@ -153,9 +149,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/docker/containers/id/stop',
       '/docker/containers/id/unpause',
     ],
-    delete: [
-      '/apikeys/key'
-    ],
+    delete: ['/apikeys/key'],
   }
 
   /*
@@ -216,4 +210,3 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
 })
-

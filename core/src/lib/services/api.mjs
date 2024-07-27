@@ -65,8 +65,9 @@ export const reconfigureApi = async () => {
 }
 
 const isApiUp = async () => {
-  const status = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/up`, { returnAs: 'status' })
+  const status = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/up`, {
+    returnAs: 'status',
+  })
 
   return status === 200
 }
-

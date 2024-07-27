@@ -1,5 +1,4 @@
 import {
-  docker,
   runDockerApiCommand,
   runContainerApiCommand,
   runContainerImageApiCommand,
@@ -7,7 +6,6 @@ import {
 } from '#lib/docker'
 import { validate } from '#lib/validation'
 import { schemaViolation, dockerError } from '#lib/response'
-import { cloneAsPojo } from '#shared/utils'
 
 /**
  * This docker controller handles low-level docker tasks

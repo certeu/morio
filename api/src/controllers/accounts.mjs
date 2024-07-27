@@ -1,5 +1,3 @@
-import Joi from 'joi'
-import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
 import { log, utils } from '../lib/utils.mjs'
@@ -51,8 +49,11 @@ Controller.prototype.create = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.account.create`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  const [valid, err] = await utils.validate(`req.account.create`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Does this user exist?
@@ -64,8 +65,7 @@ Controller.prototype.create = async (req, res) => {
      */
     if (valid.overwrite && isRoleAvailable(req, 'operator')) {
       log.debug(`Overwriting ${valid.provider}.${valid.username}`)
-    }
-    else return utils.sendErrorResponse(res, 'morio.api.account.exists', req.url)
+    } else return utils.sendErrorResponse(res, 'morio.api.account.exists', req.url)
   }
 
   /*
@@ -106,8 +106,11 @@ Controller.prototype.activate = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.account.activate`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  const [valid, err] = await utils.validate(`req.account.activate`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Does this account exist and is it in pending state??
@@ -159,7 +162,10 @@ Controller.prototype.activateMfa = async (req, res) => {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.account.activatemfa`, req.body)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Does this account exist and is it in pending state with an MFA secret set?
@@ -178,8 +184,9 @@ Controller.prototype.activateMfa = async (req, res) => {
   /*
    * Verify MFA token
    */
-  const result = (await mfa.verify(valid.token, await utils.decrypt(pending.mfa)))
-  if (!result) return utils.sendErrorResponse(res, 'morio.api.account.credentials.mismatch', req.url)
+  const result = await mfa.verify(valid.token, await utils.decrypt(pending.mfa))
+  if (!result)
+    return utils.sendErrorResponse(res, 'morio.api.account.credentials.mismatch', req.url)
 
   /*
    * Also generate scratch codes because we've all lost our phone at one point
@@ -204,4 +211,3 @@ Controller.prototype.activateMfa = async (req, res) => {
    */
   return res.send({ scratch_codes: scratchCodes })
 }
-

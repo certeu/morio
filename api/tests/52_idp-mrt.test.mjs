@@ -2,12 +2,7 @@ import { store, api, validateErrorResponse } from './utils.mjs'
 import { errors } from '../src/errors.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-/*
- * Load the MRT straight from disk, so that these tests can
- * run without having to go through the setup each time.
- * Note that this is only possible when running the dev container.
- */
-import keys from '../../data/config/keys.json' assert { type: 'json' }
+import { keys } from './json-loader.mjs'
 
 const { mrt } = keys
 

@@ -1,7 +1,7 @@
-import { store, core, getPreset, setup, attempt, isCoreReady } from './utils.mjs'
+import { store, core, setup, attempt, isCoreReady } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import pkg from '../package.json' with { type: 'json' }
+import { pkg } from './json-loader.mjs'
 
 describe('Ensure we are out of configuration mode', async () => {
   /*
@@ -114,7 +114,7 @@ describe('Core Settings/Reload/Status Tests', () => {
     // status.cluster
     assert.equal(typeof d.status.cluster, 'object')
     assert.equal(typeof d.status.cluster.code, 'number')
-    assert.equal(["green", "amber", "red"].includes(d.status.cluster.color), true)
+    assert.equal(['green', 'amber', 'red'].includes(d.status.cluster.color), true)
     assert.equal(typeof d.status.cluster.time, 'number')
     assert.equal(typeof d.status.cluster.updated, 'number')
     /*
@@ -154,7 +154,10 @@ describe('Core Settings/Reload/Status Tests', () => {
     for (const type in types) {
       for (const key of types[type]) assert.equal(typeof d.node[key], type)
     }
-    assert.equal([...types.number, ...types.string, ...types.boolean].length, Object.keys(d.node).length)
+    assert.equal(
+      [...types.number, ...types.string, ...types.boolean].length,
+      Object.keys(d.node).length
+    )
     // settings
     assert.equal(typeof d.settings, 'object')
     assert.equal(d.settings.cluster.name, setup.cluster.name)
@@ -186,7 +189,18 @@ describe('Core Settings/Reload/Status Tests', () => {
     // keys
     assert.equal(typeof d.keys, 'object')
     if (store.mrt) assert.equal(d.keys.mrt, store.mrt)
-    for (const key of ['jwt', 'mrt', 'public', 'private', 'rfpr', 'rcrt', 'rkey', 'rpwd', 'icrt', 'ikey']) {
+    for (const key of [
+      'jwt',
+      'mrt',
+      'public',
+      'private',
+      'rfpr',
+      'rcrt',
+      'rkey',
+      'rpwd',
+      'icrt',
+      'ikey',
+    ]) {
       assert.equal(typeof d.keys[key], 'string')
     }
     for (const key of ['public', 'private', 'rcrt', 'rkey', 'icrt', 'ikey']) {
@@ -307,7 +321,7 @@ describe('Core Settings/Reload/Status Tests', () => {
         about: 'Test LDAP server',
         id: 'ldap',
         label: 'LDAP',
-        provider: 'ldap'
+        provider: 'ldap',
       },
       mrt: { id: 'mrt', provider: 'mrt', about: false },
       local: {

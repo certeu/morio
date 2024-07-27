@@ -1,4 +1,4 @@
-import { store, core, services } from './utils.mjs'
+import { store, core } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -134,7 +134,7 @@ describe('Core Docker Active Tests', async () => {
    * Just need to grab the proxy container ID real quick
    */
   const container = (await core.get(`/docker/running-containers`))[1]
-    .filter(container => container.Names.includes("/proxy"))
+    .filter((container) => container.Names.includes('/proxy'))
     .pop()
   const cid = container.Id
   const iid = container.ImageID.split(':').pop()
@@ -226,9 +226,8 @@ describe('Core Docker Container State Tests', async () => {
    * Just need to grab the proxy container ID real quick
    */
   const container = (await core.get(`/docker/running-containers`))[1]
-    .filter(container => container.Names.includes("/proxy"))
-    .pop()
-    .Id
+    .filter((container) => container.Names.includes('/proxy'))
+    .pop().Id
   /*
    * Note: We're not stopping/killing containers here
    * as we're just passing through the output from the Docker API.
@@ -249,4 +248,3 @@ describe('Core Docker Container State Tests', async () => {
     })
   }
 })
-

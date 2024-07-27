@@ -21,7 +21,7 @@ export const service = {
     wanted: async () => {
       const pipelines = utils.getSettings('connector.pipelines', false)
 
-      return (pipelines && Object.values(pipelines).filter((pipe) => !pipe.disabled).length > 0)
+      return pipelines && Object.values(pipelines).filter((pipe) => !pipe.disabled).length > 0
         ? true
         : false
     },
@@ -132,7 +132,10 @@ const pipelineFilename = (id) => `${id}.config`
 const createWantedPipelines = async (wantedPipelines) => {
   const pipelines = []
   for (const id of wantedPipelines) {
-    const config = generatePipelineConfiguration(utils.getSettings(['connector', 'pipelines', id]), id)
+    const config = generatePipelineConfiguration(
+      utils.getSettings(['connector', 'pipelines', id]),
+      id
+    )
     if (config) {
       const file = pipelineFilename(id)
       await writeFile(`/etc/morio/connector/pipelines/${file}`, config, log)
@@ -261,7 +264,10 @@ input {
   kafka {
     codec => json
     topics => ["${pipeline.input.topic}"]
-    bootstrap_servers => "${utils.getSettings('cluster.broker_nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`)
+      .join(',')}"
     client_id => "morio_connector_input"
     id => "${pipelineId}_${xput.id}"
   }
@@ -308,7 +314,10 @@ output {
   kafka {
     codec => json
     topic_id => "${pipeline.output.topic}"
-    bootstrap_servers => "${utils.getSettings('cluster.broker_nodes').map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`)
+      .join(',')}"
     client_id => "morio_connector_output"
     id => "${pipelineId}_${xput.id}"
   }

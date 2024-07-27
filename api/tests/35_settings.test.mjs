@@ -1,8 +1,6 @@
-import { api, accounts, setup, attempt, isCoreReady, isApiReady, getPreset } from './utils.mjs'
+import { api, setup } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import pkg from '../package.json' with { type: 'json' }
-import corePkg from '../../core/package.json' with { type: 'json' }
 
 describe('API Settings Tests', () => {
   /*
@@ -150,8 +148,8 @@ describe('API Settings Tests', () => {
         id: 'ldap',
         provider: 'ldap',
         label: 'LDAP',
-        about: 'Test LDAP server'
-      }
+        about: 'Test LDAP server',
+      },
     })
     // ui
     assert.deepEqual(d.ui, {})
@@ -188,4 +186,3 @@ describe('API Settings Tests', () => {
     assert.equal(typeof key.e, 'string')
   })
 })
-

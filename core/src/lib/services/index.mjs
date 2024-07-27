@@ -146,11 +146,10 @@ export const startMorio = async (hookParams = {}) => {
        * Wait for service to come up before we continue
        */
       await ensureMorioService(service, hookParams)
-    }
+    } else promises.push(ensureMorioService(service, hookParams))
     /*
      * Or handle it in parallel
      */
-    else promises.push(ensureMorioService(service, hookParams))
   }
 
   return await Promise.all(promises)
@@ -186,10 +185,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    * Generate morio service config
    * Docker config will be generated after the preCreate lifecycle hook
    */
-  utils.setMorioServiceConfig(
-    serviceName,
-    resolveServiceConfiguration(serviceName, { utils })
-  )
+  utils.setMorioServiceConfig(serviceName, resolveServiceConfiguration(serviceName, { utils }))
 
   /*
    * Does the service need to be recreated?

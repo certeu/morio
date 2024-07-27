@@ -56,7 +56,7 @@ describe('Core Setup Tests', () => {
        * Normally, the proxy adds the headers to the body
        * Since we're talking to core direcytly, we need to do this ourselves
        */
-      headers: { "x-forwarded-host": getPreset('MORIO_UNIT_TEST_HOST') }
+      headers: { 'x-forwarded-host': getPreset('MORIO_UNIT_TEST_HOST') },
     })
     const d = result[1]
     assert.equal(Array.isArray(result), true)

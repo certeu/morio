@@ -77,7 +77,7 @@ export const loadAccountApikeys = async (id) => {
     { id: fields.id(id) }
   )
 
-  return (status === 200) ? apikeysAsList(result) : false
+  return status === 200 ? apikeysAsList(result) : false
 }
 
 /**

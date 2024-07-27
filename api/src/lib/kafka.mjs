@@ -12,7 +12,9 @@ export function KafkaClient() {
    */
   this.client = new Kafka({
     clientId: this.id,
-    brokers: utils.getSettings('cluster.broker_nodes').map((node, i) => `broker_${Number(i) + 1}:9092`),
+    brokers: utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`),
     logLevel: logLevel.ERROR,
   })
 

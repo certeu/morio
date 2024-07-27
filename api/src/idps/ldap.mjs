@@ -78,7 +78,7 @@ export const ldap = (id, data, req) => {
   /*
    * Get provider from settings
    */
-  const provider =  utils.getSettings(['iam', 'providers', id])
+  const provider = utils.getSettings(['iam', 'providers', id])
 
   /*
    * Passport uses callback style, so we'll wrap this in a Promise to support async
@@ -105,13 +105,8 @@ export const ldap = (id, data, req) => {
         /*
          * Can we assign the requested role?
          */
-        const [allowed, maxLevel] = checkRole(
-          data.role,
-          provider.rbac,
-          user
-        )
-        if (!allowed)
-          return resolve([false, 'morio.api.account.role.unavailable'])
+        const [allowed, maxLevel] = checkRole(data.role, provider.rbac, user)
+        if (!allowed) return resolve([false, 'morio.api.account.role.unavailable'])
 
         /*
          * Update the latest login time, but don't wait for it

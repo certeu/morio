@@ -1,5 +1,14 @@
 import { Buffer } from 'node:buffer'
-import { store, api, setup, attempt, getPreset, isCoreReady, isApiReady, validateErrorResponse } from './utils.mjs'
+import {
+  store,
+  api,
+  setup,
+  attempt,
+  getPreset,
+  isCoreReady,
+  isApiReady,
+  validateErrorResponse,
+} from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
@@ -17,7 +26,7 @@ describe('API Setup Tests', () => {
    * }
    */
   it('Should POST /setup (invalid data)', async () => {
-    const result = await api.post('/setup', { settings: 'are not valid' },)
+    const result = await api.post('/setup', { settings: 'are not valid' })
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
@@ -43,10 +52,10 @@ describe('API Setup Tests', () => {
      * Note that we also need to fake them to make core accept
      * this setup request as if we're talking to host unit.test.morio.it.
      */
-    const headers = { "x-forwarded-host": "unit.test.morio.it" }
+    const headers = { 'x-forwarded-host': 'unit.test.morio.it' }
     const axiosResult = await axios.post(
       `http://core:${getPreset('MORIO_CORE_PORT')}/setup`,
-      {...setup, headers },
+      { ...setup, headers },
       { headers }
     )
     const result = [axiosResult.status, axiosResult.data, null]
@@ -119,4 +128,3 @@ describe('Ensure we have reloaded configuration from core', async () => {
       })
     })
 })
-

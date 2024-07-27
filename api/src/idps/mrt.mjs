@@ -14,7 +14,6 @@ import { isRoleAvailable } from '../rbac.mjs'
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
 export const mrt = async (id, data) => {
-
   /*
    * Authenticate
    */
@@ -31,14 +30,15 @@ export const mrt = async (id, data) => {
      * this boils down to: Does the role exist?
      */
     const available = isRoleAvailable('root', data.role)
-    if (!available) return [
-      false,
-      'morio.api.account.role.unavailable',
-      {
-        requested_role: data.role,
-        available_roles: roles,
-      },
-    ]
+    if (!available)
+      return [
+        false,
+        'morio.api.account.role.unavailable',
+        {
+          requested_role: data.role,
+          available_roles: roles,
+        },
+      ]
 
     /*
      * Return result

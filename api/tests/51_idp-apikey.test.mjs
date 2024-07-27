@@ -1,8 +1,7 @@
-import { store, api, validateErrorResponse, getPreset } from './utils.mjs'
+import { store, api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
-import { sleep } from '#shared/utils'
 
 const keys = {
   key1: {
@@ -13,7 +12,6 @@ const keys = {
 }
 
 describe('API Key Tests', () => {
-
   for (const field of ['name', 'expires', 'role']) {
     /*
      * POST /apikey (missing ${field})
@@ -58,10 +56,7 @@ describe('API Key Tests', () => {
     assert.equal(d.role, keys.key1.role)
     assert.equal(typeof d.created_at, 'string')
     assert.equal(typeof d.expires_at, 'string')
-    assert.equal(
-      new Date(d.expires_at) - new Date(d.created_at) - 24 * 60 * 60 * 1000 < 1000,
-      true
-    )
+    assert.equal(new Date(d.expires_at) - new Date(d.created_at) - 24 * 60 * 60 * 1000 < 1000, true)
     store.set('keys.key1', d)
   })
 
@@ -72,7 +67,6 @@ describe('API Key Tests', () => {
    */
   it(`Should GET /apikeys`, async () => {
     const result = await api.get(`/apikeys`)
-    const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)

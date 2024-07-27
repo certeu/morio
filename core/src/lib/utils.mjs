@@ -15,8 +15,8 @@ export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
 /*
  * Add a log method to make it easy to spot things still to be done
  */
-log.todo = (a,b) => {
-  const location = new Error().stack.split("\n")[2]
+log.todo = (a, b) => {
+  const location = new Error().stack.split('\n')[2]
 
   return typeof a === 'object'
     ? log.debug(a, `🟠 ${b}${location}`)
@@ -73,13 +73,11 @@ export const utils = { hooks: { services: {} } }
  * @return {array} list - The list of all FQDNs
  *
  */
-utils.getAllFqdns = () => ([
+utils.getAllFqdns = () => [
   ...utils.getSettings('cluster.broker_nodes'),
   ...utils.getSettings('cluster.flanking_nodes', []),
-  ...utils.getSettings('cluster.fqdn', false)
-    ? [ utils.getSettings('cluster.fqdn') ]
-    : []
-])
+  ...(utils.getSettings('cluster.fqdn', false) ? [utils.getSettings('cluster.fqdn')] : []),
+]
 
 /**
  * Helper method to number of broker nodes
@@ -105,12 +103,10 @@ utils.getBrokerFqdns = () => utils.getSettings('cluster.broker_nodes')
  * @return {array} list - The list of all central node FQDNs
  *
  */
-utils.getCentralFqdns = () => ([
+utils.getCentralFqdns = () => [
   ...utils.getSettings('cluster.broker_nodes'),
-  ...utils.getSettings('cluster.fqdn')
-    ? [ utils.getSettings('cluster.fqdn') ]
-    : []
-])
+  ...(utils.getSettings('cluster.fqdn') ? [utils.getSettings('cluster.fqdn')] : []),
+]
 
 /**
  * Helper method to get a cache entry (see utils.cacheHit)
@@ -128,9 +124,7 @@ utils.getCache = (path) => store.get(unshift(['cache'], path), false)
  */
 utils.getCacheHit = (key) => {
   const hit = utils.getCache(key)
-  return (hit && (Date.now() - hit.time  < 15000))
-    ? hit.value
-    : false
+  return hit && Date.now() - hit.time < 15000 ? hit.value : false
 }
 
 /**
@@ -148,7 +142,10 @@ utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], 
 /**
  * Helper method to get the data for a cluster rnode based on its serial
  */
-utils.getClusterNodeFromSerial = (serial) => Object.values(store.get(['state', 'cluster', 'nodes'], {})).filter(node => node.serial === serial).pop()
+utils.getClusterNodeFromSerial = (serial) =>
+  Object.values(store.get(['state', 'cluster', 'nodes'], {}))
+    .filter((node) => node.serial === serial)
+    .pop()
 
 /**
  * Helper method to get the data of the cluster nodes
@@ -175,7 +172,8 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  *
  * @return {string} fqdn - The FQDN of the cluster leader node
  */
-utils.getClusterLeaderFqdn = () => utils.getSettings('cluster.broker_nodes', [])[Number(utils.getLeaderSerial()) - 1] || false
+utils.getClusterLeaderFqdn = () =>
+  utils.getSettings('cluster.broker_nodes', [])[Number(utils.getLeaderSerial()) - 1] || false
 
 /**
  * Helper method to get the node_serial of the node leading the cluster
@@ -218,7 +216,8 @@ utils.getClusterLeaderUuid = () => {
  * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
  * @return {object} config - The docker service configuration
  */
-utils.getDockerServiceConfig = (serviceName) => store.get(['config', 'services', 'docker', serviceName])
+utils.getDockerServiceConfig = (serviceName) =>
+  store.get(['config', 'services', 'docker', serviceName])
 
 /**
  * Helper method to get a Docer service configuration
@@ -249,14 +248,13 @@ utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).l
  *
  * @return {number} seconds - The number of seconds between heartbeats
  */
-utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 1),
-
-/**
- * Helper method to get local heartbeat setTimeout id
- *
- * @return {number} id - The setTimeout id which allows clearing the timetout
- */
-utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false)
+;(utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 1)),
+  /**
+   * Helper method to get local heartbeat setTimeout id
+   *
+   * @return {number} id - The setTimeout id which allows clearing the timetout
+   */
+  (utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false))
 
 /**
  * Helper method to get outgoing heartbeat setTimeout id
@@ -312,7 +310,8 @@ utils.getServicesStateAge = () => store.get('state.services.updated', 172e10)
  * @param {string} serviceName - The name of the service for which to retrieve the configuration
  * @return {object} config - The service configuration
  */
-utils.getMorioServiceConfig = (serviceName) => store.get(['config', 'services', 'morio', serviceName])
+utils.getMorioServiceConfig = (serviceName) =>
+  store.get(['config', 'services', 'morio', serviceName])
 
 /**
  * Helper method to get info on this node
@@ -326,7 +325,10 @@ utils.getNode = () => store.get('state.node')
  *
  * @return {number} count - Number of nodes in the cluster
  */
-utils.getNodeCount = () => utils.getSettings('cluster.broker_nodes', []).concat(utils.getSettings('cluster.flanking_nodes', [])).length
+utils.getNodeCount = () =>
+  utils
+    .getSettings('cluster.broker_nodes', [])
+    .concat(utils.getSettings('cluster.flanking_nodes', [])).length
 
 /**
  * Helper method to get the FQDN of this node
@@ -341,10 +343,10 @@ utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
  * @return {array} list - The list of all node FQDNs
  *
  */
-utils.getNodeFqdns = () => ([
+utils.getNodeFqdns = () => [
   ...utils.getSettings('cluster.broker_nodes'),
   ...utils.getSettings('cluster.flanking_nodes', []),
-])
+]
 
 /**
  * Helper method to get the (short) hostname of this node
@@ -379,7 +381,8 @@ utils.getNodeUuid = () => store.get('state.node.uuid')
  *
  * @return {string} uuid - This node's UUID
  */
-utils.getNodeFingerprint = () => store.get('state.node.uuid','').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
+utils.getNodeFingerprint = () =>
+  store.get('state.node.uuid', '').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
 /**
  * Helper method to get the reconfigure_count
@@ -408,9 +411,10 @@ utils.getSanitizedSettings = () => store.get('settings.sanitized')
  * @param {mixed} dflt - A default value to return if none is found
  * @return {object} settings - The settings object
  */
-utils.getSettings = (path, dflt) => path === undefined
-  ? store.get('settings.resolved', dflt)
-  : store.get(unshift(['settings', 'resolved'], path), dflt)
+utils.getSettings = (path, dflt) =>
+  path === undefined
+    ? store.get('settings.resolved', dflt)
+    : store.get(unshift(['settings', 'resolved'], path), dflt)
 
 /**
  * Helper method to get the settings_serial
@@ -476,7 +480,7 @@ utils.getNetworkName = () => utils.getPreset('MORIO_NETWORK')
  * @return {mixed} value - The value in the environment variable of default
  */
 utils.getPreset = (key, dflt, opts) => {
-  const result = getPreset(key, { dflt, ...opts})
+  const result = getPreset(key, { dflt, ...opts })
   if (result === undefined) log.warn(`core: Preset ${key} is undefined`)
   else log.trace(`core: Preset ${key} = ${result}`)
 
@@ -538,7 +542,10 @@ utils.setCaConfig = (config) => {
  *
  * @return {string} uuid - The cluster's UUID fingerprint
  */
-utils.getClusterFingerprint = () => store.get('state.cluster.uuid','').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
+utils.getClusterFingerprint = () =>
+  store
+    .get('state.cluster.uuid', '')
+    .slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
 /**
  * Helper method to set the cluster UUID
@@ -629,10 +636,7 @@ utils.setPeerStatus = (fqdn, status) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatIn = (fqdn, data) => {
-  store.set(
-    ['state', 'cluster', 'heartbeats', 'in', fqdn],
-    { ...data, time: Date.now() }
-  )
+  store.set(['state', 'cluster', 'heartbeats', 'in', fqdn], { ...data, time: Date.now() })
   return utils
 }
 
@@ -873,19 +877,19 @@ utils.setVersion = (version) => {
  *
  * @return {bool} resolved - True if the config is resolved, false if not
  */
-utils.isBrokerNode = () => utils.getNodeSerial() < 100 ? true : false
+utils.isBrokerNode = () => (utils.getNodeSerial() < 100 ? true : false)
 
 /**
  * Helper method to see whether the config is resolved
  *
  * @return {bool} resolved - True if the config is resolved, false if not
  */
-utils.isConfigResolved = () => store.get('state.config_resolved') ? true : false
+utils.isConfigResolved = () => (store.get('state.config_resolved') ? true : false)
 
 /**
  * Helper method to determine whether core is ready
  */
-utils.isCoreReady = () => store.get('state.core_ready') ? true : false
+utils.isCoreReady = () => (store.get('state.core_ready') ? true : false)
 
 /**
  * Helper method to see if brokers are distributed
@@ -895,49 +899,61 @@ utils.isCoreReady = () => store.get('state.core_ready') ? true : false
  *
  * @return {bool} distritbuted - True if brokers are distributed, false if not
  */
-utils.isDistributed = () => utils.getSettings('cluster.broker_nodes', []).concat(utils.getSettings('cluster.flanking_nodes', [])).length > 1
+utils.isDistributed = () =>
+  utils
+    .getSettings('cluster.broker_nodes', [])
+    .concat(utils.getSettings('cluster.flanking_nodes', [])).length > 1
 
 /**
  * Helper method for returning ephemeral state
  *
  * @return {bool} ephemeral - True if ephemeral, false if not
  */
-utils.isEphemeral = () => store.get('state.ephemeral', false) ? true : false
+utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
 
 /*
  * Determined whether this node is leading the cluster
  *
  * @return {bool} leading - True if this cluster node is leading, false if not
  */
-utils.isLeading = () => store.get('status.cluster.leading', false) ? true : false
+utils.isLeading = () => (store.get('status.cluster.leading', false) ? true : false)
 
 /*
  * Determined whether we are running in production or not
  *
  * @return {bool} leading - True if NODE_ENV is production
  */
-utils.isProduction = () => inProduction() ? true : false
+utils.isProduction = () => (inProduction() ? true : false)
 
 /**
  * Helper method to determine the status of a service is ok
  *
  * @return {bool} ok - True if the status is ok, false if not
  */
-utils.isServiceOk = (serviceName) => store.get(['status', utils.getNodeFqdn(), serviceName], 1) === 0 ? true : false
+utils.isServiceOk = (serviceName) =>
+  store.get(['status', utils.getNodeFqdn(), serviceName], 1) === 0 ? true : false
 
 /**
  * Helper method to determine whether the services state is stale
  *
  * @return {bool} stale - True if the services state is stale, false if not
  */
-utils.isServicesStateStale = () => Math.floor((Date.now() - utils.getServicesStateAge())/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
+utils.isServicesStateStale = () =>
+  Math.floor((Date.now() - utils.getServicesStateAge()) / 1000) >
+  getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') / 2
+    ? true
+    : false
 
 /**
  * Helper method to determine whether the status is stale
  *
  * @return {bool} stale - True if the status is stale, false if not
  */
-utils.isStatusStale = () => Math.floor((Date.now() - utils.getClusterStatusAge())/1000) > getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')/2 ? true : false
+utils.isStatusStale = () =>
+  Math.floor((Date.now() - utils.getClusterStatusAge()) / 1000) >
+  getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') / 2
+    ? true
+    : false
 
 /**
  * Helper method to determine whether a node (any node) is a flanking node
@@ -947,7 +963,7 @@ utils.isStatusStale = () => Math.floor((Date.now() - utils.getClusterStatusAge()
  * @param {number} params.serial - The node's serial
  * @return {bool} flanking - True if the node is a flanking node, false if not
  */
-utils.isThisAFlankingNode = ({ fqdn=false, serial=0 }) => {
+utils.isThisAFlankingNode = ({ fqdn = false, serial = 0 }) => {
   if (serial) return serial < 100 ? false : true
   if (fqdn) return utils.getSettings('cluster.flanking_nodes', []).includes(fqdn) ? true : false
   log.warn(`Called isThisAFlankingNode() but neither fqdn or serial were provided`)
@@ -960,7 +976,7 @@ utils.isThisAFlankingNode = ({ fqdn=false, serial=0 }) => {
  *
  * @return {bool} test - True if is a unit test, or false if not
  */
-utils.isUnitTest = () => store.get('testing', false) ? true : false
+utils.isUnitTest = () => (store.get('testing', false) ? true : false)
 
 /*  _                     __
  * | |_ _ _ __ _ _ _  ___/ _|___ _ _ _ __  ___ _ _ ___
@@ -1022,7 +1038,9 @@ utils.endReconfigure = () => {
   store.set('state.config_resolved', true)
   store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
   const serial = store.get('state.settings_serial')
-  log.info(`Configuration Resolved - ${serial ? 'Running settings serial '+serial : 'Running in ephemeral mode'}`)
+  log.info(
+    `Configuration Resolved - ${serial ? 'Running settings serial ' + serial : 'Running in ephemeral mode'}`
+  )
   return utils
 }
 
@@ -1070,15 +1088,18 @@ utils.resolveHostAsIp = resolveHostAsIp
  * @param {string|object} tempalte - Either a string for a know tempate, or a customg object holding the response data
  * @param {bool|string} route - The API route to construct the instance string, or false if there is none
  */
-utils.sendErrorResponse = (res, template, route=false) => {
+utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
   let data = {}
   /*
    * Allow passing in an error template name
    */
   if (typeof template === 'string') {
-    if (errors[template]) data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX')+template }
+    if (errors[template])
+      data = { ...errors[template], type: utils.getPreset('MORIO_ERRORS_WEB_PREFIX') + template }
     else {
-      store.log.error(`The sendErrorResponse method was alled with a template string that is not a known error template: ${template}`)
+      store.log.error(
+        `The sendErrorResponse method was called with a template string that is not a known error template: ${template}`
+      )
       return res.status(500).send().end()
     }
   }
@@ -1086,14 +1107,17 @@ utils.sendErrorResponse = (res, template, route=false) => {
   /*
    * Add the instance
    */
-  data.instance = `http://core_${store.get('state.node.serial')}:${utils.getPreset('MORIO_CORE_PORT')}` +
-    (data.route ? data.route : route ? route : '')
+  data.instance =
+    `http://core:${utils.getPreset('MORIO_CORE')}` + (data.route ? data.route : url ? url : '')
 
-  return res.type('application/problem+json').status(data.status).send(data).end()
+  return res
+    .type('application/problem+json')
+    .status(data.status)
+    .send({ ...data, ...extraData })
+    .end()
 }
 
 /**
  * Add validate method for eacy access
  */
 utils.validate = validateMethod
-

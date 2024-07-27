@@ -9,7 +9,6 @@ const Accounts = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-
   /*
    * List accounts known to Morio
    */

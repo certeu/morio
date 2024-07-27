@@ -8,7 +8,6 @@ const Anonymous = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-
   /*
    * Get the CA certifiates and fingerprint
    */

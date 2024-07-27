@@ -37,7 +37,7 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * This is a bit more convoluted as we need to send headers with the tests
  * so we use axios as a general purpose handler, and setup custom methods below
  */
-const axiosHandler = async (route, data=null, customHeaders={}, method='get') => {
+const axiosHandler = async (route, data = null, customHeaders = {}, method = 'get') => {
   const params = []
   if (['post', 'put', 'patch'].includes(method)) params.push(data)
   params.push({ headers: { ...headers, ...customHeaders } })
@@ -45,33 +45,24 @@ const axiosHandler = async (route, data=null, customHeaders={}, method='get') =>
   try {
     result = await axios[method](`http://api:${getPreset('MORIO_API_PORT')}${route}`, ...params)
     //console.log({result})
-  }
-  catch (err) {
+  } catch (err) {
     //console.log({err})
     if (err?.response?.status) return [err.response.status, err.response.data, err]
     return false
   }
 
-  return result
-    ? [result.status, result.data, result]
-    : false
+  return result ? [result.status, result.data, result] : false
 }
 /*
  * Management AIP client based on axios, which allows us to add headers
  */
 const api = {
-  post: (route, data, headers)  => axiosHandler(route, data, headers, 'post'),
-  put: (route, data, headers)   => axiosHandler(route, data, headers, 'put'),
+  post: (route, data, headers) => axiosHandler(route, data, headers, 'post'),
+  put: (route, data, headers) => axiosHandler(route, data, headers, 'put'),
   patch: (route, data, headers) => axiosHandler(route, data, headers, 'patch'),
-  get: (route, headers)         => axiosHandler(route, null, headers, 'get'),
-  delete: (route, headers)      => axiosHandler(route, null, headers, 'delete'),
+  get: (route, headers) => axiosHandler(route, null, headers, 'get'),
+  delete: (route, headers) => axiosHandler(route, null, headers, 'delete'),
 }
-
-/*
- * Client for the management API
- * This allows access to the internal auth route
- */
-const apiAuth = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
 
 /*
  * List of all Morio services
@@ -89,7 +80,7 @@ const setup = {
   tokens: {
     flags: {
       HEADLESS_MORIO: false,
-      DISABLE_ROOT_TOKEN: false
+      DISABLE_ROOT_TOKEN: false,
     },
     secrets: {
       TEST_SECRET_1: 'banana',
@@ -119,7 +110,7 @@ const setup = {
         server: {
           url: 'ldap://ldap:10389',
           bindDN: 'uid=admin,ou=system',
-          bindCredentials: "{{{ LDAP_BIND_SECRET }}}",
+          bindCredentials: '{{{ LDAP_BIND_SECRET }}}',
           searchBase: 'ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
           searchFilter: '(&(objectclass=person)(uid={{username}}))',
         },
@@ -127,14 +118,14 @@ const setup = {
         rbac: {
           manager: {
             attribute: 'employeetype',
-            regex: '^manager$'
+            regex: '^manager$',
           },
           operator: {
             attribute: 'employeetype',
-            regex: '^admin$'
+            regex: '^admin$',
           },
-        }
-      }
+        },
+      },
     },
   },
 }
@@ -205,7 +196,6 @@ const validateErrorResponse = (result, errors, template) => {
     assert.equal(typeof result[1].instance, 'string')
   }
 }
-
 
 export {
   api,

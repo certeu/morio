@@ -54,14 +54,14 @@ export const schema = {
   }),
   'req.auth.login': Joi.object({
     provider: provider.required(),
-    data: Joi.object().required()
+    data: Joi.object().required(),
   }),
   'req.auth.login.apikey': Joi.object({
     provider: provider.valid('apikey').required(),
     data: Joi.object({
       password: Joi.string().length(96),
       username: Joi.string().length(36).required(),
-    }).required()
+    }).required(),
   }),
   'req.auth.login.local': Joi.object({
     provider: provider.valid('local').required(),
@@ -70,7 +70,7 @@ export const schema = {
       username: username.required(),
       token: token.required(),
       role: role.required(),
-    }).required()
+    }).required(),
   }),
   'req.auth.login.ldap': Joi.object({
     provider: provider.valid('ldap').required(),
@@ -78,16 +78,15 @@ export const schema = {
       password: password.required(),
       username: username.required(),
       role: role.required(),
-    }).required()
+    }).required(),
   }),
   'req.auth.login.mrt': Joi.object({
     provider: provider.valid('mrt').required(),
     data: Joi.object({
       mrt: mrt.required(),
       role: role.optional(),
-    }).required()
+    }).required(),
   }),
-
 }
 
 /*

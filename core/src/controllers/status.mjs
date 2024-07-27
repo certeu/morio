@@ -28,7 +28,6 @@ Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getReloadData = async (req, res) => {
-
   const data = getStatus()
   if (!utils.isEphemeral()) {
     data.sanitized_settings = utils.getSanitizedSettings()
@@ -58,10 +57,10 @@ const getStatus = () => {
       reconfigure_count: utils.getReconfigureCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
-    }
+    },
   }
-  if (statusCodes[data.status.cluster.code]) data.status.cluster.msg = statusCodes[data.status.cluster.code]
+  if (statusCodes[data.status.cluster.code])
+    data.status.cluster.msg = statusCodes[data.status.cluster.code]
 
   return data
 }
-

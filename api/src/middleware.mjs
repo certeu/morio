@@ -35,8 +35,8 @@ const allowed = [
    * Add them all again but with a trailing slash this time
    * This will avoid head-scratching and support calls
    */
-  ...internalRoutes.map(url => `${url}/`),
-  ...ephemeralRoutes.map(url => `${url}/`),
+  ...internalRoutes.map((url) => `${url}/`),
+  ...ephemeralRoutes.map((url) => `${url}/`),
 ]
 
 /*
@@ -101,11 +101,11 @@ export const addRbacHeaders = (req, res, next) => {
    * Attach forwardAuth headers to req.morio
    */
   req.morio = {
-    roles: req.headers['x-morio-roles'] ? req.headers['x-morio-roles'].split(',').map(role => role.trim()) : [],
+    roles: req.headers['x-morio-roles']
+      ? req.headers['x-morio-roles'].split(',').map((role) => role.trim())
+      : [],
     user: currentUser(req),
     provider: currentProvider(req),
   }
   next()
 }
-
-

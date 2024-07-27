@@ -52,7 +52,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-      /*
+    /*
     poststart: async () => {
 
       // TODOE: Create deny-all ACL entry here for the console api:
@@ -130,9 +130,10 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    precreate: () => writeYamlFile(
-      `/etc/morio/console/config.yaml`,
-      utils.getMorioServiceConfig('console').console
-    ),
+    precreate: () =>
+      writeYamlFile(
+        `/etc/morio/console/config.yaml`,
+        utils.getMorioServiceConfig('console').console
+      ),
   },
 }

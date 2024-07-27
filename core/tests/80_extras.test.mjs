@@ -123,5 +123,4 @@ describe('Core Extra Tests', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
   })
-
 })

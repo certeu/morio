@@ -1,4 +1,4 @@
-import { store, api, services } from './utils.mjs'
+import { api } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -25,7 +25,6 @@ describe('API Docker GET Info Tests', () => {
    */
   it(`Should GET /docker/containers`, async () => {
     const result = await api.get(`/docker/containers`)
-    const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -91,9 +90,12 @@ describe('API Docker GET Info Tests', () => {
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
     assert.equal(Array.isArray(d), true)
-    const morionet = d.filter(net => net.Name === 'morionet').pop()
+    const morionet = d.filter((net) => net.Name === 'morionet').pop()
     assert.equal(morionet.Driver, 'bridge')
-    assert.equal(morionet.Labels['morio.network.description'], 'Bridge docker network for morio services')
+    assert.equal(
+      morionet.Labels['morio.network.description'],
+      'Bridge docker network for morio services'
+    )
   })
 
   /*
@@ -132,7 +134,7 @@ describe('API Docker Active Tests', async () => {
    * Just need to grab the proxy container info real quick
    */
   const container = (await api.get(`/docker/running-containers`))[1]
-    .filter(container => container.Names.includes("/proxy"))
+    .filter((container) => container.Names.includes('/proxy'))
     .pop()
   const cid = container.Id
   const iid = container.ImageID.split(':').pop()
@@ -224,9 +226,8 @@ describe('API Docker Container State Tests', async () => {
    * Just need to grab the proxy container ID real quick
    */
   const container = (await api.get(`/docker/running-containers`))[1]
-    .filter(container => container.Names.includes("/proxy"))
-    .pop()
-    .Id
+    .filter((container) => container.Names.includes('/proxy'))
+    .pop().Id
   /*
    * Note: We're not stopping/killing containers here
    * as we're just passing through the output from the Docker API.

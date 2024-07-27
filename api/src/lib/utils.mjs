@@ -55,7 +55,7 @@ export const utils = new Store(log)
  *
  * @return {number} count - The number of broker nodes
  */
- utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
+utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
 
 /**
  * Helper method to get the cluster Fqdn
@@ -154,7 +154,7 @@ utils.getPreset = (key, dflt, opts) => {
  *
  * @return {array} ids - The list of provider IDs
  */
-utils.getProviderIds = (path, dflt) => Object.keys(utils.getSettings('iam.providers', {}))
+utils.getProviderIds = () => Object.keys(utils.getSettings('iam.providers', {}))
 
 /**
  * Helper method to get the reload_count
@@ -420,14 +420,13 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
    * Add the instance
    */
   data.instance =
-    `http://api:${utils.getPreset('MORIO_API_PORT')}` +
-    (data.route
-      ? data.route
-      : url
-        ? url
-        : '')
+    `http://api:${utils.getPreset('MORIO_API_PORT')}` + (data.route ? data.route : url ? url : '')
 
-  return res.type('application/problem+json').status(data.status).send({...data, ...extraData }).end()
+  return res
+    .type('application/problem+json')
+    .status(data.status)
+    .send({ ...data, ...extraData })
+    .end()
 }
 
 /**

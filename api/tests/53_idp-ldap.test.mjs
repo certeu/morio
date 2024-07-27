@@ -176,7 +176,6 @@ describe('API IDP/LDAP Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
   })
 
-
   /*
    * POST /login (non-existing role)
    * Example response:

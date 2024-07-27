@@ -162,10 +162,10 @@ export const ensureServiceCertificate = async (service) => {
   const files = await readDirectory(`/etc/morio/${service}`)
   let missing = 0
   let jsonMissing = false
-  for (const file of ["tls-ca.pem", "tls-cert.pem", "tls-key.pem", "certs.json"]) {
+  for (const file of ['tls-ca.pem', 'tls-cert.pem', 'tls-key.pem', 'certs.json']) {
     if (!Object.values(files).includes(file)) {
       missing++
-      if (file === "certs.json") jsonMissing = true
+      if (file === 'certs.json') jsonMissing = true
     }
   }
 
@@ -189,18 +189,19 @@ export const ensureServiceCertificate = async (service) => {
   const certAndKey = await attempt({
     every: 5,
     timeout: 60,
-    run: async () => await createX509Certificate({
-      certificate: {
-        cn: `${service}.infra.${utils.getClusterUuid()}.morio`,
-        c: utils.getPreset('MORIO_X509_C'),
-        st: utils.getPreset('MORIO_X509_ST'),
-        l: utils.getPreset('MORIO_X509_L'),
-        o: utils.getPreset('MORIO_X509_O'),
-        ou: utils.getPreset('MORIO_X509_OU'),
-        san: utils.getBrokerFqdns(),
-      },
-      notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-    }),
+    run: async () =>
+      await createX509Certificate({
+        certificate: {
+          cn: `${service}.infra.${utils.getClusterUuid()}.morio`,
+          c: utils.getPreset('MORIO_X509_C'),
+          st: utils.getPreset('MORIO_X509_ST'),
+          l: utils.getPreset('MORIO_X509_L'),
+          o: utils.getPreset('MORIO_X509_O'),
+          ou: utils.getPreset('MORIO_X509_OU'),
+          san: utils.getBrokerFqdns(),
+        },
+        notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+      }),
     onFailedAttempt: (s) =>
       log.debug(`${service}: Waited ${s} seconds for CA, will continue waiting.`),
   })
@@ -231,9 +232,10 @@ export const ensureServiceCertificate = async (service) => {
    */
   await writeJsonFile('/etc/morio/db/certs.json', {
     created: new Date(),
-    expires: new Date(Date.now() + certificateLifetimeInMs(utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'))),
+    expires: new Date(
+      Date.now() + certificateLifetimeInMs(utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'))
+    ),
   })
 
   return true
 }
-

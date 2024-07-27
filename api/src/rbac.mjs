@@ -1,5 +1,5 @@
 import { roles as allRoles } from '#config/roles'
-import { log, utils } from './lib/utils.mjs'
+import { utils } from './lib/utils.mjs'
 
 /*
  * Re-export this here as it's more intuitive to import roles from rbac.mjs
@@ -18,13 +18,9 @@ export const currentUser = (req) => {
   /*
    * Is the user and provider something that makes sense?
    */
-  return (
-    !provider ||
-    !user ||
-    typeof user !== 'string'
-    || user.length < 3
-    || user.length > 255
-  ) ? false : `${provider}.${user}`
+  return !provider || !user || typeof user !== 'string' || user.length < 3 || user.length > 255
+    ? false
+    : `${provider}.${user}`
 }
 
 /**
@@ -40,9 +36,7 @@ export const currentProvider = (req) => {
   /*
    * Only allow providers that are currently configured
    */
-  return (providers.includes(provider))
-    ? provider
-    : false
+  return providers.includes(provider) ? provider : false
 }
 
 /**
@@ -56,9 +50,7 @@ export const currentRole = (req) => {
   /*
    * Only allow roles that exist
    */
-  return (roles.includes(role))
-    ? role
-    : false
+  return roles.includes(role) ? role : false
 }
 
 /**
@@ -70,12 +62,9 @@ export const currentRole = (req) => {
 export const currentUsername = (req) => {
   const username = req.headers['x-morio-user']
 
-  return (
-    !username ||
-    typeof username !== 'string'
-    || username.length < 3
-    || username.length > 255
-  ) ? false : username
+  return !username || typeof username !== 'string' || username.length < 3 || username.length > 255
+    ? false
+    : username
 }
 
 /*
@@ -84,7 +73,7 @@ export const currentUsername = (req) => {
 export const availableRoles = (role) => {
   const i = roles.indexOf(role)
   if (i < 0) return []
-  return roles.slice(0,i+1)
+  return roles.slice(0, i + 1)
 }
 
 /*

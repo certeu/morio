@@ -5,10 +5,7 @@ import { attempt } from '#shared/utils'
 import { testUrl } from '#shared/network'
 import { resolveServiceConfiguration } from '#config'
 // Default hooks
-import {
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -22,11 +19,11 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(
-        `https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`,
-        { returnAs: 'json', ignoreCertificate: true }
-      )
-      const status = result?.status === "ok" ? 0 : 1
+      const result = await testUrl(`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`, {
+        returnAs: 'json',
+        ignoreCertificate: true,
+      })
+      const status = result?.status === 'ok' ? 0 : 1
       utils.setServiceStatus('ca', status)
 
       return status === 0 ? true : false
@@ -43,7 +40,7 @@ export const service = {
      * not be a problem to generate new ones.
      * Until we hear back from smallstep, thi will have to do.
      */
-    wanted: () => utils.isBrokerNode() ? true : false,
+    wanted: () => (utils.isBrokerNode() ? true : false),
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
@@ -101,8 +98,7 @@ export const service = {
         every: 5,
         timeout: 60,
         run: async () => await isCaUp(),
-        onFailedAttempt: (s) =>
-          log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
+        onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
       })
       if (up) log.debug(`CA is up.`)
       else log.warn(`CA did not come up before timeout. Moving on anyway.`)
@@ -314,5 +310,3 @@ export const ensureCaConfig = async () => {
   await cp(`/morio/data/ca/certs/root_ca.crt`, `/etc/morio/shared/root_ca.crt`)
   await cp(`/morio/data/ca/certs/intermediate_ca.crt`, `/etc/morio/shared/intermediate_ca.crt`)
 }
-
-

@@ -9,7 +9,6 @@ const Auth = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-
   /*
    * Internal authentication route for traefik forwardauth
    */

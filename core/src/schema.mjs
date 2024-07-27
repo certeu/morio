@@ -8,7 +8,7 @@ import {
   keys,
   version,
   nodeSerial,
-  settings
+  settings,
 } from '#shared/schema'
 
 /*

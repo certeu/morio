@@ -1,14 +1,8 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, accounts, attempt, isCoreReady, isApiReady, api, validateErrorResponse } from './utils.mjs'
+import { store, accounts, attempt, isCoreReady, isApiReady, api } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { errors } from '../src/errors.mjs'
-/*
- * Load the MRT straight from disk, so that these tests can
- * run without having to go through the setup each time.
- * Note that this is only possible when running the dev container.
- */
-import keys from '../../data/config/keys.json' assert { type: 'json' }
+import { keys } from './json-loader.mjs'
 
 const { mrt } = keys
 
@@ -52,7 +46,6 @@ describe('Wait for API to reconfigure itself', async () => {
 })
 
 describe('Create Test Account', () => {
-
   /*
    * POST /login
    * Example response:
@@ -105,7 +98,7 @@ describe('Create Test Account', () => {
     assert.equal(d.role, accounts.user.role)
     assert.equal(typeof d.invite, 'string')
     assert.equal(typeof d.inviteUrl, 'string')
-    assert.equal(d.inviteUrl.slice(0,8), 'https://')
+    assert.equal(d.inviteUrl.slice(0, 8), 'https://')
     store.set('accounts.user', d)
   })
 

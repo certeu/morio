@@ -29,18 +29,19 @@ Controller.prototype.heartbeat = async (req, res) => {
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
   if (!valid) {
     log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/sync')
-  }
-  else {
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  } else {
     if (valid.broadcast && !utils.isLeading()) {
       /*
        * Increase the heartbeat rate and log
        */
       utils.setHeartbeatInterval(1)
-      log.info(`Received a broadcast heartbeat from node ${valid.node_serial
-      }, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`)
-    }
-    else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
+      log.info(
+        `Received a broadcast heartbeat from node ${valid.node_serial}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`
+      )
+    } else log.debug(`Incoming heartbeat from node ${valid.node_serial}`)
   }
 
   /*
@@ -57,9 +58,8 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   if (utils.isLeading()) {
     for (const fqdn of Object.keys(valid.status.nodes)
-      .filter(fqdn => fqdn !== utils.getNodeFqdn())
-      .filter(fqdn => utils.getNodeFqdns().includes(fqdn))
-    ) {
+      .filter((fqdn) => fqdn !== utils.getNodeFqdn())
+      .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
       utils.setPeerStatus(fqdn, valid.status.nodes[fqdn])
     }
   }
@@ -74,7 +74,7 @@ Controller.prototype.heartbeat = async (req, res) => {
    * as we'll be leaderless and need a few hearbeats for things to
    * clink into place.
    */
-  if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') *2) {
+  if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
     if (action === 'SYNC') {
       log.todo('Handle heartbeat SYNC action')
     } else if (action === 'INVITE') {
@@ -114,14 +114,12 @@ Controller.prototype.join = async (req, res) => {
    */
   if (!utils.isEphemeral())
     return req.body.you === utils.getNodeFqdn() && req.body.cluster === utils.getClusterUuid()
-      ? res
-          .status(200)
-          .send({
-            cluster: utils.getClusterUuid(),
-            node: utils.getNodeUuid(),
-            serial: utils.getSettingsSerial(),
-          })
-      : utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/cluster/join')
+      ? res.status(200).send({
+          cluster: utils.getClusterUuid(),
+          node: utils.getNodeUuid(),
+          serial: utils.getSettingsSerial(),
+        })
+      : utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
 
   /*
    * Validate request against schema
@@ -132,7 +130,9 @@ Controller.prototype.join = async (req, res) => {
       err,
       `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`
     )
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/cluster/join')
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.err, {
+      schema_violation: err.message,
+    })
   } else
     log.info(
       `Accepted request to join cluster ${valid.cluster.slice(
@@ -150,10 +150,10 @@ Controller.prototype.join = async (req, res) => {
   const serial = Number(valid.settings.serial)
   log.debug(`Joining cluster, writing new settings to settings.${serial}.yaml`)
   let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
-  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
-  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', '/cluster/join')
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing node data to node.json`)
   const nodeUuid = uuid()
   result = await writeJsonFile(`/etc/morio/node.json`, {

@@ -41,13 +41,14 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * Validate request against schema, but strip headers from body first
    */
-  const body = {...req.body}
+  const body = { ...req.body }
   delete body.headers
   const [valid, err] = await utils.validate(`req.settings.deploy`, body)
   if (!valid?.cluster) {
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/deploy')
-  }
-  else log.info(`Processing request to deploy new settings`)
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  } else log.info(`Processing request to deploy new settings`)
 
   /*
    * Generate time-stamp for use in file names
@@ -58,8 +59,7 @@ Controller.prototype.deploy = async (req, res) => {
   /*
    * Handle secrets
    */
-  if (valid.tokens?.secrets)
-    valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
+  if (valid.tokens?.secrets) valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
 
   /*
    * Write the protected valid settings to disk
@@ -89,16 +89,18 @@ Controller.prototype.setup = async (req, res) => {
    * Only allow this endpoint when running in ephemeral mode
    */
   if (!utils.isEphemeral())
-    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', '/setup')
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
 
   /*
    * Validate request against schema, but strip headers from body first
    */
-  const body = {...req.body}
+  const body = { ...req.body }
   delete body.headers
   const [valid, err] = await utils.validate(`req.settings.setup`, body)
   if (!valid?.cluster) {
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', '/setup')
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
   }
 
   /*
@@ -107,9 +109,8 @@ Controller.prototype.setup = async (req, res) => {
   const node = await localNodeInfo(req.body)
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
-    return utils.sendErrorResponse(res, 'morio.core.settings.fqdn.mismatch', '/setup')
-  }
-  else log.debug(`Processing request to setup Morio with provided settings`)
+    return utils.sendErrorResponse(res, 'morio.core.settings.fqdn.mismatch', req.url)
+  } else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
    * Drop us in reconfigure mode

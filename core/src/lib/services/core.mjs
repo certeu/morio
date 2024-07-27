@@ -1,9 +1,5 @@
 // Required for config file management
-import {
-  readYamlFile,
-  readJsonFile,
-  readDirectory,
-} from '#shared/fs'
+import { readYamlFile, readJsonFile, readDirectory } from '#shared/fs'
 // Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
 // Required to generated X.509 certificates
@@ -63,7 +59,6 @@ export const service = {
      * @params {object} hookParams.coldStart - True if this is a cold start
      */
     beforeall: async (hookParams) => {
-
       /*
        * Load existing settings, keys, node info and timestamp from disk
        */

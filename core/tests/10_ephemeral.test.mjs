@@ -1,7 +1,7 @@
-import { store, core, getPreset } from './utils.mjs'
+import { store, core } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import pkg from '../package.json' with { type: 'json' }
+import { pkg } from './json-loader.mjs'
 
 describe('Ephemeral Core: Status Routes', () => {
   /*
@@ -41,7 +41,7 @@ describe('Ephemeral Core: Status Routes', () => {
     // status.cluster
     assert.equal(typeof d.status.cluster, 'object')
     assert.equal(d.status.cluster.code, 2)
-    assert.equal(d.status.cluster.color, "amber")
+    assert.equal(d.status.cluster.color, 'amber')
     assert.equal(typeof d.status.cluster.time, 'number')
     // nodes
     assert.equal(typeof d.nodes, 'object')

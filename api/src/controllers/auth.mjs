@@ -1,8 +1,8 @@
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
-import { currentProvider, availableRoles } from '../rbac.mjs'
+import { availableRoles } from '../rbac.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -72,7 +72,8 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * Don't bother in ephemeral mode
    */
-  if (utils.isEphemeral()) return utils.sendErrorResponse(res, 'morio.api.ephemeral.prohibited', uri)
+  if (utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.prohibited', uri)
 
   /*
    * Keep track of the token payload
@@ -102,20 +103,23 @@ Controller.prototype.authenticate = async (req, res) => {
    * If we have the payload, set roles in response header
    * These will be injected by Traefik in the original request
    */
-  if (payload) return res
-    .set('X-Morio-Role', payload.role)
-    .set('X-Morio-User', payload.user)
-    .set('X-Morio-Provider', payload.provider)
-    .status(200)
-    .end()
+  if (payload)
+    return res
+      .set('X-Morio-Role', payload.role)
+      .set('X-Morio-User', payload.user)
+      .set('X-Morio-Provider', payload.provider)
+      .status(200)
+      .end()
 
   /*
    * Is this just a bare request with no token, no headers, no nothing?
    * If so, send a 401. If not, send a 403
    */
-  return utils.sendErrorResponse(res, (!token && !header)
-    ? 'morio.api.authentication.required'
-    : 'morio.api.rbac.denied', uri)
+  return utils.sendErrorResponse(
+    res,
+    !token && !header ? 'morio.api.authentication.required' : 'morio.api.rbac.denied',
+    uri
+  )
 }
 
 /**
@@ -130,8 +134,11 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Validate high-level input
    */
-  const [valid1, err1] = (await utils.validate(`req.auth.login`, req.body))
-  if (!valid1) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err1.message })
+  const [valid1, err1] = await utils.validate(`req.auth.login`, req.body)
+  if (!valid1)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err1.message,
+    })
 
   /*
    * Get the provider ID
@@ -140,8 +147,11 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Validate identity provider input
    */
-  const [valid2, err2] = (await utils.validate(`req.auth.login.${providerId}`, req.body))
-  if (!valid2) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err2. message })
+  const [valid2, err2] = await utils.validate(`req.auth.login.${providerId}`, req.body)
+  if (!valid2)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err2.message,
+    })
   /*
    * The mrt, local, and apikey provider types cannot be instantiated
    * more than once. If anything, doing so would open up a bag of bugs.
@@ -164,12 +174,23 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Looks good, hand over to provider
    */
-  const [success, data, extraData={}] = await idps[providerType](providerId, req.body.data, req, res)
+  const [success, data, extraData = {}] = await idps[providerType](
+    providerId,
+    req.body.data,
+    req,
+    res
+  )
 
   /*
    * If authentication failed, return here
    */
-  if (!success) return utils.sendErrorResponse(res, typeof data === 'string' ? data : 'morio.api.authentication.required', req.url, extraData)
+  if (!success)
+    return utils.sendErrorResponse(
+      res,
+      typeof data === 'string' ? data : 'morio.api.authentication.required',
+      req.url,
+      extraData
+    )
 
   /*
    * Looks good, generate JSON Web Token

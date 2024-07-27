@@ -1,11 +1,8 @@
-import Joi from 'joi'
-import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
 import { uuid, randomString, hashPassword } from '#shared/crypto'
-import { validateSchema } from '../lib/validation.mjs'
 import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This account controller handles apikeys in Morio
@@ -37,8 +34,11 @@ Controller.prototype.create = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.apikey.create`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  const [valid, err] = await utils.validate(`req.apikey.create`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Only nominative accounts can create API keys
@@ -69,9 +69,11 @@ Controller.prototype.create = async (req, res) => {
     key,
   }
 
-  const result = await saveApikey(key, {...data, secret: hashPassword(secret) })
+  const [dbStatus] = await saveApikey(key, { ...data, secret: hashPassword(secret) })
 
-  return res.send({ ...data, secret })
+  return dbStatus === 200
+    ? res.send({ ...data, secret })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -123,8 +125,11 @@ Controller.prototype.update = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.apikey.update`, req.params))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  const [valid, err] = await utils.validate(`req.apikey.update`, req.params)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Fet the key with a filter method
@@ -189,8 +194,11 @@ Controller.prototype.delete = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.apikey.delete`, req.params))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+  const [valid, err] = await utils.validate(`req.apikey.delete`, req.params)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Load the key with a filter method
@@ -212,4 +220,3 @@ Controller.prototype.delete = async (req, res) => {
 
   res.status(gone ? 204 : 500).send()
 }
-

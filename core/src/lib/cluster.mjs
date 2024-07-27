@@ -10,7 +10,7 @@ import { log, utils } from './utils.mjs'
 /*
  * Helper method to update the cluster state
  */
-export const updateClusterState = async (force=false) => {
+export const updateClusterState = async (force = false) => {
   /*
    * Don't bother in ephemeral mode
    */
@@ -32,7 +32,7 @@ export const updateClusterState = async (force=false) => {
 /**
  * Helper method to update the cluster state
  */
-export const forceUpdateClusterState = async (silent) => {
+export const forceUpdateClusterState = async () => {
   await updateNodeState()
   utils.resetClusterStatusAge()
 }
@@ -80,7 +80,6 @@ const statusColorFromCode = (code) => {
   // TODO: handle more amber states
   return 'red'
 }
-
 
 /**
  * Helper method to join a node to the cluster
@@ -195,7 +194,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
  * will start to decay.
  *
  */
-export const runLocalHeartbeat = async (init=false) => {
+export const runLocalHeartbeat = async (init = false) => {
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -209,9 +208,7 @@ export const runLocalHeartbeat = async (init=false) => {
   /*
    * Store timeout ID so we can cancel it later
    */
-  utils.setHeartbeatLocal(
-    setTimeout(async () => triggerLocalHeartbeat(), heartbeatDelay())
-  )
+  utils.setHeartbeatLocal(setTimeout(async () => triggerLocalHeartbeat(), heartbeatDelay()))
 }
 
 const triggerLocalHeartbeat = async () => {
@@ -219,7 +216,7 @@ const triggerLocalHeartbeat = async () => {
   runLocalHeartbeat(false)
 }
 
-const sendHeartbeat = async (fqdn, broadcast=false, justOnce=false) => {
+const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
   /*
    * Send heartbeat request and verify the result
    */
@@ -284,11 +281,11 @@ const heartbeatDelay = () => {
   const now = Number(utils.getHeartbeatInterval())
   const next = Math.ceil(now * 1.5)
   const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
-  if (next > max) return max*1000
+  if (next > max) return max * 1000
   else {
     log.debug(`Slowing heartbeat rate from ${now}s to ${next}s interval`)
     utils.setHeartbeatInterval(next)
-    return next*1000
+    return next * 1000
   }
 }
 
@@ -314,7 +311,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
     /*
      * Also log something an error-specific message, but not when we're still finding our feet
      */
-    if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') *2) {
+    if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
       if (error.code === 'ECONNREFUSED') {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
@@ -362,9 +359,8 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
    * Update status of cluster nodes
    */
   for (const fqdn of Object.keys(data.status.nodes)
-    .filter(fqdn => fqdn !== utils.getNodeFqdn())
-    .filter(fqdn => utils.getNodeFqdns().includes(fqdn))
-  ) {
+    .filter((fqdn) => fqdn !== utils.getNodeFqdn())
+    .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
     utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
   }
   utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)

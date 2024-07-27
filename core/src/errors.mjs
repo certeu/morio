@@ -13,7 +13,8 @@ export const errors = {
   'morio.core.ephemeral.required': {
     status: 409,
     title: 'Only available in ephemeral mode',
-    detail: 'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
+    detail:
+      'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
    * Error for when writing to the filesystem fails
@@ -29,7 +30,8 @@ export const errors = {
   'morio.core.schema.violation': {
     status: 400,
     title: 'This request violates the data schema',
-    detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+    detail:
+      'The request data failed validation against the Morio data schema. This means the request is invalid.',
   },
   /*
    * Error for invalid settings
@@ -37,7 +39,8 @@ export const errors = {
   'morio.core.settings.invalid': {
     status: 400,
     title: 'These settings are invalid',
-    detail: 'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
+    detail:
+      'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
   },
   /*
    * Error for when the settings are deployed on a host that's not listed as a node
@@ -45,6 +48,7 @@ export const errors = {
   'morio.core.settings.fqdn.mismatch': {
     status: 400,
     title: 'Settings FQDN mismatch',
-    detail: 'The provided settings do not include the FQDN used to submit this request. This mismatch indicates the settings are unlikely to be correct.',
+    detail:
+      'The provided settings do not include the FQDN used to submit this request. This mismatch indicates the settings are unlikely to be correct.',
   },
 }

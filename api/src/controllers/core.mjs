@@ -1,4 +1,4 @@
-import { validateSettings } from '#lib/validation'
+import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
 
@@ -121,11 +121,13 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Validate request against schema, but strip headers from body first
    */
-  const body = {...req.body}
+  const body = { ...req.body }
   delete body.headers
   const [valid, err] = await utils.validate(`req.setup`, body)
   if (!valid) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
   }
 
   /*
@@ -136,8 +138,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Make sure setting are valid
    */
-  if (!report.valid)
-    return utils.sendErrorResponse(res, 'morio.api.settings.invalid', req.url)
+  if (!report.valid) return utils.sendErrorResponse(res, 'morio.api.settings.invalid', req.url)
 
   /*
    * Make sure settings are deployable
@@ -285,7 +286,10 @@ Controller.prototype.encrypt = async (req, res) => {
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async (req, res, type) => {
-  const [status, result] = await utils.coreClient.post(`/pkgs/clients/${type}/build`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(
+    `/pkgs/clients/${type}/build`,
+    bodyPlusHeaders(req)
+  )
 
   return res.status(status).send(result)
 }
@@ -329,5 +333,3 @@ Controller.prototype.reconfigure = async (req, res) => {
 }
 
 const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })
-
-

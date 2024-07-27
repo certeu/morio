@@ -1,8 +1,7 @@
 import { globDir } from '#shared/fs'
-import { validate, validateSettings, validateNode } from '#lib/validation'
+import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
-import { utils, log } from '../lib/utils.mjs'
-import { schemaViolation } from '#lib/response'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -23,7 +22,7 @@ export function Controller() {}
 Controller.prototype.getCaCerts = async (req, res) => {
   const keys = utils.getKeys()
 
-  return (keys.rfpr && keys.rcrt && keys.icrt)
+  return keys.rfpr && keys.rcrt && keys.icrt
     ? res.send({
         root_fingerprint: keys.rfpr,
         root_certificate: keys.rcrt,
@@ -100,7 +99,8 @@ Controller.prototype.getStatus = async (req, res) => {
    */
   const [status, result] = await utils.coreClient.get(`/status`)
 
-  if (status !== 200) return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, req.url)
+  if (status !== 200)
+    return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, req.url)
 
   /*
    * Update relevant data
@@ -121,7 +121,7 @@ Controller.prototype.getStatus = async (req, res) => {
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
     },
-    core: utils.getCoreStatus()
+    core: utils.getCoreStatus(),
   })
 }
 
@@ -156,4 +156,3 @@ Controller.prototype.validateSettings = async (req, res) => {
 
   return res.send(report).end()
 }
-

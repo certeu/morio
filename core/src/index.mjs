@@ -66,7 +66,6 @@ wrapExpress(
  * @param {object} hookParams = Optional data to pass to lifecycle hooks
  */
 export async function reconfigure(hookParams = {}) {
-
   /*
    * Drop us in config resolving mode
    */

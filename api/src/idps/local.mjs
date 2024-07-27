@@ -2,7 +2,7 @@ import { updateLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
 import { isRoleAvailable, availableRoles } from '../rbac.mjs'
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * local: Local Morio identity/authentication provider
@@ -25,28 +25,27 @@ export const local = async (id, data) => {
      * Look up the account
      */
     const account = await loadAccount('local', data.username)
-    if (!account)
-      return [false, 'morio.api.account.unknown']
+    if (!account) return [false, 'morio.api.account.unknown']
 
     /*
      * Verify the password
      */
     const passwordOk = verifyPassword(data.password, account.password)
-    if (!passwordOk)
-      return [false, 'morio.api.account.credentials.mismatch']
+    if (!passwordOk) return [false, 'morio.api.account.credentials.mismatch']
 
     /*
      * Is the role accessible to this user?
      */
     const available = isRoleAvailable(account.role, data.role)
-    if (!available) return [
-      false,
-      'morio.api.account.role.unavailable',
-      {
-        requested_role: data.role,
-        available_roles: availableRoles(data.role),
-      },
-    ]
+    if (!available)
+      return [
+        false,
+        'morio.api.account.role.unavailable',
+        {
+          requested_role: data.role,
+          available_roles: availableRoles(data.role),
+        },
+      ]
 
     /*
      * Verify MFA

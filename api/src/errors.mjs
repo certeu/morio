@@ -13,7 +13,8 @@ export const errors = {
   'morio.api.ephemeral.required': {
     status: 409,
     title: 'Only available in ephemeral mode',
-    detail: 'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
+    detail:
+      'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
    * Error for not in ephemeral mode' errors
@@ -21,7 +22,8 @@ export const errors = {
   'morio.api.ephemeral.prohibited': {
     status: 409,
     title: 'Not available in ephemeral mode',
-    detail: 'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
+    detail:
+      'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
   },
   /*
    * Error for not in ephemeral mode' errors
@@ -29,7 +31,8 @@ export const errors = {
   'morio.api.reloading.prohibited': {
     status: 409,
     title: 'Not available while reloading',
-    detail: 'This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.',
+    detail:
+      'This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.',
   },
   /*
    * Status issues coming from core
@@ -37,7 +40,7 @@ export const errors = {
   'morio.api.core.status.503': {
     status: 503,
     title: 'Unable to load status data from Morio Core',
-    detail: 'When reaching out to Morio Core, we received a status code 503.'
+    detail: 'When reaching out to Morio Core, we received a status code 503.',
   },
   /*
    * Failed to retrieve info data
@@ -53,7 +56,8 @@ export const errors = {
   'morio.api.apikeys.list.failed': {
     status: 503,
     title: 'Unable to load the list of API keys from the database',
-    detail: 'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request'
+    detail:
+      'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request',
   },
   /*
    * Specific error for schema violations
@@ -61,7 +65,8 @@ export const errors = {
   'morio.api.schema.violation': {
     status: 400,
     title: 'This request violates the data schema',
-    detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+    detail:
+      'The request data failed validation against the Morio data schema. This means the request is invalid.',
   },
   /*
    * Error for invalid settings
@@ -69,7 +74,8 @@ export const errors = {
   'morio.api.settings.invalid': {
     status: 400,
     title: 'These settings are invalid',
-    detail: 'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
+    detail:
+      'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
   },
   /*
    * Error for undeployable settings
@@ -153,6 +159,14 @@ export const errors = {
     detail: 'The request was not properly authenticated.',
   },
   /*
+   * Error for when a database backend is not available or caused an error
+   */
+  'morio.api.db.failure': {
+    status: 403,
+    title: 'Database Failure',
+    detail: 'Cannot authenticate because the database returned an error.',
+  },
+  /*
    * Error for when an identity provider is not available or caused an error
    */
   'morio.api.idp.failure': {
@@ -161,4 +175,3 @@ export const errors = {
     detail: 'Cannot authenticate because the identity provider returned an error.',
   },
 }
-

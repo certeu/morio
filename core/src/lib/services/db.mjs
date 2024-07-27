@@ -21,12 +21,11 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(
-        `http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
-        { returnAs: 'json' }
-      )
+      const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
+        returnAs: 'json',
+      })
 
-      const status = (result && result.indexOf('node ok')) ? 0 : 1
+      const status = result && result.indexOf('node ok') ? 0 : 1
       utils.setServiceStatus('db', status)
 
       return status === 0 ? true : false
@@ -111,7 +110,7 @@ const isDbUp = async () => {
     returnAs: 'text',
   })
 
-  return (result && result.includes('node ok')) ? true : false
+  return result && result.includes('node ok') ? true : false
 }
 
 /**

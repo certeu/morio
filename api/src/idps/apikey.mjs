@@ -1,6 +1,5 @@
 import { updateLastLoginTime, loadApikey } from '../lib/apikey.mjs'
 import { verifyPassword } from '#shared/crypto'
-import { isRoleAvailable } from '../rbac.mjs'
 
 /**
  * apikey: API key identity/authentication provider
