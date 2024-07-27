@@ -1,38 +1,55 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, api, hapi, validateErrorResponse } from './utils.mjs'
+import { store, accounts, attempt, isCoreReady, isApiReady, api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
-import authData from '../../data/config/keys.json' with { type: 'json' }
+/*
+ * Load the MRT straight from disk, so that these tests can
+ * run without having to go through the setup each time.
+ * Note that this is only possible when running the dev container.
+ */
+import keys from '../../data/config/keys.json' assert { type: 'json' }
+
+const { mrt } = keys
 
 const timeout = 80000
 
-const accounts = {
-  mrt: {
-    username: `testAccount${Date.now()}`,
-    about: 'This account was created as part of a test',
-    provider: 'local',
-    role: 'user',
-  },
-  user1: {
-    username: `testAccount${Date.now()}`,
-    about: 'This account was created as part of a test',
-    provider: 'local',
-    role: 'user',
-  },
-}
-const headers = {
-  mrt: {
-    'X-Morio-Role': 'engineer',
-    'X-Morio-User': 'root',
-    'X-Morio-Provider': 'mrt',
-  },
-  user1: {
-    'X-Morio-Role': 'engineer',
-    'X-Morio-User': 'test_user',
-    'X-Morio-Provider': 'local',
-  }
-}
+describe('Wait for core to reconfigure itself', async () => {
+  /*
+   * When running tests, the previous tests just setup core
+   * so we are probably still resolving the configuration.
+   * That's why we wait here and give feedback so it's clear what is going on.
+   */
+  const coreReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isCoreReady(),
+    onFailedAttempt: () => describe('Core is not ready yet, will continue waiting', () => true),
+  })
+  if (coreReady) describe('Core is ready', () => true)
+  else
+    describe('Core did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is core ready?')
+      })
+    })
+})
+
+describe('Wait for API to reconfigure itself', async () => {
+  const apiReady = await attempt({
+    every: 1,
+    timeout: 90,
+    run: async () => await isApiReady(),
+    onFailedAttempt: () => describe('API is not ready yet, will continue waiting', () => true),
+  })
+  if (apiReady) describe('API is ready', () => true)
+  else
+    describe('API did not become ready before timeout, failing test', () => {
+      it('Should have been ready by now', async () => {
+        assert(false, 'Is API ready?')
+      })
+    })
+})
 
 describe('Create Test Account', () => {
 
@@ -48,7 +65,7 @@ describe('Create Test Account', () => {
     const data = {
       provider: 'mrt',
       data: {
-        mrt: authData.mrt,
+        mrt: mrt,
         role: 'engineer',
       },
     }
@@ -56,7 +73,7 @@ describe('Create Test Account', () => {
     /*
      * TODO: This test is sometimes flaky, this is here to debug
      */
-    //if (result[0] !== 200) console.log(result)
+    if (result[0] !== 200) console.log(result)
     assert.equal(result[0], 200)
     const d = result[1]
     assert.equal(Object.keys(d).length, 2)
@@ -79,17 +96,17 @@ describe('Create Test Account', () => {
    * }
    */
   it(`Should POST /account`, { timeout }, async () => {
-    const result = await hapi.post(`/account`, accounts.user1, headers.mrt)
+    const result = await api.post(`/account`, accounts.user)
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.username, accounts.user1.username)
-    assert.equal(d.about, accounts.user1.about)
-    assert.equal(d.provider, accounts.user1.provider)
-    assert.equal(d.role, accounts.user1.role)
+    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.about, accounts.user.about)
+    assert.equal(d.provider, accounts.user.provider)
+    assert.equal(d.role, accounts.user.role)
     assert.equal(typeof d.invite, 'string')
     assert.equal(typeof d.inviteUrl, 'string')
     assert.equal(d.inviteUrl.slice(0,8), 'https://')
-    store.set('accounts.user1', d)
+    store.set('accounts.user', d)
   })
 
   /*
@@ -103,11 +120,11 @@ describe('Create Test Account', () => {
    */
   it(`Should POST /activate-account`, async () => {
     const data = {
-      username: store.accounts.user1.username,
-      invite: store.accounts.user1.invite,
-      provider: store.accounts.user1.provider,
+      username: store.accounts.user.username,
+      invite: store.accounts.user.invite,
+      provider: store.accounts.user.provider,
     }
-    const result = await hapi.post(`/activate-account`, data, headers.mrt)
+    const result = await api.post(`/activate-account`, data)
     assert.equal(result[0], 200)
     const d = result[1]
     assert.equal(typeof d, 'object')
@@ -117,7 +134,7 @@ describe('Create Test Account', () => {
     assert.equal(typeof d.qrcode, 'string')
     assert.equal(d.otpauth.includes('otpauth://totp/'), true)
     assert.equal(d.qrcode.includes('<svg class="qrcode"'), true)
-    store.set('accounts.user1.secret', d.secret)
+    store.set('accounts.user.secret', d.secret)
   })
 
   /*
@@ -133,13 +150,13 @@ describe('Create Test Account', () => {
    */
   it(`Should POST /activate-mfa`, async () => {
     const data = {
-      username: store.accounts.user1.username,
-      invite: store.accounts.user1.invite,
-      provider: store.accounts.user1.provider,
-      token: authenticator.generate(store.accounts.user1.secret),
+      username: store.accounts.user.username,
+      invite: store.accounts.user.invite,
+      provider: store.accounts.user.provider,
+      token: authenticator.generate(store.accounts.user.secret),
       password: 'password',
     }
-    const result = await hapi.post(`/activate-mfa`, data, headers.mrt)
+    const result = await api.post(`/activate-mfa`, data)
     assert.equal(result[0], 200)
     const d = result[1]
     assert.equal(typeof d, 'object')
@@ -147,6 +164,6 @@ describe('Create Test Account', () => {
     assert.equal(Array.isArray(d.scratch_codes), true)
     assert.equal(d.scratch_codes.length, 3)
     for (const code of d.scratch_codes) assert.equal(typeof code, 'string')
-    store.set('accounts.user1.scratchCodes', d.scratch_codes)
+    store.set('accounts.user.scratch_codes', d.scratch_codes)
   })
 })

@@ -18,7 +18,7 @@ export function routes(app) {
   /*
    * Public authentication / login route
    */
-  app.post(`/login`, rbac.user, Auth.login)
+  app.post(`/login`, Auth.login)
 
   /*
    * Refresh token route

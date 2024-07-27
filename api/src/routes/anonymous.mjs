@@ -12,7 +12,7 @@ export function routes(app) {
   /*
    * Get the CA certifiates and fingerprint
    */
-  app.get(`/cacerts`, Anonymous.getCaCerts)
+  app.get(`/ca/certificates`, Anonymous.getCaCerts)
 
   /*
    * Get a list of the available idenity/authentication providers (idps)

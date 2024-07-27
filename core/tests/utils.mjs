@@ -7,6 +7,22 @@ import { strict as assert } from 'node:assert'
 import axios from 'axios'
 
 /*
+ * We'll re-use these in the API unit tests
+ */
+const accounts = {
+  user: {
+    username: `testAccount${Date.now()}`,
+    about: 'This account was created as part of a test',
+    provider: 'local',
+    role: 'user',
+  },
+}
+const headers = {
+  'x-morio-role': 'engineer',
+  'x-morio-user': 'test_user',
+  'x-morio-provider': 'local',
+}
+/*
  * Setup the store
  */
 const store = new Store().set('log', logger('trace'))
@@ -18,46 +34,37 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
  * Client for the management API
- * This file is used by API unit tests too, that is why this is here
+ * This is a bit more convoluted as we need to send headers with the tests
+ * so we use axios as a general purpose handler, and setup custom methods below
  */
-const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+const axiosHandler = async (route, data=null, customHeaders={}, method='get') => {
+  const params = []
+  if (['post', 'put', 'patch'].includes(method)) params.push(data)
+  params.push({ headers: { ...headers, ...customHeaders } })
+  let result
+  try {
+    result = await axios[method](`http://api:${getPreset('MORIO_API_PORT')}${route}`, ...params)
+    //console.log({result})
+  }
+  catch (err) {
+    //console.log({err})
+    if (err?.response?.status) return [err.response.status, err.response.data, err]
+    return false
+  }
 
+  return result
+    ? [result.status, result.data, result]
+    : false
+}
 /*
  * Management AIP client based on axios, which allows us to add headers
  */
-const hapi = {
-  get: async (route, headers) => {
-    let result
-    try {
-      result = await axios.get(`http://api:${getPreset('MORIO_API_PORT')}${route}`, { headers })
-      //console.log({result})
-    }
-    catch (err) {
-      //console.log({err})
-      if (err.response?.status) return [err.reponse.status, err.reponse.data, err]
-      return false
-    }
-
-    return result
-      ? [result.status, result.data, result]
-      : false
-  },
-  post: async (route, data, headers) => {
-    let result
-    try {
-      result = await axios.post(`http://api:${getPreset('MORIO_API_PORT')}${route}`, data, { headers })
-      //console.log({result})
-    }
-    catch (err) {
-      //console.log({err})
-      if (err?.response?.status) return [err.response.status, err.response.data, err]
-      return false
-    }
-
-    return result
-      ? [result.status, result.data, result]
-      : false
-  }
+const api = {
+  post: (route, data, headers)  => axiosHandler(route, data, headers, 'post'),
+  put: (route, data, headers)   => axiosHandler(route, data, headers, 'put'),
+  patch: (route, data, headers) => axiosHandler(route, data, headers, 'patch'),
+  get: (route, headers)         => axiosHandler(route, null, headers, 'get'),
+  delete: (route, headers)      => axiosHandler(route, null, headers, 'delete'),
 }
 
 /*
@@ -199,9 +206,10 @@ const validateErrorResponse = (result, errors, template) => {
   }
 }
 
+
 export {
   api,
-  hapi,
+  accounts,
   core,
   equalIgnoreSpaces,
   getPreset,

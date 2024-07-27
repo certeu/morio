@@ -400,7 +400,7 @@ utils.coreClient = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
  * @param {string|object} tempalte - Either a string for a know tempate, or a customg object holding the response data
  * @param {bool|string} route - The API route to construct the instance string, or false if there is none
  */
-utils.sendErrorResponse = (res, template, route = false) => {
+utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
   let data = {}
   /*
    * Allow passing in an error template name
@@ -423,11 +423,11 @@ utils.sendErrorResponse = (res, template, route = false) => {
     `http://api:${utils.getPreset('MORIO_API_PORT')}` +
     (data.route
       ? data.route
-      : route
-        ? route
+      : url
+        ? url
         : '')
 
-  return res.type('application/problem+json').status(data.status).send(data).end()
+  return res.type('application/problem+json').status(data.status).send({...data, ...extraData }).end()
 }
 
 /**

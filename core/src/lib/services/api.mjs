@@ -19,13 +19,10 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/info`, {
-        returnAs: 'json',
-      })
-      const status = result?.about ? 0 : 1
-      utils.setServiceStatus('api', status)
+      const up = await isApiUp()
+      utils.setServiceStatus('api', up ? 0 : 1)
 
-      return status === 0 ? true : false
+      return up
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
@@ -60,12 +57,16 @@ export const reconfigureApi = async () => {
   const up = await attempt({
     every: 5,
     timeout: 60,
-    run: async () => {
-      const isup = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/up`)
-      return isup
-    },
+    run: isApiUp,
     onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for API, will continue waiting.`),
   })
   if (up) log.debug(`API notified of reconfigure event.`)
   else log.warn(`API did not come up before timeout`)
 }
+
+const isApiUp = async () => {
+  const status = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/up`, { returnAs: 'status' })
+
+  return status === 200
+}
+

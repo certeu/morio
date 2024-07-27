@@ -28,12 +28,17 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.create = async (req, res) => {
+  /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 
   /*
    * Validate input
    */
   const [valid, err] = (await utils.validate(`req.apikey.create`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Only nominative accounts can create API keys
@@ -41,7 +46,7 @@ Controller.prototype.create = async (req, res) => {
    * an API key or the Morio Root Token, we say no
    */
   if (['mrt', 'apikey'].includes(currentProvider(req)))
-    return utils.sendErrorResponse(res, 'morio.api.nominative.account.required', '/apikey')
+    return utils.sendErrorResponse(res, 'morio.api.nominative.account.required', req.url)
 
   /*
    * Does the user have permission to assign the requested role?
@@ -56,20 +61,17 @@ Controller.prototype.create = async (req, res) => {
   const secret = randomString(48)
   const data = {
     name: valid.name,
-    secret: hashPassword(secret),
     status: 'active',
-    createdBy: currentUser(req),
+    created_by: currentUser(req),
     role: valid.role,
-    createdAt: asTime(),
-    expiresAt: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
+    created_at: asTime(),
+    expires_at: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
+    key,
   }
 
-  const result = await saveApikey(key, data)
+  const result = await saveApikey(key, {...data, secret: hashPassword(secret) })
 
-  return res.send({
-    result: 'success',
-    data: { ...data, secret, key },
-  })
+  return res.send({ ...data, secret })
 }
 
 /**
@@ -85,16 +87,19 @@ Controller.prototype.create = async (req, res) => {
  */
 Controller.prototype.list = async (req, res) => {
   /*
-   * Fetch all keys with a filter method
+   * Check user
    */
   const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
+   * Fetch all keys with a filter method
+   */
   const keys = await loadAccountApikeys(currentUser(req))
 
-  log.todo({ keys, user: currentUser(req) })
-
   return keys
-    ? res.send({ result: 'success', keys})
-    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, '/apikeys')
+    ? res.send(keys)
+    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, req.url)
 }
 
 /**
@@ -110,15 +115,16 @@ Controller.prototype.list = async (req, res) => {
  */
 Controller.prototype.update = async (req, res) => {
   /*
-   * Validate input
-   */
-  const [valid, err] = (await utils.validate(`req.apikey.update`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
-
-  /*
-   * Get the current user
+   * Check user
    */
   const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
+   * Validate input
+   */
+  const [valid, err] = (await utils.validate(`req.apikey.update`, req.params))
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Fet the key with a filter method
@@ -128,13 +134,13 @@ Controller.prototype.update = async (req, res) => {
   /*
    * Does the key exist
    */
-  if (!key) return res.status(404).send().end()
+  if (!key) return utils.sendErrorResponse(res, 'morio.api.404', req.url)
 
   /*
    * Is this is a key not created by the current user, you need
    * operator or higher as a role
    */
-  if (key.createdBy !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
+  if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
     return res.status(403).send({ error: 'Access Denied' })
   }
 
@@ -143,8 +149,8 @@ Controller.prototype.update = async (req, res) => {
    */
   const updated = {
     key: valid.key,
-    updatedBy: user,
-    updatedAt: asTime(),
+    updated_by: user,
+    updated_at: asTime(),
   }
 
   /*
@@ -170,7 +176,7 @@ Controller.prototype.update = async (req, res) => {
   if (updated.secret) data.secret = secret
   else delete data.secret
 
-  return res.send({ result: 'success', data })
+  return res.send(data)
 }
 
 /**
@@ -183,9 +189,8 @@ Controller.prototype.delete = async (req, res) => {
   /*
    * Validate input
    */
-  const [valid, err] = (await utils.validate(`req.apikey.delete`, req.body))
-  if (!valid) log.todo({ body: req.body, err})
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/apikey')
+  const [valid, err] = (await utils.validate(`req.apikey.delete`, req.params))
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Load the key with a filter method
@@ -196,7 +201,7 @@ Controller.prototype.delete = async (req, res) => {
    * Is this is a key not created by the current user, you need
    * operator or higher as a role
    */
-  if (key.createdBy !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
+  if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
     return res.status(403).send({ error: 'Access Denied' })
   }
 

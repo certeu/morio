@@ -152,5 +152,13 @@ export const errors = {
     title: 'Authentication required',
     detail: 'The request was not properly authenticated.',
   },
+  /*
+   * Error for when an identity provider is not available or caused an error
+   */
+  'morio.api.idp.failure': {
+    status: 403,
+    title: 'Identity Provider Failure',
+    detail: 'Cannot authenticate because the identity provider returned an error.',
+  },
 }
 

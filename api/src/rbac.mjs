@@ -1,5 +1,10 @@
-import { roles } from '#config/roles'
+import { roles as allRoles } from '#config/roles'
 import { log, utils } from './lib/utils.mjs'
+
+/*
+ * Re-export this here as it's more intuitive to import roles from rbac.mjs
+ */
+export const roles = allRoles
 
 /**
  * Helper method to get the current user ID from headers
@@ -47,7 +52,7 @@ export const currentProvider = (req) => {
  * @return {string} role - The current role
  */
 export const currentRole = (req) => {
-  const role = req.headers['x-morio-provider']
+  const role = req.headers['x-morio-role']
   /*
    * Only allow roles that exist
    */
@@ -55,7 +60,6 @@ export const currentRole = (req) => {
     ? role
     : false
 }
-
 
 /**
  * Helper method to get the current username
@@ -72,6 +76,15 @@ export const currentUsername = (req) => {
     || username.length < 3
     || username.length > 255
   ) ? false : username
+}
+
+/*
+ * Helper method to get all roles available to a given role
+ */
+export const availableRoles = (role) => {
+  const i = roles.indexOf(role)
+  if (i < 0) return []
+  return roles.slice(0,i+1)
 }
 
 /*

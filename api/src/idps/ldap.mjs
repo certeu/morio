@@ -86,21 +86,13 @@ export const ldap = (id, data, req) => {
   return new Promise((resolve) => {
     passport.authenticate(id, function (err, user) {
       if (err) {
-        log.warn(err, `Failed to authenticate user ${user} with provider ${id}`)
-        return resolve([false, { success: false, reason: 'Authentication error', error: err }])
+        log.warn(err, `Failed to authenticate user ${user} with provider ${id} due to an IDP error`)
+        return resolve([false, 'morio.api.idp.failure'])
       }
 
       if (!user) {
-        log.warn(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
-        console.log({err})
-        return resolve([
-          false,
-          {
-            success: false,
-            reason: 'Authentication failed',
-            error: 'Invalid LDAP credentials',
-          },
-        ])
+        log.info(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
+        return resolve([false, 'morio.api.account.credentials.mismatch'])
       }
 
       if (user) {
@@ -108,33 +100,18 @@ export const ldap = (id, data, req) => {
          * Can we find the username?
          */
         const username = caseInsensitiveGet(provider.username_field, user)
-        if (!username)
-          return resolve([
-            false,
-            {
-              success: false,
-              reason: 'Authentication failed',
-              error: 'Unable to retrieve username based on configured username_field',
-            },
-          ])
+        if (!username) return resolve([false, 'morio.api.404'])
 
         /*
          * Can we assign the requested role?
          */
         const [allowed, maxLevel] = checkRole(
-          req.body?.data?.role,
+          data.role,
           provider.rbac,
           user
         )
         if (!allowed)
-          return resolve([
-            false,
-            {
-              success: false,
-              reason: 'Authentication failed',
-              error: 'This role is not available to you',
-            },
-          ])
+          return resolve([false, 'morio.api.account.role.unavailable'])
 
         /*
          * Update the latest login time, but don't wait for it
@@ -146,7 +123,8 @@ export const ldap = (id, data, req) => {
           {
             user: username,
             role: req.body.data.role,
-            maxRole: roles[maxLevel],
+            highest_role: roles[maxLevel],
+            provider: id,
           },
         ])
       }

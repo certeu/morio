@@ -94,15 +94,15 @@ const fields = {
   invite: asString,
   status: asStatus,
   role: asRole,
-  createdBy: clean,
-  createdAt: (time) => (typeof time === 'undefined' ? 'datetime()' : time),
+  created_by: clean,
+  created_at: (time) => (typeof time === 'undefined' ? 'datetime()' : time),
   provider: asProvider,
-  updatedBy: clean,
-  updatedAt: asNull,
+  updated_by: clean,
+  updated_at: asNull,
   password: asJson,
   mfa: asString,
-  scratchCodes: asJson,
-  lastLogin: asString,
+  scratch_codes: asJson,
+  last_login: asString,
 }
 
 /*
@@ -110,7 +110,7 @@ const fields = {
  */
 const values = {
   password: fromJson,
-  scratchCodes: fromJson,
+  scratch_codes: fromJson,
 }
 
 /**
@@ -144,7 +144,7 @@ export const loadAccount = async (provider, id) => {
  * @return {object} keys - The API keys saved for the account
  */
 export const loadAccountApikeys = async (provider, id) =>
-  await db.read(`SELECT id FROM apikeys WHERE createdBy=:username`, {
+  await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
     id: fields.id(fullId(provider, id)),
   })
 
@@ -190,7 +190,7 @@ export const saveAccount = async (provider = false, id = false, data) => {
  * @return {object} keys - The API keys saved for the account
  */
 export const listAccounts = async () => {
-  const query = `SELECT id, about, status, role, createdBy, createdAt, updatedBy, updatedAt, lastLogin, provider FROM accounts`
+  const query = `SELECT id, about, status, role, created_by, created_at, updated_by, updated_at, last_login, provider FROM accounts`
   const [status, result] = await db.read(query)
 
   return status === 200 ? accountsAsList(result) : false
@@ -203,7 +203,7 @@ export const listAccounts = async () => {
  * @param {string} id - The id of the account (the username)
  */
 export const updateLastLoginTime = async (provider, id) =>
-  await saveAccount(provider, id, { lastLogin: 'datetime()' })
+  await saveAccount(provider, id, { last_login: 'datetime()' })
 
 /**
  * Helper method to parse results into an array of objects

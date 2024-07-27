@@ -116,7 +116,7 @@ Controller.prototype.setup = async (req, res) => {
    * This route is only accessible when running in ephemeral mode
    */
   if (!utils.isEphemeral())
-    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', '/setup')
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
 
   /*
    * Validate request against schema, but strip headers from body first
@@ -125,7 +125,7 @@ Controller.prototype.setup = async (req, res) => {
   delete body.headers
   const [valid, err] = await utils.validate(`req.setup`, body)
   if (!valid) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/setup')
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
   }
 
   /*
@@ -137,13 +137,13 @@ Controller.prototype.setup = async (req, res) => {
    * Make sure setting are valid
    */
   if (!report.valid)
-    return utils.sendErrorResponse(res, 'morio.api.settings.invalid', '/setup')
+    return utils.sendErrorResponse(res, 'morio.api.settings.invalid', req.url)
 
   /*
    * Make sure settings are deployable
    */
   if (!report.deployable)
-    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', '/setup')
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
 
   /*
    * Settings are valid and deployable, pass them to core
@@ -231,7 +231,7 @@ Controller.prototype.getConfig = async (req, res) => {
 }
 
 /**
- * Loads the current settings
+ * Loads the current (sanitized) settings
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express

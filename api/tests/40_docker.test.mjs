@@ -240,6 +240,7 @@ describe('API Docker Container State Tests', async () => {
     it(`Should PUT /docker/containers/:id/${state}`, async () => {
       const result = await api.put(`/docker/containers/${container}/${state}`)
       const d = result[1]
+      console.log(d)
       assert.equal(Array.isArray(result), true)
       assert.equal(result.length, 3)
       assert.equal(result[0], 204)

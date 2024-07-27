@@ -1,3 +1,4 @@
+import { roles } from '#config/roles'
 import { utils } from '../lib/utils.mjs'
 import { updateLastLoginTime } from '../lib/account.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
@@ -17,7 +18,9 @@ export const mrt = async (id, data) => {
   /*
    * Authenticate
    */
-  if (id === 'mrt' && data.mrt === utils.getKeys().mrt) {
+  const keys = utils.getKeys()
+  if (!keys?.mrt) return false
+  if (id === 'mrt' && data.mrt === keys.mrt) {
     /*
      * Update the latest login time, but don't wait for it
      */
@@ -28,7 +31,14 @@ export const mrt = async (id, data) => {
      * this boils down to: Does the role exist?
      */
     const available = isRoleAvailable('root', data.role)
-    if (!available) return [false, 'morio.api.account.role.unavailable']
+    if (!available) return [
+      false,
+      'morio.api.account.role.unavailable',
+      {
+        requested_role: data.role,
+        available_roles: roles,
+      },
+    ]
 
     /*
      * Return result
@@ -38,6 +48,9 @@ export const mrt = async (id, data) => {
       {
         user: 'root',
         role: data.role || 'user',
+        available_roles: roles,
+        highest_role: 'root',
+        provider: id,
       },
     ]
   }

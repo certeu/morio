@@ -72,6 +72,14 @@ export const schema = {
       role: role.required(),
     }).required()
   }),
+  'req.auth.login.ldap': Joi.object({
+    provider: provider.valid('ldap').required(),
+    data: Joi.object({
+      password: password.required(),
+      username: username.required(),
+      role: role.required(),
+    }).required()
+  }),
   'req.auth.login.mrt': Joi.object({
     provider: provider.valid('mrt').required(),
     data: Joi.object({

@@ -7,6 +7,7 @@ import { currentRole, currentProvider, currentUser, isRoleAvailable } from './rb
  */
 const ephemeralRoutes = [
   'GET:/status',
+  'GET:/up',
   'POST:/setup',
   'GET:/reload',
   'GET:/info',
@@ -81,7 +82,7 @@ const requireRole = (req, res, next, role) => {
   const realRole = currentRole(req)
   if (realRole) {
     const isOk = isRoleAvailable(realRole, role)
-    if (isOk) next()
+    if (isOk) return next()
   }
   return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 }

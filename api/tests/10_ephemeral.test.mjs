@@ -83,6 +83,17 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(d.core.status.cluster.color, "amber")
     assert.equal(typeof d.core.status.cluster.time, "number")
   })
+
+  /*
+   * GET /up
+   * No response body
+   */
+  it('Should load /up', async () => {
+    const result = await api.get('/status')
+    assert.equal(true, Array.isArray(result), true)
+    assert.equal(3, result.length, 3)
+    assert.equal(200, result[0], 200)
+  })
 })
 
 describe('Ephemeral API: Non-available Routes', () => {
@@ -93,10 +104,9 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/token',
       '/whoami',
       '/docker/containers/',
+      '/docker/containers/id',
       '/docker/containers/id/logs',
       '/docker/containers/id/stats',
-      '/docker/containers/id/stream/logs',
-      '/docker/containers/id/stream/stats',
       '/docker/images/id',
       '/docker/images/id/history',
       '/docker/networks/id',
@@ -106,15 +116,9 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/docker/all-containers',
       '/docker/images',
       '/docker/networks',
-      '/docker/nodes',
-      '/docker/plugins',
       '/docker/running-containers',
-      '/docker/secrets',
-      '/docker/services',
-      '/docker/tasks',
       '/docker/version',
-      '/docker/volumes',
-      '/ca/root',
+      '/ca/certificates',
       '/logs/service',
       '/pkgs/clients/deb/defaults',
       '/config',
@@ -135,20 +139,11 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/activate-mfa',
       '/apikey',
       '/login',
-      '/docker/container',
-      '/docker/secret',
-      '/docker/config',
-      '/docker/plugin',
-      '/docker/volume',
-      '/docker/service',
-      '/docker/network',
-      '/docker/image',
       '/settings',
       '/ca/certificate',
       '/encrypt',
       '/decrypt',
       '/pkgs/clients/deb/build',
-      '/validate/node',
     ],
     put: [
       '/docker/containers/id/kill',

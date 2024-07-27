@@ -12,13 +12,13 @@ const fields = {
   name: asString,
   status: asStatus,
   role: asRole,
-  createdBy: clean,
-  createdAt: asTime,
-  expiresAt: asTime,
-  updatedBy: clean,
-  updatedAt: asTime,
+  created_by: clean,
+  created_at: asTime,
+  expires_at: asTime,
+  updated_by: clean,
+  updated_at: asTime,
   secret: asJson,
-  lastLogin: asTime,
+  last_login: asTime,
 }
 
 /*
@@ -29,11 +29,11 @@ const nonSecretFields = [
   'name',
   'status',
   'role',
-  'createdBy',
-  'createdAt',
-  'updatedBy',
-  'updatedAt',
-  'lastLogin',
+  'created_by',
+  'created_at',
+  'updated_by',
+  'updated_at',
+  'last_login',
 ].join(',')
 
 /*
@@ -73,7 +73,7 @@ export const loadApikey = async (id) => {
  */
 export const loadAccountApikeys = async (id) => {
   const [status, result] = await db.read(
-    `SELECT ${nonSecretFields} FROM apikeys WHERE createdBy=:id`,
+    `SELECT ${nonSecretFields} FROM apikeys WHERE created_by=:id`,
     { id: fields.id(id) }
   )
 
@@ -143,7 +143,7 @@ export const deleteApikey = async (id = false) => {
  * @return {object} keys - The API keys
  */
 export const listApikeys = async () => {
-  const query = `SELECT id, name, status, role, createdBy, createdAt, updatedBy, updatedAt, lastLogin FROM apikeys`
+  const query = `SELECT id, name, status, role, created_by, created_at, updated_by, updated_at, last_login FROM apikeys`
   const [status, result] = await db.read(query)
 
   return status === 200 ? apikeysAsList(result) : false
@@ -154,7 +154,7 @@ export const listApikeys = async () => {
  *
  * @param {string} id - The id of the apikey (the key)
  */
-export const updateLastLoginTime = async (id) => await saveApikey(id, { lastLogin: asTime() })
+export const updateLastLoginTime = async (id) => await saveApikey(id, { last_login: asTime() })
 
 /**
  * Helper method to parse results into an array of objects

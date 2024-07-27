@@ -1,8 +1,8 @@
 import { updateLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
-import { isRoleAvailable } from '../rbac.mjs'
-import { utils } from '../lib/utils.mjs'
+import { isRoleAvailable, availableRoles } from '../rbac.mjs'
+import { utils, log } from '../lib/utils.mjs'
 
 /**
  * local: Local Morio identity/authentication provider
@@ -39,7 +39,14 @@ export const local = async (id, data) => {
      * Is the role accessible to this user?
      */
     const available = isRoleAvailable(account.role, data.role)
-    if (!available) return [false, 'morio.api.account.role.unavailable']
+    if (!available) return [
+      false,
+      'morio.api.account.role.unavailable',
+      {
+        requested_role: data.role,
+        available_roles: availableRoles(data.role),
+      },
+    ]
 
     /*
      * Verify MFA
@@ -47,14 +54,13 @@ export const local = async (id, data) => {
     const mfaOk = await mfa.verify(
       data.token,
       await utils.decrypt(account.mfa),
-      account.scratchCodes
+      account.scratch_codes
     )
     if (mfaOk[0]) {
       /*
-       * Update scratchcodes in case they were used
+       * Update scratch codes in case they were used
        */
-      updateLastLoginTime('local', data.username, { scratchCodes: mfaOk[1] })
-
+      updateLastLoginTime('local', data.username, { scratch_codes: mfaOk[1] })
       /*
        * All good, return
        */
@@ -63,6 +69,9 @@ export const local = async (id, data) => {
         {
           user: `local.${data.username}`,
           role: data.role || 'user',
+          available_roles: availableRoles(account.role),
+          highest_role: account.role,
+          provider: id,
         },
       ]
     }

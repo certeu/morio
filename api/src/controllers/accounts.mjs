@@ -46,13 +46,13 @@ Controller.prototype.create = async (req, res) => {
    * Check user
    */
   const user = currentUser(req)
-  log.todo(user)
-  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', '/account')
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
   /*
    * Validate input
    */
   const [valid, err] = (await utils.validate(`req.account.create`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/account')
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Does this user exist?
@@ -65,7 +65,7 @@ Controller.prototype.create = async (req, res) => {
     if (valid.overwrite && isRoleAvailable(req, 'operator')) {
       log.debug(`Overwriting ${valid.provider}.${valid.username}`)
     }
-    else return utils.sendErrorResponse(res, 'morio.api.account.exists', '/account')
+    else return utils.sendErrorResponse(res, 'morio.api.account.exists', req.url)
   }
 
   /*
@@ -78,8 +78,8 @@ Controller.prototype.create = async (req, res) => {
     invite: hash(invite),
     status: 'pending',
     role: valid.role,
-    createdBy: currentUser(req),
-    createdAt: Date.now(),
+    created_by: currentUser(req),
+    created_at: Date.now(),
   })
 
   return res.send({
@@ -107,21 +107,21 @@ Controller.prototype.activate = async (req, res) => {
    * Validate input
    */
   const [valid, err] = (await utils.validate(`req.account.activate`, req.body))
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/activate-account')
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Does this account exist and is it in pending state??
    */
   const pending = await loadAccount('local', valid.username)
-  if (!pending) return utils.sendErrorResponse(res, 'morio.api.account.unknown', '/activate-account')
+  if (!pending) return utils.sendErrorResponse(res, 'morio.api.account.unknown', req.url)
   if (pending.status !== 'pending')
-    return utils.sendErrorResponse(res, 'morio.api.account.state.invalid', '/activate-account')
+    return utils.sendErrorResponse(res, 'morio.api.account.state.invalid', req.url)
 
   /*
    * Does the invite match?
    */
   if (pending.invite !== hash(req.body.invite))
-    return utils.sendErrorResponse(res, 'morio.api.account.invite.mismatch', '/activate-account')
+    return utils.sendErrorResponse(res, 'morio.api.account.invite.mismatch', req.url)
 
   /*
    * MFA is mandatory for local accounts. So set it up
@@ -159,27 +159,27 @@ Controller.prototype.activateMfa = async (req, res) => {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.account.activatemfa`, req.body)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', '/activate-mfa')
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, { schema_violation: err.message })
 
   /*
    * Does this account exist and is it in pending state with an MFA secret set?
    */
   const pending = await loadAccount('local', valid.username)
-  if (!pending) return utils.sendErrorResponse(res, 'morio.api.account.unknown', '/activate-mfa')
+  if (!pending) return utils.sendErrorResponse(res, 'morio.api.account.unknown', req.url)
   if (pending.status !== 'pending' || !pending.mfa)
-    return utils.sendErrorResponse(res, 'morio.api.account.state.invalid', '/activate-mfa')
+    return utils.sendErrorResponse(res, 'morio.api.account.state.invalid', req.url)
 
   /*
    * Does the invite match?
    */
   if (pending.invite !== hash(req.body.invite))
-    return utils.sendErrorResponse(res, 'morio.api.account.invite.mismatch', '/activate-mfa')
+    return utils.sendErrorResponse(res, 'morio.api.account.invite.mismatch', req.url)
 
   /*
    * Verify MFA token
    */
   const result = (await mfa.verify(valid.token, await utils.decrypt(pending.mfa)))
-  if (!result) return utils.sendErrorResponse(res, 'morio.api.account.credentials.mismatch', '/activate-mfa')
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.account.credentials.mismatch', req.url)
 
   /*
    * Also generate scratch codes because we've all lost our phone at one point
@@ -192,7 +192,7 @@ Controller.prototype.activateMfa = async (req, res) => {
    */
   const data = {
     ...pending,
-    scratchCodes: scratchCodes.map((code) => hash(code)),
+    scratch_codes: scratchCodes.map((code) => hash(code)),
     password: hashPassword(valid.password),
     status: 'active',
   }

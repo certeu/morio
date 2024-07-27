@@ -29,7 +29,7 @@ Controller.prototype.getCaCerts = async (req, res) => {
         root_certificate: keys.rcrt,
         intermediate_certificate: keys.icrt,
       })
-    : utils.sendErrorResponse(res, `morio.api.info.unavailable`, `/cacerts`)
+    : utils.sendErrorResponse(res, `morio.api.info.unavailable`, req.url)
 }
 
 /**
@@ -100,7 +100,7 @@ Controller.prototype.getStatus = async (req, res) => {
    */
   const [status, result] = await utils.coreClient.get(`/status`)
 
-  if (status !== 200) return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, '/status')
+  if (status !== 200) return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, req.url)
 
   /*
    * Update relevant data

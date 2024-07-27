@@ -1,4 +1,5 @@
-import { store, api, apiAuth, validationShouldFail } from './utils.mjs'
+import { store, api, validateErrorResponse } from './utils.mjs'
+import { errors } from '../src/errors.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 /*
@@ -11,15 +12,8 @@ import keys from '../../data/config/keys.json' assert { type: 'json' }
 const { mrt } = keys
 
 describe('API MRT Tests', () => {
-  const headers = {
-    'X-Morio-Role': 'engineer',
-    'X-Morio-User': 'test_user',
-    'X-Morio-Provider': 'local',
-  }
-
   /*
    * POST /login
-   *
    * Example response:
    * {
    *   jwt: 'eyJhbGciOiJSUzI1...',
@@ -48,12 +42,15 @@ describe('API MRT Tests', () => {
 
   /*
    * POST /login (non-existing role)
-   *
    * Example response:
    * {
-   *   success: false,
-   *   reason: 'Authentication failed',
-   *   error: 'Role not available'
+   *   status: 403,
+   *   title: 'Role unavailable',
+   *   detail: 'The requested role is not available to this account.',
+   *   type: 'https://morio.it/reference/errors/morio.api.account.role.unavailable',
+   *   instance: 'http://api:3000/login',
+   *   requested_role: 'schmuser',
+   *   available_roles: [ 'user', 'manager', 'operator', 'engineer', 'root' ]
    * }
    */
   it(`Should POST /login (non-existing role)`, async () => {
@@ -65,16 +62,11 @@ describe('API MRT Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(d.success, false)
-    assert.equal(d.reason, `Authentication failed`)
-    assert.equal(d.error, `Role not available`)
+    validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
   })
 
   /*
    * GET /whoami (JWT in Bearer header)
-   *
    * Example response:
    * {
    *   user: 'root',
@@ -98,21 +90,19 @@ describe('API MRT Tests', () => {
     assert.equal(d.role, 'user')
     assert.equal(d.provider, 'mrt')
     for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
-    for (const field of ['node', 'deployment']) assert.equal(typeof d[field], 'string')
+    for (const field of ['node', 'cluster']) assert.equal(typeof d[field], 'string')
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
   })
 
   /*
    * GET /auth (JWT in Bearer header)
-   *
    * No response body
    */
   it(`Should GET /auth (JWT in Bearer header)`, async () => {
-    const result = await apiAuth.get(`/auth`, {
+    const result = await api.get(`/auth`, {
       'X-Forwarded-Uri': '/-/api/settings',
       Authorization: `Bearer ${store.mrt_jwt}`,
     })
     assert.equal(result[0], 200)
   })
-
 })
