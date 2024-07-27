@@ -367,7 +367,7 @@ utils.getNodeIp = () => store.get('state.node.ip')
  *
  * @return {number} node_serial - This node's serial
  */
-utils.getNodeSerial = () => store.get('state.node.serial')
+utils.getNodeSerial = () => store.get('state.node.serial', 0)
 
 /**
  * Helper method to get the uuid of this node
@@ -1108,7 +1108,7 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
    * Add the instance
    */
   data.instance =
-    `http://core:${utils.getPreset('MORIO_CORE')}` + (data.route ? data.route : url ? url : '')
+    `http://core:${utils.getPreset('MORIO_CORE_PORT')}` + (data.route ? data.route : url ? url : '')
 
   return res
     .type('application/problem+json')

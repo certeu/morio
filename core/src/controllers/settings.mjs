@@ -98,9 +98,12 @@ Controller.prototype.setup = async (req, res) => {
   delete body.headers
   const [valid, err] = await utils.validate(`req.settings.setup`, body)
   if (!valid?.cluster) {
-    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
+    return utils.sendErrorResponse(
+      res,
+      'morio.core.schema.violation',
+      req.url,
+      err?.message ? { schema_violation: err.message } : undefined
+    )
   }
 
   /*
