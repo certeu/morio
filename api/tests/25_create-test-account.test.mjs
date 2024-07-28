@@ -1,10 +1,7 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, accounts, attempt, isCoreReady, isApiReady, api } from './utils.mjs'
+import { store, accounts, attempt, isCoreReady, isApiReady, api, loadKeys } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { keys } from './json-loader.mjs'
-
-const { mrt } = keys
 
 const timeout = 80000
 
@@ -45,7 +42,10 @@ describe('Wait for API to reconfigure itself', async () => {
     })
 })
 
-describe('Create Test Account', () => {
+describe('Create Test Account', async () => {
+  const keys = await loadKeys()
+  store.set('mrt', keys.mrt)
+  const mrt = keys.mrt
   /*
    * POST /login
    * Example response:

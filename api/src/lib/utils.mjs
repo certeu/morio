@@ -58,6 +58,14 @@ export const utils = new Store(log)
 utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
 
 /**
+ * Helper method to get a list of all FQDNS for broker nodes
+ *
+ * @return {array} list - The list of all broker node FQDNs
+ *
+ */
+utils.getBrokerFqdns = () => utils.getSettings('cluster.broker_nodes', [])
+
+/**
  * Helper method to get the cluster Fqdn
  *
  * @return {string} fqdn - The cluster's FQDN

@@ -473,7 +473,11 @@ export const ensureMorioCluster = async () => {
       utils.getNetworkName(), // Network name
       'core', // Service name
       {
-        Aliases: ['core', utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`],
+        Aliases: [
+          'core',
+          'coredocs',
+          utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`
+        ],
       }, // Endpoint config
       true // Disconnect from other networks
     )

@@ -109,7 +109,7 @@ const cliOptions = (name, env) => `\\
   --log-driver=journald \\
   --log-opt labels=morio.service \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${name} \\
+  --network-alias ${[name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(" \\\n")} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(" \\\n")} \\

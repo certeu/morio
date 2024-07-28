@@ -12,6 +12,9 @@ import { guardRoutes } from './middleware.mjs'
 // Load the logger and utils
 import { log, utils } from './lib/utils.mjs'
 import { updateClusterState } from './lib/cluster.mjs'
+// Swagger
+import swaggerUi from 'swagger-ui-express'
+import { spec } from '../openapi/index.mjs'
 
 /*
  * Say hello
@@ -33,6 +36,12 @@ app.use(express.json({ limit: '1mb' }))
  * in ephemeral mode or reconfiguring
  */
 app.use(guardRoutes)
+
+/*
+ * Add the route for the Swagger (OpenAPI) docs
+ */
+const docs = swaggerUi.setup(spec)
+app.use(`/docs`, swaggerUi.serve, docs)
 
 /*
  * Load the API routes

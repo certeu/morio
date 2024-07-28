@@ -9,7 +9,7 @@ import { routes } from '#routes/index'
 import { reloadConfiguration } from './reload.mjs'
 // Swagger
 import swaggerUi from 'swagger-ui-express'
-import { openapi } from '../openapi/index.mjs'
+import { spec } from '../openapi/index.mjs'
 // Middleware
 import { guardRoutes, addRbacHeaders } from './middleware.mjs'
 // Load logger and utils
@@ -49,7 +49,7 @@ for (const type in routes) routes[type](app)
 /*
  * Add the route for the Swagger (OpenAPI) docs
  */
-const docs = swaggerUi.setup(openapi)
+const docs = swaggerUi.setup(spec)
 app.use(`/docs`, swaggerUi.serve, docs)
 
 /*

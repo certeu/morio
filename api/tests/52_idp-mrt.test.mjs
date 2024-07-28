@@ -1,12 +1,13 @@
-import { store, api, validateErrorResponse } from './utils.mjs'
+import { store, api, validateErrorResponse, loadKeys } from './utils.mjs'
 import { errors } from '../src/errors.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
-import { keys } from './json-loader.mjs'
 
-const { mrt } = keys
 
-describe('API MRT Tests', () => {
+describe('API MRT Tests', async () => {
+  const keys = await loadKeys()
+  store.set('mrt', keys.mrt)
+  const mrt = keys.mrt
   /*
    * POST /login
    * Example response:

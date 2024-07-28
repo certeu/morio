@@ -23,6 +23,13 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.list = async (req, res) => {
+  /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  // TODO: Limit this based on role
   const accounts = await listAccounts()
 
   return res.send(accounts)

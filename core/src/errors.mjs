@@ -17,6 +17,24 @@ export const errors = {
       'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
+   * Error for not in ephemeral mode' errors
+   */
+  'morio.core.ephemeral.prohibited': {
+    status: 409,
+    title: 'Not available in ephemeral mode',
+    detail:
+      'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
+  },
+  /*
+   * Error for not while reloading errors
+   */
+  'morio.core.reloading.prohibited': {
+    status: 409,
+    title: 'Not available while reloading',
+    detail:
+      'This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.',
+  },
+  /*
    * Error for when writing to the filesystem fails
    */
   'morio.core.fs.write.failed': {

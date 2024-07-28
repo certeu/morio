@@ -15,8 +15,8 @@ export const validateSettings = async (newSettings) => {
    * Set up the report skeleton that we will return
    */
   const report = {
-    valid: false,
-    deployable: false,
+    valid: true,
+    deployable: true,
     errors: [],
     warnings: [],
     info: [],
@@ -32,6 +32,8 @@ export const validateSettings = async (newSettings) => {
    */
   const abort = () => {
     report.warnings.push(`Validation was terminated before completion due to errors`)
+    report.deployable = false
+    report.valid = false
 
     return report
   }
@@ -126,13 +128,14 @@ export const validateSettings = async (newSettings) => {
               report.info.push(`Node ${i} runs Morio and is ready for setup`)
             } else {
               if (status.info?.name === '@morio/api') {
-                report.errors.push(
-                  `Node ${i} is not in ephemeral mode, which is required for setup`
+                report.warnings.push(
+                  `Node ${i} runs Morio, but is not in ephemeral mode, its settings would be overwritten`
                 )
+                report.deployable = false
               } else {
                 report.errors.push(`Node ${i} does not seem to run Morio`)
+                abort()
               }
-              abort()
             }
           }
         )
@@ -146,8 +149,6 @@ export const validateSettings = async (newSettings) => {
   /*
    * Looks good
    */
-  report.valid = true
-  report.deployable = true
   report.validated_settings = newSettings
 
   return report

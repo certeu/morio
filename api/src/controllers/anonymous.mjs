@@ -32,6 +32,20 @@ Controller.prototype.getCaCerts = async (req, res) => {
 }
 
 /**
+ * List downloads
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listDownloads = async (req, res) => {
+  const list = await globDir('/morio/downloads')
+
+  return list
+    ? res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))
+    : utils.sendErrorResponse(res, `morio.api.info.unavailable`, req.url)
+}
+
+/**
  * Loads the available idenitity/authentication providers (IDPs)
  *
  * @param {object} req - The request object from Express
@@ -126,19 +140,6 @@ Controller.prototype.getStatus = async (req, res) => {
 }
 
 /**
- * List downloads
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listDownloads = async (req, res) => {
-  const list = await globDir('/morio/downloads')
-
-  if (list) return res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))
-  else return res.status(500).send({ errors: ['Failed to read file list'] })
-}
-
-/**
  * Validate Morio settings
  *
  * This allows people to validate a settings object prior to applying it.
@@ -148,6 +149,16 @@ Controller.prototype.listDownloads = async (req, res) => {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.validateSettings = async (req, res) => {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await utils.validate(`req.setup`, req.body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
   /*
    * Run the settings validation helper, which takes proposed
    * and current settings and returns a report object

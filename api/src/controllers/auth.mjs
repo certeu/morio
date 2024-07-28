@@ -10,28 +10,23 @@ import { availableRoles } from '../rbac.mjs'
 const allowedUris = [
   `/setup`,
   `/status`,
-  `/status/`,
   `/info`,
   `/info/`,
   `/login`,
-  `/login/`,
   `/idps`,
-  `/idps/`,
   `/activate-account`,
-  `/activate-account/`,
   `/activate-mfa`,
-  `/activate-mfa/`,
   `/jwks`,
   `/cluster/join`,
   `/validate/settings`,
-  `/cacerts`,
+  `/ca/certificates`,
 ]
 
 /**
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [/^\/downloads\//, /^\/coverage\//]
+const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/]
 
 /**
  * This auth controller handles authentication in Morio
@@ -174,12 +169,18 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Looks good, hand over to provider
    */
-  const [success, data, extraData = {}] = await idps[providerType](
+  const idpResult = await idps[providerType](
     providerId,
     req.body.data,
     req,
     res
   )
+  if (!Array.isArray(idpResult)) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
+   * Deconstruct whether it worked
+   */
+  const [success, data, extraData = {}] = idpResult
 
   /*
    * If authentication failed, return here

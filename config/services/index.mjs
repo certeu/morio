@@ -117,7 +117,7 @@ export const traefikHostRulePrefix = (router, nodes) => `traefik.http.routers.${
 
 const getServicePort = (service, utils) => {
   if (service === 'api') return utils.getPreset('MORIO_API_PORT')
-  if (service === 'core') return utils.getPreset('MORIO_CORE_PORT')
+  if (service === 'core' || service === 'coredocs') return utils.getPreset('MORIO_CORE_PORT')
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
   if (service === 'ca') return utils.getPreset('MORIO_CA_PORT')
   if (service === 'db') return utils.getPreset('MORIO_DB_HTTP_PORT')

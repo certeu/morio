@@ -146,7 +146,7 @@ Controller.prototype.update = async (req, res) => {
    * operator or higher as a role
    */
   if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
-    return res.status(403).send({ error: 'Access Denied' })
+    return utils.sendErrorResponse(res, 'morio.api.account.role.insufficient', req.url)
   }
 
   /*
@@ -192,6 +192,12 @@ Controller.prototype.update = async (req, res) => {
  */
 Controller.prototype.delete = async (req, res) => {
   /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.apikey.delete`, req.params)
@@ -210,7 +216,7 @@ Controller.prototype.delete = async (req, res) => {
    * operator or higher as a role
    */
   if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
-    return res.status(403).send({ error: 'Access Denied' })
+    return utils.sendErrorResponse(res, 'morio.api.account.role.insufficient', req.url)
   }
 
   /*

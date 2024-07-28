@@ -75,6 +75,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       }).set("http.middlewares.core-prefix.replacepathregex.regex", `^/-/core/(.*)`)
         .set("http.middlewares.core-prefix.replacepathregex.replacement", "/$1")
         .set('http.routers.core.middlewares', ['core-prefix@file']),
+      coredocs: generateTraefikConfig(utils, {
+        service: 'coredocs',
+        prefixes: [`${utils.getPreset('MORIO_CORE_PREFIX')}/docs`],
+        priority: 666,
+      }).set("http.middlewares.coredocs-prefix.replacepathregex.regex", `^/-/core/(.*)`)
+        .set("http.middlewares.coredocs-prefix.replacepathregex.replacement", "/$1")
+        .set('http.routers.coredocs.middlewares', ['coredocs-prefix@file']),
     },
     /*
      * When the initial settings are created, these values will be merged in

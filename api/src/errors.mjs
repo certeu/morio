@@ -135,6 +135,14 @@ export const errors = {
     detail: 'The requested role is not available to this account.',
   },
   /*
+   * Error for when a role is too low to perform the current action
+   */
+  'morio.api.account.role.insufficient': {
+    status: 403,
+    title: 'Role insufficient',
+    detail: 'This endpoint required a higher role.',
+  },
+  /*
    * Error for when a role is not sufficient to access and endpoint
    */
   'morio.api.rbac.denied': {

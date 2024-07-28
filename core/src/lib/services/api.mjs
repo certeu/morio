@@ -69,5 +69,5 @@ const isApiUp = async () => {
     returnAs: 'status',
   })
 
-  return status === 200
+  return status === 204
 }

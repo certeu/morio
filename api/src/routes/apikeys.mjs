@@ -9,15 +9,16 @@ const Apikeys = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  /*
-   * Create an API key
-   */
-  app.post(`/apikey`, rbac.user, Apikeys.create)
 
   /*
    * List API keys
    */
   app.get(`/apikeys`, rbac.user, Apikeys.list)
+
+  /*
+   * Create an API key
+   */
+  app.post(`/apikey`, rbac.user, Apikeys.create)
 
   /*
    * Update an API key

@@ -1,61 +1,95 @@
 import { getPreset } from '#config'
-import { paths as setup } from './setup.mjs'
-import { paths as status } from './status.mjs'
-import { paths as validate } from './validate.mjs'
-import { paths as docker } from './docker.mjs'
+import { OpenAPI } from '#shared/openapi'
+import { utils } from '../src/lib/utils.mjs'
+import { errors } from '../src/errors.mjs'
+import loadAnonymousEndpoints from './anonymous.mjs'
+import loadAccountsEndpoints from './accounts.mjs'
+import loadApikeysEndpoints from './apikeys.mjs'
 
-const description = `
-## What am I looking at?
-This is reference documentation of the morio API.
-It is auto-generated from this API's OpenAPI v3 specification.
+/**
+ * Helper method to define a response
+ */
+export const response = (desc, example) => ({
+  description: desc,
+  content: { 'application/json': { example }, }
+})
 
-To learn more about morio, visit [the GitHub repository](https://github.com/certeu/morio/).
-`
+/**
+ * Helper method to define an error response
+ */
+export const errorResponse = (template) => {
+  const err = errors[template]
+  const data = {}
+  data[err.status] = {
+    description: err.title,
+    content: { 'application/problem+json': { example: err } }
+  }
 
-export const openapi = {
-  openapi: '3.0.3',
-  info: {
-    title: 'Morio Operator API',
-    description,
-    termsOfService: 'FIXME: Do we need terms of service?',
-    contact: {
-      name: 'CERT-EU',
-      email: 'morio@cert.europa.eu',
-    },
-    license: {
-      name: 'FIXME: What license?',
-      url: 'https://cert.europa.eu',
-    },
-    version: getPreset('MORIO_VERSION'),
-  },
-  externalDocs: {
-    description: 'Morio documentation on GitHub',
-    url: 'https://gihub.com/certeu/morio/',
-  },
-  tags: [
-    {
-      name: 'Docker',
-      description: 'Retrieve data from the Docker daemon about the Docker instance itself',
-    },
-    {
-      name: 'Setup',
-      description: 'Initial setup of a Morio instance or cluster',
-    },
-    {
-      name: 'Status',
-      description: 'Monitor a Morio instance or cluster',
-    },
-    {
-      name: 'Validate',
-      description: 'Validate Morio configurations',
-    },
-  ],
-
-  components: {},
-  paths: {
-    ...docker,
-    ...setup,
-    ...status,
-    ...validate,
-  },
+  return data
 }
+
+/**
+ * Helper method to define multipla error responses
+ * Also allows multiple responses with the same status code
+ */
+export const errorResponses = (templates) => {
+  const codes = {}
+  for (const template of templates) {
+    const err = errors[template]
+    if (typeof codes[err.status] === 'undefined') {
+      codes[err.status] = {
+        description: err.title,
+        content: { 'application/problem+json': { example: err } }
+      }
+    }
+    else {
+      const examples = {}
+      if (codes[err.status].content['application/problem+json'].example) {
+        examples[codes[err.status].content['application/problem+json'].example.title] =
+          { value: codes[err.status].content['application/problem+json'].example }
+        //delete codes[err.status].content['application/problem+json'].example
+      }
+      else {
+        for (const [id, val] of Object.entries(codes[err.status].content['application/problem+json'].examples)) {
+          examples[id] = val
+        }
+      }
+      examples[err.title] = { value: err }
+      codes[err.status] = {
+        description: 'Multiple responses with this status code',
+        content: { 'application/problem+json': { examples } }
+      }
+    }
+  }
+
+  return codes
+}
+
+/**
+ * Helper array to add auth to the endpoint
+ */
+export const security = [
+  { 'API Key': [] },
+  { 'JWT in Header': [] },
+  { 'JWT in Cookie': [] },
+]
+
+const api = new OpenAPI(utils, 'api', {
+  components: {
+    securitySchemes: {
+      'API Key': { type: 'http', scheme: 'basic' },
+      'JWT in Header': { type: 'http', scheme: 'bearer' },
+      'JWT in Cookie': { type: 'apiKey', in: 'cookie', name: 'morio' },
+    }
+  },
+  paths: {},
+})
+
+loadAnonymousEndpoints(api, utils)
+loadAccountsEndpoints(api, utils)
+loadApikeysEndpoints(api, utils)
+
+export const spec = api.spec
+
+
+

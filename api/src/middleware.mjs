@@ -50,6 +50,7 @@ export const guardRoutes = (req, res, next) => {
   if (
     utils.isEphemeral() &&
     req.url.slice(0, 10) !== '/coverage/' &&
+    req.url.slice(0, 5) !== '/docs/' &&
     !allowed.includes(`${req.method}:${req.url}`)
   ) {
     log.debug(`Prohibited in ephemeral state: ${req.method} ${req.url}`)

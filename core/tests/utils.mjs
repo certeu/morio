@@ -5,6 +5,8 @@ import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
 import axios from 'axios'
+import { readJsonFile } from "#shared/fs"
+import path from 'path'
 
 /*
  * We'll re-use these in the API unit tests
@@ -197,12 +199,28 @@ const validateErrorResponse = (result, errors, template) => {
   }
 }
 
+/*
+ * To make sure we can authenticate to the freshly deployed cluster,
+ * we load the MRT straight from disk, so that these tests can
+ * run without having to go through the setup each time.
+ * Note that this is only possible when running the dev container,
+ * and even then, the file won't be on disk when we start the tests,
+ * so we can't just import them. Instead, this method loads them
+ * on demand.
+ */
+const loadKeys = async () => {
+  const file = path.resolve('../data/config/keys.json')
+  const keys = await readJsonFile(file, console.log)
+  return keys
+}
+
 export {
   api,
   accounts,
   core,
   equalIgnoreSpaces,
   getPreset,
+  loadKeys,
   services,
   setup,
   store,
