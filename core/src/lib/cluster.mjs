@@ -310,7 +310,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
       if (error.code === 'ECONNREFUSED') {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
-        log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
+        log.warn(error, `Unspecified error when sending heartbeat to node ${fqdn}.`)
       }
     }
 

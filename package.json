@@ -28,8 +28,8 @@
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "logs:core": "docker logs -n 10 -f core | pino-pretty -i pid,time,name,hostname",
-    "logs:api": "docker logs -n 10 -f api | pino-pretty -i pid,time,name,hostname"
+    "logs:core": "docker logs -n 20 -f core | pino-pretty -i pid,time,name,hostname",
+    "logs:api": "docker logs -n 20 -f api | pino-pretty -i pid,time,name,hostname"
   },
   "repository": {
     "type": "git",
