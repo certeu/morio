@@ -80,8 +80,8 @@ Controller.prototype.heartbeat = async (req, res) => {
       log.todo('Handle heartbeat SYNC action')
     } else if (action === 'INVITE') {
       log.todo('Handle heartbeat INVITE action')
-    } else if (action === 'ELECT') {
-      log.todo('Handle hearbeat ELECT action')
+    } else if (action === 'LEADER_CHANGE') {
+      log.todo('Handle hearbeat LEADER_CHANGE action')
     }
   }
 

@@ -154,6 +154,15 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   const targets = broadcast ? utils.getNodeFqdns() : [utils.getClusterLeaderFqdn()]
 
   /*
+   * If there are no targets, that might indicate a leader change.
+   * We stop the heartbeat, TODO: Can we recover from this?
+   */
+  if (!targets) {
+    log.info(`No heartbeat targets found. Stopping heartbeat`)
+    return
+  }
+
+  /*
    * Create a heartbeat for each target
    */
   for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
@@ -316,7 +325,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
     return
   }
-  log.todo(data)
+  log.todo(JSON.stringify(data, null ,2))
 
   /*
    * Just because the request didn't error doesn't mean all is ok
@@ -342,6 +351,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
    */
   if (data.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
+    if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
   } else {
     for (const uuid in data.nodes) {
       /*
@@ -429,8 +439,8 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   ) {
     const err = 'LEADER_MISMATCH'
     errors.push(err)
-    action = 'ELECT'
-    log.debug(`Leader mismatch in ${type} from node ${data.node}: ${err}`)
+    action = 'LEADER_CHANGE'
+    log.info(`Leader mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   /*
