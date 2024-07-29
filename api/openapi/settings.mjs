@@ -1,16 +1,9 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
-import { Joi, uuid } from '#shared/schema'
 import { response, errorResponse, errorResponses, formatResponseExamples } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-/*
-  app.post(`/setup`, Core.setup)
-  app.post(`/settings`, rbac.operator, Core.deploy)
-
-*/
-
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['settings'] }
   api.tag('settings', 'Endpoints related to Morio settings')
 
@@ -28,15 +21,12 @@ In other words, once settings are deployed, this endpoint becomes unavailable.`,
         'application/json': {
           schema: j2s(schema['req.setup']).swagger,
           examples: formatResponseExamples(examples.obj.settings),
-        }
-      }
+        },
+      },
     },
     responses: {
       // TODO
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.ephemeral.required`,
-      ])
+      ...errorResponses([`morio.api.schema.violation`, `morio.api.ephemeral.required`]),
     },
   })
   api.get('/settings', {
@@ -86,8 +76,8 @@ Note that this endpoint requires you to post the full settings, so when making u
         'application/json': {
           schema: j2s(schema['req.setup']).swagger,
           example: examples.res.settingsSanitized,
-        }
-      }
+        },
+      },
     },
     responses: {
       // TODO
@@ -96,9 +86,7 @@ Note that this endpoint requires you to post the full settings, so when making u
         `morio.api.authentication.required`,
         'morio.api.account.exists',
         `morio.api.account.state.invalid`,
-      ])
+      ]),
     },
   })
-
 }
-

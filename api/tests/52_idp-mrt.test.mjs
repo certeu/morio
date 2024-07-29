@@ -3,7 +3,6 @@ import { errors } from '../src/errors.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
-
 describe('API MRT Tests', async () => {
   const keys = await loadKeys()
   store.set('mrt', keys.mrt)

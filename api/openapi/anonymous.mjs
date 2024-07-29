@@ -3,8 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['anonymous'] }
   api.tag('anonymous', 'Endpoints that do not require authentication')
 
@@ -61,7 +60,7 @@ export default (api, utils) => {
     summary: `Quick check to verify the API is up`,
     description: `Returns status code 204 if the API is up. No response body or data is returned. Useful for a quick healhcheck.`,
     responses: {
-      204: { description: 'No response body' }
+      204: { description: 'No response body' },
     },
   })
 
@@ -76,14 +75,12 @@ export default (api, utils) => {
         'application/json': {
           schema: j2s(schema['req.setup']).swagger,
           example: examples.obj.settings.cluster1,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('Validation report', examples.res.validateSettings),
       ...errorResponse(`morio.api.schema.violation`),
     },
   })
-
 }
-

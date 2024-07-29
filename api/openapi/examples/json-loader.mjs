@@ -50,14 +50,14 @@ export const settings = {
     ...settingsCluster1,
     ...settingsTokens,
     ...settingsIam,
-    ...settingsUi
+    ...settingsUi,
   },
   cluster3: {
     ...settingsCluster3,
     ...settingsTokens,
     ...settingsIam,
-    ...settingsUi
-  }
+    ...settingsUi,
+  },
 }
 
 export const examples = {
@@ -107,4 +107,3 @@ export const examples = {
     whoami,
   },
 }
-

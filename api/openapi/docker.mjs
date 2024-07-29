@@ -1,17 +1,18 @@
 import j2s from 'joi-to-swagger'
-import { schema } from '../src/schema.mjs'
-import { Joi, uuid } from '#shared/schema'
-import { response, errorResponse, errorResponses, formatResponseExamples } from './index.mjs'
-import { examples } from './examples/json-loader.mjs'
+import { Joi } from '#shared/schema'
+import { response, errorResponses } from './index.mjs'
 
-
-const parameters = [{
-  in: 'path',
-  name: `id`,
-  schema: j2s(Joi.string().required().description('The ID (or name) of the relevant Docker object')).swagger,
-  retuired: true,
-  description: 'The ID (or name) of the relevant docker object'
-}]
+const parameters = [
+  {
+    in: 'path',
+    name: `id`,
+    schema: j2s(
+      Joi.string().required().description('The ID (or name) of the relevant Docker object')
+    ).swagger,
+    retuired: true,
+    description: 'The ID (or name) of the relevant docker object',
+  },
+]
 
 const dockerGets = [
   // Simple GETs
@@ -26,7 +27,7 @@ To only get the running containers, use the \`/docker/containers\` endpoint inst
     api: {
       title: 'List Containers',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList',
-    }
+    },
   },
   {
     slug: 'containers',
@@ -39,7 +40,7 @@ To get all containers, use the \`/docker/allcontainers\` endpoint instead.`,
     api: {
       title: 'List Containers',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList',
-    }
+    },
   },
   {
     slug: 'df',
@@ -51,8 +52,8 @@ This endpoint is named after the the \`df\` command on Linux.`,
     },
     api: {
       title: 'Get data usage information',
-      url: 'https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage'
-    }
+      url: 'https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage',
+    },
   },
   {
     slug: 'images',
@@ -63,7 +64,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
     api: {
       title: 'List Images',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList',
-    }
+    },
   },
   {
     slug: 'info',
@@ -74,7 +75,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
     api: {
       title: 'Get system information',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo',
-    }
+    },
   },
   {
     slug: 'networks',
@@ -85,7 +86,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
     api: {
       title: 'List networks',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList',
-    }
+    },
   },
   {
     slug: 'version',
@@ -96,7 +97,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
     api: {
       title: 'Get version',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion',
-    }
+    },
   },
   // With parameters
   {
@@ -114,7 +115,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
     api: {
       title: 'Inspect a container',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/',
-    }
+    },
   },
   {
     slug: 'container/:id/logs',
@@ -131,7 +132,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
     api: {
       title: 'Get container logs',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect',
-    }
+    },
   },
   {
     slug: 'container/:id/stats',
@@ -148,7 +149,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
     api: {
       title: 'Get container stats based on resource usages',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect',
-    }
+    },
   },
   {
     slug: 'image/:id',
@@ -165,7 +166,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
     api: {
       title: 'Inspect an image',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect',
-    }
+    },
   },
   {
     slug: 'networks/:id',
@@ -182,11 +183,11 @@ Note that Docker accepts an ID or (unambigious) name as input.
     api: {
       title: 'Inspect a network',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect',
-    }
+    },
   },
 ]
 
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['docker'] }
   api.tag('docker', 'Endpoints that leverage the Docker daemon API')
 
@@ -196,10 +197,7 @@ export default (api, utils) => {
       ...d.spread,
       responses: {
         200: response(`[See **${d.api.title}** in the Docker API docs](${d.api.url}) `),
-        ...errorResponses([
-          `morio.api.authentication.required`,
-          `morio.api.ephemeral.prohibited`,
-        ]),
+        ...errorResponses([`morio.api.authentication.required`, `morio.api.ephemeral.prohibited`]),
       },
     })
   }
@@ -210,13 +208,11 @@ export default (api, utils) => {
       summary: `${action} a container`,
       description: `This changes, or attempts to change, the container state by issuing a \`${action.toLowerCase()}\` command.`,
       responses: {
-        200: response(`[See **${action} a container** in the Docker API docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/Container${action}) `),
-        ...errorResponses([
-          `morio.api.authentication.required`,
-          `morio.api.ephemeral.prohibited`,
-        ]),
+        200: response(
+          `[See **${action} a container** in the Docker API docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/Container${action}) `
+        ),
+        ...errorResponses([`morio.api.authentication.required`, `morio.api.ephemeral.prohibited`]),
       },
     })
   }
 }
-

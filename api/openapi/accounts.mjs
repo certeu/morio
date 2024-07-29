@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse, errorResponses, security } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['accounts'] }
   api.tag('accounts', 'Endpoints for the local accounts identity provider')
 
@@ -33,8 +33,8 @@ export default (api, utils) => {
         'application/json': {
           schema: j2s(schema['req.account.create']).swagger,
           example: examples.req.createAccount,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('Account details', examples.res.createAccount),
@@ -43,7 +43,7 @@ export default (api, utils) => {
         `morio.api.authentication.required`,
         'morio.api.account.exists',
         `morio.api.account.state.invalid`,
-      ])
+      ]),
     },
   })
 
@@ -55,7 +55,7 @@ export default (api, utils) => {
 Note that for local Morio accounts, the account will still need to activate MFA before it can be used.
 That is because MFA is manadatory for local Morio accounts.
 
-So for a local Morio account, this endpoint will return the secret to setup MFA, as well as (an SVG of) the QR-code to do so.` ,
+So for a local Morio account, this endpoint will return the secret to setup MFA, as well as (an SVG of) the QR-code to do so.`,
     requestBody: {
       description: 'The invite code, as well as username and (identity) provider',
       required: true,
@@ -63,8 +63,8 @@ So for a local Morio account, this endpoint will return the secret to setup MFA,
         'application/json': {
           schema: j2s(schema['req.account.activate']).swagger,
           example: examples.req.activateAccount,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('MFA secret and QR code', examples.res.activateAccount),
@@ -74,7 +74,7 @@ So for a local Morio account, this endpoint will return the secret to setup MFA,
         `morio.api.rbac.denied`,
         `morio.api.account.unknown`,
         `morio.api.account.state.invalid`,
-      ])
+      ]),
     },
   })
 
@@ -91,8 +91,8 @@ Three scratch codes will be provided that can each be used once as a fallback fo
         'application/json': {
           schema: j2s(schema['req.account.activatemfa']).swagger,
           example: examples.req.activateMfa,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('MFA secret and QR code', examples.res.activateMfa),
@@ -104,4 +104,3 @@ Three scratch codes will be provided that can each be used once as a fallback fo
     },
   })
 }
-

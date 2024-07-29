@@ -1,10 +1,9 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
-import { Joi, uuid } from '#shared/schema'
 import { response, errorResponse, errorResponses, formatResponseExamples } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['authentication'] }
   api.tag('authentication', 'Endpoints related to authentication')
 
@@ -18,11 +17,13 @@ export default (api, utils) => {
       content: {
         'application/json': {
           schema: {
-            oneOf: ['apikey', 'ldap', 'local', 'mrt'].map(idp => j2s(schema[`req.auth.login.${idp}`]).swagger),
+            oneOf: ['apikey', 'ldap', 'local', 'mrt'].map(
+              (idp) => j2s(schema[`req.auth.login.${idp}`]).swagger
+            ),
           },
           examples: examples.req.login,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('Account details', false, formatResponseExamples(examples.res.login)),
@@ -32,7 +33,7 @@ export default (api, utils) => {
         'morio.api.account.exists',
         `morio.api.account.state.invalid`,
         `morio.api.idp.unknown`,
-      ])
+      ]),
     },
   })
 
@@ -56,4 +57,3 @@ export default (api, utils) => {
     },
   })
 }
-

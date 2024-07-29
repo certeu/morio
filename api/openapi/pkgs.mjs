@@ -1,10 +1,9 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
-import { Joi, uuid } from '#shared/schema'
-import { response, errorResponse, errorResponses, formatResponseExamples } from './index.mjs'
+import { response, errorResponse, errorResponses } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['client packages'] }
   api.tag('client packages', 'Endpoints related to client packages')
 
@@ -21,8 +20,8 @@ Note that this will start an ephemeral container to start the build. This API en
         'application/json': {
           schema: j2s(schema['req.pkg.build.deb']).swagger,
           example: examples.req.pkgBuild.deb,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('Account details', examples.res.pkgBuild.deb),
@@ -31,7 +30,7 @@ Note that this will start an ephemeral container to start the build. This API en
         `morio.api.authentication.required`,
         'morio.api.account.exists',
         `morio.api.account.state.invalid`,
-      ])
+      ]),
     },
   })
 
@@ -47,6 +46,4 @@ You can adapt these defaults (that's why we provide them), but should [consult t
       ...errorResponse(`morio.api.authentication.required`),
     },
   })
-
 }
-

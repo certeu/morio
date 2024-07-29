@@ -30,11 +30,6 @@
       "local": "icon",
       "apikey": "icon"
     },
-    "order": [
-      "ad",
-      "local",
-      "apikey",
-      "mrt"
-    ]
+    "order": ["ad", "local", "apikey", "mrt"]
   }
 }

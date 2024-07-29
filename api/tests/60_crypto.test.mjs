@@ -1,20 +1,16 @@
-import { authenticator } from '@otplib/preset-default'
-import { store, accounts, attempt, isCoreReady, isApiReady, api, loadKeys, validateErrorResponse } from './utils.mjs'
+import { store, api, loadKeys, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
 
-const timeout = 80000
-
 describe('Encryp/Decrypt data', async () => {
   const keys = await loadKeys()
   store.set('mrt', keys.mrt)
-  const mrt = keys.mrt
 
   const time = String(Date.now())
   const data = {
     text: time,
-    json: `{ "time": "${time}" }`
+    json: `{ "time": "${time}" }`,
   }
 
   /*

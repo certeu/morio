@@ -1,6 +1,4 @@
-import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
-import { reload } from '../index.mjs'
 
 /**
  * This crypto controller handles encryption/decryption
@@ -22,7 +20,8 @@ Controller.prototype.decrypt = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await utils.validate(`req.decrypt`, req.body)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
 
@@ -50,7 +49,8 @@ Controller.prototype.encrypt = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await utils.validate(`req.encrypt`, req.body)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
 

@@ -4,16 +4,22 @@ import { roles } from '#config/roles'
 /*
  * Some re-usable schema blocks
  */
-const about = Joi.string().min(2).max(255).description('A description or nmemonic note for the acount')
-const invite = Joi.string().length(48).required().description('The account invite code')
-const provider = Joi.string().min(2).max(255).description('The ID of the identity provider to use for this account')
+const about = Joi.string()
+  .min(2)
+  .max(255)
+  .description('A description or nmemonic note for the acount')
+const invite = Joi.string().length(48).description('The account invite code')
+const provider = Joi.string()
+  .min(2)
+  .max(255)
+  .description('The ID of the identity provider to use for this account')
 const role = Joi.string().allow(roles.join()).description('The role of the account')
 const username = Joi.string().min(2).max(255).description('The username of the account')
-const overwrite = Joi.boolean().valid(true, false).description('Whether to overwrite the account, if one has a sufficiently high role')
+const overwrite = Joi.boolean()
+  .valid(true, false)
+  .description('Whether to overwrite the account, if one has a sufficiently high role')
 const password = Joi.string().min(3).max(1024).description(`The account's password`)
 const token = Joi.string().min(3).max(12).description(`The TOTP token (one-time password)`)
-
-
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -31,12 +37,12 @@ export const schema = {
     overwrite: overwrite.optional(),
   }),
   'req.account.activate': Joi.object({
-    invite: Joi.string().length(48).required(),
+    invite: invite.required(),
     provider: provider.required(),
     username: username.required(),
   }),
   'req.account.activatemfa': Joi.object({
-    invite: Joi.string().length(48).required(),
+    invite: invite.required(),
     provider: provider.required(),
     token: token.required(),
     password: password.required(),
@@ -44,12 +50,19 @@ export const schema = {
   }),
   'req.apikey.create': Joi.object({
     name: Joi.string().required().min(2).description('A name for the API key'),
-    expires: Joi.number().required().min(1).max(730).description('Number of days before the API key expires'),
+    expires: Joi.number()
+      .required()
+      .min(1)
+      .max(730)
+      .description('Number of days before the API key expires'),
     role: role.required().description('The role to assign to the API key'),
   }),
   'req.apikey.update': Joi.object({
     key: uuid.required().description('The ID of the API key'),
-    action: Joi.string().required().valid('rotate', 'disable', 'enable').description('The action to perform on the API key'),
+    action: Joi.string()
+      .required()
+      .valid('rotate', 'disable', 'enable')
+      .description('The action to perform on the API key'),
   }),
   'req.apikey.delete': Joi.object({
     key: uuid.required().description('The ID of the API key'),
@@ -93,19 +106,19 @@ export const schema = {
   'req.pkg.build.deb': Joi.object({
     Package: Joi.string().required(),
     Source: Joi.string().required(),
-    Section: Joi.string().valid("utils").required(),
-    Priority: Joi.string().valid("required,important,standard,optional,extra").required(),
+    Section: Joi.string().valid('utils').required(),
+    Priority: Joi.string().valid('required,important,standard,optional,extra').required(),
     Architecture: Joi.string().required(),
-    Essential: Joi.string().valid("no").required(),
+    Essential: Joi.string().valid('no').required(),
     Depends: Joi.array().required(),
-    "Installed-Size": Joi.number().required(),
+    'Installed-Size': Joi.number().required(),
     Maintainer: Joi.string().required(),
-    "Changed-By": Joi.string().required(),
+    'Changed-By': Joi.string().required(),
     Uploaders: Joi.array().required(),
     Homepage: Joi.string().required(),
     Description: Joi.string().required(),
     DetailedDescription: Joi.string().required(),
-    "Vcs-Git": Joi.string().required(),
+    'Vcs-Git': Joi.string().required(),
     Version: Joi.string().required(),
     Revision: Joi.number().required(),
   }),
@@ -119,14 +132,14 @@ export const schema = {
       o: Joi.string().required(),
       ou: Joi.string().required(),
       san: Joi.array().required(),
-    })
+    }),
   }),
   'req.encrypt': Joi.object({
-    data: Joi.string().required()
+    data: Joi.string().required(),
   }),
   'req.decrypt': Joi.object({
     iv: Joi.string().required(),
-    ct: Joi.string().required()
+    ct: Joi.string().required(),
   }),
 
   /*
@@ -165,4 +178,3 @@ export const schema = {
  * @retrn {object} result - The validation result
  */
 export const validate = async (key, input) => await sharedValidate(key, input, schema)
-

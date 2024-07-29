@@ -15,12 +15,13 @@ export const asNull = () => null
  * @param {string} username - The username (eg: 'Tony Soprano ')
  * @return {string} username - The username cleaned (eg: 'tony soprano')
  */
-export const clean = (username) => username === null ? null : String(username).toLowerCase().trim()
+export const clean = (username) =>
+  username === null ? null : String(username).toLowerCase().trim()
 
 /**
  * Helper method to force data to a string
  */
-export const asString = (data) => data === null ? null : String(data)
+export const asString = (data) => (data === null ? null : String(data))
 
 /**
  * Helper method to force data to a (known) status

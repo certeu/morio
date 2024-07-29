@@ -1,8 +1,8 @@
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
-import { availableRoles, currentProvider } from '../rbac.mjs'
+import { availableRoles } from '../rbac.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -130,7 +130,8 @@ Controller.prototype.login = async (req, res) => {
    * Validate high-level input against schema
    */
   const [valid1, err1] = await utils.validate(`req.auth.login`, req.body)
-  if (!valid1) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+  if (!valid1)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err1.message,
     })
 
@@ -164,7 +165,6 @@ Controller.prototype.login = async (req, res) => {
    */
   const [valid2, err2] = await utils.validate(`req.auth.login.${providerType}`, req.body)
   if (!valid2) {
-    log.todo(valid, err2)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err2.message,
     })
@@ -173,13 +173,9 @@ Controller.prototype.login = async (req, res) => {
   /*
    * Looks good, hand over to provider
    */
-  const idpResult = await idps[providerType](
-    providerId,
-    req.body.data,
-    req,
-    res
-  )
-  if (!Array.isArray(idpResult)) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+  const idpResult = await idps[providerType](providerId, req.body.data, req, res)
+  if (!Array.isArray(idpResult))
+    return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 
   /*
    * Deconstruct whether it worked

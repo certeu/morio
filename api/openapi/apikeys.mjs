@@ -1,10 +1,10 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
-import { Joi, uuid } from '#shared/schema'
+import { uuid } from '#shared/schema'
 import { response, errorResponse, errorResponses, security } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api, utils) => {
+export default (api) => {
   const shared = { tags: ['apikeys'] }
   api.tag('apikeys', 'Endpoints for the local API keys identity provider')
 
@@ -34,8 +34,8 @@ export default (api, utils) => {
         'application/json': {
           schema: j2s(schema['req.apikey.create']).swagger,
           example: examples.res.createApikey,
-        }
-      }
+        },
+      },
     },
     responses: {
       200: response('API key details', examples.res.createApikey),
@@ -45,20 +45,22 @@ export default (api, utils) => {
         'morio.api.nominative.account.required',
         'morio.api.account.role.unavailable',
         'morio.api.db.failure',
-      ])
+      ]),
     },
   })
 
   /*
    * Let's re-use the parameters config for the remaining endpoints
    */
-  const parameters = [{
-    in: 'path',
-    name: `id`,
-    schema: j2s(uuid.required().description('The ID of the API key')).swagger,
-    retuired: true,
-    description: 'The API key ID (a UUID)'
-  }]
+  const parameters = [
+    {
+      in: 'path',
+      name: `id`,
+      schema: j2s(uuid.required().description('The ID of the API key')).swagger,
+      retuired: true,
+      description: 'The API key ID (a UUID)',
+    },
+  ]
 
   /*
    * Going to iterate over the 3 actions for this endpoint
@@ -66,7 +68,7 @@ export default (api, utils) => {
   for (const [action, desc] of Object.entries({
     rotate: 'Rotate an API key',
     enable: 'Enable a previously disabled API key',
-    disable: 'Disable an API key'
+    disable: 'Disable an API key',
   })) {
     api.patch(`/apikey/:id/${action}`, {
       ...shared,
@@ -80,7 +82,7 @@ export default (api, utils) => {
           `morio.api.authentication.required`,
           'morio.api.db.failure',
           'morio.api.account.role.insufficient',
-        ])
+        ]),
       },
     })
   }
@@ -97,8 +99,7 @@ export default (api, utils) => {
         `morio.api.authentication.required`,
         'morio.api.db.failure',
         'morio.api.account.role.insufficient',
-      ])
+      ]),
     },
   })
 }
-

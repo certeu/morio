@@ -1,58 +1,54 @@
 {
-  "cluster":{
-    "name":"Morio Unit Tests",
-    "broker_nodes":[
-      "unit.test.morio.it"
-    ]
+  "cluster": {
+    "name": "Morio Unit Tests",
+    "broker_nodes": ["unit.test.morio.it"]
   },
-  "tokens":{
-    "flags":{
-      "HEADLESS_MORIO":false,
-      "DISABLE_ROOT_TOKEN":false
+  "tokens": {
+    "flags": {
+      "HEADLESS_MORIO": false,
+      "DISABLE_ROOT_TOKEN": false
     },
-    "secrets":{
-      "TEST_SECRET_1":"{\"iv\":\"4b16f0efa70cdcad568441143b0ebbea\",\"ct\":\"28262a424d8b3378b2ac78c7074deeec\"}",
-      "TEST_SECRET_2":"{\"iv\":\"bc0fb68aa6f37cc4eda8fca6a50d7448\",\"ct\":\"cc786dfb1c5fe6dd4ad389855a206d57\"}",
-      "LDAP_BIND_SECRET":"{\"iv\":\"8b185698a44410657ce84ba6a35b82ce\",\"ct\":\"7ed3e4c461455f3a4a8b44f834935b6b\"}"
+    "secrets": {
+      "TEST_SECRET_1": "{\"iv\":\"4b16f0efa70cdcad568441143b0ebbea\",\"ct\":\"28262a424d8b3378b2ac78c7074deeec\"}",
+      "TEST_SECRET_2": "{\"iv\":\"bc0fb68aa6f37cc4eda8fca6a50d7448\",\"ct\":\"cc786dfb1c5fe6dd4ad389855a206d57\"}",
+      "LDAP_BIND_SECRET": "{\"iv\":\"8b185698a44410657ce84ba6a35b82ce\",\"ct\":\"7ed3e4c461455f3a4a8b44f834935b6b\"}"
     }
   },
-  "iam":{
-    "providers":{
-      "apikey":{
-        "provider":"apikey",
-        "id":"apikey",
-        "label":"API Key"
+  "iam": {
+    "providers": {
+      "apikey": {
+        "provider": "apikey",
+        "id": "apikey",
+        "label": "API Key"
       },
-      "mrt":{
-
+      "mrt": {},
+      "local": {
+        "provider": "local",
+        "id": "mrt",
+        "label": "Morio Account"
       },
-      "local":{
-        "provider":"local",
-        "id":"mrt",
-        "label":"Morio Account"
-      },
-      "ldap":{
-        "provider":"ldap",
-        "verify_certificate":false,
-        "id":"ldap",
-        "label":"LDAP",
-        "about":"Test LDAP server",
-        "server":{
-          "url":"ldap://ldap:10389",
-          "bindDN":"uid=admin,ou=system",
-          "bindCredentials":"{{{ LDAP_BIND_SECRET }}}",
-          "searchBase":"ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it",
-          "searchFilter":"(&(objectclass=person)(uid={{username}}))"
+      "ldap": {
+        "provider": "ldap",
+        "verify_certificate": false,
+        "id": "ldap",
+        "label": "LDAP",
+        "about": "Test LDAP server",
+        "server": {
+          "url": "ldap://ldap:10389",
+          "bindDN": "uid=admin,ou=system",
+          "bindCredentials": "{{{ LDAP_BIND_SECRET }}}",
+          "searchBase": "ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it",
+          "searchFilter": "(&(objectclass=person)(uid={{username}}))"
         },
-        "username_field":"uid",
-        "rbac":{
-          "manager":{
-            "attribute":"employeetype",
-            "regex":"^manager$"
+        "username_field": "uid",
+        "rbac": {
+          "manager": {
+            "attribute": "employeetype",
+            "regex": "^manager$"
           },
-          "operator":{
-            "attribute":"employeetype",
-            "regex":"^admin$"
+          "operator": {
+            "attribute": "employeetype",
+            "regex": "^admin$"
           }
         }
       }
