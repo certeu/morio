@@ -248,30 +248,6 @@ Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitiz
 Controller.prototype.getPresets = async (req, res) => res.send(utils.getPresets())
 
 /**
- * Submits a decryption request to core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.decrypt = async (req, res) => {
-  const [status, result] = await utils.coreClient.post(`/decrypt`, bodyPlusHeaders(req))
-
-  return res.status(status).send(result)
-}
-
-/**
- * Submits an encryption request to core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.encrypt = async (req, res) => {
-  const [status, result] = await utils.coreClient.post(`/encrypt`, bodyPlusHeaders(req))
-
-  return res.status(status).send(result)
-}
-
-/**
  * Submits a build request for a client package to core
  *
  * @param {object} req - The request object from Express

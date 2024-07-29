@@ -43,6 +43,14 @@ export const errors = {
     detail: 'When reaching out to Morio Core, we received a status code 503.',
   },
   /*
+   * Status issues coming from core
+   */
+  'morio.api.input.malformed': {
+    status: 503,
+    title: 'Input malformed',
+    detail: 'The input provided is malformed.',
+  },
+  /*
    * Failed to retrieve info data
    */
   'morio.api.info.unavailable': {

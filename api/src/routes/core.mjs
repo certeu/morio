@@ -72,16 +72,6 @@ export function routes(app) {
   app.get(`/pkgs/clients/deb/defaults`, rbac.operator, (req, res) => Core.getClientPackageDefaults(req, res, 'deb'))
 
   /*
-   * Encrypt data
-   */
-  app.post(`/encrypt`, rbac.operator, Core.encrypt)
-
-  /*
-   * Decrypt data
-   */
-  app.post(`/decrypt`, rbac.engineer, Core.decrypt)
-
-  /*
    * Build a .deb client package
    */
   app.post(`/pkgs/clients/deb/build`, rbac.operator, (req, res) => Core.buildClientPackage(req, res, 'deb'))

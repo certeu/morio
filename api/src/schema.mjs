@@ -125,7 +125,8 @@ export const schema = {
     data: Joi.string().required()
   }),
   'req.decrypt': Joi.object({
-    data: Joi.string().required()
+    iv: Joi.string().required(),
+    ct: Joi.string().required()
   }),
 
   /*

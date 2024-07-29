@@ -32,7 +32,7 @@ export default (api, utils) => {
   })
 
   for (const action of ['Decrypt', 'Encrypt']) {
-    api.post(`/${action}`, {
+    api.post(`/${action.toLowerCase()}`, {
       ...shared,
       summary: `${action} data`,
       description: `${action}s data with Morio's internal key pair`,
