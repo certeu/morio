@@ -1,0 +1,163 @@
+{
+  "broadcast": {
+    "from": "poc-morio-node1.cert.europa.eu",
+    "to": "poc-morio-node3.cert.europa.eu",
+    "cluster": "e291267d-9d42-48cc-8d8d-a4963bad3107",
+    "node": "a3bf4e7e-4b52-455f-bb68-3bb316287133",
+    "version": "0.2.0",
+    "settings_serial": 1722263233587,
+    "node_serial": 1,
+    "status": {
+      "cluster": {
+        "code": 2,
+        "color": "amber",
+        "time": 1722263986215,
+        "updated": 1722263986414
+      },
+      "nodes": {
+        "poc-morio-node1.cert.europa.eu": {
+          "broker": 1,
+          "api": 0,
+          "ca": 0,
+          "db": 1,
+          "proxy": 0,
+          "console": 1,
+          "ui": 0
+        }
+      }
+    },
+    "nodes": {
+      "a3bf4e7e-4b52-455f-bb68-3bb316287133": {
+        "fqdn": "poc-morio-node1.cert.europa.eu",
+        "hostname": "poc-morio-node1",
+        "ip": "10.1.1.175",
+        "serial": 1,
+        "uuid": "a3bf4e7e-4b52-455f-bb68-3bb316287133",
+        "settings": 1722263233587
+      }
+    },
+    "broadcast": true,
+    "uptime": 3
+  }
+}
+{
+  "from": "poc-morio-node1.cert.europa.eu",
+  "to": "poc-morio-node2.cert.europa.eu",
+  "cluster": "e291267d-9d42-48cc-8d8d-a4963bad3107",
+  "node": "a3bf4e7e-4b52-455f-bb68-3bb316287133",
+  "version": "0.2.0",
+  "settings_serial": 1722263233587,
+  "node_serial": 1,
+  "status": {
+    "cluster": {
+      "code": 2,
+      "color": "amber",
+      "time": 1722264956909,
+      "updated": 1722264957220
+    },
+    "nodes": {
+      "poc-morio-node1.cert.europa.eu": {
+        "console": 1,
+        "broker": 1,
+        "api": 0,
+        "db": 1,
+        "ca": 0,
+        "proxy": 0,
+        "ui": 0
+      }
+    }
+  },
+  "nodes": {
+    "a3bf4e7e-4b52-455f-bb68-3bb316287133": {
+      "fqdn": "poc-morio-node1.cert.europa.eu",
+      "hostname": "poc-morio-node1",
+      "ip": "10.1.1.175",
+      "serial": 1,
+      "uuid": "a3bf4e7e-4b52-455f-bb68-3bb316287133",
+      "settings": 1722263233587
+    }
+  },
+  "broadcast": true,
+  "uptime": 2
+}
+
+
+action: "ELECT"
+    errors: [
+      "LEADER_MISMATCH"
+    ]
+    cluster: "e291267d-9d42-48cc-8d8d-a4963bad3107"
+    node: "a3bf4e7e-4b52-455f-bb68-3bb316287133"
+    node_serial: 1
+    settings_serial: 1722263233587
+    version: "0.2.0"
+    nodes: {
+      "a3bf4e7e-4b52-455f-bb68-3bb316287133": {
+        "fqdn": "poc-morio-node1.cert.europa.eu",
+        "hostname": "poc-morio-node1",
+        "ip": "10.1.1.175",
+        "serial": 1,
+        "uuid": "a3bf4e7e-4b52-455f-bb68-3bb316287133",
+        "settings": 1722263233587
+      }
+    }
+    status: {
+      "cluster": {
+        "code": 2,
+        "color": "amber",
+        "time": 1722264956909,
+        "updated": 1722264961059
+      },
+      "nodes": {
+        "poc-morio-node1.cert.europa.eu": {
+          "console": 1,
+          "broker": 1,
+          "api": 0,
+          "db": 1,
+          "ca": 0,
+          "proxy": 0,
+          "ui": 0
+        }
+      }
+    }
+
+
+    {
+  "from": "poc-morio-node3.cert.europa.eu",
+  "to": "poc-morio-node1.cert.europa.eu",
+  "cluster": "e291267d-9d42-48cc-8d8d-a4963bad3107",
+  "node": "c61c66ed-d91e-4d92-8a24-f02297ecc7db",
+  "version": "0.2.0",
+  "settings_serial": 1722263233587,
+  "node_serial": 3,
+  "status": {
+    "cluster": {
+      "code": 2,
+      "color": "amber",
+      "time": 1722264970450,
+      "updated": 1722264970753
+    },
+    "nodes": {
+      "poc-morio-node3.cert.europa.eu": {
+        "broker": 1,
+        "db": 1,
+        "console": 1,
+        "api": 0,
+        "proxy": 0,
+        "ui": 0,
+        "ca": 1
+      }
+    }
+  },
+  "nodes": {
+    "c61c66ed-d91e-4d92-8a24-f02297ecc7db": {
+      "fqdn": "poc-morio-node3.cert.europa.eu",
+      "hostname": "poc-morio-node3",
+      "serial": 3,
+      "uuid": "c61c66ed-d91e-4d92-8a24-f02297ecc7db",
+      "settings": 1722263233587
+    }
+  },
+  "broadcast": true,
+  "uptime": 31
+}

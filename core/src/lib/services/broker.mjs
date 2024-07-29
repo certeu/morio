@@ -27,20 +27,33 @@ export const service = {
        */
       const result = await testUrl(
         `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
-        { returnAs: 'json' }
+        { returnAs: 'json', returnError: true }
       )
-      const local = utils.getNodeSerial()
-      const status = result && (result.is_healthy || !result.nodes_down.includes(local)) ? 0 : 1
-      utils.setServiceStatus('broker', status)
-      /*
-       * Also track the leader state
-       */
-      if (result.controller_id) {
-        utils.setLeaderSerial(result.controller_id)
-        utils.setLeading(result.controller_id === local)
-      }
+      if (result.message) {
+        /*
+         * An error from the broker is REAL BAD and something we probably cannot recover from.
+         * Unless of course, we have just started, and it just needs some time.
+         * So if uptime is below 1 minutes, we log at INFO. If it's higher, we log at ERROR.
+         */
+        const uptime = utils.getUptime()
+        if (uptime < 60) log.info(`Received an error from the broker health check. Will give it some more time as uptime is only ${uptime}s`)
+        else log.error(`Received an error from the broker health check. Not only does the broker seem down, we also cannot determine the cluster without it. Please escalate to a human.`)
 
-      return status === 0 ? true : false
+        return false
+      } else {
+        const local = utils.getNodeSerial()
+        const status = result && (result.is_healthy || !result.nodes_down.includes(local)) ? 0 : 1
+        utils.setServiceStatus('broker', status)
+        /*
+         * Also track the leader state
+         */
+        if (result.controller_id) {
+          utils.setLeaderSerial(result.controller_id)
+          utils.setLeading(result.controller_id === local)
+        }
+
+        return status === 0 ? true : false
+      }
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
