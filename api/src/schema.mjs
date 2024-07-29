@@ -75,7 +75,7 @@ export const schema = {
     }).required(),
   }),
   'req.auth.login.ldap': Joi.object({
-    provider: provider.valid('ldap').required(),
+    provider: provider.required(),
     data: Joi.object({
       password: password.required(),
       username: username.required(),

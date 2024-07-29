@@ -2,7 +2,7 @@ import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
 import { uuid, randomString, hashPassword } from '#shared/crypto'
 import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
 
 /**
  * This account controller handles apikeys in Morio

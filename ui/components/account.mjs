@@ -21,7 +21,7 @@ import {
   RestartIcon,
   LogoutIcon,
 } from 'components/icons.mjs'
-import { TimeToGo, MsAgo } from 'components/time-ago.mjs'
+import { DateAndTime, TimeToGo, TimeAgo } from 'components/time.mjs'
 import { Role } from 'components/role.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { RoleInput, StringInput, FormControl } from 'components/inputs.mjs'
@@ -56,12 +56,22 @@ export const AccountOverview = () => {
             <Role role={account.role} />
           </td>
         </tr>
-        <tr>
-          <td className="w-36 text-right font-bold">Maximum role</td>
-          <td>
-            <Role role={account.maxRole} />
-          </td>
-        </tr>
+        {account.highest_role ? (
+          <tr>
+            <td className="w-36 text-right font-bold">Maximum role</td>
+            <td>
+              <Role role={account.highest_role} />
+            </td>
+          </tr>
+        ) : null}
+        {account.available_roles ? (
+          <tr>
+            <td className="w-36 text-right font-bold">Maximum role</td>
+            <td>
+              {account.available_roles.map(role => <Role key={role} role={role} />)}
+            </td>
+          </tr>
+        ) : null}
         <tr>
           <td className="w-36 text-right font-bold">Identity Provider</td>
           <td>
@@ -73,7 +83,7 @@ export const AccountOverview = () => {
           <td>
             Your session will expire in{' '}
             <b>
-              <TimeToGo time={account.exp} />
+              <TimeToGo iso={new Date(account.exp*1000).toISOString()} />
             </b>
           </td>
         </tr>
@@ -180,7 +190,7 @@ export const AddApiKey = () => {
       setLoadingStatus([true, 'API Key Created', true, true])
       pushModal(
         <ModalWrapper keepOpenOnClick>
-          <ShowNewApiKey data={result[0].data} />
+          <ShowNewApiKey data={result[0]} />
         </ModalWrapper>
       )
     } else
@@ -226,7 +236,8 @@ const ShowNewApiKey = ({ data }) => (
     <p>
       This API key holds the <Role role={data.role} /> role and expires{' '}
       <b>
-        <TimeToGo time={data.expiresAt / 1000} />
+        <DateAndTime iso={data.expires_at} />
+        <TimeToGo time={data.expires_at / 1000} />
       </b>{' '}
       from now.
     </p>
@@ -299,12 +310,13 @@ export const Apikey = ({ data }) => (
     <Role role={data.role} />
     <span>
       <b>
-        <MsAgo time={data.createdAt} />
+        <TimeAgo time={data.created_at} />
       </b>
     </span>
     <span>
       <b>
-        <TimeToGo time={data.expiresAt / 1000} />
+        <DateAndTime iso={data.expires_at} />
+        <TimeToGo time={data.expires_at / 1000} />
       </b>{' '}
       from now
     </span>
@@ -320,7 +332,7 @@ export const AccountApiKeys = () => {
   useEffect(() => {
     const getApikeys = async () => {
       const result = await api.getApikeys()
-      if (result[1] === 200) setKeys(result[0].keys)
+      if (result[1] === 200) setKeys(result[0])
     }
     getApikeys()
   }, [refresher])
@@ -335,8 +347,8 @@ export const AccountApiKeys = () => {
           <th>Name</th>
           <th>Status</th>
           <th>Role</th>
-          <th>Created At</th>
-          <th>Expires At</th>
+          <th>Created</th>
+          <th>Expires</th>
           <th>Owner</th>
         </tr>
       </thead>
@@ -357,7 +369,7 @@ export const AccountApiKeys = () => {
               <td>
                 <code>{data.key.slice(0, 8)}</code>
               </td>
-              <td>{data.name}</td>
+              <td><b>{data.name}</b></td>
               <td>
                 <AccountStatus status={data.status} />
               </td>
@@ -367,16 +379,19 @@ export const AccountApiKeys = () => {
               <td>
                 <span>
                   <b>
-                    <MsAgo time={data.createdAt} />
+                    <TimeAgo iso={data.created_at} />
+                    <br />
+                    <small><DateAndTime iso={data.created_at} /></small>
                   </b>
                 </span>
               </td>
               <td>
                 <span>
                   <b>
-                    <TimeToGo time={data.expiresAt / 1000} />
-                  </b>{' '}
-                  from now
+                    <TimeToGo iso={data.expires_at} />
+                    <br />
+                    <small><DateAndTime iso={data.expires_at} /></small>
+                  </b>
                 </span>
               </td>
               <td>
@@ -404,7 +419,7 @@ export const EditApikey = ({ data, refresh }) => {
       if (action === 'rotate')
         pushModal(
           <ModalWrapper keepOpenOnClick>
-            <ShowRotatedApiKey data={result[0].data} />
+            <ShowRotatedApiKey data={result[0]} />
           </ModalWrapper>
         )
       else clearModal()

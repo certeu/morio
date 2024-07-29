@@ -10,7 +10,7 @@ import { useAccount } from 'hooks/use-account.mjs'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { PlayIcon } from 'components/icons.mjs'
-import { MsAgo } from 'components/time-ago.mjs'
+import { TimeAgo } from 'components/time.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
 import { StringInput, TextInput, SecretInput, RoleInput } from 'components/inputs.mjs'
@@ -93,7 +93,7 @@ export const ListAccounts = () => {
             <td>{acc.username}</td>
             <td>
               {acc.lastLogin ? (
-                <MsAgo time={acc.lastLogin} />
+                <TimeAgo time={acc.lastLogin} />
               ) : (
                 <em className="opacity-60">never</em>
               )}

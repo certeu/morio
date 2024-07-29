@@ -31,6 +31,7 @@ export default (api, utils) => {
         `morio.api.authentication.required`,
         'morio.api.account.exists',
         `morio.api.account.state.invalid`,
+        `morio.api.idp.unknown`,
       ])
     },
   })

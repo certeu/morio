@@ -190,4 +190,12 @@ export const errors = {
     title: 'Identity Provider Failure',
     detail: 'Cannot authenticate because the identity provider returned an error.',
   },
+  /*
+   * Error for when an identity provider is not known
+   */
+  'morio.api.idp.unknown': {
+    status: 403,
+    title: 'Identity Provider Unknown',
+    detail: 'Cannot authenticate because the identity provider is unknown.',
+  },
 }

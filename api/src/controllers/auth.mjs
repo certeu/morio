@@ -1,8 +1,8 @@
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
-import { availableRoles } from '../rbac.mjs'
+import { availableRoles, currentProvider } from '../rbac.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -127,26 +127,18 @@ Controller.prototype.authenticate = async (req, res) => {
  */
 Controller.prototype.login = async (req, res) => {
   /*
-   * Validate high-level input
+   * Validate high-level input against schema
    */
   const [valid1, err1] = await utils.validate(`req.auth.login`, req.body)
-  if (!valid1)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+  if (!valid1) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err1.message,
     })
 
   /*
-   * Get the provider ID
+   * Store the provider ID for reuse
    */
-  const providerId = req.body?.provider || false
-  /*
-   * Validate identity provider input
-   */
-  const [valid2, err2] = await utils.validate(`req.auth.login.${providerId}`, req.body)
-  if (!valid2)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err2.message,
-    })
+  const providerId = valid1.provider
+
   /*
    * The mrt, local, and apikey provider types cannot be instantiated
    * more than once. If anything, doing so would open up a bag of bugs.
@@ -159,12 +151,24 @@ Controller.prototype.login = async (req, res) => {
   const providerType = ['mrt', 'local', 'apikey'].includes(providerId)
     ? providerId
     : utils.getSettings(['iam', 'providers', providerId, 'provider'], false)
+
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request
    */
   if (!providerId || !providerType || typeof idps[providerType] !== 'function')
     return utils.sendErrorResponse(res, 'morio.api.ipd.unknown', req.url)
+
+  /*
+   * Validate identity provider input against schema (provider specific)
+   */
+  const [valid2, err2] = await utils.validate(`req.auth.login.${providerType}`, req.body)
+  if (!valid2) {
+    log.todo(valid, err2)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err2.message,
+    })
+  }
 
   /*
    * Looks good, hand over to provider

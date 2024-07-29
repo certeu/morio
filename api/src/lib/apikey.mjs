@@ -31,6 +31,7 @@ const nonSecretFields = [
   'role',
   'created_by',
   'created_at',
+  'expires_at',
   'updated_by',
   'updated_at',
   'last_login',
