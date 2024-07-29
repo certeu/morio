@@ -23,7 +23,7 @@ const internalRoutes = ['GET:/auth']
 /*
  * List of routes allowed while reloading
  */
-const reloadRoutes = ['GET:/status', 'GET:/info', 'GET:/reload']
+const reloadRoutes = ['GET:/status', 'GET:/up', 'GET:/info', 'GET:/reconfigure']
 
 /*
  * All routes that we allow

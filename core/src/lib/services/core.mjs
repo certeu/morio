@@ -156,6 +156,7 @@ export const service = {
        * node can have flanking nodes for which we require inter-node
        * communication.
        * So we always run a cluster, even if it's a 1-node cluster.
+       * Also, don't wait
        */
       await ensureMorioCluster(hookParams)
 

@@ -136,14 +136,9 @@ const ensureClusterHeartbeat = async () => {
  */
 export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   /*
-   * Run heartbeats locally if there's only 1 node
+   * Run heartbeats locally if there are no remote nodes
    */
-  if (utils.getBrokerCount() === 1) runLocalHeartbeat()
-
-  /*
-   * Continue, unless there's no flanking nodes
-   */
-  if (utils.getFlankingCount() < 1) return
+  if (utils.getBrokerCount() === 1 && utils.getFlankingCount() < 1) runLocalHeartbeat()
 
   /*
    *
@@ -321,7 +316,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
     return
   }
-  log.todo(JSON.stringify(data, null, 2))
+  log.todo(data)
 
   /*
    * Just because the request didn't error doesn't mean all is ok
@@ -359,12 +354,14 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Update status of cluster nodes
    */
-  for (const fqdn of Object.keys(data.status.nodes)
-    .filter((fqdn) => fqdn !== utils.getNodeFqdn())
-    .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
-    utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
+  if (data.status?.nodes) {
+    for (const fqdn of Object.keys(data.status.nodes)
+      .filter((fqdn) => fqdn !== utils.getNodeFqdn())
+      .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
+      utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
+    }
+    utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)
   }
-  utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)
 }
 
 export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {

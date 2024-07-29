@@ -57,7 +57,7 @@ const mrt = Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/)
  * The contents of the keys file/object
  */
 const keys = Joi.object({
-  jwt: mrt.required(),
+  jwt: Joi.string().required(),
   mrt: Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
   public: Joi.string().required(),
   private: Joi.string().required(),
