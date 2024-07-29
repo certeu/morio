@@ -486,8 +486,9 @@ export const ensureMorioCluster = async () => {
   /*
    * Morio is always (ready to be) a cluster.
    * This needs to run, regardless of how many nodes we have.
+   * Unless of course, we're running in ephemeral mode
    */
-  await ensureMorioClusterConsensus()
+  if (!utils.isEphemeral()) await ensureMorioClusterConsensus()
 
   /*
    * Is the cluster healthy?
