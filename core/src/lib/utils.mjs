@@ -347,7 +347,7 @@ utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
  *
  */
 utils.getNodeFqdns = () => [
-  ...utils.getSettings('cluster.broker_nodes'),
+  ...utils.getSettings('cluster.broker_nodes', []),
   ...utils.getSettings('cluster.flanking_nodes', []),
 ]
 
