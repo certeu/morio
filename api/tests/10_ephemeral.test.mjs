@@ -111,7 +111,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/docker/info',
       '/docker/containers',
       '/docker/df',
-      '/docker/all-containers',
+      '/docker/allcontainers',
       '/docker/images',
       '/docker/networks',
       '/docker/running-containers',

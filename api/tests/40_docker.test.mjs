@@ -4,12 +4,12 @@ import { strict as assert } from 'node:assert'
 
 describe('API Docker GET Info Tests', () => {
   /*
-   * GET /docker/all-containers
+   * GET /docker/allcontainers
    * Note: This is not something we test in depth,
    * as we're just passing through the output from the Docker API.
    */
-  it(`Should GET /docker/all-containers`, async () => {
-    const result = await api.get(`/docker/all-containers`)
+  it(`Should GET /docker/allcontainers`, async () => {
+    const result = await api.get(`/docker/allcontainers`)
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
@@ -241,7 +241,6 @@ describe('API Docker Container State Tests', async () => {
     it(`Should PUT /docker/containers/:id/${state}`, async () => {
       const result = await api.put(`/docker/containers/${container}/${state}`)
       const d = result[1]
-      console.log(d)
       assert.equal(Array.isArray(result), true)
       assert.equal(result.length, 3)
       assert.equal(result[0], 204)

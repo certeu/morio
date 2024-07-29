@@ -1,0 +1,40 @@
+{
+  "idps": {
+    "apikey": {
+      "id": "apikey",
+      "provider": "apikey",
+      "label": "API Key",
+      "about": false
+    },
+    "mrt": {
+      "id": "mrt",
+      "provider": "mrt",
+      "about": false
+    },
+    "local": {
+      "id": "local",
+      "provider": "local",
+      "label": "Morio Account",
+      "about": false
+    },
+    "ad": {
+      "id": "ad",
+      "provider": "ldap",
+      "label": "Active Directory",
+      "about": "Morio Tokyo branch on-prem Active Directory"
+    }
+  },
+  "ui": {
+    "visibility": {
+      "mrt": "icon",
+      "local": "icon",
+      "apikey": "icon"
+    },
+    "order": [
+      "ad",
+      "local",
+      "apikey",
+      "mrt"
+    ]
+  }
+}

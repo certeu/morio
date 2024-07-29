@@ -55,7 +55,7 @@ Controller.prototype.getIdps = async (req, res) => {
   const idps = {}
 
   /*
-   * Add the IDPs configured by the user
+   * Add the configured IDPs
    */
   const providers = utils.getSettings('iam.providers', {})
   if (providers) {

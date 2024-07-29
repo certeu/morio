@@ -40,8 +40,11 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
 Controller.prototype.buildClientPackage = async (req, res, type) => {
   /*
    * The preBuild lifecycle hook will generate the control file
+   * First we need to strip the headers from the body
    */
-  const settings = await runHook('prebuild', 'dbuilder', { customSettings: req.body })
+  const body = {...req.body}
+  delete body.headers
+  const settings = await runHook('prebuild', 'dbuilder', { customSettings: body })
 
   /*
    * Generate a certificate and key for mTLS

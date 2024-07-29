@@ -5,14 +5,25 @@ import { errors } from '../src/errors.mjs'
 import loadAnonymousEndpoints from './anonymous.mjs'
 import loadAccountsEndpoints from './accounts.mjs'
 import loadApikeysEndpoints from './apikeys.mjs'
+import loadAuthEndpoints from './auth.mjs'
+import loadClientPackagesEndpoints from './pkgs.mjs'
+import loadCryptoEndpoints from './crypto.mjs'
+import loadDockerEndpoints from './docker.mjs'
+import loadSettingsEndpoints from './settings.mjs'
 
 /**
  * Helper method to define a response
  */
-export const response = (desc, example) => ({
-  description: desc,
-  content: { 'application/json': { example }, }
-})
+export const response = (desc, example=false, examples=false) => {
+  const res = {
+    description: desc,
+    content: { 'application/json': { } }
+  }
+  if (example) res.content['application/json'] = { example }
+  else if (examples) res.content['application/json'] = { examples }
+
+  return res
+}
 
 /**
  * Helper method to define an error response
@@ -66,6 +77,15 @@ export const errorResponses = (templates) => {
 }
 
 /**
+ * Helper method to format response examples for OAS
+ */
+export const formatResponseExamples = (obj) => {
+  const newObj = {}
+  for (const [key, value] of Object.entries(obj)) newObj[key] = { value, title: 'banana' }
+  return newObj
+}
+
+/**
  * Helper array to add auth to the endpoint
  */
 export const security = [
@@ -88,6 +108,11 @@ const api = new OpenAPI(utils, 'api', {
 loadAnonymousEndpoints(api, utils)
 loadAccountsEndpoints(api, utils)
 loadApikeysEndpoints(api, utils)
+loadAuthEndpoints(api, utils)
+loadClientPackagesEndpoints(api, utils)
+loadCryptoEndpoints(api, utils)
+loadDockerEndpoints(api, utils)
+loadSettingsEndpoints(api, utils)
 
 export const spec = api.spec
 

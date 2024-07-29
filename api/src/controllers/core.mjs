@@ -222,14 +222,14 @@ Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getConfig = async (req, res) => {
-  const [status, result] = await utils.coreClient.get(`/config`)
-
-  if (result.cluster) {
-    utils.setConfig(result)
-    return res.status(status).send(result)
-  } else return res.status(500).send()
-}
+//Controller.prototype.getConfig = async (req, res) => {
+//  const [status, result] = await utils.coreClient.get(`/config`)
+//
+//  if (result.cluster) {
+//    utils.setConfig(result)
+//    return res.status(status).send(result)
+//  } else return res.status(500).send()
+//}
 
 /**
  * Loads the current (sanitized) settings
@@ -245,14 +245,7 @@ Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitiz
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getPresets = async (req, res) => {
-  const [status, result] = await utils.coreClient.get(`/presets`)
-
-  if (status === 200) {
-    utils.setPresets(result)
-    return res.status(status).send(result)
-  } else return res.status(500).send()
-}
+Controller.prototype.getPresets = async (req, res) => res.send(utils.getPresets())
 
 /**
  * Submits a decryption request to core
@@ -324,7 +317,7 @@ Controller.prototype.reconfigure = async (req, res) => {
    * de-facto be a deadlock.
    */
   log.debug('Reveived reconfigure signal from core')
-  res.status(200).send({})
+  res.status(204).send()
 
   /*
    * Reload, but don't wait for it.

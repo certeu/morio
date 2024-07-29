@@ -15,7 +15,6 @@ describe('API Create Account Tests', () => {
   it(`Should GET /accounts`, { timeout }, async () => {
     const result = await api.get(`/accounts`)
     const d = result[1]
-    console.log(d)
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)

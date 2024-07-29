@@ -45,10 +45,9 @@ export function routes(app) {
   app.get(`/docker/info`,               rbac.operator, (req, res) => Core.getDockerData(req, res, 'info'))
   app.get(`/docker/containers`,         rbac.operator, (req, res) => Core.getDockerData(req, res, 'containers'))
   app.get(`/docker/df`,                 rbac.operator, (req, res) => Core.getDockerData(req, res, 'df'))
-  app.get(`/docker/all-containers`,     rbac.operator, (req, res) => Core.getDockerData(req, res, 'all-containers'))
+  app.get(`/docker/allcontainers`,     rbac.operator, (req, res) => Core.getDockerData(req, res, 'all-containers'))
   app.get(`/docker/images`,             rbac.operator, (req, res) => Core.getDockerData(req, res, 'images'))
   app.get(`/docker/networks`,           rbac.operator, (req, res) => Core.getDockerData(req, res, 'networks'))
-  app.get(`/docker/running-containers`, rbac.operator, (req, res) => Core.getDockerData(req, res, 'containers'))
   app.get(`/docker/version`,            rbac.operator, (req, res) => Core.getDockerData(req, res, 'version'))
 
   /*
@@ -95,7 +94,7 @@ export function routes(app) {
   /*
    * Hit this route to get the running config
    */
-  app.get(`/config`, rbac.operator, Core.getConfig)
+  //app.get(`/config`, rbac.operator, Core.getConfig)
 
   /*
    * Hit this route to get the running presets

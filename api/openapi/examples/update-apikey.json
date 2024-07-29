@@ -1,0 +1,43 @@
+{
+  "rotate":{
+    "id":"600d03a3-573b-4f64-b127-96f0157cb6b0",
+    "name":"testKey2024-07-29T06:47:57.472Z",
+    "status":"active",
+    "role":"user",
+    "created_by":"local.test_user",
+    "created_at":"2024-07-29T06:47:57.679Z",
+    "expires_at":"2024-07-30T06:47:57.679Z",
+    "updated_by":"local.test_user",
+    "updated_at":"2024-07-29T06:47:57.872Z",
+    "secret":"90a28457c6bc7c5b5b40aa94730bf12b1f0bb726bfc015652147598ca781d3f7b61551716ffa8839cbad41e20ea76ffa",
+    "last_login":null,
+    "key":"600d03a3-573b-4f64-b127-96f0157cb6b0"
+  },
+  "disable": {
+    "id":"600d03a3-573b-4f64-b127-96f0157cb6b0",
+    "name":"testKey2024-07-29T06:47:57.472Z",
+    "status":"disabled",
+    "role":"user",
+    "created_by":"local.test_user",
+    "created_at":"2024-07-29T06:47:57.679Z",
+    "expires_at":"2024-07-30T06:47:57.679Z",
+    "updated_by":"local.test_user",
+    "updated_at":"2024-07-29T06:47:58.020Z",
+    "last_login":"2024-07-29T06:47:57.985Z",
+    "key":"600d03a3-573b-4f64-b127-96f0157cb6b0"
+  },
+  "enable": {
+    "id":"600d03a3-573b-4f64-b127-96f0157cb6b0",
+    "name":"testKey2024-07-29T06:47:57.472Z",
+    "status":"active",
+    "role":"user",
+    "created_by":"local.test_user",
+    "created_at":"2024-07-29T06:47:57.679Z",
+    "expires_at":"2024-07-30T06:47:57.679Z",
+    "updated_by":"local.test_user",
+    "updated_at":"2024-07-29T06:47:58.048Z",
+    "last_login":"2024-07-29T06:47:57.985Z",
+    "key":"600d03a3-573b-4f64-b127-96f0157cb6b0"
+  }
+}
+

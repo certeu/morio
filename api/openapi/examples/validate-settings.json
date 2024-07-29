@@ -1,0 +1,16 @@
+{
+  "valid": true,
+  "deployable": false,
+  "errors": [],
+  "warnings": [
+    "Node 1 runs Morio, but is not in ephemeral mode, its settings would be overwritten"
+  ],
+  "info": [
+    "Settings passed schema validation",
+    "Validating node 1: morio-node1.tokyo.morio.it",
+    "Node 1 resolves to: 10.123.12.15",
+    "Node 1 is reachable over HTTPS"
+  ],
+  "validated_settings": {}
+}
+

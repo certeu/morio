@@ -158,6 +158,11 @@ utils.getPreset = (key, dflt, opts) => {
 }
 
 /**
+ * Helper method to get all presets
+ */
+utils.getPresets = (key, dflt, opts) => store.get('presets', {})
+
+/**
  * Helper method to get the provider IDs
  *
  * @return {array} ids - The list of provider IDs

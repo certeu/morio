@@ -1,0 +1,7 @@
+{
+  "name": "Morio Standalone Example",
+  "broker_nodes": [
+    "morio-node1.tokyo.morio.it"
+  ]
+}
+
