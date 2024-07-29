@@ -26,7 +26,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Validate request against schema
    */
-  log.todo(JSON.stringify(data, null, 2))
+  log.todo(JSON.stringify(req.body, null, 2))
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
   if (!valid) {
     log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
