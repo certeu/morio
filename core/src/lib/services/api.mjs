@@ -64,10 +64,13 @@ export const reconfigureApi = async () => {
   else log.warn(`API did not come up before timeout`)
 }
 
-const isApiUp = async (reconfigure=false) => {
-  const status = await testUrl(`http://api:${utils.getPreset('MORIO_API_PORT')}/${reconfigure ? 'reconfigure' : 'up'}`, {
-    returnAs: 'status',
-  })
+const isApiUp = async (reconfigure = false) => {
+  const status = await testUrl(
+    `http://api:${utils.getPreset('MORIO_API_PORT')}/${reconfigure ? 'reconfigure' : 'up'}`,
+    {
+      returnAs: 'status',
+    }
+  )
 
   return status === 204
 }

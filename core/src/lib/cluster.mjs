@@ -321,6 +321,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
     return
   }
+  log.todo(JSON.stringify(data, null, 2))
 
   /*
    * Just because the request didn't error doesn't mean all is ok
@@ -476,7 +477,7 @@ export const ensureMorioCluster = async () => {
         Aliases: [
           'core',
           'coredocs',
-          utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`
+          utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`,
         ],
       }, // Endpoint config
       true // Disconnect from other networks

@@ -126,7 +126,7 @@ export const createDockerNetwork = async (name) => {
 
   let success
   try {
-    [success] = await runDockerApiCommand('createNetwork', config, true)
+    ;[success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
     log.warn({ err })
   }

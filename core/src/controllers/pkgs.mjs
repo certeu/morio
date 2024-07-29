@@ -42,7 +42,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
    * The preBuild lifecycle hook will generate the control file
    * First we need to strip the headers from the body
    */
-  const body = {...req.body}
+  const body = { ...req.body }
   delete body.headers
   const settings = await runHook('prebuild', 'dbuilder', { customSettings: body })
 

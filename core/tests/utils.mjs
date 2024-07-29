@@ -5,7 +5,7 @@ import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
 import axios from 'axios'
-import { readJsonFile } from "#shared/fs"
+import { readJsonFile } from '#shared/fs'
 import path from 'path'
 
 /*

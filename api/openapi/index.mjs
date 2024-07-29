@@ -1,4 +1,10 @@
-import { OpenAPI } from '#shared/openapi'
+import {
+  OpenAPI,
+  response,
+  errorResponse as sharedErrorResponse,
+  errorResponses as sharedErrorResponses,
+  formatResponseExamples
+} from '#shared/openapi'
 import { utils } from '../src/lib/utils.mjs'
 import { errors } from '../src/errors.mjs'
 import loadAnonymousEndpoints from './anonymous.mjs'
@@ -11,85 +17,20 @@ import loadDockerEndpoints from './docker.mjs'
 import loadSettingsEndpoints from './settings.mjs'
 
 /**
- * Helper method to define a response
- */
-export const response = (desc, example = false, examples = false) => {
-  const res = {
-    description: desc,
-    content: { 'application/json': {} },
-  }
-  if (example) res.content['application/json'] = { example }
-  else if (examples) res.content['application/json'] = { examples }
-
-  return res
-}
-
-/**
- * Helper method to define an error response
- */
-export const errorResponse = (template) => {
-  const err = errors[template]
-  const data = {}
-  data[err.status] = {
-    description: err.title,
-    content: { 'application/problem+json': { example: err } },
-  }
-
-  return data
-}
-
-/**
- * Helper method to define multipla error responses
- * Also allows multiple responses with the same status code
- */
-export const errorResponses = (templates) => {
-  const codes = {}
-  for (const template of templates) {
-    const err = errors[template]
-    if (typeof codes[err.status] === 'undefined') {
-      codes[err.status] = {
-        description: err.title,
-        content: { 'application/problem+json': { example: err } },
-      }
-    } else {
-      const examples = {}
-      if (codes[err.status].content['application/problem+json'].example) {
-        examples[codes[err.status].content['application/problem+json'].example.title] = {
-          value: codes[err.status].content['application/problem+json'].example,
-        }
-        //delete codes[err.status].content['application/problem+json'].example
-      } else {
-        for (const [id, val] of Object.entries(
-          codes[err.status].content['application/problem+json'].examples
-        )) {
-          examples[id] = val
-        }
-      }
-      examples[err.title] = { value: err }
-      codes[err.status] = {
-        description: 'Multiple responses with this status code',
-        content: { 'application/problem+json': { examples } },
-      }
-    }
-  }
-
-  return codes
-}
-
-/**
- * Helper method to format response examples for OAS
- */
-export const formatResponseExamples = (obj) => {
-  const newObj = {}
-  for (const [key, value] of Object.entries(obj)) newObj[key] = { value, title: 'banana' }
-  return newObj
-}
-
-/**
  * Helper array to add auth to the endpoint
  */
-export const security = [{ 'API Key': [] }, { 'JWT in Header': [] }, { 'JWT in Cookie': [] }]
+const security = [{ 'API Key': [] }, { 'JWT in Header': [] }, { 'JWT in Cookie': [] }]
 
+/**
+ * Can't load the errors in the shared code as the are different per API
+ * so instead, we wrap these methods and pass them in
+ */
+const errorResponse = (template) => sharedErrorResponse(template, errors)
+const errorResponses = (templates) => sharedErrorResponses(templates, errors)
+
+/**
+ * Setup a helper object to build out the OpenAPI specification
+ */
 const api = new OpenAPI(utils, 'api', {
   components: {
     securitySchemes: {
@@ -101,6 +42,9 @@ const api = new OpenAPI(utils, 'api', {
   paths: {},
 })
 
+/*
+ * Now pass the helper object and utils to the various groups of endpoints
+ */
 loadAnonymousEndpoints(api, utils)
 loadAccountsEndpoints(api, utils)
 loadApikeysEndpoints(api, utils)
@@ -110,4 +54,22 @@ loadCryptoEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
 loadSettingsEndpoints(api, utils)
 
-export const spec = api.spec
+/*
+ * Finally, this is our spec
+ */
+const spec = api.spec
+
+/*
+ * And these are the named exports
+ */
+export {
+  api,
+  errors,
+  spec,
+  security,
+  response,
+  errorResponse,
+  errorResponses,
+  formatResponseExamples,
+}
+

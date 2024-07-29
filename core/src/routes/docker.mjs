@@ -20,7 +20,6 @@ export function routes(app) {
    * API routes to get data from a specific container image
    */
   app.get(`/docker/images/:id`, (req, res) => Docker.getImageData(req, res))
-  app.get(`/docker/images/:id/history`, (req, res) => Docker.getImageData(req, res, 'history'))
 
   /*
    * API routes to get data from a specific docker network

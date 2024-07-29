@@ -73,11 +73,14 @@ export const utils = { hooks: { services: {} } }
  * @return {array} list - The list of all FQDNs
  *
  */
-utils.getAllFqdns = () => utils.isEphemeral() ? [] : [
-  ...utils.getSettings('cluster.broker_nodes'),
-  ...utils.getSettings('cluster.flanking_nodes', []),
-  ...(utils.getSettings('cluster.fqdn', false) ? [utils.getSettings('cluster.fqdn')] : []),
-]
+utils.getAllFqdns = () =>
+  utils.isEphemeral()
+    ? []
+    : [
+        ...utils.getSettings('cluster.broker_nodes'),
+        ...utils.getSettings('cluster.flanking_nodes', []),
+        ...(utils.getSettings('cluster.fqdn', false) ? [utils.getSettings('cluster.fqdn')] : []),
+      ]
 
 /**
  * Helper method to number of broker nodes

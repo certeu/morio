@@ -1,18 +1,51 @@
-import { getPreset } from '#config'
-import { OpenAPI } from '#shared/openapi'
+import {
+  OpenAPI,
+  response,
+  errorResponse as sharedErrorResponse,
+  errorResponses as sharedErrorResponses,
+  formatResponseExamples
+} from '#shared/openapi'
 import { utils } from '../src/lib/utils.mjs'
-//import { paths as setup } from './setup.mjs'
-//import { paths as status } from './status.mjs'
-//import { paths as validate } from './validate.mjs'
-//import { paths as docker } from './docker.mjs'
+import { errors } from '../src/errors.mjs'
+import loadClusterEndpoints from './cluster.mjs'
+import loadDockerEndpoints from './docker.mjs'
 
-const api = new OpenAPI(utils, 'core')
+/**
+ * Can't load the errors in the shared code as the are different per API
+ * so instead, we wrap these methods and pass them in
+ */
+const errorResponse = (template) => sharedErrorResponse(template, errors)
+const errorResponses = (templates) => sharedErrorResponses(templates, errors)
 
+/**
+ * Setup a helper object to build out the OpenAPI specification
+ */
+const api = new OpenAPI(utils, 'api', {
+  components: { },
+  paths: {},
+})
 
-  //app.post('/cluster/heartbeat', (req, res) => Cluster.heartbeat(req, res))
-  //app.post('/cluster/sync', (req, res) => Cluster.sync(req, res))
-  //app.post('/cluster/elect', (req, res) => Cluster.elect(req, res))
-  //app.post('/cluster/join', (req, res) => Cluster.join(req, res))
+/*
+ * Now pass the helper object and utils to the various groups of endpoints
+ */
+loadClusterEndpoints(api, utils)
+loadDockerEndpoints(api, utils)
 
+/*
+ * Finally, this is our spec
+ */
+const spec = api.spec
 
-export const spec = api.spec
+/*
+ * And these are the named exports
+ */
+export {
+  api,
+  errors,
+  spec,
+  response,
+  errorResponse,
+  errorResponses,
+  formatResponseExamples,
+}
+

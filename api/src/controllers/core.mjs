@@ -138,7 +138,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Make sure setting are valid
    */
-  if (!report.valid) return utils.sendErrorResponse(res, 'morio.api.settings.invalid', req.url)
+  if (!report.valid) return utils.sendErrorResponse(res, 'morio.api.settings.invalid', req.url, report.errors ? { validation_errors: report.errors } : false)
 
   /*
    * Make sure settings are deployable
