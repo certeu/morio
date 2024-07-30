@@ -5,7 +5,7 @@ import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
-import { validDataWithChecksum } from '../lib/services/core.mjs'
+import { dataWithChecksum, validDataWithChecksum } from '../lib/services/core.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -106,7 +106,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Always return status 200, be specific in the data
    */
-  return res.status(200).send({
+  return res.status(200).send(dataWithChecksum({
     action,
     errors,
     cluster: utils.getClusterUuid(),
@@ -120,7 +120,7 @@ Controller.prototype.heartbeat = async (req, res) => {
     version: utils.getVersion(),
     nodes: utils.getClusterNodes(),
     status: utils.getStatus(),
-  })
+  }))
 }
 
 /**
