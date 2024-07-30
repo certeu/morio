@@ -413,18 +413,18 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     errors.push(err)
-    log.info(`Version mismatch in ${type} from node ${data.node}: ${err}`)
+    log.info(`Version mismatch in ${type} from ${data.from.fqdn}: ${err}`)
   }
 
   /*
    * Verify we know this node
    * If there's a mismatch there is nothing we can do so this is lowest priority.
    */
-  if (!utils.getNodeFqdns().includes(data.from)) {
+  if (!utils.getNodeFqdns().includes(data.from.fqdn)) {
     const err = 'ROGUE_CLUSTER_MEMBER'
     errors.push(err)
     log.warn(
-      `Rogue cluster member. Received heartbeat from ${data.from} which is not a node of this cluster: ${err}`
+      `Rogue cluster member. Received heartbeat from ${data.from.fqdn} which is not a node of this cluster: ${err}`
     )
   }
 
@@ -445,7 +445,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
     const err = 'SETTINGS_SERIAL_MISMATCH'
     errors.push(err)
     action = 'SYNC'
-    log.debug(`Settings serial mismatch in ${type} from node ${data.node}: ${err}`)
+    log.debug(`Settings serial mismatch in ${type} from ${data.from.fqdn}: ${err}`)
   }
 
   /*
@@ -505,7 +505,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * It it's a valid hearbeat, add the node info to the state
    */
   if (errors.length === 0) {
-    if (data.nodes[data.node]) utils.setClusterNode(data.node, data.nodes[data.node])
+    if (data.nodes[data.from.uuid]) utils.setClusterNode(data.from.uuid, data.nodes[data.from.uuid])
   }
 
   return { action, errors }
