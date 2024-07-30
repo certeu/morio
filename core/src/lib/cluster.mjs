@@ -5,6 +5,7 @@ import { serviceCodes } from '#shared/errors'
 import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
+import { isBrokerLeading } from './services/broker.mjs'
 import { log, utils } from './utils.mjs'
 
 /*
@@ -157,20 +158,24 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * Create a heartbeat for each target
    */
   for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
-    if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
-    else {
-      /*
-       * Do not stack timeouts
-       */
-      const running = utils.getHeartbeatOut(fqdn)
-      if (running) clearTimeout(running)
-      /*
-       * Store timeout ID so we can cancel it later
-       */
-      utils.setHeartbeatOut(
-        fqdn,
-        setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
-      )
+    if (fqdn) {
+      if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
+      else {
+        /*
+         * Do not stack timeouts
+         */
+        const running = utils.getHeartbeatOut(fqdn)
+        if (running) clearTimeout(running)
+        /*
+         * Store timeout ID so we can cancel it later
+         */
+        utils.setHeartbeatOut(
+          fqdn,
+          setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
+        )
+      }
+    } else {
+      log.todo(targets, `FQDN of target is not valid to send hearbteat to: ${fqdn}`)
     }
   }
 }
@@ -436,13 +441,38 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
     !data.status?.cluster?.leader_serial ||
     data.status.cluster.leader_serial !== utils.getLeaderSerial()
   ) {
-    const err = 'LEADER_MISMATCH'
-    errors.push(err)
-    action = 'LEADER_CHANGE'
-    log.info({
-      remote_leader: data.status?.cluster?.leader_serial,
-      local_leader: utils.getLeaderSerial(),
-    }, `Leader mismatch in ${type} from node ${data.node}: ${err}`)
+    /*
+     * Do they look to us as their leader?
+     */
+    if (data.status?.cluster?.leader_serial === utils.getNodeSerial()) {
+      /*
+       * Are they correct
+       */
+      const leading = await isBrokerLeading()
+      if (leading) {
+        /*
+         * We hereby humbly accept our leading role
+         */
+        utils.setLeaderSerial(utils.getNodeSerial())
+        log.info(`We are now leading this cluster`)
+      } else {
+        const err = 'LEADER_MISMATCH'
+        errors.push(err)
+        action = 'LEADER_CHANGE'
+        log.info({
+          remote_leader: data.status?.cluster?.leader_serial,
+          local_leader: utils.getLeaderSerial(),
+        }, `Node ${data.node} disagrees about the leader in ${type}: ${err}`)
+      }
+    } else {
+        const err = 'LEADER_MISMATCH'
+        errors.push(err)
+        action = 'LEADER_CHANGE'
+        log.info({
+          remote_leader: data.status?.cluster?.leader_serial,
+          local_leader: utils.getLeaderSerial(),
+        }, `Leader update received from Node ${data.node} in ${type}: ${err}`)
+    }
   }
 
   /*

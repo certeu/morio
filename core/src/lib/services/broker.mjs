@@ -203,3 +203,20 @@ const getTopics = async () => {
 
   return result
 }
+
+/**
+ * This method checks whether or not the local broker is leading the cluster
+ *
+ * @return {bool} result - True if the broker is leading, false if not
+ */
+export const isBrokerLeading = async () => {
+  const result = await testUrl(`http://broker:9644/v1/cluster/health_overview`, {
+    ignoreCertificate: true,
+    returnAs: 'json',
+  })
+
+  return (result && result.controller_id && result.controller_id === utils.getNodeSerial())
+    ? true
+    : false
+}
+
