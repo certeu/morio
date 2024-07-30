@@ -369,7 +369,8 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   if (data?.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
     if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
-  } else {
+  }
+  else if (Array.isArray(data?.nodes)) {
     for (const uuid in data.nodes) {
       /*
        * It it's a valid hearbeat, add the node info to the state
