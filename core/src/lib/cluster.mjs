@@ -146,6 +146,16 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   const targets = broadcast ? utils.getNodeFqdns() : [utils.getLeaderFqdn()]
 
   /*
+   * If we are leaderless, targets will hold [false] so guard against that
+   * just defer for a while, then try again
+   */
+  if (targets.length === 1 && targets[0] === false) {
+    const delay = 3000
+    log.debug(`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/1000)} seconds`)
+    return setTimeout(async () => runHeartbeat(true, false), 3000)
+  }
+
+  /*
    * If there are no targets, that might indicate a leader change.
    * We stop the heartbeat, TODO: Can we recover from this?
    */
@@ -158,24 +168,20 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * Create a heartbeat for each target
    */
   for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
-    if (fqdn) {
-      if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
-      else {
-        /*
-         * Do not stack timeouts
-         */
-        const running = utils.getHeartbeatOut(fqdn)
-        if (running) clearTimeout(running)
-        /*
-         * Store timeout ID so we can cancel it later
-         */
-        utils.setHeartbeatOut(
-          fqdn,
-          setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
-        )
-      }
-    } else {
-      log.todo({ targets, leading: utils.isLeading() }, `FQDN of target is not valid to send hearbteat to: ${fqdn}`)
+    if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
+    else {
+      /*
+       * Do not stack timeouts
+       */
+      const running = utils.getHeartbeatOut(fqdn)
+      if (running) clearTimeout(running)
+      /*
+       * Store timeout ID so we can cancel it later
+       */
+      utils.setHeartbeatOut(
+        fqdn,
+        setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
+      )
     }
   }
 }
