@@ -47,7 +47,6 @@ export const service = {
         /*
          * Also track the leader state
          */
-        log.todo(result)
         if (result.controller_id) {
           utils.setLeaderSerial(result.controller_id)
           utils.setLeading(result.controller_id === local)
