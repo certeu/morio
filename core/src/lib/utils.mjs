@@ -1195,7 +1195,7 @@ utils.validate = validateMethod
  * For debugging
  */
 utils.dumpStore = () => {
-  const dump = {...store}
-  delete dumnp.cache
+  const dump = { ...store }
+  delete dump.cache
   log.debug(JSON.stringify(dump, null, 2))
 }

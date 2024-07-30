@@ -53,7 +53,8 @@ export const service = {
             weAre: local
           })
           utils.setLeaderSerial(result.controller_id)
-          utils.setLeading(result.controller_id === local)
+          if (result.controller_id === local) utils.beginLeading()
+          else utils.endLeading()
         }
 
         return status === 0 ? true : false
