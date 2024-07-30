@@ -69,4 +69,13 @@ export const errors = {
     detail:
       'The provided settings do not include the FQDN used to submit this request. This mismatch indicates the settings are unlikely to be correct.',
   },
+  /*
+   * Error for when the settings are deployed on a host that's not listed as a node
+   */
+  'morio.core.checksum.mismatch': {
+    status: 400,
+    title: 'Data checksum mismatch',
+    detail:
+      'The data checksum could not be matched. This mismatch indicates a lack of common ground between both nodes.',
+  },
 }

@@ -600,17 +600,6 @@ const inviteClusterNodeAttempt = async (remote) => {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
-  const postData = {
-    you: remote,
-    join: utils.getNodeFqdn(),
-    as: flanking ? 'flanking_node' : 'broker_node',
-    cluster: utils.getClusterUuid(),
-    settings: {
-      serial: Number(utils.getSettingsSerial()),
-      data: utils.getSanitizedSettings(),
-    },
-    keys: utils.getKeys(),
-  }
   const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
     method: 'POST',
     data: {
