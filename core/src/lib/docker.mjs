@@ -57,7 +57,7 @@ export const createDockerContainer = async (serviceName, config) => {
     } else
       log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
   } else
-    log.warn({ result, config, serviceName }, `[${serviceName}] Failed to create service container`)
+    log.warn(`[${serviceName}] Failed to create service container`)
 
   return false
 }
@@ -126,9 +126,9 @@ export const createDockerNetwork = async (name) => {
 
   let success
   try {
-    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+    [success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
-    log.warn({ err })
+    log.warn({ err }, `Failed to run Docker \`createNetwork\` command`)
   }
 
   /*

@@ -213,6 +213,14 @@ const triggerLocalHeartbeat = async () => {
 
 const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
   /*
+   * If fqdn is not a thing, don't bother
+   */
+  if (!fqdn) {
+    log.warn(`Cannot send heartbeat to ${fqdn}`)
+    return
+  }
+
+  /*
    * Send heartbeat request and verify the result
    */
   const start = Date.now()
@@ -430,7 +438,10 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
     const err = 'LEADER_MISMATCH'
     errors.push(err)
     action = 'LEADER_CHANGE'
-    log.info(`Leader mismatch in ${type} from node ${data.node}: ${err}`)
+    log.info({
+      remote_leader: data.status?.cluster?.leader_serial,
+      local_leader: utils.getLeaderSerial(),
+    }, `Leader mismatch in ${type} from node ${data.node}: ${err}`)
   }
 
   /*
