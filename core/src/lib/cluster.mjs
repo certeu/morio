@@ -153,7 +153,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    */
   if (targets.length === 1 && targets[0] === false) {
     const delay = 3000
-    log.debug(`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/1000)} seconds`)
+    log.debug(utils.getClusterStatus(),`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/1000)} seconds`)
     return setTimeout(async () => runHeartbeat(true, false), 3000)
   }
 
