@@ -470,7 +470,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         errors.push(err)
         action = 'LEADER_CHANGE'
         log.info({
-          remote_leader: data.status?.cluster?.leader_serial,
+          remote_leader: data.state?.cluster?.leader_serial,
           local_leader: utils.getLeaderSerial(),
         }, `Node ${data.node} disagrees about the leader in ${type}: ${err}`)
       }
