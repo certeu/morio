@@ -1,8 +1,7 @@
 import { globDir } from '#shared/fs'
 import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
-import { utils, log } from '../lib/utils.mjs'
-import { testUrl } from '#shared/network'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
