@@ -114,14 +114,6 @@ export const service = {
       utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
-       * The cluster UUID is saved in keys.cluster as that saves us from
-       * having to write a cluster.json to disk.
-       * However, we (also) save the cluster UUID in the same way as the node UUID
-       * as things are more intuitive that way
-       */
-      utils.setClusterUuid(keys.cluster)
-
-      /*
        * Log some info, for debugging
        */
       log.debug(`Found settings with serial ${timestamp}`)

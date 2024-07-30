@@ -181,7 +181,7 @@ utils.getClusterStatus = () => store.get('status.cluster', { code: 499, time: 17
 /**
  * Helper method to get the cluster uuid
  */
-utils.getClusterUuid = () => store.get('status.cluster.uuid')
+utils.getClusterUuid = () => store.get('keys')?.cluster
 
 /**
  * Helper method to get the cluster leader fqdn
@@ -540,22 +540,6 @@ utils.getClusterFingerprint = () =>
   store
     .get('status.cluster.uuid', '')
     .slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
-
-/**
- * Helper method to set the cluster UUID
- *
- * @param {string} uuid - The cluster UUID
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setClusterUuid = (uuid) => {
-  const current = store.get('status.cluster.uuid', false)
-  if (current && current !== uuid) {
-    log.error(`Attempt to change cluster UUID from ${current} to ${uuid}`)
-  }
-  else store.set('status.cluster.uuid', uuid)
-
-  return utils
-}
 
 /**
  * Helper method to set data for a cluster node
