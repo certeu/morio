@@ -491,7 +491,6 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * If there's a mismatch, log an error because we can't fix this without human intervention.
    */
   if (data.cluster !== utils.getClusterUuid()) {
-    if (
     const err = 'CLUSTER_MISMATCH'
     errors.push(err)
     log.debug({localClusterUuid: utils.getClusterUuid()}, `Cluster mismatch in ${type} from node ${data.node}: ${err}`)
