@@ -196,7 +196,7 @@ const isBrokerUp = async () => {
  * @return {object} result - The JSON output as a POJO
  */
 const getTopics = async () => {
-  const result = await testUrl(`http://broker_${utils.getNodeSerial()}:8082/topics`, {
+  const result = await testUrl(`http://broker:8082/topics`, {
     ignoreCertificate: true,
     returnAs: 'json',
   })

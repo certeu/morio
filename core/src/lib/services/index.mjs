@@ -10,7 +10,7 @@ import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 // Dependencies
-import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder } from '#config'
+import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
 // Docker
 import {
   docker,
@@ -163,23 +163,25 @@ export const startMorio = async (hookParams = {}) => {
  * @return {bool} ok = Whether or not the service was started
  */
 export const ensureMorioService = async (serviceName, hookParams = {}) => {
-  /*
-   * If the service wanted and running, stop it
-   */
-  const wanted = await runHook('wanted', serviceName, hookParams)
-  if (!wanted) {
-    log.debug(`${serviceName}: Service is not wanted`)
-    const running = isContainerRunning(serviceName)
+  if (optionalServices.includes(serviceName)) {
     /*
-     * Stopping services can take a long time.
-     * No need to wait for that, we can continue with other services.
-     * So we're letting this run its course async, rather than waiting for it.
+     * If the service optional, not wanted, yet running, stop it
      */
-    if (running) stopMorioService(serviceName)
+    const wanted = await runHook('wanted', serviceName, hookParams)
+    if (!wanted) {
+      log.debug(`${serviceName}: Optional service is not wanted`)
+      const running = isContainerRunning(serviceName)
+      /*
+       * Stopping services can take a long time.
+       * No need to wait for that, we can continue with other services.
+       * So we're letting this run its course async, rather than waiting for it.
+       */
+      if (running) stopMorioService(serviceName)
 
-    // Not wanted, return early
-    return true
-  } else log.debug(`${serviceName}: Service is wanted`)
+      // Not wanted, return early
+      return true
+    } else log.debug(`${serviceName}: Optional service is wanted`)
+  }
 
   /*
    * Generate morio service config

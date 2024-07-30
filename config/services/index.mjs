@@ -50,6 +50,16 @@ export const ephemeralServiceOrder = [
   'ui',
 ]
 
+/*
+ * List of services that we should not take for granted
+ */
+export const optionalServices = [
+  'db',
+  'ui',
+  'connector',
+  'dbuilder'
+]
+
 /**
  * Helper method to generate the Traefik configuration
  *

@@ -4,7 +4,7 @@ import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
-import { generateCaConfig } from '../lib/services/ca.mjs'
+import { ensureCaConfig } from '../lib/services/ca.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -146,7 +146,7 @@ Controller.prototype.join = async (req, res) => {
    * To join the cluster, we write settings to disk and reconfigure
    * But first make sure to cast the serial to a number as we'll use it to
    * construct the path to write to disk, and join cluster is an unauthenticated
-   * request. So can't trust this input.
+   * request. So we can't trust this input.
    */
   const serial = Number(valid.settings.serial)
   log.debug(`Joining cluster, writing new settings to settings.${serial}.yaml`)
@@ -169,12 +169,12 @@ Controller.prototype.join = async (req, res) => {
   })
 
   /*
-   * We need to generate the CA config before we trigger a reconfigured
-   * It also needs access to the settings & keys, so save those first
+   * We need to generate the CA config before we trigger a reconfigure event
+   * We also need to pre-seed it with the cluster keys or it will generate its own
    */
-  utils.setKeys(valid.keys)
-  utils.setSettings(valid.settings.data)
-  await generateCaConfig()
+  //utils.setKeys(valid.keys)
+  //utils.setSettings(valid.settings.data)
+  await ensureCaConfig(valid.keys)
 
   /*
    * Don't forget to finalize the request

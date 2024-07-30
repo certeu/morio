@@ -166,7 +166,7 @@ const reloadCaConfiguration = async () => {
    * Save fingerprint, JWK, and root certificate in memory for easy access
    */
   utils.setCaConfig({
-    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
+    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
@@ -214,7 +214,7 @@ export const generateCaConfig = async () => {
    * Save root certificate and fingerprint in memory
    */
   const caConfig = {
-    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
+    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: init.root.fingerprint,
     jwk,
     certificate: init.root.certificate,
@@ -228,13 +228,13 @@ export const generateCaConfig = async () => {
   await ensureCaConfig()
 }
 
-export const ensureCaConfig = async () => {
+export const ensureCaConfig = async (clusterKeys = false) => {
   /*
    * Save root certificate and fingerprint in memory
    */
-  const keys = utils.getKeys()
+  const keys = clusterKeys ? clusterKeys : utils.getKeys()
   utils.setCaConfig({
-    url: `https://ca_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CA_PORT')}`,
+    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: keys.rfpr,
     jwk: keys.jwk,
     certificate: keys.rcrt,

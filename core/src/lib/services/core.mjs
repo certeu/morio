@@ -7,7 +7,7 @@ import { encryptionMethods } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysWantedHook } from './index.mjs'
+import { alwaysWantedHook, ensureMorioService } from './index.mjs'
 // Cluster code
 import { ensureMorioCluster } from '#lib/cluster'
 // log & utils
@@ -150,6 +150,11 @@ export const service = {
        */
       const coreConfig = resolveServiceConfiguration('core', { utils })
       ensureTraefikDynamicConfiguration('core', coreConfig.traefik)
+
+      /*
+       * We need a CA before we can do anything fancy
+       */
+      await ensureMorioService('ca')
 
       /*
        * Morio always runs as a cluster, because even a stand-alone
