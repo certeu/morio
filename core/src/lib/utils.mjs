@@ -196,14 +196,14 @@ utils.getLeaderFqdn = () =>
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getLeaderSerial = () => store.get('status.cluster.leader_serial', false)
+utils.getLeaderSerial = () => store.get('state.cluster.leader_serial', false)
 
 /**
  * Helper method to get the uuid of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getLeaderUuid = () => store.get('status.cluster.leader_uuid', false)
+utils.getLeaderUuid = () => store.get('state.cluster.leader_uuid', false)
 
 /**
  * Helper method to get a Docer service configuration
@@ -243,13 +243,14 @@ utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).l
  *
  * @return {number} seconds - The number of seconds between heartbeats
  */
-;(utils.getHeartbeatInterval = () => store.get('status.cluster.heartbeat_interval', 1)),
-  /**
-   * Helper method to get local heartbeat setTimeout id
-   *
-   * @return {number} id - The setTimeout id which allows clearing the timetout
-   */
-  (utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false))
+utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeat_interval', 1)
+
+/**
+ * Helper method to get local heartbeat setTimeout id
+ *
+ * @return {number} id - The setTimeout id which allows clearing the timetout
+ */
+utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false)
 
 /**
  * Helper method to get outgoing heartbeat setTimeout id
@@ -277,7 +278,7 @@ utils.getKeys = () => store.get('config.keys')
  *
  * @return {object} services - The service as stored in state
  */
-utils.getLeaderSerial = () => store.get('status.cluster.leader_serial', false)
+utils.getLeaderSerial = () => store.get('state.cluster.leader_serial', false)
 
 /**
  * Helper method to get the services from state
@@ -364,7 +365,7 @@ utils.getNodeIp = () => store.get('state.node.ip')
  */
 utils.getNodeSerial = () => {
   const serial = store.get('state.node.serial', 0)
-  if (!serial) log.error(`Could not determine own serial`)
+  if (!serial) log.todo(`Could not determine own serial`)
   return serial
 }
 
@@ -634,7 +635,7 @@ utils.setHeartbeatIn = (fqdn, data) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatInterval = (seconds) => {
-  store.set('status.cluster.heartbeat_interval', seconds)
+  store.set('state.cluster.heartbeat_interval', seconds)
   return utils
 }
 
@@ -722,7 +723,7 @@ utils.setLeader = ({ serial=false, uuid=false }) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLeaderSerial = (node_serial) => {
-  store.set('status.cluster.leader_serial', Number(node_serial))
+  store.set('state.cluster.leader_serial', Number(node_serial))
   return utils
 }
 
@@ -733,7 +734,7 @@ utils.setLeaderSerial = (node_serial) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLeaderUuid = (uuid) => {
-  store.set('status.cluster.leader_uuid', String(uuid))
+  store.set('state.cluster.leader_uuid', String(uuid))
   return utils
 }
 
@@ -744,7 +745,7 @@ utils.setLeaderUuid = (uuid) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLeading = (leading) => {
-  store.set('status.cluster.leading', leading ? true : false)
+  store.set('state.cluster.leading', leading ? true : false)
   if (leading) {
     utils.setLeaderSerial(utils.getNodeSerial())
     utils.setLeaderUuid(utils.getNodeUuid())
@@ -812,12 +813,7 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setClusterStatus = (code, color) => {
-  const data = { code, color, time: Date.now() }
-  if (utils.isLeading()) {
-    data.leader_serial = utils.getNodeSerial()
-    data.leader_uuid = utils.getNodeUuid()
-  }
-  store.set(['status', 'cluster'], data)
+  store.set(['status', 'cluster'], { code, color, time: Date.now() })
 
   return utils
 }
@@ -950,7 +946,7 @@ utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
  *
  * @return {bool} leading - True if this cluster node is leading, false if not
  */
-utils.isLeading = () => (store.get('status.cluster.leading', false) ? true : false)
+utils.isLeading = () => (store.get('state.cluster.leading', false) ? true : false)
 
 /*
  * Determined whether we are running in production or not
