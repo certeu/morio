@@ -244,7 +244,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
       method: 'POST',
       data: {
         from: {
-          fqnd: utils.getNodeFqdn(),
+          fqdn: utils.getNodeFqdn(),
           serial: Number(utils.getNodeSerial()),
           uuid: utils.getNodeUuid(),
         },

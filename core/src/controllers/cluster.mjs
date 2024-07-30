@@ -23,7 +23,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  */
 Controller.prototype.heartbeat = async (req, res) => {
-  //log.todo(req.body)
+  log.todo(req.body)
   /*
    * Validate request against schema
    */
