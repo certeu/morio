@@ -453,13 +453,13 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * If there's a mismatch, ask to re-elect the cluster leader.
    */
   if (
-    !data.status?.cluster?.leader_serial ||
-    data.status.cluster.leader_serial !== utils.getLeaderSerial()
+    !data?.cluster_leader?.serial ||
+    data.cluster_leader.serial !== utils.getLeaderSerial()
   ) {
     /*
      * Do they look to us as their leader?
      */
-    if (data.status?.cluster?.leader_serial === utils.getNodeSerial()) {
+    if (data?.cluster_leader?.serial === utils.getNodeSerial()) {
       /*
        * Are they correct
        */
@@ -476,18 +476,18 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         errors.push(err)
         action = 'LEADER_CHANGE'
         log.info({
-          remote_leader: data.state?.cluster?.leader_serial,
+          remote_leader: data?.cluster_leader?.serial,
           local_leader: utils.getLeaderSerial(),
-        }, `Node ${data.node} disagrees about the leader in ${type}: ${err}`)
+        }, `Node ${data.from.fqdn} disagrees about the leader in ${type}: ${err}`)
       }
     } else {
         const err = 'LEADER_MISMATCH'
         errors.push(err)
         action = 'LEADER_CHANGE'
         log.info({
-          remote_leader: data.status?.cluster?.leader_serial,
+          remote_leader: data?.cluster_leader?.serial,
           local_leader: utils.getLeaderSerial(),
-        }, `Leader update received from Node ${data.node} in ${type}: ${err}`)
+        }, `Leader update received from Node ${data.from.fqdn} in ${type}: ${err}`)
     }
   }
 
@@ -498,7 +498,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   if (data.cluster !== utils.getClusterUuid()) {
     const err = 'CLUSTER_MISMATCH'
     errors.push(err)
-    log.debug({localClusterUuid: utils.getClusterUuid()}, `Cluster mismatch in ${type} from node ${data.node}: ${err}`)
+    log.debug({localClusterUuid: utils.getClusterUuid()}, `Cluster mismatch in ${type} from node ${data.from.fqdn}: ${err}`)
   }
 
   /*
