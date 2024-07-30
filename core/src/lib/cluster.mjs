@@ -175,7 +175,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
         )
       }
     } else {
-      log.todo(targets, `FQDN of target is not valid to send hearbteat to: ${fqdn}`)
+      log.todo({ targets, leading: utils.isLeading() }, `FQDN of target is not valid to send hearbteat to: ${fqdn}`)
     }
   }
 }

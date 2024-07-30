@@ -22,6 +22,7 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
+      log.todo("BROKER HEARTBEAT")
       /*
        * Get the status from the broker admin API
        */
