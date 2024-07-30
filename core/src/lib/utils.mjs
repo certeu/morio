@@ -142,7 +142,9 @@ utils.getCaConfig = () => store.get('config.ca')
  */
 utils.getClusterFqdn = () => {
   let fqdn = utils.getSettings('cluster.fqdn', false)
-  if (!fqdn) return utils.getSettings(['cluster', 'broker_nodes', 0], null)
+  if (!fqdn) fqdn = utils.getSettings(['cluster', 'broker_nodes', 0], null)
+
+  return fqdn
 }
 
 /**
