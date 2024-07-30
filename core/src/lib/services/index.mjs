@@ -68,14 +68,14 @@ const createMorioService = async (serviceName) => {
    * For Docker, it's unlikely, but possible that we need to pull this image first
    */
   const [ok, list] = await runDockerApiCommand('listImages')
-  if (!ok) log.warn(`${serviceName}: Unable to load list of docker images`)
+  if (!ok) log.warn(`Unable to load list of docker images`)
   if (list.filter((img) => img.RepoTags.includes(config.Image)).length < 1) {
-    log.info(`${serviceName}: Image ${config.Image} is not available on disk. Attempting pull.`)
+    log.info(`[${serviceName}] Image ${config.Image} is not available on disk. Attempting pull.`)
 
     return new Promise((resolve) => {
       docker.pull(config.Image, (err, stream) => {
         async function onFinished() {
-          log.debug(`${serviceName}: Image pulled: ${config.Image}`)
+          log.debug(`[${serviceName}] Image pulled: ${config.Image}`)
           const id = await createDockerContainer(serviceName, config)
           resolve(id)
         }
@@ -102,7 +102,7 @@ export const startMorio = async (hookParams = {}) => {
    */
   if (!go) {
     log.fatal(
-      'core: The beforeall lifecycle hook did return an error. Cannot start Morio. Please escalate to a human.'
+      'The beforeall hook did return an error. Cannot start Morio. Please escalate this.'
     )
     return
   }
@@ -110,7 +110,7 @@ export const startMorio = async (hookParams = {}) => {
   /*
    * Log version and environment
    */
-  log.info(`core: Morio v${utils.getVersion()}`)
+  log.info(`This is Morio version ${utils.getVersion()}`)
 
   /*
    * Log mount locations, useful for debugging
@@ -122,7 +122,7 @@ export const startMorio = async (hookParams = {}) => {
       'MORIO_LOGS_ROOT',
       'MORIO_DOCKER_SOCKET',
     ])
-      log.debug(`core: ${mount} = ${utils.getPreset(mount)}`)
+      log.debug(`Mount ${mount} = ${utils.getPreset(mount)}`)
   }
 
   /*
@@ -169,7 +169,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
      */
     const wanted = await runHook('wanted', serviceName, hookParams)
     if (!wanted) {
-      log.debug(`${serviceName}: Optional service is not wanted`)
+      log.debug(`[${serviceName}] Optional service is not wanted`)
       const running = isContainerRunning(serviceName)
       /*
        * Stopping services can take a long time.
@@ -180,7 +180,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
 
       // Not wanted, return early
       return true
-    } else log.debug(`${serviceName}: Optional service is wanted`)
+    } else log.debug(`[${serviceName}] Optional service is wanted`)
   }
 
   /*
@@ -195,13 +195,13 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
   const recreate = await shouldServiceBeRecreated(serviceName, hookParams)
 
   if (recreate) {
-    log.debug(`${serviceName}: Updating container`)
+    log.debug(`[${serviceName}] Updating container`)
     /*
      * Run precreate lifecycle hook
      */
     await runHook('precreate', serviceName, hookParams)
   } else {
-    log.debug(`${serviceName}: Not updating container`)
+    log.debug(`[${serviceName}] Not updating container`)
   }
 
   /*
@@ -219,7 +219,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
    */
   const restart = await shouldServiceBeRestarted(serviceName, { ...hookParams, recreate })
   if (restart) {
-    log.debug(`${serviceName}: Restarting service`)
+    log.debug(`[${serviceName}] Restarting service`)
     /*
      * Run preStart lifecycle hook
      */
@@ -235,7 +235,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
      */
     await runHook('poststart', serviceName, { ...hookParams, recreate })
   } else {
-    log.debug(`${serviceName}: Not restarting service`)
+    log.debug(`[${serviceName}] Not restarting service`)
   }
 
   /*
@@ -262,7 +262,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
    */
   const running = isContainerRunning(serviceName)
   if (!running) {
-    log.debug(`${serviceName}: Recreating service`)
+    log.debug(`[${serviceName}] Recreating service`)
     return true
   }
 
@@ -277,7 +277,7 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
   }
   if (imgs.next !== imgs.current) {
     if (imgs.current !== false)
-      log.debug(`${serviceName}: Container image changed from ${imgs.current} to ${imgs.next}`)
+      log.debug(`[${serviceName}] Container image changed from ${imgs.current} to ${imgs.next}`)
     return true
   }
 
@@ -327,14 +327,14 @@ export const runHook = async (hookName, serviceName, hookParams) => {
   if (!hookMethod) return result
 
   try {
-    log.trace(`Running ${hookName} lifecycle hook on service ${serviceName}`)
+    log.trace(`[${serviceName}] Running ${hookName} hook`)
     result = await hookMethod(hookParams)
   } catch (err) {
-    log.warn(err, `Error in the ${hookName} lifecycle hook on service ${serviceName}`)
+    log.warn(err, `[${serviceName}] Error in the ${hookName} hook`)
   }
 
   if (!result && !['wanted', 'recreate', 'restart', 'heartbeat'].includes(hookName)) {
-    log.warn(`The ${hookName} lifecycle hook failed for service ${serviceName}`)
+    log.warn(`[${serviceName}] The ${hookName} hook failed`)
   }
 
   return result
@@ -342,7 +342,7 @@ export const runHook = async (hookName, serviceName, hookParams) => {
 
 const stopMorioService = async (serviceName) => {
   await runHook('prestop', serviceName)
-  log.debug(`${serviceName}: Stopping service`)
+  log.debug(`[${serviceName}] Stopping service`)
   await stopService(serviceName)
   await runHook('poststop', serviceName)
 }
@@ -427,14 +427,14 @@ export function defaultRecreateServiceHook(service) {
     container.name !== `/${config.container_name}` ||
     container.image !== `${config.image}:${config.tag}`
   ) {
-    log.debug(`${service}: The service name or image has changed`)
+    log.debug(`[${service}] The service name or image has changed`)
     return true
   }
 
   /*
    * If we make it this far, do not recreate the container
    */
-  log.debug(`${service}: The service does not need to be recreated`)
+  log.debug(`[${service}] The service does not need to be recreated`)
   return false
 }
 
@@ -462,7 +462,7 @@ export async function defaultRestartServiceHook(service, { recreate }) {
    */
   const running = isContainerRunning(service)
   const restart = recreate || !running ? true : false
-  log.debug(`${service}: ${restart ? 'Re' : 'Not re'}starting service`)
+  log.debug(`[${service}] ${restart ? 'Re' : 'Not re'}starting service`)
 
   return restart
 }

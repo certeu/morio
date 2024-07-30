@@ -157,7 +157,7 @@ export const presets = {
   MORIO_CORE_CONFIG_FOLDER: '/etc/morio',
 
   // CORE log level |  One of: trace, debug, info, warn, error, fatal, silent
-  MORIO_CORE_LOG_LEVEL: 'debug',
+  MORIO_CORE_LOG_LEVEL: 'trace',
 
   // TCP port core should listen on
   MORIO_CORE_PORT: 3007,

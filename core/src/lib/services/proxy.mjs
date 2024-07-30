@@ -99,7 +99,7 @@ export const service = {
 export const ensureTraefikDynamicConfiguration = async (config) => {
   if (typeof config?.traefik !== 'object') return
   for (const [name, tconf] of Object.entries(config.traefik)) {
-    log.debug(`Writing traefik dynamic config for ${name}`)
+    log.trace(`[${name}] Writing traefik dynamic config to disk`)
     await writeYamlFile(`/etc/morio/proxy/${name}.yaml`, tconf)
   }
 }

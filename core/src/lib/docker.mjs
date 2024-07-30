@@ -29,10 +29,10 @@ const apiCache = {
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
 export const createDockerContainer = async (serviceName, config) => {
-  log.debug(`${serviceName}: Creating service container`)
+  log.debug(`[${serviceName}] Creating container`)
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
-    log.debug(`${serviceName}: Service container created`)
+    log.debug(`[${serviceName}] Container created`)
     return result.id
   } else if (
     result?.json?.message &&
@@ -48,16 +48,16 @@ export const createDockerContainer = async (serviceName, config) => {
      */
     const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
     if (removed) {
-      log.debug(`${serviceName}: Removed existing container`)
+      log.debug(`[${serviceName}] Removed existing container`)
       const [ok, created] = await runDockerApiCommand('createContainer', config, true)
       if (ok) {
-        log.debug(`${serviceName} Service container recreated`)
+        log.debug(`[${serviceName}] Container recreated`)
         return created.id
-      } else log.warn(`${serviceName}: Failed to recreate service container`)
+      } else log.warn(`[${serviceName}] Failed to recreate container`)
     } else
-      log.warn(`${serviceName}: Failed to remove service container - Not creating new container`)
+      log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
   } else
-    log.warn({ result, config, serviceName }, `${serviceName}: Failed to create service container`)
+    log.warn({ result, config, serviceName }, `[${serviceName}] Failed to create service container`)
 
   return false
 }
@@ -145,16 +145,16 @@ export const createDockerNetwork = async (name) => {
          * First disconnect all containers, then remove it
          */
         log.debug(
-          `core: Network ${name} is of type ${existingNetworkConfig.Driver}, which is not suitable for running services.`
+          `Network ${name} is of type ${existingNetworkConfig.Driver}, which is not suitable for running services.`
         )
-        log.debug(`core: Disconnecting all containers from network ${name}`)
+        log.debug(`Disconnecting all containers from network ${name}`)
         for (const id in existingNetworkConfig.Containers) {
           await network.disconnect({ Container: id, Force: true })
-          log.debug(`core: Disconnected ${id}`)
+          log.debug(`Disconnected ${id}`)
         }
-        log.debug(`core: Removing network ${name}`)
+        log.debug(`Removing network ${name}`)
         await network.remove()
-        log.debug(`core: Removed network ${name}`)
+        log.debug(`Removed network ${name}`)
         return createDockerNetwork(name)
       } else return network
       /*
@@ -164,7 +164,7 @@ export const createDockerNetwork = async (name) => {
     log.warn(`core; Unable to get info on the ${name} Docker network`)
   }
 
-  log.debug(`core: Network created: ${name}`)
+  log.debug(`Network created: ${name}`)
   /*
    * Return the network object
    */
@@ -183,7 +183,7 @@ export const createDockerNetwork = async (name) => {
 export const attachToDockerNetwork = async (serviceName, network, endpointConfig) => {
   if (!network) {
     log.warn(
-      `${serviceName}: Attempt to attach to network ${network.id}, but no network object was passed`
+      `[${serviceName}] Attempt to attach to network ${network.id}, but no network object was passed`
     )
     return false
   }
@@ -192,8 +192,8 @@ export const attachToDockerNetwork = async (serviceName, network, endpointConfig
     await network.connect({ Container: serviceName, EndpointConfig: endpointConfig })
   } catch (err) {
     if (err?.json?.message && err.json.message.includes(' already ')) {
-      log.debug(`${serviceName}: Container is already attached to network ${network.id}`)
-    } else log.warn(err, `${serviceName}: Failed to attach container to network ${network.id}`)
+      log.debug(`[${serviceName}] Container is already attached to network ${network.id}`)
+    } else log.warn(err, `[${serviceName}] Failed to attach container to network ${network.id}`)
   }
 
   /*
@@ -207,16 +207,16 @@ export const attachToDockerNetwork = async (serviceName, network, endpointConfig
         const netId = result.NetworkSettings.Networks[netName].NetworkID
         const [ok, net] = await runDockerApiCommand('getNetwork', netId)
         if (ok && net) {
-          log.debug(`${serviceName}: Disconnecting container from network ${netName}`)
+          log.debug(`[${serviceName}] Disconnecting container from network ${netName}`)
           try {
             await net.disconnect({ Container: serviceName, Force: true })
           } catch (err) {
-            log.warn(err, `${serviceName}: Disconnecting container from network ${netName} failed`)
+            log.warn(err, `[${serviceName}] Disconnecting container from network ${netName} failed`)
           }
         }
       }
     }
-  } else log(`Failed to inspect ${serviceName} container`)
+  } else log(`[${serviceName}] Failed to inspect container`)
 }
 
 /**
@@ -235,7 +235,7 @@ export const generateContainerConfig = (serviceName) => {
    */
   const name = config.container.container_name
   const aliases = config.container.aliases || []
-  log.debug(`${name}: Generating container configuration`)
+  log.debug(`[${name}] Generating container configuration`)
   const opts = {
     name,
     HostConfig: {
@@ -326,14 +326,14 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
     const hit = utils.getCacheHit(cache)
     if (hit) return [true, hit]
   }
-  log.trace(`core: Running Docker command: ${cmd}`)
+  log.trace(`Running Docker command: ${cmd}`)
   let result
   try {
     result = await docker[cmd](options)
   } catch (err) {
     if (!silent) {
-      if (err instanceof Error) log.info(err.message, 'core: Docker API command returned an error')
-      else log.info(err, 'core: Docker API command returned and error')
+      if (err instanceof Error) log.info(err.message, 'Docker API command returned an error')
+      else log.info(err, 'Docker API command returned and error')
     }
     return [false, err]
   }
@@ -359,7 +359,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
     log.debug(
-      `core: Attemted to run \`${cmd}\` command on a container but no container ID was passed`
+      `Attemted to run \`${cmd}\` command on a container but no container ID was passed`
     )
     return [false]
   }
@@ -369,7 +369,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
 
   let result
   try {
-    log.trace(`core: Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
+    log.trace(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
@@ -402,7 +402,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
  */
 export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    log.debug(`core: Attemted to run \`${cmd}\` command on a node but no node ID was passed`)
+    log.debug(`Attemted to run \`${cmd}\` command on a node but no node ID was passed`)
     return [false]
   }
 
@@ -411,7 +411,7 @@ export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) =
 
   let result
   try {
-    log.debug(`core: Running \`${cmd}\` command on node \`${id.slice(0, 6)}\``)
+    log.debug(`Running \`${cmd}\` command on node \`${id.slice(0, 6)}\``)
     result = await node[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
@@ -444,7 +444,7 @@ export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) =
  */
 export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    log.debug(`core: Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
+    log.debug(`Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
     return [false]
   }
 
@@ -453,7 +453,7 @@ export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false
 
   let result
   try {
-    log.debug(`core: Running \`${cmd}\` command on network \`${id.slice(0, 6)}\``)
+    log.debug(`Running \`${cmd}\` command on network \`${id.slice(0, 6)}\``)
     result = await network[cmd](options)
   } catch (err) {
     if (err instanceof Error) {

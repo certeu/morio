@@ -17,11 +17,6 @@ import swaggerUi from 'swagger-ui-express'
 import { spec } from '../openapi/index.mjs'
 
 /*
- * Say hello
- */
-log.info('core: Start of Morio Core')
-
-/*
  * Instantiate the Express app
  */
 const app = express()
@@ -64,7 +59,7 @@ await reconfigure({ coldStart: true })
 wrapExpress(
   log,
   app.listen(utils.getPreset('MORIO_CORE_PORT'), (err) => {
-    if (err) log.error(err, 'core: An error occured')
+    if (err) log.error(err, 'An error occured while wrapper express')
   })
 )
 

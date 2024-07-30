@@ -60,6 +60,11 @@ export const service = {
      */
     beforeall: async (hookParams) => {
       /*
+       * Dump presets for debugging
+       */
+      for (const [key, val] of Object.entries(utils.getPresets())) log.trace(`Preset ${key} = ${val}`)
+
+      /*
        * Load existing settings, keys, node info and timestamp from disk
        */
       const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
@@ -69,7 +74,7 @@ export const service = {
        * are running in ephemeral mode. In which case we return early.
        */
       if (!timestamp) {
-        log.info('core: Morio is running in ephemeral mode')
+        log.info('Morio is running in ephemeral mode')
         utils.setEphemeral(true)
         utils.setEphemeralUuid(uuid())
         utils.setSettingsSerial(false)
@@ -118,9 +123,9 @@ export const service = {
       /*
        * Log some info, for debugging
        */
-      log.debug(`core: Found settings with serial ${timestamp}`)
+      log.debug(`Found settings with serial ${timestamp}`)
       for (const [flagName, flagValue] of Object.entries(settings.tokens?.flags || {})) {
-        if (flagValue) log.info(`core: Enabled feature flag: ${flagName}`)
+        if (flagValue) log.info(`Feature flag enabled: ${flagName}`)
       }
 
       /*

@@ -51,7 +51,8 @@ try {
   await mkdir('/etc/morio/shared')
   await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
 } catch (err) {
-  log.warn(err, 'core: Failed to write presets to disk')
+  log.warn(err, 'Failed to write Morio presets to disk')
+
 }
 
 /*
@@ -480,7 +481,7 @@ utils.getNetworkName = () => utils.getPreset('MORIO_NETWORK')
 /**
  * Helper method to get a preset
  *
- * This wraps getPreset() to output trace logs about how presets are resolved
+ * This wraps getPreset() to logs when a preset is undefined
  * This is surprisingly helpful during debugging
  *
  * @param {string} key - Name of the environment variable (or default) to return
@@ -494,8 +495,7 @@ utils.getNetworkName = () => utils.getPreset('MORIO_NETWORK')
  */
 utils.getPreset = (key, dflt, opts) => {
   const result = getPreset(key, { dflt, ...opts })
-  if (result === undefined) log.warn(`core: Preset ${key} is undefined`)
-  else log.trace(`core: Preset ${key} = ${result}`)
+  if (result === undefined) log.warn(`Preset ${key} is undefined`)
 
   return result
 }
@@ -1015,7 +1015,7 @@ utils.beginEphemeral = () => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.beginReconfigure = () => {
-  log.debug('core: Start reconfigure')
+  log.debug('Start reconfigure')
   store.set('state.config_resolved', false)
   store.set('state.reconfigure_time', Date.now())
   utils.setClusterStatus(2, 'amber')

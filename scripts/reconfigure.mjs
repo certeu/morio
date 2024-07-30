@@ -26,7 +26,7 @@ const presetGetters = {
       MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
       NODE_ENV: 'development',
       MORIO_REPO_ROOT,
-      MORIO_CORE_LOG_LEVEL: 'debug',
+      MORIO_CORE_LOG_LEVEL: 'trace',
     }
   }),
   test: (key, opts) => getPreset(key, {

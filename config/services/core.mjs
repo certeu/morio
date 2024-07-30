@@ -61,7 +61,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Environment
       environment: [
         // Set log level to trace in development
-        `MORIO_CORE_LOG_LEVEL=${PROD ? utils.getPreset('MORIO_CORE_LOG_LEVEL') : 'debug'}`,
+        `MORIO_CORE_LOG_LEVEL=${PROD ? utils.getPreset('MORIO_CORE_LOG_LEVEL') : 'trace'}`,
       ],
     },
     /*
