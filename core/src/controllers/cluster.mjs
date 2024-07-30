@@ -31,7 +31,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   if (!valid) {
     log.todo(
       { body: req.body, err: err?.message },
-      `Received invalid heartbeat from ${req.body.data.node.from}`
+      `Received invalid heartbeat from ${req.body.data.node.fqdn}`
     )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err.message,
@@ -53,7 +53,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   if (!validaDataWithChecksum(valid)) {
     log.todo(
       { body: req.body, err: err?.message },
-      `Received heartbeat with invalid checksum from ${req.body.data.node.from}`
+      `Received heartbeat with invalid checksum from ${req.body.data.node.fqdn}`
     )
     return utils.sendErrorResponse(res, 'morio.core.checksum.mismatch', req.url)
   }
