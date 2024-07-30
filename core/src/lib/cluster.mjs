@@ -460,7 +460,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         /*
          * We hereby humbly accept our leading role
          */
-        utils.setLeaderUuid(utils.getNodeUuid())
+        utils.setLeader(utils.getNodeUuid())
         utils.setLeaderSerial(utils.getNodeSerial())
         log.info(`We are now leading this cluster`)
       } else {

@@ -719,14 +719,39 @@ utils.setKeys = (keys) => {
 }
 
 /**
+ * Helper method to store the cluster leader
+ *
+ * @param {object} params - The node_serial of the leading node
+ * @param {number} params.serial - The node_serial of the leading node
+ * @param {number} params.uuid - The UUID of the leading node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLeader = ({ serial=false, uuid=false }) => {
+  if (serial) {
+    utils.setLeaderSerial(serial)
+    if (Number(serial) === utils.getNodeSerial()) {
+      utils.setLeaderUuid(utils.getNodeUuid())
+      utils.setLeading(true)
+    }
+  }
+  else if (uuid) {
+    utils.setLeaderUuid(uuid)
+    if (String(uuid) === utils.getNodeUuid()) {
+      utils.setLeaderSerial(utils.getNodeSerial())
+      utils.setLeading(true)
+    }
+  }
+  return utils
+}
+
+/**
  * Helper method to store the cluster leader's node_serial
  *
  * @param {number} node_serial - The node_serial of the leading node
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLeaderSerial = (node_serial) => {
-  store.set('status.cluster.leader_serial', node_serial)
-  if (node_serial === utils.getNodeSerial()) utils.setLeaderUuid(utils.getNodeUuid())
+  store.set('status.cluster.leader_serial', Number(node_serial))
   return utils
 }
 
@@ -737,7 +762,7 @@ utils.setLeaderSerial = (node_serial) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setLeaderUuid = (uuid) => {
-  store.set('status.cluster.leader_uuid', uuid)
+  store.set('status.cluster.leader_uuid', String(uuid))
   return utils
 }
 
@@ -816,7 +841,13 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setClusterStatus = (code, color) => {
-  store.set(['status', 'cluster'], { code, color, time: Date.now() })
+  const data = { code, color, time: Date.now() }
+  if (utils.isLeading()) {
+    data.leader_serial = utils.getNodeSerial()
+    data.leader_uuid = utils.getNodeUuid()
+  }
+  store.set(['status', 'cluster'], data)
+
   return utils
 }
 
@@ -1029,6 +1060,18 @@ utils.beginEphemeral = () => {
 }
 
 /**
+ * Helper method for starting a leading role in the cluster
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.beginLeading = () => {
+  utils.setLeader({ uuid: utils.getNodeUuid() })
+  utils.setLeading(true)
+
+  return utils
+}
+
+/**
  * Helper method for starting a reconfigure event
  *
  * @return {object} utils - The utils instance, making this method chainable
@@ -1058,6 +1101,17 @@ utils.clearServicesState = () => {
  */
 utils.endEphemeral = () => {
   store.set('state.ephemeral', false)
+  return utils
+}
+
+/**
+ * Helper method for ending a leading role in the cluster
+ *
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.endLeading = () => {
+  utils.setLeading(false)
+
   return utils
 }
 

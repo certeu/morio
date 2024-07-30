@@ -98,6 +98,10 @@ Controller.prototype.heartbeat = async (req, res) => {
     version: utils.getVersion(),
     nodes: utils.getClusterNodes(),
     status: utils.getStatus(),
+    cluster_leader: {
+      serial: utils.getLeaderSerial(),
+      uuid: utils.getLeaderUuid()
+    },
   })
 }
 
