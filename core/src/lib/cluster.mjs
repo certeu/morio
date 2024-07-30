@@ -366,7 +366,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Do we need to take any action?
    */
-  if (data.action) {
+  if (data?.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
     if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
   } else {
@@ -381,7 +381,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Update status of cluster nodes
    */
-  if (data.status?.nodes) {
+  if (data?.status?.nodes) {
     for (const fqdn of Object.keys(data.status.nodes)
       .filter((fqdn) => fqdn !== utils.getNodeFqdn())
       .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
