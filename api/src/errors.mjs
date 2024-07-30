@@ -43,6 +43,14 @@ export const errors = {
     detail: 'When reaching out to Morio Core, we received a status code 503.',
   },
   /*
+   * Status issues coming from core when it does not response
+   */
+  'morio.api.core.status.undefined': {
+    status: 503,
+    title: 'Unable to load data from Morio Core',
+    detail: 'When reaching out to Morio Core, we did not receive a response, idicating that core may be down.',
+  },
+  /*
    * Status issues coming from core
    */
   'morio.api.input.malformed': {

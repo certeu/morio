@@ -1,7 +1,6 @@
 import { attempt } from '#shared/utils'
 import { encryptionMethods } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
-import { coreClient } from '#lib/core'
 import process from 'node:process'
 
 /**
@@ -62,14 +61,6 @@ export const reloadConfiguration = async () => {
     utils.setKeys(data.keys)
     utils.setSettings(data.settings)
     utils.setSanitizedSettings(data.sanitized_settings)
-    /*
-     * If there's more than 1 node, switch core client to stay local
-     */
-    if (utils.getSettings('cluster.broker_nodes', []).length > 1) {
-      utils.coreClient = coreClient(
-        `http://core_${utils.getNodeSerial()}:${utils.getPreset('MORIO_CORE_PORT')}`
-      )
-    }
   }
 
   /*

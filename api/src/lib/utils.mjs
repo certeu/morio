@@ -1,9 +1,9 @@
 import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
-import { coreClient } from '#lib/core'
 import { errors } from '../errors.mjs'
 import { validate as validateMethod } from '../schema.mjs'
+import { restClient } from '#shared/network'
 
 /*
  * Export a log object for logging via the logger
@@ -404,7 +404,7 @@ utils.endReload = () => {
 /**
  * Returns a pre-configured API client, itself on object
  */
-utils.coreClient = coreClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+utils.coreClient = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 
 /**
  * Add helper method for sending RFC7807 error responses

@@ -1,7 +1,8 @@
 import { globDir } from '#shared/fs'
 import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
+import { testUrl } from '#shared/network'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -111,7 +112,7 @@ Controller.prototype.getStatus = async (req, res) => {
   /*
    * Get the status from core to ensure we have the latest info
    */
-  const [status, result] = await utils.coreClient.get(`/status`)
+  const [status, result] = await utils.coreClient.get(`/status`, false, true)
 
   if (status !== 200)
     return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, req.url)
