@@ -142,7 +142,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
   /*
    * Who are we sending heartbeats to?
    */
-  const targets = broadcast ? utils.getNodeFqdns() : [utils.getClusterLeaderFqdn()]
+  const targets = broadcast ? utils.getNodeFqdns() : [utils.getLeaderFqdn()]
 
   /*
    * If there are no targets, that might indicate a leader change.
@@ -234,7 +234,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
         to: fqdn,
         cluster: utils.getClusterUuid(),
         node: utils.getNodeUuid(),
-        leader: utils.getClusterLeaderSerial() || undefined,
+        leader: utils.getLeaderSerial() || undefined,
         version: utils.getVersion(),
         settings_serial: Number(utils.getSettingsSerial()),
         node_serial: Number(utils.getNodeSerial()),

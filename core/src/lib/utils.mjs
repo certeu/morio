@@ -188,7 +188,7 @@ utils.getClusterUuid = () => store.get('state.cluster.uuid')
  *
  * @return {string} fqdn - The FQDN of the cluster leader node
  */
-utils.getClusterLeaderFqdn = () =>
+utils.getLeaderFqdn = () =>
   utils.getSettings('cluster.broker_nodes', [])[Number(utils.getLeaderSerial()) - 1] || false
 
 /**
@@ -196,8 +196,8 @@ utils.getClusterLeaderFqdn = () =>
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getClusterLeaderSerial = () => {
-  const serial = utils.getClusterLeaderState()?.serial
+utils.getLeaderSerial = () => {
+  const serial = utils.getLeaderState()?.serial
 
   return serial ? serial : false
 }
@@ -207,7 +207,7 @@ utils.getClusterLeaderSerial = () => {
  *
  * @return {object} state - State of the cluster leader
  */
-utils.getClusterLeaderState = () => {
+utils.getLeaderState = () => {
   const leader = store.get('state.cluster.leader', false)
   if (!leader) return false
   const state = store.get(['state', 'cluster', 'nodes', leader], false)
@@ -220,8 +220,8 @@ utils.getClusterLeaderState = () => {
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getClusterLeaderUuid = () => {
-  const uuid = utils.getClusterLeaderState()?.uuid
+utils.getLeaderUuid = () => {
+  const uuid = utils.getLeaderState()?.uuid
 
   return uuid ? uuid : false
 }
