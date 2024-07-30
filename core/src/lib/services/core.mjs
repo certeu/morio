@@ -3,7 +3,7 @@ import { readYamlFile, readJsonFile, readDirectory } from '#shared/fs'
 // Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
 // Required to generated X.509 certificates
-import { encryptionMethods } from '#shared/crypto'
+import { encryptionMethods, hash } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
@@ -229,3 +229,17 @@ export const templateSettings = (settings) => {
 
   return newSettings
 }
+
+const generateDataChecksum = (data) => {
+  const keys = utils.getKeys()
+  return hash(JSON.stringify(data)+keys.mrt+keys.cluster+keys.rpwd)
+}
+
+const validateDataChecksum = (data, checksum) => {
+  const keys = utils.getKeys()
+  return (checksum === generateDataChecksum(data))
+}
+
+export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
+export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)
+

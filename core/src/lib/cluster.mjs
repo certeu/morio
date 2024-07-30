@@ -1,12 +1,14 @@
 // Shared imports
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
+import { hash } from '#shared/crypto'
 import { serviceCodes } from '#shared/errors'
 import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
 // Core imports
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { isBrokerLeading } from './services/broker.mjs'
 import { log, utils } from './utils.mjs'
+import { dataWithChecksum, validDataWithChecksum } from './services/core.mjs'
 
 /*
  * Helper method to update the cluster state
@@ -242,7 +244,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
-      data: {
+      data: dataWithChecksum({
         from: {
           fqdn: utils.getNodeFqdn(),
           serial: Number(utils.getNodeSerial()),
@@ -260,7 +262,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
         nodes: utils.getClusterNodes(),
         broadcast,
         uptime: utils.getUptime(),
-      },
+      }),
       timeout: 1666,
       returnAs: 'json',
       returnError: true,
@@ -342,6 +344,11 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
     return
   }
+  else if ( data.data && data.checksum) {
+    if (validDataWithChecksum(data)) data = data.data
+    else log.warn(data, `Heartbeat checksum failure`)
+  }
+  else log.todo(data, `Invalid heartbeat response`)
 
   /*
    * Just because the request didn't error doesn't mean all is ok
@@ -392,6 +399,15 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 }
 
 export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
+  /*
+   * Verify the checksum
+   */
+  if (data.data && data.checksum) {
+    if (validDataWithChecksum(data)) data = data.data
+    else log.warn(data, `Heartbeat checksum failure`)
+  }
+  else log.todo(data, `Invalid heartbeat request`)
+
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -593,6 +609,17 @@ const inviteClusterNodeAttempt = async (remote) => {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
+  const postData = {
+    you: remote,
+    join: utils.getNodeFqdn(),
+    as: flanking ? 'flanking_node' : 'broker_node',
+    cluster: utils.getClusterUuid(),
+    settings: {
+      serial: Number(utils.getSettingsSerial()),
+      data: utils.getSanitizedSettings(),
+    },
+    keys: utils.getKeys(),
+  }
   const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
     method: 'POST',
     data: {

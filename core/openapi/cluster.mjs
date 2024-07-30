@@ -2,6 +2,7 @@ import j2s from 'joi-to-swagger'
 import { Joi } from '#shared/schema'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponses } from './index.mjs'
+import { examples } from './examples/json-loader.mjs'
 
 export default (api) => {
   const shared = { tags: ['cluster'] }
@@ -17,18 +18,14 @@ export default (api) => {
       content: {
         'application/json': {
           schema: j2s(schema['req.cluster.heartbeat']).swagger,
-          //example: examples.res.createApikey,
+          example: examples.req.cluster.heartbeat
         },
       },
     },
     responses: {
-      200: response('API key details', {}),
+      200: response('API key details', examples.res.cluster.heartbeat),
       ...errorResponses([
         `morio.core.schema.violation`,
-        //`morio.api.authentication.required`,
-        //'morio.api.nominative.account.required',
-        //'morio.api.account.role.unavailable',
-        //'morio.api.db.failure',
       ]),
     },
   })

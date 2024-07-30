@@ -19,10 +19,13 @@ export const schema = {
    * Requests
    */
   'req.cluster.heartbeat': Joi.object({
-    from: Joi.object({
-      fqdn: fqdn.required(),
-      uuid: uuid.required(),
-      serial: nodeSerial.required(),
+    data: Joi.object({
+      from: Joi.object({
+        fqdn: fqdn.required(),
+        uuid: uuid.required(),
+        serial: nodeSerial.required(),
+      }),
+      checksum: Joi.string().required(),
     }),
     to: fqdn.required(),
     cluster: uuid.required(),
@@ -66,18 +69,21 @@ export const schema = {
    * Responses
    */
   'res.cluster.heartbeat': Joi.object({
-    cluster: uuid.required(),
-    cluster_leader: Joi.object({
-      serial: Joi.number().min(1).max(9),
-      uuid: uuid,
+    data: Joi.object({
+      cluster: uuid.required(),
+      cluster_leader: Joi.object({
+        serial: Joi.number().min(1).max(9),
+        uuid: uuid,
+      }),
+      node: uuid.required(),
+      node_serial: jsTime.required(),
+      current: Joi.object({
+        keys,
+        settings,
+        serial: jsTime.required(),
+      }),
     }),
-    node: uuid.required(),
-    node_serial: jsTime.required(),
-    current: Joi.object({
-      keys,
-      settings,
-      serial: jsTime.required(),
-    }),
+    checksum: Joi.string().required(),
   }),
   'res.status': Joi.object({
     name: Joi.string(),
