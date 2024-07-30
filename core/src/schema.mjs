@@ -25,20 +25,20 @@ export const schema = {
         uuid: uuid.required(),
         serial: nodeSerial.required(),
       }),
-      checksum: Joi.string().required(),
+      to: fqdn.required(),
+      cluster: uuid.required(),
+      cluster_leader: Joi.object({
+        serial: Joi.number().min(1).max(9),
+        uuid: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
+      }),
+      version: version.required(),
+      settings_serial: jsTime.required(),
+      status: Joi.object(), // TODO: Make this more detailed
+      nodes: Joi.object(), // TODO: Make this more detailed
+      broadcast: Joi.bool().required(),
+      uptime: Joi.number().required(),
     }),
-    to: fqdn.required(),
-    cluster: uuid.required(),
-    cluster_leader: Joi.object({
-      serial: Joi.number().min(1).max(9),
-      uuid: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
-    }),
-    version: version.required(),
-    settings_serial: jsTime.required(),
-    status: Joi.object(), // TODO: Make this more detailed
-    nodes: Joi.object(), // TODO: Make this more detailed
-    broadcast: Joi.bool().required(),
-    uptime: Joi.number().required(),
+    checksum: Joi.string().required(),
   }),
   'req.cluster.join': Joi.object({
     you: fqdn.required(),
