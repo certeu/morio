@@ -548,7 +548,12 @@ utils.getClusterFingerprint = () =>
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setClusterUuid = (uuid) => {
-  store.set('status.cluster.uuid', uuid)
+  const current = store.get('status.cluster.uuid')
+  if (current && current !== uuid) {
+    log.error(`Attempt to change cluster UUID from ${current} to ${uuid}`)
+  }
+  else store.set('status.cluster.uuid', uuid)
+
   return utils
 }
 

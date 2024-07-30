@@ -107,6 +107,7 @@ export const service = {
        */
       utils.setEphemeral(false)
       utils.setNode({ ...node, settings: Number(timestamp) })
+      // TODO: do we need this next line?
       utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
       utils.setKeys(keys)
       utils.setSettingsSerial(Number(timestamp))

@@ -2,7 +2,7 @@
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { serviceCodes } from '#shared/errors'
-import { serviceOrder, ephemeralServiceOrder } from '#config'
+import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
 // Core imports
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { isBrokerLeading } from './services/broker.mjs'
@@ -47,7 +47,9 @@ const updateNodeState = async () => {
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    if (await runHook('wanted', service)) promises.push(runHook('heartbeat', service))
+    if (optionalServices.includes(service) ||
+      (await runHook('wanted', service))
+    ) promises.push(runHook('heartbeat', service))
   }
   /*
    * Do the same for core as the final service
@@ -315,7 +317,7 @@ const heartbeatDelay = () => {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
-  log.todo({response: data })
+  //log.todo({response: data })
   /*
    * Is this an error?
    */
