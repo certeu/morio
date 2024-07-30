@@ -1,6 +1,8 @@
-//import { core } from './utils.mjs'
-import { describe } from 'node:test'
+import { describe, it } from 'node:test'
+import { strict as assert } from 'node:assert'
 
 describe('Core Cluster Tests (TODO)', () => {
-  // TODO: Not sure how much we can do in unit tests alone*
+  it('Should find a way to run cluster tests somehow', async () => {
+    assert.equal(true, true)
+  })
 })

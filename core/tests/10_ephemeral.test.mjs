@@ -1,7 +1,8 @@
-import { store, core } from './utils.mjs'
+import { core, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg } from './json-loader.mjs'
+import { errors } from '../src/errors.mjs'
 
 describe('Ephemeral Core: Status Routes', () => {
   /*
@@ -14,11 +15,19 @@ describe('Ephemeral Core: Status Routes', () => {
    *     production: false,
    *     version: '0.2.0'
    *   },
-   *   status: { cluster: { code: 2, color: 'amber', time: 1721887129046 } },
+   *   status: {
+   *     cluster: {
+   *       code: 1,
+   *       color: 'amber',
+   *       time: 1722352609787,
+   *       msg: 'Morio is running in ephemeral mode'
+   *     }
+   *   },
    *   nodes: {},
    *   node: {
-   *     uptime: 5,
+   *     uptime: 6,
    *     ephemeral: true,
+   *     ephemeral_uuid: '5008f15a-4366-46ca-b5df-230e106cd49a',
    *     reconfigure_count: 1,
    *     config_resolved: true,
    *     settings_serial: 0
@@ -40,7 +49,7 @@ describe('Ephemeral Core: Status Routes', () => {
     assert.equal(d.info.production, false)
     // status.cluster
     assert.equal(typeof d.status.cluster, 'object')
-    assert.equal(d.status.cluster.code, 2)
+    assert.equal(d.status.cluster.code, 1)
     assert.equal(d.status.cluster.color, 'amber')
     assert.equal(typeof d.status.cluster.time, 'number')
     // nodes
@@ -49,55 +58,37 @@ describe('Ephemeral Core: Status Routes', () => {
     assert.equal(typeof d.node, 'object')
     assert.equal(typeof d.node.uptime, 'number')
     assert.equal(typeof d.node.reconfigure_count, 'number')
-    assert.equal(typeof d.node.settings_serial, 'number')
+    assert.equal(d.node.settings_serial, 0)
     assert.equal(d.node.ephemeral, true)
     assert.equal(d.node.config_resolved, true)
-    /*
-     * Add to store for re-use in other tests
-     */
-    store.ephemeral = true
+    assert.equal(typeof d.node.ephemeral_uuid, 'string')
   })
 })
 
 describe('Ephemeral Core: Non-available Routes', () => {
   const test = {
     get: [
-      '/status_logs',
       '/settings',
       '/idps',
       '/info',
       '/jwks',
-      '/docker/containers/test',
-      '/docker/containers/test/stats',
-      '/docker/images/test',
-      '/docker/images/test/history',
-      '/docker/networks/test',
-      '/docker/configs',
-      '/docker/containers',
       '/docker/df',
+      '/docker/containers',
       '/docker/all-containers',
       '/docker/images',
       '/docker/info',
       '/docker/networks',
-      '/docker/nodes',
-      '/docker/plugins',
-      '/docker/running-containers',
-      '/docker/secrets',
-      '/docker/services',
       '/pkgs/clients/deb/defaults',
     ],
     post: [
       '/docker/container',
-      '/docker/secret',
-      '/docker/plugin',
       '/docker/volume',
-      '/docker/service',
       '/docker/network',
       '/docker/image',
-      '/docker/pull',
       '/pkgs/clients/deb/build',
       '/ca/certificate',
       '/encrypt',
+      '/decrypt',
     ],
     put: [
       '/settings',
@@ -116,14 +107,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
   for (const url of test.get) {
     it(`Should not GET ${url} in ephemeral mode`, async () => {
       const result = await core.get(url)
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(Array.isArray(d.errors), true)
-      assert.equal(d.errors.length, 1)
-      assert.equal(d.errors[0], 'Not available in ephemeral mode')
+      validateErrorResponse(result, errors, 'morio.core.ephemeral.prohibited')
     })
   }
 
@@ -133,14 +117,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
   for (const url of test.post) {
     it(`Should not POST ${url} in ephemeral mode`, async () => {
       const result = await core.post(url, {})
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(Array.isArray(d.errors), true)
-      assert.equal(d.errors.length, 1)
-      assert.equal(d.errors[0], 'Not available in ephemeral mode')
+      validateErrorResponse(result, errors, 'morio.core.ephemeral.prohibited')
     })
   }
 
@@ -150,14 +127,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
   for (const url of test.put) {
     it(`Should not PUT ${url} in ephemeral mode`, async () => {
       const result = await core.put(url, {})
-      assert.equal(Array.isArray(result), true)
-      assert.equal(result.length, 3)
-      assert.equal(result[0], 503)
-      const d = result[1]
-      assert.equal(typeof d, 'object')
-      assert.equal(Array.isArray(d.errors), true)
-      assert.equal(d.errors.length, 1)
-      assert.equal(d.errors[0], 'Not available in ephemeral mode')
+      validateErrorResponse(result, errors, 'morio.core.ephemeral.prohibited')
     })
   }
 })

@@ -1,7 +1,6 @@
 // Shared imports
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
-import { hash } from '#shared/crypto'
 import { serviceCodes } from '#shared/errors'
 import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
 // Core imports
@@ -557,8 +556,10 @@ export const ensureMorioCluster = async () => {
    * Morio is always (ready to be) a cluster.
    * This needs to run, regardless of how many nodes we have.
    * Unless of course, we're running in ephemeral mode
+   * in which case we can just set the cluster status accordingly
    */
   if (!utils.isEphemeral()) await ensureMorioClusterConsensus()
+  else utils.setClusterStatus(1, statusColorFromCode(1))
 
   /*
    * Is the cluster healthy?

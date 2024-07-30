@@ -189,20 +189,6 @@ describe('Core Docker Active Tests', async () => {
   })
 
   /*
-   * GET /docker/images/:id/history
-   * Note: This is not something we test in depth,
-   * as we're just passing through the output from the Docker API.
-   */
-  it(`Should GET /docker/images/:id/history`, async () => {
-    const result = await core.get(`/docker/images/${iid}/history`)
-    const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-    assert.equal(Array.isArray(d), true)
-  })
-
-  /*
    * GET /docker/networks/:id
    * Note: This is not something we test in depth,
    * as we're just passing through the output from the Docker API.

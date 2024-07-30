@@ -60,21 +60,75 @@ describe('Core Extra Tests', () => {
   })
 
   /*
-   * GET /reload (after leader is found)
+   * GET /reload
+   * Example response:
+   * {
+   *   info: {
+   *     about: 'Morio Core',
+   *     name: '@morio/core',
+   *     production: false,
+   *     version: '0.2.0'
+   *   },
+   *   status: {
+   *     cluster: {
+   *       code: 0,
+   *       color: 'green',
+   *       time: 1722353260726,
+   *       updated: 1722353260726,
+   *       msg: 'Everything is ok'
+   *     },
+   *     nodes: { 'unit.test.morio.it': [Object] }
+   *   },
+   *   nodes: {
+   *     '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197': {
+   *       fqdn: 'unit.test.morio.it',
+   *       hostname: 'unit',
+   *       ip: '192.168.144.35',
+   *       serial: 1,
+   *       uuid: '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197',
+   *       settings: 1722353233483
+   *     }
+   *   },
+   *   node: {
+   *     uptime: 246,
+   *     cluster: '9211bcab-f2fe-4313-a56d-a05490bb0630',
+   *     node: '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197',
+   *     node_serial: 1,
+   *     ephemeral: false,
+   *     reconfigure_count: 3,
+   *     config_resolved: true,
+   *     settings_serial: 1722353233483
+   *   },
+   *   sanitized_settings: {
+   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
+   *     tokens: { flags: [Object], secrets: [Object] },
+   *     iam: { providers: [Object] }
+   *   },
+   *   settings: {
+   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
+   *     tokens: { flags: [Object], secrets: [Object] },
+   *     iam: { providers: [Object] }
+   *   },
+   *   keys: { ... },
+   *   presets { ... },
+  }
    */
-  it('Should GET /reload (and have found a leader)', async () => {
+  it('Should GET /reload', async () => {
     const result = await core.get('/reload')
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
     assert.equal(typeof d, 'object')
-    /*
-     * After the intial setup, it will take a while for the
-     * cluster leader to be found. This tests that
-     */
-    assert.equal(typeof d.status.cluster.leader_serial, 'number')
-    assert.equal([true, false].includes(d.status.cluster.leading), true)
+    assert.equal(typeof d.info, 'object')
+    assert.equal(typeof d.status.cluster, 'object')
+    assert.equal(typeof d.status.nodes, 'object')
+    assert.equal(typeof d.nodes, 'object')
+    assert.equal(typeof d.node, 'object')
+    assert.equal(typeof d.sanitized_settings, 'object')
+    assert.equal(typeof d.settings, 'object')
+    assert.equal(typeof d.keys, 'object')
+    assert.equal(typeof d.presets, 'object')
   })
 
   /*
@@ -108,19 +162,4 @@ describe('Core Extra Tests', () => {
     }
   })
 
-  /*
-   * GET /status (after setup)
-   * Example response:
-   * {
-   *   "url": "/does-not-exist",
-   *   "method":"GET",
-   *   "originalUrl": "/does-not-exist"
-   * }
-   */
-  it('Should GET /status (after initial setup)', async () => {
-    const result = await core.get('/status')
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-  })
 })

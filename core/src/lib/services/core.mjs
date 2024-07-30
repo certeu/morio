@@ -235,10 +235,7 @@ const generateDataChecksum = (data) => {
   return hash(JSON.stringify(data)+keys.mrt+keys.cluster+keys.rpwd)
 }
 
-const validateDataChecksum = (data, checksum) => {
-  const keys = utils.getKeys()
-  return (checksum === generateDataChecksum(data))
-}
+const validateDataChecksum = (data, checksum) => (checksum === generateDataChecksum(data))
 
 export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
 export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)
