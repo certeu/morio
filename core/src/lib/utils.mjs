@@ -1190,3 +1190,8 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
  * Add validate method for eacy access
  */
 utils.validate = validateMethod
+
+/**
+ * For debugging
+ */
+utils.dumpStore = () => log.debug(JSON.stringify(store, null, 2)

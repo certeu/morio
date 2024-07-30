@@ -238,6 +238,8 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
    */
   const start = Date.now()
   let data
+  log.todo(`About to send heartbeat to ${fqdn}, cluster is: ${utils.getClusterUuid()}`)
+  if (!utils.getClusterUuid()) utils.dumpStore()
   try {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
