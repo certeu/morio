@@ -29,7 +29,8 @@ Controller.prototype.heartbeat = async (req, res) => {
    */
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
   if (!valid) {
-    log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
+    //log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
+    log.info(err?.message, `Received invalid heartbeat from ${req.body.node}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err.message,
     })
