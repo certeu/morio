@@ -321,7 +321,6 @@ const heartbeatDelay = () => {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
-  if (!data.message) log.todo({heartbeat_response: data})
   /*
    * Is this an error?
    */
@@ -393,7 +392,6 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 }
 
 export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
-  if (!data.message) log.todo({heartbeat_request: data})
   /*
    * Ensure we are comparing to up to date cluster state
    */
