@@ -138,6 +138,14 @@ utils.getCacheHit = (key) => {
 utils.getCaConfig = () => store.get('config.ca')
 
 /**
+ * Helper method to get the FQDN of the cluster
+ */
+utils.getClusterFqdn = () => {
+  let fqdn = utils.getSettings('cluster.fqdn', false)
+  if (!fqdn) return utils.getSettings(['cluster', 'broker_nodes', 0], null)
+}
+
+/**
  * Helper method to get the data for a cluster rnode
  */
 utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], false)
