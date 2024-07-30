@@ -154,8 +154,8 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * just defer for a while, then try again
    */
   if (targets.length === 1 && targets[0] === false) {
-    const delay = 3000
-    log.debug(utils.getClusterState(),`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/1000)} seconds`)
+    const delay = 6660
+    log.debug(utils.getClusterState(),`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/100)/100} seconds`)
     return setTimeout(async () => runHeartbeat(true, false), 3000)
   }
 
@@ -348,7 +348,14 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
     if (validDataWithChecksum(data)) data = data.data
     else log.warn(data, `Heartbeat checksum failure`)
   }
-  else log.todo(data, `Invalid heartbeat response`)
+  else {
+    /*
+     * It is normal for nodes to not be able to properly sign/checksum the heartbeats
+     * when the cluster just came up, since they may not have the required data yet
+     * So below 1 minute of uptime, let's swallow these warnings
+     */
+    if (utils.getUptime() > 60) log.warn(`Received an invalid heartbeat response`)
+  }
 
   /*
    * Just because the request didn't error doesn't mean all is ok
