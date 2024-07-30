@@ -66,7 +66,7 @@ export const schema = {
     cluster_leader: Joi.object({
       serial: Joi.number().min(1).max(9),
       uuid: uuid,
-    },
+    }),
     node: uuid.required(),
     node_serial: jsTime.required(),
     current: Joi.object({
