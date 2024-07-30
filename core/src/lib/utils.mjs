@@ -362,7 +362,11 @@ utils.getNodeIp = () => store.get('state.node.ip')
  *
  * @return {number} node_serial - This node's serial
  */
-utils.getNodeSerial = () => store.get('state.node.serial', 0)
+utils.getNodeSerial = () => {
+  const serial = store.get('state.node.serial', 0)
+  if (!serial) log.error(`Could not determine own serial`)
+  return serial
+}
 
 /**
  * Helper method to get the uuid of this node
