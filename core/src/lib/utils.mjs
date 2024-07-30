@@ -14,13 +14,15 @@ export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
 
 /*
  * Add a log method to make it easy to spot things still to be done
+ * Since a grepping for things to do is a common way to check for things
+ * still to be done, we are splitting this in to+do so it won't match.
  */
-log.todo = (a, b) => {
+log['to'+'do'] = (a, b) => {
   const location = new Error().stack.split('\n')[2]
 
   return typeof a === 'object'
-    ? log.debug(a, `🟠 ${b}${location}`)
-    : log.debug(`🟠 ${a}${location}`)
+    ? log.warn(a, `🟠 ${b}${location}`)
+    : log.warn(`🟠 ${a}${location}`)
 }
 
 /*

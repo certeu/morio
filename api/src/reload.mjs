@@ -16,10 +16,7 @@ export const reloadConfiguration = async () => {
     every: 5,
     timeout: 3600,
     run: async () => {
-      const result = await utils.coreClient.get('/reload')
-      log.todo(result)
       const [status, body] = await utils.coreClient.get('/reload')
-      log.todo({status ,body})
 
       return status === 200 ? body : false
     },

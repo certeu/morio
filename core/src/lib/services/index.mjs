@@ -316,8 +316,6 @@ const shouldServiceBeRestarted = async (serviceName, hookParams) => {
   /*
    * Defer to the restart lifecycle hook
    */
-  //const restart = await runHook('restart', serviceName, hookParams)
-  //log.todo({restart, serviceName, status: utils.getStatus() })
   return await runHook('restart', serviceName, hookParams)
 }
 

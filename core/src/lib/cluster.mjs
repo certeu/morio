@@ -82,15 +82,6 @@ const statusColorFromCode = (code) => {
 }
 
 /**
- * Helper method to join a node to the cluster
- */
-export const joinCluster = async () => {
-  log.todo('Implement joinCluster')
-
-  return
-}
-
-/**
  * Ensure that the Morio cluster reaches consensus about what config to run
  *
  * Consensus building typically falls apart in 2 main parts:
@@ -227,7 +218,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
   const start = Date.now()
   let data
   try {
-    if (broadcast) log.debug(`Broadcast heartbeat to ${fqdn}`)
+    if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: {
@@ -325,7 +316,6 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
     return
   }
-  log.todo(JSON.stringify(data, null ,2))
 
   /*
    * Just because the request didn't error doesn't mean all is ok
@@ -569,7 +559,7 @@ const inviteClusterNodeAttempt = async (remote) => {
     log.info(`Node ${result.node} will join the cluster`)
     return true
   } else {
-    log.todo('Implement cluster join problem')
+    log.todo('Handle cluster join failure')
     return false
   }
 }
