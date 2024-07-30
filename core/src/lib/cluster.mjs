@@ -243,15 +243,19 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: {
-        from: utils.getNodeFqdn(),
+        from: {
+          fqnd: utils.getNodeFqdn(),
+          serial: Number(utils.getNodeSerial()),
+          uuid: utils.getNodeUuid(),
+        },
         to: fqdn,
         cluster: utils.getClusterUuid(),
-        node: utils.getNodeUuid(),
-        leader: utils.getLeaderUuid() || undefined,
-        leader_serial: utils.getLeaderSerial() || undefined,
+        cluster_leader: {
+          serial: tils.getLeaderSerial() || undefined,
+          uuid: utils.getLeaderUuid() || undefined,
+        },
         version: utils.getVersion(),
         settings_serial: Number(utils.getSettingsSerial()),
-        node_serial: Number(utils.getNodeSerial()),
         status: utils.getStatus(),
         nodes: utils.getClusterNodes(),
         broadcast,
@@ -321,7 +325,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   /*
    * Is this an error?
    */
-  if (error || data.code) {
+  if (error || data?.code) {
     /*
      * Storing the result of a failed hearbteat will influence the cluster state
      */

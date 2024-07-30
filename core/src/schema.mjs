@@ -19,15 +19,19 @@ export const schema = {
    * Requests
    */
   'req.cluster.heartbeat': Joi.object({
-    from: fqdn.required(),
+    from: Joi.object({
+      fqdn: fqdn.required(),
+      uuid: uuid.required(),
+      serial: nodeSerial.required(),
+    }),
     to: fqdn.required(),
     cluster: uuid.required(),
-    node: uuid.required(),
-    leader: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
-    leader_serial: Joi.number().min(1).max(9),
+    cluster_leader: Joi.object({
+      serial: Joi.number().min(1).max(9),
+      uuid: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
+    }),
     version: version.required(),
     settings_serial: jsTime.required(),
-    node_serial: nodeSerial.required(),
     status: Joi.object(), // TODO: Make this more detailed
     nodes: Joi.object(), // TODO: Make this more detailed
     broadcast: Joi.bool().required(),
