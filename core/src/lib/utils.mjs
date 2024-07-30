@@ -749,6 +749,10 @@ utils.setLeaderUuid = (uuid) => {
  */
 utils.setLeading = (leading) => {
   store.set('status.cluster.leading', leading ? true : false)
+  if (leading) {
+    utils.setLeaderSerial(utils.getNodeSerial())
+    utils.setLeaderUuid(utils.getNodeUuid())
+  }
   return utils
 }
 
