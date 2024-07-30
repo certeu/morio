@@ -181,12 +181,7 @@ utils.getClusterStatus = () => store.get('status.cluster', { code: 499, time: 17
 /**
  * Helper method to get the cluster uuid
  */
-utils.getClusterUuid = () => {
-  const keys = store.get('keys')
-  log.todo(keys)
-
-  return keys?.cluster
-}
+utils.getClusterUuid = () => utils.getKeys()?.cluster
 
 /**
  * Helper method to get the cluster leader fqdn
