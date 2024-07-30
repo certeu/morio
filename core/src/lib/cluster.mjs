@@ -315,6 +315,7 @@ const heartbeatDelay = () => {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
+  log.todo({response: data })
   /*
    * Is this an error?
    */
@@ -459,6 +460,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         /*
          * We hereby humbly accept our leading role
          */
+        utils.setLeaderUuid(utils.getNodeUuid())
         utils.setLeaderSerial(utils.getNodeSerial())
         log.info(`We are now leading this cluster`)
       } else {
