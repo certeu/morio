@@ -400,15 +400,6 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
 
 export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   /*
-   * Verify the checksum
-   */
-  if (data.data && data.checksum) {
-    if (validDataWithChecksum(data)) data = data.data
-    else log.warn(data, `Heartbeat checksum failure`)
-  }
-  else log.todo(data, `Invalid heartbeat request`)
-
-  /*
    * Ensure we are comparing to up to date cluster state
    */
   await updateClusterState()

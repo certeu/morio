@@ -5,6 +5,7 @@ import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reconfigure } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
+import { validDataWithChecksum } from '../lib/services/core.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -27,25 +28,14 @@ Controller.prototype.heartbeat = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
-  if (valid) {
-    //log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
+  if (!valid) {
     log.todo(
       { body: req.body, err: err?.message },
-      `Received invalid heartbeat from ${req.body.node}`
+      `Received invalid heartbeat from ${req.body.data.node.from}`
     )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err.message,
     })
-  } else {
-    if (valid.broadcast && !utils.isLeading()) {
-      /*
-       * Increase the heartbeat rate and log
-       */
-      utils.setHeartbeatInterval(1)
-      log.info(
-        `Received a broadcast heartbeat from ${valid.from.fqdn}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`
-      )
-    } else log.debug(`Incoming heartbeat from ${valid.from.fqdn}`)
   }
 
   /*
@@ -58,20 +48,45 @@ Controller.prototype.heartbeat = async (req, res) => {
     })
 
   /*
+   * If now, then validate the checksum before we continue
+   */
+  if (!validaDataWithChecksum(valid)) {
+    log.todo(
+      { body: req.body, err: err?.message },
+      `Received heartbeat with invalid checksum from ${req.body.data.node.from}`
+    )
+    return utils.sendErrorResponse(res, 'morio.core.checksum.mismatch', req.url)
+  }
+
+  /*
+   * So far so good. Is this a broadcast?
+   */
+  if (valid.data.broadcast && !utils.isLeading()) {
+    /*
+     * Increase the heartbeat rate and log
+     */
+    utils.setHeartbeatInterval(1)
+    log.info(
+      `Received a broadcast heartbeat from ${valid.data.from.fqdn}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`
+    )
+  }
+  else log.debug(`Incoming heartbeat from ${valid.data.from.fqdn}`)
+
+  /*
    * If we are leading, update the follower status
    */
   if (utils.isLeading()) {
-    for (const fqdn of Object.keys(valid.status.nodes)
+    for (const fqdn of Object.keys(valid.data.status.nodes)
       .filter((fqdn) => fqdn !== utils.getNodeFqdn())
       .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
-      utils.setPeerStatus(fqdn, valid.status.nodes[fqdn])
+      utils.setPeerStatus(fqdn, valid.data.status.nodes[fqdn])
     }
   }
 
   /*
    * Verify the heartbeat request which will determin the action to take
    */
-  const { action, errors } = await verifyHeartbeatRequest(valid)
+  const { action, errors } = await verifyHeartbeatRequest(valid.data)
 
   /*
    * (potentially) take action, but not if we just got on our feet
