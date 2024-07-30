@@ -1194,4 +1194,4 @@ utils.validate = validateMethod
 /**
  * For debugging
  */
-utils.dumpStore = () => log.debug(JSON.stringify(store, null, 2)
+utils.dumpStore = () => log.debug(JSON.stringify(store, null, 2))
