@@ -181,7 +181,7 @@ utils.getClusterStatus = () => store.get('status.cluster', { code: 499, time: 17
 /**
  * Helper method to get the cluster uuid
  */
-utils.getClusterUuid = () => store.get('state.cluster.uuid')
+utils.getClusterUuid = () => store.get('status.cluster.uuid')
 
 /**
  * Helper method to get the cluster leader fqdn
@@ -196,36 +196,14 @@ utils.getLeaderFqdn = () =>
  *
  * @return {string} serial - The node serial of the cluster leader
  */
-utils.getLeaderSerial = () => {
-  const serial = utils.getLeaderState()?.serial
-
-  return serial ? serial : false
-}
-
-/**
- * Helper method to get the state of the cluster leader
- *
- * @return {object} state - State of the cluster leader
- */
-utils.getLeaderState = () => {
-  const leader = store.get('state.cluster.leader', false)
-  if (!leader) return false
-  const state = store.get(['state', 'cluster', 'nodes', leader], false)
-  log.todo(store.state.cluster.nodes)
-
-  return state ? state : false
-}
+utils.getLeaderSerial = () => store.get('status.cluster.leader_serial', false)
 
 /**
  * Helper method to get the uuid of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
-utils.getLeaderUuid = () => {
-  const uuid = utils.getLeaderState()?.uuid
-
-  return uuid ? uuid : false
-}
+utils.getLeaderUuid = () => store.get('status.cluster.leader_uuid', false)
 
 /**
  * Helper method to get a Docer service configuration
@@ -265,7 +243,7 @@ utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).l
  *
  * @return {number} seconds - The number of seconds between heartbeats
  */
-;(utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeats.interval', 1)),
+;(utils.getHeartbeatInterval = () => store.get('status.cluster.heartbeat_interval', 1)),
   /**
    * Helper method to get local heartbeat setTimeout id
    *
@@ -560,7 +538,7 @@ utils.setCaConfig = (config) => {
  */
 utils.getClusterFingerprint = () =>
   store
-    .get('state.cluster.uuid', '')
+    .get('status.cluster.uuid', '')
     .slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
 /**
@@ -570,7 +548,7 @@ utils.getClusterFingerprint = () =>
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setClusterUuid = (uuid) => {
-  store.set('state.cluster.uuid', uuid)
+  store.set('status.cluster.uuid', uuid)
   return utils
 }
 
@@ -663,7 +641,7 @@ utils.setHeartbeatIn = (fqdn, data) => {
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatInterval = (seconds) => {
-  store.set('state.cluster.heartbeats.interval', seconds)
+  store.set('status.cluster.heartbeat_interval', seconds)
   return utils
 }
 
