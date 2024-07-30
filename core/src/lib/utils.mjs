@@ -211,6 +211,7 @@ utils.getLeaderState = () => {
   const leader = store.get('state.cluster.leader', false)
   if (!leader) return false
   const state = store.get(['state', 'cluster', 'nodes', leader], false)
+  log.todo(store.state.cluster.nodes)
 
   return state ? state : false
 }
@@ -725,6 +726,18 @@ utils.setKeys = (keys) => {
  */
 utils.setLeaderSerial = (node_serial) => {
   store.set('status.cluster.leader_serial', node_serial)
+  if (node_serial === utils.getNodeSerial()) utils.setLeaderUuid(utils.getNodeUuid())
+  return utils
+}
+
+/**
+ * Helper method to store the cluster leader's UUID
+ *
+ * @param {string} uuid - The UUID of the leading node
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setLeaderUuid = (uuid) => {
+  store.set('status.cluster.leader_uuid', uuid)
   return utils
 }
 

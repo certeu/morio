@@ -24,6 +24,7 @@ export const schema = {
     cluster: uuid.required(),
     node: uuid.required(),
     leader: Joi.string().guid({ version: 'uuidv4', separator: '-' }),
+    leader_serial: Joi.number().min(1).max(9),
     version: version.required(),
     settings_serial: jsTime.required(),
     node_serial: nodeSerial.required(),
