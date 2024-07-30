@@ -251,7 +251,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
         to: fqdn,
         cluster: utils.getClusterUuid(),
         cluster_leader: {
-          serial: tils.getLeaderSerial() || undefined,
+          serial: utils.getLeaderSerial() || undefined,
           uuid: utils.getLeaderUuid() || undefined,
         },
         version: utils.getVersion(),
