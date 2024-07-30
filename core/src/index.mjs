@@ -91,9 +91,10 @@ export async function reconfigure(hookParams = {}) {
   reconfigureApi()
 
   /*
-   * Give the API some time to settle, then update cluster state
+   * If we're not running in ephemeral mode,
+   * give the API some time to settle, then update cluster state
    */
-  setTimeout(() => {
+  if (!utils.isEphemeral()) setTimeout(() => {
     log.debug('Triggering refresh of cluster status')
     updateClusterState(true)
   }, 2000)
