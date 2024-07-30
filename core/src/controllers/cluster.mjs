@@ -27,9 +27,12 @@ Controller.prototype.heartbeat = async (req, res) => {
    * Validate request against schema
    */
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
-  if (!valid) {
+  if (valid) {
     //log.info({ body: req.body, err }, `Received invalid heartbeat from ${req.body.node}`)
-    log.info(err?.message, `Received invalid heartbeat from ${req.body.node}`)
+    log.todo(
+      { body: req.body, err: err?.message },
+      `Received invalid heartbeat from ${req.body.node}`
+    )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err.message,
     })
@@ -94,7 +97,7 @@ Controller.prototype.heartbeat = async (req, res) => {
     cluster: utils.getClusterUuid(),
     cluster_leader: {
       serial: utils.getLeaderSerial(),
-      uuid: utils.getLeaderUuid()
+      uuid: utils.getLeaderUuid(),
     },
     node: utils.getNodeUuid(),
     node_serial: Number(utils.getNodeSerial()),
