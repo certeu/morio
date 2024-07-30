@@ -50,7 +50,7 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * If now, then validate the checksum before we continue
    */
-  if (!validaDataWithChecksum(valid)) {
+  if (!validDataWithChecksum(valid)) {
     log.todo(
       { body: req.body, err: err?.message },
       `Received heartbeat with invalid checksum from ${req.body.data.from.fqdn}`
