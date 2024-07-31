@@ -553,7 +553,7 @@ export const ensureMorioCluster = async () => {
           'coredocs',
           utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`,
         ],
-      }, // Endpoint config
+      } // Endpoint config
     )
   } catch (err) {
     log.error(err, 'Failed to ensure morio network configuration')
