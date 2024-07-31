@@ -1,12 +1,9 @@
 import { AuthLayout } from './layout.mjs'
 import { Login } from './login.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
-import { LogoSpinner, CountdownCircle } from 'components/animations.mjs'
-import { Arrows } from './layout.mjs'
+import { LogoSpinner } from 'components/animations.mjs'
 import { roles } from 'config/roles.mjs'
 
 const OneMomentPlease = () => (
@@ -52,7 +49,7 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
      */
     const whoAmI = async () => {
       const result = await api.whoAmI()
-      if (result[1] === 401)  logout()
+      if (result[1] === 401) logout()
     }
     const ephemeral = async () => {
       const result = await api.getStatus()
@@ -60,10 +57,8 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
        * If we are running in ephemeral mode, always load homepage
        * unless it's one of the allow-listed URLs
        */
-      if (
-        result[0]?.state?.ephemeral &&
-        !ephemeralUrlList.includes(router.pathname)
-      ) router.push('/')
+      if (result[0]?.state?.ephemeral && !ephemeralUrlList.includes(router.pathname))
+        router.push('/')
     }
     whoAmI()
     ephemeral()

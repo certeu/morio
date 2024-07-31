@@ -12,12 +12,10 @@ const RpmPage = (props) => {
           <Popout comment by="joost">
             <h3>This is not supported</h3>
             <p>
-              I am not even certain that we will ever support this,
-              as Apple is notoriously developer-hostile.
+              I am not even certain that we will ever support this, as Apple is notoriously
+              developer-hostile.
             </p>
-            <p>
-              Still, I added this placeholder page just in case.
-            </p>
+            <p>Still, I added this placeholder page just in case.</p>
           </Popout>
         </div>
       </ContentWrapper>

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
@@ -15,8 +14,7 @@ import {
 } from 'components/account.mjs'
 
 const AccountPage = (props) => {
-  const { account, logout, renewToken } = useAccount()
-  const [showToken, setShowToken] = useState(false)
+  const { account } = useAccount()
 
   return (
     <PageWrapper {...props}>
@@ -32,7 +30,7 @@ const AccountPage = (props) => {
                     <RenewTokenButton />
                     <LogoutButton />
                   </div>
-                  {showToken ? <AccountToken /> : null}
+                  <AccountToken />
                 </Tab>
                 <Tab key="apikeys">
                   <AccountApiKeys />

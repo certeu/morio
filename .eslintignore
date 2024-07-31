@@ -1,4 +1,7 @@
 **/*.json
 **/*.sh
 *.sh
+**/*.md
+*.md
 **/Dockerfile.*
+json-loader.mjs

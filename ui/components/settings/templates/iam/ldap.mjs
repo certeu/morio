@@ -5,7 +5,7 @@ import { Popout } from 'components/popout.mjs'
 
 const Roles = [
   { tabs: {}, navs: false },
-  <Popout tip>
+  <Popout tip key="tip">
     <h5>Role-Based Access Control</h5>
     <p>
       For each role, you can set an <b>LDAP attribute</b>, and a <b>regular expression</b> (regex)
@@ -32,7 +32,7 @@ for (const role of roles)
         label: 'Regex',
         labelBL: `The regex to match`,
         key: `rbac.${role}.regex`,
-        placeholder: `^(?:jdecock|stellene|lbazille)\$`,
+        placeholder: `^(?:jdecock|stellene|lbazille)$`,
       },
     ],
   ]
@@ -40,10 +40,9 @@ for (const role of roles)
 /*
  * LDAP Authenticator Provider template
  */
-export const ldap = (context) => ({
+export const ldap = {
   title: 'LDAP / Active Directory',
   about: 'Provides authentication against an LDAP service',
-  desc: 'fixme',
   desc: 'Use this to read content from a website feed',
   local: (data) => `iam.providers.${data.id}`,
   form: ({ data }) => [
@@ -125,4 +124,4 @@ export const ldap = (context) => ({
       },
     },
   ],
-})
+}

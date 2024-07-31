@@ -1,5 +1,4 @@
 // Dependencies
-import get from 'lodash.get'
 import { atomWithLocation } from 'jotai-location'
 import { validateSettings, cloneAsPojo } from 'lib/utils.mjs'
 import yaml from 'yaml'
@@ -17,10 +16,10 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport } from './report.mjs'
-import { SettingsIcon, OkIcon, CheckCircleIcon, RightIcon, PlayIcon } from 'components/icons.mjs'
+import { SettingsIcon, OkIcon, CheckCircleIcon, RightIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
-import { SettingsNavigation, NavButton } from './navigation.mjs'
+import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { StatusLogs } from 'components/status-logs.mjs'
@@ -332,7 +331,6 @@ export const PrimedSettingsWizard = (props) => {
    * React state
    */
   const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings this wizard builds
-  const [valid, setValid] = useState(false) // Whether or not the current input is valid
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [view, _setView] = useAtom(viewInLocation) // Holds the current view
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview

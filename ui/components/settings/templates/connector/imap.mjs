@@ -15,7 +15,7 @@ export const imap = {
       `##### Create a new IMAP connector input`,
       {
         tabs: {
-          Metadata: xputMeta('input', 'imap'),
+          Metadata: xputMeta('input'),
           Settings: [
             [
               {

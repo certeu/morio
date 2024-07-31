@@ -1,5 +1,4 @@
 // Dependencies
-import { roles } from 'config/roles.mjs'
 import { shortDate } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext, useEffect } from 'react'
@@ -31,9 +30,6 @@ import { AccountStatus } from './accounts.mjs'
 
 export const AccountOverview = () => {
   const { account } = useAccount()
-
-  const level = roles.indexOf(account.role)
-  const maxLevel = roles.indexOf(account.maxRole)
 
   return account ? (
     <table className="table">
@@ -68,7 +64,9 @@ export const AccountOverview = () => {
           <tr>
             <td className="w-36 text-right font-bold">Maximum role</td>
             <td>
-              {account.available_roles.map(role => <Role key={role} role={role} />)}
+              {account.available_roles.map((role) => (
+                <Role key={role} role={role} />
+              ))}
             </td>
           </tr>
         ) : null}
@@ -83,7 +81,7 @@ export const AccountOverview = () => {
           <td>
             Your session will expire in{' '}
             <b>
-              <TimeToGo iso={new Date(account.exp*1000).toISOString()} />
+              <TimeToGo iso={new Date(account.exp * 1000).toISOString()} />
             </b>
           </td>
         </tr>
@@ -110,7 +108,6 @@ export const LogoutButton = () => {
 
 export const ShowTokenButton = () => {
   const { pushModal } = useContext(ModalContext)
-  const { account } = useAccount()
 
   return (
     <button
@@ -129,7 +126,7 @@ export const ShowTokenButton = () => {
 }
 
 export const RenewTokenButton = () => {
-  const { logout, renewToken } = useAccount()
+  const { renewToken } = useAccount()
 
   return (
     <button className="btn btn-primary flex flex-row justify-between gap-4" onClick={renewToken}>
@@ -139,7 +136,7 @@ export const RenewTokenButton = () => {
   )
 }
 
-const NoKeysForYou = ({ provider }) => (
+const NoKeysForYou = () => (
   <button className="btn btn-error" isabled>
     <div className="flex flex-row gap-1">
       <WarningIcon />
@@ -369,7 +366,9 @@ export const AccountApiKeys = () => {
               <td>
                 <code>{data.key.slice(0, 8)}</code>
               </td>
-              <td><b>{data.name}</b></td>
+              <td>
+                <b>{data.name}</b>
+              </td>
               <td>
                 <AccountStatus status={data.status} />
               </td>
@@ -381,7 +380,9 @@ export const AccountApiKeys = () => {
                   <b>
                     <TimeAgo iso={data.created_at} />
                     <br />
-                    <small><DateAndTime iso={data.created_at} /></small>
+                    <small>
+                      <DateAndTime iso={data.created_at} />
+                    </small>
                   </b>
                 </span>
               </td>
@@ -390,7 +391,9 @@ export const AccountApiKeys = () => {
                   <b>
                     <TimeToGo iso={data.expires_at} />
                     <br />
-                    <small><DateAndTime iso={data.expires_at} /></small>
+                    <small>
+                      <DateAndTime iso={data.expires_at} />
+                    </small>
                   </b>
                 </span>
               </td>

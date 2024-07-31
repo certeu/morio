@@ -5,12 +5,9 @@ import { useEffect, useContext, useState } from 'react'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { ModalContext } from 'context/modal.mjs'
 // Components
-import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
-import { PasswordInput } from '../inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Term } from 'components/term.mjs'
-import { ListInput, RoleInput } from '../inputs.mjs'
 import { CloseIcon, QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'components/icons.mjs'
 // Providers
 import { BaseProvider } from './base-provider.mjs'
@@ -282,8 +279,8 @@ export const Login = ({ setAccount, account = false, role = false }) => {
             </button>
           </>
         )
-      ) : tabList ? (
-        <Tabs tabs={tabList.map((id) => idps[id].label || id)} children={tabs} />
+      ) : tabList.length > 0 ? (
+        <Tabs tabs={tabList.map((id) => idps[id].label || id)}>{tabs}</Tabs>
       ) : (
         <Popout warning>Failed to load identity providers</Popout>
       )}

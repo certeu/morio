@@ -1,20 +1,16 @@
-import Joi from 'joi'
-import { providerMeta } from './index.mjs'
-import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
-import { PageLink } from 'components/link.mjs'
 
 /*
  * Morio Root Token Identity Provider template
  *
  * Note that this cannot be remove, although it can be disabled
  */
-export const mrt = (context) => ({
+export const mrt = {
   title: 'Morio Root Token',
   about: 'Provides authentication using the Morio Root Token',
   desc: 'fixme',
-  local: (data) => `iam.providers.mrt`,
-  form: ({ data }) => [
+  local: () => `iam.providers.mrt`,
+  form: () => [
     {
       key: 'id',
       current: 'mrt',
@@ -44,4 +40,4 @@ export const mrt = (context) => ({
       </Popout>
     </>,
   ],
-})
+}

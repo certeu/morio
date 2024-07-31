@@ -55,6 +55,7 @@ export const TokenSelect = (props) => {
       {...{ label, labelTR, labelBL, labelBR }}
       forId={id}
       labelTR={<TokenHelp {...{ pushModal, secrets }} />}
+      value={current}
     >
       <select
         className={`select w-full select-bordered select-success`}
@@ -66,7 +67,7 @@ export const TokenSelect = (props) => {
         {Object.keys(allTokens).map((key) => {
           const val = `{{{ ${key} }}}`
           return (
-            <option key={key} value={val} selected={current === val}>
+            <option key={key} value={val}>
               {key}
             </option>
           )
@@ -196,7 +197,7 @@ const AddVariable = ({ update, data, current = {}, edit, secrets, popModal }) =>
           {edit ? 'Update' : 'Create'} {secrets ? 'Secret' : 'Variable'}
         </button>
         {edit ? (
-          <button className="btn btn-error" onClick={() => remove(token.key || current.key)}>
+          <button className="btn btn-error" onClick={remove}>
             <TrashIcon />
           </button>
         ) : null}
@@ -268,47 +269,41 @@ const flags = {
   HEADLESS_MORIO: 'Run Morio in headless mode, where the UI is not available',
 }
 
-export const Flags = ({ update, data }) => {
-  const { pushModal, popModal } = useContext(ModalContext)
-
-  const allFlags = data?.tokens?.flags || {}
-
-  return (
-    <>
-      <div className="flex flex-col gap-2">
-        {Object.keys(data?.tokens?.flags || {})
-          .sort()
-          .map((key) => (
-            <label
-              className={`hover:cursor-pointer border-4 border-y-0 border-r-0 p-2
-              hover:border-primary hover:bg-primary hover:bg-opacity-10`}
-              key={key}
-              for={key}
-            >
-              <div for={key} className="flex flex-row gap-2 items-center">
-                {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
-                <span
-                  className={`badge badge-lg badge-${data.tokens.flags[key] ? 'success' : 'error'}`}
-                >
-                  {key}
-                </span>
-              </div>
-              <div className="flex flex-row gap-2 items-center">
-                <input
-                  id={key}
-                  type="checkbox"
-                  value={data.tokens.flags[key]}
-                  onChange={() => update(`tokens.flags.${key}`, !data.tokens.flags[key])}
-                  className="toggle my-3 toggle-primary"
-                  checked={data.tokens.flags[key]}
-                />
-                <label className="hover:cursor-pointer" for={key}>
-                  {flags[key]}
-                </label>
-              </div>
-            </label>
-          ))}
-      </div>
-    </>
-  )
-}
+export const Flags = ({ update, data }) => (
+  <>
+    <div className="flex flex-col gap-2">
+      {Object.keys(data?.tokens?.flags || {})
+        .sort()
+        .map((key) => (
+          <label
+            className={`hover:cursor-pointer border-4 border-y-0 border-r-0 p-2
+            hover:border-primary hover:bg-primary hover:bg-opacity-10`}
+            key={key}
+            htmlFor={key}
+          >
+            <div htmlFor={key} className="flex flex-row gap-2 items-center">
+              {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
+              <span
+                className={`badge badge-lg badge-${data.tokens.flags[key] ? 'success' : 'error'}`}
+              >
+                {key}
+              </span>
+            </div>
+            <div className="flex flex-row gap-2 items-center">
+              <input
+                id={key}
+                type="checkbox"
+                value={data.tokens.flags[key]}
+                onChange={() => update(`tokens.flags.${key}`, !data.tokens.flags[key])}
+                className="toggle my-3 toggle-primary"
+                checked={data.tokens.flags[key]}
+              />
+              <label className="hover:cursor-pointer" htmlFor={key}>
+                {flags[key]}
+              </label>
+            </div>
+          </label>
+        ))}
+    </div>
+  </>
+)

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { SecretInput, RoleInput } from '../inputs.mjs'
 
 /**
  * The login for for the Morio Root Token provider
  */
-export const MrtProvider = ({ id, api, setLoadingStatus, setAccount, setError }) => {
+export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => {
   const [mrt, setMrt] = useState('')
   const [role, setRole] = useState('user')
 

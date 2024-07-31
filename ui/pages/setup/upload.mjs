@@ -157,7 +157,7 @@ const SettingsUploadPage = (props) => {
                     One moment please
                   </div>
                 ) : null}
-                {!loading && !deployResult && report ? (
+                {!loading && report ? (
                   <>
                     <SettingsReport report={report} />
                     <p className="text-center mt-4">
@@ -173,16 +173,7 @@ const SettingsUploadPage = (props) => {
                     </p>
                   </>
                 ) : null}
-                {!loading && deployResult ? (
-                  <>
-                    <p className="text-center mt-4">
-                      <Link className="btn btn-primary" href="/">
-                        To the home page
-                      </Link>
-                    </p>
-                  </>
-                ) : null}
-                {!loading && !report && !deployResult ? (
+                {!loading && !report ? (
                   <>
                     <h3 className="text-center">{props.title}</h3>
                     <FileInput
