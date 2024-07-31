@@ -8,7 +8,7 @@
     "vbuild": "MORIO_ESBUILD_VERBOSE=1 node build.mjs",
     "clean": "rimraf dist",
     "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
-    "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**'",
+    "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
     "test": "docker exec -it api node --no-warnings --test-concurrency=1 --test",
     "retest": "cd .. && npm run redev && cd - && sleep 8 && npm run test"

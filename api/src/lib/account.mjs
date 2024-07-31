@@ -203,8 +203,8 @@ export const listAccounts = async () => {
  * @param {string} provider - The ID of the identity provider
  * @param {string} id - The id of the account (the username)
  */
-export const updateLastLoginTime = async (provider, id) =>
-  await saveAccount(provider, id, { last_login: 'datetime()' })
+export const updateLastLoginTime = async (provider, id, extraData={}) =>
+  await saveAccount(provider, id, { last_login: 'datetime()', ...extraData })
 
 /**
  * Helper method to parse results into an array of objects

@@ -2,7 +2,6 @@ import { readFile, writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
-import mustache from 'mustache'
 import yaml from 'js-yaml'
 import path from 'path'
 

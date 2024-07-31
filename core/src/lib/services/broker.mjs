@@ -29,7 +29,7 @@ export const service = {
         `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
         { returnAs: 'json', returnError: true }
       )
-      if (result.message) {
+      if (result?.message) {
         /*
          * An error from the broker is REAL BAD and something we probably cannot recover from.
          * Unless of course, we have just started, and it just needs some time.

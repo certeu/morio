@@ -1,5 +1,4 @@
 import j2s from 'joi-to-swagger'
-import { Joi } from '#shared/schema'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponses } from './index.mjs'
 import { examples } from '#shared/openapi'

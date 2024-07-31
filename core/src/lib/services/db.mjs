@@ -117,7 +117,7 @@ const isDbUp = async () => {
  * Helper method to create database tables
  */
 const ensureTablesExist = async () => {
-  for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema, {})) {
+  for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema || {})) {
     log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1]?.results?.[0]?.error && result[1].results[0].error.includes('already exists')) {

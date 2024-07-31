@@ -152,7 +152,7 @@ Controller.prototype.join = async (req, res) => {
   if (!valid) {
     log.info(
       err,
-      `Refused request to join cluster ${valid.cluster} as ${valid.as} as it violates the schema`
+      `Refused request to join cluster ${String(req.body.cluster)} as ${String(req.body.as)} as it violates the schema`
     )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.err, {
       schema_violation: err.message,

@@ -419,7 +419,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
    */
-  if (data.version !== utils.getVersion()) {
+  if (data?.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     errors.push(err)
     log.info(`Version mismatch in ${type} from ${data.from.fqdn}: ${err}`)

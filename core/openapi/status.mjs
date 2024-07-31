@@ -1,6 +1,4 @@
-import j2s from 'joi-to-swagger'
-import { schema } from '../src/schema.mjs'
-import { response, errorResponse, errorResponses } from './index.mjs'
+import { response } from './index.mjs'
 import { examples } from '#shared/openapi'
 
 export default (api) => {

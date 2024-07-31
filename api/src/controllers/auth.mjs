@@ -89,7 +89,7 @@ Controller.prototype.authenticate = async (req, res) => {
    */
   let header = false
   if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
-    header === true
+    header = true
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
   }

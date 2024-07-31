@@ -4,6 +4,7 @@
   "description": "Morio Configuration",
   "private": true,
   "scripts": {
+    "lint": "eslint --fix '*.mjs' 'clients/**' 'services/**'",
     "prettier": "npx prettier --write './*.mjs'"
   },
   "repository": {
