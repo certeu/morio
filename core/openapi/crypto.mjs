@@ -1,7 +1,7 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
-import { response, errorResponses, formatResponseExamples } from './index.mjs'
-import { examples } from './examples/json-loader.mjs'
+import { response, errorResponse, formatResponseExamples } from './index.mjs'
+import { examples } from '#shared/openapi'
 
 export default (api) => {
   const shared = { tags: ['cryptography'] }
@@ -23,7 +23,7 @@ export default (api) => {
     },
     responses: {
       200: response('X.509 data', examples.res.createCertificate),
-      ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
+      ...errorResponse(`morio.core.schema.violation`),
     },
   })
 
@@ -48,7 +48,7 @@ export default (api) => {
           false,
           formatResponseExamples(examples.res[action.toLowerCase()])
         ),
-        ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
+        ...errorResponse(`morio.core.schema.violation`),
       },
     })
   }

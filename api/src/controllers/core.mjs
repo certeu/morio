@@ -160,7 +160,7 @@ Controller.prototype.setup = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.deploy = async (req, res) => {
+Controller.prototype.settings = async (req, res) => {
   /*
    * This route is not accessible when running in ephemeral mode
    */

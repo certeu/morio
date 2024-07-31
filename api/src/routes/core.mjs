@@ -59,7 +59,7 @@ export function routes(app) {
   /*
    * API route to update (replace) Morio settings
    */
-  app.post(`/settings`, rbac.operator, Core.deploy)
+  app.post(`/settings`, rbac.operator, Core.settings)
 
   /*
    * Create a certificate

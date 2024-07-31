@@ -4,7 +4,7 @@ import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
 
 /**
- * This utils controller handles utility routes
+ * This crypto controller handles cryptography routes
  *
  * @returns {object} Controller - The config controller object
  */

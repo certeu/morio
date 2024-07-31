@@ -1,0 +1,11 @@
+{
+  "result": "success",
+  "uuids": {
+    "node": "40361cd8-a149-4675-bd46-11a2b48acd04",
+    "cluster": "26e66c95-c342-49fc-8e3a-f5ca69b392ba"
+  },
+  "root_token": {
+    "about": "This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.",
+    "value": "mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43"
+  }
+}

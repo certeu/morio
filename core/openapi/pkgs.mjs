@@ -1,7 +1,7 @@
 import j2s from 'joi-to-swagger'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponse, errorResponses } from './index.mjs'
-import { examples } from './examples/json-loader.mjs'
+import { examples } from '#shared/openapi'
 
 export default (api) => {
   const shared = { tags: ['client packages'] }
@@ -26,8 +26,7 @@ Note that this will start an ephemeral container to start the build. This API en
     responses: {
       200: response('Confirmation data', examples.res.pkgBuild.deb),
       ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
+        `morio.core.schema.violation`,
       ]),
     },
   })
@@ -40,8 +39,7 @@ Note that this will start an ephemeral container to start the build. This API en
 Note that configuration of a \`.deb\`package needs to be correct or the package will not function.
 You can adapt these defaults (that's why we provide them), but should [consult the Debian documnentation on packaging](https://wiki.debian.org/Packaging).`,
     responses: {
-      200: response('Debian client package defaults', examples.obj.pkgDefaults.deb),
-      ...errorResponse(`morio.api.authentication.required`),
+      200: response('Debian client package defaults', examples.res.pkgDefaults.deb),
     },
   })
 }

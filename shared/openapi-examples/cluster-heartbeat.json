@@ -1,0 +1,157 @@
+{
+  "req": {
+    "data": {
+      "from": {
+        "fqdn":"morio-node2.tokyo.morio.it",
+        "serial": 2,
+        "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed"
+      },
+      "to":"morio-node1.tokyo.morio.it",
+      "cluster": "3dafca38-993c-4ebf-8613-2d044e1450f4",
+      "cluster_leader": {
+        "serial": 1
+      },
+      "version": "0.2.0",
+      "settings_serial": 1722353755056,
+      "status": {
+        "cluster": {
+          "code": 2,
+          "color": "amber",
+          "time": 1722353803197,
+          "updated": 1722353833254
+        },
+        "nodes": {
+          "morio-node2.tokyo.morio.it": {
+            "db": 0,
+            "console": 0,
+            "api": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "broker": 0
+          },
+          "morio-node1.tokyo.morio.it": {
+            "db": 0,
+            "console": 0,
+            "api": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "broker": 0
+          },
+          "morio-node3.tokyo.morio.it": {
+            "db": 0,
+            "console": 0,
+            "api": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "broker": 0
+          }
+        }
+      },
+      "nodes": {
+        "39a47fb4-ec89-44ef-8080-9aa20b4872ed": {
+          "fqdn":"morio-node2.tokyo.morio.it",
+          "hostname": "morio-node2",
+          "serial": 2,
+          "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed",
+          "settings": 1722353755056
+        },
+        "cc048048-798b-4d13-97a0-200874b281f6": {
+          "fqdn":"morio-node3.tokyo.morio.it",
+          "hostname": "morio-node3",
+          "serial": 3,
+          "uuid": "cc048048-798b-4d13-97a0-200874b281f6",
+          "settings": 1722353755056
+        },
+        "e6d275ab-6285-4986-a0f9-81cb12d2ce4b": {
+          "fqdn":"morio-node1.tokyo.morio.it",
+          "hostname": "morio-node1",
+          "serial": 1,
+          "uuid": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b",
+          "settings": 1722353755056
+        }
+      },
+      "broadcast": false,
+      "uptime": 105
+    },
+    "checksum": "fcbad2602bb511502d3665ba32c3e3aaa6fe552487d18d25c4ef32c2d2e16c95"
+  },
+  "res": {
+    "data": {
+      "action": false,
+      "errors": [],
+      "cluster": "3dafca38-993c-4ebf-8613-2d044e1450f4",
+      "cluster_leader": {
+        "serial": 1,
+        "uuid": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b"
+      },
+      "node": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b",
+      "node_serial": 1,
+      "settings_serial": 1722353755056,
+      "version": "0.2.0",
+      "nodes": {
+        "e6d275ab-6285-4986-a0f9-81cb12d2ce4b": {
+          "fqdn":"morio-node1.tokyo.morio.it",
+          "hostname": "morio-node1",
+          "serial": 1,
+          "uuid": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b",
+          "settings": 1722353755056
+        },
+        "39a47fb4-ec89-44ef-8080-9aa20b4872ed": {
+          "fqdn":"morio-node2.tokyo.morio.it",
+          "hostname": "morio-node2",
+          "serial": 2,
+          "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed",
+          "settings": 1722353755056
+        },
+        "cc048048-798b-4d13-97a0-200874b281f6": {
+          "fqdn":"morio-node3.tokyo.morio.it",
+          "hostname": "morio-node3",
+          "serial": 3,
+          "uuid": "cc048048-798b-4d13-97a0-200874b281f6",
+          "settings": 1722353755056
+        }
+      },
+      "status": {
+        "cluster": {
+          "code": 0,
+          "color": "green",
+          "time": 1722354096080,
+          "updated": 1722354096080
+        },
+        "nodes": {
+          "morio-node1.tokyo.morio.it": {
+            "api": 0,
+            "broker": 0,
+            "db": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "console": 0
+          },
+          "morio-node2.tokyo.morio.it": {
+            "api": 0,
+            "broker": 0,
+            "db": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "console": 0
+          },
+          "morio-node3.tokyo.morio.it": {
+            "db": 0,
+            "console": 0,
+            "api": 0,
+            "ca": 0,
+            "proxy": 0,
+            "ui": 0,
+            "broker": 0
+          }
+        }
+      }
+    },
+    "checksum": "f977ca99827c4dbbf2e228cee32289f98a3332c8f0fc37e6b89e63b561521c6a"
+  }
+}

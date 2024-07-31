@@ -1,6 +1,6 @@
-import { Controller } from '#controllers/utils'
+import { Controller } from '#controllers/crypto'
 
-const Utils = new Controller()
+const Crypto = new Controller()
 
 /**
  * This method adds the CA routes to Express
@@ -11,15 +11,15 @@ export function routes(app) {
   /*
    * Create a new certificate
    */
-  app.post('/ca/certificate', Utils.createCertificate)
+  app.post('/ca/certificate', Crypto.createCertificate)
 
   /*
    * Encrypt data
    */
-  app.post('/encrypt', Utils.encrypt)
+  app.post('/encrypt', Crypto.encrypt)
 
   /*
    * Decrypt data
    */
-  app.post('/decrypt', Utils.decrypt)
+  app.post('/decrypt', Crypto.decrypt)
 }

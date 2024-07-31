@@ -1,0 +1,18 @@
+{
+  "req": {
+    "you": "morio-node2.tokyo.morio.it",
+    "join": "morio-node1.tokyo.morio.it",
+    "as": "broker_bode",
+    "cluster": "3dafca38-993c-4ebf-8613-2d044e1450f4",
+    "settings": {
+      "serial": 1722353755056,
+      "data": {}
+    },
+    "keys": {}
+  },
+  "res": {
+    "cluster": "3dafca38-993c-4ebf-8613-2d044e1450f4",
+    "node": "39a47fb4-ec89-44ef-8080-9aa20b4872ed",
+    "serial": 1722353755056
+  }
+}

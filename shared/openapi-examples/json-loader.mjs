@@ -29,6 +29,9 @@ import login from './login.json' with { type: 'json' }
 import whoami from './whoami.json' with { type: 'json' }
 // Client packages
 import pkgBuildDeb from './pkg-build.deb.json' with { type: 'json' }
+// Cluster
+import clusterHeartbeat from './cluster-heartbeat.json' with { type: 'json' }
+import clusterJoin from './cluster-join.json' with { type: 'json' }
 // Cryptopgraphy
 import createCertificate from './create-certificate.json' with { type: 'json' }
 import encrypt from './encrypt.json' with { type: 'json' }
@@ -38,13 +41,14 @@ import setupRes from './setup.res.json' with { type: 'json' }
 import presets from './presets.json' with { type: 'json' }
 
 // Objects
+import jwt from './jwt.json' with { type: 'json' }
+import keys from './keys.json' with { type: 'json' }
+import pkgDefaults from './pkg-defaults.json' with { type: 'json' }
 import settingsCluster1 from './settings.cluster.1.json' with { type: 'json' }
 import settingsCluster3 from './settings.cluster.3.json' with { type: 'json' }
 import settingsIam from './settings.iam.json' with { type: 'json' }
 import settingsTokens from './settings.tokens.json' with { type: 'json' }
 import settingsUi from './settings.ui.json' with { type: 'json' }
-import jwt from './jwt.json' with { type: 'json' }
-import pkgDefaults from './pkg-defaults.json' with { type: 'json' }
 
 export const settings = {
   cluster1: {
@@ -61,8 +65,15 @@ export const settings = {
   },
 }
 
+/*
+ * Combine the cluster join request
+ */
+clusterJoin.req.settings.data = settingsSanitized
+clusterJoin.req.settings.keys = keys
+
 export const examples = {
   obj: {
+    keys,
     jwt: jwt.jwt,
     settings,
     pkgDefaults,
@@ -70,6 +81,10 @@ export const examples = {
   req: {
     activateAccount: activateAccount.req,
     activateMfa: activateMfa.req,
+    cluster: {
+      heartbeat: clusterHeartbeat.req,
+      join: clusterJoin.req,
+    },
     createAccount: createAccount.req,
     createCertificate: createCertificate.req,
     decrypt: encrypt.res,
@@ -83,6 +98,10 @@ export const examples = {
     activateAccount: activateAccount.res,
     activateMfa: activateMfa.res,
     caCertificates,
+    cluster: {
+      heartbeat: clusterHeartbeat.res,
+      join: clusterJoin.res,
+    },
     createAccount: createAccount.res,
     createApikey: createApikey.res,
     createCertificate: createCertificate.res,
@@ -98,7 +117,16 @@ export const examples = {
     pkgBuild: {
       deb: pkgBuildDeb.res,
     },
+    pkgDefaults: {
+      deb: pkgDefaults.deb,
+    },
     presets,
+    reload: {
+      ...status,
+      settings: settingsSanitized,
+      keys,
+      presets
+    },
     status,
     settingsSanitized,
     updateApikey,

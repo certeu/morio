@@ -8,7 +8,11 @@ import {
 import { utils } from '../src/lib/utils.mjs'
 import { errors } from '../src/errors.mjs'
 import loadClusterEndpoints from './cluster.mjs'
+import loadCryptoEndpoints from './crypto.mjs'
 import loadDockerEndpoints from './docker.mjs'
+import loadPkgsEndpoints from './pkgs.mjs'
+import loadSettingsEndpoints from './settings.mjs'
+import loadStatusEndpoints from './status.mjs'
 
 /**
  * Can't load the errors in the shared code as the are different per API
@@ -29,7 +33,11 @@ const api = new OpenAPI(utils, 'api', {
  * Now pass the helper object and utils to the various groups of endpoints
  */
 loadClusterEndpoints(api, utils)
+loadCryptoEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
+loadPkgsEndpoints(api, utils)
+loadSettingsEndpoints(api, utils)
+loadStatusEndpoints(api, utils)
 
 /*
  * Finally, this is our spec

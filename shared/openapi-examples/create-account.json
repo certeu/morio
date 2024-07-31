@@ -1,0 +1,16 @@
+{
+  "req": {
+    "username": "testAccount1722234021332",
+    "about": "This account was created as part of a test",
+    "provider": "local",
+    "role": "user"
+  },
+  "res": {
+    "username": "testAccount1722068362387",
+    "about": "This account was created as part of a test",
+    "provider": "local",
+    "role": "user",
+    "invite": "e7d7b6427378f9ddde77775160ac91dda8eea6c5ef0491c8",
+    "inviteUrl": "https://unit.test.morio.it/morio/invite/testAccount1722068362387-e7d7b6427378f9ddde77775160ac91dda8eea6c5ef0491c8"
+  }
+}

@@ -1,4 +1,5 @@
 import set from 'lodash.set'
+import { examples } from '../openapi-examples/json-loader.mjs'
 
 const meta = {
   title: {
@@ -44,7 +45,7 @@ To learn how to interact with Morio through its user-facing API, refer to [the d
  * @constructor
  * @return {OpenAPI} this - The OpenAPI instance
  */
-export function OpenAPI(utils, type='api', extra={}) {
+function OpenAPI(utils, type='api', extra={}) {
   /*
    * Attach utils
    */
@@ -122,7 +123,7 @@ export const response = (desc, example = false, examples = false) => {
 /**
  * Helper method to define an error response
  */
-export const errorResponse = (template, errors) => {
+const errorResponse = (template, errors) => {
   const err = errors[template]
   const data = {}
   data[err.status] = {
@@ -137,7 +138,7 @@ export const errorResponse = (template, errors) => {
  * Helper method to define multipla error responses
  * Also allows multiple responses with the same status code
  */
-export const errorResponses = (templates, errors) => {
+const errorResponses = (templates, errors) => {
   const codes = {}
   for (const template of templates) {
     const err = errors[template]
@@ -174,9 +175,16 @@ export const errorResponses = (templates, errors) => {
 /**
  * Helper method to format response examples for OAS
  */
-export const formatResponseExamples = (obj) => {
+const formatResponseExamples = (obj) => {
   const newObj = {}
   for (const [key, value] of Object.entries(obj)) newObj[key] = { value, title: 'banana' }
   return newObj
 }
 
+export {
+  OpenAPI,
+  examples,
+  errorResponse,
+  errorResponses,
+  formatResponseExamples,
+}

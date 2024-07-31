@@ -1,0 +1,40 @@
+{
+  "providers": {
+    "apikey": {
+      "provider": "apikey",
+      "id": "apikey",
+      "label": "API Key"
+    },
+    "mrt": {},
+    "local": {
+      "provider": "local",
+      "id": "local",
+      "label": "Morio Account"
+    },
+    "ad": {
+      "provider": "ldap",
+      "id": "ad",
+      "about": "Morio Tokyo branch on-prem Active Directory",
+      "server": {
+        "url": "ldaps://dc1.tokyo.morio.it",
+        "bindDN": "CN=morio-ldap,OU=Users,DC=tokyo,DC=morio,DC=it",
+        "bindCredentials": "{{{ AD_PASSWORD }}}",
+        "searchBase": "OU=Users-EU,DC=tokyo,DC=morio,DC=it",
+        "searchFilter": "(&(objectClass=user)(samaccountname={{username}}))"
+      },
+      "username_field": "samaccountname",
+      "label": "Active Directory",
+      "rbac": {
+        "user": {
+          "attribute": "samaccountname",
+          "regex": "."
+        },
+        "root": {
+          "attribute": "samaccountname",
+          "regex": "^(?:joostdecock|sorchanidhubhghaill)$"
+        }
+      },
+      "verify_certificate": true
+    }
+  }
+}

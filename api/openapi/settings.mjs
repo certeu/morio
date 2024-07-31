@@ -7,15 +7,15 @@ export default (api) => {
   const shared = { tags: ['settings'] }
   api.tag('settings', 'Endpoints related to Morio settings')
 
-  api.post('/deploy', {
+  api.post('/setup', {
     tags: ['settings', 'anonymous'],
-    summary: `Deploy initial Morio settings`,
-    description: `This will deploy the initial Morio settings. Or rather, it will ask Morio Core to do so after validation.
+    summary: `Initial setup of Morio`,
+    description: `This will handle the initial setup of Morio. Or rather, it will ask Morio Core to do so after validation.
 
 This endpoint does not require authentication. However, it is only available in ephemeral Mode.
-In other words, once settings are deployed, this endpoint becomes unavailable.`,
+In other words, once Morio is set up, this endpoint becomes unavailable.`,
     requestBody: {
-      description: 'The Morio settings to deploy',
+      description: 'The Morio settings to use for the initial setup',
       required: true,
       content: {
         'application/json': {
@@ -25,10 +25,11 @@ In other words, once settings are deployed, this endpoint becomes unavailable.`,
       },
     },
     responses: {
-      // TODO
+      200: response('Setup result', examples.res.setup),
       ...errorResponses([`morio.api.schema.violation`, `morio.api.ephemeral.required`]),
     },
   })
+
   api.get('/settings', {
     ...shared,
     summary: `Get the current Morio settings`,
@@ -75,7 +76,7 @@ Note that this endpoint requires you to post the full settings, so when making u
       content: {
         'application/json': {
           schema: j2s(schema['req.setup']).swagger,
-          example: examples.res.settingsSanitized,
+          examples: formatResponseExamples(examples.obj.settings),
         },
       },
     },
@@ -84,8 +85,6 @@ Note that this endpoint requires you to post the full settings, so when making u
       ...errorResponses([
         `morio.api.schema.violation`,
         `morio.api.authentication.required`,
-        'morio.api.account.exists',
-        `morio.api.account.state.invalid`,
       ]),
     },
   })

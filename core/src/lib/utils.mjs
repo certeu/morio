@@ -357,13 +357,6 @@ utils.getNodeFqdns = () => [
 utils.getNodeHostname = () => store.get('state.node.hostname')
 
 /**
- * Helper method to get the IP address of this node
- *
- * @return {string} ip - This node's IP address
- */
-utils.getNodeIp = () => store.get('state.node.ip')
-
-/**
  * Helper method to get the node_serial of this node
  *
  * @return {number} node_serial - This node's serial
@@ -827,17 +820,6 @@ utils.setClusterStatus = (code, color) => {
  */
 utils.setNode = (node) => {
   store.set('state.node', node)
-  return utils
-}
-
-/**
- * Helper method to store the node IP in the state
- *
- * @param {string} ip - The IP address of this node
- * @return {object} utils - The utils instance, making this method chainable
- */
-utils.setNodeIp = (ip) => {
-  store.set('state.node.ip', ip)
   return utils
 }
 
