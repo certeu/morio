@@ -91,5 +91,5 @@ export const reloadConfiguration = async () => {
  */
 const coreFetchOk = (data) => {
   if (data.node?.ephemeral) return true
-  else return (data.info && data.nodes && data.presets && data.settings && data.keys)
+  else return data.info && data.nodes && data.presets && data.settings && data.keys
 }
