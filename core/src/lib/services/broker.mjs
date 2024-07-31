@@ -36,8 +36,14 @@ export const service = {
          * So if uptime is below 1 minutes, we log at INFO. If it's higher, we log at ERROR.
          */
         const uptime = utils.getUptime()
-        if (!uptime || uptime < 60) log.debug(`Received an error from the broker health check. Will give it some more time as uptime is only ${uptime}s`)
-        else log.error(`Received an error from the broker health check. Not only does the broker seem down, we also cannot determine the cluster without it. Please escalate to a human.`)
+        if (!uptime || uptime < 60)
+          log.debug(
+            `Received an error from the broker health check. Will give it some more time as uptime is only ${uptime}s`
+          )
+        else
+          log.error(
+            `Received an error from the broker health check. Not only does the broker seem down, we also cannot determine the cluster without it. Please escalate to a human.`
+          )
 
         return false
       } else {
@@ -216,8 +222,7 @@ export const isBrokerLeading = async () => {
     returnAs: 'json',
   })
 
-  return (result && result.controller_id && result.controller_id === utils.getNodeSerial())
+  return result && result.controller_id && result.controller_id === utils.getNodeSerial()
     ? true
     : false
 }
-

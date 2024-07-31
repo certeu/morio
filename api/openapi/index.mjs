@@ -3,7 +3,7 @@ import {
   response,
   errorResponse as sharedErrorResponse,
   errorResponses as sharedErrorResponses,
-  formatResponseExamples
+  formatResponseExamples,
 } from '#shared/openapi'
 import { utils } from '../src/lib/utils.mjs'
 import { errors } from '../src/errors.mjs'
@@ -72,4 +72,3 @@ export {
   errorResponses,
   formatResponseExamples,
 }
-

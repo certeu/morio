@@ -48,9 +48,8 @@ const updateNodeState = async () => {
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    if (optionalServices.includes(service) ||
-      (await runHook('wanted', service))
-    ) promises.push(runHook('heartbeat', service))
+    if (optionalServices.includes(service) || (await runHook('wanted', service)))
+      promises.push(runHook('heartbeat', service))
   }
   /*
    * Do the same for core as the final service
@@ -154,7 +153,9 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    */
   if (targets.length === 1 && targets[0] === false) {
     const delay = 6660
-    log.debug(`No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay/10)/100} seconds`)
+    log.debug(
+      `No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay / 10) / 100} seconds`
+    )
     return setTimeout(async () => runHeartbeat(true, false), 3000)
   }
 
@@ -342,12 +343,10 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
     }
 
     return
-  }
-  else if ( data.data && data.checksum) {
+  } else if (data.data && data.checksum) {
     if (validDataWithChecksum(data)) data = data.data
     else log.warn(data, `Heartbeat checksum failure`)
-  }
-  else {
+  } else {
     /*
      * It is normal for nodes to not be able to properly sign/checksum the heartbeats
      * when the cluster just came up, since they may not have the required data yet
@@ -381,8 +380,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   if (data?.action) {
     if (data.action === 'INVITE') inviteClusterNode(fqdn)
     if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
-  }
-  else if (Array.isArray(data?.nodes)) {
+  } else if (Array.isArray(data?.nodes)) {
     for (const uuid in data.nodes) {
       /*
        * It it's a valid hearbeat, add the node info to the state
@@ -463,10 +461,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster leader.
    */
-  if (
-    !data?.cluster_leader?.serial ||
-    data.cluster_leader.serial !== utils.getLeaderSerial()
-  ) {
+  if (!data?.cluster_leader?.serial || data.cluster_leader.serial !== utils.getLeaderSerial()) {
     /*
      * Do they look to us as their leader?
      */
@@ -486,19 +481,25 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         const err = 'LEADER_MISMATCH'
         errors.push(err)
         action = 'LEADER_CHANGE'
-        log.info({
-          remote_leader: data?.cluster_leader?.serial,
-          local_leader: utils.getLeaderSerial(),
-        }, `Node ${data.from.fqdn} disagrees about the leader in ${type}: ${err}`)
+        log.info(
+          {
+            remote_leader: data?.cluster_leader?.serial,
+            local_leader: utils.getLeaderSerial(),
+          },
+          `Node ${data.from.fqdn} disagrees about the leader in ${type}: ${err}`
+        )
       }
     } else {
-        const err = 'LEADER_MISMATCH'
-        errors.push(err)
-        action = 'LEADER_CHANGE'
-        log.info({
+      const err = 'LEADER_MISMATCH'
+      errors.push(err)
+      action = 'LEADER_CHANGE'
+      log.info(
+        {
           remote_leader: data?.cluster_leader?.serial,
           local_leader: utils.getLeaderSerial(),
-        }, `Leader update received from Node ${data.from.fqdn} in ${type}: ${err}`)
+        },
+        `Leader update received from Node ${data.from.fqdn} in ${type}: ${err}`
+      )
     }
   }
 
@@ -509,7 +510,10 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
   if (data.cluster !== utils.getClusterUuid()) {
     const err = 'CLUSTER_MISMATCH'
     errors.push(err)
-    log.debug({localClusterUuid: utils.getClusterUuid()}, `Cluster mismatch in ${type} from node ${data.from.fqdn}: ${err}`)
+    log.debug(
+      { localClusterUuid: utils.getClusterUuid() },
+      `Cluster mismatch in ${type} from node ${data.from.fqdn}: ${err}`
+    )
   }
 
   /*

@@ -25,10 +25,7 @@ Note that this will start an ephemeral container to start the build. This API en
     },
     responses: {
       200: response('Confirmation data', examples.res.pkgBuild.deb),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-      ]),
+      ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
     },
   })
 

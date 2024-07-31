@@ -10,7 +10,12 @@ import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 // Dependencies
-import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
+import {
+  resolveServiceConfiguration,
+  serviceOrder,
+  ephemeralServiceOrder,
+  optionalServices,
+} from '#config'
 // Docker
 import {
   docker,
@@ -101,9 +106,7 @@ export const startMorio = async (hookParams = {}) => {
    * If we can't figure out how to start, don't
    */
   if (!go) {
-    log.fatal(
-      'The beforeall hook did return an error. Cannot start Morio. Please escalate this.'
-    )
+    log.fatal('The beforeall hook did return an error. Cannot start Morio. Please escalate this.')
     return
   }
 

@@ -35,9 +35,7 @@ Note that this endpoint requires you to post the full settings, so when making u
       },
     },
     responses: {
-      ...errorResponses([
-        `morio.core.schema.violation`,
-      ]),
+      ...errorResponses([`morio.core.schema.violation`]),
     },
   })
 

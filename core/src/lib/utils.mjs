@@ -17,12 +17,10 @@ export const log = logger(getPreset('MORIO_CORE_LOG_LEVEL'), 'core')
  * Since a grepping for things to do is a common way to check for things
  * still to be done, we are splitting this in to+do so it won't match.
  */
-log['to'+'do'] = (a, b) => {
+log['to' + 'do'] = (a, b) => {
   const location = new Error().stack.split('\n')[2]
 
-  return typeof a === 'object'
-    ? log.warn(a, `🟠 ${b}${location}`)
-    : log.warn(`🟠 ${a}${location}`)
+  return typeof a === 'object' ? log.warn(a, `🟠 ${b}${location}`) : log.warn(`🟠 ${a}${location}`)
 }
 
 /*
@@ -54,7 +52,6 @@ try {
   await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
 } catch (err) {
   log.warn(err, 'Failed to write Morio presets to disk')
-
 }
 
 /*
@@ -692,15 +689,14 @@ utils.setKeys = (keys) => {
  * @param {number} params.uuid - The UUID of the leading node
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setLeader = ({ serial=false, uuid=false }) => {
+utils.setLeader = ({ serial = false, uuid = false }) => {
   if (serial) {
     utils.setLeaderSerial(serial)
     if (Number(serial) === utils.getNodeSerial()) {
       utils.setLeaderUuid(utils.getNodeUuid())
       utils.setLeading(true)
     }
-  }
-  else if (uuid) {
+  } else if (uuid) {
     utils.setLeaderUuid(uuid)
     if (String(uuid) === utils.getNodeUuid()) {
       utils.setLeaderSerial(utils.getNodeSerial())

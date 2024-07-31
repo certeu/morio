@@ -62,7 +62,8 @@ export const service = {
       /*
        * Dump presets for debugging
        */
-      for (const [key, val] of Object.entries(utils.getPresets())) log.trace(`Preset ${key} = ${val}`)
+      for (const [key, val] of Object.entries(utils.getPresets()))
+        log.trace(`Preset ${key} = ${val}`)
 
       /*
        * Load existing settings, keys, node info and timestamp from disk
@@ -232,11 +233,10 @@ export const templateSettings = (settings) => {
 
 const generateDataChecksum = (data) => {
   const keys = utils.getKeys()
-  return hash(JSON.stringify(data)+keys.mrt+keys.cluster+keys.rpwd)
+  return hash(JSON.stringify(data) + keys.mrt + keys.cluster + keys.rpwd)
 }
 
-const validateDataChecksum = (data, checksum) => (checksum === generateDataChecksum(data))
+const validateDataChecksum = (data, checksum) => checksum === generateDataChecksum(data)
 
 export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
 export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)
-

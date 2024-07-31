@@ -161,5 +161,4 @@ describe('Core Extra Tests', () => {
       assert.equal(typeof enc.ct, 'string')
     }
   })
-
 })

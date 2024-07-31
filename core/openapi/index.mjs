@@ -3,7 +3,7 @@ import {
   response,
   errorResponse as sharedErrorResponse,
   errorResponses as sharedErrorResponses,
-  formatResponseExamples
+  formatResponseExamples,
 } from '#shared/openapi'
 import { utils } from '../src/lib/utils.mjs'
 import { errors } from '../src/errors.mjs'
@@ -25,7 +25,7 @@ const errorResponses = (templates) => sharedErrorResponses(templates, errors)
  * Setup a helper object to build out the OpenAPI specification
  */
 const api = new OpenAPI(utils, 'api', {
-  components: { },
+  components: {},
   paths: {},
 })
 
@@ -47,13 +47,4 @@ const spec = api.spec
 /*
  * And these are the named exports
  */
-export {
-  api,
-  errors,
-  spec,
-  response,
-  errorResponse,
-  errorResponses,
-  formatResponseExamples,
-}
-
+export { api, errors, spec, response, errorResponse, errorResponses, formatResponseExamples }

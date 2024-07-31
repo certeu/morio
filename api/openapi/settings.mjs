@@ -82,10 +82,7 @@ Note that this endpoint requires you to post the full settings, so when making u
     },
     responses: {
       // TODO
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.authentication.required`,
-      ]),
+      ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
     },
   })
 }

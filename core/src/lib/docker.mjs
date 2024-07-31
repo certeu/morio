@@ -54,10 +54,8 @@ export const createDockerContainer = async (serviceName, config) => {
         log.debug(`[${serviceName}] Container recreated`)
         return created.id
       } else log.warn(`[${serviceName}] Failed to recreate container`)
-    } else
-      log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
-  } else
-    log.warn(`[${serviceName}] Failed to create service container`)
+    } else log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
+  } else log.warn(`[${serviceName}] Failed to create service container`)
 
   return false
 }
@@ -126,7 +124,7 @@ export const createDockerNetwork = async (name) => {
 
   let success
   try {
-    [success] = await runDockerApiCommand('createNetwork', config, true)
+    ;[success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
     log.warn({ err }, `Failed to run Docker \`createNetwork\` command`)
   }
@@ -358,9 +356,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  */
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    log.debug(
-      `Attemted to run \`${cmd}\` command on a container but no container ID was passed`
-    )
+    log.debug(`Attemted to run \`${cmd}\` command on a container but no container ID was passed`)
     return [false]
   }
 

@@ -52,10 +52,6 @@ export const schema = {
     keys,
     headers: Joi.object(),
   }),
-  'req.decrypt': Joi.object({
-    iv: Joi.string().required(),
-    ct: Joi.string().required(),
-  }),
   'req.docker.pull': Joi.object({ tag: id }),
   'req.docker.container.id': Joi.object({ id }),
   'req.docker.container.inspect': Joi.object({ id }),

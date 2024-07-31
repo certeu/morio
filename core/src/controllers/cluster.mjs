@@ -69,8 +69,7 @@ Controller.prototype.heartbeat = async (req, res) => {
     log.info(
       `Received a broadcast heartbeat from ${valid.data.from.fqdn}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`
     )
-  }
-  else log.debug(`Incoming heartbeat from ${valid.data.from.fqdn}`)
+  } else log.debug(`Incoming heartbeat from ${valid.data.from.fqdn}`)
 
   /*
    * If we are leading, update the follower status
@@ -106,21 +105,23 @@ Controller.prototype.heartbeat = async (req, res) => {
   /*
    * Always return status 200, be specific in the data
    */
-  return res.status(200).send(dataWithChecksum({
-    action,
-    errors,
-    cluster: utils.getClusterUuid(),
-    cluster_leader: {
-      serial: utils.getLeaderSerial(),
-      uuid: utils.getLeaderUuid(),
-    },
-    node: utils.getNodeUuid(),
-    node_serial: Number(utils.getNodeSerial()),
-    settings_serial: Number(utils.getSettingsSerial()),
-    version: utils.getVersion(),
-    nodes: utils.getClusterNodes(),
-    status: utils.getStatus(),
-  }))
+  return res.status(200).send(
+    dataWithChecksum({
+      action,
+      errors,
+      cluster: utils.getClusterUuid(),
+      cluster_leader: {
+        serial: utils.getLeaderSerial(),
+        uuid: utils.getLeaderUuid(),
+      },
+      node: utils.getNodeUuid(),
+      node_serial: Number(utils.getNodeSerial()),
+      settings_serial: Number(utils.getSettingsSerial()),
+      version: utils.getVersion(),
+      nodes: utils.getClusterNodes(),
+      status: utils.getStatus(),
+    })
+  )
 }
 
 /**
