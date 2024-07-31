@@ -9,7 +9,7 @@ const ephemeralRoutes = [
   'GET:/status',
   'GET:/up',
   'POST:/setup',
-  'GET:/reconfigure',
+  'GET:/reload',
   'GET:/info',
   'POST:/cluster/join',
   'POST:/validate/settings',
@@ -23,7 +23,7 @@ const internalRoutes = ['GET:/auth']
 /*
  * List of routes allowed while reloading
  */
-const reloadRoutes = ['GET:/status', 'GET:/up', 'GET:/info', 'GET:/reconfigure']
+const reloadRoutes = ['GET:/status', 'GET:/up', 'GET:/info', 'GET:/reload']
 
 /*
  * All routes that we allow

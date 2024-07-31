@@ -94,5 +94,5 @@ export function routes(app) {
   /*
    * This route is called by core after reconfiguring itself
    */
-  app.get(`/reconfigure`, (req, res) => Core.reconfigure(req, res))
+  app.get(`/reload`, (req, res) => Core.reload(req, res))
 }

@@ -2,7 +2,7 @@ import { log, utils } from '../lib/utils.mjs'
 import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
-import { reconfigure } from '../index.mjs'
+import { reload } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
 import { dataWithChecksum, validDataWithChecksum } from '../lib/services/core.mjs'
@@ -34,7 +34,7 @@ Controller.prototype.heartbeat = async (req, res) => {
       `Received invalid heartbeat from ${req.body.data.from.fqdn}`
     )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
-      schema_violation: err.message,
+      schema_violation: err?.message,
     })
   }
 
@@ -166,7 +166,7 @@ Controller.prototype.join = async (req, res) => {
     )
 
   /*
-   * To join the cluster, we write settings to disk and reconfigure
+   * To join the cluster, we write settings to disk and reload
    * But first make sure to cast the serial to a number as we'll use it to
    * construct the path to write to disk, and join cluster is an unauthenticated
    * request. So we can't trust this input.
@@ -191,7 +191,7 @@ Controller.prototype.join = async (req, res) => {
   })
 
   /*
-   * We need to generate the CA config before we trigger a reconfigure event
+   * We need to generate the CA config before we trigger a reload event
    * We also need to pre-seed it with the cluster keys or it will generate its own
    */
   //utils.setKeys(valid.keys)
@@ -204,7 +204,7 @@ Controller.prototype.join = async (req, res) => {
   res.status(200).send({ cluster: valid.keys.cluster, node: nodeUuid, serial })
 
   /*
-   * Now return as reconfigure
+   * Now return as reload
    */
-  return reconfigure({ joinCluster: true })
+  return reload({ joinCluster: true })
 }

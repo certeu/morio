@@ -93,9 +93,7 @@ export const ldap = (id, data, req) => {
       if (!user) {
         log.info(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
         return resolve([false, 'morio.api.account.credentials.mismatch'])
-      }
-
-      if (user) {
+      } else {
         /*
          * Can we find the username?
          */

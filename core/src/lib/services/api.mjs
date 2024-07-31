@@ -44,13 +44,13 @@ export const service = {
 }
 
 /**
- * Reach out to the API to reconfigure itself
+ * Reach out to the API to reload itself
  *
- * Once core has been reconfigured, the API (which is stateless) should
- * reload the data to also reconfigure itself. This message reaches out
- * to the API, asking it to reconfigure itself.
+ * Once core has been reloaded, the API (which is stateless) should
+ * reload the data to also reload itself. This message reaches out
+ * to the API, asking it to reload itself.
  */
-export const reconfigureApi = async () => {
+export const reloadApi = async () => {
   /*
    * Since the API might still be starting up, we'll attempt this until it works
    */
@@ -60,13 +60,13 @@ export const reconfigureApi = async () => {
     run: async () => await isApiUp(true),
     onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for API, will continue waiting.`),
   })
-  if (up) log.debug(`API notified of reconfigure event.`)
+  if (up) log.debug(`API notified of reload event.`)
   else log.warn(`API did not come up before timeout`)
 }
 
-const isApiUp = async (reconfigure = false) => {
+const isApiUp = async (reload = false) => {
   const status = await testUrl(
-    `http://api:${utils.getPreset('MORIO_API_PORT')}/${reconfigure ? 'reconfigure' : 'up'}`,
+    `http://api:${utils.getPreset('MORIO_API_PORT')}/${reload ? 'reload' : 'up'}`,
     {
       returnAs: 'status',
     }

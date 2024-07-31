@@ -30,9 +30,4 @@ export function routes(app) {
    * Hit this route to get the available downloads
    */
   app.get(`${PREFIX}/downloads`, Status.listDownloads)
-
-  /*
-   * This route is called by core after reconfiguring itself
-   */
-  app.get(`${PREFIX}/reconfigure`, (req, res) => Status.reconfigure(req, res))
 }

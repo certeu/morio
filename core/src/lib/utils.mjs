@@ -31,7 +31,7 @@ log['to' + 'do'] = (a, b) => {
 const store = new Store(log)
   .set('state.start_time', Date.now())
   .set('state.config_resolved', false)
-  .set('state.reconfigure_count', 0)
+  .set('state.reload_count', 0)
   .set('state.ephemeral', true)
   .set('info', {
     about: 'Morio Core',
@@ -376,11 +376,11 @@ utils.getNodeFingerprint = () =>
   store.get('state.node.uuid', '').slice(0, utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH'))
 
 /**
- * Helper method to get the reconfigure_count
+ * Helper method to get the reload
  *
- * @return {number} count - The reconfigure count
+ * @return {number} count - The reload count
  */
-utils.getReconfigureCount = () => store.get('state.reconfigure_count')
+utils.getReloadCount = () => store.get('state.reload_count')
 
 /**
  * Helper method to get the sanitized settings
@@ -1018,14 +1018,14 @@ utils.beginLeading = () => {
 }
 
 /**
- * Helper method for starting a reconfigure event
+ * Helper method for starting a reload event
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.beginReconfigure = () => {
-  log.debug('Start reconfigure')
+utils.beginReload = () => {
+  log.debug('Start reload')
   store.set('state.config_resolved', false)
-  store.set('state.reconfigure_time', Date.now())
+  store.set('state.reload_time', Date.now())
   utils.setClusterStatus(2, 'amber')
   return utils
 }
@@ -1066,9 +1066,9 @@ utils.endLeading = () => {
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.endReconfigure = () => {
+utils.endReload = () => {
   store.set('state.config_resolved', true)
-  store.set('state.reconfigure_count', Number(store.get('state.reconfigure_count')) + 1)
+  store.set('state.reload_count', Number(store.get('state.reload_count')) + 1)
   const serial = store.get('state.settings_serial')
   log.info(
     `Configuration Resolved - ${serial ? 'Running settings serial ' + serial : 'Running in ephemeral mode'}`

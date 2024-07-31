@@ -8,7 +8,7 @@ import {
   encryptionMethods,
   uuid,
 } from '#shared/crypto'
-import { reconfigure } from '../index.mjs'
+import { reload } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
@@ -69,9 +69,9 @@ Controller.prototype.deploy = async (req, res) => {
   if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
 
   /*
-   * Don't await reconfigure, just return
+   * Don't await reload, just return
    */
-  reconfigure({ hotReload: true })
+  reload({ hotReload: true })
 
   return res.send({ result: 'success', settings: utils.getSanitizedSettings() })
 }
@@ -116,9 +116,9 @@ Controller.prototype.setup = async (req, res) => {
   } else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
-   * Drop us in reconfigure mode
+   * Drop us in reload mode
    */
-  utils.beginReconfigure()
+  utils.beginReload()
 
   /*
    * Generate time-stamp for use in file names
@@ -240,10 +240,10 @@ Controller.prototype.setup = async (req, res) => {
   res.send(data)
 
   /*
-   * Trigger a reconfigure, but don't await it.
+   * Trigger a reload, but don't await it.
    */
   log.info(`Bring Morio out of ephemeral mode`)
-  return reconfigure({ initialSetup: true })
+  return reload({ initialSetup: true })
 }
 
 /**

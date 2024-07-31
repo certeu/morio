@@ -53,7 +53,7 @@ export const service = {
         /*
          * Also track the leader state
          */
-        if (result.controller_id) {
+        if (result?.controller_id) {
           utils.setLeaderSerial(result.controller_id)
           if (result.controller_id === local) utils.beginLeading()
           else utils.endLeading()
