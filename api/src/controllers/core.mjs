@@ -283,14 +283,14 @@ Controller.prototype.joinCluster = async (req, res) => {
 }
 
 /**
- * Reconfigure
+ * Reload
  *
  * This route is called from core, it triggers a reload of the config
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.reconfigure = async (req, res) => {
+Controller.prototype.reload = async (req, res) => {
   /*
    * We will not wait for the reload event here as doing so can
    * introduce a deadlock where core is waiting for the response to
@@ -298,7 +298,7 @@ Controller.prototype.reconfigure = async (req, res) => {
    * data from core. Since NodeJS is single-threaded, this will
    * de-facto be a deadlock.
    */
-  log.debug('Reveived reconfigure signal from core')
+  log.debug('Reveived reload signal from core')
   res.status(204).send()
 
   /*

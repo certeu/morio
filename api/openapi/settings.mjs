@@ -52,9 +52,9 @@ Note that Morio will encrypt all secrets and remove them from the settings. So t
     },
   })
 
-  api.get('/reconfigure', {
+  api.get('/reload', {
     ...shared,
-    summary: `Triggers a reconfigure event on the API`,
+    summary: `Triggers a reload event on the API`,
     description: `This will cause the API to re-initialize itself, including reaching out the Morio Core to re-load the settings.
 
 This is an internal route that is exposed to allow for troubleshooting. You probably don't want to use this.`,

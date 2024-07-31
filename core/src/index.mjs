@@ -3,8 +3,8 @@ import express from 'express'
 import { wrapExpress } from '#shared/utils'
 // Start Morio method
 import { startMorio } from './lib/services/index.mjs'
-// reconfigureApi method
-import { reconfigureApi } from './lib/services/api.mjs'
+// reloadApi method
+import { reloadApi } from './lib/services/api.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Middleware
@@ -28,7 +28,7 @@ app.use(express.json({ limit: '1mb' }))
 
 /*
  * Add middleware to guard routes while we are
- * in ephemeral mode or reconfiguring
+ * in ephemeral mode or reloading
  */
 app.use(guardRoutes)
 
@@ -51,7 +51,7 @@ app.get('/*', async (req, res) => utils.sendErrorResponse(res, 'morio.core.404',
 /*
  * (re)Configure core
  */
-await reconfigure({ coldStart: true })
+await reload({ coldStart: true })
 
 /*
  * Start listening for requests
@@ -69,11 +69,11 @@ wrapExpress(
  *
  * @param {object} hookParams = Optional data to pass to lifecycle hooks
  */
-export async function reconfigure(hookParams = {}) {
+export async function reload(hookParams = {}) {
   /*
    * Drop us in config resolving mode
    */
-  utils.beginReconfigure()
+  utils.beginReload()
 
   /*
    * This will (re)start all services if that is needed
@@ -83,12 +83,12 @@ export async function reconfigure(hookParams = {}) {
   /*
    * Let the world know we are ready
    */
-  utils.endReconfigure()
+  utils.endReload()
 
   /*
    * Tell the API to update the config, but don't wait for it
    */
-  reconfigureApi()
+  reloadApi()
 
   /*
    * If we're not running in ephemeral mode,

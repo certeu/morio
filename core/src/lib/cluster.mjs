@@ -70,12 +70,11 @@ const updateNodeState = async () => {
 
 const consolidateClusterStatus = () => {
   const status = utils.getStatus()?.nodes?.[utils.getNodeFqdn()]
-  const warnings = []
   let code = 0
   for (const service of [...serviceOrder]) {
     if (typeof status[service] !== 'undefined' && status[service] !== 0) {
       if (code === 0) code = serviceCodes[service]
-      warnings.push(`The ${service} service has status code ${status[service]}`)
+      log.warn(`[${service}] Service has status code ${status[service]}`)
     }
   }
 
@@ -168,7 +167,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
    * If there are no targets, that might indicate a leader change.
    * We stop the heartbeat, TODO: Can we recover from this?
    */
-  if (!targets) {
+  if (targets.length === 0) {
     log.info(`No heartbeat targets found. Stopping heartbeat`)
     return
   }
@@ -488,7 +487,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
         action = 'LEADER_CHANGE'
         log.info(
           {
-            remote_leader: data?.cluster_leader?.serial,
+            remote_leader: data.cluster_leader?.serial,
             local_leader: utils.getLeaderSerial(),
           },
           `Node ${data.from.fqdn} disagrees about the leader in ${type}: ${err}`
@@ -500,7 +499,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
       action = 'LEADER_CHANGE'
       log.info(
         {
-          remote_leader: data?.cluster_leader?.serial,
+          remote_leader: data.cluster_leader?.serial,
           local_leader: utils.getLeaderSerial(),
         },
         `Leader update received from Node ${data.from.fqdn} in ${type}: ${err}`
@@ -555,7 +554,6 @@ export const ensureMorioCluster = async () => {
           utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`,
         ],
       }, // Endpoint config
-      true // Disconnect from other networks
     )
   } catch (err) {
     log.error(err, 'Failed to ensure morio network configuration')

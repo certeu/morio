@@ -63,7 +63,7 @@ describe('Core Settings/Reload/Status Tests', () => {
    *     node_serial: 1,
    *     ephemeral: false,
    *     ephemeral_uuid: '539fe81f-8c82-4b1f-836c-606db6e37386',
-   *     reconfigure_count: 2,
+   *     reload_count: 2,
    *     config_resolved: true,
    *     settings_serial: 1721837321743
    *   },
@@ -147,7 +147,7 @@ describe('Core Settings/Reload/Status Tests', () => {
     // node
     assert.equal(typeof d.node, 'object')
     const types = {
-      number: ['uptime', 'node_serial', 'reconfigure_count', 'settings_serial'],
+      number: ['uptime', 'node_serial', 'reload_count', 'settings_serial'],
       string: ['cluster', 'node'],
       boolean: ['ephemeral', 'config_resolved'],
     }

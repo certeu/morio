@@ -60,7 +60,7 @@ const getStatus = () => {
       node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
       ephemeral: utils.isEphemeral(),
       ephemeral_uuid: utils.isEphemeral() ? utils.getEphemeralUuid() : undefined,
-      reconfigure_count: utils.getReconfigureCount(),
+      reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
     },

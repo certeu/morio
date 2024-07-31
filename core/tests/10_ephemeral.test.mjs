@@ -28,7 +28,7 @@ describe('Ephemeral Core: Status Routes', () => {
    *     uptime: 6,
    *     ephemeral: true,
    *     ephemeral_uuid: '5008f15a-4366-46ca-b5df-230e106cd49a',
-   *     reconfigure_count: 1,
+   *     reload_count: 1,
    *     config_resolved: true,
    *     settings_serial: 0
    *   }
@@ -57,7 +57,7 @@ describe('Ephemeral Core: Status Routes', () => {
     // nodes
     assert.equal(typeof d.node, 'object')
     assert.equal(typeof d.node.uptime, 'number')
-    assert.equal(typeof d.node.reconfigure_count, 'number')
+    assert.equal(typeof d.node.reload_count, 'number')
     assert.equal(d.node.settings_serial, 0)
     assert.equal(d.node.ephemeral, true)
     assert.equal(d.node.config_resolved, true)

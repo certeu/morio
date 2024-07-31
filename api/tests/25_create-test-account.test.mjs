@@ -5,7 +5,7 @@ import { strict as assert } from 'node:assert'
 
 const timeout = 80000
 
-describe('Wait for core to reconfigure itself', async () => {
+describe('Wait for core reload', async () => {
   /*
    * When running tests, the previous tests just setup core
    * so we are probably still resolving the configuration.
@@ -26,7 +26,7 @@ describe('Wait for core to reconfigure itself', async () => {
     })
 })
 
-describe('Wait for API to reconfigure itself', async () => {
+describe('Wait for API reload', async () => {
   const apiReady = await attempt({
     every: 1,
     timeout: 90,

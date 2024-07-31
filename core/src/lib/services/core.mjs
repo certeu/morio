@@ -147,8 +147,7 @@ export const service = {
        * We do this here because it happens in the restart lifecycle hook
        * but core is never restarted
        */
-      const coreConfig = resolveServiceConfiguration('core', { utils })
-      ensureTraefikDynamicConfiguration('core', coreConfig.traefik)
+      ensureTraefikDynamicConfiguration('core')
 
       /*
        * We need a CA before we can do anything fancy
