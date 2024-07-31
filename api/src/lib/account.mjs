@@ -211,7 +211,7 @@ export const updateLastLoginTime = async (provider, id, extraData = {}) =>
  */
 const accountsAsList = (result) => {
   const cols = result.results?.[0].columns
-  const list = (result.results[0].values).map((entry) => {
+  const list = result.results[0].values.map((entry) => {
     const account = {}
     for (const i in cols)
       account[cols[i]] =

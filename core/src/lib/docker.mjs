@@ -180,9 +180,7 @@ export const createDockerNetwork = async (name) => {
  */
 export const attachToDockerNetwork = async (serviceName, network, endpointConfig) => {
   if (!network) {
-    log.warn(
-      `[${serviceName}] Attempt to attach to a network, but no network object was passed`
-    )
+    log.warn(`[${serviceName}] Attempt to attach to a network, but no network object was passed`)
     return false
   }
 
