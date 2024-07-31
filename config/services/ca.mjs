@@ -20,8 +20,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     await: true,
     /*
-    * Container configuration
-    */
+     * Container configuration
+     */
     container: {
       // Name to use for the running container
       container_name: 'ca',
@@ -34,23 +34,28 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD ? [
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
-      ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
-      ],
+      volumes: PROD
+        ? [
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/ca:/home/step/config`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs:/home/step/certs`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/ca/db:/home/step/db`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
+          ]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
+          ],
     },
     /*
      * Traefik (proxy) configuration for the CA service
      */
-    traefik:new YamlConfig()
-      .set('http.routers.ca.rule', '( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )')
+    traefik: new YamlConfig()
+      .set(
+        'http.routers.ca.rule',
+        '( PathPrefix(`/root`) || PathPrefix(`/acme`) || PathPrefix(`/provisioners`) )'
+      )
       .set('http.routers.ca.priority', 666)
       .set('http.routers.ca.service', 'ca')
       .set('http.services.ca.loadBalancer.servers', { url: `https://ca:${PORT}/` })
@@ -62,8 +67,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.stepca.tls', true)
       .set('http.services.stepca.loadBalancer.servers', { url: `https://ca:${PORT}/` }),
     /*
-    * Step-CA server configuration
-    */
+     * Step-CA server configuration
+     */
     server: {
       root: '/home/step/certs/root_ca.crt',
       federatedRoots: null,

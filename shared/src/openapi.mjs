@@ -36,7 +36,7 @@ To learn how to interact with Morio through its user-facing API, refer to [the d
 - [Morio's GitHub repository at \`certeu/morio\`](https://github.com/certeu/morio/)
 - [Morio's online documentation at \`morio.it\`](https://morio.it/)
 `,
-  }
+  },
 }
 
 /**
@@ -45,7 +45,7 @@ To learn how to interact with Morio through its user-facing API, refer to [the d
  * @constructor
  * @return {OpenAPI} this - The OpenAPI instance
  */
-function OpenAPI(utils, type='api', extra={}) {
+function OpenAPI(utils, type = 'api', extra = {}) {
   /*
    * Attach utils
    */
@@ -71,8 +71,8 @@ function OpenAPI(utils, type='api', extra={}) {
     },
     tags: [],
     servers: this.utils.getBrokerFqdns().map((fqdn, i) => ({
-      url: `https://${fqdn}${utils.getPreset('MORIO_'+type.toUpperCase()+'_PREFIX')}`,
-      description: `Node ${i} of this Morio deployment`
+      url: `https://${fqdn}${utils.getPreset('MORIO_' + type.toUpperCase() + '_PREFIX')}`,
+      description: `Node ${i} of this Morio deployment`,
     })),
     ...extra,
   }
@@ -83,8 +83,8 @@ function OpenAPI(utils, type='api', extra={}) {
 /*
  * Method to add a tac
  */
-OpenAPI.prototype.tag = function(name, description) {
-  this.spec.tags.push({name, description})
+OpenAPI.prototype.tag = function (name, description) {
+  this.spec.tags.push({ name, description })
 
   return this
 }
@@ -92,16 +92,17 @@ OpenAPI.prototype.tag = function(name, description) {
 /**
  * General purpose method to add an endpoint
  */
-OpenAPI.prototype.addEndpoint = function(method, url, config) {
+OpenAPI.prototype.addEndpoint = function (method, url, config) {
   set(this.spec, ['paths', url, method.toLowerCase()], config)
 
   return this
 
-/**
- * Attach a specific method for all methods used in the API
- */}
+  /**
+   * Attach a specific method for all methods used in the API
+   */
+}
 for (const method of ['get', 'post', 'patch', 'put', 'delete']) {
-  OpenAPI.prototype[method] = function(url, config) {
+  OpenAPI.prototype[method] = function (url, config) {
     return this.addEndpoint(method, url, config)
   }
 }
@@ -181,10 +182,4 @@ const formatResponseExamples = (obj) => {
   return newObj
 }
 
-export {
-  OpenAPI,
-  examples,
-  errorResponse,
-  errorResponses,
-  formatResponseExamples,
-}
+export { OpenAPI, examples, errorResponse, errorResponses, formatResponseExamples }

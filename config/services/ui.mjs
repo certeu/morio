@@ -29,12 +29,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD
-        ? [
-          `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        ] : [
-          `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
-          `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        ],
+        ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+          ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment
@@ -48,7 +47,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
     traefik: {
       ui: generateTraefikConfig(utils, {
         service: 'ui',
-        prefixes: [ '/' ],
+        prefixes: ['/'],
         priority: 6,
       }),
     },

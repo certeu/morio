@@ -3,8 +3,8 @@ import Joi from 'joi'
 /*
  * A little help to type less numbers
  */
-const brokerNodesNumbers = [...Array(9).keys()].map(i => i + 1)
-const flankingNodesNumbers = [...Array(36).keys()].map(i => i + 101)
+const brokerNodesNumbers = [...Array(9).keys()].map((i) => i + 1)
+const flankingNodesNumbers = [...Array(36).keys()].map((i) => i + 101)
 
 /*
  * An FQDN
@@ -51,14 +51,19 @@ const flankingNodes = Joi.array().items(fqdn).min(0).max(36)
 /*
  * The morio root token (mrt)
  */
-const mrt = Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/)
+const mrt = Joi.string()
+  .length(68, 'utf8')
+  .pattern(/^mrt\.[0-9a-z]+$/)
 
 /*
  * The contents of the keys file/object
  */
 const keys = Joi.object({
   jwt: Joi.string().required(),
-  mrt: Joi.string().length(68, 'utf8').pattern(/^mrt\.[0-9a-z]+$/).required(),
+  mrt: Joi.string()
+    .length(68, 'utf8')
+    .pattern(/^mrt\.[0-9a-z]+$/)
+    .required(),
   public: Joi.string().required(),
   private: Joi.string().required(),
   cluster: uuid.required(),
@@ -76,13 +81,16 @@ const keys = Joi.object({
   ikey: Joi.string().required(),
 })
 
-
 /*
  * The Morio settings object
  */
 const settings = Joi.object({
   cluster: Joi.object({
-    name: Joi.string().required().min(2).max(255).pattern(/^[A-Za-z0-9\s-_,.;:()]+$/),
+    name: Joi.string()
+      .required()
+      .min(2)
+      .max(255)
+      .pattern(/^[A-Za-z0-9\s-_,.;:()]+$/),
     broker_nodes: brokerNodes,
     flanking_nodes: flankingNodes,
     fqdn: fqdn.when('broker_nodes', {
@@ -108,7 +116,7 @@ const settings = Joi.object({
     providers: Joi.object(),
     ui: Joi.object({
       visibility: Joi.object(),
-      order: Joi.array()
+      order: Joi.array(),
     }),
   }),
 }).required()
@@ -138,23 +146,10 @@ const validate = async (key, input, schema) => {
     }
 
     return [valid, null]
-  }
-  else return [false, `No such schema key: ${key}`]
+  } else return [false, `No such schema key: ${key}`]
 }
 
 /*
  * Named exports
  */
-export {
-  Joi,
-  validate,
-  id,
-  fqdn,
-  jsTime,
-  uuid,
-  keys,
-  mrt,
-  version,
-  nodeSerial,
-  settings,
-}
+export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, version, nodeSerial, settings }

@@ -31,37 +31,36 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export
-      ports: [
-        '9600:9600',
-      ],
+      ports: ['9600:9600'],
       // Environment
       environment: {
         // Node ID
-        LOGSTASH_HOME: "/usr/share/logstash",
+        LOGSTASH_HOME: '/usr/share/logstash',
       },
       // Volumes
-      volumes: PROD ? [
-        `${utils.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
-        `${utils.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
-        //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
-      ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
-        //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
-      ],
+      volumes: PROD
+        ? [
+            `${utils.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
+            `${utils.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
+            //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+          ]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
+            //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+          ],
     },
 
     /*
      * Logstash configuration file
      */
     logstash: {
-
       /*
        * NOTE: Do not configure paths as doing so will make Logstash ignore pipelines.yml
        */
@@ -70,7 +69,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
        * Set node name based on the node serial and nodes list
        */
       node: {
-        name: utils.getSettings('cluster.broker_nodes')[(NODE - 1)],
+        name: utils.getSettings('cluster.broker_nodes')[NODE - 1],
       },
       /*
        * Set the log level and format
@@ -104,25 +103,24 @@ export const resolveServiceConfiguration = ({ utils }) => {
        * See: https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html
        */
       monitoring: {
-        enabled: false
+        enabled: false,
       },
       xpack: {
         management: {
-          enabled: false
-        }
+          enabled: false,
+        },
       },
       api: {
         enabled: true,
-        environment: utils.getSettings('cluster.broker_nodes')[(NODE - 1)],
+        environment: utils.getSettings('cluster.broker_nodes')[NODE - 1],
         http: {
-          host: '0.0.0.0'
+          host: '0.0.0.0',
         },
         ssl: {
           enabled: false,
-        }
+        },
       },
       allow_superuser: false,
     },
   }
 }
-

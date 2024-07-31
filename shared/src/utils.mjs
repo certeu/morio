@@ -50,30 +50,32 @@ export const attempt = async ({
   run,
   onFailedAttempt = false,
   validate = false,
-}) => new Promise((resolve) => tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve))
+}) =>
+  new Promise((resolve) =>
+    tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve)
+  )
 
 /*
  * Promise resolver functions should not be async
  * so this method is here to side-step that
  */
-const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, validate }, resolve) => {
+const tryWhilePromiseResolver = async (
+  { every, timeout, run, onFailedAttempt, validate },
+  resolve
+) => {
   /*
    * Quick check
    */
   let ok
   try {
     ok = await run()
-  }
-  catch (err) {
+  } catch (err) {
     // Log error if error was passed in
     console.log(err)
   }
 
-  if (
-    (typeof validate === 'function' && validate(ok))
-    ||
-    (typeof validate !== 'function' && ok)
-  ) return resolve(ok)
+  if ((typeof validate === 'function' && validate(ok)) || (typeof validate !== 'function' && ok))
+    return resolve(ok)
 
   /*
    * Keep trying until timeout
@@ -83,8 +85,7 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, v
     let ok
     try {
       ok = await run()
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err)
     }
     if (ok) {
@@ -95,8 +96,8 @@ const tryWhilePromiseResolver = async ({ every, timeout, run, onFailedAttempt, v
       if (delta > timeout) {
         clearInterval(interval)
         return resolve(false)
-      }
-      else if (onFailedAttempt && typeof onFailedAttempt === 'function') onFailedAttempt(Math.floor(delta))
+      } else if (onFailedAttempt && typeof onFailedAttempt === 'function')
+        onFailedAttempt(Math.floor(delta))
     }
   }, every * 1000)
 }

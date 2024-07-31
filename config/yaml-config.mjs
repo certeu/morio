@@ -25,7 +25,7 @@ export function YamlConfig() {
  * @return {string} this - The config as yaml
  */
 YamlConfig.prototype.asYaml = function () {
-  const data = {...this}
+  const data = { ...this }
 
   return yaml.dump(data)
 }

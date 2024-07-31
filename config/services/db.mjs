@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Ports to export (none)
       ports: [
         `${utils.getPreset('MORIO_DB_HTTP_PORT')}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-        `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`
+        `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
       ],
       // Environment
       environment: {
@@ -38,32 +38,39 @@ export const resolveServiceConfiguration = ({ utils }) => {
         NODE_ID: utils.getNodeSerial(),
       },
       // Volumes
-      volumes: PROD ? [
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
-      ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
-      ],
+      volumes: PROD
+        ? [
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
+          ]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+          ],
       // Command
-      command: utils.isDistributed() ? [
-        `/bin/rqlited`,
-        `-node-id`,
-        String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
-        `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-        `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
-        `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-        `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
-        `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
-        `-node-cert=/etc/rqlite/tls-cert.pem`,
-        `-node-key=/etc/rqlite/tls-key.pem`,
-        `-node-verify-client`,
-        `-bootstrap-expect`,
-        String(utils.getBrokerCount()),
-        `-join`,
-        utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`).join(','),
-        'data',
-      ] : false,
+      command: utils.isDistributed()
+        ? [
+            `/bin/rqlited`,
+            `-node-id`,
+            String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
+            `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
+            `-node-cert=/etc/rqlite/tls-cert.pem`,
+            `-node-key=/etc/rqlite/tls-key.pem`,
+            `-node-verify-client`,
+            `-bootstrap-expect`,
+            String(utils.getBrokerCount()),
+            `-join`,
+            utils
+              .getBrokerFqdns()
+              .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`)
+              .join(','),
+            'data',
+          ]
+        : false,
     },
     /*
      * Traefik (proxy) configuration for the API service
@@ -71,14 +78,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
     traefik: {
       db: generateTraefikConfig(utils, {
         service: 'db',
-        prefixes: [
-          '/-/db/status',
-          '/-/db/nodes',
-          '/-/db/readyz',
-        ],
+        prefixes: ['/-/db/status', '/-/db/nodes', '/-/db/readyz'],
         priority: 666,
-      }).set("http.middlewares.db-prefix.replacepathregex.regex", "^/-/db/(.*)")
-        .set("http.middlewares.db-prefix.replacepathregex.replacement", "/$1")
+      })
+        .set('http.middlewares.db-prefix.replacepathregex.regex', '^/-/db/(.*)')
+        .set('http.middlewares.db-prefix.replacepathregex.replacement', '/$1')
         .set('http.routers.db.middlewares', ['db-prefix@file']),
     },
     /**

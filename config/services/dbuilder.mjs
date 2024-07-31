@@ -31,13 +31,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD ? [
-        `${DIRS.data}/clients/linux:/morio/src`,
-        `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/dist`,
-      ] : [
-        `${DIRS.repo}/data/data/clients/linux:/morio/src`,
-        `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/dist`,
-      ],
+      volumes: PROD
+        ? [
+            `${DIRS.data}/clients/linux:/morio/src`,
+            `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/dist`,
+          ]
+        : [
+            `${DIRS.repo}/data/data/clients/linux:/morio/src`,
+            `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/dist`,
+          ],
       // Don't keep container after it exits
       ephemeral: true,
     },
@@ -63,7 +65,7 @@ export const defaults = {
   'Installed-Size': 5000,
   Maintainer: 'CERT-EU <services@cert.europa.eu>',
   'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
-  Uploaders: [ 'Joost De Cock <joost.decock@cert.europa.eu>' ],
+  Uploaders: ['Joost De Cock <joost.decock@cert.europa.eu>'],
   Homepage: 'https://github.com/certeu/morio',
   Description: `The Morio client collects and ships observability data to a Morio instance.`,
   DetailedDescription: `Deploy this Morio client (based on Elastic Beats) on your endpoints,
@@ -79,7 +81,7 @@ or event-driven automation.`,
  * @param {object} settigns - Specific settings to build this package
  * @return {string} controlFile - The control file contents
  */
-export const resolveControlFile = (settings={}) => {
+export const resolveControlFile = (settings = {}) => {
   const s = {
     ...defaults,
     ...settings,
@@ -96,27 +98,18 @@ export const resolveControlFile = (settings={}) => {
   /*
    * Construct more complex fields
    */
-  const extra = [
-    `Depends: ` + s.Depends.map(pkg => `${pkg[0]} (${pkg[1]})`).join(', '),
-  ]
+  const extra = [`Depends: ` + s.Depends.map((pkg) => `${pkg[0]} (${pkg[1]})`).join(', ')]
   delete s.Depends
-  if (s.Uploaders.length > 0) extra.push(
-    `Uploaders: ` + s.Uploaders.join(', ')
-  )
+  if (s.Uploaders.length > 0) extra.push(`Uploaders: ` + s.Uploaders.join(', '))
   delete s.Uploaders
-  s.Description += "\n  " + s.DetailedDescription.split("\n").join("\n  ")
+  s.Description += '\n  ' + s.DetailedDescription.split('\n').join('\n  ')
   delete s.DetailedDescription
 
   /*
    * Return control file structure/contents
    */
   return {
-    control: [
-      ...Object.keys(s).map(key => `${key}: ${s[key]}`),
-      ...extra,
-      ''
-    ].join("\n"),
-    settings: s
+    control: [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n'),
+    settings: s,
   }
 }
-

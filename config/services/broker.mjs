@@ -4,7 +4,6 @@ import { generateTraefikConfig } from './index.mjs'
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
-
   /*
    * Make it easy to test production containers in a dev environment
    */
@@ -52,15 +51,17 @@ export const resolveServiceConfiguration = ({ utils }) => {
         NODE_ID: NODE,
       },
       // Volumes
-      volumes: PROD ? [
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
-      ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
-      ],
+      volumes: PROD
+        ? [
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/broker:/etc/redpanda`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
+          ]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
+          ],
       // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
       aliases: ['rpadmin', 'rpproxy'],
       // Command
@@ -76,16 +77,17 @@ export const resolveServiceConfiguration = ({ utils }) => {
     traefik: {
       rpadmin: generateTraefikConfig(utils, {
         service: 'rpadmin',
-        prefixes: [ `/v1/` ],
+        prefixes: [`/v1/`],
         priority: 666,
         //backendTls: true,
       }),
       rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
-        prefixes: [ `/-/rpproxy/` ],
+        prefixes: [`/-/rpproxy/`],
         priority: 666,
-      }).set("http.middlewares.rpproxy-prefix.replacepathregex.regex", `^/-/rpproxy/(.*)`)
-        .set("http.middlewares.rpproxy-prefix.replacepathregex.replacement", "/$1")
+      })
+        .set('http.middlewares.rpproxy-prefix.replacepathregex.regex', `^/-/rpproxy/(.*)`)
+        .set('http.middlewares.rpproxy-prefix.replacepathregex.replacement', '/$1')
         .set('http.routers.rpproxy.middlewares', ['rpproxy-prefix@file']),
     },
     /*
@@ -99,7 +101,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Seed services is crucial for the cluster bootstrap
          */
-        seed_servers: utils.getBrokerFqdns().map(address => ({ host: { address, port: 33145 } })),
+        seed_servers: utils.getBrokerFqdns().map((address) => ({ host: { address, port: 33145 } })),
 
         /*
          * Do not start a cluster when seed_servers is empty
@@ -153,7 +155,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         advertised_rpc_api: {
           address: utils.getNodeFqdn(),
-          port: 33145
+          port: 33145,
         },
 
         /*
@@ -172,7 +174,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Kafka API TLS
          *
-          */
+         */
         kafka_api_tls: [
           {
             name: 'external',
@@ -198,12 +200,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
           },
         ],
         rpc_server_tls: {
-            name: 'external',
-            enabled: true,
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            key_file: '/etc/redpanda/tls-key.pem',
-            truststore_file: '/etc/redpanda/tls-ca.pem',
-            require_client_auth: false,
+          name: 'external',
+          enabled: true,
+          cert_file: '/etc/redpanda/tls-cert.pem',
+          key_file: '/etc/redpanda/tls-key.pem',
+          truststore_file: '/etc/redpanda/tls-ca.pem',
+          require_client_auth: false,
         },
 
         /*
@@ -311,35 +313,37 @@ export const resolveServiceConfiguration = ({ utils }) => {
     rpk: {
       version: 4,
       globals: {
-        prompt: "",
+        prompt: '',
         no_default_cluster: false,
         command_timeout: '10s',
         dial_timeout: '10s',
         request_timeout_overhead: '10s',
         retry_timeout: '0s',
         fetch_max_wait: '0s',
-        kafka_protocol_request_client_id: ""
+        kafka_protocol_request_client_id: '',
       },
       current_profile: 'morio',
-      current_cloud_auth_org_id: "",
-      current_cloud_auth_kind: "",
-      profiles: [{
-        name: 'morio',
-        description: 'rpk profile for Morio',
-        prompt: "",
-        from_cloud: false,
-        kafka_api: {
-          brokers: [ `${utils.getNodeFqdn()}:${PORTS.EXT}` ],
-          tls: {
-            key_file: '/etc/redpanda/tls-key.pem',
-            cert_file: '/etc/redpanda/tls-cert.pem',
-            ca_file: '/etc/redpanda/tls-ca.pem',
+      current_cloud_auth_org_id: '',
+      current_cloud_auth_kind: '',
+      profiles: [
+        {
+          name: 'morio',
+          description: 'rpk profile for Morio',
+          prompt: '',
+          from_cloud: false,
+          kafka_api: {
+            brokers: [`${utils.getNodeFqdn()}:${PORTS.EXT}`],
+            tls: {
+              key_file: '/etc/redpanda/tls-key.pem',
+              cert_file: '/etc/redpanda/tls-cert.pem',
+              ca_file: '/etc/redpanda/tls-ca.pem',
+            },
           },
+          admin_api: {},
+          schema_registry: {},
+          cloud_auth: [],
         },
-        admin_api: {},
-        schema_registry: {},
-        cloud_auth: [],
-      }],
+      ],
     },
   }
 }

@@ -22,28 +22,21 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     // Instead, attach to the morio network
     network: utils.getPreset('MORIO_NETWORK'),
     // Command
-    command: [
-      '/app/console',
-      '-config.filepath /etc/morio/console/config.yaml'
-    ],
+    command: ['/app/console', '-config.filepath /etc/morio/console/config.yaml'],
     // Entrypoint
     entrypoint: '/bin/sh',
     environment: {
       CONFIG_FILEPATH: '/etc/morio/console/config.yaml',
     },
     // Volumes
-    volumes: [
-      `${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`,
-    ],
+    volumes: [`${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`],
     // TODO: For unit tests, we need to know the IP, something like:
     //hosts: ['unit.test.morio.it:10.10.10.10'],
   },
   traefik: {
     console: generateTraefikConfig(utils, {
       service: 'console',
-      prefixes: [
-        `/${utils.getPreset('MORIO_CONSOLE_PREFIX')}`
-      ],
+      prefixes: [`/${utils.getPreset('MORIO_CONSOLE_PREFIX')}`],
       priority: 666,
     }),
   },
@@ -52,7 +45,9 @@ export const resolveServiceConfiguration = ({ utils }) => ({
    */
   console: {
     kafka: {
-      brokers: utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
+      brokers: utils
+        .getBrokerFqdns()
+        .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
       clientId: `console_${utils.getNodeSerial()}`,
       schemaRegistry: { enabled: false },
       tls: {
@@ -61,12 +56,12 @@ export const resolveServiceConfiguration = ({ utils }) => ({
         certFilepath: '/etc/morio/console/tls-cert.pem',
         keyFilepath: '/etc/morio/console/tls-key.pem',
         insecureSkipTlsVerify: false,
-      }
+      },
     },
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: utils.getBrokerFqdns().map(fqdn => `https://${fqdn}:443`),
+        urls: utils.getBrokerFqdns().map((fqdn) => `https://${fqdn}:443`),
         tls: {
           enabled: true,
           caFilepath: '/etc/morio/console/tls-ca.pem',

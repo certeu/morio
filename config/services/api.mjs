@@ -24,25 +24,28 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const traefik = {
     api: generateTraefikConfig(utils, {
       service: 'api',
-      prefixes: [
-        utils.getPreset('MORIO_API_PREFIX'),
-        '/downloads',
-        '/coverage'
-      ],
+      prefixes: [utils.getPreset('MORIO_API_PREFIX'), '/downloads', '/coverage'],
       priority: 666,
-    }).set("http.middlewares.api-prefix.replacepathregex.regex", `^${utils.getPreset('MORIO_API_PREFIX')}/(.*)`)
-      .set("http.middlewares.api-prefix.replacepathregex.replacement", "/$1")
-      .set('http.routers.api.middlewares', utils.isEphemeral() ? ['api-prefix@file'] : ['api-prefix@file', 'api-auth@file']),
+    })
+      .set(
+        'http.middlewares.api-prefix.replacepathregex.regex',
+        `^${utils.getPreset('MORIO_API_PREFIX')}/(.*)`
+      )
+      .set('http.middlewares.api-prefix.replacepathregex.replacement', '/$1')
+      .set(
+        'http.routers.api.middlewares',
+        utils.isEphemeral() ? ['api-prefix@file'] : ['api-prefix@file', 'api-auth@file']
+      ),
   }
   /*
    * To run unit tests, we need to modify the config slightly
    */
   if (!PROD && utils.isUnitTest()) {
-    traefik.set("http.routers.api.tls", true)
-    traefik.set("http.routers.api.tls.certresolver", "ca")
-    traefik.set("tls.stores.default.defaultgeneratedcert.domain.main", "unit.test.morio.it")
-    traefik.set("tls.stores.default.defaultgeneratedcert.domain.sans", "unit.test.morio.it")
-    traefik.set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
+    traefik.set('http.routers.api.tls', true)
+    traefik.set('http.routers.api.tls.certresolver', 'ca')
+    traefik.set('tls.stores.default.defaultgeneratedcert.domain.main', 'unit.test.morio.it')
+    traefik.set('tls.stores.default.defaultgeneratedcert.domain.sans', 'unit.test.morio.it')
+    traefik.set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
   }
 
   return {
@@ -61,14 +64,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
-      volumes: PROD ? [
-        `${DIRS.conf}/shared:/etc/morio/shared`,
-        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-      ] : [
-        `${DIRS.conf}/shared:/etc/morio/shared`,
-        `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
-      ],
+      volumes: PROD
+        ? [`${DIRS.conf}/shared:/etc/morio/shared`, `${DIRS.data}/${DIRS.dl}:/morio/downloads`]
+        : [
+            `${DIRS.conf}/shared:/etc/morio/shared`,
+            `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+          ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment

@@ -44,21 +44,12 @@ export const serviceOrder = [
 /*
  * This is the order in which services are started in ephemeral mode
  */
-export const ephemeralServiceOrder = [
-  'proxy',
-  'api',
-  'ui',
-]
+export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = [
-  'db',
-  'ui',
-  'connector',
-  'dbuilder'
-]
+export const optionalServices = ['db', 'ui', 'connector', 'dbuilder']
 
 /**
  * Helper method to generate the Traefik configuration
@@ -70,14 +61,10 @@ export const optionalServices = [
  * @param {number} priority - The priority when matching the rules to incoming requests
  * @return {array} labels - An array of labels for the container/service
  */
-export const generateTraefikConfig = (utils, {
-  service,
-  prefixes=[],
-  paths=[],
-  priority=666,
-  backendTls=false,
-}) => {
-
+export const generateTraefikConfig = (
+  utils,
+  { service, prefixes = [], paths = [], priority = 666, backendTls = false }
+) => {
   const port = getServicePort(service, utils)
   // Paths to save us from typing them too often
   const ROUTER = ['http', 'routers', service]
@@ -95,22 +82,21 @@ export const generateTraefikConfig = (utils, {
     })
     .set(SERVICE, {
       loadBalancer: {
-        servers: [
-          { url: `${backendTls ? 'https' : 'http'}://${service}:${port}` }
-        ]
-      }
+        servers: [{ url: `${backendTls ? 'https' : 'http'}://${service}:${port}` }],
+      },
     })
   if (utils.isEphemeral()) {
-    if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
-    else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
-  }
-  else {
+    if (paths.length > 0) tc.set(RULE, `( ${paths.map((p) => 'Path(`' + p + '`)').join(' || ')} )`)
+    else if (prefixes.length > 0)
+      tc.set(RULE, `( ${prefixes.map((p) => 'PathPrefix(`' + p + '`)').join(' || ')} )`)
+  } else {
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
     // Include rules and config using the cluster's FQDNs/nodes
     tc.set([...ROUTER, 'tls'], true)
-    if (paths.length > 0) tc.set(RULE, `( ${paths.map(p => "Path(`"+p+"`)").join(' || ')} )`)
-    else if (prefixes.length > 0) tc.set(RULE, `( ${prefixes.map(p => "PathPrefix(`"+p+"`)").join(' || ')} )`)
+    if (paths.length > 0) tc.set(RULE, `( ${paths.map((p) => 'Path(`' + p + '`)').join(' || ')} )`)
+    else if (prefixes.length > 0)
+      tc.set(RULE, `( ${prefixes.map((p) => 'PathPrefix(`' + p + '`)').join(' || ')} )`)
   }
 
   return tc
@@ -123,7 +109,8 @@ export const generateTraefikConfig = (utils, {
  * @param {array} nodes - The nodes to include in the rule
  * @param {string} rule - The (part of a) Traefik rule matching the nodes on the router
  */
-export const traefikHostRulePrefix = (router, nodes) => `traefik.http.routers.${router}.rule=(${nodes.map(n => "Host(`"+n+"`)").join(' || ')})`
+export const traefikHostRulePrefix = (router, nodes) =>
+  `traefik.http.routers.${router}.rule=(${nodes.map((n) => 'Host(`' + n + '`)').join(' || ')})`
 
 const getServicePort = (service, utils) => {
   if (service === 'api') return utils.getPreset('MORIO_API_PORT')

@@ -17,22 +17,26 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const traefik = {
     proxy: new YamlConfig()
-      .set("http.routers.dashboard.rule", "( PathPrefix(`/api`) || PathPrefix(`/dashboard`) )")
-      .set("http.routers.dashboard.priority", 666)
-      .set("http.routers.dashboard.service", "api@internal")
-      .set("http.routers.dashboard.tls", true)
-      .set("http.routers.dashboard.entrypoints", "https")
+      .set('http.routers.dashboard.rule', '( PathPrefix(`/api`) || PathPrefix(`/dashboard`) )')
+      .set('http.routers.dashboard.priority', 666)
+      .set('http.routers.dashboard.service', 'api@internal')
+      .set('http.routers.dashboard.tls', true)
+      .set('http.routers.dashboard.entrypoints', 'https'),
   }
-  if (!utils.isEphemeral()) traefik.proxy
-    .set("tls.stores.default.defaultgeneratedcert.resolver", "ca")
-    .set("tls.stores.default.defaultgeneratedcert.domain.main", clusterFqdn
-      ? clusterFqdn
-      : utils.getSettings(['cluster', 'broker_nodes', 0])
-    )
-    .set("tls.stores.default.defaultgeneratedcert.domain.sans", nodes.join(', '))
-    .set('http.middlewares.api-auth.forwardAuth.address', `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`)
-    .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
-    .set('http.routers.api.middlewares', ['api-auth@file'])
+  if (!utils.isEphemeral())
+    traefik.proxy
+      .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
+      .set(
+        'tls.stores.default.defaultgeneratedcert.domain.main',
+        clusterFqdn ? clusterFqdn : utils.getSettings(['cluster', 'broker_nodes', 0])
+      )
+      .set('tls.stores.default.defaultgeneratedcert.domain.sans', nodes.join(', '))
+      .set(
+        'http.middlewares.api-auth.forwardAuth.address',
+        `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+      )
+      .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+      .set('http.routers.api.middlewares', ['api-auth@file'])
 
   return {
     /**
@@ -55,21 +59,27 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: ['80:80', '443:443', `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`],
-      // Volumes
-      volumes: PROD ? [
-        `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
-        //`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-        `${utils.getPreset('MORIO_CONFIG_ROOT')}/proxy:/etc/morio/proxy`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
-        `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
-      ] : [
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-        //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/proxy:/etc/morio/proxy`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
-        `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+      ports: [
+        '80:80',
+        '443:443',
+        `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`,
       ],
+      // Volumes
+      volumes: PROD
+        ? [
+            `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
+            //`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/proxy:/etc/morio/proxy`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/proxy/entrypoint.sh:/entrypoint.sh`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+          ]
+        : [
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+            //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/proxy:/etc/morio/proxy`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+          ],
       // Command
       command: [
         'traefik',
@@ -110,20 +120,22 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Watch for changes
         '--providers.file.watch=true',
         // TODO: Enable metrics
-      ].concat(utils.isEphemeral()
-        ? []
-        : [
-          // Create STEP-CA entrypoint (for access to the CA)
-          `--entrypoints.stepca.address=:${utils.getPreset('MORIO_CA_PORT')}`,
-          // Enable ACME certificate resolver
-          '--certificatesresolvers.ca.acme.storage=acme.json',
-          // Set CA server
-          `--certificatesresolvers.ca.acme.caserver=https://ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
-          //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
-          '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
-          // Point to root CA (will only work after CA is initialized)
-          '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
-        ]),
+      ].concat(
+        utils.isEphemeral()
+          ? []
+          : [
+              // Create STEP-CA entrypoint (for access to the CA)
+              `--entrypoints.stepca.address=:${utils.getPreset('MORIO_CA_PORT')}`,
+              // Enable ACME certificate resolver
+              '--certificatesresolvers.ca.acme.storage=acme.json',
+              // Set CA server
+              `--certificatesresolvers.ca.acme.caserver=https://ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
+              //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
+              '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
+              // Point to root CA (will only work after CA is initialized)
+              '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+            ]
+      ),
     },
     /*
      * Traefik (proxy) configuration for the proxy service

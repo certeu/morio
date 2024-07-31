@@ -2,11 +2,11 @@
   "req": {
     "data": {
       "from": {
-        "fqdn":"morio-node2.tokyo.morio.it",
+        "fqdn": "morio-node2.tokyo.morio.it",
         "serial": 2,
         "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed"
       },
-      "to":"morio-node1.tokyo.morio.it",
+      "to": "morio-node1.tokyo.morio.it",
       "cluster": "3dafca38-993c-4ebf-8613-2d044e1450f4",
       "cluster_leader": {
         "serial": 1
@@ -52,21 +52,21 @@
       },
       "nodes": {
         "39a47fb4-ec89-44ef-8080-9aa20b4872ed": {
-          "fqdn":"morio-node2.tokyo.morio.it",
+          "fqdn": "morio-node2.tokyo.morio.it",
           "hostname": "morio-node2",
           "serial": 2,
           "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed",
           "settings": 1722353755056
         },
         "cc048048-798b-4d13-97a0-200874b281f6": {
-          "fqdn":"morio-node3.tokyo.morio.it",
+          "fqdn": "morio-node3.tokyo.morio.it",
           "hostname": "morio-node3",
           "serial": 3,
           "uuid": "cc048048-798b-4d13-97a0-200874b281f6",
           "settings": 1722353755056
         },
         "e6d275ab-6285-4986-a0f9-81cb12d2ce4b": {
-          "fqdn":"morio-node1.tokyo.morio.it",
+          "fqdn": "morio-node1.tokyo.morio.it",
           "hostname": "morio-node1",
           "serial": 1,
           "uuid": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b",
@@ -93,21 +93,21 @@
       "version": "0.2.0",
       "nodes": {
         "e6d275ab-6285-4986-a0f9-81cb12d2ce4b": {
-          "fqdn":"morio-node1.tokyo.morio.it",
+          "fqdn": "morio-node1.tokyo.morio.it",
           "hostname": "morio-node1",
           "serial": 1,
           "uuid": "e6d275ab-6285-4986-a0f9-81cb12d2ce4b",
           "settings": 1722353755056
         },
         "39a47fb4-ec89-44ef-8080-9aa20b4872ed": {
-          "fqdn":"morio-node2.tokyo.morio.it",
+          "fqdn": "morio-node2.tokyo.morio.it",
           "hostname": "morio-node2",
           "serial": 2,
           "uuid": "39a47fb4-ec89-44ef-8080-9aa20b4872ed",
           "settings": 1722353755056
         },
         "cc048048-798b-4d13-97a0-200874b281f6": {
-          "fqdn":"morio-node3.tokyo.morio.it",
+          "fqdn": "morio-node3.tokyo.morio.it",
           "hostname": "morio-node3",
           "serial": 3,
           "uuid": "cc048048-798b-4d13-97a0-200874b281f6",

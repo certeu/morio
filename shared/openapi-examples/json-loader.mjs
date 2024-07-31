@@ -125,7 +125,7 @@ export const examples = {
       ...status,
       settings: settingsSanitized,
       keys,
-      presets
+      presets,
     },
     status,
     settingsSanitized,

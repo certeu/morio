@@ -1,7 +1,7 @@
 import dns from 'dns'
 import https from 'https'
 import axios from 'axios'
-import { pipeline } from "node:stream/promises"
+import { pipeline } from 'node:stream/promises'
 
 const dnsOptions = {
   family: 4, // Don't use IPv6
@@ -40,9 +40,7 @@ export const resolveHost = async (host) => {
 export const resolveHostAsIp = async (host) => {
   const result = (await resolveHost(host))[1]
 
-  return (Array.isArray(result) && result.length > 0)
-    ? result[0]
-    : false
+  return Array.isArray(result) && result.length > 0 ? result[0] : false
 }
 
 /**
@@ -107,7 +105,7 @@ export const testUrl = async (url, customOptions = {}) => {
  * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export const get = async function (url, raw = false, log=false) {
+export const get = async function (url, raw = false, log = false) {
   /*
    * Send the request to core
    */
@@ -116,7 +114,7 @@ export const get = async function (url, raw = false, log=false) {
     response = await fetch(url)
   } catch (err) {
     // Log error if requested
-    if (log) console.log({ url, err})
+    if (log) console.log({ url, err })
   }
 
   /*
@@ -179,7 +177,7 @@ export const streamGet = async function (url, res) {
  * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-const __postput = async function (method = 'POST', url, data, raw = false, log=false) {
+const __postput = async function (method = 'POST', url, data, raw = false, log = false) {
   /*
    * Construct the request object with or without a request body
    */
@@ -208,17 +206,13 @@ const __postput = async function (method = 'POST', url, data, raw = false, log=f
   if (response?.status && [204].includes(response.status)) return [response.status, {}]
   /*
    * Handle all other status codes
-   */
-  else if (response?.status && response.status < 400) {
+   */ else if (response?.status && response.status < 400) {
     let data
     try {
       data = raw ? await response.text() : await response.json()
-    }
-    catch (err) {
+    } catch (err) {
       if (log) log(err)
-      return raw
-        ? [response.status, {err}]
-        : [response.status, data]
+      return raw ? [response.status, { err }] : [response.status, data]
     }
 
     return [response.status, data]
