@@ -72,7 +72,7 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreate: (hookParams) => defaultRecreateServiceHook('broker', hookParams),
+    recreate: () => defaultRecreateServiceHook('broker'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container

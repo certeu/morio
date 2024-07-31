@@ -158,10 +158,6 @@ export const streamGet = async function (url, res) {
     //console.log(err)
   }
 
-  if (!response) {
-    console.log('Response is not ok', typeof response)
-  }
-
   /*
    * Try parsing the body as JSON, fallback to text
    */

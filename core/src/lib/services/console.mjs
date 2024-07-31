@@ -39,8 +39,7 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreate: (hookParams) =>
-      defaultRecreateServiceHook('console', { ...hookParams, traefikTLS: true }),
+    recreate: () => defaultRecreateServiceHook('console'),
     /**
      * Lifecycle hook for anything to be done prior to starting the container
      *

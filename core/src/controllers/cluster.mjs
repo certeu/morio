@@ -180,7 +180,7 @@ Controller.prototype.join = async (req, res) => {
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing node data to node.json`)
   const nodeUuid = uuid()
-  result = await writeJsonFile(`/etc/morio/node.json`, {
+  await writeJsonFile(`/etc/morio/node.json`, {
     fqdn: valid.you,
     hostname: valid.you.split('.')[0],
     serial:

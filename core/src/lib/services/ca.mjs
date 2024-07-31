@@ -46,7 +46,7 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreate: (hookParams) => defaultRecreateServiceHook('ca', hookParams),
+    recreate: () => defaultRecreateServiceHook('ca'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container

@@ -210,8 +210,8 @@ export const updateLastLoginTime = async (provider, id, extraData = {}) =>
  * Helper method to parse results into an array of objects
  */
 const accountsAsList = (result) => {
-  const cols = result.results[0].columns
-  const list = (result.results?.[0]?.values || []).map((entry) => {
+  const cols = result.results?.[0].columns
+  const list = (result.results[0].values).map((entry) => {
     const account = {}
     for (const i in cols)
       account[cols[i]] =

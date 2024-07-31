@@ -57,6 +57,11 @@ const updateNodeState = async () => {
   promises.push(runHook('heartbeat', 'core'))
 
   /*
+   * Don't consolidate until we have all reasults
+   */
+  await Promise.all(promises)
+
+  /*
    * If we are leading the cluster,
    * we should also update the consolidated cluster status
    */
@@ -419,7 +424,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * Verify version.
    * If there's a mismatch there is nothing we can do so this is lowest priority.
    */
-  if (data?.version !== utils.getVersion()) {
+  if (data.version !== utils.getVersion()) {
     const err = 'VERSION_MISMATCH'
     errors.push(err)
     log.info(`Version mismatch in ${type} from ${data.from.fqdn}: ${err}`)
@@ -461,11 +466,11 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster leader.
    */
-  if (!data?.cluster_leader?.serial || data.cluster_leader.serial !== utils.getLeaderSerial()) {
+  if (!data.cluster_leader?.serial || data.cluster_leader.serial !== utils.getLeaderSerial()) {
     /*
      * Do they look to us as their leader?
      */
-    if (data?.cluster_leader?.serial === utils.getNodeSerial()) {
+    if (data.cluster_leader?.serial === utils.getNodeSerial()) {
       /*
        * Are they correct
        */
