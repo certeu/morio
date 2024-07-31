@@ -99,21 +99,6 @@ describe('API Docker GET Info Tests', () => {
   })
 
   /*
-   * GET /docker/running-containers
-   * Note: This is not something we test in depth,
-   * as we're just passing through the output from the Docker API.
-   */
-  it(`Should GET /docker/running-containers`, async () => {
-    const result = await api.get(`/docker/running-containers`)
-    const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-    assert.equal(Array.isArray(d), true)
-    assert.equal(d.length > 4, true)
-  })
-
-  /*
    * GET /docker/verion
    * Note: This is not something we test in depth,
    * as we're just passing through the output from the Docker API.
@@ -133,7 +118,7 @@ describe('API Docker Active Tests', async () => {
   /*
    * Just need to grab the proxy container info real quick
    */
-  const container = (await api.get(`/docker/running-containers`))[1]
+  const container = (await api.get(`/docker/containers`))[1]
     .filter((container) => container.Names.includes('/proxy'))
     .pop()
   const cid = container.Id
@@ -190,20 +175,6 @@ describe('API Docker Active Tests', async () => {
   })
 
   /*
-   * GET /docker/images/:id/history
-   * Note: This is not something we test in depth,
-   * as we're just passing through the output from the Docker API.
-   */
-  it(`Should GET /docker/images/:id/history`, async () => {
-    const result = await api.get(`/docker/images/${iid}/history`)
-    const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-    assert.equal(Array.isArray(d), true)
-  })
-
-  /*
    * GET /docker/networks/:id
    * Note: This is not something we test in depth,
    * as we're just passing through the output from the Docker API.
@@ -225,7 +196,7 @@ describe('API Docker Container State Tests', async () => {
   /*
    * Just need to grab the proxy container ID real quick
    */
-  const container = (await api.get(`/docker/running-containers`))[1]
+  const container = (await api.get(`/docker/containers`))[1]
     .filter((container) => container.Names.includes('/proxy'))
     .pop().Id
   /*

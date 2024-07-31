@@ -45,7 +45,13 @@ Controller.prototype.getReloadData = async (req, res) => {
 const getStatus = () => {
   const data = {
     info: utils.getInfo(),
-    status: utils.getStatus(true),
+    status: {
+      ...utils.getStatus(true),
+      cluster_leader: {
+        serial: utils.getLeaderSerial(),
+        uuid: utils.getLeaderUuid(),
+      },
+    },
     nodes: utils.getClusterNodes(),
     node: {
       uptime: utils.getUptime(),

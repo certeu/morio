@@ -31,22 +31,23 @@ describe('Anonymous Routes Tests', () => {
    *     },
    *     status: {
    *       cluster: {
-   *       code: 0,
-   *       color: 'green',
-   *       time: 1721971430413,
-   *       updated: 1721971430413,
-   *       leader_serial: 1,
-   *       leading: true,
-   *       msg: 'Everything is ok'
-   *     },
-   *     nodes: {
-   *       'unit.test.morio.it': { api: 0, broker: 0, db: 0, ca: 0, proxy: 0, ui: 0, console: 0 }
+   *         code: 0,
+   *         color: 'green',
+   *         time: 1721971430413,
+   *         updated: 1721971430413,
+   *         msg: 'Everything is ok'
+   *       }
+   *       nodes: {
+   *         'unit.test.morio.it': { api: 0, broker: 0, db: 0, ca: 0, proxy: 0, ui: 0, console: 0 }
+   *       },
+   *       cluster_leader: {
+   *         serial: 1,
+   *         uuid: '34362aae-326f-4368-8b1a-c492a44044b7'
    *     },
    *     nodes: {
    *       '34362aae-326f-4368-8b1a-c492a44044b7': {
    *         fqdn: 'unit.test.morio.it',
    *         hostname: 'unit',
-   *         ip: '192.168.144.35',
    *         serial: 1,
    *         uuid: '448a7148-44c6-40b9-9605-5fa421619d79',
    *         settings: 1721971254878
@@ -98,9 +99,7 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(['amber', 'green'].includes(d.core.status.cluster.color), true)
     assert.equal(typeof d.core.status.cluster.time, 'number')
     assert.equal(typeof d.core.status.cluster.updated, 'number')
-    assert.equal(typeof d.core.status.cluster.leader_serial, 'number')
     assert.equal(typeof d.core.status.cluster.msg, 'string')
-    assert.equal(typeof d.core.status.cluster.leading, 'boolean')
     // core.status.nodes
     assert.equal(typeof d.core.status.nodes['unit.test.morio.it'], 'object')
     // core.nodes
@@ -128,7 +127,7 @@ describe('Anonymous Routes Tests', () => {
    */
   it('Should GET /up', async () => {
     const result = await api.get('/up')
-    assert.equal(result[0], 200)
+    assert.equal(result[0], 204)
   })
 
   /*

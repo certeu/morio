@@ -182,7 +182,6 @@ Controller.prototype.join = async (req, res) => {
   result = await writeJsonFile(`/etc/morio/node.json`, {
     fqdn: valid.you,
     hostname: valid.you.split('.')[0],
-    //ip: (await resolveHostAsIp(valid.you)),
     serial:
       valid.settings.data.cluster.broker_nodes
         .concat(valid.settings.data.cluster.flanking_nodes || [])

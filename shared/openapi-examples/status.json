@@ -40,6 +40,10 @@
           "ui": 0,
           "console": 0
         }
+      },
+      "cluster_leader": {
+        "serial": 1,
+        "uuid": "39b0b5fd-6648-41f8-b3b9-df96c5d11579"
       }
     },
     "nodes": {

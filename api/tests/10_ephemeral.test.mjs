@@ -77,7 +77,7 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(d.core.info.production, false)
     // core.status
     assert.equal(typeof d.core.status.cluster, 'object')
-    assert.equal(d.core.status.cluster.code, 2)
+    assert.equal(d.core.status.cluster.code, 1)
     assert.equal(d.core.status.cluster.color, 'amber')
     assert.equal(typeof d.core.status.cluster.time, 'number')
   })
