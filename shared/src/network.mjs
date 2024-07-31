@@ -52,7 +52,7 @@ export const resolveHostAsIp = async (host) => {
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
  */
-export const testUrl = async (url, customOptions = {}, log = false) => {
+export const testUrl = async (url, customOptions = {}) => {
   /*
    * Merge default and custom options
    */
@@ -61,7 +61,7 @@ export const testUrl = async (url, customOptions = {}, log = false) => {
     headers: {},
     data: undefined,
     ignoreCertificate: false,
-    timeout: 3000,
+    timeout: 1500,
     returnAs: false,
     returnError: false,
     ...customOptions,
@@ -83,7 +83,7 @@ export const testUrl = async (url, customOptions = {}, log = false) => {
     result = await axios(url, options)
   } catch (err) {
     // Swallow error?
-    if (log) log(`${err.toString()} (${url})`)
+    //console.log(err, `${url}`)
     return options.returnError ? err : false
   }
 
@@ -114,7 +114,7 @@ export const get = async function (url, raw = false, log = false) {
     response = await fetch(url)
   } catch (err) {
     // Log error if requested
-    if (log) log(err)
+    if (log) console.log({ url, err })
   }
 
   /*
@@ -158,14 +158,10 @@ export const streamGet = async function (url, res) {
     //console.log(err)
   }
 
-  if (!response) {
-    console.log('Response is not ok', typeof response)
-  }
-
   /*
    * Try parsing the body as JSON, fallback to text
    */
-  await pipeline(response?.body, res)
+  await pipeline(response.body, res)
 }
 
 /*

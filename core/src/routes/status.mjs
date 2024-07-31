@@ -1,4 +1,3 @@
-import { store } from '../lib/store.mjs'
 import { Controller } from '#controllers/status'
 
 const Status = new Controller()
@@ -15,16 +14,8 @@ export function routes(app) {
   app.get('/status', (req, res) => Status.status(req, res))
 
   /*
-   * Hit this route to get the MORIO status logs
+   * Hit this route to get the MORIO status, settings, config
+   * and everything required to bootstrap the API
    */
-  app.get('/status_logs', (req, res) =>
-    res.send({
-      status_logs: [...store.get('status_logs', [])],
-    })
-  )
-
-  /*
-   * Hit this route to get the JWKS info
-   */
-  app.get('/jwks', (req, res) => Status.jwks(req, res))
+  app.get('/reload', (req, res) => Status.getReloadData(req, res))
 }

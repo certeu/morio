@@ -1,85 +1,56 @@
-import { core, setup } from './utils.mjs'
+import { core, setup, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 describe('Core Extra Tests', () => {
   /*
    * POST /setup (should not work a second time)
-   *
    * Example response:
    * {
-   *   "result": "success",
-   *   "uuids": {
-   *     "node": "2d1653c8-1105-4ba2-8a99-85deb8144ced",
-   *     "deployment": "98d5a9ce-6c1c-4d5a-9d9e-d85c39f2446f"
-   *   },
-   *   "root_token": {
-   *     "about": "This is the Morio root token. You can use it to authenticate before any authentication providers have been configured. Store it in a safe space, as it will never be shown again.",
-   *     "value": "mrt.33a15c81a9389857162b3146820e835110b2bcf86318f3c4b71c5c7e6c2a3a91"
-   *   }
+   *   status: 409,
+   *   title: 'Unavailable in ephemeral mode',
+   *   detail: 'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
+   *   type: 'https://morio.it/reference/errors/morio.core.ephemeral.required'
    * }
    */
   it('Should POST /setup (second time should not work)', async () => {
     const result = await core.post('/setup', setup)
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 400)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Array.isArray(d.errors), true)
-    assert.equal(d.errors[0], 'You can only use this endpoint on an ephemeral Morio node')
+    validateErrorResponse(result, errors, 'morio.core.ephemeral.required')
   })
 
   /*
    * GET /does-not-exist
-   *
    * Example response:
    * {
-   *   "url": "/does-not-exist",
-   *   "method":"GET",
-   *   "originalUrl": "/does-not-exist"
+   *   status: 404,
+   *   title: 'No such endpoint',
+   *   detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
+   *   type: 'https://morio.it/reference/errors/morio.core.404'
    * }
    */
   it('Should GET /does-not-exist', async () => {
     const result = await core.get('/does-not-exist')
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 404)
+    validateErrorResponse(result, errors, 'morio.core.404')
   })
 
   /*
-   * POST /settings (missing deployment key)
-   *
+   * POST /settings (missing cluster settings)
    * Example response:
    * {
-   *   result: 'success',
-   *   settings: {
-   *     deployment: { node_count: 1, display_name: 'Morio Unit Tests', nodes: [Array] },
-   *     tokens: { flags: [Object], secrets: [Object] },
-   *     iam: { providers: [Object] }
-   *   }
+   *   status: 400,
+   *   title: 'This request violates the data schema',
+   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
+   *   type: 'https://morio.it/reference/errors/morio.core.schema.violation'
    * }
    */
-  it('Should POST /settings (with missing deployment key)', async () => {
-    const result = await core.post('/settings', { ...setup, deployment: false })
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 400)
-    const d = result[1]
-    assert.equal(typeof d, 'object')
-    assert.equal(Array.isArray(d.errors), true)
-    assert.equal(d.errors[0], 'Settings are not valid')
+  it('Should POST /settings (with missing cluster settings)', async () => {
+    const result = await core.post('/settings', { ...setup, cluster: false })
+    validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
   /*
    * GET /status (after setup)
-   *
-   * Example response:
-   * {
-   *   "url": "/does-not-exist",
-   *   "method":"GET",
-   *   "originalUrl": "/does-not-exist"
-   * }
    */
   it('Should GET /status (after initial setup)', async () => {
     const result = await core.get('/status')
@@ -89,13 +60,84 @@ describe('Core Extra Tests', () => {
   })
 
   /*
+   * GET /reload
+   * Example response:
+   * {
+   *   info: {
+   *     about: 'Morio Core',
+   *     name: '@morio/core',
+   *     production: false,
+   *     version: '0.2.0'
+   *   },
+   *   status: {
+   *     cluster: {
+   *       code: 0,
+   *       color: 'green',
+   *       time: 1722353260726,
+   *       updated: 1722353260726,
+   *       msg: 'Everything is ok'
+   *     },
+   *     nodes: { 'unit.test.morio.it': [Object] }
+   *   },
+   *   nodes: {
+   *     '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197': {
+   *       fqdn: 'unit.test.morio.it',
+   *       hostname: 'unit',
+   *       ip: '192.168.144.35',
+   *       serial: 1,
+   *       uuid: '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197',
+   *       settings: 1722353233483
+   *     }
+   *   },
+   *   node: {
+   *     uptime: 246,
+   *     cluster: '9211bcab-f2fe-4313-a56d-a05490bb0630',
+   *     node: '1e20be7e-5efc-4b9d-a56f-e7dd5cfbc197',
+   *     node_serial: 1,
+   *     ephemeral: false,
+   *     reconfigure_count: 3,
+   *     config_resolved: true,
+   *     settings_serial: 1722353233483
+   *   },
+   *   sanitized_settings: {
+   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
+   *     tokens: { flags: [Object], secrets: [Object] },
+   *     iam: { providers: [Object] }
+   *   },
+   *   settings: {
+   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
+   *     tokens: { flags: [Object], secrets: [Object] },
+   *     iam: { providers: [Object] }
+   *   },
+   *   keys: { ... },
+   *   presets { ... },
+  }
+   */
+  it('Should GET /reload', async () => {
+    const result = await core.get('/reload')
+    const d = result[1]
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], 200)
+    assert.equal(typeof d, 'object')
+    assert.equal(typeof d.info, 'object')
+    assert.equal(typeof d.status.cluster, 'object')
+    assert.equal(typeof d.status.nodes, 'object')
+    assert.equal(typeof d.nodes, 'object')
+    assert.equal(typeof d.node, 'object')
+    assert.equal(typeof d.sanitized_settings, 'object')
+    assert.equal(typeof d.settings, 'object')
+    assert.equal(typeof d.keys, 'object')
+    assert.equal(typeof d.presets, 'object')
+  })
+
+  /*
    * POST /settings
-   *
    * Example response:
    * {
    *   result: 'success',
    *   settings: {
-   *     deployment: { node_count: 1, display_name: 'Morio Unit Tests', nodes: [Array] },
+   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
    *     tokens: { flags: [Object], secrets: [Object] },
    *     iam: { providers: [Object] }
    *   }
@@ -119,21 +161,4 @@ describe('Core Extra Tests', () => {
       assert.equal(typeof enc.ct, 'string')
     }
   })
-
-  /*
-   * GET /status (after setup)
-   *
-   * Example response:
-   * {
-   *   "url": "/does-not-exist",
-   *   "method":"GET",
-   *   "originalUrl": "/does-not-exist"
-   * }
-  it('Should GET /status (after initial setup)', async () => {
-    const result = await core.get('/status')
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-  })
-   */
 })

@@ -1,0 +1,8 @@
+[
+  "/downloads/certs",
+  "/downloads/certs/root.pem",
+  "/downloads/certs/intermediate.pem",
+  "/downloads/certs/db.pem",
+  "/downloads/certs/console.pem",
+  "/downloads/certs/broker.pem"
+]

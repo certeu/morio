@@ -1,12 +1,14 @@
-import { readJsonFile, writeYamlFile } from '#shared/fs'
+import { ensureServiceCertificate } from '#lib/tls'
+import { writeYamlFile } from '#shared/fs'
 // Default hooks
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store } from '../store.mjs'
+import { testUrl } from '#shared/network'
+// log & utils
+import { utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -15,63 +17,122 @@ export const service = {
   name: 'console',
   hooks: {
     /*
+     * Lifecycle hook to determine the service status (runs every heartbeat)
+     */
+    heartbeat: async () => {
+      const result = await testUrl(
+        `http://console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/api/console/endpoints`,
+        { returnAs: 'json' }
+      )
+      const status = result?.distribution ? 0 : 1
+      utils.setServiceStatus('console', status)
+
+      return status === 0 ? true : false
+    },
+    /*
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) =>
-      defaultRecreateContainerHook('console', { ...hookProps, traefikTLS: true }),
+    recreate: () => defaultRecreateServiceHook('console'),
+    /**
+     * Lifecycle hook for anything to be done prior to starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
+    prestart: async () => await ensureServiceCertificate('console'),
+    /**
+     * Lifecycle hook for anything to be done after to starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
+    /*
+    poststart: async () => {
+
+      // TODOE: Create deny-all ACL entry here for the console api:
+         // Topics
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Topic",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // Groups
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Group",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // TransactionalIDs
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"TransactionalID",
+            "resourceName":"*",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+         // Cluster
+         POST /console/api/acls", {
+          "headers": {
+              "Content-Type": "application/json",
+          },
+          "body": {
+            "host":"*",
+            "principal":"User:*",
+            "resourceType":"Cluster",
+            "resourceName":"kafka-cluster",
+            "resourcePatternType":"Literal",
+            "operation":"All",
+            "permissionType":"Deny"
+          }
+
+      return true
+    },
+       */
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('console', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('console', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    preCreate: async () => {
-      /*
-       * We'll check if there's a config file on disk
-       * If so, the console has already been initialized
-       */
-      const bootstrapped = await readJsonFile('/etc/morio/console/config.yaml')
-
-      /*
-       * If the Console is initialized, return early
-       */
-      if (bootstrapped && bootstrapped.redpanda) {
-        store.log.debug('Console already initialized')
-        return
-      }
-
-      /*
-       * Load configuration base
-       */
-      const base = { ...store.config.services.console.console }
-      /*
-       * Populate Kafka nodes, schema URLs, and RedPanda URLs
-       */
-      base.kafka.brokers = store.config.deployment.nodes.map((n, i) => `broker_${i + 1}:9092`)
-      base.kafka.schemaRegistry.urls = store.config.deployment.nodes.map(
-        (n, i) => `http://broker_${i + 1}:8081`
-      )
-      base.redpanda.adminApi.urls = store.config.deployment.nodes.map(
-        (n, i) => `http://broker_${i + 1}:9644`
-      )
-      /*
-       * Write configuration file
-       */
-      await writeYamlFile(`/etc/morio/console/config.yaml`, base)
-
-      return true
-    },
+    precreate: () =>
+      writeYamlFile(
+        `/etc/morio/console/config.yaml`,
+        utils.getMorioServiceConfig('console').console
+      ),
   },
 }

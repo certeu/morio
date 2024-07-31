@@ -1,8 +1,8 @@
-import { storeLastLoginTime, loadAccount } from '../lib/account.mjs'
+import { updateLastLoginTime, loadAccount } from '../lib/account.mjs'
 import { verifyPassword } from '#shared/crypto'
 import { mfa } from '../lib/mfa.mjs'
-import { isRoleAvailable } from '../rbac.mjs'
-import { store } from '../lib/store.mjs'
+import { isRoleAvailable, availableRoles } from '../rbac.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * local: Local Morio identity/authentication provider
@@ -25,15 +25,13 @@ export const local = async (id, data) => {
      * Look up the account
      */
     const account = await loadAccount('local', data.username)
-    if (!account)
-      return [false, { success: false, reason: 'Authentication failed', error: 'No such account' }]
+    if (!account) return [false, 'morio.api.account.unknown']
 
     /*
      * Verify the password
      */
     const passwordOk = verifyPassword(data.password, account.password)
-    if (!passwordOk)
-      return [false, { success: false, reason: 'Authentication failed', error: 'Invalid password' }]
+    if (!passwordOk) return [false, 'morio.api.account.credentials.mismatch']
 
     /*
      * Is the role accessible to this user?
@@ -42,10 +40,10 @@ export const local = async (id, data) => {
     if (!available)
       return [
         false,
+        'morio.api.account.role.unavailable',
         {
-          success: false,
-          reason: 'Authentication failed',
-          error: 'Role not available to this user',
+          requested_role: data.role,
+          available_roles: availableRoles(data.role),
         },
       ]
 
@@ -54,15 +52,14 @@ export const local = async (id, data) => {
      */
     const mfaOk = await mfa.verify(
       data.token,
-      await store.decrypt(account.mfa),
-      account.scratchCodes
+      await utils.decrypt(account.mfa),
+      account.scratch_codes
     )
     if (mfaOk[0]) {
       /*
-       * FIXME: Update scratchcodes in case they were used
+       * Update scratch codes in case they were used
        */
-      storeLastLoginTime('local', data.username) //, { scratchCodes: mfaOk[1] })
-
+      updateLastLoginTime('local', data.username, { scratch_codes: mfaOk[1] })
       /*
        * All good, return
        */
@@ -71,21 +68,16 @@ export const local = async (id, data) => {
         {
           user: `local.${data.username}`,
           role: data.role || 'user',
+          available_roles: availableRoles(account.role),
+          highest_role: account.role,
+          provider: id,
         },
       ]
-    } else
-      return [
-        false,
-        {
-          success: false,
-          reason: 'Authentication requires MFA',
-          error: 'Please provide your MFA token',
-        },
-      ]
+    }
   }
 
   /*
    * If we get here, it means authentication failed
    */
-  return [false, { success: false, reason: 'Authentication failed', error: 'Input is invalid' }]
+  return [false, 'morio.api.account.credentials.mismatch']
 }

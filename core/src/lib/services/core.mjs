@@ -1,33 +1,23 @@
-// REST client for API
-import { restClient } from '#shared/network'
 // Required for config file management
-import {
-  readYamlFile,
-  readJsonFile,
-  readDirectory,
-  writeYamlFile,
-  mkdir,
-  writeJsonFile,
-} from '#shared/fs'
-// Avoid objects pointing to the same memory location
+import { readYamlFile, readJsonFile, readDirectory } from '#shared/fs'
+// Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
-// Used to setup the core service
-import { getPreset, inProduction, loadAllPresets } from '#config'
-// Axios is required to talk to the CA
-import https from 'https'
-import axios from 'axios'
 // Required to generated X.509 certificates
-import { generateJwt, generateCsr, keypairAsJwk, encryptionMethods, uuid } from '#shared/crypto'
+import { encryptionMethods, hash } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysWantedHook, ensureMorioNetwork } from './index.mjs'
-// Cluster
-import { startCluster } from '#lib/cluster'
-// Docker
-import { storeRunningContainers } from '#lib/docker'
-// Store
-import { store } from '../store.mjs'
+import { alwaysWantedHook, ensureMorioService } from './index.mjs'
+// Cluster code
+import { ensureMorioCluster } from '#lib/cluster'
+// log & utils
+import { log, utils } from '../utils.mjs'
+// UUID
+import { uuid } from '#shared/crypto'
+// Traefic config
+import { ensureTraefikDynamicConfiguration } from './proxy.mjs'
+// Load core config
+import { resolveServiceConfiguration } from '#config'
 
 /*
  * This service object holds the service name,
@@ -37,69 +27,43 @@ export const service = {
   name: 'core',
   hooks: {
     /*
+     * Lifecycle hook to determine the service status
+     */
+    status: () => {
+      /*
+       * If core was not ok, this code would not get called
+       * So the status is 0 in any case. The only thing to
+       * check is whether we are leading the custer and if so
+       * update the consolidated state.
+       */
+      if (utils.isLeading()) {
+        log.todo('Implement cluster state consolidation')
+        //if (utils.isDistributed()) {
+        //  // Do cluster stuff
+        //}
+      }
+      utils.setServiceStatus('core', 0)
+
+      return true
+    },
+    /*
      * Lifecycle hook to determine whether the container is wanted
      * We reuse the always method here, since this should always be running
      */
     wanted: alwaysWantedHook,
     /*
-     * Core cannot/should not recreate or restart itself
-     */
-    recreateContainer: () => false,
-    restartContainer: () => false,
-    /*
      * This runs only when core is cold-started.
      *
-     * @params {object} hookProps - Props to pass info to the hook
-     * @params {object} hookProps.initialSetup - True if this is the initial setup
-     * @params {object} hookProps.coldStart - True if this is a cold start
+     * @params {object} hookParams - Props to pass info to the hook
+     * @params {object} hookParams.initialSetup - True if this is the initial setup
+     * @params {object} hookParams.coldStart - True if this is a cold start
      */
-    beforeAll: async (hookProps) => {
+    beforeall: async (hookParams) => {
       /*
-       * Add a getPreset() wrapper that will output trace logs about how presets are resolved
-       * This is surprisingly helpful during debugging
+       * Dump presets for debugging
        */
-      if (!store.getPreset) {
-        store.getPreset = (key, dflt, opts) => {
-          const result = getPreset(key, dflt, opts)
-          if (result === undefined) store.log.warn(`Preset ${key} is undefined`)
-          else store.log.trace(`Preset ${key} = ${result}`)
-
-          return result
-        }
-      }
-
-      /*
-       * Now populate the store
-       */
-      if (!store.info?.about)
-        store.info = {
-          about: 'Morio Core',
-          name: '@morio/core',
-          production: inProduction(),
-          version: getPreset('MORIO_VERSION'),
-        }
-      store.start_time = Date.now()
-      if (!store.inProduction) store.inProduction = inProduction
-
-      /*
-       * Add the API client
-       */
-      if (!store.apiClient)
-        store.apiClient = restClient(`http://api:${store.getPreset('MORIO_API_PORT')}`)
-
-      /*
-       * Load all presets and write them to disk for other services to load
-       * Note that this path we write to is inside the container
-       * And since this is the first time we write to it, we cannot assume
-       * the folder exists
-       */
-      store.presets = loadAllPresets()
-      try {
-        await mkdir('/etc/morio/shared')
-        await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
-      } catch (err) {
-        store.log.warn('Failed to write presets to disk')
-      }
+      for (const [key, val] of Object.entries(utils.getPresets()))
+        log.trace(`Preset ${key} = ${val}`)
 
       /*
        * Load existing settings, keys, node info and timestamp from disk
@@ -107,51 +71,30 @@ export const service = {
       const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
 
       /*
-       * Keep node info in the store
-       */
-      store.node = node
-
-      /*
        * If timestamp is false, no on-disk settings exist and we
        * are running in ephemeral mode. In which case we return early.
        */
       if (!timestamp) {
-        store.info.current_settings = false
-        store.info.ephemeral = true
+        log.info('Morio is running in ephemeral mode')
+        utils.setEphemeral(true)
+        utils.setEphemeralUuid(uuid())
+        utils.setSettingsSerial(false)
+        utils.setNodeSerial(0)
+        utils.setNode(false)
+
         /*
-         * If we are in epehemeral mode, this may very well be the first cold boot.
+         * Configure the proxy for core access
+         * We do this here because it happens in the restart lifecycle hook
+         * but core is never restarted
+         */
+        const coreConfig = resolveServiceConfiguration('core', { utils })
+        ensureTraefikDynamicConfiguration(coreConfig)
+
+        /*
+         * If we are in ephemeral mode, this may very well be the first cold boot.
          * As such, we need to ensure the docker network exists, and attach to it.
          */
-        if (hookProps.coldStart) {
-          try {
-            await ensureMorioNetwork(store.getPreset('MORIO_NETWORK'), 'core', {
-              Aliases: ['core', `core_${store.config.core?.node_nr || 1}`],
-            })
-          } catch (err) {
-            store.log.warn('Failed to ensure morio network configuration')
-          }
-        }
-
-        /*
-         * Now update the list of running containers
-         */
-        await storeRunningContainers()
-
-        /*
-         * Add our internal IP address to the config
-         * (needed to wait until after the network is created)
-         */
-        store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
-
-        /*
-         * If this is the very first boot, generate an UUID for the node
-         * and store it on disk
-         */
-        if (!store.node) {
-          store.log.debug(`Generating node UUID`)
-          store.node = { node: uuid() }
-          await writeJsonFile(`/etc/morio/node.json`, store.node)
-        }
+        await ensureMorioCluster(hookParams)
 
         /*
          * Return here for ephemeral mode
@@ -160,58 +103,67 @@ export const service = {
       }
 
       /*
-       * Update the list of running containers
+       * If we reach this point, a timestamp exists, and we are not in ephemeral mode
+       * Save data from disk in memory
        */
-      await storeRunningContainers()
+      utils.setEphemeral(false)
+      utils.setNode({ ...node, settings: Number(timestamp) })
+      // TODO: do we need this next line?
+      utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
+      utils.setKeys(keys)
+      utils.setSettingsSerial(Number(timestamp))
+      utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
-       * Add our internal IP address to the config
+       * Log some info, for debugging
        */
-      store.local_core_ip = store.running.core.NetworkSettings.Networks.morionet.IPAddress
-
-      /*
-       * Add encryption methods
-       */
-      const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-        keys.mrt,
-        'Morio by CERT-EU',
-        store.log
-      )
-      store.encrypt = encrypt
-      store.decrypt = decrypt
-      store.isEncrypted = isEncrypted
-
-      /*
-       * If we get here, we have a timestamp and on-disk settings
-       */
-      store.info.ephemeral = false
-      store.info.current_settings = timestamp
-      store.saveConfig = cloneAsPojo(settings)
-      // Take care of encrypted settings and store the save ones
-      store.saveSettings = cloneAsPojo(settings)
-      store.settings = templateSettings(settings)
-      store.config = cloneAsPojo(store.settings)
-      store.keys = keys
-
-      /*
-       * One node makes this easy
-       */
-      if (store.config.deployment?.node_count === 1) {
-        store.config.core.node_nr = 1
-        store.config.core.names = {
-          internal: 'core_1',
-          external: store.config.deployment.nodes[0],
-        }
-        store.config.deployment.fqdn = store.config.deployment.nodes[0]
-
-        return true
-      } else if (store.config.deployment?.node_count > 1) {
-        /*
-         * Clustering is a bit more work, so it's abstracted in this method
-         */
-        await startCluster(hookProps)
-        return true
+      log.debug(`Found settings with serial ${timestamp}`)
+      for (const [flagName, flagValue] of Object.entries(settings.tokens?.flags || {})) {
+        if (flagValue) log.info(`Feature flag enabled: ${flagName}`)
       }
+
+      /*
+       * Add encryption methods to utils so we can template the settings
+       */
+      if (!utils.encrypt) {
+        const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+          keys.mrt,
+          'Morio by CERT-EU',
+          log
+        )
+        utils.encrypt = encrypt
+        utils.decrypt = decrypt
+        utils.isEncrypted = isEncrypted
+      }
+
+      /*
+       * Keep a fully templated version of the on-disk settings in memory
+       * (this includes decrypted secrets)
+       */
+      utils.setSettings(templateSettings(settings))
+
+      /*
+       * Configure the proxy for core access
+       * We do this here because it happens in the restart lifecycle hook
+       * but core is never restarted
+       */
+      ensureTraefikDynamicConfiguration('core')
+
+      /*
+       * We need a CA before we can do anything fancy
+       */
+      await ensureMorioService('ca')
+
+      /*
+       * Morio always runs as a cluster, because even a stand-alone
+       * node can have flanking nodes for which we require inter-node
+       * communication.
+       * So we always run a cluster, even if it's a 1-node cluster.
+       * Also, don't wait
+       */
+      await ensureMorioCluster(hookParams)
+
+      return utils.isCoreReady()
     },
   },
 }
@@ -230,7 +182,7 @@ const loadSettingsFromDisk = async () => {
     .pop()
 
   /*
-   * Node data is created even in epehemeral mode
+   * Node data is created even in ephemeral mode
    */
   const node = await readJsonFile(`/etc/morio/node.json`)
 
@@ -250,87 +202,6 @@ const loadSettingsFromDisk = async () => {
   return { settings, keys, node, timestamp }
 }
 
-export const createX509Certificate = async (data) => {
-  /*
-   * Generate the CSR (and private key)
-   */
-  const csr = await generateCsr(data.certificate)
-
-  /*
-   * Extract the key id (kid) from the public key
-   */
-  const kid = (await keypairAsJwk({ public: store.keys.public })).kid
-
-  /*
-   * Generate the JSON web token to talk to the CA
-   *
-   * This JSON web token will be used for authenticating to Step-CA
-   * so it needs to be exactly as step-ca expects it, which means:
-   *
-   * - Header:
-   *   - The key algorithm must match (RS256)
-   *   - The key ID must match
-   * - Data:
-   *   - The `iss` field should be set to the Step CA provisioner name (admin)
-   *   - The `aud` field should be set to the URL of the Step CA API endpoint (https://ca:9000/1.0/sign)
-   *   - The `sans` field should match the SAN records in the certificate
-   *
-   * And obviously we should sign it with the deployment-wide private key,
-   * which we'll need to decrypt first.
-   */
-  const jwt = generateJwt({
-    data: {
-      sans: data.certificate.san,
-      sub: data.certificate.cn,
-      iat: Math.floor(Date.now() / 1000) - 1,
-      iss: 'admin',
-      aud: 'https://ca:9000/1.0/sign',
-      nbf: Math.floor(Date.now() / 1000) - 1,
-      exp: Number(Date.now()) + 300000,
-    },
-    options: {
-      keyid: kid,
-      algorithm: 'RS256',
-    },
-    noDefaults: true,
-    key: store.keys.private,
-    passphrase: store.keys.mrt,
-  })
-
-  /*
-   * Now ask the CA to sign the CSR
-   */
-  let result
-  try {
-    store.log.trace('about ot make CA request')
-    result = await axios.post(
-      'https://ca:9000/1.0/sign',
-      {
-        csr: csr.csr,
-        ott: jwt,
-        notAfter: data.notAfter
-          ? data.notAfter
-          : store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
-      },
-      {
-        httpsAgent: new https.Agent({
-          ca: store.ca.certificate,
-          keepAlive: false,
-          //rejectUnauthorized: false,
-        }),
-      }
-    )
-    store.log.trace('completed CA request')
-  } catch (err) {
-    store.log.debug(err, 'Failed to get certificate signed by CA')
-  }
-
-  /*
-   * If it went well, return certificate and the private key
-   */
-  return result?.data ? { certificate: result.data, key: csr.key } : false
-}
-
 export const templateSettings = (settings) => {
   const tokens = {}
   // Build the tokens object
@@ -338,7 +209,7 @@ export const templateSettings = (settings) => {
     tokens[key] = val
   }
   for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
-    tokens[key] = store.decrypt(val)
+    tokens[key] = utils.decrypt(val)
   }
 
   /*
@@ -353,8 +224,18 @@ export const templateSettings = (settings) => {
   try {
     newSettings = JSON.parse(mustache.render(JSON.stringify(settings), tokens))
   } catch (err) {
-    store.log.warn(err, 'Failed to template out settings')
+    log.warn(err, 'Failed to template out settings')
   }
 
   return newSettings
 }
+
+const generateDataChecksum = (data) => {
+  const keys = utils.getKeys()
+  return hash(JSON.stringify(data) + keys.mrt + keys.cluster + keys.rpwd)
+}
+
+const validateDataChecksum = (data, checksum) => checksum === generateDataChecksum(data)
+
+export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
+export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)

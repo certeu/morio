@@ -1,4 +1,6 @@
 **/*.json
+**/*.sh
+**/*.ldif
 json-loader.mjs
 Dockerfile.dev
 Dockerfile.prod

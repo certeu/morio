@@ -1,0 +1,15 @@
+[
+  {
+    "id": "local.testaccount1722178139692",
+    "about": "This account was created as part of a test",
+    "status": "active",
+    "role": "user",
+    "created_by": "local.test_user",
+    "created_at": "1722178140015",
+    "updated_by": null,
+    "updated_at": null,
+    "last_login": null,
+    "provider": "local",
+    "username": "testaccount1722178139692"
+  }
+]

@@ -1,6 +1,5 @@
-import { keypairAsJwk } from '#shared/crypto'
-// Store
-import { store } from '../lib/store.mjs'
+import { utils } from '../lib/utils.mjs'
+import { statusCodes } from '#shared/errors'
 
 /**
  * This status controller handles the MORIO status endpoint
@@ -17,47 +16,57 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.status = async (req, res) => {
-  /*
-   * Return this in any case
-   */
-  const base = {
-    ...store.info,
-    uptime: (Date.now() - store.start_time) / 1000,
-  }
-
-  if (store.keys?.deployment) base.deployment = store.keys.deployment
-  if (store.keys?.node) base.node = store.keys.node
-
-  /*
-   * Return adding whether MORIO is setup or not
-   */
-  return res
-    .send({
-      ...base,
-      core: store.node,
-      setup: store.config.deployment ? true : false,
-      ephemeral: store.config.deployment ? false : true,
-    })
-    .end()
-}
+Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
 
 /**
- * JWKS
+ * Get reload data / Used by API to bootstrap itself
  *
- * This returns the JWKS info, used for Vault integration
+ * This returns the current status, config, settings, and so on.
+ * Everything required for the API to find its feet.
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.jwks = async (req, res) => {
-  /*
-   * Get JWKS info from public key
-   */
-  const jwks = await keypairAsJwk({ public: store.keys.public })
+Controller.prototype.getReloadData = async (req, res) => {
+  const data = getStatus()
+  if (!utils.isEphemeral()) {
+    data.sanitized_settings = utils.getSanitizedSettings()
+    data.settings = utils.getSettings()
+    data.keys = utils.getKeys()
+  }
+  data.presets = utils.getPresets()
 
-  return res
-    .status(200)
-    .send({ keys: [jwks] })
-    .end()
+  return res.status(200).send(data)
+}
+
+/*
+ * Helper method to construct the status object
+ */
+const getStatus = () => {
+  const data = {
+    info: utils.getInfo(),
+    status: {
+      ...utils.getStatus(true),
+      cluster_leader: {
+        serial: utils.getLeaderSerial(),
+        uuid: utils.getLeaderUuid(),
+      },
+    },
+    nodes: utils.getClusterNodes(),
+    node: {
+      uptime: utils.getUptime(),
+      cluster: utils.isEphemeral() ? undefined : utils.getClusterUuid(),
+      node: utils.isEphemeral() ? undefined : utils.getNodeUuid(),
+      node_serial: utils.isEphemeral() ? undefined : utils.getNodeSerial(),
+      ephemeral: utils.isEphemeral(),
+      ephemeral_uuid: utils.isEphemeral() ? utils.getEphemeralUuid() : undefined,
+      reload_count: utils.getReloadCount(),
+      config_resolved: utils.isConfigResolved(),
+      settings_serial: utils.getSettingsSerial(),
+    },
+  }
+  if (statusCodes[data.status.cluster.code])
+    data.status.cluster.msg = statusCodes[data.status.cluster.code]
+
+  return data
 }

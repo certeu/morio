@@ -1,6 +1,6 @@
+import get from 'lodash.get'
 import set from 'lodash.set'
 import unset from 'lodash.unset'
-import get from 'lodash.get'
 import { logger } from './logger.mjs'
 
 /*
@@ -16,23 +16,21 @@ const avoid = ['set', 'setIfUnset', 'push', 'unset', 'get', 'extend']
  * Constructor for a Store
  *
  * @constructor
- * @param {Array} methods - Any methods to add to the store
+ * @param {Object} log - Logger instance
  * @return {Store} this - The Store instance
  */
-export function Store(methods = []) {
+export function Store(log = false) {
   /*
    * The store is typically extended with a logger
-   * but we will start off with a default one just in case
+   * Either one is passed in, or if not we attached a default one
+   * In each case, it's a non-enumerable property
    */
-  this.log = logger('store', 'info')
-
-  /*
-   * Attache passed-in methods
-   */
-  for (const [path, method] of methods) {
-    if (avoid.indexOf(path) !== -1) this.log.warn(`You cannot overwrite \`store.${path}()\``)
-    else set(this, path, method)
-  }
+  Object.defineProperty(this, 'log', {
+    value: log ? log : logger,
+    configurable: false,
+    enumerable: false,
+    writeable: false,
+  })
 
   return this
 }
@@ -67,8 +65,14 @@ Store.prototype.extend = function (methods) {
  * @return {mixed} value - The value stored under key
  */
 Store.prototype.get = function (path, dflt) {
+  //console.log(`store.get: ${path}`)
   const val = get(this, path, dflt)
-  if (val === undefined) this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
+  /*
+   * Help debugging by logging when a store value is missing
+   * without providing a default faalback
+   */
+  if (val === undefined && dflt === undefined)
+    this.log.warn(`Store.get(key) on key \`${path}\`, which is undefined`)
 
   return val
 }
@@ -96,6 +100,7 @@ Store.prototype.push = function (path, ...values) {
  * @return {Store} this - The Store instance
  */
 Store.prototype.set = function (path, value) {
+  //console.log(`store.set: ${path}, ${JSON.stringify(value)}`)
   if (typeof value === 'undefined')
     this.log.warn(`Store.set(value) on key \`${path}\`, but value is undefined`)
   set(this, path, value)
@@ -129,4 +134,33 @@ Store.prototype.unset = function (path) {
   unset(this, path)
 
   return this
+}
+
+/**
+ * Helper method to push a prefix to a set path
+ *
+ * By 'set path' we mean a path to be passed to the
+ * store.set method, which uses lodash's set under the hood.
+ *
+ * @param {array} prefix - The prefix path to add
+ * @param {string|array} path - The path to prefix either as array or a string in dot notation
+ * @return {array} newPath - The prefixed path
+ */
+export const unshift = (prefix, path) => {
+  if (Array.isArray(path)) return [...prefix, ...path]
+  else return [...prefix, ...path.split('.')]
+}
+
+/**
+ * Set key at path to value, but only if it's not currently set
+ *
+ * @param {object} obj - The object to update
+ * @param {string|array} path - Path to the key
+ * @param {mixed} value - The value to set
+ * @return {object} obj - The mutated object
+ */
+export const setIfUnset = (obj, path, value) => {
+  if (typeof get(obj, path) === 'undefined') return set(obj, path, value)
+
+  return obj
 }

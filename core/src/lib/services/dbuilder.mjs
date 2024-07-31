@@ -9,20 +9,20 @@ export const service = {
      *
      * We simply return the passed in value here
      */
-    wanted: ({ onDemandBuild = false }) => onDemandBuild,
+    wanted: (hookParams) => (hookParams?.onDemandBuild ? true : false),
     /*
-     * This is an epehemeral container
+     * This is an ephemeral container
      * It should only be recreated/restarted if this is an on-demand build request
      */
-    recreateContainer: ({ onDemandBuild = false }) => onDemandBuild,
-    restartContainer: ({ onDemandBuild = false }) => onDemandBuild,
+    recreate: (hookParams) => (hookParams?.onDemandBuild ? true : false),
+    restart: (hookParams) => (hookParams?.onDemandBuild ? true : false),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * We need to make sure the client code is in the right place on the host OS
      * so that it will be mapped and available in the builder.
      */
-    preCreate: async () => {
+    precreate: async () => {
       /*
        * Recursively copy the client code in the data folder
        */

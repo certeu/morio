@@ -1,15 +1,13 @@
-// REST client for API
-import { restClient } from '#shared/network'
+import { mkdir } from '#shared/fs'
+import { restClient, testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
-import { testUrl } from '#shared/network'
-// Default hooks
+import { ensureServiceCertificate } from '#lib/tls'
 import {
-  defaultWantedHook,
-  defaultRecreateContainerHook,
-  defaultRestartContainerHook,
+  defaultServiceWantedHook,
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
 } from './index.mjs'
-// Store
-import { store } from '../store.mjs'
+import { log, utils } from '../utils.mjs'
 
 const dbClient = restClient(`http://db:4001`)
 
@@ -20,41 +18,66 @@ export const service = {
   name: 'db',
   hooks: {
     /*
+     * Lifecycle hook to determine the service status (runs every heartbeat)
+     */
+    heartbeat: async () => {
+      const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
+        returnAs: 'json',
+      })
+
+      const status = result && result.indexOf('node ok') ? 0 : 1
+      utils.setServiceStatus('db', status)
+
+      return status === 0 ? true : false
+    },
+    /*
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: defaultWantedHook,
+    wanted: defaultServiceWantedHook,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * We make sure the `/etc/morio/db` and `/morio/data/db` folders exist on this node
+     */
+    precreate: ensureLocalPrerequisites,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('db', hookProps),
+    recreate: () => defaultRecreateServiceHook('db'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('db', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('db', hookParams),
     /**
-     * Lifecycle hook for anything to be done right after starting the container
+     * Lifecycle hook for anything to be done prior to starting the container
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    postStart: async () => {
+    prestart: async () => await ensureServiceCertificate('db'),
+    /**
+     * Lifecycle hook for anything to be done after starting the container
+     *
+     * @return {boolean} success - Indicates lifecycle hook success
+     */
+    poststart: async () => {
       /*
        * Make sure database is up
        */
       const up = await attempt({
-        every: 2,
+        every: 5,
         timeout: 60,
         run: async () => await isDbUp(),
         onFailedAttempt: (s) =>
-          store.log.debug(`Waited ${s} seconds for databse, will continue waiting.`),
+          log.debug(`Waited ${s} seconds for database, will continue waiting.`),
       })
-      if (up) store.log.debug(`Database is up.`)
+      if (up) log.debug(`Database is up.`)
       else {
-        store.log.warn(`Database did not come up before timeout. Not creating tables.`)
+        log.warn(`Database did not come up before timeout. Not creating tables.`)
         return
       }
 
@@ -69,28 +92,36 @@ export const service = {
   },
 }
 
+async function ensureLocalPrerequisites() {
+  for (const dir of ['/etc/morio/db', '/morio/data/db']) await mkdir(dir)
+
+  return true
+}
+
 /**
  * This method checks whether or not the database is up
  *
  * @return {bool} result - True if the database is up, false if not
  */
 const isDbUp = async () => {
-  const result = await testUrl(`http://db_${store.config.core.node_nr}:4001/readyz`, {
+  const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
     ignoreCertificate: true,
-    returnAs: 'json',
+    // This endpoint does not return JSON
+    returnAs: 'text',
   })
 
-  return result ? true : false
+  return result && result.includes('node ok') ? true : false
 }
 
 /**
  * Helper method to create database tables
  */
 const ensureTablesExist = async () => {
-  for (const [table, q] of Object.entries(store.config?.services?.db?.schema || {})) {
+  for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema || {})) {
+    log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
-    if (result[1].results.error && result[1].results.error.includes('already exists')) {
-      store.log.trace(`Table ${table} already exists`)
-    } else if (result[0] === 200) store.log.debug(`Table ${table} created`)
+    if (result[1]?.results?.[0]?.error && result[1].results[0].error.includes('already exists')) {
+      log.debug(`Table ${table} already existed`)
+    } else if (result[0] === 200) log.debug(`Table ${table} created`)
   }
 }

@@ -18,7 +18,7 @@ import {
   WarningIcon,
 } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
-import { TimeAgoBrief } from 'components/time-ago.mjs'
+import { TimeAgoBrief } from 'components/time.mjs'
 import TimeAgo from 'react-timeago'
 import { Tab, Tabs } from 'components/tabs.mjs'
 

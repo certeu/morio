@@ -1,11 +1,13 @@
+import { generateTraefikConfig } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */
-  const PROD = store.inProduction()
+  const PROD = utils.isProduction()
 
   return {
     /**
@@ -20,28 +22,68 @@ export const resolveServiceConfiguration = (store) => {
       // Image to run
       image: 'rqlite/rqlite',
       // Image tag (version) to run
-      tag: '8.24.2',
+      tag: '8.26.7',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
-      network: store.getPreset('MORIO_NETWORK'),
+      network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export (none)
-      ports: [],
+      ports: [
+        `${utils.getPreset('MORIO_DB_HTTP_PORT')}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+        `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+      ],
       // Environment
       environment: {
         // Node ID
-        NODE_ID: store.config?.core?.node_nr || 1,
+        NODE_ID: utils.getNodeSerial(),
       },
       // Volumes
       volumes: PROD
         ? [
-            `${store.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
-            `${store.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
           ]
         : [
-            `${store.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/morio/moriod/db`,
-            `${store.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
           ],
+      // Command
+      command: utils.isDistributed()
+        ? [
+            `/bin/rqlited`,
+            `-node-id`,
+            String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
+            `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
+            `-node-cert=/etc/rqlite/tls-cert.pem`,
+            `-node-key=/etc/rqlite/tls-key.pem`,
+            `-node-verify-client`,
+            `-bootstrap-expect`,
+            String(utils.getBrokerCount()),
+            `-join`,
+            utils
+              .getBrokerFqdns()
+              .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`)
+              .join(','),
+            'data',
+          ]
+        : false,
+    },
+    /*
+     * Traefik (proxy) configuration for the API service
+     */
+    traefik: {
+      db: generateTraefikConfig(utils, {
+        service: 'db',
+        prefixes: ['/-/db/status', '/-/db/nodes', '/-/db/readyz'],
+        priority: 666,
+      })
+        .set('http.middlewares.db-prefix.replacepathregex.regex', '^/-/db/(.*)')
+        .set('http.middlewares.db-prefix.replacepathregex.replacement', '/$1')
+        .set('http.routers.db.middlewares', ['db-prefix@file']),
     },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
@@ -56,27 +98,27 @@ export const resolveServiceConfiguration = (store) => {
         invite TEXT,
         status TEXT NOT NULL,
         role TEXT NOT NULL,
-        createdBy TEXT,
-        createdAt TEXT,
-        updatedBy TEXT,
-        updatedAt TEXT,
+        created_by TEXT,
+        created_at TEXT,
+        updated_by TEXT,
+        updated_at TEXT,
         password TEXT,
         mfa TEXT,
-        scratchCodes TEXT,
-        lastLogin TEXT
+        scratch_codes TEXT,
+        last_login TEXT
       )`,
       apikeys: `CREATE TABLE apikeys (
         id TEXT NOT NULL PRIMARY KEY,
         name TEXT,
         status TEXT NOT NULL,
         role TEXT NOT NULL,
-        createdBy TEXT,
-        createdAt DATETIME,
-        expiresAt DATETIME,
-        updatedBy TEXT,
-        updatedAt DATETIME,
+        created_by TEXT,
+        created_at DATETIME,
+        expires_at DATETIME,
+        updated_by TEXT,
+        updated_at DATETIME,
         secret TEXT,
-        lastLogin TEXT
+        last_login TEXT
       )`,
     },
   }

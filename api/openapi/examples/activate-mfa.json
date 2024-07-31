@@ -1,0 +1,16 @@
+{
+  "req": {
+    "username": "testAccount1722234633560",
+    "invite": "055319ca21a36ac7b7a008694bb48cf6b882242a5f78b97d",
+    "provider": "local",
+    "token": "171589",
+    "password": "kAsflASD8900)()lmn#LE$Q0-"
+  },
+  "res": {
+    "scratch_codes": [
+      "06858bad92373bfd4746b6128c5ab769f7b12a652101eeec1741e4dc7432fe99",
+      "d21da1e5e7cf70b1044f11e06a39135fab248f7f4d849d964c81a7e9e72d498f",
+      "7c68b780d1c77d17d292780acc44564e374262c58193daf867c6011cce4a9bab"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { Controller } from '#controllers/apikeys'
-import { store } from '../lib/store.mjs'
+import { rbac } from '../middleware.mjs'
 
 const Apikeys = new Controller()
 
@@ -9,25 +9,23 @@ const Apikeys = new Controller()
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.prefix
+  /*
+   * List API keys
+   */
+  app.get(`/apikeys`, rbac.user, Apikeys.list)
 
   /*
    * Create an API key
    */
-  app.post(`${PREFIX}/apikey`, Apikeys.create)
-
-  /*
-   * List API keys
-   */
-  app.get(`${PREFIX}/apikeys`, Apikeys.list)
+  app.post(`/apikey`, rbac.user, Apikeys.create)
 
   /*
    * Update an API key
    */
-  app.patch(`${PREFIX}/apikeys/:key/:action`, Apikeys.update)
+  app.patch(`/apikeys/:key/:action`, rbac.user, Apikeys.update)
 
   /*
-   * Remove an API key
+   * Delete an API key
    */
-  app.delete(`${PREFIX}/apikeys/:key`, Apikeys.remove)
+  app.delete(`/apikeys/:key`, rbac.user, Apikeys.delete)
 }

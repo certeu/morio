@@ -1,9 +1,8 @@
-// Load the store
-import { store } from './store.mjs'
+import { log } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 // Load helper methods from accounts
-import { clean, asTime, fullId, asString, asStatus, asRole, asJson, fromJson } from './account.mjs'
+import { clean, asTime, asString, asStatus, asRole, asJson, fromJson } from './account.mjs'
 
 /*
  * This maps the fields to a method to format the field
@@ -13,14 +12,30 @@ const fields = {
   name: asString,
   status: asStatus,
   role: asRole,
-  createdBy: clean,
-  createdAt: asTime,
-  expiresAt: asTime,
-  updatedBy: clean,
-  updatedAt: asTime,
+  created_by: clean,
+  created_at: asTime,
+  expires_at: asTime,
+  updated_by: clean,
+  updated_at: asTime,
   secret: asJson,
-  lastLogin: asTime,
+  last_login: asTime,
 }
+
+/*
+ * Select everything but the secret (this is what we return)
+ */
+const nonSecretFields = [
+  'id',
+  'name',
+  'status',
+  'role',
+  'created_by',
+  'created_at',
+  'expires_at',
+  'updated_by',
+  'updated_at',
+  'last_login',
+].join(',')
 
 /*
  * This maps the fields to a method to unserialize the value
@@ -33,7 +48,7 @@ const values = {
  * Helper method to load an apikey (or rather its data)
  *
  * @param {string} id - The unique id (the key)
- * @return {object} data - The data stored for the API key
+ * @return {object} data - The data saved for the API key
  */
 export const loadApikey = async (id) => {
   const [status, result] = await db.read(`SELECT * FROM apikeys WHERE id=:id`, {
@@ -46,7 +61,7 @@ export const loadApikey = async (id) => {
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
   else {
-    store.log.warn(`Found more than one apikey in loadApikeys. This is unexpected.`)
+    log.warn(`Found more than one apikey in loadApikeys. This is unexpected.`)
     return false
   }
 }
@@ -54,26 +69,29 @@ export const loadApikey = async (id) => {
 /**
  * Helper method to load API keys for a given account
  *
- * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
- * @return {object} keys - The API keys  stored for the account
+ * @param {string} id - The unique id (in provider.username format)
+ * @return {object} keys - The API keys saved for the account
  */
-export const loadAccountApikeys = async (provider, id) =>
-  await db.read(`SELECT id FROM apikeys WHERE createdBy=:username`, {
-    id: fields.id(fullId(provider, id)),
-  })
+export const loadAccountApikeys = async (id) => {
+  const [status, result] = await db.read(
+    `SELECT ${nonSecretFields} FROM apikeys WHERE created_by=:id`,
+    { id: fields.id(id) }
+  )
+
+  return status === 200 ? apikeysAsList(result) : false
+}
 
 /**
  * Helper method to create an API key
  *
- * @param {object} data - The data to store for the API key
+ * @param {object} data - The data to save for the API key
  */
 export const saveApikey = async (id = false, data) => {
   /*
    * We need at least an ID
    */
   if (!id) {
-    store.log.warn('saveApikey was called witout an id')
+    log.debug('saveApikey was called witout an id')
     return false
   }
 
@@ -99,16 +117,16 @@ export const saveApikey = async (id = false, data) => {
 }
 
 /**
- * Helper method to remove an API key
+ * Helper method to delete an API key
  *
  * @param {string} id - The apikey ID (key)
  */
-export const removeApikey = async (id = false) => {
+export const deleteApikey = async (id = false) => {
   /*
    * We need at least an ID
    */
   if (!id) {
-    store.log.warn('removeApikey was called witout an id')
+    log.warn('deleteApikey was called witout an id')
     return false
   }
 
@@ -126,18 +144,18 @@ export const removeApikey = async (id = false) => {
  * @return {object} keys - The API keys
  */
 export const listApikeys = async () => {
-  const query = `SELECT id, name, status, role, createdBy, createdAt, updatedBy, updatedAt, lastLogin FROM apikeys`
+  const query = `SELECT id, name, status, role, created_by, created_at, updated_by, updated_at, last_login FROM apikeys`
   const [status, result] = await db.read(query)
 
   return status === 200 ? apikeysAsList(result) : false
 }
 
 /**
- * Helper method to store the last login time in the apikey data
+ * Helper method to save the last login time in the apikey data
  *
  * @param {string} id - The id of the apikey (the key)
  */
-export const storeLastLoginTime = async (id) => await saveApikey(id, { lastLogin: asTime() })
+export const updateLastLoginTime = async (id) => await saveApikey(id, { last_login: asTime() })
 
 /**
  * Helper method to parse results into an array of objects

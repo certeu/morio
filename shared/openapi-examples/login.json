@@ -1,0 +1,82 @@
+{
+  "req": {
+    "apikey": {
+      "value": {
+        "provider": "apikey",
+        "data": {
+          "username": "724098e3-930a-4c93-9fac-9a55decfb735",
+          "password": "c0502771315e8239462adcccab7b6867e6d2742e3675c7aacac369f43a8f27b836292009b6badb7bc7a293b10e3275d2"
+        }
+      }
+    },
+    "ldap": {
+      "value": {
+        "provider": "ldap",
+        "data": {
+          "username": "nidhubhs",
+          "password": "VEePvJuorS0NZC43Ta1",
+          "role": "user"
+        }
+      }
+    },
+    "local": {
+      "value": {
+        "provider": "local",
+        "data": {
+          "username": "testAccount1722068362387",
+          "password": "62adcccab7b6867e6d2",
+          "role": "manager",
+          "token": "234923"
+        }
+      }
+    },
+    "mrt": {
+      "value": {
+        "provider": "mrt",
+        "data": {
+          "mrt": "mrt.14887e49a38949f0d82915f4becdf7d700e3dcfacf64fcec00681a5f74b1a600",
+          "role": "engineer"
+        }
+      }
+    }
+  },
+  "res": {
+    "apikey": {
+      "jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYXBpa2V5LjVlNTg1OGRiLWVlZjItNGM1YS05OGFhLTFlZDczM2FjODhhZSIsInJvbGUiOiJ1c2VyIiwicHJvdmlkZXIiOiJhcGlrZXkiLCJub2RlIjoiMzliMGI1ZmQtNjY0OC00MWY4LWIzYjktZGY5NmM1ZDExNTc5IiwiY2x1c3RlciI6Ijg2MDI5MDZmLTU0MzctNGNjZS1iMTUwLTdjMzM4N2RhMzZmYSIsImlhdCI6MTcyMjIzNjk5NiwibmJmIjoxNzIyMjM2OTk2LCJleHAiOjE3MjIyNTEzOTYsImF1ZCI6Im1vcmlvIiwiaXNzIjoibW9yaW8iLCJzdWIiOiJtb3JpbyJ9.LLx3wjEvAi4FdggXrkxdNTps3G50r4vhBcQF2FPEaJz9sYCxlewFKarPpmWvBu5JbkjpiZ7Nzv8rFGtNQBGt96Y4eZkPuqQ4nr6DaMp7UgoDcLqsV-2jlmLStHsHk3Bbd2Sm1eyMQvsdBeebd2fz4EGgziYd2uW4rvSGHSeTAGOymoWXilAI5nrOpiWczcIVnIfyhgdtSNwFc7MowiBGJGv0xELJQrWST3QZx_G6VNLYwJkPXaBna2dfC2UQ5nsr4RVRjaGzIVfmWfnHp7fZo-xjV_-QciXZUJcROoWjCdroDt_BDjZdWe8j8-VsyCyXAJ9cnsntFgknFRH2CYZb5jYlH2_gBSk-PIYSsTbAOjmPK0AxiUHJnRonMgP5Fdc1dF_GowAdlsBxyKffSN3z6tZbH3DvELmtT27O8tnZYnEKAFgAod4f_fXphiIcssEt-kAbhs7HsJp4rDI5l3Ur-HkxvjOuzPeNmishqjgqWHwFwH4fU34Hkdk9Fp7KIWRXbT_sV2bzuj7GwVlndnCGsCXU99vwwVBMTh-Yw61FxDcC0tHbHp72A9tAKtUfBaR8L0gbnnRbik5Z_dnN6kx_rgVA5D7rNCfj5j4vn4cyeCklywH51ApQtTr_EMddOJTxulOnktSbCwpvioPY5hjgQMHsH8vbh4__ja2aIXt89lc",
+      "data": {
+        "user": "apikey.5e5858db-eef2-4c5a-98aa-1ed733ac88ae",
+        "role": "user",
+        "provider": "apikey"
+      }
+    },
+    "ldap": {
+      "jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoidXNlcjIiLCJyb2xlIjoibWFuYWdlciIsImhpZ2hlc3Rfcm9sZSI6Im1hbmFnZXIiLCJwcm92aWRlciI6ImxkYXAiLCJub2RlIjoiYzljNGE5NTMtMTlmMi00YzFmLThkYTYtODk5ZGQ0MzEyMjdlIiwiY2x1c3RlciI6IjBmZjBkYzY2LTA3ZDQtNDAwYi04NWM2LTJiMDYwZmU3ZjQ2NiIsImlhdCI6MTcyMjIzNzM1MCwibmJmIjoxNzIyMjM3MzUwLCJleHAiOjE3MjIyNTE3NTAsImF1ZCI6Im1vcmlvIiwiaXNzIjoibW9yaW8iLCJzdWIiOiJtb3JpbyJ9.Z856Wb_D_I4qFXaGADT65XqrK-uCAwcjkpFYYtApWybjTErPJSKYTuILKKNxwfGBrDTn7VSf8nhieU47JmDYOSc7a5XbRCUuFuJ2SzK7cOxbsF6VtN3MSrykSkM17N42rB3qlXu-X4wY4eAXsvBBRG6AQI8Wo_ejMcIl239N01fdvcmiR-6EAfW1072BPE5Sl_zdx81Fw4QPKwjoIMKK-pjZJSjtTAKoLyZxJlRJnnmrXs7cGiVmvjgzz_jV--I6y9kd8ALFz4Ci8fXgRWc810Iiz_QAPz-j9AEKjvcnKY7tOixpS5AAnDtuhIQD2tvruCFfnHsUwlPxN1zgleFd9puaiVrTKWOVdvDVucohihBVk13f-jeBML1oU3j5arDowchkJnGkALEa6wTBd53qYI5QUT8_rQR-bhmtPQePMqjr1rryYNULJciQs6-Ie9vRiYYbs_aDJgCf-TDVffsYrccfpgvt_c6WAuhxLqCilVRtkcx7cJxoCaWu72Z_UTXMj_-dkj-Kv3J3Czd7xwjha_lOKazN1eR5ReqSGwo0xD0QXCdlvFM0MQjO42p_3fZdMY41hSz3IyHuj7Dyv9xLMYf_JA2W09TOP4PjYwqXUUZDDAElE7BTjtMpXR4zci21r4fsC6mckhAZL9P17b-LHA7M-H5mhmoKG4ExCbcpJ0w",
+      "data": {
+        "user": "user2",
+        "role": "manager",
+        "highest_role": "manager",
+        "provider": "ldap"
+      }
+    },
+    "local": {
+      "jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibG9jYWwudGVzdEFjY291bnQxNzIyMjM2OTIyMDQ4Iiwicm9sZSI6InVzZXIiLCJhdmFpbGFibGVfcm9sZXMiOlsidXNlciJdLCJoaWdoZXN0X3JvbGUiOiJ1c2VyIiwicHJvdmlkZXIiOiJsb2NhbCIsIm5vZGUiOiIzOWIwYjVmZC02NjQ4LTQxZjgtYjNiOS1kZjk2YzVkMTE1NzkiLCJjbHVzdGVyIjoiODYwMjkwNmYtNTQzNy00Y2NlLWIxNTAtN2MzMzg3ZGEzNmZhIiwiaWF0IjoxNzIyMjM2OTIzLCJuYmYiOjE3MjIyMzY5MjMsImV4cCI6MTcyMjI1MTMyMywiYXVkIjoibW9yaW8iLCJpc3MiOiJtb3JpbyIsInN1YiI6Im1vcmlvIn0.sij21XpVw2i6SjTZtms9Sl4WsTYh6wgcr0c79x7-6OQPaWam-Ne8t_mzcI5Opa8qOjdFBDBoRHjairzyURpQ-p0BmrDANp4gw17lAqvmgGySwTC-T0yqdRpvZLV85ZhSps3XqiTuWObOVztd3MOLc6xbbp-SEIk6VimzDWcSQbInDfTCbbx4OivWjIcpA6XGfVcXWWtZiJz7y8E8E2jrckV3jkqRUZuhZ_HIcOyh1LSKb4WWWybCcu-D6hC1VipX_oy2Q8227V-VY1Kgryxe-F8xckgBkIoFjdejVsz4UpkvWXsYEJEZjgKLC0zZEZJVaEJC3w6QpNj-nc5d5dgF0TDq_6T0GvTaoN_UZGBgYioGTd0wXHpw0Trzc0VQrN5O3yBYjnhsbwSWlhHlClSAbV_CCy2qUAyDOrXBGmOlIYN8YZ_eJe-wIYioISd9dd0h5rbTSjtMqpX8fDoRZv0jFraVDOk0eMwiGM_TKhsFfR3sx0samCt7k3nCTseLeufCxRUkBZmeoG7o0NrZ0tbTrUoS9XJX_PDK3v9u-Z1LqjmJe7nERG55gXQer-_a5yWn-LKWooAYFW3iLwZEpvAxQF_VtW2xoCkrj5BD9UOnotj6emHmK76oURrSd3waQ_EWmnwf86dSXPQiljp41jHt95V7jyN5P4my-ogotTKxoGA",
+      "data": {
+        "user": "local.testAccount1722236922048",
+        "role": "user",
+        "available_roles": ["user"],
+        "highest_role": "user",
+        "provider": "local"
+      }
+    },
+    "mrt": {
+      "jwt": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoicm9vdCIsInJvbGUiOiJ1c2VyIiwiYXZhaWxhYmxlX3JvbGVzIjpbInVzZXIiLCJtYW5hZ2VyIiwib3BlcmF0b3IiLCJlbmdpbmVlciIsInJvb3QiXSwiaGlnaGVzdF9yb2xlIjoicm9vdCIsInByb3ZpZGVyIjoibXJ0Iiwibm9kZSI6IjM5YjBiNWZkLTY2NDgtNDFmOC1iM2I5LWRmOTZjNWQxMTU3OSIsImNsdXN0ZXIiOiI4NjAyOTA2Zi01NDM3LTRjY2UtYjE1MC03YzMzODdkYTM2ZmEiLCJpYXQiOjE3MjIyMzcwNTgsIm5iZiI6MTcyMjIzNzA1OCwiZXhwIjoxNzIyMjUxNDU4LCJhdWQiOiJtb3JpbyIsImlzcyI6Im1vcmlvIiwic3ViIjoibW9yaW8ifQ.Il7nNLfxv6g-m1ZrqLWgdmdFnv_rnOFnAxE40tqO_3KcQeckwqv8pw0vPtmNKCkbgXgIMqKOoFnw39bOIy8pZJkm-tiA5mC8bn8i-aKPNH8B2F1puNj2k902ah27gOE9MVPnCGi_KaZgglJ3A34BjPqodQm0pj9xjx403mYOHCpD6CkPKqClRWXpDli_Vaco0TAakZTUyM85QfgADetNKvNLj9MuosZeXjWMnH_4jzMuNi6zkY1h_kjV4C5XflCh5kY6vrH9esPAKeUAemxzMZypF2bcaHqnoPnKK0J3kePHaREwJ_bOe9CMuDMwOMOIXmX0xFBJxYgD7bd4vvy4PyespdGsBYNqPWzS1iyx-JfLJ33xVKizBGvBLNF3HQnH7GFdfs3P9VpJCGsc6xkLckIFiVkUhlYdYXz91wuS_RzvHzzdJpd5JJWEa642DnF5x0YpeOX-gCG0u8EWMGzvvSmC8ZWK8urpNAmSnr_lc0JeTOD5_wiq-4kiiwujG-FmOLHLWK5Gl5qJZNcEozqmjjolJaWjDvZ845LGpUfMtq1Tx0cZWazckPAZBFrcvhF6yztNpsAzaG454Y7zlT0OrirVYXWtsciMAAsAVRO-56y_0SCkgSKOtLMoJevjbwX4RKbJtjCL6jrT0lfKnRP0RBxEJyVMTb1jSUF9mQjEVMw",
+      "data": {
+        "user": "root",
+        "role": "user",
+        "available_roles": ["user", "manager", "operator", "engineer", "root"],
+        "highest_role": "root",
+        "provider": "mrt"
+      }
+    }
+  }
+}

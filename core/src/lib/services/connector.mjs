@@ -1,9 +1,9 @@
 import { readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
 import { extname, basename } from 'node:path'
 // Default hooks
-import { defaultRecreateContainerHook, defaultRestartContainerHook } from './index.mjs'
-// Store
-import { store } from '../store.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
+// log & utils
+import { log, utils } from '../utils.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -19,79 +19,52 @@ export const service = {
      * @return {boolean} wanted - Wanted or not
      */
     wanted: async () => {
-      if (store.config?.connector?.pipelines) {
-        if (
-          Object.values(store.config.connector.pipelines).filter((pipe) => !pipe.disabled).length >
-          0
-        )
-          return true
-      }
+      const pipelines = utils.getSettings('connector.pipelines', false)
 
-      return false
+      return pipelines && Object.values(pipelines).filter((pipe) => !pipe.disabled).length > 0
+        ? true
+        : false
     },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreateContainer: (hookProps) => defaultRecreateContainerHook('connector', hookProps),
+    recreate: () => defaultRecreateServiceHook('connector'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restartContainer: (hookProps) => defaultRestartContainerHook('connector', hookProps),
+    restart: (hookParams) => defaultRestartServiceHook('connector', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
      * Write out the logstash.yml file as it will be volume-mapped,
      * so we need to write it to disk first so it's available
      */
-    preCreate: async () => {
-      /*
-       * Write out logstash.yml based on the settings
-       */
-      const file = '/etc/morio/connector/logstash.yml'
-      store.log.debug('Connector: Creating config file')
-      await writeYamlFile(file, store.config.services.connector.logstash, store.log, 0o644)
-
-      /*
-       * Make sure the data directory exists, and is writable
-       */
-      const uid = store.getPreset('MORIO_CONNECTOR_UID')
-      await mkdir('/morio/data/connector')
-      await chown('/morio/data/connector', uid, uid)
-
-      /*
-       * Make sure the pipelines directory exists, and is writable
-       */
-      await mkdir('/etc/morio/connector/pipelines')
-      await chown('/etc/morio/connector/pipelines', uid, uid)
-
-      /*
-       * Make sure pipelines.yml file exists, so it can be mounted
-       */
-      await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, store.log, 0o644)
-
-      return true
-    },
+    precreate: ensureLocalPrerequisites,
     /**
-     * Lifecycle hook for anything to be done prior to starting the container
+     * Lifecycle hook for anything to be done prior to creating the container
+     *
+     * Write out the logstash.yml file as it will be volume-mapped,
+     * so we need to write it to disk first so it's available
      */
-    preStart: async () => {
+    predefer: ensureLocalPrerequisites,
+    prestart: async () => {
       /*
        * Need to write out pipelines, but also remove any that
        * may no longer be there, so we first need to load all
        * pipelines that are on disk
        */
       const currentPipelines = await loadPipelinesFromDisk()
-      const wantedPipelines = Object.keys(
-        store.get('store.settings.connector.pipelines', {})
-      ).filter((id) => {
-        if (!store.settings?.connector?.pipelines?.[id]) return false
-        if (store.settings?.connector?.pipelines?.[id].disabled) return false
-        return true
-      })
+      const wantedPipelines = Object.keys(utils.getSettings('connector.pipelines', {})).filter(
+        (id) => {
+          if (!utils.getSettings(['connector', 'pipelines', id], false)) return false
+          if (utils.getSettings(['connector', 'pipelines', id, 'disabled'], false)) return false
+          return true
+        }
+      )
 
       await createWantedPipelines(wantedPipelines)
       await removeUnwantedPipelines(currentPipelines, wantedPipelines)
@@ -99,6 +72,38 @@ export const service = {
       return true
     },
   },
+}
+
+async function ensureLocalPrerequisites() {
+  /*
+   * Write out logstash.yml based on the settings
+   */
+  const config = utils.getMorioServiceConfig('connector', false)
+  if (config) {
+    const file = '/etc/morio/connector/logstash.yml'
+    log.debug('Connector: Creating config file')
+    await writeYamlFile(file, config.logstash, log, 0o644)
+  }
+
+  /*
+   * Make sure the data directory exists, and is writable
+   */
+  const uid = utils.getPreset('MORIO_CONNECTOR_UID')
+  await mkdir('/morio/data/connector')
+  await chown('/morio/data/connector', uid, uid)
+
+  /*
+   * Make sure the pipelines directory exists, and is writable
+   */
+  await mkdir('/etc/morio/connector/pipelines')
+  await chown('/etc/morio/connector/pipelines', uid, uid)
+
+  /*
+   * Make sure pipelines.yml file exists, so it can be mounted
+   */
+  await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
+
+  return true
 }
 
 /**
@@ -127,18 +132,21 @@ const pipelineFilename = (id) => `${id}.config`
 const createWantedPipelines = async (wantedPipelines) => {
   const pipelines = []
   for (const id of wantedPipelines) {
-    const config = generatePipelineConfiguration(store.settings.connector.pipelines[id], id)
+    const config = generatePipelineConfiguration(
+      utils.getSettings(['connector', 'pipelines', id]),
+      id
+    )
     if (config) {
       const file = pipelineFilename(id)
-      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, store.log)
-      store.log.debug(`Created connector pipeline ${id}`)
+      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, log)
+      log.debug(`Created connector pipeline ${id}`)
       pipelines.push({
         'pipeline.id': id,
         'path.config': `/usr/share/logstash/config/pipeline/${file}`,
       })
     }
   }
-  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, store.log)
+  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, log)
 }
 
 /**
@@ -153,7 +161,7 @@ const createWantedPipelines = async (wantedPipelines) => {
 const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
-      store.log.debug(`Removing pipeline: ${id}`)
+      log.debug(`Removing pipeline: ${id}`)
       await rm(`/etc/morio/connector/pipelines/${id}.config`)
     }
   }
@@ -167,10 +175,10 @@ const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
  * @return {string} config - The generated pipeline configuration
  */
 const generatePipelineConfiguration = (pipeline, pipelineId) => {
-  const input = store.settings.connector?.inputs?.[pipeline.input.id] || false
-  const output = store.settings.connector?.outputs?.[pipeline.output.id] || false
-
-  if (!input || !output) return false
+  const input = utils.getSettings(['connector', 'inputs', pipeline.input.id], false)
+  if (!input) return false
+  const output = utils.getSettings(['connector', 'outputs', pipeline.output.id], false)
+  if (!output) return false
 
   return `# This pipeline configuration is auto-generated by Morio core
 # Any changes you make to this file will be overwritten
@@ -256,7 +264,10 @@ input {
   kafka {
     codec => json
     topics => ["${pipeline.input.topic}"]
-    bootstrap_servers => "${store.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`)
+      .join(',')}"
     client_id => "morio_connector_input"
     id => "${pipelineId}_${xput.id}"
   }
@@ -284,7 +295,7 @@ output {
     cloud_id => "${xput.cloud_id}"`
       else
         config += `
-    # FIXME: Handle non-cloud settings`
+    # TODO: Handle non-cloud settings`
 
       return (
         config +
@@ -303,7 +314,10 @@ output {
   kafka {
     codec => json
     topic_id => "${pipeline.output.topic}"
-    bootstrap_servers => "${store.settings.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`).join(',')}"
+    bootstrap_servers => "${utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`)
+      .join(',')}"
     client_id => "morio_connector_output"
     id => "${pipelineId}_${xput.id}"
   }

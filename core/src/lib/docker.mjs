@@ -1,33 +1,43 @@
 import { Buffer } from 'node:buffer'
 import { getPreset } from '#config'
 import Docker from 'dockerode'
-// Store
-import { store } from './store.mjs'
+import { log, utils } from './utils.mjs'
 
 /**
  * This is the docker client as provided by dockerode
- * We cannot use the getPreset attached to store here as this runs
+ * We cannot use the getPreset attached to utils here as this runs
  * before core is configured.
  */
 export const docker = new Docker({ socketPath: getPreset('MORIO_DOCKER_SOCKET') })
-export const network = getPreset('MORIO_NETWORK')
+
+/*
+ * This is the list of API commands we cache
+ */
+const apiCache = {
+  stale: 15, // Amount of seconds before the cache is considered stale
+  api: [
+    // Docker API commands to cache
+    'listImages',
+  ],
+}
 
 /**
  * Creates a container for a morio service
  *
- * @param {string} name = Name of the service
- * @param {object} containerConfig = The container config to pass to the Docker API
+ * @param {string} serviceName = Name of the service
+ * @param {object} config = The container config to pass to the Docker API
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-export const createDockerContainer = async (name, containerConfig) => {
-  store.log.stabug(`Creating container: ${name}`)
-  const [success, result] = await runDockerApiCommand('createContainer', containerConfig, true)
+export const createDockerContainer = async (serviceName, config) => {
+  log.debug(`[${serviceName}] Creating container`)
+  const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
-    store.log.debug(`Service created: ${name}`)
+    log.debug(`[${serviceName}] Container created`)
     return result.id
-  }
-
-  if (result?.json?.message && result.json.message.includes('is already in use by container')) {
+  } else if (
+    result?.json?.message &&
+    result.json.message.includes('is already in use by container')
+  ) {
     /*
      * Container already exists, so let's just recreate it
      */
@@ -38,18 +48,55 @@ export const createDockerContainer = async (name, containerConfig) => {
      */
     const [removed] = await runContainerApiCommand(rid, 'remove', { force: true, v: true })
     if (removed) {
-      store.log.debug(`Removed existing container: ${name}`)
-      const [ok, created] = await runDockerApiCommand('createContainer', containerConfig, true)
+      log.debug(`[${serviceName}] Removed existing container`)
+      const [ok, created] = await runDockerApiCommand('createContainer', config, true)
       if (ok) {
-        store.log.debug(`Service recreated: ${name}`)
+        log.debug(`[${serviceName}] Container recreated`)
         return created.id
-      } else store.log.warn(`Failed to recreate container ${name}`)
-    } else store.log.warn(`Failed to remove container ${name} - Not creating new container`)
-  } else store.log.warn(result, `Failed to create container: ${name}`)
+      } else log.warn(`[${serviceName}] Failed to recreate container`)
+    } else log.warn(`[${serviceName}] Failed to remove container - Not creating new container`)
+  } else log.warn(`[${serviceName}] Failed to create service container`)
 
   return false
 }
 
+/**
+ * Gets a service id, based on its name
+ */
+export const getServiceId = async (serviceName) => {
+  /*
+   * Update state with currently running services
+   */
+  await updateRunningServicesState()
+
+  /*
+   * Make sure to log a warning if the Id is not found as that should not happen
+   */
+  const id = utils.getServiceState(serviceName)?.Id || false
+  if (!id) log.warn(`Running getServiceId failed for service ${serviceName}`)
+
+  return id
+}
+
+/**
+ * Stops a service. which just means it stops a container
+ */
+export const stopService = async (serviceName) => {
+  const id = await getServiceId(serviceName)
+  let result
+  try {
+    result = await runContainerApiCommand(id, 'stop', {}, true)
+  } catch (err) {
+    log.warn(err, `Failed to stop service: ${serviceName}`)
+  }
+
+  return result
+}
+
+/**
+ * Restarts a service. which just means it restarts a container
+ */
+export const restartService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
 /**
  * Creates a docker network
  *
@@ -57,91 +104,166 @@ export const createDockerContainer = async (name, containerConfig) => {
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
 export const createDockerNetwork = async (name) => {
-  store.log.stabug(`Creating Docker network: ${name}`)
-  const [success, result] = await runDockerApiCommand(
-    'createNetwork',
-    {
-      Name: name,
-      CheckDuplicate: true,
-      EnableIPv6: false,
+  log.debug(`Creating Docker network: ${name}`)
+  const config = {
+    Name: name,
+    CheckDuplicate: true,
+    EnableIPv6: false,
+    Driver: 'bridge',
+    Attachable: true,
+    Labels: {
+      'morio.network.description': 'Bridge docker network for morio services',
     },
-    true
-  )
-  if (success) {
-    store.log.debug(`Network created: ${name}`)
-    /*
-     * Return the network object
-     */
-    const [found, network] = await runDockerApiCommand('getNetwork', name)
-
-    return found ? network : false
+    IPAM: {
+      Config: [{ Subnet: utils.getPreset('MORIO_NETWORK_SUBNET') }],
+    },
+    Options: {
+      'com.docker.network.mtu': String(utils.getPreset('MORIO_NETWORK_MTU')),
+    },
   }
 
-  if (
-    result?.json?.message &&
-    result.json.message.includes(`network with name ${name} already exists`)
-  ) {
-    store.log.debug(`Network already exists: ${name}`)
-    /*
-     * Return the network object
-     */
+  let success
+  try {
+    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+  } catch (err) {
+    log.warn({ err }, `Failed to run Docker \`createNetwork\` command`)
+  }
+
+  /*
+   * It will fail if the network exists, but in that case we need to make sure it's
+   * the correct type
+   */
+  if (!success) {
     const [found, network] = await runDockerApiCommand('getNetwork', name)
+    if (found && network) {
+      const existingNetworkConfig = await network.inspect()
+      if (existingNetworkConfig.Driver !== 'bridge') {
+        /*
+         * This network is the wrong type of network
+         * First disconnect all containers, then remove it
+         */
+        log.debug(
+          `Network ${name} is of type ${existingNetworkConfig.Driver}, which is not suitable for running services.`
+        )
+        log.debug(`Disconnecting all containers from network ${name}`)
+        for (const id in existingNetworkConfig.Containers) {
+          await network.disconnect({ Container: id, Force: true })
+          log.debug(`Disconnected ${id}`)
+        }
+        log.debug(`Removing network ${name}`)
+        await network.remove()
+        log.debug(`Removed network ${name}`)
+        return createDockerNetwork(name)
+      } else return network
+      /*
+       * Network already exists, no need to recreate it
+       */
+    }
+    log.warn(`core; Unable to get info on the ${name} Docker network`)
+  }
 
-    return found ? network : false
-  } else store.log.warn(result, `Failed to create network: ${name}`)
+  log.debug(`Network created: ${name}`)
+  /*
+   * Return the network object
+   */
+  const [found, network] = await runDockerApiCommand('getNetwork', name)
 
-  return false
+  return found ? network : false
 }
 
 /**
- * Helper method to create options object to create a Docker container
+ * Attaches to a Docker network
+ *
+ * @param {string} serviceName - The name of the service
+ * @param {object} network - The network object (from dockerode)
+ * @param {endpointConfig}
+ */
+export const attachToDockerNetwork = async (serviceName, network, endpointConfig) => {
+  if (!network) {
+    log.warn(`[${serviceName}] Attempt to attach to a network, but no network object was passed`)
+    return false
+  }
+
+  try {
+    await network.connect({ Container: serviceName, EndpointConfig: endpointConfig })
+  } catch (err) {
+    if (err?.json?.message && err.json.message.includes(' already ')) {
+      log.debug(`[${serviceName}] Container is already attached to network ${network.id}`)
+    } else log.warn(err, `[${serviceName}] Failed to attach container to network ${network.id}`)
+  }
+
+  /*
+   * If exclusive is set, ensure the container is not attached
+   * to any other networks
+   */
+  const [success, result] = await runContainerApiCommand(serviceName, 'inspect')
+  if (success) {
+    for (const netName in result.NetworkSettings.Networks) {
+      if (netName !== network.id) {
+        const netId = result.NetworkSettings.Networks[netName].NetworkID
+        const [ok, net] = await runDockerApiCommand('getNetwork', netId)
+        if (ok && net) {
+          log.debug(`[${serviceName}] Disconnecting container from network ${netName}`)
+          try {
+            await net.disconnect({ Container: serviceName, Force: true })
+          } catch (err) {
+            log.warn(err, `[${serviceName}] Disconnecting container from network ${netName} failed`)
+          }
+        }
+      }
+    }
+  } else log(`[${serviceName}] Failed to inspect container`)
+}
+
+/**
+ * Helper method to create the config for a Docker container
  *
  * This will take the service configuration and build an options
  * object to configure the container as listed in this file
  *
- * @param {object} srvConf - The resolved service configuration
+ * @param {object} config - The resolved service configuration
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateContainerConfig = (srvConf) => {
+export const generateContainerConfig = (serviceName) => {
+  const config = utils.getMorioServiceConfig(serviceName)
   /*
    * Basic options
    */
-  const name = srvConf.container.container_name
-  const aliases = srvConf.container.aliases || []
-  store.log.stabug(`Generating container configuration: ${name}`)
-  const tag = srvConf.container.tag ? `:${srvConf.container.tag}` : ''
+  const name = config.container.container_name
+  const aliases = config.container.aliases || []
+  log.debug(`[${name}] Generating container configuration`)
   const opts = {
     name,
     HostConfig: {
-      NetworkMode: network,
-      Binds: srvConf.container.volumes,
+      NetworkMode: utils.getNetworkName(),
+      Binds: config.container.volumes,
       LogConfig: {
         Type: 'journald', // All Morio services log via journald
       },
     },
     Hostname: name,
-    Image: srvConf.container.image + tag,
+    Image: serviceContainerImageFromConfig(config),
     NetworkingConfig: {
       EndpointsConfig: {},
     },
   }
-  opts.NetworkingConfig.EndpointsConfig[network] = {
-    Aliases: [name, `${name}_${store.config.core?.node_nr || 1}`, ...aliases],
+  opts.NetworkingConfig.EndpointsConfig[utils.getNetworkName()] = {
+    Aliases: [name, `${name}_${utils.getNodeSerial() || 1}`, ...aliases],
   }
 
   /*
    * Restart policy
    */
-  if (srvConf.container.ephemeral) opts.HostConfig.AutoRemove = true
+  if (config.container.ephemeral) opts.HostConfig.AutoRemove = true
   else opts.HostConfig.RestartPolicy = { Name: 'unless-stopped' }
 
   /*
    * Exposed ports
    */
-  if (srvConf.container.ports) {
+  if (config.container.ports) {
     const ports = {}
     const bindings = {}
-    for (const port of srvConf.container.ports) {
+    for (const port of config.container.ports) {
       ports[`${port.split(':').pop()}/tcp`] = {}
       bindings[`${port.split(':').pop()}/tcp`] = [{ HostPort: port.split(':').shift() }]
     }
@@ -152,8 +274,8 @@ export const generateContainerConfig = (srvConf) => {
   /*
    * Environment variables
    */
-  if (srvConf.container.environment) {
-    opts.Env = Object.entries(srvConf.container.environment).map(([key, val]) => `${key}=${val}`)
+  if (config.container.environment) {
+    opts.Env = Object.entries(config.container.environment).map(([key, val]) => `${key}=${val}`)
   }
 
   /*
@@ -162,8 +284,8 @@ export const generateContainerConfig = (srvConf) => {
   opts.Labels = {
     'morio.service': name,
   }
-  if (srvConf.container.labels) {
-    for (const label of srvConf.container.labels) {
+  if (config.container.labels) {
+    for (const label of config.container.labels) {
       const [key, val] = label.split('=')
       opts.Labels[key] = val
     }
@@ -172,14 +294,14 @@ export const generateContainerConfig = (srvConf) => {
   /*
    * Hosts
    */
-  if (srvConf.container.hosts) {
-    opts.HostConfig.ExtraHosts = srvConf.container.hosts
+  if (config.container.hosts) {
+    opts.HostConfig.ExtraHosts = config.container.hosts
   }
 
   /*
    * Command
    */
-  if (srvConf.container.command) opts.Cmd = srvConf.container.command
+  if (config.container.command) opts.Cmd = config.container.command
 
   return opts
 }
@@ -194,17 +316,28 @@ export const generateContainerConfig = (srvConf) => {
  * failure, and the command return value
  */
 export const runDockerApiCommand = async (cmd, options = {}, silent = false) => {
-  store.log.stabug(`Running Docker command: ${cmd}`)
+  let cache = false
+  if (apiCache.api.includes(cmd)) {
+    cache = `docker.api.${cmd}`
+    const hit = utils.getCacheHit(cache)
+    if (hit) return [true, hit]
+  }
+  log.trace(`Running Docker command: ${cmd}`)
   let result
   try {
     result = await docker[cmd](options)
   } catch (err) {
     if (!silent) {
-      if (err instanceof Error) store.log.info(err.message)
-      else store.log.info(err)
+      if (err instanceof Error) log.info(err.message, 'Docker API command returned an error')
+      else log.info(err, 'Docker API command returned and error')
     }
     return [false, err]
   }
+
+  /*
+   * Cache the result if cacheable
+   */
+  if (cache) utils.setCache(cache, result)
 
   return [true, result]
 }
@@ -221,9 +354,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  */
 export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    store.log.stabug(
-      `Attemted to run \`${cmd}\` command on a container but no container ID was passed`
-    )
+    log.debug(`Attemted to run \`${cmd}\` command on a container but no container ID was passed`)
     return [false]
   }
 
@@ -232,7 +363,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
 
   let result
   try {
-    store.log.stabug(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
+    log.trace(`Running \`${cmd}\` command on container \`${id.slice(0, 6)}\``)
     result = await container[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
@@ -241,11 +372,53 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
        */
       if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
       else {
-        if (!silent) store.log.info(err.message)
+        if (!silent) log.info(err.message)
         return [false, err.message]
       }
     } else {
-      if (!silent) store.log.info(err)
+      if (!silent) log.info(err)
+      return [false, err]
+    }
+  }
+
+  return [true, Buffer.isBuffer(result) ? result.toString() : result]
+}
+
+/**
+ * This helper method runs an async command against the node API
+ *
+ * @param {string} id - The node id
+ * @param {string} cmd - An instance method to run
+ * @param {object} options - Options to pass to the Docker API
+ * @param {boolean} silent - Set this to true to not log errors
+ * @return {array} return - An array with a boolean indicating success or
+ * failure, and the command return value
+ */
+export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) => {
+  if (!id) {
+    log.debug(`Attemted to run \`${cmd}\` command on a node but no node ID was passed`)
+    return [false]
+  }
+
+  const [ready, node] = await runDockerApiCommand('getNode', id)
+  if (!ready) return [false, false]
+
+  let result
+  try {
+    log.debug(`Running \`${cmd}\` command on node \`${id.slice(0, 6)}\``)
+    result = await node[cmd](options)
+  } catch (err) {
+    if (err instanceof Error) {
+      /*
+       * Deal with errors that aren't really errors
+       */
+      if (err.message.includes('(HTTP code 304)')) return [304, { details: err.message }]
+      else {
+        if (!silent) log.info(err.message)
+        return [false, err.message]
+      }
+    } else {
+      if (!silent) log.info(err)
       return [false, err]
     }
   }
@@ -265,7 +438,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
  */
 export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false) => {
   if (!id) {
-    store.log.debug(`Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
+    log.debug(`Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
     return [false]
   }
 
@@ -274,14 +447,14 @@ export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false
 
   let result
   try {
-    store.log.stabug(`Running \`${cmd}\` command on network \`${id.slice(0, 6)}\``)
+    log.debug(`Running \`${cmd}\` command on network \`${id.slice(0, 6)}\``)
     result = await network[cmd](options)
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) store.log.info(err.message)
+      if (!silent) log.info(err.message)
       return [false, err.message]
     } else {
-      if (!silent) store.log.info(err)
+      if (!silent) log.info(err)
       return [false, err]
     }
   }
@@ -334,7 +507,7 @@ export const streamContainerLogs = async (id, onData, onEnd) => {
    */
   container.attach({ stream: true, stdout: true, stderr: true }, function (err, stream) {
     stream.on('data', (data) => {
-      store.log.debug(data.toString())
+      log.debug(data.toString())
       onData(data)
     })
     stream.on('end', () => onEnd())
@@ -359,10 +532,10 @@ export const runContainerImageApiCommand = async (id, cmd, silent = false) => {
     result = await image[cmd]()
   } catch (err) {
     if (err instanceof Error) {
-      if (!silent) store.log.info(err.message)
+      if (!silent) log.info(err.message)
       return [false, err.message]
     } else {
-      if (!silent) store.log.info(err)
+      if (!silent) log.info(err)
       return [false, err]
     }
   }
@@ -395,15 +568,56 @@ export const runDockerCliCommand = async (cmd, ...params) => {
   return [true, result]
 }
 
-/**
- * This helper method stores a list of running containers in the store
+/*
+ * This helper method saves a list of running services
  */
-export const storeRunningContainers = async () => {
-  store.running = {}
-  const [success, runningContainers] = await runDockerApiCommand('listContainers')
-  if (success) {
-    for (const container of runningContainers) {
-      store.running[container.Names[0].split('/').pop()] = container
+export const updateRunningServicesState = async () => {
+  /*
+   * On follower nodes, running this on each heartbeat is ok.
+   * But on a leader node, especially on a large cluster, this would scale poorly.
+   * So we Debounce this by checking the age of the last time the status was updated
+   */
+  if (!utils.isServicesStateStale()) return
+
+  await forceUpdateRunningServicesState()
+}
+
+/**
+ * This helper method saves a list of running services
+ */
+const forceUpdateRunningServicesState = async () => {
+  /*
+   * Clear state first, or services that went away would never be cleared
+   */
+  utils.clearServicesState()
+
+  const [ok, runningServices] = await runDockerApiCommand('listContainers')
+  if (ok) {
+    for (const service of runningServices) {
+      utils.setServiceState(service.Names[0].split('/').pop(), dockerStateToServiceState(service))
     }
   }
 }
+
+/**
+ * Strip a docker state to what is valuable to keep as service state
+ *
+ * @param {object} ds - Object returned from docker
+ * @return {object} serviceState - Object we'll keep in state
+ */
+const dockerStateToServiceState = (ds) => ({
+  name: ds.Names.pop(),
+  image: ds.Image,
+  labels: ds.Labels,
+  state: ds.State,
+  status: ds.Status,
+})
+
+/**
+ * Helper method to get the container image for a service from the config
+ *
+ * @param {object} config - The service config object
+ * @return {string} imagee - The container image for this service
+ */
+export const serviceContainerImageFromConfig = (config) =>
+  config.container.image + (config.container.tag ? `:${config.container.tag}` : '')

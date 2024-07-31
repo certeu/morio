@@ -1,10 +1,10 @@
 import { Controller } from '#controllers/auth'
-import { store } from '../lib/store.mjs'
+import { rbac } from '../middleware.mjs'
 
 const Auth = new Controller()
 
 /**
- * This method adds the authentication route to Express
+ * This method adds the authentication endpoints to Express
  *
  * @param {abject} app - The ExpressJS app
  */
@@ -17,15 +17,15 @@ export function routes(app) {
   /*
    * Public authentication / login route
    */
-  app.post(`${store.prefix}/login`, Auth.login)
+  app.post(`/login`, Auth.login)
 
   /*
    * Refresh token route
    */
-  app.get(`${store.prefix}/token`, Auth.renewToken)
+  app.get(`/token`, rbac.user, Auth.renewToken)
 
   /*
    * Whoami/ping check
    */
-  app.get(`${store.prefix}/whoami`, Auth.whoami)
+  app.get(`/whoami`, rbac.user, Auth.whoami)
 }

@@ -1,33 +1,31 @@
 import { Controller } from '#controllers/accounts'
-import { store } from '../lib/store.mjs'
+import { rbac } from '../middleware.mjs'
 
 const Accounts = new Controller()
 
 /**
- * This method adds the accounts routes to Express
+ * This method adds the accounts endpoints to Express
  *
  * @param {abject} app - The ExpressJS app
  */
 export function routes(app) {
-  const PREFIX = store.prefix
-
   /*
    * List accounts known to Morio
    */
-  app.get(`${PREFIX}/accounts`, Accounts.list)
+  app.get(`/accounts`, rbac.manager, Accounts.list)
 
   /*
    * Create account
    */
-  app.post(`${PREFIX}/account`, Accounts.create)
+  app.post(`/account`, rbac.manager, Accounts.create)
 
   /*
    * Activate account
    */
-  app.post(`${PREFIX}/activate-account`, Accounts.activate)
+  app.post(`/activate-account`, rbac.user, Accounts.activate)
 
   /*
    * Activate MFA
    */
-  app.post(`${PREFIX}/activate-mfa`, Accounts.activateMfa)
+  app.post(`/activate-mfa`, rbac.user, Accounts.activateMfa)
 }

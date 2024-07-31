@@ -1,37 +1,42 @@
-// Load the store
-import { store } from './lib/store.mjs'
+import { log, utils } from './lib/utils.mjs'
 
 /*
  * List of routes allowed in ephemeral mode
  */
-const ephemeralRoutes = ['GET/status', 'GET/config', 'POST/setup', 'POST/cluster/join']
+const ephemeralRoutes = [
+  'GET:/docs',
+  'GET:/status',
+  'GET:/config',
+  'GET:/reload',
+  'POST:/setup',
+  'POST:/cluster/join',
+  'POST:/cluster/heartbeat',
+]
 
 /*
  * List of routes allowed while reconfiguring
  */
-const reconfigureRoutes = ['GET/status']
+const reloadRoutes = ['GET:/status']
 
 /*
  * Middleware to handle endpoints that are not available
  * in ephemeral mode or while resolving the configuration
  */
 export const guardRoutes = (req, res, next) => {
-  if (store?.info?.ephemeral && !ephemeralRoutes.includes(req.method + req.url))
-    return res
-      .status(503)
-      .send({ errors: ['Not available in ephemeral mode'] })
-      .end()
+  log.debug(`${req.method} ${req.url}`)
+  if (
+    utils.isEphemeral() &&
+    req.url.slice(0, 5) !== '/docs' &&
+    !ephemeralRoutes.includes(`${req.method}:${req.url}`)
+  ) {
+    log.debug(`Prohibited in ephemeral state: ${req.method} ${req.url}`)
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.prohibited', req.url)
+  }
 
-  if (store?.info?.config_resolved !== true && !reconfigureRoutes.includes(req.method + req.url))
-    return res
-      .status(503)
-      .set('Retry-After', 28)
-      .send({
-        error: 'Service Unavailable',
-        info: 'Morio core is currently resolving the morio configuration. Please wait for the configuration to be resolved, then try again.',
-        tip: 'You can poll the /status endpoint and check the config_resovled field.',
-      })
-      .end()
+  if (!utils.isConfigResolved() && !reloadRoutes.includes(`${req.method}:${req.url}`)) {
+    log.debug(`Prohibited in reloading state: ${req.method} ${req.url}`)
+    return utils.sendErrorResponse(res, 'morio.core.reloading.prohibited', req.url)
+  }
 
   next()
 }

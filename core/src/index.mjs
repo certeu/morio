@@ -3,18 +3,18 @@ import express from 'express'
 import { wrapExpress } from '#shared/utils'
 // Start Morio method
 import { startMorio } from './lib/services/index.mjs'
+// reloadApi method
+import { reloadApi } from './lib/services/api.mjs'
 // Routes
 import { routes } from '#routes/index'
 // Middleware
 import { guardRoutes } from './middleware.mjs'
-// Load the store
-import { store } from './lib/store.mjs'
-
-/*
- * Get the logger from the store
- */
-const log = store.log
-log.status('Cold start of Morio Core')
+// Load the logger and utils
+import { log, utils } from './lib/utils.mjs'
+import { updateClusterState } from './lib/cluster.mjs'
+// Swagger
+import swaggerUi from 'swagger-ui-express'
+import { spec } from '../openapi/index.mjs'
 
 /*
  * Instantiate the Express app
@@ -28,9 +28,15 @@ app.use(express.json({ limit: '1mb' }))
 
 /*
  * Add middleware to guard routes while we are
- * in ephemeral mode or reconfiguring
+ * in ephemeral mode or reloading
  */
 app.use(guardRoutes)
+
+/*
+ * Add the route for the Swagger (OpenAPI) docs
+ */
+const docs = swaggerUi.setup(spec)
+app.use(`/docs`, swaggerUi.serve, docs)
 
 /*
  * Load the API routes
@@ -38,28 +44,22 @@ app.use(guardRoutes)
 for (const type in routes) routes[type](app)
 
 /*
- * Add the wildcard route
+ * Add the wildcard route (returns a 404 error)
  */
-app.get('/*', async (req, res) =>
-  res.set('Content-Type', 'application/json').status(404).send({
-    url: req.url,
-    method: req.method,
-    originalUrl: req.originalUrl,
-  })
-)
+app.get('/*', async (req, res) => utils.sendErrorResponse(res, 'morio.core.404', req.url))
 
 /*
  * (re)Configure core
  */
-await reconfigure({ coldStart: true })
+await reload({ coldStart: true })
 
 /*
  * Start listening for requests
  */
 wrapExpress(
   log,
-  app.listen(store.getPreset('MORIO_CORE_PORT'), (err) => {
-    if (err) log.error(err, 'An error occured')
+  app.listen(utils.getPreset('MORIO_CORE_PORT'), (err) => {
+    if (err) log.error(err, 'An error occured while wrapper express')
   })
 )
 
@@ -67,30 +67,36 @@ wrapExpress(
  * This method allows core to dynamically reload its
  * own configuration
  *
- * @param {object} hookProps = Optional data to pass to lifecycle hooks
+ * @param {object} hookParams = Optional data to pass to lifecycle hooks
  */
-export async function reconfigure(hookProps = {}) {
-  log.status('(Re)Configuring Morio Core')
-
+export async function reload(hookParams = {}) {
   /*
    * Drop us in config resolving mode
    */
-  if (typeof store.info === 'undefined') store.info = {}
-  store.info.config_resolved = false
+  utils.beginReload()
 
   /*
    * This will (re)start all services if that is needed
    */
-  await startMorio(hookProps)
-
-  /*
-   * Tell the API to refresh the config, but don't wait for it
-   */
-  store.apiClient.get(`${store.getPreset('MORIO_API_PREFIX')}/reconfigure`, false, store.log.debug)
+  await startMorio(hookParams)
 
   /*
    * Let the world know we are ready
    */
-  store.info.config_resolved = true
-  log.status('Morio Core ready - Configuration Resolved')
+  utils.endReload()
+
+  /*
+   * Tell the API to update the config, but don't wait for it
+   */
+  reloadApi()
+
+  /*
+   * If we're not running in ephemeral mode,
+   * give the API some time to settle, then update cluster state
+   */
+  if (!utils.isEphemeral())
+    setTimeout(() => {
+      log.debug('Triggering refresh of cluster status')
+      updateClusterState(true)
+    }, 2000)
 }

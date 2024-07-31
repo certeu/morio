@@ -3,9 +3,9 @@ import { loadRevision } from '#lib/services/dbuilder'
 import { ensureMorioService, runHook } from '#lib/services/index'
 import { writeFile, writeYamlFile } from '#shared/fs'
 import { resolveClientConfiguration } from '#config/clients/linux'
-import { createX509Certificate } from '#lib/services/core'
-// Store
-import { store } from '../lib/store.mjs'
+import { createX509Certificate } from '#lib/tls'
+// Utilities
+import { log, utils } from '#lib/utils'
 
 /**
  * This pkgs controller handles the Morio client packages  endpoints
@@ -27,7 +27,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
    */
   const rev = await loadRevision()
 
-  return res.send({ ...debDefaults, Version: store.info.version, Revision: rev + 1 })
+  return res.send({ ...debDefaults, Version: utils.getVersion(), Revision: rev + 1 })
 }
 
 /**
@@ -40,8 +40,11 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
 Controller.prototype.buildClientPackage = async (req, res, type) => {
   /*
    * The preBuild lifecycle hook will generate the control file
+   * First we need to strip the headers from the body
    */
-  const settings = await runHook('preBuild', 'dbuilder', { customSettings: req.body })
+  const body = { ...req.body }
+  delete body.headers
+  const settings = await runHook('prebuild', 'dbuilder', { customSettings: body })
 
   /*
    * Generate a certificate and key for mTLS
@@ -49,14 +52,14 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   const certAndKey = await createX509Certificate({
     certificate: {
       cn: `${settings.Package}-${settings.Version}-${type}`,
-      c: store.getPreset('MORIO_X509_C'),
-      st: store.getPreset('MORIO_X509_ST'),
-      l: store.getPreset('MORIO_X509_L'),
-      o: store.getPreset('MORIO_X509_O'),
-      ou: store.getPreset('MORIO_X509_OU'),
+      c: utils.getPreset('MORIO_X509_C'),
+      st: utils.getPreset('MORIO_X509_ST'),
+      l: utils.getPreset('MORIO_X509_L'),
+      o: utils.getPreset('MORIO_X509_O'),
+      ou: utils.getPreset('MORIO_X509_OU'),
       san: ['localhost'],
     },
-    notAfter: store.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
+    notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
   })
 
   /*
@@ -71,7 +74,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
    * into /morio/dbuilder by the dbuilder precreate hook
    */
   await writeFile('/morio/core/clients/linux/etc/morio/cert.pem', certAndKey.certificate.crt)
-  await writeFile('/morio/core/clients/linux/etc/morio/ca.pem', store.ca.certificate)
+  await writeFile('/morio/core/clients/linux/etc/morio/ca.pem', utils.getCaConfig().certificate)
   await writeFile('/morio/core/clients/linux/etc/morio/key.pem', certAndKey.key)
 
   /*
@@ -92,15 +95,15 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
   for (const type of ['audit', 'logs', 'metrics']) {
     await writeYamlFile(
       `/morio/data/clients/linux/etc/morio/${type}/config-template.yml`,
-      resolveClientConfiguration(type, store),
-      store.log
+      resolveClientConfiguration(type, utils),
+      log
     )
   }
 
   /*
    * Start the dbuilder service (but don't wait for it)
    */
-  ensureMorioService('dbuilder', {}, { onDemandBuild: true })
+  ensureMorioService('dbuilder', { onDemandBuild: true })
 
   /*
    * If revision is set, update it on disk

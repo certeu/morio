@@ -1,9 +1,9 @@
-import { store } from '../lib/store.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { roles } from '#config/roles'
 import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'
-import { storeLastLoginTime } from '../lib/account.mjs'
+import { updateLastLoginTime } from '../lib/account.mjs'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -17,11 +17,16 @@ import { storeLastLoginTime } from '../lib/account.mjs'
  * @return {function|bool} strategy - False if there is no such provider, or the strategy handler method when there is
  */
 const strategy = (id) => {
-  if (!store.config?.iam?.providers?.[id]) return false
+  /*
+   * Get provider from settings
+   */
+  const provider = utils.getSettings(['iam', 'providers', id], false)
+
+  if (!provider) return false
 
   const options = {
-    server: store.config.iam.providers[id].server,
-    log: store.log,
+    server: provider.server,
+    log: log,
     credentialsLookup: (req) => {
       return {
         username: req.body?.data?.username,
@@ -33,15 +38,15 @@ const strategy = (id) => {
   /*
    * Bypass certificate validation?
    */
-  if (store.config.iam.providers[id].verify_certificate === false) {
+  if (provider.verify_certificate === false) {
     options.server.tlsOptions = { rejectUnauthorized: false }
-  } else if (store.config.iam.providers[id].trust_certificate) {
+  } else if (provider.trust_certificate) {
     /*
      * Or trust a specific certificate?
      */
     options.server.tlsOptions = {
       secureContext: tls.createSecureContext({
-        ca: store.config.iam.providers[id].trust_certificate,
+        ca: provider.trust_certificate,
       }),
     }
   }
@@ -65,74 +70,57 @@ export const ldap = (id, data, req) => {
    * Add strategy to passport if it hasn't been used yet
    */
   if (passport._strategies[id] === undefined) {
-    store.log.debug('Loading ad authentication provider')
+    log.debug('Loading ad authentication provider')
     const handler = strategy(id)
     if (handler) passport.use(id, handler)
   }
+
+  /*
+   * Get provider from settings
+   */
+  const provider = utils.getSettings(['iam', 'providers', id])
 
   /*
    * Passport uses callback style, so we'll wrap this in a Promise to support async
    */
   return new Promise((resolve) => {
     passport.authenticate(id, function (err, user) {
-      if (err)
-        return resolve([false, { success: false, reason: 'Authentication error', error: err }])
+      if (err) {
+        log.warn(err, `Failed to authenticate user ${user} with provider ${id} due to an IDP error`)
+        return resolve([false, 'morio.api.idp.failure'])
+      }
 
-      if (!user)
+      if (!user) {
+        log.info(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
+        return resolve([false, 'morio.api.account.credentials.mismatch'])
+      } else {
+        /*
+         * Can we find the username?
+         */
+        const username = caseInsensitiveGet(provider.username_field, user)
+        if (!username) return resolve([false, 'morio.api.404'])
+
+        /*
+         * Can we assign the requested role?
+         */
+        const [allowed, maxLevel] = checkRole(data.role, provider.rbac, user)
+        if (!allowed) return resolve([false, 'morio.api.account.role.unavailable'])
+
+        /*
+         * Update the latest login time, but don't wait for it
+         */
+        updateLastLoginTime(id, username)
+
         return resolve([
-          false,
+          true,
           {
-            success: false,
-            reason: 'Authentication failed',
-            error: 'Invalid LDAP credentials',
+            user: username,
+            role: req.body.data.role,
+            highest_role: roles[maxLevel],
+            provider: id,
           },
         ])
-
-      /*
-       * Can we find the username?
-       */
-      const username = caseInsensitiveGet(store.config.iam.providers[id].username_field, user)
-      if (!username)
-        return resolve([
-          false,
-          {
-            success: false,
-            reason: 'Authentication failed',
-            error: 'Unable to retrieve username based on configured username_field',
-          },
-        ])
-
-      /*
-       * Can we assign the requested role?
-       */
-      const [allowed, maxLevel] = checkRole(
-        req.body?.data?.role,
-        store.config.iam.providers[id].rbac,
-        user
-      )
-      if (!allowed)
-        return resolve([
-          false,
-          {
-            success: false,
-            reason: 'Authentication failed',
-            error: 'This role is not available to you',
-          },
-        ])
-
-      /*
-       * Store the latest login time, but don't wait for it
-       */
-      storeLastLoginTime(id, username)
-
-      return resolve([
-        true,
-        {
-          user: username,
-          role: req.body.data.role,
-          maxRole: roles[maxLevel],
-        },
-      ])
+      }
     })(req)
   })
 }

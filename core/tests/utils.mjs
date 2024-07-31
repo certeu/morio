@@ -4,7 +4,26 @@ import { attempt, sleep } from '#shared/utils'
 import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
+import axios from 'axios'
+import { readJsonFile } from '#shared/fs'
+import path from 'path'
 
+/*
+ * We'll re-use these in the API unit tests
+ */
+const accounts = {
+  user: {
+    username: `testAccount${Date.now()}`,
+    about: 'This account was created as part of a test',
+    provider: 'local',
+    role: 'user',
+  },
+}
+const headers = {
+  'x-morio-role': 'engineer',
+  'x-morio-user': 'test_user',
+  'x-morio-provider': 'local',
+}
 /*
  * Setup the store
  */
@@ -17,15 +36,35 @@ const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
  * Client for the management API
- * This file is used by API unit tests too, that is why this is here
+ * This is a bit more convoluted as we need to send headers with the tests
+ * so we use axios as a general purpose handler, and setup custom methods below
  */
-const api = restClient(`http://api:${getPreset('MORIO_API_PORT')}${getPreset('MORIO_API_PREFIX')}`)
+const axiosHandler = async (route, data = null, customHeaders = {}, method = 'get') => {
+  const params = []
+  if (['post', 'put', 'patch'].includes(method)) params.push(data)
+  params.push({ headers: { ...headers, ...customHeaders } })
+  let result
+  try {
+    result = await axios[method](`http://api:${getPreset('MORIO_API_PORT')}${route}`, ...params)
+    //console.log({result})
+  } catch (err) {
+    //console.log({err})
+    if (err?.response?.status) return [err.response.status, err.response.data, err]
+    return false
+  }
 
+  return result ? [result.status, result.data, result] : false
+}
 /*
- * Client for the management API
- * This allows access to the internal auth route
+ * Management AIP client based on axios, which allows us to add headers
  */
-const apiAuth = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+const api = {
+  post: (route, data, headers) => axiosHandler(route, data, headers, 'post'),
+  put: (route, data, headers) => axiosHandler(route, data, headers, 'put'),
+  patch: (route, data, headers) => axiosHandler(route, data, headers, 'patch'),
+  get: (route, headers) => axiosHandler(route, null, headers, 'get'),
+  delete: (route, headers) => axiosHandler(route, null, headers, 'delete'),
+}
 
 /*
  * List of all Morio services
@@ -36,10 +75,9 @@ const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'conn
  * Settings for the test setup
  */
 const setup = {
-  deployment: {
-    node_count: 1,
-    display_name: 'Morio Unit Tests',
-    nodes: ['unit.test.morio.it'],
+  cluster: {
+    name: 'Morio Unit Tests',
+    broker_nodes: ['unit.test.morio.it'],
   },
   tokens: {
     flags: {
@@ -128,8 +166,7 @@ const isCoreReady = async () => {
   const res = await core.get('/status')
   const [status, result] = res
 
-  //console.log({ core: result })
-  return status === 200 && result.config_resolved === true ? true : false
+  return status === 200 && result.node.config_resolved === true ? true : false
 }
 
 /**
@@ -140,16 +177,50 @@ const isCoreReady = async () => {
 const isApiReady = async () => {
   const [status, result] = await api.get('/status')
 
-  //console.log({ api: result })
-  return status === 200 && result.config_resolved === true ? true : false
+  return status === 200 && result.state.config_resolved === true ? true : false
+}
+
+/*
+ * You need to pass in the errors here because this file is
+ * symlinked, so a local import would not function as expected
+ */
+const validateErrorResponse = (result, errors, template) => {
+  const err = errors[template]
+  if (!err) assert.equal('This is not a known error template', template)
+  else {
+    assert.equal(Array.isArray(result), true)
+    assert.equal(result.length, 3)
+    assert.equal(result[0], err.status)
+    assert.equal(typeof result[1], 'object')
+    assert.equal(result[1].title, err.title)
+    assert.equal(result[1].type, `${getPreset('MORIO_ERRORS_WEB_PREFIX')}${template}`)
+    assert.equal(result[1].detail, err.detail)
+    assert.equal(typeof result[1].instance, 'string')
+  }
+}
+
+/*
+ * To make sure we can authenticate to the freshly deployed cluster,
+ * we load the MRT straight from disk, so that these tests can
+ * run without having to go through the setup each time.
+ * Note that this is only possible when running the dev container,
+ * and even then, the file won't be on disk when we start the tests,
+ * so we can't just import them. Instead, this method loads them
+ * on demand.
+ */
+const loadKeys = async () => {
+  const file = path.resolve('../data/config/keys.json')
+  const keys = await readJsonFile(file, console.log)
+  return keys
 }
 
 export {
   api,
-  apiAuth,
+  accounts,
   core,
   equalIgnoreSpaces,
   getPreset,
+  loadKeys,
   services,
   setup,
   store,
@@ -158,4 +229,5 @@ export {
   isApiReady,
   sleep,
   validationShouldFail,
+  validateErrorResponse,
 }

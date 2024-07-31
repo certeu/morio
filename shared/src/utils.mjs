@@ -50,10 +50,9 @@ export const attempt = async ({
   run,
   onFailedAttempt = false,
   validate = false,
-  log = false,
 }) =>
   new Promise((resolve) =>
-    tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate, log }, resolve)
+    tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve)
   )
 
 /*
@@ -61,7 +60,7 @@ export const attempt = async ({
  * so this method is here to side-step that
  */
 const tryWhilePromiseResolver = async (
-  { every, timeout, run, onFailedAttempt, validate, log },
+  { every, timeout, run, onFailedAttempt, validate },
   resolve
 ) => {
   /*
@@ -72,7 +71,7 @@ const tryWhilePromiseResolver = async (
     ok = await run()
   } catch (err) {
     // Log error if error was passed in
-    if (log) log(err)
+    console.log(err)
   }
 
   if ((typeof validate === 'function' && validate(ok)) || (typeof validate !== 'function' && ok))
@@ -87,8 +86,7 @@ const tryWhilePromiseResolver = async (
     try {
       ok = await run()
     } catch (err) {
-      // Log error if error was passed in
-      if (log) log(err)
+      console.log(err)
     }
     if (ok) {
       clearInterval(interval)
@@ -127,6 +125,9 @@ export const wrapExpress = (log, server) => {
   const shutdown = (signal, value) => {
     log.info(`Received a ${signal} signal. Initiating shutdown.`)
     server.close(() => {
+      /*
+       * Wave goodbye
+       */
       log.info(`Shutdown finalized. Exiting.`)
       process.exit(128 + value) /* eslint-disable-line no-undef */
     })

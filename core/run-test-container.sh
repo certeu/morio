@@ -16,7 +16,7 @@ docker run \
  \
   --network-alias core \
   --init \
-  -p 3007:3007  \
+ \
   -v /home/jdecock/git/morio:/morio  \
   -v /var/run/docker.sock:/var/run/docker.sock  \
   -v /home/jdecock/git/morio/data/config:/etc/morio  \
@@ -30,6 +30,6 @@ docker run \
   -e MORIO_CORE_LOG_LEVEL=info \
   -e NODE_ENV=test \
   -e MORIO_REPO_ROOT=/home/jdecock/git/morio \
-  morio/core-test:0.2.0 bash /morio/core/tests/run-unit-tests.sh
+  morio/core-dev:0.2.0 bash /morio/core/tests/run-unit-tests.sh
 
 

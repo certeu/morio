@@ -1,0 +1,70 @@
+{
+  "info": {
+    "about": "Morio Management API",
+    "name": "@morio/api",
+    "production": false,
+    "version": "0.2.0"
+  },
+  "state": {
+    "ephemeral": false,
+    "uptime": 37,
+    "start_time": 1722232994724,
+    "reload_count": 1,
+    "config_resolved": true,
+    "settings_serial": 1722172709838
+  },
+  "core": {
+    "info": {
+      "about": "Morio Core",
+      "name": "@morio/core",
+      "production": false,
+      "version": "0.2.0"
+    },
+    "status": {
+      "cluster": {
+        "code": 0,
+        "color": "green",
+        "time": 1722233017641,
+        "updated": 1722233017641,
+        "leader_serial": 1,
+        "leading": true,
+        "msg": "Everything is ok"
+      },
+      "nodes": {
+        "morio-node1.tokyo.morio.it": {
+          "api": 0,
+          "broker": 0,
+          "db": 0,
+          "ca": 0,
+          "proxy": 0,
+          "ui": 0,
+          "console": 0
+        }
+      },
+      "cluster_leader": {
+        "serial": 1,
+        "uuid": "39b0b5fd-6648-41f8-b3b9-df96c5d11579"
+      }
+    },
+    "nodes": {
+      "39b0b5fd-6648-41f8-b3b9-df96c5d11579": {
+        "fqdn": "morio-node1.tokyo.morio.it",
+        "hostname": "poc-morio-node1",
+        "ip": "10.123.12.15",
+        "serial": 1,
+        "uuid": "39b0b5fd-6648-41f8-b3b9-df96c5d11579",
+        "settings": 1722172709838
+      }
+    },
+    "node": {
+      "uptime": 46633,
+      "cluster": "8602906f-5437-4cce-b150-7c3387da36fa",
+      "node": "39b0b5fd-6648-41f8-b3b9-df96c5d11579",
+      "node_serial": 1,
+      "ephemeral": false,
+      "reconfigure_count": 1,
+      "config_resolved": true,
+      "settings_serial": 1722172709838
+    }
+  }
+}

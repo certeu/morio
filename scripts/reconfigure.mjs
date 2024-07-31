@@ -1,6 +1,7 @@
 import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
-import { root as pkg } from './json-loader.mjs'
+import { Store } from '@morio/shared/store'
+import pkg from '../package.json' assert { type: 'json' }
 import path from 'path'
 
 /*
@@ -24,7 +25,7 @@ const presetGetters = {
         MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
         NODE_ENV: 'development',
         MORIO_REPO_ROOT,
-        MORIO_CORE_LOG_LEVEL: 'debug',
+        MORIO_CORE_LOG_LEVEL: 'trace',
       },
     }),
   test: (key, opts) =>
@@ -42,44 +43,58 @@ const presetGetters = {
   prod: getPreset,
 }
 
+/*
+ * An object to mock the production logger
+ */
+const logger = {
+  trace: (...data) => console.log(...data),
+  debug: (...data) => console.log(...data),
+  info: (...data) => console.log(...data),
+  warn: (...data) => console.log(...data),
+  error: (...data) => console.log(...data),
+  fatal: (...data) => console.log(...data),
+  silent: (...data) => console.log(...data),
+}
+
+/*
+ * Setup a store that we can pass to resolveServiceConfiguration
+ */
+const getHelpers = (env) => {
+  const store = new Store(logger)
+  store.config = {}
+  store.info = { production: env === 'prod' }
+  store.testing = env === 'testing'
+  const utils = new Store(logger)
+  utils.getPreset = presetGetters[env]
+  utils.isEphemeral = () => true
+  utils.isProduction = () => false
+  utils.isUnitTest = () => false
+  utils.isSwarm = () => false
+  utils.getAllFqdns = () => []
+
+  return { store, utils }
+}
+
 const config = {
   core: {
     /*
      * Resolve the development configuration
      */
-    dev: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-    }),
+    dev: await resolveServiceConfiguration('core', getHelpers('dev')),
     /*
      * Resolve the test configuration
      */
-    test: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-      testing: true,
-    }),
+    test: await resolveServiceConfiguration('core', getHelpers('test')),
     /*
      * Resolve the production configuration
      */
-    prod: await resolveServiceConfiguration('core', {
-      getPreset: presetGetters.prod,
-      inProduction: () => true,
-      config: {},
-    }),
+    prod: await resolveServiceConfiguration('core', getHelpers('prod')),
   },
   api: {
     /*
      * Resolve the test configuration
      */
-    test: await resolveServiceConfiguration('api', {
-      getPreset: presetGetters.dev,
-      inProduction: () => false,
-      config: {},
-      testing: true,
-    }),
+    test: await resolveServiceConfiguration('api', getHelpers('test')),
   },
 }
 
@@ -94,7 +109,7 @@ const cliOptions = (name, env) => `\\
   --log-driver=journald \\
   --log-opt labels=morio.service \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${name} \\
+  --network-alias ${[name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(' \\\n')} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(' \\\n')} \\

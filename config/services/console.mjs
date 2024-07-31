@@ -1,7 +1,9 @@
+import { generateTraefikConfig } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = (store) => ({
+export const resolveServiceConfiguration = ({ utils }) => ({
   /**
    * Container configuration
    *
@@ -14,61 +16,63 @@ export const resolveServiceConfiguration = (store) => ({
     // Image to run
     image: 'docker.redpanda.com/redpandadata/console',
     // Image tag (version) to run
-    tag: 'v2.5.2',
+    tag: 'v2.6.1',
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
-    network: store.getPreset('MORIO_NETWORK'),
+    network: utils.getPreset('MORIO_NETWORK'),
     // Command
-    command: '/app/console -config.filepath /etc/morio/console/config.yaml',
+    command: ['/app/console', '-config.filepath /etc/morio/console/config.yaml'],
     // Entrypoint
     entrypoint: '/bin/sh',
     environment: {
       CONFIG_FILEPATH: '/etc/morio/console/config.yaml',
     },
     // Volumes
-    volumes: [`${store.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`],
-    // Configure Traefik with container labels
-    labels: [
-      // Tell traefik to watch this container
-      'traefik.enable=true',
-      // Attach to the morio docker network
-      `traefik.docker.network=${store.getPreset('MORIO_NETWORK')}`,
-      // Match requests going to the console prefix
-      `traefik.http.routers.console.rule=(PathPrefix(\`/${store.getPreset('MORIO_CONSOLE_PREFIX')}\`))`,
-      // Set priority to avoid rule conflicts
-      'traefik.http.routers.console.priority=120',
-      // Forward to console service
-      'traefik.http.routers.console.service=console',
-      // Only match requests on the https endpoint
-      'traefik.http.routers.console.entrypoints=https',
-      // Forward to port on container
-      'traefik.http.services.console.loadbalancer.server.port=8080',
-      // Enable TLS
-      'traefik.http.routers.console.tls=true',
-    ],
+    volumes: [`${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`],
+    // TODO: For unit tests, we need to know the IP, something like:
+    //hosts: ['unit.test.morio.it:10.10.10.10'],
+  },
+  traefik: {
+    console: generateTraefikConfig(utils, {
+      service: 'console',
+      prefixes: [`/${utils.getPreset('MORIO_CONSOLE_PREFIX')}`],
+      priority: 666,
+    }),
   },
   /*
    * Console configuration
    */
   console: {
     kafka: {
-      // brokers & urls will be populated by core
-      brokers: [],
-      clientId: 'console',
-      schemaRegistry: {
+      brokers: utils
+        .getBrokerFqdns()
+        .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
+      clientId: `console_${utils.getNodeSerial()}`,
+      schemaRegistry: { enabled: false },
+      tls: {
         enabled: true,
-        urls: [],
+        caFilepath: '/etc/morio/console/tls-ca.pem',
+        certFilepath: '/etc/morio/console/tls-cert.pem',
+        keyFilepath: '/etc/morio/console/tls-key.pem',
+        insecureSkipTlsVerify: false,
       },
     },
     redpanda: {
       adminApi: {
         enabled: true,
-        urls: [],
+        urls: utils.getBrokerFqdns().map((fqdn) => `https://${fqdn}:443`),
+        tls: {
+          enabled: true,
+          caFilepath: '/etc/morio/console/tls-ca.pem',
+          certFilepath: '/etc/morio/console/tls-cert.pem',
+          keyFilepath: '/etc/morio/console/tls-key.pem',
+          insecureSkipTlsVerify: true,
+        },
       },
     },
     server: {
-      basePath: store.getPreset('MORIO_CONSOLE_PREFIX'),
+      basePath: utils.getPreset('MORIO_CONSOLE_PREFIX'),
     },
   },
 })

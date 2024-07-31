@@ -1,0 +1,9 @@
+{
+  "flags": {
+    "HEADLESS_MORIO": false,
+    "DISABLE_ROOT_TOKEN": false
+  },
+  "secrets": {
+    "AD_PASSWORD": "aa;S009)) _S asd0AS"
+  }
+}

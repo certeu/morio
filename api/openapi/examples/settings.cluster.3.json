@@ -1,0 +1,9 @@
+{
+  "name": "Morio Cluster Test",
+  "broker_nodes": [
+    "morio-node1.tokyo.morio.it",
+    "morio-node2.tokyo.morio.it",
+    "morio-node3.tokyo.morio.it"
+  ],
+  "fqdn": "morio-cluster.tokyo.morio.it"
+}

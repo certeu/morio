@@ -1,17 +1,20 @@
+import { utils, log } from './utils.mjs'
 import { Kafka, logLevel } from 'kafkajs'
 
-export function KafkaClient(store) {
+export function KafkaClient() {
   /*
-   * This ID tells the client apart in a clustered Morio deployment
+   * This ID tells the client apart in a Morio cluster
    */
-  this.id = `api-${store.config.core.node_nr}`
+  this.id = `api-${utils.getNodeSerial()}`
 
   /*
    * Attach the client
    */
   this.client = new Kafka({
     clientId: this.id,
-    brokers: store.config.deployment.nodes.map((node, i) => `broker_${Number(i) + 1}:9092`),
+    brokers: utils
+      .getSettings('cluster.broker_nodes')
+      .map((node, i) => `broker_${Number(i) + 1}:9092`),
     logLevel: logLevel.ERROR,
   })
 
@@ -40,6 +43,16 @@ export function KafkaClient(store) {
     await this.producer.disconnect()
     await this.consumer.disconnect()
   }
+
+  /*
+   * Add eventlisteners for connecting producer/consumer
+   */
+  this.producer.on(this.producer.events.CONNECT, () => {
+    log.debug('Kafka producer connected')
+  })
+  this.consumer.on(this.consumer.events.CONNECT, () => {
+    log.debug('Kafka consumer connected')
+  })
 
   /*
    * Return client

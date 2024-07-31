@@ -1,6 +1,5 @@
-import { storeLastLoginTime, loadApikey } from '../lib/apikey.mjs'
+import { updateLastLoginTime, loadApikey } from '../lib/apikey.mjs'
 import { verifyPassword } from '#shared/crypto'
-import { isRoleAvailable } from '../rbac.mjs'
 
 /**
  * apikey: API key identity/authentication provider
@@ -17,7 +16,7 @@ export const apikey = async (id, data) => {
   /*
    * Authenticate
    */
-  if (id === 'apikey' && data?.username && data?.password && data?.role) {
+  if (id === 'apikey' && data?.username && data?.password) {
     /*
      * Look up the apikey
      */
@@ -33,23 +32,9 @@ export const apikey = async (id, data) => {
       return [false, { success: false, reason: 'Authentication failed', error: 'Invalid password' }]
 
     /*
-     * Is the role accessible to this user?
-     */
-    const available = isRoleAvailable(apikey.role, data.role)
-    if (!available)
-      return [
-        false,
-        {
-          success: false,
-          reason: 'Authentication failed',
-          error: 'Role not available to this API key',
-        },
-      ]
-
-    /*
      * Update apikey with last login time
      */
-    storeLastLoginTime(data.username)
+    updateLastLoginTime(data.username)
 
     /*
      * All good, return
@@ -58,7 +43,8 @@ export const apikey = async (id, data) => {
       true,
       {
         user: `apikey.${data.username}`,
-        role: data.role || 'user',
+        role: apikey.role,
+        provider: id,
       },
     ]
   }

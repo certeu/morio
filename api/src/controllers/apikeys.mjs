@@ -1,10 +1,8 @@
-import Joi from 'joi'
-import { roles } from '#config/roles'
 import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
-import { randomString, hashPassword } from '#shared/crypto'
-import { validateSchema } from '../lib/validation.mjs'
-import { loadApikey, saveApikey, removeApikey, loadAccountApikeys } from '../lib/apikey.mjs'
+import { uuid, randomString, hashPassword } from '#shared/crypto'
+import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This account controller handles apikeys in Morio
@@ -28,10 +26,19 @@ export function Controller() {}
  */
 Controller.prototype.create = async (req, res) => {
   /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
    * Validate input
    */
-  const [valid] = await validateSchema(req.body, schema.create)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
+  const [valid, err] = await utils.validate(`req.apikey.create`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Only nominative accounts can create API keys
@@ -39,7 +46,7 @@ Controller.prototype.create = async (req, res) => {
    * an API key or the Morio Root Token, we say no
    */
   if (['mrt', 'apikey'].includes(currentProvider(req)))
-    return res.status(403).send({ error: 'Only nominative accounts can create API keys' })
+    return utils.sendErrorResponse(res, 'morio.api.nominative.account.required', req.url)
 
   /*
    * Does the user have permission to assign the requested role?
@@ -50,24 +57,23 @@ Controller.prototype.create = async (req, res) => {
   /*
    * Create the API key
    */
-  const key = randomString(16)
+  const key = uuid()
   const secret = randomString(48)
   const data = {
     name: valid.name,
-    secret: hashPassword(secret),
     status: 'active',
-    createdBy: currentUser(req),
+    created_by: currentUser(req),
     role: valid.role,
-    createdAt: asTime(),
-    expiresAt: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
+    created_at: asTime(),
+    expires_at: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
+    key,
   }
 
-  await saveApikey(key, data)
+  const [dbStatus] = await saveApikey(key, { ...data, secret: hashPassword(secret) })
 
-  return res.send({
-    result: 'success',
-    data: { ...data, secret, key },
-  })
+  return dbStatus === 200
+    ? res.send({ ...data, secret })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -83,38 +89,25 @@ Controller.prototype.create = async (req, res) => {
  */
 Controller.prototype.list = async (req, res) => {
   /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
    * Fetch all keys with a filter method
    */
   const keys = await loadAccountApikeys(currentUser(req))
 
-  /*
-   * Parse them into a nice list
-   */
-  const list =
-    typeof keys === 'object'
-      ? Object.keys(keys)
-      : []
-          .filter((id) => keys[id].status !== 'deleted')
-          .map((id) => {
-            const data = {
-              key: id.slice(7),
-              ...keys[id],
-            }
-            delete data.secret
-
-            return data
-          })
-
-  return res.send({
-    result: 'success',
-    keys: list,
-  })
+  return keys
+    ? res.send(keys)
+    : utils.sendErrorResponse(res, `morio.api.apikeys.list.failed`, req.url)
 }
 
 /**
  * Update an API key
  *
- * There are only four actions one can take:
+ * There are only three actions one can take:
  *   - rotate: Changes the key secret
  *   - disable: Sets status to 'disabled'
  *   - enable: Sets status to 'active'
@@ -124,15 +117,19 @@ Controller.prototype.list = async (req, res) => {
  */
 Controller.prototype.update = async (req, res) => {
   /*
-   * Validate input
-   */
-  const [valid] = await validateSchema(req.params, schema.update)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
-
-  /*
-   * Get the current user
+   * Check user
    */
   const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.apikey.update`, req.params)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Fet the key with a filter method
@@ -142,14 +139,14 @@ Controller.prototype.update = async (req, res) => {
   /*
    * Does the key exist
    */
-  if (!key) return res.status(404).send().end()
+  if (!key) return utils.sendErrorResponse(res, 'morio.api.404', req.url)
 
   /*
    * Is this is a key not created by the current user, you need
    * operator or higher as a role
    */
-  if (key.createdBy !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
-    return res.status(403).send({ error: 'Access Denied' })
+  if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
+    return utils.sendErrorResponse(res, 'morio.api.account.role.insufficient', req.url)
   }
 
   /*
@@ -157,8 +154,8 @@ Controller.prototype.update = async (req, res) => {
    */
   const updated = {
     key: valid.key,
-    updatedBy: user,
-    updatedAt: asTime(),
+    updated_by: user,
+    updated_at: asTime(),
   }
 
   /*
@@ -184,21 +181,30 @@ Controller.prototype.update = async (req, res) => {
   if (updated.secret) data.secret = secret
   else delete data.secret
 
-  return res.send({ result: 'success', data })
+  return res.send(data)
 }
 
 /**
- * Remove an API key
+ * Delete an API key
 
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.remove = async (req, res) => {
+Controller.prototype.delete = async (req, res) => {
+  /*
+   * Check user
+   */
+  const user = currentUser(req)
+  if (!user) return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
+
   /*
    * Validate input
    */
-  const [valid] = await validateSchema(req.params, schema.remove)
-  if (!valid) return res.status(400).send({ error: 'Validation failed' })
+  const [valid, err] = await utils.validate(`req.apikey.delete`, req.params)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Load the key with a filter method
@@ -209,32 +215,14 @@ Controller.prototype.remove = async (req, res) => {
    * Is this is a key not created by the current user, you need
    * operator or higher as a role
    */
-  if (key.createdBy !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
-    return res.status(403).send({ error: 'Access Denied' })
+  if (key.created_by !== currentUser(req) && !isRoleAvailable(req, 'operator')) {
+    return utils.sendErrorResponse(res, 'morio.api.account.role.insufficient', req.url)
   }
 
   /*
-   * Sounds good, remove the API key
+   * Sounds good, delete the API key
    */
-  const gone = await removeApikey(valid.key)
+  const gone = await deleteApikey(valid.key)
 
   res.status(gone ? 204 : 500).send()
-}
-
-const schema = {
-  create: Joi.object({
-    name: Joi.string().required().min(2),
-    expires: Joi.number().required().min(1).max(730),
-    role: Joi.string()
-      .required()
-      .valid(...roles),
-    overwrite: Joi.boolean().valid(true, false).optional(),
-  }),
-  update: Joi.object({
-    key: Joi.string().required(),
-    action: Joi.number().required().valid('rotate', 'disable', 'enable'),
-  }),
-  remove: Joi.object({
-    key: Joi.string().required(),
-  }),
 }

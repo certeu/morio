@@ -1,47 +1,32 @@
-import { store } from '../lib/store.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
+import { availableRoles } from '../rbac.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
  */
 const allowedUris = [
-  `${store.prefix}/setup`,
-  `${store.prefix}/status`,
-  `${store.prefix}/status/`,
-  `${store.prefix}/info`,
-  `${store.prefix}/info/`,
-  `${store.prefix}/login`,
-  `${store.prefix}/login/`,
-  `${store.prefix}/idps`,
-  `${store.prefix}/idps/`,
-  `${store.prefix}/activate-account`,
-  `${store.prefix}/activate-account/`,
-  `${store.prefix}/activate-mfa`,
-  `${store.prefix}/activate-mfa/`,
-  `${store.prefix}/jwks`,
-  `${store.prefix}/cluster/join`,
+  `/setup`,
+  `/status`,
+  `/info`,
+  `/info/`,
+  `/login`,
+  `/idps`,
+  `/activate-account`,
+  `/activate-mfa`,
+  `/jwks`,
+  `/cluster/join`,
+  `/validate/settings`,
+  `/ca/certificates`,
 ]
 
 /**
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [/^\/downloads\//, /^\/coverage\//]
-
-/**
- * Helper method to deny access
- */
-const deny = (res, body = {}, status = 401) =>
-  res
-    .status(status)
-    .send({
-      status: 'Unauthorized',
-      reason: 'Request failed all efforts at authentication',
-      ...body,
-    })
-    .end()
+const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/]
 
 /**
  * This auth controller handles authentication in Morio
@@ -65,7 +50,7 @@ Controller.prototype.authenticate = async (req, res) => {
    * Get the requested URL from the headers
    */
   const uri = req.headers['x-forwarded-uri']
-  if (!uri) return deny(res)
+  if (!uri) return utils.sendErrorResponse(res, 'morio.api.rbac.denied', req.url)
 
   /*
    * Is the URL allow-listed?
@@ -82,7 +67,8 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * Don't bother in ephemeral mode
    */
-  if (store.info?.ephemeral) return deny(res)
+  if (utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.prohibited', uri)
 
   /*
    * Keep track of the token payload
@@ -101,7 +87,9 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * If the JWT is not in the cookie, check the Authorization header
    */
+  let header = false
   if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+    header = true
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
   }
@@ -109,16 +97,24 @@ Controller.prototype.authenticate = async (req, res) => {
   /*
    * If we have the payload, set roles in response header
    * These will be injected by Traefik in the original request
-   * If not, deny access
    */
-  return payload
-    ? res
-        .set('X-Morio-Role', payload.role)
-        .set('X-Morio-User', payload.user)
-        .set('X-Morio-Provider', payload.provider)
-        .status(200)
-        .end()
-    : deny(res)
+  if (payload)
+    return res
+      .set('X-Morio-Role', payload.role)
+      .set('X-Morio-User', payload.user)
+      .set('X-Morio-Provider', payload.provider)
+      .status(200)
+      .end()
+
+  /*
+   * Is this just a bare request with no token, no headers, no nothing?
+   * If so, send a 401. If not, send a 403
+   */
+  return utils.sendErrorResponse(
+    res,
+    !token && !header ? 'morio.api.authentication.required' : 'morio.api.rbac.denied',
+    uri
+  )
 }
 
 /**
@@ -131,9 +127,19 @@ Controller.prototype.authenticate = async (req, res) => {
  */
 Controller.prototype.login = async (req, res) => {
   /*
-   * Get the provider ID
+   * Validate high-level input against schema
    */
-  const providerId = req.body?.provider || false
+  const [valid1, err1] = await utils.validate(`req.auth.login`, req.body)
+  if (!valid1)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err1.message,
+    })
+
+  /*
+   * Store the provider ID for reuse
+   */
+  const providerId = valid1.provider
+
   /*
    * The mrt, local, and apikey provider types cannot be instantiated
    * more than once. If anything, doing so would open up a bag of bugs.
@@ -145,34 +151,47 @@ Controller.prototype.login = async (req, res) => {
    */
   const providerType = ['mrt', 'local', 'apikey'].includes(providerId)
     ? providerId
-    : store.config?.iam?.providers?.[providerId]?.provider || false
+    : utils.getSettings(['iam', 'providers', providerId, 'provider'], false)
+
   /*
    * Verify the provider ID is valid
    * and that we have a provider method to handle the request
    */
-  if (!providerId || !providerType || typeof idps[providerType] !== 'function') {
-    return deny(
-      res,
-      {
-        success: false,
-        reason: 'Bad request',
-        error: 'No such authentication provider',
-      },
-      400
-    )
+  if (!providerId || !providerType || typeof idps[providerType] !== 'function')
+    return utils.sendErrorResponse(res, 'morio.api.ipd.unknown', req.url)
+
+  /*
+   * Validate identity provider input against schema (provider specific)
+   */
+  const [valid2, err2] = await utils.validate(`req.auth.login.${providerType}`, req.body)
+  if (!valid2) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err2.message,
+    })
   }
 
   /*
    * Looks good, hand over to provider
    */
-  const [success, data] = await idps[providerType](providerId, req.body.data, req, res)
+  const idpResult = await idps[providerType](providerId, req.body.data, req, res)
+  if (!Array.isArray(idpResult))
+    return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 
-  if (!success) {
-    /*
-     * Authentication failed. Return and end here.
-     */
-    return res.status(401).send(data).end()
-  }
+  /*
+   * Deconstruct whether it worked
+   */
+  const [success, data, extraData = {}] = idpResult
+
+  /*
+   * If authentication failed, return here
+   */
+  if (!success)
+    return utils.sendErrorResponse(
+      res,
+      typeof data === 'string' ? data : 'morio.api.authentication.required',
+      req.url,
+      extraData
+    )
 
   /*
    * Looks good, generate JSON Web Token
@@ -181,11 +200,11 @@ Controller.prototype.login = async (req, res) => {
     data: {
       ...data,
       provider: req.body.provider,
-      node: store.keys.node,
-      deployment: store.keys.deployment,
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
     },
-    key: store.keys.private,
-    passphrase: store.keys.mrt,
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().mrt,
   })
 
   return res.send({ jwt, data })
@@ -233,17 +252,18 @@ Controller.prototype.renewToken = async (req, res) => {
       data: {
         user: payload.user,
         role: payload.role,
-        maxRole: payload.maxRole,
+        available_roles: availableRoles(payload.roles),
+        highest_role: payload.maxRole,
         provider: payload.provider,
       },
-      key: store.keys.private,
-      passphrase: store.keys.mrt,
+      key: utils.getKeys().private,
+      passphrase: utils.getKeys().mrt,
     })
 
     return res.send({ jwt })
   }
 
-  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+  return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 }
 
 /**
@@ -274,7 +294,7 @@ Controller.prototype.whoami = async (req, res) => {
     if (payload) return res.send(payload).end()
   }
 
-  return deny(res, { status: 'Unauthorized', reason: 'No token found' })
+  return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
 }
 
 /**
@@ -286,7 +306,7 @@ const verifyToken = (token) =>
   new Promise((resolve) =>
     jwt.verify(
       token,
-      store.keys.public,
+      utils.getKeys().public,
       {
         audience: 'morio',
         issuer: 'morio',

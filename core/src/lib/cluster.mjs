@@ -1,304 +1,700 @@
-// Networking
-import axios from 'axios'
-import https from 'https'
-import { testUrl, resolveHost, resolveHostAsIp } from '#shared/network'
-import { sleep } from '#shared/utils'
-// Docker
-import { runDockerApiCommand } from '#lib/docker'
-// Store
-import { store } from './store.mjs'
+// Shared imports
+import { testUrl } from '#shared/network'
+import { attempt } from '#shared/utils'
+import { serviceCodes } from '#shared/errors'
+import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
+// Core imports
+import { ensureMorioNetwork, runHook } from './services/index.mjs'
+import { isBrokerLeading } from './services/broker.mjs'
+import { log, utils } from './utils.mjs'
+import { dataWithChecksum, validDataWithChecksum } from './services/core.mjs'
+
+/*
+ * Helper method to update the cluster state
+ */
+export const updateClusterState = async (force = false) => {
+  /*
+   * Don't bother in ephemeral mode
+   */
+  if (utils.isEphemeral()) return
+
+  /*
+   * On follower nodes, running this on each heartbeat is ok.
+   * But on a leader node, especially on a large cluster, this would scale poorly.
+   * So we Debounce this by checking the age of the last time the status was updated
+   */
+  if (!force && !utils.isStatusStale()) return
+
+  /*
+   * Now get to work
+   */
+  await forceUpdateClusterState()
+}
 
 /**
  * Helper method to update the cluster state
  */
-const storeClusterState = async () => {
-  await storeClusterSwarmState()
-  await storeClusterMorioState()
-}
-
-/**
- * Helper method to gather the swarm state
- */
-const storeClusterSwarmState = async () => {
-  /*
-   * Start by inspecting the local swarm
-   */
-  const [result, swarm] = await runDockerApiCommand('swarmInspect', {}, true)
-
-  /*
-   * Is a Swarm running?
-   */
-  if (result && swarm.JoinTokens) {
-    store.log.debug(`Found Docker Swarm with ID ${swarm.ID}`)
-    store.set('swarm.tokens', swarm.JoinTokens)
-    const [ok, nodes] = await runDockerApiCommand('listNodes')
-    if (ok) {
-      let i = 1
-      for (const node of nodes) {
-        store.set(['swarm', 'nodes', node.Description.Hostname], node)
-        store.log.debug(`Swarm member ${i} is ${node.Description.Hostname}`)
-        i++
-      }
-    }
-  } else store.log.debug(`No Docker Swarm found`)
+export const forceUpdateClusterState = async () => {
+  await updateNodeState()
+  utils.resetClusterStatusAge()
 }
 
 /**
  * Helper method to gather the morio cluster state
  */
-const storeClusterMorioState = async () => {
-  const nodes = {}
+const updateNodeState = async () => {
   /*
-   * Attempt to reach API instances via their public names
+   * Run heartbeat hook on all services
    */
-  let i = 0
-  for (const node of store.config.deployment.nodes.sort()) {
-    i++
-    const data = await testUrl(`https://${node}${store.getPreset('MORIO_API_PREFIX')}/info`, {
-      returnAs: 'json',
-      ignoreCertificate: true,
-      returnError: true,
-    })
-    let [ok, ip] = await resolveHost(node)
-    if (ok && Array.isArray(ip)) {
-      if (ip.length > 0) ip = ip[0]
-      else store.log.error(`Unable to resolve node ${node}. No addresses found.`)
-      if (ip.length > 1)
-        store.log.warn(
-          `Node ${node} resolves to multiple IP addresses. This should be avoided. (${ip.join()})`
-        )
-    } else store.log.error(`Unable to resolve node ${node}. Lookup failed.`)
+  const promises = []
+  for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
+    if (optionalServices.includes(service) || (await runHook('wanted', service)))
+      promises.push(runHook('heartbeat', service))
+  }
+  /*
+   * Do the same for core as the final service
+   */
+  promises.push(runHook('heartbeat', 'core'))
 
-    const add = {
-      fqdn: node,
-      ip: Array.isArray(ip),
-      hostname: node.split('.')[0],
-      node_id: i,
+  /*
+   * Don't consolidate until we have all reasults
+   */
+  await Promise.all(promises)
+
+  /*
+   * If we are leading the cluster,
+   * we should also update the consolidated cluster status
+   */
+  if (utils.isLeading()) consolidateClusterStatus()
+}
+
+const consolidateClusterStatus = () => {
+  const status = utils.getStatus()?.nodes?.[utils.getNodeFqdn()]
+  let code = 0
+  for (const service of [...serviceOrder]) {
+    if (typeof status[service] !== 'undefined' && status[service] !== 0) {
+      if (code === 0) code = serviceCodes[service]
+      log.warn(`[${service}] Service has status code ${status[service]}`)
     }
-
-    nodes[i] = data?.about ? { ...data, ...add, up: true } : { ...add, up: false }
   }
 
-  /*
-   * Find out which of these nodes we are
-   */
-  for (const [serial, node] of Object.entries(nodes)) {
-    if (node.core?.node && node.core.node === store.node.node)
-      store.set('cluster.local_node', serial)
-  }
+  utils.setClusterStatus(code, statusColorFromCode(code))
+}
 
-  /*
-   * Store data
-   */
-  store.set('cluster.nodes', nodes)
-  //store.set('cluster.leader', leader.node_id ? leader : false)
-  store.set('cluster.sets', {
-    all: Object.values(nodes).map((node) => node.node_id),
-    ephemeral: Object.values(nodes)
-      .filter((node) => (node.ephemeral ? true : false))
-      .map((node) => node.node_id),
-    up: Object.values(nodes)
-      .filter((node) => (node.up ? true : false))
-      .map((node) => node.node_id),
-  })
-  if (store.swarm?.nodes) store.cluster.sets.swarm = Object.keys(store.swarm.nodes)
+const statusColorFromCode = (code) => {
+  if (code === 0) return 'green'
+  if (code < 10) return 'amber'
+  // TODO: handle more amber states
+  return 'red'
 }
 
 /**
- * Helper method to join a node to the swarm
+ * Ensure that the Morio cluster reaches consensus about what config to run
  *
- * @param {string} ip - The IP address to advertise
- * @param {string} token - The Join Token
+ * Consensus building typically falls apart in 2 main parts:
+ *   - Figuring out who is the leader of the cluster
+ *   - Figuring out what config to run
+ * For the first part, since rqlite uses the RAFT consensus protocol, we do not
+ * need to re-implement this. We just make the db service leader the Morio cluster leader
+ * because it does not matter who leads, all we need is consensus.
+ * Then, there are two options:
+ *   - If we are leader, we reach out to all nodes asking them to sync
+ *   - If we are not leader, we reach out to the lader asking them to initiate a sync
  */
-export const joinSwarm = async (ip, token, managers = []) =>
-  await runDockerApiCommand('swarmJoin', {
-    ListenAddr: ip,
-    AdvertiseAddr: ip,
-    RemoteAddrs: managers,
-    JoinToken: token,
-  })
-
-/**
- * Ensures the Docker Swarm is up and configured
- *
- * Does not take parameters, does not return,
- * but mutates the store.
- */
-const ensureSwarm = async ({ initialSetup = false }) => {
+export const ensureMorioClusterConsensus = async () => {
   /*
-   * Find our feet
+   * Make sure we use the latest cluster state
    */
-  await storeClusterState()
+  await updateClusterState()
 
   /*
-   * Does a swarm need to be created?
+   * Ensure a cluster heartbeat is running
    */
-  if (initialSetup || !store.swarm?.tokens?.Manager) {
-    store.log.debug('Initializing Docker Swarm')
-    const [result] = await runDockerApiCommand('swarmInit', {
-      ListenAddr: store.node.ip,
-      AdvertiseAddr: store.node.ip,
-      ForceNewCluster: false,
-    })
-    /*
-     * If the swarm was created, refresh the cluster state
-     */
-    if (result) await storeClusterState()
-  }
-
-  /*
-   * Now compare cluster nodes to swarm nodes,
-   * and ask missing nodes to join the cluster
-   */
-  for (const id of store.cluster.sets.all.filter(
-    (serial) => `${serial}` !== `${store.cluster.local_node}`
-  )) {
-    const node = store.cluster.nodes[id]
-    const fqdn = store.cluster.nodes[id].fqdn
-    const host = store.cluster.nodes[id].node_hostname
-    if (!store.cluster.sets.swarm || !store.cluster.sets.swarm.includes(node.hostname)) {
-      try {
-        store.log.debug(`Asking ${fqdn} to join the cluster`)
-        await axios.post(
-          `https://${node.fqdn}${store.getPreset('MORIO_API_PREFIX')}/cluster/join`,
-          {
-            join: store.node,
-            as: { node, fqdn, host, ip: await resolveHostAsIp(fqdn) },
-            managers: swarmManagers(),
-            token: store.swarm.tokens.Manager,
-          },
-          {
-            httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-          }
-        )
-      } catch (err) {
-        store.log.warn(err, `Join Cluster request failed for ${node.fqdn}`)
-      }
-    }
-  }
+  ensureClusterHeartbeat()
 }
 
 /**
- * This is called from the beforeAll lifecycle hook
- * when we are in a clusterd depoyment. Clustering
- * requires a bit more work, because we don't just have
- * to resolve the configuration, we also need to make
- * sure we have the latest config, and start Docker in
- * swarm mode.
+ * Ensure a cluster heartbeat
  */
-export const startCluster = async (hookProps) => {
-  store.set('cluster.swarmReady', false)
-  let tries = 0
-  while (
-    store.cluster.swarmReady === false &&
-    tries < store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')
-  ) {
-    tries++
-    if (store.cluster.swarmReady) store.log.info('Cluster Swarm is ready')
-    else
-      store.log.warn(
-        `Cluster Swarm is not ready. Will attempt to bring it up (${tries}/${store.getPreset('MORIO_CORE_SWARM_ATTEMPTS')})`
-      )
-    /*
-     * Refresh the cluster state
-     */
-    await storeClusterState()
-
-    /*
-     * Setup Docker Swarm
-     */
-    await ensureSwarm(hookProps)
-    if (!store.cluster.swarmReady) await sleep(store.getPreset('MORIO_CORE_SWARM_SLEEP'))
-  }
-
+const ensureClusterHeartbeat = async () => {
   /*
-   * If this is the initial setup, make sure we have epehemeral nodes
+   * If we are leading the cluster, don't bother
    */
-  if (hookProps.initialSetup) {
-    if (store.cluster.sets.ephemeral.length < 2) {
-      store.log.error(
-        `Initial cluster setup, but not enough ephemeral nodes found. Cannot continue`
-      )
-      return
-    }
-
-    return
-  }
-
-  return
+  if (utils.isLeading()) return false
 
   /*
-   * Are we able to identity ourselves?
-  store.set('cluster.me', Object.values(store.cluster.nodes))
-    .filter(node => node.node === store.keys.node)
-    .map(node => node.node_id)
-    .pop()
-  if (Array.isArray(store.cluster.me)) store.cluster.me = store.cluster.me.pop().toString()
-  else store.cluster.me = false
+   * Let people know w're staring the heartbeat
+   */
+  log.debug(`Starting cluster heartbeat`)
+  runHeartbeat(true, false)
+}
+
+/**
+ * Start a cluster heartbeat
+ */
+export const runHeartbeat = async (broadcast = false, justOnce = false) => {
+  /*
+   * Run heartbeats locally if there are no remote nodes
+   */
+  if (utils.getBrokerCount() === 1 && utils.getFlankingCount() < 1) runLocalHeartbeat()
 
   /*
-   * Store the leader node and whether or not we are leading
-  if (store.cluster.leader?.node) store.cluster.leader = store.cluster.leader.node
-  else {
-    /*
-     * Is the leader unreachable (could be us)
-    let sawUs = false
-    for (const [id, node] of Object.entries(store.cluster.nodes)) {
-      if (node.node && node.node === store.config.deployment.node) {
-        store.cluster.leader = node.node
-        sawUs = true
-      }
-    }
-    if (!store.cluster.leader && !sawUs && store.cluster.sets.ephemeral.length > 0) {
-      /*
-       * We did not see ourselves, nor
-    }
-  }
-  //state.leading = state.nodes[state.me].node === state.leader
-
-  /*
-   * If we are not leading, attempt to reach the leader and ask to
-   * reconfigure.
-  if (!store.cluster.leader) {
-    store.log.debug('We are not leading this cluster')
-    store.log.error('FIXME: Need to ask leader to reconfigure the cluster')
-    return
-  }
-
-  /*
-   * This cluster needs our leadership.
    *
-   * There's a variety of possible states the cluster can be in.
-   * Let's deal with the ones we expect, and handle the unexpected later.
-  if (store.cluster.sets.all.length === store.cluster.sets.up.length) {
-    /*
-     * All nodes are up. This is nice.
-    store.log.debug('All cluster nodes appear to be up')
-    if (store.cluster.sets.all.length - 1 === store.cluster.sets.ephemeral.length) {
+   * Ensure we are comparing to up to date cluster state
+   * Unless this is the initial setup in which case we just updated the state
+   * and should perhaps let the world knoww we just work up
+   */
+  if (!broadcast) await updateClusterState()
+
+  /*
+   * Who are we sending heartbeats to?
+   */
+  const targets = broadcast ? utils.getNodeFqdns() : [utils.getLeaderFqdn()]
+
+  /*
+   * If we are leaderless, targets will hold [false] so guard against that
+   * just defer for a while, then try again
+   */
+  if (targets.length === 1 && targets[0] === false) {
+    const delay = 6660
+    log.debug(
+      `No cluster leader yet. Will wait a while and send out a new broadcast heartbeat in ${Math.floor(delay / 10) / 100} seconds`
+    )
+    return setTimeout(async () => runHeartbeat(true, false), 3000)
+  }
+
+  /*
+   * If there are no targets, that might indicate a leader change.
+   * We stop the heartbeat, TODO: Can we recover from this?
+   */
+  if (targets.length === 0) {
+    log.info(`No heartbeat targets found. Stopping heartbeat`)
+    return
+  }
+
+  /*
+   * Create a heartbeat for each target
+   */
+  for (const fqdn of targets.filter((fqdn) => fqdn !== utils.getNodeFqdn())) {
+    if (justOnce) sendHeartbeat(fqdn, broadcast, justOnce)
+    else {
       /*
-       * We are the only non-ephemral mode.
-       * This is the initial cluster bootstrap, so we setup Docker
-       * Swarm, and then join all other nodes to the cluster.
-      store.log.info('We are leading and all other nodes are ephemeral. Creating cluster.')
-      await ensureSwarm()
-    }
-    else if (store.cluster.sets.ephemeral.length > 0) {
-      store.log.warn('We are leading, some nodes are ephemeral, some or not. Not sure how to handle this (yet).')
-      throw('Cannot handle mixed ephemeral and instantiated nodes')
+       * Do not stack timeouts
+       */
+      const running = utils.getHeartbeatOut(fqdn)
+      if (running) clearTimeout(running)
+      /*
+       * Store timeout ID so we can cancel it later
+       */
+      utils.setHeartbeatOut(
+        fqdn,
+        setTimeout(async () => sendHeartbeat(fqdn, broadcast), heartbeatDelay())
+      )
     }
   }
-  else {
-    store.log.warn('Some nodes did not respond. Will attempt to create cluster with the nodes we have')
-    throw('FIXME: Support bootstrapping partial cluster')
-  }
-  */
 }
 
 /**
- * Helper method to get the list of Swarm managers
- * formatted for use in a joinSwarm call
+ * Start a local heartbeat
+ *
+ * When Morio has only 1 node. Or when Morio has only 1 broker node,
+ * we will run a local heartbeat. This will not reach out over the network
+ * but merely trigger the heartbeat lifecycle event locally, as that is what
+ * used to keep things up to date.
+ *
+ * The reason we also run it when there is only 1 broker node is that
+ * in a scenario where we have 1 broker node + 1 flanking node, the flanking
+ * node going down would mean there is no long a heartbeat, and thus the cluster
+ * will start to decay.
+ *
  */
-const swarmManagers = () =>
-  Object.values(store.swarm.nodes)
-    .filter((node) => node.ManagerStatus.Reachability === 'reachable')
-    .map((node) => node.ManagerStatus.Addr)
+export const runLocalHeartbeat = async (init = false) => {
+  /*
+   * Ensure we are comparing to up to date cluster state
+   */
+  if (!init) await updateClusterState()
+
+  /*
+   * Do not stack timeouts
+   */
+  const running = utils.getHeartbeatLocal()
+  if (running) clearTimeout(running)
+  /*
+   * Store timeout ID so we can cancel it later
+   */
+  utils.setHeartbeatLocal(setTimeout(async () => triggerLocalHeartbeat(), heartbeatDelay()))
+}
+
+const triggerLocalHeartbeat = async () => {
+  log.debug(`Running local heartbeat`)
+  runLocalHeartbeat(false)
+}
+
+const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
+  /*
+   * If fqdn is not a thing, don't bother
+   */
+  if (!fqdn) {
+    log.warn(`Cannot send heartbeat to ${fqdn}`)
+    return
+  }
+
+  /*
+   * Send heartbeat request and verify the result
+   */
+  const start = Date.now()
+  let data
+  try {
+    if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
+    data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
+      method: 'POST',
+      data: dataWithChecksum({
+        from: {
+          fqdn: utils.getNodeFqdn(),
+          serial: Number(utils.getNodeSerial()),
+          uuid: utils.getNodeUuid(),
+        },
+        to: fqdn,
+        cluster: utils.getClusterUuid(),
+        cluster_leader: {
+          serial: utils.getLeaderSerial() || undefined,
+          uuid: utils.getLeaderUuid() || undefined,
+        },
+        version: utils.getVersion(),
+        settings_serial: Number(utils.getSettingsSerial()),
+        status: utils.getStatus(),
+        nodes: utils.getClusterNodes(),
+        broadcast,
+        uptime: utils.getUptime(),
+      }),
+      timeout: 1666,
+      returnAs: 'json',
+      returnError: true,
+      ignoreCertificate: true,
+    })
+  } catch (error) {
+    // Help the debug party
+    const rtt = Date.now() - start
+    log.debug(
+      `${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
+    )
+    // Verify heartbeat (this will log a warning for the error)
+    verifyHeartbeatResponse({ fqdn, error })
+    // And trigger a new heartbeat
+    runHeartbeat(false, false)
+  }
+
+  /*
+   * Help the debug party
+   */
+  const rtt = Date.now() - start
+  log.debug(`${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms`)
+
+  /*
+   * Verify the response
+   */
+  verifyHeartbeatResponse({ fqdn, data, rtt })
+
+  /*
+   * Trigger a new heatbeat
+   */
+  if (!justOnce) runHeartbeat(false, false)
+}
+
+/*
+ * A method to get (and slowly increase) the heartbeat delay
+ */
+const heartbeatDelay = () => {
+  const now = Number(utils.getHeartbeatInterval())
+  const next = Math.ceil(now * 1.5)
+  const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+  if (next > max) return max * 1000
+  else {
+    log.debug(`Slowing heartbeat rate from ${now}s to ${next}s interval`)
+    utils.setHeartbeatInterval(next)
+    return next * 1000
+  }
+}
+
+/**
+ * This verifies a heartbeat response and saves the result
+ *
+ * Note that this will run on a FOLLOWER node only.
+ *
+ * @param {string} fqdn - The FQDN of the remote node
+ * @param {object} data - The data (body) from the heartbeat response
+ * @param {number} rtt - The request's round-trip-time (RTT) in ms
+ * @param {object} error - If the request errored out, this will hold the Axios error
+ */
+const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
+  /*
+   * Is this an error?
+   */
+  if (error || data?.code) {
+    /*
+     * Storing the result of a failed hearbteat will influence the cluster state
+     */
+    utils.setHeartbeatIn(fqdn, { up: false, ok: false, error: error.code })
+    /*
+     * Also log something an error-specific message, but not when we're still finding our feet
+     */
+    if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
+      if (error.code === 'ECONNREFUSED') {
+        log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
+      } else {
+        log.warn(error, `Unspecified error when sending heartbeat to node ${fqdn}.`)
+      }
+    }
+
+    return
+  } else if (data.data && data.checksum) {
+    if (validDataWithChecksum(data)) data = data.data
+    else log.warn(data, `Heartbeat checksum failure`)
+  } else {
+    /*
+     * It is normal for nodes to not be able to properly sign/checksum the heartbeats
+     * when the cluster just came up, since they may not have the required data yet
+     * So below 1 minute of uptime, let's swallow these warnings
+     */
+    if (utils.getUptime() > 60) log.warn(`Received an invalid heartbeat response`)
+  }
+
+  /*
+   * Just because the request didn't error doesn't mean all is ok
+   */
+  if (Array.isArray(data?.errors) && data.errors.length > 0) {
+    utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
+    for (const err of data.errors) {
+      log.warn(`Heartbeat error from ${fqdn}: ${err}`)
+    }
+  } else {
+    utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
+  }
+
+  /*
+   * Warn when things are too slow
+   */
+  if (rtt && rtt > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT')) {
+    log.warn(`Heartbeat RTT to ${fqdn} was ${rtt}ms which is above the warning mark`)
+  }
+
+  /*
+   * Do we need to take any action?
+   */
+  if (data?.action) {
+    if (data.action === 'INVITE') inviteClusterNode(fqdn)
+    if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
+  } else if (Array.isArray(data?.nodes)) {
+    for (const uuid in data.nodes) {
+      /*
+       * It it's a valid hearbeat, add the node info to the state
+       */
+      if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
+    }
+  }
+
+  /*
+   * Update status of cluster nodes
+   */
+  if (data?.status?.nodes) {
+    for (const fqdn of Object.keys(data.status.nodes)
+      .filter((fqdn) => fqdn !== utils.getNodeFqdn())
+      .filter((fqdn) => utils.getNodeFqdns().includes(fqdn))) {
+      utils.setPeerStatus(fqdn, data.status.nodes[fqdn])
+    }
+    utils.setClusterStatus(data.status.cluster.code, data.status.cluster.color)
+  }
+}
+
+export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
+  /*
+   * Ensure we are comparing to up to date cluster state
+   */
+  await updateClusterState()
+
+  /*
+   * This will hold our findings
+   * We end with the most problematic action
+   */
+  let action = false
+  const errors = []
+
+  /*
+   * Verify version.
+   * If there's a mismatch there is nothing we can do so this is lowest priority.
+   */
+  if (data.version !== utils.getVersion()) {
+    const err = 'VERSION_MISMATCH'
+    errors.push(err)
+    log.info(`Version mismatch in ${type} from ${data.from.fqdn}: ${err}`)
+  }
+
+  /*
+   * Verify we know this node
+   * If there's a mismatch there is nothing we can do so this is lowest priority.
+   */
+  if (!utils.getNodeFqdns().includes(data.from.fqdn)) {
+    const err = 'ROGUE_CLUSTER_MEMBER'
+    errors.push(err)
+    log.warn(
+      `Rogue cluster member. Received heartbeat from ${data.from.fqdn} which is not a node of this cluster: ${err}`
+    )
+  }
+
+  /*
+   * Verify the 'to' is really us as a mismatch here can indicate fault DNS configuration
+   */
+  if (utils.getNodeFqdn() !== data.to) {
+    const err = 'HEARTBEAT_TARGET_FQDN_MISMATCH'
+    errors.push(err)
+    log.warn(`Heartbeat target FQDN mismatch. We are not ${data.to}: ${err}`)
+  }
+
+  /*
+   * Verify settings_serial
+   * If there's a mismatch, ask to re-sync the cluster.
+   */
+  if (data.settings_serial !== utils.getSettingsSerial()) {
+    const err = 'SETTINGS_SERIAL_MISMATCH'
+    errors.push(err)
+    action = 'SYNC'
+    log.debug(`Settings serial mismatch in ${type} from ${data.from.fqdn}: ${err}`)
+  }
+
+  /*
+   * Verify leader (only for heatbeats)
+   * If there's a mismatch, ask to re-elect the cluster leader.
+   */
+  if (!data.cluster_leader?.serial || data.cluster_leader.serial !== utils.getLeaderSerial()) {
+    /*
+     * Do they look to us as their leader?
+     */
+    if (data.cluster_leader?.serial === utils.getNodeSerial()) {
+      /*
+       * Are they correct
+       */
+      const leading = await isBrokerLeading()
+      if (leading) {
+        /*
+         * We hereby humbly accept our leading role
+         */
+        utils.setLeader(utils.getNodeUuid())
+        utils.setLeaderSerial(utils.getNodeSerial())
+        log.info(`We are now leading this cluster`)
+      } else {
+        const err = 'LEADER_MISMATCH'
+        errors.push(err)
+        action = 'LEADER_CHANGE'
+        log.info(
+          {
+            remote_leader: data.cluster_leader?.serial,
+            local_leader: utils.getLeaderSerial(),
+          },
+          `Node ${data.from.fqdn} disagrees about the leader in ${type}: ${err}`
+        )
+      }
+    } else {
+      const err = 'LEADER_MISMATCH'
+      errors.push(err)
+      action = 'LEADER_CHANGE'
+      log.info(
+        {
+          remote_leader: data.cluster_leader?.serial,
+          local_leader: utils.getLeaderSerial(),
+        },
+        `Leader update received from Node ${data.from.fqdn} in ${type}: ${err}`
+      )
+    }
+  }
+
+  /*
+   * Verify cluster
+   * If there's a mismatch, log an error because we can't fix this without human intervention.
+   */
+  if (data.cluster !== utils.getClusterUuid()) {
+    const err = 'CLUSTER_MISMATCH'
+    errors.push(err)
+    log.debug(
+      { localClusterUuid: utils.getClusterUuid() },
+      `Cluster mismatch in ${type} from node ${data.from.fqdn}: ${err}`
+    )
+  }
+
+  /*
+   * It it's a valid hearbeat, add the node info to the state
+   */
+  if (errors.length === 0) {
+    if (data.nodes[data.from.uuid]) utils.setClusterNode(data.from.uuid, data.nodes[data.from.uuid])
+  }
+
+  return { action, errors }
+}
+
+/**
+ * Ensure the Morio cluster is ready
+ *
+ * This is called from the beforeall lifecycle hook
+ * Note that Morio always runs in cluster mode
+ * to ensure we can reach flanking nodes whne they are added.
+ */
+export const ensureMorioCluster = async () => {
+  utils.setCoreReady(false)
+
+  /*
+   * Ensure the network exists, and we're attached to it.
+   */
+  try {
+    await ensureMorioNetwork(
+      utils.getNetworkName(), // Network name
+      'core', // Service name
+      {
+        Aliases: [
+          'core',
+          'coredocs',
+          utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`,
+        ],
+      } // Endpoint config
+    )
+  } catch (err) {
+    log.error(err, 'Failed to ensure morio network configuration')
+  }
+
+  /*
+   * Morio is always (ready to be) a cluster.
+   * This needs to run, regardless of how many nodes we have.
+   * Unless of course, we're running in ephemeral mode
+   * in which case we can just set the cluster status accordingly
+   */
+  if (!utils.isEphemeral()) await ensureMorioClusterConsensus()
+  else utils.setClusterStatus(1, statusColorFromCode(1))
+
+  /*
+   * Is the cluster healthy?
+   */
+  utils.setCoreReady(true)
+}
+
+/*
+ * Helpoer method to invite a single node to join the cluster
+ *
+ * @param {string} fqdn - The fqdn of the remote node
+ */
+export const inviteClusterNode = async (remote) => {
+  /*
+   * First, attempt a single call to join the cluster.
+   * We will await this one because typically this works, and it
+   * prevents us from having to run this in the background.
+   */
+  const opportunisticJoin = await inviteClusterNodeAttempt(remote)
+  //const opportunisticJoin = false
+
+  /*
+   * If that didn't work, keep trying, but don't block the request
+   */
+  if (!opportunisticJoin) {
+    log.warn(
+      `Initial cluster join failed for node ${remote}. Will continue trying, but this is not a good omen.`
+    )
+    const interval = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
+    attempt({
+      every: interval,
+      timeout: interval * 0.9,
+      run: async () => await inviteClusterNodeAttempt(remote),
+      onFailedAttempt: (s) =>
+        log.debug(`Still waiting for Node ${remote} to join the cluster. It's been ${s} seconds.`),
+    }).then(() => log.info(`Node ${remote} has now joined the cluster`))
+  } else log.info(`Node ${remote} has joined the cluster`)
+}
+
+/**
+ * Helper method to attempt inviting a remote cluster node
+ *
+ * @params {string} remote - The FQDN of the remote node
+ */
+const inviteClusterNodeAttempt = async (remote) => {
+  log.debug(`Inviting ${remote} to join the cluster`)
+  const flanking = utils.isThisAFlankingNode({ fqdn: remote })
+
+  const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
+    method: 'POST',
+    data: {
+      you: remote,
+      join: utils.getNodeFqdn(),
+      as: flanking ? 'flanking_node' : 'broker_node',
+      cluster: utils.getClusterUuid(),
+      settings: {
+        serial: Number(utils.getSettingsSerial()),
+        data: utils.getSanitizedSettings(),
+      },
+      keys: utils.getKeys(),
+    },
+    ignoreCertificate: true,
+    timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')) * 900, // *0.9 * 1000 to go from ms to s
+    returnAs: 'json',
+    returnError: true,
+  })
+  if (result) {
+    log.info(`Node ${result.node} will join the cluster`)
+    return true
+  } else {
+    log.todo('Handle cluster join failure')
+    return false
+  }
+}
+
+/*
+ * This loads the status from the API
+ */
+// const getLocalEphemeralUuid = async () => {
+//   /*
+//    * This should only ever be used in ephemeral mode
+//    */
+//   if (!utils.isEphemeral()) return false
+//
+//
+//   /*
+//    * Reach out to 'api' in cleartext, which can only be access on the docker network
+//    */
+//   const result = await testUrl(
+//     `http://api:${utils.getPreset('MORIO_API_PORT')}${utils.getPreset('MORIO_API_PREFIX')}/status`,
+//     {
+//       method: 'GET',
+//       returnAs: 'json',
+//       returnError: true,
+//     }
+//   )
+//
+//   /*
+//    * Return local ephemeral UIUD if we found it
+//    */
+//   return result?.state?.core?.ephemeral_uuid
+//     ?  result.state.core.ephemeral_uuid
+//     : false
+// }
+
+/*
+ * Finds out the fqdn of this node
+ *
+ * @param {array[string]} nodes - The list of node FQDNs
+ * @return {string|bool} local - The FQDN or false if it wasn't found
+ */
+//const getLocalNode = async (nodes) => {
+//  const localEphUuid = await getLocalEphemeralUuid()
+//
+//  let local = false
+//  for (const node of nodes) {
+//    const reachable = await testUrl(
+//      `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
+//      {
+//        method: 'GET',
+//        ignoreCertificate: true,
+//        timeout: 1500,
+//        returnAs: 'json',
+//        returnError: false,
+//      }
+//    )
+//    if (reachable?.state?.core?.ephemeral_uuid === localEphUuid) local = node
+//  }
+//
+//  return local
+//}

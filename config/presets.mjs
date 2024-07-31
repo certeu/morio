@@ -29,8 +29,17 @@ export const presets = {
   // Name of the Morio public repositories folder
   MORIO_REPOS_FOLDER: 'repos',
 
-  // Network name. Change at your own peril.
+  // Network name
   MORIO_NETWORK: 'morionet',
+
+  // Network subnet.
+  MORIO_NETWORK_SUBNET: '192.168.144.32/28',
+
+  // Network subnet.
+  MORIO_NETWORK_MTU: 1500,
+
+  // Prefix for looking up errors
+  MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
 
   /*
    * API presets
@@ -64,16 +73,32 @@ export const presets = {
     '_redpanda.audit_log', // For RedPanda internal audit logging,
     //'alarms', // For alarms
     'audit', // For audit info/logs (think auditbeat)
-    //'checks', // For healthchecks
-    //'events', // For events (typically generated from other sources)
+    'checks', // For healthchecks
+    'events', // For events (typically generated from other sources)
     'logs', // For logs
     'metrics', // For metrics
-    //'notifications', // For notifications
+    'notifications', // For notifications
     //'traces', // For distributed tracing / spans
+    'cron.hourly', // For roughly hourly triggers
+    'cron.daily', // For roughly daily triggers
+    'cron.weekly', // For roughly daily triggers
+    'cron.monthly', // For roughly daily triggers
   ],
 
   // Broker UID inside container
   MORIO_BROKER_UID: 101,
+
+  // Internal port for the Kafka API
+  MORIO_BROKER_KAFKA_API_INTERNAL_PORT: 19092,
+
+  // External port for the Kafka API
+  MORIO_BROKER_KAFKA_API_EXTERNAL_PORT: 9092,
+
+  // External port for the RedPanda Admin API
+  MORIO_BROKER_ADMIN_API_PORT: 9644,
+
+  // External port for the RedPadna proxy (http-rest) API
+  MORIO_BROKER_REST_API_PORT: 8082,
 
   /*
    * CA presets
@@ -100,6 +125,9 @@ export const presets = {
   // Default certificate lifetime
   MORIO_CA_CERTIFICATE_LIFETIME_DFLT: '750h',
 
+  // (http) Port the CA will listen on
+  MORIO_CA_PORT: 9000,
+
   // CA UID inside container
   MORIO_CA_UID: 1000,
 
@@ -117,6 +145,9 @@ export const presets = {
   // Console log level
   MORIO_CONSOLE_PREFIX: 'console',
 
+  // Console port
+  MORIO_CONSOLE_PORT: 8080,
+
   /*
    * Core presets
    */
@@ -125,16 +156,50 @@ export const presets = {
   MORIO_CORE_CONFIG_FOLDER: '/etc/morio',
 
   // CORE log level |  One of: trace, debug, info, warn, error, fatal, silent
-  MORIO_CORE_LOG_LEVEL: 'debug',
+  MORIO_CORE_LOG_LEVEL: 'trace',
 
   // TCP port core should listen on
   MORIO_CORE_PORT: 3007,
 
-  // Amount of times to attempt to establish a Swarm
-  MORIO_CORE_SWARM_ATTEMPTS: 30,
+  // API prefix (since the API is behind Traefik)
+  MORIO_CORE_PREFIX: '/-/core',
 
-  // Amount of seconds to wait between attempts to establish a Swarm
-  MORIO_CORE_SWARM_SLEEP: 10,
+  // Amount of days before expiry to renew service certificates
+  MORIO_CORE_SERVICE_CERTIFICATE_RENEWAL_DAYS: 135,
+
+  // Amount of seconds to wait between cluster heartbeats
+  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 30,
+
+  // Amount of milliseconds above which we'll complain about hearbeat latency
+  MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT: 150,
+
+  // Amount of hours between triggering cron's hourly schedule (not real cron)
+  MORIO_CORE_CRON_HOURLY: 1,
+
+  // Amount of hours between triggering cron's daily schedule (not real cron)
+  MORIO_CORE_CRON_DAILY: 24,
+
+  // Amount of hours between triggering cron's weekly schedule (not real cron)
+  MORIO_CORE_CRON_WEEKLY: 720,
+
+  // Amount of hours between triggering cron's monthly schedule (not real cron)
+  MORIO_CORE_CRON_MONTHLY: 720,
+
+  // Amount of seconds to cache the cluster state
+  MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20,
+
+  // Amount of characters to use for the short version of a UUID (aka fingerprint)
+  MORIO_CORE_UUID_FINGERPRINT_LENGTH: 6,
+
+  /*
+   * Database presets
+   */
+
+  // Port to use for the REST API
+  MORIO_DB_HTTP_PORT: 4001,
+
+  // Port to use for the Raft consensus protocol
+  MORIO_DB_RAFT_PORT: 4002,
 
   /*
    * Proxy presets

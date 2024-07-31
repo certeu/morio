@@ -14,7 +14,7 @@ const X509DownloadPage = (props) => (
             <ul className="pl-6 mb-4">
               <li>Root certificate of the Morio internal CA.</li>
               <li>
-                <a href="/downloads/certs/ca.pem">/downloads/certs/root.pem</a>
+                <a href="/downloads/certs/root.pem">/downloads/certs/root.pem</a>
               </li>
             </ul>
           </li>

@@ -122,7 +122,7 @@ export const deployment = (context, toggleValidate) => {
                 '##### Cluster Name',
                 'This name should resolve to the IP addresses of all cluster nodes.',
                 {
-                  key: 'depoyment.fqdn',
+                  key: 'deployment.fqdn',
                   label: 'Cluser Name',
                   labelBL: 'A fully qualified domain name for the entire Morio cluster',
                   labelBR: (

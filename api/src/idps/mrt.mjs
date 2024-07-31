@@ -1,5 +1,6 @@
-import { store } from '../lib/store.mjs'
-import { storeLastLoginTime } from '../lib/account.mjs'
+import { roles } from '#config/roles'
+import { utils } from '../lib/utils.mjs'
+import { updateLastLoginTime } from '../lib/account.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
 
 /**
@@ -16,11 +17,13 @@ export const mrt = async (id, data) => {
   /*
    * Authenticate
    */
-  if (id === 'mrt' && data.mrt === store.keys.mrt) {
+  const keys = utils.getKeys()
+  if (!keys?.mrt) return false
+  if (id === 'mrt' && data.mrt === keys.mrt) {
     /*
-     * Store the latest login time, but don't wait for it
+     * Update the latest login time, but don't wait for it
      */
-    storeLastLoginTime('mrt', 'root')
+    updateLastLoginTime('mrt', 'root')
 
     /*
      * Is the role available? Since this is the root token,
@@ -30,10 +33,10 @@ export const mrt = async (id, data) => {
     if (!available)
       return [
         false,
+        'morio.api.account.role.unavailable',
         {
-          success: false,
-          reason: 'Authentication failed',
-          error: 'Role not available',
+          requested_role: data.role,
+          available_roles: roles,
         },
       ]
 
@@ -45,6 +48,9 @@ export const mrt = async (id, data) => {
       {
         user: 'root',
         role: data.role || 'user',
+        available_roles: roles,
+        highest_role: 'root',
+        provider: id,
       },
     ]
   }
@@ -52,5 +58,5 @@ export const mrt = async (id, data) => {
   /*
    * If we get here, it means authentication failed
    */
-  return [false, { success: false, reason: 'Authentication failed', error: 'Invalid token' }]
+  return [false, 'morio.api.account.credentials.mismatch']
 }
