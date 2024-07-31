@@ -171,13 +171,13 @@ nvm install lts/iron
 Via SSH:
 
 ```
-git clone git@github.com:joostdecock/dotfiles.git
+git clone git@github.com:certeu/morio.git
 ```
 
 Or via HTTPS:
 
 ```
-git clone https://github.com/joostdecock/dotfiles.git
+git clone https://github.com/centeu/morio.git
 ```
 
 ### Run kickstart

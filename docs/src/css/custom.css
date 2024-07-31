@@ -1,0 +1,244 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #1b88a2;
+  --ifm-color-primary-dark: #187a92;
+  --ifm-color-primary-darker: #17748a;
+  --ifm-color-primary-darkest: #135f71;
+  --ifm-color-primary-light: #1e96b2;
+  --ifm-color-primary-lighter: #1f9cba;
+  --ifm-color-primary-lightest: #23b1d3;
+  --ifm-background-color: #ffffff;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --mdx-b-comment: #8ecae6;
+  --mdx-bg-comment: 142, 202, 230;
+  --mdx-b-fixme: #fb8500;
+  --mdx-bg-fixme: 251, 133, 0;
+  --mdx-b-note: var(--ifm-color-primary);
+  --mdx-bg-note: 27, 136, 162;
+  --mdx-b-tip: #09BC8A;
+  --mdx-bg-tip: 9, 188, 138;
+  --mdx-b-warning: #EB6534;
+  --mdx-bg-warning: 235, 101, 52;
+  --mdx-alpha-bg: 0.1;
+  --mdx-muted: #666;
+  --mdx-bg-muted: 220, 220, 220;
+  --mdx-shadow: #0001 3px 3px 9px, #0002 1px 1px 6px;
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+   --ifm-color-primary: #219ebc;
+  --ifm-color-primary-dark: #1e8ea9;
+  --ifm-color-primary-darker: #1c86a0;
+  --ifm-color-primary-darkest: #176f84;
+  --ifm-color-primary-light: #24aecf;
+  --ifm-color-primary-lighter: #26b6d8;
+  --ifm-color-primary-lightest: #42c0de;
+  --ifm-background-color: #001d2d;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --mdx-b-comment: #0ca678;
+  --mdx-bg-comment: 8, 127, 91;
+  --mdx-b-fixme: #f76707;
+  --mdx-bg-fixme: 217, 72, 15;
+  --mdx-b-important: #f76707;
+  --mdx-bg-important: 217, 72, 15;
+  --mdx-b-note: #1c7ed6;
+  --mdx-bg-note: 24, 100, 171;
+  --mdx-b-related: #ae3ec9;
+  --mdx-bg-related: 134, 46, 156;
+  --mdx-b-tip: #ae3ec9;
+  --mdx-bg-tip: 134, 46, 156;
+  --mdx-b-tldr: #999;
+  --mdx-bg-tldr: 160, 160, 160;
+  --mdx-b-warning: #f03e3e;
+  --mdx-bg-warning: 201, 42, 42;
+  --mdx-alpha-bg: 0.6;
+  --mdx-muted: #999;
+  --mdx-bg-muted: 120, 120, 120;
+  --mdx-shadow: #0001 3px 3px 9px, #0002 1px 1px 6px;
+}
+
+/* Custom styles */
+footer.footer,
+nav.navbar--fixed-top {
+  background: var(--ifm-background-color);
+  box-shadow: 0px 0px 2px var(--ifm-color-gray-700);
+}
+
+footer.footer div.footer__copyright {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+footer.footer div.footer__copyright div#tagline b {
+  font-size: 1.25rem;
+  text-transform: capitalize;
+}
+footer.footer div.footer__copyright div#tagline span {
+  font-size: 0.75rem;
+  display: block;
+  word-spacing: 0.35rem;
+  letter-spacing: -0.02rem;
+  font-weight: 300;
+}
+
+/* Custom tags based on Popout component */
+div.popout-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+div.popout-title span.type {
+  font-weight: bold;
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+div.popout-title span.type span.pipe {
+  padding: 0 0.5rem;
+}
+div.popout svg.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+div.popout-content p:last-of-type {
+  margin-bottom: 0;
+}
+div.popout-inner span.by-lead {
+  font-size: 0.85rem;
+  padding: 0 0.25rem;
+  text-transform: none;
+  font-weight: normal;
+}
+div.popout-inner span.by-name {
+  font-size: 1.25rem;
+  font-family: cursive;
+  color: var(--mdx-b-note);
+}
+
+
+div.mdx-comment,
+div.mdx-error,
+div.mdx-fixme,
+div.mdx-important,
+div.mdx-note,
+div.mdx-related,
+div.mdx-scode,
+div.mdx-tip,
+div.mdx-tldr,
+div.mdx-warning {
+  margin: 1rem auto;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--mdx-shadow);
+  border-left: 6px solid transparent;
+}
+div.mdx-comment .title,
+div.mdx-error .title,
+div.mdx-fixme .title,
+div.mdx-important .title,
+div.mdx-note .title,
+div.mdx-related .title,
+div.mdx-scode .title,
+div.mdx-tip .title,
+div.mdx-tldr .title,
+div.mdx-warning .title {
+  color: var(--mdx-muted);
+  font-weight: 400;
+}
+div.mdx-comment,
+div.mdx-related {
+  background-color: rgba(var(--mdx-bg-comment), var(--mdx-alpha-bg));
+  border-color: var(--mdx-b-comment);
+}
+div.mdx-comment svg.icon,
+div.mdx-related svg.icon {
+  color: var(--mdx-b-comment);
+}
+
+div.mdx-fixme,
+div.mdx-important {
+  background-color: rgba(var(--mdx-bg-fixme), var(--mdx-alpha-bg));
+  border-color: var(--mdx-b-fixme);
+}
+div.mdx-important svg.icon,
+div.mdx-fixme svg.icon {
+  color: var(--mdx-b-fixme);
+}
+
+div.mdx-note,
+div.mdx-tldr {
+  background-color: rgba(var(--mdx-bg-note), var(--mdx-alpha-bg));
+  border-color: var(--mdx-b-note);
+}
+div.mdx-note svg.icon,
+div.mdx-tldr svg.icon {
+  color: var(--mdx-b-note);
+}
+
+div.mdx-scode,
+div.mdx-tip {
+  background-color: rgba(var(--mdx-bg-tip), var(--mdx-alpha-bg));
+  border-color: var(--mdx-b-tip);
+}
+div.mdx-tip svg.icon {
+  color: var(--mdx-b-tip);
+}
+
+div.mdx-error,
+div.mdx-warning {
+  background-color: rgba(var(--mdx-bg-warning), var(--mdx-alpha-bg));
+  border-color: var(--mdx-b-warning);
+}
+div.mdx-error svg.icon,
+div.mdx-warning svg.icon {
+  color: var(--mdx-b-warning);
+}
+
+/* Caption (for mermaid diagrams and so on) */
+div.with-caption div.shadow {
+  box-shadow: var(--mdx-shadow);
+  border: 1px solid #9996;
+}
+div.with-caption > div.shadow img,
+div.with-caption > div.shadow > p {
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+}
+p.caption {
+  text-align: center;
+  font-size: 90%;
+  font-style: italic;
+}
+
+/* MDX tweaks */
+div.theme-code-block {
+  box-shadow: var(--mdx-shadow);
+  border: 1px solid rgba(150, 150, 150, 0.2);
+}
+
+/* Support themed images */
+[data-theme='light'] img[src$='#gh-dark-mode-only'],
+[data-theme='dark'] img[src$='#gh-light-mode-only'] {
+  display: none;
+}
+
+/* Mermaid legend toggle button */
+div.with-caption a.toggle {
+  font-style: italic;
+  font-size: 90%;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+div.with-caption a.toggle:hover {
+  text-decoration-thickness: 4px;
+  cursor: pointer;
+}
+
