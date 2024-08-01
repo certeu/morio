@@ -24,7 +24,7 @@ export const Architecture = ({ children, caption=false }) => {
         justifyContent: 'space-between',
       }}>
         {caption && <p className="caption">{caption}</p>}
-        <a role="button" className="toggle" onClick={() => setShowLegend(!showLegend)}>{showLegend ? 'Hide' : 'Show'} legend</a>
+    {/* DISABLED_FOR_NOW <a role="button" className="toggle" onClick={() => setShowLegend(!showLegend)}>{showLegend ? 'Hide' : 'Show'} legend</a> */}
       </div>
     </div>
     </>

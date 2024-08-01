@@ -36,7 +36,7 @@ export const presets = {
   MORIO_NETWORK_MTU: 1500,
 
   // Prefix for looking up errors
-  MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/reference/errors/',
+  MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/docs/reference/errors/',
 
   /*
    * API presets
