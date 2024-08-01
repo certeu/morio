@@ -54,6 +54,30 @@ const config = {
         },
       }),
     ],
+    // Redocusaurus config
+    [
+      'redocusaurus',
+      {
+        // Plugin Options for loading OpenAPI files
+        specs: [
+          // Management API docs from OpenAPI spec
+          {
+            spec: './static/oas-api.yaml',
+            route: '/oas-api/',
+          },
+          // Core API docs from OpenAPI spec
+          {
+            spec: './static/oas-core.yaml',
+            route: '/oas-core/',
+          },
+        ],
+        // Theme Options for modifying how redoc renders them
+        theme: {
+          // Change with your site colors
+          primaryColor: '#1890ff',
+        },
+      },
+    ]
   ],
 
   markdown: {

@@ -5,9 +5,6 @@ export const presets = {
    * Morio presets
    */
 
-  //Node environment
-  NODE_ENV: 'production',
-
   // Version number
   MORIO_VERSION: pkg.version,
 
