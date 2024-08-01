@@ -8,10 +8,10 @@ import * as lomo from 'pages/docs/reference/terminology/lomo.mdx'
 import * as tls from 'pages/docs/reference/terminology/tls.mdx'
 import * as x509 from 'pages/docs/reference/terminology/x509.mdx'
 
-export const terminology = { 
+export const terminology = {
   ca,
   dry,
   lomo,
   tls,
-  x509
+  x509,
 }
