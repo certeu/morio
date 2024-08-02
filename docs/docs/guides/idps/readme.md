@@ -89,7 +89,7 @@ This provider allows authentication with a Morio API Keys and its matching secre
 
 - The `apikey` provider is built-in, and does not require configuration.
 - The `apikey` provider can be disabled with the [`DISABLE_IDP_APIKEY`](/docs/reference/flags/disable_idp_apikey/) feature flag.
-- The `apikey` provider's inclusion and/or appearance on the UI'slogin page can be configured in [the UI settings](/reference/settings).
+- The `apikey` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
 
 **Settings Example**
 
