@@ -141,7 +141,7 @@ This provider allows authentication with a the username, password, and TOTP toke
 
 - The `local` provider is built-in, and does not require configuration.
 - The `local` provider can be disabled with the [`DISABLE_IDP_LOCAL`](/docs/reference/flags/disable_idp_local/) feature flag.
-- The `local` provider's inclusion and/or appearance on the UI'slogin page can be configured in [the UI settings](/reference/settings).
+- The `local` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
 
 **Settings Example**
 
@@ -195,7 +195,7 @@ This provider allows against a pre-existing LDAP backend.
 
 - The `ldap` provider needs to be configured before it can be used.
 - The `local` provider can be disabled with the [`DISABLE_IDP_LOCAL`](/docs/reference/flags/disable_idp_local/) feature flag.
-- The `ldap` provider's inclusion and/or appearance on the UI'slogin page can be configured in [the UI settings](/reference/settings).
+- The `ldap` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
 
 **Settings Example**
 
