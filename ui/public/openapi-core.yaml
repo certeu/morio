@@ -1,0 +1,2283 @@
+openapi: 3.1.0
+info:
+  title: Morio Management API
+  description: >
+
+    ## What am I looking at?
+
+    This is the reference documentation for Morio's __Management API__.
+
+    It is auto-generated from this API's OpenAPI v3 specification.
+
+
+    ## Links
+
+
+    - [Morio's GitHub repository at
+    `certeu/morio`](https://github.com/certeu/morio/)
+
+    - [Morio's online documentation at `morio.it`](https://morio.it/)
+  license:
+    name: EUPL
+    url: >-
+      https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
+  version: 0.2.0
+externalDocs:
+  description: Morio Online Documentation
+  url: https://morio.it/
+tags:
+  - name: cluster
+    description: Endpoints related to clustering
+  - name: cryptography
+    description: Endpoints related to cryptography
+  - name: docker
+    description: Endpoints that leverage the Docker daemon API
+  - name: client packages
+    description: Endpoints related to client packages
+  - name: settings
+    description: Endpoints related to the Morio settings
+  - name: status
+    description: Endpoints related to the Morio status
+servers: []
+components: {}
+paths:
+  /cluster/join:
+    post:
+      tags: &ref_0
+        - cluster
+      summary: Invites a node to join the cluster
+      description: This will trigger an ephemeral node to join a cluster
+      requestBody:
+        description: >-
+          The data required to join the cluster. Note that this includes the
+          private keys and certificates.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                you:
+                  type: string
+                join:
+                  type: string
+                cluster:
+                  type: string
+                  format: uuid
+                as:
+                  type: string
+                  enum:
+                    - broker_node
+                    - flanking_node
+                settings:
+                  type: object
+                  properties:
+                    serial:
+                      type: number
+                      format: float
+                      minimum: 1720000000000
+                      maximum: 1990000000000
+                    data:
+                      type: object
+                      properties:
+                        cluster:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              pattern: ^[A-Za-z0-9\s-_,.;:()]+$
+                              minLength: 2
+                              maxLength: 255
+                            broker_nodes:
+                              type: array
+                              items:
+                                type: string
+                              minItems: 1
+                              maxItems: 9
+                            flanking_nodes:
+                              type: array
+                              items:
+                                type: string
+                              minItems: 0
+                              maxItems: 36
+                            fqdn:
+                              type: string
+                              oneOf:
+                                - {}
+                                - x-required: true
+                          required:
+                            - name
+                            - broker_nodes
+                          additionalProperties: false
+                        metadata:
+                          type: object
+                          properties:
+                            version:
+                              type: string
+                            comment:
+                              type: string
+                          additionalProperties: false
+                        connector:
+                          type: object
+                          properties: {}
+                          additionalProperties: false
+                        tokens:
+                          type: object
+                          properties:
+                            flags:
+                              type: object
+                              properties:
+                                HEADLESS_MORIO:
+                                  type: boolean
+                                DISABLE_ROOT_TOKEN:
+                                  type: boolean
+                              additionalProperties: false
+                            secrets:
+                              type: object
+                              properties: {}
+                              additionalProperties: false
+                            vars:
+                              type: object
+                              properties: {}
+                              additionalProperties: false
+                          additionalProperties: false
+                        iam:
+                          type: object
+                          properties:
+                            providers:
+                              type: object
+                              properties: {}
+                              additionalProperties: false
+                            ui:
+                              type: object
+                              properties:
+                                visibility:
+                                  type: object
+                                  properties: {}
+                                  additionalProperties: false
+                                order:
+                                  type: array
+                                  items: {}
+                              additionalProperties: false
+                          additionalProperties: false
+                      additionalProperties: false
+                  required:
+                    - serial
+                    - data
+                  additionalProperties: false
+                keys:
+                  type: object
+                  properties:
+                    jwt:
+                      type: string
+                    mrt:
+                      type: string
+                      pattern: ^mrt\.[0-9a-z]+$
+                      minLength: 68
+                      maxLength: 68
+                    public:
+                      type: string
+                    private:
+                      type: string
+                    cluster:
+                      type: string
+                      format: uuid
+                    jwk:
+                      type: object
+                      properties:
+                        kty:
+                          type: string
+                        kid:
+                          type: string
+                        'n':
+                          type: string
+                        e:
+                          type: string
+                      required:
+                        - kty
+                        - kid
+                        - 'n'
+                        - e
+                      additionalProperties: false
+                    rfpr:
+                      type: string
+                    rcrt:
+                      type: string
+                    rkey:
+                      type: string
+                    rpwd:
+                      type: string
+                    icrt:
+                      type: string
+                    ikey:
+                      type: string
+                  required:
+                    - jwt
+                    - mrt
+                    - public
+                    - private
+                    - cluster
+                    - rfpr
+                    - rcrt
+                    - rkey
+                    - rpwd
+                    - icrt
+                    - ikey
+                  additionalProperties: false
+                headers:
+                  type: object
+                  properties: {}
+                  additionalProperties: false
+              required:
+                - you
+                - join
+                - cluster
+                - as
+              additionalProperties: false
+            example:
+              you: morio-node2.tokyo.morio.it
+              join: morio-node1.tokyo.morio.it
+              as: broker_bode
+              cluster: 3dafca38-993c-4ebf-8613-2d044e1450f4
+              settings:
+                serial: 1722353755056
+                data: &ref_11
+                  cluster:
+                    name: Morio Unit Tests
+                    broker_nodes:
+                      - unit.test.morio.it
+                  tokens:
+                    flags:
+                      HEADLESS_MORIO: false
+                      DISABLE_ROOT_TOKEN: false
+                    secrets:
+                      TEST_SECRET_1: >-
+                        {"iv":"4b16f0efa70cdcad568441143b0ebbea","ct":"28262a424d8b3378b2ac78c7074deeec"}
+                      TEST_SECRET_2: >-
+                        {"iv":"bc0fb68aa6f37cc4eda8fca6a50d7448","ct":"cc786dfb1c5fe6dd4ad389855a206d57"}
+                      LDAP_BIND_SECRET: >-
+                        {"iv":"8b185698a44410657ce84ba6a35b82ce","ct":"7ed3e4c461455f3a4a8b44f834935b6b"}
+                  iam:
+                    providers:
+                      apikey:
+                        provider: apikey
+                        id: apikey
+                        label: API Key
+                      mrt: {}
+                      local:
+                        provider: local
+                        id: mrt
+                        label: Morio Account
+                      ldap:
+                        provider: ldap
+                        verify_certificate: false
+                        id: ldap
+                        label: LDAP
+                        about: Test LDAP server
+                        server:
+                          url: ldap://ldap:10389
+                          bindDN: uid=admin,ou=system
+                          bindCredentials: '{{{ LDAP_BIND_SECRET }}}'
+                          searchBase: ou=Users,dc=ldap,dc=unit,dc=test,dc=morio,dc=it
+                          searchFilter: (&(objectclass=person)(uid={{username}}))
+                        username_field: uid
+                        rbac:
+                          manager:
+                            attribute: employeetype
+                            regex: ^manager$
+                          operator:
+                            attribute: employeetype
+                            regex: ^admin$
+                keys: &ref_24
+                  jwt: >-
+                    eb3be6a4e4a3eb4dfc76202c7a8a0d62294788d8d238ae9d7de9b489b6a6cbf895bb7255e6a67cccab0ddd3ddb1a45bf3d691447c7c91dec333b8724da76c2de
+                  mrt: >-
+                    mrt.eff7902e0eff6a4ffdaffd84ae5f9fb4ee8d67db07efa561ab28fd3fb3f4ee36
+                  public: >
+                    -----BEGIN PUBLIC KEY-----
+
+                    MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAi8sk8Bk3xBB/vSdkqYUV
+
+                    7iDFaGg8ser6tBERCV8M0W5e4h9B1MO34HuElEgXGOvQwWRcWkbijxhCfFSW2D4L
+
+                    TrJ+FwWENJUMvf7HtEJ9z/iKjNeB5nVDAiu6dNljnht3UILyOWcKrqBt7kWoGZUA
+
+                    4e5WvEfQh2OtK/Fd+3Ax5I0jKHUbOIC5lP0qP+S1fakoGGOS/dXDEFO8D5BWMgRe
+
+                    VNhWJr1z5NgnWT/yfOhlfSUjqb0qhbljMI1vCpn3vJn8lVgwVd5lhzUFzD0iT25F
+
+                    gfhWphWK+XHA3zHYbVTtntEqYz/UxJM57QBbpobJXBHDU9F4FKJKQZOzjbnfnp2y
+
+                    mYbIvMmMWARh/BCrjrAR0z+3nM3JKcnoWh0CYCJoRPc8bPkztWc7LXIsxoAgHvk0
+
+                    eS5Pqd0MqX8zDQ/OsiPLLYODD6INy0m7vOlyHgRE0JS3ZKqNQPVmRGMuV1fvsZEr
+
+                    l3xFvkU3EsbSHWJ6/98o0Tndu3sUvdPhsMsn8+3YgDFC6bgCJDvSGelejgTA9OOM
+
+                    5BVUfyysC3cc4xDKYU6WLCc0k5li7i/cagGol+M250/mToHV48s8O51M/YMIrwcX
+
+                    BKuLgrUen9AD11S83/S/Xqt6+WnjkGlQkCbPvXss31f9OYZfEaYsU17dXprCchPQ
+
+                    DgUkm6s56Vz5NNY8KMOiNVECAwEAAQ==
+
+                    -----END PUBLIC KEY-----
+                  private: >
+                    -----BEGIN ENCRYPTED PRIVATE KEY-----
+
+                    MIIJrTBXBgkqhkiG9w0BBQ0wSjApBgkqhkiG9w0BBQwwHAQIzHVyaL3pdZoCAggA
+
+                    MAwGCCqGSIb3DQIJBQAwHQYJYIZIAWUDBAEqBBCPeWS/bmJL9ycL4oPdpCfBBIIJ
+
+                    UClykbE+9oS4+dbvZQC3w+u5x8G0c/QpHf43pFF76k+Wu/pv2Sy980bFPs/Hvj0O
+
+                    HnyMrqSW3Gta+EHOacjk2Ujd9EMBglbU6PjVMMhZOI5RrNRLH9jQn5nTyFfvtrFH
+
+                    azm4NLh84m/FmrmNca7lK+ZSgUZptA032jSuok247jvWgD8GmXBnk16cuhgTyuBy
+
+                    LtzISRTy/sk+WF73810dWiv6FKIyfkiNfOO94KE9cT3ErYh7CgtB8oS7pMHkiOeU
+
+                    HGdYMFqbhvjbyHQ6JmvxyWXL3W2z2akmTRMLOkDTbW0m92xlzmCfRWnwKN1gO/cK
+
+                    Sn4YslnrqI8aX+wTqF+b+wSH63u68iSLE2u4Z7YSJTQt1N5TgjN1lkAfCF79GaTn
+
+                    y/F7JZuDlHo1BdxWtX5OUZJJhaLp55V5yfD9QUK58W39+JbOMGD4RvYZoALPtZFm
+
+                    Ods89l0rKivOxRQT4+M6b6ceM0pC06OZNxPQMQcj/ZwfgAlNuxrECq097b/dd2VB
+
+                    BsPT3Pk2mq9nycJsyrj6QO3Kn+VnhBRgCfEfP7OcTr2PZOsYH5UH9CDtaijGtBmA
+
+                    gb1D6bTJB5Jqr8QfQhZjuAWqE+n4P8XGgHkrvexXfL+/ux/uQLJNhCKIEmk5EcaR
+
+                    adAuacB8RsPs7LzZealaBfzUTnzt93qyEGm9vCnhmQKQZryPEbP4d3KrkowKEiXD
+
+                    4048yYDgkA+aJ4dbjTtcZPgLNZz4HGD9MuIeWI3TmLjCxTsDWIvZb+m07gtTBrqs
+
+                    oxli5t5aRDCvjJfFe0lo/Mo2+5fe8FRlY0ilJwgqBTyy8hGOlmhO9eHvPutMoErM
+
+                    Lsz05hh24G5AwxQIzHWFeoM8hi3La4rPXpU8coVgDg914H4OTU/udtW61SdKpg/y
+
+                    rsmrKQ5RI3X1AVtX2/rLsPuNaNB1KvoXmK1Z73nHl1M6MnKJ3G6ekArc6CZAawiX
+
+                    tN2j5GMwjA6OdZRG1R/wkkUgIHyh9U3YRpCdIFzs0BB+sWurrbKa+Tb0nZyxFKAj
+
+                    /Dq3wFSEM8x2/n4Nod+Ng77kofehof+ZG2CdZuq8CWuNDHB+AhTMtBM7V50pDM73
+
+                    d2pSd2iYVuKlW6Wci58XKAlGJWQtS543Ttw1pND3uwg5ByVatGJuhfgT/QniDhfm
+
+                    Im+CNSHC5DBZ18uVP4hHHUmTvsqxUsH7ce72RkpDgX8KhEkA2Kl/38WrA7I6NjKX
+
+                    91p9gfXJCW1jgZ/qdXZjzObIDavuOf8OncGwXSDgLl8qwjCrRp38hCAWg+24XxHs
+
+                    bhoLP36CdQSb+DuABv0LBwuubGaojnmrbpMIOITS4yi1WH1SR1YiehUUBkAwD3FA
+
+                    hxGZ1NXJLScRDk9xhG9I9MA/m3k+kLw+MqeLCCU9o1EVUAy5Sn6C5K4Ym/b4c/iB
+
+                    V7eplRLAG3ynkt1pspj7W4pGxavHoX4aRdg5/181pSuvNOUl/kNYfdd+m51CCsZP
+
+                    jMZTGol8ImA3X1P8X7aDvuBm8GJPOQIKCMPhH6oHafaDA724Qhstqq7FAOgHS/cj
+
+                    AmPumyPO0Np481M/EHCSawOZ8lHdVW0g2OujbZTOs8qqeWjpV/2htCGH/+xiikss
+
+                    LPSdv1oaugQMv6HIA9oHJa0R6ydoKtdQ1i9+EKK1vJbmVWOn5dky3R5p8ZekJtZA
+
+                    BbD/hr+q9Ho2GY5d16aJR+DIAW8VJW3oMZC8dg48QNyKfSya6e8AXY70ITUh8O2z
+
+                    8RNPmzm+v2bTwXP7CeBCf3vouxrk/Ph9lbhMnKRWsqKxneexlzaIoTP3xS8fOCa6
+
+                    xjiX2Z9FiNqoFwxCoFq2pNoba9j9I50cXynsq8W8z50hIerWDlm8HeiWYtUB5pg7
+
+                    Poqsbzzf+2b/Ju0yIDRzBs5nFOGVYSucNe4GDo0zjtVKNpNU1nPl1Mszg2b9uI4p
+
+                    Pu7ibYphDIgHrZAOpwt+nQPgXIG8MrHZ9RQjc4xtb683vWofQxLIc4G1Wyeh4K4l
+
+                    FeK6+Yl28GMWIdyLCgJfZWEjkiKaUCl3OPE1gSp2zOJfeCEp2PU6y513uYO2wwsj
+
+                    K7vwRFRGvPJE2nxpjYBQVvEsCG30TtDttpMF/AmSHa3e6PHA+2DTG7dApjg0oI72
+
+                    mEXODV9S4Wgc7fLSSLN69Smp/YOG06ZJXYsEVzU72IJr63uVJCw37Rray9TmHLHI
+
+                    ugUHJzbdicN28rbeUhsy32DhWzBaFWsaiX4N/unw3/WfSZxe9IlCs1Yr2oBojzfB
+
+                    OmDZFokxVc73w7Vo/7NLYBRBpCaua4IxLrnMAJcEge9Gz9/wtsfWu1cFiLiDf/z5
+
+                    zHWsORypgaBVlmEzVnm9xIlLtIWCHKJ1nQ8wcyTb6MP28RKZ6pHlk8X152ITShzt
+
+                    Stw+0/g2W/mk0p7vclyKIwaEuq4OkqIlNxR1hVJftuaDFLfdgW43FDzdJftl5IfZ
+
+                    RauCh4BoGVCh2lnir/eJskfkvc2x0eroLgoa+LMWrrh7zxi+xRBJPMeQMIqI99uT
+
+                    vGrCI7NQ8cSZJugta9bb6kQHCB13zAi2jOm0jFrAqvzkmM+6beOooX2Zhz8i49Gv
+
+                    ExbhnJJQBlHPEKCVWKPNS6P56usEMQx6Eniyobet7o/BT0uswPrB2Xoc0Ql/wK7L
+
+                    jYdbkcxI4ru6JmL094t/vZ9MRuzSOR7x0isZ6LJXWAh2GYfaXgTlTbwsO+9NJB7/
+
+                    vZOsxMXlAvj36b3TaoBmaFrGD3x0gs/OmeJ1jghAoKiC5bs7w7TdtVVSeXvhFkgP
+
+                    Uf8Zyb6clUHtPYFTTAKrY1fqcSPlcicc1HxTdwXApYs8AkZPs/EaDz399bWdpq8E
+
+                    jWWzjtr21kSaqHpw5Zt+q2aqpl0H2m4WLXRqRDzdgSRoeIaWUxNI57YLaDlwHniv
+
+                    AU89kmtRAfGnRwTJLKrPAugJvgFOanMKIy4cOzMGLqA9ZSY/DBtNTB9g4LwbocBC
+
+                    QtFscvv/E6lOyFAe7S3ew45NKr7KiCP42m+D0kix2ObzIj9jV0QojROoa3VB0rqP
+
+                    SjzOtGTB7YG1T0MDhmuskrg6bQpUvMjlUhw4HWEgwOa7iSFYTpz0e3orcx05leor
+
+                    ZKbn4ZYduHftmipxgr1sHjTUXC7Bb4f54m4NFg7HSaVlhTECZUCd1g7uRR8qfbOO
+
+                    DmwMs8XbQOWGa8RYrYSiBHRpGf/DImCaa9pC4BihxcvF
+
+                    -----END ENCRYPTED PRIVATE KEY-----
+                  cluster: 3dafca38-993c-4ebf-8613-2d044e1450f4
+                  jwk:
+                    kty: RSA
+                    kid: Lvapo7_9qMOEpK7rH7xS4HvJqM1btSBzS01nciAzHws
+                    'n': >-
+                      i8sk8Bk3xBB_vSdkqYUV7iDFaGg8ser6tBERCV8M0W5e4h9B1MO34HuElEgXGOvQwWRcWkbijxhCfFSW2D4LTrJ-FwWENJUMvf7HtEJ9z_iKjNeB5nVDAiu6dNljnht3UILyOWcKrqBt7kWoGZUA4e5WvEfQh2OtK_Fd-3Ax5I0jKHUbOIC5lP0qP-S1fakoGGOS_dXDEFO8D5BWMgReVNhWJr1z5NgnWT_yfOhlfSUjqb0qhbljMI1vCpn3vJn8lVgwVd5lhzUFzD0iT25FgfhWphWK-XHA3zHYbVTtntEqYz_UxJM57QBbpobJXBHDU9F4FKJKQZOzjbnfnp2ymYbIvMmMWARh_BCrjrAR0z-3nM3JKcnoWh0CYCJoRPc8bPkztWc7LXIsxoAgHvk0eS5Pqd0MqX8zDQ_OsiPLLYODD6INy0m7vOlyHgRE0JS3ZKqNQPVmRGMuV1fvsZErl3xFvkU3EsbSHWJ6_98o0Tndu3sUvdPhsMsn8-3YgDFC6bgCJDvSGelejgTA9OOM5BVUfyysC3cc4xDKYU6WLCc0k5li7i_cagGol-M250_mToHV48s8O51M_YMIrwcXBKuLgrUen9AD11S83_S_Xqt6-WnjkGlQkCbPvXss31f9OYZfEaYsU17dXprCchPQDgUkm6s56Vz5NNY8KMOiNVE
+                    e: AQAB
+                  rfpr: >-
+                    b677fdebb9ba4e3124723c18981f6aea0a64259d1ccb9559588265be48e5da2e
+                  rcrt: "-----BEGIN CERTIFICATE-----\r\nMIIGojCCBIqgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBljELMAkGA1UEBhMCQkUx\r\nETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ\r\nRW5naW5lZXJpbmcgVGVhbTEbMBkGA1UECxMSTW9yaW8gQ2x1c3RlciBUZXN0MSkw\r\nJwYDVQQDEyBNb3JpbyBSb290IENlcnRpZmljYXRlIEF1dGhvcml0eTAeFw0yNDA3\r\nMzAxNTM1NTlaFw00NDA3MzAxNTM1NTlaMIGWMQswCQYDVQQGEwJCRTERMA8GA1UE\r\nCBMIQnJ1c3NlbHMxETAPBgNVBAcTCEJydXNzZWxzMRkwFwYDVQQKExBFbmdpbmVl\r\ncmluZyBUZWFtMRswGQYDVQQLExJNb3JpbyBDbHVzdGVyIFRlc3QxKTAnBgNVBAMT\r\nIE1vcmlvIFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9yaXR5MIICIjANBgkqhkiG9w0B\r\nAQEFAAOCAg8AMIICCgKCAgEAwefTWGM+YIYqTNPehFpm56wkp8ZDCli5Cq7HWKJi\r\nTtq9w36qIDcbZ1iyCQf/WVCS1dg0YYZXQMsm5oKIyrIMj3ZIhZAeGHvgk1CBO4Mz\r\nl+HJFcYiUIv/CvBuysyCtDzYNtWDRMziZpW5B3bfD9OWFK4PUF2SQRniBJQa1bOQ\r\nDYflKiIfgwQctXrhQrL+sop+5c44JhOdChvhKzwGE8sYaKPj9imOLAbVc+kl5bLH\r\nxz+kuTdfOSL/m6RuuH5dB57DZwSxedbYduBrNnjW6VpNothr8U9jc8BumR/1WGkI\r\nC7hKHe8ViUSoIdu9um8KGdfq2lMY9jIn5msw1De9jyawil6ifD7zJPP5YL4gcY7Y\r\nCKmLhDRpZT/MpZ2/r+Eo1yKxr05XqE43j5D6a6UAFDvjTJIXmXVfcXkdHzN72dq1\r\n6ao748OQthZmYjLJgZndfT6eQZ40mqxcgJV7oXPfVcdXMlvDgKy/QPCDODmPz0f4\r\nNw0q3Se9P4sPIdGDOFvWr4419l0sgBV34ci1mqkTpxXRCs4Kp/PVCV+SBQnAs5VB\r\n+21awR/+WajJ9fxDXdzjaAn42QdtuBzDpvahDKKaUOl5jYyzp+hU3CW9MXL+g0TI\r\nU2yXgVaH9kkSqu4d7YGWc4n4RwilLAkuQ7lJQCfdKV7Qmjhtutn1PHo9YkLjygMj\r\nCd8CAwEAAaOB+DCB9TAMBgNVHRMEBTADAQH/MAsGA1UdDwQEAwIC9DA7BgNVHSUE\r\nNDAyBggrBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUFBwMDBggrBgEFBQcDBAYIKwYB\r\nBQUHAwgwEQYJYIZIAYb4QgEBBAQDAgD3MB0GA1UdDgQWBBQV07pck74lG665QLsM\r\nf54h1l4kcDBpBgNVHREEYjBggh5wb2MtbW9yaW8tbm9kZTEuY2VydC5ldXJvcGEu\r\nZXWCHnBvYy1tb3Jpby1ub2RlMi5jZXJ0LmV1cm9wYS5ldYIecG9jLW1vcmlvLW5v\r\nZGUzLmNlcnQuZXVyb3BhLmV1MA0GCSqGSIb3DQEBCwUAA4ICAQAAkKHwQMiuHBFJ\r\nsm7nAfzFmxLuIW4n46BmLPYycrXRIncDbBIVa9w+X79Mo26eC0McEnXZ11ZVhD1p\r\ngiRCPY7Wz7vgppidIEplwAbv2//N+jIhjDYz5kOaru+bSaHAQpoL8oQtTsv1PPbg\r\nghDHXrmBtwvbzXz5StBKGlP0PCfTvhHr/kQ+K4BeMKsxwN1znj5vM9xYYmpAgDnb\r\nTawgDtudRMEkEX+UNOjFvu7TWfe/vv4dpKwwYXc0xFO4XTXVC9GevvKQlwAaKmzl\r\nKY0kldV/Y1sIlljPRqi3z8tsdwEf0jsjSNgWNnmDK6z/os4kzKEC4wrJcvMX2BIV\r\nj0ebkdkXaxL5eg1oEqBY8v6M+mfwe1zrN+c3aOVpar32RxAcIa4DoVQPAhZRN2uG\r\n4iOjLPcX4u7Imkzzl+VIewxNoUqu9XpYuztWOhAesrcAyeWmHdWr09pGVmP8LC1x\r\nwVA5JBii7B82BebxBdP5GLXlCpp0Hf4HVgvElE5y+hoMlskzecKK4cpfFxKVq34u\r\n07exDS8M1jqDnfPLWwqap8T6lHVotlV6gvACfUxEBovxEuo7Kp+eh3hXkcOS8Ce1\r\nbjWHXcwc/oawOp1LI9+bK5tr8iUx8L31w+gFmT2+ylVaA48w2dj8kydc87LgzQRh\r\nBHOAdVjaye0aDBXjYUV65VdxN13Rbg==\r\n-----END CERTIFICATE-----\r\n"
+                  rkey: "-----BEGIN ENCRYPTED PRIVATE KEY-----\r\n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\r\na9MQIL4ePIIyNdKSUYataRteqw==\r\n-----END ENCRYPTED PRIVATE KEY-----\r\n"
+                  rpwd: >-
+                    4b55fa9d4c4bf39ef10f319032b0cc764034631df3baf30d2a258c16dd3990f573765315a6407fe09769a5a17475c070
+                  icrt: "-----BEGIN CERTIFICATE-----\r\nMIIGqjCCBJKgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBljELMAkGA1UEBhMCQkUx\r\nETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ\r\nRW5naW5lZXJpbmcgVGVhbTEbMBkGA1UECxMSTW9yaW8gQ2x1c3RlciBUZXN0MSkw\r\nJwYDVQQDEyBNb3JpbyBSb290IENlcnRpZmljYXRlIEF1dGhvcml0eTAeFw0yNDA3\r\nMzAxNTM2MDJaFw0yOTA3MzAxNTM2MDJaMIGeMQswCQYDVQQGEwJCRTERMA8GA1UE\r\nCBMIQnJ1c3NlbHMxETAPBgNVBAcTCEJydXNzZWxzMRkwFwYDVQQKExBFbmdpbmVl\r\ncmluZyBUZWFtMRswGQYDVQQLExJNb3JpbyBDbHVzdGVyIFRlc3QxMTAvBgNVBAMT\r\nKE1vcmlvIEludGVybWVkaWF0ZSBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwggIiMA0G\r\nCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDUc48Pq4lAoBmeW+3q/EuujAaUjgqD\r\nQ+nyFmuHqpVXTTW1ihtPSHl6utHonKhJShNrWHdjLwL89CwRPr/FPYuvZdkURW/f\r\nfWkbFwxq3eYv3h2DighA037a3/n6QaWq7AEkzY0dTIZv8uLotYaahzEqdFmjY7xr\r\n4YxyH0vNySIoCQXiFCcp20lYVDcBqHOV4rRQaRXgAkFS8BCmPcdnb7IWP7FAcFBE\r\nvgmrEfsov/+ODim5nQvbWcjeNRW6VhFbr7gjC1vAbyF3CTTYhoCCAqpjMx6FRGQr\r\n98sgJS8EfOPm6KGSDifnFradOTu+iwkO9gqgaL5/tsFMVmPA0Rw7j7BAL/1BIX0U\r\npUjhYCC8EkR6DjHCflg/2r/alFY1sb7ToNF/Y6EpRge01LZQYtZTSQCtAxb2VTGV\r\nqcY2HrevwVBV7xWri+4yL4hO3g7iXhKICof73hxvzx9GzcKxji8Vx3myBF+GPHs1\r\nrjVu/NoNGnBRjtNFtMBqVWF0njjJEGctdOtjg5gQtwwdZ2HUi4AYLZwxUC2zuSNk\r\njbSAIRVby3kRds3IvWP5rA23W2ZqisFNV9JAisMp8BTOcU60U9G1LDd6aFmy4HW8\r\nxhYSZPT/FwjkOpCGkxfhj9j/Isryk6EkPjKFmAQco/SsowsTx++i0jYDakAC3kAY\r\nW9iUe9TVyUDHvwIDAQABo4H4MIH1MAwGA1UdEwQFMAMBAf8wCwYDVR0PBAQDAgL0\r\nMDsGA1UdJQQ0MDIGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwMGCCsGAQUF\r\nBwMEBggrBgEFBQcDCDARBglghkgBhvhCAQEEBAMCAPcwHQYDVR0OBBYEFBXTulyT\r\nviUbrrlAuwx/niHWXiRwMGkGA1UdEQRiMGCCHnBvYy1tb3Jpby1ub2RlMS5jZXJ0\r\nLmV1cm9wYS5ldYIecG9jLW1vcmlvLW5vZGUyLmNlcnQuZXVyb3BhLmV1gh5wb2Mt\r\nbW9yaW8tbm9kZTMuY2VydC5ldXJvcGEuZXUwDQYJKoZIhvcNAQELBQADggIBAJ0T\r\nppMmOhBjhcpdXaPnCqtl7Ey5g8GLQ7dzQzo/vtbcK20XSDP7mvFnIGSiPhXOpsKo\r\nmpbVJeueZ74MhWD7FFdaOEaiOASJS6RSqFfb1fmNDsYECX0nd3dNPzhDl0/m71ds\r\nVkuG1pZk5zuErTUjIT3WH38ihDQ/Da3pNUHk/O2gfhPmVRroyF9U1vK9nd7ODzyD\r\nXaAuXLual640Mq/QQhEU9a726MrErr1S6ij7OvE8EU4OrI5JumullNTSFNn/SVvA\r\nuMoeHup4OmkWQz2hWvihdW14IGCyLiHwHZXc1f5ade0Qn0xIlECbh2bKBpYRzn2g\r\nVLnJSu5NslLVA2++Bc9N7TsCcEDRw89JBsEGKM0IE5rUeh0M6FzXB7LDVZDNLvlw\r\nJDboMCtUNRNqsuFk9YDZnhW6T3E4vmCF6mzNt2b+2roHg7xMF86rVFtutgIewPSc\r\n5855KJAdHTJkbklsNZvpyenhNMkMhvQEyfL11OxYjDK9VDe8JKnT926URYH+9F0R\r\nY6NAXcyHMIO/+MytvjEc4GXsMqzx31z/PejchyEYwjFzzCeN5RagalKY/TfRsnOg\r\nKwMLfZI84LssJMtT28DQYejidQhVxzW8HOhPTIfDviCFMdbLXDpv0IDTbFbGyy5x\r\nAYmhojzVAVD8Mu97ZfQJzf7Gl44QDAyrwfhF8SpD\r\n-----END CERTIFICATE-----\r\n"
+                  ikey: "-----BEGIN ENCRYPTED PRIVATE KEY-----\r\n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\r\nLpyuHO417iZX4JAl1dR4klVLGA==\r\n-----END ENCRYPTED PRIVATE KEY-----\r\n"
+              keys: {}
+      responses:
+        '200':
+          description: Join confirmation
+          content:
+            application/json:
+              example:
+                cluster: 3dafca38-993c-4ebf-8613-2d044e1450f4
+                node: 39a47fb4-ec89-44ef-8080-9aa20b4872ed
+                serial: 1722353755056
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: &ref_1
+                status: 400
+                title: This request violates the data schema
+                detail: >-
+                  The request data failed validation against the Morio data
+                  schema. This means the request is invalid.
+  /cluster/heartbeat:
+    post:
+      tags: *ref_0
+      summary: The cluster hearbeat endpoint
+      description: >-
+        This is the cluster heartbeat endpoint, which is where follower nodes
+        will contact the leader node in a Morio cluster
+      requestBody:
+        description: The API key settings
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    from:
+                      type: object
+                      properties:
+                        fqdn:
+                          type: string
+                        uuid:
+                          type: string
+                          format: uuid
+                        serial:
+                          type: number
+                          format: float
+                          enum:
+                            - 1
+                            - 2
+                            - 3
+                            - 4
+                            - 5
+                            - 6
+                            - 7
+                            - 8
+                            - 9
+                            - 101
+                            - 102
+                            - 103
+                            - 104
+                            - 105
+                            - 106
+                            - 107
+                            - 108
+                            - 109
+                            - 110
+                            - 111
+                            - 112
+                            - 113
+                            - 114
+                            - 115
+                            - 116
+                            - 117
+                            - 118
+                            - 119
+                            - 120
+                            - 121
+                            - 122
+                            - 123
+                            - 124
+                            - 125
+                            - 126
+                            - 127
+                            - 128
+                            - 129
+                            - 130
+                            - 131
+                            - 132
+                            - 133
+                            - 134
+                            - 135
+                            - 136
+                      required:
+                        - fqdn
+                        - uuid
+                        - serial
+                      additionalProperties: false
+                    to:
+                      type: string
+                    cluster:
+                      type: string
+                      format: uuid
+                    cluster_leader:
+                      type: object
+                      properties:
+                        serial:
+                          type: number
+                          format: float
+                          minimum: 1
+                          maximum: 9
+                        uuid:
+                          type: string
+                          format: uuid
+                      additionalProperties: false
+                    version:
+                      type: string
+                      minLength: 2
+                      maxLength: 64
+                    settings_serial:
+                      type: number
+                      format: float
+                      minimum: 1720000000000
+                      maximum: 1990000000000
+                    status:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    nodes:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    broadcast:
+                      type: boolean
+                    uptime:
+                      type: number
+                      format: float
+                  required:
+                    - to
+                    - cluster
+                    - version
+                    - settings_serial
+                    - broadcast
+                    - uptime
+                  additionalProperties: false
+                checksum:
+                  type: string
+              required:
+                - checksum
+              additionalProperties: false
+            example:
+              data:
+                from:
+                  fqdn: morio-node2.tokyo.morio.it
+                  serial: 2
+                  uuid: 39a47fb4-ec89-44ef-8080-9aa20b4872ed
+                to: morio-node1.tokyo.morio.it
+                cluster: 3dafca38-993c-4ebf-8613-2d044e1450f4
+                cluster_leader:
+                  serial: 1
+                version: 0.2.0
+                settings_serial: 1722353755056
+                status:
+                  cluster:
+                    code: 2
+                    color: amber
+                    time: 1722353803197
+                    updated: 1722353833254
+                  nodes:
+                    morio-node2.tokyo.morio.it:
+                      db: 0
+                      console: 0
+                      api: 0
+                      ca: 0
+                      proxy: 0
+                      ui: 0
+                      broker: 0
+                    morio-node1.tokyo.morio.it:
+                      db: 0
+                      console: 0
+                      api: 0
+                      ca: 0
+                      proxy: 0
+                      ui: 0
+                      broker: 0
+                    morio-node3.tokyo.morio.it:
+                      db: 0
+                      console: 0
+                      api: 0
+                      ca: 0
+                      proxy: 0
+                      ui: 0
+                      broker: 0
+                nodes:
+                  39a47fb4-ec89-44ef-8080-9aa20b4872ed:
+                    fqdn: morio-node2.tokyo.morio.it
+                    hostname: morio-node2
+                    serial: 2
+                    uuid: 39a47fb4-ec89-44ef-8080-9aa20b4872ed
+                    settings: 1722353755056
+                  cc048048-798b-4d13-97a0-200874b281f6:
+                    fqdn: morio-node3.tokyo.morio.it
+                    hostname: morio-node3
+                    serial: 3
+                    uuid: cc048048-798b-4d13-97a0-200874b281f6
+                    settings: 1722353755056
+                  e6d275ab-6285-4986-a0f9-81cb12d2ce4b:
+                    fqdn: morio-node1.tokyo.morio.it
+                    hostname: morio-node1
+                    serial: 1
+                    uuid: e6d275ab-6285-4986-a0f9-81cb12d2ce4b
+                    settings: 1722353755056
+                broadcast: false
+                uptime: 105
+              checksum: fcbad2602bb511502d3665ba32c3e3aaa6fe552487d18d25c4ef32c2d2e16c95
+      responses:
+        '200':
+          description: API key details
+          content:
+            application/json:
+              example:
+                data:
+                  action: false
+                  errors: []
+                  cluster: 3dafca38-993c-4ebf-8613-2d044e1450f4
+                  cluster_leader:
+                    serial: 1
+                    uuid: e6d275ab-6285-4986-a0f9-81cb12d2ce4b
+                  node: e6d275ab-6285-4986-a0f9-81cb12d2ce4b
+                  node_serial: 1
+                  settings_serial: 1722353755056
+                  version: 0.2.0
+                  nodes:
+                    e6d275ab-6285-4986-a0f9-81cb12d2ce4b:
+                      fqdn: morio-node1.tokyo.morio.it
+                      hostname: morio-node1
+                      serial: 1
+                      uuid: e6d275ab-6285-4986-a0f9-81cb12d2ce4b
+                      settings: 1722353755056
+                    39a47fb4-ec89-44ef-8080-9aa20b4872ed:
+                      fqdn: morio-node2.tokyo.morio.it
+                      hostname: morio-node2
+                      serial: 2
+                      uuid: 39a47fb4-ec89-44ef-8080-9aa20b4872ed
+                      settings: 1722353755056
+                    cc048048-798b-4d13-97a0-200874b281f6:
+                      fqdn: morio-node3.tokyo.morio.it
+                      hostname: morio-node3
+                      serial: 3
+                      uuid: cc048048-798b-4d13-97a0-200874b281f6
+                      settings: 1722353755056
+                  status:
+                    cluster:
+                      code: 0
+                      color: green
+                      time: 1722354096080
+                      updated: 1722354096080
+                    nodes:
+                      morio-node1.tokyo.morio.it:
+                        api: 0
+                        broker: 0
+                        db: 0
+                        ca: 0
+                        proxy: 0
+                        ui: 0
+                        console: 0
+                      morio-node2.tokyo.morio.it:
+                        api: 0
+                        broker: 0
+                        db: 0
+                        ca: 0
+                        proxy: 0
+                        ui: 0
+                        console: 0
+                      morio-node3.tokyo.morio.it:
+                        db: 0
+                        console: 0
+                        api: 0
+                        ca: 0
+                        proxy: 0
+                        ui: 0
+                        broker: 0
+                checksum: >-
+                  f977ca99827c4dbbf2e228cee32289f98a3332c8f0fc37e6b89e63b561521c6a
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /ca/certificate:
+    post:
+      tags: &ref_2
+        - cryptography
+      summary: Generate an X.509 certificate
+      description: >-
+        Generates an X.509 certificate, issued by Morio's internal Certificate
+        Authority
+      requestBody:
+        description: The Morio settings you want to validate
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                certificate:
+                  type: object
+                  properties:
+                    cn:
+                      type: string
+                    c:
+                      type: string
+                    st:
+                      type: string
+                    l:
+                      type: string
+                    o:
+                      type: string
+                    ou:
+                      type: string
+                    san:
+                      type: array
+                      items: {}
+                  required:
+                    - cn
+                    - c
+                    - st
+                    - l
+                    - o
+                    - ou
+                    - san
+                  additionalProperties: false
+              additionalProperties: false
+            example:
+              certificate:
+                cn: A Morio Certificate
+                c: BE
+                st: Brussels
+                l: Brussels
+                o: CertsRus
+                ou: NotThatCrypto
+                san:
+                  - morio-name1.brussels.morio.it
+                  - morio-name2.brussels.morio.it
+                  - morio-name3.brussels.morio.it
+      responses:
+        '200':
+          description: X.509 data
+          content:
+            application/json:
+              example:
+                certificate:
+                  crt: >
+                    -----BEGIN CERTIFICATE-----
+
+                    MIIFIjCCAwqgAwIBAgIQZEZGk0+zMNeeFQOzdPmE0jANBgkqhkiG9w0BAQsFADCB
+
+                    nDELMAkGA1UEBhMCQkUxETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVz
+
+                    c2VsczEZMBcGA1UEChMQRW5naW5lZXJpbmcgVGVhbTEZMBcGA1UECxMQTW9yaW8g
+
+                    VW5pdCBUZXN0czExMC8GA1UEAxMoTW9yaW8gSW50ZXJtZWRpYXRlIENlcnRpZmlj
+
+                    YXRlIEF1dGhvcml0eTAeFw0yNDA3MjkwOTI1MDRaFw0yNjA3MzAwOTI2MDRaMB4x
+
+                    HDAaBgNVBAMTE0EgTW9yaW8gQ2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUA
+
+                    A4IBDwAwggEKAoIBAQC/lhIGkpFmgqh3roMLONXNkSz6WegKmI72WKmw4hUBOdeL
+
+                    i0zSmtrBWxj1+f7AA9niPWaU+TISuD5V6pSTGqYA0Q+cX3MNe/hJUk+hnjohqASR
+
+                    tW4MXbxs0xiaKGL8O30F7DPP2YTLCiAwn2ljFkA5jI6YvFh7lSPDJRMJBL7GlK2X
+
+                    fIfaJC793U75mB1GRJQJ6VS0REXkh6fFPXyA01E7DhlLBcmzSsUKwXo36agewWpq
+
+                    DIVWtNDG6CEJVvtdjOTCx5aDysCsfDyVax0/ufCy176ryakqru4YahtuFBLdkmgw
+
+                    1PTjhLKNyGcJb59JtzaC2gnPQ9jGQLGu8lAe1IjZAgMBAAGjgdwwgdkwDgYDVR0P
+
+                    AQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHQ4E
+
+                    FgQU6r8GEWT1O4DJsB6Bcy7dOiz5NN4wHwYDVR0jBBgwFoAUoSdQN6s/1SyP/x1y
+
+                    15KPY89ogRUwHQYDVR0RBBYwFIISdW5pdC50ZXN0Lm1vcmlvLml0MEkGDCsGAQQB
+
+                    gqRkxihAAQQ5MDcCAQEEBWFkbWluBCtDVTJzVDhZT3Q0aGJhWFhCUmthREVRVFoz
+
+                    Qk5aSk9EalpTdmt3a2E1M0JNMA0GCSqGSIb3DQEBCwUAA4ICAQA2Abl/JkbsaSVW
+
+                    nyF3FY6Kf4tBs+ZpVufyn5JLyWbA9T/QccBAGw7k7nOSWXhVoDjFBRyX6aVkUUuD
+
+                    LfX30vztU9fXkVmPO7ElBVG163zh+l3+jtZhKmGmHyFmipsDKSRu+zNlyjJYkxD+
+
+                    A+HsTM1cG8+W/KLPOIfQZeE/9HmUCAOtsMeXWuSOmXuq5ZjPQEClAAG0luDVGXuF
+
+                    0gyUDSfe7T8pVdUdlBMLixEyuFBFmZ0jjrf3jDDdor6xM8rl9gFJEGsv24NbHQCu
+
+                    58u1rcLUswMh6xJr3Umc7V3h0Mfaqss2RupB+6s2jgtwNXUPrts8guXKl74qmISq
+
+                    8Voon8kJ3KJqau4rjnpIDFLFErgbBtwfViEH1YRWYGrxSRqD5oDjDDudg3zekFQ6
+
+                    YH0yjCKpSJB9JcF/EDKHU4mwatl80PWo9kLDyivvtUq+cIQn9AJR99NiOSLkUbBv
+
+                    iC6KSkGOSGoibQOKpXCQJkqJLlKgR2IEfy8HiN+Or971JNEKApv7duU8iIpk0Svl
+
+                    20pI4oz4qSpt8hJzW/4CAD3sPnsQrlYmxLWQDNgJhebqwMqya37RDzny22gThpo8
+
+                    GpCrWQi/h5iZUO1o/h/Qy1wNB/K+zzJgGKCJw+BOzfXuX8uNWIYZc6C19AfcuJuR
+
+                    Q0qAthZjtW6wcj7ohuhq49szIug44A==
+
+                    -----END CERTIFICATE-----
+                  ca: >
+                    -----BEGIN CERTIFICATE-----
+
+                    MIIGWjCCBEKgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBlDELMAkGA1UEBhMCQkUx
+
+                    ETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ
+
+                    RW5naW5lZXJpbmcgVGVhbTEZMBcGA1UECxMQTW9yaW8gVW5pdCBUZXN0czEpMCcG
+
+                    A1UEAxMgTW9yaW8gUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMjQwNzI5
+
+                    MDcxMzM3WhcNMjkwNzI5MDcxMzM3WjCBnDELMAkGA1UEBhMCQkUxETAPBgNVBAgT
+
+                    CEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQRW5naW5lZXJp
+
+                    bmcgVGVhbTEZMBcGA1UECxMQTW9yaW8gVW5pdCBUZXN0czExMC8GA1UEAxMoTW9y
+
+                    aW8gSW50ZXJtZWRpYXRlIENlcnRpZmljYXRlIEF1dGhvcml0eTCCAiIwDQYJKoZI
+
+                    hvcNAQEBBQADggIPADCCAgoCggIBAJdVXnZsMS6/esyEgOBZIowVQOygS7OX1h8/
+
+                    6Wi2HZxcXk6NY6a53s1e0AVqqgnbcT5iSmdVdlsJw2uhHtm+AHAGnWQr+dNwLYBK
+
+                    1e6V5rTrW4oDZ4eMjVzEGfOkvYJplnTi27iqmrj/Em6xZ++z3E5Ujs/OP1k0HXQj
+
+                    DVgNa9hP4fV/JWOd8krWglgGQhSLINhenRldD51IpRfM3jUkxMC1WinAQ/10cv62
+
+                    KQzHGmPK/gDnNb0mJvF5JD0rN+Fr6Y+HY/M5Ti9jEw2JAZwt189fRG/Fpuje/Oca
+
+                    mWDWfiEHszrTwgIGQvNURmdsDUaXKO/DbCq8dDG9bWARREXnU/C3sOVtD1H5Lm12
+
+                    w/LCGa3+81DFcSXcwwxppGl9JgA69nfp8HJTHR1zeNPM1eCPukz/26A3mWEh0zU6
+
+                    xaqS0oeO0+aaPreLn+W7n36/oI0gc1m3hdQtOljBZFOGQQzkP+fQR0Wh/Z/+41N8
+
+                    cM1IALhsXq3Ot0w9R8ewIAitUf5lqXNDmZkFM3Z51fB1novAW6QECk1no+Hiq10s
+
+                    SHMyKkBPAeXMzxEutkT84XxBPvBfFxOyRdQim7hT9bn2t7BWQD49gkDonVGTh+HL
+
+                    iwydENkBuj/5M6+X6f4K1SsdttvyMqO4wxcJyaDB9O2h9S6WAkCL+zCV02BPjrFq
+
+                    XfIqC5XJAgMBAAGjgawwgakwDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAvQwOwYD
+
+                    VR0lBDQwMgYIKwYBBQUHAwEGCCsGAQUFBwMCBggrBgEFBQcDAwYIKwYBBQUHAwQG
+
+                    CCsGAQUFBwMIMBEGCWCGSAGG+EIBAQQEAwIA9zAdBgNVHQ4EFgQUoSdQN6s/1SyP
+
+                    /x1y15KPY89ogRUwHQYDVR0RBBYwFIISdW5pdC50ZXN0Lm1vcmlvLml0MA0GCSqG
+
+                    SIb3DQEBCwUAA4ICAQAV/yCUT8sZZj7VmSDxdQ6pbL/JWuWI6uA1g1nYNYORf7NA
+
+                    0OSFeb9SCJxAsQoTO2iWmDfwSd1mYIIKDDZ59l8COrWyIlPFvLxaJrfQFuMrK1yN
+
+                    2JDaS+qKRwX2MRdjKQNLR87Ql2oC4ZynJdnflMkSP7Kw3yiok/YpUnf7y5iCuHTe
+
+                    TXatprHebxFAcQJIhx+VNGpe5saRCGiCLfVcB6hXVKhMXHoXfrwhj4nKe8H0I/tx
+
+                    67r2JzvrQBBeVSGqoXDWgbK3RzAyPoom1jj4lot/WajVE2tc/3p0YwluZDiyuhOw
+
+                    VEexHB5g7PdqPY9U5yvBVTDa1lDhPp/5oxXrfhFjIjfrA9IpW6qATqx27001vhY7
+
+                    eTduv3rO0SH60ueBtKr77PA/9qjG+yck3N4uxPofGKZ+ccqEAbeGkxyIY3UaD0EJ
+
+                    ZjWg4QXvhnSL2cnwriJLDXQewiiXYH4ZKWCDbztgu2D49SUp/OO3AIQsf2w4EKit
+
+                    sfz4snFiACNIm+FzZSwdZR/epL5IDZtOjV0XoFOBiWxsc7i5j9DEUDBfheAVxULO
+
+                    he+ZxO+04Zx7NxB5ibJkwLLb5ITsug6qmIlcZ13IZ4QhkrUNcVZfxT2k0tJbfAxh
+
+                    ZvYknMm1bpmi7AEuC4yg2ojnxTEvQsQsWrVKyFyZNEfDLHtBc6q8Y0SF/ILzug==
+
+                    -----END CERTIFICATE-----
+                  certChain:
+                    - >
+                      -----BEGIN CERTIFICATE-----
+
+                      MIIFIjCCAwqgAwIBAgIQZEZGk0+zMNeeFQOzdPmE0jANBgkqhkiG9w0BAQsFADCB
+
+                      nDELMAkGA1UEBhMCQkUxETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVz
+
+                      c2VsczEZMBcGA1UEChMQRW5naW5lZXJpbmcgVGVhbTEZMBcGA1UECxMQTW9yaW8g
+
+                      VW5pdCBUZXN0czExMC8GA1UEAxMoTW9yaW8gSW50ZXJtZWRpYXRlIENlcnRpZmlj
+
+                      YXRlIEF1dGhvcml0eTAeFw0yNDA3MjkwOTI1MDRaFw0yNjA3MzAwOTI2MDRaMB4x
+
+                      HDAaBgNVBAMTE0EgTW9yaW8gQ2VydGlmaWNhdGUwggEiMA0GCSqGSIb3DQEBAQUA
+
+                      A4IBDwAwggEKAoIBAQC/lhIGkpFmgqh3roMLONXNkSz6WegKmI72WKmw4hUBOdeL
+
+                      i0zSmtrBWxj1+f7AA9niPWaU+TISuD5V6pSTGqYA0Q+cX3MNe/hJUk+hnjohqASR
+
+                      tW4MXbxs0xiaKGL8O30F7DPP2YTLCiAwn2ljFkA5jI6YvFh7lSPDJRMJBL7GlK2X
+
+                      fIfaJC793U75mB1GRJQJ6VS0REXkh6fFPXyA01E7DhlLBcmzSsUKwXo36agewWpq
+
+                      DIVWtNDG6CEJVvtdjOTCx5aDysCsfDyVax0/ufCy176ryakqru4YahtuFBLdkmgw
+
+                      1PTjhLKNyGcJb59JtzaC2gnPQ9jGQLGu8lAe1IjZAgMBAAGjgdwwgdkwDgYDVR0P
+
+                      AQH/BAQDAgWgMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHQ4E
+
+                      FgQU6r8GEWT1O4DJsB6Bcy7dOiz5NN4wHwYDVR0jBBgwFoAUoSdQN6s/1SyP/x1y
+
+                      15KPY89ogRUwHQYDVR0RBBYwFIISdW5pdC50ZXN0Lm1vcmlvLml0MEkGDCsGAQQB
+
+                      gqRkxihAAQQ5MDcCAQEEBWFkbWluBCtDVTJzVDhZT3Q0aGJhWFhCUmthREVRVFoz
+
+                      Qk5aSk9EalpTdmt3a2E1M0JNMA0GCSqGSIb3DQEBCwUAA4ICAQA2Abl/JkbsaSVW
+
+                      nyF3FY6Kf4tBs+ZpVufyn5JLyWbA9T/QccBAGw7k7nOSWXhVoDjFBRyX6aVkUUuD
+
+                      LfX30vztU9fXkVmPO7ElBVG163zh+l3+jtZhKmGmHyFmipsDKSRu+zNlyjJYkxD+
+
+                      A+HsTM1cG8+W/KLPOIfQZeE/9HmUCAOtsMeXWuSOmXuq5ZjPQEClAAG0luDVGXuF
+
+                      0gyUDSfe7T8pVdUdlBMLixEyuFBFmZ0jjrf3jDDdor6xM8rl9gFJEGsv24NbHQCu
+
+                      58u1rcLUswMh6xJr3Umc7V3h0Mfaqss2RupB+6s2jgtwNXUPrts8guXKl74qmISq
+
+                      8Voon8kJ3KJqau4rjnpIDFLFErgbBtwfViEH1YRWYGrxSRqD5oDjDDudg3zekFQ6
+
+                      YH0yjCKpSJB9JcF/EDKHU4mwatl80PWo9kLDyivvtUq+cIQn9AJR99NiOSLkUbBv
+
+                      iC6KSkGOSGoibQOKpXCQJkqJLlKgR2IEfy8HiN+Or971JNEKApv7duU8iIpk0Svl
+
+                      20pI4oz4qSpt8hJzW/4CAD3sPnsQrlYmxLWQDNgJhebqwMqya37RDzny22gThpo8
+
+                      GpCrWQi/h5iZUO1o/h/Qy1wNB/K+zzJgGKCJw+BOzfXuX8uNWIYZc6C19AfcuJuR
+
+                      Q0qAthZjtW6wcj7ohuhq49szIug44A==
+
+                      -----END CERTIFICATE-----
+                    - >
+                      -----BEGIN CERTIFICATE-----
+
+                      MIIGWjCCBEKgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBlDELMAkGA1UEBhMCQkUx
+
+                      ETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ
+
+                      RW5naW5lZXJpbmcgVGVhbTEZMBcGA1UECxMQTW9yaW8gVW5pdCBUZXN0czEpMCcG
+
+                      A1UEAxMgTW9yaW8gUm9vdCBDZXJ0aWZpY2F0ZSBBdXRob3JpdHkwHhcNMjQwNzI5
+
+                      MDcxMzM3WhcNMjkwNzI5MDcxMzM3WjCBnDELMAkGA1UEBhMCQkUxETAPBgNVBAgT
+
+                      CEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQRW5naW5lZXJp
+
+                      bmcgVGVhbTEZMBcGA1UECxMQTW9yaW8gVW5pdCBUZXN0czExMC8GA1UEAxMoTW9y
+
+                      aW8gSW50ZXJtZWRpYXRlIENlcnRpZmljYXRlIEF1dGhvcml0eTCCAiIwDQYJKoZI
+
+                      hvcNAQEBBQADggIPADCCAgoCggIBAJdVXnZsMS6/esyEgOBZIowVQOygS7OX1h8/
+
+                      6Wi2HZxcXk6NY6a53s1e0AVqqgnbcT5iSmdVdlsJw2uhHtm+AHAGnWQr+dNwLYBK
+
+                      1e6V5rTrW4oDZ4eMjVzEGfOkvYJplnTi27iqmrj/Em6xZ++z3E5Ujs/OP1k0HXQj
+
+                      DVgNa9hP4fV/JWOd8krWglgGQhSLINhenRldD51IpRfM3jUkxMC1WinAQ/10cv62
+
+                      KQzHGmPK/gDnNb0mJvF5JD0rN+Fr6Y+HY/M5Ti9jEw2JAZwt189fRG/Fpuje/Oca
+
+                      mWDWfiEHszrTwgIGQvNURmdsDUaXKO/DbCq8dDG9bWARREXnU/C3sOVtD1H5Lm12
+
+                      w/LCGa3+81DFcSXcwwxppGl9JgA69nfp8HJTHR1zeNPM1eCPukz/26A3mWEh0zU6
+
+                      xaqS0oeO0+aaPreLn+W7n36/oI0gc1m3hdQtOljBZFOGQQzkP+fQR0Wh/Z/+41N8
+
+                      cM1IALhsXq3Ot0w9R8ewIAitUf5lqXNDmZkFM3Z51fB1novAW6QECk1no+Hiq10s
+
+                      SHMyKkBPAeXMzxEutkT84XxBPvBfFxOyRdQim7hT9bn2t7BWQD49gkDonVGTh+HL
+
+                      iwydENkBuj/5M6+X6f4K1SsdttvyMqO4wxcJyaDB9O2h9S6WAkCL+zCV02BPjrFq
+
+                      XfIqC5XJAgMBAAGjgawwgakwDAYDVR0TBAUwAwEB/zALBgNVHQ8EBAMCAvQwOwYD
+
+                      VR0lBDQwMgYIKwYBBQUHAwEGCCsGAQUFBwMCBggrBgEFBQcDAwYIKwYBBQUHAwQG
+
+                      CCsGAQUFBwMIMBEGCWCGSAGG+EIBAQQEAwIA9zAdBgNVHQ4EFgQUoSdQN6s/1SyP
+
+                      /x1y15KPY89ogRUwHQYDVR0RBBYwFIISdW5pdC50ZXN0Lm1vcmlvLml0MA0GCSqG
+
+                      SIb3DQEBCwUAA4ICAQAV/yCUT8sZZj7VmSDxdQ6pbL/JWuWI6uA1g1nYNYORf7NA
+
+                      0OSFeb9SCJxAsQoTO2iWmDfwSd1mYIIKDDZ59l8COrWyIlPFvLxaJrfQFuMrK1yN
+
+                      2JDaS+qKRwX2MRdjKQNLR87Ql2oC4ZynJdnflMkSP7Kw3yiok/YpUnf7y5iCuHTe
+
+                      TXatprHebxFAcQJIhx+VNGpe5saRCGiCLfVcB6hXVKhMXHoXfrwhj4nKe8H0I/tx
+
+                      67r2JzvrQBBeVSGqoXDWgbK3RzAyPoom1jj4lot/WajVE2tc/3p0YwluZDiyuhOw
+
+                      VEexHB5g7PdqPY9U5yvBVTDa1lDhPp/5oxXrfhFjIjfrA9IpW6qATqx27001vhY7
+
+                      eTduv3rO0SH60ueBtKr77PA/9qjG+yck3N4uxPofGKZ+ccqEAbeGkxyIY3UaD0EJ
+
+                      ZjWg4QXvhnSL2cnwriJLDXQewiiXYH4ZKWCDbztgu2D49SUp/OO3AIQsf2w4EKit
+
+                      sfz4snFiACNIm+FzZSwdZR/epL5IDZtOjV0XoFOBiWxsc7i5j9DEUDBfheAVxULO
+
+                      he+ZxO+04Zx7NxB5ibJkwLLb5ITsug6qmIlcZ13IZ4QhkrUNcVZfxT2k0tJbfAxh
+
+                      ZvYknMm1bpmi7AEuC4yg2ojnxTEvQsQsWrVKyFyZNEfDLHtBc6q8Y0SF/ILzug==
+
+                      -----END CERTIFICATE-----
+                  tlsOptions:
+                    cipherSuites:
+                      - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+                      - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+                    minVersion: 1.2
+                    maxVersion: 1.3
+                    renegotiation: false
+                key: "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv5YSBpKRZoKod66DCzjVzZEs+lnoCpiO9lipsOIVATnXi4tM\r\n0prawVsY9fn+wAPZ4j1mlPkyErg+VeqUkxqmANEPnF9zDXv4SVJPoZ46IagEkbVu\r\nDF28bNMYmihi/Dt9Bewzz9mEywogMJ9pYxZAOYyOmLxYe5UjwyUTCQS+xpStl3yH\r\n2iQu/d1O+ZgdRkSUCelUtERF5IenxT18gNNROw4ZSwXJs0rFCsF6N+moHsFqagyF\r\nVrTQxughCVb7XYzkwseWg8rArHw8lWsdP7nwste+q8mpKq7uGGobbhQS3ZJoMNT0\r\n44SyjchnCW+fSbc2gtoJz0PYxkCxrvJQHtSI2QIDAQABAoIBAC0DD7Ienm20tesE\r\ng8JPtJ/LA4PAOs2+gRwswZWO0HuMwPEGpeJ3Qn0aL5efCDTJ0teeMGtAzvxp8C9U\r\nYVrccHMRqzbEkC3zWea0IYRpveOpa4VmWHgsT7hLsmSJp5P2UA3jrFqhktr3Qo/Z\r\n7DM9B5LdzKTi33ENnazcGYhNZpsV7Eg+GZI8oP4mLNJ6ARvEEk3xzV1bsmJxHKnt\r\nSGg4Vib+a8/Ac90rcXPztjOy6r1tnuXaeeKdfMyQ24t1wiD7KPuwU/0BCHUuORqn\r\n6WMpMeBbTTCuaRvvNvZdG5JIZ2GkZRn/XUDUSBi4l0WDfiCc2mcr7BQbGkMnQhOw\r\ncfkkK+cCgYEA4wzqMPKoGZ5uPSnyZpyxLwke8Mu0kFdvgq+wMhpNKq+ZqN1mq/nx\r\n6G7TiSbxF6Kqsht8lnWGVs3+psqcMTQPDklUKM6cVxbJrXNZqYENwsMqKqdBmRXR\r\nPPIWfjht5GSxCdMX0Pefo8qsB1nkC2+62lDPu6D3FUk3iDasUBj/cuMCgYEA2AOU\r\nA3POMiO8MstzvhCYo471WM7QmuORDETlQw9dt9OC0u9RMjJuAhHDl618onfo3ByP\r\nuKkUN4zdZ7fjG0B0pwjP92H763BtWSzXc4tJz4YzAo5zkPxtt5MLGb2eG1n3xsm7\r\n7CVlPNU9C0xf5gQM0ddW8GrqX2lszFkZY76alhMCgYEAr2xMCROCs4CH9fPR2Fwa\r\nPZgTcsJAuQEFI/iv7pYJpwBTfXfKGvebYxU1lRMkVTmWHtRD10/oQmsX5DBIq29o\r\nboZTYs/3VQZDPiMQVHlkc2Us0BW4BhooNqlonY7lwP/XFRsmnIqlqfwuG+Pk4L0r\r\npf+n8HS2UpjmMfTj/2LBAzcCgYEAtkdesQMZrgmll59CzdGnW+0Yb5YlRW5eSWIh\r\nq9LdnG8o5+H2PEt9tNVUnTtR/q78mjCnvoU+gBmoAwuS4r4jMYgoJXJTaDr4qtVC\r\nAUg6QpnVlYSrVF8OHmhAZ7owHphukxpML1rm8MxntI8AJVKplrEFtd4iY9zMaCuP\r\nVzHRtG0CgYEAm/BRJG7eVtBwzSKMJzdFgyIZFPZTrgkaZtnxrOarCkHwWbOW9i3y\r\nRBO4QuoVTU4XMUrQxQPDQLZ/Feo08qNuNSnbp3yTeQRIHhBnGqY2YjiRAIVPReDl\r\nCY9RafOlspqXqxQIEtz7rSS7Ezn46G158LvXGI+/1qHPxlejU/7uswc=\r\n-----END RSA PRIVATE KEY-----\r\n"
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /decrypt:
+    post:
+      tags: *ref_2
+      summary: Decrypt data
+      description: Decrypts data with Morio's internal key pair
+      requestBody:
+        description: The data you want to decrypt
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iv:
+                  type: string
+                ct:
+                  type: string
+              required:
+                - iv
+                - ct
+              additionalProperties: false
+            examples:
+              text:
+                value: &ref_5
+                  iv: f098ed647cae1e2ddfc53240c786c3ab
+                  ct: >-
+                    43a24de68ca4e8625692e3b3dc8e586d5e146531d49a70c727bac838d57bcda0
+                title: banana
+              json:
+                value: &ref_6
+                  iv: de2ec1efba8dbbdfa85afd4a13319160
+                  ct: >-
+                    67aadb5e24d387f5ff4a9e6827590052ea0a78b015860a2b4f5c79801f6d3ec3294c29214a4e15cf90ba633f5df825c42f82e7c5ef14ace06a3b1981f7992991ee3816cd0c372629382966344431563ad1cffd50f444c35250806dccc36b88c0
+                title: banana
+      responses:
+        '200':
+          description: Decrypted data
+          content:
+            application/json:
+              examples:
+                text:
+                  value: &ref_3
+                    data: This is secret
+                  title: banana
+                json:
+                  value: &ref_4
+                    data: >-
+                      { "secret1": "Some string", "secret2": ["an", "array",
+                      "of", "strings"] }
+                  title: banana
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /encrypt:
+    post:
+      tags: *ref_2
+      summary: Encrypt data
+      description: Encrypts data with Morio's internal key pair
+      requestBody:
+        description: The data you want to encrypt
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: string
+              required:
+                - data
+              additionalProperties: false
+            examples:
+              text:
+                value: *ref_3
+                title: banana
+              json:
+                value: *ref_4
+                title: banana
+      responses:
+        '200':
+          description: Encrypted data
+          content:
+            application/json:
+              examples:
+                text:
+                  value: *ref_5
+                  title: banana
+                json:
+                  value: *ref_6
+                  title: banana
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /docker/allcontainers:
+    get:
+      tags: &ref_7
+        - docker
+      summary: List all Docker containers
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns list of all containers available on the host system.
+
+
+        To only get the running containers, use the `/docker/containers`
+        endpoint instead.
+      responses:
+        '200':
+          description: >-
+            [See **List Containers** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: &ref_8
+                status: 409
+                title: Not available in ephemeral mode
+                detail: >-
+                  This endpoint is not available when Morio is running in
+                  ephemeral mode. Since this system has not yet been set up,
+                  this endpoint is not yet available.
+  /docker/containers:
+    get:
+      tags: *ref_7
+      summary: List running Docker containers
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns the list of containers currently running on the hoste sytem.
+
+
+        To get all containers, use the `/docker/allcontainers` endpoint instead.
+      responses:
+        '200':
+          description: >-
+            [See **List Containers** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/df:
+    get:
+      tags: *ref_7
+      summary: List Docker storage metrics
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns information on the used and available storage on the host sytem.
+
+
+        This endpoint is named after the the `df` command on Linux.
+      responses:
+        '200':
+          description: >-
+            [See **Get data usage information** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/images:
+    get:
+      tags: *ref_7
+      summary: List Docker images
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns the list of Docker images available on the host system.
+      responses:
+        '200':
+          description: >-
+            [See **List Images** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/info:
+    get:
+      tags: *ref_7
+      summary: List Docker info
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns general information about the Docker daemon on the host system.
+      responses:
+        '200':
+          description: >-
+            [See **Get system information** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/networks:
+    get:
+      tags: *ref_7
+      summary: List Docker networks
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns a list of Docker networks on the host system.
+      responses:
+        '200':
+          description: >-
+            [See **List networks** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/version:
+    get:
+      tags: *ref_7
+      summary: List Docker version information
+      description: >-
+        This is a proxy endpoint for the Docker API on the host system that
+        returns information on the version of Docker that is running on the host
+        system.
+      responses:
+        '200':
+          description: >-
+            [See **Get version** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/container/:id:
+    get:
+      tags: *ref_7
+      summary: Inspect a Docker container
+      description: >
+        This is a proxy endpoint for the Docker API on the host system that
+        returns information on the container with the ID passed as a parameter
+        in the URL.
+
+
+        This endpoint is equivalent to running the `inspect` command on a
+        container in the Docker CLI.
+
+
+        Note that Docker accepts an ID or (unambigious) name as input.
+      parameters: &ref_9
+        - in: path
+          name: id
+          schema:
+            type: string
+            description: The ID (or name) of the relevant Docker object
+          retuired: true
+          description: The ID (or name) of the relevant docker object
+      responses:
+        '200':
+          description: >-
+            [See **Inspect a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/container/:id/logs:
+    get:
+      tags: *ref_7
+      summary: Retrieve logs from a Docker container
+      description: >
+        This is a proxy endpoint for the Docker API on the host system that
+        returns logs from the container with the ID passed as a parameter in the
+        URL.
+
+
+        This endpoint is equivalent to running the `logs` command on a container
+        in the Docker CLI.
+
+
+        Note that Docker accepts an ID or (unambigious) name as input.
+      parameters: *ref_9
+      responses:
+        '200':
+          description: >-
+            [See **Get container logs** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/container/:id/stats:
+    get:
+      tags: *ref_7
+      summary: Retrieve resource usage stats from a Docker container
+      description: >
+        This is a proxy endpoint for the Docker API on the host system that
+        returns stats based on resource usage from the container with the ID
+        passed as a parameter in the URL.
+
+
+        These stats come from a container'se `inspect` command in the Docker
+        CLI.
+
+
+        Note that Docker accepts an ID or (unambigious) name as input.
+      parameters: *ref_9
+      responses:
+        '200':
+          description: >-
+            [See **Get container stats based on resource usages** in the Docker
+            API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/image/:id:
+    get:
+      tags: *ref_7
+      summary: Inspect a Docker image
+      description: >
+        This is a proxy endpoint for the Docker API on the host system that
+        returns information on the image with the ID passed as a parameter in
+        the URL.
+
+
+        This endpoint is equivalent to running the `inspect` command on an image
+        in the Docker CLI.
+
+
+        Note that Docker accepts an ID or (unambigious) name as input.
+      parameters: *ref_9
+      responses:
+        '200':
+          description: >-
+            [See **Inspect an image** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/networks/:id:
+    get:
+      tags: *ref_7
+      summary: Inspect a Docker network
+      description: >
+        This is a proxy endpoint for the Docker API on the host system that
+        returns information on the network with the ID passed as a parameter in
+        the URL.
+
+
+        This endpoint is equivalent to running the `inspect` command on a
+        network in the Docker CLI.
+
+
+        Note that Docker accepts an ID or (unambigious) name as input.
+      parameters: *ref_9
+      responses:
+        '200':
+          description: >-
+            [See **Inspect a network** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/kill:
+    put:
+      tags: *ref_7
+      summary: Kill a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `kill` command.
+      responses:
+        '200':
+          description: >-
+            [See **Kill a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/pause:
+    put:
+      tags: *ref_7
+      summary: Pause a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `pause` command.
+      responses:
+        '200':
+          description: >-
+            [See **Pause a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/restart:
+    put:
+      tags: *ref_7
+      summary: Restart a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `restart` command.
+      responses:
+        '200':
+          description: >-
+            [See **Restart a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/start:
+    put:
+      tags: *ref_7
+      summary: Start a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `start` command.
+      responses:
+        '200':
+          description: >-
+            [See **Start a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/stop:
+    put:
+      tags: *ref_7
+      summary: Stop a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `stop` command.
+      responses:
+        '200':
+          description: >-
+            [See **Stop a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /docker/containers/:id/unpause:
+    put:
+      tags: *ref_7
+      summary: Unpause a container
+      description: >-
+        This changes, or attempts to change, the container state by issuing a
+        `unpause` command.
+      responses:
+        '200':
+          description: >-
+            [See **Unpause a container** in the Docker API
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause)
+          content:
+            application/json: {}
+        '409':
+          description: Not available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_8
+  /pkgs/clients/deb/build:
+    post:
+      tags: &ref_10
+        - client packages
+      summary: Build a .deb client package
+      description: >-
+        This will trigger the build of a .deb client package.
+
+
+        Note that this will start an ephemeral container to start the build.
+        This API endpoint will not wait for the build to complete before
+        retuning.
+      requestBody:
+        description: The configuration for building the `.deb` client package
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Package:
+                  type: string
+                Source:
+                  type: string
+                Section:
+                  type: string
+                  enum:
+                    - utils
+                Priority:
+                  type: string
+                  enum:
+                    - required,important,standard,optional,extra
+                Architecture:
+                  type: string
+                Essential:
+                  type: string
+                  enum:
+                    - 'no'
+                Depends:
+                  type: array
+                  items: {}
+                Installed-Size:
+                  type: number
+                  format: float
+                Maintainer:
+                  type: string
+                Changed-By:
+                  type: string
+                Uploaders:
+                  type: array
+                  items: {}
+                Homepage:
+                  type: string
+                Description:
+                  type: string
+                DetailedDescription:
+                  type: string
+                Vcs-Git:
+                  type: string
+                Version:
+                  type: string
+                Revision:
+                  type: number
+                  format: float
+              required:
+                - Package
+                - Source
+                - Section
+                - Priority
+                - Architecture
+                - Essential
+                - Depends
+                - Installed-Size
+                - Maintainer
+                - Changed-By
+                - Uploaders
+                - Homepage
+                - Description
+                - DetailedDescription
+                - Vcs-Git
+                - Version
+                - Revision
+              additionalProperties: false
+            example:
+              Package: morio-client
+              Source: morio-client
+              Section: utils
+              Priority: optional
+              Architecture: amd64
+              Essential: 'no'
+              Depends:
+                - - auditbeat
+                  - '>= 8.12'
+                - - filebeat
+                  - '>= 8.12'
+                - - metricbeat
+                  - '>= 8.12'
+              Installed-Size: 5000
+              Maintainer: CERT-EU <services@cert.europa.eu>
+              Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
+              Uploaders:
+                - Joost De Cock <joost.decock@cert.europa.eu>
+              Homepage: https://github.com/certeu/morio
+              Description: >-
+                The Morio client collects and ships observability data to a
+                Morio instance.
+              DetailedDescription: >-
+                Deploy this Morio client (based on Elastic Beats) on your
+                endpoints,
+
+                and collect their data on one or more centralized Morio
+                instances
+
+                for analysis, further processing, downstream routing &
+                filtering,
+
+                or event-driven automation.
+              Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
+              Version: 0.2.0
+              Revision: 1
+      responses:
+        '200':
+          description: Confirmation data
+          content:
+            application/json:
+              example:
+                result: ok
+                status: building
+                settings:
+                  Package: morio-client
+                  Source: morio-client
+                  Section: utils
+                  Priority: optional
+                  Architecture: amd64
+                  Essential: 'no'
+                  Installed-Size: 5000
+                  Maintainer: CERT-EU <services@cert.europa.eu>
+                  Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
+                  Homepage: https://github.com/certeu/morio
+                  Description: >-
+                    The Morio client collects and ships observability data to a
+                    Morio instance.
+                      Deploy this Morio client (based on Elastic Beats) on your endpoints,
+                      and collect their data on one or more centralized Morio instances
+                      for analysis, further processing, downstream routing & filtering,
+                      or event-driven automation.
+                  Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
+                  Version: 0.2.0-1
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /pkgs/clients/deb/defaults:
+    get:
+      tags: *ref_10
+      summary: Get defaults for a .deb client package
+      description: >-
+        This will return the default values to create a new .deb client package.
+
+
+        Note that configuration of a `.deb`package needs to be correct or the
+        package will not function.
+
+        You can adapt these defaults (that's why we provide them), but should
+        [consult the Debian documnentation on
+        packaging](https://wiki.debian.org/Packaging).
+      responses:
+        '200':
+          description: Debian client package defaults
+          content:
+            application/json:
+              example:
+                Package: morio-client
+                Source: morio-client
+                Section: utils
+                Priority: optional
+                Architecture: amd64
+                Essential: 'no'
+                Depends:
+                  - - auditbeat
+                    - '>= 8.12'
+                  - - filebeat
+                    - '>= 8.12'
+                  - - metricbeat
+                    - '>= 8.12'
+                Installed-Size: 5000
+                Maintainer: CERT-EU <services@cert.europa.eu>
+                Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
+                Uploaders:
+                  - Joost De Cock <joost.decock@cert.europa.eu>
+                Homepage: https://github.com/certeu/morio
+                Description: >-
+                  The Morio client collects and ships observability data to a
+                  Morio instance.
+                DetailedDescription: >-
+                  Deploy this Morio client (based on Elastic Beats) on your
+                  endpoints,
+
+                  and collect their data on one or more centralized Morio
+                  instances
+
+                  for analysis, further processing, downstream routing &
+                  filtering,
+
+                  or event-driven automation.
+                Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
+                Version: 0.2.0
+                Revision: 1
+  /settings:
+    get:
+      tags: &ref_12
+        - settings
+      summary: Get the current Morio settings
+      description: >-
+        Returns the current settings.
+
+
+        Note that Morio will encrypt all secrets and remove them from the
+        settings. So this endpoint returns data that is safe to backup.
+      responses:
+        '200':
+          description: Morio settings
+          content:
+            application/json:
+              example: *ref_11
+    post:
+      tags: *ref_12
+      summary: Apply new Morio settings
+      description: >-
+        This will take a full set of new Morio settings and, after validation,
+        apply them.
+
+
+        Note that this endpoint requires you to post the full settings, so when
+        making updates, make sure to leave nothing behind.
+      requestBody:
+        description: The new Morio settings
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cluster:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      pattern: ^[A-Za-z0-9\s-_,.;:()]+$
+                      minLength: 2
+                      maxLength: 255
+                    broker_nodes:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 1
+                      maxItems: 9
+                    flanking_nodes:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 0
+                      maxItems: 36
+                    fqdn:
+                      type: string
+                      oneOf:
+                        - {}
+                        - x-required: true
+                  required:
+                    - name
+                    - broker_nodes
+                  additionalProperties: false
+                metadata:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    comment:
+                      type: string
+                  additionalProperties: false
+                connector:
+                  type: object
+                  properties: {}
+                  additionalProperties: false
+                tokens:
+                  type: object
+                  properties:
+                    flags:
+                      type: object
+                      properties:
+                        HEADLESS_MORIO:
+                          type: boolean
+                        DISABLE_ROOT_TOKEN:
+                          type: boolean
+                      additionalProperties: false
+                    secrets:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    vars:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                  additionalProperties: false
+                iam:
+                  type: object
+                  properties:
+                    providers:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    ui:
+                      type: object
+                      properties:
+                        visibility:
+                          type: object
+                          properties: {}
+                          additionalProperties: false
+                        order:
+                          type: array
+                          items: {}
+                      additionalProperties: false
+                  additionalProperties: false
+              additionalProperties: false
+            examples:
+              cluster1:
+                value: &ref_18
+                  name: Morio Standalone Example
+                  broker_nodes:
+                    - morio-node1.tokyo.morio.it
+                  flags: &ref_13
+                    HEADLESS_MORIO: false
+                    DISABLE_ROOT_TOKEN: false
+                  secrets: &ref_14
+                    AD_PASSWORD: aa;S009)) _S asd0AS
+                  providers: &ref_15
+                    apikey:
+                      provider: apikey
+                      id: apikey
+                      label: API Key
+                    mrt: {}
+                    local:
+                      provider: local
+                      id: local
+                      label: Morio Account
+                    ad:
+                      provider: ldap
+                      id: ad
+                      about: Morio Tokyo branch on-prem Active Directory
+                      server:
+                        url: ldaps://dc1.tokyo.morio.it
+                        bindDN: CN=morio-ldap,OU=Users,DC=tokyo,DC=morio,DC=it
+                        bindCredentials: '{{{ AD_PASSWORD }}}'
+                        searchBase: OU=Users-EU,DC=tokyo,DC=morio,DC=it
+                        searchFilter: (&(objectClass=user)(samaccountname={{username}}))
+                      username_field: samaccountname
+                      label: Active Directory
+                      rbac:
+                        user:
+                          attribute: samaccountname
+                          regex: .
+                        root:
+                          attribute: samaccountname
+                          regex: ^(?:joostdecock|sorchanidhubhghaill)$
+                      verify_certificate: true
+                  visibility: &ref_16
+                    mrt: icon
+                    local: icon
+                    apikey: icon
+                  order: &ref_17
+                    - ad
+                    - local
+                    - apikey
+                    - mrt
+                title: banana
+              cluster3:
+                value: &ref_19
+                  name: Morio Cluster Test
+                  broker_nodes:
+                    - morio-node1.tokyo.morio.it
+                    - morio-node2.tokyo.morio.it
+                    - morio-node3.tokyo.morio.it
+                  fqdn: morio-cluster.tokyo.morio.it
+                  flags: *ref_13
+                  secrets: *ref_14
+                  providers: *ref_15
+                  visibility: *ref_16
+                  order: *ref_17
+                title: banana
+      responses:
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+  /setup:
+    post:
+      tags: *ref_12
+      summary: Initial setup of Morio
+      description: |-
+        This will set up Morio with the provided initial settings.
+
+        This endpoint is only available in ephemeral Mode.
+        In other words, once Morio is set up, this endpoint becomes unavailable.
+      requestBody:
+        description: The Morio settings to use for the intial setup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cluster:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      pattern: ^[A-Za-z0-9\s-_,.;:()]+$
+                      minLength: 2
+                      maxLength: 255
+                    broker_nodes:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 1
+                      maxItems: 9
+                    flanking_nodes:
+                      type: array
+                      items:
+                        type: string
+                      minItems: 0
+                      maxItems: 36
+                    fqdn:
+                      type: string
+                      oneOf:
+                        - {}
+                        - x-required: true
+                  required:
+                    - name
+                    - broker_nodes
+                  additionalProperties: false
+                metadata:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    comment:
+                      type: string
+                  additionalProperties: false
+                connector:
+                  type: object
+                  properties: {}
+                  additionalProperties: false
+                tokens:
+                  type: object
+                  properties:
+                    flags:
+                      type: object
+                      properties:
+                        HEADLESS_MORIO:
+                          type: boolean
+                        DISABLE_ROOT_TOKEN:
+                          type: boolean
+                      additionalProperties: false
+                    secrets:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    vars:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                  additionalProperties: false
+                iam:
+                  type: object
+                  properties:
+                    providers:
+                      type: object
+                      properties: {}
+                      additionalProperties: false
+                    ui:
+                      type: object
+                      properties:
+                        visibility:
+                          type: object
+                          properties: {}
+                          additionalProperties: false
+                        order:
+                          type: array
+                          items: {}
+                      additionalProperties: false
+                  additionalProperties: false
+              additionalProperties: false
+            examples:
+              cluster1:
+                value: *ref_18
+                title: banana
+              cluster3:
+                value: *ref_19
+                title: banana
+      responses:
+        '200':
+          description: Setup result
+          content:
+            application/json:
+              example:
+                result: success
+                uuids:
+                  node: 40361cd8-a149-4675-bd46-11a2b48acd04
+                  cluster: 26e66c95-c342-49fc-8e3a-f5ca69b392ba
+                root_token:
+                  about: >-
+                    This is the Morio root token. You can use it to authenticate
+                    before any authentication providers have been set up. Store
+                    it in a safe space, as it will never be shown again.
+                  value: >-
+                    mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+        '409':
+          description: Only available in ephemeral mode
+          content:
+            application/problem+json:
+              example:
+                status: 409
+                title: Only available in ephemeral mode
+                detail: >-
+                  This endpoint is only available when Morio is running in
+                  ephemeral mode. Since this system has been set up, this
+                  endpoint is no longer available.
+  /status:
+    get:
+      tags: &ref_20
+        - status
+      summary: Get the current status of Morio core
+      description: Returns information about the current status of Morio core.
+      responses:
+        '200':
+          description: Morio Core Status
+          content:
+            application/json:
+              example:
+                info: &ref_21
+                  about: Morio Management API
+                  name: '@morio/api'
+                  production: false
+                  version: 0.2.0
+                state: &ref_22
+                  ephemeral: false
+                  uptime: 37
+                  start_time: 1722232994724
+                  reload_count: 1
+                  config_resolved: true
+                  settings_serial: 1722172709838
+                core: &ref_23
+                  info:
+                    about: Morio Core
+                    name: '@morio/core'
+                    production: false
+                    version: 0.2.0
+                  status:
+                    cluster:
+                      code: 0
+                      color: green
+                      time: 1722233017641
+                      updated: 1722233017641
+                      leader_serial: 1
+                      leading: true
+                      msg: Everything is ok
+                    nodes:
+                      morio-node1.tokyo.morio.it:
+                        api: 0
+                        broker: 0
+                        db: 0
+                        ca: 0
+                        proxy: 0
+                        ui: 0
+                        console: 0
+                    cluster_leader:
+                      serial: 1
+                      uuid: 39b0b5fd-6648-41f8-b3b9-df96c5d11579
+                  nodes:
+                    39b0b5fd-6648-41f8-b3b9-df96c5d11579:
+                      fqdn: morio-node1.tokyo.morio.it
+                      hostname: poc-morio-node1
+                      ip: 10.123.12.15
+                      serial: 1
+                      uuid: 39b0b5fd-6648-41f8-b3b9-df96c5d11579
+                      settings: 1722172709838
+                  node:
+                    uptime: 46633
+                    cluster: 8602906f-5437-4cce-b150-7c3387da36fa
+                    node: 39b0b5fd-6648-41f8-b3b9-df96c5d11579
+                    node_serial: 1
+                    ephemeral: false
+                    reconfigure_count: 1
+                    config_resolved: true
+                    settings_serial: 1722172709838
+  /reload:
+    get:
+      tags: *ref_20
+      summary: Load data from core to bootstrap the API
+      description: >-
+        This will return all the data required to bootstrap the Morio Management
+        API, including the settings, presets, and keys.
+      responses:
+        '200':
+          description: API bootstrap data
+          content:
+            application/json:
+              example:
+                info: *ref_21
+                state: *ref_22
+                core: *ref_23
+                settings: *ref_11
+                keys: *ref_24
+                presets:
+                  MORIO_API_JWT_EXPIRY: 12h
+                  MORIO_API_LOG_LEVEL: trace
+                  MORIO_API_PORT: 3000
+                  MORIO_API_PREFIX: /-/api
+                  MORIO_BROKER_ADMIN_API_PORT: 9644
+                  MORIO_BROKER_KAFKA_API_EXTERNAL_PORT: 9092
+                  MORIO_BROKER_KAFKA_API_INTERNAL_PORT: 19092
+                  MORIO_BROKER_LOG_LEVEL: warn
+                  MORIO_BROKER_REST_API_PORT: 8082
+                  MORIO_BROKER_TOPICS:
+                    - _redpanda.audit_log
+                    - audit
+                    - checks
+                    - events
+                    - logs
+                    - metrics
+                    - notifications
+                    - cron.hourly
+                    - cron.daily
+                    - cron.weekly
+                    - cron.monthly
+                  MORIO_BROKER_UID: 101
+                  MORIO_CA_CERTIFICATE_LIFETIME_DFLT: 750h
+                  MORIO_CA_CERTIFICATE_LIFETIME_MAX: 17544h
+                  MORIO_CA_CERTIFICATE_LIFETIME_MIN: 5m
+                  MORIO_CA_PORT: 9000
+                  MORIO_CA_UID: 1000
+                  MORIO_CONFIG_ROOT: /home/jdecock/git/morio/data/config
+                  MORIO_CONNECTOR_UID: 1000
+                  MORIO_CONSOLE_PORT: 8080
+                  MORIO_CONSOLE_PREFIX: console
+                  MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL: 30
+                  MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT: 150
+                  MORIO_CORE_CLUSTER_STATE_CACHE_TTL: 20
+                  MORIO_CORE_CONFIG_FOLDER: /etc/morio
+                  MORIO_CORE_CRON_DAILY: 24
+                  MORIO_CORE_CRON_HOURLY: 1
+                  MORIO_CORE_CRON_MONTHLY: 720
+                  MORIO_CORE_CRON_WEEKLY: 720
+                  MORIO_CORE_LOG_LEVEL: debug
+                  MORIO_CORE_PORT: 3007
+                  MORIO_CORE_PREFIX: /-/core
+                  MORIO_CORE_SERVICE_CERTIFICATE_RENEWAL_DAYS: 135
+                  MORIO_CORE_UUID_FINGERPRINT_LENGTH: 6
+                  MORIO_DATA_ROOT: /home/jdecock/git/morio/data/data
+                  MORIO_DB_HTTP_PORT: 4001
+                  MORIO_DB_RAFT_PORT: 4002
+                  MORIO_DOCKER_SOCKET: /var/run/docker.sock
+                  MORIO_DOWNLOADS_FOLDER: downloads
+                  MORIO_ERRORS_WEB_PREFIX: https://morio.it/reference/errors/
+                  MORIO_INTERMEDIATE_CA_COMMON_NAME: Morio Intermediate Certificate Authority
+                  MORIO_INTERMEDIATE_CA_VALID_YEARS: 5
+                  MORIO_LOGS_ROOT: /home/jdecock/git/morio/data/logs
+                  MORIO_NETWORK: morionet
+                  MORIO_NETWORK_MTU: 1500
+                  MORIO_NETWORK_SUBNET: 192.168.144.32/28
+                  MORIO_PROXY_ACCESS_LOG_FILEPATH: /var/log/morio/traefik.access.log
+                  MORIO_PROXY_LOG_FILEPATH: /var/log/morio/traefik.log
+                  MORIO_PROXY_LOG_FORMAT: json
+                  MORIO_PROXY_LOG_LEVEL: DEBUG
+                  MORIO_REPOS_FOLDER: repos
+                  MORIO_ROOT_CA_COMMON_NAME: Morio Root Certificate Authority
+                  MORIO_ROOT_CA_VALID_YEARS: 20
+                  MORIO_UI_PORT: 3010
+                  MORIO_UI_TIMEOUT_URL_CHECK: 1500
+                  MORIO_UNIT_TEST_HOST: unit.test.morio.it
+                  MORIO_VERSION: 0.2.0
+                  MORIO_X509_C: BE
+                  MORIO_X509_CN: Morio
+                  MORIO_X509_L: Brussels
+                  MORIO_X509_O: CERT-EU
+                  MORIO_X509_OU: Engineering Team
+                  MORIO_X509_ST: Brussels
+                  NODE_ENV: development

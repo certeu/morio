@@ -84,7 +84,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * When the initial settings are created, these values will be merged in
      */
     default_settings: [
-      ['tokens.flags.DISABLE_ROOT_TOKEN', false],
+      ['tokens.flags.DISABLE_IDP_APIKEY', false],
+      ['tokens.flags.DISABLE_IDP_MRT', false],
+      ['tokens.flags.DISABLE_IDP_LOCAL', false],
+      ['tokens.flags.DISABLE_IDP_LDAP', false],
       ['tokens.flags.HEADLESS_MORIO', false],
     ],
   }

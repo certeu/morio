@@ -48,4 +48,9 @@
   justify-content: space-between;
 }
 
+.clickme {
+  background: "red";
+  opacity: 60;
+  font-weight: bold;
+}
 

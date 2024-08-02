@@ -4,14 +4,12 @@ title: Settings
 
 In Morio, __settings__ are the high-level _settings_ that you provide to Morio.
 
-Morio -- specifically [Morio Core][core] -- will take the high-level settings
+Morio -- specifically [Morio Core](/docs/guides/services/core) -- will take the high-level settings
 provided by the user,  and resolve them into a detailed configuration for all
 services.  
 You can think of <b>core</b> as the <b>co</b>nfiguration <b>re</b>solver.
 
-The diagram below illustrates how
-[settings](/docs/reference/terminology/settings/) and
-[configuration](/docs/reference/terminology/configuration/) relate to each
+The diagram below illustrates how settings configuration relate to each
 other within Morio:
 
 <Architecture caption="Schematic overview of how core resolved the high-level Morio settings into a detailed configuration for each service">
@@ -50,7 +48,4 @@ flowchart TD
   class broker green;
 ```
 </Architecture>
-
-
-[core]: /docs/reference/services/core/
 
