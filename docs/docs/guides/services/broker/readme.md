@@ -4,7 +4,7 @@ tags:
   - broker
 ---
 
-The Morio Broker service (broker) is the data backbone of Morio.
+The **Morio Broker Service** (broker) is the data backbone of Morio.
 Under the hood, the broker is a RedPanda broker providing a Kafka-compatible
 streaming data platform.
 

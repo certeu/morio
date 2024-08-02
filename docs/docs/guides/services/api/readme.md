@@ -1,10 +1,10 @@
 ---
-title: Management API Service Guide
+title: API Service Guide
 tags: 
   - api
 ---
 
-The Morio Management API service (api) provides the main user-facing API in Morio.
+The **Morio API Service** (api) provides the main user-facing API in Morio.
 It is an [OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
 [auto-gereated reference documentation](/oas-api).
 

@@ -4,7 +4,7 @@ tags:
   - ca
 ---
 
-The Morio CA service (ca) provides a Certificate Authority that is used
+The **Morio Certificate Authority Service** (ca) provides a Certificate Authority that is used
 to facilitate TLS encryption for and between Morio services (and clients).
 
 While the ca service is used internally, Morio also makes the service
@@ -19,55 +19,58 @@ please [refer to the SmallStep Documentation
 
 ## CA service responsibilities
 
-The ca service runs on every Morio [broker node](, and handles the following
+The ca service runs on every Morio [broker node
+](/docs/reference/terminology/broker-node/), and handles the following
 responsibilities:
 
-### Orchestration
+### Internal Certificate Provisioning
 
-The core service is responsible for creacting and starting all other Morio services.
-If a service is not running that should be running, the core service will create a container for it, and start it.
-Or, if a service is running that should not be running, the core service will stop it.
+The CA is responsible for provisioning certificates that are used internally by
+Morio to secure communication, as well as for mutual TLS (mTLS).
 
-Other tasks that fall under _orchestration_ are things like creating the Docker
-network and attaching itself and other containers to it, as well as pulling
-down images that are not available on the local Docker host.
+This happens through its API, with [the core
+service](/docs/guides/services/core) handling the actual API request.
 
-To be able to accomplish this task, the core service needs access to the Docker
-socket on the host OS, which is provided by mounting the socket in the
-container.
+### API Certificate Provisioning
 
-Given that access to the host OS' Docker socket is a high-privilege access, the
-core service is internal, and not a user-facing service. Only [its `/status`
-endpoint](/oas-core#tag/status/paths/~1status/get) is accessible to users.
+The CA also supports generating certificates through [the API service
+](/docs/guides/services/api).
 
-### Configuration Resolution
+Refer to the [`/ca/certificate`](/oas-api#tag/cryptography/paths/~1ca~1certificate/post) API endpoint for details.
 
-The core service is also responsible for transforming the high-level Morio
-settings into a detailed configuration for the various Morio services.
+### ACME Certificate Provisioning
 
-For example, you do not need to worry about making certain the API is
-accessible through the proxy service, core will handle all of that and more for
-you.
+Finally, the CA service also supports provisioning certificates via [the ACME
+protocol](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment),
+for _Let's Encrypt like_ functionality..
 
-To be able to accomplish this task, core need access to shared storage with the
-various services. For example, core will generate a configuration for the proxy
-service to disk, and the proxy service will then _find_ its configuration ready
-to go when it starts up.
+Refer to [the SmallStep documentation for how to configure popular clients to use ACME](https://smallstep.com/docs/tutorials/acme-protocol-acme-clients/#about-this-tutorial) with Morio's CA service (which is a Step-CA instance).
 
-For this to be possible, core relies on access to mounted folders on the Host
-OS that are also mounted on the various services.
+<Note>
+Morio currently only supports the HTTP challenge type (`http-01`)
+</Note>
 
-### Clustering
+## Can you trust the Morio Certificate Authority?
 
-Last but not least, core is also responsible for enabling clustering support in
-Morio, as well as keeping a cluster of Morio nodes running and healthy.
+Not all Certificate Authorities are created equal.
 
-That includes initial cluster formation, where all you need is to install Morio
-on all the cluster nodes, and then setup 1 of the nodes with the clustered
-settings.  Core will also run the cluster heartbeat, making sure that
-everything is ok, and ensure that the cluster has 1 leader node and the rest of
-the nodes will be follower nodes.
+On one hand of the spectrum are CAs that are globally trusted by browsers. The
+GlobalSign, VeriSign, or Symantecs of this world, or the root CAs of large tech
+companies like Amazon, Google, or Apple.
 
-Clustering is not a goal as such, it provides high-availability, meaning that
-if a node goes down, Morio as a whole keeps on ticking.
+Morio's CA service is not on this end of the spectrum.
+
+On the other hand of the spectrum is every CA spun up -- or every sef-signed
+certificate generated -- by a person or team that just needs some certificates
+to encrypt communication or use mTLS. People that don't have an internal CA, or
+have one but it requires a written request in duplicate signed by the CISO
+before a certificate can be issued.
+
+By making Morio's Certificate Authority available as a service, we hope to help
+those people build great things.
+
+At the end of the day, only you can decide what Certificate Authority is the
+right fit for your use-case.
+
+
 

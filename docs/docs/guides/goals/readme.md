@@ -1,5 +1,5 @@
 ---
-title: Morio Design Guide
+title: Morio Design Goals
 ---
 
 Morio is an observability platform created by the engineering team at
@@ -134,7 +134,7 @@ the first thing you need is a _schema_, a set of rules that defines how the
 data should be structured.
 
 We considered [OpenTelemetry](https://opentelemetry.io/) but found it to be a
-bit too uncooked for our needs.  Instead, we chose the [Elastic Common Schema
+bit too undercooked for our needs.  Instead, we chose the [Elastic Common Schema
 (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html) as it is more
 mature, well defined, and supported by variety of systems and vendors.
 

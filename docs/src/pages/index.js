@@ -25,6 +25,18 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <div className={clsx('flex_wrapper', styles.flexWrapper)}>
+          <div style={{maxWidth: '450px', marginBottom: '2rem', backgroundColor: 'var(--ifm-color-info-contrast-background)'}}>
+            <h2>
+              <span>New to Morio?</span>
+              <span role="image">🤔</span>
+            </h2>
+            <p>
+              If this is your first encounter with Morio, we recommend reading about
+              the <a href="/docs/guides/goals"><b>Morio Design Goals</b></a> to get started.
+            </p>
+          </div>
+        </div>
         <p>
           This is a work-in-progress to provide documentation for Morio.
           <br />
