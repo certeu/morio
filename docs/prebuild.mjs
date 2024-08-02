@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import yaml from 'js-yaml'
 // OpenAPI specifications
@@ -162,12 +161,12 @@ export const prebuildDocs = async () => {
   /*
    * Presets
    */
-  await ensurePresetPages()
+  //await ensurePresetPages()
 
   /*
    * Errors
    */
-  await ensureErrorsPages()
+  //await ensureErrorsPages()
 }
 
 prebuildDocs()
