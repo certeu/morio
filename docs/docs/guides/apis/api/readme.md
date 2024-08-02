@@ -90,7 +90,7 @@ supported types:
 Use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
 That JWT can then be used in subsequent API calls to authenticate them.
 
-The [the `/login` endpoint]((/docs/guides/idps#mrt)) documentation includes examples for each dentity providers listed above.
+The [the `/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each dentity providers listed above.
 The response from the API will include a `jwt` key that holds the JWT. Below is an example using [the `local` identity provider](/docs/guides/idps#local):
 
 ```json title="API Response Body"

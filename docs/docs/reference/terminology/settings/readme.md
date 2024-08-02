@@ -9,9 +9,7 @@ provided by the user,  and resolve them into a detailed configuration for all
 services.  
 You can think of <b>core</b> as the <b>co</b>nfiguration <b>re</b>solver.
 
-The diagram below illustrates how
-[settings](/docs/reference/terminology/settings/) and
-[configuration](/docs/reference/terminology/configuration/) relate to each
+The diagram below illustrates how settings configuration relate to each
 other within Morio:
 
 <Architecture caption="Schematic overview of how core resolved the high-level Morio settings into a detailed configuration for each service">

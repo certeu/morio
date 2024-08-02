@@ -42,7 +42,7 @@ This provider allows authentication with the Morio Root Token.
 
 - The `mrt` provider is built-in, and does not require configuration.
 - The `mrt` provider can be disabled with the [`DISABLE_IDP_MRT`](/docs/reference/flags/disable_idp_mrt/) feature flag.
-- The `mrt` provider's inclusion and/or appearance on the UI'slogin page can be configured in [the UI settings](/reference/settings).
+- The `mrt` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
 
 **Settings Example**
 

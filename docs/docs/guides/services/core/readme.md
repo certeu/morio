@@ -13,12 +13,6 @@ administrator -- you do not interact with it. As such, this guide covers
 the high-level responsibilities of the service, allowing you to get a grasp
 of what it is and what it does.
 
-<Related>
-If you would like to learn more than what is covered in this guide, 
-please [refer to the Core Service Reference Documentation
-](/docs/reference/services/core/).
-</Related>
-
 ## Core service responsibilities
 
 The core service runs on every Morio node, and handles the following

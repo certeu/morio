@@ -63,7 +63,7 @@ resizing the cluster.
 
 The [ui service](/docs/guides/services/ui) provides the Morio web-based user interface.
 It's built as a so-called _composable web architecture_ where all its interactivity
-is backend by [the api service]('docs/guides/services/api).
+is backend by [the api service](/docs/guides/services/api).
 
 That makes it sound like a great candidate for a flanking service. After all,
 it's just a client of the API service. Using the ui service is just a more
