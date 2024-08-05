@@ -65,7 +65,7 @@ function OpenAPI(utils, type = 'api', extra = {}) {
       },
       version: this.utils.getPreset('MORIO_VERSION'),
       "x-logo": {
-        url: "https://github.com/certeu/morio/raw/develop/media/logo.svg",
+        url: "/downloads/morio-card-embed.svg",
         backgroundColor: "transparent",
         altText: "Morio Logo",
       },

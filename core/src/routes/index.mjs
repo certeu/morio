@@ -4,6 +4,7 @@ import { routes as docker } from '#routes/docker'
 import { routes as pkgs } from '#routes/pkgs'
 import { routes as status } from '#routes/status'
 import { routes as cluster } from '#routes/cluster'
+import { routes as docs } from '#routes/docs'
 
 export const routes = {
   crypto,
@@ -12,4 +13,5 @@ export const routes = {
   pkgs,
   status,
   cluster,
+  docs,
 }
