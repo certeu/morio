@@ -44,7 +44,7 @@
     "passport-ldapauth": "^3.0.1",
     "pino": "^8.20.0",
     "qrcode": "^1.5.3",
-    "swagger-ui-express": "^5.0.0"
+    "redoc-express": "^2.1.0"
   },
   "devDependencies": {
     "esbuild": "^0.20.2"

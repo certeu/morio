@@ -64,6 +64,11 @@ function OpenAPI(utils, type = 'api', extra = {}) {
         url: 'https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics',
       },
       version: this.utils.getPreset('MORIO_VERSION'),
+      'x-logo': {
+        url: '/downloads/morio-card-embed.svg',
+        backgroundColor: 'transparent',
+        altText: 'Morio Logo',
+      },
     },
     externalDocs: {
       description: 'Morio Online Documentation',

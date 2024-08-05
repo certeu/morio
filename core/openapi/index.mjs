@@ -24,7 +24,7 @@ const errorResponses = (templates) => sharedErrorResponses(templates, errors)
 /**
  * Setup a helper object to build out the OpenAPI specification
  */
-const api = new OpenAPI(utils, 'api', {
+const api = new OpenAPI(utils, 'core', {
   components: {},
   paths: {},
 })
