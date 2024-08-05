@@ -7,9 +7,6 @@ import cookieParser from 'cookie-parser'
 import { routes } from '#routes/index'
 // Bootstrap configuration
 import { reloadConfiguration } from './reload.mjs'
-// Swagger
-import swaggerUi from 'swagger-ui-express'
-import { spec } from '../openapi/index.mjs'
 // Middleware
 import { guardRoutes, addRbacHeaders } from './middleware.mjs'
 // Load logger and utils
@@ -45,12 +42,6 @@ app.use(addRbacHeaders)
  * Load the API routes
  */
 for (const type in routes) routes[type](app)
-
-/*
- * Add the route for the Swagger (OpenAPI) docs
- */
-const docs = swaggerUi.setup(spec)
-app.use(`/docs`, swaggerUi.serve, docs)
 
 /*
  * If not in production, allow access to coverage reports
