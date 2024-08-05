@@ -3,7 +3,7 @@ import { spec } from '../../openapi/index.mjs'
 import { utils } from '../lib/utils.mjs'
 
 /**
- * This method adds the authentication endpoints to Express
+ * This method adds the inline API documentation to Express
  *
  * @param {abject} app - The ExpressJS app
  */
