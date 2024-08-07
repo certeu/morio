@@ -2,42 +2,13 @@
   "name": "morio",
   "version": "0.2.0",
   "description": "Connect, Stream, Observe, Respond",
+  "license": "EUPL",
   "private": true,
-  "scripts": {
-    "build": "npm run build:dev",
-    "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder",
-    "build:prod": "npm run build:api prod && npm run build:core prod && npm run build:ui prod && npm run build:dbuilder",
-    "build:tests": "npm run build:api && npm run build:core tests && npm run build:ui && npm run build:dbuilder",
-    "build:api": "./scripts/build-container.sh api",
-    "build:core": "./scripts/build-container.sh core",
-    "build:ui": "./scripts/build-container.sh ui",
-    "build:dbuilder": "./builders/dbuilder/build-container.sh",
-    "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
-    "predev": "npm run reconfigure",
-    "preprod": "npm run reconfigure",
-    "tests": "./core/run-test-container.sh",
-    "dev": "./core/run-dev-container.sh",
-    "prod": "./core/run-prod-container.sh",
-    "destroy": "./scripts/destroy.sh",
-    "redev": "npm run destroy && npm run dev",
-    "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
-    "reconfigure": "node scripts/reconfigure.mjs",
-    "reversion": "node scripts/reversion.mjs && npm run reconfigure",
-    "rev": "npm run reversion",
-    "prebuild": "npm run reconfigure",
-    "prettier": "npx prettier --write .",
-    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
-    "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "logs:core": "docker logs -n 20 -f core | pino-pretty -i pid,time,name,hostname",
-    "logs:api": "docker logs -n 20 -f api | pino-pretty -i pid,time,name,hostname"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/certeu/morio.git"
   },
   "author": "CERT-EU <services@cert.europa.eu>",
-  "license": "EUPL",
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },
@@ -59,9 +30,41 @@
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "nodemon": "^3.1.0",
+    "pino-pretty": "^11.2.2",
     "prettier": "^3.2.5"
   },
-  "dependencies": {
-    "pino-pretty": "^11.2.2"
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm run build:dev",
+    "build:api": "./scripts/build-container.sh api",
+    "build:core": "./scripts/build-container.sh core",
+    "build:dbuilder": "./builders/dbuilder/build-container.sh",
+    "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder",
+    "build:prod": "npm run build:api prod && npm run build:core prod && npm run build:ui prod && npm run build:dbuilder",
+    "build:tests": "npm run build:api && npm run build:core tests && npm run build:ui && npm run build:dbuilder",
+    "build:ui": "./scripts/build-container.sh ui",
+    "ci:eslint": "npm run lint",
+    "ci:prettier": "npm run prettier",
+    "destroy": "./scripts/destroy.sh",
+    "dev": "./core/run-dev-container.sh",
+    "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
+    "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
+    "logs:api": "docker logs -n 20 -f api | pino-pretty -i pid,time,name,hostname",
+    "logs:core": "docker logs -n 20 -f core | pino-pretty -i pid,time,name,hostname",
+    "prebuild": "npm run reconfigure",
+    "predev": "npm run reconfigure",
+    "preprod": "npm run reconfigure",
+    "prettier": "npx prettier --write .",
+    "prod": "./core/run-prod-container.sh",
+    "reconfigure": "node scripts/reconfigure.mjs",
+    "redev": "npm run destroy && npm run dev",
+    "reversion": "node scripts/reversion.mjs && npm run reconfigure",
+    "rev": "npm run reversion",
+    "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
+    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tests": "./core/run-test-container.sh"
   }
 }

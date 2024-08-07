@@ -1,9 +1,11 @@
 
 > [!Warning]
-> Morio is currently early-access alpha code. 
+> ##### Morio is currently early-access alpha code. 
 >
 > We are building this in the open, so feel free to look around, 
 > try it out, or [leave feedback](https://github.com/certeu/morio/discussions).
+>
+> That being said, you probably don't want to run this in production yet.
 
 <p align='center'><a 
   href="https://deepscan.io/dashboard#view=project&tid=24001&pid=27249&bid=869644"
