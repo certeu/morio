@@ -1,12 +1,8 @@
+# This runs eslint on all files
 name: ESLint (all files)
 
 on:
-  push:
-    branches:
-      - develop
   pull_request:
-    branches:
-      - develop
 
 jobs:
   lint:
@@ -14,7 +10,8 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        # Morio uses NodeJS 20 lts/iron
+        node-version: [20.x]
 
     steps:
       - name: Checkout repository
