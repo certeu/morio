@@ -8,7 +8,7 @@ The **Morio Certificate Authority Service** (ca) provides a Certificate Authorit
 to facilitate TLS encryption for and between Morio services (and clients).
 
 While the ca service is used internally, Morio also makes the service
-available as running a Certificate Authority is non-trivial, so it's 
+available as running a Certificate Authority is non-trivial, so it's
 certainly _nice to have_ that Morio comes with one out of the box.
 
 <Related>
@@ -71,6 +71,3 @@ those people build great things.
 
 At the end of the day, only you can decide what Certificate Authority is the
 right fit for your use-case.
-
-
-

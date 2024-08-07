@@ -1,6 +1,6 @@
 ---
 title: DISABLE_IDP_MRT
-tags: 
+tags:
   - flag
   - mrt
   - idp
@@ -30,5 +30,3 @@ We plan to add support for rotating the root token in the future, but for the ti
 
 So this flag can be used as a short-term solution in case your root token is compromised.
 </Fixme>
-
-

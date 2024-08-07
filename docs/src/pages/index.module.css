@@ -49,8 +49,7 @@
 }
 
 .clickme {
-  background: "red";
+  background: 'red';
   opacity: 60;
   font-weight: bold;
 }
-

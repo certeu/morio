@@ -3,7 +3,7 @@
 // (when paired with `@ts-check`).
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
-import {themes as prismThemes} from 'prism-react-renderer';
+import { themes as prismThemes } from 'prism-react-renderer'
 import smartyPants from 'remark-smartypants'
 
 /** @type {import('@docusaurus/types').Config} */
@@ -36,18 +36,16 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          remarkPlugins: [ smartyPants ],
+          remarkPlugins: [smartyPants],
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/certeu/morio/tree/develop/docs/',
+          editUrl: 'https://github.com/certeu/morio/tree/develop/docs/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/certeu/morio/tree/develop/docs/',
+          editUrl: 'https://github.com/certeu/morio/tree/develop/docs/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -77,22 +75,21 @@ const config = {
           primaryColor: '#1890ff',
         },
       },
-    ]
+    ],
   ],
 
   markdown: {
     mermaid: true,
   },
-  themes: [
-    '@docusaurus/theme-mermaid',
-  ],
+  themes: ['@docusaurus/theme-mermaid'],
 
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       image: 'img/morio-social-card.jpg',
       announcementBar: {
-        content: '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/05/15/oven-window">Learn more</a>',
+        content:
+          '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/05/15/oven-window">Learn more</a>',
         isCloseable: false,
         backgroundColor: '#EB6534',
         textColor: '#fff',
@@ -108,15 +105,15 @@ const config = {
             type: 'doc',
             docId: 'guides/readme',
             position: 'left',
-            label: 'Guides'
+            label: 'Guides',
           },
           {
             type: 'doc',
             docId: 'reference/readme',
             position: 'left',
-            label: 'Reference'
+            label: 'Reference',
           },
-          {to: '/blog', label: 'Blog', position: 'left'},
+          { to: '/blog', label: 'Blog', position: 'left' },
           {
             href: 'https://github.com/certeu/morio',
             label: 'GitHub',
@@ -140,6 +137,6 @@ const config = {
         additionalLanguages: ['yaml'],
       },
     }),
-};
+}
 
-export default config;
+export default config

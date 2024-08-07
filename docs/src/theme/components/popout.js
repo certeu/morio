@@ -11,7 +11,6 @@ import {
   WarningIcon,
 } from './icons.js'
 
-
 const icons = {
   comment: <CommentIcon />,
   error: <ErrorIcon />,
@@ -40,7 +39,8 @@ export const Popout = (props) => {
           <span className="type">
             {type === 'tldr' ? 'TL;DR' : type === 'scode' ? 'Source Code' : type}
             {type === 'comment' && props.by && (
-              <><span className="by-lead">by {props.by}</span>
+              <>
+                <span className="by-lead">by {props.by}</span>
               </>
             )}
           </span>
@@ -58,7 +58,9 @@ export const Popout = (props) => {
  */
 const CommentMissesBy = (props) => (
   <Popout type="error">
-    <p>When using a <code>Comment</code> custom component, please provide the <code>by</code> prop.</p>
+    <p>
+      When using a <code>Comment</code> custom component, please provide the <code>by</code> prop.
+    </p>
     <p>Original comment:</p>
     <pre>{props.children}</pre>
   </Popout>
@@ -77,4 +79,3 @@ export const Scode = (props) => <Popout type="scode" {...props} />
 export const Tip = (props) => <Popout type="tip" {...props} />
 export const Tldr = (props) => <Popout type="tldr" {...props} />
 export const Warning = (props) => <Popout type="warning" {...props} />
-

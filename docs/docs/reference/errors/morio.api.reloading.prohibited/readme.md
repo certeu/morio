@@ -1,16 +1,17 @@
 ---
 title: morio.api.reloading.prohibited
-tags: 
- - error
+tags:
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Not available while reloading__ - This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.
+
+**Not available while reloading** - This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Not available while reloading__ - This endpoint is not available when Morio is
   "detail": "This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

@@ -1,6 +1,6 @@
 ---
 title: DISABLE_IDP_LOCAL
-tags: 
+tags:
   - flag
   - local
   - idp
@@ -12,4 +12,3 @@ provider](/docs/guides/idps#local) thereby blocking authentication via local Mor
 <Comment by="joost">
 This flag is not implemented yet, but it's on our todo list. 
 </Comment>
-

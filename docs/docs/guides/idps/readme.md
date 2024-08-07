@@ -7,15 +7,14 @@ a modular way to configure authentication backends for your Morio deployment.
 
 Currently, 4 types of identity providers are supported:
 
-- [The `mrt` identity provider](#mrt) lets you authenticate via __the Morio Root Token__
-- [The `apikey` identity provider](#apikey) lets you Authentication via an __API Key__
-- [The `local` identity provider](#local) lets you Authentication via a __Local Morio Account__
-- [The `ldap` identity provider](#ldap) lets you Authentication using an __LDAP account__, including LDAP-compatible backends such as Active Directory
-
+- [The `mrt` identity provider](#mrt) lets you authenticate via **the Morio Root Token**
+- [The `apikey` identity provider](#apikey) lets you Authentication via an **API Key**
+- [The `local` identity provider](#local) lets you Authentication via a **Local Morio Account**
+- [The `ldap` identity provider](#ldap) lets you Authentication using an **LDAP account**, including LDAP-compatible backends such as Active Directory
 
 ## mrt
 
-The provider named `mrt` is the __Morio Root Token__ provider.  
+The provider named `mrt` is the **Morio Root Token** provider.  
 This provider allows authentication with the Morio Root Token.
 
 **Purpose**
@@ -47,19 +46,19 @@ This provider allows authentication with the Morio Root Token.
 **Settings Example**
 
 ```yaml title="morio-settings.yaml"
-iam: 
+iam:
   providers:
     mrt: # No settings required, merely including it as a provider is sufficient
   ui:
     visibility:
       mrt: full # Anything other 'icon' will do
-    order: 
+    order:
       - mrt
 ```
 
 ## apikey
 
-The provider named `apikey` is the __Morio API Keys__ provider.  
+The provider named `apikey` is the **Morio API Keys** provider.  
 This provider allows authentication with a Morio API Keys and its matching secrets.
 
 **Purpose**
@@ -68,7 +67,6 @@ This provider allows authentication with a Morio API Keys and its matching secre
 - The `apikey` provider is not intended for human operators, although it is commonly used by developers when working on Morio API integration.
 
 **Restrictions**
-
 
 - The `apikey` provider does not allow choosing the API Key (username) or Secret (password).
 - The `apikey` provider does not support dropping privileges by assuming a different role. Only the role assigned to the API Key can be used.
@@ -84,7 +82,6 @@ This provider allows authentication with a Morio API Keys and its matching secre
 - The `apikey` provider allows for any role up to `engineer`, only the `root` role cannot be assigned to an API Key.
 - The `apikey` provider does not allow creating an API Key with a role higher than one's own.
 
-
 **Configuration**
 
 - The `apikey` provider is built-in, and does not require configuration.
@@ -94,25 +91,25 @@ This provider allows authentication with a Morio API Keys and its matching secre
 **Settings Example**
 
 ```yaml title="morio-settings.yaml"
-iam: 
+iam:
   providers:
     apikey:
       provider: apikey # You cannot choose this, it must always be `apikey`
       id: apikey # You cannot choose this, it must always be `apikey`
       label: API Key # This you can choose :)
-    mrt: 
+    mrt:
   ui:
     visibility:
       apikey: icon # This will hide the identity provider behing a lock icon on the login page
       mrt: ok
-    order: 
+    order:
       - apikey
       - mrt
 ```
 
 ## local
 
-The provider named `local` is the __Morio Local Users__ provider.  
+The provider named `local` is the **Morio Local Users** provider.  
 This provider allows authentication with a the username, password, and TOTP token of a Local Morio User Account.
 
 **Purpose**
@@ -146,23 +143,23 @@ This provider allows authentication with a the username, password, and TOTP toke
 **Settings Example**
 
 ```yaml title="morio-settings.yaml"
-iam: 
+iam:
   providers:
     apikey:
       provider: apikey
       id: apikey
       label: API Key
-    mrt: 
+    mrt:
     local:
       provider: local # You cannot choose this, it must always be `local`
-      id: local  # You cannot choose this, it must always be `local`
+      id: local # You cannot choose this, it must always be `local`
       label: Morio Account # This you can choose :)
   ui:
     visibility:
       apikey: icon
       local: ok
       mrt: icon
-    order: 
+    order:
       - apikey
       - local
       - mrt
@@ -170,7 +167,7 @@ iam:
 
 ## ldap
 
-The provider named `ldap` is the __Morio LDAP__ provider.  
+The provider named `ldap` is the **Morio LDAP** provider.  
 This provider allows against a pre-existing LDAP backend.
 
 **Purpose**
@@ -200,13 +197,13 @@ This provider allows against a pre-existing LDAP backend.
 **Settings Example**
 
 ```yaml title="morio-settings.yaml"
-iam: 
+iam:
   providers:
     apikey:
       provider: apikey
       id: apikey
       label: API Key
-    mrt: 
+    mrt:
     local:
       provider: local
       id: local
@@ -237,7 +234,7 @@ iam:
       apikey: icon
       local: icon
       mrt: icon
-    order: 
+    order:
       - ad
       - apikey
       - local
@@ -246,4 +243,3 @@ iam:
     secrets:
       AD_PASSWORD: Your password for the bindDN account here
 ```
-

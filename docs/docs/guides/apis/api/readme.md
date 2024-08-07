@@ -2,7 +2,7 @@
 title: Management API Guide
 ---
 
-The Morio Management API is the main user-facing API in Morio.  It is an
+The Morio Management API is the main user-facing API in Morio. It is an
 [OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
 [auto-gereated reference documentation](/oas-api).
 
@@ -30,9 +30,9 @@ assume we are referring to this one.
 The API itself is available on all Morio nodes, and can be accessed under the
 prefix `/-/api/`.
 
-All documentation of API endpoints is relative to this prefix. So to access 
+All documentation of API endpoints is relative to this prefix. So to access
 the `/status` endpoint of this API on a Morio node, you should use
-`https://[your-server-name]/-/api/status`. 
+`https://[your-server-name]/-/api/status`.
 
 <Note>
 
@@ -49,13 +49,13 @@ If your server's DNS name
 is `example.morio.it` , you could run this curl command to get the `/status`
 endpoint:
 
-``` title=curl
+```title=curl
 curl https://example.morio.it/-/api/status
 ```
 
 Or, if your system does not trust the Morio certificates:
 
-``` title=curl
+```title=curl
 curl --insecure https://example.morio.it/-/api/status
 ```
 
@@ -71,18 +71,18 @@ Pre-expiry, tokens can be renewed at [the `/token` endpoint](/oas-api#tag/authen
 ### Identity Providers
 
 The Morio Management API supports all authentication types that are supported
-by Morio for HTTP-based access.  In practical terms, HTTP-based authentication
+by Morio for HTTP-based access. In practical terms, HTTP-based authentication
 in Morio is backed by an _identity provider_, of which there are currently four
 supported types:
 
 - [The `mrt` identity provider](/docs/guides/idps#mrt) lets you authenticate
-  via __the Morio Root Token__
+  via **the Morio Root Token**
 - [The `apikey` identity provider](/docs/guides/idps#apikey) lets you
-  Authentication via an __API Key__
+  Authentication via an **API Key**
 - [The `local` identity provider](/docs/guides/idps#local) lets you
-  Authentication via a __Local Morio Account__
+  Authentication via a **Local Morio Account**
 - [The `ldap` identity provider](/docs/guides/idps#ldap) lets you
-  Authentication using an __LDAP account__, including LDAP-compatible backends
+  Authentication using an **LDAP account**, including LDAP-compatible backends
   such as Active Directory
 
 ### Logging In
@@ -99,9 +99,7 @@ The response from the API will include a `jwt` key that holds the JWT. Below is 
   "data": {
     "user": "local.testAccount1722236922048",
     "role": "user",
-    "available_roles": [
-      "user"
-    ],
+    "available_roles": ["user"],
     "highest_role": "user",
     "provider": "local"
   }
@@ -110,16 +108,14 @@ The response from the API will include a `jwt` key that holds the JWT. Below is 
 
 ### JSON Web Token
 
-The value in the `jwt` key of the reponse body holds our JSON Web Token (JWT). 
+The value in the `jwt` key of the reponse body holds our JSON Web Token (JWT).
 It can be [decoded](https://jwt.io/) to reveal its payload data:
 
 ```json title='Decoded Payload Data of a JSON Web Token"
 {
   "user": "local.testAccount1722236922048",
   "role": "user",
-  "available_roles": [
-    "user"
-  ],
+  "available_roles": ["user"],
   "highest_role": "user",
   "provider": "local",
   "node": "39b0b5fd-6648-41f8-b3b9-df96c5d11579",
@@ -133,17 +129,17 @@ It can be [decoded](https://jwt.io/) to reveal its payload data:
 }
 ```
 
-### Bearer Authentication 
+### Bearer Authentication
 
 Now that you have your JWT, it functions as your _Bearer Token_ and you can use _Bearer Authentication_ in subsequent API requests.
 To do so, pass the content of the JWT as the `Authorization` header, prefixed by `Bearer: `.
 A JSON representation of the headers would look like this:
 
-```json title="Bearer Authentication"
+````json title="Bearer Authentication"
 ```json
 {
   "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibG9jYWwudGVzdEFjY291bnQxNzIyMjM2OTIyMDQ4Iiwicm9sZSI6InVzZXIiLCJhdmFpbGFibGVfcm9sZXMiOlsidXNlciJdLCJoaWdoZXN0X3JvbGUiOiJ1c2VyIiwicHJvdmlkZXIiOiJsb2NhbCIsIm5vZGUiOiIzOWIwYjVmZC02NjQ4LTQxZjgtYjNiOS1kZjk2YzVkMTE1NzkiLCJjbHVzdGVyIjoiODYwMjkwNmYtNTQzNy00Y2NlLWIxNTAtN2MzMzg3ZGEzNmZhIiwiaWF0IjoxNzIyMjM2OTIzLCJuYmYiOjE3MjIyMzY5MjMsImV4cCI6MTcyMjI1MTMyMywiYXVkIjoibW9yaW8iLCJpc3MiOiJtb3JpbyIsInN1YiI6Im1vcmlvIn0.sij21XpVw2i6SjTZtms9Sl4WsTYh6wgcr0c79x7-6OQPaWam-Ne8t_mzcI5Opa8qOjdFBDBoRHjairzyURpQ-p0BmrDANp4gw17lAqvmgGySwTC-T0yqdRpvZLV85ZhSps3XqiTuWObOVztd3MOLc6xbbp-SEIk6VimzDWcSQbInDfTCbbx4OivWjIcpA6XGfVcXWWtZiJz7y8E8E2jrckV3jkqRUZuhZ_HIcOyh1LSKb4WWWybCcu-D6hC1VipX_oy2Q8227V-VY1Kgryxe-F8xckgBkIoFjdejVsz4UpkvWXsYEJEZjgKLC0zZEZJVaEJC3w6QpNj-nc5d5dgF0TDq_6T0GvTaoN_UZGBgYioGTd0wXHpw0Trzc0VQrN5O3yBYjnhsbwSWlhHlClSAbV_CCy2qUAyDOrXBGmOlIYN8YZ_eJe-wIYioISd9dd0h5rbTSjtMqpX8fDoRZv0jFraVDOk0eMwiGM_TKhsFfR3sx0samCt7k3nCTseLeufCxRUkBZmeoG7o0NrZ0tbTrUoS9XJX_PDK3v9u-Z1LqjmJe7nERG55gXQer-_a5yWn-LKWooAYFW3iLwZEpvAxQF_VtW2xoCkrj5BD9UOnotj6emHmK76oURrSd3waQ_EWmnwf86dSXPQiljp41jHt95V7jyN5P4my-ogotTKxoGA"
-```
+````
 
 To do so in curl, use this syntax:
 
@@ -151,7 +147,7 @@ To do so in curl, use this syntax:
 curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibG9jYWwudGVzdEFjY291bnQxNzIyMjM2OTIyMDQ4Iiwicm9sZSI6InVzZXIiLCJhdmFpbGFibGVfcm9sZXMiOlsidXNlciJdLCJoaWdoZXN0X3JvbGUiOiJ1c2VyIiwicHJvdmlkZXIiOiJsb2NhbCIsIm5vZGUiOiIzOWIwYjVmZC02NjQ4LTQxZjgtYjNiOS1kZjk2YzVkMTE1NzkiLCJjbHVzdGVyIjoiODYwMjkwNmYtNTQzNy00Y2NlLWIxNTAtN2MzMzg3ZGEzNmZhIiwiaWF0IjoxNzIyMjM2OTIzLCJuYmYiOjE3MjIyMzY5MjMsImV4cCI6MTcyMjI1MTMyMywiYXVkIjoibW9yaW8iLCJpc3MiOiJtb3JpbyIsInN1YiI6Im1vcmlvIn0.sij21XpVw2i6SjTZtms9Sl4WsTYh6wgcr0c79x7-6OQPaWam-Ne8t_mzcI5Opa8qOjdFBDBoRHjairzyURpQ-p0BmrDANp4gw17lAqvmgGySwTC-T0yqdRpvZLV85ZhSps3XqiTuWObOVztd3MOLc6xbbp-SEIk6VimzDWcSQbInDfTCbbx4OivWjIcpA6XGfVcXWWtZiJz7y8E8E2jrckV3jkqRUZuhZ_HIcOyh1LSKb4WWWybCcu-D6hC1VipX_oy2Q8227V-VY1Kgryxe-F8xckgBkIoFjdejVsz4UpkvWXsYEJEZjgKLC0zZEZJVaEJC3w6QpNj-nc5d5dgF0TDq_6T0GvTaoN_UZGBgYioGTd0wXHpw0Trzc0VQrN5O3yBYjnhsbwSWlhHlClSAbV_CCy2qUAyDOrXBGmOlIYN8YZ_eJe-wIYioISd9dd0h5rbTSjtMqpX8fDoRZv0jFraVDOk0eMwiGM_TKhsFfR3sx0samCt7k3nCTseLeufCxRUkBZmeoG7o0NrZ0tbTrUoS9XJX_PDK3v9u-Z1LqjmJe7nERG55gXQer-_a5yWn-LKWooAYFW3iLwZEpvAxQF_VtW2xoCkrj5BD9UOnotj6emHmK76oURrSd3waQ_EWmnwf86dSXPQiljp41jHt95V7jyN5P4my-ogotTKxoGA" https://example.morio.it/token
 ```
 
-### Cookie Authentication 
+### Cookie Authentication
 
 While Bearer Authentication is most useful for automated access and scripts, in a browser it is often easier to rely on Cookie Authentication instead. Which is the Morio Management API supports that too.
 
@@ -174,6 +170,7 @@ In this scheme, your API Key serves as the username, and the API key's secret as
 You should construct the Authorization header to hold the base-64 encoded value of `username:password` prefixed by `Basic `.
 
 An example JSON representation of the headers would look like this:
+
 ```json title="Basic Authentication"
 {
   "Authorization": "Basic MDFjNmJmMmEtZDBlYy00OWU4LTgwOTctOTNmOTZhYmNjZWQyOmU4YjZkZGIzZTExYzIyNjAwMzYzYzZjNDJjODQzYzM3MTRhM2M0YmI4YWZkMGRmMmUyYWVjOTExNWExYWNmZDEzMjEwMzRhMTVlZWI3ZWNiZDJiNzIwN2M2YzIyODYxOQ=="

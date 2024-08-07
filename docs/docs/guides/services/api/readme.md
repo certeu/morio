@@ -1,6 +1,6 @@
 ---
 title: API Service Guide
-tags: 
+tags:
   - api
 ---
 
@@ -46,7 +46,7 @@ credentials.
 ### Core access
 
 As the main user-facing API, some of the API's endpoint under the hood rely on
-functionality of the core service.  Things like setting up Morio or updating
+functionality of the core service. Things like setting up Morio or updating
 the settings, or starting and stopping containers are all handled by core.
 
 However, it is the api service that will accept these requests, authenticate
@@ -62,4 +62,3 @@ to facilitate integration with other systems.
 For example, it has endpoints to load the configured identity providers, to
 facilitate frontend integration, or an endpoint providing JWKS integration to
 integration with systems like Hashicorp Vault.
-

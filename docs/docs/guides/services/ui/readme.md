@@ -23,4 +23,3 @@ responsibilities:
 ### Provide an intuitive way to interact with Morio
 
 That's it. Perhaps easier said than done, but that's really all it has to do does.
-

@@ -23,7 +23,7 @@ In no particular order, Morio's design goals are:
 - **Provide state-of-the-art observability**
 - **Utilize streaming data and a common data schema**
 - **Remain agnostic about data storage and processing**
-- **Prioritize resilience, flexibility,  maintainability, and automation**
+- **Prioritize resilience, flexibility, maintainability, and automation**
 
 These high-level design goals are the distilled result of challenges we've
 encountered over the year in this space. We hope they speak for themselves.
@@ -39,25 +39,25 @@ should do better_:
   - With Morio, we wanted to support ingesting different data types, such as
     metrics, audit info, events, or health checks.
 - **Streaming data**
-  - Before Morio, our solution was based on batch processing -- running a variety 
-  of queries at regular intervals to monitor the incoming data.
+  - Before Morio, our solution was based on batch processing -- running a variety
+    of queries at regular intervals to monitor the incoming data.
   - With Morio, we wanted a streaming data solution, so we can get as close to
-  real-time as possible.
+    real-time as possible.
 - **Flexible ingestion**
   - Before Morio, any data we ingested would make its way into our SIEM.
   - With Morio, we wanted the flexibility to not merely ingest data, but also
-  route, filter, transform, or duplicate data streams along the way. 
+    route, filter, transform, or duplicate data streams along the way.
 - **Single pane of glass**
   - Before Morio, our log monitoring service was focussed on on-prem
-  infrastructure, while we used the cloud providers' native tools to monitor
-  cloud infrastructure. 
+    infrastructure, while we used the cloud providers' native tools to monitor
+    cloud infrastructure.
   - With Morio, we want a single pane of glass to monitor all infrastructure under
-  our care.
+    our care.
 - **Structured data**
   - Before Morio, making sense of the various sources of data that we collect would
-  take up a considerable amount of our time.
+    take up a considerable amount of our time.
   - With Morio, we want to ensure data is properly structured at ingestion-time, so
-  we can process and store it much more efficiently.
+    we can process and store it much more efficiently.
 - **Low maintenance**
   - Before Morio, maintaining the solution required too much time and effort.
   - With Morio, we want an _appliance-like_ experience with minimal maintenance.
@@ -77,7 +77,7 @@ have made the following technology choices in Morio:
 ### Docker for deployment
 
 Given that we need to make various components work together without stepping on
-each other's toes, we chose [Docker](https://www.docker.com/) containers to 
+each other's toes, we chose [Docker](https://www.docker.com/) containers to
 deploy the various services that make up Morio.
 
 <small>**Design goal**: Keep it as simple as possible</small> |
@@ -112,7 +112,6 @@ API-based management.
 <small>**Design goal**: Keep it as simple as possible / Provide state-of-the-art observability / Utilize streaming data and a common data schema / Prioritize resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: Streaming data / Low maintenance / Automation friendly</small>
 
-
 ### Beats for data collection & shipping
 
 To collect data from on-prem systems, we need some sort of agent.
@@ -134,7 +133,7 @@ the first thing you need is a _schema_, a set of rules that defines how the
 data should be structured.
 
 We considered [OpenTelemetry](https://opentelemetry.io/) but found it to be a
-bit too undercooked for our needs.  Instead, we chose the [Elastic Common Schema
+bit too undercooked for our needs. Instead, we chose the [Elastic Common Schema
 (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html) as it is more
 mature, well defined, and supported by variety of systems and vendors.
 
@@ -164,7 +163,6 @@ That is why Logstash is our choice for data routing in Morio.
 <small>**Design goal**: Remain agnostic about data storage and processing</small> |
 <small>**Challenges**: Flexible ingestion</small>
 
-
 ### Step-ca as Certificate Authority
 
 For X.509 certificates, Morio needs an on-board Certificate Authority (CA) as a
@@ -172,10 +170,10 @@ low maintenance solution that should transparently handle the
 complexity of generating and managing certificates.
 
 Here we chose [SmallStep's step-ca](https://smallstep.com/docs/step-ca/) because we had
-prior experience with it, has a small footprint, and supports 
+prior experience with it, has a small footprint, and supports
 [the ACME protocol](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment) (of Let's Encrypt fame).
 
-In addition, [the SmallStep team was open to us contibuting an Rqlite storage 
+In addition, [the SmallStep team was open to us contibuting an Rqlite storage
 backend](https://github.com/smallstep/nosql/issues/64), something we needed to
 provide a highly availabile CA service in Morio.
 
@@ -195,7 +193,7 @@ What we want is something _like_ SQLite but that can be clustered. We considered
 [LiteFS](https://fly.io/docs/litefs/) and [Dqlite](https://dqlite.io/) but in
 the end our choice for Morio's database is [Rqlite](https://rqlite.io/) as its
 HTTP REST API fits nicely within our design centered around HTTP-based
-microservices, and [its maintainer graciously offered their support to add 
+microservices, and [its maintainer graciously offered their support to add
 Rqlite as a storage backend to Step-CA
 ](https://github.com/smallstep/nosql/issues/64#issuecomment-2249985726).
 
@@ -205,12 +203,12 @@ Rqlite as a storage backend to Step-CA
 ### Traefik as reverse proxy
 
 Morio provides several HTTP-based microservices, some of which are exposed to
-the user.  It's a common scenario to have a reverse proxy handle ingress
+the user. It's a common scenario to have a reverse proxy handle ingress
 traffic, which gives us a central place to enforce access control, setup
 certificates and so on.
 
 We chose [Traefik](https://traefik.io/traefik/) for this purpose as it is a
-dedicated reverse proxy with good support for automated configuration, and 
+dedicated reverse proxy with good support for automated configuration, and
 an intuitive built-in dashboard that makes it easy for people to _look under
 the hood_ of Morio.
 
@@ -223,22 +221,22 @@ Last but not least, we needed to choose a programming language to develop those
 components of Morio that are built in-house. We took the following
 considerations into account:
 
-- __Count__: We wanted to limit the number of languages required to work on
+- **Count**: We wanted to limit the number of languages required to work on
   Morio. Preferably, one is enough.
-- __Purpose__: We wanted to use a language that meshes well with what we want
+- **Purpose**: We wanted to use a language that meshes well with what we want
   to do.
-- __Modularity__: We want to allow people to add their own code for processing
+- **Modularity**: We want to allow people to add their own code for processing
   data.
-- __Speed__: We need to make sure that stream processing is fast enough to not
+- **Speed**: We need to make sure that stream processing is fast enough to not
   be a throughput bottleneck.
 
 At CERT-EU, [Python](https://www.python.org/) is the de-facto standard
-programming language.  However, it has two important disadvantages, one of them
+programming language. However, it has two important disadvantages, one of them
 rather crucial:
 
-- __Count__: There is no way around it, for the web interface, we rely on
+- **Count**: There is no way around it, for the web interface, we rely on
   Javascript. Adding Python means dealing with two languages.
-- __Speed__: We are concerned that Python is simply too slow for the kind of
+- **Speed**: We are concerned that Python is simply too slow for the kind of
   throughput we hope to achieve.
 
 In the end, we chose
@@ -266,7 +264,6 @@ What we hoped to accomplish with Morio is to bring these technologies together
 as a neat pre-made bundle so that everyone can enjoy them without the steep
 learning curve.
 
-
 [api]: /docs/reference/services/api/
 [broker]: /docs/reference/services/broker/
 [ca]: /docs/reference/services/ca/
@@ -281,9 +278,3 @@ learning curve.
 [mbuilder]: /docs/reference/services/mbuilder/
 [wbuilder]: /docs/reference/services/wbuilder/
 [wanted]: /docs/reference/services/core/hooks/wanted/
-
-
-
-
-
-

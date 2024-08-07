@@ -58,9 +58,8 @@ nodes.
 
 As a result, the core service will defer to the broker service to determine
 which node in the cluster is the leader, and them simply mark that node as
-leader. After all, it does not matter who leads the cluster, it only matters that all 
+leader. After all, it does not matter who leads the cluster, it only matters that all
 nodes agree, that there is consensus in other words.
-
 
 As a result, clustering in Morio has a few constraints:
 
@@ -68,7 +67,3 @@ As a result, clustering in Morio has a few constraints:
   <small>This is a problem in name only because without a broker what's the point or running a Morio cluster?</small>
 - A [flanking node](/docs/reference/terminology/flanking-node/) can never becomethe cluster leader.<br />
   <small>This is a good thing because flanking nodes are allowed to come and go as they please</small>
-
-
-
-

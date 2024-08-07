@@ -23,4 +23,3 @@ responsibilities:
 
 The wbuilder service has one job and one job only: Building client packages
 for Windows systems.
-

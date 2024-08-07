@@ -1,7 +1,7 @@
 import React from 'react'
-import DocCardList from '@theme/DocCardList';
-import Link from '@docusaurus/Link';
-import {useCurrentSidebarCategory} from '@docusaurus/theme-common';
+import DocCardList from '@theme/DocCardList'
+import Link from '@docusaurus/Link'
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common'
 
 const DocList = ({ items }) => {
   const links = []
@@ -18,6 +18,9 @@ const DocList = ({ items }) => {
   return <ul>{links}</ul>
 }
 
-export const SubPages = ({ cards=false }) => cards
-  ? <DocCardList items={useCurrentSidebarCategory().items}/>
-  : <DocList items={useCurrentSidebarCategory().items}/>
+export const SubPages = ({ cards = false }) =>
+  cards ? (
+    <DocCardList items={useCurrentSidebarCategory().items} />
+  ) : (
+    <DocList items={useCurrentSidebarCategory().items} />
+  )

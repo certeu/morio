@@ -5,7 +5,7 @@ tags:
 ---
 
 The **Morio RedHat Builder Service** (rbuilder) is an on-demand service that builds
-Morio client packages in `.rpm` format, the package format used by 
+Morio client packages in `.rpm` format, the package format used by
 RedHat-based Linux distributions.
 
 As an on-demand service, it is not running all the time, instead it is started
@@ -24,4 +24,3 @@ responsibilities:
 
 The rbuilder service has one job and one job only: Building client packages
 for RedHat-based Linux distributions.
-

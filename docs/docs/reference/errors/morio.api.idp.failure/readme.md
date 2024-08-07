@@ -1,16 +1,17 @@
 ---
 title: morio.api.idp.failure
-tags: 
- - error
+tags:
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Identity Provider Failure__ - Cannot authenticate because the identity provider returned an error.
+
+**Identity Provider Failure** - Cannot authenticate because the identity provider returned an error.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Identity Provider Failure__ - Cannot authenticate because the identity provide
   "detail": "Cannot authenticate because the identity provider returned an error."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
