@@ -12,6 +12,7 @@
     "build:core": "./scripts/build-container.sh core",
     "build:ui": "./scripts/build-container.sh ui",
     "build:dbuilder": "./builders/dbuilder/build-container.sh",
+    "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
     "predev": "npm run reconfigure",
     "preprod": "npm run reconfigure",
     "tests": "./core/run-test-container.sh",
