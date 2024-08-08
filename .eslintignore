@@ -3,6 +3,6 @@
 *.sh
 **/*.md
 *.md
-**/Dockerfile.*
-Dockerfile
+**/Containerfile.*
+Containerfile
 json-loader.mjs

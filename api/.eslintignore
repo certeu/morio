@@ -2,7 +2,6 @@
 **/*.sh
 **/*.ldif
 json-loader.mjs
-Dockerfile.dev
-Dockerfile.prod
-Dockerfile
+Containerfile
+Containerfile.*
 

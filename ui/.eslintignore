@@ -1,5 +1,5 @@
 **/*.json
 **/*.md
 **/*.sh
-Dockerfile.*
-Dockerfile
+Containerfile.*
+Containerfile

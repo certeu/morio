@@ -1,6 +1,7 @@
 **/*.json
 json-loader.mjs
-Dockerfile.*
-Dockerfile
+Containerfile.*
+Containerfile
 bin/*
 run-unit-tests.sh
+*.md

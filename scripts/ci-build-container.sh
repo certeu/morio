@@ -80,7 +80,7 @@ else
 
   # Now build the OCI image
   buildah build-using-dockerfile \
-    --file Dockerfile \
+    --file Containerfile.prod \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
     --label org.opencontainers.image.url="https://morio.it/" \
@@ -91,8 +91,29 @@ else
     --label org.opencontainers.image.vendor="CERT-EU" \
     --label org.opencontainers.image.title="$TITLE" \
     --label org.opencontainers.image.description="$DESC" \
-    --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION \
+    --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
     ./build-context
+
+  echo "Build completed."
+
+  if [ -z "$2" ];
+  then
+    echo "Not publishing the newly built image."
+  elif [ "publish" == $2 ]
+    echo "Attempting to login login to the Docker registry."
+    buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT
+    echo "Attempting to publish image: Tag = latest"
+    buildah push itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
+    echo "Attempting to publish image: Tag = v$MORIO_VERSION"
+    buildah push itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
+  else
+    echo "Extra parameter not recognized."
+    exit 1
+  fi
+
+  echo "All done"
+  exit 0
 fi
+
 

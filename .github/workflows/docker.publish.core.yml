@@ -8,7 +8,7 @@ on:
 
 jobs:
   build_and_push_to_registry:
-    name: Build OCI Image
+    name: Build & Publish OCI Image
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -16,12 +16,6 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Build the OCI image
-        run: 'npm run ci:build:core'
-
-          #- name: Log in to Docker Hub
-          #  uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-          #  with:
-          #    username: ${{ vars.DOCKER_USERNAME }}
-          #    password: ${{ secrets.DOCKER_PAT }}
+      - name: Build & Publish the OCI image
+        run: 'npm run ci:build:core publish'
 
