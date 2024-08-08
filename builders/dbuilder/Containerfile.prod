@@ -1,0 +1,14 @@
+## Run in Debian 12 (bookworm)
+FROM debian:12
+
+# Make this folder our working directory
+WORKDIR /morio
+
+## Install all the latest updates
+RUN apt-get update && apt-get upgrade -y
+
+# Add builder script as custom entrypoint
+COPY ./entrypoint.sh /entrypoint.sh
+
+## Run the builder script
+CMD ["/entrypoint.sh"]
