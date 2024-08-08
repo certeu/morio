@@ -1,6 +1,7 @@
 import clsx from 'clsx'
 import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
+import { Banner } from '../components/branding.js'
 
 import Heading from '@theme/Heading'
 import styles from './index.module.css'
@@ -20,11 +21,12 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero', styles.heroBanner)}>
       <div className="container">
-        <img src="/img/logo.svg" style={{ width: '100px' }} />
-        <Heading as="h1" className="hero__title">
-          {siteConfig.title}
+        <div style={{maxWidth: "600px", margin: "auto", padding: "2rem 1rem"}}>
+        <Banner shadow iconColor="#1b88a2"/>
+        </div>
+        <Heading as="h1">
+          {siteConfig.title}: <span className="hero__subtitle" style={{fontWeight: "normal"}}>{siteConfig.tagline}</span>
         </Heading>
-        <p className="hero__subtitle">{siteConfig.tagline}</p>
         <div className={clsx('flex_wrapper', styles.flexWrapper)}>
           <div
             style={{
