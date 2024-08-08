@@ -1,4 +1,4 @@
-name: Publish itsmorio/core Docker image
+name: Build & Publish itsmorio/core Docker image
 
 on:
   # This should not run on every PR, but it's here for testing this workflow
@@ -7,7 +7,7 @@ on:
   #  types: [published]
 
 jobs:
-  push_to_registry:
+  build_and_push_to_registry:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
     permissions:
@@ -19,25 +19,31 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-        with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PAT }}
+      - name: Create Build Context
+        run: |
+          cd core
+          tar -cfz . > ../core-context.tar.gz
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+      - name: Store build context as artifact
+        uses: actions/upload-artifact@v4
+        id: artifact
         with:
-          images: itsmorio/core
+          name: core-build-context
+          path: core.tar.gz
 
-      - name: Build and push Docker image
-        id: push
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: ./core
-          file: ./core/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      - name: Show build context URL (for debug)
+        env:
+          BUILD_CONTEXT: ${{ steps.artifact.artifact-url }}
+        run: echo $BUILD_CONTEXT
+
+      - name: Build the OCI image
+        env:
+          BUILD_CONTEXT: ${{ steps.artifact.artifact-url }}
+        run: npm run ci:build:core $BUILD_CONTEXT
+
+          #- name: Log in to Docker Hub
+          #  uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+          #  with:
+          #    username: ${{ vars.DOCKER_USERNAME }}
+          #    password: ${{ secrets.DOCKER_PAT }}
 
