@@ -18,12 +18,12 @@
 
 #
 # A bit of input validation to catch obvious mistakes
-# Do we have a URL to the context?
+# Do we have a folder for the build context?
 #
 if [ -z "$2" ];
 then
   echo ""
-  echo "No tarball provided for the build context."
+  echo "No folder provided with the build context."
   echo "Cannot build without context. Exiting here."
   echo ""
   exit 1
@@ -89,8 +89,8 @@ else
   MORIO_VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
 
   # Now build the OCI image
-  buildah bud \
-    --file ./Dockerfile \
+  buildah build-using-dockerfile \
+    --file Dockerfile \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
     --label org.opencontainers.image.url="https://morio.it/" \
