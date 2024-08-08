@@ -82,7 +82,7 @@ else
   CONTAINER="itsmorio/$IMAGE"
 
   # Grab the Morio version from package.json
-  VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
+  VERSION=`sed 's/\"version\"/\"VERSION\"/' package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
 
   # Now build the OCI image
   buildah bud \
