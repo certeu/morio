@@ -103,7 +103,7 @@ else
   elif [ "publish" == $2 ]
   then
     echo "Attempting to login login to the Docker registry."
-    buildah login docker.io -u $DOCKER_USERNAME -p $DOCKER_PAT
+    buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT docker.io
     echo "Attempting to publish image: Tag = latest"
     buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:latest
     buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:v$MORIO_VERSION

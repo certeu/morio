@@ -1,4 +1,5 @@
 **/*.json
+*.sh
 json-loader.mjs
 Containerfile.*
 Containerfile
