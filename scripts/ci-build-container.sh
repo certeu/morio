@@ -79,7 +79,7 @@ else
   cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xf $REPO/build-context.tar . && cd $REPO
 
   # Now build the OCI image
-  IMAGE_ID=`buildah build-using-dockerfile \
+  IMAGE_ID=$(buildah build-using-dockerfile \
     --file Containerfile.prod \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
@@ -93,7 +93,7 @@ else
     --label org.opencontainers.image.description="$DESC" \
     --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
-    ./build-context`
+    ./build-context)
 
   echo "Build completed."
 
