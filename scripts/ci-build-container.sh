@@ -105,9 +105,9 @@ else
     echo "Attempting to login login to the Docker registry."
     buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT
     echo "Attempting to publish image: Tag = latest"
-    buildah push itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
+    buildah push docker.io/itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
     echo "Attempting to publish image: Tag = v$MORIO_VERSION"
-    buildah push itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
+    buildah push docker.io/itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
   else
     echo "Extra parameter not recognized."
     exit 1
