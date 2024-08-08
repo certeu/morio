@@ -31,16 +31,11 @@ jobs:
           name: build-context-core
           path: build-context.core.tar
 
-      - name: Show build context ID (for debug)
-        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-id }}'
-
-      - name: Show build context URL (for debug)
-        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-url }}'
+      - name: Show build context details (for debug)
+        run:  echo 'Morio code build context with ID ${{ steps.artifact-upload-step.outputs.artifact-id }} is available at ${{ steps.artifact-upload-step.outputs.artifact-url }}'
 
       - name: Build the OCI image
-        env:
-          BUILD_CONTEXT: ${{ steps.artifact.artifact-url }}
-        run: npm run ci:build:core $BUILD_CONTEXT
+        run: 'npm run ci:build:core ${{ steps.artifact-upload-step.outputs.artifact-url }}'
 
           #- name: Log in to Docker Hub
           #  uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
