@@ -101,18 +101,48 @@ else
     --tag docker.io/itsmorio/$IMAGE:latest \
     ./build-context
 
-  echo "Build completed."
+  if [ $? -eq 0 ]
+  then
+    echo "Successfully built OCI image itsmorio/$IMAGE"
+  else
+    echo "Failed to build OCI image itsmorio/$IMAGE"
+    exit 1
+  fi
 
   if [ -z "$2" ];
   then
     echo "Not publishing the newly built image."
+    exit 0
   elif [ "publish" == $2 ]
   then
     echo "Attempting to login to the Docker registry."
     buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT docker.io
+    if [ $? -eq 0 ]
+    then
+      echo "Successfully logged in to the Docker registry"
+    else
+      echo "Failed to login to the Docker registry"
+      exit 1
+    fi
+
     echo "Attempting to publish image: Tag = latest"
     buildah push docker.io/itsmorio/$IMAGE:latest
+    if [ $? -eq 0 ]
+    then
+      echo "Successfully pushed image: itsmorio/$IMAGE:latest"
+    else
+      echo "Failed to push image: itsmorio/$IMAGE:latest"
+      exit 1
+    fi
+
     buildah push docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
+    if [ $? -eq 0 ]
+    then
+      echo "Successfully pushed image: itsmorio/$IMAGE:v$MORIO_VERSION"
+    else
+      echo "Failed to push image: itsmorio/$IMAGE:v$MORIO_VERSION"
+      exit 1
+    fi
   else
     echo "Extra parameter not recognized."
     exit 1

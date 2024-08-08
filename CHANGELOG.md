@@ -7,17 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Changed
+## [0.3.0] - 2024-08-08
 
+### Added
+
+ - Initial support for clustering. Morio now support multi-node deployments. [7adc748](https://github.com/certeu/morio/commit/fadc7489e10672105915e38895fa6584ce7ded62)
+ - We now publish the [itsmorio/api](https://hub.docker.com/r/itsmorio/api) container image and will do so for all future releases
+ - We now publish the [itsmorio/core](https://hub.docker.com/r/itsmorio/core) container image and will do so for all future releases
+ - We now publish the [itsmorio/dbuilder](https://hub.docker.com/r/itsmorio/dbuilder) container image and will do so for all future releases
+ - We now publish the [itsmorio/ui](https://hub.docker.com/r/itsmorio/ui) container image and will do so for all future releases
+   
+### Changed
+
+- [api] Migrated API documentation to Redoc
 - [broker] Upgraded RedPanda Broker from 23.3.4 to 23.3.15
 - [ca] Upgraded SmallStep CA from 0.25.2 to 0.26.1
 - [connector] Upgraded Elastic Logstash from 8.12.1 to 8.13.3
 - [console] Upgraded RedPanda Console from 2.4.0 to 2.5.2
+- [core] Migrated API documentation to Redoc
 - [proxy] Upgraded Traefik Application Proxy from 2.10.7 to 2.11.2
+- [ui] Migrated API documentation to Redoc
 
-## [0.2.2] - 2014-05-07
+## [0.2.2] - 2024-05-07
 
-# Added
+### Added
 
 - [api] Start ephemeral LDAP instance for running tests
 - [api] Added reconfigure route
@@ -34,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Carve out exception to not restart API during tests
 - [db] Added database service, using Rqlite as database
 
-## Changed
+### Changed
 
 - [api] Do not attempt to authenticate in ephemeral mode
 - [api] Removed core routes that we do not want to expose
@@ -53,9 +66,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] MRT login was sending incorrect data
 - [ui] Add to npm workspace configuration
 
-## [0.1.6] - 2014-04-22
+## [0.1.6] - 2024-04-22
 
-# Added
+### Added
 
 - [api] Added `/whoami` route
 - [api] Added `/jwks` route
@@ -65,7 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Return UUIDS after setup
 - [core] Added support for setting aliases on containers
 
-## Changed
+### Changed
 
 - [api] Migrated accounts and apikeys from rpkv to db
 - [client] No pager when invoking systemctl
@@ -90,7 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Dropped rpkv functionality in favor of the new database service
 - [core] Dropped creation of KV topics in favor of the new database service
 
-## [0.1.5] - 2014-04-16
+## [0.1.5] - 2024-04-16
 
 ### Added
 
@@ -120,7 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Conditionally check hookprops rather than assume they are set
 - [core] Fix location of client source files inside container
 
-## [0.1.4] - 2014-04-12
+## [0.1.4] - 2024-04-12
 
 ### Added
 
@@ -136,51 +149,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Moved config and data into moriod subfolder on host OS
 - [moriod] Updates to folder locations
 - [proxy] Include custom entrypoint.sh in moriod package
-
-### Dependencies
-
-- Dropped chai, chai-http, and mocha dependencies in favor of a future test container image
-- Dropped pino-pretty as a dev dependency
-- Hoisted esbuild, eslint, lint-staged, and prettier dev dependencies to the repo root
-- Updated esbuild from `^0.19.9` to `^0.20.2`
-- Updated eslint-plugin-react from `^7.33.2` to `^7.34.1`
-- Updated husky from `^8.0.0` to `^9.0.11`
-- Updated lint-staged from `^15.2.0` to `^15.2.2`
-- Updated prettier from `^3.1.1` to `^3.3.0`
-- [api] Updated axios from `^1.6.3` to `^1.6.8`
-- [api] Updated bson from `^6.4.0"` to `^6.6.0"`
-- [api] Updated express from `^4.18.2` to `^4.19.2`
-- [api] Updated glob from `^10.3.10` to `^10.3.12`
-- [api] Updated joi from `^17.11.0` to `^17.12.3`
-- [api] Updated pino from `^8.16.2` to `^8.20.0`
-- [api] Updated nodemon from `^3.0.2` to `^3.1.0`
-- [core] Updated axios from `^1.6.7` to `^1.6.8`
-- [core] Updated bson from `^6.4.0"` to `^6.6.0"`
-- [core] Updated dockerode from `^4.0.0` to `^4.0.2`
-- [core] Updated express from `^4.18.2` to `^4.19.2`
-- [core] Updated joi from `^17.11.0` to `^17.12.3`
-- [core] Updated pino from `^8.16.2` to `^8.20.0`
-- [shared] Updated bson from `^6.2.0"` to `^6.6.0"`
-- [shared] Updated glob from `^10.3.10` to `^10.3.12`
-- [ui] Updated @mdx-js/loader from `^3.0.0` to `^3.0.1`
-- [ui] Updated @mdx-js/react from `^3.0.0` to `^3.0.1`
-- [ui] Updated @next/mdx from `^14.1.0` to `^14.2.0`
-- [ui] Updated @types/mdx from `^2.0.11` to `^2.0.13`
-- [ui] Updated diff from `^5,1,0` to `^5.2.0`
-- [ui] Updated joi from `^17.11.0` to `^17.12.3`
-- [ui] Updated jotai from `^2.6.0` to `^2.8.0`
-- [ui] Updated jotai-location from `^0.5.2` to `^0.5.4`
-- [ui] Updated next from `14.0.3` to `^14.2.0`
-- [ui] Updated react-cookie from ``^7.1.0 to `^7.1.4`
-- [ui] Updated react-diff-viewer-continued from `^3.2.5` to `^3.4.0`
-- [ui] Updated recma-export-filepath from ``^1.0.0 to `^1.1.0`
-- [ui] Updated use-local-storage-state from ``^19.1.0 to `^19.2.0`
-- [ui] Updated yaml from `^2.3.4` to `^2.4.1`
-- [ui] Updated autoprefixer from `^10.0.1` to `^10.4.19`
-- [ui] Updated daisyui from `^4.4.18` to `^4.10.1`
-- [ui] Updated lint-staged from `^15.2.0` to `^15.2.2`
-- [ui] Updated tailwindcss from `^3.3.0` to `^3.4.3`
-- [ui] Updated yaml-loader from `^0.8.0` to `^0.8.1`
 
 ### Fixed
 
@@ -199,7 +167,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [client] Remove option to add Elastic repo as it's a requirement for installation
 - [shared] Removed getRevision and verion epoch
 
-## [0.1.3] - 2014-04-09
+## [0.1.3] - 2024-04-09
 
 ### Added
 

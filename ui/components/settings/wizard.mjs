@@ -335,7 +335,6 @@ export const PrimedSettingsWizard = (props) => {
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview
   const [showDelta, setShowDelta] = useState(false)
   const [deployOngoing, setDeployOngoing] = useState(false)
-  const [lastLogLine, setLastLogLine] = useState(false)
 
   /*
    * Figure out the current sectionPath from the view
@@ -448,7 +447,7 @@ export const PrimedSettingsWizard = (props) => {
   }
 
   if (deployOngoing) {
-    const done = lastLogLine?.msg === 'Morio Core ready - Configuration Resolved'
+    const done = true // FIXME
     const text = `text-${done ? 'success' : 'accent'}-content`
     return (
       <WizardWrapper {...wrapProps} title="Apply Settings">
