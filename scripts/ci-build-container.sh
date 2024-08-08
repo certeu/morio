@@ -85,7 +85,7 @@ else
   VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
 
   # Now build the OCI image
-  buildah dub \
+  buildah bud \
     --env MORIO_VERSION=$VERSION \
     --file ./Dockerfile \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
