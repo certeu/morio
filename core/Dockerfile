@@ -20,6 +20,7 @@ RUN npm i
 COPY . .
 
 ## Build core into a self-contained application
+RUN ls -l *
 RUN npm run build
 
 ## Stage 2: Run in NodeJS v20 (runner)
