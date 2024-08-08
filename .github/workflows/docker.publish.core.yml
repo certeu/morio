@@ -26,15 +26,16 @@ jobs:
 
       - name: Store build context as artifact
         uses: actions/upload-artifact@v4
-        id: artifact
+        id: artifact-upload-step
         with:
           name: build-context-core
           path: build-context.core.tar
 
+      - name: Show build context ID (for debug)
+        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-id }}'
+
       - name: Show build context URL (for debug)
-        env:
-          BUILD_CONTEXT: ${{ steps.artifact.artifact-url }}
-        run: echo $BUILD_CONTEXT
+        run:  echo 'Artifact ID is ${{ steps.artifact-upload-step.outputs.artifact-url }}'
 
       - name: Build the OCI image
         env:
