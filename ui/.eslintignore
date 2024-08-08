@@ -3,3 +3,4 @@
 **/*.sh
 Containerfile.*
 Containerfile
+.next

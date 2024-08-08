@@ -22,7 +22,6 @@ import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
-import { Markdown } from 'components/markdown.mjs'
 import { Box } from 'components/box.mjs'
 
 const Welcome = ({ setView }) => (
@@ -460,18 +459,9 @@ export const PrimedSettingsWizard = (props) => {
                 <LogoSpinner />
               )}
             </div>
-            {done ? (
-              <Markdown className={`mdx dense ${text} inherit-color grow`}>
-                {lastLogLine?.msg}
-              </Markdown>
-            ) : (
-              <span>Processing deploy request</span>
-            )}
-            {done ? (
-              <button className="btn-success" onClick={() => setDeployOngoing(false)}>
-                Close
-              </button>
-            ) : null}
+            <button className="btn-success" onClick={() => setDeployOngoing(false)}>
+              Close
+            </button>
           </div>
         </Box>
         <h2>Status Logs</h2>
