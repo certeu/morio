@@ -22,14 +22,14 @@ jobs:
       - name: Create Build Context
         run: |
           cd core
-          tar -cz -f ../core-context.tar.gz .
+          tar -c -f ../build-context.core.tar .
 
       - name: Store build context as artifact
         uses: actions/upload-artifact@v4
         id: artifact
         with:
-          name: core-build-context
-          path: core.tar.gz
+          name: build-context-core
+          path: build-context.core.tar
 
       - name: Show build context URL (for debug)
         env:
