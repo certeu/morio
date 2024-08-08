@@ -1,5 +1,6 @@
 **/*.json
 json-loader.mjs
 Dockerfile.*
+Dockerfile
 bin/*
 run-unit-tests.sh
