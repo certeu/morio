@@ -16,35 +16,8 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Create the Build Context
-        # Because we use a monorepo structure, shared code is outside of the 'core' folder
-        # In development, we simply symlink these folders inside core and it will just work
-        # But when building the container, the build context is set to 'core' and the build
-        # will not have access to anything behind a symlink.
-        #
-        # To side-step the problem, we create a specific build context by running core folder
-        # through tar and using the -h flag to dereference (aka follow) symlinks.
-        # However, since Buildah cannot accept a local tarbal as build context, we then need
-        # to unpack this tarball again in a folder and use that folder as build context.
-        run: |
-          mkdir build-context
-          cd core
-          tar -ch -f ../build-context-core.tar .
-          cd ../build-context
-          tar -xvf ../build-context-core.tar .
-
-          # - name: Store build context as artifact
-          #   uses: actions/upload-artifact@v4
-          #   id: artifact-upload-step
-          #   with:
-          #     name: build-context-core
-          #     path: build-context.core.tar
-
-          # - name: Show build context details (for debug)
-          #   run:  echo 'Morio code build context with ID ${{ steps.artifact-upload-step.outputs.artifact-id }} is available at ${{ steps.artifact-upload-step.outputs.artifact-url }}'
-
       - name: Build the OCI image
-        run: 'npm run ci:build:core build-context'
+        run: 'npm run ci:build:core'
 
           #- name: Log in to Docker Hub
           #  uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a

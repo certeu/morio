@@ -18,21 +18,6 @@
 
 #
 # A bit of input validation to catch obvious mistakes
-# Do we have a folder for the build context?
-#
-if [ -z "$2" ];
-then
-  echo ""
-  echo "No folder provided with the build context."
-  echo "Cannot build without context. Exiting here."
-  echo ""
-  exit 1
-else
-  CONTEXT=$1
-fi
-
-#
-# A bit of input validation to catch obvious mistakes
 # Are we building something that we know what to do with?
 #
 if [ -z "$1" ];
@@ -88,6 +73,11 @@ else
   # Grab the Morio version from package.json
   MORIO_VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
 
+  # Create a folder for the build context
+  rm -rf $REPO/build-context
+  mkdir -p $REPO/build-context
+  cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xvf $REPO/build-context.tar . && cd $REPO
+
   # Now build the OCI image
   buildah build-using-dockerfile \
     --file Dockerfile \
@@ -103,6 +93,6 @@ else
     --label org.opencontainers.image.description="$DESC" \
     --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
-    $CONTEXT
+    ./build-context
 fi
 
