@@ -76,7 +76,7 @@ else
   # Create a folder for the build context
   rm -rf $REPO/build-context
   mkdir -p $REPO/build-context
-  cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xvf $REPO/build-context.tar . && cd $REPO
+  cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xf $REPO/build-context.tar . && cd $REPO
 
   # Now build the OCI image
   buildah build-using-dockerfile \
