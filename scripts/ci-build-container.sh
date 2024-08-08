@@ -89,7 +89,6 @@ else
 
   # Now build the OCI image
   buildah bud \
-    --env=MORIO_VERSION \
     --file ./Dockerfile \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
