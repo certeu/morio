@@ -81,24 +81,27 @@ else
   # Container to build
   CONTAINER="itsmorio/$IMAGE"
 
+  # Figure out the repository root
+  REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
+
   # Grab the Morio version from package.json
-  VERSION=`sed 's/\"version\"/\"VERSION\"/' package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
+  MORIO_VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
 
   # Now build the OCI image
   buildah bud \
-    --env MORIO_VERSION=$VERSION \
+    --env=MORIO_VERSION \
     --file ./Dockerfile \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
     --label org.opencontainers.image.url="https://morio.it/" \
     --label org.opencontainers.image.documentation="https://morio.it/docs/" \
     --label org.opencontainers.image.source="https://github.com/certeu/morio" \
-    --label org.opencontainers.image.version="$VERSION" \
+    --label org.opencontainers.image.version="$MORIO_VERSION" \
     --label org.opencontainers.image.revision="$GITHUB_SHA" \
     --label org.opencontainers.image.vendor="CERT-EU" \
     --label org.opencontainers.image.title="$TITLE" \
     --label org.opencontainers.image.description="$DESC" \
-    --tag docker.io/itsmorio/$IMAGE:$VERSION \
+    --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
     $CONTEXT
 fi
