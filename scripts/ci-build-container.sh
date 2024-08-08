@@ -102,9 +102,10 @@ else
     echo "Not publishing the newly built image."
   elif [ "publish" == $2 ]
   then
-    echo "Attempting to login login to the Docker registry."
+    echo "Attempting to login to the Docker registry."
     buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT docker.io
     echo "Attempting to publish image: Tag = latest"
+    echo "Image ID is $IMAGE_ID"
     buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:latest
     buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
   else
