@@ -1,4 +1,4 @@
-# itsnorio/core
+# itsmorio/core
 
 This is the container image for **Morio Core**, or **core** for short.
 

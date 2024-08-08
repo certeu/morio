@@ -79,7 +79,7 @@ else
   cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xf $REPO/build-context.tar . && cd $REPO
 
   # Now build the OCI image
-  IMAGE_ID=$(buildah build-using-dockerfile \
+  buildah build-using-dockerfile \
     --file Containerfile.prod \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
@@ -93,7 +93,7 @@ else
     --label org.opencontainers.image.description="$DESC" \
     --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
-    ./build-context)
+    ./build-context
 
   echo "Build completed."
 
@@ -105,7 +105,6 @@ else
     echo "Attempting to login to the Docker registry."
     buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT docker.io
     echo "Attempting to publish image: Tag = latest"
-    #CMD="buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:latest"
     buildah push docker.io/itsmorio/$IMAGE:latest
     buildah push docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
   else

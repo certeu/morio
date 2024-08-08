@@ -4,8 +4,11 @@ FROM node:20-slim as builder
 ## Make this folder our working directory
 WORKDIR /morio/core
 
+## Install all the latest updates
+RUN apt-get update && apt-get upgrade -y
+
 ## Install build toolchange for native bindings
-RUN apt-get update && apt-get install -y python3 make g++
+RUN apt-get install -y python3 make g++
 
 ## Copy in package.json so we can cache dependencies when changes code only
 COPY package.json package.json
