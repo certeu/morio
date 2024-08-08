@@ -1,5 +1,5 @@
 import set from 'lodash.set'
-import { examples } from '../openapi-examples/json-loader.mjs'
+import { examples } from './openapi-examples/json-loader.mjs'
 
 const meta = {
   title: {
