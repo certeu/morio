@@ -22,7 +22,6 @@ import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
-import { StatusLogs } from 'components/status-logs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { Box } from 'components/box.mjs'
 
@@ -477,7 +476,6 @@ export const PrimedSettingsWizard = (props) => {
           </div>
         </Box>
         <h2>Status Logs</h2>
-        <StatusLogs lastLineSetter={setLastLogLine} />
       </WizardWrapper>
     )
   }
