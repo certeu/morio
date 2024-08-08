@@ -4,3 +4,5 @@
 json-loader.mjs
 Dockerfile.dev
 Dockerfile.prod
+Dockerfile
+

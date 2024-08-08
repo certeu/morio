@@ -45,6 +45,7 @@ else
   then
     echo ""
     echo "Building itsmorio/api OCI container image."
+    echo "Using build context: $CONTEXT"
     echo ""
     IMAGE="api"
     TITLE="The Morio Management API"
