@@ -19,6 +19,9 @@ FROM node:20-slim as runner
 ## Make this folder our working directory
 WORKDIR /morio/api
 
+## Install all the latest updates
+RUN apt-get update && apt-get upgrade -y
+
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production
 

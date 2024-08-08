@@ -1,6 +1,7 @@
 **/*.json
 **/*.sh
 **/*.ldif
+**/*.md
 json-loader.mjs
 Containerfile
 Containerfile.*
