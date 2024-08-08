@@ -79,7 +79,7 @@ else
   cd $REPO/$IMAGE && tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xf $REPO/build-context.tar . && cd $REPO
 
   # Now build the OCI image
-  buildah build-using-dockerfile \
+  IMAGE_ID=`buildah build-using-dockerfile \
     --file Containerfile.prod \
     --label org.opencontainers.image.created="`date --rfc-3339='seconds'`" \
     --label org.opencontainers.image.authors="CERT-EU <services@cert.europa.eu>" \
@@ -93,7 +93,7 @@ else
     --label org.opencontainers.image.description="$DESC" \
     --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
     --tag docker.io/itsmorio/$IMAGE:latest \
-    ./build-context
+    ./build-context`
 
   echo "Build completed."
 
@@ -103,11 +103,10 @@ else
   elif [ "publish" == $2 ]
   then
     echo "Attempting to login login to the Docker registry."
-    buildah login -u $DOCKER_USERNAME -p $DOCKER_PAT
+    buildah login docker.io -u $DOCKER_USERNAME -p $DOCKER_PAT
     echo "Attempting to publish image: Tag = latest"
-    buildah push docker.io/itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
-    echo "Attempting to publish image: Tag = v$MORIO_VERSION"
-    buildah push docker.io/itsmotio/$IMAGE:latest docker://docker.io/itsmorio/$IMAGE
+    buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:latest
+    buildah push $IMAGE_ID docker://docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
   else
     echo "Extra parameter not recognized."
     exit 1
