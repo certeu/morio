@@ -17,5 +17,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build & Publish the OCI image
+        env:
+          DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
+          DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
         run: 'npm run ci:build:core publish'
 
