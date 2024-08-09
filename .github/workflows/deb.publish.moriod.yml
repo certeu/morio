@@ -10,6 +10,10 @@ jobs:
   build_and_push_to_packagecloud:
     name: Build & Publish .deb Package
     runs-on: ubuntu-latest
+    #
+    # we build this on Debian 12, but it _should_ work for any .deb based distru
+    #
+    container: debian-bookworm
     permissions:
       contents: read
     steps:
