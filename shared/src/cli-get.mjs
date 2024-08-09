@@ -44,9 +44,9 @@ Arguments:
 const cliParamToVar = {
   "banner": banner,
   "moriod-deb-control": deb.control,
-  "moriod-moriod-env": deb.morioEnv,
+  "moriod-moriod-env": moriodEnv,
   "moriod-rpm-spec": rpm.spec,
-  "moriod-version-env": deb.versionEnv,
+  "moriod-version-env": versionEnv,
   "repo": repo,
   "repo-url": repoUrl,
   "version": version,
