@@ -3,6 +3,11 @@ import path from 'path'
 import { pkg } from './json-loader.mjs'
 
 /**
+ * The morio root folder
+ */
+const root = path.resolve(path.basename(import.meta.url), '..')
+
+/**
  * Recursively reads the contents of a directory
  *
  * This is included here because importing shared/fs would require
