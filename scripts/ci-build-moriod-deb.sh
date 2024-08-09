@@ -76,18 +76,27 @@ then
   # Username is the API token, password is empty
   #
     #--write-out '%{http_code}' --silent --output /dev/null \
-  curl \
+  RESPONSE=$(curl \
+    -s -w "%{http_code}" \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=35" \
     -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json
+    https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
 
-  if [ $? -eq 0 ]
+  if [ "201" = ${RESPONSE: -3} ]
   then
-    echo "Successfully published package: $NAME"
+    echo "Package $NAME was published on packagecloud.io/morio/deb"
+    exit 0
+  elif [ "422" = ${RESPONSE: -3} ]
+  then
+    echo "Package already exists in the repository."
+    echo "This might be ok, but we will still fail this pipeline to prevent this from going unnoticed."
+    exit 1
   else
-    echo "Failed to publish package: $NAME. HTTP status was $STATUS."
+    echo "Failed to publish package: $NAME. HTTP status was ${RESPONSE: -3}"
+    echo "Response below:"
+    echo $RESPONSE
     exit 1
   fi
 fi
