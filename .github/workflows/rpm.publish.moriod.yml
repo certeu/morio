@@ -13,7 +13,7 @@ jobs:
     #
     # we build this on Debian 12, but it _should_ work for any .deb based distru
     #
-    container: debian:bookworm
+    container: redhat/ubi
     permissions:
       contents: read
     steps:
