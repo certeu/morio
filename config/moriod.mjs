@@ -28,6 +28,9 @@ export const readDirectory = async (dirPath) => {
 
   return files
 }
+
+const noRpmFiles = ['control', 'postinst']
+
 /*
  * Let's not maintain a list of files by hand
  */
@@ -149,13 +152,16 @@ This is the Morio distribution, which provides the Morio core service, running i
 Documentation: https://morio.it
 
 %install
-mkdir -p %{buildroot}/etc/morio/
+mkdir -p %{buildroot}/etc/morio/moriod
+mkdir -p %{buildroot}/var/lib/morio/moriod
 mkdir -p %{buildroot}/usr/sbin/
-cp -R %{_sourcedir}/etc/morio %{buildroot}/etc/
-cp %{_sourcedir}/usr/sbin/morio-* %{buildroot}/usr/sbin
-echo %{name}-%{version}-%{release}.%{_arch}
 mkdir -p %{buildroot}/etc/systemd/system/
-cp -R %{_sourcedir}/etc/systemd/system/morio-* %{buildroot}/etc/systemd/system
+cp -R %{_sourcedir}/etc/morio/moriod %{buildroot}/etc/morio
+cp %{_sourcedir}/usr/sbin/moriod %{buildroot}/usr/sbin
+cp %{_sourcedir}/var/lib/morio/moriod-completion.sh %{buildroot}/var/lib/morio/moriod-completion.sh
+cp %{_sourcedir}/usr/share/man/man8/moriod.8 %{buildroot}/usr/share/man/man8/moriod.8
+cp %{_sourcedir}/etc/systemd/system/moriod.service %{buildroot}/etc/systemd/system/moriod.service
+echo %{name}-%{version}-%{release}.%{_arch}
 
 %files
 ${
@@ -163,7 +169,7 @@ ${
  * Let us not maintain a list of files by hand
  */
 (await getMoriodFiles().then(files => files
-  .filter(file => file !== 'control')
+  .filter(file => !noRpmFiles.includes(file))
   .map(file => '/' + file)
   .join("\n") + `
 
