@@ -75,12 +75,14 @@ then
   # https://packagecloud.io/docs/api#resource_distributions
   # Username is the API token, password is empty
   #
-  curl -vv \
+  STATUS=$(curl \
+    --write-out '%{http_code}' --silent --output /dev/null \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=35" \
     -F "pacakge[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json
+    https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
+  echo "Status code is: $STATUS"
 
   if [ $? -eq 0 ]
   then
