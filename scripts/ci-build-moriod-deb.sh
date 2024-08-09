@@ -80,7 +80,7 @@ then
     -F "package[distro_version_id]=35" \
     -F "pcakge[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/pacakges.json
+    https://packagecloud.io/api/v1/repos/morio/deb/packages.json
 
   if [ $? -eq 0 ]
   then
