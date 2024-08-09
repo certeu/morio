@@ -62,36 +62,5 @@ if (process.argv[2]) {
   const key = process.argv[2].toLowerCase()
   if (Object.keys(cliParamToVar).includes(key)) console.log(cliParamToVar[key])
   else showHelp()
-  /*
-  else {
-    switch (process.argv[2].toLowerCase()) {
-      case 'moriod-deb-control-file':
-        console.log(deb.control.file(process.argv[3]))
-        break;
-      default:
-        showHelp()
-    }
-  }
-  */
 } else showHelp()
-
-/**
- * Reads the contents of a directory (non-recursive)
- *
- * @param {string} dirPath - (relative) path to the directory to read
- * @param {funtion} onError - a method to call on error
- */
-export const readDirectory = async (dirPath, onError) => {
-  let files
-  try {
-    const dir = path.resolve(root, dirPath)
-    files = await fs.promises.readdir(dir, { recursive })
-  } catch (err) {
-    if (onError) onError(err)
-
-    return false
-  }
-
-  return files
-}
 

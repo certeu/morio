@@ -262,7 +262,7 @@ export const readDirectory = async (dirPath, onError) => {
   let files
   try {
     const dir = path.resolve(root, dirPath)
-    files = await fs.promises.readdir(dir, { recursive })
+    files = await fs.promises.readdir(dir)
   } catch (err) {
     if (onError) onError(err)
 

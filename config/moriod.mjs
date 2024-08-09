@@ -15,7 +15,7 @@ const root = path.resolve(path.basename(import.meta.url), '..')
  *
  * @param {string} dirPath - (relative) path to the directory to read
  */
-export const readDirectory = async (dirPath, onError) => {
+export const readDirectory = async (dirPath) => {
   let files = []
   try {
     const dir = path.resolve(root, dirPath)
