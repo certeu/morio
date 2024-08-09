@@ -1,4 +1,4 @@
-import pkg from './json-loading.mjs'
+import { pkg } from './json-loader.mjs'
 
 export const version = pkg.version
 

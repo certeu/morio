@@ -1,3 +1,5 @@
+import process from 'node:process'
+
 /*
  * This is not supposed to be caled inside a JS project
  * but rather from the command line
