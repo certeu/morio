@@ -21,10 +21,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Update dependencies
-        run: 'yum update -y'
+        run: 'dnf update -y'
 
       - name: Install dependencies
-        run: 'yum install -y rpmdevtools'
+        run: 'dnf install -y rpmdevtools'
 
       - name: Install nvm
         run: 'touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
