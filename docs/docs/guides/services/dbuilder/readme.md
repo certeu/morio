@@ -5,7 +5,7 @@ tags:
 ---
 
 The **Morio Debian Builder Service** (dbuilder) is an on-demand service that builds
-Morio client packages in `.deb` format, the package format used by 
+Morio client packages in `.deb` format, the package format used by
 Debian-based Linux distributions.
 
 As an on-demand service, it is not running all the time, instead it is started
@@ -22,4 +22,3 @@ responsibilities:
 
 The dbuilder service has one job and one job only: Building client packages
 for Debian-based Linux distributions.
-

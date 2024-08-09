@@ -22,8 +22,6 @@ import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
-import { StatusLogs } from 'components/status-logs.mjs'
-import { Markdown } from 'components/markdown.mjs'
 import { Box } from 'components/box.mjs'
 
 const Welcome = ({ setView }) => (
@@ -336,7 +334,6 @@ export const PrimedSettingsWizard = (props) => {
   const [preview, setPreview] = useState(false) // Whether or not to show the settings preview
   const [showDelta, setShowDelta] = useState(false)
   const [deployOngoing, setDeployOngoing] = useState(false)
-  const [lastLogLine, setLastLogLine] = useState(false)
 
   /*
    * Figure out the current sectionPath from the view
@@ -449,7 +446,7 @@ export const PrimedSettingsWizard = (props) => {
   }
 
   if (deployOngoing) {
-    const done = lastLogLine?.msg === 'Morio Core ready - Configuration Resolved'
+    const done = true // FIXME
     const text = `text-${done ? 'success' : 'accent'}-content`
     return (
       <WizardWrapper {...wrapProps} title="Apply Settings">
@@ -462,22 +459,12 @@ export const PrimedSettingsWizard = (props) => {
                 <LogoSpinner />
               )}
             </div>
-            {done ? (
-              <Markdown className={`mdx dense ${text} inherit-color grow`}>
-                {lastLogLine?.msg}
-              </Markdown>
-            ) : (
-              <span>Processing deploy request</span>
-            )}
-            {done ? (
-              <button className="btn-success" onClick={() => setDeployOngoing(false)}>
-                Close
-              </button>
-            ) : null}
+            <button className="btn-success" onClick={() => setDeployOngoing(false)}>
+              Close
+            </button>
           </div>
         </Box>
         <h2>Status Logs</h2>
-        <StatusLogs lastLineSetter={setLastLogLine} />
       </WizardWrapper>
     )
   }

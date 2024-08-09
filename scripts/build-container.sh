@@ -52,7 +52,7 @@ else
   # Now build the container
   cd $REPO/$1
   tar -ch . | docker build \
-    --file Dockerfile.$TARGET \
+    --file Containerfile.$TARGET \
     --tag morio/$CONTAINER:latest \
     --tag morio/$CONTAINER:$VERSION \
     -

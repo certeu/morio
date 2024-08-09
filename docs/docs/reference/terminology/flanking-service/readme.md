@@ -35,7 +35,7 @@ The [connector service](/docs/guides/services/connector) is responsible for
 routing data from and to external systems.
 
 To accomplish that, the service -- a Logstash instance -- will act as a client to the
-broker service. 
+broker service.
 In the capacity of _consumer_ when reading data from the
 Morio broker service, and in the capacity of _producer_ when writing data
 to the broker service.
@@ -69,7 +69,7 @@ That makes it sound like a great candidate for a flanking service. After all,
 it's just a client of the API service. Using the ui service is just a more
 user-friendly way to talk to the api service.
 
-However, the ui service relies on the proxy service for TLS termination, 
+However, the ui service relies on the proxy service for TLS termination,
 enforcing authentication through middleware, and some other things.
 So to deploy it, we'd also need to deploy the proxy service with it.
 
@@ -88,4 +88,3 @@ such as consumer groups.
 These stream processing services are also the most obvious candidates for
 horizontal scaling as these services tend to consume much more compute and
 memory resources than say, the ui service.
-

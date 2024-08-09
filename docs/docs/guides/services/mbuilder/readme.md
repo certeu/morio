@@ -23,4 +23,3 @@ responsibilities:
 
 The mbuilder service has one job and one job only: Building client packages
 for Mac systems.
-

@@ -1,6 +1,6 @@
 ---
 title: DISABLE_IDP_APIKEY
-tags: 
+tags:
   - flag
   - apikey
   - idp
@@ -12,4 +12,3 @@ provider](/docs/guides/idps#apikey) thereby blocking authentication via API Keys
 <Comment by="joost">
 This flag is not implemented yet, but it's on our todo list. 
 </Comment>
-

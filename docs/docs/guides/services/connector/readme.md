@@ -22,4 +22,3 @@ These pipelines are sometimes referred to as [ETL
 pipelines](https://en.wikipedia.org/wiki/Extract,_transform,_load), but it's
 important to understand that these pipelines operate on streaming data, and are
 not batch pipelines which are the more common way of doing ETL.
-

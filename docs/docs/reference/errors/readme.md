@@ -26,9 +26,6 @@ page](/docs/reference/errors/morio.api.schema.violation).
 This is rather helpful when troubleshooting, so where possible -- even outside
 API responses -- Morio will make errors a URL that leads to the relevant documentation page.
 
-
-
 ## List of Morio Error Types
 
 <SubPages />
-

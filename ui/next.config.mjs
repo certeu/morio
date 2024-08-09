@@ -32,6 +32,12 @@ import recmaFilePath from 'recma-export-filepath'
  * The NextJS configuration
  */
 const nextConfig = {
+  /*
+   * Tell eslint what to lint
+   */
+  eslint: {
+    dirs: ['components', 'hooks', 'lib', 'mdx', 'pages', 'prebuild', 'public', 'styles', 'themes'],
+  },
   pageExtensions: ['mjs', 'mdx'],
   reactStrictMode: true,
   output: 'standalone',

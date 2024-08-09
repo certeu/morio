@@ -22,9 +22,9 @@
   --mdx-bg-fixme: 251, 133, 0;
   --mdx-b-note: var(--ifm-color-primary);
   --mdx-bg-note: 27, 136, 162;
-  --mdx-b-tip: #09BC8A;
+  --mdx-b-tip: #09bc8a;
   --mdx-bg-tip: 9, 188, 138;
-  --mdx-b-warning: #EB6534;
+  --mdx-b-warning: #eb6534;
   --mdx-bg-warning: 235, 101, 52;
   --mdx-alpha-bg: 0.1;
   --mdx-muted: #666;
@@ -34,7 +34,7 @@
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-   --ifm-color-primary: #219ebc;
+  --ifm-color-primary: #219ebc;
   --ifm-color-primary-dark: #1e8ea9;
   --ifm-color-primary-darker: #1c86a0;
   --ifm-color-primary-darkest: #176f84;
@@ -122,7 +122,6 @@ div.popout-inner span.by-name {
   font-family: cursive;
   color: var(--mdx-b-note);
 }
-
 
 div.mdx-comment,
 div.mdx-error,
@@ -241,4 +240,3 @@ div.with-caption a.toggle:hover {
   text-decoration-thickness: 4px;
   cursor: pointer;
 }
-

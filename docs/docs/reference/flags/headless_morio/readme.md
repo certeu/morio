@@ -1,6 +1,6 @@
 ---
 title: HEADLESS_MORIO
-tags: 
+tags:
   - flag
   - ui
 ---
@@ -12,4 +12,3 @@ to manage it.
 <Comment by="joost">
 This flag is not implemented yet, but it's on our todo list. 
 </Comment>
-

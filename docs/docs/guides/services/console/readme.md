@@ -39,4 +39,3 @@ The ACL governs who can read or write what type of data on the broker service.
 Given that authentication is based on mutual TLS (mTLS) managing the ACL is
 something that is a lot more user-friendly via the consolve service than
 through the api service.
-

@@ -1,7 +1,7 @@
 ---
-title: "Announcing Morio: Your Comprehensive Observability Solution"
-authors: [ stellene, jdecock ]
-tags: [ morio, announcement, alpha ]
+title: 'Announcing Morio: Your Comprehensive Observability Solution'
+authors: [stellene, jdecock]
+tags: [morio, announcement, alpha]
 ---
 
 Today we are delighted to introduce [Morio](https://github.com/certeu/morio),
@@ -40,4 +40,3 @@ ensure transparency, flexibility, and freedom in managing your data
 infrastructure. By contributing to Morio, you can help shape the future of
 observability tools and ensure that it meets the needs of a diverse range of
 users. We are pretty excited about it... and we hope that you will be, too!
-

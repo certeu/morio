@@ -1,16 +1,17 @@
 ---
 title: morio.api.input.malformed
-tags: 
- - error
+tags:
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Input malformed__ - The input provided is malformed.
+
+**Input malformed** - The input provided is malformed.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Input malformed__ - The input provided is malformed.
   "detail": "The input provided is malformed."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
