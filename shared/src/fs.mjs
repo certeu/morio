@@ -114,7 +114,7 @@ export const mkdir = async (
   let dir
   try {
     dir = path.resolve(root, dirPath)
-    await fs.promises.mkdir(dir, { recursive: true })
+    await fs.promises.mkdir(dir)
   } catch (err) {
     if (onError) onError(err)
 
@@ -257,9 +257,8 @@ export const writeJsonFile = async (filePath, data) =>
  *
  * @param {string} dirPath - (relative) path to the directory to read
  * @param {funtion} onError - a method to call on error
- * @param {bool} recursive - set to true to read the folder recursively
  */
-export const readDirectory = async (dirPath, onError, recursive=false) => {
+export const readDirectory = async (dirPath, onError) => {
   let files
   try {
     const dir = path.resolve(root, dirPath)

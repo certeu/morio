@@ -74,3 +74,24 @@ if (process.argv[2]) {
   }
   */
 } else showHelp()
+
+/**
+ * Reads the contents of a directory (non-recursive)
+ *
+ * @param {string} dirPath - (relative) path to the directory to read
+ * @param {funtion} onError - a method to call on error
+ */
+export const readDirectory = async (dirPath, onError) => {
+  let files
+  try {
+    const dir = path.resolve(root, dirPath)
+    files = await fs.promises.readdir(dir, { recursive })
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+
+  return files
+}
+

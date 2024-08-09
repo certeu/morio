@@ -1,6 +1,29 @@
+import fs from 'fs'
+import path from 'path'
 import { pkg } from './json-loader.mjs'
-import { readDirectory } from '../shared/src/fs.mjs'
 
+/**
+ * Recursively reads the contents of a directory
+ *
+ * This is included here because importing shared/fs would require
+ * installing js-yaml when running in a CI pipeline
+ *
+ * @param {string} dirPath - (relative) path to the directory to read
+ * @param {funtion} onError - a method to call on error
+ */
+export const readDirectory = async (dirPath, onError) => {
+  let files
+  try {
+    const dir = path.resolve(root, dirPath)
+    files = await fs.promises.readdir(dir, { recursive: true })
+  } catch (err) {
+    if (onError) onError(err)
+
+    return false
+  }
+
+  return files
+}
 /*
  * Let's not maintain a list of files by hand
  */
