@@ -68,22 +68,22 @@ then
   # Grab the name
   #
   NAME=`ls -1 $DIST`
-  echo "Attempting to publish package: $NAME"
+  echo "Attempting to publish package: $DIST/$NAME"
 
   #
   # Note that 35 is the id that you can get from the packagecloud API:
   # https://packagecloud.io/docs/api#resource_distributions
   # Username is the API token, password is empty
   #
-  STATUS=$(curl \
-    --write-out '%{http_code}' --silent --output /dev/null \
+    #--write-out '%{http_code}' --silent --output /dev/null \
+  curl \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=35" \
-    -F "pacakge[package_file]=@$DIST/$NAME" \
+    -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
+    https://packagecloud.io/api/v1/repos/morio/deb/packages.json
 
-  if [ $STATUS -eq 201 ]
+  if [ $? -eq 0 ]
   then
     echo "Successfully published package: $NAME"
   else
