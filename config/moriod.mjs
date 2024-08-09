@@ -9,7 +9,6 @@ import { pkg } from './json-loader.mjs'
  * installing js-yaml when running in a CI pipeline
  *
  * @param {string} dirPath - (relative) path to the directory to read
- * @param {funtion} onError - a method to call on error
  */
 export const readDirectory = async (dirPath, onError) => {
   let files
@@ -17,7 +16,7 @@ export const readDirectory = async (dirPath, onError) => {
     const dir = path.resolve(root, dirPath)
     files = await fs.promises.readdir(dir, { recursive: true })
   } catch (err) {
-    if (onError) onError(err)
+    console.log(err)
 
     return false
   }
@@ -27,7 +26,7 @@ export const readDirectory = async (dirPath, onError) => {
 /*
  * Let's not maintain a list of files by hand
  */
-const getMoriodFiles = async () => await readDirectory('moriod', console.log, true)
+const getMoriodFiles = async () => await readDirectory('moriod')
 
 export const version = pkg.version
 
