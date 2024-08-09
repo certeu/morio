@@ -17,7 +17,7 @@ Essential: no
 Installed-Size: 500000
 Maintainer: CERT-EU <services@cert.europa.eu>
 Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
-Homepage: https://github.com/certeu/morio
+Homepage: https://morio.it
 Description: Umbrella package for Morio
   Morio is an end-to-end streaming data backbone
   for your observability needs.
@@ -97,5 +97,54 @@ systemctl start moriod || true
 
 MORIO_VERSION=${pkg.version}
 `,
+}
+
+export const rpm = {
+  spec: `
+Name: moriod
+Version: ${pkg.version}
+Release: 0%{?dist}
+Summary: Morio provides the plumbing for your observability needs.
+License: EUPL
+URL: https://github.com/certeu/morio
+Requires: docker.io
+
+%description
+Morio allows you to connect your systems, ingest their logs, metrics
+and audit info, and do stream processing and analysis in real time.
+
+This is the Morio distribution, which provides the Morio core service, running inside Docker.
+
+Documentation: https://morio.it
+
+%install
+mkdir -p %{buildroot}/etc/morio/
+mkdir -p %{buildroot}/usr/sbin/
+cp -R %{_sourcedir}/etc/morio %{buildroot}/etc/
+cp %{_sourcedir}/usr/sbin/morio-* %{buildroot}/usr/sbin
+echo %{name}-%{version}-%{release}.%{_arch}
+mkdir -p %{buildroot}/etc/systemd/system/
+cp -R %{_sourcedir}/etc/systemd/system/morio-* %{buildroot}/etc/systemd/system
+
+%files
+/usr/sbin/morio
+/usr/sbin/morio-audit
+/usr/sbin/morio-logs
+/usr/sbin/morio-metrics
+/usr/sbin/morio-restart
+/usr/sbin/morio-start
+/usr/sbin/morio-stop
+/etc/systemd/system/morio-audit.service
+/etc/systemd/system/morio-logs.service
+/etc/systemd/system/morio-metrics.service
+/etc/rc.d/init.d/morio-audit
+/etc/rc.d/init.d/morio-logs
+/etc/rc.d/init.d/morio-metrics
+/etc/client/ca.pem
+/etc/client/audit/config.yml
+/etc/client/audit/modules.d/system.yml
+/etc/client/logs/config.yml
+/etc/client/logs/inputs.d/linux-system.yml
+`
 }
 
