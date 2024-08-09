@@ -1,0 +1,21 @@
+name: Publish moriod .deb package
+
+on:
+  # This should not run on every PR, but it's here for testing this workflow
+  pull_request:
+  #release:
+  #  types: [published]
+
+jobs:
+  build_and_push_to_packagecloud:
+    name: Build & Publish .deb Package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Build & Publish the .deb package
+        run: 'npm run ci:build:moriod:deb'
+
