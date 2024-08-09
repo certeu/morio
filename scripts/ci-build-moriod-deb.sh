@@ -35,7 +35,7 @@ npm run -s get moriod-deb-version-env > $SRC/etc/morio/moriod/version.env
 npm run -s get moriod-deb-moriod-env > $SRC/etc/morio/moriod/moriod.env
 
 # Build the package
-cd $REPO.build-context
+cd $REPO/build-context
 mkdir -p pkg/DEBIAN
 for FILE in control postinst; do
   if [ -f $SRC/$FILE ]
