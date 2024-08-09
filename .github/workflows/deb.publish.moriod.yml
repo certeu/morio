@@ -20,6 +20,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
+      - name: Update dependencies
+        run: 'apt update && apt upgrade -y'
+
+      - name: Install curl
+        run: 'apt install -y curl'
+
       - name: Install nvm
         run: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
 
