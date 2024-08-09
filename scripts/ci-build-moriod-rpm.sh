@@ -23,6 +23,9 @@ RPMS=~/rpmbuild/RPMS/x86_64/
 # Get the Morio version
 VERSION=`npm run -s get version`
 
+# Create folders to write files in
+mkdir -p $SRC/etc/morio/moriod
+
 # Write out the version file
 npm run -s get version > $SRC/etc/morio/moriod/version
 
