@@ -159,9 +159,9 @@ mkdir -p %{buildroot}/etc/systemd/system/
 mkdir -p %{buildroot}/usr/share/man/man8
 cp -R %{_sourcedir}/etc/morio/moriod %{buildroot}/etc/morio
 cp %{_sourcedir}/usr/sbin/moriod %{buildroot}/usr/sbin
+cp %{_sourcedir}/etc/systemd/system/moriod.service %{buildroot}/etc/systemd/system/moriod.service
 cp %{_sourcedir}/var/lib/morio/moriod-completion.sh %{buildroot}/var/lib/morio/moriod-completion.sh
 cp %{_sourcedir}/usr/share/man/man8/moriod.8 %{buildroot}/usr/share/man/man8/moriod.8
-cp %{_sourcedir}/etc/systemd/system/moriod.service %{buildroot}/etc/systemd/system/moriod.service
 echo %{name}-%{version}-%{release}.%{_arch}
 
 %files
