@@ -33,10 +33,10 @@ npm run -s get version > $SRC/etc/morio/moriod/version
 npm run -s get moriod-rpm-spec > $SRC/build.spec
 
 # Write out the version EnvironmentFile for systemd
-npm run -s get moriod-deb-version-env > $SRC/etc/morio/moriod/version.env
+npm run -s get moriod-version-env > $SRC/etc/morio/moriod/version.env
 
 # Write out the vars EnvironmentFile for systemd
-npm run -s get moriod-deb-moriod-env > $SRC/etc/morio/moriod/moriod.env
+npm run -s get moriod-moriod-env > $SRC/etc/morio/moriod/moriod.env
 
 # Build the package
 cd $REPO/build-context
@@ -78,7 +78,7 @@ then
     -F "package[distro_version_id]=35" \
     -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json
+    https://packagecloud.io/api/v1/repos/morio/rpm/packages.json
 
   if [ $? -eq 0 ]
   then
