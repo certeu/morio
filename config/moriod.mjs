@@ -11,14 +11,14 @@ import { pkg } from './json-loader.mjs'
  * @param {string} dirPath - (relative) path to the directory to read
  */
 export const readDirectory = async (dirPath, onError) => {
-  let files
+  let files = []
   try {
     const dir = path.resolve(root, dirPath)
     files = await fs.promises.readdir(dir, { recursive: true })
   } catch (err) {
     console.log(err)
 
-    return false
+    return files
   }
 
   return files
