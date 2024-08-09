@@ -17,11 +17,10 @@ If you spot a mistake or see something that you can improve, please do not hesit
 
 ## Making quick edits
 
-
 The fastest way is via the **Edit this page** link that you can find at the bottom of every page. This will take you to the GitHub online editor where you can propose changes directly.
 
 Alternatively, you can find the file in [our monorepo][repo] and make changes that way.
-Whereas the `docs` folder in our monorepo holds the Docusaurus files, the actual documentation -- the markdown content -- is located in the `docs/docs` folder. 
+Whereas the `docs` folder in our monorepo holds the Docusaurus files, the actual documentation -- the markdown content -- is located in the `docs/docs` folder.
 
 Contributors looking to improve our documentation should update the various
 markdown files under [the `docs` folder][docs].
@@ -41,6 +40,7 @@ npm run start
 ```
 
 In other words:
+
 - Clone the repository
 - Install dependencies
 - Run `npm run start` in the `docs` folder
@@ -55,10 +55,9 @@ While we support Microsoft Windows as a platform for the Morio client, no Micros
 If you are on Windows, your mileage may vary.
 </Warning>
 
-
 ## Custom components
 
-We provide some MDX components that you can use in documentation pages. 
+We provide some MDX components that you can use in documentation pages.
 They are typically various ways to engage the reader with the material.
 
 The full list is included below:

@@ -1,10 +1,10 @@
 ---
-title: "Initial support for Morio clusters"
-authors: [ jdecock ]
-tags: [ morio, cluster, alpha ]
+title: 'Initial support for Morio clusters'
+authors: [jdecock]
+tags: [morio, cluster, alpha]
 ---
 
-We are happy to report that initial support for distributed  Morio deployments
+We are happy to report that initial support for distributed Morio deployments
 [has been merged into the codebase](https://github.com/certeu/morio/pull/18).
 In other words, deploying a highly avaiable Morio cluster is now possible.
 

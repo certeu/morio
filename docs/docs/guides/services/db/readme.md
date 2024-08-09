@@ -25,5 +25,3 @@ responsibilities:
 
 The db service provides the default database service for all other Morio
 services.
-
-

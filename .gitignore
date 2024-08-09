@@ -29,6 +29,11 @@ core/run-prod-container.sh
 core/coverage
 api/coverage
 
+# Build artifacts
+build-context
+build-context/*
+build-context.*
+
 # dependencies
 node_modules
 

@@ -9,7 +9,7 @@ responsible for [orchestration](#orchestration), [configuration
 resolution](#configuration-resolution), and [clustering](#clustering).
 
 Core is a Morio internal service, meaning that as a Morio user -- or even
-administrator -- you do not interact with it. As such, this guide covers 
+administrator -- you do not interact with it. As such, this guide covers
 the high-level responsibilities of the service, allowing you to get a grasp
 of what it is and what it does.
 
@@ -60,10 +60,9 @@ Morio, as well as keeping a cluster of Morio nodes running and healthy.
 
 That includes initial cluster formation, where all you need is to install Morio
 on all the cluster nodes, and then setup 1 of the nodes with the clustered
-settings.  Core will also run the cluster heartbeat, making sure that
+settings. Core will also run the cluster heartbeat, making sure that
 everything is ok, and ensure that the cluster has 1 leader node and the rest of
 the nodes will be follower nodes.
 
 Clustering is not a goal as such, it provides high-availability, meaning that
 if a node goes down, Morio as a whole keeps on ticking.
-

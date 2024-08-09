@@ -1,0 +1,52 @@
+#
+# This action runs eslint on all files
+# To run this locallly, you can run any of these two in the repository root:
+#   - npm run lint
+#   - npm run ci:eslint
+#
+name: ESLint
+
+on:
+  # We use branch protection, so run this on pull requests only
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Morio uses NodeJS 20 lts/iron
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache_node_modules
+        with:
+          path: '**/node_modules'
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      #- name: Install dependencies
+      #  if: steps.cache_node_modules.outputs.cache-hit != 'true'
+      #  run: npm install
+      #  env:
+      #    CI: true
+
+      # No do not need to install Morio dependenicies, just ESlint will do
+      - name: Install Eslint
+        if: steps.cache_node_modules.outputs.cache-hit != 'true'
+        run: npm install eslint eslint-config-prettier eslint-plugin-react
+        env:
+          CI: true
+
+      - name: Run eslint
+        run: npm run ci:eslint

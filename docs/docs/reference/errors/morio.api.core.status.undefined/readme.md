@@ -1,16 +1,17 @@
 ---
 title: morio.api.core.status.undefined
-tags: 
- - error
+tags:
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Unable to load data from Morio Core__ - When reaching out to Morio Core, we did not receive a response, idicating that core may be down.
+
+**Unable to load data from Morio Core** - When reaching out to Morio Core, we did not receive a response, idicating that core may be down.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Unable to load data from Morio Core__ - When reaching out to Morio Core, we di
   "detail": "When reaching out to Morio Core, we did not receive a response, idicating that core may be down."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

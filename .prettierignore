@@ -1,0 +1,6 @@
+docs/build/*
+docs/.docusaurus/*
+# Until we figure out how to handle the yaml+mustache files, let's ignore them
+clients/linux/etc/morio/audit/module-templates.d/*
+clients/linux/etc/morio/logs/module-templates.d/*
+clients/linux/etc/morio/metrics/module-templates.d/*

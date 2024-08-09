@@ -1,6 +1,6 @@
 ---
 title: DISABLE_IDP_LDAP
-tags: 
+tags:
   - flag
   - ldap
   - idp
@@ -12,4 +12,3 @@ provider](/docs/guides/idps#ldap) thereby blocking authentication via any LDAP b
 <Comment by="joost">
 This flag is not implemented yet, but it's on our todo list. 
 </Comment>
-

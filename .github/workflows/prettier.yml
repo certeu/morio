@@ -1,0 +1,52 @@
+#
+# This action runs prettier on all files
+# To run this locallly, you can run any of these two in the repository root:
+#   - npm run prettier
+#   - npm run ci:prettier
+#
+name: Prettier
+
+on:
+  pull_request:
+
+jobs:
+  # We use branch protection, so run this on pull requests only
+  prettier:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Morio uses NodeJS 20 lts/iron
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache_node_modules
+        with:
+          path: '**/node_modules'
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      #- name: Install dependencies
+      #  if: steps.cache_node_modules.outputs.cache-hit != 'true'
+      #  run: yarn install
+      #  env:
+      #    CI: true
+
+      # No do not need to install Morio dependenicies, just ESlint will do
+      - name: Install Prettier
+        if: steps.cache_node_modules.outputs.cache-hit != 'true'
+        run: npm install prettier
+        env:
+          CI: true
+
+      - name: Run prettier
+        run: npm run ci:prettier

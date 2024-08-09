@@ -22,6 +22,10 @@ info:
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
   version: 0.2.0
+  x-logo:
+    url: /downloads/morio-card-embed.svg
+    backgroundColor: transparent
+    altText: Morio Logo
 externalDocs:
   description: Morio Online Documentation
   url: https://morio.it/

@@ -37,7 +37,7 @@ certificates for all HTTP-based Morio services.
 ### Authentication
 
 While the proxy service does not handle authentication itself -- it is [the
-api service who does](/docs/guides/services/api) it is crucial in Morio's 
+api service who does](/docs/guides/services/api) it is crucial in Morio's
 authentication flow as it is [ForwardAut
 middleware](https://doc.traefik.io/traefik/middlewares/http/forwardauth/) on
 the proxy service that intercepts all HTTP requests and passes them to the api
@@ -49,13 +49,13 @@ service pass it to the backend service.
 The proxy service is responsible for routing requests to the correct backend service.
 
 For example, the urls `/login`, `/console`, or `/-/api/status` target the ui,
-console, and api services respectively.  It is the proxy service's job to route
+console, and api services respectively. It is the proxy service's job to route
 the request to the correct backend service based on the URL.
 
 ## URL Rewriting
 
 As Morio uses URL-based routing -- rather than using subdomains for example --
-we sometimes need to match the constraints imposed by the URL-based routing 
+we sometimes need to match the constraints imposed by the URL-based routing
 with the URL patterns expected by the backend service.
 
 Where needed, it is the proxy service who will rewrite the request URL to
@@ -66,4 +66,3 @@ use a specific prefix for routing the request.
 
 Last but not least, the proxy service provides a dashboard at `/dashboard`
 that shows that status and configuration of the proxy service.
-

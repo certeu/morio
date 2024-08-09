@@ -1,9 +1,11 @@
-
 > [!Warning]
-> Morio is currently early-access alpha code. 
 >
-> We are building this in the open, so feel free to look around, 
+> ##### Morio is currently early-access alpha code.
+>
+> We are building this in the open, so feel free to look around,
 > try it out, or [leave feedback](https://github.com/certeu/morio/discussions).
+>
+> That being said, you probably don't want to run this in production yet.
 
 <p align='center'><a 
   href="https://deepscan.io/dashboard#view=project&tid=24001&pid=27249&bid=869644"
@@ -11,8 +13,8 @@
   alt="DeepScan grade"
   ></a></p>
 
-
 # Morio
+
 ![image](https://github.com/certeu/morio/assets/1708494/91892e94-0cb5-4c94-8845-ffe52c19c417)
 
 ## What is Morio?
@@ -40,7 +42,7 @@ the entire system through it's web UI or REST API.
 
 ## Current status
 
-Morio is __alpha code and under active development__.
+Morio is **alpha code and under active development**.
 It is not ready to handle your production workloads, and likely won't be for a while.
 
 ## What's with the name?
@@ -52,17 +54,17 @@ I was mulling it over one weekend, and landed on **morio**. Here's why:
 **It's a _data plumbing_ project**
 
 Making sure data flows from every little place where it's generated to your
-data lake is the data equivalent of plumbing.  It's not very sexy, but it is
+data lake is the data equivalent of plumbing. It's not very sexy, but it is
 very important. See how you fair when the drain in your kitched gets clogged,
 or worse, your toilet.
 
 Plumbing is not sexy or cool, so we borrow some cool from the world's most
-beloved plumber: **Mario**.  This is Morio, not Mario. But it's a good reminder
+beloved plumber: **Mario**. This is Morio, not Mario. But it's a good reminder
 that plumbers rock.
 
 **More data in, more value out**
 
-Another way to explain the **morio** name is to read it as **More IO**.  If we
+Another way to explain the **morio** name is to read it as **More IO**. If we
 can make it easy (and affordable) to stream more data, we can get more value
 out of that stream.
 
@@ -240,4 +242,3 @@ Then pipe the logs into it, stripping some of the fields we don't care about:
 ```
 docker logs -f core | pino-pretty --ignore pid,time,hostname
 ```
-

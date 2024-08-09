@@ -1,13 +1,31 @@
 openapi: 3.1.0
 info:
-  title: Morio Management API
+  title: Morio Core API
   description: >
 
     ## What am I looking at?
 
-    This is the reference documentation for Morio's __Management API__.
+    This is the reference documentation for Morio's __Core API__.
 
     It is auto-generated from this API's OpenAPI v3 specification.
+
+
+    ## This Core API is internal to Morio
+
+
+    With the exception of the `/status` endpoint — along with this `/docs`
+    endpoint itself — this API is internal to Morio.
+
+
+    In other words, you cannot interact with it, or use it as a regular user, or
+    even an administrator.
+
+    This documentation serves only those who want to learn how Morio works under
+    the hood.
+
+
+    To learn how to interact with Morio through its user-facing API, refer to
+    [the documentation for Morio's Management API](/-/api/docs) instead.
 
 
     ## Links
@@ -22,6 +40,10 @@ info:
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
   version: 0.2.0
+  x-logo:
+    url: /downloads/morio-card-embed.svg
+    backgroundColor: transparent
+    altText: Morio Logo
 externalDocs:
   description: Morio Online Documentation
   url: https://morio.it/
