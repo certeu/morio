@@ -257,12 +257,13 @@ export const writeJsonFile = async (filePath, data) =>
  *
  * @param {string} dirPath - (relative) path to the directory to read
  * @param {funtion} onError - a method to call on error
+ * @param {bool} recursive - set to true to read the folder recursively
  */
-export const readDirectory = async (dirPath, onError) => {
+export const readDirectory = async (dirPath, onError, recursive=false) => {
   let files
   try {
     const dir = path.resolve(root, dirPath)
-    files = await fs.promises.readdir(dir)
+    files = await fs.promises.readdir(dir, { recursive })
   } catch (err) {
     if (onError) onError(err)
 

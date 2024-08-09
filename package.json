@@ -49,6 +49,7 @@
     "ci:build:core": "./scripts/ci-build-container.sh core",
     "ci:build:dbuilder": "./scripts/ci-build-container.sh dbuilder",
     "ci:build:moriod:deb": "./scripts/ci-build-moriod-deb.sh",
+    "ci:build:moriod:rpm": "./scripts/ci-build-moriod-rpm.sh",
     "ci:build:ui": "./scripts/ci-build-container.sh ui",
     "ci:eslint": "npm run lint",
     "ci:prettier": "npm run prettier",

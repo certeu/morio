@@ -5,7 +5,7 @@ import process from 'node:process'
  * but rather from the command line
  */
 import { banner, repo, repoUrl, website, websiteUrl } from  '../../config/cli.mjs'
-import { deb, version } from '../../config/moriod.mjs'
+import { deb, rpm, version, versionEnv, moriodEnv } from '../../config/moriod.mjs'
 
 const showHelp = () => console.log(`
 ${banner}
@@ -33,8 +33,9 @@ Arguments:
   website-url                         Output the URL to the morio website
 
   moriod-deb-control                  Outputs the content of the .deb control file
-  moriod-deb-version                  Outputs the morio version (alias of version)
-  moriod-deb-version-env              Outputs the content of the version.env file for the moriod .deb pacakge
+  moriod-rpm-spec                     Outputs the content of the .rpm spec file
+  moriod-moriod-env                   Outputs the content of the moriod.env file for the moriod pacakge
+  moriod-version-env                  Outputs the content of the version.env file for the moriod pacakge
 `)
 
 /*
@@ -43,8 +44,9 @@ Arguments:
 const cliParamToVar = {
   "banner": banner,
   "moriod-deb-control": deb.control,
-  "moriod-deb-version": version,
-  "moriod-deb-version-env": deb.control,
+  "moriod-moriod-env": deb.morioEnv,
+  "moriod-rpm-spec": rpm.spec,
+  "moriod-version-env": deb.versionEnv,
   "repo": repo,
   "repo-url": repoUrl,
   "version": version,
@@ -59,6 +61,7 @@ const cliParamToVar = {
 if (process.argv[2]) {
   const key = process.argv[2].toLowerCase()
   if (Object.keys(cliParamToVar).includes(key)) console.log(cliParamToVar[key])
+  else showHelp()
   /*
   else {
     switch (process.argv[2].toLowerCase()) {
