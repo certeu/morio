@@ -48,3 +48,49 @@ for DIR in etc usr var; do
 done
 dpkg-deb --build pkg $DIST
 
+
+if [ $? -eq 0 ]
+then
+  echo "Successfully built moriod .deb package"
+else
+  echo "Failed to build the moriod .deb pacakge"
+  exit 1
+fi
+
+if [ -z "$1" ];
+then
+  echo "Not publishing the newly built package."
+  exit 0
+elif [ "publish" == $1 ]
+then
+
+  #
+  # Grab the name
+  #
+  NAME=`ls -1 $DIST`
+  echo "Attempting to publish package: $NAME"
+
+  #
+  # Note that 35 is the id that you can get from the packagecloud API:
+  # https://packagecloud.io/docs/api#resource_distributions
+  # Username is the API token, password is empty
+  #
+  curl \
+    -u $PACKAGECLOUD_TOKEN:  \
+    -F "package[distro_version_id]=35" \
+    -F "pcakge[package_file]=@$DIST/$NAME" \
+    -X POST \
+    https://packagecloud.io/api/v1/repos/morio/deb/pacakges.json
+
+  if [ $? -eq 0 ]
+  then
+    echo "Successfully published package: $NAME"
+  else
+    echo "Failed to publish package: $NAME"
+    exit 1
+  fi
+fi
+
+echo "All done"
+exit 0
+
