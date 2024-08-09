@@ -20,6 +20,12 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
+      - name: Install nvm
+        run: 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
+
+      - name: Install node
+        run: 'nvm install lts/iron'
+
       - name: Build & Publish the .deb package
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
