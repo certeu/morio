@@ -13,7 +13,7 @@ jobs:
     #
     # we build this on RedHat 9 but it _should_ work for any .rpm based distros
     #
-    container: redhat/ubi9
+    container: rockylinux:9
     permissions:
       contents: read
     steps:
