@@ -82,13 +82,12 @@ then
     -F "pacakge[package_file]=@$DIST/$NAME" \
     -X POST \
     https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
-  echo "Status code is: $STATUS"
 
-  if [ $? -eq 0 ]
+  if [ $STATUS -eq 201 ]
   then
     echo "Successfully published package: $NAME"
   else
-    echo "Failed to publish package: $NAME"
+    echo "Failed to publish package: $NAME. HTTP status was $STATUS."
     exit 1
   fi
 fi
