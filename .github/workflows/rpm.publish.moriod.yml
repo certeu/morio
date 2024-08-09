@@ -11,7 +11,12 @@ jobs:
     name: Build & Publish .rpm Package
     runs-on: ubuntu-latest
     #
-    # we build this on RedHat 9 but it _should_ work for any .rpm based distros
+    # We build this on Rockylinux 9 but it _should_ work for any .rpm based distros
+    #
+    # Why not RedHat?
+    # Because the images RedHat makes available (ubi) do not provide rpmdevtools
+    # and they cannot be installed through dnf. In other words, the images provided
+    # are not suitable for building RPM packages.
     #
     container: rockylinux:9
     permissions:
