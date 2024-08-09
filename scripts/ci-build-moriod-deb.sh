@@ -75,7 +75,7 @@ then
   # https://packagecloud.io/docs/api#resource_distributions
   # Username is the API token, password is empty
   #
-  curl \
+  curl -vv \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=35" \
     -F "pacakge[package_file]=@$DIST/$NAME" \
