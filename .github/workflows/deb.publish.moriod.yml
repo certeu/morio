@@ -17,5 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build & Publish the .deb package
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
         run: 'npm run ci:build:moriod:deb publish'
 
