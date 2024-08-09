@@ -78,7 +78,7 @@ then
   curl \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=35" \
-    -F "pcakge[package_file]=@$DIST/$NAME" \
+    -F "pacakge[package_file]=@$DIST/$NAME" \
     -X POST \
     https://packagecloud.io/api/v1/repos/morio/deb/packages.json
 
