@@ -11,9 +11,9 @@ jobs:
     name: Build & Publish .rpm Package
     runs-on: ubuntu-latest
     #
-    # we build this on Debian 12, but it _should_ work for any .deb based distru
+    # we build this on RedHat 9 but it _should_ work for any .rpm based distros
     #
-    container: redhat/ubi
+    container: redhat/ubi9
     permissions:
       contents: read
     steps:

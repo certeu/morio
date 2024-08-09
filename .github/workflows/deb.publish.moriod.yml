@@ -11,7 +11,7 @@ jobs:
     name: Build & Publish .deb Package
     runs-on: ubuntu-latest
     #
-    # we build this on Debian 12, but it _should_ work for any .deb based distru
+    # we build this on Debian 12, but it _should_ work for any .deb based distros
     #
     container: debian:bookworm
     permissions:
