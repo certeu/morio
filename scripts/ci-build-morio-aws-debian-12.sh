@@ -17,6 +17,11 @@
 REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
 
 #
+# Grab the version and export it as it's used in the packer config
+#
+export MORIO_VERSION = $(npm run -s get version)
+
+#
 # Make sure we are in the repo, then run packer
 #
 cd $REPO/packer
