@@ -3,6 +3,9 @@ jdecock:
   title: Morio Maintainer
   url: https://github.com/joostdecock
   image_url: https://github.com/joostdecock.png
+  socials:
+    github: joostdecock
+    Mastodon: https://freesewing.social/@joost
 
 stellene:
   name: Serge Tellene
