@@ -2,7 +2,7 @@
 #
 # This script will build the .deb package for moriod
 # It is created for a CI environment, but should also run fine
-# on a system that supports .deb (a Debuan-based distribution)
+# on a system that supports .deb (a Debian-based distribution)
 #
 
 #
