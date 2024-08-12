@@ -70,6 +70,7 @@ then
   #
     #--write-out '%{http_code}' --silent --output /dev/null \
   RESPONSE=$(curl \
+    -s -w "%{http_code}" \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=227" \
     -F "package[package_file]=@$RPMS/$NAME" \
