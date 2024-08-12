@@ -51,9 +51,9 @@ dpkg-deb --build pkg $DIST
 
 if [ $? -eq 0 ]
 then
-  echo "Successfully built moriod .deb package"
+  echo "Successfully built the moriod .deb package"
 else
-  echo "Failed to build the moriod .deb pacakge"
+  echo "Failed to build the moriod .deb package"
   exit 1
 fi
 
