@@ -1,7 +1,7 @@
 import process from 'node:process'
 
 /*
- * This is not supposed to be caled inside a JS project
+ * This is not supposed to be called inside a JS project
  * but rather from the command line
  */
 import { banner, repo, repoUrl, website, websiteUrl } from  '../../config/cli.mjs'
@@ -11,7 +11,7 @@ const showHelp = () => console.log(`
 ${banner}
 This is a helper to bridge the gap between your shell and NodeJS.
 
-Speficially, you can call this from a shell and pass command-line paratmers
+Specifically, you can call this from a shell and pass command-line parameters
 to get certain data from JS in your shell scripts.
 
 To run this, call it from node. For example (from the repo root):
@@ -34,8 +34,8 @@ Arguments:
 
   moriod-deb-control                  Outputs the content of the .deb control file
   moriod-rpm-spec                     Outputs the content of the .rpm spec file
-  moriod-moriod-env                   Outputs the content of the moriod.env file for the moriod pacakge
-  moriod-version-env                  Outputs the content of the version.env file for the moriod pacakge
+  moriod-moriod-env                   Outputs the content of the moriod.env file for the moriod package
+  moriod-version-env                  Outputs the content of the version.env file for the moriod package
 `)
 
 /*
