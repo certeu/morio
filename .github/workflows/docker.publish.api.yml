@@ -1,10 +1,8 @@
 name: Publish itsmorio/api OCI image
 
 on:
-  # This should not run on every PR, but it's here for testing this workflow
-  pull_request:
-  #release:
-  #  types: [published]
+  release:
+    types: [published]
 
 jobs:
   build_and_push_to_registry:
