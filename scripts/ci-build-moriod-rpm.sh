@@ -75,7 +75,7 @@ then
     #--write-out '%{http_code}' --silent --output /dev/null \
   curl \
     -u $PACKAGECLOUD_TOKEN:  \
-    -F "package[distro_version_id]=35" \
+    -F "package[distro_version_id]=227" \
     -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
     https://packagecloud.io/api/v1/repos/morio/rpm/packages.json
