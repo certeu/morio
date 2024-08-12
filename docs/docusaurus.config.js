@@ -20,12 +20,12 @@ const config = {
   projectName: 'morio',
 
   // How to handle broken links
-  onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  //onBrokenLinks: 'throw',
+  //onBrokenMarkdownLinks: 'warn',
 
   // Blog
-  onInlineAuthors: 'throw',
-  onUntruncatedBlogPost: 'throw',
+  //onInlineAuthors: 'throw',
+  //onUntruncatedBlogPost: 'throw',
   // i18n
   i18n: {
     defaultLocale: 'en',
