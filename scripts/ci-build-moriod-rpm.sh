@@ -44,9 +44,9 @@ rpmbuild -bb --quiet $SRC/build.spec --define "_sourcedir $WD/$SRC/"
 
 if [ $? -eq 0 ]
 then
-  echo "Successfully built moriod .rpm package"
+  echo "Successfully built the moriod .rpm package"
 else
-  echo "Failed to build the moriod .rpm pacakge"
+  echo "Failed to build the moriod .rpm package"
   exit 1
 fi
 ls $RPMS
