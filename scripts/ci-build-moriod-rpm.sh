@@ -17,7 +17,6 @@ rm -rf $REPO/build-context
 mkdir -p $REPO/build-context/dist
 cp -R $REPO/moriod $REPO/build-context/src
 SRC=$REPO/build-context/src
-DIST=$REPO/build-context/dist
 RPMS=~/rpmbuild/RPMS/x86_64/
 
 # Get the Morio version
@@ -62,7 +61,7 @@ then
   # Grab the name
   #
   NAME=`ls -1 $RPMS`
-  echo "Attempting to publish package: $DIST/$NAME"
+  echo "Attempting to publish package: $RPMS/$NAME"
 
   #
   # Note that 35 is the id that you can get from the packagecloud API:
@@ -73,7 +72,7 @@ then
   curl \
     -u $PACKAGECLOUD_TOKEN:  \
     -F "package[distro_version_id]=227" \
-    -F "package[package_file]=@$DIST/$NAME" \
+    -F "package[package_file]=@$RPMS/$NAME" \
     -X POST \
     https://packagecloud.io/api/v1/repos/morio/rpm/packages.json
 
