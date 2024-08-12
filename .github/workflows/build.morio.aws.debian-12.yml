@@ -18,16 +18,19 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v4
 
-      - name: Add hashicorp apt repo
-        run: |
-          wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg &&
-          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-
       - name: Update dependencies
         run: 'apt update && apt upgrade -y'
 
-      - name: Install curl & packer
-        run: 'apt install -y curl packer'
+      - name: Install curl
+        run: 'apt install -y curl'
+
+      - name: Add hashicorp apt repo
+        run: |
+          curl -s https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg &&
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+
+      - name: Install packer
+        run: 'apt update && apt install -y packer'
 
       - name: Install nvm
         run: 'touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
@@ -39,6 +42,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run packer:build:aws:debian-12'
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build:morio:aws:debian-12'
 
 

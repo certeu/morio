@@ -53,6 +53,7 @@
     "ci:build:ui": "./scripts/ci-build-container.sh ui",
     "ci:eslint": "npm run lint",
     "ci:prettier": "npm run prettier",
+    "ci:build:morio:aws:debian-12": "./scripts/ci-build-morio-aws-debian-12.sh",
     "docker:build:moriod:deb": "./scripts/docker-build-moriod-deb.sh",
     "docker:build:moriod:rpm": "./scripts/docker-build-moriod-rpm.sh",
     "destroy": "./scripts/destroy.sh",
