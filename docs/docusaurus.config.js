@@ -43,6 +43,8 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          onInlineAuthors: 'throw',
+          //onUntruncatedBlogPost: 'throw',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/certeu/morio/tree/develop/docs/',
@@ -89,7 +91,7 @@ const config = {
       image: 'img/morio-social-card.jpg',
       announcementBar: {
         content:
-          '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/05/15/oven-window">Learn more</a>',
+          '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/06/26/oven-window">Learn more</a>',
         isCloseable: false,
         backgroundColor: '#EB6534',
         textColor: '#fff',

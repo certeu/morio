@@ -5,7 +5,7 @@ tags: [morio, release, alpha, v0.3.0]
 ---
 
 We have released verion 0.3.0 of Morio, which brings initial clustering support.
-
+<!-- truncate -->
 We [wrote about the new support for clustered
 deployments](/blog/2024/08/01/clustering-support) last week, and it's the main
 feature in this release. Check [the

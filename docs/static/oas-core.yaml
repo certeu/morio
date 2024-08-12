@@ -39,7 +39,7 @@ info:
     name: EUPL
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
-  version: 0.2.0
+  version: 0.3.0
   x-logo:
     url: /downloads/morio-card-embed.svg
     backgroundColor: transparent

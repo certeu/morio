@@ -7,7 +7,7 @@ tags: [morio, disclaimer, alpha]
 After the initial months of design, preparation, and writing code, we've
 recently started working on the Morio documentation, including its automated
 publishing in a CI pipeline.
-
+<!-- truncate -->
 We strongly believe that documentation should never be an afterthought, but be
 written alongside the code itself. When trying to explain things in
 documentation, those things that are counter-intuitive and awkwardly named

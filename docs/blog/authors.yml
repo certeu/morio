@@ -3,6 +3,11 @@ jdecock:
   title: Morio Maintainer
   url: https://github.com/joostdecock
   image_url: https://github.com/joostdecock.png
+  description: Full-stack engineer at CERT-EU. Creator of Morio. More plans than time.
+  page: true
+  socials:
+    github: joostdecock
+    Mastodon: https://freesewing.social/@joost
 
 stellene:
   name: Serge Tellene
