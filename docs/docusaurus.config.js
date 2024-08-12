@@ -25,8 +25,7 @@ const config = {
 
   // Blog
   onInlineAuthors: 'throw',
-  onUntruncatedBlogPost: 'throw'
-
+  onUntruncatedBlogPost: 'throw',
   // i18n
   i18n: {
     defaultLocale: 'en',
