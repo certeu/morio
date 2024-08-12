@@ -21,8 +21,8 @@ jobs:
       - name: Update dependencies
         run: 'apt update && apt upgrade -y'
 
-      - name: Install curl
-        run: 'apt install -y curl'
+      - name: Install curl & gpg
+        run: 'apt install -y curl gpg'
 
       - name: Add hashicorp apt repo
         run: |
