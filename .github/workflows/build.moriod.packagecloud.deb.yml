@@ -1,17 +1,16 @@
 name: Publish moriod .deb package
 
 on:
-  # This should not run on every PR, but it's here for testing this workflow
-  pull_request:
-  #release:
-  #  types: [published]
+  # Only run this on a new release
+  release:
+    types: [published]
 
 jobs:
   build_and_push_to_packagecloud:
     name: Build & Publish .deb Package
     runs-on: ubuntu-latest
     #
-    # we build this on Debian 12, but it _should_ work for any .deb based distros
+    # We build this on Debian 12, but it _should_ work for any .deb based distros
     #
     container: debian:bookworm
     permissions:

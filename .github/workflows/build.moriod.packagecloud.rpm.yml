@@ -1,10 +1,9 @@
 name: Publish moriod .rpm package
 
 on:
-  # This should not run on every PR, but it's here for testing this workflow
-  pull_request:
-  #release:
-  #  types: [published]
+  # Only run this on a new release
+  release:
+    types: [published]
 
 jobs:
   build_and_push_to_packagecloud:

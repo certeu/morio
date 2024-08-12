@@ -82,11 +82,11 @@ then
     -F "package[distro_version_id]=35" \
     -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
+    https://packagecloud.io/api/v1/repos/morio/debian-12/packages.json)
 
   if [ "201" = ${RESPONSE: -3} ]
   then
-    echo "Package $NAME was published on packagecloud.io/morio/deb"
+    echo "Package $NAME was published on packagecloud.io/morio/debian-12"
     exit 0
   elif [ "422" = ${RESPONSE: -3} ]
   then
