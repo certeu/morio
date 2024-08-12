@@ -19,6 +19,6 @@ REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )
 #
 # Make sure we are in the repo, then run packer
 #
-cd $REPO
+cd $REPO/packer
 packer init aws-debian-12.pkr.hcl
 packer build aws-debian-12.pkr.hcl
