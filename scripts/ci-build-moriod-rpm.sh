@@ -58,9 +58,6 @@ then
   exit 0
 elif [ "publish" == $1 ]
 then
-
-  # We'll handle publishing once it builds
-  exit 1
   #
   # Grab the name
   #
