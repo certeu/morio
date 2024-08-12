@@ -53,6 +53,8 @@
     "ci:build:ui": "./scripts/ci-build-container.sh ui",
     "ci:eslint": "npm run lint",
     "ci:prettier": "npm run prettier",
+    "docker:build:moriod:deb": "./scripts/docker-build-moriod-deb.sh",
+    "docker:build:moriod:rpm": "./scripts/docker-build-moriod-rpm.sh",
     "destroy": "./scripts/destroy.sh",
     "dev": "./core/run-dev-container.sh",
     "get": "node --no-warnings shared/src/cli-get.mjs",
