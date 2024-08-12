@@ -61,7 +61,7 @@ then
   #
   # Grab the name
   #
-  NAME=`ls -1 $DIST`
+  NAME=`ls -1 $RPMS`
   echo "Attempting to publish package: $DIST/$NAME"
 
   #
