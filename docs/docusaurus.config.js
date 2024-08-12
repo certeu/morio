@@ -23,6 +23,10 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
 
+  // Blog
+  onInlineAuthors: 'throw',
+  onUntruncatedBlogPost: 'throw'
+
   // i18n
   i18n: {
     defaultLocale: 'en',
