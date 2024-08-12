@@ -20,12 +20,9 @@ const config = {
   projectName: 'morio',
 
   // How to handle broken links
-  //onBrokenLinks: 'throw',
-  //onBrokenMarkdownLinks: 'warn',
+  onBrokenLinks: 'throw',
+  onBrokenMarkdownLinks: 'warn',
 
-  // Blog
-  //onInlineAuthors: 'throw',
-  //onUntruncatedBlogPost: 'throw',
   // i18n
   i18n: {
     defaultLocale: 'en',
@@ -46,6 +43,8 @@ const config = {
         },
         blog: {
           showReadingTime: true,
+          onInlineAuthors: 'throw',
+          //onUntruncatedBlogPost: 'throw',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: 'https://github.com/certeu/morio/tree/develop/docs/',
