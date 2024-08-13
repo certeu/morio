@@ -1,4 +1,4 @@
-name: Publish itsmorio/core OCI image
+name: Publish itsmorio/ui OCI image
 
 on:
   release:
@@ -18,5 +18,5 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
-        run: 'npm run ci:build:core publish'
+        run: 'npm run ci:build.ui publish'
 
