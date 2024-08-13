@@ -64,6 +64,8 @@ else
   cp $JSON $DIST
   echo "Creating commit"
   git add $DIST
+  git config user.email "bot@morio.it"
+  git config user.name "Morio Bot"
   git commit -m "chore: Updated list of published AMIs on AWS"
   echo "Creating pull request"
   git push --set-upstream origin $BRANCH

@@ -58,5 +58,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          GH_TOKEN: ${{ secrets.MORIO_BOT_GITHUB_TOKEN }}
         run: 'npm run ci:postbuild.morio.aws pr'
 
