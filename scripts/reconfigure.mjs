@@ -2,7 +2,6 @@ import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
-import path from 'path'
 import { MORIO_GIT_ROOT } from '../config/cli.mjs'
 
 

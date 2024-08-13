@@ -15,7 +15,7 @@ import {
  MORIO_WEBSITE,
  MORIO_WEBSITE_URL,
 } from  '../../config/cli.mjs'
-import { deb, rpm, version, versionEnv, moriodEnv } from '../../config/moriod.mjs'
+import { deb, rpm, versionEnv, moriodEnv } from '../../config/moriod.mjs'
 
 const showHelp = () => console.log(`
 ${MORIO_ASCII_BANNER}
