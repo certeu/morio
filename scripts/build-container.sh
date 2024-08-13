@@ -1,4 +1,6 @@
 #!/bin/bash
+# Sounce config variables
+source config/cli.sh
 #
 # Check that an environment was specified
 if [ -z "$2" ];
@@ -43,18 +45,12 @@ else
   # Container to build
   CONTAINER="$1$SUFFIX"
 
-  # Figure out the repository root
-  REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
-
-  # Grab the Morio version from package.json
-  VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
-
   # Now build the container
-  cd $REPO/$1
+  cd $MORIO_GIT_ROOT/$1
   tar -ch . | docker build \
     --file Containerfile.$TARGET \
     --tag morio/$CONTAINER:latest \
-    --tag morio/$CONTAINER:$VERSION \
+    --tag morio/$CONTAINER:$MORIO_VERSION \
     -
 fi
 
