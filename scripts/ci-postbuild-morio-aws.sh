@@ -20,7 +20,7 @@ source config/cli.sh
 cd $MORIO_GIT_ROOT
 mkdir -p build-context
 FILE="aws.json"
-SRC="build-context/$FILE"
+SRC="build-context"
 DEST="docs/static/images"
 mkdir -p $DEST
 
@@ -30,7 +30,6 @@ mkdir -p $DEST
 echo "Getting list of AMIs from AWS"
 IMAGES=$(aws ec2 describe-images --region="us-east-1" --owners self --filters "Name=tag:morio,Values=true")
 echo $IMAGES | jq .Images > $SRC/$FILE
-
 #
 # Iterate over the images to see if they are public
 #
