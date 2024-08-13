@@ -69,7 +69,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         : [
             `${DIRS.conf}/shared:/etc/morio/shared`,
             `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
           ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,

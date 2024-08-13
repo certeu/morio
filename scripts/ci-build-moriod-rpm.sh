@@ -5,28 +5,23 @@
 # on a system that supports .rpm (a RedHat-based distribution)
 #
 
-#
-# Figure out the repository root
-#
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
+# Sounce config variables
+source config/cli.sh
 
 #
 # Create a folder to hold the build context
 #
-rm -rf $REPO/build-context
-mkdir -p $REPO/build-context/dist
-cp -R $REPO/moriod $REPO/build-context/src
-SRC=$REPO/build-context/src
+rm -rf $MORIO_GIT_ROOT/build-context
+mkdir -p $MORIO_GIT_ROOT/build-context/dist
+cp -R $MORIO_GIT_ROOT/moriod $MORIO_GIT_ROOT/build-context/src
+SRC=$MORIO_GIT_ROOT/build-context/src
 RPMS=~/rpmbuild/RPMS/x86_64/
-
-# Get the Morio version
-VERSION=`npm run -s get version`
 
 # Create folders to write files in
 mkdir -p $SRC/etc/morio/moriod
 
 # Write out the version file
-npm run -s get version > $SRC/etc/morio/moriod/version
+echo $MORIO_VERSION > $SRC/etc/morio/moriod/version
 
 # Write out the .rpm spec file
 npm run -s get moriod-rpm-spec > $SRC/build.spec
@@ -38,7 +33,7 @@ npm run -s get moriod-version-env > $SRC/etc/morio/moriod/version.env
 npm run -s get moriod-moriod-env > $SRC/etc/morio/moriod/moriod.env
 
 # Build the package
-cd $REPO/build-context
+cd $MORIO_GIT_ROOT/build-context
 rpmdev-setuptree
 rpmbuild -bb --quiet $SRC/build.spec --define "_sourcedir $WD/$SRC/"
 

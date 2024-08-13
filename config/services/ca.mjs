@@ -42,10 +42,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/ca:/home/step/config`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/certs:/home/step/certs`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/db:/home/step/db`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
           ],
     },
     /*
