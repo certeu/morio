@@ -21,6 +21,7 @@ cd $MORIO_GIT_ROOT
 mkdir -p build-context
 JSON="build-context/aws.json"
 DIST="docs/static/images/aws.json"
+mkdir -p $DIST
 
 #
 # Get the list of AMIs from AWS that are tagged as being morio images
