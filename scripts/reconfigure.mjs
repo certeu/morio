@@ -3,14 +3,8 @@ import { resolveServiceConfiguration, getPreset } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import path from 'path'
+import { MORIO_GIT_ROOT } from '../config/cli.mjs'
 
-/*
- * We need to know the root folder of the morio's git repo
- * since while in development, we don't write data to the regular
- * locales (like /etc/morio for config for example) but instead write
- * everything under a 'data' folder in the repo (which is ignored)
- */
-const MORIO_REPO_ROOT = path.resolve(path.basename(import.meta.url), '..')
 
 /*
  * When in development, we remap the volumes to keep data inside the repo
@@ -20,11 +14,11 @@ const presetGetters = {
     getPreset(key, {
       ...opts,
       force: {
-        MORIO_CONFIG_ROOT: `${MORIO_REPO_ROOT}/data/config`,
-        MORIO_DATA_ROOT: `${MORIO_REPO_ROOT}/data/data`,
-        MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
+        MORIO_CONFIG_ROOT: `${MORIO_GIT_ROOT}/data/config`,
+        MORIO_DATA_ROOT: `${MORIO_GIT_ROOT}/data/data`,
+        MORIO_LOGS_ROOT: `${MORIO_GIT_ROOT}/data/logs`,
         NODE_ENV: 'development',
-        MORIO_REPO_ROOT,
+        MORIO_GIT_ROOT,
         MORIO_CORE_LOG_LEVEL: 'trace',
       },
     }),
@@ -32,11 +26,11 @@ const presetGetters = {
     getPreset(key, {
       ...opts,
       force: {
-        MORIO_CONFIG_ROOT: `${MORIO_REPO_ROOT}/data/config`,
-        MORIO_DATA_ROOT: `${MORIO_REPO_ROOT}/data/data`,
-        MORIO_LOGS_ROOT: `${MORIO_REPO_ROOT}/data/logs`,
+        MORIO_CONFIG_ROOT: `${MORIO_GIT_ROOT}/data/config`,
+        MORIO_DATA_ROOT: `${MORIO_GIT_ROOT}/data/data`,
+        MORIO_LOGS_ROOT: `${MORIO_GIT_ROOT}/data/logs`,
         NODE_ENV: 'test',
-        MORIO_REPO_ROOT,
+        MORIO_GIT_ROOT,
         MORIO_CORE_LOG_LEVEL: 'info',
       },
     }),
@@ -121,7 +115,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
   ${
-    env !== 'prod' ? '-e MORIO_REPO_ROOT=' + MORIO_REPO_ROOT + ' \\\n  ' : ''
+    env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
   }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
 `
 

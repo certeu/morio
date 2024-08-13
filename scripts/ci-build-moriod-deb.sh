@@ -5,25 +5,20 @@
 # on a system that supports .deb (a Debian-based distribution)
 #
 
-#
-# Figure out the repository root
-#
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
+# Sounce config variables
+source config/cli.sh
 
 #
 # Create a folder to hold the build context
 #
-rm -rf $REPO/build-context
-mkdir -p $REPO/build-context/dist
-cp -R $REPO/moriod $REPO/build-context/src
-SRC=$REPO/build-context/src
-DIST=$REPO/build-context/dist
-
-# Get the Morio version
-VERSION=`npm run -s get version`
+rm -rf $MORIO_GIT_ROOT/build-context
+mkdir -p $MORIO_GIT_ROOT/build-context/dist
+cp -R $MORIO_GIT_ROOT/moriod $MORIO_GIT_ROOT/build-context/src
+SRC=$MORIO_GIT_ROOT/build-context/src
+DIST=$MORIO_GIT_ROOT/build-context/dist
 
 # Write out the version file
-npm run -s get version > $SRC/etc/morio/moriod/version
+echo $MORIO_VERSION > $SRC/etc/morio/moriod/version
 
 # Write out the .deb control file
 npm run -s get moriod-deb-control > $SRC/control
@@ -35,7 +30,7 @@ npm run -s get moriod-version-env > $SRC/etc/morio/moriod/version.env
 npm run -s get moriod-moriod-env > $SRC/etc/morio/moriod/moriod.env
 
 # Build the package
-cd $REPO/build-context
+cd $MORIO_GIT_ROOT/build-context
 mkdir -p pkg/DEBIAN
 for FILE in control postinst; do
   if [ -f $SRC/$FILE ]

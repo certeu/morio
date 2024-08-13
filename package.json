@@ -1,7 +1,7 @@
 {
   "name": "morio",
   "version": "0.3.0",
-  "description": "Connect, Stream, Observe, Respond",
+  "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
   "repository": {
@@ -12,7 +12,7 @@
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },
-  "homepage": "https://github.com/certeu/morio#readme",
+  "homepage": "https://morio.it/",
   "workspaces": [
     "api",
     "config",
@@ -71,6 +71,8 @@
     "predev": "npm run reconfigure",
     "preprod": "npm run reconfigure",
     "prettier": "npx prettier --write .",
+    "print:cli.js": "node ./scripts/print-cli-config.mjs",
+    "print:cli.sh": "./scripts/print-cli-config.sh",
     "prod": "./core/run-prod-container.sh",
     "reconfigure": "node scripts/reconfigure.mjs",
     "redev": "npm run destroy && npm run dev",

@@ -11,21 +11,12 @@
 #  - AWS_SECRET_ACCESS_KEY
 #
 
-#
-# Figure out the repository root
-#
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
-
-#
-# Grab the version and export it as it's used in the packer config
-#
-cd $REPO
-export MORIO_VERSION=$(npm run -s get version)
-echo "Morio version is $MORIO_VERSION"
+# Sounce config variables
+source config/cli.sh
 
 #
 # Make sure we are in the repo, then run packer
 #
 cd $REPO/packer
 packer init aws-debian-12.pkr.hcl
-packer build aws-debian-12.pkr.hcl
+packer build aws-debian-12.pkr.hcl --var "morio_version=$MORIO_VERSION"
