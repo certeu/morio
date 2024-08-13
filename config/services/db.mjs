@@ -44,8 +44,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/db:/rqlite/file`,
           ],
       // Command
       command: utils.isDistributed()

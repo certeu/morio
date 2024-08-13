@@ -45,11 +45,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
             `${utils.getPreset('MORIO_DOCKER_SOCKET')}:${utils.getPreset('MORIO_DOCKER_SOCKET')}`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config:/etc/morio`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data:/morio/data`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config:/etc/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data:/morio/data`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs:/var/log/morio`,
           ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
