@@ -39,5 +39,5 @@ jobs:
       - name: Build & Publish the .rpm package
         env:
           PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
-        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build:moriod:rpm publish'
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.moriod.rpm publish'
 
