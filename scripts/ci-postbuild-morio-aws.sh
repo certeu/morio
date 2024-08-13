@@ -72,7 +72,7 @@ else
   git push --set-upstream origin $BRANCH
   echo "Creating pull request"
   # See:
-  git fetch origin main
+  git fetch origin develop
   gh pr create \
     --assignee joostdecock \
     --base develop \
