@@ -55,5 +55,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run postbuild script
-        run: 'npm run ci:postbuild.morio.aws'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: 'npm run ci:postbuild.morio.aws pr'
 
