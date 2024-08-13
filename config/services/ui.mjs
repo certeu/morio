@@ -31,7 +31,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       volumes: PROD
         ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
           ],
       // Run an init inside the container to forward signals and avoid PID 1
