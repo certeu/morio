@@ -44,21 +44,21 @@ jobs:
   #          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   #        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.morio.aws.debian-12'
   #
-  postbuild:
-    #needs: build_on_aws
-    name: Postbuild steps
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
+  #postbuild:
+  #  #needs: build_on_aws
+  #  name: Postbuild steps
+  #  runs-on: ubuntu-latest
+  #  permissions:
+  #    contents: write
+  #    pull-requests: write
+  #  steps:
+  #    - name: Check out the repo
+  #      uses: actions/checkout@v4
 
-      - name: Run postbuild script
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          GH_TOKEN: ${{ secrets.MORIO_BOT_GITHUB_TOKEN }}
-        run: 'npm run ci:postbuild.morio.aws pr'
+  #    - name: Run postbuild script
+  #      env:
+  #        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #        GH_TOKEN: ${{ secrets.MORIO_BOT_GITHUB_TOKEN }}
+  #      run: 'npm run ci:postbuild.morio.aws pr'
 
