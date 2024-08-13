@@ -49,7 +49,7 @@ jobs:
     name: Postbuild steps
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: Check out the repo
