@@ -48,10 +48,20 @@ variable "instance_type" {
 }
 
 #
+# The AMI name
+#
+#
+variable "ami_name" {
+  description = "The AMI name"
+  type        = string
+  default     = "morio-${env("MORIO_VERSION")}-debian-12"
+}
+
+#
 # Source block defines what we want
 #
 source "amazon-ebs" "debian-bookworm" {
-  ami_name        = "morio-${var.morio_version}-debian-12"
+  ami_name        = var.ami_name
   ami_description = "Morio provides the plumbing for your observability needs"
   tags = {
     os             = "debian"
@@ -60,6 +70,7 @@ source "amazon-ebs" "debian-bookworm" {
     base_ami_id    = "{{ .SourceAMI }}"
     base_ami_name  = "{{ .SourceAMIName }}"
     morio_version  = "${var.morio_version}"
+    morio          = true
   }
   force_deregister      = true
   force_delete_snapshot = true

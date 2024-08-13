@@ -1,17 +1,14 @@
-name: Publish Debian 12 Morio AMI image
+name: Make Debian 12 Morio AMI image public
 
 on:
-  # This should not run on every PR, but it's here for testing this workflow
-  pull_request:
-  # Only run this on a new release
-  #release:
-  #  types: [published]
+  workflow_run:
+    workflows: [ "Publish Debian 12 Morio AMI image"]
+    types: [completed]
 
 jobs:
-  build_on_aws:
-    name: Build AMI
+  postbuid_job:
+    name: Make AMI public
     runs-on: ubuntu-latest
-    container: debian:bookworm
     permissions:
       contents: read
     steps:
@@ -44,16 +41,4 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.morio.aws.debian-12'
 
-  postbuild:
-    needs: build_on_aws
-    name: Postbuild steps
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Check out the repo
-        uses: actions/checkout@v4
-
-      - name: Run postbuild script
-        run: 'npm run ci:postbuild.morio.aws'
 
