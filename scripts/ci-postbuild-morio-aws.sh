@@ -19,21 +19,22 @@ source config/cli.sh
 #
 cd $MORIO_GIT_ROOT
 mkdir -p build-context
-JSON="build-context/aws.json"
-DIST="docs/static/images/aws.json"
-mkdir -p $DIST
+FILE="aws.json"
+SRC="build-context/$FILE"
+DEST="docs/static/images"
+mkdir -p $DEST
 
 #
 # Get the list of AMIs from AWS that are tagged as being morio images
 #
 echo "Getting list of AMIs from AWS"
 IMAGES=$(aws ec2 describe-images --region="us-east-1" --owners self --filters "Name=tag:morio,Values=true")
-echo $IMAGES | jq .Images > $JSON
+echo $IMAGES | jq .Images > $SRC/$FILE
 
 #
 # Iterate over the images to see if they are public
 #
-jq -c '.[]' "$JSON" | while IFS= read -r item; do
+jq -c '.[]' "$SRC/$FILE" | while IFS= read -r item; do
   # Is the image public?
   if echo "$item" | jq -e '.Public == false' > /dev/null; then
     imageId=$(echo "$item" | jq -r '.ImageId')
@@ -45,7 +46,7 @@ done
 #
 # Does the list of images differ from what's in the repo?
 #
-diff $JSON $DIST > /dev/null 2>&1
+diff $SRC/$FILE $DIET/$FILE > /dev/null 2>&1
 if [ $? -eq 0 ];
 then
   echo "No changes detected in the list of AMI images"
@@ -62,9 +63,9 @@ else
   git switch -c $BRANCH
   echo "Branch created: $BRANCH"
   echo "Adding new images list"
-  cp $JSON $DIST
+  cp $SRC/$FILE $DEST/$FILE
   echo "Creating commit"
-  git add $DIST
+  git add $DEST/$FILE
   git config user.email "bot@morio.it"
   git config user.name "Morio Bot"
   git commit -m "chore: Updated list of published AMIs on AWS"
