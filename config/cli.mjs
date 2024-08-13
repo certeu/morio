@@ -20,7 +20,7 @@ import path from 'path'
 /*
  * About Morio
  */
-export const MORIO_ABOUT = "Morio provides the plumbing for your observability needs"
+export const MORIO_ABOUT = 'Morio provides the plumbing for your observability needs'
 
 /*
  * Ascii banner
@@ -58,6 +58,3 @@ export const MORIO_VERSION = pkg.version
  */
 export const MORIO_WEBSITE = 'morio.it'
 export const MORIO_WEBSITE_URL = 'https://morio.it'
-
-
-

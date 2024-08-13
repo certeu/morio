@@ -191,7 +191,6 @@ The config lives in `docusaurus.config.js` and it adds these two routes:
 - [/oas-api](/oas-api) for the Management API
 - [/oas-core](/oas-core) for the Core API
 
-
 [netlify]: https://www.netlify.com/
 [docusaurus]: https://docusaurus.io/
 [docs]: https://github.com/certeu/morio/tree/develop/docs/docs

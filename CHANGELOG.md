@@ -9,18 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
- - Updated dependencies in docs site (no breaking changes)
+- Updated dependencies in docs site (no breaking changes)
 
 ## [0.3.0] - 2024-08-08
 
 ### Added
 
- - Initial support for clustering. Morio now support multi-node deployments. [7adc748](https://github.com/certeu/morio/commit/fadc7489e10672105915e38895fa6584ce7ded62)
- - We now publish the [itsmorio/api](https://hub.docker.com/r/itsmorio/api) container image and will do so for all future releases
- - We now publish the [itsmorio/core](https://hub.docker.com/r/itsmorio/core) container image and will do so for all future releases
- - We now publish the [itsmorio/dbuilder](https://hub.docker.com/r/itsmorio/dbuilder) container image and will do so for all future releases
- - We now publish the [itsmorio/ui](https://hub.docker.com/r/itsmorio/ui) container image and will do so for all future releases
-   
+- Initial support for clustering. Morio now support multi-node deployments. [7adc748](https://github.com/certeu/morio/commit/fadc7489e10672105915e38895fa6584ce7ded62)
+- We now publish the [itsmorio/api](https://hub.docker.com/r/itsmorio/api) container image and will do so for all future releases
+- We now publish the [itsmorio/core](https://hub.docker.com/r/itsmorio/core) container image and will do so for all future releases
+- We now publish the [itsmorio/dbuilder](https://hub.docker.com/r/itsmorio/dbuilder) container image and will do so for all future releases
+- We now publish the [itsmorio/ui](https://hub.docker.com/r/itsmorio/ui) container image and will do so for all future releases
+
 ### Changed
 
 - [api] Migrated API documentation to Redoc

@@ -1,52 +1,51 @@
+#
+# WARNING:
+#   This pipeline can trigger an endless loop if it is not properly configured
+#   DO NOT RUN THIS ON EVERY PULL REQUEST - Or at least disable the postbuild job
+#
 name: Publish Debian 12 Morio AMI image
 
 on:
-  #
-  # WARNING:
-  #   This pipeline can trigger an endless loop if it is not properly configured
-  #   DO NOT RUN THIS ON EVERY PULL REQUEST - Or at least disable the postbuild job
-  #
   # Only run this on a new release
-  #
   release:
     types: [published]
 
 jobs:
-    build_on_aws:
-      name: Build AMI
-      runs-on: ubuntu-latest
-      container: debian:bookworm
-      permissions:
-        contents: read
-      steps:
-        - name: Check out the repo
-          uses: actions/checkout@v4
+  build_on_aws:
+    name: Build AMI
+    runs-on: ubuntu-latest
+    container: debian:bookworm
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-        - name: Update dependencies
-          run: 'apt update && apt upgrade -y'
+      - name: Update dependencies
+        run: 'apt update && apt upgrade -y'
 
-        - name: Install curl, lsb-release  & gpg
-          run: 'apt install -y curl gpg lsb-release'
+      - name: Install curl, lsb-release  & gpg
+        run: 'apt install -y curl gpg lsb-release'
 
-        - name: Add hashicorp apt repo
-          run: |
-            curl -s https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg &&
-            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+      - name: Add hashicorp apt repo
+        run: |
+          curl -s https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg &&
+          echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
 
-        - name: Install packer
-          run: 'apt update && apt install -y packer'
+      - name: Install packer
+        run: 'apt update && apt install -y packer'
 
-        - name: Install nvm
-          run: 'touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
+      - name: Install nvm
+        run: 'touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
 
-        - name: Install node
-          run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install lts/iron'
+      - name: Install node
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install lts/iron'
 
-        - name: Build the AMI image
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.morio.aws.debian-12'
+      - name: Build the AMI image
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.morio.aws.debian-12'
 
   postbuild:
     needs: build_on_aws
@@ -66,4 +65,3 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           GH_TOKEN: ${{ secrets.MORIO_BOT_GITHUB_TOKEN }}
         run: 'npm run ci:postbuild.morio.aws pr'
-
