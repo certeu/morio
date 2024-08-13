@@ -17,6 +17,6 @@ source config/cli.sh
 #
 # Make sure we are in the repo, then run packer
 #
-cd $REPO/packer
+cd $MORIO_GIT_ROOT/packer
 packer init aws-debian-12.pkr.hcl
 packer build aws-debian-12.pkr.hcl --var "morio_version=$MORIO_VERSION"
