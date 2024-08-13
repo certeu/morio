@@ -61,15 +61,15 @@ else
   BRANCH="ci-awsamis-$(date +%s)"
   git switch -c $BRANCH
   echo "Branch created: $BRANCH"
-  echo "Adding now images list"
+  echo "Adding new images list"
   cp $JSON $DIST
   echo "Creating commit"
   git add $DIST
   git config user.email "bot@morio.it"
   git config user.name "Morio Bot"
   git commit -m "chore: Updated list of published AMIs on AWS"
-  echo "Creating pull request"
   git push --set-upstream origin $BRANCH
+  echo "Creating pull request"
   gh pr create \
     --assignee joostdecock \
     --base develop \
@@ -80,6 +80,4 @@ else
     --title "chore: Update list of published AWS IMA images"
   fi
 fi
-
-echo "All done"
 
