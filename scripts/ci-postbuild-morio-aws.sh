@@ -71,7 +71,7 @@ else
   git commit -m "chore: Updated list of published AMIs on AWS"
   git push --set-upstream origin $BRANCH
   echo "Creating pull request"
-  # See:
+  # See: https://github.com/cli/cli/issues/5896#issuecomment-1783831619
   git fetch origin develop
   gh pr create \
     --assignee joostdecock \
@@ -80,7 +80,7 @@ else
     --fill \
     --label bot \
     --reviewer joostdecock \
-    --title "chore: Update list of published AWS IMA images"
+    --title "chore: Update list of published AWS AMI images"
   fi
 fi
 
