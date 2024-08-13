@@ -7,7 +7,9 @@ tags: [morio, cluster, alpha]
 We are happy to report that initial support for distributed Morio deployments
 [has been merged into the codebase](https://github.com/certeu/morio/pull/18).
 In other words, deploying a highly avaiable Morio cluster is now possible.
+
 <!-- truncate -->
+
 There are certainly still some sharp edges — and probably a bunch of bugs too
 — but the groundword for clustered deployments is in place.
 

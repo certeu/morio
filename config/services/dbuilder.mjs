@@ -9,7 +9,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const DIRS = {
     data: utils.getPreset('MORIO_DATA_ROOT'),
     dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),
-    repo: utils.getPreset('MORIO_REPO_ROOT'),
+    repo: utils.getPreset('MORIO_GIT_ROOT'),
   }
 
   return {

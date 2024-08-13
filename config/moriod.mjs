@@ -166,23 +166,27 @@ echo %{name}-%{version}-%{release}.%{_arch}
 
 %files
 ${
-/*
- * Let us not maintain a list of files by hand
- * Note that the  RPM build tools will compress man files
- * This means that they get the .gz extention added.
- * We need to reflect that in the build.spec file or the build will fail
- * That is what the first map() call does below
- */
-(await getMoriodFiles().then(files => files
-  .filter(file => !noRpmFiles.includes(file))
-  .map(file => file === 'usr/share/man/man8/moriod.8' ? file+'.gz' : file)
-  .map(file => '/' + file)
-  .join("\n") + `
+  /*
+   * Let us not maintain a list of files by hand
+   * Note that the  RPM build tools will compress man files
+   * This means that they get the .gz extention added.
+   * We need to reflect that in the build.spec file or the build will fail
+   * That is what the first map() call does below
+   */
+  await getMoriodFiles().then(
+    (files) =>
+      files
+        .filter((file) => !noRpmFiles.includes(file))
+        .map((file) => (file === 'usr/share/man/man8/moriod.8' ? file + '.gz' : file))
+        .map((file) => '/' + file)
+        .join('\n') +
+      `
 
 %clean
 rm -rf %{buildroot}
 
 %post
-`))}`
+`
+  )
+}`,
 }
-

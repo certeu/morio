@@ -8,7 +8,9 @@ Today we are delighted to introduce [Morio](https://github.com/certeu/morio),
 an end-to-end streaming data backbone designed to meet your observability
 needs. Morio will simplify the setup and management of a robust observability
 infrastructure, leveraging top-tier open-source technologies.
+
 <!-- truncate -->
+
 Morio is currently **early-access alpha code**. We are building this in the
 open, so feel free to look around, try it out, and [leave
 feedback](https://github.com/certeu/morio/discussions).
