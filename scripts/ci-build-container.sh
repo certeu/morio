@@ -15,6 +15,7 @@
 # Then upload it somewhere and pass that URL tot his script
 #   ./scripts/ci-build-container.sh core https://my-webhost/root.tar
 
+source config/cli.sh
 
 #
 # A bit of input validation to catch obvious mistakes
@@ -67,22 +68,16 @@ else
   # Container to build
   CONTAINER="itsmorio/$IMAGE"
 
-  # Figure out the repository root
-  REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
-
-  # Grab the Morio version from package.json
-  MORIO_VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
-
   # Create a folder for the build context
-  rm -rf $REPO/build-context
-  mkdir -p $REPO/build-context
+  rm -rf $MORIO_GIT_ROOT/build-context
+  mkdir -p $MORIO_GIT_ROOT/build-context
   if [[ $IMAGE == *"builder" ]]
   then
-    cd $REPO/builders/$IMAGE
+    cd $MORIO_GIT_ROOT/builders/$IMAGE
   else
-    cd $REPO/$IMAGE
+    cd $MORIO_GIT_ROOT/$IMAGE
   fi
-  tar -ch -f $REPO/build-context.tar . && cd $REPO/build-context && tar -xf $REPO/build-context.tar . && cd $REPO
+  tar -ch -f $MORIO_GIT_ROOT/build-context.tar . && cd $MORIO_GIT_ROOT/build-context && tar -xf $MORIO_GIT_ROOT/build-context.tar . && cd $MORIO_GIT_ROOT
 
   # Now build the OCI image
   buildah build-using-dockerfile \
