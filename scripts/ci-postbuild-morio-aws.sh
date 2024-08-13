@@ -71,6 +71,8 @@ else
   git commit -m "chore: Updated list of published AMIs on AWS"
   git push --set-upstream origin $BRANCH
   echo "Creating pull request"
+  # See:
+  git fetch origin main
   gh pr create \
     --assignee joostdecock \
     --base develop \
