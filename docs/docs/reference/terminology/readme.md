@@ -2,8 +2,14 @@
 title: Terminology
 ---
 
-When we write about Morio, we may reach for terminology or jargon that readers may be unfamiliar with.
+When reading about Morio, you may encounter terms
+you are unfamiliar with, or that are ambigious wiothout 
+context.
 
-Below are all terms where we felt the need to explain what we mean by them to avoid confusion:
+For example, if you are new to Morio, you are unlikely to _intuitivel get_ what
+a _flanking node_ is, and while you probably know what _settings_ are that
+doesn't explain why we mean by them in the context of Morio.
+
+These pages -- along with [our jargon file](/docs/reference/jargon) -- attempt to remediate that:
 
 <SubPages />

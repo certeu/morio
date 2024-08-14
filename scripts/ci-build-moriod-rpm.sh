@@ -63,7 +63,6 @@ then
   # https://packagecloud.io/docs/api#resource_distributions
   # Username is the API token, password is empty
   #
-    #--write-out '%{http_code}' --silent --output /dev/null \
   RESPONSE=$(curl \
     -s -w "%{http_code}" \
     -u $PACKAGECLOUD_TOKEN:  \
@@ -74,7 +73,7 @@ then
 
   if [ "201" = ${RESPONSE: -3} ]
   then
-    echo "Package $NAME was published on packagecloud.io/morio/rpm"
+    echo "Package $NAME was published on packagecloud.io/morio/rocky-9"
     exit 0
   elif [ "422" = ${RESPONSE: -3} ]
   then

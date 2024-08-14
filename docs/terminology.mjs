@@ -9,6 +9,20 @@ import { frontMatter as ephemeralNode } from './docs/reference/terminology/ephem
 import { frontMatter as flankingNode } from './docs/reference/terminology/flanking-node/readme.md'
 import { frontMatter as flankingService } from './docs/reference/terminology/flanking-service/readme.md'
 import { frontMatter as settings } from './docs/reference/terminology/settings/readme.md'
+// Services
+import { frontMatter as apiService } from './docs/reference/terminology/api-service/readme.md'
+import { frontMatter as brokerService } from './docs/reference/terminology/broker-service/readme.md'
+import { frontMatter as caService } from './docs/reference/terminology/ca-service/readme.md'
+import { frontMatter as connectorService } from './docs/reference/terminology/connector-service/readme.md'
+import { frontMatter as consoleService } from './docs/reference/terminology/console-service/readme.md'
+import { frontMatter as coreService } from './docs/reference/terminology/core-service/readme.md'
+import { frontMatter as dbService } from './docs/reference/terminology/db-service/readme.md'
+import { frontMatter as dbuilderService } from './docs/reference/terminology/dbuilder-service/readme.md'
+import { frontMatter as mbuilderService } from './docs/reference/terminology/mbuilder-service/readme.md'
+import { frontMatter as proxyService } from './docs/reference/terminology/proxy-service/readme.md'
+import { frontMatter as rbuilderService } from './docs/reference/terminology/rbuilder-service/readme.md'
+import { frontMatter as uiService } from './docs/reference/terminology/ui-service/readme.md'
+import { frontMatter as wbuilderService } from './docs/reference/terminology/wbuilder-service/readme.md'
 
 export const terminology = {
   'broker node': {
@@ -35,6 +49,59 @@ export const terminology = {
     title: settings.title,
     url: `/docs/reference/terminology/settings`,
   },
+  // Services
+  'api service': {
+    title: apiService.title,
+    url: `/docs/reference/terminology/api-service`,
+  },
+  'broker service': {
+    title: brokerService.title,
+    url: `/docs/reference/terminology/broker-service`,
+  },
+  'ca service': {
+    title: caService.title,
+    url: `/docs/reference/terminology/ca-service`,
+  },
+  'connector service': {
+    title: connectorService.title,
+    url: `/docs/reference/terminology/connector-service`,
+  },
+  'console service': {
+    title: consoleService.title,
+    url: `/docs/reference/terminology/console-service`,
+  },
+  'core service': {
+    title: coreService.title,
+    url: `/docs/reference/terminology/core-service`,
+  },
+  'db service': {
+    title: dbService.title,
+    url: `/docs/reference/terminology/db-service`,
+  },
+  'dbuilder service': {
+    title: dbuilderService.title,
+    url: `/docs/reference/terminology/dbuilder-service`,
+  },
+  'mbuilder service': {
+    title: mbuilderService.title,
+    url: `/docs/reference/terminology/mbuilder-service`,
+  },
+  'proxy service': {
+    title: proxyService.title,
+    url: `/docs/reference/terminology/proxy-service`,
+  },
+  'rbuilder service': {
+    title: rbuilderService.title,
+    url: `/docs/reference/terminology/rbuilder-service`,
+  },
+  'ui service': {
+    title: uiService.title,
+    url: `/docs/reference/terminology/ui-service`,
+  },
+  'wbuilder service': {
+    title: wbuilderService.title,
+    url: `/docs/reference/terminology/wbuilder-service`,
+  },
 }
 
 /*
@@ -50,8 +117,13 @@ export const jargon = {
 <p>Learn more at <a href="https://cert.europa.eu/">cert.europa.eu</a>.</p>
 `
   },
+  ci: {
+    title: 'CI',
+    content: `<p><b>CI</b> stands for <b>Continious Integration</b>. In the context of Morio, we use it as shorthand for CI/CD, which combines CI with <b>Continious Deployment</b>. We use CI to refer to the automation in building, testing, and deploying changes in software.</p>
+   <p>To learn more, the <a href="https://en.wikipedia.org/wiki/Continuous_integration">CI</a> and <a href="https://en.wikipedia.org/wiki/CI/CD">CI/CD</a> articles on Wikipedia are a good starting point.</p>`,
+  },
   dry: {
-    title: "DRY: Don't Repeat Yourself",
+    title: "DRY",
     content: `
 <p>
 In programming, <b>DRY</b> stands for <b>Don’t Repeat Yourself</b>.
@@ -67,7 +139,20 @@ The idea being that you should not write the same thing twice, rather everything
     title: 'MDX',
     content: `<p>MDX lets you use JSX in your markdown content. It allows you to import components, and embed them within your content. This makes writing markdown with custom components a blast.<p><p>Learn more at <a href="chttps://mdxjs.com">mdxjs.com</a></p>`
   },
+  monorepo: {
+    title: 'Morio Monorepo',
+    content: '<p>The Morio monorepo, or <b>monorepo</b> for short, is the repository hosting the Morio source code.</p><p>You can find it at <a href="https://github.com/certeu/morio">github.com/certeu/morio</a></p>',
+  },
+  "run script": {
+    title: 'NPM run scripts',
+    content: '<p>NPM run scripts, or <b>run scripts</b> for short, refer to scripts defined in the <b>scripts</b> section of a NodeJS <b>package.json</b> file. These scripts are typically ysed for all sorts of housekeeping an automation.</p><p>For more info, refer to <a href="https://docs.npmjs.com/cli/v10/using-npm/scripts">the NPM docs on scripts</a></p>',
+  }
 }
+
+/*
+ * Jargon aliases
+ */
+jargon["run scripts"] = jargon["run script"]
 
 
 

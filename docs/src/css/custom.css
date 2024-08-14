@@ -246,6 +246,7 @@ div.with-caption a.toggle:hover {
 /* Jargon term button */
 button.term {
   font-style: italic;
+  font-size: inherit;
   border: none;
   background: transparent;
   text-decoration: underline;

@@ -3,6 +3,7 @@ idp:
 apikey:
 ldap:
 local:
+moriod:
 mrt:
 # Service tags
 api:

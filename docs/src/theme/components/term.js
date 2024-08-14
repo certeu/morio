@@ -67,7 +67,7 @@ export const JargonTerms = () => (
       </tr>
     </thead>
     <tbody>
-    {Object.keys(jargon).map(term => (
+    {Object.keys(jargon).sort().map(term => (
       <tr key="term">
         <td style={{ minWidth: "12ch" }}>{term}</td>
         <td>{jargon[term].title}</td>
@@ -76,6 +76,26 @@ export const JargonTerms = () => (
     )}
     </tbody>
   </table>
+)
+
+export const JargonList = () => (
+  <>
+  {Object.keys(jargon).sort().map(term => (
+    <div key="term">
+      <h2 id={term} className="anchor anchorWithStickyNavbar_---node_modules-@docusaurus-theme-classic-lib-theme-Heading-styles-module">
+        <span style={{opacity: "0.5", fontSize: "75%"}}>{term}</span><br />{jargon[term].title}
+        <a
+          href={`#${term.split(' ').join('-')}`}
+          class="hash-link"
+          ariaLabel={`Direct link to ${jargon[term].title}`}
+          title={`Direct link to ${jargon[term].title}`}
+          title="Direct link to Purpose of Morio’s Management API"
+        > </a>
+      </h2>
+      <div dangerouslySetInnerHTML={{ __html: jargon[term].content }} />
+    </div>)
+  )}
+</>
 )
 
 export const TerminologyTerms = () => (
