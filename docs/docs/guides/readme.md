@@ -2,4 +2,4 @@
 title: Guides
 ---
 
-<SubPages cards />
+<SubPages />

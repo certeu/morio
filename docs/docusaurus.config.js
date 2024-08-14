@@ -115,6 +115,12 @@ const config = {
             position: 'left',
             label: 'Reference',
           },
+          {
+            type: 'doc',
+            docId: 'training/readme',
+            position: 'left',
+            label: 'Training',
+          },
           { to: '/blog', label: 'Blog', position: 'left' },
           {
             href: 'https://github.com/certeu/morio',

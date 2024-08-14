@@ -2,4 +2,4 @@
 title: Service Guides
 ---
 
-<SubPages cards />
+<SubPages />

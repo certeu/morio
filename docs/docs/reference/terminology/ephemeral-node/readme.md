@@ -2,4 +2,4 @@
 title: Ephemeral Node
 ---
 
-An **ephemeral node** is any Morio node running in [ephemeral mode](/docs/reference/terminology/ephemeral-mode).
+An _ephemeral node_ is any Morio node running in _ephemeral mode_.
