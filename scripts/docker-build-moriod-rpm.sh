@@ -4,12 +4,10 @@
 # This allows you to build the .rpm package on a non-rpm Linux distro.
 #
 
-#
-# Figure out the repository root
-#
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
+# Sounce config variables
+source config/cli.sh
 
 #
 # Run CI script inside the rockylinux container
 #
-docker run --rm --name=moriod-rpm-builder -v $REPO:/morio rockylinux:9 /morio/scripts/docker-build-moriod-rpm-steps.sh
+docker run --rm --name=moriod-rpm-builder -v $MORIO_GIT_ROOT:/morio rockylinux:9 /morio/scripts/docker-build-moriod-rpm-steps.sh

@@ -1211,7 +1211,7 @@ paths:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
           content:
             application/json: {}
         '409':
@@ -1239,7 +1239,7 @@ paths:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
           content:
             application/json: {}
         '409':
@@ -1261,7 +1261,7 @@ paths:
         '200':
           description: >-
             [See **Get data usage information** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage)
           content:
             application/json: {}
         '409':
@@ -1280,7 +1280,7 @@ paths:
         '200':
           description: >-
             [See **List Images** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList)
           content:
             application/json: {}
         '409':
@@ -1299,7 +1299,7 @@ paths:
         '200':
           description: >-
             [See **Get system information** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo)
           content:
             application/json: {}
         '409':
@@ -1318,7 +1318,7 @@ paths:
         '200':
           description: >-
             [See **List networks** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList)
           content:
             application/json: {}
         '409':
@@ -1338,7 +1338,7 @@ paths:
         '200':
           description: >-
             [See **Get version** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion)
           content:
             application/json: {}
         '409':
@@ -1373,7 +1373,7 @@ paths:
         '200':
           description: >-
             [See **Inspect a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/)
           content:
             application/json: {}
         '409':
@@ -1401,7 +1401,7 @@ paths:
         '200':
           description: >-
             [See **Get container logs** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
           content:
             application/json: {}
         '409':
@@ -1430,7 +1430,7 @@ paths:
           description: >-
             [See **Get container stats based on resource usages** in the Docker
             API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
           content:
             application/json: {}
         '409':
@@ -1458,7 +1458,7 @@ paths:
         '200':
           description: >-
             [See **Inspect an image** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
           content:
             application/json: {}
         '409':
@@ -1486,7 +1486,7 @@ paths:
         '200':
           description: >-
             [See **Inspect a network** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
           content:
             application/json: {}
         '409':
@@ -1505,7 +1505,7 @@ paths:
         '200':
           description: >-
             [See **Kill a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill)
           content:
             application/json: {}
         '409':
@@ -1524,7 +1524,7 @@ paths:
         '200':
           description: >-
             [See **Pause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause)
           content:
             application/json: {}
         '409':
@@ -1543,7 +1543,7 @@ paths:
         '200':
           description: >-
             [See **Restart a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart)
           content:
             application/json: {}
         '409':
@@ -1562,7 +1562,7 @@ paths:
         '200':
           description: >-
             [See **Start a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart)
           content:
             application/json: {}
         '409':
@@ -1581,7 +1581,7 @@ paths:
         '200':
           description: >-
             [See **Stop a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop)
           content:
             application/json: {}
         '409':
@@ -1600,7 +1600,7 @@ paths:
         '200':
           description: >-
             [See **Unpause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause) 
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause)
           content:
             application/json: {}
         '409':
