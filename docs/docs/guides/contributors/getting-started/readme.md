@@ -70,7 +70,7 @@ To learn more, refer to [the monorepo guide](/docs/guides/contributors/monorepo)
 
 ## Documentation
 
-The Morio documentation is (also) hosted in the [certeu/morio][repo] respository on
+The Morio documentation is (also) hosted in the [certeu/morio][repo] repository on
 GitHub, specifically in the `docs/docs` folder.
 
 <Related>
