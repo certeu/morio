@@ -2,11 +2,11 @@
 title: Ephemeral Mode
 ---
 
-Before a Morio node receives its initial settings, it will run in an ephemeral
+Before a Morio node receives its initial _settings_, it will run in an ephemeral
 mode, where it does nothing but eagerly await its setup.
 
 To bring a node out of its ephemeral mode, you need to provide initial
-settings.
+_settings_.
 You can use the setup wizard of the ui service to do so, or use the API service
 directly.
 

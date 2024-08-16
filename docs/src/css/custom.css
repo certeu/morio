@@ -30,6 +30,7 @@
   --mdx-muted: #666;
   --mdx-bg-muted: 220, 220, 220;
   --mdx-shadow: #0001 3px 3px 9px, #0002 1px 1px 6px;
+  --modal-bg: #ececec;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -63,6 +64,7 @@
   --mdx-muted: #999;
   --mdx-bg-muted: 120, 120, 120;
   --mdx-shadow: #0001 3px 3px 9px, #0002 1px 1px 6px;
+  --modal-bg: #262626;
 }
 
 /* Custom styles */
@@ -239,4 +241,82 @@ div.with-caption a.toggle {
 div.with-caption a.toggle:hover {
   text-decoration-thickness: 4px;
   cursor: pointer;
+}
+
+/* Jargon term button */
+button.term {
+  font-style: italic;
+  font-size: inherit;
+  border: none;
+  background: transparent;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-color: var(--ifm-color-primary);
+  padding-right: 0.15rem;
+}
+button.term:hover {
+  cursor: pointer;
+  text-decoration-style: solid;
+  text-decoration-thickness: 2px;
+}
+button.term:after {
+  content: '?';
+  transform: translate(0.05rem, -0.2rem);
+  padding: 0 0.1rem;
+  color: var(--ifm-color-primary);
+  display: inline-block;
+}
+
+/* Modal wrapper */
+div.modal-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: var(--ifm-z-index-fixed);
+  display: flex;
+  flex-direction: col;
+  padding: 1.5rem;
+  margin: 0;
+  background-color: var(--modal-bg);
+  background-image: url('/img/bg.svg');
+  background-size: 10%;
+}
+div.modal-wrapper:hover {
+  cursor: pointer;
+}
+div.modal-wrapper-content {
+  background: var(--ifm-color-content-inverse);
+  width: 100%;
+  max-width: 66ch;
+  margin: auto;
+  box-shadow: 0px 0px 2px var(--ifm-color-gray-700);
+  padding: 1.5rem;
+  border-radius: 0.25rem;
+}
+div.modal-wrapper-content:hover {
+  cursor: default;
+}
+button.modal-wrapper-close-button {
+  border-radius: 50%;
+  padding: 0.25rem;
+  border: 2px solid var(--ifm-color-primary);
+  background: transparent;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+}
+button.modal-wrapper-close-button:hover {
+  cursor: pointer;
+}
+button.modal-wrapper-close-button svg.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--ifm-color-primary);
+}
+/* YouTube embed */
+iframe.yt-embed {
+  width: 100%;
+  aspect-ratio: 16 /9
 }

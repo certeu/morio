@@ -1,12 +1,10 @@
 ---
 title: Flanking Service
 tags:
-  - flanking-service
-  - flanking-node
+  - flanking
 ---
 
-A **flanking service** is any service that can be deployed on a [flanking
-node](/docs/reference/terminology/flanking-node).  
+A _flanking service_ is any service that can be deployed on a _flanking node_.  
 A flanking node is a node running flanking services, so that creates a
 circular argument.
 

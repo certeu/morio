@@ -27,7 +27,7 @@ export const MORIO_ABOUT = 'Morio provides the plumbing for your observability n
  */
 export const MORIO_ASCII_BANNER = `
 
-  ._ _ _  ___  _ _  _  ___
+   _ _ _  ___  _ _  _  ___
   | ' ' |/ . \\| '_/| |/ . \\
   |_|_|_|\\___/|_|  |_|\\___/
 `

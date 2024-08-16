@@ -4,7 +4,7 @@ source config/cli.sh
 
 echo "  $MORIO_ASCII_BANNER"
 echo ""
-echo "The Morio configuration values are as follows:"
+echo "The Morio CLI configuration values are as follows:"
 echo ""
 echo " - MORIO_GIT_ROOT: $MORIO_GIT_ROOT"
 echo " - MORIO_ABOUT: $MORIO_ABOUT"

@@ -18,6 +18,15 @@ export const IconWrapper = ({ className = '', stroke = 1.5, children = null, fil
 )
 
 /*
+ * CloseIcon - Looks like X
+ */
+export const CloseIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M6 18L18 6M6 6l12 12" />
+  </IconWrapper>
+)
+
+/*
  * Comment - Looks like a speech bubble
  */
 export const CommentIcon = (props) => (

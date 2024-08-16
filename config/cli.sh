@@ -34,7 +34,7 @@ MORIO_ABOUT="Morio provides the plumbing for your observability needs"
 #
 read -r -d '' MORIO_ASCII_BANNER << EOB
 
-  ._ _ _  ___  _ _  _  ___
+   _ _ _  ___  _ _  _  ___
   | ' ' |/ . \\| '_/| |/ . \\
   |_|_|_|\\___/|_|  |_|\\___/
 

@@ -22,7 +22,7 @@ const vars = {
 }
 console.log(MORIO_ASCII_BANNER)
 console.log(`
-The Morio configuration values are as follows:
+The Morio CLI configuration values are as follows:
 `)
 for (const [name, val] of Object.entries(vars)) console.log(`  - ${name}: ${val}`)
 console.log()
