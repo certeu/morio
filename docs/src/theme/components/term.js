@@ -1,5 +1,4 @@
-import React, { useContext, useState } from 'react'
-import { ModalContext } from './modal-context.js'
+import React, { useState } from 'react'
 import { ModalWrapper } from './modal-wrapper.js'
 import { jargon, terminology } from '@site/terminology.mjs'
 
@@ -89,7 +88,6 @@ export const JargonList = () => (
           class="hash-link"
           ariaLabel={`Direct link to ${jargon[term].title}`}
           title={`Direct link to ${jargon[term].title}`}
-          title="Direct link to Purpose of Morio’s Management API"
         > </a>
       </h2>
       <div dangerouslySetInnerHTML={{ __html: jargon[term].content }} />

@@ -35,7 +35,7 @@ export const terminology = {
     url: `/docs/reference/terminology/ephemeral-mode`,
   },
   'ephemeral node': {
-    title: ephemeralMode.title,
+    title: ephemeralNode.title,
     url: `/docs/reference/terminology/ephemeral-node`,
   },
   'flanking node': {
