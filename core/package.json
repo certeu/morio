@@ -13,7 +13,7 @@
     "retest": "cd .. && npm run redev && cd - && sleep 5 && npm run test"
   },
   "dependencies": {
-    "axios": "^1.6.8",
+    "axios": "^1.7.4",
     "bson": "^6.6.0",
     "dockerode": "^4.0.2",
     "express": "^4.19.2",
