@@ -161,6 +161,8 @@ They are typically various ways to engage the reader with the material.
 
 ### Comment
 
+The `Comment` custom component allows you to insert a comment.
+
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
@@ -177,6 +179,8 @@ Comments are most useful when something is opinion, rather than fact.
 </Tabs>
 
 ### Fixme
+
+The `Fixme` custom component allows you to insert a message indicating something needs work.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -195,6 +199,8 @@ Use this to indicate something needs work or is incomplete.
 
 ### Important
 
+The `Important` custom component allows you to insert a message indicating something is important.
+
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
@@ -211,6 +217,8 @@ You need to start a new line after the opening tag of a custom component to ensu
 </Tabs>
 
 ### Note
+
+The `Note` custom component allows you to insert something you want to draw the reader's attention to.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -229,6 +237,8 @@ This is a good way to draw the reader's attention to additional information.
 
 ### Related
 
+The `Related` custom component allows you to insert a message with links to related content.
+
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
@@ -244,7 +254,27 @@ If you are new to MDX, you can check the documentation at [mdxjs.com](https://md
   </TabItem>
 </Tabs>
 
+### RepoFile
+
+The `RepoFile` custom component allows you to create a link for a file in the
+_monorepo_. The link will point to the same file on GitHub, specifically in the default
+`develop` branch..
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.md</RepoFile>.
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.md</RepoFile>.
+  </TabItem>
+</Tabs>
+
+
 ### Scode
+
+The `Scode` custom component allows you to insert a message with links to relevant source code.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -263,6 +293,8 @@ The Morio source code is available at [github.com/certeu/morio](https://github.c
 
 ### Tip
 
+The `Scode` custom component allows you to insert a message with one or more tips for the reader.
+
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
@@ -280,6 +312,8 @@ If there is a lot of information on the page, start with a `Tldr` component that
 
 ### Tldr
 
+The `Tldr` custom component allows you to insert a message that summarizes content for the reader.
+
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
@@ -293,6 +327,8 @@ Too long; Didn't read
 </Tabs>
 
 ### Warning
+
+The `Warning` custom component allows you to insert a message that warns the reader about potential consequences.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -310,6 +346,8 @@ Use this when a certain action is potentially destructive or problems are likely
 </Tabs>
 
 ### WithCaption
+
+The `WithCaption` custom component allows you to place a caption under any content.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -521,7 +559,54 @@ The following terminology pages are currently available for use in your markdown
 
 <TerminologyTerms />
 
+## Includes
 
+Sometimes, you may find yourself repeating the same information on various
+documentation pages.  You could create a page for it and link to it, but
+perhaps it's more elegant to inline the information in the page.
+
+In a case like this, you can use an include. This allows you import _MDX_
+content into your documentation page.
+
+### Creating an include page
+
+To create an include page, add the page to the <RepoFile>docs/includes</RepoFile> folder in the _monorepo_.
+
+Unlike the <RepoFile>docs/docs</RepoFile> folder where we rely on folder
+structure, all files should be in the same folder.
+
+As such, you should give it a name that conveys the intent of the include.
+As an practical example, the difference between the built container images for
+the development environment and production is something that is relevant on
+various documentation pages.
+
+So, the documentation is kept in the <RepoFile>docs/includes/docker-env-diffs.md</RepoFile> file.
+
+### Importing and using the include file
+
+Once created, you can import the file as any other import in your `readme.md`:
+
+```mdx
+--- 
+title: Example of how to use an include
+---
+
+import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.md'
+
+Some (optinoal) other content here.
+
+<DockerBuildEnvDiffs />
+```
+
+A few things to note:
+
+- The `import` statement should be the first thing after the frontmatter
+- Use the `@site/includes/` prefix to import include files.
+- Since we are using the default export, the name you give it can by anything (here we used `DockerBuildEndDiffs`
+- This will be used as a React component, so you __must__ pick a name tht starts with a Capital.
+- Output the info as a react component: `<DockerBuildEnvDiffs />` 
+
+See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.md</RepoFile> for an example.
 
 ## Tips for writing great documentation
 
@@ -570,9 +655,7 @@ Don't use jargon without explaining it.
 
 The ["Technical Writing From Google" course](https://developers.google.com/tech-writing/one) comes highly recommended.
 
-See [the documentation on Jargon and
-acronyms](/docs/reference/is/docs/mdx/jargon/#defining-jargon) for info on how
-to define jargon.
+Remember that the worst possible documentation is the documentation that is never written.
 
 ## Running the documentation site locally
 

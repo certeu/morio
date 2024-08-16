@@ -274,12 +274,14 @@ div.modal-wrapper {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: var(--modal-bg);
   z-index: var(--ifm-z-index-fixed);
   display: flex;
   flex-direction: col;
   padding: 1.5rem;
   margin: 0;
+  background-color: var(--modal-bg);
+  background-image: url('/img/bg.svg');
+  background-size: 10%;
 }
 div.modal-wrapper:hover {
   cursor: pointer;

@@ -59,6 +59,7 @@
     "destroy": "./scripts/destroy.sh",
     "dev": "./core/run-dev-container.sh",
     "get": "node --no-warnings shared/src/cli-get.mjs",
+    "help": "cat docs/includes/cli-help-content.md",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
     "logs:api": "docker logs -n 20 -f api | pino-pretty -i pid,time,name,hostname",
@@ -69,18 +70,15 @@
     "packer:init": "packer init packer",
     "prebuild": "npm run reconfigure",
     "predev": "npm run reconfigure",
-    "preprod": "npm run reconfigure",
     "prettier": "npx prettier --write .",
     "print:cli.js": "node ./scripts/print-cli-config.mjs",
     "print:cli.sh": "./scripts/print-cli-config.sh",
-    "prod": "./core/run-prod-container.sh",
     "reconfigure": "node scripts/reconfigure.mjs",
     "redev": "npm run destroy && npm run dev",
     "reversion": "node scripts/reversion.mjs && npm run reconfigure",
     "rev": "npm run reversion",
+    "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
-    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "tests": "./core/run-test-container.sh"
+    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
   }
 }

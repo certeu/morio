@@ -16,6 +16,7 @@ import {
 } from './components/popout.js'
 import { Architecture } from './components/mermaid.js'
 import { Term } from './components/term.js'
+import { RepoFile } from './components/repofile.js'
 
 /*
  * This seems to simple to put in a file on its own
@@ -38,6 +39,7 @@ export default {
   Fixme,
   Note,
   Related,
+  RepoFile,
   Scode,
   Tip,
   Tldr,

@@ -210,9 +210,259 @@ You can request reviews from github users [joostdecock](https://github.com/joost
 
 ## Run scripts
 
-The repository contains a lot of run scripts. We will cover the main ones here.
-Refer to the run script reference documentation for all details.
+The repository uses a number of [NPM run scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
+These are scripts that help with a variety of housekeeping and automation tests
+and can be ran by issuing the following command in the _monorepo_ root:
 
+```sh title="Terminal"
+npm run name
+```
+
+where `name` is the name of the run script.
+
+We will cover the main run scripts here. For a full list and all details, refer
+to [the run scripts reference documentation for
+contributors](/docs/reference/contributors/monorepo/run-scripts/).
+
+### npm run kickstart
+
+We've already mentioned it when we explained how to get started, but this run script will install dependencies and set up the monorepo for you.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run kickstart
+```
+
+### npm run build
+
+This will build development versions of the various container images requires
+by Morio to run the local development environment.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run build
+```
+
+### npm run eslint
+
+This will run the [ESLint](https://eslint.org/) Javascript linter on the _monorepo_.
+
+The linter will find potential issues in your code that you should fix.
+The linter wil also run in _CI_ when submitting a pull request, so running it
+locally first means you can be confident your PR will pass that test.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run eslint
+```
+
+### npm run prettier
+
+This will run the [Prettier](https://prettier.io/) Javascript code 
+formatter on the _monorepo_.
+
+The formatter will find reformat your code according to our coding standards.
+The formatter wil also run in _CI_ when submitting a pull request, so running it
+locally first means you can be confident your PR will pass that test.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run prettier
+```
+
+### npm run dev
+
+This will run the local development environment. In other words, it will
+start Morio locally.
+
+To run this, you should first run `npm run build`. Afterwards, you do not
+need to rebuild again unless the version changes. Your local changes will
+be picked up automatically, and the relevant services will be reloaded.
+
+The exact nature of that depends a bit on the various services, but in
+general, starting Morio this way will run the code in your local copy of
+the _monorepo_ rather than any pre-built code.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run dev
+```
+
+### npm run logs\:core
+
+This will tail the logs of the _core service_ and output them in a nicely
+formatted way. As logs are formatted in JSON, this will make them easier 
+to read while developing.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run logs:core
+```
+
+<Note>
+#### Requires pino-pretty
+
+This requires [the pino-pretty NPM 
+pacakge](https://www.npmjs.com/package/pino-pretty) to be instelled.
+To install it, run:
+
+```sh title="Terminal"
+npm install --global https://www.npmjs.com/package/pino-pretty
+```
+</Note>
+
+### npm run logs\:api
+
+This will tail the logs of the _api service_ and output them in a nicely
+formatted way. As logs are formatted in JSON, this will make them easier 
+to read while developing.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run logs:api
+```
+
+<Note>
+#### Requires pino-pretty
+
+This requires [the pino-pretty NPM 
+pacakge](https://www.npmjs.com/package/pino-pretty) to be instelled.
+To install it, run:
+
+```sh title="Terminal"
+npm install --global https://www.npmjs.com/package/pino-pretty
+```
+</Note>
+
+### npm run destroy
+
+This will __destroy__ the local development environment. In other words, it will
+undo what `npm run dev` did.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run destroy
+```
+
+<Note>
+You will not lose any code changes you made.
+</Note>
+
+### npm run redev
+
+This will __destroy__ the local development environment, and create a fresh one.
+It combines `npm run destroy` with `npm run dev`.
+
+
+```sh title="Terminal"
+npm run redev
+```
+
+<Note>
+You will not lose any code changes you made.
+</Note>
+
+### npm run test\:api
+
+This will run the unit tests on the _api service_.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run test:api
+```
+
+<Note>
+This will __destroy__ your local development environment,
+although it will set it up again after tests completed.
+
+You will not lose any code changes you made.
+</Note>
+
+### npm run test\:core
+
+This will run the unit tests on the _core service_.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run test:core
+```
+
+<Note>
+This will __destroy__ your local development environment,
+although it will set it up again after tests completed.
+
+You will not lose any code changes you made.
+</Note>
+
+### npm run help
+
+This will output information on where to get help with/for Morio.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run help
+```
+
+When you get stuck, this will tell you where to get help.
+
+## About our use of GitHub 
+
+We use GitHub for hosting our _monorepo_ because that's where the largest
+community of potential contributors are.
+But we also maintain a mirror at
+[code.europa.eu/certeu/morio](https://code.europa.eu/certeu/morio) (a 
+GitLab instance) and in general like to keep our options open and not be
+_beholden_ to any particular code hosting platform.
+
+The area where that goal of flexibility requires the most discipline is perhaps
+_CI_.  In general, CI can refer to any sort of automation that is triggered
+by changes in the code base, such as a commit or pull request.  However, in the
+context of GitHub, many people equate CI with [GitHub
+Actions](https://docs.github.com/en/actions), GitHub's own flavor of CI that
+has grown into an ecosystem.
+
+The problem with this is that we want whatever runs in CI to be available
+locally. A faster feedback loop means you can iterate faster. 
+Nobody should have to commit, push, and then wait for CI to
+complete to know wheter a given pipeline passes.
+
+While [there are solutions to run GitHub Actions locally](https://github.com/nektos/act), they add a non-trivial amount of complexity.
+Better is to avoid these pitfalls by creating pipelines that run locally first, and then calling themn from CI.
+
+To ensure this, please consider the following choices when considering CI or automation:
+
+ 1. Can it run locally?
+ 2. Does it make sense to run this locally?
+
+Only if the answers are __No__ and __No__ again should you consider a GitHub
+action that only runs on GitHub.  For all other cases, please create a local
+run script.
+
+The decision tree below visualises these rules:
+
+```mermaid
+graph TD;
+  action["(only) Use\nGitHub Actions"]
+  runscript["Use a\nrun script"]
+  1["Can this\nrun locally?"]
+  2["Does it\nmake sense to\nrun this locally?"]
+  1-- Yes -->2
+  1-- No\n(eg: Deepscan) -->action
+  2-- Yes -->runscript
+  2-- No\n(eg: Triage Issues) -->action
+
+```
 
 
 

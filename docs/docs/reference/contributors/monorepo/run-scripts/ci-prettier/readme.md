@@ -14,5 +14,5 @@ npm run prettier
 ```
 
 In other words `npm run ci:prettier` is an alias of `npm run prettier`.
-See [lint](/docs/reference/contributors/monorepo/run-scripts/prettier).
+See [prettier](/docs/reference/contributors/monorepo/run-scripts/prettier).
 

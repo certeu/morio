@@ -9,6 +9,7 @@ import { frontMatter as ephemeralNode } from './docs/reference/terminology/ephem
 import { frontMatter as flankingNode } from './docs/reference/terminology/flanking-node/readme.md'
 import { frontMatter as flankingService } from './docs/reference/terminology/flanking-service/readme.md'
 import { frontMatter as settings } from './docs/reference/terminology/settings/readme.md'
+import { frontMatter as moriod } from './docs/reference/terminology/moriod/readme.md'
 // Services
 import { frontMatter as apiService } from './docs/reference/terminology/api-service/readme.md'
 import { frontMatter as brokerService } from './docs/reference/terminology/broker-service/readme.md'
@@ -44,6 +45,10 @@ export const terminology = {
   'flanking service': {
     title: flankingService.title,
     url: `/docs/reference/terminology/flanking-service`,
+  },
+  'moriod': {
+    title: moriod.title,
+    url: `/docs/reference/terminology/moriod`,
   },
   'settings': {
     title: settings.title,
@@ -108,6 +113,15 @@ export const terminology = {
  * This is the jargon for the Morio documentation site
  */
 export const jargon = {
+  ami: {
+    title: 'AMI',
+    content: `<p>An <b>Amazon Machine Image</b> (AMI) is a type of virtual machine image format suitable for deployment on <a href="https://aws.amazon.com/pm/ec2/">the EC2 compute service</a> of <a href="https://aws.amazon.com/">Amazon Web Services</a> (AWS).</p>`
+  },
+  aws: {
+    title: 'AWS',
+    content: `<p><b>Amazon Web Services</b> is the world's largest clould service provider.
+    <br />Learn more at <a href="https://aws.amazon.com/">aws.amazon.com</a>.</p>`
+  },
   "cert-eu": {
     title: 'CERT-EU',
     content: `
@@ -146,6 +160,10 @@ The idea being that you should not write the same thing twice, rather everything
   "run script": {
     title: 'NPM run scripts',
     content: '<p>NPM run scripts, or <b>run scripts</b> for short, refer to scripts defined in the <b>scripts</b> section of a NodeJS <b>package.json</b> file. These scripts are typically ysed for all sorts of housekeeping an automation.</p><p>For more info, refer to <a href="https://docs.npmjs.com/cli/v10/using-npm/scripts">the NPM docs on scripts</a></p>',
+  },
+  workspace: {
+    title: 'Workspaces',
+    content: `<p><b>NPM workspaces</b> is is a generic term that refers to the set of features in the <a href="https://docs.npmjs.com/cli/v10/">npm cli</a> that facilitate handling NodeJS dependencies inside a monorepo.</p><p>For example, both the <b>core</b> and <b>api</b> folders rely on common dependencies. Rather than installing them twice, through the use of workspaces they will be installed the monorepo root, and shared.</p><p>There is more to workspaces, as it is a somewhat advanced feature of NPM, but that's not really relevant for Morio. If you want to learn more, refer to <a href="https://docs.npmjs.com/cli/v10/using-npm/workspaces">the NPM documentation on workspaces</a>.</p>`
   }
 }
 
@@ -153,6 +171,7 @@ The idea being that you should not write the same thing twice, rather everything
  * Jargon aliases
  */
 jargon["run scripts"] = jargon["run script"]
+jargon.workspaces = jargon.workspace
 
 
 
