@@ -61,12 +61,12 @@ curl --insecure https://example.morio.it/-/api/status
 
 ## Authentication
 
-<Tldr>
+<Tip>
 ### JWT FTW
 Grab a JSON Web Token from 
 [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) and use it in subsequent API as your Bearer token.  
 Pre-expiry, tokens can be renewed at [the `/token` endpoint](/oas-api#tag/authentication/paths/~1token/get).
-</Tldr>
+</Tip>
 
 ### Identity Providers
 

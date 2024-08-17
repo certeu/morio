@@ -8,9 +8,8 @@ A _flanking service_ is any service that can be deployed on a _flanking node_.
 A flanking node is a node running flanking services, so that creates a
 circular argument.
 
-<Tldr>
-In practice, flanking services are services leveraging native __Kafka stream processing__.
-</Tldr>
+In practice, flanking services are services leveraging native __Kafka stream
+processing__.
 
 To better understand this, we need to briefly unpack what separates a flanking
 service from a non-flanking service.
