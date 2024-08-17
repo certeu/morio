@@ -1,5 +1,7 @@
 ---
 title: API Service
+aliases: 
+  - api
 tags:
   - api
 ---

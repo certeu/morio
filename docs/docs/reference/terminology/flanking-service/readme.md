@@ -9,10 +9,10 @@ A flanking node is a node running flanking services, so that creates a
 circular argument.
 
 <Tldr>
-In practice, flanking services are services leveraging native __Kakfa stream processing__.
+In practice, flanking services are services leveraging native __Kafka stream processing__.
 </Tldr>
 
-To better understand this, we need to briefly unpack what seperates a flanking
+To better understand this, we need to briefly unpack what separates a flanking
 service from a non-flanking service.
 
 ## Flanking vs regular services
@@ -54,7 +54,7 @@ Later, you might even add 2 more nodes and run 3 connector services in parallel
 working together as a single consumer group.
 
 This shows the flexibility of flanking services. They can run on any node and
-you can moce them around without having to worry about the implications of
+you can move them around without having to worry about the implications of
 resizing the cluster.
 
 ### Regular service example: The ui service
@@ -77,7 +77,7 @@ as possible.
 
 ## Summary
 
-Given the constraintd outlines above, flanking services are without exception
+Given the constraints outlines above, flanking services are without exception
 services providing stream processing over the Kafka protocol. Their ability
 to scale horizontally is provided partially by Morio handling the configuration
 and deployment of the service, but also hinges on the Kafka-native abilities

@@ -251,20 +251,14 @@ button.term {
   background: transparent;
   text-decoration: underline;
   text-decoration-style: dashed;
+  text-decoration-thickness: 1.5px;
   text-decoration-color: var(--ifm-color-primary);
-  padding-right: 0.15rem;
+  padding: 0;
 }
 button.term:hover {
   cursor: pointer;
   text-decoration-style: solid;
   text-decoration-thickness: 2px;
-}
-button.term:after {
-  content: '?';
-  transform: translate(0.05rem, -0.2rem);
-  padding: 0 0.1rem;
-  color: var(--ifm-color-primary);
-  display: inline-block;
 }
 
 /* Modal wrapper */
@@ -281,7 +275,7 @@ div.modal-wrapper {
   margin: 0;
   background-color: var(--modal-bg);
   background-image: url('/img/bg.svg');
-  background-size: 10%;
+  background-size: 112px;
 }
 div.modal-wrapper:hover {
   cursor: pointer;

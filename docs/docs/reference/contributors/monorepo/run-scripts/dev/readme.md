@@ -2,7 +2,7 @@
 title: dev
 ---
 
-The `dev` _run script_ starts a Morio development enviroment.
+The `dev` _run script_ starts a Morio development environment.
 Specifically, it will start the development version of the _core service_
 container, making sure to properly map the local source code to the container.
 

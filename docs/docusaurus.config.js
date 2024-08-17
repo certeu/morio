@@ -91,7 +91,7 @@ const config = {
       image: 'img/morio-social-card.jpg',
       announcementBar: {
         content:
-          '<b>Warning</b>: Morio is not yet ready for production | <a href="/blog/2024/06/26/oven-window">Learn more</a>',
+          'Morio is not ready for production | <a href="/blog/2024/06/26/oven-window">Learn more</a>',
         isCloseable: false,
         backgroundColor: '#EB6534',
         textColor: '#fff',
@@ -140,7 +140,7 @@ const config = {
         </div>`,
       },
       prism: {
-        theme: prismThemes.github,
+        theme: prismThemes.dracla,
         darkTheme: prismThemes.dracula,
         additionalLanguages: ['yaml'],
       },

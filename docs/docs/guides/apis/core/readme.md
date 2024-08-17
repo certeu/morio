@@ -7,7 +7,7 @@ The Morio Core API is internal to Morio and with the exception of [the
 to users.
 
 The API is an [OpenAPI v3.1](https://swagger.io/specification/) compliant API,
-with [auto-gereated reference documentation](/oas-core).
+with [auto-generated reference documentation](/oas-core).
 
 In other words, if you're already familiar with the API, and are merely looking
 for for answers on which endpoint to use or what data to expect, refer to
@@ -87,8 +87,8 @@ So no authentication is required.
 
 ### The `/cluster/join` endpoint
 
-Perhaps counter-intutitively, this too is a public or anonymous route.
-However, it is only avalable while Morio is running in _ephemeral mode_.
+Perhaps counter-intuitively, this too is a public or anonymous route.
+However, it is only available while Morio is running in _ephemeral mode_.
 While in _ephemeral mode_ Morio will eagerly await either its initial setup, or a cluster join request.
 
 In other words, once Morio has received its initial settings, this endpoint

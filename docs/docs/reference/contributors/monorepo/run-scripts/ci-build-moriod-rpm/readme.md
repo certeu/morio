@@ -2,7 +2,7 @@
 title: ci:build.moriod.rpm
 ---
 
-The `ci:build.moriod.rpm` _run script_ builds a RedHat pacakge (.rpm) for
+The `ci:build.moriod.rpm` _run script_ builds a RedHat package (.rpm) for
 _moriod_, the morio distribution. 
 
 Run `npm run ci:build.moriod.rpm` in the _monorepo_ root to trigger this script.

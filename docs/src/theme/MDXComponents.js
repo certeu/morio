@@ -11,7 +11,6 @@ import {
   Related,
   Scode,
   Tip,
-  Tldr,
   Warning,
 } from './components/popout.js'
 import { Architecture } from './components/mermaid.js'
@@ -42,7 +41,6 @@ export default {
   RepoFile,
   Scode,
   Tip,
-  Tldr,
   Warning,
   SubPages,
   // Jargon

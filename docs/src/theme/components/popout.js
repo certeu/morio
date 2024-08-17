@@ -7,7 +7,6 @@ import {
   NoteIcon,
   RelatedIcon,
   TipIcon,
-  TldrIcon,
   WarningIcon,
 } from './icons.js'
 
@@ -20,7 +19,6 @@ const icons = {
   related: <RelatedIcon />,
   scode: <GitHubIcon />,
   tip: <TipIcon />,
-  tldr: <TldrIcon />,
   warning: <WarningIcon />,
 }
 
@@ -37,7 +35,7 @@ export const Popout = (props) => {
       <div className="popout-inner">
         <div className="popout-title">
           <span className="type">
-            {type === 'tldr' ? 'TL;DR' : type === 'scode' ? 'Source Code' : type}
+            {type === 'scode' ? 'Source Code' : type}
             {type === 'comment' && props.by && (
               <>
                 <span className="by-lead">by {props.by}</span>
@@ -77,5 +75,4 @@ export const Note = (props) => <Popout type="note" {...props} />
 export const Related = (props) => <Popout type="related" {...props} />
 export const Scode = (props) => <Popout type="scode" {...props} />
 export const Tip = (props) => <Popout type="tip" {...props} />
-export const Tldr = (props) => <Popout type="tldr" {...props} />
 export const Warning = (props) => <Popout type="warning" {...props} />

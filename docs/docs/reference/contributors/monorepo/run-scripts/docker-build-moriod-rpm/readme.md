@@ -2,7 +2,7 @@
 title: docker:build.moriod.rpm
 ---
 
-The `docker:build.moriod.rpm` _run script_ builds a RedHat pacakge (.rpm) 
+The `docker:build.moriod.rpm` _run script_ builds a RedHat package (.rpm) 
 for _moriod_, the morio distribution.
 
 Run `npm run docker:build.moriod.rpm` in the _monorepo_ root to trigger this script.
@@ -10,7 +10,7 @@ Run `npm run docker:build.moriod.rpm` in the _monorepo_ root to trigger this scr
 Unlike [the `ci:build.moriod.rpm` run
 script](/docs/reference/contributors/monorepo/run-scripts/ci-build-moriod-rpm),
 this script will launch a RockyLinux 8 container and run inside of it. In other
-words, you can use this run script to the build the .rpm pacakge locally on a
+words, you can use this run script to the build the .rpm package locally on a
 non-RedHat Linux system.
 
 Under the hood, this will run:

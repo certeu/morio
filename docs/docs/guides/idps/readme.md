@@ -41,7 +41,7 @@ This provider allows authentication with the Morio Root Token.
 
 - The `mrt` provider is built-in, and does not require configuration.
 - The `mrt` provider can be disabled with the [`DISABLE_IDP_MRT`](/docs/reference/flags/disable_idp_mrt/) feature flag.
-- The `mrt` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
+- The `mrt` provider's inclusion and/or appearance on the UI's login page can be configured in the UI settings.
 
 **Settings Example**
 
@@ -86,7 +86,7 @@ This provider allows authentication with a Morio API Keys and its matching secre
 
 - The `apikey` provider is built-in, and does not require configuration.
 - The `apikey` provider can be disabled with the [`DISABLE_IDP_APIKEY`](/docs/reference/flags/disable_idp_apikey/) feature flag.
-- The `apikey` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
+- The `apikey` provider's inclusion and/or appearance on the UI's login page can be configured in the UI settings.
 
 **Settings Example**
 
@@ -115,7 +115,7 @@ This provider allows authentication with a the username, password, and TOTP toke
 **Purpose**
 
 - The `local` provider is intended for access by humans.
-- The `local` provider is most suitable for smaller setups where no centralized identity provider (such as `ldap`) is avalable, or as a backup for when external identity providers are unavailable.
+- The `local` provider is most suitable for smaller setups where no centralized identity provider (such as `ldap`) is available, or as a backup for when external identity providers are unavailable.
 
 **Restrictions**
 
@@ -126,7 +126,7 @@ This provider allows authentication with a the username, password, and TOTP toke
 
 - The `local` provider allows any user with the role `manager` or higher to create local Morio accounts.
 - The `local` provider generates an invite code and URL to be shared with users, facilitating onboarding.
-- The `local` provider will provide _scratch codes_ to the user that can be used when their device used to generate the TOTP token is unavalable.
+- The `local` provider will provide _scratch codes_ to the user that can be used when their device used to generate the TOTP token is unavailable.
 - The [Morio Management API](/docs/guides/apis/api) providers [various endpoints to handle Local Morio Accounts](/oas-api#tag/accounts).
 
 **Roles**
@@ -138,7 +138,7 @@ This provider allows authentication with a the username, password, and TOTP toke
 
 - The `local` provider is built-in, and does not require configuration.
 - The `local` provider can be disabled with the [`DISABLE_IDP_LOCAL`](/docs/reference/flags/disable_idp_local/) feature flag.
-- The `local` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
+- The `local` provider's inclusion and/or appearance on the UI's login page can be configured in the UI settings.
 
 **Settings Example**
 
@@ -172,7 +172,7 @@ This provider allows against a pre-existing LDAP backend.
 
 **Purpose**
 
-- The `ldap` provider is intended for organisations that have pre-existing user identities available in an LDAP server, or a system compatible with LDAP, such as Microsoft Active Directory.
+- The `ldap` provider is intended for organizations that have pre-existing user identities available in an LDAP server, or a system compatible with LDAP, such as Microsoft Active Directory.
 - The `ldap` provider is most suitable for environments where users already have an account on a different system that they also want to use to access Morio.
 
 **Restrictions**
@@ -182,7 +182,7 @@ This provider allows against a pre-existing LDAP backend.
 **Provider-specific functionality**
 
 - The `ldap` provider allows configuring the assigned of Morio roles based on any field of the LDAP user object.
-- The `ldap` provider supports more than 1 instance of this provider, thus allowing you to use different LDAP backends simultenously.
+- The `ldap` provider supports more than 1 instance of this provider, thus allowing you to use different LDAP backends simultaneously.
 
 **Roles**
 
@@ -192,7 +192,7 @@ This provider allows against a pre-existing LDAP backend.
 
 - The `ldap` provider needs to be configured before it can be used.
 - The `local` provider can be disabled with the [`DISABLE_IDP_LOCAL`](/docs/reference/flags/disable_idp_local/) feature flag.
-- The `ldap` provider's inclusion and/or appearance on the UI'slogin page can be configured in the UI settings.
+- The `ldap` provider's inclusion and/or appearance on the UI's login page can be configured in the UI settings.
 
 **Settings Example**
 

@@ -4,8 +4,8 @@ tags:
   - proxy
 ---
 
-The **Morio Proxy Service** (proxy) provides an appllication proxy that
-is the main entrypoint for all HTTP-based traffic in Morio.
+The **Morio Proxy Service** (proxy) provides an application proxy that
+is the main entry point for all HTTP-based traffic in Morio.
 
 This service is backend by [Traefik](https://traefik.io/traefik/) a
 modern reverse proxy that lends itself well to integration with Morio.
@@ -38,7 +38,7 @@ certificates for all HTTP-based Morio services.
 
 While the proxy service does not handle authentication itself -- it is [the
 api service who does](/docs/guides/services/api) it is crucial in Morio's
-authentication flow as it is [ForwardAut
+authentication flow as it is [ForwardAuth
 middleware](https://doc.traefik.io/traefik/middlewares/http/forwardauth/) on
 the proxy service that intercepts all HTTP requests and passes them to the api
 service for authentication. Only if the API allows the request will the proxy
@@ -48,7 +48,7 @@ service pass it to the backend service.
 
 The proxy service is responsible for routing requests to the correct backend service.
 
-For example, the urls `/login`, `/console`, or `/-/api/status` target the ui,
+For example, the URLs `/login`, `/console`, or `/-/api/status` target the UI,
 console, and api services respectively. It is the proxy service's job to route
 the request to the correct backend service based on the URL.
 

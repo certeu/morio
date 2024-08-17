@@ -31,7 +31,7 @@ encountered over the year in this space. We hope they speak for themselves.
 ## Challenges
 
 Morio is not our first foray into this problem domain. Based on our previous
-experience, we have shortlisted the following challenges as things that _Mori
+experience, we have shortlisted the following challenges as things that _Morio
 should do better_:
 
 - **More types of data**
@@ -48,7 +48,7 @@ should do better_:
   - With Morio, we wanted the flexibility to not merely ingest data, but also
     route, filter, transform, or duplicate data streams along the way.
 - **Single pane of glass**
-  - Before Morio, our log monitoring service was focussed on on-prem
+  - Before Morio, our log monitoring service was focused on on-prem
     infrastructure, while we used the cloud providers' native tools to monitor
     cloud infrastructure.
   - With Morio, we want a single pane of glass to monitor all infrastructure under
@@ -99,7 +99,7 @@ constituents, and that RedPanda brokers [do no support auto-scaling](https://doc
 ### RedPanda as our streaming backbone
 
 Since we want streaming data we considered
-[Kafka](https://kafka.apache.org/) as it is the de-facto standard streaming platform.
+[Kafka](https://kafka.apache.org/) as it is the most common streaming platform.
 However, it is also notoriously complex to run in production, which
 clashes with our design goals.
 
@@ -133,7 +133,7 @@ the first thing you need is a _schema_, a set of rules that defines how the
 data should be structured.
 
 We considered [OpenTelemetry](https://opentelemetry.io/) but found it to be a
-bit too undercooked for our needs. Instead, we chose the [Elastic Common Schema
+bit too under cooked for our needs. Instead, we chose the [Elastic Common Schema
 (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html) as it is more
 mature, well defined, and supported by variety of systems and vendors.
 
@@ -173,9 +173,9 @@ Here we chose [SmallStep's step-ca](https://smallstep.com/docs/step-ca/) because
 prior experience with it, has a small footprint, and supports
 [the ACME protocol](https://en.wikipedia.org/wiki/Automatic_Certificate_Management_Environment) (of Let's Encrypt fame).
 
-In addition, [the SmallStep team was open to us contibuting an Rqlite storage
+In addition, [the SmallStep team was open to us contributing an Rqlite storage
 backend](https://github.com/smallstep/nosql/issues/64), something we needed to
-provide a highly availabile CA service in Morio.
+provide a highly available CA service in Morio.
 
 <small>**Design goal**: Keep it as simple as possible</small> |
 <small>**Challenges**: Low maintenance / Automation friendly</small>
@@ -215,7 +215,7 @@ the hood_ of Morio.
 <small>**Design goal**: Keep it as simple as possible / Prioritize resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: Low maintenance / Automation friendly</small>
 
-### Javascript for development
+### JavaScript for development
 
 Last but not least, we needed to choose a programming language to develop those
 components of Morio that are built in-house. We took the following
@@ -230,17 +230,17 @@ considerations into account:
 - **Speed**: We need to make sure that stream processing is fast enough to not
   be a throughput bottleneck.
 
-At CERT-EU, [Python](https://www.python.org/) is the de-facto standard
+At CERT-EU, [Python](https://www.python.org/) is the default
 programming language. However, it has two important disadvantages, one of them
 rather crucial:
 
 - **Count**: There is no way around it, for the web interface, we rely on
-  Javascript. Adding Python means dealing with two languages.
+  JavaScript. Adding Python means dealing with two languages.
 - **Speed**: We are concerned that Python is simply too slow for the kind of
   throughput we hope to achieve.
 
 In the end, we chose
-[Javascript](https://www.javascript.com/)/[NodeJS](https://nodejs.org/en) as
+[JavaScript](https://www.javascript.com/)/[NodeJS](https://nodejs.org/en) as
 the programming language for Morio as it is fast, available both in the browser
 and backend, fit for purpose, and because its interpreted nature makes it easy to load
 code in a modular way.

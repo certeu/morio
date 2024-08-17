@@ -1,5 +1,7 @@
 ---
 title: DB Service
+aliases:
+  - db
 tags:
   - db
 ---

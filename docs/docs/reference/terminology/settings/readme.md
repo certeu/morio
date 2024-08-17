@@ -1,5 +1,7 @@
 ---
 title: Settings
+aliases:
+  - morio settings
 ---
 
 In Morio, **settings** are the high-level _settings_ that you provide to Morio.

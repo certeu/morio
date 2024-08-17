@@ -46,7 +46,7 @@ You can find those under `docs/blog`.
 The folder structure of the markdown files directly translates to the URL structure of the documentation website.
 The file names must always be `readme.md`.
 
-If we take this documenation guide as an example:
+If we take this documentation guide as an example:
 
 - Relative url: <b>/docs/guides/contributors/docs</b>
 - Path to the markdown file: docs<b>/docs/guides/contributors/docs</b>/readme.md
@@ -58,9 +58,9 @@ also has implications for how you should structure the markdown content:
 - All folders under `docs/docs` should have a URL-friendly name, using only the characters `a-z`, `0-9`, and `-`
 - Every folder should have a `readme.md`, no empty folders
 
-## Frontmatter
+## Front matter
 
-Frontmatter is metadata that sits at the top of a markdown file.
+Front matter is metadata that sits at the top of a markdown file.
 Strictly speaking, it is not part of markdown, but rather a list of key/value pairs in YAML format that starts and ends with `---`.
 Here's an example:
 
@@ -76,7 +76,7 @@ do not hesitate to do so.
 ```
 
 The `title` entry is mandatory. In other words, __every documentation page must
-have its title set in frontmatter__.
+have its title set in front matter__.
 
 As in YAML, you do not have to wrap your title in quotes, unless when it holds
 characters that would trip up the YAML parser (like when your title itself
@@ -84,14 +84,14 @@ includes quotations marks).
 
 
 <Related> 
-For an overview of all supported frontmatter, see [the Docusaurus documentation
-on frontmatter in
+For an overview of all supported front matter, see [the Docusaurus documentation
+on front matter in
 docs](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter)
 </Related>
 
 ## Tags
 
-The frontmatter example above can be further extended to add tags to the page.
+The front matter example above can be further extended to add tags to the page.
 Here is an example:
 
 ```md
@@ -293,36 +293,20 @@ The Morio source code is available at [github.com/certeu/morio](https://github.c
 
 ### Tip
 
-The `Scode` custom component allows you to insert a message with one or more tips for the reader.
+The `Tip` custom component allows you to insert a message with one or more tips for the reader.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
 <Tip>
-If there is a lot of information on the page, start with a `Tldr` component that holds a summary.
+Good advice goes here.
 </Tip>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Tip>
-If there is a lot of information on the page, start with a `Tldr` component that holds a summary.
+Good advice goes here.
 </Tip>
-  </TabItem>
-</Tabs>
-
-### Tldr
-
-The `Tldr` custom component allows you to insert a message that summarizes content for the reader.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Tldr>
-Too long; Didn't read
-</Tldr>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
   </TabItem>
 </Tabs>
 
@@ -334,7 +318,7 @@ The `Warning` custom component allows you to insert a message that warns the rea
   <TabItem value="mdx" label="MDX" default>
 ```markup
 <Warning>
-Use this when a certain action is potentially descructive.
+Use this when a certain action is potentially destructive.
 </Warning>
 ```
   </TabItem>
@@ -388,7 +372,7 @@ If the answers are __No__, __No__, __Yes__, create a terminology page.
 If the answers are __No__, __No__, __No__, [create a jargon term](#creating-a-jargon-term).  
 For all other cases, no action is required.
 
-The decision tree below visualises these rules:
+The decision tree below visualizes these rules:
 
 <WithCaption caption="A decision tree to facilitate decisions about whether or not to create jargon or terminology">
 
@@ -421,7 +405,7 @@ In this case, we create a jargon term: _IICB_.
 
 #### `flanking node`: Create terminology page
 1. This has a specific meaning in Morio and people cannot be expected to know this.
-2. Goolging this won't help.
+2. Googling this won't help.
 3. This requires proper explanation. A documentation page is the best option here.
 
 In this case, we create a terminology page: _flanking node_..
@@ -436,50 +420,111 @@ In this case, we do nothing.
 
 #### Creating a jargon term
 
-To create a new jargon term, add it to the `jargon` section of the `docs/jargon.mjs` file.
+To create a new jargon term, create a `name.md` file under <RepoFile>docs/docs/jargon</RepoFile>.
+The `name` of the file should follow [the same rules as folders under
+`docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
+`0-9`, and `-`.
 
-<Scode>
-[github.com/certeu/morio/blob/develop/docs/terminology.mjs](https://github.com/certeu/morio/blob/develop/docs/terminology.mjs)
-</Scode>
+Inside the your `.md` file, you can use markdown content like in a regular documentation page.
 
-Tthis file has a named export `jargon` which is a pojo that holds `title` and `content` keys.  
-You can use HTML in the `content`, but not in the `title`.  
-The key of the jargon term should be lowercased and stripped of `.` characters.
+#### Jargon properties
 
-Below is an example:
+Jargon terms have the following properties that are used to render them on the page:
 
-```js
-export const jargon = {
-  iicb: {
-    title: 'IICB',
-    content: `<p>The IICB is the European Union's <b>Interinstitutional Cybersecurity Board</b> and the governing body of <b>CERT-EU</b>, the home of Morio.</p>`
-  },
-}
+- `title`
+  - __description__: The title used when displaying the jargon term's info
+  - __default__: The file's _uppercased_ basename
+  - __custom__: The front matter `title` value
+- `term`
+  - __description__: The term that will trigger rendering the jargon term when emphasized
+  - __default__: The file's _lowecased_ basename
+  - __custom__: The front matter `term` value
+- `aliases`
+  - __description__: A list of additional terms that will trigger rendering the jargon term when emphasized.  
+  - __default__: none
+  - __custom__: The front matter `aliases` value (an array of strings)
+- `content`
+  - __description__: The main content when displaying the jargon term's info
+  - __default__: The file's markdown content
+  - __custom__: none
+
+#### Examples
+
+Let's use two examples to illustrate the use of default vs custom values for jargon properties:
+
+<Tabs>
+  <TabItem value="mdx" label="Default" default>
+
+This <RepoFile>docs/docs/jargon/mdx.md</RepoFile> example uses only defaults.
+- title: `MDX` (the uppercased basename is used as default)
+- term: `mdx` (the lowercased basename is used as default)
+- aliases: `[]` (no aliases is default)
+
+In a case like this, your markdown file does not need any front matter:
+
+```md title="docs/docs/jargon/mdx.md"
+MDX lets you use JSX in your markdown content. It allows you to import
+components, and embed them within your content. This makes writing markdown
+with custom components a blast.
+
+Learn more at [mdxjs.com](chttps://mdxjs.com).
 ```
 
-<Note>
-#### Restart docusaurus to pick up changes to jargon terms
+  </TabItem>
+  <TabItem value="html" label="Custom">
 
-When running docusaurus locally in develop mode, you will need to restart it to pick up changes to this file.
+This <RepoFile>docs/docs/jargon/run-files.md</RepoFile> example uses custom properties.
+- title: `Run scripts` (default would have been `run-scripts`)
+- term: `run scripts` (default would have been `run-scripts`)
+- aliases: `['run script']` (default would have been no aliases)
+
+In this case, all customization is handled in the front matter:
+
+```md title="docs/docs/jargon/run-scripts.md"
+---
+title: Run scripts
+term: run scripts
+aliases:
+  - run script
+---
+
+NPM run scripts, or __run scripts__ for short, refer to scripts defined in the
+__scripts__ section of a NodeJS __package.json__ file. These scripts are
+typically ysed for all sorts of housekeeping an automation.
+
+For more info, refer to [the NPM docs on
+scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
+```
+  </TabItem>
+</Tabs>
+
+<Note>
+#### This relies on the work done by the prebuild step
+
+When running docusaurus locally in develop mode, you will need to run `npm run
+prebuild` in the `docs` folder to ensure this works.
 </Note>
 
 #### Using a jargon term
 
-Once you have created a jargon term, you can use it by _emphesising_ it in your markdown contett.
+Once you have created a jargon term, you can use it by _emphasizing_ it in your markdown content.
 
-For exampole, this markdown:
+For example, this markdown:
 
 ```md
-I have no idea what _iicb_ is.
+I have no idea what _mdx_ is.
 ```
 
 Will render as:
 
-I have no idea what _iicb_ is.
+I have no idea what _mdx_ is.
 
 The jargon term will be turned into a button that you can click to reveal the meaning of the term.
 
-Jargon terms are case-insensitive. You can write _IICB_, _iicb_, or even _iICb_.
+<Tip>
+#### Jargon terms are case-insensitive
+You can write _mdx_, _MDX_, or even _mDx_, they will all trigger rendering the `mdx` jargon term.
+</Tip>
 
 #### List of jargon terms
 
@@ -497,61 +542,59 @@ The name of the folder should follow [the same rules as any folders under
 `docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
 `0-9`, and `-`.
 
+Then, add a `readme.md` file to the folder as you would for any documentation page.
+
+#### Terminology properties
+
+Terminology terms have the following properties that are used to render them on the page:
+
+- `title`
+  - __description__: The text used when displaying the terminology link
+  - __default__: The front matter `title` value
+- `term`
+  - __description__: The term that will trigger rendering the terminology link when emphasized
+  - __default__: The file's _lowecased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
+  - __custom__: The front matter `term` value
+- `aliases`
+  - __description__: A list of additional terms that will trigger rendering the terminology link when emphasized.  
+  - __default__: none
+  - __custom__: The front matter `aliases` value (an array of strings)
+
 Below is an example:
 
-```md
+```md title="docs/docs/jargon/mdx.md"
 ---
-title: Broker Node
+title: Core Service
+aliases:
+  - core
+tags:
+  - core
 ---
 
-A _broker node_ is any Morio node that provides [the broker service](/docs/guides/services/broker).
+The **Morio Core Service** (core) sits at the root of any Morio deployment and is
+responsible for [orchestration](#orchestration), [configuration
+resolution](#configuration-resolution), and [clustering](#clustering).
 
-A node in a Morio deployment can have two different roles, _broker node_, or _flanking node_.
-As you may have guessed, a _flanking node_ is a node that does not provide the broker service.
-```
-
-Next, you need to add the page to the `terminology` section of the `docs/jargon.mjs` file.
-
-<Scode>
-[github.com/certeu/morio/blob/develop/docs/terminology.mjs](https://github.com/certeu/morio/blob/develop/docs/terminology.mjs)
-</Scode>
-
-First import the page's frontmatter:
-
-```js
-import { frontMatter as brokerNode } from './docs/reference/terminology/broker-node/readme.md'
-```
-
-Then add it to the `terminology` object:
-
-```js
-export const terminology = {
-  'broker node': {
-    title: brokerNode.title,
-    url: `/docs/reference/terminology/broker-node`,
-  },
-}
+To learn more, visit [the Core Service guide](/docs/guides/services/core).
 ```
 
 #### Using a terminology term
 
-Once you have created a terminology term, you can use it by _emphesising_ the page title in your markdown contett.
-
-For exampole, this markdown:
+Once you have created a terminology term, you can use it by _emphasizing_ the page title in your markdown content.
+This will turn the terminology term into a link that leads to the terminology page:
 
 ```md
-I have no idea what a _broker node_ is.
+I want to learn more about _core_ which is the _core service_.
 ```
 
 Will render as:
 
-I have no idea what _broker node_ is.
+I want to learn more about _core_. Is it the same as the _core service_?
 
-The terminology term will be turned into a link that leads to the terminology page.
-
-Terminology terms are case-insensitive, but will always us the terminology page's title.  
-So you can write _broker node_, _Broker Node_, or even _BroKEr NoDE_, but it will
-all look the same.
+<Tip>
+#### Terminology terms are case-insensitive
+You can write _core_, _CORE_, or even _cORe_, they will all trigger rendering the `core` terminology link.
+</Tip>
 
 #### List of terminology pages
 
@@ -600,10 +643,10 @@ Some (optinoal) other content here.
 
 A few things to note:
 
-- The `import` statement should be the first thing after the frontmatter
+- The `import` statement should be the first thing after the front matter
 - Use the `@site/includes/` prefix to import include files.
 - Since we are using the default export, the name you give it can by anything (here we used `DockerBuildEndDiffs`
-- This will be used as a React component, so you __must__ pick a name tht starts with a Capital.
+- This will be used as a React component, so you __must__ pick a name that starts with a Capital.
 - Output the info as a react component: `<DockerBuildEnvDiffs />` 
 
 See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.md</RepoFile> for an example.
@@ -628,7 +671,10 @@ Just write. Don't worry about grammar or making mistakes. It's fine.
 
 It doesn't have to be perfect, it just needs to be written down.
 
-Anybody can can edit to improve form or structure. If you have a spell checker, use it. It truly helps.
+Anybody can can edit to improve form or structure. 
+And the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck) 
+and [`ci:spellcheck`](/docs/reference/contributors/monorepo/run-scripts/ci-spellcheck) 
+_run scripts_ are there to help with spelling.
 
 #### Use plain language
 
@@ -663,7 +709,7 @@ Remember that the worst possible documentation is the documentation that is neve
 We assume you have git, and NodeJS installed.
 </Note>
 
-To run a local instance of the documentation site -- higly recommended if
+To run a local instance of the documentation site -- highly recommended if
 you're looking to make non-trivial changes to the documentation -- you can
 follow these steps:
 
@@ -694,9 +740,13 @@ If you are on Windows, your mileage may vary.
 
 ## Redoc Integration
 
-We integration our API reference documentation by using [redocusaurus](https://github.com/rohit-gohri/redocusaurus) which integrates [redoc](https://github.com/redocly/redoc) in [docusaurus](https://docusaurus.io/).
+We generate our API reference documentation by 
+using [redocusaurus](https://github.com/rohit-gohri/redocusaurus) which 
+integrates [redoc](https://github.com/redocly/redoc) 
+in [docusaurus](https://docusaurus.io/).
 
-The config lives in `docusaurus.config.js` and it adds these two routes:
+The configuration is part of <RepoFile>docs/docusaurus.config.js</RepoFile> and
+it adds these two routes:
 
 - [/oas-api](/oas-api) for the Management API
 - [/oas-core](/oas-core) for the Core API

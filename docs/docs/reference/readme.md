@@ -2,6 +2,6 @@
 title: Reference
 ---
 
-Reference documenation for Morio:
+Reference documentation for Morio:
 
 <SubPages />

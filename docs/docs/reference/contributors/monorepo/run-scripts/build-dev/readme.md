@@ -22,7 +22,7 @@ In other words `npm run build:dev` is an umbrella script that runs the following
 - [build:api](/docs/reference/contributors/monorepo/run-scripts/build-api)
 - [build:core](/docs/reference/contributors/monorepo/run-scripts/build-core)
 - [build:ui](/docs/reference/contributors/monorepo/run-scripts/build-ui)
-- [build:dbiulder](/docs/reference/contributors/monorepo/run-scripts/build-dbuilder)
+- [build:dbuilder](/docs/reference/contributors/monorepo/run-scripts/build-dbuilder)
 
 <DockerBuildEnvDiffs />
 

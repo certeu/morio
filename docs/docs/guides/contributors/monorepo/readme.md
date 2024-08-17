@@ -2,7 +2,7 @@
 title: Monorepo Guide
 ---
 
-The Morio source code is hosted in the [certeu/morio][repo] respository on GitHub.
+The Morio source code is hosted in the [certeu/morio][repo] repository on GitHub.
 This is a so-called _monorepo_, meaning that it combines the source code for
 different aspects of the Morio project in a single repository.
 
@@ -19,7 +19,7 @@ If not, read on.
 
 ### Installing git
 
-[Git](https://git-scm.com/) is the de-facto standard version control system for
+[Git](https://git-scm.com/) is the de facto standard version control system for
 software development. It is what we use to keep the Morio source code under
 version control.
 
@@ -76,7 +76,7 @@ If you get a bunch of output, nvm was installed successfully.
 #### Install NodeJS lts/iron
 
 Morio currently uses NodeJS 20 which is known as `lts/iron`.
-The LTS releases provide long term support (lts) and are recomended for production use.
+The LTS releases provide long term support (lts) and are recommended for production use.
 
 To install the `lts/iron` release of NodeJS with nvm, you run this command:
 
@@ -97,7 +97,7 @@ GitHub accounts are free of charge. You do not have to pay anything.
 
 ## Getting started
 
-To get started, we will clone the reposisory on your local system.
+To get started, we will clone the repository on your local system.
 
 You can either clone the repository directly, or first fork it, then clone the forked repository:
 
@@ -122,7 +122,7 @@ Given that it is your own copy, you will be allowed to make changes in it.
 ### Clone the repository
 
 <Note>
-If you did fork the `certeu/morio` reposutory, replace `certeu/morio` by
+If you did fork the `certeu/morio` repository, replace `certeu/morio` by
 `username/morio`, where `username` is your GitHub username.
 </Note>
 
@@ -158,7 +158,7 @@ When it's ready, your local Morio repository is set up.
 
 ## Repository layout
 
-The reposistory has a number of top-level files and folders. 
+The repository has a number of top-level files and folders. 
 The most relevant of them are:
 
 - Files:
@@ -247,10 +247,10 @@ npm run build
 
 ### npm run eslint
 
-This will run the [ESLint](https://eslint.org/) Javascript linter on the _monorepo_.
+This will run the [ESLint](https://eslint.org/) JavaScript linter on the _monorepo_.
 
 The linter will find potential issues in your code that you should fix.
-The linter wil also run in _CI_ when submitting a pull request, so running it
+The linter will also run in _CI_ when submitting a pull request, so running it
 locally first means you can be confident your PR will pass that test.
 
 To use this, run the following command in the _monorepo_ root:
@@ -261,11 +261,11 @@ npm run eslint
 
 ### npm run prettier
 
-This will run the [Prettier](https://prettier.io/) Javascript code 
-formatter on the _monorepo_.
+This will run the [Prettier](https://prettier.io/) JavaScript code 
+front matter on the _monorepo_.
 
-The formatter will find reformat your code according to our coding standards.
-The formatter wil also run in _CI_ when submitting a pull request, so running it
+The front matter will find reformat your code according to our coding standards.
+The front matter will also run in _CI_ when submitting a pull request, so running it
 locally first means you can be confident your PR will pass that test.
 
 To use this, run the following command in the _monorepo_ root:
@@ -309,11 +309,11 @@ npm run logs:core
 #### Requires pino-pretty
 
 This requires [the pino-pretty NPM 
-pacakge](https://www.npmjs.com/package/pino-pretty) to be instelled.
+package](https://www.npmjs.com/package/pino-pretty) to be installed.
 To install it, run:
 
 ```sh title="Terminal"
-npm install --global https://www.npmjs.com/package/pino-pretty
+npm install --global pino-pretty
 ```
 </Note>
 
@@ -333,11 +333,11 @@ npm run logs:api
 #### Requires pino-pretty
 
 This requires [the pino-pretty NPM 
-pacakge](https://www.npmjs.com/package/pino-pretty) to be instelled.
+package](https://www.npmjs.com/package/pino-pretty) to be installed.
 To install it, run:
 
 ```sh title="Terminal"
-npm install --global https://www.npmjs.com/package/pino-pretty
+npm install --global pino-pretty
 ```
 </Note>
 
@@ -435,10 +435,10 @@ has grown into an ecosystem.
 The problem with this is that we want whatever runs in CI to be available
 locally. A faster feedback loop means you can iterate faster. 
 Nobody should have to commit, push, and then wait for CI to
-complete to know wheter a given pipeline passes.
+complete to know whether a given pipeline passes.
 
 While [there are solutions to run GitHub Actions locally](https://github.com/nektos/act), they add a non-trivial amount of complexity.
-Better is to avoid these pitfalls by creating pipelines that run locally first, and then calling themn from CI.
+Better is to avoid these pitfalls by creating pipelines that run locally first, and then calling them from CI.
 
 To ensure this, please consider the following choices when considering CI or automation:
 
@@ -449,7 +449,7 @@ Only if the answers are __No__ and __No__ again should you consider a GitHub
 action that only runs on GitHub.  For all other cases, please create a local
 run script.
 
-The decision tree below visualises these rules:
+The decision tree below visualizes these rules:
 
 ```mermaid
 graph TD;
