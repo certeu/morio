@@ -88,7 +88,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      image: 'img/morio-social-card.jpg',
+      image: 'img/morio-social-card.png',
       announcementBar: {
         content:
           'Morio is not ready for production | <a href="/blog/2024/06/26/oven-window">Learn more</a>',
