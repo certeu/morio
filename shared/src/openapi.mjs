@@ -1,4 +1,5 @@
 import set from 'lodash.set'
+import { getPreset } from '#config'
 import { examples } from './openapi-examples/json-loader.mjs'
 
 const meta = {
@@ -63,7 +64,7 @@ function OpenAPI(utils, type = 'api', extra = {}) {
         name: 'EUPL',
         url: 'https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics',
       },
-      version: this.utils.getPreset('MORIO_VERSION'),
+      version: getPreset('MORIO_VERSION'), // Use a silent getPreset here
       'x-logo': {
         url: '/downloads/morio-card-embed.svg',
         backgroundColor: 'transparent',
