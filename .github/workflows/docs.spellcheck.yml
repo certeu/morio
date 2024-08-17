@@ -35,7 +35,7 @@ jobs:
           key: node_modules-${{ hashFiles('package-lock.json') }}
 
       - name: Install Aspell
-        run: apt install -y aspell
+        run: sudo apt install -y aspell
 
       - name: Run aspell
         run: npm run ci:spellcheck
