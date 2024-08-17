@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { ModalWrapper } from './modal-wrapper.js'
-//2import { jargon, terminology } from '@site/terminology.mjs'
 import jargon from '@site/prebuild/jargon.js'
 import terminology from '@site/prebuild/terminology.js'
 

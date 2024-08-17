@@ -5,7 +5,7 @@ import yaml from 'js-yaml'
 import { spec as apiSpec } from '../api/openapi/index.mjs'
 import { spec as coreSpec } from '../core/openapi/index.mjs'
 // Utils
-import { globDir, readDirectory, mkdir, writeFile, readFile } from '../shared/src/fs.mjs'
+import { globDir, readDirectory, writeFile, readFile } from '../shared/src/fs.mjs'
 
 /*
  * Helper method to write out OpenAPI specification files
@@ -27,8 +27,10 @@ export const header = `/*
  */
 `
 
+/*
+ * Ensure key can be used in an import statement
+ */
 const toImportKey = (key) => key.split('-').join('DASH').split(' ').join('SPACE')
-const fromImportKey = (key) => key.splt('DASH').join('-').split('SPACE').join(' ')
 
 /*
  * Helper method to generate the jargon imports umbrella file
@@ -75,9 +77,9 @@ const ensureTerminologyImports = async () => {
     imports.push(`import { frontMatter as ${ikey} } from '@site/docs/reference/terminology/${key}/readme.md'`)
     data.push(
       `  "${key.split('-').join(' ').toLowerCase()}": { ` +
-      `title: "${fm.data?.title ? fm.data.title : key}", ` +
-      `term: "${fm.data?.term ? fm.data.term.toLowerCase() : fm.data.title.toLowerCase()}", ` +
-      `aliases: ${fm.data?.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
+      `title: "${fm.data.title ? fm.data.title : key}", ` +
+      `term: "${fm.data.term ? fm.data.term.toLowerCase() : fm.data.title.toLowerCase()}", ` +
+      `aliases: ${fm.data.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
       `url: "/docs/reference/terminology/${key}" }`
     )
   }
