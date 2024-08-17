@@ -1,4 +1,4 @@
-personal_ws-1.1 en 193 
+personal_ws-1.1 en 194 
 ACL
 AMI
 API's
@@ -99,6 +99,7 @@ YYMV
 api
 apikey
 apis
+aspell
 backend
 backends
 basename
