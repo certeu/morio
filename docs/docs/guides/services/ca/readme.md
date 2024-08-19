@@ -60,7 +60,7 @@ companies like Amazon, Google, or Apple.
 
 Morio's CA service is not on this end of the spectrum.
 
-On the other hand of the spectrum is every CA spun up -- or every sef-signed
+On the other hand of the spectrum is every CA spun up -- or every self-signed
 certificate generated -- by a person or team that just needs some certificates
 to encrypt communication or use mTLS. People that don't have an internal CA, or
 have one but it requires a written request in duplicate signed by the CISO

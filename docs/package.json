@@ -29,7 +29,8 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.5.1",
-    "@docusaurus/types": "3.5.1"
+    "@docusaurus/types": "3.5.1",
+    "gray-matter": "^4.0.3"
   },
   "browserslist": {
     "production": [

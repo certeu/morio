@@ -2,7 +2,6 @@ import { restClient, resolveHostAsIp } from '#shared/network'
 import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
-import { writeYamlFile, mkdir } from '#shared/fs'
 import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
@@ -41,18 +40,9 @@ const store = new Store(log)
   })
 
 /*
- * Load all presets and write them to disk for other services to load
- * Note that this path we write to is inside the container
- * And since this is the first time we write to it, we cannot assume
- * the folder exists
+ * Load all presets
  */
 store.presets = loadAllPresets()
-try {
-  await mkdir('/etc/morio/shared')
-  await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
-} catch (err) {
-  log.warn(err, 'Failed to write Morio presets to disk')
-}
 
 /*
  * Export an utils object to hold utility methods

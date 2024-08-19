@@ -1,5 +1,7 @@
 ---
 title: UI Service
+aliases:
+  - ui
 tags:
   - ui
 ---
@@ -7,5 +9,5 @@ tags:
 The Morio **User Interface Service** (ui) provides a web-based
 user interface for interacting with your Morio deployment.
 
-To learn more, visit [the UI Serice guide](/docs/guides/services/ui).
+To learn more, visit [the UI Service guide](/docs/guides/services/ui).
 

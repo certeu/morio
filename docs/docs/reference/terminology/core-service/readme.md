@@ -1,5 +1,7 @@
 ---
 title: Core Service
+aliases:
+  - core
 tags:
   - core
 ---

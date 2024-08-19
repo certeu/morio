@@ -2,7 +2,7 @@
 title: docker:build.moriod.deb
 ---
 
-The `docker:build.moriod.deb` _run script_ builds a Debiam pacakge (.deb) 
+The `docker:build.moriod.deb` _run script_ builds a Debian package (.deb) 
 for _moriod_, the morio distribution.
 
 Run `npm run docker:build.moriod.deb` in the _monorepo_ root to trigger this script.
@@ -10,7 +10,7 @@ Run `npm run docker:build.moriod.deb` in the _monorepo_ root to trigger this scr
 Unlike [the `ci:build.moriod.deb` run
 script](/docs/reference/contributors/monorepo/run-scripts/ci-build-moriod-deb),
 this script will launch a Debian 12 container and run inside of it.  In other
-words, you can use this run script to the build the .deb pacakge locally on a
+words, you can use this run script to the build the .deb package locally on a
 non-Debian Linux system.
 
 Under the hood, this will run:

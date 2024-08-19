@@ -20,7 +20,7 @@ responsibilities:
 
 ### Orchestration
 
-The core service is responsible for creacting and starting all other Morio services.
+The core service is responsible for creating and starting all other Morio services.
 If a service is not running that should be running, the core service will create a container for it, and start it.
 Or, if a service is running that should not be running, the core service will stop it.
 

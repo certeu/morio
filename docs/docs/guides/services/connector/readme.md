@@ -15,7 +15,7 @@ only be started when pipelines have been configured in the Morio settings.
 
 ### Running ETL pipelines
 
-The console service is reposible for running the pipelines that are configured
+The console service is responsible for running the pipelines that are configured
 in the Morio settings.
 
 These pipelines are sometimes referred to as [ETL

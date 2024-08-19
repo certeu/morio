@@ -1,6 +1,8 @@
 ---
 title: Contributor Guide
 sidebar_position: 0
+tags:
+  - contributors
 ---
 
 import Help from '@site/includes/cli-help-content.md'
@@ -51,7 +53,7 @@ When you contribute to Morio, those contributions shall also be licensed as EUPL
 
 Our [code of
 conduct](https://github.com/certeu/morio/blob/develop/CHANGELOG.md) is a
-verbatim copy of the [Contributor Covenant v2.1](Contributor Covenant v2.1).
+verbatim copy of the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).  
 The only change made are the insertion of CERT-EU's contact details.
 
 As a Morio contributor, you must respect and uphold this code of conduct.
@@ -85,3 +87,4 @@ The output will resemble this:
 
 <Help />
 
+[repo]: https://github.com/certeu/morio

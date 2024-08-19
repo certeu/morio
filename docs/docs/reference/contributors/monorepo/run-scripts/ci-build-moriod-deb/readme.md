@@ -2,7 +2,7 @@
 title: ci:build.moriod.deb
 ---
 
-The `ci:build.moriod.deb` _run script_ builds a Debiam pacakge (.deb) for
+The `ci:build.moriod.deb` _run script_ builds a Debian package (.deb) for
 _moriod_, the morio distribution.
 
 Run `npm run ci:build.moriod.deb` in the _monorepo_ root to trigger this script.

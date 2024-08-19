@@ -1,5 +1,7 @@
 ---
 title: CA Service
+aliases:
+  - ca
 tags:
   - ca
 ---

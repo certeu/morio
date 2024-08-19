@@ -33,6 +33,7 @@ api/coverage
 build-context
 build-context/*
 build-context.*
+docs/prebuild/*
 
 # dependencies
 node_modules
@@ -66,3 +67,6 @@ yarn-error.log*
 # Nx
 .nx/installation
 .nx/cache
+
+# backup files for aspell
+*.bak

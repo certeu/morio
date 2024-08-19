@@ -1,5 +1,7 @@
 ---
 title: Connector Service
+aliases:
+  - connector
 tags:
   - connector
 ---

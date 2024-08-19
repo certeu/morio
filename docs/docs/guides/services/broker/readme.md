@@ -46,7 +46,7 @@ This API is also used internally by Morio.
 
 Finally, the broker service also provides Morio cluster consensus.
 Consensus is a fundamental problem in fault-tolerant distributed systems.
-Essemtially, whenever multiple servers have to agree on something, consensus
+Essentially, whenever multiple servers have to agree on something, consensus
 needs to be established.
 
 Since Morio supports clustering, it also requires establishing consensus between cluster nodes.
@@ -65,5 +65,5 @@ As a result, clustering in Morio has a few constraints:
 
 - You cannot run a Morio cluster without the broker service.<br />
   <small>This is a problem in name only because without a broker what's the point or running a Morio cluster?</small>
-- A [flanking node](/docs/reference/terminology/flanking-node/) can never becomethe cluster leader.<br />
+- A [flanking node](/docs/reference/terminology/flanking-node/) can never become the cluster leader.<br />
   <small>This is a good thing because flanking nodes are allowed to come and go as they please</small>

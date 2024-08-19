@@ -22,7 +22,7 @@ In other words `npm run build:prod` is an umbrella script that runs the followin
 - [ci:build.api](/docs/reference/contributors/monorepo/run-scripts/ci-build-api)
 - [ci:build.core](/docs/reference/contributors/monorepo/run-scripts/ci-build-core)
 - [ci:build.ui](/docs/reference/contributors/monorepo/run-scripts/ci-build-ui)
-- [ci:build.dbiulder](/docs/reference/contributors/monorepo/run-scripts/ci-build-dbuilder)
+- [ci:build.dbuilder](/docs/reference/contributors/monorepo/run-scripts/ci-build-dbuilder)
 
 <DockerBuildEnvDiffs />
 

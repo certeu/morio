@@ -1,5 +1,7 @@
 ---
 title: Broker Service
+aliases:
+  - broker
 tags:
   - broker
 ---

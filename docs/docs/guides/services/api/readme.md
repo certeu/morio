@@ -6,7 +6,7 @@ tags:
 
 The **Morio API Service** (api) provides the main user-facing API in Morio.
 It is an [OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
-[auto-gereated reference documentation](/oas-api).
+[auto-generated reference documentation](/oas-api).
 
 <Related>
 This guide talks about the why and how of the API service.  
@@ -24,7 +24,7 @@ responsibilities:
 The api service handles all HTTP-based authentication within Morio.
 The only authentication within Morio that is not handled by the API is the
 native Kafka protocol which uses mutual TLS (mTLS), which is why we say _all
-HTTP-based autentication_.
+HTTP-based authentication_.
 
 In practice, we use [ForwardAuth
 middleware](https://doc.traefik.io/traefik/middlewares/http/forwardauth/) on

@@ -18,7 +18,7 @@ Under the hood, this will run:
 ## Publish the built image
 
 This script takes an optional parameter `publish` that will publish the newly
-built image on dockerhub:
+built image on docker hub:
 
 ```sh title="Terminal"
 npm run ci:build.dbuilder publish

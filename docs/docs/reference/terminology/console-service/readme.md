@@ -1,5 +1,7 @@
 ---
 title: Console Service
+aliases:
+  - console
 tags:
   - console
 ---

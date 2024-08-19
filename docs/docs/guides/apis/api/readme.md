@@ -4,7 +4,7 @@ title: Management API Guide
 
 The Morio Management API is the main user-facing API in Morio. It is an
 [OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
-[auto-gereated reference documentation](/oas-api).
+[auto-generated reference documentation](/oas-api).
 
 In other words, if you're already familiar with the API, and are merely looking
 for for answers on which endpoint to use or what data to expect, refer to
@@ -61,12 +61,12 @@ curl --insecure https://example.morio.it/-/api/status
 
 ## Authentication
 
-<Tldr>
+<Tip>
 ### JWT FTW
 Grab a JSON Web Token from 
 [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) and use it in subsequent API as your Bearer token.  
 Pre-expiry, tokens can be renewed at [the `/token` endpoint](/oas-api#tag/authentication/paths/~1token/get).
-</Tldr>
+</Tip>
 
 ### Identity Providers
 
@@ -90,7 +90,7 @@ supported types:
 Use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
 That JWT can then be used in subsequent API calls to authenticate them.
 
-The [the `/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each dentity providers listed above.
+The [the `/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each identity providers listed above.
 The response from the API will include a `jwt` key that holds the JWT. Below is an example using [the `local` identity provider](/docs/guides/idps#local):
 
 ```json title="API Response Body"
@@ -108,7 +108,7 @@ The response from the API will include a `jwt` key that holds the JWT. Below is 
 
 ### JSON Web Token
 
-The value in the `jwt` key of the reponse body holds our JSON Web Token (JWT).
+The value in the `jwt` key of the response body holds our JSON Web Token (JWT).
 It can be [decoded](https://jwt.io/) to reveal its payload data:
 
 ```json title='Decoded Payload Data of a JSON Web Token"
@@ -151,7 +151,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoi
 
 While Bearer Authentication is most useful for automated access and scripts, in a browser it is often easier to rely on Cookie Authentication instead. Which is the Morio Management API supports that too.
 
-The APi will check the `morio` cookie for JWT content. So place the JSON Web Token in a cookie named `morio` to use this way to authenticate.
+The API will check the `morio` cookie for JWT content. So place the JSON Web Token in a cookie named `morio` to use this way to authenticate.
 
 A JSON representation of the request cookies would look like this:
 
@@ -191,7 +191,7 @@ curl -u "apikey:apisecret" https://example.morio.it/docker/containers
 
 ### When to (not) use Basic Authentication
 
-While Basic Authentication is easier -- no need to login to request a token -- it is also an order of magniture slower then Bearer or Cookie Authentication..
+While Basic Authentication is easier -- no need to login to request a token -- it is also an order of magnitude slower then Bearer or Cookie Authentication..
 
 That is because both Bearer and Cookie authentication send the JSON Web Token. [As we saw above](#json-web-token) the token contains a payload the has everything we need to make a decision about whether or not to grant access. The only thing to do is verify the cryptographic signature of the token.
 
@@ -201,7 +201,7 @@ This round-trip to the database adds significant delay. Perhaps barely noticeabl
 
 So as a rule of thumb we recommend that:
 
-- Do not use Basic AUthetnication for more than 3 API requests in a row.
+- Do not use Basic Authentication for more than 3 API requests in a row.
 - If you need to make more than 3 API requests, use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to grab a JSON Web Token instead, and use either Bearer or Cookie authentication for subsequent API requests.
 
 ### Token expiry and renewal
