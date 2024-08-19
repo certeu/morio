@@ -1,5 +1,5 @@
-__CI__ stands for __Continious Integration__. In the context of Morio, we use
-it as shorthand for CI/CD, which combines CI with __Continious Deployment__. We
+__CI__ stands for __Continuous Integration__. In the context of Morio, we use
+it as shorthand for CI/CD, which combines CI with __Continuous Deployment__. We
 use CI to refer to the automation in building, testing, and deploying changes
 in software.
 

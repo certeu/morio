@@ -437,7 +437,7 @@ Jargon terms have the following properties that are used to render them on the p
   - __custom__: The front matter `title` value
 - `term`
   - __description__: The term that will trigger rendering the jargon term when emphasized
-  - __default__: The file's _lowecased_ basename
+  - __default__: The file's _lowercased_ basename
   - __custom__: The front matter `term` value
 - `aliases`
   - __description__: A list of additional terms that will trigger rendering the jargon term when emphasized.  
@@ -553,7 +553,7 @@ Terminology terms have the following properties that are used to render them on 
   - __default__: The front matter `title` value
 - `term`
   - __description__: The term that will trigger rendering the terminology link when emphasized
-  - __default__: The file's _lowecased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
+  - __default__: The file's _lowercased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
   - __custom__: The front matter `term` value
 - `aliases`
   - __description__: A list of additional terms that will trigger rendering the terminology link when emphasized.  

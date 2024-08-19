@@ -3,7 +3,7 @@ title: Monorepo
 ---
 
 A monorepo is a repository that combines source code for different project,
-pacakges, or services into a single source code repository.  This faciliates
+packages, or services into a single source code repository.  This facilitates
 sharing code, functionality, and dependencies.
 
 The Morio monorepo, or __monorepo__ for short, is the repository hosting the Morio source code.
