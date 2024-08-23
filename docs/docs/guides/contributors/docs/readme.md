@@ -29,12 +29,12 @@ directly.
 
 We store our documentation as [Markdown](https://www.markdownguide.org/) in git 
 and use [Docusaurus][docusaurus] to generate a static website from it, 
-which we then publish as [morio.it](https://morio.it/).
+which we then publish at [morio.it](https://morio.it/).
 
 Inside our monorepo, the `docs` folder holds the docusaurus setup.
 Within that folder, the `docs` subfolder holds the actual markdown content.
 
-So relative to the monorepo root, you can find the markdown of our documentation under `docs/docs`.
+So, relative to the monorepo root, you can find the markdown of our documentation under `docs/docs`.
 
 <Note>
 Apart from documentation, we also publish blog posts using the same docusaurus setup.  
@@ -107,7 +107,7 @@ do not hesitate to do so.
 
 ```
 
-We have added the `contributors` tag to this page. Marking it as a page that is
+We have added the `contributors` tag to this page, marking it as a page that is
 relevant for Morio contributors.
 
 Tags are a way to group pages together that cover the same topic or category.
@@ -137,7 +137,7 @@ contributors:
 ```
 
 As you can see, you can explicitly set a label, permalink, and description.
-However, we just rely on the defaults. So you define the tag and do not specify any
+However, we just rely on the defaults, so you will define the tag and do not specify any
 properties. Here is how to do that in YAML:
 
 ```yaml
@@ -156,8 +156,7 @@ Docusaurus supports _MDX_ which is markdown with support for custom components.
 A number of MDX components are supported out of the box, like [the tabs used on
 this page](https://docusaurus.io/docs/markdown-features/tabs).
 
-In addition, we provide some MDX components that you can use in documentation pages.
-They are typically various ways to engage the reader with the material.
+In addition, we provide some MDX components that you can use in documentation pages. They provide various ways to engage the reader with the material.
 
 ### Comment
 
@@ -205,13 +204,13 @@ The `Important` custom component allows you to insert a message indicating somet
   <TabItem value="mdx" label="MDX" default>
 ```markup
 <Important>
-You need to start a new line after the opening tag of a custom component to ensure your markdown within the component will be parsed.
+You need to start a new line after the opening tag of a custom component to ensure that the markdown within the component will be parsed.
 </Important>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Important>
-You need to start a new line after the opening tag of a custom component to ensure your markdown within the component will be parsed.
+You need to start a new line after the opening tag of a custom component to ensure that the markdown within the component will be parsed.
 </Important>
   </TabItem>
 </Tabs>
@@ -256,9 +255,9 @@ If you are new to MDX, you can check the documentation at [mdxjs.com](https://md
 
 ### RepoFile
 
-The `RepoFile` custom component allows you to create a link for a file in the
+The `RepoFile` custom component allows you to create a link to a file in the
 _monorepo_. The link will point to the same file on GitHub, specifically in the default
-`develop` branch..
+`develop` branch.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -274,7 +273,7 @@ To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.m
 
 ### Scode
 
-The `Scode` custom component allows you to insert a message with links to relevant source code.
+The `Scode` custom component allows you to insert a message with links to the relevant source code.
 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
@@ -318,7 +317,7 @@ The `Warning` custom component allows you to insert a message that warns the rea
   <TabItem value="mdx" label="MDX" default>
 ```markup
 <Warning>
-Use this when a certain action is potentially destructive.
+Use this when a certain action is potentially destructive or problems are likely to occur.
 </Warning>
 ```
   </TabItem>
@@ -362,9 +361,9 @@ Both jargon and terminology can be anything that needs explaining.
 The difference is that jargon does not warrant or require its own dedicated documentation page.
 
 The following rules can guide you when deciding whether you should create a
-jargon term, add a terminology page, or do take no action.
+jargon term, add a terminology page, or take no action.
 
- 1. Can someone who is new to Morio be expected to know this?
+ 1. Is someone new to Morio expected to know this?
  2. Would a simple Google search explain this?
  3. Does this warrant its own documentation page?
 
@@ -372,14 +371,14 @@ If the answers are __No__, __No__, __Yes__, create a terminology page.
 If the answers are __No__, __No__, __No__, [create a jargon term](#creating-a-jargon-term).  
 For all other cases, no action is required.
 
-The decision tree below visualizes these rules:
+The decision tree below visualises these rules:
 
 <WithCaption caption="A decision tree to facilitate decisions about whether or not to create jargon or terminology">
 
 ```mermaid
 graph TD;
   noop["No action\nneeded"]
-  1["Can someone who is\nnew to Morio be\nexpected to know this?"]
+  1["Is someone\nnew to Morio\nexpected to know this?"]
   2["Would a simple\nGoogle search\nexplain this?"]
   3["Does this warrant its\nown documentation page?"]
   jargon["Create a jargon entry"]
@@ -394,7 +393,7 @@ graph TD;
 
 </WithCaption>
 
-Let use some examples to further clarify these rules:
+Let's use some examples to further clarify these rules:
 
 #### `IICB`: Create jargon term
 1. This is something rather niche that has little to no meaning outside the context of European Union's administration.
@@ -408,7 +407,7 @@ In this case, we create a jargon term: _IICB_.
 2. Googling this won't help.
 3. This requires proper explanation. A documentation page is the best option here.
 
-In this case, we create a terminology page: _flanking node_..
+In this case, we create a terminology page: _flanking node_.
 
 #### `TLS node`: Do nothing
 1. This is common terminology, people are unlikely to be confused by this. But even if they are...
@@ -436,11 +435,11 @@ Jargon terms have the following properties that are used to render them on the p
   - __default__: The file's _uppercased_ basename
   - __custom__: The front matter `title` value
 - `term`
-  - __description__: The term that will trigger rendering the jargon term when emphasized
+  - __description__: The term that will trigger rendering the jargon term when emphasised
   - __default__: The file's _lowercased_ basename
   - __custom__: The front matter `term` value
 - `aliases`
-  - __description__: A list of additional terms that will trigger rendering the jargon term when emphasized.  
+  - __description__: A list of additional terms that will trigger rendering the jargon term when emphasised.  
   - __default__: none
   - __custom__: The front matter `aliases` value (an array of strings)
 - `content`
@@ -450,7 +449,7 @@ Jargon terms have the following properties that are used to render them on the p
 
 #### Examples
 
-Let's use two examples to illustrate the use of default vs custom values for jargon properties:
+Let's use two examples to illustrate the use of default versus custom values for jargon properties:
 
 <Tabs>
   <TabItem value="mdx" label="Default" default>
@@ -478,7 +477,7 @@ This <RepoFile>docs/docs/jargon/run-files.md</RepoFile> example uses custom prop
 - term: `run scripts` (default would have been `run-scripts`)
 - aliases: `['run script']` (default would have been no aliases)
 
-In this case, all customization is handled in the front matter:
+In this case, all customisation is handled in the front matter:
 
 ```md title="docs/docs/jargon/run-scripts.md"
 ---
@@ -490,7 +489,7 @@ aliases:
 
 NPM run scripts, or __run scripts__ for short, refer to scripts defined in the
 __scripts__ section of a NodeJS __package.json__ file. These scripts are
-typically ysed for all sorts of housekeeping an automation.
+typically used for all sorts of housekeeping an automation.
 
 For more info, refer to [the NPM docs on
 scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
@@ -507,7 +506,7 @@ prebuild` in the `docs` folder to ensure this works.
 
 #### Using a jargon term
 
-Once you have created a jargon term, you can use it by _emphasizing_ it in your markdown content.
+Once you have created a jargon term, you can use it by _emphasising_ it in your markdown content.
 
 For example, this markdown:
 
@@ -552,11 +551,11 @@ Terminology terms have the following properties that are used to render them on 
   - __description__: The text used when displaying the terminology link
   - __default__: The front matter `title` value
 - `term`
-  - __description__: The term that will trigger rendering the terminology link when emphasized
+  - __description__: The term that will trigger rendering the terminology link when emphasised
   - __default__: The file's _lowercased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
   - __custom__: The front matter `term` value
 - `aliases`
-  - __description__: A list of additional terms that will trigger rendering the terminology link when emphasized.  
+  - __description__: A list of additional terms that will trigger rendering the terminology link when emphasised.  
   - __default__: none
   - __custom__: The front matter `aliases` value (an array of strings)
 
@@ -580,11 +579,11 @@ To learn more, visit [the Core Service guide](/docs/guides/services/core).
 
 #### Using a terminology term
 
-Once you have created a terminology term, you can use it by _emphasizing_ the page title in your markdown content.
+Once you have created a terminology term, you can use it by _emphasising_ the page title in your markdown content.
 This will turn the terminology term into a link that leads to the terminology page:
 
 ```md
-I want to learn more about _core_ which is the _core service_.
+I want to learn more about _core_. Is it the same as the _core service_?
 ```
 
 Will render as:
@@ -619,7 +618,7 @@ Unlike the <RepoFile>docs/docs</RepoFile> folder where we rely on folder
 structure, all files should be in the same folder.
 
 As such, you should give it a name that conveys the intent of the include.
-As an practical example, the difference between the built container images for
+As a practical example, the difference between the built container images for
 the development environment and production is something that is relevant on
 various documentation pages.
 
@@ -646,8 +645,8 @@ A few things to note:
 - The `import` statement should be the first thing after the front matter
 - Use the `@site/includes/` prefix to import include files.
 - Since we are using the default export, the name you give it can by anything (here we used `DockerBuildEndDiffs`
-- This will be used as a React component, so you __must__ pick a name that starts with a Capital.
-- Output the info as a react component: `<DockerBuildEnvDiffs />` 
+- This will be used as a React component, so you __must__ pick a name that starts with a capital letter
+- Output the info as a React component: `<DockerBuildEnvDiffs />` 
 
 See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.md</RepoFile> for an example.
 
@@ -661,7 +660,7 @@ Writing yourself will make you a better writer.
 
 <Note>
 We take pride in the fact that all of Morio's documentation is written by actual human beings.  
-Please respect that and don't reach for Chat-GPT or whatever the generative AI flavor of the day is.
+Please respect that and don't reach for ChatGPT or whatever the generative AI flavor of the day is.
 </Note>
 
 
@@ -671,8 +670,8 @@ Just write. Don't worry about grammar or making mistakes. It's fine.
 
 It doesn't have to be perfect, it just needs to be written down.
 
-Anybody can can edit to improve form or structure. 
-And the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck) 
+Anybody can edit to improve form or structure, 
+and the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck) 
 and [`ci:spellcheck`](/docs/reference/contributors/monorepo/run-scripts/ci-spellcheck) 
 _run scripts_ are there to help with spelling.
 
@@ -683,7 +682,7 @@ Use headings and paragraphs to structure your writing.
 
 #### Get to the point
 
-Say what you need to say. No more. No less.  
+Say what you need to say -- no more, no less.  
 Make your text as short as possible; your documentation will be better this way.
 
 #### Use meaningful hyperlinks
@@ -706,7 +705,7 @@ Remember that the worst possible documentation is the documentation that is neve
 ## Running the documentation site locally
 
 <Note>
-We assume you have git, and NodeJS installed.
+We assume you have git and NodeJS installed.
 </Note>
 
 To run a local instance of the documentation site -- highly recommended if
