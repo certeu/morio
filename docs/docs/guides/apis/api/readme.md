@@ -7,7 +7,7 @@ The Morio Management API is the main user-facing API in Morio. It is an
 [auto-generated reference documentation](/oas-api).
 
 In other words, if you're already familiar with the API, and are merely looking
-for for answers on which endpoint to use or what data to expect, refer to
+for answers on which endpoint to use or what data to expect, refer to
 [/oas-api](/oas-api).
 
 If you're new to this API, read on for a gentle introduction.
@@ -22,15 +22,15 @@ enabling and disabling services, managing user accounts and API keys,
 generating certificates, and building client packages.
 
 This API is Morio's main user-facing API, and when we mention _the API_ in the
-Morio documentation without being specific about _which API_ this is, you can
+Morio documentation without being specific about _which API_ it is, you can
 assume we are referring to this one.
 
 ## Accessing the API
 
-The API itself is available on all Morio nodes, and can be accessed under the
+The API itself is available on all Morio nodes and can be accessed under the
 prefix `/-/api/`.
 
-All documentation of API endpoints is relative to this prefix. So to access
+All documentation of API endpoints is relative to this prefix, so to access
 the `/status` endpoint of this API on a Morio node, you should use
 `https://[your-server-name]/-/api/status`.
 
@@ -46,7 +46,7 @@ that this has been changed when Morio was deployed by your _LOMO_.
 </Note>
 
 If your server's DNS name
-is `example.morio.it` , you could run this curl command to get the `/status`
+is `example.morio.it`, you could run this curl command to get the `/status`
 endpoint:
 
 ```title=curl
@@ -64,7 +64,7 @@ curl --insecure https://example.morio.it/-/api/status
 <Tip>
 ### JWT FTW
 Grab a JSON Web Token from 
-[the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) and use it in subsequent API as your Bearer token.  
+[the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) and use it in subsequent API calls as your Bearer token.  
 Pre-expiry, tokens can be renewed at [the `/token` endpoint](/oas-api#tag/authentication/paths/~1token/get).
 </Tip>
 
@@ -78,11 +78,11 @@ supported types:
 - [The `mrt` identity provider](/docs/guides/idps#mrt) lets you authenticate
   via **the Morio Root Token**
 - [The `apikey` identity provider](/docs/guides/idps#apikey) lets you
-  Authentication via an **API Key**
+  authenticate via an **API Key**
 - [The `local` identity provider](/docs/guides/idps#local) lets you
-  Authentication via a **Local Morio Account**
+  authenticate via a **Local Morio Account**
 - [The `ldap` identity provider](/docs/guides/idps#ldap) lets you
-  Authentication using an **LDAP account**, including LDAP-compatible backends
+  authenticate using an **LDAP Account**, including LDAP-compatible backends
   such as Active Directory
 
 ### Logging In
@@ -90,7 +90,7 @@ supported types:
 Use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
 That JWT can then be used in subsequent API calls to authenticate them.
 
-The [the `/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each identity providers listed above.
+The [`/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each identity providers listed above.
 The response from the API will include a `jwt` key that holds the JWT. Below is an example using [the `local` identity provider](/docs/guides/idps#local):
 
 ```json title="API Response Body"
@@ -131,8 +131,8 @@ It can be [decoded](https://jwt.io/) to reveal its payload data:
 
 ### Bearer Authentication
 
-Now that you have your JWT, it functions as your _Bearer Token_ and you can use _Bearer Authentication_ in subsequent API requests.
-To do so, pass the content of the JWT as the `Authorization` header, prefixed by `Bearer: `.
+Now that you have your JWT, it serves as your _Bearer Token_ and you can use _Bearer Authentication_ in subsequent API requests.
+To do so, pass the content of the JWT as the `Authorization` header, prefixed by `Bearer `.
 A JSON representation of the headers would look like this:
 
 ````json title="Bearer Authentication"
@@ -149,9 +149,9 @@ curl -H "Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoi
 
 ### Cookie Authentication
 
-While Bearer Authentication is most useful for automated access and scripts, in a browser it is often easier to rely on Cookie Authentication instead. Which is the Morio Management API supports that too.
+While Bearer Authentication is most useful for automated access and scripts, in a browser it is often easier to rely on Cookie Authentication instead, which the Morio Management API supports as well.
 
-The API will check the `morio` cookie for JWT content. So place the JSON Web Token in a cookie named `morio` to use this way to authenticate.
+The API will check the `morio` cookie for JWT content, so place the JSON Web Token in a cookie named `morio` to use this way to authenticate.
 
 A JSON representation of the request cookies would look like this:
 
@@ -163,10 +163,10 @@ A JSON representation of the request cookies would look like this:
 ### Basic Authentication
 
 While we recommend using either Bearer or Cookie authentication with a JSON
-Web Token you obtained from the API, the API also supports using API keys as
+Web Token you obtained from the API, the API also supports using API Keys as
 credentials through [Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617).
 
-In this scheme, your API Key serves as the username, and the API key's secret as the password.
+In this scheme, your key serves as the username, and the key's secret as the password.
 You should construct the Authorization header to hold the base-64 encoded value of `username:password` prefixed by `Basic `.
 
 An example JSON representation of the headers would look like this:
@@ -183,7 +183,7 @@ Here too, you can send this header in curl:
 curl -H "Authorization": "Basic MDFjNmJmMmEtZDBlYy00OWU4LTgwOTctOTNmOTZhYmNjZWQyOmU4YjZkZGIzZTExYzIyNjAwMzYzYzZjNDJjODQzYzM3MTRhM2M0YmI4YWZkMGRmMmUyYWVjOTExNWExYWNmZDEzMjEwMzRhMTVlZWI3ZWNiZDJiNzIwN2M2YzIyODYxOQ==" https://example.morio.it/docker/containers
 ```
 
-Although for Basic Authentication, curl supports the `-u` flag to pass username:password directly, no need to base-64 encode anything:
+Although for Basic Authentication, curl also supports the `-u` flag to pass username:password directly, no need to base-64 encode anything:
 
 ```
 curl -u "apikey:apisecret" https://example.morio.it/docker/containers
@@ -191,27 +191,28 @@ curl -u "apikey:apisecret" https://example.morio.it/docker/containers
 
 ### When to (not) use Basic Authentication
 
-While Basic Authentication is easier -- no need to login to request a token -- it is also an order of magnitude slower then Bearer or Cookie Authentication..
+While Basic Authentication is easier -- no need to login to request a token -- it is also an order of magnitude slower then Bearer or Cookie Authentication.
 
-That is because both Bearer and Cookie authentication send the JSON Web Token. [As we saw above](#json-web-token) the token contains a payload the has everything we need to make a decision about whether or not to grant access. The only thing to do is verify the cryptographic signature of the token.
+It is because both Bearer and Cookie authentication send the JSON Web Token. [As we saw above](#json-web-token), the token contains a payload the has everything we need to make a decision about whether or not to grant access. The only thing to do is to verify the cryptographic signature of the token.
 
 Compare that to a Basic Authentication request where we need to reach out to the database to lookup the API key, and then cryptographically verify that its credentials are correct.
 
-This round-trip to the database adds significant delay. Perhaps barely noticeable to us humans, but it is on order or magnitude slower to use Basic Authentication.
+This round-trip to the database adds significant delay -- perhaps barely noticeable to us humans, but it is still an order of magnitude slower to use Basic Authentication.
 
-So as a rule of thumb we recommend that:
+So, as a rule of thumb, we recommend that:
 
-- Do not use Basic Authentication for more than 3 API requests in a row.
-- If you need to make more than 3 API requests, use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to grab a JSON Web Token instead, and use either Bearer or Cookie authentication for subsequent API requests.
+- You do not use Basic Authentication for more than 3 API requests in a row.
+- If you need to make more than 3 API requests, you use the [`/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to grab a JSON Web Token instead, and use either Bearer or Cookie authentication for subsequent API requests.
 
 ### Token expiry and renewal
 
-The tokens issued by the API expire. Their expiry is set in [the `MORIO_API_JWT_EXPIRY` preset](/docs/reference/presets/morio_api_jwt_expiry/) which has a default value of `12h`, or 12 hours.
+The tokens issued by the API expire. Their expiry is set in the [`MORIO_API_JWT_EXPIRY` preset](/docs/reference/presets/morio_api_jwt_expiry/) which has a default value of `12h`, or 12 hours.
 
-At any time prior to the token's expiry, you can get a new token from [the `/token` endpoint](/oas-api#tag/authentication/paths/~1token/get) to reset the clock on your token expiry.
+At any time prior to the token's expiry, you can get a new token from the [`/token` endpoint](/oas-api#tag/authentication/paths/~1token/get) to reset the clock on your token expiry.
 
 ## API Dependencies
 
-The Morio Management API relies on [the Core service](/docs/guides/services/core) to bootstrap itself, and on [the proxy service](/docs/guides/services/proxy) to act as a reverse proxy.
+The Morio Management API relies on the [Core service](/docs/guides/services/core) to bootstrap itself, and on the [proxy service](/docs/guides/services/proxy) to act as a reverse proxy.
 
-So any problem with the core or proxy services will also impact the API service.
+As a result, any problem with the core or proxy services will also impact the API service.
+
