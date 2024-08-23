@@ -52,7 +52,7 @@ When you contribute to Morio, those contributions shall also be licensed as EUPL
 ## Code of Conduct
 
 Our [code of
-conduct](https://github.com/certeu/morio/blob/develop/CHANGELOG.md) is a
+conduct](https://github.com/certeu/morio/blob/develop/CODE_OF_CONDUCT.md) is a
 verbatim copy of the [Contributor Covenant v2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).  
 The only change made are the insertion of CERT-EU's contact details.
 
