@@ -10,11 +10,11 @@ is the main entry point for all HTTP-based traffic in Morio.
 This service is backend by [Traefik](https://traefik.io/traefik/) a
 modern reverse proxy that lends itself well to integration with Morio.
 
-<Related>
+<Note title="Learn more">
 If you would like to learn more than what is covered in this guide, 
 please [refer to the Traefik Documentation
 ](https://doc.traefik.io/).
-</Related>
+</Note>
 
 ## Proxy service responsibilities
 

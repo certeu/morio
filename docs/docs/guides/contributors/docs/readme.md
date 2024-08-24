@@ -83,11 +83,11 @@ characters that would trip up the YAML parser (like when your title itself
 includes quotations marks).
 
 
-<Related> 
+<Note title="Supported front matter"> 
 For an overview of all supported front matter, see [the Docusaurus documentation
 on front matter in
 docs](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter)
-</Related>
+</Note>
 
 ## Tags
 
@@ -166,14 +166,33 @@ The `Comment` custom component allows you to insert a comment.
   <TabItem value="mdx" label="MDX" default>
 ```markup
 <Comment by='joost'>
-Comments are most useful when something is opinion, rather than fact.
+  Comments are most useful when something is opinion, rather than fact.
 </Comment>
+
+<Comment by='Joost' title="My title" compact>
+  Compact view with custom title
+</Comment>
+
+<Comment>The `by` prop is mandatory</Comment>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Comment by='joost'>
-Comments are most useful when something is opinion, rather than fact.
+  Comments are most useful when something is opinion, rather than fact.
 </Comment>
+
+<Comment by='joost' title="My title" compact>
+  Compact view with custom title
+</Comment>
+
+<Comment>The `by` prop is mandatory</Comment>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default   |
+| ------------ | --------------------------- | --------- |
+| `by`         | The comment author          | `false`   |
+| `compact`    | Renders a compact view      | `false`   |
+| `title`      | Overrides the default title | `COMMENT` |
   </TabItem>
 </Tabs>
 
@@ -187,12 +206,27 @@ The `Fixme` custom component allows you to insert a message indicating something
 <Fixme>
 Use this to indicate something needs work or is incomplete.
 </Fixme>
+
+<Fixme by='joost' title="My title" compact>
+  Compact view with custom title
+</Fixme>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Fixme>
 Use this to indicate something needs work or is incomplete.
 </Fixme>
+
+<Fixme by='Joost' title="My title" compact>
+  Compact view with custom title
+</Fixme>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `by`         | The `Fixme` author          | `false` |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `FIXME` |
   </TabItem>
 </Tabs>
 
@@ -203,15 +237,25 @@ The `Important` custom component allows you to insert a message indicating somet
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
-<Important>
-You need to start a new line after the opening tag of a custom component to ensure that the markdown within the component will be parsed.
+<Important>Drink plenty of fluids</Important>
+
+<Important by='Joost' title="My title" compact>
+  Compact view with custom title
 </Important>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
-<Important>
-You need to start a new line after the opening tag of a custom component to ensure that the markdown within the component will be parsed.
+<Important>Drink plenty of fluids</Important>
+
+<Important by='Joost' title="My title" compact>
+  Compact view with custom title
 </Important>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `FIXME` |
   </TabItem>
 </Tabs>
 
@@ -225,31 +269,26 @@ The `Note` custom component allows you to insert something you want to draw the 
 <Note>
 This is a good way to draw the reader's attention to additional information.
 </Note>
+
+<Note by='Joost' title="My title" compact>
+  Compact view with custom title
+</Note>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Note>
 This is a good way to draw the reader's attention to additional information.
 </Note>
+
+<Note by='Joost' title="My title" compact>
+  Compact view with custom title
+</Note>
   </TabItem>
-</Tabs>
-
-### Related
-
-The `Related` custom component allows you to insert a message with links to related content.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Related>
-If you are new to MDX, you can check the documentation at [mdxjs.com](https://mdxjs.com/).
-</Related>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Related>
-If you are new to MDX, you can check the documentation at [mdxjs.com](https://mdxjs.com/).
-</Related>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `NOTE`  |
   </TabItem>
 </Tabs>
 
@@ -281,12 +320,25 @@ The `Scode` custom component allows you to insert a message with links to the re
 <Scode>
 The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
 </Scode>
+
+<Scode by='Joost' title="My title" compact>
+  Compact view with custom title
+</Scode>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Scode>
 The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
 </Scode>
+<Scode by='joost' title="My title" compact>
+  Compact view with custom title
+</Scode>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default        |
+| ------------ | --------------------------- | -------------- |
+| `compact`    | Renders a compact view      | `false`        |
+| `title`      | Overrides the default title | `Source Code`  |
   </TabItem>
 </Tabs>
 
@@ -297,15 +349,25 @@ The `Tip` custom component allows you to insert a message with one or more tips 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
-<Tip>
-Good advice goes here.
+<Tip>Good advice goes here</Tip>
+
+<Tip by='Joost' title="My title" compact>
+  Compact view with custom title
 </Tip>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
-<Tip>
-Good advice goes here.
+<Tip>Good advice goes here</Tip>
+
+<Tip by='Joost' title="My title" compact>
+  Compact view with custom title
 </Tip>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `TIP`   |
   </TabItem>
 </Tabs>
 
@@ -319,12 +381,26 @@ The `Warning` custom component allows you to insert a message that warns the rea
 <Warning>
 Use this when a certain action is potentially destructive or problems are likely to occur.
 </Warning>
+
+<Warning by='Joost' title="My title" compact>
+  Compact view with custom title
+</Warning>
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
 <Warning>
 Use this when a certain action is potentially destructive or problems are likely to occur.
 </Warning>
+
+<Warning by='Joost' title="My title" compact>
+  Compact view with custom title
+</Warning>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default     |
+| ------------ | --------------------------- | ----------- |
+| `compact`    | Renders a compact view      | `false`     |
+| `title`      | Overrides the default title | `WARNING`   |
   </TabItem>
 </Tabs>
 
@@ -685,12 +761,22 @@ Use headings and paragraphs to structure your writing.
 Say what you need to say -- no more, no less.  
 Make your text as short as possible; your documentation will be better this way.
 
-#### Use meaningful hyperlinks
+#### Use meaningful titles and hyperlinks
 
-Make hyperlinks meaningful:
+Page titles should be meaningful without context. They are the main result in
+search, so strive to make them meaningful and informative on their own.
 
-- **Good link**: [Tips for writing great documentation](/docs/guides/contributors/docs/#tips-for-writing-great-documentation)
-- **Bad link**: [click here](/docs/guides/contributors/docs/#tips-for-writing-great-documentation)
+That often means making your titles a lot longer, which doesn't work well in
+the navigation sidebar. You can use the `sidebar_label` key in front matter to
+set a different title to use in the sidebar.:
+
+ 
+To a lesser extend, the same advice applies to links:
+
+- Bad: You can find the info [here][yt].
+- Good: You can find the info [by watching this YouTube video with 1.3 billion views][yt]
+
+[yt]: https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 #### Define jargon
 

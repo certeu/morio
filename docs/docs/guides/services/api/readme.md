@@ -8,11 +8,11 @@ The **Morio API Service** (api) provides the main user-facing API in Morio.
 It is an [OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
 [auto-generated reference documentation](/oas-api).
 
-<Related>
+<Note title="Learn more">
 This guide talks about the why and how of the API service.  
 To learn how to use the API, please [refer to the Management API Guide
 ](/docs/reference/apis/api/).
-</Related>
+</Note>
 
 ## API service responsibilities
 
