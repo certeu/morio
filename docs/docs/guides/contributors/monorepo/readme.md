@@ -429,7 +429,7 @@ The area where that goal of flexibility requires the most discipline is perhaps
 _CI_. In general, CI can refer to any sort of automation that is triggered
 by changes in the code base, such as a commit or a pull request. However, in the
 context of GitHub, many people equate CI with [GitHub
-Actions](https://docs.github.com/en/actions), GitHub's own flavor of CI that
+Actions](https://docs.github.com/en/actions), GitHub's own flavour of CI that
 has grown into an ecosystem.
 
 The problem with this is that we want whatever runs in CI to be available

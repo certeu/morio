@@ -192,7 +192,7 @@ seems hard to rhyme with keeping it as simple as possible.
 What we want is something _like_ SQLite but that can be clustered. We considered both
 [LiteFS](https://fly.io/docs/litefs/) and [Dqlite](https://dqlite.io/) but in
 the end our choice for Morio's database is [Rqlite](https://rqlite.io/) as its
-HTTP REST API fits nicely within our design centered around HTTP-based
+HTTP REST API fits nicely within our design centred around HTTP-based
 microservices, and [its maintainer graciously offered their support to add
 Rqlite as a storage backend to Step-CA
 ](https://github.com/smallstep/nosql/issues/64#issuecomment-2249985726).

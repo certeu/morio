@@ -167,7 +167,7 @@ Web Token you obtained from the API, the API also supports using API Keys as
 credentials through [Basic Authentication](https://datatracker.ietf.org/doc/html/rfc7617).
 
 In this scheme, your key serves as the username, and the key's secret as the password.
-You should construct the Authorization header to hold the base-64 encoded value of `username:password` prefixed by `Basic `.
+You should construct the `Authorization` header to hold the base-64 encoded value of `username:password` prefixed by `Basic `.
 
 An example JSON representation of the headers would look like this:
 

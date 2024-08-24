@@ -1,7 +1,7 @@
 ---
 title: 'Announcing Morio: Your Comprehensive Observability Solution'
-authors: [stellene, jdecock]
-tags: [morio, announcement, alpha]
+authors: [ stellene, jdecock ] # skip-spellcheck
+tags: [ morio, announcement, alpha ]
 ---
 
 Today we are delighted to introduce [Morio](https://github.com/certeu/morio),
@@ -20,13 +20,13 @@ from various endpoints, ensuring seamless data flow and comprehensive
 monitoring. Under the hood, Morio utilises:
 
 - [RedPanda](https://redpanda.com/) for its Kafka-compatible streaming API
-- [Smallstep Step-CA](https://smallstep.com/docs/step-ca/) for X.509
+- [SmallStep Step-CA](https://smallstep.com/docs/step-ca/) for X.509
   certificate provisioning and mTLS authentication
 - [Beats](https://www.elastic.co/beats) and
   [Logstash](https://www.elastic.co/logstash) from
   [Elastic](https://www.elastic.co/) for collecting/shipping and routing data
   respectively
-- and [Traefik](https://traefik.io/traefik/) as the entrypoint proxy for all
+- and [Traefik](https://traefik.io/traefik/) as the entry point proxy for all
   HTTP-based services.
 
 While anyone with sufficient expertise, time, and dedication can build a

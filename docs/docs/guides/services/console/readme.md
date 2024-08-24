@@ -22,7 +22,7 @@ a RedPanda broker under the hood,
 This includes not only the health status of the broker(s) but also information
 about topics, partitions, and configuration.
 
-It's an intuitive way to familiarize yourself with the internals of what is
+It's an intuitive way to familiarise yourself with the internals of what is
 otherwise a rather complex service.
 
 ## Allow management of topics

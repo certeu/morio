@@ -660,7 +660,7 @@ Writing yourself will make you a better writer.
 
 <Note>
 We take pride in the fact that all of Morio's documentation is written by actual human beings.  
-Please respect that and don't reach for ChatGPT or whatever the generative AI flavor of the day is.
+Please respect that and don't reach for ChatGPT or whatever the generative AI flavour of the day is.
 </Note>
 
 
