@@ -15,7 +15,7 @@ change log](https://github.com/certeu/morio/blob/develop/CHANGELOG.md) for all
 details.
 
 With this release, we've also started working on our build pipelines,
-and from this release onwards, we will publish container images on the
+and from this release onward, we will publish container images on the
 Docker registry for our releases.  
 The first batch of images published in this release are:
 

@@ -44,7 +44,7 @@
     "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder",
     "build:prod": "npm run ci:build.api && npm run ci:build.core && npm run ci:build.ui && npm run ci:build.dbuilder",
     "build:ui": "./scripts/build-container.sh ui",
-    "cdf": "npm run check-docs-page",
+    "cdp": "npm run check-docs-page",
     "check-docs-page": "./scripts/check-docs-page.sh",
     "ci:build.api": "./scripts/ci-build-container.sh api",
     "ci:build.core": "./scripts/ci-build-container.sh core",
