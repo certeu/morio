@@ -94,9 +94,9 @@ export const FormBlock = (props) => {
             return (
               <Tabs
                 {...formEl}
+                key={i}
                 tabs={Object.keys(formEl.tabs).join()}
                 navs={formEl.navs === false ? false : true}
-                key={i}
               >
                 {Object.keys(formEl.tabs).map((key) => (
                   <Tab key={key} tabId={key}>
@@ -108,8 +108,8 @@ export const FormBlock = (props) => {
           if (Joi.isSchema(formEl.schema))
             return (
               <FormElement
-                key={i}
                 {...formEl}
+                key={i}
                 update={(val) => _update(val, formEl.key, formEl.transform)}
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}
@@ -121,8 +121,8 @@ export const FormBlock = (props) => {
           if (formEl.hidden)
             return (
               <FormElement
-                key={i}
                 {...formEl}
+                key={i}
                 update={(val) => _update(val, formEl.key, formEl.transform)}
                 current={get(props.data, formEl.key, formEl.current)}
                 id={formEl.key}

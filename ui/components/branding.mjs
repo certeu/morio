@@ -68,7 +68,7 @@ const ShadowDefs = () => (
 /*
  * Banner = Icon + Wordmark
  */
-export const Banner = ({
+export const MorioBanner = ({
   iconColor = 'var(--morio-primary)',
   wordmarkColor = 'currentColor',
   shadow = false,
@@ -83,13 +83,13 @@ export const Banner = ({
   </SvgWrapper>
 )
 
-export const Icon = ({ color = 'currentColor', shadow = false }) => (
-  <SvgWrapper viewBox="-1 -1 92 92">
+export const MorioIcon = ({ color = 'currentColor', shadow = false, className="w-6 h-6" }) => (
+  <SvgWrapper viewBox="-1 -1 92 92" className={className}>
     <IconPath color={color} />
   </SvgWrapper>
 )
 
-export const Wordmark = ({ color = 'currentColor', shadow = false, className="h-8" }) => (
+export const MorioWordmark = ({ color = 'currentColor', shadow = false, className="h-8" }) => (
   <SvgWrapper viewBox="110 8 310 76" className={className}>
     {`<!-- Morio wordmark font is phosphate (with some tweaks -->`}
     {shadow ? <ShadowDefs /> : null}

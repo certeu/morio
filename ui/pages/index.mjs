@@ -5,7 +5,8 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Link, PageLink } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
-import { MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
+import { DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
+import { MorioIcon, MorioWordmark } from 'components/branding.mjs'
 import { useTheme } from 'hooks/use-theme.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 // Context
@@ -64,7 +65,10 @@ const Setup = ({ pageProps }) => {
           <div>
             <h1 className="flex flex-row gap-2 items-center justify-between">
               <MorioIcon className="w-12 h-12 text-primary" />
-              <div className="text-4xl text-center">Welcome to Morio</div>
+              <div className="text-4xl font-black flex flex-row items-center gap-2">
+                Welcome to
+                <MorioWordmark className="h-8" />
+              </div>
               <button onClick={toggleTheme} title="Switch between dark and light mode">
                 {theme === 'dark' ? (
                   <LightThemeIcon className="w-12 h-12 text-accent hover:text-warning" />
@@ -77,9 +81,14 @@ const Setup = ({ pageProps }) => {
               <Link className="btn btn-primary btn-lg" href="/setup">
                 Use the Setup Wizard
               </Link>
-              <Link href="/setup/upload" className="btn btn-ghost">
-                Provide a Settings File
-              </Link>
+              <div className="grid grid-cols-2 items-center flex-wrap">
+                <Link href="/setup/preseed" className="btn btn-ghost">
+                  Upload a Preseed File
+                </Link>
+                <Link href="/setup/upload" className="btn btn-ghost">
+                  Upload a Settings File
+                </Link>
+              </div>
             </div>
           </div>
           <div>
@@ -101,17 +110,13 @@ const Setup = ({ pageProps }) => {
                 </div>
               </button>
             </p>
-            <p className="text-center opacity-50 text-sm">
-              <a
-                href="https://cert.europa.eu/"
-                className="text-base-content hover:text-primary"
-                title="To the CERT-EU website"
-              >
-                <b>MORIO</b>
-                <span className="px-2">by</span>
-                <b>CERT-EU</b>
-              </a>
-            </p>
+            <a
+              href="https://cert.europa.eu/"
+              className="text-base-content hover:text-primary flex flex-row items-center gap-1 opacity-50 justify-center mt-2"
+              title="To the CERT-EU website"
+            >
+              <MorioWordmark className="h-4" /> by <b>CERT-EU</b>
+            </a>
           </div>
         </div>
       </div>

@@ -1,5 +1,6 @@
 import { useTheme } from 'hooks/use-theme.mjs'
-import { RightIcon, MorioIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
+import { RightIcon, DarkThemeIcon, LightThemeIcon } from 'components/icons.mjs'
+import { MorioIcon, MorioWordmark } from 'components/branding.mjs'
 
 export const Arrows = () => (
   <>
@@ -17,7 +18,7 @@ export const AuthLayout = ({ children }) => {
       <div className="bg-neutral w-full flex flex-col justify-center bg-opacity-60 px-8 pt-12 pb-24 lg:pt-4 lg:pt-4">
         <h1 className="flex flex-row gap-2 items-center justify-between w-full max-w-lg mx-auto">
           <MorioIcon className="w-12 h-12 text-secondary" />
-          <div className="text-4xl text-center text-neutral-content">Morio</div>
+          <MorioWordmark className="h-12 text-neutral-content" shadow />
           <button onClick={toggleTheme} title="Switch between dark and light mode">
             {theme === 'dark' ? (
               <LightThemeIcon className="w-12 h-12 text-accent hover:text-warning" />

@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { WarningIcon, MorioIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { GitHub } from 'components/brands.mjs'
 import pkg from 'ui/package.json'
-import { Banner } from 'components/branding.mjs'
+import { MorioBanner } from 'components/branding.mjs'
 
 export const NavButton = ({
   href,
@@ -92,7 +92,7 @@ export const Header = ({
         <div className="m-auto p-2 py-0 md:px-8">
           <div className="p-0 flex flex-row gap-0 justify-between items-center">
             <Link href="/" label="Home" title="Home" className="text-current hover:text-primary">
-              <Banner className="h-6" shadow/>
+              <MorioBanner className="h-6" shadow/>
             </Link>
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
