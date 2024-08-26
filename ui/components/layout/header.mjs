@@ -5,7 +5,7 @@ import { useScrollPosition } from '@n8tb1t/use-scroll-position'
 import { useRouter } from 'next/router'
 // Components
 import Link from 'next/link'
-import { WarningIcon, MorioIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
+import { QuestionIcon, WarningIcon, MorioIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { GitHub } from 'components/brands.mjs'
 import pkg from 'ui/package.json'
 import { MorioBanner } from 'components/branding.mjs'
@@ -133,6 +133,9 @@ export const Header = ({
             </div>
             <NavButton onClick={toggleTheme} label="Change theme" toggle>
               {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
+            </NavButton>
+            <NavButton href="https://morio.it/" label="Documentation on morio.it">
+              <QuestionIcon />
             </NavButton>
             <NavButton href="https://github.com/certeu/morio" label="Source code on Github">
               <GitHub />
