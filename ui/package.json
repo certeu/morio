@@ -10,7 +10,9 @@
     "prebuild": "node ./prebuild.mjs",
     "start": "next start",
     "lint": "next lint",
-    "prettier": "prettier -w ."
+    "prettier": "prettier -w .",
+    "test": "npx playwright test",
+    "testui": "npx playwright test --ui"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.1",
@@ -69,6 +71,8 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.46.1",
+    "@types/node": "^22.5.0",
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.10.1",
     "eslint-config-next": "14.2.0",
