@@ -11,25 +11,8 @@ export const MainSideView = ({ children, page, title, side, sideTitle, Icon = nu
 
   return (
     <div className="flex flex-row-reverse gap-8 justify-between">
-      <div
-        className={`w-80 border-l border-2 border-y-0 border-r-0 shrink-0 pt-12 min-h-screen sticky top-4
-          border-secondary bg-base-300 bg-opacity-40 transition-all ${dense ? '-mr-80' : '-mr-0'}`}
-      >
-        <button
-          className={`w-full flex items-center justify-between py-2 uppercase text-primary ${
-            dense
-              ? 'flex-row -ml-10 rounded-full bg-accent text-accent-content px-2'
-              : 'flex-row-reverse hover:bg-accent hover:text-accent-content px-4'
-          }`}
-          onClick={() => setDense(!dense)}
-        >
-          {dense ? (
-            <LeftIcon className={iconSize} stroke={4} />
-          ) : (
-            <RightIcon className={iconSize} stroke={4} />
-          )}
-          <span>{sideTitle}</span>
-        </button>
+      <div className="w-80 shrink-0 pt-12 min-h-screen sticky top-4">
+        <h3>{sideTitle}</h3>
         {side}
       </div>
       <div className={`mx-auto p-8 w-full ${dense ? 'max-w-full' : 'max-w-4xl'}`}>

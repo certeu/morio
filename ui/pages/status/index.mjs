@@ -145,7 +145,7 @@ const StatusPage = (props) => {
             <Card
               title="Docker"
               href="/status/docker"
-              desc="Display running containers, available images, swarm state, or start and stop containers."
+              desc="Display running containers, available images, and configured networks."
               width="w-full"
               Icon={Docker}
             />

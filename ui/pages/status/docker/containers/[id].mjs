@@ -42,8 +42,10 @@ const ContainerPage = ({ page, id }) => {
       <div className="flex flex-col gap-2 w-full items-stretch p-4">
         <h5>Change Status</h5>
         <ContainerStateActions {...sideProps} />
+        {/*
         <h5 className="mt-4">Troubleshoot</h5>
         <ContainerTroubleshootActions {...sideProps} />
+        */}
         <h5 className="mt-4">Expert Mode</h5>
         <ContainerExpertActions {...sideProps} />
       </div>
