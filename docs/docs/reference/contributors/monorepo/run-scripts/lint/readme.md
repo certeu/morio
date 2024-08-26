@@ -15,5 +15,5 @@ npm run lint --workspace=api && \
 npm run lint --workspace=ui
 ```
 
-We utilize the various monorepo _workspaces_ here.
+We utilise the various monorepo _workspaces_ here.
 

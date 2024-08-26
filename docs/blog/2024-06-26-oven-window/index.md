@@ -1,6 +1,6 @@
 ---
 title: 'Watching Morio through the oven window'
-authors: [jdecock]
+authors: [ jdecock ] # skip-spellcheck
 tags: [morio, disclaimer, alpha]
 ---
 
@@ -19,8 +19,8 @@ these tweaks require too many changes.
 As we do our work in the open, this means that our documentation too is now _out there_.
 Which is great, because it allows for early [feedback](https://github.com/certeu/morio/discussions) on what we're doing, and how we're doing it.
 
-But on the flip side, we need to be concious of
-raised expectations, and prevent people from getting dissapointed because their
+But on the flip side, we need to be conscious of
+raised expectations, and prevent people from getting disappointed because their
 initial enthusiasm bumps into the still (very) rough edges of Morio.
 
 For this reason, we'd like to clarity what you can expect at this time:
@@ -31,7 +31,7 @@ For this reason, we'd like to clarity what you can expect at this time:
   As we mentioned, we write our documentation as we make progress on Morio. So often we document the _desired state_ where we are working towards. In other words, the documentation can sometimes be ahead of the implementation, and sometimes behind. The goal is that they will converge over time.
 
 Even though things are not ready for production, for those who have taken an
-interest in Morio, we want to make it easy to familiarize yourself with the
+interest in Morio, we want to make it easy to familiarise yourself with the
 project, understand what we are trying to do, and how we are going about doing
 it. We are also open to contributions or ideas that can bring value to
 CERT-EU, our constituents, our partners, and our peers.

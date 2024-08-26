@@ -1,21 +1,21 @@
 ---
 title: 'Morio v0.3.0'
-authors: [jdecock]
-tags: [morio, release, alpha, v0.3.0]
+authors: [ jdecock ] # skip-spellcheck
+tags: [ morio, release, alpha, v0.3.0 ]
 ---
 
-We have released verion 0.3.0 of Morio, which brings initial clustering support.
+We have released version 0.3.0 of Morio, which brings initial clustering support.
 
 <!-- truncate -->
 
 We [wrote about the new support for clustered
 deployments](/blog/2024/08/01/clustering-support) last week, and it's the main
 feature in this release. Check [the
-changelog](https://github.com/certeu/morio/blob/develop/CHANGELOG.md) for all
+change log](https://github.com/certeu/morio/blob/develop/CHANGELOG.md) for all
 details.
 
 With this release, we've also started working on our build pipelines,
-and from this release onwards, we will publish container images on the
+and from this release onward, we will publish container images on the
 Docker registry for our releases.  
 The first batch of images published in this release are:
 

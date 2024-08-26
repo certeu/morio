@@ -21,12 +21,12 @@ In no particular order, Morio's design goals are:
 
 - **Keep it as simple as possible**
 - **Provide state-of-the-art observability**
-- **Utilize streaming data and a common data schema**
+- **Utilise streaming data and a common data schema**
 - **Remain agnostic about data storage and processing**
-- **Prioritize resilience, flexibility, maintainability, and automation**
+- **Prioritise resilience, flexibility, maintainability, and automation**
 
 These high-level design goals are the distilled result of challenges we've
-encountered over the year in this space. We hope they speak for themselves.
+encountered over the years in this space. We hope they speak for themselves.
 
 ## Challenges
 
@@ -66,7 +66,7 @@ should do better_:
     work, such as clicking around in a web UI, editing configuration files by
     hand, restarting services, trial and error while trying to build custom event
     log parsing expressions.
-  - With Morio, we wanted to make it easy to automation the rollout and
+  - With Morio, we wanted to make it easy to automate the rollout and
     maintenance of our solution.
 
 ## Technology choices
@@ -109,7 +109,7 @@ One of those is [RedPanda](https://redpanda.com/) which is our choice for
 Morio's streaming backbone due to it simple setup, configuration, and
 API-based management.
 
-<small>**Design goal**: Keep it as simple as possible / Provide state-of-the-art observability / Utilize streaming data and a common data schema / Prioritize resilience, flexibility, maintainability, and automation</small> |
+<small>**Design goal**: Keep it as simple as possible / Provide state-of-the-art observability / Utilise streaming data and a common data schema / Prioritise resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: Streaming data / Low maintenance / Automation friendly</small>
 
 ### Beats for data collection & shipping
@@ -123,7 +123,7 @@ resilient setup.
 
 As a foreshadowing bonus, it generates ECS compliant data by default.
 
-<small>**Design goal**: Provide state-of-the-art observability / Utilize streaming data and a common data schema / Prioritize resilience, flexibility, maintainability, and automation</small> |
+<small>**Design goal**: Provide state-of-the-art observability / Utilise streaming data and a common data schema / prioritise resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: More types of data / Streaming data / Structured data / Automation friendly</small>
 
 ### Data structured according to the Elastic Common Schema
@@ -137,7 +137,7 @@ bit too under cooked for our needs. Instead, we chose the [Elastic Common Schema
 (ECS)](https://www.elastic.co/guide/en/ecs/current/index.html) as it is more
 mature, well defined, and supported by variety of systems and vendors.
 
-<small>**Design goal**: Utilize streaming data and a common data schema</small> |
+<small>**Design goal**: Utilise streaming data and a common data schema</small> |
 <small>**Challenges**: Structured data</small>
 
 ### Logstash for data routing
@@ -192,7 +192,7 @@ seems hard to rhyme with keeping it as simple as possible.
 What we want is something _like_ SQLite but that can be clustered. We considered both
 [LiteFS](https://fly.io/docs/litefs/) and [Dqlite](https://dqlite.io/) but in
 the end our choice for Morio's database is [Rqlite](https://rqlite.io/) as its
-HTTP REST API fits nicely within our design centered around HTTP-based
+HTTP REST API fits nicely within our design centred around HTTP-based
 microservices, and [its maintainer graciously offered their support to add
 Rqlite as a storage backend to Step-CA
 ](https://github.com/smallstep/nosql/issues/64#issuecomment-2249985726).
@@ -212,7 +212,7 @@ dedicated reverse proxy with good support for automated configuration, and
 an intuitive built-in dashboard that makes it easy for people to _look under
 the hood_ of Morio.
 
-<small>**Design goal**: Keep it as simple as possible / Prioritize resilience, flexibility, maintainability, and automation</small> |
+<small>**Design goal**: Keep it as simple as possible / prioritise resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: Low maintenance / Automation friendly</small>
 
 ### JavaScript for development
@@ -245,23 +245,23 @@ the programming language for Morio as it is fast, available both in the browser
 and backend, fit for purpose, and because its interpreted nature makes it easy to load
 code in a modular way.
 
-<small>**Design goal**: Keep it as simple as possible / Prioritize resilience, flexibility, maintainability, and automation</small> |
+<small>**Design goal**: Keep it as simple as possible / prioritise resilience, flexibility, maintainability, and automation</small> |
 <small>**Challenges**: Streaming data </small>
 
 ## Summary
 
 As you can see from our [technology choices](#technology-choices), Morio wraps a
 number of best-of-breed open source components to create a turn-key observability and streaming data platform.
-Morio abstract away the underlying complexity of configuring each of these services yourself,
+Morio abstracts away the underlying complexity of configuring each of these services yourself,
 instead you can _Just run Morio_.
 
 Anyone with sufficient expertise, time, and dedication can build a
 state-of-the-art streaming data infrastructure and observability solution out
 of the components we have chosen. And if that is the kind of thing you are itching
-to setup and maintain, then by all means, have at it.
+to setup and maintain, then by all means, go for it.
 
 What we hoped to accomplish with Morio is to bring these technologies together
-as a neat pre-made bundle so that everyone can enjoy them without the steep
+as a neat, pre-made bundle so that everyone can enjoy them without the steep
 learning curve.
 
 [api]: /docs/reference/services/api/

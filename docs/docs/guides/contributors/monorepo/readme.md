@@ -6,8 +6,8 @@ The Morio source code is hosted in the [certeu/morio][repo] repository on GitHub
 This is a so-called _monorepo_, meaning that it combines the source code for
 different aspects of the Morio project in a single repository.
 
-This guide will help you familiarize yourself with the repository layout, where
-you can find what, as well as how to utilize the repository locally.
+This guide will help you familiarise yourself with the repository layout, where
+you can find what, as well as how to use the repository locally.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ version control.
 If you are new to git, or feel uncomfortable about using it, there is no need
 to worry, we've all been there.
 
-To help you get over git's learning curve, we have create a git training course
+To help you get over git's learning curve, we have created a git training course
 that explains how it works, and helps you getting things done.
 **Chapter 7** deals specifically with **Installing git**.
 
@@ -38,7 +38,7 @@ It comes highly recommended: [Git Training](/docs/training/git).
 
 
 - If you are on __linux__, git is probably already installed, and if not you should
-be able to install it from your distributions package manager. One of
+be able to install it from your distribution's package manager. One of
 `apt install git`, `yum install git`, or `dnf install git` should do the trick.
 - If you are on __Mac__, git comes with the Xcode developer tools, so if you have
 Xcode installed, you are good to go. If not, install it.
@@ -54,18 +54,18 @@ If you get a bunch of output, we are good to go.
 The instructions on this page should work for both Linux and Mac systems.  
 Windows users using the [Linux Subsystem for Windows
 (LSW)](https://learn.microsoft.com/en-us/windows/wsl/install) will _probably_
-be ok, but we do not test or support this.
+be OK, but we do not test or support this.
 </Warning>
 
 ### Install NodeJS
 
-Morio uses [NodeJS](https://nodejs.org/) a JavaScript runtime.
+Morio uses [NodeJS](https://nodejs.org/), a JavaScript runtime.
 
 You may already have NodeJS on your system. Run `node` in a command line
 terminal to test that.
 
 If you do not have NodeJS, we recommend using nvm -- short for Node Version
-Manager -- to install it as that will make it easy to install NodeJS, and use
+Manager -- to install it as that will make it easy to install NodeJS and use
 different versions.
 
 To setup nvm, [follow the install instructions in the nvm README](https://github.com/nvm-sh/nvm#installing-and-updating).
@@ -76,7 +76,7 @@ If you get a bunch of output, nvm was installed successfully.
 #### Install NodeJS lts/iron
 
 Morio currently uses NodeJS 20 which is known as `lts/iron`.
-The LTS releases provide long term support (lts) and are recommended for production use.
+The LTS releases (lts) provide long term support and are recommended for production use.
 
 To install the `lts/iron` release of NodeJS with nvm, you run this command:
 
@@ -93,22 +93,22 @@ If you do not have a GitHub account, you can create one
 by going to [github.com/signup](https://github.com/signup) and following
 the steps.
 
-GitHub accounts are free of charge. You do not have to pay anything.
+GitHub accounts are free of charge -- you do not have to pay anything.
 
 ## Getting started
 
 To get started, we will clone the repository on your local system.
 
-You can either clone the repository directly, or first fork it, then clone the forked repository:
+You can either clone the repository directly or first fork it, then clone the forked repository:
 
 Clone the repository directly if:
 
-- You do not want to make any changes
-- Or you have write access to the `certeu/morio`repository
+- You do not want to make any changes, or
+- You have write access to the `certeu/morio` repository
 
 Clone a fork of the repository if:
 
-- You want to make changes
+- You want to make changes, and
 - You do not have write access to the `certeu/morio` repository
 
 ### Fork the repository
@@ -152,18 +152,18 @@ Once the repository is cloned, you should run the `kickstart` run script:
 npm run kickstart
 ```
 
-It will install dependencies, and configure your local repository for use.
+It will install dependencies and configure your local repository for use.
 
-When it's ready, your local Morio repository is set up.
+When it's done, your local Morio repository is ready.
 
 ## Repository layout
 
 The repository has a number of top-level files and folders. 
-The most relevant of them are:
+The most relevant are:
 
 - Files:
-  - `CHANGELOG.md`: Holds a list of changes in Morio over time and versions
-  - `CODE_OF_CONDUCT.md`: Holds Morio's Code of Conduct
+  - `CHANGELOG.md`: A list of changes in Morio over time and versions
+  - `CODE_OF_CONDUCT.md`: Morio's Code of Conduct
   - `LICENSE`: Holds the Morio license (EUPL)
   - `package.json`: The NodeJS configuration file
   - `package-lock.json`: The NodeJS dependency lock file
@@ -198,7 +198,7 @@ The most relevant of them are:
 Morio's default branch is `develop` whereas the `main` branch is considered the _production_ branch.
 
 Both branches are protected. To propose changes, you must open a pull request to
-the `develop` branch (the default branch).  The pull request can be made from
+the `develop` branch (the default branch). The pull request can be made from
 your own fork, or from a feature branch in the `certeu/morio`, assuming you
 have the rights to create branches there.
 
@@ -212,7 +212,7 @@ You can request reviews from github users [joostdecock](https://github.com/joost
 
 The repository uses a number of [NPM run scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
 These are scripts that help with a variety of housekeeping and automation tests
-and can be ran by issuing the following command in the _monorepo_ root:
+and can be run by issuing the following command in the _monorepo_ root:
 
 ```sh title="Terminal"
 npm run name
@@ -236,7 +236,7 @@ npm run kickstart
 
 ### npm run build
 
-This will build development versions of the various container images requires
+This will build development versions of the various container images required
 by Morio to run the local development environment.
 
 To use this, run the following command in the _monorepo_ root:
@@ -251,7 +251,7 @@ This will run the [ESLint](https://eslint.org/) JavaScript linter on the _monore
 
 The linter will find potential issues in your code that you should fix.
 The linter will also run in _CI_ when submitting a pull request, so running it
-locally first means you can be confident your PR will pass that test.
+locally first means you can be confident that your pull request will pass that test.
 
 To use this, run the following command in the _monorepo_ root:
 
@@ -264,9 +264,9 @@ npm run eslint
 This will run the [Prettier](https://prettier.io/) JavaScript code 
 front matter on the _monorepo_.
 
-The front matter will find reformat your code according to our coding standards.
+The front matter will first reformat your code according to our coding standards.
 The front matter will also run in _CI_ when submitting a pull request, so running it
-locally first means you can be confident your PR will pass that test.
+locally first means you can be confident that your pull request will pass that test.
 
 To use this, run the following command in the _monorepo_ root:
 
@@ -283,7 +283,7 @@ To run this, you should first run `npm run build`. Afterwards, you do not
 need to rebuild again unless the version changes. Your local changes will
 be picked up automatically, and the relevant services will be reloaded.
 
-The exact nature of that depends a bit on the various services, but in
+What will happen exactly depends a bit on the various services, but in
 general, starting Morio this way will run the code in your local copy of
 the _monorepo_ rather than any pre-built code.
 
@@ -382,7 +382,7 @@ npm run test:api
 
 <Note>
 This will __destroy__ your local development environment,
-although it will set it up again after tests completed.
+although it will set it up again after the tests have completed.
 
 You will not lose any code changes you made.
 </Note>
@@ -399,7 +399,7 @@ npm run test:core
 
 <Note>
 This will __destroy__ your local development environment,
-although it will set it up again after tests completed.
+although it will set it up again after the tests have completed.
 
 You will not lose any code changes you made.
 </Note>
@@ -426,10 +426,10 @@ GitLab instance) and in general like to keep our options open and not be
 _beholden_ to any particular code hosting platform.
 
 The area where that goal of flexibility requires the most discipline is perhaps
-_CI_.  In general, CI can refer to any sort of automation that is triggered
-by changes in the code base, such as a commit or pull request.  However, in the
+_CI_. In general, CI can refer to any sort of automation that is triggered
+by changes in the code base, such as a commit or a pull request. However, in the
 context of GitHub, many people equate CI with [GitHub
-Actions](https://docs.github.com/en/actions), GitHub's own flavor of CI that
+Actions](https://docs.github.com/en/actions), GitHub's own flavour of CI that
 has grown into an ecosystem.
 
 The problem with this is that we want whatever runs in CI to be available
@@ -446,10 +446,10 @@ To ensure this, please consider the following choices when considering CI or aut
  2. Does it make sense to run this locally?
 
 Only if the answers are __No__ and __No__ again should you consider a GitHub
-action that only runs on GitHub.  For all other cases, please create a local
+action that only runs on GitHub. For all other cases, please create a local
 run script.
 
-The decision tree below visualizes these rules:
+The decision tree below visualises these rules:
 
 ```mermaid
 graph TD;
@@ -463,10 +463,6 @@ graph TD;
   2-- No\n(eg: Triage Issues) -->action
 
 ```
-
-
-
-
 
 
 [repo]: https://github.com/certeu/morio

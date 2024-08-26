@@ -72,18 +72,9 @@ export const ImportantIcon = (props) => (
 )
 
 /*
- * NoteIcon - Looks like a pencil and notepad
+ * InfoIcon - Looks like an i in a circle
  */
-export const NoteIcon = (props) => (
-  <IconWrapper {...props}>
-    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </IconWrapper>
-)
-
-/*
- * RelatedIcon - Looks like an i in a circle
- */
-export const RelatedIcon = (props) => (
+export const InfoIcon = (props) => (
   <IconWrapper {...props}>
     <path d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
   </IconWrapper>

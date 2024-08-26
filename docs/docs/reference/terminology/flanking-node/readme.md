@@ -16,7 +16,7 @@ However, services that instead are a client of the broker service -- either as
 a consumer, a producer, or both -- can run on one or more different nodes,
 which we call flanking nodes.
 
-<Related>
+<Note title="Flanking service">
 Refer to _flanking service_ for
 details of what it means to be a flanking service.
-</Related>
+</Note>

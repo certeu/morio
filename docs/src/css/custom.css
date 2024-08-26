@@ -100,7 +100,6 @@ div.popout-title {
 }
 div.popout-title span.type {
   font-weight: bold;
-  text-transform: uppercase;
   opacity: 0.5;
 }
 div.popout-title span.type span.pipe {
@@ -110,8 +109,20 @@ div.popout svg.icon {
   width: 1.5rem;
   height: 1.5rem;
 }
+div.popout-content {
+  flex-grow: 3
+}
 div.popout-content p:last-of-type {
   margin-bottom: 0;
+}
+div.popout-inner {
+  display: flex;
+  flex-direction: column;
+}
+div.popout-inner.compact {
+  display: flex;
+  flex-direction: row;
+  align-items: start;
 }
 div.popout-inner span.by-lead {
   font-size: 0.85rem;

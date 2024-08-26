@@ -11,11 +11,11 @@ While the ca service is used internally, Morio also makes the service
 available as running a Certificate Authority is non-trivial, so it's
 certainly _nice to have_ that Morio comes with one out of the box.
 
-<Related>
+<Note title="Learn more">
 If you would like to learn more than what is covered in this guide, 
 please [refer to the SmallStep Documentation
 ](https://smallstep.com/docs/step-ca/).
-</Related>
+</Note>
 
 ## CA service responsibilities
 

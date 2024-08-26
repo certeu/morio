@@ -10,11 +10,11 @@ streaming data platform.
 
 It is in many ways the most important service within Morio.
 
-<Related>
+<Note title="Learn more">
 If you would like to learn more than what is covered in this guide, 
 please [refer to the RedPanda Documentation
 ](https://docs.redpanda.com/).
-</Related>
+</Note>
 
 ## Broker service responsibilities
 

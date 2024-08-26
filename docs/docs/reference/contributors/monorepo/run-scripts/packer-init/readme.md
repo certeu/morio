@@ -2,7 +2,7 @@
 title: packer:init
 ---
 
-The `packer:init` _run script_ will initialize all 
+The `packer:init` _run script_ will initialise all 
 [Hashicorp Packer](https://packer.io/) configurations, and install
 all their required Packer plugins.
 
