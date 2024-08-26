@@ -50,15 +50,6 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
 }
 
 /**
- * Gets the status logs
- *
- * @return {object|false} - The API result as parsed JSON or false in case of trouble
- */
-MorioClient.prototype.getStatusLogs = async function () {
-  return await this.call(`${morioConfig.api}/status_logs`)
-}
-
-/**
  * Gets the current configuration
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
