@@ -179,6 +179,7 @@ Controller.prototype.settings = async (req, res) => {
    * Validate settings
    */
   const report = await validateSettings(req.body)
+  console.log(report)
 
   /*
    * Make sure setting are valid

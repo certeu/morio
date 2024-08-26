@@ -27,11 +27,7 @@ import { Box } from 'components/box.mjs'
 const Welcome = ({ setView }) => (
   <>
     <p>These pages allow you to update the settings of this Morio deployment.</p>
-    <Popout warning compact noP dense>
-      All changes are ephemeral until you apply them.
-    </Popout>
-    <Popout tip>
-      <h5>Getting started</h5>
+      <h2>Getting started</h2>
       <p>
         Use the navigation menu on the right to locate the settings you want to update.
         <br />
@@ -53,6 +49,9 @@ const Welcome = ({ setView }) => (
           <small className="pl-4">Only possible if validation is successful</small>
         </li>
       </ul>
+    <Popout note compact noP dense>
+      All changes are ephemeral until you apply them.
+    </Popout>
       <h5>Shortcuts</h5>
       <ul className="list list-disc list-inside ml-4">
         <li>
@@ -68,7 +67,6 @@ const Welcome = ({ setView }) => (
           </a>
         </li>
       </ul>
-    </Popout>
   </>
 )
 
@@ -117,6 +115,7 @@ const ShowSettingsValidation = ({
               <button
                 className="btn btn-accent btn-lg flex flex-row justify-between"
                 onClick={deploy}
+                disabled={!validationReport.valid || !validationReport.deployable}
               >
                 <Nr color="accent">2</Nr>
                 Apply Settings
@@ -175,7 +174,7 @@ const ShowSettingsPreview = ({ preview, mSettings }) =>
 /**
  * Keeps track of the view in the URL location
  */
-export const viewInLocation = atomWithLocation('deployment/node_count')
+export const viewInLocation = atomWithLocation('cluster/nodes')
 
 const NotCool = () => (
   <div className="flex flex-row gap-8 justify-start">
@@ -209,7 +208,7 @@ const PleaseWait = () => (
 
 const getRunningSettings = async (api, setOk, setKo) => {
   const result = await api.getCurrentSettings()
-  if (result[1] === 200 && result[0].deployment) {
+  if (result[1] === 200 && result[0].cluster) {
     const newMSettings = { ...result[0] }
     setOk(JSON.parse(JSON.stringify(newMSettings)))
   } else setKo(true)
@@ -231,7 +230,7 @@ export const SettingsWizard = (props) => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
-  return runningSettings?.deployment ? (
+  return runningSettings?.cluster ? (
     <PrimedSettingsWizard {...props} {...{ runningSettings }} />
   ) : notCool ? (
     <NotCool />
@@ -389,11 +388,11 @@ export const PrimedSettingsWizard = (props) => {
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
     else {
-      setLoadingStatus([true, 'Deployment initialized', true, true])
+      setLoadingStatus([true, 'Cluster initialized', true, true])
     }
   }
 
-  if (!mSettings.deployment) return null
+  if (!mSettings.cluster) return null
 
   /*
    * Load the template and section
@@ -446,25 +445,16 @@ export const PrimedSettingsWizard = (props) => {
   }
 
   if (deployOngoing) {
-    const done = true // FIXME
     const text = `text-${done ? 'success' : 'accent'}-content`
     return (
       <WizardWrapper {...wrapProps} title="Apply Settings">
-        <Box color={done ? 'success' : 'accent'}>
-          <div className={`flex flex-row items-center gap-2 ${text}`}>
-            <div className="w-6 h-6">
-              {done ? (
-                <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
-              ) : (
-                <LogoSpinner />
-              )}
-            </div>
-            <button className="btn-success" onClick={() => setDeployOngoing(false)}>
-              Close
-            </button>
+        <Box color="success">
+          <div className="flex flex-row items-center gap-2 text-success-content">
+            <div className="w-6 h-6"><OkIcon className="w-6 h-6 text-success-content" stroke={4} /></div>
+            Settings are being deployed
           </div>
         </Box>
-        <h2>Status Logs</h2>
+        <p>Please wait as Morio applies the new settings.</p>
       </WizardWrapper>
     )
   }
