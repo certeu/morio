@@ -72,6 +72,11 @@ const config = defineConfig({
      }`,
 
     /*
+     * Do not balk at certificate issues
+     */
+    ignoreHTTPSErrors: true,
+
+    /*
      * Collect trace when retrying the failed test.
      * See https://playwright.dev/docs/trace-viewer
      */
