@@ -13,6 +13,7 @@ import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { resolveServiceConfiguration } from '#config'
+import { loadPreseededConfig } from '#shared/loaders'
 
 /**
  * This settings controller handles settings routes
@@ -92,11 +93,94 @@ Controller.prototype.setup = async (req, res) => {
     return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
 
   /*
+   * Handle initial setup
+   */
+  return await initialSetup(req, res, settings, true)
+}
+
+/**
+ * Preseed initial settings
+ *
+ * This will write the preseed config to disk and restart Morio
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.preseed = async (req, res) => {
+  /*
+   * Only allow this endpoint when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
    * Validate request against schema, but strip headers from body first
    */
   const body = { ...req.body }
   delete body.headers
-  const [valid, err] = await utils.validate(`req.settings.setup`, body)
+  const [preseed, err] = await utils.validate(`req.settings.preseed`, body)
+  if (!preseed?.base) {
+    return utils.sendErrorResponse(
+      res,
+      'morio.core.schema.violation',
+      req.url,
+      err?.message ? { schema_violation: err.message } : undefined
+    )
+  }
+
+  /*
+   * Load the preseeded settings
+   */
+  const settings = await loadPreseededConfig(body, utils, log)
+
+  /*
+   * From here on, handle it like a regular setup
+   */
+  return await initialSetup(req, res, settings)
+}
+
+/**
+ * This is a helper method to figure who we are.
+ * This is most relevant when we have a cluster.
+ *
+ * @param {object} body - The request body
+ * @return {object} data - Data about this node
+ */
+const localNodeInfo = async (body) => {
+  /*
+   * The API injects the headers into the body
+   * so we will look at the X-Forwarded-Host header
+   * and hope that it matches one of the cluster nodes
+   */
+  let fqdn = false
+  const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
+  for (const header of ['x-forwarded-host', 'host']) {
+    const hval = (body.headers?.[header] || '').toLowerCase()
+    if (hval && nodes.includes(hval)) fqdn = hval
+  }
+
+  /*
+   * If we cannot figure it out, return false
+   */
+  if (!fqdn) return false
+
+  /*
+   * Else return uuid, hostname, and IP
+   */
+  return {
+    ...utils.getNode(),
+    fqdn,
+    hostname: fqdn.split('.')[0],
+    ip: await resolveHostAsIp(fqdn),
+    serial: nodes.indexOf(fqdn) + 1,
+  }
+}
+
+const initialSetup = async (req, res, settings) => {
+  /*
+   * Validate settings against schema
+   */
+  const [valid, err] = await utils.validate(`req.settings.setup`, settings)
   if (!valid?.cluster) {
     return utils.sendErrorResponse(
       res,
@@ -108,8 +192,9 @@ Controller.prototype.setup = async (req, res) => {
 
   /*
    * Check whether we can figure out who we are
+   * Need to merge the loaded settings with the request headers
    */
-  const node = await localNodeInfo(req.body)
+  const node = await localNodeInfo({...settings, headers: req.body.headers })
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
     return utils.sendErrorResponse(res, 'morio.core.settings.fqdn.mismatch', req.url)
@@ -196,7 +281,7 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Write the valid settings to disk
+   * Write the settings to disk
    */
   log.debug(`Writing initial settings to settings.${time}.yaml`)
   let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
@@ -244,41 +329,4 @@ Controller.prototype.setup = async (req, res) => {
    */
   log.info(`Bring Morio out of ephemeral mode`)
   return reload({ initialSetup: true })
-}
-
-/**
- * This is a helper method to figure who we are.
- * This is most relevant when we have a cluster.
- *
- * @param {object} body - The request body
- * @return {object} data - Data about this node
- */
-const localNodeInfo = async (body) => {
-  /*
-   * The API injects the headers into the body
-   * so we will look at the X-Forwarded-Host header
-   * and hope that it matches one of the cluster nodes
-   */
-  let fqdn = false
-  const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
-  for (const header of ['x-forwarded-host', 'host']) {
-    const hval = (body.headers?.[header] || '').toLowerCase()
-    if (hval && nodes.includes(hval)) fqdn = hval
-  }
-
-  /*
-   * If we cannot figure it out, return false
-   */
-  if (!fqdn) return false
-
-  /*
-   * Else return uuid, hostname, and IP
-   */
-  return {
-    ...utils.getNode(),
-    fqdn,
-    hostname: fqdn.split('.')[0],
-    ip: await resolveHostAsIp(fqdn),
-    serial: nodes.indexOf(fqdn) + 1,
-  }
 }

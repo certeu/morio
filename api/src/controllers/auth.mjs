@@ -9,6 +9,7 @@ import { availableRoles } from '../rbac.mjs'
  */
 const allowedUris = [
   `/setup`,
+  `/preseed`,
   `/status`,
   `/info`,
   `/info/`,

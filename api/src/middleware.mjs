@@ -9,6 +9,7 @@ const ephemeralRoutes = [
   'GET:/status',
   'GET:/up',
   'POST:/setup',
+  'POST:/preseed',
   'GET:/reload',
   'GET:/info',
   'POST:/cluster/join',

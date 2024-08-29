@@ -57,6 +57,12 @@ export function routes(app) {
   app.post(`/setup`, Core.setup)
 
   /*
+   * API route for initial preseeding of a Morio instance
+   * Note: This is a public/anonymous route, but will only work in ephemeral state
+   */
+  app.post(`/preseed`, Core.preseed)
+
+  /*
    * API route to update (replace) Morio settings
    */
   app.post(`/settings`, rbac.operator, Core.settings)

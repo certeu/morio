@@ -3,6 +3,7 @@ import { uuid, randomString, hashPassword } from '#shared/crypto'
 import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { utils } from '../lib/utils.mjs'
+import { loadPreseededConfig } from '#shared/loaders'
 
 /**
  * This account controller handles apikeys in Morio

@@ -15,6 +15,11 @@ export function routes(app) {
   app.post('/setup', Settings.setup)
 
   /*
+   * Preseed an initial set of settings
+   */
+  app.post('/preseed', Settings.preseed)
+
+  /*
    * Deploy a new set of settings
    */
   app.post('/settings', Settings.deploy)

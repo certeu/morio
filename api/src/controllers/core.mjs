@@ -1,6 +1,7 @@
 import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
+import { loadPreseededConfig } from '#shared/loaders'
 
 /**
  * This core controller provides access to morio core
@@ -156,6 +157,66 @@ Controller.prototype.setup = async (req, res) => {
    * Settings are valid and deployable, pass them to core
    */
   const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req))
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Handles the initial preseeding
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.preseed = async (req, res) => {
+  /*
+   * This route is only accessible when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
+
+  /*
+   * Validate request against schema, but strip headers from body first
+   */
+  const body = { ...req.body }
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.preseed`, body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
+  /*
+   * Load the preseeded config so we can validate it
+   */
+  const config = await loadPreseededConfig(body, utils, log)
+
+  /*
+   * Validate settings are deployable
+   */
+  const report = await validateSettings(config)
+
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid)
+    return utils.sendErrorResponse(
+      res,
+      'morio.api.settings.invalid',
+      req.url,
+      report.errors ? { validation_errors: report.errors } : false
+    )
+
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
+
+  /*
+   * Settings are valid and deployable, pass them to core
+   */
+  const [status, result] = await utils.coreClient.post(`/preseed`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }
