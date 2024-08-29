@@ -461,6 +461,17 @@ export const PrimedSettingsWizard = (props) => {
 
   return (
     <WizardWrapper {...wrapProps}>
+      {mSettings.preseed?.base ? (
+        <Popout warning>
+          <h5>These settings are preseeded</h5>
+          <p>This Morio deployment uses preseeded settings. This means the settings are loaded from a remote system, typically a version control system like GitLab or GitHub.</p>
+          <p>
+            While you <b>can</b> update the settings here, those settings will be lost next time Morio is reseeded.
+            <br />
+            You probably should <b>update the preseeded setting instead</b>.
+          </p>
+        </Popout>
+      ) : null}
       {template === false && !doValidate ? (
         <Welcome setView={setView} />
       ) : doValidate ? (

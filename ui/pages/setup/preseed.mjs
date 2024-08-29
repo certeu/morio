@@ -1,6 +1,6 @@
 // Dependencies
 import yaml from 'yaml'
-import { validateSettings } from 'lib/utils.mjs'
+import { validatePreseed } from 'lib/utils.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { ModalContext } from 'context/modal.mjs'
@@ -23,7 +23,7 @@ import { LogoSpinner } from 'components/animations.mjs'
 import { SettingsReport } from 'components/settings/report.mjs'
 import { EphemeralWrapper } from './index.mjs'
 
-const SettingsUploadPage = (props) => {
+const SettingsPreseedPage = (props) => {
   /*
    * React state
    */
@@ -50,7 +50,7 @@ const SettingsUploadPage = (props) => {
       if (chunks[0].includes('json')) data = JSON.parse(atob(chunks[1]))
       else data = yaml.parse(atob(chunks[1]))
       setMSettings(data)
-      const report = await validateSettings(api, data, setLoadingStatus)
+      const report = await validatePreseed(api, data, setLoadingStatus)
       setReport(report)
       setLoading(false)
     } catch (err) {
@@ -69,14 +69,14 @@ const SettingsUploadPage = (props) => {
   }
 
   /*
-   * Helper method to deploy the configuration
+   * Helper method to preseed the configuration
    */
-  const deploy = async () => {
+  const preseed = async () => {
     setLoading(true)
-    setLoadingStatus([true, 'Deploying your settings, this will take a while'])
-    const [data, status] = await api.setup(mSettings)
+    setLoadingStatus([true, 'Preseeding your settings, this will take a while'])
+    const [data, status] = await api.preseed(mSettings)
     if (data.result !== 'success' || status !== 200)
-      return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
+      return setLoadingStatus([true, `Unable to preseed the settings`, true, false])
     else {
       setLoading(false)
       setDeployResult(data)
@@ -162,8 +162,8 @@ const SettingsUploadPage = (props) => {
                     <SettingsReport report={report} />
                     <p className="text-center mt-4">
                       {report.deployable ? (
-                        <button className="btn btn-primary btn-lg w-full" onClick={deploy}>
-                          Apply Settings
+                        <button className="btn btn-primary btn-lg w-full" onClick={preseed}>
+                          Preseed Settings
                         </button>
                       ) : (
                         <button className="btn btn-primary w-52 mx-auto" onClick={restart}>
@@ -177,7 +177,7 @@ const SettingsUploadPage = (props) => {
                   <>
                     <h3 className="text-center">{props.title}</h3>
                     <FileInput
-                      label="Settings file (YAML or JSON)"
+                      label="Preseed file (YAML or JSON)"
                       update={processUpload}
                       current=""
                       id="file"
@@ -237,11 +237,11 @@ const SettingsUploadPage = (props) => {
   )
 }
 
-export default SettingsUploadPage
+export default SettingsPreseedPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Provide a Morio Settings File',
-    page: ['setup', 'upload'],
+    title: 'Provide a Morio Preseed File',
+    page: ['setup', 'preseed'],
   },
 })

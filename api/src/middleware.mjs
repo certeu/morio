@@ -14,6 +14,7 @@ const ephemeralRoutes = [
   'GET:/info',
   'POST:/cluster/join',
   'POST:/validate/settings',
+  'POST:/validate/preseed',
 ]
 
 /*

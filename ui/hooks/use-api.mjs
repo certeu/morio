@@ -328,6 +328,21 @@ MorioClient.prototype.validateSettings = async function (settings) {
 }
 
 /**
+ * Validates the preseed settings
+ *
+ * This endpoint does not require authentication
+ * @param {object} preseed - The preseed object to validate
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.validatePreseed = async function (preseed) {
+  return await this.call(`${morioConfig.api}/validate/preseed`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(preseed),
+  })
+}
+
+/**
  * Validates a Morio node
  *
  * This endpoint does not require authentication
@@ -361,7 +376,7 @@ MorioClient.prototype.dockerGetContainer = async function (id) {
  *
  * This endpoint does not require authentication but only
  * works on an ephemeral node
- * @param {object} config - The configuration to deploy
+ * @param {object} settings - The settings to deploy
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.setup = async function (settings) {
@@ -369,6 +384,22 @@ MorioClient.prototype.setup = async function (settings) {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(settings),
+  })
+}
+
+/**
+ * Initial preseed
+ *
+ * This endpoint does not require authentication but only
+ * works on an ephemeral node
+ * @param {object} preseed - The preseed settings
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.preseed = async function (preseed) {
+  return await this.call(`${morioConfig.api}/preseed`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(preseed),
   })
 }
 

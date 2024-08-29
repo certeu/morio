@@ -175,16 +175,32 @@ export const template = (input, replace = {}) =>
   typeof input === 'undefined' ? input : mustache.render(input, replace)
 
 /**
- * Helper method to validate the configuration
+ * Helper method to validate the settings
  *
  * @param {object} api - The api client as returned from the useApi hook
- * @param {object} config - The configuration to validate
+ * @param {object} settings - The settings to validate
  * @param {function} setLoadingStatus - The setLoadingStatus method from loading context
  */
 export const validateSettings = async (api, settings, setLoadingStatus) => {
   setLoadingStatus([true, 'Contacting Morio API'])
   const [report, statusCode] = await api.validateSettings(settings)
   if (report && statusCode === 200) setLoadingStatus([true, 'Settings validated', true, true])
+  else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
+
+  return report
+}
+
+/**
+ * Helper method to validate the preseed settings
+ *
+ * @param {object} api - The api client as returned from the useApi hook
+ * @param {object} preseed - The preseed settings to validate
+ * @param {function} setLoadingStatus - The setLoadingStatus method from loading context
+ */
+export const validatePreseed = async (api, preseed, setLoadingStatus) => {
+  setLoadingStatus([true, 'Contacting Morio API'])
+  const [report, statusCode] = await api.validatePreseed(preseed)
+  if (report && statusCode === 200) setLoadingStatus([true, 'Preseed validated', true, true])
   else setLoadingStatus([true, `Morio API returned an error [${statusCode}]`, true, false])
 
   return report
