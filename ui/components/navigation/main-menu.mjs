@@ -100,13 +100,6 @@ export const links = {
       containers: {},
       images: {},
       networks: {},
-      nodes: {},
-      services: {},
-      tasks: {},
-      volumes: {},
-    },
-    logs: {
-      t: 'Status Logs',
     },
     dashboard: {
       t: 'Traefik Dashboard',

@@ -1,7 +1,7 @@
 // Dependencies
 import { validateSettings } from 'lib/utils.mjs'
-// Deployment template
-import { deployment } from './templates/deployment.mjs'
+// Cluster template
+import { cluster } from './templates/cluster.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
@@ -17,6 +17,11 @@ import { OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { Link } from 'components/link.mjs'
+
+/*
+ * Little helper method to strip out the TMP key from an object
+ */
+const withoutTMP = (obj) => ({ ...obj, TMP: undefined })
 
 /*
  * Displays configuration validation
@@ -78,7 +83,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   const deploy = async () => {
     setDeploymentOngoing(true)
     setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
-    const [data, status] = await api.setup(mSettings)
+    const [data, status] = await api.setup(withoutTMP(mSettings))
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
     else {
@@ -133,11 +138,11 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
 
   const toggleValidate = async () => {
     if (!validateView) {
-      setValidationReport(await validateSettings(api, mSettings, setLoadingStatus))
+      setValidationReport(await validateSettings(api, withoutTMP(mSettings), setLoadingStatus))
     }
     setValidateView(!validateView)
   }
-  const formEl = deployment(mSettings, toggleValidate).children.setup.form
+  const formEl = cluster(mSettings, toggleValidate).children.setup.form
 
   return (
     <div className="w-full max-w-2xl mx-auto">

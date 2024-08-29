@@ -166,6 +166,10 @@ const settings = Joi.object({
     flags: Joi.object({
       HEADLESS_MORIO: Joi.boolean(),
       DISABLE_ROOT_TOKEN: Joi.boolean(),
+      DISABLE_IDP_APIKEY: Joi.boolean(),
+      DISABLE_IDP_LDAP: Joi.boolean(),
+      DISABLE_IDP_LOCAL: Joi.boolean(),
+      DISABLE_IDP_MRT: Joi.boolean(),
     }),
     secrets: Joi.object(),
     vars: Joi.object(),

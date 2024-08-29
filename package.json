@@ -61,6 +61,7 @@
     "docker:build.moriod.rpm": "./scripts/docker-build-moriod-rpm.sh",
     "destroy": "./scripts/destroy.sh",
     "dev": "./core/run-dev-container.sh",
+    "e2e:ephemeral": "cd ui && npm run test:ephemeral && cd -",
     "get": "node --no-warnings shared/src/cli-get.mjs",
     "help": "cat docs/includes/cli-help-content.md",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",

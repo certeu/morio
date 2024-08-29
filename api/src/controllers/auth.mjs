@@ -7,7 +7,7 @@ import { availableRoles } from '../rbac.mjs'
 /**
  * List of allowListed URLs that do not require authentication
  */
-const allowedUris = [
+const allowedUrisBase = [
   `/setup`,
   `/preseed`,
   `/status`,
@@ -22,6 +22,12 @@ const allowedUris = [
   `/validate/settings`,
   `/ca/certificates`,
 ]
+
+/*
+ * Add them all again but with a trailing slash this time
+ * This will avoid head-scratching and support calls
+ */
+const allowedUris = [...allowedUrisBase, ...allowedUrisBase.map((url) => url + '/')]
 
 /**
  * List of allowListed URL patterns do not require authentication

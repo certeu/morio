@@ -70,3 +70,10 @@ yarn-error.log*
 
 # backup files for aspell
 *.bak
+
+# Playwright
+ui/.test-results/
+ui/playwright-report/
+ui/blob-report/
+ui/playwright/.cache/
+

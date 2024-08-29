@@ -34,7 +34,7 @@ export const EphemeralWrapper = ({ children }) => {
   useEffect(() => {
     const checkState = async () => {
       const result = await api.getStatus()
-      if (result[1] === 200 && result[0].ephemeral === true) setEphemeral(true)
+      if (result[1] === 200 && result[0].state?.ephemeral === true) setEphemeral(true)
     }
     if (!ephemeral) checkState()
   }, [])
@@ -54,7 +54,7 @@ export const EphemeralWrapper = ({ children }) => {
           </button>
         </h1>
         <Popout note>
-          <h5>Morio&apos;s setup wizard can only be used in epehemeral state</h5>
+          <h5>Morio&apos;s setup wizard can only be used in ephemeral state</h5>
           <p>
             This Morio instance has already been set up.
             <br />
