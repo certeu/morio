@@ -43,16 +43,18 @@ const asYamlOrJson = (input, base64=false) => {
  * Helper method to load a preseed file from a URL
  *
  * @param {object} config - The preseed config
- * @param {object} utils - The utils object
  * @return {object} config - The loaded config
  */
-export const loadPreseedFileFromUrl = async (config, utils) => {
-  const result = await testUrl(config.url, {
-    ignoreCertificate: config.verify_certificate === false ? false : true,
-    timeout: 4500,
-    returnAs: 'json',
-    headers: config.headers ? config.headers : undefined
-  })
+export const loadPreseedFileFromUrl = async (config) => {
+  const result = await testUrl(
+    typeof config === 'string' ? config : config.url,
+    {
+      ignoreCertificate: config.verify_certificate === false ? false : true,
+      timeout: 4500,
+      returnAs: 'json',
+      headers: config.headers ? config.headers : undefined
+    }
+  )
 
   /*
    * Handle YAML
@@ -66,10 +68,9 @@ export const loadPreseedFileFromUrl = async (config, utils) => {
  * Helper method to load a preseed file from the Gitlab API
  *
  * @param {object} config - The preseed config
- * @param {object} utils - The utils object
  * @return {object} config - The loaded config
  */
-export const loadPreseedFileFromGitlab = async (config, utils) => {
+export const loadPreseedFileFromGitlab = async (config) => {
   const result = await testUrl(
     `${config.gitlab.url}/api/v4/projects/${config.gitlab.project_id}/repository/files/${encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`,
     {
@@ -90,10 +91,9 @@ export const loadPreseedFileFromGitlab = async (config, utils) => {
  * Helper method to load a preseed file from the Github API
  *
  * @param {object} config - The preseed config
- * @param {object} utils - The utils object
  * @return {object} config - The loaded config
  */
-export const loadPreseedFileFromGithub = async (config, utils) => {
+export const loadPreseedFileFromGithub = async (config) => {
   const result = await testUrl(
     `${config.github.url || 'https://api.github.com'}/repos/${config.github.owner}/${config.github.repo}/contents/${encodeURIComponent(config.github.file_path)}?ref=${config.github.ref}`,
     {
@@ -119,13 +119,35 @@ export const loadPreseedFileFromGithub = async (config, utils) => {
  * Helper method to load a preseed file
  *
  * @param {object} preseed - The preseed file config
- * @param {object} utils - The utils object
  * @return {object} config - The loaded config
  */
-export const loadPreseedFile = async (config={}, utils) => {
-  if (config.url) return await loadPreseedFileFromUrl(config, utils)
-  if (config.gitlab) return await loadPreseedFileFromGitlab(config, utils)
-  if (config.github) return await loadPreseedFileFromGithub(config, utils)
+export const loadPreseedFile = async (config={}, base=false) => {
+  if (base === false) {
+    /*
+     * No base settings passed in, so we are loading the base settings here
+     */
+    if (typeof config === 'string' || config.url) return await loadPreseedFileFromUrl(config)
+    if (config.gitlab) return await loadPreseedFileFromGitlab(config)
+    if (config.github) return await loadPreseedFileFromGithub(config)
+  } else {
+    /*
+     * Base settings were passed in, so we are loading an overlay here
+     * We need to handle the various ways this can be specified
+     */
+    if (base.gitlab) {
+      if (typeof config === 'string') return await loadPreseedFileFromGitlab({ gitlab: { ...base.gitlab, file_path: config }})
+      else return await loadPreseedFileFromGitlab({ ...base, ...config})
+    }
+    if (base.github) {
+      if (typeof config === 'string') return await loadPreseedFileFromGithub({ github: { ...base.github, file_path: config }})
+      else return await loadPreseedFileFromGithub({ ...base, ...config})
+    }
+    if (typeof base === 'string') return await loadPreseedFileFromUrl(config)
+    if (base.url) {
+      if (typeof config === 'string') return await loadPreseedFileFromUrl({ ...base, url: config })
+      else return await loadPreseedFileFromUrl({...base, ...config })
+    }
+  }
 
   return false
 }
@@ -134,16 +156,15 @@ export const loadPreseedFile = async (config={}, utils) => {
  * Helper method to load a preseeded configuration
  *
  * @param {object} preseed - The preseed config
- * @param {object} utils - The utils object
  * @param {object} log - A logger instance
  * @return {object} config - The loaded config
  */
-export const loadPreseededConfig = async (preseed, utils, log) => {
+export const loadPreseededSettings = async (preseed, log) => {
   /*
    * Attempt to load the preseed base file
    */
-  const config = await loadPreseedFile(preseed.base, utils)
-  if (!config) {
+  const settings = await loadPreseedFile(preseed.base)
+  if (!settings) {
     log.warn(`Failed to load preseed base file`)
     return false
   }
@@ -158,7 +179,7 @@ export const loadPreseededConfig = async (preseed, utils, log) => {
     let i = 0
     for (const overlay of preseed.overlays) {
       i++
-      const overlayConfig = await loadPreseedFile(overlay)
+      const overlayConfig = await loadPreseedFile(overlay, preseed.base)
       if (!overlayConfig) {
         /*
          * We _could_ continue if an overlay cannot be loaded
@@ -171,12 +192,12 @@ export const loadPreseededConfig = async (preseed, utils, log) => {
       else {
         log.debug(`Loaded preseed overlay ${i}/${count}`)
         for (const [path, value] of Object.entries(overlayConfig)) {
-          set(config, path, value)
+          set(settings, path, value)
         }
       }
     }
   }
 
-  return config
+  return settings
 }
 

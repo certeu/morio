@@ -1,7 +1,7 @@
 import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
-import { loadPreseededConfig } from '#shared/loaders'
+import { loadPreseededSettings } from '#shared/loaders'
 
 /**
  * This core controller provides access to morio core
@@ -175,7 +175,7 @@ Controller.prototype.preseed = async (req, res) => {
     return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
 
   /*
-   * Validate request against schema, but strip headers from body first
+   * Validate preseed request against schema, but strip headers from body first
    */
   const body = { ...req.body }
   delete body.headers
@@ -187,14 +187,24 @@ Controller.prototype.preseed = async (req, res) => {
   }
 
   /*
-   * Load the preseeded config so we can validate it
+   * Load the preseeded settings so we can validate them
    */
-  const config = await loadPreseededConfig(body, utils, log)
+  const settings = await loadPreseededSettings(body, log)
+
+  /*
+   * Validate settings against the schema
+   */
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
 
   /*
    * Validate settings are deployable
    */
-  const report = await validateSettings(config)
+  const report = await validateSettings(settings)
 
   /*
    * Make sure setting are valid
@@ -240,7 +250,6 @@ Controller.prototype.settings = async (req, res) => {
    * Validate settings
    */
   const report = await validateSettings(req.body)
-  console.log(report)
 
   /*
    * Make sure setting are valid

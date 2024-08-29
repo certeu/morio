@@ -128,7 +128,8 @@ const preseedFile = Joi.alternatives().try(
         vaultSecret,
       ).required()
     })
-  })
+  }),
+  Joi.string()
 )
 
 /*
@@ -136,7 +137,7 @@ const preseedFile = Joi.alternatives().try(
  */
 const preseed = Joi.object({
   base: preseedFile,
-  overlays: Joi.array().items(preseedFile),
+  overlays: Joi.array().items(preseedFile)
 })
 
 /*
