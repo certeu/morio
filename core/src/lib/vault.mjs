@@ -1,6 +1,5 @@
-import { log, utils } from './utils.mjs'
+import { utils } from './utils.mjs'
 import { generateJwt } from '#shared/crypto'
-import jwt from 'jsonwebtoken'
 import axios from 'axios'
 
 /*

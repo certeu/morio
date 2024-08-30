@@ -385,13 +385,13 @@ const deployNewSettings = async (settings) => {
   /*
    * Handle secrets
    */
-  if (valid.tokens?.secrets) valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
+  if (settings.tokens?.secrets) settings.tokens.secrets = ensureTokenSecrecy(settings.tokens.secrets)
 
   /*
-   * Write the protected valid settings to disk
+   * Write the protected settings to disk
    */
   log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, settings)
 
   return result
 }

@@ -1,7 +1,7 @@
-import axios from 'axios'
 import { testUrl } from './network.mjs'
 import set from 'lodash.set'
 import yaml from 'js-yaml'
+import { Buffer } from 'node:buffer'
 
 /*
  * A collection of utils to load various files
