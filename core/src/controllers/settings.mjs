@@ -24,7 +24,7 @@ export function Controller() {}
 
 const ensureTokenSecrecy = (secrets) => {
   for (let [key, val] of Object.entries(secrets)) {
-    if (!utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
+    if (!val?.vault && !utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
   }
 
   return secrets

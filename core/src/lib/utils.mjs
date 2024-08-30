@@ -5,6 +5,7 @@ import { getPreset, inProduction } from '#config'
 import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
+import { vaultGetSecret } from './vault.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -138,7 +139,7 @@ utils.getClusterFqdn = () => {
 }
 
 /**
- * Helper method to get the data for a cluster rnode
+ * Helper method to get the data for a cluster node
  */
 utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], false)
 
@@ -1138,6 +1139,13 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
     .send({ ...data, ...extraData })
     .end()
 }
+
+/**
+ * Unwrap a secret
+ */
+utils.unwrapSecret = async (key, val) => (val?.vault)
+  ? await vaultGetSecret(key, val.vault)
+  : utils.decrypt(val)
 
 /**
  * Add validate method for eacy access

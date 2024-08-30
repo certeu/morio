@@ -85,7 +85,14 @@ const keys = Joi.object({
  * A vault secret
  */
 const vaultSecret = Joi.object({
-  vault: Joi.string().required()
+  vault: Joi.alternatives().try(
+    Joi.string(),
+    Joi.object({
+      path: Joi.string().required(),
+      key: Joi.string().required(),
+      instance: Joi.string()
+    })
+  )
 })
 
 /*
@@ -94,6 +101,9 @@ const vaultSecret = Joi.object({
 const vaultInstance = Joi.object({
   url: Joi.string().uri().required(),
   verify_certificate: Joi.boolean(),
+  role: Joi.string(),
+  jwt_auth_path: Joi.string(),
+  kv_path: Joi.string(),
 })
 
 /*
