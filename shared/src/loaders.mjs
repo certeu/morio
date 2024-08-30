@@ -17,22 +17,18 @@ import { Buffer } from 'node:buffer'
 /**
  * Helper method to parse a result as YAML or JSON
  */
-const asYamlOrJson = (input, base64=false) => {
-  const data = base64
-    ? Buffer.from(input, 'base64').toString('utf-8')
-    : input
+const asYamlOrJson = (input, base64 = false) => {
+  const data = base64 ? Buffer.from(input, 'base64').toString('utf-8') : input
   try {
     const yml = yaml.load(data)
     if (yml) return yml
-  }
-  catch (err) {
+  } catch (err) {
     // So it's not yaml
   }
   try {
     const json = JSON.parse(data)
     if (json) return json
-  }
-  catch (err) {
+  } catch (err) {
     // So it's not json either?
   }
 
@@ -46,22 +42,17 @@ const asYamlOrJson = (input, base64=false) => {
  * @return {object} config - The loaded config
  */
 export const loadPreseedFileFromUrl = async (config) => {
-  const result = await testUrl(
-    typeof config === 'string' ? config : config.url,
-    {
-      ignoreCertificate: config.verify_certificate === false ? false : true,
-      timeout: 4500,
-      returnAs: 'json',
-      headers: config.headers ? config.headers : undefined
-    }
-  )
+  const result = await testUrl(typeof config === 'string' ? config : config.url, {
+    ignoreCertificate: config.verify_certificate === false ? false : true,
+    timeout: 4500,
+    returnAs: 'json',
+    headers: config.headers ? config.headers : undefined,
+  })
 
   /*
    * Handle YAML
    */
-  return typeof result === 'string'
-    ? asYamlOrJson(result, false)
-    : result
+  return typeof result === 'string' ? asYamlOrJson(result, false) : result
 }
 
 /**
@@ -77,14 +68,11 @@ export const loadPreseedFileFromGitlab = async (config) => {
       ignoreCertificate: config.verify_certificate === false ? true : false,
       timeout: 4500,
       returnAs: 'json',
-      headers: config.gitlab.token
-        ? { 'PRIVATE-TOKEN': config.gitlab.token }
-        : undefined
-  })
+      headers: config.gitlab.token ? { 'PRIVATE-TOKEN': config.gitlab.token } : undefined,
+    }
+  )
 
-  return typeof result.content === 'string'
-    ? asYamlOrJson(result.content, true)
-    : false
+  return typeof result.content === 'string' ? asYamlOrJson(result.content, true) : false
 }
 
 /**
@@ -102,17 +90,14 @@ export const loadPreseedFileFromGithub = async (config) => {
       timeout: 4500,
       returnAs: 'json',
       headers: {
-        Accept: "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28",
-        Authorization: config.github.token
-          ? `Bearer ${config.github.token}`
-          : undefined
-      }
-  })
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        Authorization: config.github.token ? `Bearer ${config.github.token}` : undefined,
+      },
+    }
+  )
 
-  return typeof result.content === 'string'
-    ? asYamlOrJson(result.content, true)
-    : false
+  return typeof result.content === 'string' ? asYamlOrJson(result.content, true) : false
 }
 
 /**
@@ -121,7 +106,7 @@ export const loadPreseedFileFromGithub = async (config) => {
  * @param {object} preseed - The preseed file config
  * @return {object} config - The loaded config
  */
-export const loadPreseedFile = async (config={}, base=false) => {
+export const loadPreseedFile = async (config = {}, base = false) => {
   if (base === false) {
     /*
      * No base settings passed in, so we are loading the base settings here
@@ -135,17 +120,19 @@ export const loadPreseedFile = async (config={}, base=false) => {
      * We need to handle the various ways this can be specified
      */
     if (base.gitlab) {
-      if (typeof config === 'string') return await loadPreseedFileFromGitlab({ gitlab: { ...base.gitlab, file_path: config }})
-      else return await loadPreseedFileFromGitlab({ ...base, ...config})
+      if (typeof config === 'string')
+        return await loadPreseedFileFromGitlab({ gitlab: { ...base.gitlab, file_path: config } })
+      else return await loadPreseedFileFromGitlab({ ...base, ...config })
     }
     if (base.github) {
-      if (typeof config === 'string') return await loadPreseedFileFromGithub({ github: { ...base.github, file_path: config }})
-      else return await loadPreseedFileFromGithub({ ...base, ...config})
+      if (typeof config === 'string')
+        return await loadPreseedFileFromGithub({ github: { ...base.github, file_path: config } })
+      else return await loadPreseedFileFromGithub({ ...base, ...config })
     }
     if (typeof base === 'string') return await loadPreseedFileFromUrl(config)
     if (base.url) {
       if (typeof config === 'string') return await loadPreseedFileFromUrl({ ...base, url: config })
-      else return await loadPreseedFileFromUrl({...base, ...config })
+      else return await loadPreseedFileFromUrl({ ...base, ...config })
     }
   }
 
@@ -167,8 +154,7 @@ export const loadPreseededSettings = async (preseed, log) => {
   if (!settings) {
     log.warn(`Failed to load preseed base file`)
     return false
-  }
-  else log.debug(`Loaded preseed base file`)
+  } else log.debug(`Loaded preseed base file`)
 
   /*
    * Handle any preseed overlays
@@ -186,10 +172,11 @@ export const loadPreseededSettings = async (preseed, log) => {
          * but doing so would result in a non-deterministic config.
          * Better to bail and make it clear something is wrong.
          */
-        log.debug(`Failed to load preseed overlay ${i}/${count}. Cannot load preseeded configuration.`)
+        log.debug(
+          `Failed to load preseed overlay ${i}/${count}. Cannot load preseeded configuration.`
+        )
         return false
-      }
-      else {
+      } else {
         log.debug(`Loaded preseed overlay ${i}/${count}`)
         for (const [path, value] of Object.entries(overlayConfig)) {
           set(settings, path, value)
@@ -200,4 +187,3 @@ export const loadPreseededSettings = async (preseed, log) => {
 
   return settings
 }
-

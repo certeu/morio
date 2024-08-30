@@ -9,26 +9,20 @@ import axios from 'axios'
  * So, this minimal implementation will do the trick.
  */
 
-
 export const vaultGetSecret = async (key, vault) => {
   const vconf = getVaultConfig(key, vault)
   const token = await getVaultToken(vconf)
   const secret = await getVaultSecret(vconf, token)
 
-  return secret
-    ? secret
-    : false
+  return secret ? secret : false
 }
 
 const getVaultSecret = async (vconf, token) => {
-  const result = await axios.get(
-    `${vconf.url}/v1/${vconf.kv_path}/data/${vconf.path}`,
-    { headers: { 'X-Vault-Token': token } }
-  )
+  const result = await axios.get(`${vconf.url}/v1/${vconf.kv_path}/data/${vconf.path}`, {
+    headers: { 'X-Vault-Token': token },
+  })
 
-  return result?.data?.data?.data?.[vconf.key]
-    ? result.data.data.data[vconf.key]
-    : false
+  return result?.data?.data?.data?.[vconf.key] ? result.data.data.data[vconf.key] : false
 }
 
 const getVaultToken = async (vconf) => {
@@ -48,21 +42,19 @@ const getVaultToken = async (vconf) => {
     passphrase: utils.getKeys().mrt,
     options: {
       expiresIn: '3m',
-      issuer: utils.getClusterFqdn()
-    }
+      issuer: utils.getClusterFqdn(),
+    },
   })
 
   /*
    * Authenticate with JWT to get a Vault token
    */
-  const result = await axios.post(
-    `${vconf.url}/v1/auth/${vconf.jwt_auth_path}/login`,
-    { jwt, role: vconf.role },
-  )
+  const result = await axios.post(`${vconf.url}/v1/auth/${vconf.jwt_auth_path}/login`, {
+    jwt,
+    role: vconf.role,
+  })
 
-  return result?.data?.auth?.client_token
-    ? result.data.auth.client_token
-    : false
+  return result?.data?.auth?.client_token ? result.data.auth.client_token : false
 }
 
 const getVaultConfig = (key, vault) => {
@@ -87,12 +79,12 @@ const getVaultConfig = (key, vault) => {
     vconf.key = result[2] || key
     if (result[3]) vconf = { ...vconf, ...utils.getSettings(['vaults', result[3]], {}) }
     else vconf = { ...defaults, ...vconf, ...utils.getSettings('vault', {}) }
-  }
-  else {
+  } else {
     /*
      * If it's not a string, that makes it easier
      */
-    if (vault.instance) vconf = { ...defaults, ...utils.getSettings(['vaults', vault.instance], {}), ...vault }
+    if (vault.instance)
+      vconf = { ...defaults, ...utils.getSettings(['vaults', vault.instance], {}), ...vault }
     else vconf = { ...defaults, ...utils.getSettings('vault', {}), ...vault }
   }
 

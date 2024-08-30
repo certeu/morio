@@ -108,9 +108,10 @@ Controller.prototype.getJwks = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getPubkey = async (req, res, pem=false) => pem
-  ? res.type('application/x-pem-file').send(utils.getKeys().public)
-  : res.send({ pubkey: utils.getKeys().public })
+Controller.prototype.getPubkey = async (req, res, pem = false) =>
+  pem
+    ? res.type('application/x-pem-file').send(utils.getKeys().public)
+    : res.send({ pubkey: utils.getKeys().public })
 
 /**
  * Get status
@@ -145,7 +146,7 @@ Controller.prototype.getStatus = async (req, res) => {
       reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
-      settings_preseeded: utils.getSettings('preseed', false) ? true : false
+      settings_preseeded: utils.getSettings('preseed', false) ? true : false,
     },
     core: utils.getCoreStatus(),
   })

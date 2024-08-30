@@ -131,7 +131,7 @@ export const get = async function (url, raw = false, log = false) {
     }
   }
 
-  return [(response?.status ? response.status : false), body]
+  return [response?.status ? response.status : false, body]
 }
 
 /*

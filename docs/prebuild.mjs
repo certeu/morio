@@ -26,7 +26,6 @@ const writeOpenAPISpecs = async () => {
     await writeFile(`./static/oas-${name}.yaml`, yaml.dump(spec))
 }
 
-
 /*
  * Helper method to wrap auto-generated content in opening and closing comments
  * This allows us to update it should we ever need to, even if the page has been hand-edited.
@@ -82,7 +81,6 @@ const ensurePresetPages = async () => {
   }
 }
 
-
 /*
  * Helper method to create a preset page
  */
@@ -101,7 +99,6 @@ const renderPresetValue = (val) => {
   if (Array.isArray(val)) return `<ul>${val.map((item) => '<li>' + item + '</li>').join(' ')}</ul>`
   else return `<pre>${JSON.stringify(val, null, 2)}</pre>`
 }
-
 
 /*
  * Helper method to create/ensure pages for all errors
@@ -192,15 +189,15 @@ const ensureJargonImports = async () => {
     imports.push(`import ${ikey}, { frontMatter as ${ikey}Fm } from '@site/jargon/${key}.md'`)
     data.push(
       `  "${fm.data?.term ? fm.data.term.toLowerCase() : key.toLowerCase()}": {` +
-      `title: "${fm.data?.title ? fm.data.title : key.toUpperCase()}", ` +
-      `aliases: ${fm.data?.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
-      `content: ${ikey} }`
+        `title: "${fm.data?.title ? fm.data.title : key.toUpperCase()}", ` +
+        `aliases: ${fm.data?.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
+        `content: ${ikey} }`
     )
   }
 
   await writeFile(
     path.resolve('./prebuild/jargon.js'),
-    header + imports.join("\n") + "\n\n" + 'export default {' + "\n" + data.join(",\n") + "\n}\n"
+    header + imports.join('\n') + '\n\n' + 'export default {' + '\n' + data.join(',\n') + '\n}\n'
   )
 }
 
@@ -211,29 +208,32 @@ const ensureTerminologyImports = async () => {
   const data = []
   const imports = []
   const root = path.resolve('./docs/reference/terminology')
-  const pages = (await readDirectory(root)).filter(dir => dir !== "readme.md").map((page) => page.split(`${root}/`).pop())
+  const pages = (await readDirectory(root))
+    .filter((dir) => dir !== 'readme.md')
+    .map((page) => page.split(`${root}/`).pop())
   for (const page of pages) {
     const file = path.resolve(`./docs/reference/terminology/${page}/readme.md`)
     const md = await readFile(file)
     const fm = matter(md)
     const key = page
     const ikey = toImportKey(key)
-    imports.push(`import { frontMatter as ${ikey} } from '@site/docs/reference/terminology/${key}/readme.md'`)
+    imports.push(
+      `import { frontMatter as ${ikey} } from '@site/docs/reference/terminology/${key}/readme.md'`
+    )
     data.push(
       `  "${key.split('-').join(' ').toLowerCase()}": { ` +
-      `title: "${fm.data.title ? fm.data.title : key}", ` +
-      `term: "${fm.data.term ? fm.data.term.toLowerCase() : fm.data.title.toLowerCase()}", ` +
-      `aliases: ${fm.data.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
-      `url: "/docs/reference/terminology/${key}" }`
+        `title: "${fm.data.title ? fm.data.title : key}", ` +
+        `term: "${fm.data.term ? fm.data.term.toLowerCase() : fm.data.title.toLowerCase()}", ` +
+        `aliases: ${fm.data.aliases ? JSON.stringify(fm.data.aliases) : '[]'}, ` +
+        `url: "/docs/reference/terminology/${key}" }`
     )
   }
 
   await writeFile(
     path.resolve('./prebuild/terminology.js'),
-    header + imports.join("\n") + "\n\n" + 'export default {' + "\n" + data.join(",\n") + "\n}\n"
+    header + imports.join('\n') + '\n\n' + 'export default {' + '\n' + data.join(',\n') + '\n}\n'
   )
 }
-
 
 /*
  * Main method that does what needs doing for the docs

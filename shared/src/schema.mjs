@@ -90,9 +90,9 @@ const vaultSecret = Joi.object({
     Joi.object({
       path: Joi.string().required(),
       key: Joi.string().required(),
-      instance: Joi.string()
+      instance: Joi.string(),
     })
-  )
+  ),
 })
 
 /*
@@ -112,7 +112,7 @@ const vaultInstance = Joi.object({
 const preseedFile = Joi.alternatives().try(
   Joi.object({
     url: Joi.string().uri().required(),
-    headers: Joi.object()
+    headers: Joi.object(),
   }),
   Joi.object({
     gitlab: Joi.object({
@@ -120,11 +120,8 @@ const preseedFile = Joi.alternatives().try(
       project_id: Joi.number().required(),
       file_path: Joi.string().required(),
       ref: Joi.string(),
-      token: Joi.alternatives().try(
-        Joi.string(),
-        vaultSecret,
-      ).required()
-    })
+      token: Joi.alternatives().try(Joi.string(), vaultSecret).required(),
+    }),
   }),
   Joi.object({
     github: Joi.object({
@@ -133,11 +130,8 @@ const preseedFile = Joi.alternatives().try(
       repo: Joi.string().required(),
       file_path: Joi.string().required(),
       ref: Joi.string(),
-      token: Joi.alternatives().try(
-        Joi.string(),
-        vaultSecret,
-      ).required()
-    })
+      token: Joi.alternatives().try(Joi.string(), vaultSecret).required(),
+    }),
   }),
   Joi.string()
 )
@@ -147,7 +141,7 @@ const preseedFile = Joi.alternatives().try(
  */
 const preseed = Joi.object({
   base: preseedFile,
-  overlays: Joi.array().items(preseedFile)
+  overlays: Joi.array().items(preseedFile),
 })
 
 /*

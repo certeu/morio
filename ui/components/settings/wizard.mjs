@@ -27,46 +27,46 @@ import { Box } from 'components/box.mjs'
 const Welcome = ({ setView }) => (
   <>
     <p>These pages allow you to update the settings of this Morio deployment.</p>
-      <h2>Getting started</h2>
-      <p>
-        Use the navigation menu on the right to locate the settings you want to update.
+    <h2>Getting started</h2>
+    <p>
+      Use the navigation menu on the right to locate the settings you want to update.
+      <br />
+      When you have made your changes{' '}
+      <a role="button" onClick={() => setView('validate')}>
+        navigate to the validation page
+      </a>{' '}
+      to apply your changes:
+    </p>
+    <ul className="list list-disc list-inside ml-4">
+      <li>
+        <b>Step 1</b>: Click the <b>Validate Settings</b> button
         <br />
-        When you have made your changes{' '}
-        <a role="button" onClick={() => setView('validate')}>
-          navigate to the validation page
-        </a>{' '}
-        to apply your changes:
-      </p>
-      <ul className="list list-disc list-inside ml-4">
-        <li>
-          <b>Step 1</b>: Click the <b>Validate Settings</b> button
-          <br />
-          <small className="pl-4">No changes will be made at this point</small>
-        </li>
-        <li>
-          <b>Step 2</b>: Click the <b>Apply Settings</b> button to make the changes permanent
-          <br />
-          <small className="pl-4">Only possible if validation is successful</small>
-        </li>
-      </ul>
+        <small className="pl-4">No changes will be made at this point</small>
+      </li>
+      <li>
+        <b>Step 2</b>: Click the <b>Apply Settings</b> button to make the changes permanent
+        <br />
+        <small className="pl-4">Only possible if validation is successful</small>
+      </li>
+    </ul>
     <Popout note compact noP dense>
       All changes are ephemeral until you apply them.
     </Popout>
-      <h5>Shortcuts</h5>
-      <ul className="list list-disc list-inside ml-4">
-        <li>
-          The <b>Validate Settings</b> button on the right will always take you to{' '}
-          <a role="button" onClick={() => setView('validate')}>
-            the validation page
-          </a>
-        </li>
-        <li>
-          The <b>Getting Started</b> button on the right will always bring you back to{' '}
-          <a role="button" onClick={() => setView('start')}>
-            this page
-          </a>
-        </li>
-      </ul>
+    <h5>Shortcuts</h5>
+    <ul className="list list-disc list-inside ml-4">
+      <li>
+        The <b>Validate Settings</b> button on the right will always take you to{' '}
+        <a role="button" onClick={() => setView('validate')}>
+          the validation page
+        </a>
+      </li>
+      <li>
+        The <b>Getting Started</b> button on the right will always bring you back to{' '}
+        <a role="button" onClick={() => setView('start')}>
+          this page
+        </a>
+      </li>
+    </ul>
   </>
 )
 
@@ -444,29 +444,33 @@ export const PrimedSettingsWizard = (props) => {
     setPreview,
   }
 
-  if (deployOngoing) {
-    const text = `text-${done ? 'success' : 'accent'}-content`
+  if (deployOngoing)
     return (
       <WizardWrapper {...wrapProps} title="Apply Settings">
         <Box color="success">
           <div className="flex flex-row items-center gap-2 text-success-content">
-            <div className="w-6 h-6"><OkIcon className="w-6 h-6 text-success-content" stroke={4} /></div>
+            <div className="w-6 h-6">
+              <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
+            </div>
             Settings are being deployed
           </div>
         </Box>
         <p>Please wait as Morio applies the new settings.</p>
       </WizardWrapper>
     )
-  }
 
   return (
     <WizardWrapper {...wrapProps}>
       {mSettings.preseed?.base ? (
         <Popout warning>
           <h5>These settings are preseeded</h5>
-          <p>This Morio deployment uses preseeded settings. This means the settings are loaded from a remote system, typically a version control system like GitLab or GitHub.</p>
           <p>
-            While you <b>can</b> update the settings here, those settings will be lost next time Morio is reseeded.
+            This Morio deployment uses preseeded settings. This means the settings are loaded from a
+            remote system, typically a version control system like GitLab or GitHub.
+          </p>
+          <p>
+            While you <b>can</b> update the settings here, those settings will be lost next time
+            Morio is reseeded.
             <br />
             You probably should <b>update the preseeded setting instead</b>.
           </p>

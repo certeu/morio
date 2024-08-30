@@ -771,7 +771,9 @@ export const DisplayDockerImage = ({ data }) => {
         <StatsWrapper>
           <div className="stat place-items-center">
             <div className="stat-title">Created</div>
-            <div className="stat-value capitalize"><TimeAgoBrief time={new Date(data.Created)}/></div>
+            <div className="stat-value capitalize">
+              <TimeAgoBrief time={new Date(data.Created)} />
+            </div>
             <div className="stat-desc"></div>
           </div>
         </StatsWrapper>

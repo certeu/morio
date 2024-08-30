@@ -11,12 +11,12 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { StatusIcon, OkIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 import { Docker, Traefik, RedPandaConsole } from 'components/brands.mjs'
-import { StorageIcon, RestartIcon, ReseedIcon } from 'components/icons.mjs'
+import { RestartIcon, ReseedIcon } from 'components/icons.mjs'
 import { Echart } from 'components/echarts.mjs'
 
-const statusColors = { green: "success", amber: "warning", red: "error" }
+const statusColors = { green: 'success', amber: 'warning', red: 'error' }
 const statusIcons = {
-  green: <OkIcon className="text-success-content w-6 h-6" stroke={4}/>
+  green: <OkIcon className="text-success-content w-6 h-6" stroke={4} />,
 }
 
 const ClusterStatus = ({ status }) => {
@@ -24,7 +24,7 @@ const ClusterStatus = ({ status }) => {
 
   const color = statusColors[status.color]
 
-  return(
+  return (
     <div className={`bg-${color} rounded-lg p-2 px-4 flex flex-row items-center gap-2`}>
       {statusIcons[status.color]}
       <span className={`text-${color}-content`}>Cluster status:</span>
@@ -42,22 +42,20 @@ const ClusterInfo = ({ status }) => {
 
   return (
     <div className={`p-2 px-4 flex flex-row items-center gap-2`}>
-        <b className={``}>Morio v{status.core.info.version}</b>
-        on
-        <b>{node}</b>
-        {node === leader
-          ? <small>(cluster leader)</small>
-          : <small>(cluster leader is {leader})</small>
-        }
+      <b className={``}>Morio v{status.core.info.version}</b>
+      on
+      <b>{node}</b>
+      {node === leader ? (
+        <small>(cluster leader)</small>
+      ) : (
+        <small>(cluster leader is {leader})</small>
+      )}
     </div>
   )
 }
 
 const ClusterServices = ({ status }) => {
   if (!status?.core?.status?.cluster_leader) return null
-
-  const node = status.core.nodes[status.core.node.node].fqdn
-  const leader = status.core.nodes[status.core.status.cluster_leader.uuid].fqdn
 
   const services = {}
   for (const [fqdn, node] of Object.entries(status.core.status.nodes)) {
@@ -70,57 +68,60 @@ const ClusterServices = ({ status }) => {
   const data = []
   const states = ['green', 'amber', 'red']
   for (const color of states) {
-    if (services[color]) data.push({ value: services[color].length, name: `${color} (${services[color].length})` })
+    if (services[color])
+      data.push({ value: services[color].length, name: `${color} (${services[color].length})` })
   }
 
   return (
     <div className="">
-      <Echart theme="gar" option={{
-        title: {
-          text: 'Morio Services',
-          left: 'center'
-        },
-        tooltip: { trigger: 'item' },
-        legend: {
-          top: '5%',
-          right: 'center'
-        },
-        series: [
-          {
-            name: 'Services',
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-              borderRadius: 10,
-              borderColor: 'var(--morio-bg)',
-              borderWidth: 2
-            },
-            label: {
-              show: false,
-              position: 'center'
-            },
-            emphasis: {
+      <Echart
+        theme="gar"
+        option={{
+          title: {
+            text: 'Morio Services',
+            left: 'center',
+          },
+          tooltip: { trigger: 'item' },
+          legend: {
+            top: '5%',
+            right: 'center',
+          },
+          series: [
+            {
+              name: 'Services',
+              type: 'pie',
+              radius: ['40%', '70%'],
+              avoidLabelOverlap: false,
+              itemStyle: {
+                borderRadius: 10,
+                borderColor: 'var(--morio-bg)',
+                borderWidth: 2,
+              },
               label: {
-                show: true,
-                fontSize: 40,
-                fontWeight: 'bold'
-              }
+                show: false,
+                position: 'center',
+              },
+              emphasis: {
+                label: {
+                  show: true,
+                  fontSize: 40,
+                  fontWeight: 'bold',
+                },
+              },
+              labelLine: {
+                show: false,
+              },
+              data,
             },
-            labelLine: {
-              show: false
-            },
-            data,
-          }
-        ]
-      }} />
+          ],
+        }}
+      />
     </div>
   )
 }
 
 const Status = ({ status }) => {
-
-  return(
+  return (
     <div className="max-w-4xl">
       <ClusterStatus status={status?.core?.status?.cluster} />
       <ClusterInfo status={status} />
@@ -139,7 +140,9 @@ const RestartConfirmation = ({ restart }) => (
       <br />
       One or more services will potentially be restarted.
     </p>
-    <button className="btn btn-primary w-full" onClick={restart}>Restart Morio now</button>
+    <button className="btn btn-primary w-full" onClick={restart}>
+      Restart Morio now
+    </button>
   </>
 )
 
@@ -155,13 +158,14 @@ const ReseedConfirmation = ({ reseed }) => (
       <br />
       One or more services will likely be restarted.
     </p>
-    <button className="btn btn-primary w-full" onClick={reseed}>Reseed Morio now</button>
+    <button className="btn btn-primary w-full" onClick={reseed}>
+      Reseed Morio now
+    </button>
   </>
 )
 
 const StatusPage = (props) => {
   const [status, setStatus] = useState()
-  const [timer, setTimer] = useState()
   const { api } = useApi()
   const { pushModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
@@ -170,10 +174,8 @@ const StatusPage = (props) => {
     const result = await api.getStatus()
     if (result[1] === 200) {
       setStatus(result[0])
-      setTimer(setTimeout(updateStatus, 5000))
-    } else {
-      setTimer(setTimeout(updateStatus, 2000))
-    }
+      setTimeout(updateStatus, 5000)
+    } else setTimeout(updateStatus, 2000)
   }
 
   useEffect(() => {
@@ -182,15 +184,15 @@ const StatusPage = (props) => {
 
   const restart = async () => {
     setLoadingStatus([true, 'Restarting Morio, this will take a while'])
-    const [data, status] = await api.restart()
-    if (status !== 204) return setLoadingStatus([true, `Unable to restart Morio`, true, false])
+    const result = await api.restart()
+    if (result[1] !== 204) return setLoadingStatus([true, `Unable to restart Morio`, true, false])
     else setLoadingStatus([true, 'Restart initialized', true, true])
   }
 
   const reseed = async () => {
     setLoadingStatus([true, 'Reseeding Morio, this will take a while'])
-    const [data, status] = await api.reseed()
-    if (status !== 204) return setLoadingStatus([true, `Unable to reseed Morio`, true, false])
+    const result = await api.reseed()
+    if (result[1] !== 204) return setLoadingStatus([true, `Unable to reseed Morio`, true, false])
     else setLoadingStatus([true, 'Reseed initialized', true, true])
   }
 

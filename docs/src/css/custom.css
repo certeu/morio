@@ -110,7 +110,7 @@ div.popout svg.icon {
   height: 1.5rem;
 }
 div.popout-content {
-  flex-grow: 3
+  flex-grow: 3;
 }
 div.popout-content p:last-of-type {
   margin-bottom: 0;
@@ -323,5 +323,5 @@ button.modal-wrapper-close-button svg.icon {
 /* YouTube embed */
 iframe.yt-embed {
   width: 100%;
-  aspect-ratio: 16 /9
+  aspect-ratio: 16 /9;
 }

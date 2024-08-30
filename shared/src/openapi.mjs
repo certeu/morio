@@ -115,10 +115,15 @@ for (const method of ['get', 'post', 'patch', 'put', 'delete']) {
 /**
  * Helper method to define a response
  */
-export const response = (desc, example = false, examples = false, contentType='application/json') => {
+export const response = (
+  desc,
+  example = false,
+  examples = false,
+  contentType = 'application/json'
+) => {
   const res = {
     description: desc,
-    content: { }
+    content: {},
   }
   if (example) res.content[contentType] = { example }
   else if (examples) res.content[contentType] = { examples }

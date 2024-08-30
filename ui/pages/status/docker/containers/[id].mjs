@@ -8,7 +8,6 @@ import { ContainerIcon } from 'components/icons.mjs'
 import {
   DockerContainer,
   ContainerStateActions,
-  ContainerTroubleshootActions,
   ContainerExpertActions,
 } from 'components/docker/index.mjs'
 import { Spinner } from 'components/animations.mjs'

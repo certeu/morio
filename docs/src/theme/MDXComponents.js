@@ -2,16 +2,7 @@ import React from 'react'
 import MDXComponents from '@theme-original/MDXComponents'
 // Custom Morio scope
 import { SubPages } from './components/subpages.js'
-import {
-  Comment,
-  Error,
-  Important,
-  Fixme,
-  Note,
-  Scode,
-  Tip,
-  Warning,
-} from './components/popout.js'
+import { Comment, Error, Important, Fixme, Note, Scode, Tip, Warning } from './components/popout.js'
 import { Architecture } from './components/mermaid.js'
 import { Term } from './components/term.js'
 import { RepoFile } from './components/repofile.js'

@@ -2,15 +2,7 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Card } from 'components/card.mjs'
-import {
-  ContainerIcon,
-  ContainerImageIcon,
-  LayersIcon,
-  ServersIcon,
-  StorageIcon,
-  TaskIcon,
-  WifiIcon,
-} from 'components/icons.mjs'
+import { ContainerIcon, ContainerImageIcon, WifiIcon } from 'components/icons.mjs'
 import { Docker } from 'components/brands.mjs'
 import { DockerInfo, DockerDf, DockerVersion } from 'components/docker/index.mjs'
 

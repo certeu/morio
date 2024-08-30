@@ -32,10 +32,7 @@ export const cluster = (context, toggleValidate) => {
                 `### Choose your deployment size`,
                 {
                   key: 'TMP.node_count',
-                  schema: Joi.number()
-                    .valid(1, 3, 5, 7, 9)
-                    .required()
-                    .label('Node Count'),
+                  schema: Joi.number().valid(1, 3, 5, 7, 9).required().label('Node Count'),
                   inputType: 'buttonList',
                   title: 'Node vs Cluster',
                   lockOnEdit: true,

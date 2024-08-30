@@ -6,4 +6,3 @@ import { test } from '@playwright/test'
 export const runTests = (obj) => {
   for (const [name, method] of Object.entries(obj)) test(name, method)
 }
-

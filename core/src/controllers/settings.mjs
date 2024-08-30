@@ -235,23 +235,23 @@ const initialSetup = async (req, res, settings) => {
    */
   const [valid, err] = await utils.validate(`req.settings.setup`, settings)
   if (!valid?.cluster) {
-    return [false, [
-      'morio.core.schema.violation',
-      err?.message ? { schema_violation: err.message } : undefined
-    ]]
+    return [
+      false,
+      ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
+    ]
   }
 
   /*
    * Check whether we can figure out who we are
    * Need to merge the loaded settings with the request headers
    */
-  const node = await localNodeInfo({...settings, headers: req.body.headers })
+  const node = await localNodeInfo({ ...settings, headers: req.body.headers })
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
-    return [false, [
-      'morio.core.schema.violation',
-      err?.message ? { schema_violation: err.message } : undefined
-    ]]
+    return [
+      false,
+      ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
+    ]
   } else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
@@ -339,8 +339,7 @@ const initialSetup = async (req, res, settings) => {
    */
   log.debug(`Writing initial settings to settings.${time}.yaml`)
   let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
-  if (!result) return [false, ['morio.core.fs.write.failed'] ]
-
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
    * Also write the keys to disk
@@ -348,31 +347,34 @@ const initialSetup = async (req, res, settings) => {
    */
   log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, utils.getKeys())
-  if (!result) return [false, ['morio.core.fs.write.failed'] ]
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
    * Write the node info to disk
    */
   log.debug(`Writing node data to node.json`)
   result = await writeJsonFile(`/etc/morio/node.json`, node)
-  if (!result) return [false, ['morio.core.fs.write.failed'] ]
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
    * The data to return
    * The Morio Root Token is actually the passphrase used to encrypt the private key
    */
-  return [{
-    result: 'success',
-    uuids: {
-      node: node.uuid,
-      cluster: keys.cluster,
+  return [
+    {
+      result: 'success',
+      uuids: {
+        node: node.uuid,
+        cluster: keys.cluster,
+      },
+      root_token: {
+        about:
+          'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
+        value: keys.mrt,
+      },
     },
-    root_token: {
-      about:
-        'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-      value: keys.mrt,
-    },
-  }, false]
+    false,
+  ]
 }
 
 const deployNewSettings = async (settings) => {
@@ -385,7 +387,8 @@ const deployNewSettings = async (settings) => {
   /*
    * Handle secrets
    */
-  if (settings.tokens?.secrets) settings.tokens.secrets = ensureTokenSecrecy(settings.tokens.secrets)
+  if (settings.tokens?.secrets)
+    settings.tokens.secrets = ensureTokenSecrecy(settings.tokens.secrets)
 
   /*
    * Write the protected settings to disk

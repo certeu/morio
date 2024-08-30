@@ -33,11 +33,12 @@ export const Popout = (props) => {
       <div className={`popout-inner ${props.compact ? 'compact' : ''}`}>
         <div className="popout-title">
           <span className="type">
-            {props.title
-              ? props.title
-              : (type === 'scode' ? 'Source Code' : type.toUpperCase())
-            }
-            {['comment', 'fixme'].includes(type) && props.by && <span className="by-lead">by <b>{props.by}</b></span>}
+            {props.title ? props.title : type === 'scode' ? 'Source Code' : type.toUpperCase()}
+            {['comment', 'fixme'].includes(type) && props.by && (
+              <span className="by-lead">
+                by <b>{props.by}</b>
+              </span>
+            )}
           </span>
           {props.compact || typeof icons[type] === 'undefined' ? null : icons[type]}
         </div>

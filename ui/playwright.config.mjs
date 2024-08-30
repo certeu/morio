@@ -23,7 +23,7 @@ const config = defineConfig({
   /*
    * Make shell completion go to tests
    */
-  outputDir: "./.test-results",
+  outputDir: './.test-results',
 
   /*
    * Run tests in files in parallel
@@ -61,15 +61,15 @@ const config = defineConfig({
      * - MORIO_TEST_TLS : Set this to use TLS (https)
      * - MORIO_TEST_PORT : Set this to use a non-standard port (443 for https, 80 for http)
      */
-    baseURL: `${process.env.MORIO_TEST_TLS
-     ? 'https://'
-     : 'http://' }${process.env.MORIO_TEST_DOMAIN
-     }:${process.env.MORIO_TEST_PORT
-       ? process.env.MORIO_TEST_PORT
-       : process.env.MORIO_TEST_TLS
-         ? 443
-         : 80
-     }`,
+    baseURL: `${process.env.MORIO_TEST_TLS ? 'https://' : 'http://'}${
+      process.env.MORIO_TEST_DOMAIN
+    }:${
+      process.env.MORIO_TEST_PORT
+        ? process.env.MORIO_TEST_PORT
+        : process.env.MORIO_TEST_TLS
+          ? 443
+          : 80
+    }`,
 
     /*
      * Do not balk at certificate issues
