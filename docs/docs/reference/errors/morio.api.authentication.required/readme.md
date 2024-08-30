@@ -1,17 +1,16 @@
 ---
 title: morio.api.authentication.required
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**Authentication required** - The request was not properly authenticated.
-
+__Authentication required__ - The request was not properly authenticated.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The request was not properly authenticated."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

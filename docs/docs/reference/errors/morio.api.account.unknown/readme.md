@@ -1,17 +1,16 @@
 ---
 title: morio.api.account.unknown
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**Account unknown** - The provided account identifier could not be matched to an existing account.
-
+__Account unknown__ - The provided account identifier could not be matched to an existing account.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The provided account identifier could not be matched to an existing account."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

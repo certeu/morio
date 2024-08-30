@@ -9,7 +9,7 @@ export default (api) => {
 
   api.post('/login', {
     ...shared,
-    summary: `Authenticates to the Morio API`,
+    summary: `Authenticate`,
     description: `Generates a JSON Web Token that can be used for subsequential API access.`,
     requestBody: {
       description: 'The Morio settings you want to validate',
@@ -39,7 +39,7 @@ export default (api) => {
 
   api.get('/token', {
     ...shared,
-    summary: `Renews a JSON Web Token`,
+    summary: `Renew JWT`,
     description: `This will return a new JSON Web Token that can replace the current token. This will only work if the current token is not expired yet.`,
     responses: {
       200: response('JSON Web Token', { jwt: examples.obj.jwt }),
@@ -49,8 +49,8 @@ export default (api) => {
 
   api.get('/whoami', {
     ...shared,
-    summary: `Returns info about the currently authenticated account`,
-    description: `This will return a new JSON Web Token that can replace the current token. This will only work if the current token is not expired yet.`,
+    summary: `Who am I?`,
+    description: `This will return info about the currently authenticated account`,
     responses: {
       200: response('JSON Web Token', false, formatResponseExamples(examples.res.whoami)),
       ...errorResponse(`morio.api.authentication.required`),

@@ -1,17 +1,16 @@
 ---
 title: morio.api.account.role.unavailable
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**Role unavailable** - The requested role is not available to this account.
-
+__Role unavailable__ - The requested role is not available to this account.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The requested role is not available to this account."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

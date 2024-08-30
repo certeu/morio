@@ -1,17 +1,16 @@
 ---
 title: morio.api.rbac.denied
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**Denied by role-base access control** - The request did not pass the role based access control check.
-
+__Denied by role-base access control__ - The request did not pass the role based access control check.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The request did not pass the role based access control check."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

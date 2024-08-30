@@ -1,17 +1,16 @@
 ---
 title: morio.api.settings.undeployable
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**These settings are undeployable** - The provided settings would result in a configuration that cannot be deployed.
-
+__These settings are undeployable__ - The provided settings would result in a configuration that cannot be deployed.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The provided settings would result in a configuration that cannot be deployed."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

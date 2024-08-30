@@ -9,7 +9,7 @@ export default (api) => {
 
   api.post('/ca/certificate', {
     ...shared,
-    summary: `Generate an X.509 certificate`,
+    summary: `Generate X.509 certificate`,
     description: `Generates an X.509 certificate, issued by Morio's internal Certificate Authority`,
     requestBody: {
       description: 'The Morio settings you want to validate',

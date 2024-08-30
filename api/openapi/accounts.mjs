@@ -10,7 +10,7 @@ export default (api) => {
   api.get('/accounts', {
     ...shared,
     security,
-    summary: `Get a list of accounts`,
+    summary: `List local accounts`,
     description: `Returns the list of accounts. Needs at least the \`manager\` role.
 
 
@@ -24,7 +24,7 @@ export default (api) => {
 
   api.post('/account', {
     ...shared,
-    summary: `Create a local Morio account`,
+    summary: `Create local account`,
     description: `Creates a local Morio account. The account needs to be activated via the invite code/url.`,
     requestBody: {
       description: 'The Morio settings you want to validate',
@@ -49,7 +49,7 @@ export default (api) => {
 
   api.post('/activate-account', {
     ...shared,
-    summary: `Activate an account with its invite code`,
+    summary: `Activate local account`,
     description: `Activates an account based on its invite code.
 
 Note that for local Morio accounts, the account will still need to activate MFA before it can be used.
@@ -80,7 +80,7 @@ So for a local Morio account, this endpoint will return the secret to setup MFA,
 
   api.post('/activate-mfa', {
     ...shared,
-    summary: `Activate MFA on a local Morio account.`,
+    summary: `Activate local account MFA`,
     description: `Activates MFA on a local Morio account, and provides scratch codes as fallback.
 
 Three scratch codes will be provided that can each be used once as a fallback for the TOTP token, in case the device generating the token is unavailable.`,

@@ -1,17 +1,16 @@
 ---
 title: morio.core.settings.invalid
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**These settings are invalid** - The provided settings failed validation against the Morio data schema, or are invalid for some other reason.
-
+__These settings are invalid__ - The provided settings failed validation against the Morio data schema, or are invalid for some other reason.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "The provided settings failed validation against the Morio data schema, or are invalid for some other reason."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

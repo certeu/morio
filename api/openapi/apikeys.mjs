@@ -11,7 +11,7 @@ export default (api) => {
   api.get('/apikeys', {
     ...shared,
     security,
-    summary: `Get a list of API keys`,
+    summary: `List API keys`,
     description: `Returns the list of API keys.
 
 - When using the endpoint with the \`user\` role, the list will include all API keys created by the current user.
@@ -25,7 +25,7 @@ export default (api) => {
 
   api.post('/apikey', {
     ...shared,
-    summary: `Create a new API key`,
+    summary: `Create API key`,
     description: `Creates a Morio API key. The role of the API key can not be higher than the role of the user creating the API key.`,
     requestBody: {
       description: 'The API key settings',
@@ -66,9 +66,9 @@ export default (api) => {
    * Going to iterate over the 3 actions for this endpoint
    */
   for (const [action, desc] of Object.entries({
-    rotate: 'Rotate an API key',
-    enable: 'Enable a previously disabled API key',
-    disable: 'Disable an API key',
+    rotate: 'Rotate API key',
+    enable: 'Enable API key',
+    disable: 'Disable API key',
   })) {
     api.patch(`/apikey/:id/${action}`, {
       ...shared,
@@ -89,7 +89,7 @@ export default (api) => {
 
   api.delete('/apikey/:id', {
     ...shared,
-    summary: `Delete an API key`,
+    summary: `Delete API key`,
     description: `Removes a Morio API key.`,
     parameters,
     responses: {

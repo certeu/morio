@@ -1,17 +1,16 @@
 ---
 title: morio.core.fs.write.failed
 tags:
-  - error
+ - error
 ---
 
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-
-**Unable to write to filesystem** - An attempt to write to the filesystem failed unexpectedly. This warrants escalation.
-
+__Unable to write to filesystem__ - An attempt to write to the filesystem failed unexpectedly. This warrants escalation.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 
+<!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
 ## Example response
 
 ```json
@@ -22,5 +21,4 @@ tags:
   "detail": "An attempt to write to the filesystem failed unexpectedly. This warrants escalation."
 }
 ```
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

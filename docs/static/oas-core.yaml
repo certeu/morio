@@ -67,8 +67,8 @@ paths:
     post:
       tags: &ref_0
         - cluster
-      summary: Invites a node to join the cluster
-      description: This will trigger an ephemeral node to join a cluster
+      summary: Join cluster
+      description: This will cause an ephemeral node to join a cluster
       requestBody:
         description: >-
           The data required to join the cluster. Note that this includes the
@@ -153,6 +153,14 @@ paths:
                                   type: boolean
                                 DISABLE_ROOT_TOKEN:
                                   type: boolean
+                                DISABLE_IDP_APIKEY:
+                                  type: boolean
+                                DISABLE_IDP_LDAP:
+                                  type: boolean
+                                DISABLE_IDP_LOCAL:
+                                  type: boolean
+                                DISABLE_IDP_MRT:
+                                  type: boolean
                               additionalProperties: false
                             secrets:
                               type: object
@@ -181,6 +189,189 @@ paths:
                                   type: array
                                   items: {}
                               additionalProperties: false
+                          additionalProperties: false
+                        vault:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                            verify_certificate:
+                              type: boolean
+                          required:
+                            - url
+                          additionalProperties: false
+                        vaults:
+                          type: object
+                          properties: {}
+                          additionalProperties:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                              verify_certificate:
+                                type: boolean
+                            required:
+                              - url
+                            additionalProperties: false
+                        preseed:
+                          type: object
+                          properties:
+                            base:
+                              anyOf:
+                                - type: object
+                                  properties:
+                                    url:
+                                      type: string
+                                    headers:
+                                      type: object
+                                      properties: {}
+                                      additionalProperties: false
+                                  required:
+                                    - url
+                                  additionalProperties: false
+                                - type: object
+                                  properties:
+                                    gitlab:
+                                      type: object
+                                      properties:
+                                        url:
+                                          type: string
+                                        project_id:
+                                          type: number
+                                          format: float
+                                        file_path:
+                                          type: string
+                                        ref:
+                                          type: string
+                                        token:
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                vault:
+                                                  type: string
+                                              required:
+                                                - vault
+                                              additionalProperties: false
+                                      required:
+                                        - url
+                                        - project_id
+                                        - file_path
+                                        - token
+                                      additionalProperties: false
+                                  additionalProperties: false
+                                - type: object
+                                  properties:
+                                    github:
+                                      type: object
+                                      properties:
+                                        url:
+                                          type: string
+                                        owner:
+                                          type: string
+                                        repo:
+                                          type: string
+                                        file_path:
+                                          type: string
+                                        ref:
+                                          type: string
+                                        token:
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                vault:
+                                                  type: string
+                                              required:
+                                                - vault
+                                              additionalProperties: false
+                                      required:
+                                        - owner
+                                        - repo
+                                        - file_path
+                                        - token
+                                      additionalProperties: false
+                                  additionalProperties: false
+                                - type: string
+                            overlays:
+                              type: array
+                              items:
+                                anyOf:
+                                  - type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      headers:
+                                        type: object
+                                        properties: {}
+                                        additionalProperties: false
+                                    required:
+                                      - url
+                                    additionalProperties: false
+                                  - type: object
+                                    properties:
+                                      gitlab:
+                                        type: object
+                                        properties:
+                                          url:
+                                            type: string
+                                          project_id:
+                                            type: number
+                                            format: float
+                                          file_path:
+                                            type: string
+                                          ref:
+                                            type: string
+                                          token:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  vault:
+                                                    type: string
+                                                required:
+                                                  - vault
+                                                additionalProperties: false
+                                        required:
+                                          - url
+                                          - project_id
+                                          - file_path
+                                          - token
+                                        additionalProperties: false
+                                    additionalProperties: false
+                                  - type: object
+                                    properties:
+                                      github:
+                                        type: object
+                                        properties:
+                                          url:
+                                            type: string
+                                          owner:
+                                            type: string
+                                          repo:
+                                            type: string
+                                          file_path:
+                                            type: string
+                                          ref:
+                                            type: string
+                                          token:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  vault:
+                                                    type: string
+                                                required:
+                                                  - vault
+                                                additionalProperties: false
+                                        required:
+                                          - owner
+                                          - repo
+                                          - file_path
+                                          - token
+                                        additionalProperties: false
+                                    additionalProperties: false
+                                  - type: string
                           additionalProperties: false
                       additionalProperties: false
                   required:
@@ -310,7 +501,7 @@ paths:
                           operator:
                             attribute: employeetype
                             regex: ^admin$
-                keys: &ref_24
+                keys: &ref_26
                   jwt: >-
                     eb3be6a4e4a3eb4dfc76202c7a8a0d62294788d8d238ae9d7de9b489b6a6cbf895bb7255e6a67cccab0ddd3ddb1a45bf3d691447c7c91dec333b8724da76c2de
                   mrt: >-
@@ -489,7 +680,7 @@ paths:
   /cluster/heartbeat:
     post:
       tags: *ref_0
-      summary: The cluster hearbeat endpoint
+      summary: Cluster hearbeat
       description: >-
         This is the cluster heartbeat endpoint, which is where follower nodes
         will contact the leader node in a Morio cluster
@@ -761,7 +952,7 @@ paths:
     post:
       tags: &ref_2
         - cryptography
-      summary: Generate an X.509 certificate
+      summary: Generate X.509 certificate
       description: >-
         Generates an X.509 certificate, issued by Morio's internal Certificate
         Authority
@@ -1199,7 +1390,7 @@ paths:
     get:
       tags: &ref_7
         - docker
-      summary: List all Docker containers
+      summary: List containers
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns list of all containers available on the host system.
@@ -1228,7 +1419,7 @@ paths:
   /docker/containers:
     get:
       tags: *ref_7
-      summary: List running Docker containers
+      summary: List running containers
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns the list of containers currently running on the hoste sytem.
@@ -1250,7 +1441,7 @@ paths:
   /docker/df:
     get:
       tags: *ref_7
-      summary: List Docker storage metrics
+      summary: Get storage metrics
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the used and available storage on the host sytem.
@@ -1260,7 +1451,7 @@ paths:
       responses:
         '200':
           description: >-
-            [See **Get data usage information** in the Docker API
+            [See **Get data usage** in the Docker API
             docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage) 
           content:
             application/json: {}
@@ -1272,7 +1463,7 @@ paths:
   /docker/images:
     get:
       tags: *ref_7
-      summary: List Docker images
+      summary: List images
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns the list of Docker images available on the host system.
@@ -1291,7 +1482,7 @@ paths:
   /docker/info:
     get:
       tags: *ref_7
-      summary: List Docker info
+      summary: Get Docker info
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns general information about the Docker daemon on the host system.
@@ -1310,7 +1501,7 @@ paths:
   /docker/networks:
     get:
       tags: *ref_7
-      summary: List Docker networks
+      summary: List networks
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns a list of Docker networks on the host system.
@@ -1329,7 +1520,7 @@ paths:
   /docker/version:
     get:
       tags: *ref_7
-      summary: List Docker version information
+      summary: Get Docker version
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the version of Docker that is running on the host
@@ -1349,7 +1540,7 @@ paths:
   /docker/container/:id:
     get:
       tags: *ref_7
-      summary: Inspect a Docker container
+      summary: Inspect container
       description: >
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the container with the ID passed as a parameter
@@ -1384,7 +1575,7 @@ paths:
   /docker/container/:id/logs:
     get:
       tags: *ref_7
-      summary: Retrieve logs from a Docker container
+      summary: Get logs
       description: >
         This is a proxy endpoint for the Docker API on the host system that
         returns logs from the container with the ID passed as a parameter in the
@@ -1412,7 +1603,7 @@ paths:
   /docker/container/:id/stats:
     get:
       tags: *ref_7
-      summary: Retrieve resource usage stats from a Docker container
+      summary: Get usage stats
       description: >
         This is a proxy endpoint for the Docker API on the host system that
         returns stats based on resource usage from the container with the ID
@@ -1441,7 +1632,7 @@ paths:
   /docker/image/:id:
     get:
       tags: *ref_7
-      summary: Inspect a Docker image
+      summary: Inspect image
       description: >
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the image with the ID passed as a parameter in
@@ -1469,7 +1660,7 @@ paths:
   /docker/networks/:id:
     get:
       tags: *ref_7
-      summary: Inspect a Docker network
+      summary: Inspect network
       description: >
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the network with the ID passed as a parameter in
@@ -1497,7 +1688,7 @@ paths:
   /docker/containers/:id/kill:
     put:
       tags: *ref_7
-      summary: Kill a container
+      summary: Kill container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `kill` command.
@@ -1516,7 +1707,7 @@ paths:
   /docker/containers/:id/pause:
     put:
       tags: *ref_7
-      summary: Pause a container
+      summary: Pause container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `pause` command.
@@ -1535,7 +1726,7 @@ paths:
   /docker/containers/:id/restart:
     put:
       tags: *ref_7
-      summary: Restart a container
+      summary: Restart container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `restart` command.
@@ -1554,7 +1745,7 @@ paths:
   /docker/containers/:id/start:
     put:
       tags: *ref_7
-      summary: Start a container
+      summary: Start container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `start` command.
@@ -1573,7 +1764,7 @@ paths:
   /docker/containers/:id/stop:
     put:
       tags: *ref_7
-      summary: Stop a container
+      summary: Stop container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `stop` command.
@@ -1592,7 +1783,7 @@ paths:
   /docker/containers/:id/unpause:
     put:
       tags: *ref_7
-      summary: Unpause a container
+      summary: Unpause container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `unpause` command.
@@ -1612,7 +1803,7 @@ paths:
     post:
       tags: &ref_10
         - client packages
-      summary: Build a .deb client package
+      summary: Build a .deb package
       description: >-
         This will trigger the build of a .deb client package.
 
@@ -1764,7 +1955,7 @@ paths:
   /pkgs/clients/deb/defaults:
     get:
       tags: *ref_10
-      summary: Get defaults for a .deb client package
+      summary: Get .deb package defaults
       description: >-
         This will return the default values to create a new .deb client package.
 
@@ -1821,9 +2012,9 @@ paths:
     get:
       tags: &ref_12
         - settings
-      summary: Get the current Morio settings
+      summary: Get settings
       description: >-
-        Returns the current settings.
+        Returns the current Morio settings.
 
 
         Note that Morio will encrypt all secrets and remove them from the
@@ -1836,7 +2027,7 @@ paths:
               example: *ref_11
     post:
       tags: *ref_12
-      summary: Apply new Morio settings
+      summary: Apply settings
       description: >-
         This will take a full set of new Morio settings and, after validation,
         apply them.
@@ -1903,6 +2094,14 @@ paths:
                           type: boolean
                         DISABLE_ROOT_TOKEN:
                           type: boolean
+                        DISABLE_IDP_APIKEY:
+                          type: boolean
+                        DISABLE_IDP_LDAP:
+                          type: boolean
+                        DISABLE_IDP_LOCAL:
+                          type: boolean
+                        DISABLE_IDP_MRT:
+                          type: boolean
                       additionalProperties: false
                     secrets:
                       type: object
@@ -1931,6 +2130,189 @@ paths:
                           type: array
                           items: {}
                       additionalProperties: false
+                  additionalProperties: false
+                vault:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                    verify_certificate:
+                      type: boolean
+                  required:
+                    - url
+                  additionalProperties: false
+                vaults:
+                  type: object
+                  properties: {}
+                  additionalProperties:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      verify_certificate:
+                        type: boolean
+                    required:
+                      - url
+                    additionalProperties: false
+                preseed:
+                  type: object
+                  properties:
+                    base:
+                      anyOf:
+                        - type: object
+                          properties:
+                            url:
+                              type: string
+                            headers:
+                              type: object
+                              properties: {}
+                              additionalProperties: false
+                          required:
+                            - url
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            gitlab:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                project_id:
+                                  type: number
+                                  format: float
+                                file_path:
+                                  type: string
+                                ref:
+                                  type: string
+                                token:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        vault:
+                                          type: string
+                                      required:
+                                        - vault
+                                      additionalProperties: false
+                              required:
+                                - url
+                                - project_id
+                                - file_path
+                                - token
+                              additionalProperties: false
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            github:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                owner:
+                                  type: string
+                                repo:
+                                  type: string
+                                file_path:
+                                  type: string
+                                ref:
+                                  type: string
+                                token:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        vault:
+                                          type: string
+                                      required:
+                                        - vault
+                                      additionalProperties: false
+                              required:
+                                - owner
+                                - repo
+                                - file_path
+                                - token
+                              additionalProperties: false
+                          additionalProperties: false
+                        - type: string
+                    overlays:
+                      type: array
+                      items:
+                        anyOf:
+                          - type: object
+                            properties:
+                              url:
+                                type: string
+                              headers:
+                                type: object
+                                properties: {}
+                                additionalProperties: false
+                            required:
+                              - url
+                            additionalProperties: false
+                          - type: object
+                            properties:
+                              gitlab:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  project_id:
+                                    type: number
+                                    format: float
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            type: string
+                                        required:
+                                          - vault
+                                        additionalProperties: false
+                                required:
+                                  - url
+                                  - project_id
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: object
+                            properties:
+                              github:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  owner:
+                                    type: string
+                                  repo:
+                                    type: string
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            type: string
+                                        required:
+                                          - vault
+                                        additionalProperties: false
+                                required:
+                                  - owner
+                                  - repo
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: string
                   additionalProperties: false
               additionalProperties: false
             examples:
@@ -1999,6 +2381,8 @@ paths:
                   order: *ref_17
                 title: banana
       responses:
+        '204':
+          description: No response body
         '400':
           description: This request violates the data schema
           content:
@@ -2007,7 +2391,7 @@ paths:
   /setup:
     post:
       tags: *ref_12
-      summary: Initial setup of Morio
+      summary: Set up Morio
       description: |-
         This will set up Morio with the provided initial settings.
 
@@ -2072,6 +2456,14 @@ paths:
                           type: boolean
                         DISABLE_ROOT_TOKEN:
                           type: boolean
+                        DISABLE_IDP_APIKEY:
+                          type: boolean
+                        DISABLE_IDP_LDAP:
+                          type: boolean
+                        DISABLE_IDP_LOCAL:
+                          type: boolean
+                        DISABLE_IDP_MRT:
+                          type: boolean
                       additionalProperties: false
                     secrets:
                       type: object
@@ -2101,6 +2493,189 @@ paths:
                           items: {}
                       additionalProperties: false
                   additionalProperties: false
+                vault:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                    verify_certificate:
+                      type: boolean
+                  required:
+                    - url
+                  additionalProperties: false
+                vaults:
+                  type: object
+                  properties: {}
+                  additionalProperties:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      verify_certificate:
+                        type: boolean
+                    required:
+                      - url
+                    additionalProperties: false
+                preseed:
+                  type: object
+                  properties:
+                    base:
+                      anyOf:
+                        - type: object
+                          properties:
+                            url:
+                              type: string
+                            headers:
+                              type: object
+                              properties: {}
+                              additionalProperties: false
+                          required:
+                            - url
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            gitlab:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                project_id:
+                                  type: number
+                                  format: float
+                                file_path:
+                                  type: string
+                                ref:
+                                  type: string
+                                token:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        vault:
+                                          type: string
+                                      required:
+                                        - vault
+                                      additionalProperties: false
+                              required:
+                                - url
+                                - project_id
+                                - file_path
+                                - token
+                              additionalProperties: false
+                          additionalProperties: false
+                        - type: object
+                          properties:
+                            github:
+                              type: object
+                              properties:
+                                url:
+                                  type: string
+                                owner:
+                                  type: string
+                                repo:
+                                  type: string
+                                file_path:
+                                  type: string
+                                ref:
+                                  type: string
+                                token:
+                                  anyOf:
+                                    - type: string
+                                    - type: object
+                                      properties:
+                                        vault:
+                                          type: string
+                                      required:
+                                        - vault
+                                      additionalProperties: false
+                              required:
+                                - owner
+                                - repo
+                                - file_path
+                                - token
+                              additionalProperties: false
+                          additionalProperties: false
+                        - type: string
+                    overlays:
+                      type: array
+                      items:
+                        anyOf:
+                          - type: object
+                            properties:
+                              url:
+                                type: string
+                              headers:
+                                type: object
+                                properties: {}
+                                additionalProperties: false
+                            required:
+                              - url
+                            additionalProperties: false
+                          - type: object
+                            properties:
+                              gitlab:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  project_id:
+                                    type: number
+                                    format: float
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            type: string
+                                        required:
+                                          - vault
+                                        additionalProperties: false
+                                required:
+                                  - url
+                                  - project_id
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: object
+                            properties:
+                              github:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  owner:
+                                    type: string
+                                  repo:
+                                    type: string
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            type: string
+                                        required:
+                                          - vault
+                                        additionalProperties: false
+                                required:
+                                  - owner
+                                  - repo
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: string
+                  additionalProperties: false
               additionalProperties: false
             examples:
               cluster1:
@@ -2114,7 +2689,7 @@ paths:
           description: Setup result
           content:
             application/json:
-              example:
+              example: &ref_20
                 result: success
                 uuids:
                   node: 40361cd8-a149-4675-bd46-11a2b48acd04
@@ -2135,18 +2710,226 @@ paths:
           description: Only available in ephemeral mode
           content:
             application/problem+json:
-              example:
+              example: &ref_21
                 status: 409
                 title: Only available in ephemeral mode
                 detail: >-
                   This endpoint is only available when Morio is running in
                   ephemeral mode. Since this system has been set up, this
                   endpoint is no longer available.
+  /preseed:
+    post:
+      tags: *ref_12
+      summary: Preseed Morio
+      description: |-
+        This will set up Morio with the provided preseed settings.
+
+        This endpoint is only available in ephemeral Mode.
+        In other words, once Morio is set up, this endpoint becomes unavailable.
+      requestBody:
+        description: The Morio preseed settings to use for the intial setup
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                base:
+                  anyOf:
+                    - type: object
+                      properties:
+                        url:
+                          type: string
+                        headers:
+                          type: object
+                          properties: {}
+                          additionalProperties: false
+                      required:
+                        - url
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        gitlab:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                            project_id:
+                              type: number
+                              format: float
+                            file_path:
+                              type: string
+                            ref:
+                              type: string
+                            token:
+                              anyOf:
+                                - type: string
+                                - type: object
+                                  properties:
+                                    vault:
+                                      type: string
+                                  required:
+                                    - vault
+                                  additionalProperties: false
+                          required:
+                            - url
+                            - project_id
+                            - file_path
+                            - token
+                          additionalProperties: false
+                      additionalProperties: false
+                    - type: object
+                      properties:
+                        github:
+                          type: object
+                          properties:
+                            url:
+                              type: string
+                            owner:
+                              type: string
+                            repo:
+                              type: string
+                            file_path:
+                              type: string
+                            ref:
+                              type: string
+                            token:
+                              anyOf:
+                                - type: string
+                                - type: object
+                                  properties:
+                                    vault:
+                                      type: string
+                                  required:
+                                    - vault
+                                  additionalProperties: false
+                          required:
+                            - owner
+                            - repo
+                            - file_path
+                            - token
+                          additionalProperties: false
+                      additionalProperties: false
+                    - type: string
+                overlays:
+                  type: array
+                  items:
+                    anyOf:
+                      - type: object
+                        properties:
+                          url:
+                            type: string
+                          headers:
+                            type: object
+                            properties: {}
+                            additionalProperties: false
+                        required:
+                          - url
+                        additionalProperties: false
+                      - type: object
+                        properties:
+                          gitlab:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                              project_id:
+                                type: number
+                                format: float
+                              file_path:
+                                type: string
+                              ref:
+                                type: string
+                              token:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      vault:
+                                        type: string
+                                    required:
+                                      - vault
+                                    additionalProperties: false
+                            required:
+                              - url
+                              - project_id
+                              - file_path
+                              - token
+                            additionalProperties: false
+                        additionalProperties: false
+                      - type: object
+                        properties:
+                          github:
+                            type: object
+                            properties:
+                              url:
+                                type: string
+                              owner:
+                                type: string
+                              repo:
+                                type: string
+                              file_path:
+                                type: string
+                              ref:
+                                type: string
+                              token:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      vault:
+                                        type: string
+                                    required:
+                                      - vault
+                                    additionalProperties: false
+                            required:
+                              - owner
+                              - repo
+                              - file_path
+                              - token
+                            additionalProperties: false
+                        additionalProperties: false
+                      - type: string
+              additionalProperties: false
+            examples:
+              base:
+                value:
+                  github:
+                    owner: morio
+                    repo: preseed
+                    file_path: settings/standalone.yaml
+                    ref: main
+                    token: >-
+                      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
+                title: banana
+              overlays:
+                value:
+                  - settings/overlays/idp-ad.yaml
+                  - settings/overlays/idp-apikey.yaml
+                  - settings/overlays/idp-local.yaml
+                  - settings/overlays/idp-mrt.yaml
+                title: banana
+      responses:
+        '200':
+          description: Setup result
+          content:
+            application/json:
+              example: *ref_20
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_1
+        '409':
+          description: Only available in ephemeral mode
+          content:
+            application/problem+json:
+              example: *ref_21
   /status:
     get:
-      tags: &ref_20
+      tags: &ref_22
         - status
-      summary: Get the current status of Morio core
+      summary: Get status
       description: Returns information about the current status of Morio core.
       responses:
         '200':
@@ -2154,19 +2937,19 @@ paths:
           content:
             application/json:
               example:
-                info: &ref_21
+                info: &ref_23
                   about: Morio Management API
                   name: '@morio/api'
                   production: false
                   version: 0.2.0
-                state: &ref_22
+                state: &ref_24
                   ephemeral: false
                   uptime: 37
                   start_time: 1722232994724
                   reload_count: 1
                   config_resolved: true
                   settings_serial: 1722172709838
-                core: &ref_23
+                core: &ref_25
                   info:
                     about: Morio Core
                     name: '@morio/core'
@@ -2212,8 +2995,8 @@ paths:
                     settings_serial: 1722172709838
   /reload:
     get:
-      tags: *ref_20
-      summary: Load data from core to bootstrap the API
+      tags: *ref_22
+      summary: Reload API data
       description: >-
         This will return all the data required to bootstrap the Morio Management
         API, including the settings, presets, and keys.
@@ -2223,11 +3006,11 @@ paths:
           content:
             application/json:
               example:
-                info: *ref_21
-                state: *ref_22
-                core: *ref_23
+                info: *ref_23
+                state: *ref_24
+                core: *ref_25
                 settings: *ref_11
-                keys: *ref_24
+                keys: *ref_26
                 presets:
                   MORIO_API_JWT_EXPIRY: 12h
                   MORIO_API_LOG_LEVEL: trace
