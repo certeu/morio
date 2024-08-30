@@ -258,13 +258,13 @@ export const prebuildDocs = async () => {
    * Presets
    * This is commented out because it rarely needs to run
    */
-  //await ensurePresetPages()
+  await ensurePresetPages()
 
   /*
    * Errors
    * This is commented out because it rarely needs to run
    */
-  //await ensureErrorsPages()
+  await ensureErrorsPages()
 }
 
 prebuildDocs()

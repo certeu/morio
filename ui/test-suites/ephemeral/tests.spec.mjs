@@ -1,4 +1,3 @@
-import { expect } from '@playwright/test'
 import uiTests from './ui.mjs'
 import { runTests } from '../lib.mjs'
 

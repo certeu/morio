@@ -115,7 +115,7 @@ const ShowSettingsValidation = ({
               <button
                 className="btn btn-accent btn-lg flex flex-row justify-between"
                 onClick={deploy}
-                disabled={!validationReport.valid || !validationReport.deployable}
+                disabled={!validationReport.deployable}
               >
                 <Nr color="accent">2</Nr>
                 Apply Settings

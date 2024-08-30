@@ -86,7 +86,7 @@ Controller.prototype.setup = async (req, res) => {
   /*
    * Handle initial setup
    */
-  const [data, error] = await initialSetup(req, res, settings)
+  const [data, error] = await initialSetup(req, settings)
 
   /*
    * Send error, or data
@@ -139,7 +139,7 @@ Controller.prototype.preseed = async (req, res) => {
   /*
    * From here on, handle it like a regular setup
    */
-  const [data, error] = await initialSetup(req, res, settings)
+  const [data, error] = await initialSetup(req, settings)
 
   /*
    * Send error, or data
@@ -229,7 +229,7 @@ const localNodeInfo = async (body) => {
   }
 }
 
-const initialSetup = async (req, res, settings) => {
+const initialSetup = async (req, settings) => {
   /*
    * Validate settings against schema
    */
