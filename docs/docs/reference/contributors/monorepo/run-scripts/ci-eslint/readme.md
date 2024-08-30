@@ -1,4 +1,4 @@
---- 
+---
 title: ci:eslint
 ---
 
@@ -15,4 +15,3 @@ npm run lint
 
 In other words `npm run ci:eslint` is an alias of `npm run lint`.
 See [lint](/docs/reference/contributors/monorepo/run-scripts/lint).
-

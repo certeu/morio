@@ -1,4 +1,4 @@
---- 
+---
 title: destroy
 ---
 
@@ -12,4 +12,3 @@ Under the hood, this will run:
 ```sh title="Terminal"
 ./scripts/destroy.sh
 ```
-

@@ -1,4 +1,4 @@
---- 
+---
 title: kickstart
 ---
 
@@ -13,7 +13,7 @@ Under the hood, this will run:
 npm install && \
 npm install --global husky && \
 husky install && \
-npm run prebuild 
+npm run prebuild
 ```
 
 As you can see, it does a bit more than installing dependencies:

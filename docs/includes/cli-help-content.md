@@ -51,4 +51,3 @@ And remember to not get discouraged.
 Nobody knows everything.
 But together, we may be able to figure it out.
 ```
-

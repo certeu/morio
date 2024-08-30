@@ -10,4 +10,3 @@ The Morio **Certificate Authority Service** (ca) provides a Certificate Authorit
 to facilitate TLS encryption for and between Morio services (and clients).
 
 To learn more, visit [the CA Service guide](/docs/guides/services/ca).
-

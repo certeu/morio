@@ -1,4 +1,4 @@
---- 
+---
 title: lint
 ---
 
@@ -16,4 +16,3 @@ npm run lint --workspace=ui
 ```
 
 We utilise the various monorepo _workspaces_ here.
-

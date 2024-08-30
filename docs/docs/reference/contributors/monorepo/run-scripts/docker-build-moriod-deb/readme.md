@@ -1,15 +1,15 @@
---- 
+---
 title: docker:build.moriod.deb
 ---
 
-The `docker:build.moriod.deb` _run script_ builds a Debian package (.deb) 
+The `docker:build.moriod.deb` _run script_ builds a Debian package (.deb)
 for _moriod_, the morio distribution.
 
 Run `npm run docker:build.moriod.deb` in the _monorepo_ root to trigger this script.
 
 Unlike [the `ci:build.moriod.deb` run
 script](/docs/reference/contributors/monorepo/run-scripts/ci-build-moriod-deb),
-this script will launch a Debian 12 container and run inside of it.  In other
+this script will launch a Debian 12 container and run inside of it. In other
 words, you can use this run script to the build the .deb package locally on a
 non-Debian Linux system.
 
@@ -31,7 +31,6 @@ npm run ci:build.moriod.deb publish
 
 To make this work, the following environment variables should be available:
 
-| Name | Description |
-| ----:| ----------- |
+|                 Name | Description                                                                                       |
+| -------------------: | ------------------------------------------------------------------------------------------------- |
 | `PACKAGECLOUD_TOKEN` | The token to access the packagecloud.io API ([docs](https://packagecloud.io/docs/api#api_tokens)) |
-

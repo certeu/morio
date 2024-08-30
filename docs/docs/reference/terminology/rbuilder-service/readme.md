@@ -11,4 +11,3 @@ Morio client packages in `.rpm` format, the package format used by
 RedHat-based Linux distributions.
 
 To learn more, visit [the RBuilder Service guide](/docs/guides/services/rbuilder).
-

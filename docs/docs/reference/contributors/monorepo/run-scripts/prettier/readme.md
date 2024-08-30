@@ -1,4 +1,4 @@
---- 
+---
 title: prettier
 ---
 
@@ -15,5 +15,5 @@ npx prettier --write .
 
 The Prettier configuration is held in these files in the _monorepo_:
 
- - <RepoFile>.prettierignore</RepoFile>
- - <RepoFile>.prettierrc.json</RepoFile>
+- <RepoFile>.prettierignore</RepoFile>
+- <RepoFile>.prettierrc.json</RepoFile>

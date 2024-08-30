@@ -1,6 +1,6 @@
---- 
+---
 title: reconfigure
---- 
+---
 
 The `reconfigure` _run script_ will run a variety of housekeeping task
 to ensure the monorepo is correctly set up.
@@ -13,8 +13,8 @@ Under the hood, this will run:
 node scripts/reconfigure.mjs
 ```
 
-The main task of this script to to create the scripts to launch the 
-_core service_ container for local development. For that to work, we 
+The main task of this script to to create the scripts to launch the
+_core service_ container for local development. For that to work, we
 map the local git repository into the container.
 Since the path to the local git repository can be different on
 every contributor's machine, we need to generate this script dynamically.

@@ -1,7 +1,7 @@
 ---
 title: 'Morio v0.3.0'
-authors: [ jdecock ] # skip-spellcheck
-tags: [ morio, release, alpha, v0.3.0 ]
+authors: [jdecock] # skip-spellcheck
+tags: [morio, release, alpha, v0.3.0]
 ---
 
 We have released version 0.3.0 of Morio, which brings initial clustering support.

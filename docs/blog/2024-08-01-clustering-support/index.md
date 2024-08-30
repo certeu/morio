@@ -1,7 +1,7 @@
 ---
 title: 'Initial support for Morio clusters'
-authors: [ jdecock ] # skip-spellcheck
-tags: [ morio, cluster, alpha ]
+authors: [jdecock] # skip-spellcheck
+tags: [morio, cluster, alpha]
 ---
 
 We are happy to report that initial support for distributed Morio deployments

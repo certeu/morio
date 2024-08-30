@@ -1,4 +1,4 @@
---- 
+---
 title: ci:build.ui
 ---
 
@@ -26,13 +26,11 @@ npm run ci:build.ui publish
 
 To make this work, the following environment variables should be available:
 
-| Name | Description |
-| ----:| ----------- |
-| `DOCKER_USERNAME` | The username to authentication to [the Docker registry][dockerhub] |
-| `DOCKER_PAT` | The (personal access) token to authentication to [the Docker registry][dockerhub] |
-
+|              Name | Description                                                                       |
+| ----------------: | --------------------------------------------------------------------------------- |
+| `DOCKER_USERNAME` | The username to authentication to [the Docker registry][dockerhub]                |
+|      `DOCKER_PAT` | The (personal access) token to authentication to [the Docker registry][dockerhub] |
 
 <DockerBuildEnvDiffs />
 
 [dockerhub]: https://hub.docker.com/
-

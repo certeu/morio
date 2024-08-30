@@ -11,4 +11,3 @@ responsible for [orchestration](#orchestration), [configuration
 resolution](#configuration-resolution), and [clustering](#clustering).
 
 To learn more, visit [the Core Service guide](/docs/guides/services/core).
-

@@ -1,6 +1,6 @@
 ---
 title: 'Watching Morio through the oven window'
-authors: [ jdecock ] # skip-spellcheck
+authors: [jdecock] # skip-spellcheck
 tags: [morio, disclaimer, alpha]
 ---
 

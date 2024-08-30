@@ -1,6 +1,6 @@
---- 
+---
 title: test:core
---- 
+---
 
 The `test:core` _run script_ runs unit tests on the _core service_.
 
@@ -19,6 +19,5 @@ npm run destroy && \
 npm run redev
 ```
 
-In other words, __this will destroy your local development environment__,
+In other words, **this will destroy your local development environment**,
 although it will spin it up again after running the tests.
-

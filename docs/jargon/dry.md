@@ -1,4 +1,4 @@
-In programming, __DRY__ stands for __Don’t Repeat Yourself__. The idea being
+In programming, **DRY** stands for **Don’t Repeat Yourself**. The idea being
 that you should not write the same thing twice, rather everything should have
 its place.
 

@@ -1,4 +1,4 @@
---- 
+---
 title: help
 ---
 
@@ -21,4 +21,3 @@ cat docs/includes/cli-help-content.md
 
 In other words, this merely output the contents of
 <RepoFile>docs/includes/cli-help-content.md</RepoFile>.
-

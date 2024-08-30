@@ -1,16 +1,17 @@
 ---
 title: morio.core.404
 tags:
- - error
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__No such API endpoint__ - This is the API equivalent of a 404 page. The endpoint you requested does not exist.
+
+**No such API endpoint** - This is the API equivalent of a 404 page. The endpoint you requested does not exist.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __No such API endpoint__ - This is the API equivalent of a 404 page. The endpoin
   "detail": "This is the API equivalent of a 404 page. The endpoint you requested does not exist."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

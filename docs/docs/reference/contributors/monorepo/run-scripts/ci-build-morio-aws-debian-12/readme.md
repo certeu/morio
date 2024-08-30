@@ -1,4 +1,4 @@
---- 
+---
 title: ci:build.morio.aws.debian-12
 ---
 
@@ -19,9 +19,9 @@ This script typically runs in CI, but it can be ran locally as long as you make
 sure that Hashicorp Packer is available, and the the following environment
 variables are set:
 
-| Name | Description |
-| ----:| ----------- |
-| `AWS_ACCESS_KEY_ID` | The key ID for access to [AWS][aws] |
+|                    Name | Description                         |
+| ----------------------: | ----------------------------------- |
+|     `AWS_ACCESS_KEY_ID` | The key ID for access to [AWS][aws] |
 | `AWS_SECRET_ACCESS_KEY` | The secret for access to [AWS][aws] |
 
 This will create an EC2 instance as well as supporting resources to build the AMI on.

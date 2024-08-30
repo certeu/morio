@@ -10,7 +10,7 @@ This applies to the containers we build ourselves, not the ones we use as-is fro
 
 ### Container entrypoint
 
-- Development builds running NodeJS (api, core, ui)  willrun in _development mode_ where they automatically reload when changes are detected (using [nodemon](https://www.npmjs.com/package/nodemon))
+- Development builds running NodeJS (api, core, ui) willrun in _development mode_ where they automatically reload when changes are detected (using [nodemon](https://www.npmjs.com/package/nodemon))
 - Production containers use [the PM2 process manager](https://pm2.keymetrics.io/) to run the NodeJS code
 
 ### Run script prefix
@@ -23,8 +23,7 @@ This applies to the containers we build ourselves, not the ones we use as-is fro
 - Development builds use the `morio` namespace (which cannot be published on Dockerhub)
 - Production builds use the `itsmorio` namespace
 
-### Builder 
+### Builder
 
 - Development builds are built using Docker's own BuildKit
 - Production builds are built using [Buildah](https://buildah.io/) as this avoids the need to access the Docker socket, which is often impossible in a _CI_ environment.
-

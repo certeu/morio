@@ -1,4 +1,4 @@
---- 
+---
 title: get
 ---
 
@@ -57,4 +57,3 @@ node --no-warnings shared/src/cli-get.mjs
 ```
 
 Refer to the output above for more details or run `npm run get` in the _monorepo_ root.
-

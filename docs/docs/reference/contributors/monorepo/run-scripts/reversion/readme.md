@@ -1,6 +1,6 @@
---- 
+---
 title: reversion
---- 
+---
 
 The `reversion` _run script_ will prompt for a new version number and apply
 that to the _monorepo_.
@@ -26,4 +26,3 @@ The current version is: 0.3.0
 
 Enter a new version number:
 ```
-

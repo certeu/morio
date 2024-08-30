@@ -1,8 +1,8 @@
---- 
+---
 title: ci:spellcheck
 ---
 
-The `ci:spellcheck` _run script_ runs the [aspell](http://aspell.net/) 
+The `ci:spellcheck` _run script_ runs the [aspell](http://aspell.net/)
 spell checker on the documentation.
 
 Run `npm run spellcheck` in the _monorepo_ root to trigger this script.
@@ -20,5 +20,3 @@ Under the hood, this will run:
 ## Prerequisites
 
 This relies on the [aspell](http://aspell.net/) package being available.
-
-

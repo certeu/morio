@@ -1,6 +1,6 @@
---- 
+---
 title: test
---- 
+---
 
 The `test` _run script_ outputs information on how to run tests.
 
@@ -29,4 +29,3 @@ Given that `npm run test` is a common way to run tests in the JavaScript
 ecosystem, we keep this run script to onboard new contributors, and point
 them in the right direction for running tests..
 </Note>
-

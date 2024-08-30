@@ -1,6 +1,6 @@
---- 
+---
 title: build
---- 
+---
 
 The `build` _run script_ builds container images for local development.
 
@@ -14,4 +14,3 @@ npm run build:dev
 
 In other words `npm run build` is an alias of `npm run build:dev`.
 See [build:dev](/docs/reference/contributors/monorepo/run-scripts/build-dev).
-

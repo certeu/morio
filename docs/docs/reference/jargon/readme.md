@@ -10,4 +10,3 @@ you are unfamiliar with.
 This page -- along with [our terminology pages](/docs/reference/terminology) -- attempt to remediate that:
 
 <JargonList />
-

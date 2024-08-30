@@ -1,8 +1,8 @@
---- 
+---
 title: docker:build.moriod.rpm
 ---
 
-The `docker:build.moriod.rpm` _run script_ builds a RedHat package (.rpm) 
+The `docker:build.moriod.rpm` _run script_ builds a RedHat package (.rpm)
 for _moriod_, the morio distribution.
 
 Run `npm run docker:build.moriod.rpm` in the _monorepo_ root to trigger this script.
@@ -31,7 +31,6 @@ npm run ci:build.moriod.rpm publish
 
 To make this work, the following environment variables should be available:
 
-| Name | Description |
-| ----:| ----------- |
+|                 Name | Description                                                                                       |
+| -------------------: | ------------------------------------------------------------------------------------------------- |
 | `PACKAGECLOUD_TOKEN` | The token to access the packagecloud.io API ([docs](https://packagecloud.io/docs/api#api_tokens)) |
-

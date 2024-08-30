@@ -1,16 +1,17 @@
 ---
 title: morio.core.ephemeral.required
 tags:
- - error
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Only available in ephemeral mode__ - This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.
+
+**Only available in ephemeral mode** - This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Only available in ephemeral mode__ - This endpoint is only available when Mori
   "detail": "This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

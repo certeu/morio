@@ -1,4 +1,4 @@
---- 
+---
 title: build:api
 ---
 
@@ -16,4 +16,3 @@ Under the hood, this will run:
 ```
 
 <DockerBuildEnvDiffs />
-

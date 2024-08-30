@@ -3,7 +3,7 @@ title: Terminology
 ---
 
 When reading about Morio, you may encounter terms
-you are unfamiliar with, or that are ambiguous without 
+you are unfamiliar with, or that are ambiguous without
 context.
 
 For example, if you are new to Morio, you are unlikely to _intuitively get_ what

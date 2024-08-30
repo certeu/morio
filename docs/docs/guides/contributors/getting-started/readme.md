@@ -31,12 +31,12 @@ have the final say on all things CERT-EU, including Morio.
 The day to day management of the project is in the hands of CERT-EU's engineering team.
 
 <Note title="Learn more">
-To learn more about CERT-EU or the IICB, consult this summary on EUR-Lex:  
+To learn more about CERT-EU or the IICB, consult this summary on EUR-Lex:
 
 - [Cybersecurity at the European Union institutions, bodies, offices and
   agencies](https://eur-lex.europa.eu/EN/legal-content/summary/cybersecurity-at-the-european-union-institutions-bodies-offices-and-agencies.html)
   _(1-minute read)_.
-</Note>
+  </Note>
 
 ## License
 
@@ -69,7 +69,6 @@ Contributions should be made as pull requests against the `develop` branch.
 To learn more, refer to [the monorepo guide](/docs/guides/contributors/monorepo).
 </Note>
 
-
 ## Documentation
 
 The Morio documentation is (also) hosted in the [certeu/morio][repo] repository on
@@ -78,7 +77,6 @@ GitHub, specifically in the `docs/docs` folder.
 <Note title="Documentation Guide" compact>
 To learn more, refer to [the documentation guide](/docs/guides/contributors/docs).
 </Note>
-
 
 ## Help & Feedback
 

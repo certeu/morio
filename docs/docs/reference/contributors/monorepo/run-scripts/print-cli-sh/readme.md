@@ -1,4 +1,4 @@
---- 
+---
 title: print:cli.sh
 ---
 
@@ -38,4 +38,3 @@ Under the hood, this will run:
 In other words, this runs (Bash) shell, unlike the [print:cli.js run
 script](/docs/reference/contributors/monorepo/run-scripts/print-cli-js/), which
 uses NodeJS.
-

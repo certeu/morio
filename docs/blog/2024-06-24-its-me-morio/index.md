@@ -1,7 +1,7 @@
 ---
 title: 'Announcing Morio: Your Comprehensive Observability Solution'
-authors: [ stellene, jdecock ] # skip-spellcheck
-tags: [ morio, announcement, alpha ]
+authors: [stellene, jdecock] # skip-spellcheck
+tags: [morio, announcement, alpha]
 ---
 
 Today we are delighted to introduce [Morio](https://github.com/certeu/morio),

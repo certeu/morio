@@ -1,4 +1,4 @@
---- 
+---
 title: logs:core
 ---
 
@@ -22,4 +22,3 @@ You can install it globally with:
 ```sh title="Terminal"
 npm install --global pino-pretty
 ```
-

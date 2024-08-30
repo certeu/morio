@@ -1,16 +1,17 @@
 ---
 title: morio.api.account.invite.mismatch
 tags:
- - error
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Account invite mismatch__ - The provided account invite is incorrect.
+
+**Account invite mismatch** - The provided account invite is incorrect.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Account invite mismatch__ - The provided account invite is incorrect.
   "detail": "The provided account invite is incorrect."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

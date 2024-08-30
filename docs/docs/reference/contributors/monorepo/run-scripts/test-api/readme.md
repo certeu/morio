@@ -1,6 +1,6 @@
---- 
+---
 title: test:api
---- 
+---
 
 The `test:api` _run script_ runs unit tests on the _api service_.
 
@@ -20,6 +20,5 @@ sleep 5 && \
 npm run redev
 ```
 
-In other words, __this will destroy your local development environment__,
+In other words, **this will destroy your local development environment**,
 although it will spin it up again after running the tests.
-

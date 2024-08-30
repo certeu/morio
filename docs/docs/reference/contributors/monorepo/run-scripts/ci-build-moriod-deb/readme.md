@@ -1,4 +1,4 @@
---- 
+---
 title: ci:build.moriod.deb
 ---
 
@@ -25,7 +25,6 @@ npm run ci:build.moriod.deb publish
 
 To make this work, the following environment variables should be available:
 
-| Name | Description |
-| ----:| ----------- |
+|                 Name | Description                                                                                       |
+| -------------------: | ------------------------------------------------------------------------------------------------- |
 | `PACKAGECLOUD_TOKEN` | The token to access the packagecloud.io API ([docs](https://packagecloud.io/docs/api#api_tokens)) |
-

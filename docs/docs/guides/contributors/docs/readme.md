@@ -18,7 +18,7 @@ This guide will show you how you can do that.
 ### Making quick edits
 
 The easiest way to make changes to the documentation is via the **Edit this
-page** link that you can find at the bottom of every documentation page. 
+page** link that you can find at the bottom of every documentation page.
 
 This will take you to the GitHub online editor where you can propose changes
 directly.  
@@ -27,8 +27,8 @@ directly.
 
 ## Where to find our documentation
 
-We store our documentation as [Markdown](https://www.markdownguide.org/) in git 
-and use [Docusaurus][docusaurus] to generate a static website from it, 
+We store our documentation as [Markdown](https://www.markdownguide.org/) in git
+and use [Docusaurus][docusaurus] to generate a static website from it,
 which we then publish at [morio.it](https://morio.it/).
 
 Inside our monorepo, the `docs` folder holds the docusaurus setup.
@@ -72,16 +72,14 @@ title: Documentation Guide
 Improving our documentation is one of the easiest ways to start contributing to
 Morio. So if you spot a mistake or see something that you can improve, please
 do not hesitate to do so.
-
 ```
 
-The `title` entry is mandatory. In other words, __every documentation page must
-have its title set in front matter__.
+The `title` entry is mandatory. In other words, **every documentation page must
+have its title set in front matter**.
 
 As in YAML, you do not have to wrap your title in quotes, unless when it holds
 characters that would trip up the YAML parser (like when your title itself
 includes quotations marks).
-
 
 <Note title="Supported front matter"> 
 For an overview of all supported front matter, see [the Docusaurus documentation
@@ -104,7 +102,6 @@ tags:
 Improving our documentation is one of the easiest ways to start contributing to
 Morio. So if you spot a mistake or see something that you can improve, please
 do not hesitate to do so.
-
 ```
 
 We have added the `contributors` tag to this page, marking it as a page that is
@@ -115,7 +112,7 @@ Docusaurus will automatically create an overview page of all documentation that
 is tagged with any given tag.
 
 For example, the pages tagged with `contributors` can be found at
-[/docs/tags/contributors](/docs/tags/contributors).  Docusaurus will also
+[/docs/tags/contributors](/docs/tags/contributors). Docusaurus will also
 include the tags at the bottom of the page, and they link to their overview
 pages.
 
@@ -126,7 +123,7 @@ To ensure that, all tags must be defined in the `docs/docs/tags.yml` file.
 [github.com/certeu/morio/blob/develop/docs/docs/tags.yml](https://github.com/certeu/morio/blob/develop/docs/docs/tags.yml)
 </Scode>
 
-The file holds tags that can be defined as such (using our `contributors` tag as 
+The file holds tags that can be defined as such (using our `contributors` tag as
 an example):
 
 ```yaml
@@ -174,7 +171,8 @@ The `Comment` custom component allows you to insert a comment.
 </Comment>
 
 <Comment>The `by` prop is mandatory</Comment>
-```
+
+````
   </TabItem>
   <TabItem value="html" label="HTML">
 <Comment by='joost'>
@@ -210,7 +208,8 @@ Use this to indicate something needs work or is incomplete.
 <Fixme by='joost' title="My title" compact>
   Compact view with custom title
 </Fixme>
-```
+````
+
   </TabItem>
   <TabItem value="html" label="HTML">
 <Fixme>
@@ -308,7 +307,6 @@ To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.m
 To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.md</RepoFile>.
   </TabItem>
 </Tabs>
-
 
 ### Scode
 
@@ -429,7 +427,7 @@ It is common in technical documentation to use terms or acronyms that the
 reader might not be familiar with. This can create a barrier to readers,
 especially when those terms are specific to Morio.
 
-To address this, we have extended Docusaurus with two custom features that help you demystify this type of content: __jargon__ and __terminology__.
+To address this, we have extended Docusaurus with two custom features that help you demystify this type of content: **jargon** and **terminology**.
 
 ### Jargon vs Terminology
 
@@ -439,12 +437,12 @@ The difference is that jargon does not warrant or require its own dedicated docu
 The following rules can guide you when deciding whether you should create a
 jargon term, add a terminology page, or take no action.
 
- 1. Is someone new to Morio expected to know this?
- 2. Would a simple Google search explain this?
- 3. Does this warrant its own documentation page?
+1.  Is someone new to Morio expected to know this?
+2.  Would a simple Google search explain this?
+3.  Does this warrant its own documentation page?
 
-If the answers are __No__, __No__, __Yes__, create a terminology page.  
-If the answers are __No__, __No__, __No__, [create a jargon term](#creating-a-jargon-term).  
+If the answers are **No**, **No**, **Yes**, create a terminology page.  
+If the answers are **No**, **No**, **No**, [create a jargon term](#creating-a-jargon-term).  
 For all other cases, no action is required.
 
 The decision tree below visualises these rules:
@@ -472,13 +470,15 @@ graph TD;
 Let's use some examples to further clarify these rules:
 
 #### `IICB`: Create jargon term
+
 1. This is something rather niche that has little to no meaning outside the context of European Union's administration.
-2. People cannot be expected to know this, and a simple Google search is unlikely to help.  
+2. People cannot be expected to know this, and a simple Google search is unlikely to help.
 3. Knowing what the IICB is not relevant for understanding Morio. So a dedicated documentation page is not needed.
 
 In this case, we create a jargon term: _IICB_.
 
 #### `flanking node`: Create terminology page
+
 1. This has a specific meaning in Morio and people cannot be expected to know this.
 2. Googling this won't help.
 3. This requires proper explanation. A documentation page is the best option here.
@@ -486,6 +486,7 @@ In this case, we create a jargon term: _IICB_.
 In this case, we create a terminology page: _flanking node_.
 
 #### `TLS node`: Do nothing
+
 1. This is common terminology, people are unlikely to be confused by this. But even if they are...
 2. A simple Google query will explain this.
 
@@ -507,21 +508,21 @@ Inside the your `.md` file, you can use markdown content like in a regular docum
 Jargon terms have the following properties that are used to render them on the page:
 
 - `title`
-  - __description__: The title used when displaying the jargon term's info
-  - __default__: The file's _uppercased_ basename
-  - __custom__: The front matter `title` value
+  - **description**: The title used when displaying the jargon term's info
+  - **default**: The file's _uppercased_ basename
+  - **custom**: The front matter `title` value
 - `term`
-  - __description__: The term that will trigger rendering the jargon term when emphasised
-  - __default__: The file's _lowercased_ basename
-  - __custom__: The front matter `term` value
+  - **description**: The term that will trigger rendering the jargon term when emphasised
+  - **default**: The file's _lowercased_ basename
+  - **custom**: The front matter `term` value
 - `aliases`
-  - __description__: A list of additional terms that will trigger rendering the jargon term when emphasised.  
-  - __default__: none
-  - __custom__: The front matter `aliases` value (an array of strings)
+  - **description**: A list of additional terms that will trigger rendering the jargon term when emphasised.
+  - **default**: none
+  - **custom**: The front matter `aliases` value (an array of strings)
 - `content`
-  - __description__: The main content when displaying the jargon term's info
-  - __default__: The file's markdown content
-  - __custom__: none
+  - **description**: The main content when displaying the jargon term's info
+  - **default**: The file's markdown content
+  - **custom**: none
 
 #### Examples
 
@@ -531,6 +532,7 @@ Let's use two examples to illustrate the use of default versus custom values for
   <TabItem value="mdx" label="Default" default>
 
 This <RepoFile>docs/docs/jargon/mdx.md</RepoFile> example uses only defaults.
+
 - title: `MDX` (the uppercased basename is used as default)
 - term: `mdx` (the lowercased basename is used as default)
 - aliases: `[]` (no aliases is default)
@@ -549,6 +551,7 @@ Learn more at [mdxjs.com](chttps://mdxjs.com).
   <TabItem value="html" label="Custom">
 
 This <RepoFile>docs/docs/jargon/run-files.md</RepoFile> example uses custom properties.
+
 - title: `Run scripts` (default would have been `run-scripts`)
 - term: `run scripts` (default would have been `run-scripts`)
 - aliases: `['run script']` (default would have been no aliases)
@@ -563,13 +566,14 @@ aliases:
   - run script
 ---
 
-NPM run scripts, or __run scripts__ for short, refer to scripts defined in the
-__scripts__ section of a NodeJS __package.json__ file. These scripts are
+NPM run scripts, or **run scripts** for short, refer to scripts defined in the
+**scripts** section of a NodeJS **package.json** file. These scripts are
 typically used for all sorts of housekeeping an automation.
 
 For more info, refer to [the NPM docs on
 scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
 ```
+
   </TabItem>
 </Tabs>
 
@@ -607,7 +611,6 @@ The following jargon terms are currently available for use in your markdown cont
 
 <JargonTerms />
 
-
 ### Terminology
 
 #### Creating a terminology page
@@ -624,16 +627,16 @@ Then, add a `readme.md` file to the folder as you would for any documentation pa
 Terminology terms have the following properties that are used to render them on the page:
 
 - `title`
-  - __description__: The text used when displaying the terminology link
-  - __default__: The front matter `title` value
+  - **description**: The text used when displaying the terminology link
+  - **default**: The front matter `title` value
 - `term`
-  - __description__: The term that will trigger rendering the terminology link when emphasised
-  - __default__: The file's _lowercased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
-  - __custom__: The front matter `term` value
+  - **description**: The term that will trigger rendering the terminology link when emphasised
+  - **default**: The file's _lowercased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
+  - **custom**: The front matter `term` value
 - `aliases`
-  - __description__: A list of additional terms that will trigger rendering the terminology link when emphasised.  
-  - __default__: none
-  - __custom__: The front matter `aliases` value (an array of strings)
+  - **description**: A list of additional terms that will trigger rendering the terminology link when emphasised.
+  - **default**: none
+  - **custom**: The front matter `aliases` value (an array of strings)
 
 Below is an example:
 
@@ -680,7 +683,7 @@ The following terminology pages are currently available for use in your markdown
 ## Includes
 
 Sometimes, you may find yourself repeating the same information on various
-documentation pages.  You could create a page for it and link to it, but
+documentation pages. You could create a page for it and link to it, but
 perhaps it's more elegant to inline the information in the page.
 
 In a case like this, you can use an include. This allows you import _MDX_
@@ -705,7 +708,7 @@ So, the documentation is kept in the <RepoFile>docs/includes/docker-env-diffs.md
 Once created, you can import the file as any other import in your `readme.md`:
 
 ```mdx
---- 
+---
 title: Example of how to use an include
 ---
 
@@ -721,8 +724,8 @@ A few things to note:
 - The `import` statement should be the first thing after the front matter
 - Use the `@site/includes/` prefix to import include files.
 - Since we are using the default export, the name you give it can by anything (here we used `DockerBuildEndDiffs`
-- This will be used as a React component, so you __must__ pick a name that starts with a capital letter
-- Output the info as a React component: `<DockerBuildEnvDiffs />` 
+- This will be used as a React component, so you **must** pick a name that starts with a capital letter
+- Output the info as a React component: `<DockerBuildEnvDiffs />`
 
 See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.md</RepoFile> for an example.
 
@@ -739,16 +742,15 @@ We take pride in the fact that all of Morio's documentation is written by actual
 Please respect that and don't reach for ChatGPT or whatever the generative AI flavour of the day is.
 </Note>
 
-
 #### Write now, edit later
 
 Just write. Don't worry about grammar or making mistakes. It's fine.
 
 It doesn't have to be perfect, it just needs to be written down.
 
-Anybody can edit to improve form or structure, 
-and the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck) 
-and [`ci:spellcheck`](/docs/reference/contributors/monorepo/run-scripts/ci-spellcheck) 
+Anybody can edit to improve form or structure,
+and the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck)
+and [`ci:spellcheck`](/docs/reference/contributors/monorepo/run-scripts/ci-spellcheck)
 _run scripts_ are there to help with spelling.
 
 #### Use plain language
@@ -770,7 +772,6 @@ That often means making your titles a lot longer, which doesn't work well in
 the navigation sidebar. You can use the `sidebar_label` key in front matter to
 set a different title to use in the sidebar.:
 
- 
 To a lesser extend, the same advice applies to links:
 
 - Bad: You can find the info [here][yt].
@@ -822,12 +823,11 @@ While we support Microsoft Windows as a platform for the Morio client, no Micros
 If you are on Windows, your mileage may vary.
 </Warning>
 
-
 ## Redoc Integration
 
-We generate our API reference documentation by 
-using [redocusaurus](https://github.com/rohit-gohri/redocusaurus) which 
-integrates [redoc](https://github.com/redocly/redoc) 
+We generate our API reference documentation by
+using [redocusaurus](https://github.com/rohit-gohri/redocusaurus) which
+integrates [redoc](https://github.com/redocly/redoc)
 in [docusaurus](https://docusaurus.io/).
 
 The configuration is part of <RepoFile>docs/docusaurus.config.js</RepoFile> and
@@ -835,7 +835,6 @@ it adds these two routes:
 
 - [/oas-api](/oas-api) for the Management API
 - [/oas-core](/oas-core) for the Core API
-
 
 [netlify]: https://www.netlify.com/
 [docusaurus]: https://docusaurus.io/

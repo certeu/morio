@@ -215,4 +215,3 @@ At any time prior to the token's expiry, you can get a new token from the [`/tok
 The Morio Management API relies on the [Core service](/docs/guides/services/core) to bootstrap itself, and on the [proxy service](/docs/guides/services/proxy) to act as a reverse proxy.
 
 As a result, any problem with the core or proxy services will also impact the API service.
-

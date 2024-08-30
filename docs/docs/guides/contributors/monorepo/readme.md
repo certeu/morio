@@ -11,11 +11,10 @@ you can find what, as well as how to use the repository locally.
 
 ## Prerequisites
 
-To use our monorepo, you need __git__ and __NodeJS__, as well as __a GitHub account__.
+To use our monorepo, you need **git** and **NodeJS**, as well as **a GitHub account**.
 
 If you have those, you can skip ahead to [getting started](#getting-started).
 If not, read on.
-
 
 ### Installing git
 
@@ -36,14 +35,13 @@ that explains how it works, and helps you getting things done.
 It comes highly recommended: [Git Training](/docs/training/git).
 </Tip>
 
-
-- If you are on __linux__, git is probably already installed, and if not you should
-be able to install it from your distribution's package manager. One of
-`apt install git`, `yum install git`, or `dnf install git` should do the trick.
-- If you are on __Mac__, git comes with the Xcode developer tools, so if you have
-Xcode installed, you are good to go. If not, install it.
-- If you are on __Windows__, then [download the git installer for
-windows](https://git-scm.com/download/win) and follow the steps.
+- If you are on **linux**, git is probably already installed, and if not you should
+  be able to install it from your distribution's package manager. One of
+  `apt install git`, `yum install git`, or `dnf install git` should do the trick.
+- If you are on **Mac**, git comes with the Xcode developer tools, so if you have
+  Xcode installed, you are good to go. If not, install it.
+- If you are on **Windows**, then [download the git installer for
+  windows](https://git-scm.com/download/win) and follow the steps.
 
 Once installed, type `git` in a terminal window.
 If you get a bunch of output, we are good to go.
@@ -158,7 +156,7 @@ When it's done, your local Morio repository is ready.
 
 ## Repository layout
 
-The repository has a number of top-level files and folders. 
+The repository has a number of top-level files and folders.
 The most relevant are:
 
 - Files:
@@ -205,7 +203,7 @@ have the rights to create branches there.
 Pull requests will start a number of CI pipelines. Please make sure that all pipelines pass before requesting review.
 
 Before a merge request can be merged, it must get a positive review from someone on the Morio team.
-You can request reviews from github users [joostdecock](https://github.com/joostdecock), 
+You can request reviews from github users [joostdecock](https://github.com/joostdecock),
 [serge-tellene](https://github.com/serge-tellene) or [lilianbaz](https://github.com/lilianbaz).
 
 ## Run scripts
@@ -261,7 +259,7 @@ npm run eslint
 
 ### npm run prettier
 
-This will run the [Prettier](https://prettier.io/) JavaScript code 
+This will run the [Prettier](https://prettier.io/) JavaScript code
 front matter on the _monorepo_.
 
 The front matter will first reformat your code according to our coding standards.
@@ -296,7 +294,7 @@ npm run dev
 ### npm run logs\:core
 
 This will tail the logs of the _core service_ and output them in a nicely
-formatted way. As logs are formatted in JSON, this will make them easier 
+formatted way. As logs are formatted in JSON, this will make them easier
 to read while developing.
 
 To use this, run the following command in the _monorepo_ root:
@@ -308,19 +306,20 @@ npm run logs:core
 <Note>
 #### Requires pino-pretty
 
-This requires [the pino-pretty NPM 
+This requires [the pino-pretty NPM
 package](https://www.npmjs.com/package/pino-pretty) to be installed.
 To install it, run:
 
 ```sh title="Terminal"
 npm install --global pino-pretty
 ```
+
 </Note>
 
 ### npm run logs\:api
 
 This will tail the logs of the _api service_ and output them in a nicely
-formatted way. As logs are formatted in JSON, this will make them easier 
+formatted way. As logs are formatted in JSON, this will make them easier
 to read while developing.
 
 To use this, run the following command in the _monorepo_ root:
@@ -332,18 +331,19 @@ npm run logs:api
 <Note>
 #### Requires pino-pretty
 
-This requires [the pino-pretty NPM 
+This requires [the pino-pretty NPM
 package](https://www.npmjs.com/package/pino-pretty) to be installed.
 To install it, run:
 
 ```sh title="Terminal"
 npm install --global pino-pretty
 ```
+
 </Note>
 
 ### npm run destroy
 
-This will __destroy__ the local development environment. In other words, it will
+This will **destroy** the local development environment. In other words, it will
 undo what `npm run dev` did.
 
 To use this, run the following command in the _monorepo_ root:
@@ -358,9 +358,8 @@ You will not lose any code changes you made.
 
 ### npm run redev
 
-This will __destroy__ the local development environment, and create a fresh one.
+This will **destroy** the local development environment, and create a fresh one.
 It combines `npm run destroy` with `npm run dev`.
-
 
 ```sh title="Terminal"
 npm run redev
@@ -416,12 +415,12 @@ npm run help
 
 When you get stuck, this will tell you where to get help.
 
-## About our use of GitHub 
+## About our use of GitHub
 
 We use GitHub for hosting our _monorepo_ because that's where the largest
 community of potential contributors are.
 But we also maintain a mirror at
-[code.europa.eu/certeu/morio](https://code.europa.eu/certeu/morio) (a 
+[code.europa.eu/certeu/morio](https://code.europa.eu/certeu/morio) (a
 GitLab instance) and in general like to keep our options open and not be
 _beholden_ to any particular code hosting platform.
 
@@ -433,7 +432,7 @@ Actions](https://docs.github.com/en/actions), GitHub's own flavour of CI that
 has grown into an ecosystem.
 
 The problem with this is that we want whatever runs in CI to be available
-locally. A faster feedback loop means you can iterate faster. 
+locally. A faster feedback loop means you can iterate faster.
 Nobody should have to commit, push, and then wait for CI to
 complete to know whether a given pipeline passes.
 
@@ -442,10 +441,10 @@ Better is to avoid these pitfalls by creating pipelines that run locally first, 
 
 To ensure this, please consider the following choices when considering CI or automation:
 
- 1. Can it run locally?
- 2. Does it make sense to run this locally?
+1.  Can it run locally?
+2.  Does it make sense to run this locally?
 
-Only if the answers are __No__ and __No__ again should you consider a GitHub
+Only if the answers are **No** and **No** again should you consider a GitHub
 action that only runs on GitHub. For all other cases, please create a local
 run script.
 
@@ -463,6 +462,5 @@ graph TD;
   2-- No\n(eg: Triage Issues) -->action
 
 ```
-
 
 [repo]: https://github.com/certeu/morio

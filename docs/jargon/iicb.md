@@ -1,2 +1,2 @@
-The IICB is the European Union's __Interinstitutional Cybersecurity Board__ and
-the governing body of __CERT-EU__, the home of Morio.
+The IICB is the European Union's **Interinstitutional Cybersecurity Board** and
+the governing body of **CERT-EU**, the home of Morio.

@@ -1,16 +1,17 @@
 ---
 title: morio.api.core.status.false
 tags:
- - error
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Unable to connect to Morio Core__ - When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.
+
+**Unable to connect to Morio Core** - When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Unable to connect to Morio Core__ - When reaching out to Morio Core, the conne
   "detail": "When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->

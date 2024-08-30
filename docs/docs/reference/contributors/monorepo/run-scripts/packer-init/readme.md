@@ -1,8 +1,8 @@
---- 
+---
 title: packer:init
 ---
 
-The `packer:init` _run script_ will initialise all 
+The `packer:init` _run script_ will initialise all
 [Hashicorp Packer](https://packer.io/) configurations, and install
 all their required Packer plugins.
 
@@ -14,8 +14,7 @@ Under the hood, this will run:
 packer init packer
 ```
 
-As such, it will run `packer init` for all configurations stored in 
+As such, it will run `packer init` for all configurations stored in
 the <RepoFile>packer</RepoFile> folder of the _monorepo_.
 As Packer's `init` command installs required plugins, this will
 format all of them.
-

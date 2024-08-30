@@ -1,4 +1,4 @@
---- 
+---
 title: cdp # skip-spellcheck
 ---
 
@@ -11,5 +11,3 @@ Under the hood, this will run:
 ```sh title="Terminal"
 npm run check-docs-page
 ```
-
-

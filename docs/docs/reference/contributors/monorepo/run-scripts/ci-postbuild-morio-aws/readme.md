@@ -1,4 +1,4 @@
---- 
+---
 title: ci:postbuild.morio.aws
 ---
 
@@ -21,9 +21,9 @@ sure that the GitHub cli and AWS cli is available.
 
 In addition, the following environment variables should be set:
 
-| Name | Description |
-| ----:| ----------- |
-| `AWS_ACCESS_KEY_ID` | The key ID for access to [AWS][aws] |
+|                    Name | Description                         |
+| ----------------------: | ----------------------------------- |
+|     `AWS_ACCESS_KEY_ID` | The key ID for access to [AWS][aws] |
 | `AWS_SECRET_ACCESS_KEY` | The secret for access to [AWS][aws] |
 
 This will pull the list of AMI images tagged `morio=true` and make them public.

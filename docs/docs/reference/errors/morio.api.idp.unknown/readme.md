@@ -1,16 +1,17 @@
 ---
 title: morio.api.idp.unknown
 tags:
- - error
+  - error
 ---
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
-__Identity Provider Unknown__ - Cannot authenticate because the identity provider is unknown.
+
+**Identity Provider Unknown** - Cannot authenticate because the identity provider is unknown.
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
 
-
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten -->
+
 ## Example response
 
 ```json
@@ -21,4 +22,5 @@ __Identity Provider Unknown__ - Cannot authenticate because the identity provide
   "detail": "Cannot authenticate because the identity provider is unknown."
 }
 ```
+
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten -->
