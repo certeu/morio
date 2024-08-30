@@ -1,13 +1,17 @@
 // Hooks
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
+// Context
+import { ModalContext } from 'context/modal.mjs'
+import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { StatusIcon, OkIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 import { Docker, Traefik, RedPandaConsole } from 'components/brands.mjs'
-import { StorageIcon } from 'components/icons.mjs'
+import { StorageIcon, RestartIcon, ReseedIcon } from 'components/icons.mjs'
 import { Echart } from 'components/echarts.mjs'
 
 const statusColors = { green: "success", amber: "warning", red: "error" }
@@ -125,47 +129,130 @@ const Status = ({ status }) => {
   )
 }
 
+const RestartConfirmation = ({ restart }) => (
+  <>
+    <h2>Restart Morio?</h2>
+    <p>Click the button below to trigger a soft restart of Morio</p>
+    <b>What will happen?</b>
+    <p>
+      Morio Core will reload the settings on disk and re-bootstrap itself.
+      <br />
+      One or more services will potentially be restarted.
+    </p>
+    <button className="btn btn-primary w-full" onClick={restart}>Restart Morio now</button>
+  </>
+)
+
+const ReseedConfirmation = ({ reseed }) => (
+  <>
+    <h2>Reseed Morio?</h2>
+    <p>Click the button below to trigger a reseed of Morio</p>
+    <b>What will happen?</b>
+    <p>
+      Morio Core will use the current preseed settings to construct a new settings file.
+      <br />
+      It will then write that file to disk, and trigger a soft restart.
+      <br />
+      One or more services will likely be restarted.
+    </p>
+    <button className="btn btn-primary w-full" onClick={reseed}>Reseed Morio now</button>
+  </>
+)
+
 const StatusPage = (props) => {
   const [status, setStatus] = useState()
+  const [timer, setTimer] = useState()
   const { api } = useApi()
+  const { pushModal } = useContext(ModalContext)
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  const updateStatus = async () => {
+    const result = await api.getStatus()
+    if (result[1] === 200) {
+      setStatus(result[0])
+      setTimer(setTimeout(updateStatus, 5000))
+    } else {
+      setTimer(setTimeout(updateStatus, 2000))
+    }
+  }
 
   useEffect(() => {
-    const getStatus = async () => {
-      const result = await api.getStatus()
-      if (result[1] === 200) setStatus(result[0])
-    }
-    getStatus()
-  },[])
+    updateStatus()
+  }, [])
+
+  const restart = async () => {
+    setLoadingStatus([true, 'Restarting Morio, this will take a while'])
+    const [data, status] = await api.restart()
+    if (status !== 204) return setLoadingStatus([true, `Unable to restart Morio`, true, false])
+    else setLoadingStatus([true, 'Restart initialized', true, true])
+  }
+
+  const reseed = async () => {
+    setLoadingStatus([true, 'Reseeding Morio, this will take a while'])
+    const [data, status] = await api.reseed()
+    if (status !== 204) return setLoadingStatus([true, `Unable to reseed Morio`, true, false])
+    else setLoadingStatus([true, 'Reseed initialized', true, true])
+  }
 
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={StatusIcon} title={props.title}>
+        <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl mb-4">
+          <button
+            title="Restart Morio..."
+            className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper>
+                  <RestartConfirmation restart={restart} />
+                </ModalWrapper>
+              )
+            }
+          >
+            <RestartIcon />
+            Restart Morio...
+          </button>
+          <button
+            title="Reseed Morio..."
+            className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper>
+                  <ReseedConfirmation reseed={reseed} />
+                </ModalWrapper>
+              )
+            }
+          >
+            <ReseedIcon />
+            Reseed Morio...
+          </button>
+        </div>
         <Status status={status} />
-          <div className="grid grid-cols-3 gap-4 items-center justify-between items-stretch max-w-4xl">
-            <Card
-              title="Docker"
-              href="/status/docker"
-              desc="Display running containers, available images, and configured networks."
-              width="w-full"
-              Icon={Docker}
-            />
-            <Card
-              title="Traefik Dashboard"
-              target="_blank"
-              href={`/dashboard/?cache_bust=${Date.now()}#/`}
-              desc="Display Morio's HTTP microservices, their status, configuration, and availability."
-              width="w-full"
-              Icon={Traefik}
-            />
-            <Card
-              title="RedPanda Console"
-              target="_blank"
-              href="/console/overview"
-              desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
-              width="w-full"
-              Icon={RedPandaConsole}
-            />
-          </div>
+        <div className="grid grid-cols-3 gap-4 items-center justify-between items-stretch max-w-4xl">
+          <Card
+            title="Docker"
+            href="/status/docker"
+            desc="Display running containers, available images, and configured networks."
+            width="w-full"
+            Icon={Docker}
+          />
+          <Card
+            title="Traefik Dashboard"
+            target="_blank"
+            href={`/dashboard/?cache_bust=${Date.now()}#/`}
+            desc="Display Morio's HTTP microservices, their status, configuration, and availability."
+            width="w-full"
+            Icon={Traefik}
+          />
+          <Card
+            title="RedPanda Console"
+            target="_blank"
+            href="/console/overview"
+            desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
+            width="w-full"
+            Icon={RedPandaConsole}
+          />
+        </div>
       </ContentWrapper>
     </PageWrapper>
   )

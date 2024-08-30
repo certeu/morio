@@ -51,30 +51,15 @@ Controller.prototype.deploy = async (req, res) => {
     })
   } else log.info(`Processing request to deploy new settings`)
 
-  /*
-   * Generate time-stamp for use in file names
-   */
-  const time = Date.now()
-  log.info(`New settings will be tracked as: ${time}`)
-
-  /*
-   * Handle secrets
-   */
-  if (valid.tokens?.secrets) valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
-
-  /*
-   * Write the protected valid settings to disk
-   */
-  log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
-  if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
+  const result = await deployNewSettings(valid)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
 
   /*
    * Don't await reload, just return
    */
   reload({ hotReload: true })
 
-  return res.send({ result: 'success', settings: utils.getSanitizedSettings() })
+  return res.status(204).send()
 }
 
 /**
@@ -103,15 +88,12 @@ Controller.prototype.setup = async (req, res) => {
    */
   const [data, error] = await initialSetup(req, res, settings)
 
-  console.log({data, error})
-
   /*
    * Send error, or data
    */
   if (data === false && error) return utils.sendErrorResponse(res, error[0], req.url, error?.[1])
   else res.send(data)
 
-  console.log('here now')
   /*
    * Trigger a reload, but don't await it.
    */
@@ -141,7 +123,6 @@ Controller.prototype.preseed = async (req, res) => {
   delete body.headers
   const [preseed, err] = await utils.validate(`req.settings.preseed`, body)
   if (!preseed?.base) {
-    console.log({preseed, err})
     return utils.sendErrorResponse(
       res,
       'morio.core.schema.violation',
@@ -172,6 +153,43 @@ Controller.prototype.preseed = async (req, res) => {
    */
   log.info(`Bring Morio out of ephemeral mode`)
   return reload({ initialSetup: true })
+}
+
+/**
+ * Soft restart core (aka reload)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.restart = async (req, res) => {
+  reload({ restart: true })
+  return res.status(204).send()
+}
+
+/**
+ * Reseed the settings
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.reseed = async (req, res) => {
+  /*
+   * Load the preseeded settings
+   */
+  const settings = await loadPreseededSettings(utils.getSettings('preseed', log))
+
+  /*
+   * Write to disk
+   */
+  const result = await deployNewSettings(settings)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
+
+  /*
+   * Don't await reload, just return
+   */
+  reload({ hotReload: true })
+
+  return res.status(204).send()
 }
 
 /**
@@ -217,7 +235,6 @@ const initialSetup = async (req, res, settings) => {
    */
   const [valid, err] = await utils.validate(`req.settings.setup`, settings)
   if (!valid?.cluster) {
-    console.log('in initial setup', {valid, err})
     return [false, [
       'morio.core.schema.violation',
       err?.message ? { schema_violation: err.message } : undefined
@@ -356,4 +373,25 @@ const initialSetup = async (req, res, settings) => {
       value: keys.mrt,
     },
   }, false]
+}
+
+const deployNewSettings = async (settings) => {
+  /*
+   * Generate time-stamp for use in file names
+   */
+  const time = Date.now()
+  log.info(`New settings will be tracked as: ${time}`)
+
+  /*
+   * Handle secrets
+   */
+  if (valid.tokens?.secrets) valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
+
+  /*
+   * Write the protected valid settings to disk
+   */
+  log.debug(`Writing new settings to settings.${time}.yaml`)
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
+
+  return result
 }

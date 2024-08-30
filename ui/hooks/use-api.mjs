@@ -418,6 +418,30 @@ MorioClient.prototype.deploy = async function (settings) {
 }
 
 /**
+ * Restart Morio
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.restart = async function () {
+  return await this.call(`${morioConfig.api}/restart`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Reseed Morio
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.reseed = async function () {
+  return await this.call(`${morioConfig.api}/reseed`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
  * Changes a container state
  *
  * @param {string} id - The Docker Container ID

@@ -126,9 +126,9 @@ export const loadPreseedFile = async (config={}, base=false) => {
     /*
      * No base settings passed in, so we are loading the base settings here
      */
-    if (typeof config === 'string' || config.url) return await loadPreseedFileFromUrl(config)
     if (config.gitlab) return await loadPreseedFileFromGitlab(config)
     if (config.github) return await loadPreseedFileFromGithub(config)
+    if (typeof config === 'string' || config.url) return await loadPreseedFileFromUrl(config)
   } else {
     /*
      * Base settings were passed in, so we are loading an overlay here

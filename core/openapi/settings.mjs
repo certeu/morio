@@ -35,6 +35,7 @@ Note that this endpoint requires you to post the full settings, so when making u
       },
     },
     responses: {
+      204: { description: 'No response body' },
       ...errorResponses([`morio.core.schema.violation`]),
     },
   })

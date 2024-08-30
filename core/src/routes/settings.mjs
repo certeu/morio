@@ -29,4 +29,14 @@ export function routes(app) {
    * Which means they are not decrypted (no secrets).
    */
   app.get('/settings', (req, res) => res.send(utils.getSanitizedSettings()))
+
+  /*
+   * Hit this route to soft restart Morio
+   */
+  app.get('/restart', (req, res) => Settings.restart(req, res))
+
+  /*
+   * Hit this route to soft reseed Morio
+   */
+  app.get('/reseed', (req, res) => Settings.restart(req, res))
 }

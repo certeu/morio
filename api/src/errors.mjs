@@ -52,6 +52,15 @@ export const errors = {
       'When reaching out to Morio Core, we did not receive a response, idicating that core may be down.',
   },
   /*
+   * Status issues coming from core when it rejects connections
+   */
+  'morio.api.core.status.false': {
+    status: 503,
+    title: 'Unable to connect to Morio Core',
+    detail:
+      'When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.',
+  },
+  /*
    * Status issues coming from core
    */
   'morio.api.input.malformed': {

@@ -1,0 +1,18 @@
+{
+  "base": {
+    "github": {
+      "owner": "morio",
+      "repo": "preseed",
+      "file_path": "settings/standalone.yaml",
+      "ref": "main",
+      "token": "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"
+    }
+  },
+  "overlays": [
+    "settings/overlays/idp-ad.yaml",
+    "settings/overlays/idp-apikey.yaml",
+    "settings/overlays/idp-local.yaml",
+    "settings/overlays/idp-mrt.yaml"
+  ]
+}
+

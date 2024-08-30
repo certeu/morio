@@ -378,4 +378,70 @@ Controller.prototype.reload = async (req, res) => {
   return reload()
 }
 
+/**
+ * (soft) restart core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.restart = async (req, res) => {
+  log.info('Received request to do a soft restart')
+  const [status, result] = await utils.coreClient.get(`/restart`)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Reseed core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.reseed = async (req, res) => {
+  log.info('Received request to reseed')
+  /*
+   * Load the preseeded settings so we can validate them
+   */
+  const settings = await loadPreseededSettings(utils.getSettings('preseed'), log)
+
+  /*
+   * Validate settings against the schema
+   */
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
+
+  /*
+   * Validate settings are deployable
+   */
+  const report = await validateSettings(settings)
+
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid)
+    return utils.sendErrorResponse(
+      res,
+      'morio.api.settings.invalid',
+      req.url,
+      report.errors ? { validation_errors: report.errors } : false
+    )
+
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
+
+  /*
+   * Looks good, pass the request to core
+   */
+  const [status, result] = await utils.coreClient.get(`/reseed`)
+
+  return res.status(status).send(result)
+}
+
 const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })

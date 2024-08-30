@@ -101,4 +101,14 @@ export function routes(app) {
    * This route is called by core after reconfiguring itself
    */
   app.get(`/reload`, (req, res) => Core.reload(req, res))
+
+  /*
+   * This route will cause core to do a soft restart
+   */
+  app.get(`/restart`, (req, res) => Core.restart(req, res))
+
+  /*
+   * This route will cause core to reseed the configuration
+   */
+  app.get(`/reseed`, (req, res) => Core.reseed(req, res))
 }

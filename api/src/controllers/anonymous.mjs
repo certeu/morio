@@ -135,6 +135,7 @@ Controller.prototype.getStatus = async (req, res) => {
       reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
+      settings_preseeded: utils.getSettings('preseed', false) ? true : false
     },
     core: utils.getCoreStatus(),
   })
