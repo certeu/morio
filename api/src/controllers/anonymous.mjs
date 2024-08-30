@@ -103,6 +103,16 @@ Controller.prototype.getJwks = async (req, res) => {
 }
 
 /**
+ * This returns the public key
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getPubkey = async (req, res, pem=false) => pem
+  ? res.type('application/x-pem-file').send(utils.getKeys().public)
+  : res.send({ pubkey: utils.getKeys().public })
+
+/**
  * Get status
  *
  * @param {object} req - The request object from Express

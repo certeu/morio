@@ -17,6 +17,26 @@ export default (api) => {
     },
   })
 
+  api.get('/pubkey', {
+    tags: ['anonymous', 'cryptography'],
+    summary: `Get public key`,
+    description: `Returns Morio's internal public key. This can be used to validate Morio's JWTs`,
+    responses: {
+      200: response('Public Key', examples.obj.pubkey),
+      ...errorResponse(`morio.api.info.unavailable`),
+    },
+  })
+
+  api.get('/pubkey.pem', {
+    tags: ['anonymous', 'cryptography'],
+    summary: `Get public key.pem`,
+    description: `Returns Morio's internal public key as a PEM file. This can be used to validate Morio's JWTs`,
+    responses: {
+      200: response('PublicKey.pem', examples.obj.pubkey.pubkey, false, 'application/x-pem-file'),
+      ...errorResponse(`morio.api.info.unavailable`),
+    },
+  })
+
   api.get('/downloads', {
     ...shared,
     summary: `List downloads`,

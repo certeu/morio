@@ -21,6 +21,8 @@ const allowedUrisBase = [
   `/cluster/join`,
   `/validate/settings`,
   `/ca/certificates`,
+  `/pubkey`,
+  `/pubkey.pem`,
 ]
 
 /*
