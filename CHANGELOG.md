@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Watcher service
 - Fixed bug in the client CLI options
 - Fixed broker to trust root and intermediate CA certs
+- Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
 
 ### Changed
 
