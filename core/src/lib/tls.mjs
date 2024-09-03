@@ -150,10 +150,12 @@ export const createX509Certificate = async (data) => {
  * Since this is often used during cluster startup, it will handle the
  * eventuality that the CA is not up, and keep trying for a good while.
  *
- * @param {string} cn - The service name
+ * @param {string} service - The service name
+ * @param {boolean} internal - Set this to true to generate an internal certificate
+ * @param {boolean} chain - Set this to true to include the intermediate cert in the cert file
  * @return {bool} result - True is everything went well, false if not
  */
-export const ensureServiceCertificate = async (service) => {
+export const ensureServiceCertificate = async (service, internal=false, chain=true) => {
   /*
    * We'll check for the required files on disk.
    * If at least one is missing, we need to generate the certificates.
@@ -193,7 +195,7 @@ export const ensureServiceCertificate = async (service) => {
       await createX509Certificate({
         certificate: {
           //cn: `${service}.infra.${utils.getClusterUuid()}.morio`,
-          cn: utils.getClusterFqdn(),
+          cn: (internal ? utils.getInternalServiceCn(service) : utils.getClusterFqdn()),
           c: utils.getPreset('MORIO_X509_C'),
           st: utils.getPreset('MORIO_X509_ST'),
           l: utils.getPreset('MORIO_X509_L'),
@@ -218,10 +220,15 @@ export const ensureServiceCertificate = async (service) => {
   log.debug(`${service}: Writing certificates for inter-node TLS`)
   await writeFile(
     `/etc/morio/${service}/tls-cert.pem`,
-    certAndKey.certificate.crt + '\n' + utils.getCaConfig().intermediate
+    chain
+      ? certAndKey.certificate.crt + utils.getCaConfig().intermediate
+      : certAndKey.certificate.crt
   )
   await writeFile(`/etc/morio/${service}/tls-key.pem`, certAndKey.key)
-  await writeFile(`/etc/morio/${service}/tls-ca.pem`, utils.getCaConfig().certificate)
+  await writeFile(
+    `/etc/morio/${service}/tls-ca.pem`,
+    utils.getCaConfig().intermediate + utils.getCaConfig().certificate
+  )
 
   /*
    * Also write broker certificates to the downloads folder

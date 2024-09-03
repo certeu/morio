@@ -260,6 +260,14 @@ utils.getHeartbeatOut = (fqdn) => store.get(['state', 'cluster', 'heartbeats', '
 utils.getInfo = () => store.get('info')
 
 /**
+ * Get internal service CN
+ *
+ * @param {string} service - The service name
+ * @return {string} fqdn - The internal CN (and fqdn)
+ */
+utils.getInternalServiceCn = (service) => `${service}.${utils.getClusterUuid()}.morio.internal`
+
+/**
  * Helper method to get the keys configuration
  *
  * @return {object} keys - The keys configuration as loaded from disk

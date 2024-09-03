@@ -9,6 +9,7 @@ import { service as connectorService } from './connector.mjs'
 import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
+import { service as watcherService } from './watcher.mjs'
 // Dependencies
 import {
   resolveServiceConfiguration,
@@ -48,6 +49,7 @@ const services = {
   console: consoleService,
   connector: connectorService,
   dbuilder: dbuilderService,
+  watcher: watcherService,
 }
 
 /*

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- Upgraded connector from 8.13.3 to 8.15.0
+- Preseed stuff
+- Vault integration
+- Watcher service
+- Fixed bug in the client CLI options
+- Fixed broker to trust root and intermediate CA certs
+
 ### Changed
 
 - Updated dependencies in docs site (no breaking changes)
