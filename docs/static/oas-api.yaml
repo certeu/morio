@@ -89,6 +89,88 @@ paths:
                 detail: >-
                   We were unable to retrieve the requested data from the
                   internal state.
+  /pubkey:
+    get:
+      tags:
+        - anonymous
+        - cryptography
+      summary: Get public key
+      description: >-
+        Returns Morio's internal public key. This can be used to validate
+        Morio's JWTs
+      responses:
+        '200':
+          description: Public Key
+          content:
+            application/json:
+              example:
+                pubkey: >
+                  -----BEGIN PUBLIC KEY-----
+
+                  MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA2w8z3zdnU8oAWYD8UfQ9
+
+                  Ar3xVlEo2PIC4ZNZ7AYsXitFJ8NNdHvXqO5VIC3R2LHIsdn9wPkaaI5sAEcGNzeL
+
+                  2AD4QzDCWIIYWfLLS1MTVVd9hW1HzHZxzvng4WJV3vuULCvYh+9bcy0xoKzq9OzE
+
+                  jETDSFpsTEl3VGHE/J2XN/bh4I6qYvrze2ZAMtYfu1Xd7lk6tXooQO8WGaVdH/5/
+
+                  R3HCoiFBTGJAa1VLlFp7Zuc2P4Gi7lbI1VAANCmN38olkyP2yrqPAtaFzAHZdmUZ
+
+                  P+1BkJ7OQ2Z0uNKrpMiZZaweuaFGnmf1N3YsAJNwNvVksKWJJMilpNZbWQsm2QQj
+
+                  U5i/MKSngXx7yyzATAxwH/JZrXYamNEdWFxFUdNaAleO3cSXQVxhqzcCb7JthlhG
+
+                  n1DVvuM2kPGJJr8iSylXpX2Sge1Z9dnnrWpK+7/+mVTgYH+dlqZEHf7NC8cw7D/M
+
+                  SN9phe5P6gCOppTqDNFi/3QsgdQ8w9kKhvD2d77I1pzTvjXqHxrFnZ/Je/8iOpa8
+
+                  HnlRWso2II0Wn6BNOxNK5K/4TRFcOdVS+RbWaQ/+xuvX3/8GMeuOybwydqtIUXWs
+
+                  ropJOuQ/yET5BtYVnalr4V9BfKmALfcYenIrk9sWLe3f+FG34kGF1egaWy2c4HFV
+
+                  2zVgK4iWU+nnSlpFGcwAxVUCAwEAAQ==
+
+                  -----END PUBLIC KEY-----
+        '503':
+          description: Unable to load the requested data
+          content:
+            application/problem+json:
+              example: *ref_0
+  /pubkey.pem:
+    get:
+      tags:
+        - anonymous
+        - cryptography
+      summary: Get public key.pem
+      description: >-
+        Returns Morio's internal public key as a PEM file. This can be used to
+        validate Morio's JWTs
+      responses:
+        '200':
+          description: PublicKey.pem
+          content:
+            application/x-pem-file:
+              example: |
+                -----BEGIN PUBLIC KEY-----
+                MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA2w8z3zdnU8oAWYD8UfQ9
+                Ar3xVlEo2PIC4ZNZ7AYsXitFJ8NNdHvXqO5VIC3R2LHIsdn9wPkaaI5sAEcGNzeL
+                2AD4QzDCWIIYWfLLS1MTVVd9hW1HzHZxzvng4WJV3vuULCvYh+9bcy0xoKzq9OzE
+                jETDSFpsTEl3VGHE/J2XN/bh4I6qYvrze2ZAMtYfu1Xd7lk6tXooQO8WGaVdH/5/
+                R3HCoiFBTGJAa1VLlFp7Zuc2P4Gi7lbI1VAANCmN38olkyP2yrqPAtaFzAHZdmUZ
+                P+1BkJ7OQ2Z0uNKrpMiZZaweuaFGnmf1N3YsAJNwNvVksKWJJMilpNZbWQsm2QQj
+                U5i/MKSngXx7yyzATAxwH/JZrXYamNEdWFxFUdNaAleO3cSXQVxhqzcCb7JthlhG
+                n1DVvuM2kPGJJr8iSylXpX2Sge1Z9dnnrWpK+7/+mVTgYH+dlqZEHf7NC8cw7D/M
+                SN9phe5P6gCOppTqDNFi/3QsgdQ8w9kKhvD2d77I1pzTvjXqHxrFnZ/Je/8iOpa8
+                HnlRWso2II0Wn6BNOxNK5K/4TRFcOdVS+RbWaQ/+xuvX3/8GMeuOybwydqtIUXWs
+                ropJOuQ/yET5BtYVnalr4V9BfKmALfcYenIrk9sWLe3f+FG34kGF1egaWy2c4HFV
+                2zVgK4iWU+nnSlpFGcwAxVUCAwEAAQ==
+                -----END PUBLIC KEY-----
+        '503':
+          description: Unable to load the requested data
+          content:
+            application/problem+json:
+              example: *ref_0
   /downloads:
     get:
       tags: &ref_1
@@ -375,6 +457,12 @@ paths:
                       type: string
                     verify_certificate:
                       type: boolean
+                    role:
+                      type: string
+                    jwt_auth_path:
+                      type: string
+                    kv_path:
+                      type: string
                   required:
                     - url
                   additionalProperties: false
@@ -388,12 +476,73 @@ paths:
                         type: string
                       verify_certificate:
                         type: boolean
+                      role:
+                        type: string
+                      jwt_auth_path:
+                        type: string
+                      kv_path:
+                        type: string
                     required:
                       - url
                     additionalProperties: false
                 preseed:
                   type: object
                   properties:
+                    git:
+                      type: object
+                      properties: {}
+                      additionalProperties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                          ref:
+                            type: string
+                          user:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                          token:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                        additionalProperties: false
                     base:
                       anyOf:
                         - type: object
@@ -427,9 +576,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - url
@@ -459,9 +619,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - owner
@@ -472,84 +643,108 @@ paths:
                           additionalProperties: false
                         - type: string
                     overlays:
-                      type: array
-                      items:
-                        anyOf:
-                          - type: object
-                            properties:
-                              url:
-                                type: string
-                              headers:
-                                type: object
-                                properties: {}
-                                additionalProperties: false
-                            required:
-                              - url
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              gitlab:
-                                type: object
+                      anyOf:
+                        - type: array
+                          items:
+                            anyOf:
+                              - type: object
                                 properties:
                                   url:
                                     type: string
-                                  project_id:
-                                    type: number
-                                    format: float
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
+                                  headers:
+                                    type: object
+                                    properties: {}
+                                    additionalProperties: false
                                 required:
                                   - url
-                                  - project_id
-                                  - file_path
-                                  - token
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              github:
-                                type: object
+                              - type: object
                                 properties:
-                                  url:
-                                    type: string
-                                  owner:
-                                    type: string
-                                  repo:
-                                    type: string
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
-                                required:
-                                  - owner
-                                  - repo
-                                  - file_path
-                                  - token
+                                  gitlab:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      project_id:
+                                        type: number
+                                        format: float
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - url
+                                      - project_id
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: string
+                              - type: object
+                                properties:
+                                  github:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      owner:
+                                        type: string
+                                      repo:
+                                        type: string
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - owner
+                                      - repo
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
+                                additionalProperties: false
+                              - type: string
+                        - type: string
                   additionalProperties: false
               additionalProperties: false
             example: &ref_2
@@ -644,6 +839,61 @@ paths:
             schema:
               type: object
               properties:
+                git:
+                  type: object
+                  properties: {}
+                  additionalProperties:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                      ref:
+                        type: string
+                      user:
+                        anyOf:
+                          - type: string
+                          - type: object
+                            properties:
+                              vault:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      path:
+                                        type: string
+                                      key:
+                                        type: string
+                                      instance:
+                                        type: string
+                                    required:
+                                      - path
+                                      - key
+                                    additionalProperties: false
+                            additionalProperties: false
+                      token:
+                        anyOf:
+                          - type: string
+                          - type: object
+                            properties:
+                              vault:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      path:
+                                        type: string
+                                      key:
+                                        type: string
+                                      instance:
+                                        type: string
+                                    required:
+                                      - path
+                                      - key
+                                    additionalProperties: false
+                            additionalProperties: false
+                    additionalProperties: false
                 base:
                   anyOf:
                     - type: object
@@ -677,9 +927,20 @@ paths:
                                 - type: object
                                   properties:
                                     vault:
-                                      type: string
-                                  required:
-                                    - vault
+                                      anyOf:
+                                        - type: string
+                                        - type: object
+                                          properties:
+                                            path:
+                                              type: string
+                                            key:
+                                              type: string
+                                            instance:
+                                              type: string
+                                          required:
+                                            - path
+                                            - key
+                                          additionalProperties: false
                                   additionalProperties: false
                           required:
                             - url
@@ -709,9 +970,20 @@ paths:
                                 - type: object
                                   properties:
                                     vault:
-                                      type: string
-                                  required:
-                                    - vault
+                                      anyOf:
+                                        - type: string
+                                        - type: object
+                                          properties:
+                                            path:
+                                              type: string
+                                            key:
+                                              type: string
+                                            instance:
+                                              type: string
+                                          required:
+                                            - path
+                                            - key
+                                          additionalProperties: false
                                   additionalProperties: false
                           required:
                             - owner
@@ -722,84 +994,108 @@ paths:
                       additionalProperties: false
                     - type: string
                 overlays:
-                  type: array
-                  items:
-                    anyOf:
-                      - type: object
-                        properties:
-                          url:
-                            type: string
-                          headers:
-                            type: object
-                            properties: {}
-                            additionalProperties: false
-                        required:
-                          - url
-                        additionalProperties: false
-                      - type: object
-                        properties:
-                          gitlab:
-                            type: object
+                  anyOf:
+                    - type: array
+                      items:
+                        anyOf:
+                          - type: object
                             properties:
                               url:
                                 type: string
-                              project_id:
-                                type: number
-                                format: float
-                              file_path:
-                                type: string
-                              ref:
-                                type: string
-                              token:
-                                anyOf:
-                                  - type: string
-                                  - type: object
-                                    properties:
-                                      vault:
-                                        type: string
-                                    required:
-                                      - vault
-                                    additionalProperties: false
+                              headers:
+                                type: object
+                                properties: {}
+                                additionalProperties: false
                             required:
                               - url
-                              - project_id
-                              - file_path
-                              - token
                             additionalProperties: false
-                        additionalProperties: false
-                      - type: object
-                        properties:
-                          github:
-                            type: object
+                          - type: object
                             properties:
-                              url:
-                                type: string
-                              owner:
-                                type: string
-                              repo:
-                                type: string
-                              file_path:
-                                type: string
-                              ref:
-                                type: string
-                              token:
-                                anyOf:
-                                  - type: string
-                                  - type: object
-                                    properties:
-                                      vault:
-                                        type: string
-                                    required:
-                                      - vault
-                                    additionalProperties: false
-                            required:
-                              - owner
-                              - repo
-                              - file_path
-                              - token
+                              gitlab:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  project_id:
+                                    type: number
+                                    format: float
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  path:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                  instance:
+                                                    type: string
+                                                required:
+                                                  - path
+                                                  - key
+                                                additionalProperties: false
+                                        additionalProperties: false
+                                required:
+                                  - url
+                                  - project_id
+                                  - file_path
+                                  - token
+                                additionalProperties: false
                             additionalProperties: false
-                        additionalProperties: false
-                      - type: string
+                          - type: object
+                            properties:
+                              github:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  owner:
+                                    type: string
+                                  repo:
+                                    type: string
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  path:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                  instance:
+                                                    type: string
+                                                required:
+                                                  - path
+                                                  - key
+                                                additionalProperties: false
+                                        additionalProperties: false
+                                required:
+                                  - owner
+                                  - repo
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: string
+                    - type: string
               additionalProperties: false
             example:
               base: &ref_32
@@ -2537,9 +2833,8 @@ paths:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2570,9 +2865,8 @@ paths:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2597,9 +2891,8 @@ paths:
         '200':
           description: >-
             [See **Get data usage** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2621,9 +2914,8 @@ paths:
         '200':
           description: >-
             [See **List Images** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2645,9 +2937,8 @@ paths:
         '200':
           description: >-
             [See **Get system information** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2669,9 +2960,8 @@ paths:
         '200':
           description: >-
             [See **List networks** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2694,9 +2984,8 @@ paths:
         '200':
           description: >-
             [See **Get version** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2734,9 +3023,8 @@ paths:
         '200':
           description: >-
             [See **Inspect a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2767,9 +3055,8 @@ paths:
         '200':
           description: >-
             [See **Get container logs** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2801,9 +3088,8 @@ paths:
           description: >-
             [See **Get container stats based on resource usages** in the Docker
             API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2834,9 +3120,8 @@ paths:
         '200':
           description: >-
             [See **Inspect an image** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2867,9 +3152,8 @@ paths:
         '200':
           description: >-
             [See **Inspect a network** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2891,9 +3175,8 @@ paths:
         '200':
           description: >-
             [See **Kill a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2915,9 +3198,8 @@ paths:
         '200':
           description: >-
             [See **Pause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2939,9 +3221,8 @@ paths:
         '200':
           description: >-
             [See **Restart a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2963,9 +3244,8 @@ paths:
         '200':
           description: >-
             [See **Start a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -2987,9 +3267,8 @@ paths:
         '200':
           description: >-
             [See **Stop a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -3011,9 +3290,8 @@ paths:
         '200':
           description: >-
             [See **Unpause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause)
-          content:
-            application/json: {}
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause) 
+          content: {}
         '401':
           description: Authentication required
           content:
@@ -3142,6 +3420,12 @@ paths:
                       type: string
                     verify_certificate:
                       type: boolean
+                    role:
+                      type: string
+                    jwt_auth_path:
+                      type: string
+                    kv_path:
+                      type: string
                   required:
                     - url
                   additionalProperties: false
@@ -3155,12 +3439,73 @@ paths:
                         type: string
                       verify_certificate:
                         type: boolean
+                      role:
+                        type: string
+                      jwt_auth_path:
+                        type: string
+                      kv_path:
+                        type: string
                     required:
                       - url
                     additionalProperties: false
                 preseed:
                   type: object
                   properties:
+                    git:
+                      type: object
+                      properties: {}
+                      additionalProperties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                          ref:
+                            type: string
+                          user:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                          token:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                        additionalProperties: false
                     base:
                       anyOf:
                         - type: object
@@ -3194,9 +3539,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - url
@@ -3226,9 +3582,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - owner
@@ -3239,84 +3606,108 @@ paths:
                           additionalProperties: false
                         - type: string
                     overlays:
-                      type: array
-                      items:
-                        anyOf:
-                          - type: object
-                            properties:
-                              url:
-                                type: string
-                              headers:
-                                type: object
-                                properties: {}
-                                additionalProperties: false
-                            required:
-                              - url
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              gitlab:
-                                type: object
+                      anyOf:
+                        - type: array
+                          items:
+                            anyOf:
+                              - type: object
                                 properties:
                                   url:
                                     type: string
-                                  project_id:
-                                    type: number
-                                    format: float
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
+                                  headers:
+                                    type: object
+                                    properties: {}
+                                    additionalProperties: false
                                 required:
                                   - url
-                                  - project_id
-                                  - file_path
-                                  - token
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              github:
-                                type: object
+                              - type: object
                                 properties:
-                                  url:
-                                    type: string
-                                  owner:
-                                    type: string
-                                  repo:
-                                    type: string
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
-                                required:
-                                  - owner
-                                  - repo
-                                  - file_path
-                                  - token
+                                  gitlab:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      project_id:
+                                        type: number
+                                        format: float
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - url
+                                      - project_id
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: string
+                              - type: object
+                                properties:
+                                  github:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      owner:
+                                        type: string
+                                      repo:
+                                        type: string
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - owner
+                                      - repo
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
+                                additionalProperties: false
+                              - type: string
+                        - type: string
                   additionalProperties: false
               additionalProperties: false
             examples:
@@ -3393,6 +3784,61 @@ paths:
             schema:
               type: object
               properties:
+                git:
+                  type: object
+                  properties: {}
+                  additionalProperties:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      url:
+                        type: string
+                      ref:
+                        type: string
+                      user:
+                        anyOf:
+                          - type: string
+                          - type: object
+                            properties:
+                              vault:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      path:
+                                        type: string
+                                      key:
+                                        type: string
+                                      instance:
+                                        type: string
+                                    required:
+                                      - path
+                                      - key
+                                    additionalProperties: false
+                            additionalProperties: false
+                      token:
+                        anyOf:
+                          - type: string
+                          - type: object
+                            properties:
+                              vault:
+                                anyOf:
+                                  - type: string
+                                  - type: object
+                                    properties:
+                                      path:
+                                        type: string
+                                      key:
+                                        type: string
+                                      instance:
+                                        type: string
+                                    required:
+                                      - path
+                                      - key
+                                    additionalProperties: false
+                            additionalProperties: false
+                    additionalProperties: false
                 base:
                   anyOf:
                     - type: object
@@ -3426,9 +3872,20 @@ paths:
                                 - type: object
                                   properties:
                                     vault:
-                                      type: string
-                                  required:
-                                    - vault
+                                      anyOf:
+                                        - type: string
+                                        - type: object
+                                          properties:
+                                            path:
+                                              type: string
+                                            key:
+                                              type: string
+                                            instance:
+                                              type: string
+                                          required:
+                                            - path
+                                            - key
+                                          additionalProperties: false
                                   additionalProperties: false
                           required:
                             - url
@@ -3458,9 +3915,20 @@ paths:
                                 - type: object
                                   properties:
                                     vault:
-                                      type: string
-                                  required:
-                                    - vault
+                                      anyOf:
+                                        - type: string
+                                        - type: object
+                                          properties:
+                                            path:
+                                              type: string
+                                            key:
+                                              type: string
+                                            instance:
+                                              type: string
+                                          required:
+                                            - path
+                                            - key
+                                          additionalProperties: false
                                   additionalProperties: false
                           required:
                             - owner
@@ -3471,84 +3939,108 @@ paths:
                       additionalProperties: false
                     - type: string
                 overlays:
-                  type: array
-                  items:
-                    anyOf:
-                      - type: object
-                        properties:
-                          url:
-                            type: string
-                          headers:
-                            type: object
-                            properties: {}
-                            additionalProperties: false
-                        required:
-                          - url
-                        additionalProperties: false
-                      - type: object
-                        properties:
-                          gitlab:
-                            type: object
+                  anyOf:
+                    - type: array
+                      items:
+                        anyOf:
+                          - type: object
                             properties:
                               url:
                                 type: string
-                              project_id:
-                                type: number
-                                format: float
-                              file_path:
-                                type: string
-                              ref:
-                                type: string
-                              token:
-                                anyOf:
-                                  - type: string
-                                  - type: object
-                                    properties:
-                                      vault:
-                                        type: string
-                                    required:
-                                      - vault
-                                    additionalProperties: false
+                              headers:
+                                type: object
+                                properties: {}
+                                additionalProperties: false
                             required:
                               - url
-                              - project_id
-                              - file_path
-                              - token
                             additionalProperties: false
-                        additionalProperties: false
-                      - type: object
-                        properties:
-                          github:
-                            type: object
+                          - type: object
                             properties:
-                              url:
-                                type: string
-                              owner:
-                                type: string
-                              repo:
-                                type: string
-                              file_path:
-                                type: string
-                              ref:
-                                type: string
-                              token:
-                                anyOf:
-                                  - type: string
-                                  - type: object
-                                    properties:
-                                      vault:
-                                        type: string
-                                    required:
-                                      - vault
-                                    additionalProperties: false
-                            required:
-                              - owner
-                              - repo
-                              - file_path
-                              - token
+                              gitlab:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  project_id:
+                                    type: number
+                                    format: float
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  path:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                  instance:
+                                                    type: string
+                                                required:
+                                                  - path
+                                                  - key
+                                                additionalProperties: false
+                                        additionalProperties: false
+                                required:
+                                  - url
+                                  - project_id
+                                  - file_path
+                                  - token
+                                additionalProperties: false
                             additionalProperties: false
-                        additionalProperties: false
-                      - type: string
+                          - type: object
+                            properties:
+                              github:
+                                type: object
+                                properties:
+                                  url:
+                                    type: string
+                                  owner:
+                                    type: string
+                                  repo:
+                                    type: string
+                                  file_path:
+                                    type: string
+                                  ref:
+                                    type: string
+                                  token:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          vault:
+                                            anyOf:
+                                              - type: string
+                                              - type: object
+                                                properties:
+                                                  path:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                  instance:
+                                                    type: string
+                                                required:
+                                                  - path
+                                                  - key
+                                                additionalProperties: false
+                                        additionalProperties: false
+                                required:
+                                  - owner
+                                  - repo
+                                  - file_path
+                                  - token
+                                additionalProperties: false
+                            additionalProperties: false
+                          - type: string
+                    - type: string
               additionalProperties: false
             examples:
               base:
@@ -3754,6 +4246,12 @@ paths:
                       type: string
                     verify_certificate:
                       type: boolean
+                    role:
+                      type: string
+                    jwt_auth_path:
+                      type: string
+                    kv_path:
+                      type: string
                   required:
                     - url
                   additionalProperties: false
@@ -3767,12 +4265,73 @@ paths:
                         type: string
                       verify_certificate:
                         type: boolean
+                      role:
+                        type: string
+                      jwt_auth_path:
+                        type: string
+                      kv_path:
+                        type: string
                     required:
                       - url
                     additionalProperties: false
                 preseed:
                   type: object
                   properties:
+                    git:
+                      type: object
+                      properties: {}
+                      additionalProperties:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                          url:
+                            type: string
+                          ref:
+                            type: string
+                          user:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                          token:
+                            anyOf:
+                              - type: string
+                              - type: object
+                                properties:
+                                  vault:
+                                    anyOf:
+                                      - type: string
+                                      - type: object
+                                        properties:
+                                          path:
+                                            type: string
+                                          key:
+                                            type: string
+                                          instance:
+                                            type: string
+                                        required:
+                                          - path
+                                          - key
+                                        additionalProperties: false
+                                additionalProperties: false
+                        additionalProperties: false
                     base:
                       anyOf:
                         - type: object
@@ -3806,9 +4365,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - url
@@ -3838,9 +4408,20 @@ paths:
                                     - type: object
                                       properties:
                                         vault:
-                                          type: string
-                                      required:
-                                        - vault
+                                          anyOf:
+                                            - type: string
+                                            - type: object
+                                              properties:
+                                                path:
+                                                  type: string
+                                                key:
+                                                  type: string
+                                                instance:
+                                                  type: string
+                                              required:
+                                                - path
+                                                - key
+                                              additionalProperties: false
                                       additionalProperties: false
                               required:
                                 - owner
@@ -3851,84 +4432,108 @@ paths:
                           additionalProperties: false
                         - type: string
                     overlays:
-                      type: array
-                      items:
-                        anyOf:
-                          - type: object
-                            properties:
-                              url:
-                                type: string
-                              headers:
-                                type: object
-                                properties: {}
-                                additionalProperties: false
-                            required:
-                              - url
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              gitlab:
-                                type: object
+                      anyOf:
+                        - type: array
+                          items:
+                            anyOf:
+                              - type: object
                                 properties:
                                   url:
                                     type: string
-                                  project_id:
-                                    type: number
-                                    format: float
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
+                                  headers:
+                                    type: object
+                                    properties: {}
+                                    additionalProperties: false
                                 required:
                                   - url
-                                  - project_id
-                                  - file_path
-                                  - token
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: object
-                            properties:
-                              github:
-                                type: object
+                              - type: object
                                 properties:
-                                  url:
-                                    type: string
-                                  owner:
-                                    type: string
-                                  repo:
-                                    type: string
-                                  file_path:
-                                    type: string
-                                  ref:
-                                    type: string
-                                  token:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          vault:
-                                            type: string
-                                        required:
-                                          - vault
-                                        additionalProperties: false
-                                required:
-                                  - owner
-                                  - repo
-                                  - file_path
-                                  - token
+                                  gitlab:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      project_id:
+                                        type: number
+                                        format: float
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - url
+                                      - project_id
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
                                 additionalProperties: false
-                            additionalProperties: false
-                          - type: string
+                              - type: object
+                                properties:
+                                  github:
+                                    type: object
+                                    properties:
+                                      url:
+                                        type: string
+                                      owner:
+                                        type: string
+                                      repo:
+                                        type: string
+                                      file_path:
+                                        type: string
+                                      ref:
+                                        type: string
+                                      token:
+                                        anyOf:
+                                          - type: string
+                                          - type: object
+                                            properties:
+                                              vault:
+                                                anyOf:
+                                                  - type: string
+                                                  - type: object
+                                                    properties:
+                                                      path:
+                                                        type: string
+                                                      key:
+                                                        type: string
+                                                      instance:
+                                                        type: string
+                                                    required:
+                                                      - path
+                                                      - key
+                                                    additionalProperties: false
+                                            additionalProperties: false
+                                    required:
+                                      - owner
+                                      - repo
+                                      - file_path
+                                      - token
+                                    additionalProperties: false
+                                additionalProperties: false
+                              - type: string
+                        - type: string
                   additionalProperties: false
               additionalProperties: false
             examples:
