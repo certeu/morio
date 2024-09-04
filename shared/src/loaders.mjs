@@ -2,22 +2,23 @@ import { testUrl } from './network.mjs'
 import set from 'lodash.set'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
+import { simpleGit } from 'simple-git'
+import { hash } from './crypto.mjs'
+import { rm, mkdir, readFile } from './fs.mjs'
 
 /*
  * A collection of utils to load various files
- * Typially used to load the preseeded config
+ * Typically used to load the preseeded config
  */
-
-/**
- * Helper method to resolve credentials for a preseed request
- */
-//const resolvePreseedCredentials = (config, utils) => {
-//}
 
 /**
  * Helper method to parse a result as YAML or JSON
+ *
+ * @param {string} input - The input to parse
+ * @param {bool} base64 - Whether or not the input is base64 encoded
+ * @return {object|bool} - The object resulting from parsing input as YAML or JSON, or false if we failed
  */
-const asYamlOrJson = (input, base64 = false) => {
+function asJsonOrYaml(input, base64 = false) {
   const data = base64 ? Buffer.from(input, 'base64').toString('utf-8') : input
   try {
     const yml = yaml.load(data)
@@ -36,43 +37,188 @@ const asYamlOrJson = (input, base64 = false) => {
 }
 
 /**
- * Helper method to load a preseed file from a URL
+ * Determines whether a file should be read from an API (github or gitlab)
  *
- * @param {object} config - The preseed config
- * @return {object} config - The loaded config
+ * @param {string} url - The configured 'url' (not a real url)
+ * @param {bool} result - True if it ends with "@{github/gitlab]"
  */
-export const loadPreseedFileFromUrl = async (config) => {
-  const result = await testUrl(typeof config === 'string' ? config : config.url, {
-    ignoreCertificate: config.verify_certificate === false ? false : true,
-    timeout: 4500,
-    returnAs: 'json',
-    headers: config.headers ? config.headers : undefined,
-  })
+function fromApi(url) {
+  const chunks = url.split('@')
+  const api = (chunks.length > 1)
+    ? chunks.pop()
+    : false
 
-  /*
-   * Handle YAML
-   */
-  return typeof result === 'string' ? asYamlOrJson(result, false) : result
+  return api && ['github', 'gitlab'].includes(api)
+    ? api
+    : false
 }
 
 /**
- * Helper method to load a preseed file from the Gitlab API
+ * Determines whether a file should be read from a local git repo
  *
- * @param {object} config - The preseed config
+ * @param {string} url - The configured 'url' (not a real url)
+ * @param {bool} result - True if it starts with 'git:'
+ */
+function fromRepo(url) {
+  return url.slice(0,4) === 'git:'
+}
+
+/**
+ * Helper method to clone a git repository
+ *
+ * @param {string} gitroot - Folder in which to place the subfolder holding the repo
+ * @param {string} id - id of this git repo in the preseed settings
+ * @param {object} config - git preseed config
+ * @param {object} log - Logger object
+ */
+async function loadGitRepo(gitroot, id, config, log) {
+  const git = simpleGit({ baseDir: gitroot })
+  const folder = sanitizeGitFolder(id)
+  const dir = `${gitroot}/${folder}`
+  let url
+
+  if (config.url.slice(0,7) === 'http://' && config.user && config.token) {
+    url = `http://${config.user}:${config.token}@${config.url.slice(7)}`
+  }
+  else if (config.url.slice(0,8) === 'https://') {
+    url = `https://${config.user}:${config.token}@${config.url.slice(8)}`
+  }
+  else url = config.url
+
+  /*
+   * Ensure target folder exists and is empty
+   */
+  try {
+    await rm(dir, { recursive: true, force: true }) // Do not mutate, just rm and re-clone
+    await mkdir(dir, console.log)
+
+  }
+  catch (err) {
+    log.warn(`Unable to create folder for git: ${dir}`)
+    return false
+  }
+
+  /*
+   * Now clone the repo
+   */
+  try {
+    const cloneOptions = ['--depth=1', '--recurse-submodules', '--shallow-submodules' ]
+    if (config.ref) cloneOptions.push([`--branch=${config.ref}`])
+    await git.clone(url, dir, cloneOptions)
+  }
+  catch (err) {
+    log.warn(`Unable to clone git repo ${config.id}: ${config.url}`)
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Helper method to load a preseed base file
+ *
+ * @param {object} preseed - The preseed settings
+ * @param {string} gitroot - Path to the root where git repos are stored
+ * @param {object} log - A logger instance
+ * @return {object} settings - The loaded settings
+ */
+async function loadPreseedBaseFile(preseed, gitroot, log) {
+  if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
+  if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
+  if (typeof preseed.base === 'string') {
+    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot, log)
+    else return await loadPreseedFileFromUrl(preseed.base)
+  }
+  if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
+  if (preseed.base?.github) return await loadPreseedFileFromGithub(preseed.base)
+  if (preseed.base?.url) return await loadPreseedFileFromUrl(preseed.base)
+
+  return false
+}
+
+/**
+ * Helper method to load preseeded settings
+ *
+ * @param {object} preseed - The preseed settings
+ * @param {object} log - A logger instance
+ * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export const loadPreseedFileFromGitlab = async (config) => {
-  const result = await testUrl(
-    `${config.gitlab.url}/api/v4/projects/${config.gitlab.project_id}/repository/files/${encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`,
-    {
-      ignoreCertificate: config.verify_certificate === false ? true : false,
-      timeout: 4500,
-      returnAs: 'json',
-      headers: config.gitlab.token ? { 'PRIVATE-TOKEN': config.gitlab.token } : undefined,
+export async function loadPreseededSettings(preseed, log, gitroot="/etc/morio/shared") {
+  /*
+   * If there's a git config, we need to handle that first
+   */
+  if (preseed.git) {
+    for (const [id, config] of Object.entries(preseed.git)) {
+      await loadGitRepo(gitroot, id, config, log)
     }
-  )
+  }
 
-  return typeof result.content === 'string' ? asYamlOrJson(result.content, true) : false
+  /*
+   * Attempt to load the preseed base file
+   */
+  const settings = await loadPreseedBaseFile(preseed, gitroot, log)
+  if (!settings) {
+    log.warn(`Failed to load preseed base file`)
+    return false
+  } else log.debug(`Loaded preseed base file`)
+
+  /*
+   * Load any preseed overlays
+   */
+  const overlays = await loadPreseedOverlays(preseed, gitroot, log)
+
+  /*
+   * Now merge overlays into base settings
+   */
+  const count = overlays.length
+  let i = 0
+  for (const overlayConfig of overlays) {
+    i++
+    log.debug(`Loaded preseed overlay ${i}/${count}`)
+    for (const [path, value] of Object.entries(overlayConfig)) {
+      set(settings, path, value)
+    }
+  }
+
+  return settings
+
+/*
+  if (typeof preseed.overlays === 'string') {
+    if (fromRepo(preseed.overlays)) {
+      const repoOverlays = loadPreseedOverlaysFromRepo(preseed, gitroot, log)
+      if (!repoOverlays) {
+        log.warn(
+          `Failed to load preseed overlays from repo. Cannot load preseeded configuration.`
+        )
+        return false
+      }
+      overlays.push(...repoOverlays)
+    }
+    else {
+      // FIXME
+      return false
+    }
+  }
+  else if (Array.isArray(preseed.overlays) && preseed.overlays.length > 0) {
+    log.debug(`Need to load ${preseed.overlays.length} preseed overlays`)
+    let i = 0
+    for (const overlay of preseed.overlays) {
+      const overlayConfig = await loadPreseedFile(preseed.base, 'overlay', i)
+      if (!overlayConfig) {
+        log.debug(
+          `Failed to load preseed overlay ${i}/${preseed.overlays.length}. Cannot load preseeded configuration.`
+        )
+        return false
+      }
+      overlays.push(overlayConfig)
+      i++
+    }
+  }
+
+
+  return settings
+  */
 }
 
 /**
@@ -81,7 +227,7 @@ export const loadPreseedFileFromGitlab = async (config) => {
  * @param {object} config - The preseed config
  * @return {object} config - The loaded config
  */
-export const loadPreseedFileFromGithub = async (config) => {
+async function loadPreseedFileFromGithub(config) {
   const result = await testUrl(
     `${config.github.url || 'https://api.github.com'}/repos/${config.github.owner}/${config.github.repo}/contents/${encodeURIComponent(config.github.file_path)}?ref=${config.github.ref}`,
     {
@@ -97,27 +243,93 @@ export const loadPreseedFileFromGithub = async (config) => {
     }
   )
 
-  return typeof result.content === 'string' ? asYamlOrJson(result.content, true) : false
+  return typeof result.content === 'string' ? asJsonOrYaml(result.content, true) : false
 }
 
 /**
- * Helper method to load a preseed file
+ * Helper method to load a preseed file from the Gitlab API
  *
- * @param {object} preseed - The preseed file config
+ * @param {object} config - The preseed config
  * @return {object} config - The loaded config
  */
-export const loadPreseedFile = async (config = {}, base = false) => {
-  if (base === false) {
+async function loadPreseedFileFromGitlab(config) {
+  const result = await testUrl(
+    `${config.gitlab.url || 'https://gitlab.com'}/api/v4/projects/${config.gitlab.project_id}/repository/files/${encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`,
+    {
+      ignoreCertificate: config.verify_certificate === false ? true : false,
+      timeout: 4500,
+      returnAs: 'json',
+      headers: config.gitlab.token ? { 'PRIVATE-TOKEN': config.gitlab.token } : undefined,
+    }
+  )
+
+  return typeof result.content === 'string' ? asJsonOrYaml(result.content, true) : false
+}
+
+/**
+ * Helper method to load a preseed file from a (local) git repo
+ *
+ * @param {object} config - The preseed file config
+ * @param {object} preseed - The preseed settings
+ * @param {string} gitroot - Path to the root where git repos are stored
+ * @param {object} log - A logger instance
+ * @return {object} settings - The loaded settings
+ */
+async function loadPreseedFileFromRepo(config, preseed, gitroot, log) {
+  const chunks = config.slice(4).split('@')
+  const repo = chunks[1]
+    ? chunks[1]
+    : Object.keys(preseed.git)[0]
+  const content = await readFileFromRepo(repo, chunks[0], gitroot)
+  const data = asJsonOrYaml(content)
+
+  return data
+    ? data
+    : false
+}
+
+/**
+ * Helper method to load a preseed file from a URL
+ *
+ * @param {object|string} config - The preseed config
+ * @return {object} config - The loaded config
+ */
+async function loadPreseedFileFromUrl(config) {
+  const result = await testUrl(typeof config === 'string' ? config : config.url, {
+    ignoreCertificate: config.verify_certificate === false ? false : true,
+    timeout: 4500,
+    returnAs: 'json',
+    headers: config.headers ? config.headers : undefined,
+  })
+
+  /*
+   * Handle YAML or JSON
+   */
+  return typeof result === 'string' ? asJsonOrYaml(result, false) : result
+}
+
+/**
+ * Helper method to load a preseed overlay file
+ *
+ * @param {object} preseed - The preseed settings
+ * @param {string} type - One of 'base' or 'overlay'
+ * @param {integer} index - Index in the overlays array
+ * @return {object} settings - The loaded settings
+ */
+async function loadPreseedFile(preseed, type, index) {
+  const config = (type === 'base')
+    ? preseed.base
+    : Array.isArray(preseed.overlays)
+      ? preseed.overlays[index]
+      : preseed.overlays
+
+  if (config.gitlab) return await loadPreseedFileFromGitlab(config, preseed, type, index)
+  if (config.github) return await loadPreseedFileFromGithub(config, preseed, type, index)
+  if (typeof preseed.base === 'string' || preseed.url) return await loadPreseedFileFromUrl(config, preseed, type, index)
+
+  else if (type === 'overlay') {
     /*
-     * No base settings passed in, so we are loading the base settings here
-     */
-    if (config.gitlab) return await loadPreseedFileFromGitlab(config)
-    if (config.github) return await loadPreseedFileFromGithub(config)
-    if (typeof config === 'string' || config.url) return await loadPreseedFileFromUrl(config)
-  } else {
-    /*
-     * Base settings were passed in, so we are loading an overlay here
-     * We need to handle the various ways this can be specified
+     * Loading an overlay
      */
     if (base.gitlab) {
       if (typeof config === 'string')
@@ -140,50 +352,149 @@ export const loadPreseedFile = async (config = {}, base = false) => {
 }
 
 /**
- * Helper method to load a preseeded configuration
+ * Helper method to load a preseed overlay
  *
- * @param {object} preseed - The preseed config
+ * @param {object|string} overlay - The preseed settings for this overlay
+ * @param {object} preseed - The preseed settings
+ * @param {string} gitroot - Path to the root where git repos are stored
  * @param {object} log - A logger instance
- * @return {object} config - The loaded config
+ * @return {object} settings - The loaded settings
  */
-export const loadPreseededSettings = async (preseed, log) => {
-  /*
-   * Attempt to load the preseed base file
-   */
-  const settings = await loadPreseedFile(preseed.base)
-  if (!settings) {
-    log.warn(`Failed to load preseed base file`)
-    return false
-  } else log.debug(`Loaded preseed base file`)
+async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
+  if (typeof overlay === 'string') {
+    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot, log)
+    const api = fromApi(overlay)
+    if (api === 'github') return await loadPreseedFileFromGithub({
+      github: {
+        ...preseed.base.github,
+        // Replace the file path, but strip out the '@github' at the end
+        file_path: overlay.slice(0, -7)
+      }
+    })
+    if (api === 'gitlab') return await loadPreseedFileFromGitlab({
+      gitlab: {
+        ...preseed.base.gitlab,
+        // Replace the file path, but strip out the '@gitlab' at the end
+        file_path: overlay.slice(0, -7)
+      }
+    })
+    return  await loadPreseedFileFromUrl(overlay)
+  }
+
+  if (overlay.github) return await loadPreseedFileFromGithub(overlay)
+  if (overlay.gitlab) return await loadPreseedFileFromGitlab(overlay)
+
+  return false
+}
+
+/**
+ * Helper method to load the preseed overlays
+ *
+ * @param {object} preseed - The preseed settings
+ * @param {string} gitroot - Path to the root where git repos are stored
+ * @param {object} log - A logger instance
+ * @return {object} settings - The loaded settings
+ */
+async function loadPreseedOverlays(preseed, gitroot, log) {
+
+  if (!preseed?.overlays) return overlays
+
+  const overlays = []
 
   /*
-   * Handle any preseed overlays
+   * Handle string
    */
-  if (Array.isArray(preseed.overlays) && preseed.overlays.length > 0) {
-    const count = preseed.overlays.length
-    log.debug(`Need to load ${count} preseed overlays`)
-    let i = 0
-    for (const overlay of preseed.overlays) {
-      i++
-      const overlayConfig = await loadPreseedFile(overlay, preseed.base)
-      if (!overlayConfig) {
-        /*
-         * We _could_ continue if an overlay cannot be loaded
-         * but doing so would result in a non-deterministic config.
-         * Better to bail and make it clear something is wrong.
-         */
-        log.debug(
-          `Failed to load preseed overlay ${i}/${count}. Cannot load preseeded configuration.`
-        )
-        return false
-      } else {
-        log.debug(`Loaded preseed overlay ${i}/${count}`)
-        for (const [path, value] of Object.entries(overlayConfig)) {
-          set(settings, path, value)
-        }
-      }
+  if (typeof preseed.overlays === 'string') {
+    const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
+    if (overlay) overlays.push(overlay)
+  }
+
+  /*
+   * Handle array
+   */
+  else if (Array.isArray(preseed.overlays)) {
+    for (const config of preseed.overlays) {
+      const overlay = await loadPreseedOverlay(config, preseed, gitroot, log)
+      if (overlay) overlays.push(overlay)
     }
   }
 
-  return settings
+  return overlays
 }
+
+/*
+  if (typeof preseed.overlays === 'string') {
+    if (fromRepo(preseed.overlays)) {
+      const repoOverlays = loadPreseedOverlaysFromRepo(preseed, gitroot, log)
+      if (!repoOverlays) {
+        log.warn(
+          `Failed to load preseed overlays from repo. Cannot load preseeded configuration.`
+        )
+        return false
+      }
+      overlays.push(...repoOverlays)
+    }
+    else {
+      // FIXME
+      return false
+    }
+  }
+  else if (Array.isArray(preseed.overlays) && preseed.overlays.length > 0) {
+    log.debug(`Need to load ${preseed.overlays.length} preseed overlays`)
+    let i = 0
+    for (const overlay of preseed.overlays) {
+      const overlayConfig = await loadPreseedFile(preseed.base, 'overlay', i)
+      if (!overlayConfig) {
+        log.debug(
+          `Failed to load preseed overlay ${i}/${preseed.overlays.length}. Cannot load preseeded configuration.`
+        )
+        return false
+      }
+      overlays.push(overlayConfig)
+      i++
+    }
+  }
+
+
+
+
+
+  if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
+  if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
+  if (typeof preseed.base === 'string') {
+    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot, log)
+    else return await loadPreseedFileFromUrl(preseed.base)
+  }
+  if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
+  if (preseed.base?.github) return await loadPreseedFileFromGithub(preseed.base)
+  if (preseed.base?.url) return await loadPreseedFileFromUrl(preseed.base)
+
+  return false
+}
+*/
+
+/**
+ * Helper method to read a file from a local git repo
+ *
+ * @param {string} id - The key in the preseed.git object
+ * @param {string} path - The (path to the) file to read
+ * @param {gitroot} gitroot - Folder under which git repos reside
+ * @return {string} content - The file contents
+ */
+async function readFileFromRepo(id, path, gitroot) {
+  const dir = sanitizeGitFolder(id)
+  const file = `${gitroot}/${dir}/${path}`
+
+  return await readFile(`${gitroot}/${dir}/${path}`)
+}
+
+/**
+ * Helper method to sanitize a git folder
+ *
+ * @param {string} id - The key under preseed.git
+ * @return {string} hash - The hashed id
+ */
+function sanitizeGitFolder(id) {
+  return hash(id)
+}
+

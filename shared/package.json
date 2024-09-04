@@ -7,7 +7,8 @@
   "license": "EUPL",
   "scripts": {
     "lint": "eslint --fix 'src/**'",
-    "prettier": "npx prettier --ignore-unknown --write 'src/'"
+    "prettier": "npx prettier --ignore-unknown --write 'src/'",
+    "test": "node --no-warnings --test-concurrency=1 --test"
   },
   "repository": {
     "type": "git",

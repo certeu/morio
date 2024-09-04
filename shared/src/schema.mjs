@@ -137,12 +137,31 @@ const preseedFile = Joi.alternatives().try(
 )
 
 /*
+ * A git repository to load
+ */
+const gitRepo = Joi.object({
+  id: Joi.string(),
+  url: Joi.string().uri(),
+  ref: Joi.string(),
+  user: Joi.alternatives().try(Joi.string(), vaultSecret),
+  token: Joi.alternatives().try(Joi.string(), vaultSecret),
+})
+
+/*
  * The Morio preseed object
  */
-const preseed = Joi.object({
-  base: preseedFile,
-  overlays: Joi.array().items(preseedFile),
-})
+const preseed = Joi.alternatives().try(
+  Joi.object({
+    url: Joi.string(),
+    git: Joi.object().pattern(Joi.string(), gitRepo),
+    base: preseedFile,
+    overlays: Joi.alternatives().try(
+      Joi.array().items(preseedFile),
+      Joi.string()
+    )
+  }),
+  Joi.string()
+)
 
 /*
  * The Morio settings object
