@@ -368,7 +368,7 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
   })
 
   /*
-   * A fully configured git object
+   * From git repos
    */
   it('Should load overlay from cloned git repositories', async () => {
     const settings = await loadPreseededSettings({
@@ -381,6 +381,21 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
     }, log, gitroot)
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
+    assert.equal(settings.nested.property, true)
+    assert.equal(settings.nested.overlay.one, true)
+    assert.equal(settings.nested.overlay.two, true)
+  })
+
+  /*
+   * From git repos (glob)
+   */
+  it('Should load overlay from cloned git repositories (glob)', async () => {
+    const settings = await loadPreseededSettings({
+      ...tests.overlays.url,
+      git: tests.git,
+      overlays: "git:unit-tests/shared/loaders/overlay*.yml@github",
+    }, log, gitroot)
+    assert.equal(typeof settings, 'object')
     assert.equal(settings.nested.property, true)
     assert.equal(settings.nested.overlay.one, true)
     assert.equal(settings.nested.overlay.two, true)

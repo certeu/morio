@@ -4,7 +4,7 @@ import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
-import { rm, mkdir, readFile } from './fs.mjs'
+import { rm, mkdir, readFile, globDir } from './fs.mjs'
 
 /*
  * A collection of utils to load various files
@@ -61,6 +61,27 @@ function fromApi(url) {
  */
 function fromRepo(url) {
   return url.slice(0,4) === 'git:'
+}
+
+/**
+ * Determines whether a file should be read from a local git repo
+ *
+ * @param {string} pattern - The glob pattern
+ * @param {string} repo - The repo ID (key in the preseed.git object)
+ * @param {string} gitroot - Folder holding the cloned git repos
+ * @param {array} found - Found files
+ */
+async function globFromRepo(pattern, repo, gitroot) {
+  const folder = sanitizeGitFolder(repo)
+  const found = await globDir(`${gitroot}/${sanitizeGitFolder(repo)}`, pattern)
+
+  const data = []
+  for (const file of found) {
+    const content = await readFile(file)
+    data.push(asJsonOrYaml(content))
+  }
+
+  return data
 }
 
 /**
@@ -405,8 +426,26 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
    * Handle string
    */
   if (typeof preseed.overlays === 'string') {
-    const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
-    if (overlay) overlays.push(overlay)
+    /*
+     * Could still be a glob for a local git repo
+     */
+    if (fromRepo(preseed.overlays)) {
+      const repos = Object.keys(preseed.git || {})
+      let repo = fromApi(preseed.overlays)
+      if (!repo) repo = repos[0]
+      if (!preseed.git[repo]) {
+        log.warn(`Cannot find repo to glob from: ${preseed.overlays}`)
+        return false
+      }
+      const found = await globFromRepo(preseed.overlays.slice(4).split('@')[0], repo, gitroot)
+      for (const overlay of found) {
+        if (overlay) overlays.push(overlay)
+      }
+    }
+    else {
+      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
+      if (overlay) overlays.push(overlay)
+    }
   }
 
   /*
