@@ -189,7 +189,8 @@ Controller.prototype.preseed = async (req, res) => {
   /*
    * Load the preseeded settings so we can validate them
    */
-  const settings = await loadPreseededSettings(body, log)
+  const settings = await loadPreseededSettings(body, log, '/tmp')
+  if (!settings) return utils.sendErrorResponse(res, 'morio.api.preseed.failed', req.url)
 
   /*
    * Validate settings against the schema
