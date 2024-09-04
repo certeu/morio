@@ -1,0 +1,93 @@
+---
+title: 'Morio Settings: cluster'
+sidebar_label: cluster
+---
+
+The `cluster` settings hold information about the nodes that make up your Morio cluser.
+
+Whether you are running a _standalone node_ or several _broker nodes_ or
+_flanking nodes_, the `cluster` settings hold this information.
+
+## `cluster.name`
+
+<Label style="danger">Mandatory</Label>
+Provides a human-friendly name to your Morio deployment.
+This name will be used in the generated X.509 certificates, as well as in the UI.
+
+```yaml
+cluster:
+  name: My awesome Morio setup
+```
+
+## `cluster.broker_nodes`
+
+<Label style="danger">Mandatory</Label>
+This lists the _broker nodes_ of your Morio deployment.
+The list should be made up of _FQDN_ for each node.
+
+<Tabs>
+  <TabItem value="a" label="Standalone" default>
+
+```yaml
+cluster:
+  broker_nodes:
+    - broker.example.morio.it
+```
+
+</TabItem>
+<TabItem value="b" label="Distributed">
+
+```yaml
+cluster:
+  broker_nodes:
+    - broker1.example.morio.it
+    - broker2.example.morio.it
+    - broker3.example.morio.it
+```
+
+</TabItem>
+</Tabs>
+
+## `cluster.fqdn`
+
+<Label style="danger">Mandatory</Label> when there is **more than 1 broker node**.
+<Label>Pptional</Label> when running **a single broker node**
+
+This is an _FQDN_ that **must** resolve to the IP addresses of all broker nodes (a round-robin DNS record).
+This will be used as the _cluster FQDN_ and it is what Morio clients will attempt to connect to.
+
+If there is only 1 broker node, this is unused and the broker node FQDN will be used as cluster FQDN.
+
+```yaml
+cluster:
+  fqdn: cluster.example.morio.it
+```
+
+## `cluster.flanking_nodes`
+
+<Label>Optional</Label>
+This lists the _flanking nodes_ of your Morio deployment.
+The list should be made up of _FQDN_ for each node.
+
+<Tabs>
+  <TabItem value="a" label="Standalone" default>
+
+```yaml
+cluster:
+  broker_nodes:
+    - broker.example.morio.it
+```
+
+</TabItem>
+<TabItem value="b" label="Distributed">
+
+```yaml
+cluster:
+  broker_nodes:
+    - broker1.example.morio.it
+    - broker2.example.morio.it
+    - broker3.example.morio.it
+```
+
+</TabItem>
+</Tabs>

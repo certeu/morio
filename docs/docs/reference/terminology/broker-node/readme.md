@@ -1,5 +1,7 @@
 ---
 title: Broker Node
+aliases:
+  - broker nodes
 ---
 
 A _broker node_ is any Morio node that provides [the broker service](/docs/guides/services/broker).

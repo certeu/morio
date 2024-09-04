@@ -5,8 +5,6 @@ tags:
 ---
 
 import { JargonTerms, TerminologyTerms } from '@site/src/theme/components/term.js'
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
 
 Improving our documentation is one of the easiest ways to start contributing to
 Morio. So if you spot a mistake or see something that you can improve, please

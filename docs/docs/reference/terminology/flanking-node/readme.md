@@ -2,6 +2,8 @@
 title: Flanking Node
 tags:
   - flanking
+aliases:
+  - flanking nodes
 ---
 
 A **flanking node** is any Morio node that does not provide [the broker

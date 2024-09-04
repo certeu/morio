@@ -31,12 +31,14 @@ have the final say on all things CERT-EU, including Morio.
 The day to day management of the project is in the hands of CERT-EU's engineering team.
 
 <Note title="Learn more">
+
 To learn more about CERT-EU or the IICB, consult this summary on EUR-Lex:
 
 - [Cybersecurity at the European Union institutions, bodies, offices and
   agencies](https://eur-lex.europa.eu/EN/legal-content/summary/cybersecurity-at-the-european-union-institutions-bodies-offices-and-agencies.html)
   _(1-minute read)_.
-  </Note>
+
+</Note>
 
 ## License
 

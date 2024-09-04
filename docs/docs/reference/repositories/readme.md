@@ -30,7 +30,8 @@ If you are looking to install Morio on a Linux system, these are the repositorie
 - Follow the links above for instructions on how to add these repositories to your system, or to download packages directly.
 - We build `.deb` packages on Debian 12, and `.rpm` packages on Rocky Linux 9, but they should work on other distributions too.
 - The moriod packages require docker and systemd
-  </Note>
+
+</Note>
 
 ## Container Images for Morio Services
 

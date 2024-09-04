@@ -206,7 +206,6 @@ const settings = Joi.object({
     }),
   }),
   vault: vaultInstance,
-  vaults: Joi.object().pattern(Joi.string(), vaultInstance),
   preseed,
 }).required()
 
