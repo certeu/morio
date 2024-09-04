@@ -20,7 +20,7 @@ FROM node:20-slim as runner
 WORKDIR /morio/api
 
 ## Install all the latest updates
-RUN apt-get update && apt-get upgrade -y
+RUN apt-get update && apt-get upgrade -y && apt-get install -y git
 
 ## Set environment variable to indicate this is production code
 ENV NODE_ENV production
