@@ -1,0 +1,346 @@
+---
+title: Preseeding Guide
+---
+
+To _preseed_ the Morio config means to load it from an external source, rather
+than keep it within Morio itself.
+
+This guide covers the general principle and best practices. For details about
+all possibilities, refer to [the reference documentation on the `preseed`
+settings](/docs/reference/settings/preseed/).
+
+## General principle and origin story
+
+At CERT-EU we like to keep our configurations under version control.
+There are [so many reasons](/docs/training/git/) for this that we consider
+it common sense, and we have added the preseeding functionality to Morio
+so we could keep its settings in git too.
+
+We also run several different Morio instances. We have a production instance,
+a staging instance, and a bunch of development instances that come and go as
+we work on or test out new features.
+
+Often, a variety of settings are the same between these different instances and
+maintaining the same info in multiple places is error-prone, and no fun.
+
+This is why we implemented the idea of the _base settings_ and one or more _overlays_.
+This allows you to create a modular Morio configuration.
+
+We'll typically store the node info in the base settings, and this would be
+different for every envrionment. Then, we add overlays like various identity
+providers, internal certificates that should be trusted and so on.
+
+Obviously, you know best what works in your environment. But understanding the
+reasons behind these preseeding settings will hopefully help you make the most
+of this poweful feature.
+
+## Understanding overlays
+
+The base settings file is just that: The base on which we will construct our final settings object.
+
+An overlay then is a file that will _mutate_ the base settings.
+Typically by adding settings, but an overlay can also overwrite settings.
+
+To understand this process, we will use an example with fictional values.
+
+<Tabs>
+  <TabItem value="a" label="base.yaml" default>
+
+The base settings file, whether it's provided as YAML or JSON will be
+converted to a Javascript object that will form the basis of our settings.
+
+```yaml title="Provided YAML base"
+key1: value1
+key2:
+  subkey1: subvalue 1
+  subkey2:
+    subsubkey1: subsubvalue 1
+```
+
+```js title="The resulting Javascript object"
+{
+  key1: "value1"
+  key2: {
+    subkey1: "subvalue 1",
+    subkey2: {
+      subsubkey1: "subsubvalue 1"
+    }
+  }
+}
+```
+
+  </TabItem>
+  <TabItem value="b" label="overlay1.yaml" default>
+
+An overlay file holds key/value pairs. The key determines the **target** in dot-notation,
+and the value holds, well, the value.
+
+```yaml title="Provided YAML overlay"
+key1: different value 1
+key2.subkey2.subsubkey2: I am new
+key3: So am I:
+```
+
+You can read an overlay as a series of mutations:
+
+- Set `key1` to `different value 1`
+- Set `key2.subkey2.subsubkey2` to `I am new`
+- Set `key3` to `So am I`
+
+Which results in:
+
+```js title="The resulting Javascript object"
+{
+  key1: "different value 1"
+  key2: {
+    subkey1: "subvalue 1",
+    subkey2: {
+      subsubkey1: "subsubvalue 1"
+      subsubkey2: "I am new"
+    }
+  },
+  key3: "So am I"
+}
+```
+
+  </TabItem>
+  <TabItem value="c" label="overlay2.json" default>
+
+Whether you use YAML or JSON does not matter.
+
+```json title="Provided JSON overlay"
+{
+  "key1": "different again",
+  "key2.whatever": {
+    "values": {
+      "can": {
+        "be any": {
+          "type": ["of course"]
+        }
+      }
+    }
+  }
+}
+```
+
+Overlays are applied one after the other, so the end result is:
+
+```js title="The resulting Javascript object"
+{
+  key1: "different again"
+  key2: {
+    subkey1: "subvalue 1",
+    subkey2: {
+      subsubkey1: "subsubvalue 1"
+      subsubkey2: "I am new"
+    },
+    whatever: {
+      values: {
+        can: {
+          "be any": {
+            type: [ "of course" ]
+          }
+        }
+      }
+    }
+  },
+  key3: "So am I"
+}
+```
+
+  </TabItem>
+</Tabs>
+
+## Overlay limitations
+
+Because of the ways overlays use dot-notation to make changes to the settings object, there are two limitations to be aware of:
+
+- Working with array is difficult. You cannot easily add something to an array.
+  This is why in general in Morio we avoid using arrays for settings.
+- You cannot _remove_ settings. While you can overwrite them, and set them to
+  something falsy or `null`, you cannot remove them. Which is why it is best to
+  keep your base settings to the strict minimum.
+
+## Recommended setup using a git repository
+
+We recommend placing your Morio settings and overlays for one or more different
+environments in a single repository and then let Morio clone this repository
+and reference files from it.
+
+Let's walk through this example step by step.
+
+### Initial setup
+
+When we initially setup a Morio instance, there is no Vault integration, nor
+can we use encrypted secrets as there is no key pair yet.
+
+<Tabs>
+  <TabItem value="a" label="Without authentication" default>
+
+If the git repository you are using **does not** require authentication, you can
+use an example like this:
+
+```json title="Minimal JSON preseed settings"
+{
+  "git": {
+    "repo":
+      "url": "https://git.morio.it/iac/morio.git",
+      "ref": "main"
+    }
+  }
+  "base": "git:base.yaml@repo"
+}
+```
+
+  </TabItem>
+  <TabItem value="b" label="With Authentication">
+
+If the git repository you are using **does** require authentication, you can
+use an example like this:
+
+```json title="Minimal JSON preseed settings"
+{
+  "git": {
+    "repo":
+      "url": "https://git.morio.it/iac/morio.git",
+      "ref": "main",
+      "token": "your-short-lived-token-here"
+    }
+  }
+  "base": "git:base.yaml@repo"
+}
+```
+
+  </TabItem>
+</Tabs>
+
+If you save this as `preseed.json` we can set up Morio with this curl command:
+
+```sh
+curl -k -H "Content-Type: application/json" -d@preseed.json https://example.morio.it/-/api/preseed
+```
+
+This will be sufficient to bootstrap Morio, assuming
+`base.yaml` in the repo holds valid settings.
+
+### Example base settings file
+
+On initial setup, we need to provide Morio with our preseed settings.
+But once Morio is deployed, they are part of our regular settings.
+Which means that they can be provided by the base file or an overlay.
+
+<Tabs>
+  <TabItem value="a" label="Base settings" default>
+
+Our base settings holds the minimal settings: Our cluster nodes and name.
+
+```yaml
+cluster:
+  broker_nodes:
+    - broker.morio.it
+  name: Just an example
+```
+
+</TabItem>
+  <TabItem value="a2" label="Preseed Overlay" default>
+
+We've places our preseed setting in an overlay and made some changes:
+
+- The preseed settings are now under the `preseed` key
+- We've added our overlays, for which we used a glob pattern
+- We're now using a secret to hold our `GIT_TOKEN`
+
+```yaml
+preseed:
+  git:
+    repo:
+      url: 'https://git.morio.it/iac/morio.git'
+      ref: main
+      token: '{{ GIT_TOKEN }}'
+  base: git:base-settings/my-instance.yaml@repo
+  overlays: git:overlays/*.yaml
+```
+
+</TabItem>
+<TabItem value="b" label="IDP Overlay">
+
+This is another example, it adds and identity provider.
+
+```yaml
+iam.providers.ad:
+  provider: ldap
+  about: This is your Active Directory account, the same you use to login to your computer.
+  server:
+    url: "ldaps://dc1.tokyo.morio.it
+    bindDN: "CN=morio-ldap,OU=Users,DC=tokyo,DC=morio,DC=it",
+    bindCredentials: "{{{ AD_PASSWORD }}}",
+    searchBase: "OU=Users-EU,DC=tokyo,DC=morio,DC=it",
+    searchFilter: "(&(objectClass=user)(samaccountname={{username}}))"
+  username_field: samaccountname
+  label: Active Directory
+  rbac:
+    user:
+      attribute: samaccountname
+      regex: .
+    engineer:
+      attribute: samaccountname
+      list:
+        - jdecock
+        - lbazille
+        - stellene
+```
+
+  </TabItem>
+<TabItem value="c" label="Secrets overlay">
+
+If you do not have Hashicorp Vault or OpenBao available, you can pre-encrypt your secrets via the Morio API or UI.
+Then, you can savely commit them to git:
+
+```yaml
+secrets:
+  GIT_TOKEN: '{ iv: "9989922c677e1d4d0f9a9d1556ac7e7d", ct: "4e3fafac2f4febb1c40b7cced3ddcd21" }'
+```
+
+  </TabItem>
+<TabItem value="d" label="Overlay using Vault">
+If you have Hashicorp Vault or OpenBao available, you can defer to it for secrets storage:
+```yaml
+secrets:
+  AD_PASSWORD:
+    vault: "morio:AD_PASSWORD"
+
+vault:
+url: https://vault.morio.it
+
+```
+</TabItem>
+</Tabs>
+
+## Alternative preseed sources
+
+In the example above, we cloned a git repository and then loaded files from it for our base settings and overlays.
+
+That is a common scenario that comes warmly recommended, but there are other sources you can use.
+
+### Preseed from a URL
+
+You can preseed from a URL, both the base settings or one or more overlays.
+This is useful for simple scenarios and quick tests.
+
+Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
+
+### Preseed from the GitHub API
+
+If your repository is very large, cloning it in its entirety to be able to load a few files might be overkill.
+In that case, you can configure Morio to fetch specific files from the GitHub API.
+
+Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
+
+### Preseed from the GitLab API
+
+If your repository is very large, cloning it in its entirety to be able to load a few files might be overkill.
+In that case, you can configure Morio to fetch specific files from the GitLab API.
+
+Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
+
+```

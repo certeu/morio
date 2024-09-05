@@ -134,10 +134,17 @@ paths:
                         metadata:
                           type: object
                           properties:
-                            version:
-                              type: string
                             comment:
-                              type: string
+                              anyOf:
+                                - type: string
+                                - type: array
+                                  items:
+                                    type: string
+                            version:
+                              anyOf:
+                                - type: string
+                                - type: number
+                                  format: float
                           additionalProperties: false
                         connector:
                           type: object
@@ -2155,10 +2162,17 @@ paths:
                 metadata:
                   type: object
                   properties:
-                    version:
-                      type: string
                     comment:
-                      type: string
+                      anyOf:
+                        - type: string
+                        - type: array
+                          items:
+                            type: string
+                    version:
+                      anyOf:
+                        - type: string
+                        - type: number
+                          format: float
                   additionalProperties: false
                 connector:
                   type: object
@@ -2615,10 +2629,17 @@ paths:
                 metadata:
                   type: object
                   properties:
-                    version:
-                      type: string
                     comment:
-                      type: string
+                      anyOf:
+                        - type: string
+                        - type: array
+                          items:
+                            type: string
+                    version:
+                      anyOf:
+                        - type: string
+                        - type: number
+                          format: float
                   additionalProperties: false
                 connector:
                   type: object

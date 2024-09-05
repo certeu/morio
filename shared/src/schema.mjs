@@ -182,8 +182,14 @@ const settings = Joi.object({
     }),
   }),
   metadata: Joi.object({
-    version: Joi.string(),
-    comment: Joi.string(),
+    comment: Joi.alternatives().try(
+      Joi.string(),
+      Joi.array().items(Joi.string())
+    ),
+    version: Joi.alternatives().try(
+      Joi.string(),
+      Joi.number(),
+    ),
   }),
   connector: Joi.object(),
   tokens: Joi.object({

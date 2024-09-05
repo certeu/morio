@@ -1,3 +1,118 @@
 ---
-title: settings.vault
+title: 'Morio Settings: vault'
+sidebar_label: vault
 ---
+
+<!-- start-spellcheck-skip -->
+
+import OpenBao from '@site/includes/vault-openbao.md'
+
+<!-- endspellcheck-skip -->
+
+The `vault` settings allow you to integration Morio with [Hashicorp Vault](https://www.vaultproject.io/).
+
+<OpenBao />
+
+## `vault.url`
+
+<Label style="danger">Mandatory</Label>
+The URL to connect to your Vault instance.
+
+```yaml
+vault:
+  url: vault.example.morio.it
+```
+
+## `vault.jwt_auth_path`
+
+<Label>Optional</Label> The path under which the `JWT` authentication method is mounted.
+
+<Tabs>
+<TabItem value="b" label="Default" default>
+
+```yaml
+vault:
+  jwt_auth_path: morio
+```
+
+</TabItem>
+  <TabItem value="a" label="Alternate JWT Authentication path">
+
+```yaml
+vault:
+  jwt_auth_path: jwt
+```
+
+</TabItem>
+</Tabs>
+
+## `vault.kv_path`
+
+<Label>Optional</Label> The path under which the `KV` secrets engine is mounted.
+
+<Tabs>
+<TabItem value="b" label="Default" default>
+
+```yaml
+vault:
+  jwt_auth_path: secret
+```
+
+</TabItem>
+  <TabItem value="a" label="Alternate KV path">
+
+```yaml
+vault:
+  jwt_auth_path: kv
+```
+
+</TabItem>
+</Tabs>
+
+## `vault.role`
+
+<Label>Optional</Label> The role Morio will use to authenticate to Vault.
+
+<Tabs>
+<TabItem value="b" label="Default" default>
+
+```yaml
+vault:
+  role: morio
+```
+
+</TabItem>
+  <TabItem value="a" label="Custom role">
+
+```yaml
+vault:
+  role: bot-morio-production
+```
+
+</TabItem>
+</Tabs>
+
+## `vault.verify_certificate`
+
+<Label>Optional</Label>
+This lists the _broker nodes_ of your Morio deployment.
+The list should be made up of _FQDN_ for each node.
+
+<Tabs>
+<TabItem value="b" label="Default" default>
+
+```yaml
+vault:
+  verify_certificate: true
+```
+
+</TabItem>
+  <TabItem value="a" label="Disable certificate verification">
+
+```yaml
+vault:
+  verify_certificate: false
+```
+
+</TabItem>
+</Tabs>

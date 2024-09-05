@@ -1,0 +1,288 @@
+---
+title: Hashicorp Vault
+---
+
+<!-- start-spellcheck-skip -->
+
+import OpenBao from '@site/includes/vault-openbao.md'
+
+<!-- endspellcheck-skip -->
+
+Morio con be integrated with [Hashicord Vault](https://www.vaultproject.io/).
+When doing so, Morio can be instructed to read secrets from Vault, rather
+then store them locally as encrypted data.
+
+Morio cannot and will not write to Vault. It will only read secrets from it.
+
+<OpenBao />
+
+To make this happen, you need to configure both Morio van Vault.
+
+## Morio configuration
+
+In the morio settings, you need a `vault` key. At the very minimum you need a `url`.
+The other values are set to their defaults in htis example, so you can leave them out if they match your setup.
+
+```yaml
+vault:
+  url: https://vault.morio.it
+  jwt_auth_path: morio
+  kv_path: secret
+  role: morio
+  verify_certificate: true
+```
+
+That't is. You're done. Now you need to configure Vault.
+
+## Vault configuration
+
+Configuring Vault can be done via the UI or the API.
+Since the UI does not support everything, we will use examples to do the configuration via the API using curl.
+
+In the examples below, you need to substitute the following:
+
+- `VAULT_TOKEN`: Use either the Vault root token, or another token with permissions sufficient for configuring these settings
+- `https://vault.morio.it`: Use the URL to your own Vault instance
+
+### Enable the KV secrets engine
+
+This may very well already be active, but just in case: The first thing to do is to enable the `kv` secrets engine:
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Enable the KV secrets engine under /secret"
+curl \
+  --header "X-Vault-Token: VAULT_TOKEN" \
+  --data '{
+    "type":"kv", 
+    "options": { "version": "2" }
+  }' \
+  https://vault.morio.it/v1/sys/mounts/secret
+```
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace                  | With                           | Notes                                             |
+| ------------------------ | ------------------------------ | ------------------------------------------------- |
+| `VAULT_TOKEN`            | Your own Vault access token    | Token needs sufficient privileges                 |
+| `https://vault.morio.it` | URL to your own Vault instance | Note that Vault listens on port `8200` by default |
+
+</TabItem>
+<TabItem value="c" label="Optional Replacements">
+
+| Replace  | With                     | Notes                                               |
+| -------- | ------------------------ | --------------------------------------------------- |
+| `secret` | A non-default mount path | This should match the `vault.kv_path` Morio setting |
+
+</TabItem>
+</Tabs>
+
+<Note compact>Morio only supports version 2 of the `kv` secrets engine</Note>
+
+### Create a JWT authentication method under /morio
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Create a JWT authentication method under /secret"
+curl \
+  --header "X-Vault-Token: VAULT_TOKEN" \
+  --data '{"type": "jwt"}' \
+  https://vault.morio.it/v1/sys/auth/morio
+```
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace                  | With                           | Notes                                             |
+| ------------------------ | ------------------------------ | ------------------------------------------------- |
+| `VAULT_TOKEN`            | Your own Vault access token    | Token needs sufficient privileges                 |
+| `https://vault.morio.it` | URL to your own Vault instance | Note that Vault listens on port `8200` by default |
+
+</TabItem>
+<TabItem value="c" label="Optional Replacements">
+
+| Replace | With                                                    | Notes                                                       |
+| ------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `morio` | An alternative mount path for the authentication method | This should match the `vault.jwt_auth_path` Morio setting } |
+
+</TabItem>
+</Tabs>
+
+### Grab Morio's public key from the API
+
+Make sure to store it, as we will need it in the next command.
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Get the public key from the Morio API"
+curl -k https://example.morio.it/-/api/pubkey.pem
+```
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace            | With                           | Notes |
+| ------------------ | ------------------------------ | ----- |
+| `example.morio.it` | URL to your own Morio instance |       |
+
+</TabItem>
+</Tabs>
+
+### Configure the authentication method we created
+
+We will configure the Vault authentication method to trust JSON Web Tokens
+(JWT) signed by Morio's private key.
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Configure the morio JWT authentication method in Vault"
+curl \
+  --header "X-Vault-Token: VAULT_TOKEN" \
+  --data '{
+    "type": "jwt", 
+    "jwt_supported_algs": "RS256", 
+    "jwt_validation_pubkeys": "MORIO_PUBLIC_KEY" 
+  }' \
+  https://vault.morio.it/v1/sys/auth/morio/config
+```
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace                  | With                                  | Notes                                             |
+| ------------------------ | ------------------------------------- | ------------------------------------------------- |
+| `VAULT_TOKEN`            | Your own Vault access token           | Token needs sufficient privileges                 |
+| `https://vault.morio.it` | URL to your own Vault instance        | Note that Vault listens on port `8200` by default |
+| `MORIO_PUBLIC_KEY`       | The public key of your Morio instance | See tip below                                     |
+
+<Tip>
+The public key should go on a single line, with linebreaks represented by `\n`. Something like this:
+
+```
+"-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhki ...  owbyFirECAwEAAQ==\n-----END PUBLIC KEY-----\n"
+```
+
+</Tip>
+
+</TabItem>
+<TabItem value="c" label="Optional Replacements">
+
+| Replace | With                                                    | Notes                                                       |
+| ------- | ------------------------------------------------------- | ----------------------------------------------------------- |
+| `morio` | An alternative mount path for the authentication method | This should match the `vault.jwt_auth_path` Morio setting } |
+
+</TabItem>
+</Tabs>
+
+### Create a Vault policy for Morio
+
+The final step is to create a Vault policy.
+The example below allows Morio read access to everything under `/morio` in the `kv` engine.
+Adapt it accordingly if you deviated from the defaults.
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Create a role under our JWT authentication method in Vault"
+curl  \
+  --header "X-Vault-Token: VAULT_TOKEN" \
+  --data '{
+    "policy": "# Grant Morio read access to everything under path /morio in the KV engine\npath \"secret/data/morio/*\" {\n  capabilities = [\"read\"]\n}"
+  }' \
+  https://vault.morio.it/v1/sys/policy/morio
+```
+
+This creates the following `morio` Vault policy:
+
+```hcl
+# Grant Morio read access to everything under path /morio in the KV engine
+path "secret/data/morio/*" {
+  capabilities = ["read"]
+}
+```
+
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace                  | With                           | Notes                                             |
+| ------------------------ | ------------------------------ | ------------------------------------------------- |
+| `VAULT_TOKEN`            | Your own Vault access token    | Token needs sufficient privileges                 |
+| `https://vault.morio.it` | URL to your own Vault instance | Note that Vault listens on port `8200` by default |
+
+</TabItem>
+<TabItem value="c" label="Optional Replacements">
+
+| Replace                                  | With                       | Notes                                               |
+| ---------------------------------------- | -------------------------- | --------------------------------------------------- |
+| `morio` in the URL                       | An alternative policy name | You can choose this freely. It's just a name.       |
+| `morio` in the `path` part of the policy | A non-default mount path   | This should match the `vault.kv_path` Morio setting |
+
+</TabItem>
+</Tabs>
+
+### Create a role under the JWT authentication method
+
+Next we create a role for Morio under our new JWT authentication method and assign our policy to it.
+
+<Tabs>
+<TabItem value="a" label="Command">
+```sh title="Create a role under our JWT authentication method in Vault"
+curl  \
+  --header "X-Vault-Token: VAULT_TOKEN" \
+  --data '{
+    "name": "morio",
+    "role_type": "jwt",
+    "bound_audiences": "morio",
+    "user_claim": "trigger",
+    "user_claim_json_pointer": true,
+    "token_policies": "morio"
+  }' \
+  https://vault.morio.it/v1/sys/auth/morio/role/morio
+```
+</TabItem>
+<TabItem value="b" label="Mandatory Replacements">
+
+| Replace                  | With                           | Notes                                             |
+| ------------------------ | ------------------------------ | ------------------------------------------------- |
+| `VAULT_TOKEN`            | Your own Vault access token    | Token needs sufficient privileges                 |
+| `https://vault.morio.it` | URL to your own Vault instance | Note that Vault listens on port `8200` by default |
+
+</TabItem>
+<TabItem value="c" label="Optional Replacements">
+
+| Replace                                       | With                     | Notes                                            |
+| --------------------------------------------- | ------------------------ | ------------------------------------------------ |
+| `morio` in `"name": "morio"`                  | An alternative role name | This should match the `vault.role` Morio setting |
+| `morio` in `role/morio` at the end of the URL | An alternative role name | This should match the `vault.role` Morio setting |
+| `morio` in `"token_policies": "morio"`        | An alternative policy    | We'll create the policy in the next step         |
+
+</TabItem>
+</Tabs>
+
+## Using Vault secrets
+
+To use a Vault secret, define it in the `tokens.secrets` settings.
+
+- The key can be any name you want, although we recommend using the same key name in Morio as in Vault.
+- The value should be an object with a `vault` key and a value like: `path/in/kv:SECRET_NAME`
+
+Example:
+
+```yaml
+tokens:
+  secrets:
+    SECRET_FROM_VAULT:
+      vault: morio/production:SECRET_FROM_VAULT
+```
+
+Then, you can reference this secret in the configuration just like any other: `{{ SECRET_FROM_VAULT }}`.
+
+## Summary
+
+In this guide we have configured Morio to integrate with Hashicorp Vault so that Morio can read secrets from Vault.
+
+To do so, we went through these steps:
+
+- [We created the `vault` settings](#morio-configuration)
+- [We enabled the `kv` engine in Vault](#enable-the-kv-secrets-engine)
+- [We created a JWT authentication method](#create-a-jwt-authentication-method-under-morio)
+- [We configured it to trust Morio's public key](#configure-the-authentication-method-we-created)
+- [We created a policy for Morio](#create-a-vault-policy-for-morio)
+- [We created a role for Morio](#create-a-role-under-the-jwt-authentication-method)
+- [We learned how to use Vault secrets](#using-vault-secrets)
