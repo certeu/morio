@@ -1,18 +1,21 @@
 ---
-title: ci:build.ui
+title: ci:build.dbuilder
 ---
+<!-- start-spellcheck-skip -->
 
-import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.md'
+import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.mdx'
 
-The `ci:build.ui` _run script_ builds a container image for the _ui service_
+<!-- end-spellcheck-skip -->
+
+The `ci:build.dbuilder` _run script_ builds a container image for the _dbuilder service_
 that is intended to be used in production, or can be published as a new release.
 
-Run `npm run ci:build.ui` in the _monorepo_ root to trigger this script.
+Run `npm run ci:build.dbuilder` in the _monorepo_ root to trigger this script.
 
 Under the hood, this will run:
 
 ```sh title="Terminal"
-./scripts/ci-build-container.sh ui
+./scripts/ci-build-container.sh dbuilder
 ```
 
 ## Publish the built image
@@ -21,7 +24,7 @@ This script takes an optional parameter `publish` that will publish the newly
 built image on docker hub:
 
 ```sh title="Terminal"
-npm run ci:build.ui publish
+npm run ci:build.dbuilder publish
 ```
 
 To make this work, the following environment variables should be available:

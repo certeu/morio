@@ -42,19 +42,19 @@ You can find those under `docs/blog`.
 ## Folder structure & file names
 
 The folder structure of the markdown files directly translates to the URL structure of the documentation website.
-The file names must always be `readme.md`.
+The file names must always be `readme.mdx`.
 
 If we take this documentation guide as an example:
 
 - Relative url: <b>/docs/guides/contributors/docs</b>
-- Path to the markdown file: docs<b>/docs/guides/contributors/docs</b>/readme.md
+- Path to the markdown file: docs<b>/docs/guides/contributors/docs</b>/readme.mdx
 
 That not only makes it easy to find the source markdown of any given page, it
 also has implications for how you should structure the markdown content:
 
-- All markdown files under `docs/docs` should be named `readme.md`
+- All markdown files under `docs/docs` should be named `readme.mdx`
 - All folders under `docs/docs` should have a URL-friendly name, using only the characters `a-z`, `0-9`, and `-`
-- Every folder should have a `readme.md`, no empty folders
+- Every folder should have a `readme.mdx`, no empty folders
 
 ## Front matter
 
@@ -298,11 +298,11 @@ _monorepo_. The link will point to the same file on GitHub, specifically in the 
 <Tabs>
   <TabItem value="mdx" label="MDX" default>
 ```markup
-To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.md</RepoFile>.
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.mdx</RepoFile>.
 ```
   </TabItem>
   <TabItem value="html" label="HTML">
-To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.md</RepoFile>.
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.mdx</RepoFile>.
   </TabItem>
 </Tabs>
 
@@ -618,7 +618,7 @@ The name of the folder should follow [the same rules as any folders under
 `docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
 `0-9`, and `-`.
 
-Then, add a `readme.md` file to the folder as you would for any documentation page.
+Then, add a `readme.mdx` file to the folder as you would for any documentation page.
 
 #### Terminology properties
 
@@ -699,18 +699,18 @@ As a practical example, the difference between the built container images for
 the development environment and production is something that is relevant on
 various documentation pages.
 
-So, the documentation is kept in the <RepoFile>docs/includes/docker-env-diffs.md</RepoFile> file.
+So, the documentation is kept in the <RepoFile>docs/includes/docker-env-diffs.mdx</RepoFile> file.
 
 ### Importing and using the include file
 
-Once created, you can import the file as any other import in your `readme.md`:
+Once created, you can import the file as any other import in your `readme.mdx`:
 
 ```mdx
 ---
 title: Example of how to use an include
 ---
 
-import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.md'
+import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.mdx'
 
 Some (optinoal) other content here.
 
@@ -725,7 +725,7 @@ A few things to note:
 - This will be used as a React component, so you **must** pick a name that starts with a capital letter
 - Output the info as a React component: `<DockerBuildEnvDiffs />`
 
-See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.md</RepoFile> for an example.
+See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.mdx</RepoFile> for an example.
 
 ## Tips for writing great documentation
 
