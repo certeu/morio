@@ -139,10 +139,9 @@ async function loadGitRepo(gitroot, id, config, log) {
  *
  * @param {object} preseed - The preseed settings
  * @param {string} gitroot - Path to the root where git repos are stored
- * @param {object} log - A logger instance
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedBaseFile(preseed, gitroot, log) {
+async function loadPreseedBaseFile(preseed, gitroot) {
   if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.base === 'string') {
@@ -177,7 +176,7 @@ export async function loadPreseededSettings(preseed, log, gitroot="/etc/morio/sh
   /*
    * Attempt to load the preseed base file
    */
-  const settings = await loadPreseedBaseFile(preseed, gitroot, log)
+  const settings = await loadPreseedBaseFile(preseed, gitroot)
   if (!settings) {
     log.warn(`Failed to load preseed base file`)
     return false
@@ -296,10 +295,9 @@ async function loadPreseedFileFromUrl(config) {
  * @param {object|string} overlay - The preseed settings for this overlay
  * @param {object} preseed - The preseed settings
  * @param {string} gitroot - Path to the root where git repos are stored
- * @param {object} log - A logger instance
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
+async function loadPreseedOverlay(overlay, preseed, gitroot) {
   if (typeof overlay === 'string') {
     if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot)
     const api = fromApi(overlay)
@@ -361,7 +359,7 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
       }
     }
     else {
-      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
+      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot)
       if (overlay) overlays.push(overlay)
     }
   }
@@ -371,7 +369,7 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
    */
   else if (Array.isArray(preseed.overlays)) {
     for (const config of preseed.overlays) {
-      const overlay = await loadPreseedOverlay(config, preseed, gitroot, log)
+      const overlay = await loadPreseedOverlay(config, preseed, gitroot)
       if (overlay) overlays.push(overlay)
     }
   }

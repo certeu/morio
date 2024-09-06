@@ -57,7 +57,7 @@ export const errors = {
     status: 503,
     title: 'Unable to load data from Morio Core',
     detail:
-      'When reaching out to Morio Core, we did not receive a response, idicating that core may be down.',
+      'When reaching out to Morio Core, we did not receive a response, indicating that core may be down.',
   },
   /*
    * Status issues coming from core when it rejects connections
