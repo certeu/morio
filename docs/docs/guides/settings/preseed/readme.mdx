@@ -28,7 +28,7 @@ This allows you to create a modular Morio configuration.
 
 We'll typically store the node info in the base settings, and this would be
 different for every environment. Then, we add overlays like various identity
-providers, internal certificates that should be trusted and so on.
+providers, internal certificates that should be trusted, and so on.
 
 Obviously, you know best what works in your environment. But understanding the
 reasons behind these preseeding settings will hopefully help you make the most
@@ -36,7 +36,7 @@ of this powerful feature.
 
 ## Understanding overlays
 
-The base settings file is just that: The base on which we will construct our final settings object.
+The base settings file is just that: the base on which we will construct our final settings object.
 
 An overlay then is a file that will _mutate_ the base settings.
 Typically by adding settings, but an overlay can also overwrite settings.
@@ -78,7 +78,7 @@ and the value holds, well, the value.
 ```yaml title="Provided YAML overlay"
 key1: different value 1
 key2.subkey2.subsubkey2: I am new
-key3: So am I:
+key3: So am I
 ```
 
 You can read an overlay as a series of mutations:
@@ -155,10 +155,10 @@ Overlays are applied one after the other, so the end result is:
 
 Because of the ways overlays use dot-notation to make changes to the settings object, there are two limitations to be aware of:
 
-- Working with array is difficult. You cannot easily add something to an array.
+- Working with arrays is difficult. You cannot easily add something to an array.
   This is why in general in Morio we avoid using arrays for settings.
 - You cannot _remove_ settings. While you can overwrite them, and set them to
-  something falsy or `null`, you cannot remove them. Which is why it is best to
+  something falsy or `null`, you cannot remove them, which is why it is best to
   keep your base settings to the strict minimum.
 
 ## Recommended setup using a git repository
@@ -167,7 +167,7 @@ We recommend placing your Morio settings and overlays for one or more different
 environments in a single repository and then let Morio clone this repository
 and reference files from it.
 
-Let's walk through this example step by step.
+Let's walk through an example step by step.
 
 ### Initial setup
 
@@ -193,7 +193,7 @@ use an example like this:
 ```
 
   </TabItem>
-  <TabItem value="b" label="With Authentication">
+  <TabItem value="b" label="With authentication">
 
 If the git repository you are using **does** require authentication, you can
 use an example like this:
@@ -220,19 +220,19 @@ If you save this as `preseed.json` we can set up Morio with this curl command:
 curl -k -H "Content-Type: application/json" -d@preseed.json https://example.morio.it/-/api/preseed
 ```
 
-This will be sufficient to bootstrap Morio, assuming
+This is sufficient to bootstrap Morio, assuming that
 `base.yaml` in the repository holds valid settings.
 
 ### Example base settings file
 
-On initial setup, we need to provide Morio with our preseed settings.
-But once Morio is deployed, they are part of our regular settings.
-Which means that they can be provided by the base file or an overlay.
+On initial setup, we need to provide Morio with our preseed settings - 
+but once Morio is deployed, they become a part of our regular settings,
+which means that they can be provided by the base file or by an overlay.
 
 <Tabs>
   <TabItem value="a" label="Base settings" default>
 
-Our base settings holds the minimal settings: Our cluster nodes and name.
+Our base settings holds the minimal settings: our cluster nodes and name.
 
 ```yaml
 cluster:
@@ -244,7 +244,7 @@ cluster:
 </TabItem>
   <TabItem value="a2" label="Preseed Overlay" default>
 
-We've places our preseed setting in an overlay and made some changes:
+We've placed our preseed settings in an overlay and made some changes:
 
 - The preseed settings are now under the `preseed` key
 - We've added our overlays, for which we used a glob pattern
@@ -264,7 +264,7 @@ preseed:
 </TabItem>
 <TabItem value="b" label="IDP Overlay">
 
-This is another example, it adds and identity provider.
+This is another example, it adds an identity provider.
 
 ```yaml
 iam.providers.ad:
@@ -320,27 +320,27 @@ url: https://vault.morio.it
 
 ## Alternative preseed sources
 
-In the example above, we cloned a git repository and then loaded files from it for our base settings and overlays.
+In the example above, we cloned a git repository, then loaded files from it for our base settings and overlays.
 
 That is a common scenario that comes warmly recommended, but there are other sources you can use.
 
 ### Preseed from a URL
 
-You can preseed from a URL, both the base settings or one or more overlays.
+You can preseed both the base settings and one or more overlays from a URL.
 This is useful for simple scenarios and quick tests.
 
 Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
 
 ### Preseed from the GitHub API
 
-If your repository is very large, cloning it in its entirety to be able to load a few files might be overkill.
+If your repository is very large, cloning it in its entirety just to load a few files might be overkill.
 In that case, you can configure Morio to fetch specific files from the GitHub API.
 
 Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
 
 ### Preseed from the GitLab API
 
-If your repository is very large, cloning it in its entirety to be able to load a few files might be overkill.
+If your repository is very large, cloning it in its entirety just to load a few files might be overkill.
 In that case, you can configure Morio to fetch specific files from the GitLab API.
 
 Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
