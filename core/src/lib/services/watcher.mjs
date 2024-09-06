@@ -59,12 +59,7 @@ async function ensureLocalPrerequisites() {
    * Make sure the folders exist, and are writable
    */
   const uid = utils.getPreset('MORIO_WATCHER_UID')
-  for (const dir of [
-    '/etc/morio/watcher',
-    '/morio/data/watcher',
-    '/morio/data/watcher/tls',
-    'morio/data/watcher/tls',
-  ]) {
+  for (const dir of ['/etc/morio/watcher', '/morio/data/watcher', '/morio/data/watcher/tls']) {
     await mkdir(dir)
     await chown(dir, uid, uid)
   }
