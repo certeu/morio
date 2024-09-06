@@ -29,6 +29,16 @@ export function routes(app) {
   app.get(`/jwks`, (req, res) => Anonymous.getJwks(req, res))
 
   /*
+   * Get the public key
+   */
+  app.get(`/pubkey`, (req, res) => Anonymous.getPubkey(req, res))
+
+  /*
+   * Get the public key
+   */
+  app.get(`/pubkey.pem`, (req, res) => Anonymous.getPubkey(req, res, 'pem'))
+
+  /*
    * Get the Morio status
    */
   app.get(`/status`, Anonymous.getStatus)
@@ -42,4 +52,9 @@ export function routes(app) {
    * Validates Morio settings
    */
   app.post(`/validate/settings`, Anonymous.validateSettings)
+
+  /*
+   * Validates Morio preseed settings
+   */
+  app.post(`/validate/preseed`, Anonymous.validatePreseed)
 }

@@ -1,4 +1,4 @@
-personal_ws-1.1 en 198 
+personal_ws-1.1 en 212 
 ACL
 AMI
 API's
@@ -11,6 +11,7 @@ ChatGPT
 Cybersecurity
 DBuilder
 DFLT
+DN
 DNS
 DockerBuildEnvDiffs
 Docusaurus
@@ -29,8 +30,10 @@ ForwardAuth
 GPT
 GitLab
 GlobalSign
+HTTPS
 Hashicorp
 IDP
+IDP's
 IDPs
 IICB
 Interinstitutional
@@ -57,15 +60,20 @@ MirrorMaker
 Modularity
 Morio
 Morio's
+Mustache
 NPM
 NextJS
 NodeJS
 OCI
+OIDC
 OSI
 OU
 OpenAPI
+OpenBao
 OpenTelemetry
+PEM
 Pre
+Preseeding
 RBuilder
 REPOS
 RTT
@@ -124,17 +132,20 @@ docusaurus
 env
 eslint
 facto
+falsy
 filesystem
 fmt
 formatter
 frontend
 git's
 github
+gitops
 http
 idp
 init
 io
 itsmorio
+jdecock
 joostdecock
 js
 json
@@ -173,6 +184,8 @@ prebuild
 precommit
 predev
 prem
+preseed
+preseeding
 preset's
 prettierignore
 prettierrc
@@ -185,6 +198,7 @@ redpanda
 rollout
 runtime
 sha
+stellene
 subfolder
 subgraph
 systemd

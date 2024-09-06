@@ -9,6 +9,7 @@ import {
   version,
   nodeSerial,
   settings,
+  preseed,
 } from '#shared/schema'
 
 /*
@@ -60,6 +61,7 @@ export const schema = {
   'req.docker.network.inspect': Joi.object({ id }),
   'req.docker.network.remove': Joi.object({ id }),
   'req.settings.setup': settings,
+  'req.settings.preseed': preseed,
   'req.settings.deploy': settings,
   // TODO: Lock this down further and share between api/core
   'req.pkg.build.deb': Joi.object({
@@ -130,4 +132,6 @@ export const schema = {
   }),
 }
 
-export const validate = (key, input) => sharedValidate(key, input, schema)
+export function validate(key, input) {
+  return sharedValidate(key, input, schema)
+}

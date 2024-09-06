@@ -16,7 +16,7 @@ import { utils } from '../lib/utils.mjs'
  * @param {string} data.token - The MFA token to verify
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
-export const local = async (id, data) => {
+export async function local(id, data) {
   /*
    * Authenticate
    */

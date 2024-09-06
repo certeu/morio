@@ -146,7 +146,7 @@ Store.prototype.unset = function (path) {
  * @param {string|array} path - The path to prefix either as array or a string in dot notation
  * @return {array} newPath - The prefixed path
  */
-export const unshift = (prefix, path) => {
+export function unshift(prefix, path) {
   if (Array.isArray(path)) return [...prefix, ...path]
   else return [...prefix, ...path.split('.')]
 }
@@ -159,7 +159,7 @@ export const unshift = (prefix, path) => {
  * @param {mixed} value - The value to set
  * @return {object} obj - The mutated object
  */
-export const setIfUnset = (obj, path, value) => {
+export function setIfUnset(obj, path, value) {
   if (typeof get(obj, path) === 'undefined') return set(obj, path, value)
 
   return obj

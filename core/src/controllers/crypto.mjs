@@ -16,7 +16,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.createCertificate = async (req, res) => {
+Controller.prototype.createCertificate = async function (req, res) {
   const cert = await createX509Certificate(req.body)
 
   return cert
@@ -32,7 +32,7 @@ Controller.prototype.createCertificate = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.decrypt = async (req, res) => {
+Controller.prototype.decrypt = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -57,7 +57,7 @@ Controller.prototype.decrypt = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.encrypt = async (req, res) => {
+Controller.prototype.encrypt = async function (req, res) {
   if (typeof req.body.data === 'undefined')
     return res.status(400).send({ errors: ['No data in body'] })
 

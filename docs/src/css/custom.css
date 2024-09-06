@@ -13,6 +13,7 @@
   --ifm-color-primary-light: #1e96b2;
   --ifm-color-primary-lighter: #1f9cba;
   --ifm-color-primary-lightest: #23b1d3;
+  --ifm-color-info: #00a9df;
   --ifm-background-color: #ffffff;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
@@ -43,6 +44,7 @@
   --ifm-color-primary-lighter: #26b6d8;
   --ifm-color-primary-lightest: #42c0de;
   --ifm-background-color: #001d2d;
+  --ifm-color-success: #00b700;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
   --mdx-b-comment: #0ca678;
   --mdx-bg-comment: 8, 127, 91;
@@ -110,7 +112,7 @@ div.popout svg.icon {
   height: 1.5rem;
 }
 div.popout-content {
-  flex-grow: 3
+  flex-grow: 3;
 }
 div.popout-content p:last-of-type {
   margin-bottom: 0;
@@ -323,5 +325,5 @@ button.modal-wrapper-close-button svg.icon {
 /* YouTube embed */
 iframe.yt-embed {
   width: 100%;
-  aspect-ratio: 16 /9
+  aspect-ratio: 16 /9;
 }

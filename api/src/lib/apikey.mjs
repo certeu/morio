@@ -50,7 +50,7 @@ const values = {
  * @param {string} id - The unique id (the key)
  * @return {object} data - The data saved for the API key
  */
-export const loadApikey = async (id) => {
+export async function loadApikey(id) {
   const [status, result] = await db.read(`SELECT * FROM apikeys WHERE id=:id`, {
     id: fields.id(id),
   })
@@ -72,7 +72,7 @@ export const loadApikey = async (id) => {
  * @param {string} id - The unique id (in provider.username format)
  * @return {object} keys - The API keys saved for the account
  */
-export const loadAccountApikeys = async (id) => {
+export async function loadAccountApikeys(id) {
   const [status, result] = await db.read(
     `SELECT ${nonSecretFields} FROM apikeys WHERE created_by=:id`,
     { id: fields.id(id) }
@@ -86,7 +86,7 @@ export const loadAccountApikeys = async (id) => {
  *
  * @param {object} data - The data to save for the API key
  */
-export const saveApikey = async (id = false, data) => {
+export async function saveApikey(id = false, data) {
   /*
    * We need at least an ID
    */
@@ -121,7 +121,7 @@ export const saveApikey = async (id = false, data) => {
  *
  * @param {string} id - The apikey ID (key)
  */
-export const deleteApikey = async (id = false) => {
+export async function deleteApikey(id = false) {
   /*
    * We need at least an ID
    */
@@ -143,7 +143,7 @@ export const deleteApikey = async (id = false) => {
  *
  * @return {object} keys - The API keys
  */
-export const listApikeys = async () => {
+export async function listApikeys() {
   const query = `SELECT id, name, status, role, created_by, created_at, updated_by, updated_at, last_login FROM apikeys`
   const [status, result] = await db.read(query)
 
@@ -155,12 +155,14 @@ export const listApikeys = async () => {
  *
  * @param {string} id - The id of the apikey (the key)
  */
-export const updateLastLoginTime = async (id) => await saveApikey(id, { last_login: asTime() })
+export async function updateLastLoginTime(id) {
+  return await saveApikey(id, { last_login: asTime() })
+}
 
 /**
  * Helper method to parse results into an array of objects
  */
-const apikeysAsList = (result) => {
+function apikeysAsList(result) {
   const cols = result.results[0].columns
   const list = (result.results[0].values || []).map((entry) => {
     const apikey = {}

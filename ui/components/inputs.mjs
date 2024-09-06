@@ -369,7 +369,7 @@ export const ListInput = ({
                     key={i}
                     disabled={disabled}
                     className={`btn btn-sm ${
-                      current === item.val.values[i] ? 'btn-primary' : 'btn-secondary'
+                      current === item.val.values[i] ? 'btn-primary' : 'btn-primary btn-outline'
                     }`}
                     onClick={() => update(item.val.values[i])}
                   >

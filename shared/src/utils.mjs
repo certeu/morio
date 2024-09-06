@@ -6,8 +6,9 @@ import { setTimeout } from 'node:timers/promises'
  * @param {string} string - The string to capitalize
  * @return {string} result - The string with its first character capitalized
  */
-export const capitalize = (string) =>
-  typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : ''
+export function capitalize(string) {
+  return typeof string === 'string' ? string.charAt(0).toUpperCase() + string.slice(1) : ''
+}
 
 /**
  * Clone a data structure in a way that ensures no references
@@ -15,7 +16,9 @@ export const capitalize = (string) =>
  *
  * @param {object} obj - The object to clone
  */
-export const cloneAsPojo = (obj) => JSON.parse(JSON.stringify(obj))
+export function cloneAsPojo(obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
 
 /**
  * Sleeps for a number of seconds in a async way
@@ -27,7 +30,9 @@ export const cloneAsPojo = (obj) => JSON.parse(JSON.stringify(obj))
  * @param {number} seconds - Time to sleep in seconds
  * @return {promise} result - Returns a promise
  */
-export const sleep = async (seconds) => await setTimeout(seconds * 1000)
+export async function sleep(seconds) {
+  return await setTimeout(seconds * 1000)
+}
 
 /*
  * This method will continue attempting to get a truthy result every seconds until timeout
@@ -44,25 +49,26 @@ export const sleep = async (seconds) => await setTimeout(seconds * 1000)
  *
  * @return {promise} result - The promise
  */
-export const attempt = async ({
+export async function attempt({
   every = 2,
   timeout = 60,
   run,
   onFailedAttempt = false,
   validate = false,
-}) =>
-  new Promise((resolve) =>
+}) {
+  return new Promise((resolve) =>
     tryWhilePromiseResolver({ every, timeout, run, onFailedAttempt, validate }, resolve)
   )
+}
 
 /*
  * Promise resolver functions should not be async
  * so this method is here to side-step that
  */
-const tryWhilePromiseResolver = async (
+async function tryWhilePromiseResolver(
   { every, timeout, run, onFailedAttempt, validate },
   resolve
-) => {
+) {
   /*
    * Quick check
    */
@@ -109,7 +115,7 @@ const tryWhilePromiseResolver = async (
  * @param {object} server - The Express server instance
  * @return {object} server - The Express server instance
  */
-export const wrapExpress = (log, server) => {
+export function wrapExpress(log, server) {
   /*
    * These are the signals we want to handle
    */

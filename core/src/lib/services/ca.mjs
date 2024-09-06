@@ -117,7 +117,7 @@ export const service = {
  *
  * @return {bool} result - True if the CA is up, false if not
  */
-export const isCaUp = async () => {
+export async function isCaUp() {
   const result = await testUrl(`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`, {
     ignoreCertificate: true,
     returnAs: 'json',
@@ -131,7 +131,7 @@ export const isCaUp = async () => {
  * Helper method to reload the configuration, and update state
  *
  */
-const reloadCaConfiguration = async () => {
+async function reloadCaConfiguration() {
   /*
    * Load CA configuration from disk
    */
@@ -176,7 +176,7 @@ const reloadCaConfiguration = async () => {
   return true
 }
 
-export const generateCaConfig = async () => {
+export async function generateCaConfig() {
   /*
    * Let people know this will take a while
    */
@@ -228,7 +228,7 @@ export const generateCaConfig = async () => {
   await ensureCaConfig()
 }
 
-export const ensureCaConfig = async (clusterKeys = false) => {
+export async function ensureCaConfig(clusterKeys = false) {
   /*
    * Save root certificate and fingerprint in memory
    */

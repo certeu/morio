@@ -2,7 +2,7 @@ import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
-import { MORIO_GIT_ROOT } from '../config/cli.mjs'
+import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
 
 /*
  * When in development, we remap the volumes to keep data inside the repo
@@ -98,8 +98,9 @@ const cliOptions = (name, env) => `\\
   --name=${config[name][env].container.container_name} \\
   --hostname=${config[name][env].container.container_name} \\
   --label morio.service=${name} \\
-  --log-driver=journald \\
-  --log-opt labels=morio.service \\
+  --log-driver=${MORIO_DOCKER_LOG_DRIVER} \\
+  ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
+${MORIO_DOCKER_ADD_HOST ? '--add-host '+MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
   --network-alias ${[name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
@@ -111,7 +112,9 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e MORIO_DATA_ROOT=${presetGetters[env]('MORIO_DATA_ROOT')} \\
   -e MORIO_LOGS_ROOT=${presetGetters[env]('MORIO_LOGS_ROOT')} \\
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
+  -e MORIO_DOCKER_LOG_DRIVER=${MORIO_DOCKER_LOG_DRIVER} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
+${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="'+MORIO_DOCKER_ADD_HOST+'"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
   }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}

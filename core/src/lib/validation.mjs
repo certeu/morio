@@ -14,7 +14,7 @@ import { schema } from '../schema.mjs'
  * @param {object] input - The input to validate
  * @return {object} valid - The result of the Joi validation
  */
-export const validate = async (key, input) => {
+export async function validate(key, input) {
   const target = schema[key]
   if (target) {
     let valid

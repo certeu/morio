@@ -82,6 +82,88 @@ const keys = Joi.object({
 })
 
 /*
+ * A vault secret
+ */
+const vaultSecret = Joi.object({
+  vault: Joi.alternatives().try(
+    Joi.string(),
+    Joi.object({
+      path: Joi.string().required(),
+      key: Joi.string().required(),
+      instance: Joi.string(),
+    })
+  ),
+})
+
+/*
+ * A vault instance
+ */
+const vaultInstance = Joi.object({
+  url: Joi.string().uri().required(),
+  verify_certificate: Joi.boolean(),
+  role: Joi.string(),
+  jwt_auth_path: Joi.string(),
+  kv_path: Joi.string(),
+})
+
+/*
+ * A preseed file object
+ */
+const preseedFile = Joi.alternatives().try(
+  Joi.object({
+    url: Joi.string().uri().required(),
+    headers: Joi.object(),
+  }),
+  Joi.object({
+    gitlab: Joi.object({
+      url: Joi.string().uri().required(),
+      project_id: Joi.number().required(),
+      file_path: Joi.string().required(),
+      ref: Joi.string(),
+      token: Joi.alternatives().try(Joi.string(), vaultSecret).required(),
+    }),
+  }),
+  Joi.object({
+    github: Joi.object({
+      url: Joi.string().uri(),
+      owner: Joi.string().required(),
+      repo: Joi.string().required(),
+      file_path: Joi.string().required(),
+      ref: Joi.string(),
+      token: Joi.alternatives().try(Joi.string(), vaultSecret).required(),
+    }),
+  }),
+  Joi.string()
+)
+
+/*
+ * A git repository to load
+ */
+const gitRepo = Joi.object({
+  id: Joi.string(),
+  url: Joi.string().uri(),
+  ref: Joi.string(),
+  user: Joi.alternatives().try(Joi.string(), vaultSecret),
+  token: Joi.alternatives().try(Joi.string(), vaultSecret),
+})
+
+/*
+ * The Morio preseed object
+ */
+const preseed = Joi.alternatives().try(
+  Joi.object({
+    url: Joi.string(),
+    git: Joi.object().pattern(Joi.string(), gitRepo),
+    base: preseedFile,
+    overlays: Joi.alternatives().try(
+      Joi.array().items(preseedFile),
+      Joi.string()
+    )
+  }),
+  Joi.string()
+)
+
+/*
  * The Morio settings object
  */
 const settings = Joi.object({
@@ -100,14 +182,24 @@ const settings = Joi.object({
     }),
   }),
   metadata: Joi.object({
-    version: Joi.string(),
-    comment: Joi.string(),
+    comment: Joi.alternatives().try(
+      Joi.string(),
+      Joi.array().items(Joi.string())
+    ),
+    version: Joi.alternatives().try(
+      Joi.string(),
+      Joi.number(),
+    ),
   }),
   connector: Joi.object(),
   tokens: Joi.object({
     flags: Joi.object({
       HEADLESS_MORIO: Joi.boolean(),
       DISABLE_ROOT_TOKEN: Joi.boolean(),
+      DISABLE_IDP_APIKEY: Joi.boolean(),
+      DISABLE_IDP_LDAP: Joi.boolean(),
+      DISABLE_IDP_LOCAL: Joi.boolean(),
+      DISABLE_IDP_MRT: Joi.boolean(),
     }),
     secrets: Joi.object(),
     vars: Joi.object(),
@@ -119,6 +211,8 @@ const settings = Joi.object({
       order: Joi.array(),
     }),
   }),
+  vault: vaultInstance,
+  preseed,
 }).required()
 
 /**
@@ -135,7 +229,7 @@ const settings = Joi.object({
  * @param {object] input - The input to validate
  * @return {object} valid - The result of the Joi validation
  */
-const validate = async (key, input, schema) => {
+async function validate(key, input, schema) {
   const target = schema[key]
   if (target) {
     let valid
@@ -152,4 +246,4 @@ const validate = async (key, input, schema) => {
 /*
  * Named exports
  */
-export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, version, nodeSerial, settings }
+export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, version, nodeSerial, settings, preseed }

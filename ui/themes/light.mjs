@@ -62,12 +62,12 @@ export const theme = {
   'primary-content': c.bg, //c.dark,
 
   // secondary: The link color on default backgrounds (base-100)
-  secondary: c.mid,
+  secondary: colors.teal['500'],
   // secondary-focus: The :hover link color for default backgrounds. Or:
   // secondary-focus: An alternative link color for on dark backgrounds
-  'secondary-focus': colors.orange['500'],
+  'secondary-focus': colors.teal['500'],
   // secondary-content: The text color on a secondary button
-  'secondary-content': c.dark,
+  'secondary-content': colors.teal['50'],
 
   // accent: The accent color is used to highlight active things
   // Should be something is positive/neutral. Avoid red or orange.
@@ -111,7 +111,7 @@ export const theme = {
    * Title color
    */
   '--morio-heading': c.mid,
-  '--morio-link': c.accent2,
+  '--morio-link': c.mid,
   '--morio-primary': c.mid,
   '--morio-light': '#8ecae6',
   '--morio-mid': '#219ebc',

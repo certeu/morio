@@ -9,6 +9,7 @@ import { resolveServiceConfiguration as db } from './db.mjs'
 import { resolveServiceConfiguration as dbuilder } from './dbuilder.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
+import { resolveServiceConfiguration as watcher } from './watcher.mjs'
 
 const resolvers = {
   api,
@@ -21,6 +22,7 @@ const resolvers = {
   dbuilder,
   proxy,
   ui,
+  watcher,
 }
 
 export const resolveServiceConfiguration = (name, helpers) =>
@@ -39,6 +41,7 @@ export const serviceOrder = [
   'proxy',
   'connector',
   'dbuilder',
+  'watcher',
 ]
 
 /*
@@ -49,7 +52,7 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = ['db', 'ui', 'connector', 'dbuilder']
+export const optionalServices = ['db', 'ui', 'connector', 'dbuilder', 'watcher']
 
 /**
  * Helper method to generate the Traefik configuration
@@ -121,4 +124,5 @@ const getServicePort = (service, utils) => {
   if (service === 'console') return utils.getPreset('MORIO_CONSOLE_PORT')
   if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
   if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')
+  if (service === 'watcher') return utils.getPreset('MORIO_WATCHER_HTTP_PORT')
 }

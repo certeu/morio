@@ -1,0 +1,840 @@
+---
+title: Documentation Guide
+tags:
+  - contributors
+---
+
+import { JargonTerms, TerminologyTerms } from '@site/src/theme/components/term.js'
+
+Improving our documentation is one of the easiest ways to start contributing to
+Morio. So if you spot a mistake or see something that you can improve, please
+do not hesitate to do so.
+
+This guide will show you how you can do that.
+
+<Tip>
+### Making quick edits
+
+The easiest way to make changes to the documentation is via the **Edit this
+page** link that you can find at the bottom of every documentation page.
+
+This will take you to the GitHub online editor where you can propose changes
+directly.  
+<small><b>Note:</b> You need a GitHub account to do this, but they are free.</small>
+</Tip>
+
+## Where to find our documentation
+
+We store our documentation as [Markdown](https://www.markdownguide.org/) in git
+and use [Docusaurus][docusaurus] to generate a static website from it,
+which we then publish at [morio.it](https://morio.it/).
+
+Inside our monorepo, the `docs` folder holds the docusaurus setup.
+Within that folder, the `docs` subfolder holds the actual markdown content.
+
+So, relative to the monorepo root, you can find the markdown of our documentation under `docs/docs`.
+
+<Note>
+Apart from documentation, we also publish blog posts using the same docusaurus setup.  
+You can find those under `docs/blog`.
+</Note>
+
+## Folder structure & file names
+
+The folder structure of the markdown files directly translates to the URL structure of the documentation website.
+The file names must always be `readme.mdx`.
+
+If we take this documentation guide as an example:
+
+- Relative url: <b>/docs/guides/contributors/docs</b>
+- Path to the markdown file: docs<b>/docs/guides/contributors/docs</b>/readme.mdx
+
+That not only makes it easy to find the source markdown of any given page, it
+also has implications for how you should structure the markdown content:
+
+- All markdown files under `docs/docs` should be named `readme.mdx`
+- All folders under `docs/docs` should have a URL-friendly name, using only the characters `a-z`, `0-9`, and `-`
+- Every folder should have a `readme.mdx`, no empty folders
+
+## Front matter
+
+Front matter is metadata that sits at the top of a markdown file.
+Strictly speaking, it is not part of markdown, but rather a list of key/value pairs in YAML format that starts and ends with `---`.
+Here's an example:
+
+```md
+---
+title: Documentation Guide
+---
+
+Improving our documentation is one of the easiest ways to start contributing to
+Morio. So if you spot a mistake or see something that you can improve, please
+do not hesitate to do so.
+```
+
+The `title` entry is mandatory. In other words, **every documentation page must
+have its title set in front matter**.
+
+As in YAML, you do not have to wrap your title in quotes, unless when it holds
+characters that would trip up the YAML parser (like when your title itself
+includes quotations marks).
+
+<Note title="Supported front matter"> 
+For an overview of all supported front matter, see [the Docusaurus documentation
+on front matter in
+docs](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter)
+</Note>
+
+## Tags
+
+The front matter example above can be further extended to add tags to the page.
+Here is an example:
+
+```md
+---
+title: Documentation Guide
+tags:
+  - contributors
+---
+
+Improving our documentation is one of the easiest ways to start contributing to
+Morio. So if you spot a mistake or see something that you can improve, please
+do not hesitate to do so.
+```
+
+We have added the `contributors` tag to this page, marking it as a page that is
+relevant for Morio contributors.
+
+Tags are a way to group pages together that cover the same topic or category.
+Docusaurus will automatically create an overview page of all documentation that
+is tagged with any given tag.
+
+For example, the pages tagged with `contributors` can be found at
+[/docs/tags/contributors](/docs/tags/contributors). Docusaurus will also
+include the tags at the bottom of the page, and they link to their overview
+pages.
+
+Tags are most useful as a carefully curated collection of pointers.
+To ensure that, all tags must be defined in the `docs/docs/tags.yml` file.
+
+<Scode>
+[github.com/certeu/morio/blob/develop/docs/docs/tags.yml](https://github.com/certeu/morio/blob/develop/docs/docs/tags.yml)
+</Scode>
+
+The file holds tags that can be defined as such (using our `contributors` tag as
+an example):
+
+```yaml
+contributors:
+  label: Contributors
+  permalink: /docs/tags/contributors
+  description: Documentation relevant for contributors
+```
+
+As you can see, you can explicitly set a label, permalink, and description.
+However, we just rely on the defaults, so you will define the tag and do not specify any
+properties. Here is how to do that in YAML:
+
+```yaml
+contributors:
+```
+
+To add a tag, place it on a new line followed by `:`.
+
+<Tip>
+An overview of all tags is available at [/docs/tags](/docs/tags).
+</Tip>
+
+## Custom components
+
+Docusaurus supports _MDX_ which is markdown with support for custom components.
+A number of MDX components are supported out of the box, like [the tabs used on
+this page](https://docusaurus.io/docs/markdown-features/tabs).
+
+In addition, we provide some MDX components that you can use in documentation pages. They provide various ways to engage the reader with the material.
+
+### Comment
+
+The `Comment` custom component allows you to insert a comment.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Comment by='joost'>
+  Comments are most useful when something is opinion, rather than fact.
+</Comment>
+
+<Comment by='Joost' title="My title" compact>
+  Compact view with custom title
+</Comment>
+
+<Comment>The `by` prop is mandatory</Comment>
+
+````
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Comment by='joost'>
+  Comments are most useful when something is opinion, rather than fact.
+</Comment>
+
+<Comment by='joost' title="My title" compact>
+  Compact view with custom title
+</Comment>
+
+<Comment>The `by` prop is mandatory</Comment>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default   |
+| ------------ | --------------------------- | --------- |
+| `by`         | The comment author          | `false`   |
+| `compact`    | Renders a compact view      | `false`   |
+| `title`      | Overrides the default title | `COMMENT` |
+  </TabItem>
+</Tabs>
+
+### Fixme
+
+The `Fixme` custom component allows you to insert a message indicating something needs work.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Fixme>
+Use this to indicate something needs work or is incomplete.
+</Fixme>
+
+<Fixme by='joost' title="My title" compact>
+  Compact view with custom title
+</Fixme>
+````
+
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Fixme>
+Use this to indicate something needs work or is incomplete.
+</Fixme>
+
+<Fixme by='Joost' title="My title" compact>
+  Compact view with custom title
+</Fixme>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `by`         | The `Fixme` author          | `false` |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `FIXME` |
+  </TabItem>
+</Tabs>
+
+### Important
+
+The `Important` custom component allows you to insert a message indicating something is important.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Important>Drink plenty of fluids</Important>
+
+<Important by='Joost' title="My title" compact>
+  Compact view with custom title
+</Important>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Important>Drink plenty of fluids</Important>
+
+<Important by='Joost' title="My title" compact>
+  Compact view with custom title
+</Important>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `FIXME` |
+  </TabItem>
+</Tabs>
+
+### Note
+
+The `Note` custom component allows you to insert something you want to draw the reader's attention to.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Note>
+This is a good way to draw the reader's attention to additional information.
+</Note>
+
+<Note by='Joost' title="My title" compact>
+  Compact view with custom title
+</Note>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Note>
+This is a good way to draw the reader's attention to additional information.
+</Note>
+
+<Note by='Joost' title="My title" compact>
+  Compact view with custom title
+</Note>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `NOTE`  |
+  </TabItem>
+</Tabs>
+
+### RepoFile
+
+The `RepoFile` custom component allows you to create a link to a file in the
+_monorepo_. The link will point to the same file on GitHub, specifically in the default
+`develop` branch.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.mdx</RepoFile>.
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.mdx</RepoFile>.
+  </TabItem>
+</Tabs>
+
+### Scode
+
+The `Scode` custom component allows you to insert a message with links to the relevant source code.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Scode>
+The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
+</Scode>
+
+<Scode by='Joost' title="My title" compact>
+  Compact view with custom title
+</Scode>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Scode>
+The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
+</Scode>
+<Scode by='joost' title="My title" compact>
+  Compact view with custom title
+</Scode>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default        |
+| ------------ | --------------------------- | -------------- |
+| `compact`    | Renders a compact view      | `false`        |
+| `title`      | Overrides the default title | `Source Code`  |
+  </TabItem>
+</Tabs>
+
+### Tip
+
+The `Tip` custom component allows you to insert a message with one or more tips for the reader.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Tip>Good advice goes here</Tip>
+
+<Tip by='Joost' title="My title" compact>
+  Compact view with custom title
+</Tip>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Tip>Good advice goes here</Tip>
+
+<Tip by='Joost' title="My title" compact>
+  Compact view with custom title
+</Tip>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default |
+| ------------ | --------------------------- | ------- |
+| `compact`    | Renders a compact view      | `false` |
+| `title`      | Overrides the default title | `TIP`   |
+  </TabItem>
+</Tabs>
+
+### Warning
+
+The `Warning` custom component allows you to insert a message that warns the reader about potential consequences.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<Warning>
+Use this when a certain action is potentially destructive or problems are likely to occur.
+</Warning>
+
+<Warning by='Joost' title="My title" compact>
+  Compact view with custom title
+</Warning>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<Warning>
+Use this when a certain action is potentially destructive or problems are likely to occur.
+</Warning>
+
+<Warning by='Joost' title="My title" compact>
+  Compact view with custom title
+</Warning>
+  </TabItem>
+  <TabItem value="props" label="Props" default>
+| Name         | Description                 | Default     |
+| ------------ | --------------------------- | ----------- |
+| `compact`    | Renders a compact view      | `false`     |
+| `title`      | Overrides the default title | `WARNING`   |
+  </TabItem>
+</Tabs>
+
+### WithCaption
+
+The `WithCaption` custom component allows you to place a caption under any content.
+
+<Tabs>
+  <TabItem value="mdx" label="MDX" default>
+```markup
+<WithCaption caption="This allows you to put a caption under anything">
+![Placeholder image](https://dummyimage.com/1200x400/3/a&text=It's-a%20me,%20Morio!)
+</WithCaption>
+```
+  </TabItem>
+  <TabItem value="html" label="HTML">
+<WithCaption caption="This allows you to put a caption under anything">
+![Placeholder image](https://dummyimage.com/1200x400/3/a&text=It's-a%20me,%20Morio!)
+</WithCaption>
+  </TabItem>
+</Tabs>
+
+## Jargon and Terminology
+
+It is common in technical documentation to use terms or acronyms that the
+reader might not be familiar with. This can create a barrier to readers,
+especially when those terms are specific to Morio.
+
+To address this, we have extended Docusaurus with two custom features that help you demystify this type of content: **jargon** and **terminology**.
+
+### Jargon vs Terminology
+
+Both jargon and terminology can be anything that needs explaining.
+The difference is that jargon does not warrant or require its own dedicated documentation page.
+
+The following rules can guide you when deciding whether you should create a
+jargon term, add a terminology page, or take no action.
+
+1.  Is someone new to Morio expected to know this?
+2.  Would a simple Google search explain this?
+3.  Does this warrant its own documentation page?
+
+If the answers are **No**, **No**, **Yes**, create a terminology page.  
+If the answers are **No**, **No**, **No**, [create a jargon term](#creating-a-jargon-term).  
+For all other cases, no action is required.
+
+The decision tree below visualises these rules:
+
+<WithCaption caption="A decision tree to facilitate decisions about whether or not to create jargon or terminology">
+
+```mermaid
+graph TD;
+  noop["No action\nneeded"]
+  1["Is someone\nnew to Morio\nexpected to know this?"]
+  2["Would a simple\nGoogle search\nexplain this?"]
+  3["Does this warrant its\nown documentation page?"]
+  jargon["Create a jargon entry"]
+  terminology["Create a terminology page"]
+  1-- Yes -->noop
+  1-- No -->2
+  2-- No -->3
+  2-- Yes -->noop
+  3-- No -->jargon
+  3-- Yes -->terminology
+```
+
+</WithCaption>
+
+Let's use some examples to further clarify these rules:
+
+#### `IICB`: Create jargon term
+
+1. This is something rather niche that has little to no meaning outside the context of European Union's administration.
+2. People cannot be expected to know this, and a simple Google search is unlikely to help.
+3. Knowing what the IICB is not relevant for understanding Morio. So a dedicated documentation page is not needed.
+
+In this case, we create a jargon term: _IICB_.
+
+#### `flanking node`: Create terminology page
+
+1. This has a specific meaning in Morio and people cannot be expected to know this.
+2. Googling this won't help.
+3. This requires proper explanation. A documentation page is the best option here.
+
+In this case, we create a terminology page: _flanking node_.
+
+#### `TLS node`: Do nothing
+
+1. This is common terminology, people are unlikely to be confused by this. But even if they are...
+2. A simple Google query will explain this.
+
+In this case, we do nothing.
+
+### Jargon
+
+#### Creating a jargon term
+
+To create a new jargon term, create a `name.md` file under <RepoFile>docs/docs/jargon</RepoFile>.
+The `name` of the file should follow [the same rules as folders under
+`docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
+`0-9`, and `-`.
+
+Inside the your `.md` file, you can use markdown content like in a regular documentation page.
+
+#### Jargon properties
+
+Jargon terms have the following properties that are used to render them on the page:
+
+- `title`
+  - **description**: The title used when displaying the jargon term's info
+  - **default**: The file's _uppercased_ basename
+  - **custom**: The front matter `title` value
+- `term`
+  - **description**: The term that will trigger rendering the jargon term when emphasised
+  - **default**: The file's _lowercased_ basename
+  - **custom**: The front matter `term` value
+- `aliases`
+  - **description**: A list of additional terms that will trigger rendering the jargon term when emphasised.
+  - **default**: none
+  - **custom**: The front matter `aliases` value (an array of strings)
+- `content`
+  - **description**: The main content when displaying the jargon term's info
+  - **default**: The file's markdown content
+  - **custom**: none
+
+#### Examples
+
+Let's use two examples to illustrate the use of default versus custom values for jargon properties:
+
+<Tabs>
+  <TabItem value="mdx" label="Default" default>
+
+This <RepoFile>docs/docs/jargon/mdx.md</RepoFile> example uses only defaults.
+
+- title: `MDX` (the uppercased basename is used as default)
+- term: `mdx` (the lowercased basename is used as default)
+- aliases: `[]` (no aliases is default)
+
+In a case like this, your markdown file does not need any front matter:
+
+```md title="docs/docs/jargon/mdx.md"
+MDX lets you use JSX in your markdown content. It allows you to import
+components, and embed them within your content. This makes writing markdown
+with custom components a blast.
+
+Learn more at [mdxjs.com](chttps://mdxjs.com).
+```
+
+  </TabItem>
+  <TabItem value="html" label="Custom">
+
+This <RepoFile>docs/docs/jargon/run-files.md</RepoFile> example uses custom properties.
+
+- title: `Run scripts` (default would have been `run-scripts`)
+- term: `run scripts` (default would have been `run-scripts`)
+- aliases: `['run script']` (default would have been no aliases)
+
+In this case, all customisation is handled in the front matter:
+
+```md title="docs/docs/jargon/run-scripts.md"
+---
+title: Run scripts
+term: run scripts
+aliases:
+  - run script
+---
+
+NPM run scripts, or **run scripts** for short, refer to scripts defined in the
+**scripts** section of a NodeJS **package.json** file. These scripts are
+typically used for all sorts of housekeeping an automation.
+
+For more info, refer to [the NPM docs on
+scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
+```
+
+  </TabItem>
+</Tabs>
+
+<Note>
+#### This relies on the work done by the prebuild step
+
+When running docusaurus locally in develop mode, you will need to run `npm run
+prebuild` in the `docs` folder to ensure this works.
+</Note>
+
+#### Using a jargon term
+
+Once you have created a jargon term, you can use it by _emphasising_ it in your markdown content.
+
+For example, this markdown:
+
+```md
+I have no idea what _mdx_ is.
+```
+
+Will render as:
+
+I have no idea what _mdx_ is.
+
+The jargon term will be turned into a button that you can click to reveal the meaning of the term.
+
+<Tip>
+#### Jargon terms are case-insensitive
+You can write _mdx_, _MDX_, or even _mDx_, they will all trigger rendering the `mdx` jargon term.
+</Tip>
+
+#### List of jargon terms
+
+The following jargon terms are currently available for use in your markdown content:
+
+<JargonTerms />
+
+### Terminology
+
+#### Creating a terminology page
+
+To create a new terminology page, create a folder under `/docs/docs/reference/terminology`.  
+The name of the folder should follow [the same rules as any folders under
+`docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
+`0-9`, and `-`.
+
+Then, add a `readme.mdx` file to the folder as you would for any documentation page.
+
+#### Terminology properties
+
+Terminology terms have the following properties that are used to render them on the page:
+
+- `title`
+  - **description**: The text used when displaying the terminology link
+  - **default**: The front matter `title` value
+- `term`
+  - **description**: The term that will trigger rendering the terminology link when emphasised
+  - **default**: The file's _lowercased_ basename with dashed replaced by spaces (`core-service` becomes `core service`)
+  - **custom**: The front matter `term` value
+- `aliases`
+  - **description**: A list of additional terms that will trigger rendering the terminology link when emphasised.
+  - **default**: none
+  - **custom**: The front matter `aliases` value (an array of strings)
+
+Below is an example:
+
+```md title="docs/docs/jargon/mdx.md"
+---
+title: Core Service
+aliases:
+  - core
+tags:
+  - core
+---
+
+The **Morio Core Service** (core) sits at the root of any Morio deployment and is
+responsible for [orchestration](#orchestration), [configuration
+resolution](#configuration-resolution), and [clustering](#clustering).
+
+To learn more, visit [the Core Service guide](/docs/guides/services/core).
+```
+
+#### Using a terminology term
+
+Once you have created a terminology term, you can use it by _emphasising_ the page title in your markdown content.
+This will turn the terminology term into a link that leads to the terminology page:
+
+```md
+I want to learn more about _core_. Is it the same as the _core service_?
+```
+
+Will render as:
+
+I want to learn more about _core_. Is it the same as the _core service_?
+
+<Tip>
+#### Terminology terms are case-insensitive
+You can write _core_, _CORE_, or even _cORe_, they will all trigger rendering the `core` terminology link.
+</Tip>
+
+#### List of terminology pages
+
+The following terminology pages are currently available for use in your markdown content:
+
+<TerminologyTerms />
+
+## Includes
+
+Sometimes, you may find yourself repeating the same information on various
+documentation pages. You could create a page for it and link to it, but
+perhaps it's more elegant to inline the information in the page.
+
+In a case like this, you can use an include. This allows you import _MDX_
+content into your documentation page.
+
+### Creating an include page
+
+To create an include page, add the page to the <RepoFile>docs/includes</RepoFile> folder in the _monorepo_.
+
+Unlike the <RepoFile>docs/docs</RepoFile> folder where we rely on folder
+structure, all files should be in the same folder.
+
+As such, you should give it a name that conveys the intent of the include.
+As a practical example, the difference between the built container images for
+the development environment and production is something that is relevant on
+various documentation pages.
+
+So, the documentation is kept in the <RepoFile>docs/includes/docker-env-diffs.mdx</RepoFile> file.
+
+### Importing and using the include file
+
+Once created, you can import the file as any other import in your `readme.mdx`:
+
+```mdx
+---
+title: Example of how to use an include
+---
+
+import DockerBuildEnvDiffs from '@site/includes/docker-env-diffs.mdx'
+
+Some (optinoal) other content here.
+
+<DockerBuildEnvDiffs />
+```
+
+A few things to note:
+
+- The `import` statement should be the first thing after the front matter
+- Use the `@site/includes/` prefix to import include files.
+- Since we are using the default export, the name you give it can by anything (here we used `DockerBuildEndDiffs`
+- This will be used as a React component, so you **must** pick a name that starts with a capital letter
+- Output the info as a React component: `<DockerBuildEnvDiffs />`
+
+See <RepoFile>docs/reference/contributors/monorepo/run-scripts/build-api/readme.mdx</RepoFile> for an example.
+
+## Tips for writing great documentation
+
+Here is some friendly advice to help you write great documentation:
+
+#### Don't use gen-AI
+
+Writing yourself will make you a better writer.
+
+<Note>
+We take pride in the fact that all of Morio's documentation is written by actual human beings.  
+Please respect that and don't reach for ChatGPT or whatever the generative AI flavour of the day is.
+</Note>
+
+#### Write now, edit later
+
+Just write. Don't worry about grammar or making mistakes. It's fine.
+
+It doesn't have to be perfect, it just needs to be written down.
+
+Anybody can edit to improve form or structure,
+and the [`spellcheck`](/docs/reference/contributors/monorepo/run-scripts/spellcheck)
+and [`ci:spellcheck`](/docs/reference/contributors/monorepo/run-scripts/ci-spellcheck)
+_run scripts_ are there to help with spelling.
+
+#### Use plain language
+
+Explain things in simple words. Write short plain sentences.
+Use headings and paragraphs to structure your writing.
+
+#### Get to the point
+
+Say what you need to say -- no more, no less.  
+Make your text as short as possible; your documentation will be better this way.
+
+#### Use meaningful titles and hyperlinks
+
+Page titles should be meaningful without context. They are the main result in
+search, so strive to make them meaningful and informative on their own.
+
+That often means making your titles a lot longer, which doesn't work well in
+the navigation sidebar. You can use the `sidebar_label` key in front matter to
+set a different title to use in the sidebar.:
+
+To a lesser extend, the same advice applies to links:
+
+- Bad: You can find the info [here][yt].
+- Good: You can find the info [by watching this YouTube video with 1.3 billion views][yt]
+
+[yt]: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+
+#### Define jargon
+
+Don't use jargon without explaining it.
+
+#### More advice
+
+The ["Technical Writing From Google" course](https://developers.google.com/tech-writing/one) comes highly recommended.
+
+Remember that the worst possible documentation is the documentation that is never written.
+
+## Running the documentation site locally
+
+<Note>
+We assume you have git and NodeJS installed.
+</Note>
+
+To run a local instance of the documentation site -- highly recommended if
+you're looking to make non-trivial changes to the documentation -- you can
+follow these steps:
+
+```sh title="Terminal"
+git clone git@github.com:certeu/morio.git
+cd morio
+npm install
+cd docs
+npm run start
+```
+
+In other words:
+
+- Clone the repository
+- Install dependencies
+- Run `npm run start` in the `docs` folder
+
+The docs site will now be running on http://localhost:3000 and any changes you
+make will be hot-reloaded.
+
+<Warning>
+#### Untested on Windows
+
+While we support Microsoft Windows as a platform for the Morio client, no Microsoft Windows is used in the development of Morio.
+If you are on Windows, your mileage may vary.
+</Warning>
+
+## Redoc Integration
+
+We generate our API reference documentation by
+using [redocusaurus](https://github.com/rohit-gohri/redocusaurus) which
+integrates [redoc](https://github.com/redocly/redoc)
+in [docusaurus](https://docusaurus.io/).
+
+The configuration is part of <RepoFile>docs/docusaurus.config.js</RepoFile> and
+it adds these two routes:
+
+- [/oas-api](/oas-api) for the Management API
+- [/oas-core](/oas-core) for the Core API
+
+[netlify]: https://www.netlify.com/
+[docusaurus]: https://docusaurus.io/
+[docs]: https://github.com/certeu/morio/tree/develop/docs/docs
+[repo]: https://github.com/certeu/morio

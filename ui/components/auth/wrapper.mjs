@@ -32,7 +32,7 @@ const checkRole = (role = false, requiredRole = 'user') => {
   return false
 }
 
-const ephemeralUrlList = ['/', '/setup', '/setup/upload']
+const ephemeralUrlList = ['/', '/setup', '/setup/upload', '/setup/preseed']
 
 export const AuthWrapper = ({ role = 'user', account, setAccount, children, logout }) => {
   const [user, setUser] = useState(false)

@@ -24,6 +24,8 @@ moriod/etc/morio/moriod/version.env
 # Auto-generated scripts
 core/run-dev-container.sh
 core/run-prod-container.sh
+core/run-test-container.sh
+api/run-test-container.sh
 
 # Test artifacts
 core/coverage
@@ -70,3 +72,10 @@ yarn-error.log*
 
 # backup files for aspell
 *.bak
+
+# Playwright
+ui/.test-results/
+ui/playwright-report/
+ui/blob-report/
+ui/playwright/.cache/
+

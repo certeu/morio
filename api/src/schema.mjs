@@ -1,4 +1,4 @@
-import { Joi, validate as sharedValidate, settings, uuid, mrt } from '#shared/schema'
+import { Joi, validate as sharedValidate, settings, preseed, uuid, mrt } from '#shared/schema'
 import { roles } from '#config/roles'
 
 /*
@@ -29,6 +29,7 @@ export const schema = {
    * Requests
    */
   'req.setup': settings,
+  'req.preseed': preseed,
   'req.account.create': Joi.object({
     about,
     provider: provider.required(),
@@ -177,4 +178,6 @@ export const schema = {
  * @param {object} input - The input to validate
  * @retrn {object} result - The validation result
  */
-export const validate = async (key, input) => await sharedValidate(key, input, schema)
+export async function validate(key, input) {
+  return await sharedValidate(key, input, schema)
+}

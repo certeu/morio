@@ -133,7 +133,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
               //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
               '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
               // Point to root CA (will only work after CA is initialized)
-              '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+              '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
             ]
       ),
     },

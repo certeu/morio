@@ -1,8 +1,10 @@
 import { pkg } from './json-loader.mjs'
 import path from 'path'
+import "dotenv/config"
+import process from "node:process"
 
 /*
- * A little helper file with named exports to get access to a bunch of configurartion values.
+ * A little helper file with named exports to get access to a bunch of configuration values.
  *
  * This provides the following named exports:
  *
@@ -15,7 +17,19 @@ import path from 'path'
  *  - MORIO_VERSION
  *  - MORIO_WEBSITE
  *  - MORIO_WEBSITE_URL
+ *
+ *  In addition, the following named exports can be changed
+ *  by setting an environment variable with the same name:
+ *
+ *  - MORIO_DOCKER_LOG_DRIVER
+ *  -  MORIO_DOCKER_ADD_HOST
  */
+
+/*
+ * Environment variables
+ */
+export const MORIO_DOCKER_LOG_DRIVER = process.env.MORIO_DOCKER_LOG_DRIVER || 'journald'
+export const MORIO_DOCKER_ADD_HOST = process.env.MORIO_DOCKER_ADD_HOST || false
 
 /*
  * About Morio

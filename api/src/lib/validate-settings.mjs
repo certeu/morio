@@ -10,7 +10,7 @@ import { utils, log } from './utils.mjs'
  * @param {object} newSettings - The settings to validate
  * @retrun {object} report - An object detailing the results of the validation
  */
-export const validateSettings = async (newSettings) => {
+export async function validateSettings(newSettings) {
   /*
    * Set up the report skeleton that we will return
    */
@@ -131,7 +131,6 @@ export const validateSettings = async (newSettings) => {
                 report.warnings.push(
                   `Node ${i} runs Morio, but is not in ephemeral mode, its settings would be overwritten`
                 )
-                report.deployable = false
               } else {
                 report.errors.push(`Node ${i} does not seem to run Morio`)
                 abort()

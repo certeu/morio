@@ -1,6 +1,7 @@
 import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
+import { loadPreseededSettings } from '#shared/loaders'
 
 /**
  * This core controller provides access to morio core
@@ -16,7 +17,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerData = async (req, res, path) => {
+Controller.prototype.getDockerData = async function (req, res, path) {
   const [status, result] = await utils.coreClient.get(`/docker/${path}`)
 
   return res.status(status).send(result)
@@ -29,7 +30,7 @@ Controller.prototype.getDockerData = async (req, res, path) => {
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.getContainerData = async (req, res, path = false) => {
+Controller.prototype.getContainerData = async function (req, res, path = false) {
   const [status, result] = await utils.coreClient.get(
     `/docker/containers/${req.params.id}${path ? '/' + path : ''}`
   )
@@ -44,7 +45,7 @@ Controller.prototype.getContainerData = async (req, res, path = false) => {
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.updateContainer = async (req, res, path) => {
+Controller.prototype.updateContainer = async function (req, res, path) {
   const [status, result] = await utils.coreClient.put(`/docker/containers/${req.params.id}/${path}`)
 
   return res.status(status).send(result)
@@ -57,7 +58,7 @@ Controller.prototype.updateContainer = async (req, res, path) => {
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.createDockerResource = async (req, res, path) => {
+Controller.prototype.createDockerResource = async function (req, res, path) {
   const [status, result] = await utils.coreClient.post(`/docker/${path}`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
@@ -69,7 +70,7 @@ Controller.prototype.createDockerResource = async (req, res, path) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.createCertificate = async (req, res) => {
+Controller.prototype.createCertificate = async function (req, res) {
   const [status, result] = await utils.coreClient.post(`/ca/certificate`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
@@ -82,7 +83,7 @@ Controller.prototype.createCertificate = async (req, res) => {
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerImageData = async (req, res, path = false) => {
+Controller.prototype.getDockerImageData = async function (req, res, path = false) {
   const [status, result] = await utils.coreClient.get(
     `/docker/images/${req.params.id}${path ? '/' + path : ''}`
   )
@@ -97,7 +98,7 @@ Controller.prototype.getDockerImageData = async (req, res, path = false) => {
  * @param {object} res - The response object from Express
  * @param {string} path - The core api path
  */
-Controller.prototype.getDockerNetworkData = async (req, res, path = false) => {
+Controller.prototype.getDockerNetworkData = async function (req, res, path = false) {
   const [status, result] = await utils.coreClient.get(
     `/docker/networks/${req.params.id}${path ? '/' + path : ''}`
   )
@@ -111,7 +112,7 @@ Controller.prototype.getDockerNetworkData = async (req, res, path = false) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.setup = async (req, res) => {
+Controller.prototype.setup = async function (req, res) {
   /*
    * This route is only accessible when running in ephemeral mode
    */
@@ -161,12 +162,83 @@ Controller.prototype.setup = async (req, res) => {
 }
 
 /**
+ * Handles the initial preseeding
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.preseed = async function (req, res) {
+  /*
+   * This route is only accessible when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
+
+  /*
+   * Validate preseed request against schema, but strip headers from body first
+   */
+  const body = { ...req.body }
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.preseed`, body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
+  /*
+   * Load the preseeded settings so we can validate them
+   */
+  const settings = await loadPreseededSettings(body, log, '/tmp')
+  if (!settings) return utils.sendErrorResponse(res, 'morio.api.preseed.failed', req.url)
+
+  /*
+   * Validate settings against the schema
+   */
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
+
+  /*
+   * Validate settings are deployable
+   */
+  const report = await validateSettings(settings)
+
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid)
+    return utils.sendErrorResponse(
+      res,
+      'morio.api.settings.invalid',
+      req.url,
+      report.errors ? { validation_errors: report.errors } : false
+    )
+
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
+
+  /*
+   * Settings are valid and deployable, pass them to core
+   */
+  const [status, result] = await utils.coreClient.post(`/preseed`, bodyPlusHeaders(req))
+
+  return res.status(status).send(result)
+}
+
+/**
  * Deploys new settings
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.settings = async (req, res) => {
+Controller.prototype.settings = async function (req, res) {
   /*
    * This route is not accessible when running in ephemeral mode
    */
@@ -205,7 +277,7 @@ Controller.prototype.settings = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.streamServiceLogs = async (req, res) => {
+Controller.prototype.streamServiceLogs = async function (req, res) {
   return await utils.coreClient.streamGet(`/logs/${req.params.service}`, res)
 }
 
@@ -216,26 +288,11 @@ Controller.prototype.streamServiceLogs = async (req, res) => {
  * @param {object} res - The response object from Express
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
-Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
+Controller.prototype.getClientPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/clients/${type}/defaults`)
 
   return res.status(status).send(result)
 }
-
-/**
- * Loads the current config from core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-//Controller.prototype.getConfig = async (req, res) => {
-//  const [status, result] = await utils.coreClient.get(`/config`)
-//
-//  if (result.cluster) {
-//    utils.setConfig(result)
-//    return res.status(status).send(result)
-//  } else return res.status(500).send()
-//}
 
 /**
  * Loads the current (sanitized) settings
@@ -243,7 +300,9 @@ Controller.prototype.getClientPackageDefaults = async (req, res, type) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitizedSettings())
+Controller.prototype.getSettings = async function (req, res) {
+  return res.send(utils.getSanitizedSettings())
+}
 
 /**
  * Loads the current presets from core
@@ -251,7 +310,9 @@ Controller.prototype.getSettings = async (req, res) => res.send(utils.getSanitiz
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getPresets = async (req, res) => res.send(utils.getPresets())
+Controller.prototype.getPresets = async function (req, res) {
+  return res.send(utils.getPresets())
+}
 
 /**
  * Submits a build request for a client package to core
@@ -260,7 +321,7 @@ Controller.prototype.getPresets = async (req, res) => res.send(utils.getPresets(
  * @param {object} res - The response object from Express
  * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
-Controller.prototype.buildClientPackage = async (req, res, type) => {
+Controller.prototype.buildClientPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
     `/pkgs/clients/${type}/build`,
     bodyPlusHeaders(req)
@@ -275,7 +336,7 @@ Controller.prototype.buildClientPackage = async (req, res, type) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.joinCluster = async (req, res) => {
+Controller.prototype.joinCluster = async function (req, res) {
   log.info('Received request to join cluster')
   const [status, result] = await utils.coreClient.post(`/cluster/join`, bodyPlusHeaders(req))
 
@@ -290,7 +351,7 @@ Controller.prototype.joinCluster = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.reload = async (req, res) => {
+Controller.prototype.reload = async function (req, res) {
   /*
    * We will not wait for the reload event here as doing so can
    * introduce a deadlock where core is waiting for the response to
@@ -305,6 +366,72 @@ Controller.prototype.reload = async (req, res) => {
    * Reload, but don't wait for it.
    */
   return reload()
+}
+
+/**
+ * (soft) restart core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.restart = async function (req, res) {
+  log.info('Received request to do a soft restart')
+  const [status, result] = await utils.coreClient.get(`/restart`)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Reseed core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.reseed = async function (req, res) {
+  log.info('Received request to reseed')
+  /*
+   * Load the preseeded settings so we can validate them
+   */
+  const settings = await loadPreseededSettings(utils.getSettings('preseed'), log)
+
+  /*
+   * Validate settings against the schema
+   */
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
+
+  /*
+   * Validate settings are deployable
+   */
+  const report = await validateSettings(settings)
+
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid)
+    return utils.sendErrorResponse(
+      res,
+      'morio.api.settings.invalid',
+      req.url,
+      report.errors ? { validation_errors: report.errors } : false
+    )
+
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
+
+  /*
+   * Looks good, pass the request to core
+   */
+  const [status, result] = await utils.coreClient.get(`/reseed`)
+
+  return res.status(status).send(result)
 }
 
 const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })

@@ -1,7 +1,11 @@
 import { CloseIcon } from './icons.js'
 
-export const ModalWrapper = ({ children = null, bare = false, keepOpenOnClick = false, closeHandler }) => {
-
+export const ModalWrapper = ({
+  children = null,
+  bare = false,
+  keepOpenOnClick = false,
+  closeHandler,
+}) => {
   const close = (evt) => {
     // Only process the first event
     if (evt?.event) evt.event.stopPropagation()

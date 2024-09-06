@@ -57,7 +57,7 @@ export const service = {
 /*
  * Loads current revision (from disk)
  */
-export const loadRevision = async () => {
+export async function loadRevision() {
   const Revision = Number(await readFile('/etc/morio/dbuilder/revision'))
 
   return Revision

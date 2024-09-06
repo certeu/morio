@@ -35,6 +35,14 @@ export const errors = {
       'This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.',
   },
   /*
+   * Failed to preseed the settings (load the preseed files)
+   */
+  'morio.api.preseed.failed': {
+    status: 400,
+    title: 'Unable to preseed the Morio settings',
+    detail: 'We were unable to resolve the preseed settings into a proper settings object.',
+  },
+  /*
    * Status issues coming from core
    */
   'morio.api.core.status.503': {
@@ -49,7 +57,16 @@ export const errors = {
     status: 503,
     title: 'Unable to load data from Morio Core',
     detail:
-      'When reaching out to Morio Core, we did not receive a response, idicating that core may be down.',
+      'When reaching out to Morio Core, we did not receive a response, indicating that core may be down.',
+  },
+  /*
+   * Status issues coming from core when it rejects connections
+   */
+  'morio.api.core.status.false': {
+    status: 503,
+    title: 'Unable to connect to Morio Core',
+    detail:
+      'When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.',
   },
   /*
    * Status issues coming from core

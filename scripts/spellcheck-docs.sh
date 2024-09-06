@@ -8,13 +8,13 @@ function spellcheck () {
 
 shopt -s globstar
 cd $MORIO_GIT_ROOT/docs
-for page in $MORIO_GIT_ROOT/docs/docs/**/readme.md; do
+for page in $MORIO_GIT_ROOT/docs/docs/**/readme.mdx; do
   spellcheck $page
 done
-for page in $MORIO_GIT_ROOT/docs/jargon/*.md; do
+for page in $MORIO_GIT_ROOT/docs/jargon/*.mdx; do
   spellcheck $page
 done
-for page in $MORIO_GIT_ROOT/docs/blog/*/index.md; do
+for page in $MORIO_GIT_ROOT/docs/blog/*/index.mdx; do
   spellcheck $page
 done
 
