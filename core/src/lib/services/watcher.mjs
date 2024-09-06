@@ -92,7 +92,7 @@ async function ensureLocalPrerequisites() {
   if (config) {
     config.heartbeat.heartbeat.monitors = [
       ...generateMonitorList(config.internal_monitors),
-      ...generateMonitorList(utils.getSettings('watcher.monitors'), {}),
+      ...generateMonitorList(utils.getSettings('watcher.monitors', {})),
     ]
     const file = '/etc/morio/watcher/heartbeat.yml'
     log.debug('Watcher: Creating config file')

@@ -72,7 +72,6 @@ function fromRepo(url) {
  * @param {array} found - Found files
  */
 async function globFromRepo(pattern, repo, gitroot) {
-  const folder = sanitizeGitFolder(repo)
   const found = await globDir(`${gitroot}/${sanitizeGitFolder(repo)}`, pattern)
 
   const data = []
@@ -147,7 +146,7 @@ async function loadPreseedBaseFile(preseed, gitroot, log) {
   if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.base === 'string') {
-    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot, log)
+    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot)
     else return await loadPreseedFileFromUrl(preseed.base)
   }
   if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
@@ -256,10 +255,9 @@ async function loadPreseedFileFromGitlab(config) {
  * @param {object} config - The preseed file config
  * @param {object} preseed - The preseed settings
  * @param {string} gitroot - Path to the root where git repos are stored
- * @param {object} log - A logger instance
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedFileFromRepo(config, preseed, gitroot, log) {
+async function loadPreseedFileFromRepo(config, preseed, gitroot) {
   const chunks = config.slice(4).split('@')
   const repo = chunks[1]
     ? chunks[1]
@@ -293,49 +291,6 @@ async function loadPreseedFileFromUrl(config) {
 }
 
 /**
- * Helper method to load a preseed overlay file
- *
- * @param {object} preseed - The preseed settings
- * @param {string} type - One of 'base' or 'overlay'
- * @param {integer} index - Index in the overlays array
- * @return {object} settings - The loaded settings
- */
-async function loadPreseedFile(preseed, type, index) {
-  const config = (type === 'base')
-    ? preseed.base
-    : Array.isArray(preseed.overlays)
-      ? preseed.overlays[index]
-      : preseed.overlays
-
-  if (config.gitlab) return await loadPreseedFileFromGitlab(config)
-  if (config.github) return await loadPreseedFileFromGithub(config)
-  if (typeof preseed.base === 'string' || preseed.url) return await loadPreseedFileFromUrl(config)
-
-  else if (type === 'overlay') {
-    /*
-     * Loading an overlay
-     */
-    if (base.gitlab) {
-      if (typeof config === 'string')
-        return await loadPreseedFileFromGitlab({ gitlab: { ...base.gitlab, file_path: config } })
-      else return await loadPreseedFileFromGitlab({ ...base, ...config })
-    }
-    if (base.github) {
-      if (typeof config === 'string')
-        return await loadPreseedFileFromGithub({ github: { ...base.github, file_path: config } })
-      else return await loadPreseedFileFromGithub({ ...base, ...config })
-    }
-    if (typeof base === 'string') return await loadPreseedFileFromUrl(config)
-    if (base.url) {
-      if (typeof config === 'string') return await loadPreseedFileFromUrl({ ...base, url: config })
-      else return await loadPreseedFileFromUrl({ ...base, ...config })
-    }
-  }
-
-  return false
-}
-
-/**
  * Helper method to load a preseed overlay
  *
  * @param {object|string} overlay - The preseed settings for this overlay
@@ -346,7 +301,7 @@ async function loadPreseedFile(preseed, type, index) {
  */
 async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
   if (typeof overlay === 'string') {
-    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot, log)
+    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot)
     const api = fromApi(overlay)
     if (api === 'github') return await loadPreseedFileFromGithub({
       github: {
@@ -381,9 +336,9 @@ async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
  */
 async function loadPreseedOverlays(preseed, gitroot, log) {
 
-  if (!preseed?.overlays) return overlays
-
   const overlays = []
+
+  if (!preseed?.overlays) return overlays
 
   /*
    * Handle string
@@ -433,10 +388,7 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
  * @return {string} content - The file contents
  */
 async function readFileFromRepo(id, path, gitroot) {
-  const dir = sanitizeGitFolder(id)
-  const file = `${gitroot}/${dir}/${path}`
-
-  return await readFile(`${gitroot}/${dir}/${path}`)
+  return await readFile(`${gitroot}/${sanitizeGitFolder(id)}/${path}`)
 }
 
 /**

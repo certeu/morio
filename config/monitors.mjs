@@ -6,11 +6,6 @@
 const imd = { schedule: '@every 30s' }
 
 /*
- * Helpers to trust the internal CA
- */
-const ca = [ "/usr/share/heartbeat/tls/tls-ca.pem" ]
-
-/*
  * Helpers to trust the internal CA, but provce the entire ssl config
  */
 const ssl = { ssl: { certificate_authorities: [ "/usr/share/heartbeat/tls/tls-ca.pem" ] } }

@@ -117,6 +117,8 @@ export async function get(url, raw = false, log = false) {
     if (log) console.log({ url, err })
   }
 
+  if (!response) return [false, false]
+
   /*
    * Try parsing the body as JSON, fallback to text
    */
@@ -131,7 +133,7 @@ export async function get(url, raw = false, log = false) {
     }
   }
 
-  return [response?.status || false, body]
+  return [response.status || false, body]
 }
 
 /*
