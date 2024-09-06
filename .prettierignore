@@ -4,3 +4,8 @@ docs/.docusaurus/*
 clients/linux/etc/morio/audit/module-templates.d/*
 clients/linux/etc/morio/logs/module-templates.d/*
 clients/linux/etc/morio/metrics/module-templates.d/*
+# Need to setup proper remark linting one day.
+# Something like: "remark . --frail --output --quiet && remark . --ext mdx --frail --output --quiet --use remark-mdx && prettier . --log-level warn --write && xo --fix"
+docs/docs/*
+docs/jargon/*
+docs/includes/*

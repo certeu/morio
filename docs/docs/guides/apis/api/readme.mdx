@@ -75,13 +75,13 @@ by Morio for HTTP-based access. In practical terms, HTTP-based authentication
 in Morio is backed by an _identity provider_, of which there are currently four
 supported types:
 
-- [The `mrt` identity provider](/docs/guides/idps#mrt) lets you authenticate
+- [The `mrt` identity provider](/docs/guides/settings/idps#mrt) lets you authenticate
   via **the Morio Root Token**
-- [The `apikey` identity provider](/docs/guides/idps#apikey) lets you
+- [The `apikey` identity provider](/docs/guides/settings/idps#apikey) lets you
   authenticate via an **API Key**
-- [The `local` identity provider](/docs/guides/idps#local) lets you
+- [The `local` identity provider](/docs/guides/settings/idps#local) lets you
   authenticate via a **Local Morio Account**
-- [The `ldap` identity provider](/docs/guides/idps#ldap) lets you
+- [The `ldap` identity provider](/docs/guides/settings/idps#ldap) lets you
   authenticate using an **LDAP Account**, including LDAP-compatible backends
   such as Active Directory
 
@@ -90,8 +90,8 @@ supported types:
 Use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
 That JWT can then be used in subsequent API calls to authenticate them.
 
-The [`/login` endpoint](/docs/guides/idps#mrt)) documentation includes examples for each identity providers listed above.
-The response from the API will include a `jwt` key that holds the JWT. Below is an example using [the `local` identity provider](/docs/guides/idps#local):
+The [`/login` endpoint](/docs/guides/settings/idps#mrt)) documentation includes examples for each identity providers listed above.
+The response from the API will include a `jwt` key that holds the JWT. Below is an example using [the `local` identity provider](/docs/guides/settings/idps#local):
 
 ```json title="API Response Body"
 {

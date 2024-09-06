@@ -1,7 +1,7 @@
 ---
-title: 'Morio Settings: iam'
-sidebar_label: iam
-toc_max_heading_level: 6
+title: 'Morio Settings: iam' # skip-spellcheck
+sidebar_label: iam # skip-spellcheck
+toc_max_heading_level: 6 # skip-spellcheck
 ---
 
 The `iam` settings control **identity and access management** in Morio.
@@ -38,7 +38,7 @@ There are two two types:
 
 ### The Morio root token _just works_
 
-The [Morio root token provider (mrt)](/docs/guides/idps/#mrt) is enabled by
+The [Morio root token provider (mrt)](/docs/guides/settings/idps/#mrt) is enabled by
 default and does not require configuration. In other words, authenticating
 with the _Morio root token_ just works, even if not providers are set up.
 
@@ -51,7 +51,7 @@ flag](/docs/reference/flags/disable_idp_mrt/).
 
 ### `iam.providers.apikey`
 
-<Label>Optional</Label> This configures [the `apikey` identity provider](/docs/guides/idps/#apikey).
+<Label>Optional</Label> This configures [the `apikey` identity provider](/docs/guides/settings/idps/#apikey).
 
 #### `iam.providers.apikey.provider`
 
@@ -89,7 +89,7 @@ iam:
 
 ### `iam.providers.local`
 
-<Label>Optional</Label> This configures [the `local` identity provider](/docs/guides/idps/#local).
+<Label>Optional</Label> This configures [the `local` identity provider](/docs/guides/settings/idps/#local).
 
 #### `iam.providers.local.provider`
 
@@ -132,7 +132,7 @@ This allows you to set up multiple identity providers of this type.
 
 ### `iam.providers.[ldap-id]`
 
-<Label>Optional</Label> This configures [an `ldap` identity provider](/docs/guides/idps/#ldap).
+<Label>Optional</Label> This configures [an `ldap` identity provider](/docs/guides/settings/idps/#ldap).
 
 <Note>
 
@@ -299,11 +299,13 @@ iam:
 ```
 
 <Note>
+
 LDAP servers typically do not allow an anonymous search.
 So we need to bind to the LDAP server to be able to find the user.
 This `bindDN` is the LDAP-equivalent of the username used for that initial bind.
 You should probably create a dedicated service account for this that does not
 have any privileges apart from looking up information.
+
 </Note>
 
 ##### `iam.providers.[ldap-id].server.bindCredentials`
@@ -392,7 +394,7 @@ regular expression with the `regex` key, or an explicit list with the `list` key
 When the expression matches the attribute value, **or** it is included in the list,
 that role will be assigned to the user.
 
-This system applies to all identity providers, giving you a lot of flexbility
+This system applies to all identity providers, giving you a lot of flexibility
 to define who gets what role(s).
 
 <Note compact>We will use the `user` role in our examples below</Note>
@@ -453,7 +455,7 @@ iam:
 
 <Note>
 
-In the example above, the regex `.` matches anyrthing. So every user who can
+In the example above, the regex `.` matches anything. So every user who can
 successfully authenticate to LDAP will get the `user` role.
 
 </Note>

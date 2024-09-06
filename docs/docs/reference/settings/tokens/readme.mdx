@@ -16,7 +16,7 @@ All of them are <Label>optional</Label>.
 <Label>Optional</Label>
 Allows you to create variables that you can then re-use throughout your configuration.
 
-To use them, use [mustache syntax](https://mustache.github.io/):
+To use them, use [Mustache syntax](https://mustache.github.io/):
 
 - Use double curly braces for default replacement: `"{{ MY_VAR }}"`
 - Use triple curly braces to suppress HTML-escaping of the value: `"{{{ MY_HTML_VAR }}}"`
@@ -43,9 +43,9 @@ throughout your configuration.
 Secrets behave exactly like variables, but have two important differences:
 
 - They will be encrypted
-- They support Morio's [Hashicarp Vault integration](/docs/guides/integrations/vault)
+- They support Morio's [Hashicorp Vault integration](/docs/guides/settings/integrations/vault)
 
-To use them, use [mustache syntax](https://mustache.github.io/):
+To use them, use [Mustache syntax](https://mustache.github.io/):
 
 - Use double curly braces for default replacement: `"{{ MY_VAR }}"`
 - Use triple curly braces to suppress HTML-escaping of the value: `"{{{ MY_HTML_VAR }}}"`
@@ -69,13 +69,13 @@ Morio will encrypt this value at rest so that it looks something like this:
 ```yaml
 tokens:
   secrets:
-    NOBODY_CAN_KNOW_THIS: FIXME
+    NOBODY_CAN_KNOW_THIS: "{ iv: \"9989922c677e1d4d0f9a9d1556ac7e7d\", ct: \"4e3fafac2f4febb1c40b7cced3ddcd21\" }"
 ```
 
 </TabItem>
 <TabItem value="b" label="Hashicorp Vault">
 
-To defer to [the Hashicarp Vault integration](/docs/guides/integrations/vault),
+To defer to [the Hashicorp Vault integration](/docs/guides/settings/integrations/vault),
 make your value an object with key `vault` and use the following syntax for its
 value:
 

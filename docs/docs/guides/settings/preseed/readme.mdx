@@ -27,12 +27,12 @@ This is why we implemented the idea of the _base settings_ and one or more _over
 This allows you to create a modular Morio configuration.
 
 We'll typically store the node info in the base settings, and this would be
-different for every envrionment. Then, we add overlays like various identity
+different for every environment. Then, we add overlays like various identity
 providers, internal certificates that should be trusted and so on.
 
 Obviously, you know best what works in your environment. But understanding the
 reasons behind these preseeding settings will hopefully help you make the most
-of this poweful feature.
+of this powerful feature.
 
 ## Understanding overlays
 
@@ -47,7 +47,7 @@ To understand this process, we will use an example with fictional values.
   <TabItem value="a" label="base.yaml" default>
 
 The base settings file, whether it's provided as YAML or JSON will be
-converted to a Javascript object that will form the basis of our settings.
+converted to a JavaScript object that will form the basis of our settings.
 
 ```yaml title="Provided YAML base"
 key1: value1
@@ -221,7 +221,7 @@ curl -k -H "Content-Type: application/json" -d@preseed.json https://example.mori
 ```
 
 This will be sufficient to bootstrap Morio, assuming
-`base.yaml` in the repo holds valid settings.
+`base.yaml` in the repository holds valid settings.
 
 ### Example base settings file
 
@@ -294,7 +294,7 @@ iam.providers.ad:
 <TabItem value="c" label="Secrets overlay">
 
 If you do not have Hashicorp Vault or OpenBao available, you can pre-encrypt your secrets via the Morio API or UI.
-Then, you can savely commit them to git:
+Then, you can safely commit them to git:
 
 ```yaml
 secrets:
@@ -303,7 +303,9 @@ secrets:
 
   </TabItem>
 <TabItem value="d" label="Overlay using Vault">
+
 If you have Hashicorp Vault or OpenBao available, you can defer to it for secrets storage:
+
 ```yaml
 secrets:
   AD_PASSWORD:

@@ -3,7 +3,7 @@ title: 'Morio Settings: cluster'
 sidebar_label: cluster
 ---
 
-The `cluster` settings hold information about the nodes that make up your Morio cluser.
+The `cluster` settings hold information about the nodes that make up your Morio cluster.
 
 Whether you are running a _standalone node_ or several _broker nodes_ or
 _flanking nodes_, the `cluster` settings hold this information.
@@ -51,7 +51,7 @@ cluster:
 ## `cluster.fqdn`
 
 <Label style="danger">Mandatory</Label> when there is **more than 1 broker node**.
-<Label>Pptional</Label> when running **a single broker node**
+<Label>Optional</Label> when running **a single broker node**
 
 This is an _FQDN_ that **must** resolve to the IP addresses of all broker nodes (a round-robin DNS record).
 This will be used as the _cluster FQDN_ and it is what Morio clients will attempt to connect to.

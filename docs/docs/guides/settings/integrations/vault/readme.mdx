@@ -8,7 +8,7 @@ import OpenBao from '@site/includes/vault-openbao.mdx'
 
 <!-- endspellcheck-skip -->
 
-Morio con be integrated with [Hashicord Vault](https://www.vaultproject.io/).
+Morio con be integrated with [Hashicorp Vault](https://www.vaultproject.io/).
 When doing so, Morio can be instructed to read secrets from Vault, rather
 then store them locally as encrypted data.
 
@@ -21,7 +21,7 @@ To make this happen, you need to configure both Morio van Vault.
 ## Morio configuration
 
 In the morio settings, you need a `vault` key. At the very minimum you need a `url`.
-The other values are set to their defaults in htis example, so you can leave them out if they match your setup.
+The other values are set to their defaults in this example, so you can leave them out if they match your setup.
 
 ```yaml
 vault:
@@ -32,7 +32,7 @@ vault:
   verify_certificate: true
 ```
 
-That't is. You're done. Now you need to configure Vault.
+That's is. You're done. Now you need to configure Vault.
 
 ## Vault configuration
 
@@ -153,7 +153,7 @@ curl \
 | `MORIO_PUBLIC_KEY`       | The public key of your Morio instance | See tip below                                     |
 
 <Tip>
-The public key should go on a single line, with linebreaks represented by `\n`. Something like this:
+The public key should go on a single line, with line breaks represented by `\n`. Something like this:
 
 ```
 "-----BEGIN PUBLIC KEY-----\nMIICIjANBgkqhki ...  owbyFirECAwEAAQ==\n-----END PUBLIC KEY-----\n"

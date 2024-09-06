@@ -1,7 +1,7 @@
 ---
 title: 'Morio Settings: preseed'
-sidebar_label: preseed
-toc_max_heading_level: 6
+sidebar_label: preseed # skip-spellcheck
+toc_max_heading_level: 6 # skip-spellcheck
 ---
 
 The `preseed` settings hold information to _preseed_ Morio. It is
@@ -26,7 +26,7 @@ This defines one or more git repositories that Morio should clone locally so the
 
 <Label style="danger">Mandatory</Label>
 When defining a git repository to clone, you must give it an `id`.
-In practice, we utilize the key under the `preseed.git` settings as the `id`.
+In practice, we utilise the key under the `preseed.git` settings as the `id`.
 
 Going forward, we will use `repo` as the example `id`.
 
@@ -428,7 +428,7 @@ preseed:
 ### When `preseed.overlays` is an array
 
 When `preseed.overlays` holds an array, you have more options. When an
-elelent in the array is a string, it supports all the options [listed
+element in the array is a string, it supports all the options [listed
 above](/docs/reference/settings/preseed/#when-preseedoverlays-is-a-string).
 
 In addition, for each element you have the following additional options:
