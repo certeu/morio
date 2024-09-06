@@ -7,17 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Upgraded connector from 8.13.3 to 8.15.0
-- Preseed stuff
-- Vault integration
-- Watcher service
-- Fixed bug in the client CLI options
-- Fixed broker to trust root and intermediate CA certs
-- Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
+### Added
+
+- Support for preseeding
+- Added the new Watcher service
+- Integration with Hashicorp Vault / OpenBao
+- Added preseeding support to UI setup wizard
+- Added a new cluster status page in the UI
+- Added new `/pubkey` and `/pubkey.pem` endpoints to the API
 
 ### Changed
 
-- Updated dependencies in docs site (no breaking changes)
+- Upgraded connector from 8.13.3 to 8.15.0
+- Updated JavaScript dependencies
+- Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
+- Migrated docs content from `.md` to `.mdx`
+- Updated the term style in docs
+
+### Fixed
+
+- Fixed bug in the client CLI options
+- Fixed broker to trust root and intermediate CA certs
+- Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
 
 ## [0.3.0] - 2024-08-08
 
