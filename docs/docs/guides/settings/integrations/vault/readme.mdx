@@ -16,11 +16,11 @@ Morio cannot and will not write to Vault. It will only read secrets from it.
 
 <OpenBao />
 
-To make this happen, you need to configure both Morio van Vault.
+To make this happen, you need to configure both Morio and Vault.
 
 ## Morio configuration
 
-In the morio settings, you need a `vault` key. At the very minimum you need a `url`.
+In the Morio settings, you need a `vault` key. At the very minimum you need a `url`.
 The other values are set to their defaults in this example, so you can leave them out if they match your setup.
 
 ```yaml
@@ -42,11 +42,11 @@ Since the UI does not support everything, we will use examples to do the configu
 In the examples below, you need to substitute the following:
 
 - `VAULT_TOKEN`: Use either the Vault root token, or another token with permissions sufficient for configuring these settings
-- `https://vault.morio.it`: Use the URL to your own Vault instance
+- `https://vault.morio.it`: Use the URL of your own Vault instance
 
 ### Enable the KV secrets engine
 
-This may very well already be active, but just in case: The first thing to do is to enable the `kv` secrets engine:
+This may very well already be active, but just in case: the first thing to do is to enable the `kv` secrets engine:
 
 <Tabs>
 <TabItem value="a" label="Command">
@@ -133,7 +133,7 @@ We will configure the Vault authentication method to trust JSON Web Tokens
 
 <Tabs>
 <TabItem value="a" label="Command">
-```sh title="Configure the morio JWT authentication method in Vault"
+```sh title="Configure the Morio JWT authentication method in Vault"
 curl \
   --header "X-Vault-Token: VAULT_TOKEN" \
   --data '{
