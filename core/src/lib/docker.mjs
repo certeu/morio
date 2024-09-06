@@ -241,7 +241,7 @@ export function generateContainerConfig(serviceName) {
       NetworkMode: utils.getNetworkName(),
       Binds: config.container.volumes,
       LogConfig: {
-        Type: 'journald', // All Morio services log via journald
+        Type: getPreset('MORIO_DOCKER_LOG_DRIVER'),
       },
     },
     Hostname: name,
@@ -297,9 +297,11 @@ export function generateContainerConfig(serviceName) {
   /*
    * Hosts
    */
+  const extraHost = getPreset('MORIO_DOCKER_ADD_HOST')
   if (config.container.hosts) {
     opts.HostConfig.ExtraHosts = config.container.hosts
-  }
+    if (extraHost) opts.HostConfig.ExtraHosts.push(extraHost)
+  } else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
 
   /*
    * Command

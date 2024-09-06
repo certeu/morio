@@ -39,6 +39,16 @@ export const presets = {
   MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/docs/reference/errors/',
 
   /*
+   * Docker presets
+   */
+
+  // The default log driver
+  MORIO_DOCKER_LOG_DRIVER: 'journald',
+
+  // Allows adding an extra host, useful for developers
+  MORIO_DOCKER_ADD_HOST: false,
+
+  /*
    * API presets
    */
 
