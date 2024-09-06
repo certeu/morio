@@ -167,7 +167,7 @@ export const service = {
 /**
  * Helper method to create topics on the broker
  */
-const ensureTopicsExist = async () => {
+async function ensureTopicsExist() {
   const topics = await getTopics()
   if (!topics) {
     log.warn(`Failed to ensure broker topics: Unable to fetch list of current topics from broker.`)
@@ -187,7 +187,7 @@ const ensureTopicsExist = async () => {
  *
  * @return {bool} result - True if the broker is up, false if not
  */
-const isBrokerUp = async () => {
+async function isBrokerUp() {
   const result = await testUrl(`http://broker:9644/v1/cluster/health_overview`, {
     ignoreCertificate: true,
     returnAs: 'json',
@@ -202,7 +202,7 @@ const isBrokerUp = async () => {
  *
  * @return {object} result - The JSON output as a POJO
  */
-const getTopics = async () => {
+async function getTopics() {
   const result = await testUrl(`http://broker:8082/topics`, {
     ignoreCertificate: true,
     returnAs: 'json',
@@ -216,7 +216,7 @@ const getTopics = async () => {
  *
  * @return {bool} result - True if the broker is leading, false if not
  */
-export const isBrokerLeading = async () => {
+export async function isBrokerLeading() {
   const result = await testUrl(`http://broker:9644/v1/cluster/health_overview`, {
     ignoreCertificate: true,
     returnAs: 'json',

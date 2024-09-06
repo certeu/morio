@@ -187,7 +187,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
   },
 ]
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['docker'] }
   api.tag('docker', 'Endpoints that leverage the Docker daemon API')
 

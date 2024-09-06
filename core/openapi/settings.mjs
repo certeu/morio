@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponses, formatResponseExamples } from './index.mjs'
 import { examples } from '#shared/openapi'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['settings'] }
   api.tag('settings', 'Endpoints related to the Morio settings')
 

@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse, errorResponses, security } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['accounts'] }
   api.tag('accounts', 'Endpoints for the local accounts identity provider')
 

@@ -9,7 +9,7 @@ import axios from 'axios'
  * So, this minimal implementation will do the trick.
  */
 
-export const vaultGetSecret = async (key, vault) => {
+export async function vaultGetSecret(key, vault) {
   const vconf = getVaultConfig(key, vault)
   const token = await getVaultToken(vconf)
   const secret = await getVaultSecret(vconf, token)
@@ -17,7 +17,7 @@ export const vaultGetSecret = async (key, vault) => {
   return secret ? secret : false
 }
 
-const getVaultSecret = async (vconf, token) => {
+async function getVaultSecret(vconf, token) {
   const result = await axios.get(`${vconf.url}/v1/${vconf.kv_path}/data/${vconf.path}`, {
     headers: { 'X-Vault-Token': token },
   })
@@ -25,7 +25,7 @@ const getVaultSecret = async (vconf, token) => {
   return result?.data?.data?.data?.[vconf.key] ? result.data.data.data[vconf.key] : false
 }
 
-const getVaultToken = async (vconf) => {
+async function getVaultToken(vconf) {
   /*
    * Generate JSON Web Token
    */
@@ -57,7 +57,7 @@ const getVaultToken = async (vconf) => {
   return result?.data?.auth?.client_token ? result.data.auth.client_token : false
 }
 
-const getVaultConfig = (key, vault) => {
+function getVaultConfig(key, vault) {
   const defaults = {
     role: 'morio',
     jwt_auth_path: 'morio',

@@ -10,7 +10,7 @@ import { utils, log } from './utils.mjs'
  * @param {object} newSettings - The settings to validate
  * @retrun {object} report - An object detailing the results of the validation
  */
-export const validateSettings = async (newSettings) => {
+export async function validateSettings(newSettings) {
   /*
    * Set up the report skeleton that we will return
    */

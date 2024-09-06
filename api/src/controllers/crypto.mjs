@@ -15,7 +15,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.decrypt = async (req, res) => {
+Controller.prototype.decrypt = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -44,7 +44,7 @@ Controller.prototype.decrypt = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.encrypt = async (req, res) => {
+Controller.prototype.encrypt = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -63,23 +63,3 @@ Controller.prototype.encrypt = async (req, res) => {
 
   return res.send(data)
 }
-/**
- * Submits an encryption request to core
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-//Controller.prototype.encrypt = async (req, res) => {
-//  const [valid, err] = await utils.validate(`req.encrypt`, req.body)
-//  if (!valid) {
-//    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-//      schema_violation: err.message,
-//    })
-//  }
-//
-//  const [status, result] = await utils.coreClient.post(`/encrypt`, bodyPlusHeaders(req))
-//
-//  return res.status(status).send(result)
-//}
-
-//const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })

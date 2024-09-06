@@ -17,7 +17,7 @@ const dnsOptions = {
  *
  * @param {string} host - The hostname to resolve
  */
-export const resolveHost = async (host) => {
+export async function resolveHost(host) {
   let result
   try {
     result = await dns.promises.lookup(host, dnsOptions)
@@ -37,7 +37,7 @@ export const resolveHost = async (host) => {
  *
  * @param {string} host - The hostname to resolve
  */
-export const resolveHostAsIp = async (host) => {
+export async function resolveHostAsIp(host) {
   const result = (await resolveHost(host))[1]
 
   return Array.isArray(result) && result.length > 0 ? result[0] : false
@@ -52,7 +52,7 @@ export const resolveHostAsIp = async (host) => {
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
  */
-export const testUrl = async (url, customOptions = {}) => {
+export async function testUrl(url, customOptions = {}) {
   /*
    * Merge default and custom options
    */
@@ -105,7 +105,7 @@ export const testUrl = async (url, customOptions = {}) => {
  * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export const get = async function (url, raw = false, log = false) {
+export async function get(url, raw = false, log = false) {
   /*
    * Send the request to core
    */
@@ -140,7 +140,7 @@ export const get = async function (url, raw = false, log = false) {
  * @param {url} string - The URL to call
  * @return {object} res - The Express response object
  */
-export const streamGet = async function (url, res) {
+export async function streamGet(url, res) {
   /*
    * Send headers
    */
@@ -173,7 +173,7 @@ export const streamGet = async function (url, res) {
  * @param {function} log - Optional logging method to log errors
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-const __postput = async function (method = 'POST', url, data, raw = false, log = false) {
+async function __postput(method = 'POST', url, data, raw = false, log = false) {
   /*
    * Construct the request object with or without a request body
    */
@@ -219,8 +219,12 @@ const __postput = async function (method = 'POST', url, data, raw = false, log =
   return [response?.status || 500, false]
 }
 
-export const post = async (url, data) => __postput('POST', url, data)
-export const put = async (url, data) => __postput('PUT', url, data)
+export async function post(url, data) {
+  return __postput('POST', url, data)
+}
+export async function put(url, data) {
+  return __postput('PUT', url, data)
+}
 
 /**
  * General purpose client for a REST API
@@ -228,9 +232,11 @@ export const put = async (url, data) => __postput('PUT', url, data)
  * @param {string} api - The API root URL
  * @return {object] client - The API client
  */
-export const restClient = (api) => ({
-  get: async (url, raw, log) => get(api + url, raw, log),
-  post: async (url, data, raw, log) => __postput('POST', api + url, data, raw, log),
-  put: async (url, data, raw, log) => __postput('PUT', api + url, data, raw, log),
-  streamGet: async (url, res) => streamGet(api + url, res),
-})
+export function restClient(api) {
+  return {
+    get: async (url, raw, log) => get(api + url, raw, log),
+    post: async (url, data, raw, log) => __postput('POST', api + url, data, raw, log),
+    put: async (url, data, raw, log) => __postput('PUT', api + url, data, raw, log),
+    streamGet: async (url, res) => streamGet(api + url, res),
+  }
+}

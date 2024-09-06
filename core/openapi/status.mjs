@@ -1,7 +1,7 @@
 import { response } from './index.mjs'
 import { examples } from '#shared/openapi'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['status'] }
   api.tag('status', 'Endpoints related to the Morio status')
 

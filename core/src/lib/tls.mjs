@@ -15,7 +15,7 @@ import { log, utils } from '#lib/utils'
  * @param {string} lifetime - A lifetime string like '750h'
  * @return {number|bool} lifetime - The lifetime in ms or false if we can't figure it out
  */
-export const certificateLifetimeInMs = (lifetime) => {
+export function certificateLifetimeInMs(lifetime) {
   if (typeof lifetime !== 'string') return false
   const unit = lifetime.slice(-1)
   const count = lifetime.slice(0, -1)
@@ -44,7 +44,7 @@ export const certificateLifetimeInMs = (lifetime) => {
  *                                   x is m for minutes, or h for hours
  * @return {object} result - An object with a certificate and key property holding the relevant data
  */
-export const createX509Certificate = async (data) => {
+export async function createX509Certificate(data) {
   /*
    * These are the defaults for the certificate
    */
@@ -155,7 +155,7 @@ export const createX509Certificate = async (data) => {
  * @param {boolean} chain - Set this to true to include the intermediate cert in the cert file
  * @return {bool} result - True is everything went well, false if not
  */
-export const ensureServiceCertificate = async (service, internal=false, chain=true) => {
+export async function ensureServiceCertificate(service, internal = false, chain = true) {
   /*
    * We'll check for the required files on disk.
    * If at least one is missing, we need to generate the certificates.
@@ -195,7 +195,7 @@ export const ensureServiceCertificate = async (service, internal=false, chain=tr
       await createX509Certificate({
         certificate: {
           //cn: `${service}.infra.${utils.getClusterUuid()}.morio`,
-          cn: (internal ? utils.getInternalServiceCn(service) : utils.getClusterFqdn()),
+          cn: internal ? utils.getInternalServiceCn(service) : utils.getClusterFqdn(),
           c: utils.getPreset('MORIO_X509_C'),
           st: utils.getPreset('MORIO_X509_ST'),
           l: utils.getPreset('MORIO_X509_L'),

@@ -203,43 +203,6 @@ export async function loadPreseededSettings(preseed, log, gitroot="/etc/morio/sh
   }
 
   return settings
-
-/*
-  if (typeof preseed.overlays === 'string') {
-    if (fromRepo(preseed.overlays)) {
-      const repoOverlays = loadPreseedOverlaysFromRepo(preseed, gitroot, log)
-      if (!repoOverlays) {
-        log.warn(
-          `Failed to load preseed overlays from repo. Cannot load preseeded configuration.`
-        )
-        return false
-      }
-      overlays.push(...repoOverlays)
-    }
-    else {
-      // FIXME
-      return false
-    }
-  }
-  else if (Array.isArray(preseed.overlays) && preseed.overlays.length > 0) {
-    log.debug(`Need to load ${preseed.overlays.length} preseed overlays`)
-    let i = 0
-    for (const overlay of preseed.overlays) {
-      const overlayConfig = await loadPreseedFile(preseed.base, 'overlay', i)
-      if (!overlayConfig) {
-        log.debug(
-          `Failed to load preseed overlay ${i}/${preseed.overlays.length}. Cannot load preseeded configuration.`
-        )
-        return false
-      }
-      overlays.push(overlayConfig)
-      i++
-    }
-  }
-
-
-  return settings
-  */
 }
 
 /**
@@ -344,9 +307,9 @@ async function loadPreseedFile(preseed, type, index) {
       ? preseed.overlays[index]
       : preseed.overlays
 
-  if (config.gitlab) return await loadPreseedFileFromGitlab(config, preseed, type, index)
-  if (config.github) return await loadPreseedFileFromGithub(config, preseed, type, index)
-  if (typeof preseed.base === 'string' || preseed.url) return await loadPreseedFileFromUrl(config, preseed, type, index)
+  if (config.gitlab) return await loadPreseedFileFromGitlab(config)
+  if (config.github) return await loadPreseedFileFromGithub(config)
+  if (typeof preseed.base === 'string' || preseed.url) return await loadPreseedFileFromUrl(config)
 
   else if (type === 'overlay') {
     /*
@@ -433,7 +396,7 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
       const repos = Object.keys(preseed.git || {})
       let repo = fromApi(preseed.overlays)
       if (!repo) repo = repos[0]
-      if (!preseed.git[repo]) {
+      if (!preseed?.git[repo]) {
         log.warn(`Cannot find repo to glob from: ${preseed.overlays}`)
         return false
       }
@@ -460,57 +423,6 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
 
   return overlays
 }
-
-/*
-  if (typeof preseed.overlays === 'string') {
-    if (fromRepo(preseed.overlays)) {
-      const repoOverlays = loadPreseedOverlaysFromRepo(preseed, gitroot, log)
-      if (!repoOverlays) {
-        log.warn(
-          `Failed to load preseed overlays from repo. Cannot load preseeded configuration.`
-        )
-        return false
-      }
-      overlays.push(...repoOverlays)
-    }
-    else {
-      // FIXME
-      return false
-    }
-  }
-  else if (Array.isArray(preseed.overlays) && preseed.overlays.length > 0) {
-    log.debug(`Need to load ${preseed.overlays.length} preseed overlays`)
-    let i = 0
-    for (const overlay of preseed.overlays) {
-      const overlayConfig = await loadPreseedFile(preseed.base, 'overlay', i)
-      if (!overlayConfig) {
-        log.debug(
-          `Failed to load preseed overlay ${i}/${preseed.overlays.length}. Cannot load preseeded configuration.`
-        )
-        return false
-      }
-      overlays.push(overlayConfig)
-      i++
-    }
-  }
-
-
-
-
-
-  if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
-  if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
-  if (typeof preseed.base === 'string') {
-    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot, log)
-    else return await loadPreseedFileFromUrl(preseed.base)
-  }
-  if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
-  if (preseed.base?.github) return await loadPreseedFileFromGithub(preseed.base)
-  if (preseed.base?.url) return await loadPreseedFileFromUrl(preseed.base)
-
-  return false
-}
-*/
 
 /**
  * Helper method to read a file from a local git repo

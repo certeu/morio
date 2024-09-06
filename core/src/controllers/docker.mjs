@@ -37,7 +37,7 @@ export function Controller() {}
  * @param {string} cmd - The command to run (method on the docker client)
  * @param {object} options - Any options to pass to the command
  */
-Controller.prototype.getDockerData = async (req, res, cmd = 'inspect', options = {}) => {
+Controller.prototype.getDockerData = async function (req, res, cmd = 'inspect', options = {}) {
   /*
    * Run the Docker command, with options if there are any
    */
@@ -62,7 +62,7 @@ Controller.prototype.getDockerData = async (req, res, cmd = 'inspect', options =
  * @param {string} cmd - The command to run (method on the docker client)
  * @param {object} options - Options to pass to the container API
  */
-Controller.prototype.getContainerData = async (req, res, cmd = 'inspect', options = {}) => {
+Controller.prototype.getContainerData = async function (req, res, cmd = 'inspect', options = {}) {
   /*
    * Validate request against schema
    */
@@ -94,7 +94,7 @@ Controller.prototype.getContainerData = async (req, res, cmd = 'inspect', option
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.updateContainer = async (req, res, cmd) => {
+Controller.prototype.updateContainer = async function (req, res, cmd) {
   /*
    * Validate request against schema
    */
@@ -125,7 +125,7 @@ Controller.prototype.updateContainer = async (req, res, cmd) => {
  * @param {object} res - The response object from Express
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getImageData = async (req, res, cmd = 'inspect') => {
+Controller.prototype.getImageData = async function (req, res, cmd = 'inspect') {
   /*
    * Validate request against schema
    */
@@ -153,7 +153,7 @@ Controller.prototype.getImageData = async (req, res, cmd = 'inspect') => {
  * @param {object} res - The response object from Express
  * @param {string} cmd - The command to run (method on the docker client)
  */
-Controller.prototype.getNetworkData = async (req, res, cmd = 'inspect') => {
+Controller.prototype.getNetworkData = async function (req, res, cmd = 'inspect') {
   /*
    * Validate request against schema
    */

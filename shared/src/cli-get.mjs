@@ -17,7 +17,7 @@ import {
 } from '../../config/cli.mjs'
 import { deb, rpm, versionEnv, moriodEnv } from '../../config/moriod.mjs'
 
-const showHelp = () =>
+function showHelp() {
   console.log(`
 ${MORIO_ASCII_BANNER}
 This is a helper to bridge the gap between your shell and NodeJS.
@@ -56,6 +56,7 @@ Note that the CLI variables can also be loaded by sourcing the cli config:
 
 source config/cli.sh
 `)
+}
 
 /*
  * Map CLI flag to the variable to output

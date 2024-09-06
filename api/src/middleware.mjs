@@ -45,7 +45,7 @@ const allowed = [
  * Middleware to handle endpoints that are not available
  * in ephemeral mode or while resolving the configuration
  */
-export const guardRoutes = (req, res, next) => {
+export function guardRoutes(req, res, next) {
   /*
    * Run the check and return an error if it's not allowed
    */
@@ -81,7 +81,7 @@ export const guardRoutes = (req, res, next) => {
 /*
  * Middleware to require a certain role for an endpoint
  */
-const requireRole = (req, res, next, role) => {
+function requireRole(req, res, next, role) {
   const realRole = currentRole(req)
   if (realRole) {
     const isOk = isRoleAvailable(realRole, role)
@@ -99,7 +99,7 @@ for (const role of roles) rbac[role] = (req, res, next) => requireRole(req, res,
 /*
  * Add custom middleware to load roles from header
  */
-export const addRbacHeaders = (req, res, next) => {
+export function addRbacHeaders(req, res, next) {
   /*
    * Attach forwardAuth headers to req.morio
    */

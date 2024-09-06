@@ -34,7 +34,7 @@ export function hash(string) {
  * @param {object} data - Data to encode in the CSR
  * @return {object} jwt - The JSON web token
  */
-export const generateCsr = async (data) => {
+export async function generateCsr(data) {
   /*
    * Generate a key pair
    */
@@ -98,13 +98,13 @@ export const generateCsr = async (data) => {
  * @param {object} data - Data to encode in the token
  * @return {object} jwt - The JSON web token
  */
-export const generateJwt = ({
+export function generateJwt({
   data,
   key,
   passphrase = false,
   options = {},
   noDefaults = false,
-}) => {
+}) {
   const dfltOptions = {
     expiresIn: '4h',
     notBefore: 0,
@@ -131,7 +131,9 @@ export const generateJwt = ({
  *
  * @return {string} - A key suitable for Passport's JWT middleware which will sign JWTs
  */
-export const generateJwtKey = () => randomString(64)
+export function generateJwtKey() {
+  return randomString(64)
+}
 
 /**
  * Generates a public/private key pair
@@ -139,8 +141,8 @@ export const generateJwtKey = () => randomString(64)
  * @param {string} passphrase - The passphrase to use to encrypt the private key
  * @return {object} - An object with `publicKey` and `privateKey` properties
  */
-export const generateKeyPair = async (passphrase) =>
-  generateKeyPairSync('rsa', {
+export async function generateKeyPair(passphrase) {
+  return generateKeyPairSync('rsa', {
     modulusLength: 4096,
     publicKeyEncoding: {
       type: 'spki',
@@ -153,6 +155,7 @@ export const generateKeyPair = async (passphrase) =>
       passphrase: passphrase.toString(),
     },
   })
+}
 
 /**
  * Generates a random string
@@ -282,15 +285,16 @@ export function generateCaRoot(hostnames, name) {
   }
 }
 
-const encryptPrivateKey = (key, pwd) =>
-  forge.pki.encryptedPrivateKeyToPem(
+function encryptPrivateKey(key, pwd) {
+  return forge.pki.encryptedPrivateKeyToPem(
     forge.pki.encryptPrivateKeyInfo(
       forge.pki.wrapRsaPrivateKey(forge.pki.privateKeyToAsn1(key)),
       pwd
     )
   )
+}
 
-export const keypairAsJwk = async (pair) => {
+export async function keypairAsJwk(pair) {
   const keystore = jose.JWK.createKeyStore()
   const jwk = await keystore.add(pair.public, 'pem')
 

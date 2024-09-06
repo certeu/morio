@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse, formatResponseExamples } from './index.mjs'
 import { examples } from '#shared/openapi'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['cryptography'] }
   api.tag('cryptography', 'Endpoints related to cryptography')
 

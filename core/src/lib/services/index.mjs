@@ -65,7 +65,7 @@ for (const [serviceName, service] of Object.entries(services)) {
  * @param {string} serviceNme = Name of the service
  * @returm {object|bool} options - The id of the created container/service or false if no container/service could be created
  */
-const createMorioService = async (serviceName) => {
+async function createMorioService(serviceName) {
   /*
    * Save us some typing
    */
@@ -98,7 +98,7 @@ const createMorioService = async (serviceName) => {
  * @param {array} services = A list of services that should be up
  * @param {object} hookParams - Optional data to pass to lifecyle hooks
  */
-export const startMorio = async (hookParams = {}) => {
+export async function startMorio(hookParams = {}) {
   /*
    * Run beforeall lifecycle hook on the core service
    */
@@ -167,7 +167,7 @@ export const startMorio = async (hookParams = {}) => {
  * @param {object} hookParams = Optional props to pass to the lifecycle hooks
  * @return {bool} ok = Whether or not the service was started
  */
-export const ensureMorioService = async (serviceName, hookParams = {}) => {
+export async function ensureMorioService(serviceName, hookParams = {}) {
   if (optionalServices.includes(serviceName)) {
     /*
      * If the service optional, not wanted, yet running, stop it
@@ -255,7 +255,7 @@ export const ensureMorioService = async (serviceName, hookParams = {}) => {
  * @param {string} sercice = The name of the service
  * @param {object} hookParams - Optional props to pass to the lifecycle hook
  */
-const shouldServiceBeRecreated = async (serviceName, hookParams) => {
+async function shouldServiceBeRecreated(serviceName, hookParams) {
   /*
    * Never recreate core from within core as the container will be destroyed
    * and then core will exit before it can recreate itself.
@@ -317,14 +317,14 @@ const shouldServiceBeRecreated = async (serviceName, hookParams) => {
  * @param {string} sercice = The name of the service
  * @param {object} hookParams - Optional parameters to pass to the lifecycle hook
  */
-const shouldServiceBeRestarted = async (serviceName, hookParams) => {
+async function shouldServiceBeRestarted(serviceName, hookParams) {
   /*
    * Defer to the restart lifecycle hook
    */
   return await runHook('restart', serviceName, hookParams)
 }
 
-export const runHook = async (hookName, serviceName, hookParams) => {
+export async function runHook(hookName, serviceName, hookParams) {
   let result = true
   const hookMethod = utils.getHook(serviceName, hookName)
   if (!hookMethod) return result
@@ -343,14 +343,14 @@ export const runHook = async (hookName, serviceName, hookParams) => {
   return result
 }
 
-const stopMorioService = async (serviceName) => {
+async function stopMorioService(serviceName) {
   await runHook('prestop', serviceName)
   log.debug(`[${serviceName}] Stopping service`)
   await stopService(serviceName)
   await runHook('poststop', serviceName)
 }
 
-const isContainerRunning = (serviceName) => {
+function isContainerRunning(serviceName) {
   const details = utils.getServiceState(serviceName, false)
 
   return typeof details.state === 'string' && details.state.toLowerCase() === 'running'
@@ -365,7 +365,7 @@ const isContainerRunning = (serviceName) => {
  * @param {string} containerId = The ID of the container object
  * @return {bool} ok = Whether or not the service was started
  */
-export const restartMorioService = async (serviceName, id) => {
+export async function restartMorioService(serviceName, id) {
   const [ok, err] = await runContainerApiCommand(id, 'restart')
   if (ok) log.info(`Service started: ${serviceName}`)
   else log.warn(err, `Failed to start service: ${serviceName}`)
@@ -479,11 +479,11 @@ export async function defaultRestartServiceHook(service, { recreate }) {
  * @param {bool} exclusive = Whether or not to disconnect the service's container from all other networks
  * @return {bool} ok = Whether or not the service was started
  */
-export const ensureMorioNetwork = async (
+export async function ensureMorioNetwork(
   networkName = 'morionet',
   service = 'core',
   endpointConfig = {}
-) => {
+) {
   /*
    * Create Docker network
    */

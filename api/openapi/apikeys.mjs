@@ -4,7 +4,7 @@ import { uuid } from '#shared/schema'
 import { response, errorResponse, errorResponses, security } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['apikeys'] }
   api.tag('apikeys', 'Endpoints for the local API keys identity provider')
 

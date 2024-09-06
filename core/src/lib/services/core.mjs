@@ -178,7 +178,7 @@ export const service = {
 /**
  * Loads the most recent Morio settings  file(s) from disk
  */
-const loadSettingsFromDisk = async () => {
+async function loadSettingsFromDisk() {
   /*
    * Find the most recent timestamp file that exists on disk
    */
@@ -209,7 +209,7 @@ const loadSettingsFromDisk = async () => {
   return { settings, keys, node, timestamp }
 }
 
-export const templateSettings = async (settings) => {
+export async function templateSettings(settings) {
   const tokens = {}
   // Build the tokens object
   for (const [key, val] of Object.entries(settings.tokens?.vars || {})) {
@@ -239,12 +239,19 @@ export const templateSettings = async (settings) => {
   return newSettings
 }
 
-const generateDataChecksum = (data) => {
+function generateDataChecksum(data) {
   const keys = utils.getKeys()
   return hash(JSON.stringify(data) + keys.mrt + keys.cluster + keys.rpwd)
 }
 
-const validateDataChecksum = (data, checksum) => checksum === generateDataChecksum(data)
+function validateDataChecksum(data, checksum) {
+  return checksum === generateDataChecksum(data)
+}
 
-export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
-export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)
+export function dataWithChecksum(data) {
+  return { data, checksum: generateDataChecksum(data) }
+}
+
+export function validDataWithChecksum({ data, checksum }) {
+  return validateDataChecksum(data, checksum)
+}

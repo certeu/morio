@@ -132,4 +132,6 @@ export const schema = {
   }),
 }
 
-export const validate = (key, input) => sharedValidate(key, input, schema)
+export function validate(key, input) {
+  return sharedValidate(key, input, schema)
+}

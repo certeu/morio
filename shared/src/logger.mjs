@@ -24,8 +24,9 @@ const levels = {
  * @param {string} name - The name to log under
  * @return {object} logger - The logger
  */
-export const logger = (level = 'info', name) =>
-  pino({
+export function logger(level = 'info', name) {
+  return pino({
     name,
     level: levels[level] ? levels[level] : 30,
   })
+}

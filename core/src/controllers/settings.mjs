@@ -38,7 +38,7 @@ const ensureTokenSecrecy = (secrets) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.deploy = async (req, res) => {
+Controller.prototype.deploy = async function (req, res) {
   /*
    * Validate request against schema, but strip headers from body first
    */
@@ -70,7 +70,7 @@ Controller.prototype.deploy = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.setup = async (req, res) => {
+Controller.prototype.setup = async function (req, res) {
   /*
    * Only allow this endpoint when running in ephemeral mode
    */
@@ -109,7 +109,7 @@ Controller.prototype.setup = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.preseed = async (req, res) => {
+Controller.prototype.preseed = async function (req, res) {
   /*
    * Only allow this endpoint when running in ephemeral mode
    */
@@ -161,7 +161,7 @@ Controller.prototype.preseed = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.restart = async (req, res) => {
+Controller.prototype.restart = async function (req, res) {
   reload({ restart: true })
   return res.status(204).send()
 }
@@ -172,7 +172,7 @@ Controller.prototype.restart = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.reseed = async (req, res) => {
+Controller.prototype.reseed = async function (req, res) {
   /*
    * Load the preseeded settings
    */
@@ -199,7 +199,7 @@ Controller.prototype.reseed = async (req, res) => {
  * @param {object} body - The request body
  * @return {object} data - Data about this node
  */
-const localNodeInfo = async (body) => {
+const localNodeInfo = async function (body) {
   /*
    * The API injects the headers into the body
    * so we will look at the X-Forwarded-Host header
@@ -229,7 +229,7 @@ const localNodeInfo = async (body) => {
   }
 }
 
-const initialSetup = async (req, settings) => {
+const initialSetup = async function (req, settings) {
   /*
    * Validate settings against schema
    */
@@ -377,7 +377,7 @@ const initialSetup = async (req, settings) => {
   ]
 }
 
-const deployNewSettings = async (settings) => {
+const deployNewSettings = async function (settings) {
   /*
    * Generate time-stamp for use in file names
    */

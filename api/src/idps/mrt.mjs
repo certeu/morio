@@ -13,7 +13,7 @@ import { isRoleAvailable } from '../rbac.mjs'
  * @param {string} data.mrt - The root token to verify
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
-export const mrt = async (id, data) => {
+export async function mrt(id, data) {
   /*
    * Authenticate
    */

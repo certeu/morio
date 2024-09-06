@@ -54,7 +54,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.authenticate = async (req, res) => {
+Controller.prototype.authenticate = async function (req, res) {
   /*
    * Get the requested URL from the headers
    */
@@ -134,7 +134,7 @@ Controller.prototype.authenticate = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.login = async (req, res) => {
+Controller.prototype.login = async function (req, res) {
   /*
    * Validate high-level input against schema
    */
@@ -227,7 +227,7 @@ Controller.prototype.login = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.renewToken = async (req, res) => {
+Controller.prototype.renewToken = async function (req, res) {
   /*
    * Keep track of the token payload
    */
@@ -285,7 +285,7 @@ Controller.prototype.renewToken = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.whoami = async (req, res) => {
+Controller.prototype.whoami = async function (req, res) {
   /*
    * Is there a cookie with a JSON Web Token we can check?
    */

@@ -178,4 +178,6 @@ export const schema = {
  * @param {object} input - The input to validate
  * @retrn {object} result - The validation result
  */
-export const validate = async (key, input) => await sharedValidate(key, input, schema)
+export async function validate(key, input) {
+  return await sharedValidate(key, input, schema)
+}

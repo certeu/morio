@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponses } from './index.mjs'
 import { examples } from '#shared/openapi'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['cluster'] }
   api.tag('cluster', 'Endpoints related to clustering')
 

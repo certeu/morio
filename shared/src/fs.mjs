@@ -23,12 +23,12 @@ export const root = path.resolve(path.basename(import.meta.url), '..')
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const chown = async (
+export async function chown(
   target, // The (relative) path to the folder to create
   uid, // The user ID
   gid, // The group ID
   onError // Method to run on error
-) => {
+) {
   try {
     await fs.promises.chown(path.resolve(root, target), uid, gid)
   } catch (err) {
@@ -49,7 +49,7 @@ export const chown = async (
  * @param {object} options - Options for the fs.cp call in NodeJS
  *
  */
-export const cp = async (src, dst, options = {}) => {
+export async function cp(src, dst, options = {}) {
   try {
     await fs.promises.cp(path.resolve(root, src), path.resolve(root, dst), options)
   } catch (err) {
@@ -66,7 +66,7 @@ export const cp = async (src, dst, options = {}) => {
  * @param {object} options - Options for NodeJS' rm method
  *
  */
-export const rm = async (file, options = { force: true }) => {
+export async function rm(file, options = { force: true }) {
   try {
     await fs.promises.rm(path.resolve(root, file), options)
   } catch (err) {
@@ -84,10 +84,10 @@ export const rm = async (file, options = { force: true }) => {
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const globDir = async (
+export async function globDir(
   folderPath = '/morio/downloads', // The (relative) path to the folder
   pattern = '**/*' // Glob pattern to match
-) => {
+) {
   let list = []
   try {
     list = await glob(path.resolve(folderPath) + '/' + pattern)
@@ -107,10 +107,10 @@ export const globDir = async (
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const mkdir = async (
+export async function mkdir(
   dirPath, // The (relative) path to the folder to create
   onError // Method to run on error
-) => {
+) {
   let dir
   try {
     dir = path.resolve(root, dirPath)
@@ -131,11 +131,11 @@ export const mkdir = async (
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const readFile = async (
+export async function readFile(
   filePath, // The (relative) path to the file
   onError, // Method to run on error
   binary = false
-) => {
+) {
   let content, file
   try {
     file = path.resolve(root, filePath)
@@ -156,10 +156,10 @@ export const readFile = async (
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const readJsonFile = async (
+export async function readJsonFile(
   filePath, // The (relative) path to the file
   onError // Method to run on error
-) => {
+) {
   let content
   try {
     content = await readFile(filePath, onError, true)
@@ -181,10 +181,10 @@ export const readJsonFile = async (
  *
  * @return {string} File contents, or false in case of trouble
  */
-export const readYamlFile = async (
+export async function readYamlFile(
   filePath, // The (relative) path to the file
   onError // Method to run on error
-) => {
+) {
   let content
   try {
     content = await readFile(filePath, onError)
@@ -208,12 +208,12 @@ export const readYamlFile = async (
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeFile = async (
+export async function writeFile(
   filePath, // The (relative) path to the file
   data, // The data to write to disk
   log = false,
   mode = 0o666
-) => {
+) {
   let file
   try {
     file = path.resolve(root, filePath)
@@ -238,8 +238,9 @@ export const writeFile = async (
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeYamlFile = async (filePath, data, log = false, mode = 0o666) =>
-  await writeFile(filePath, yaml.dump(data), log, mode)
+export async function writeYamlFile(filePath, data, log = false, mode = 0o666) {
+  return await writeFile(filePath, yaml.dump(data), log, mode)
+}
 
 /**
  * Writes a JSON file to disk
@@ -249,8 +250,9 @@ export const writeYamlFile = async (filePath, data, log = false, mode = 0o666) =
  *
  * @return {bool} true of success, false in case of trouble
  */
-export const writeJsonFile = async (filePath, data) =>
-  await writeFile(filePath, JSON.stringify(data, null, 2))
+export async function writeJsonFile(filePath, data) {
+  return await writeFile(filePath, JSON.stringify(data, null, 2))
+}
 
 /**
  * Reads the contents of a directory (non-recursive)
@@ -258,7 +260,7 @@ export const writeJsonFile = async (filePath, data) =>
  * @param {string} dirPath - (relative) path to the directory to read
  * @param {funtion} onError - a method to call on error
  */
-export const readDirectory = async (dirPath, onError) => {
+export async function readDirectory(dirPath, onError) {
   let files
   try {
     const dir = path.resolve(root, dirPath)

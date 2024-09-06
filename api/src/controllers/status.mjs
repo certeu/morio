@@ -19,7 +19,9 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.info = async (req, res) => res.send(store.info)
+Controller.prototype.info = async function (req, res) {
+  return res.send(store.info)
+}
 
 /**
  * List downloads
@@ -29,7 +31,7 @@ Controller.prototype.info = async (req, res) => res.send(store.info)
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.listDownloads = async (req, res) => {
+Controller.prototype.listDownloads = async function (req, res) {
   const list = await globDir('/morio/downloads')
 
   if (list) return res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))

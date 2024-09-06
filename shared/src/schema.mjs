@@ -229,7 +229,7 @@ const settings = Joi.object({
  * @param {object] input - The input to validate
  * @return {object} valid - The result of the Joi validation
  */
-const validate = async (key, input, schema) => {
+async function validate(key, input, schema) {
   const target = schema[key]
   if (target) {
     let valid

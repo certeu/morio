@@ -20,7 +20,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getCaCerts = async (req, res) => {
+Controller.prototype.getCaCerts = async function (req, res) {
   const keys = utils.getKeys()
 
   return keys.rfpr && keys.rcrt && keys.icrt
@@ -38,7 +38,7 @@ Controller.prototype.getCaCerts = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.listDownloads = async (req, res) => {
+Controller.prototype.listDownloads = async function (req, res) {
   const list = await globDir('/morio/downloads')
 
   return list
@@ -52,7 +52,7 @@ Controller.prototype.listDownloads = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getIdps = async (req, res) => {
+Controller.prototype.getIdps = async function (req, res) {
   const idps = {}
 
   /*
@@ -90,7 +90,7 @@ Controller.prototype.getIdps = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getJwks = async (req, res) => {
+Controller.prototype.getJwks = async function (req, res) {
   /*
    * Get JWKS info from public key
    */
@@ -108,10 +108,11 @@ Controller.prototype.getJwks = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getPubkey = async (req, res, pem = false) =>
-  pem
+Controller.prototype.getPubkey = async function (req, res, pem = false) {
+  return pem
     ? res.type('application/x-pem-file').send(utils.getKeys().public)
     : res.send({ pubkey: utils.getKeys().public })
+}
 
 /**
  * Get status
@@ -119,7 +120,7 @@ Controller.prototype.getPubkey = async (req, res, pem = false) =>
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getStatus = async (req, res) => {
+Controller.prototype.getStatus = async function (req, res) {
   /*
    * Get the status from core to ensure we have the latest info
    */
@@ -161,7 +162,7 @@ Controller.prototype.getStatus = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.validateSettings = async (req, res) => {
+Controller.prototype.validateSettings = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -189,7 +190,7 @@ Controller.prototype.validateSettings = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.validatePreseed = async (req, res) => {
+Controller.prototype.validatePreseed = async function (req, res) {
   /*
    * Validate request against schema
    */

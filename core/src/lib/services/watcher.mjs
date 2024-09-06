@@ -1,7 +1,11 @@
 import { writeYamlFile, chown, mkdir, cp } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
-import { defaultRecreateServiceHook, defaultRestartServiceHook, defaultServiceWantedHook } from './index.mjs'
+import {
+  defaultRecreateServiceHook,
+  defaultRestartServiceHook,
+  defaultServiceWantedHook,
+} from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -46,7 +50,10 @@ export const service = {
 /*
  * Transform monitors from object to array and add the key as ID
  */
-const generateMonitorList = (config={}) => Object.entries(config).map(([id, val]) => ({ id, ...val }))
+function generateMonitorList(config = {}) {
+  return Object.entries(config).map(([id, val]) => ({ id, ...val }))
+}
+
 async function ensureLocalPrerequisites() {
   /*
    * Make sure the folders exist, and are writable
@@ -75,7 +82,8 @@ async function ensureLocalPrerequisites() {
   /*
    * Copy key and certificates into mounted folder
    */
-  for (const file of ['tls-ca.pem','tls-cert.pem','tls-key.pem']) await cp(`/etc/morio/watcher/${file}`, `/etc/morio/watcher/tls/${file}`)
+  for (const file of ['tls-ca.pem', 'tls-cert.pem', 'tls-key.pem'])
+    await cp(`/etc/morio/watcher/${file}`, `/etc/morio/watcher/tls/${file}`)
 
   /*
    * Write out heartbeat.yml based on the settings
@@ -84,7 +92,7 @@ async function ensureLocalPrerequisites() {
   if (config) {
     config.heartbeat.heartbeat.monitors = [
       ...generateMonitorList(config.internal_monitors),
-      ...generateMonitorList(utils.getSettings('watcher.monitors'), {})
+      ...generateMonitorList(utils.getSettings('watcher.monitors'), {}),
     ]
     const file = '/etc/morio/watcher/heartbeat.yml'
     log.debug('Watcher: Creating config file')
@@ -93,4 +101,3 @@ async function ensureLocalPrerequisites() {
 
   return true
 }
-

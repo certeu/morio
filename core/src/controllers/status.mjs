@@ -16,7 +16,9 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
+Controller.prototype.status = async function (req, res) {
+  return res.send(getStatus()).end()
+}
 
 /**
  * Get reload data / Used by API to bootstrap itself
@@ -27,7 +29,7 @@ Controller.prototype.status = async (req, res) => res.send(getStatus()).end()
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getReloadData = async (req, res) => {
+Controller.prototype.getReloadData = async function (req, res) {
   const data = getStatus()
   if (!utils.isEphemeral()) {
     data.sanitized_settings = utils.getSanitizedSettings()
@@ -42,7 +44,7 @@ Controller.prototype.getReloadData = async (req, res) => {
 /*
  * Helper method to construct the status object
  */
-const getStatus = () => {
+function getStatus() {
   const data = {
     info: utils.getInfo(),
     status: {

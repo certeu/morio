@@ -3,7 +3,7 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse, errorResponses } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['client packages'] }
   api.tag('client packages', 'Endpoints related to client packages')
 

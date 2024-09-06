@@ -96,7 +96,7 @@ export const service = {
  *
  * @param {object} config - The service configuration
  */
-export const ensureTraefikDynamicConfiguration = async (config) => {
+export async function ensureTraefikDynamicConfiguration(config) {
   if (typeof config?.traefik !== 'object') return
   for (const [name, tconf] of Object.entries(config.traefik)) {
     log.trace(`[${name}] Writing traefik dynamic config to disk`)

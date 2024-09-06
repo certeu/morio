@@ -12,7 +12,7 @@ import { verifyPassword } from '#shared/crypto'
  * @param {string} data.password - The password to verify (the secret)
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
-export const apikey = async (id, data) => {
+export async function apikey(id, data) {
   /*
    * Authenticate
    */
