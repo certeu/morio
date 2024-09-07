@@ -2,13 +2,15 @@
 title: Management API Guide
 ---
 
-The Morio Management API is the main user-facing API in Morio. It is an
-[OpenAPI v3.1](https://swagger.io/specification/) compliant API, with
-[auto-generated reference documentation](/oas-api).
+The Morio Management API is a [OpenAPI v3.1](https://swagger.io/specification/)
+compliant API, and the main user-facing API in Morio.
 
-In other words, if you're already familiar with the API, and are merely looking
+<Tip>
+### Management API reference documentation
+If you're already familiar with the API, and are merely looking
 for answers on which endpoint to use or what data to expect, refer to
-[/oas-api](/oas-api).
+[/docs/reference/apis/api](/docs/reference/apis/api).
+</Tip>
 
 If you're new to this API, read on for a gentle introduction.
 
@@ -64,8 +66,8 @@ curl --insecure https://example.morio.it/-/api/status
 <Tip>
 ### JWT FTW
 Grab a JSON Web Token from 
-[the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) and use it in subsequent API calls as your Bearer token.  
-Pre-expiry, tokens can be renewed at [the `/token` endpoint](/oas-api#tag/authentication/paths/~1token/get).
+[the `/login` endpoint](/docs/reference/apis/api#tag/authentication/paths/~1login/post) and use it in subsequent API calls as your Bearer token.  
+Pre-expiry, tokens can be renewed at [the `/token` endpoint](/docs/reference/apis/api#tag/authentication/paths/~1token/get).
 </Tip>
 
 ### Identity Providers
@@ -87,7 +89,7 @@ supported types:
 
 ### Logging In
 
-Use [the `/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
+Use [the `/login` endpoint](/docs/reference/apis/api#tag/authentication/paths/~1login/post) to exchange your credentials for a [JSON Web Token (JWT)](https://jwt.io/).
 That JWT can then be used in subsequent API calls to authenticate them.
 
 The [`/login` endpoint](/docs/guides/settings/idps#mrt)) documentation includes examples for each identity providers listed above.
@@ -202,13 +204,13 @@ This round-trip to the database adds significant delay -- perhaps barely noticea
 So, as a rule of thumb, we recommend that:
 
 - You do not use Basic Authentication for more than 3 API requests in a row.
-- If you need to make more than 3 API requests, you use the [`/login` endpoint](/oas-api#tag/authentication/paths/~1login/post) to grab a JSON Web Token instead, and use either Bearer or Cookie authentication for subsequent API requests.
+- If you need to make more than 3 API requests, you use the [`/login` endpoint](/docs/reference/apis/api#tag/authentication/paths/~1login/post) to grab a JSON Web Token instead, and use either Bearer or Cookie authentication for subsequent API requests.
 
 ### Token expiry and renewal
 
 The tokens issued by the API expire. Their expiry is set in the [`MORIO_API_JWT_EXPIRY` preset](/docs/reference/presets/morio_api_jwt_expiry/) which has a default value of `12h`, or 12 hours.
 
-At any time prior to the token's expiry, you can get a new token from the [`/token` endpoint](/oas-api#tag/authentication/paths/~1token/get) to reset the clock on your token expiry.
+At any time prior to the token's expiry, you can get a new token from the [`/token` endpoint](/docs/reference/apis/api#tag/authentication/paths/~1token/get) to reset the clock on your token expiry.
 
 ## API Dependencies
 

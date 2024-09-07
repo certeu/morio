@@ -63,12 +63,12 @@ const config = {
           // Management API docs from OpenAPI spec
           {
             spec: './static/oas-api.yaml',
-            route: '/oas-api/',
+            route: '/docs/reference/apis/api/',
           },
           // Core API docs from OpenAPI spec
           {
             spec: './static/oas-core.yaml',
-            route: '/oas-core/',
+            route: '/docs/reference/apis/core/',
           },
         ],
         // Theme Options for modifying how redoc renders them
