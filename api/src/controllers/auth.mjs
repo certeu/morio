@@ -7,8 +7,9 @@ import { availableRoles } from '../rbac.mjs'
 /**
  * List of allowListed URLs that do not require authentication
  */
-const allowedUris = [
+const allowedUrisBase = [
   `/setup`,
+  `/preseed`,
   `/status`,
   `/info`,
   `/info/`,
@@ -20,7 +21,15 @@ const allowedUris = [
   `/cluster/join`,
   `/validate/settings`,
   `/ca/certificates`,
+  `/pubkey`,
+  `/pubkey.pem`,
 ]
+
+/*
+ * Add them all again but with a trailing slash this time
+ * This will avoid head-scratching and support calls
+ */
+const allowedUris = [...allowedUrisBase, ...allowedUrisBase.map((url) => url + '/')]
 
 /**
  * List of allowListed URL patterns do not require authentication
@@ -45,7 +54,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.authenticate = async (req, res) => {
+Controller.prototype.authenticate = async function (req, res) {
   /*
    * Get the requested URL from the headers
    */
@@ -125,7 +134,7 @@ Controller.prototype.authenticate = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.login = async (req, res) => {
+Controller.prototype.login = async function (req, res) {
   /*
    * Validate high-level input against schema
    */
@@ -218,7 +227,7 @@ Controller.prototype.login = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.renewToken = async (req, res) => {
+Controller.prototype.renewToken = async function (req, res) {
   /*
    * Keep track of the token payload
    */
@@ -276,7 +285,7 @@ Controller.prototype.renewToken = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.whoami = async (req, res) => {
+Controller.prototype.whoami = async function (req, res) {
   /*
    * Is there a cookie with a JSON Web Token we can check?
    */

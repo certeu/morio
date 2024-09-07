@@ -3,13 +3,13 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponse } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['anonymous'] }
   api.tag('anonymous', 'Endpoints that do not require authentication')
 
   api.get('/ca/certificates', {
     tags: ['anonymous', 'cryptography'],
-    summary: `Get the certificates from the Morio Certificate Authoritiy (CA)`,
+    summary: `List CA certificates`,
     description: `Returns the root and intermediate certificates of the Morio CA, along with the root certificate's fingerprint.`,
     responses: {
       200: response('Certificate data', examples.res.caCertificates),
@@ -17,9 +17,29 @@ export default (api) => {
     },
   })
 
+  api.get('/pubkey', {
+    tags: ['anonymous', 'cryptography'],
+    summary: `Get public key`,
+    description: `Returns Morio's internal public key. This can be used to validate Morio's JWTs`,
+    responses: {
+      200: response('Public Key', examples.obj.pubkey),
+      ...errorResponse(`morio.api.info.unavailable`),
+    },
+  })
+
+  api.get('/pubkey.pem', {
+    tags: ['anonymous', 'cryptography'],
+    summary: `Get public key.pem`,
+    description: `Returns Morio's internal public key as a PEM file. This can be used to validate Morio's JWTs`,
+    responses: {
+      200: response('PublicKey.pem', examples.obj.pubkey.pubkey, false, 'application/x-pem-file'),
+      ...errorResponse(`morio.api.info.unavailable`),
+    },
+  })
+
   api.get('/downloads', {
     ...shared,
-    summary: `Get the list of downloads that are available`,
+    summary: `List downloads`,
     description: `Returns a list of files in the download folder that can be downloaded from the API`,
     responses: {
       200: response('List of files', examples.res.downloads),
@@ -29,7 +49,7 @@ export default (api) => {
 
   api.get('/idps', {
     tags: ['anonymous', 'authentication'],
-    summary: `Get the list of available identity providers`,
+    summary: `List identity providers`,
     description: `Returns information about the available identity providers (IDPs). Useful for frontend integration.`,
     responses: {
       200: response('List of IDPs', examples.res.idps),
@@ -38,7 +58,7 @@ export default (api) => {
 
   api.get('/jwks', {
     tags: ['anonymous', 'authentication'],
-    summary: `Get the JSON Web Key Set (JWKS) of Morio`,
+    summary: `List JWKS`,
     description: `Returns information to verify the JSON Web Tokens (JWT) were issued by this Morio deployment. Useful for integration with exteral services. See [RFC 7517](https://datatracker.ietf.org/doc/html/rfc7517)`,
     responses: {
       200: response('JWKS data', examples.res.jwks),
@@ -47,7 +67,7 @@ export default (api) => {
 
   api.get('/status', {
     ...shared,
-    summary: `Get the current status of Morio`,
+    summary: `Get status`,
     description: `Returns information about how Morio is doing. Useful for monitoring.`,
     responses: {
       200: response('Morio Status', examples.res.status),
@@ -57,7 +77,7 @@ export default (api) => {
 
   api.get('/up', {
     ...shared,
-    summary: `Quick check to verify the API is up`,
+    summary: `API Healthcheck`,
     description: `Returns status code 204 if the API is up. No response body or data is returned. Useful for a quick healhcheck.`,
     responses: {
       204: { description: 'No response body' },
@@ -66,8 +86,8 @@ export default (api) => {
 
   api.post('/validate/settings', {
     tags: ['anonymous', 'settings'],
-    summary: `Validates Morio settings`,
-    description: `Returns status code 200 if the API is up. No response body or data is returned. Useful for a quick healhcheck.`,
+    summary: `Validate settings`,
+    description: `Will validate settings so you can deploy them with confidence.`,
     requestBody: {
       description: 'The Morio settings you want to validate',
       required: true,
@@ -75,6 +95,26 @@ export default (api) => {
         'application/json': {
           schema: j2s(schema['req.setup']).swagger,
           example: examples.obj.settings.cluster1,
+        },
+      },
+    },
+    responses: {
+      200: response('Validation report', examples.res.validateSettings),
+      ...errorResponse(`morio.api.schema.violation`),
+    },
+  })
+
+  api.post('/validate/preseed', {
+    tags: ['anonymous', 'settings'],
+    summary: `Validate preseed settings`,
+    description: `Will validate preseed settings so you can deploy them with confidence.`,
+    requestBody: {
+      description: 'The Morio preseed settings you want to validate',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.preseed']).swagger,
+          example: examples.obj.preseed,
         },
       },
     },

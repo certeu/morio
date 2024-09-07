@@ -45,6 +45,8 @@ import settingsTokens from './settings.tokens.json' with { type: 'json' }
 import settingsUi from './settings.ui.json' with { type: 'json' }
 import jwt from './jwt.json' with { type: 'json' }
 import pkgDefaults from './pkg-defaults.json' with { type: 'json' }
+import preseed from './preseed.json' with { type: 'json' }
+import pubkey from './pubkey.json' with { type: 'json' }
 
 export const settings = {
   cluster1: {
@@ -66,6 +68,8 @@ export const examples = {
     jwt: jwt.jwt,
     settings,
     pkgDefaults,
+    preseed,
+    pubkey,
   },
   req: {
     activateAccount: activateAccount.req,

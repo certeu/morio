@@ -13,6 +13,7 @@ import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { resolveServiceConfiguration } from '#config'
+import { loadPreseededSettings } from '#shared/loaders'
 
 /**
  * This settings controller handles settings routes
@@ -23,7 +24,7 @@ export function Controller() {}
 
 const ensureTokenSecrecy = (secrets) => {
   for (let [key, val] of Object.entries(secrets)) {
-    if (!utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
+    if (!val?.vault && !utils.isEncrypted(val)) secrets[key] = utils.encrypt(val)
   }
 
   return secrets
@@ -37,7 +38,7 @@ const ensureTokenSecrecy = (secrets) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.deploy = async (req, res) => {
+Controller.prototype.deploy = async function (req, res) {
   /*
    * Validate request against schema, but strip headers from body first
    */
@@ -50,30 +51,15 @@ Controller.prototype.deploy = async (req, res) => {
     })
   } else log.info(`Processing request to deploy new settings`)
 
-  /*
-   * Generate time-stamp for use in file names
-   */
-  const time = Date.now()
-  log.info(`New settings will be tracked as: ${time}`)
-
-  /*
-   * Handle secrets
-   */
-  if (valid.tokens?.secrets) valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
-
-  /*
-   * Write the protected valid settings to disk
-   */
-  log.debug(`Writing new settings to settings.${time}.yaml`)
-  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
-  if (!result) return res.status(500).send({ errors: ['Failed to write new settings to disk'] })
+  const result = await deployNewSettings(valid)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
 
   /*
    * Don't await reload, just return
    */
   reload({ hotReload: true })
 
-  return res.send({ result: 'success', settings: utils.getSanitizedSettings() })
+  return res.status(204).send()
 }
 
 /**
@@ -84,7 +70,46 @@ Controller.prototype.deploy = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.setup = async (req, res) => {
+Controller.prototype.setup = async function (req, res) {
+  /*
+   * Only allow this endpoint when running in ephemeral mode
+   */
+  if (!utils.isEphemeral())
+    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
+
+  /*
+   * Strip headers from body
+   */
+  const settings = { ...req.body }
+  delete settings.headers
+
+  /*
+   * Handle initial setup
+   */
+  const [data, error] = await initialSetup(req, settings)
+
+  /*
+   * Send error, or data
+   */
+  if (data === false && error) return utils.sendErrorResponse(res, error[0], req.url, error?.[1])
+  else res.send(data)
+
+  /*
+   * Trigger a reload, but don't await it.
+   */
+  log.info(`Bring Morio out of ephemeral mode`)
+  return reload({ initialSetup: true })
+}
+
+/**
+ * Preseed initial settings
+ *
+ * This will write the preseed config to disk and restart Morio
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.preseed = async function (req, res) {
   /*
    * Only allow this endpoint when running in ephemeral mode
    */
@@ -96,8 +121,8 @@ Controller.prototype.setup = async (req, res) => {
    */
   const body = { ...req.body }
   delete body.headers
-  const [valid, err] = await utils.validate(`req.settings.setup`, body)
-  if (!valid?.cluster) {
+  const [preseed, err] = await utils.validate(`req.settings.preseed`, body)
+  if (!preseed?.base) {
     return utils.sendErrorResponse(
       res,
       'morio.core.schema.violation',
@@ -107,12 +132,126 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Check whether we can figure out who we are
+   * Load the preseeded settings
    */
-  const node = await localNodeInfo(req.body)
+  const settings = await loadPreseededSettings(body, log)
+
+  /*
+   * From here on, handle it like a regular setup
+   */
+  const [data, error] = await initialSetup(req, settings)
+
+  /*
+   * Send error, or data
+   */
+
+  if (data === false && error) return utils.sendErrorResponse(res, error[0], req.url, error?.[1])
+  else res.send(data)
+
+  /*
+   * Trigger a reload, but don't await it.
+   */
+  log.info(`Bring Morio out of ephemeral mode`)
+  return reload({ initialSetup: true })
+}
+
+/**
+ * Soft restart core (aka reload)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.restart = async function (req, res) {
+  reload({ restart: true })
+  return res.status(204).send()
+}
+
+/**
+ * Reseed the settings
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.reseed = async function (req, res) {
+  /*
+   * Load the preseeded settings
+   */
+  const settings = await loadPreseededSettings(utils.getSettings('preseed', log))
+
+  /*
+   * Write to disk
+   */
+  const result = await deployNewSettings(settings)
+  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
+
+  /*
+   * Don't await reload, just return
+   */
+  reload({ hotReload: true })
+
+  return res.status(204).send()
+}
+
+/**
+ * This is a helper method to figure who we are.
+ * This is most relevant when we have a cluster.
+ *
+ * @param {object} body - The request body
+ * @return {object} data - Data about this node
+ */
+const localNodeInfo = async function (body) {
+  /*
+   * The API injects the headers into the body
+   * so we will look at the X-Forwarded-Host header
+   * and hope that it matches one of the cluster nodes
+   */
+  let fqdn = false
+  const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
+  for (const header of ['x-forwarded-host', 'host']) {
+    const hval = (body.headers?.[header] || '').toLowerCase()
+    if (hval && nodes.includes(hval)) fqdn = hval
+  }
+
+  /*
+   * If we cannot figure it out, return false
+   */
+  if (!fqdn) return false
+
+  /*
+   * Else return uuid, hostname, and IP
+   */
+  return {
+    ...utils.getNode(),
+    fqdn,
+    hostname: fqdn.split('.')[0],
+    ip: await resolveHostAsIp(fqdn),
+    serial: nodes.indexOf(fqdn) + 1,
+  }
+}
+
+const initialSetup = async function (req, settings) {
+  /*
+   * Validate settings against schema
+   */
+  const [valid, err] = await utils.validate(`req.settings.setup`, settings)
+  if (!valid?.cluster) {
+    return [
+      false,
+      ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
+    ]
+  }
+
+  /*
+   * Check whether we can figure out who we are
+   * Need to merge the loaded settings with the request headers
+   */
+  const node = await localNodeInfo({ ...settings, headers: req.body.headers })
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
-    return utils.sendErrorResponse(res, 'morio.core.settings.fqdn.mismatch', req.url)
+    return [
+      false,
+      ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
+    ]
   } else log.debug(`Processing request to setup Morio with provided settings`)
 
   /*
@@ -196,11 +335,11 @@ Controller.prototype.setup = async (req, res) => {
   }
 
   /*
-   * Write the valid settings to disk
+   * Write the settings to disk
    */
   log.debug(`Writing initial settings to settings.${time}.yaml`)
   let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
-  if (!result) return res.status(500).send({ errors: ['Failed to write initial settings to disk'] })
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
    * Also write the keys to disk
@@ -208,77 +347,54 @@ Controller.prototype.setup = async (req, res) => {
    */
   log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, utils.getKeys())
-  if (!result) return res.status(500).send({ errors: ['Failed to write keys to disk'] })
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
    * Write the node info to disk
    */
   log.debug(`Writing node data to node.json`)
   result = await writeJsonFile(`/etc/morio/node.json`, node)
-  if (!result) return res.status(500).send({ errors: ['Failed to write node info to disk'] })
+  if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
-   * Prepare data to return
+   * The data to return
    * The Morio Root Token is actually the passphrase used to encrypt the private key
    */
-  const data = {
-    result: 'success',
-    uuids: {
-      node: node.uuid,
-      cluster: keys.cluster,
+  return [
+    {
+      result: 'success',
+      uuids: {
+        node: node.uuid,
+        cluster: keys.cluster,
+      },
+      root_token: {
+        about:
+          'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
+        value: keys.mrt,
+      },
     },
-    root_token: {
-      about:
-        'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-      value: keys.mrt,
-    },
-  }
-
-  /*
-   * Finalize the response
-   */
-  res.send(data)
-
-  /*
-   * Trigger a reload, but don't await it.
-   */
-  log.info(`Bring Morio out of ephemeral mode`)
-  return reload({ initialSetup: true })
+    false,
+  ]
 }
 
-/**
- * This is a helper method to figure who we are.
- * This is most relevant when we have a cluster.
- *
- * @param {object} body - The request body
- * @return {object} data - Data about this node
- */
-const localNodeInfo = async (body) => {
+const deployNewSettings = async function (settings) {
   /*
-   * The API injects the headers into the body
-   * so we will look at the X-Forwarded-Host header
-   * and hope that it matches one of the cluster nodes
+   * Generate time-stamp for use in file names
    */
-  let fqdn = false
-  const nodes = (body.cluster?.broker_nodes || []).map((node) => node.toLowerCase())
-  for (const header of ['x-forwarded-host', 'host']) {
-    const hval = (body.headers?.[header] || '').toLowerCase()
-    if (hval && nodes.includes(hval)) fqdn = hval
-  }
+  const time = Date.now()
+  log.info(`New settings will be tracked as: ${time}`)
 
   /*
-   * If we cannot figure it out, return false
+   * Handle secrets
    */
-  if (!fqdn) return false
+  if (settings.tokens?.secrets)
+    settings.tokens.secrets = ensureTokenSecrecy(settings.tokens.secrets)
 
   /*
-   * Else return uuid, hostname, and IP
+   * Write the protected settings to disk
    */
-  return {
-    ...utils.getNode(),
-    fqdn,
-    hostname: fqdn.split('.')[0],
-    ip: await resolveHostAsIp(fqdn),
-    serial: nodes.indexOf(fqdn) + 1,
-  }
+  log.debug(`Writing new settings to settings.${time}.yaml`)
+  const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, settings)
+
+  return result
 }

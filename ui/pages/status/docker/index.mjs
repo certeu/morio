@@ -2,15 +2,7 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { Card } from 'components/card.mjs'
-import {
-  ContainerIcon,
-  ContainerImageIcon,
-  LayersIcon,
-  ServersIcon,
-  StorageIcon,
-  TaskIcon,
-  WifiIcon,
-} from 'components/icons.mjs'
+import { ContainerIcon, ContainerImageIcon, WifiIcon } from 'components/icons.mjs'
 import { Docker } from 'components/brands.mjs'
 import { DockerInfo, DockerDf, DockerVersion } from 'components/docker/index.mjs'
 
@@ -27,44 +19,20 @@ const StatusPage = (props) => {
           <Card
             title="Containers"
             href="/status/docker/containers"
-            desc="See which containers are running, or not running, start and stop containers, or inspect them."
+            desc="List running containers, change their state, or inspect their details."
             Icon={ContainerIcon}
           />
           <Card
             href="/status/docker/images"
             title="Images"
-            desc="See which container images are availabe, pull new images, or purge the image cache."
+            desc="List available container images, and inspect their details."
             Icon={ContainerImageIcon}
           />
           <Card
             href="/status/docker/networks"
             title="Networks"
-            desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
+            desc="List available Docker networks, and inspect their details."
             Icon={WifiIcon}
-          />
-          <Card
-            href="/status/docker/nodes"
-            title="Nodes"
-            desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
-            Icon={ServersIcon}
-          />
-          <Card
-            href="/status/docker/services"
-            title="Services"
-            desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
-            Icon={LayersIcon}
-          />
-          <Card
-            href="/status/docker/tasks"
-            title="Tasks"
-            desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
-            Icon={TaskIcon}
-          />
-          <Card
-            href="/status/docker/volumes"
-            title="Volumes"
-            desc="Inspect the Docker networking stack, list containers internal IP addresses, and more."
-            Icon={StorageIcon}
           />
         </div>
       </ContentWrapper>

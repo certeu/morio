@@ -12,19 +12,9 @@ export function routes(app) {
   const PREFIX = store.prefix
 
   /*
-   * Hit this route to get the Morio status
-   */
-  app.get(`${PREFIX}/status`, Status.status)
-
-  /*
    * Hit this route to get the Morio info (no core outreach)
    */
   app.get(`${PREFIX}/info`, Status.info)
-
-  /*
-   * Hit this route to get the Morio status logs
-   */
-  app.get(`${PREFIX}/status_logs`, Status.statusLogs)
 
   /*
    * Hit this route to get the available downloads

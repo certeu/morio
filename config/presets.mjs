@@ -39,6 +39,16 @@ export const presets = {
   MORIO_ERRORS_WEB_PREFIX: 'https://morio.it/docs/reference/errors/',
 
   /*
+   * Docker presets
+   */
+
+  // The default log driver
+  MORIO_DOCKER_LOG_DRIVER: 'journald',
+
+  // Allows adding an extra host, useful for developers
+  MORIO_DOCKER_ADD_HOST: false,
+
+  /*
    * API presets
    */
 
@@ -94,8 +104,11 @@ export const presets = {
   // External port for the RedPanda Admin API
   MORIO_BROKER_ADMIN_API_PORT: 9644,
 
-  // External port for the RedPadna proxy (http-rest) API
+  // External port for the RedPanda proxy (http-rest) API
   MORIO_BROKER_REST_API_PORT: 8082,
+
+  // Port for the RedPanda RPC server
+  MORIO_BROKER_RPC_SERVER_PORT: 33145,
 
   /*
    * CA presets
@@ -223,6 +236,19 @@ export const presets = {
 
   // Timeout URL check after this many milliseconds
   MORIO_UI_TIMEOUT_URL_CHECK: 1500,
+
+  /*
+   * Watcher presets
+   */
+
+  // Port for the HTTP listener (for metrics)
+  MORIO_WATCHER_HTTP_PORT: 5066,
+
+  // Watcher prefix (since the watcher API is behind Traefik)
+  MORIO_WATCHER_PREFIX: '/-/watcher',
+
+  // Watcher UID inside container
+  MORIO_WATCHER_UID: 1000,
 
   /*
    * X509 presets

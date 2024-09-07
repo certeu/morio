@@ -22,7 +22,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.list = async (req, res) => {
+Controller.prototype.list = async function (req, res) {
   /*
    * Check user
    */
@@ -46,7 +46,7 @@ Controller.prototype.list = async (req, res) => {
  * @param {string} req.body.provider - The provider (local)
  * @param {object} res - The response object from Express
  */
-Controller.prototype.create = async (req, res) => {
+Controller.prototype.create = async function (req, res) {
   /*
    * Check user
    */
@@ -109,7 +109,7 @@ Controller.prototype.create = async (req, res) => {
  * @param {string} req.body.provider - The provider (local)
  * @param {object} res - The response object from Express
  */
-Controller.prototype.activate = async (req, res) => {
+Controller.prototype.activate = async function (req, res) {
   /*
    * Validate input
    */
@@ -164,7 +164,7 @@ Controller.prototype.activate = async (req, res) => {
  * @param {string} req.body.provider - The provider (local)
  * @param {object} res - The response object from Express
  */
-Controller.prototype.activateMfa = async (req, res) => {
+Controller.prototype.activateMfa = async function (req, res) {
   /*
    * Validate input
    */

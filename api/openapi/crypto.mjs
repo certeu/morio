@@ -3,13 +3,13 @@ import { schema } from '../src/schema.mjs'
 import { response, errorResponses, formatResponseExamples } from './index.mjs'
 import { examples } from './examples/json-loader.mjs'
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['cryptography'] }
   api.tag('cryptography', 'Endpoints related to cryptography')
 
   api.post('/ca/certificate', {
     ...shared,
-    summary: `Generate an X.509 certificate`,
+    summary: `Generate X.509 certificate`,
     description: `Generates an X.509 certificate, issued by Morio's internal Certificate Authority`,
     requestBody: {
       description: 'The Morio settings you want to validate',

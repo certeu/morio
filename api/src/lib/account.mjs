@@ -15,18 +15,21 @@ export const asNull = () => null
  * @param {string} username - The username (eg: 'Tony Soprano ')
  * @return {string} username - The username cleaned (eg: 'tony soprano')
  */
-export const clean = (username) =>
-  username === null ? null : String(username).toLowerCase().trim()
+export function clean(username) {
+  return username === null ? null : String(username).toLowerCase().trim()
+}
 
 /**
  * Helper method to force data to a string
  */
-export const asString = (data) => (data === null ? null : String(data))
+export function asString(data) {
+  return data === null ? null : String(data)
+}
 
 /**
  * Helper method to force data to a (known) status
  */
-export const asStatus = (data) => {
+export function asStatus(data) {
   const s = String(data).toLowerCase()
   if (statuses.includes(s)) return s
   else {
@@ -38,17 +41,21 @@ export const asStatus = (data) => {
 /**
  * Helper method to force data to a JSON string
  */
-export const asJson = (data) => JSON.stringify(data)
+export function asJson(data) {
+  return JSON.stringify(data)
+}
 
 /**
  * Helper method to parse data from a JSON string
  */
-export const fromJson = (data) => JSON.parse(data)
+export function fromJson(data) {
+  return JSON.parse(data)
+}
 
 /**
  * Helper method to force data to a (known) role
  */
-export const asRole = (data) => {
+export function asRole(data) {
   const r = String(data).toLowerCase()
   if (roles.includes(r)) return r
   else {
@@ -60,7 +67,7 @@ export const asRole = (data) => {
 /**
  * Helper method to force data to a (known) provider
  */
-const asProvider = (data) => {
+function asProvider(data) {
   const p = String(data).toLowerCase()
   if (Object.keys(utils.getSettings('iam.providers', {})).includes(p)) return p
   else {
@@ -72,19 +79,25 @@ const asProvider = (data) => {
 /**
  * Helper method to force data to a timestamp
  */
-export const asTime = (data) => (data ? new Date(data).toISOString() : new Date().toISOString())
+export function asTime(data) {
+  return data ? new Date(data).toISOString() : new Date().toISOString()
+}
 
 /**
  * Helper method to return the full id (provider + '.' + id)
  * @return null
  */
-export const fullId = (provider, id) => `${String(provider)}.${String(id)}`
+export function fullId(provider, id) {
+  return `${String(provider)}.${String(id)}`
+}
 
 /**
  * Helper method to return the username based on the full id (provider + '.' + id)
  * @return null
  */
-const username = (fullId = '') => String(fullId).split('.').slice(1).join('.')
+function username(fullId = '') {
+  return String(fullId).split('.').slice(1).join('.')
+}
 
 /*
  * This maps the fields to a method to format the field
@@ -121,7 +134,7 @@ const values = {
  * @param {string} id - The unique id (the username)
  * @return {object} data - The data saved for the account
  */
-export const loadAccount = async (provider, id) => {
+export async function loadAccount(provider, id) {
   const [status, result] = await db.read(`SELECT * FROM accounts WHERE id=:id`, {
     id: fields.id(fullId(provider, id)),
   })
@@ -144,17 +157,18 @@ export const loadAccount = async (provider, id) => {
  * @param {string} id - The unique id (the username)
  * @return {object} keys - The API keys saved for the account
  */
-export const loadAccountApikeys = async (provider, id) =>
-  await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
+export async function loadAccountApikeys(provider, id) {
+  return await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
     id: fields.id(fullId(provider, id)),
   })
+}
 
 /**
  * Helper method to create an account
  *
  * @param {object} data - The data to save for the account
  */
-export const saveAccount = async (provider = false, id = false, data) => {
+export async function saveAccount(provider = false, id = false, data) {
   /*
    * We need at least an ID and provider
    */
@@ -190,7 +204,7 @@ export const saveAccount = async (provider = false, id = false, data) => {
  *
  * @return {object} keys - The API keys saved for the account
  */
-export const listAccounts = async () => {
+export async function listAccounts() {
   const query = `SELECT id, about, status, role, created_by, created_at, updated_by, updated_at, last_login, provider FROM accounts`
   const [status, result] = await db.read(query)
 
@@ -203,13 +217,14 @@ export const listAccounts = async () => {
  * @param {string} provider - The ID of the identity provider
  * @param {string} id - The id of the account (the username)
  */
-export const updateLastLoginTime = async (provider, id, extraData = {}) =>
-  await saveAccount(provider, id, { last_login: 'datetime()', ...extraData })
+export async function updateLastLoginTime(provider, id, extraData = {}) {
+  return await saveAccount(provider, id, { last_login: 'datetime()', ...extraData })
+}
 
 /**
  * Helper method to parse results into an array of objects
  */
-const accountsAsList = (result) => {
+function accountsAsList(result) {
   const cols = result?.results?.[0]?.columns
   const list = (result?.results?.[0]?.values || []).map((entry) => {
     const account = {}

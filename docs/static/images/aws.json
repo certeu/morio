@@ -1,0 +1,69 @@
+[
+  {
+    "Architecture": "x86_64",
+    "CreationDate": "2024-08-13T12:53:03.000Z",
+    "ImageId": "ami-0d47a403966e1ad81",
+    "ImageLocation": "719603448334/morio--debian-12",
+    "ImageType": "machine",
+    "Public": true,
+    "OwnerId": "719603448334",
+    "PlatformDetails": "Linux/UNIX",
+    "UsageOperation": "RunInstances",
+    "State": "available",
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/xvda",
+        "Ebs": {
+          "DeleteOnTermination": true,
+          "Iops": 3000,
+          "SnapshotId": "snap-012405142e65ac0e2",
+          "VolumeSize": 8,
+          "VolumeType": "gp3",
+          "Throughput": 125,
+          "Encrypted": false
+        }
+      }
+    ],
+    "Description": "Morio provides the plumbing for your observability needs",
+    "EnaSupport": true,
+    "Hypervisor": "xen",
+    "Name": "morio--debian-12",
+    "RootDeviceName": "/dev/xvda",
+    "RootDeviceType": "ebs",
+    "SriovNetSupport": "simple",
+    "Tags": [
+      {
+        "Key": "os",
+        "Value": "debian"
+      },
+      {
+        "Key": "base_ami_id",
+        "Value": "ami-064519b8c76274859"
+      },
+      {
+        "Key": "os_version",
+        "Value": "12"
+      },
+      {
+        "Key": "base_ami_name",
+        "Value": "debian-12-amd64-20240717-1811"
+      },
+      {
+        "Key": "debian_release",
+        "Value": "bookworm"
+      },
+      {
+        "Key": "morio",
+        "Value": "true"
+      },
+      {
+        "Key": "morio_version",
+        "Value": "0.3.0"
+      }
+    ],
+    "VirtualizationType": "hvm",
+    "DeprecationTime": "2026-08-13T12:53:03.000Z",
+    "SourceInstanceId": "i-07ba002150704e15f",
+    "DeregistrationProtection": "disabled"
+  }
+]

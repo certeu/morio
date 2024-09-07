@@ -65,7 +65,7 @@ const strategy = (id) => {
  * @param {string} data.password - The password for said username to verify
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
-export const ldap = (id, data, req) => {
+export function ldap(id, data, req) {
   /*
    * Add strategy to passport if it hasn't been used yet
    */
@@ -125,7 +125,7 @@ export const ldap = (id, data, req) => {
   })
 }
 
-const checkRole = (requestedRole = false, config = false, data = false) => {
+function checkRole(requestedRole = false, config = false, data = false) {
   /*
    * Make sure we have everything to check the role
    * And if not, deny access
@@ -152,7 +152,7 @@ const checkRole = (requestedRole = false, config = false, data = false) => {
   return [Number(approvedLevel) >= Number(roles.indexOf(requestedRole)), approvedLevel]
 }
 
-const caseInsensitiveGet = (key, obj = {}) => {
+function caseInsensitiveGet(key, obj = {}) {
   for (const k of Object.keys(obj)) {
     if (k.toLowerCase() === String(key).toLowerCase()) return obj[k]
   }

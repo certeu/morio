@@ -4,7 +4,9 @@
  * @param {number} timestamp - Node timestamp (milliseconds since epoch)
  * @return {number} delta - Number of seconds since the timestamp
  */
-export const secondsSince = (timestamp) => (Date.now() - timestamp) / 1000
+export function secondsSince(timestamp) {
+  return (Date.now() - timestamp) / 1000
+}
 
 /*
  * Returns time since a given timestamp
@@ -13,7 +15,7 @@ export const secondsSince = (timestamp) => (Date.now() - timestamp) / 1000
  * @return {object} result - An object with time_since and seconds_since keys
  * where time_since is a natural language approximation of seconds since
  */
-export const timeSince = (timestamp) => {
+export function timeSince(timestamp) {
   let time_since
 
   /*

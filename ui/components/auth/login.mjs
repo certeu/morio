@@ -75,7 +75,7 @@ const tabOrder = (idps, ui, showAll) => {
 
 export const Login = ({ setAccount, account = false, role = false }) => {
   const [error, setError] = useState(false)
-  const [idps, setIdps] = useState({})
+  const [idps, setIdps] = useState(false)
   const [ui, setUi] = useState({})
   const [showAll, setShowAll] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
@@ -281,8 +281,10 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         )
       ) : tabList.length > 0 ? (
         <Tabs tabs={tabList.map((id) => idps[id].label || id)}>{tabs}</Tabs>
+      ) : idps === false ? (
+        <Popout warning>Could not load identity providers from the API</Popout>
       ) : (
-        <Popout warning>Failed to load identity providers</Popout>
+        <Popout note>No identity providers are currently configured</Popout>
       )}
       {onlyMrt ? <MrtProvider label="Morio Root Token" {...providerProps} /> : null}
       {error ? (

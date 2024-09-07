@@ -74,11 +74,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-            //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/proxy:/etc/morio/proxy`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs:/var/log/morio`,
+            //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared:/etc/morio/shared`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/proxy:/etc/morio/proxy`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
           ],
       // Command
       command: [
@@ -133,7 +133,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
               //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
               '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
               // Point to root CA (will only work after CA is initialized)
-              '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+              '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
             ]
       ),
     },

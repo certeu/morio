@@ -1,0 +1,37 @@
+name: Publish moriod .deb package
+
+on:
+  # Only run this on a new release
+  release:
+    types: [published]
+
+jobs:
+  build_and_push_to_packagecloud:
+    name: Build & Publish .deb Package
+    runs-on: ubuntu-latest
+    #
+    # We build this on Debian 12, but it _should_ work for any .deb based distros
+    #
+    container: debian:bookworm
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Update dependencies
+        run: 'apt update && apt upgrade -y'
+
+      - name: Install curl
+        run: 'apt install -y curl'
+
+      - name: Install nvm
+        run: 'touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash'
+
+      - name: Install node
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm install lts/iron'
+
+      - name: Build & Publish the .deb package
+        env:
+          PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
+        run: 'export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && nvm use lts/iron && npm run ci:build.moriod.deb publish'

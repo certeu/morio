@@ -9,33 +9,6 @@ import { store } from '../lib/store.mjs'
 export function Controller() {}
 
 /**
- * Status
- *
- * This returns the current status
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.status = async (req, res) => {
-  /*
-   * Just get the status from core and pass it with some tweaks
-   */
-  const [status, result] = await store.core.get(`/status`)
-
-  if (!status) return res.status(500).send({ status, result }).end()
-
-  /*
-   * Override name,
-   */
-  result.about = 'Morio API'
-  result.name = '@morio/api'
-  result.config_resolved = store.info.config_resolved
-
-  if ([200, 503].includes(status)) return res.status(status).send(result)
-  else return res.status(500).send({})
-}
-
-/**
  * Info
  *
  * This returns the current info
@@ -46,23 +19,8 @@ Controller.prototype.status = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.info = async (req, res) => res.send(store.info)
-
-/**
- * Status logs
- *
- * This returns the status logs
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.statusLogs = async (req, res) => {
-  /*
-   * Just get the status from core and pass it
-   */
-  const [status, result] = await store.core.get(`/status_logs`)
-
-  return res.status(status).send(result)
+Controller.prototype.info = async function (req, res) {
+  return res.send(store.info)
 }
 
 /**
@@ -73,7 +31,7 @@ Controller.prototype.statusLogs = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.listDownloads = async (req, res) => {
+Controller.prototype.listDownloads = async function (req, res) {
   const list = await globDir('/morio/downloads')
 
   if (list) return res.send(list.map((file) => file.replace('/morio/downloads', '/downloads')))

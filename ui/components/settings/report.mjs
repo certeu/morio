@@ -20,12 +20,12 @@ export const SettingsReport = ({ report }) => (
         </div>
       </div>
     </Box>
-    <Box color={report.valid ? 'success' : 'error'}>
+    <Box color={report.deployable ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
-        {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
+        {report.deployable ? <OkIcon stroke={4} /> : <WarningIcon />}
         <div className="text-inherit">
           These settings
-          {report.valid ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
+          {report.deployable ? <span> can </span> : <b className="px-1 underline">CANNOT</b>}
           be deployed
         </div>
       </div>

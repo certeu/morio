@@ -9,6 +9,7 @@ const ephemeralRoutes = [
   'GET:/config',
   'GET:/reload',
   'POST:/setup',
+  'POST:/preseed',
   'POST:/cluster/join',
   'POST:/cluster/heartbeat',
 ]
@@ -22,7 +23,7 @@ const reloadRoutes = ['GET:/status']
  * Middleware to handle endpoints that are not available
  * in ephemeral mode or while resolving the configuration
  */
-export const guardRoutes = (req, res, next) => {
+export function guardRoutes(req, res, next) {
   log.debug(`${req.method} ${req.url}`)
   if (
     utils.isEphemeral() &&

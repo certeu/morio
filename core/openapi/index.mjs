@@ -18,8 +18,12 @@ import loadStatusEndpoints from './status.mjs'
  * Can't load the errors in the shared code as the are different per API
  * so instead, we wrap these methods and pass them in
  */
-const errorResponse = (template) => sharedErrorResponse(template, errors)
-const errorResponses = (templates) => sharedErrorResponses(templates, errors)
+function errorResponse(template) {
+  return sharedErrorResponse(template, errors)
+}
+function errorResponses(templates) {
+  return sharedErrorResponses(templates, errors)
+}
 
 /**
  * Setup a helper object to build out the OpenAPI specification

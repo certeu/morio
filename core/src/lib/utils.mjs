@@ -2,10 +2,10 @@ import { restClient, resolveHostAsIp } from '#shared/network'
 import { Store, unshift } from '#shared/store'
 import { logger } from '#shared/logger'
 import { getPreset, inProduction } from '#config'
-import { writeYamlFile, mkdir } from '#shared/fs'
 import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
+import { vaultGetSecret } from './vault.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -41,18 +41,9 @@ const store = new Store(log)
   })
 
 /*
- * Load all presets and write them to disk for other services to load
- * Note that this path we write to is inside the container
- * And since this is the first time we write to it, we cannot assume
- * the folder exists
+ * Load all presets
  */
 store.presets = loadAllPresets()
-try {
-  await mkdir('/etc/morio/shared')
-  await writeYamlFile('/etc/morio/shared/presets.yaml', store.presets)
-} catch (err) {
-  log.warn(err, 'Failed to write Morio presets to disk')
-}
 
 /*
  * Export an utils object to hold utility methods
@@ -148,7 +139,7 @@ utils.getClusterFqdn = () => {
 }
 
 /**
- * Helper method to get the data for a cluster rnode
+ * Helper method to get the data for a cluster node
  */
 utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], false)
 
@@ -267,6 +258,14 @@ utils.getHeartbeatOut = (fqdn) => store.get(['state', 'cluster', 'heartbeats', '
  * @return {object} info - The info object
  */
 utils.getInfo = () => store.get('info')
+
+/**
+ * Get internal service CN
+ *
+ * @param {string} service - The service name
+ * @return {string} fqdn - The internal CN (and fqdn)
+ */
+utils.getInternalServiceCn = (service) => `${service}.${utils.getClusterUuid()}.morio.internal`
 
 /**
  * Helper method to get the keys configuration
@@ -1148,6 +1147,12 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
     .send({ ...data, ...extraData })
     .end()
 }
+
+/**
+ * Unwrap a secret
+ */
+utils.unwrapSecret = async (key, val) =>
+  val?.vault ? await vaultGetSecret(key, val.vault) : utils.decrypt(val)
 
 /**
  * Add validate method for eacy access

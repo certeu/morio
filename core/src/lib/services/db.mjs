@@ -103,7 +103,7 @@ async function ensureLocalPrerequisites() {
  *
  * @return {bool} result - True if the database is up, false if not
  */
-const isDbUp = async () => {
+async function isDbUp() {
   const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
     ignoreCertificate: true,
     // This endpoint does not return JSON
@@ -116,7 +116,7 @@ const isDbUp = async () => {
 /**
  * Helper method to create database tables
  */
-const ensureTablesExist = async () => {
+async function ensureTablesExist() {
   for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema || {})) {
     log.debug(`Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])

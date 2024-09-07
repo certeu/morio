@@ -24,7 +24,7 @@ export function Controller() {}
  * @param {string} req.body.role - The role to assign to the key
  * @param {object} res - The response object from Express
  */
-Controller.prototype.create = async (req, res) => {
+Controller.prototype.create = async function (req, res) {
   /*
    * Check user
    */
@@ -87,7 +87,7 @@ Controller.prototype.create = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.list = async (req, res) => {
+Controller.prototype.list = async function (req, res) {
   /*
    * Check user
    */
@@ -115,7 +115,7 @@ Controller.prototype.list = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.update = async (req, res) => {
+Controller.prototype.update = async function (req, res) {
   /*
    * Check user
    */
@@ -190,7 +190,7 @@ Controller.prototype.update = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.delete = async (req, res) => {
+Controller.prototype.delete = async function (req, res) {
   /*
    * Check user
    */

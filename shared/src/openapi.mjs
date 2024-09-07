@@ -115,13 +115,18 @@ for (const method of ['get', 'post', 'patch', 'put', 'delete']) {
 /**
  * Helper method to define a response
  */
-export const response = (desc, example = false, examples = false) => {
+export function response(
+  desc,
+  example = false,
+  examples = false,
+  contentType = 'application/json'
+) {
   const res = {
     description: desc,
-    content: { 'application/json': {} },
+    content: {},
   }
-  if (example) res.content['application/json'] = { example }
-  else if (examples) res.content['application/json'] = { examples }
+  if (example) res.content[contentType] = { example }
+  else if (examples) res.content[contentType] = { examples }
 
   return res
 }
@@ -129,7 +134,7 @@ export const response = (desc, example = false, examples = false) => {
 /**
  * Helper method to define an error response
  */
-const errorResponse = (template, errors) => {
+function errorResponse(template, errors) {
   const err = errors[template]
   const data = {}
   data[err.status] = {
@@ -144,7 +149,7 @@ const errorResponse = (template, errors) => {
  * Helper method to define multipla error responses
  * Also allows multiple responses with the same status code
  */
-const errorResponses = (templates, errors) => {
+function errorResponses(templates, errors) {
   const codes = {}
   for (const template of templates) {
     const err = errors[template]
@@ -181,7 +186,7 @@ const errorResponses = (templates, errors) => {
 /**
  * Helper method to format response examples for OAS
  */
-const formatResponseExamples = (obj) => {
+function formatResponseExamples(obj) {
   const newObj = {}
   for (const [key, value] of Object.entries(obj)) newObj[key] = { value, title: 'banana' }
   return newObj

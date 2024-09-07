@@ -13,10 +13,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1
-  const PORTS = {
-    EXT: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
-    INT: utils.getPreset('MORIO_BROKER_KAFKA_API_INTERNAL_PORT'),
-  }
 
   return {
     /**
@@ -42,7 +38,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '18082:18082',
         '19082:19082',
         '19644:19644',
-        `${PORTS.EXT}:${PORTS.EXT}`,
+        `${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         '33145:33145',
       ],
       // Environment
@@ -58,9 +54,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker:/etc/redpanda`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
           ],
       // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
       aliases: ['rpadmin', 'rpproxy'],
@@ -68,8 +64,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        `--kafka-addr external://0.0.0.0:${PORTS.EXT}`,
-        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        `--kafka-addr external://0.0.0.0:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         `--rpc-addr 0.0.0.0:33145`,
         //'--default-log-level=debug',
       ],
@@ -132,7 +128,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         admin: [
           {
             address: '0.0.0.0',
-            port: 9644,
+            port: utils.getPreset('MORIO_BROKER_ADMIN_API_PORT'),
             name: 'external',
             advertise_address: utils.getNodeFqdn(),
           },
@@ -145,7 +141,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         rpc_server: {
           address: '0.0.0.0',
-          port: 33145,
+          port: utils.getPreset('MORIO_BROKER_RPC_SERVER_PORT'),
           name: 'external',
         },
 
@@ -155,7 +151,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         advertised_rpc_api: {
           address: utils.getNodeFqdn(),
-          port: 33145,
+          port: utils.getPreset('MORIO_BROKER_RPC_SERVER_PORT'),
         },
 
         /*
@@ -165,9 +161,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           {
             name: 'external',
             address: '0.0.0.0',
-            port: PORTS.EXT,
+            port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             advertise_address: utils.getNodeFqdn(),
-            advertise_port: PORTS.EXT,
+            advertise_port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
           },
         ],
 
@@ -214,7 +210,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         advertised_kafka_api: [
           {
             address: utils.getNodeFqdn(),
-            port: PORTS.EXT,
+            port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             name: 'external',
           },
         ],
@@ -276,7 +272,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         pandaproxy_api: [
           {
             address: `broker_${NODE}`,
-            port: 8082,
+            port: utils.getPreset('MORIO_BROKER_REST_API_PORT'),
             name: 'internal',
           },
         ],
@@ -332,7 +328,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
           prompt: '',
           from_cloud: false,
           kafka_api: {
-            brokers: [`${utils.getNodeFqdn()}:${PORTS.EXT}`],
+            brokers: [`${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`],
             tls: {
               key_file: '/etc/redpanda/tls-key.pem',
               cert_file: '/etc/redpanda/tls-cert.pem',
