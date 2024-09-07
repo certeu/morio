@@ -1,6 +1,17 @@
 import { generateTraefikConfig } from './index.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'rqlite/rqlite',
+  // Image tag (version) to run
+  tag: '8.26.7',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -17,12 +28,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'db',
-      // Image to run
-      image: 'rqlite/rqlite',
-      // Image tag (version) to run
-      tag: '8.26.7',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

@@ -1,5 +1,6 @@
 import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
+import { pullConfig } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
@@ -173,3 +174,14 @@ await writeFile(
 MORIO_VERSION=${pkg.version}
 `
 )
+
+/*
+ * also generate the pull-oci script
+ */
+const pulls = []
+for (const [service, config] of Object.entries(pullConfig)) {
+  pulls.push(`docker pull ${config.image}:${config.tag}`)
+}
+await writeFile(`scripts/pull-oci-images.sh`, "#!/bin/bash\n" + pulls.join("\n"), false, 0o755)
+
+

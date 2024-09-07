@@ -1,6 +1,17 @@
 import { YamlConfig } from '../yaml-config.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'traefik',
+  // Image tag (version) to run
+  tag: 'v3.0.4',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -46,14 +57,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'proxy',
       // Aliases to use on the docker network (used to add unit test alias)
       aliases: !PROD ? ['unit.test.morio.it'] : [],
-      // Image to run
-      image: 'traefik',
-      // Image tag (version) to run
-      tag: 'v3.0.4',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

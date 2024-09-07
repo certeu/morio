@@ -6,20 +6,25 @@ The Morio Core API is an [OpenAPI v3.1](https://swagger.io/specification/)
 compliant API internal to Morio and -- with the exception of a few endpoints --
 is not accessible to users.
 
+<Note>
+#### This API is safe to ignore
+The most important thing to know about the Core API is that
+you can safely ignore it. It is internal to Morio, and users or even
+administrators of Morio should never have to use it.
+
+</Note>
+
+This guide is intended for (aspiring) contributors, or anyone who would like to
+gain a deeper understanding of how Morio works under the hood.
+
 <Tip>
-### Core API Reference Documentation
+#### Core API Reference Documentation
 
 If you're already familiar with the API, and are merely looking
 for for answers on which endpoint to use or what data to expect, refer to
 [/docs/reference/apis/core](/docs/reference/apis/core).
 </Tip>
 
-If you're new to this API, then most important thing to understand is that you
-can safely ignore this API. It is internal only, and users or even
-administrators of Morio are not supposed to use it or understand it.
-
-This guide is intended for (aspiring) contributors, or anyone who would like to
-gain a deeper understanding of how Morio works under the hood.
 
 ## Purpose of Morio's Core API
 
@@ -35,7 +40,7 @@ Morio's Core API (the API) provides functionality that spans various domains:
 ## Accessing the API
 
 <Note>
-### Most Core API endpoints are not available in the network
+### Most Core API endpoints are not exposed
 As this is an internal API, the only endpoints that are available from the network are
 the `/status` endpoint and the `/cluster/join` and `/cluster/heartbeat` endpoints.
 </Note>
@@ -44,19 +49,10 @@ The API itself is available on all Morio nodes, and can be accessed under the
 prefix `/-/core/`.
 
 All documentation of API endpoints is relative to this prefix. So to access
-the `/status` endpoint of this API on a Morio node, you should use
-`https://[your-server-name]/-/core/status`.
-
-<Note>
-
-### This is a preset, we are using the default value in the documentation
-
-The prefix to the Morio API is stored in [the `MORIO_CORE_PREFIX` preset
-](/docs/reference/presets/morio_core_prefix).
-We are using `/-/core` here as that is the default value, but it is possible
-that this has been changed when Morio was deployed by your _LOMO_.
-
-</Note>
+the `/status` endpoint of this API on a Morio node, you should use:
+```
+https://[your-server-name]/-/core/status
+```
 
 If your server's DNS name
 is `example.morio.it` , you could run this curl command to get the `/status`
@@ -83,18 +79,29 @@ used:
 
 ### The `/status` endpoint
 
-Just as in [the Management API](/docs/guides/apis/api), this is a public or anonymous route.
-So no authentication is required.
+Just as in [the Management API](/docs/guides/apis/api), this is a public or
+anonymous route. So no authentication is required.
+
+<Note>
+#### Included in the `/status` endpoint of the Management API
+
+The [Management API](/docs/guides/apis/api) includes the core status in its own
+`/status` endpoint. So you do not need to hit this endpoint, you can use the
+regular API and check the `core` key for the core-specific status.
+
+</Note>
 
 ### The `/cluster/join` endpoint
 
 Perhaps counter-intuitively, this too is a public or anonymous route.
 However, it is only available while Morio is running in _ephemeral mode_.
-While in _ephemeral mode_ Morio will eagerly await either its initial setup, or a cluster join request.
+While in _ephemeral mode_ Morio will eagerly await either its initial setup, or
+a cluster join request.
 
 In other words, once Morio has received its initial settings, this endpoint
-will no longer be available, and instead return an error response of type
-[morio.core.ephemeral.required](/docs/reference/errors/morio.core.ephemeral.required/).
+will no longer be available, and instead return [an error response of type
+`morio.core.ephemeral.required`
+](/docs/reference/errors/morio.core.ephemeral.required/).
 
 ### The `/cluster/heartbeat` endpoint
 

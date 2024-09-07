@@ -4,7 +4,11 @@ tags:
   - contributors
 ---
 
+<!-- start-spellcheck-skip -->
+
 import { JargonTerms, TerminologyTerms } from '@site/src/theme/components/term.js'
+
+<!-- end-spellcheck-skip -->
 
 Improving our documentation is one of the easiest ways to start contributing to
 Morio. So if you spot a mistake or see something that you can improve, please
@@ -25,19 +29,16 @@ directly.
 
 ## Where to find our documentation
 
-We store our documentation as [Markdown](https://www.markdownguide.org/) in git
-and use [Docusaurus][docusaurus] to generate a static website from it,
-which we then publish at [morio.it](https://morio.it/).
+We store our documentation as [Markdown](https://www.markdownguide.org/) (nay
+_MDX_) in git and use [Docusaurus][docusaurus] to generate
+a static website from it, which we then publish at
+[morio.it](https://morio.it/).
 
 Inside our monorepo, the `docs` folder holds the docusaurus setup.
-Within that folder, the `docs` subfolder holds the actual markdown content.
+Within that folder, the `docs` subfolder holds the actual markdown/mdx content.
 
-So, relative to the monorepo root, you can find the markdown of our documentation under `docs/docs`.
-
-<Note>
-Apart from documentation, we also publish blog posts using the same docusaurus setup.  
-You can find those under `docs/blog`.
-</Note>
+So, relative to the monorepo root, you can find the source of our documentation
+under `docs/docs`.
 
 ## Folder structure & file names
 
@@ -46,13 +47,13 @@ The file names must always be `readme.mdx`.
 
 If we take this documentation guide as an example:
 
-- Relative url: <b>/docs/guides/contributors/docs</b>
-- Path to the markdown file: docs<b>/docs/guides/contributors/docs</b>/readme.mdx
+- Relative url: `/docs/guides/contributors/docs`
+- Path to the source file: `docs/docs/guides/contributors/docs/readme.mdx`
 
-That not only makes it easy to find the source markdown of any given page, it
-also has implications for how you should structure the markdown content:
+That not only makes it easy to find the source of any given page, it
+also has implications for how you should structure content:
 
-- All markdown files under `docs/docs` should be named `readme.mdx`
+- All content files under `docs/docs` should be named `readme.mdx`
 - All folders under `docs/docs` should have a URL-friendly name, using only the characters `a-z`, `0-9`, and `-`
 - Every folder should have a `readme.mdx`, no empty folders
 
@@ -72,6 +73,8 @@ Morio. So if you spot a mistake or see something that you can improve, please
 do not hesitate to do so.
 ```
 
+### Title
+
 The `title` entry is mandatory. In other words, **every documentation page must
 have its title set in front matter**.
 
@@ -85,7 +88,7 @@ on front matter in
 docs](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter)
 </Note>
 
-## Tags
+### Tags
 
 The front matter example above can be further extended to add tags to the page.
 Here is an example:
@@ -144,6 +147,25 @@ To add a tag, place it on a new line followed by `:`.
 <Tip>
 An overview of all tags is available at [/docs/tags](/docs/tags).
 </Tip>
+
+### Keywords
+
+Keywords are like tags but they are not centrally manages, and no pages are created to link togethere the pages with the same keywords.
+
+Instead, their use is intended to enhance search results as Docusaurus will use them to populate the HTML meta tags of the page.
+
+Here is an example:
+
+```md
+---
+title: Documentation Guide
+keywords:
+  - contributors
+  - documentation
+  - markdown
+  - mdx
+---
+```
 
 ## Custom components
 
@@ -427,83 +449,31 @@ especially when those terms are specific to Morio.
 
 To address this, we have extended Docusaurus with two custom features that help you demystify this type of content: **jargon** and **terminology**.
 
-### Jargon vs Terminology
+<Note>
+#### Jargon vs Terminology
 
 Both jargon and terminology can be anything that needs explaining.
 The difference is that jargon does not warrant or require its own dedicated documentation page.
-
-The following rules can guide you when deciding whether you should create a
-jargon term, add a terminology page, or take no action.
-
-1.  Is someone new to Morio expected to know this?
-2.  Would a simple Google search explain this?
-3.  Does this warrant its own documentation page?
-
-If the answers are **No**, **No**, **Yes**, create a terminology page.  
-If the answers are **No**, **No**, **No**, [create a jargon term](#creating-a-jargon-term).  
-For all other cases, no action is required.
-
-The decision tree below visualises these rules:
-
-<WithCaption caption="A decision tree to facilitate decisions about whether or not to create jargon or terminology">
-
-```mermaid
-graph TD;
-  noop["No action\nneeded"]
-  1["Is someone\nnew to Morio\nexpected to know this?"]
-  2["Would a simple\nGoogle search\nexplain this?"]
-  3["Does this warrant its\nown documentation page?"]
-  jargon["Create a jargon entry"]
-  terminology["Create a terminology page"]
-  1-- Yes -->noop
-  1-- No -->2
-  2-- No -->3
-  2-- Yes -->noop
-  3-- No -->jargon
-  3-- Yes -->terminology
-```
-
-</WithCaption>
-
-Let's use some examples to further clarify these rules:
-
-#### `IICB`: Create jargon term
-
-1. This is something rather niche that has little to no meaning outside the context of European Union's administration.
-2. People cannot be expected to know this, and a simple Google search is unlikely to help.
-3. Knowing what the IICB is not relevant for understanding Morio. So a dedicated documentation page is not needed.
-
-In this case, we create a jargon term: _IICB_.
-
-#### `flanking node`: Create terminology page
-
-1. This has a specific meaning in Morio and people cannot be expected to know this.
-2. Googling this won't help.
-3. This requires proper explanation. A documentation page is the best option here.
-
-In this case, we create a terminology page: _flanking node_.
-
-#### `TLS node`: Do nothing
-
-1. This is common terminology, people are unlikely to be confused by this. But even if they are...
-2. A simple Google query will explain this.
-
-In this case, we do nothing.
+</Note>
 
 ### Jargon
 
 #### Creating a jargon term
 
-To create a new jargon term, create a `name.md` file under <RepoFile>docs/docs/jargon</RepoFile>.
-The `name` of the file should follow [the same rules as folders under
+To create a new jargon term, create a `term.mdx` file under
+<RepoFile>docs/docs/jargon</RepoFile>.
+
+The name of the file (`term` in our example)
+should follow [the same rules as folders under
 `docs/docs`](#folder-structure--file-names): use only the characters `a-z`,
 `0-9`, and `-`.
 
-Inside the your `.md` file, you can use markdown content like in a regular documentation page.
+Inside the file, write content like like in a regular documentation page.
 
-#### Jargon properties
+#### Jargon front matter
 
-Jargon terms have the following properties that are used to render them on the page:
+Jargon terms have the following properties that can be set in front matter and
+are used to render them on the page:
 
 - `title`
   - **description**: The title used when displaying the jargon term's info
@@ -575,16 +545,10 @@ scripts](https://docs.npmjs.com/cli/v10/using-npm/scripts).
   </TabItem>
 </Tabs>
 
-<Note>
-#### This relies on the work done by the prebuild step
-
-When running docusaurus locally in develop mode, you will need to run `npm run
-prebuild` in the `docs` folder to ensure this works.
-</Note>
-
 #### Using a jargon term
 
-Once you have created a jargon term, you can use it by _emphasising_ it in your markdown content.
+Once you have created a jargon term, you can use it by _emphasising_ it in your
+content.
 
 For example, this markdown:
 
@@ -596,11 +560,15 @@ Will render as:
 
 I have no idea what _mdx_ is.
 
-The jargon term will be turned into a button that you can click to reveal the meaning of the term.
+The jargon term will be turned into a button that you can click to reveal the
+meaning of the term.
 
 <Tip>
+
 #### Jargon terms are case-insensitive
-You can write _mdx_, _MDX_, or even _mDx_, they will all trigger rendering the `mdx` jargon term.
+You can write _mdx_, _MDX_, or even _mDx_, they will all trigger rendering the
+`mdx` jargon term.
+
 </Tip>
 
 #### List of jargon terms
@@ -622,7 +590,8 @@ Then, add a `readme.mdx` file to the folder as you would for any documentation p
 
 #### Terminology properties
 
-Terminology terms have the following properties that are used to render them on the page:
+Terminology terms have the following properties that are set in front matter
+and control how they are rendered on the page:
 
 - `title`
   - **description**: The text used when displaying the terminology link
@@ -779,7 +748,7 @@ To a lesser extend, the same advice applies to links:
 
 #### Define jargon
 
-Don't use jargon without explaining it.
+Don't use jargon without giving readers an easy way to learn about it.
 
 #### More advice
 

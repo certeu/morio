@@ -2,8 +2,10 @@
 title: Monorepo Guide
 ---
 
-The Morio source code is hosted in the [certeu/morio][repo] repository on GitHub.
-This is a so-called _monorepo_, meaning that it combines the source code for
+The Morio source code is hosted in the [certeu/morio][repo] repository on
+GitHub, and a read-only mirror is available on
+[code.europa.eu](https://code.europa.eu/certeu/morio).
+Morio uses a so-called _monorepo_, meaning that it combines the source code for
 different aspects of the Morio project in a single repository.
 
 This guide will help you familiarise yourself with the repository layout, where
@@ -12,6 +14,7 @@ you can find what, as well as how to use the repository locally.
 ## Prerequisites
 
 To use our monorepo, you need **git** and **NodeJS**, as well as **a GitHub account**.
+To run Morio locally in development mode, you also need **Docker**.
 
 If you have those, you can skip ahead to [getting started](#getting-started).
 If not, read on.
@@ -84,6 +87,21 @@ nvm install lts/iron
 
 When it's all done, running `node -v` in your terminal should confirm that
 version 20 of NodeJS is installed and ready to go.
+
+### Installing Docker
+
+If you want to run Morio locally, you also need **Docker**.
+
+- If you are on **linux**, you should be able to install docker 
+  from your distribution's package manager. Debian-based distros should only
+  need to run `apt install docker.io`.\
+  RedHat pushes PodMan hard, so their 
+  derivatives typically also come with podman. Which is no good because Morio
+  does its own orchestration, so it needs the Docker daemon. You
+  cannot run Morio on podman. Make sure to install Docker.
+- If you are on **Mac**, you will need to install [Docker
+  Desktop](https://www.docker.com/products/docker-desktop/)
+- If you are on **Windows**, then you cannot run Morio locally.
 
 ### Create a GitHub account
 
@@ -193,18 +211,187 @@ The most relevant are:
 
 ## Branches and merge requests
 
-Morio's default branch is `develop` whereas the `main` branch is considered the _production_ branch.
+Morio's default branch is `develop` whereas the `main` branch is considered the
+_production_ branch.
 
 Both branches are protected. To propose changes, you must open a pull request to
 the `develop` branch (the default branch). The pull request can be made from
 your own fork, or from a feature branch in the `certeu/morio`, assuming you
 have the rights to create branches there.
 
-Pull requests will start a number of CI pipelines. Please make sure that all pipelines pass before requesting review.
+Pull requests will start a number of CI pipelines. Please make sure that all
+pipelines pass before requesting review.
 
-Before a merge request can be merged, it must get a positive review from someone on the Morio team.
-You can request reviews from github users [joostdecock](https://github.com/joostdecock),
-[serge-tellene](https://github.com/serge-tellene) or [lilianbaz](https://github.com/lilianbaz).
+Before a merge request can be merged, it must get a positive review from
+someone on the Morio team.  You can request reviews from github users
+[joostdecock](https://github.com/joostdecock),
+[serge-tellene](https://github.com/serge-tellene) or
+[lilianbaz](https://github.com/lilianbaz).
+
+## Running the Morio development environment
+
+Depending on what you are looking to work on or contribute to, 
+and your local environment, you may want to:
+
+- [Run the documentation site](#running-the-documentation-site)
+- [Run Morio](#running-morio)
+- [Use a FQDN to set up Morio](#)
+- [Run Morio on MacOS](#run-morio-on-macos)
+- [Run Morio without network access](#run-morio-without-network-access)
+
+### Running the documentation site
+
+To run the development version, enter the `docs` folder and run `npm run start`:
+
+```js title='Terminal'
+cd docs
+npm run start
+```
+
+This will open the documentation site at http://localhost:3000
+
+When you make changes, the page will be updated automatically, no reload needed.
+
+### Running Morio
+
+To run Morio itself, you need to fist build the development version of the various container images. In the monorepo root, run this command:
+
+```js title="Terminal"
+cd docs
+npm run build
+```
+
+When that works, you can start Morio with:
+
+```js title="Terminal"
+npm run dev
+```
+
+Open your browser at https://localhost and -- after telling your browser to
+ignore the invalid certificate -- will see the Morio setup screen.
+
+### Create an FQDN for Morio
+
+If you want to set up Morio on your local machine, you need an _FQDN_ that
+resolves to a routable IP address that points at your machine.
+
+The easiest way to accomplish that is to use a service like
+[nip.io](https://nip.io) which provides DNS records for any IP address.
+
+For example, if your local machine's IP address is currently `192.168.1.4` you
+can use `192-168-1-4.nip.io` as FQDN.
+
+Now, connect to https://192-168-1-4.nip.io/ and setup a standalone
+Morio node using `192-168-1-4.nip.io` as FQDN. 
+
+If you have a DNS zone you control, you can also create a record yourself.
+
+<Tip>
+#### Were you thinking of just editing `/etc/hosts`?
+
+You could update `/etc/host` to add the IP/FQDN mapping, but that requires some
+extra steps.  Refer to [Run Morio without network
+access](#run-morio-without-network-access) for details.
+</Tip>
+
+
+
+### Run Morio on MacOS
+
+Morio uses the `journald` log driver for Docker, which is not available
+on MacOS. If you run `npm run dev` you will get an error from the 
+Docker daemon:
+
+```
+failed to initialize logging driver: journald is not enabled on this host
+```
+
+To avoid this, you can override the Docker log driver by setting the
+`MORIO_DOCKER_LOG_DRIVER` environment variable.  Setting it to `local` should
+do the trick:
+
+```sh
+export MORIO_DOCKER_LOG_DRIVER=local
+npm run dev
+```
+
+### Run Morio without network access
+
+If you want to be able to work on Morio on the train, on a plane, at a cabin in
+the woods, or any other place where you do not have a network connection, you
+need to take some extra steps.
+
+#### Pre-pull Docker images
+
+The Morio core service will pull Docker images the first time they are used.
+If you already ran Morio, the images will be available locally. But if the
+first time you attempt to start Morio the network is not available, core
+won't be able to pull the image, and Morio won't start properly.
+
+To avoid that, you can pre-pull all images by running:
+
+```
+npm run pull-oci
+```
+
+#### Provide a routable IP address
+
+Morio needs a routable IP address to point to your machine. You cannot use
+`localhost` or a loopback IP address like `127.0.0.1` because inside a
+containers these will resolve to the container's loopback interface, rather
+than your machine's interface.
+
+When network is available, you can use a service like `nio.io` [as we covered
+above](#create-an-fqdn-for-morio). Alas without network available we need to
+help ourselves.
+
+To do that, you can assign a routable IP address as an alias to your
+loopback interface. For example, we can create an alias using IP address
+`10.10.10.10`:
+
+```
+sudo ifconfig lo0 alias 10.10.10.10 netmask 255.255.255.0
+```
+
+To remove the alias again, run this command:
+
+```
+sudo ifconfig lo0 -alias 10.10.10.10
+```
+
+#### Provide name resolution for our IP address
+
+With a routable IP address in place, we still need to ensure it resolves
+correctly.
+
+##### On your machine
+
+Add a line to `/etc/hosts` for the DNS name you want to use for your local
+Morio setup.  If we use `local.morio.it` as an example along with our
+`10.10.10.10` example IP address, you need to add a line like this:
+
+```
+10.10.10.10 local.morio.it
+```
+
+Now your own machine will resolve `local.morio.it` to `10.10.10.10`, even
+without network access.
+
+##### Inside the containers
+
+Editing the `/etc/hosts` file on our machine does not mean that inside the
+containers `local.morio.it` will also resolve `10.10.10.10`. That will only
+work on our own machine.
+
+To fix that, you can tell Morio to use ensure a custom name resolves to the
+IP of your choice by setting the `MORIO_DOCKER_ADD_HOST` environment variable
+to a `fqdn:ip` value:
+
+```
+export MORIO_DOCKER_ADD_HOST="local.morio.it:192.168.1.4"
+```
+
+With that, you can run Morio without the need for network access.
 
 ## Run scripts
 
@@ -402,6 +589,17 @@ although it will set it up again after the tests have completed.
 
 You will not lose any code changes you made.
 </Note>
+
+### npm run pull-oci
+
+This will pull all Docker images used by Morio. This prevents from
+core having to do so when you set up Morio.
+
+To use this, run the following command in the _monorepo_ root:
+
+```sh title="Terminal"
+npm run pull-oci
+```
 
 ### npm run help
 
