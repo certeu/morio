@@ -18,6 +18,7 @@ mbuilder:
 proxy:
 rbuilder:
 ui:
+watcher:
 wbuilder:
 # Various tags
 contributors:
