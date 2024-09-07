@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will build the .deb package for moriod inside a debian:bookworm container
 # This allows you to build the .deb package on a non-deb Linux distro.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 apt update && apt upgrade -y
 apt install -y curl
 touch ~/.bash_profile && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
