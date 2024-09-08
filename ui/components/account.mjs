@@ -14,7 +14,6 @@ import {
   CloseIcon,
   ResetIcon,
   TrashIcon,
-  WarningIcon,
   FingerprintIcon,
   KeyIcon,
   RestartIcon,
@@ -136,13 +135,16 @@ export const RenewTokenButton = () => {
   )
 }
 
-const NoKeysForYou = () => (
-  <button className="btn btn-error" isabled>
-    <div className="flex flex-row gap-1">
-      <WarningIcon />
-      <span>This identity provider does not allow creating API keys</span>
-    </div>
-  </button>
+const NoKeysForYou = ({ provider }) => (
+  <Popout note>
+    <h5>
+      The <code>{provider}</code> identity provider does not allow creating API keys
+    </h5>
+    <p>
+      To create an API key, authenticate using a provider that is not the <code>mrt</code> or{' '}
+      <code>apikey</code> provider as they do not allow creating API keys.
+    </p>
+  </Popout>
 )
 
 export const NewApiKeyButton = () => {
@@ -335,6 +337,8 @@ export const AccountApiKeys = () => {
   }, [refresher])
 
   const refresh = () => setRefresher(refresher + 1)
+
+  if (!keys || keys.length < 1) return null
 
   return (
     <table className="mdx table">

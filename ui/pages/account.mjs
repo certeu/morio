@@ -34,10 +34,8 @@ const AccountPage = (props) => {
                 </Tab>
                 <Tab key="apikeys">
                   <AccountApiKeys />
-                  <div className="grid grid-cols-3 gap-4 items-center my-6">
-                    <span></span>
+                  <div className="mx-auto my-6">
                     <NewApiKeyButton />
-                    <span></span>
                   </div>
                 </Tab>
               </Tabs>
