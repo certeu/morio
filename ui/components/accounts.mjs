@@ -9,7 +9,7 @@ import { useAccount } from 'hooks/use-account.mjs'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { PlayIcon } from 'components/icons.mjs'
-import { TimeAgo } from 'components/time.mjs'
+import { TimeForHumans } from 'components/time.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
 import { StringInput, TextInput, RoleInput } from 'components/inputs.mjs'
@@ -91,8 +91,8 @@ export const ListAccounts = () => {
             </td>
             <td>{acc.username}</td>
             <td>
-              {acc.lastLogin ? (
-                <TimeAgo time={acc.lastLogin} />
+              {acc.last_login ? (
+                <TimeForHumans iso={acc.last_login} />
               ) : (
                 <em className="opacity-60">never</em>
               )}
@@ -149,7 +149,16 @@ export const AddLocalAccount = () => {
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
-  if (!local) return null
+  if (!local)
+    return (
+      <Popout note>
+        <h5>Local Morio Accounts are not available</h5>
+        <p>
+          No local accounts can be created because the <b>local</b> identity provider is not
+          enabled.
+        </p>
+      </Popout>
+    )
 
   return (
     <Popout note>

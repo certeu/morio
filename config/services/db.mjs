@@ -101,32 +101,32 @@ export const resolveServiceConfiguration = ({ utils }) => {
     schema: {
       accounts: `CREATE TABLE accounts (
         id TEXT NOT NULL PRIMARY KEY,
-        provider TEXT NOT NULL,
+        provider TEXT,
         about TEXT,
         invite TEXT,
-        status TEXT NOT NULL,
-        role TEXT NOT NULL,
+        status TEXT,
+        role TEXT,
         created_by TEXT,
-        created_at TEXT,
+        created_at DATETIME,
         updated_by TEXT,
-        updated_at TEXT,
+        updated_at DATETIME,
         password TEXT,
         mfa TEXT,
         scratch_codes TEXT,
-        last_login TEXT
+        last_login DATETIME
       )`,
       apikeys: `CREATE TABLE apikeys (
         id TEXT NOT NULL PRIMARY KEY,
         name TEXT,
-        status TEXT NOT NULL,
-        role TEXT NOT NULL,
+        status TEXT,
+        role TEXT,
         created_by TEXT,
         created_at DATETIME,
         expires_at DATETIME,
         updated_by TEXT,
         updated_at DATETIME,
         secret TEXT,
-        last_login TEXT
+        last_login DATETIME
       )`,
     },
   }

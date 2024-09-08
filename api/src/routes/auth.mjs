@@ -28,4 +28,5 @@ export function routes(app) {
    * Whoami/ping check
    */
   app.get(`/whoami`, rbac.user, Auth.whoami)
+  app.get(`/whoami/`, rbac.user, Auth.whoami)
 }
