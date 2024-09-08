@@ -182,6 +182,6 @@ const pulls = []
 for (const [service, config] of Object.entries(pullConfig)) {
   pulls.push(`docker pull ${config.image}:${config.tag}`)
 }
-await writeFile(`scripts/pull-oci-images.sh`, "#!/bin/bash\n" + pulls.join("\n"), false, 0o755)
+await writeFile(`scripts/pull-oci-images.sh`, "#!/usr/bin/env bash\n" + pulls.join("\n") + "\n", false, 0o755)
 
 
