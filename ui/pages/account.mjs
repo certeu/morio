@@ -7,7 +7,6 @@ import {
   AccountOverview,
   AccountApiKeys,
   LogoutButton,
-  AccountToken,
   RenewTokenButton,
   NewApiKeyButton,
   ShowTokenButton,
@@ -30,7 +29,6 @@ const AccountPage = (props) => {
                     <RenewTokenButton />
                     <LogoutButton />
                   </div>
-                  <AccountToken />
                 </Tab>
                 <Tab key="apikeys">
                   <AccountApiKeys />

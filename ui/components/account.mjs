@@ -61,8 +61,8 @@ export const AccountOverview = () => {
         ) : null}
         {account.available_roles ? (
           <tr>
-            <td className="w-36 text-right font-bold">Maximum role</td>
-            <td>
+            <td className="w-36 text-right font-bold">Available roles</td>
+            <td className="flex flex-row items-center gap-1">
               {account.available_roles.map((role) => (
                 <Role key={role} role={role} />
               ))}
