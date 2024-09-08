@@ -216,7 +216,7 @@ export const NavButton = ({
               k={key}
               level={level + 1}
               parents={[...parents, k]}
-              {...{ current, key }}
+              current={current}
               {...page}
             />
           ))
