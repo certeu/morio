@@ -195,7 +195,6 @@ export async function saveAccount(provider = false, id = false, data) {
     `REPLACE INTO accounts(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
     params
   )
-  console.log({ updates, params })
 
   return result
 }

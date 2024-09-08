@@ -261,8 +261,8 @@ Controller.prototype.renewToken = async function (req, res) {
       data: {
         user: payload.user,
         role: payload.role,
-        available_roles: availableRoles(payload.roles),
-        highest_role: payload.maxRole,
+        available_roles: availableRoles(payload.highest_role),
+        highest_role: payload.highest_role,
         provider: payload.provider,
       },
       key: utils.getKeys().private,
