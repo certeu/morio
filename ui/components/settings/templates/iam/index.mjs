@@ -5,6 +5,7 @@ import { mrt } from './mrt.mjs'
 import { apikey } from './apikey.mjs'
 import { local } from './local.mjs'
 import { ldap } from './ldap.mjs'
+import { oidc } from './oidc.mjs'
 
 /*
  * Reuse this for the provider ID
@@ -86,7 +87,7 @@ export const iam = () => ({
       type: 'authProviders',
       title: 'Identity Providers',
       about: 'Identity providers are services that allow users to prove their identity',
-      blocks: { apikey, ldap, local, mrt },
+      blocks: { apikey, ldap, local, mrt, oidc },
     },
     /*
      * Login form
