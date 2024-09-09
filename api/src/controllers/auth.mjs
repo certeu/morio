@@ -167,7 +167,7 @@ Controller.prototype.login = async function (req, res) {
    * and that we have a provider method to handle the request
    */
   if (!providerId || !providerType || typeof idps[providerType] !== 'function')
-    return utils.sendErrorResponse(res, 'morio.api.ipd.unknown', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.idp.unknown', req.url)
 
   /*
    * Validate identity provider input against schema (provider specific)
