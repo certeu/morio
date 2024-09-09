@@ -386,7 +386,7 @@ export const PrimedSettingsWizard = (props) => {
     setDeployOngoing(true)
     const result = await api.deploy(mSettings)
     return result[1] === 204
-      ? setLoadingStatus([true, 'Cluster initialized', true, true])
+      ? setLoadingStatus([true, 'Settings updated', true, true])
       : setLoadingStatus([true, `Unable to deploy the settings`, true, false])
   }
 

@@ -12,7 +12,7 @@ import { PlayIcon } from 'components/icons.mjs'
 import { TimeForHumans } from 'components/time.mjs'
 import { LogoSpinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
-import { StringInput, TextInput, RoleInput } from 'components/inputs.mjs'
+import { SecretInput, StringInput, TextInput, RoleInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { PageLink } from 'components/link.mjs'
 import { Role } from 'components/role.mjs'
@@ -165,7 +165,7 @@ export const AddLocalAccount = () => {
       <h5 className="flex flex-row gap-2 items-center w-full mb-4">
         <span className="grow">Local Morio Accounts are enabled</span>
         <button
-          className="btn btn-neutral"
+          className="btn btn-primary"
           onClick={() =>
             pushModal(
               <ModalWrapper keepOpenOnClick>
@@ -243,11 +243,11 @@ const AddLocalAccountModal = () => {
       role: userRole,
       overwrite,
     })
-    if (result[1] === 200 && result[0].data) {
+    if (result[1] === 200 && result[0].invite) {
       setLoadingStatus([true, 'Account created', true, true])
       pushModal(
         <ModalWrapper keepOpenOnClick>
-          <InviteResult data={result[0].data} />
+          <InviteResult data={result[0]} />
         </ModalWrapper>
       )
     } else if (result[1] === 409) {
@@ -319,9 +319,9 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
   const activateAccount = async () => {
     setLoadingStatus([true, 'One moment please, contacting the Morio API'])
     const result = await api.activateAccount({ username, invite: inviteCode, provider: 'local' })
-    if (result[1] === 200 && result[0].data) {
+    if (result[1] === 200 && result[0]) {
       setLoadingStatus([true, 'Account needs to be setup', true, true])
-      setData(result[0].data)
+      setData(result[0])
     } else return setLoadingStatus([true, `Unable to activate account`, true, false])
   }
 
@@ -334,9 +334,9 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
       password,
       token: mfa,
     })
-    if (result[1] === 200 && result[0].data) {
+    if (result[1] === 200 && result[0]) {
       setLoadingStatus([true, 'Account activated', true, true])
-      setScratchCodes(result[0].data.scratchCodes)
+      setScratchCodes(result[0].scratchCodes)
     } else
       return setLoadingStatus([
         true,
@@ -377,7 +377,7 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
         <div className="grid grid-cols-2 gap-4">
           <div dangerouslySetInnerHTML={{ __html: data.qrcode }} className="max-w-sm mx-auto" />
           <div>
-            <StringInput
+            <SecretInput
               label="Password"
               current={password}
               update={setPassword}
