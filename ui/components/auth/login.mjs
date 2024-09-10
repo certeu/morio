@@ -1,6 +1,7 @@
 // Hooks
 import { useApi } from 'hooks/use-api.mjs'
 import { useEffect, useContext, useState } from 'react'
+import { useRouter } from 'next/router'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { ModalContext } from 'context/modal.mjs'
@@ -13,12 +14,26 @@ import { CloseIcon, QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'component
 import { BaseProvider } from './base-provider.mjs'
 import { LocalProvider } from './local-provider.mjs'
 import { MrtProvider } from './mrt-provider.mjs'
+import { OidcProvider } from './oidc-provider.mjs'
+
+/*
+ * For now this goes here, but this is not DRY
+ */
+const redirectErrors = {
+  'morio.api.oidc.discovery.failed': 'OIDC Discovery failed for this identity provider.',
+  'morio.api.oidc.client.init.failed': 'Failed to initialise OIDC client.',
+  'morio.api.oidc.userinfo.unavailable': 'User info not available from OIDC provider.',
+  'morio.api.oidc.callback.mismatch': 'OIDC callback mismatch.',
+  'morio.api.oidc.username.unmatched': 'Unable to match username to OIDC property.',
+  'morio.api.account.role.unavailable': 'The requested role is not available to you.',
+}
 
 const providers = {
   ldap: BaseProvider,
   apikey: (props) => <BaseProvider {...props} usernameLabel="API Key" passwordLabel="API Secret" />,
   local: LocalProvider,
   mrt: MrtProvider,
+  oidc: OidcProvider,
 }
 
 const UnknownIdp = ({ label }) => (
@@ -80,6 +95,13 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   const [showAll, setShowAll] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const { clearModal } = useContext(ModalContext)
+  const router = useRouter()
+  const { error: redirectError = false } = router.query
+
+  /*
+   * Loading context
+   */
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   /*
    * API client
@@ -97,6 +119,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         setUi(result.ui)
         /*
          * Force closing modal windows and loading status when the login form initially loads
+         * unless there's a redirect error
          */
         setLoadingStatus([false])
         clearModal()
@@ -112,10 +135,6 @@ export const Login = ({ setAccount, account = false, role = false }) => {
     if (history) history.back()
   }
 
-  /*
-   * Loading context
-   */
-  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   /*
    * Props shared by each idp
@@ -227,8 +246,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
             </p>
             <h4>Identity Providers</h4>
             <p>
-              You local Morio operator (<Term>LoMO</Term>) has configured the following identity
-              providers:
+              This Morio instance is set up with the following providers:
             </p>
             <ul className="list list-inside list-disc ml-4">
               {tabList.map((id) => (
@@ -245,8 +263,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
               ))}
             </ul>
             <p>
-              Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
-              deployment.
+              Contact your Morio administrator for questions about how to authenticate to Morio.
             </p>
             {!showAll && tabList.length < Object.keys(idps).length ? (
               <Popout note>
@@ -290,6 +307,12 @@ export const Login = ({ setAccount, account = false, role = false }) => {
       {error ? (
         <Popout warning compact noP>
           {error}
+        </Popout>
+      ) : null}
+      {redirectError ? (
+        <Popout warning noP>
+          <h5>An error occured</h5>
+          {redirectErrors[redirectError] || redirectError }
         </Popout>
       ) : null}
     </div>

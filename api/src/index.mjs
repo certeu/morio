@@ -8,7 +8,7 @@ import { routes } from '#routes/index'
 // Bootstrap configuration
 import { reloadConfiguration } from './reload.mjs'
 // Middleware
-import { guardRoutes, addRbacHeaders } from './middleware.mjs'
+import { guardRoutes, addRbacHeaders, session } from './middleware.mjs'
 // Load logger and utils
 import { log, utils } from './lib/utils.mjs'
 
@@ -37,6 +37,18 @@ app.use(cookieParser())
  * Add custom middleware to load roles from header
  */
 app.use(addRbacHeaders)
+
+/*
+ * Add session middleware to the authentication routes as
+ * some identity providers (OIDC) require it.
+ */
+app.use('/login-form', session)
+app.use(`/callback/oidc/:provider_id`, session)
+
+/*
+ * Add content type for full page form requests to routes who handle this
+ */
+app.use('/login-form', express.urlencoded({ extende: true }))
 
 /*
  * Load the API routes

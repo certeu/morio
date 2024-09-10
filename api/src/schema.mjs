@@ -97,6 +97,14 @@ export const schema = {
       role: role.required(),
     }).required(),
   }),
+  'req.auth.login-form': Joi.object({
+    provider: provider.required(),
+    role: role.required(),
+  }),
+  'req.auth.login.oidc': Joi.object({
+    provider: provider.required(),
+    role: role.required(),
+  }),
   'req.auth.login.mrt': Joi.object({
     provider: provider.valid('mrt').required(),
     data: Joi.object({

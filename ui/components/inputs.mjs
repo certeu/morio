@@ -70,6 +70,7 @@ export const ButtonFrame = ({
   dir = 'col',
 }) => (
   <button
+    type="button"
     disabled={disabled}
     className={`
     btn btn-ghost btn-secondary relative grow
@@ -261,6 +262,7 @@ export const SecretInput = ({
   const [reveal, setReveal] = useState(false)
   const labelTR = (
     <button
+      type="button"
       onClick={() => setReveal(!reveal)}
       className={`px-2 rounded ${
         reveal ? 'bg-success text-success-content' : 'bg-warning text-warning-content'
@@ -366,6 +368,7 @@ export const ListInput = ({
               <div className="flex flex-row gap-1 flex-wrap items-center justify-around">
                 {item.val.labels.map((lbl, i) => (
                   <button
+                    type="button"
                     key={i}
                     disabled={disabled}
                     className={`btn btn-sm ${
@@ -450,6 +453,7 @@ export const FileInput = ({
       <FormControl label={label} isValid={valid(current)}>
         <div className="bg-base-100 w-full h-36 mb-2 mx-auto flex flex-col items-center text-center justify-center">
           <button
+            type="button"
             className="btn btn-neutral btn-circle opacity-50 hover:opacity-100"
             onClick={() => update(original)}
           >
@@ -473,7 +477,7 @@ export const FileInput = ({
       >
         <input {...getInputProps()} />
         <p className="hidden lg:block p-0 m-0">Drag and drop your file here</p>
-        <button className={`btn btn-secondary btn-outline mt-4 px-8`}>Browse...</button>
+        <button type="button" className={`btn btn-secondary btn-outline mt-4 px-8`}>Browse...</button>
       </div>
     </FormControl>
   )
@@ -504,6 +508,7 @@ export const RoleInput = ({
   labelBL,
   labelBR,
   labelTR,
+  hide = ['root']
 }) => (
   <ListInput
     label={label}
@@ -512,7 +517,7 @@ export const RoleInput = ({
     dir="row"
     update={(val) => (role === val ? setRole(false) : setRole(val))}
     current={role}
-    list={roles.map((role, i) => ({
+    list={roles.filter(role => !hide.includes(role)).map((role, i) => ({
       val: role,
       label: <span className="text-center block">{role}</span>,
       disabled: maxRole ? i > roles.indexOf(maxRole) : false,

@@ -53,6 +53,7 @@ export async function reloadConfiguration() {
      */
     utils.setNodeUuid(data.node.node)
     utils.setNodeSerial(data.node.node_serial)
+    utils.setNodeFqdn(data.nodes[data.node.node].fqdn)
     utils.setClusterUuid(data.node.cluster)
     utils.setSettingsSerial(data.node.settings_serial)
     utils.setKeys(data.keys)

@@ -464,6 +464,19 @@ export function encryptionMethods(stringKey, salt, logger) {
   }
 }
 
+/**
+ * Generate verifier and challenge for Proof Key for Code Exchange PKCE)
+ */
+export function generatePkce () {
+  const verifier = randomString(32)
+
+  return {
+    verifier,
+    challenge: createHash('sha256').update(verifier).digest('base64url'),
+    state: randomString(32)
+  }
+}
+
 /*
  * Salts and hashes a password
  */

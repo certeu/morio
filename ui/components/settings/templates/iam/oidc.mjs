@@ -55,31 +55,11 @@ export const oidc = {
             schema: Joi.string()
               .uri({ scheme: ['https'] })
               .required()
-              .label('Authorization URL'),
-            label: 'Authorization URL',
-            labelBL: 'URL of the OIDC authorization endpoint',
-            key: 'authorization_url',
-            placeholder: 'https://gitlab.com/oauth/authorize',
-          },
-          {
-            schema: Joi.string()
-              .uri({ scheme: ['https'] })
-              .required()
-              .label('Token URL'),
-            label: 'Token URL',
-            labelBL: 'URL of the OIDC token endpoint',
-            key: 'token_url',
-            placeholder: 'https://gitlab.com/oauth/token',
-          },
-          {
-            schema: Joi.string()
-              .uri({ scheme: ['https'] })
-              .required()
-              .label('User Info URL'),
-            label: 'User Info URL',
-            labelBL: 'URL of the User Info endpoint',
-            key: 'user_info_url',
-            placeholder: 'https://gitlab.com/oauth/userinfo',
+              .label('Issuer URL'),
+            label: 'Issuer URL',
+            labelBL: 'URL of the issuer',
+            key: 'issuer',
+            placeholder: 'https://gitlab.com/',
           },
           [
             {
@@ -107,6 +87,16 @@ export const oidc = {
         ],
         Roles,
         Advanced: [
+          'Typically we can use the default auto-discovery URL. However, some OIDC providers -- typically ones supporting mult-tenancy -- will require a custom autodiscovery URL. If that is the case, you can specify it below.',
+          {
+            schema: Joi.string()
+              .uri({ scheme: ['https'] })
+              .label('Custom autodiscovery URL'),
+            label: 'Custom autodiscovery URL',
+            labelBL: 'Autodiscover URL of the issuer',
+            key: 'autodiscovery_url',
+            placeholder: 'https://keycloak.my-company.com/realms/my-realm/.well-known/openid-configuration',
+          },
           {
             schema: Joi.boolean().default(true).label('Validate Certificate'),
             label: 'Validate Certificate',

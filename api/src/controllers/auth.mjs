@@ -3,6 +3,7 @@ import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
 import { availableRoles } from '../rbac.mjs'
+import { oidcCallbackHandler } from '../idps/oidc.mjs'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -14,6 +15,7 @@ const allowedUrisBase = [
   `/info`,
   `/info/`,
   `/login`,
+  `/login-form`,
   `/idps`,
   `/activate-account`,
   `/activate-mfa`,
@@ -35,7 +37,7 @@ const allowedUris = [...allowedUrisBase, ...allowedUrisBase.map((url) => url + '
  * List of allowListed URL patterns do not require authentication
  * Each is/can be a regex
  */
-const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/]
+const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/, /^\/callback\/oidc\/.*/]
 
 /**
  * This auth controller handles authentication in Morio
@@ -43,6 +45,11 @@ const allowedUriPatterns = [/^\/downloads/, /^\/docs/, /^\/coverage/]
  * @returns {object} Controller - The auth controller object
  */
 export function Controller() {}
+
+/*
+ * OIDC Callback hander is provided by the OIDC IDP
+ */
+Controller.prototype.oidcCallback = oidcCallbackHandler
 
 /**
  * Authenticate
@@ -133,12 +140,14 @@ Controller.prototype.authenticate = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * @param {bool} form - True of it is a full page form request
  */
-Controller.prototype.login = async function (req, res) {
+Controller.prototype.login = async function (req, res, form=false) {
   /*
    * Validate high-level input against schema
    */
-  const [valid1, err1] = await utils.validate(`req.auth.login`, req.body)
+  const [valid1, err1] = await utils.validate(`req.auth.login${form === true ? '-form' : ''}`, req.body)
+
   if (!valid1)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err1.message,
@@ -178,6 +187,12 @@ Controller.prototype.login = async function (req, res) {
       schema_violation: err2.message,
     })
   }
+
+  /*
+   * oidc provider cannot be handled in a singler request
+   * instead it will trigger a redirect
+   */
+  if (providerType === 'oidc') return idps[providerType](providerId, req, res)
 
   /*
    * Looks good, hand over to provider

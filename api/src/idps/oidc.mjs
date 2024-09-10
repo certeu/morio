@@ -1,159 +1,201 @@
 import { log, utils } from '../lib/utils.mjs'
 import { roles } from '#config/roles'
-import passport from 'passport'
-import OpenIDConnectStrategy from 'passport-openidconnect'
-import tls from 'tls'
 import { updateLastLoginTime } from '../lib/account.mjs'
+import { Issuer } from 'openid-client'
+import { generatePkce } from '#shared/crypto'
+import { generateJwt } from '#shared/crypto'
+// No need to reinvent the wheel
+import { checkRole, caseInsensitiveGet } from './ldap.mjs'
+
+/*
+ * NOTES about the OIDC Identity Provider
+ *
+ * This IDP is rather different from othee IDPs because OIDC is rather
+ * different from your typically authentication request.
+ *
+ * In a typically request, be it the local, ldap, mrt, or apikey IDP,
+ * we get a single CHR/Ajax request and that contains enough info for
+ * us to make a decision about whether authentication is ok or not, and
+ * to generate the JWT and send it back in a JSON response.
+ *
+ * With OIDC, the situation is rather different. Here, we first send
+ * the user to `/login-form at this API from where we are redirecting
+ * the user to the OIDC provider's authorization endpoint. After prompting
+ * for consent, the OIDC provider will redirect the user again to the
+ * callback URL (handled by the oidcCallbackHandler in this file).
+ *
+ * If all goes well, we set a cookie with the JWT and finally redirect
+ * to the /account page.
+ *
+ * To tie the original request to /login-form to the callback from
+ * the OIDC provider, we store state and PKCE data in the store.
+ */
+
 
 /**
- * Initialize the OpenID Connect strategy
+ * This method starts the OIDC flow
  *
- * Note that this (and other Passport strategies) are typically
- * used as middleware in Express.
- * Here, we are calling it directly, because middleware is just
- * a method with a (req, res, next) signature.
- *
- * @param {string} id - The provider ID in the iam config
- * @return {function|bool} strategy - False if there is no such provider, or the strategy handler method when there is
+ * @param {string} id - The provider ID
+ * @param {object} req - The express request object
+ * @param {object} res - The express response object
  */
-const strategy = (id) => {
+export async function oidc(id, req, res) {
+  /*
+   * Get the OIDC client
+   */
+  const client = await getClient(id)
+
+  if (!client || Array.isArray(client)) return Array.isArray(client)
+    ? res.redirect(`/?error=${client[1]}`)
+    : res.redirect(`/?error=morio.api.oidc.client.init.failed`)
+
+  /*
+   * Set up PKCE - We use this to link this initial redirect to the incoming callback request
+   */
+  const pkce = generatePkce()
+  utils.setOidcPkce(id, pkce.state, {
+    // We need to pass the verifier in the callback
+    verifier: pkce.verifier,
+    // We need to keep track of the requested role
+    role: req.body.role
+  })
+
+  /*
+   * Return redirect
+   */
+  return res.redirect(client.authorizationUrl({
+    scope: 'openid profile email',
+    code_challenge: pkce.challenge,
+    code_challenge_method: 'S256',
+    state: pkce.state
+  }))
+}
+
+/**
+ * This method handles the callback from the OIDC provider
+ *
+ * @param {object} req - The express request object
+ * @param {object} res - The express response object
+ */
+export async function oidcCallbackHandler(req, res) {
+  /*
+   * Load the OIDC provider client & provider config
+   */
+  const provider = utils.getSettings(['iam', 'providers', req.params.provider_id], false)
+  const client = await getClient(req.params.provider_id)
+  const pkce = utils.getOidcPkce(req.params.provider_id, req.query.state, false)
+
+  /*
+   * Do not continue if we cannot find the client or provider config
+   */
+  if (!client || !provider || !pkce) return res.redirect(`/?error=morio.api.oidc.callback.mismatch`)
+
+  /*
+   * Perform the callback for the Authorization Server's authorization response
+   */
+  const tokenSet = await client.callback(
+    getOidcRedirectUrl(req.params.provider_id),
+    client.callbackParams(req),
+    {
+      state: req.query.state,
+      code_verifier: pkce.verifier
+    }
+  )
+
+  /*
+   * Use the tokenSet to get user information
+   */
+  const userInfo = await client.userinfo(tokenSet.access_token)
+  if (!userInfo.email) return res.redirect(`/?error=morio.api.oidc.userinfo.unavailable`)
+
+  /*
+   * Can we find the username?
+   */
+  const username = caseInsensitiveGet(provider.username_field, userInfo)
+  if (!username) return res.redirect('/?error=morio.api.oidc.username.unmatched')
+
+  /*
+   * Verify the requested role is available to the user
+   */
+  const [allowed, maxLevel] = checkRole(pkce.role, provider.rbac, userInfo)
+  if (!allowed) return res.redirect('/?error=morio.api.account.role.unavailable')
+
+
+  /*
+   * Update the latest login time, but don't wait for it
+   */
+  updateLastLoginTime(req.params.provider_id, username)
+
+  /*
+   * Generate JSON Web Token
+   */
+  const jwt = await generateJwt({
+    data: {
+      user: username,
+      role: pkce.role,
+      highest_role: roles[maxLevel],
+      provider: req.params.provider_id,
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().mrt,
+  })
+
+  /*
+   * Set cookie with JWT, then redirect
+   */
+  res.cookie('morio', jwt, {
+    path: '/',
+    maxAge: 3600000, // FIXME: Is 1 hour enough?
+    secure: true,
+    sameSite: 'Strict',
+    httpOnly: false,
+  })
+
+  /*
+   * Redirect to account page
+   */
+  return res.redirect('/account')
+}
+
+/**
+ * Helper method to setup the OIDC client for a given provider
+ *
+ * @param {string} id - The id of the identity provider
+ * @return {object} client - The OIDC client
+ */
+async function getClient (id) {
+  const existingClient = utils.getOidcClient(id)
+  if (existingClient) return existingClient
+
   /*
    * Get provider from settings
    */
   const provider = utils.getSettings(['iam', 'providers', id], false)
 
-  if (!provider) return false
-
-  const options = {
-    issuer: provider.issuer,
-    authorizationURL: issuer.authorization_url,
-    tokenURL: issuer.token_url,
-    userInfoURL: issuer.user_info_url,
-    clientID: issuer.client_id,
-    clientSecret: issuer.client_secret,
-    callbackURL: `https://${utils.getNodeFqdn()}/callback/oidc/${id}`,
+  let oidcIssuer
+  try {
+    oidcIssuer = await Issuer.discover(provider.autodiscovery_url || provider.issuer)
+  }
+  catch (err) {
+    log.warn(err, `OIDC discovery failed for provider ${id}`)
+    return [false, 'morio.api.oidc.discovery.failed']
   }
 
-  /*
-   * Bypass certificate validation?
-  if (provider.verify_certificate === false) {
-    options.server.tlsOptions = { rejectUnauthorized: false }
-  } else if (provider.trust_certificate) {
-    /*
-     * Or trust a specific certificate?
-    options.server.tlsOptions = {
-      secureContext: tls.createSecureContext({
-        ca: provider.trust_certificate,
-      }),
-    }
-  }
-     */
-
-  return new OpenIDConnectStrategy(options)
-}
-
-/**
- * oidc: OpenID Connect identity/authentication provider
- *
- * This method handles login/authentnication using the `oidc` provider
- *
- * @param {string} id - The provider ID
- * @param {object} data - The data to authenticate with
- * @param {string} data.username - The username to verify
- * @param {string} data.password - The password for said username to verify
- * @return {[Bool, Object]} [result, data] - An array indicating result and data
- */
-export function ldap(id, data, req) {
-  /*
-   * Add strategy to passport if it hasn't been used yet
-   */
-  if (passport._strategies[id] === undefined) {
-    log.debug(`Loading oidc/${id} authentication provider`)
-    const handler = strategy(id)
-    if (handler) passport.use(id, handler)
-  }
-
-  /*
-   * Get provider from settings
-   */
-  const provider = utils.getSettings(['iam', 'providers', id])
-
-  /*
-   * Passport uses callback style, so we'll wrap this in a Promise to support async
-   */
-  return new Promise((resolve) => {
-    passport.authenticate(id, function (err, user) {
-      if (err) {
-        log.warn(err, `Failed to authenticate user ${user} with provider ${id} due to an IDP error`)
-        return resolve([false, 'morio.api.idp.failure'])
-      }
-
-      if (!user) {
-        log.info(err, `Login failed for user '${req.body.data.username}' on LDAP provider '${id}'`)
-        return resolve([false, 'morio.api.account.credentials.mismatch'])
-      } else {
-        /*
-         * Can we find the username?
-         */
-        const username = caseInsensitiveGet(provider.username_field, user)
-        if (!username) return resolve([false, 'morio.api.404'])
-
-        /*
-         * Can we assign the requested role?
-         */
-        const [allowed, maxLevel] = checkRole(data.role, provider.rbac, user)
-        if (!allowed) return resolve([false, 'morio.api.account.role.unavailable'])
-
-        /*
-         * Update the latest login time, but don't wait for it
-         */
-        updateLastLoginTime(id, username)
-
-        return resolve([
-          true,
-          {
-            user: username,
-            role: req.body.data.role,
-            highest_role: roles[maxLevel],
-            provider: id,
-          },
-        ])
-      }
-    })(req)
+  const client = new oidcIssuer.Client({
+    client_id: provider.client_id,
+    client_secret: provider.client_secret,
+    redirect_uris: [getOidcRedirectUrl(id)],
+    response_types: ['code'],
   })
+  utils.setOidcClient(id, client)
+
+  return client
 }
 
-function checkRole(requestedRole = false, config = false, data = false) {
-  /*
-   * Make sure we have everything to check the role
-   * And if not, deny access
-   */
-  if (!config || !data || !roles.includes(requestedRole)) return [false, null]
-
-  /*
-   * Higher roles can assume lower roles so we need to check
-   * what roles are configured, including higher ones
-   */
-  let approvedLevel = -1
-  for (const level in roles) {
-    if (
-      level >= roles.indexOf(requestedRole) &&
-      config[roles[level]] &&
-      new RegExp(config[roles[level]].regex).test(
-        caseInsensitiveGet(config[roles[level]].attribute, data)
-      )
-    ) {
-      approvedLevel = Number(level)
-    }
-  }
-
-  return [Number(approvedLevel) >= Number(roles.indexOf(requestedRole)), approvedLevel]
+function getOidcRedirectUrl(id) {
+  return `https://${utils.getNodeFqdn()}/-/api/callback/oidc/${id}`
 }
 
-function caseInsensitiveGet(key, obj = {}) {
-  for (const k of Object.keys(obj)) {
-    if (k.toLowerCase() === String(key).toLowerCase()) return obj[k]
-  }
 
-  return
-}

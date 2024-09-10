@@ -125,7 +125,7 @@ export function ldap(id, data, req) {
   })
 }
 
-function checkRole(requestedRole = false, config = false, data = false) {
+export function checkRole(requestedRole = false, config = false, data = false) {
   /*
    * Make sure we have everything to check the role
    * And if not, deny access
@@ -152,7 +152,7 @@ function checkRole(requestedRole = false, config = false, data = false) {
   return [Number(approvedLevel) >= Number(roles.indexOf(requestedRole)), approvedLevel]
 }
 
-function caseInsensitiveGet(key, obj = {}) {
+export function caseInsensitiveGet(key, obj = {}) {
   for (const k of Object.keys(obj)) {
     if (k.toLowerCase() === String(key).toLowerCase()) return obj[k]
   }
