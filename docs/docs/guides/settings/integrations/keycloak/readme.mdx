@@ -29,38 +29,36 @@ or services that can request authentication of a user. So that's what we need.
 
 Follow these steps to get started:
 
- - Log in to Keycloak as an administrator
- - On the navigation menu, select **Clients**
- - Select **Create**
- - On the **Add Client** form, in the **Client ID** box, type `morio` as name for the client (or whatever you want)
- - On the **Client Protocol** list, select `openid-connect`
- - Set the **Root URL** to the URL of the Morio instance or cluster, for example, `https://<your instance fqdn>/`
- - Select **Save**
+- Log in to Keycloak as an administrator
+- On the navigation menu, select **Clients**
+- Click the **Create client** button
+- Under **General Settings**:
+  - Set **Client type** to `OpenID Connect`
+  - Set the **Client ID** box to `morio` as name for the client (or whatever you want)
+  - Add a name and description if you like
+  - Click the **Next** button
+- Under **Capability config**:
+  - Ensure **Client Authentication** is enabled
+  - Make the **Authentication flow** is set to `Standard flow`
+  - Click the **Next** button
+- Under **Login settings**:
+  - Set the **Root URL** to the URL of the Morio instance or cluster, for example, `https://<your instance fqdn>/`
+  - Set the **Home URL** to the same
+  - For **Valid redirect URLs**, use
+   `https://your-morio-fqdn/-/api/callback/oidc/keycloak` where
+   `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `keycloak` is
+   the ID of the identity provider we will create below. If you have more than
+   1 broker node, enter the URL for each node on its own line, and also add a
+   line for a similar URL using the cluster _FQDN_.
+  - For **Web origins**, use `https://your-morio-fqdn/ where `your-morio-fqdn`
+    is the _FQDN_ of your Morio instance.  If you have more than 1 broker node,
+    enter the URL for each node on its own line, and also add a line for a
+    similar URL using the cluster _FQDN_.
+  - Click the **Save** button
 
 After saving, you’ll be taken to the client’s settings page. Here, under the
-**settings** tab, complete the configuration as follows:
-
-- General Settings:
-  - **Enabled**: Ensure this is set to `ON`
-  - **Client Authentication**: Leave this enabled
-- Access Type:
-  - Choose `Confidential`
-- Valid Redirect Uris:
-  - **Redirect URL**: Use
-    `https://your-morio-fqdn/-/api/callback/oidc/keycloak` where
-    `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `keycloak` is
-    the ID of the identity provider we will create below. If you have more than
-    1 broker node, enter the URL for each node on its own line, and also add a
-    line for a similar URL using the cluster _FQDN_.
-- Web Origins:
-  -  Use `https://your-morio-fqdn/*` where `your-morio-fqdn` is the _FQDN_ of
-     your Morio instance.  If you have more than 1 broker node, enter the URL
-     for each node on its own line, and also add a line for a similar URL using
-     the cluster _FQDN_.
-- Ensure **Client Authentication** is `ON`
-- Ensure `Standard flow` is selected under **Authentication flow**
-
-Click **Save** and copy the client ID and secret.
+**Settings** tab you can copy the client ID, whereas the client secret can be
+found under the **Credentials** tab,
 
 ### Create a new identity provider in Morio
 

@@ -1,0 +1,82 @@
+---
+title: "Integration guide: Microsoft Active Directory"
+sidebar_label: Microsoft Active Directory
+sidebar_position: 4000
+---
+
+Microsoft's [Active Directory](https://en.wikipedia.org/wiki/Active_Directory)
+can be integrated with Morio to act as an identity provider.
+
+If you have user accounts in Active Directory that you want to use to
+authenticate to Morio, you can do so by configuring [an LDAP identity
+provider](/docs/guides/settings/idps/#ldap) with Active Directory as the
+backing LDAP service.
+
+To do so requires configuring a service account in Active Directory, and then using that
+account to set up a new identity provider in Morio. You also need to ensure
+Morio can talk LDAPS to Active Directory.
+
+### Ensure connectivity
+
+For this to work, Morio needs access to an Active Directory domain controller
+on TCP port 636 (LDAPS).
+
+### Create an Active Directory service account
+
+Create a new user in Active Directory. This user will be used to perform an LDAP bind to Active Directory.
+Make sure that:
+
+- You pick a strong password for the account
+- You do not force the user to check the password at next logon
+- You set the password to never expire
+- You do not give the account elevated privileges, and do not allow it to login interactively
+
+Note the account's Distinguished Name (DN) and password for the next steps.
+
+### Create a new identity provider in Morio
+
+Next, you need to add a new identity provider to Morio, specifically, [an
+LDAP identity provider](/docs/guides/settings/idps/#ldap).
+
+Below is an example configuration:
+
+```yaml
+iam:
+  providers:
+    ad: # You can choose the ID of the ldap provider instance
+     provider: ldap # You cannot choose this, it must always be `ldap`
+     label: Active Directory
+     about: This is your Active Directory account, the same you use to login to your computer.
+     server:
+       url: "ldaps://dc1.tokyo.morio.it
+       bindDN: "CN=morio-ldap,OU=Users,DC=tokyo,DC=morio,DC=it",
+       bindCredentials: "{{{ AD_PASSWORD }}}",
+       searchBase: "OU=Users-EU,DC=tokyo,DC=morio,DC=it",
+       searchFilter: "(&(objectClass=user)(samaccountname={{username}}))"
+     username_field: samaccountname
+     rbac:
+       user:
+         attribute: samaccountname
+         regex: .
+       engineer:
+         attribute: samaccountname
+         list:
+           - mario
+           - luigi
+  ui:
+    visibility:
+      # Use 'tab' to show the identity provider
+      # as a tab on the login page
+      ad: tab
+    order:
+      ad: 2
+secrets:
+  AD_PASSWORD: "Your secret here"
+```
+
+<Tip>
+Refer to [the Identity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
+reference documentation on the `iam`
+settings](/docs/reference/settings/iam/#iamprovidersoidc-id) for more details.
+</Tip>
+
