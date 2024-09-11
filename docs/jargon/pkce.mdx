@@ -1,0 +1,13 @@
+**Proof Key for Code Exchange** or **PKCE** (pronounced _pixy_) is an OpenID
+Connect flow that is specifically designed to protect against authorization
+code interception attacks.
+
+It is typically used in scenarios where the client secret cannot be protected,
+  such as native mobile apps, or single page applications.
+
+While the Morio UI service is a single page application, any OpenID Connect
+client secret is not available in the frontend code since the OpenID flow is
+initiated by the Morio API service.
+
+Still, Morio implements the PKCE flow for OpenID Connect as an extra layer of
+protection according to the _defense in depth_ pricinple.
