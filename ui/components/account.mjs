@@ -354,8 +354,7 @@ export const AccountApiKeys = () => {
         </tr>
       </thead>
       <tbody className="nostripes">
-        {keys &&
-          keys.map((data) => (
+        {keys.map((data) => (
             <tr
               key={data.key}
               className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
