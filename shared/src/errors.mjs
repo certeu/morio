@@ -28,9 +28,5 @@ export const statusCodes = {
 }
 
 export function statusCodeAsColor(code) {
-  return code === 0
-    ? 'green'
-    : code < 500
-    ? 'amber'
-    : 'green'
+  return code === 0 ? 'green' : code < 500 ? 'amber' : 'green'
 }

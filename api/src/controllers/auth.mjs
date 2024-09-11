@@ -142,11 +142,14 @@ Controller.prototype.authenticate = async function (req, res) {
  * @param {object} res - The response object from Express
  * @param {bool} form - True of it is a full page form request
  */
-Controller.prototype.login = async function (req, res, form=false) {
+Controller.prototype.login = async function (req, res, form = false) {
   /*
    * Validate high-level input against schema
    */
-  const [valid1, err1] = await utils.validate(`req.auth.login${form === true ? '-form' : ''}`, req.body)
+  const [valid1, err1] = await utils.validate(
+    `req.auth.login${form === true ? '-form' : ''}`,
+    req.body
+  )
 
   if (!valid1)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {

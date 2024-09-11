@@ -41,8 +41,8 @@ ${content}
  */
 const pageTitle = (title, tags, sidebarTitle) => `---
 title: "${title}" # skip-spellcheck
-${tags ? "tags:\n" + tags.map((tag) => ` - ${tag}`).join(' # skip-spellcheck\n') : ''}
-${sidebarTitle ? 'sidebar_label: "'+sidebarTitle + '"' : ''}
+${tags ? 'tags:\n' + tags.map((tag) => ` - ${tag}`).join(' # skip-spellcheck\n') : ''}
+${sidebarTitle ? 'sidebar_label: "' + sidebarTitle + '"' : ''}
 ---`
 
 /*
@@ -87,20 +87,21 @@ const createPresetPage = async (preset, slug, root) =>
   await writeFile(
     `${root}/${slug}/readme.mdx`,
     pageTitle(`Preset: ${preset}`, ['preset'], preset) +
-      '\n' + `
+      '\n' +
+      `
 ${presetDocs[preset]}.
 
 <Note>
 
 The default value of this preset is ${renderPresetValue(presets[preset])}, ${
-  presetsSaveToEdit.includes(preset)
-  ? 'but it is <Label style="success">Save</Label> to change this.'
-  : 'and it is <Label style="danger">Not Save</Label> to change this.'
-}
+        presetsSaveToEdit.includes(preset)
+          ? 'but it is <Label style="success">Save</Label> to change this.'
+          : 'and it is <Label style="danger">Not Save</Label> to change this.'
+      }
 
 </Note>
 `
-)
+  )
 
 const renderPresetValue = (val) => {
   if (['number', 'string'].includes(typeof val)) return `\`${val}\``

@@ -336,7 +336,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           prompt: '',
           from_cloud: false,
           kafka_api: {
-            brokers: [`${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`],
+            brokers: [
+              `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+            ],
             tls: {
               key_file: '/etc/redpanda/tls-key.pem',
               cert_file: '/etc/redpanda/tls-cert.pem',

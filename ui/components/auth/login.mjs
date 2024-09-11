@@ -135,7 +135,6 @@ export const Login = ({ setAccount, account = false, role = false }) => {
     if (history) history.back()
   }
 
-
   /*
    * Props shared by each idp
    */
@@ -245,9 +244,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
               Morio supports a variety of authentication backends, or <b>identity providers</b>.
             </p>
             <h4>Identity Providers</h4>
-            <p>
-              This Morio instance is set up with the following providers:
-            </p>
+            <p>This Morio instance is set up with the following providers:</p>
             <ul className="list list-inside list-disc ml-4">
               {tabList.map((id) => (
                 <li key={id}>
@@ -312,7 +309,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
       {redirectError ? (
         <Popout warning noP>
           <h5>An error occured</h5>
-          {redirectErrors[redirectError] || redirectError }
+          {redirectErrors[redirectError] || redirectError}
         </Popout>
       ) : null}
     </div>

@@ -31,7 +31,6 @@ import { checkRole, caseInsensitiveGet } from './ldap.mjs'
  * the OIDC provider, we store state and PKCE data in the store.
  */
 
-
 /**
  * This method starts the OIDC flow
  *
@@ -45,9 +44,10 @@ export async function oidc(id, req, res) {
    */
   const client = await getClient(id)
 
-  if (!client || Array.isArray(client)) return Array.isArray(client)
-    ? res.redirect(`/?error=${client[1]}`)
-    : res.redirect(`/?error=morio.api.oidc.client.init.failed`)
+  if (!client || Array.isArray(client))
+    return Array.isArray(client)
+      ? res.redirect(`/?error=${client[1]}`)
+      : res.redirect(`/?error=morio.api.oidc.client.init.failed`)
 
   /*
    * Set up PKCE - We use this to link this initial redirect to the incoming callback request
@@ -57,18 +57,20 @@ export async function oidc(id, req, res) {
     // We need to pass the verifier in the callback
     verifier: pkce.verifier,
     // We need to keep track of the requested role
-    role: req.body.role
+    role: req.body.role,
   })
 
   /*
    * Return redirect
    */
-  return res.redirect(client.authorizationUrl({
-    scope: 'openid profile email',
-    code_challenge: pkce.challenge,
-    code_challenge_method: 'S256',
-    state: pkce.state
-  }))
+  return res.redirect(
+    client.authorizationUrl({
+      scope: 'openid profile email',
+      code_challenge: pkce.challenge,
+      code_challenge_method: 'S256',
+      state: pkce.state,
+    })
+  )
 }
 
 /**
@@ -98,7 +100,7 @@ export async function oidcCallbackHandler(req, res) {
     client.callbackParams(req),
     {
       state: req.query.state,
-      code_verifier: pkce.verifier
+      code_verifier: pkce.verifier,
     }
   )
 
@@ -119,7 +121,6 @@ export async function oidcCallbackHandler(req, res) {
    */
   const [allowed, maxLevel] = checkRole(pkce.role, provider.rbac, userInfo)
   if (!allowed) return res.redirect('/?error=morio.api.account.role.unavailable')
-
 
   /*
    * Update the latest login time, but don't wait for it
@@ -165,7 +166,7 @@ export async function oidcCallbackHandler(req, res) {
  * @param {string} id - The id of the identity provider
  * @return {object} client - The OIDC client
  */
-async function getClient (id) {
+async function getClient(id) {
   const existingClient = utils.getOidcClient(id)
   if (existingClient) return existingClient
 
@@ -177,8 +178,7 @@ async function getClient (id) {
   let oidcIssuer
   try {
     oidcIssuer = await Issuer.discover(provider.autodiscovery_url || provider.issuer)
-  }
-  catch (err) {
+  } catch (err) {
     log.warn(err, `OIDC discovery failed for provider ${id}`)
     return [false, 'morio.api.oidc.discovery.failed']
   }
@@ -197,5 +197,3 @@ async function getClient (id) {
 function getOidcRedirectUrl(id) {
   return `https://${utils.getNodeFqdn()}/-/api/callback/oidc/${id}`
 }
-
-

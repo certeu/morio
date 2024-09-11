@@ -477,7 +477,9 @@ export const FileInput = ({
       >
         <input {...getInputProps()} />
         <p className="hidden lg:block p-0 m-0">Drag and drop your file here</p>
-        <button type="button" className={`btn btn-secondary btn-outline mt-4 px-8`}>Browse...</button>
+        <button type="button" className={`btn btn-secondary btn-outline mt-4 px-8`}>
+          Browse...
+        </button>
       </div>
     </FormControl>
   )
@@ -508,7 +510,7 @@ export const RoleInput = ({
   labelBL,
   labelBR,
   labelTR,
-  hide = ['root']
+  hide = ['root'],
 }) => (
   <ListInput
     label={label}
@@ -517,11 +519,13 @@ export const RoleInput = ({
     dir="row"
     update={(val) => (role === val ? setRole(false) : setRole(val))}
     current={role}
-    list={roles.filter(role => !hide.includes(role)).map((role, i) => ({
-      val: role,
-      label: <span className="text-center block">{role}</span>,
-      disabled: maxRole ? i > roles.indexOf(maxRole) : false,
-    }))}
+    list={roles
+      .filter((role) => !hide.includes(role))
+      .map((role, i) => ({
+        val: role,
+        label: <span className="text-center block">{role}</span>,
+        disabled: maxRole ? i > roles.indexOf(maxRole) : false,
+      }))}
     dflt="user"
   />
 )

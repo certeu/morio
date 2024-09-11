@@ -67,7 +67,7 @@ export const oidc = {
               label: 'Application/Client ID',
               labelBL: 'The OIDC application/client ID',
               key: 'client_id',
-              placeholder: '9f8afda548c112e70323ff60ff3d080b3216c691a05e69ca8b08e146085adf27'
+              placeholder: '9f8afda548c112e70323ff60ff3d080b3216c691a05e69ca8b08e146085adf27',
             },
             {
               schema: Joi.string().required().label('Application/Client Secret'),
@@ -95,7 +95,8 @@ export const oidc = {
             label: 'Custom autodiscovery URL',
             labelBL: 'Autodiscover URL of the issuer',
             key: 'autodiscovery_url',
-            placeholder: 'https://keycloak.my-company.com/realms/my-realm/.well-known/openid-configuration',
+            placeholder:
+              'https://keycloak.my-company.com/realms/my-realm/.well-known/openid-configuration',
           },
           {
             schema: Joi.boolean().default(true).label('Validate Certificate'),

@@ -155,10 +155,7 @@ const preseed = Joi.alternatives().try(
     url: Joi.string(),
     git: Joi.object().pattern(Joi.string(), gitRepo),
     base: preseedFile,
-    overlays: Joi.alternatives().try(
-      Joi.array().items(preseedFile),
-      Joi.string()
-    )
+    overlays: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
   }),
   Joi.string()
 )
@@ -182,14 +179,8 @@ const settings = Joi.object({
     }),
   }),
   metadata: Joi.object({
-    comment: Joi.alternatives().try(
-      Joi.string(),
-      Joi.array().items(Joi.string())
-    ),
-    version: Joi.alternatives().try(
-      Joi.string(),
-      Joi.number(),
-    ),
+    comment: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
+    version: Joi.alternatives().try(Joi.string(), Joi.number()),
   }),
   connector: Joi.object(),
   tokens: Joi.object({

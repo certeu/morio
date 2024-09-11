@@ -3,12 +3,11 @@ import { log, utils } from './lib/utils.mjs'
 import { currentRole, currentProvider, currentUser, isRoleAvailable } from './rbac.mjs'
 import sessionMiddleware from 'express-session'
 
-
 export const session = sessionMiddleware({
   secret: 'test',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: true },
 })
 
 /*

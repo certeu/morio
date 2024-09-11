@@ -44,13 +44,9 @@ function asJsonOrYaml(input, base64 = false) {
  */
 function fromApi(url) {
   const chunks = url.split('@')
-  const api = (chunks.length > 1)
-    ? chunks.pop()
-    : false
+  const api = chunks.length > 1 ? chunks.pop() : false
 
-  return api && ['github', 'gitlab'].includes(api)
-    ? api
-    : false
+  return api && ['github', 'gitlab'].includes(api) ? api : false
 }
 
 /**
@@ -60,7 +56,7 @@ function fromApi(url) {
  * @param {bool} result - True if it starts with 'git:'
  */
 function fromRepo(url) {
-  return url.slice(0,4) === 'git:'
+  return url.slice(0, 4) === 'git:'
 }
 
 /**
@@ -97,13 +93,11 @@ async function loadGitRepo(gitroot, id, config, log) {
   const dir = `${gitroot}/${folder}`
   let url
 
-  if (config.url.slice(0,7) === 'http://' && config.user && config.token) {
+  if (config.url.slice(0, 7) === 'http://' && config.user && config.token) {
     url = `http://${config.user}:${config.token}@${config.url.slice(7)}`
-  }
-  else if (config.url.slice(0,8) === 'https://') {
+  } else if (config.url.slice(0, 8) === 'https://') {
     url = `https://${config.user}:${config.token}@${config.url.slice(8)}`
-  }
-  else url = config.url
+  } else url = config.url
 
   /*
    * Ensure target folder exists and is empty
@@ -111,9 +105,7 @@ async function loadGitRepo(gitroot, id, config, log) {
   try {
     await rm(dir, { recursive: true, force: true }) // Do not mutate, just rm and re-clone
     await mkdir(dir, console.log)
-
-  }
-  catch (err) {
+  } catch (err) {
     log.warn(`Unable to create folder for git: ${dir}`)
     return false
   }
@@ -122,11 +114,10 @@ async function loadGitRepo(gitroot, id, config, log) {
    * Now clone the repo
    */
   try {
-    const cloneOptions = ['--depth=1', '--recurse-submodules', '--shallow-submodules' ]
+    const cloneOptions = ['--depth=1', '--recurse-submodules', '--shallow-submodules']
     if (config.ref) cloneOptions.push([`--branch=${config.ref}`])
     await git.clone(url, dir, cloneOptions)
-  }
-  catch (err) {
+  } catch (err) {
     log.warn(`Unable to clone git repo ${config.id}: ${config.url}`)
     return false
   }
@@ -145,7 +136,8 @@ async function loadPreseedBaseFile(preseed, gitroot) {
   if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
   if (typeof preseed.base === 'string') {
-    if (preseed.git && fromRepo(preseed.base)) return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot)
+    if (preseed.git && fromRepo(preseed.base))
+      return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot)
     else return await loadPreseedFileFromUrl(preseed.base)
   }
   if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
@@ -163,7 +155,7 @@ async function loadPreseedBaseFile(preseed, gitroot) {
  * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export async function loadPreseededSettings(preseed, log, gitroot="/etc/morio/shared") {
+export async function loadPreseededSettings(preseed, log, gitroot = '/etc/morio/shared') {
   /*
    * If there's a git config, we need to handle that first
    */
@@ -258,15 +250,11 @@ async function loadPreseedFileFromGitlab(config) {
  */
 async function loadPreseedFileFromRepo(config, preseed, gitroot) {
   const chunks = config.slice(4).split('@')
-  const repo = chunks[1]
-    ? chunks[1]
-    : Object.keys(preseed.git)[0]
+  const repo = chunks[1] ? chunks[1] : Object.keys(preseed.git)[0]
   const content = await readFileFromRepo(repo, chunks[0], gitroot)
   const data = asJsonOrYaml(content)
 
-  return data
-    ? data
-    : false
+  return data ? data : false
 }
 
 /**
@@ -301,21 +289,23 @@ async function loadPreseedOverlay(overlay, preseed, gitroot) {
   if (typeof overlay === 'string') {
     if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot)
     const api = fromApi(overlay)
-    if (api === 'github') return await loadPreseedFileFromGithub({
-      github: {
-        ...preseed.base.github,
-        // Replace the file path, but strip out the '@github' at the end
-        file_path: overlay.slice(0, -7)
-      }
-    })
-    if (api === 'gitlab') return await loadPreseedFileFromGitlab({
-      gitlab: {
-        ...preseed.base.gitlab,
-        // Replace the file path, but strip out the '@gitlab' at the end
-        file_path: overlay.slice(0, -7)
-      }
-    })
-    return  await loadPreseedFileFromUrl(overlay)
+    if (api === 'github')
+      return await loadPreseedFileFromGithub({
+        github: {
+          ...preseed.base.github,
+          // Replace the file path, but strip out the '@github' at the end
+          file_path: overlay.slice(0, -7),
+        },
+      })
+    if (api === 'gitlab')
+      return await loadPreseedFileFromGitlab({
+        gitlab: {
+          ...preseed.base.gitlab,
+          // Replace the file path, but strip out the '@gitlab' at the end
+          file_path: overlay.slice(0, -7),
+        },
+      })
+    return await loadPreseedFileFromUrl(overlay)
   }
 
   if (overlay.github) return await loadPreseedFileFromGithub(overlay)
@@ -333,7 +323,6 @@ async function loadPreseedOverlay(overlay, preseed, gitroot) {
  * @return {object} settings - The loaded settings
  */
 async function loadPreseedOverlays(preseed, gitroot, log) {
-
   const overlays = []
 
   if (!preseed?.overlays) return overlays
@@ -357,17 +346,15 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
       for (const overlay of found) {
         if (overlay) overlays.push(overlay)
       }
-    }
-    else {
+    } else {
       const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot)
       if (overlay) overlays.push(overlay)
     }
-  }
+  } else if (Array.isArray(preseed.overlays)) {
 
   /*
    * Handle array
    */
-  else if (Array.isArray(preseed.overlays)) {
     for (const config of preseed.overlays) {
       const overlay = await loadPreseedOverlay(config, preseed, gitroot)
       if (overlay) overlays.push(overlay)
@@ -398,4 +385,3 @@ async function readFileFromRepo(id, path, gitroot) {
 function sanitizeGitFolder(id) {
   return hash(id)
 }
-

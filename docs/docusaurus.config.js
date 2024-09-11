@@ -145,9 +145,9 @@ const config = {
         additionalLanguages: ['yaml'],
       },
       algolia: {
-        appId: "UZ39NUY47C",
-        apiKey: "f502f6d4701c9fbc8b735157198fbc0f",
-        indexName: "morio",
+        appId: 'UZ39NUY47C',
+        apiKey: 'f502f6d4701c9fbc8b735157198fbc0f',
+        indexName: 'morio',
         contextualSearch: true,
         searchParameters: {},
         searchPagePath: 'search',

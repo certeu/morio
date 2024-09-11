@@ -42,8 +42,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Environment
-      environment: {
-      },
+      environment: {},
       // Volumes
       volumes: PROD
         ? [
@@ -73,7 +72,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
           `^${utils.getPreset('MORIO_WATCHER_PREFIX')}/(.*)`
         )
         .set('http.middlewares.watcher-prefix.replacepathregex.replacement', '/$1')
-        .set('http.routers.watcher.middlewares', ['watcher-prefix@file'])
+        .set('http.routers.watcher.middlewares', ['watcher-prefix@file']),
     },
     /*
      * Heartbeat configuration file
@@ -99,7 +98,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           /*
            * Brokers
            */
-          hosts: utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
+          hosts: utils
+            .getBrokerFqdns()
+            .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
           /*
            * Use node UIUD for client_id
            */
@@ -122,18 +123,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
             // Encrypt traffic
             enabled: true,
             // Trust the Morio CA
-            certificate_authorities: ["/usr/share/heartbeat/tls/tls-ca.pem"],
+            certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.pem'],
             // Verify certificates
             verification_mode: 'full',
             // Certificate to use for mTLS
-            certificate: "/usr/share/heartbeat/tls/tls-cert.pem",
+            certificate: '/usr/share/heartbeat/tls/tls-cert.pem',
             // Key to use for mTLS
-            key: "/usr/share//heartbeat/tls/tls-key.pem",
+            key: '/usr/share//heartbeat/tls/tls-key.pem',
           },
           /*
            * Topic to publish to
            */
-          topic: "checks",
+          topic: 'checks',
           /*
            * Disable compression
            */
@@ -142,7 +143,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
            * Kafka API version
            */
           version: '2.0.0',
-
         },
       },
       /*

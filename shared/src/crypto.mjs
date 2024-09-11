@@ -98,13 +98,7 @@ export async function generateCsr(data) {
  * @param {object} data - Data to encode in the token
  * @return {object} jwt - The JSON web token
  */
-export function generateJwt({
-  data,
-  key,
-  passphrase = false,
-  options = {},
-  noDefaults = false,
-}) {
+export function generateJwt({ data, key, passphrase = false, options = {}, noDefaults = false }) {
   const dfltOptions = {
     expiresIn: '4h',
     notBefore: 0,
@@ -467,13 +461,13 @@ export function encryptionMethods(stringKey, salt, logger) {
 /**
  * Generate verifier and challenge for Proof Key for Code Exchange PKCE)
  */
-export function generatePkce () {
+export function generatePkce() {
   const verifier = randomString(32)
 
   return {
     verifier,
     challenge: createHash('sha256').update(verifier).digest('base64url'),
-    state: randomString(32)
+    state: randomString(32),
   }
 }
 

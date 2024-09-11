@@ -13,7 +13,7 @@ export const esbuild = esBuild
  * @return {string} banner - The banner
  */
 export function banner(pkg) {
-  return  `/**
+  return `/**
  * ${pkg.name} | v${pkg.version}
  * ${pkg.description}
  * (c) ${new Date().getFullYear()} European Commission
