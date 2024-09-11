@@ -88,6 +88,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ['tokens.flags.DISABLE_IDP_MRT', false],
       ['tokens.flags.DISABLE_IDP_LOCAL', false],
       ['tokens.flags.DISABLE_IDP_LDAP', false],
+      ['tokens.flags.DISABLE_IDP_OIDC', false],
       ['tokens.flags.HEADLESS_MORIO', false],
     ],
   }
