@@ -34,7 +34,7 @@ Follow these steps to get started:
  - Select **Create**
  - On the **Add Client** form, in the **Client ID** box, type `morio` as name for the client (or whatever you want)
  - On the **Client Protocol** list, select `openid-connect`
- - Set the **Root URL** to the URL of the Morion instance or cluster, for example, `https://<your instance fqdn>/`
+ - Set the **Root URL** to the URL of the Morio instance or cluster, for example, `https://<your instance fqdn>/`
  - Select **Save**
 
 After saving, you’ll be taken to the client’s settings page. Here, under the
@@ -45,7 +45,7 @@ After saving, you’ll be taken to the client’s settings page. Here, under the
   - **Client Authentication**: Leave this enabled
 - Access Type:
   - Choose `Confidential`
-- Valid Redirect URIs:
+- Valid Redirect Uris:
   - **Redirect URL**: Use
     `https://your-morio-fqdn/-/api/callback/oidc/keycloak` where
     `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `keycloak` is
@@ -101,7 +101,7 @@ secrets:
 ```
 
 <Tip>
-Refer to [the Idenity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
+Refer to [the Identity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
 reference documentation on the `iam`
 settings](/docs/reference/settings/iam/#iamprovidersoidc-id) for more details.
 </Tip>

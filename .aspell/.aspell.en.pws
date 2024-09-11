@@ -1,4 +1,4 @@
-personal_ws-1.1 en 217 
+personal_ws-1.1 en 221 
 ACL
 AMI
 API's
@@ -46,6 +46,7 @@ JargonList
 JargonTerms
 Joost
 KV
+Keycloak
 Kubernetes
 LDAP
 LOMO
@@ -71,8 +72,10 @@ OSI
 OU
 OpenAPI
 OpenBao
+OpenID
 OpenTelemetry
 PEM
+PKCE
 Podman
 Pre
 Preseeding
@@ -92,6 +95,7 @@ SmallStep
 SmallStep's
 SubPages
 Symantecs
+TCP
 TLS
 TOTP
 TTL
