@@ -143,7 +143,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   /*
    * Helper to get the tablist, and array of tabs with IDPs
    */
-  const tabList = tabOrder(idps, ui, showAll)
+  const tabList = tabOrder(idps, ui, showAll).filter(id => typeof idps[id] !== 'undefined')
 
   const tabs = tabList.map((id) => {
     const Idp = providers[idps[id].provider] || UnknownIdp
