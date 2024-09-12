@@ -5,6 +5,7 @@ ldap:
 local:
 moriod:
 mrt:
+oidc:
 # Service tags
 api:
 broker:

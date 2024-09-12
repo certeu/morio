@@ -54,7 +54,370 @@ servers:
   - url: https://false/-/api
     description: Morio management API on false
 components:
-  schemas: {}
+  schemas:
+    Request:
+      login:
+        apikey:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - apikey
+              description: >-
+                ID of the Morio identity provider. Must always be 'apikey' for
+                authentication with an API key
+            data:
+              type: object
+              properties:
+                api_key:
+                  type: string
+                  minLength: 96
+                  maxLength: 96
+                  description: This is the API key (a UUID)
+                api_key_secret:
+                  type: string
+                  minLength: 36
+                  maxLength: 36
+                  description: This is the API key secret
+              required:
+                - api_key
+                - api_key_secret
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        local:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - local
+              description: >-
+                ID of the Morio identity provider. Must always be 'local' for
+                authentication with a local Morio account
+            data:
+              type: object
+              properties:
+                password:
+                  type: string
+                  minLength: 3
+                  maxLength: 1024
+                  description: The account's password
+                username:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: The username of the account
+                token:
+                  type: string
+                  minLength: 3
+                  maxLength: 12
+                  description: The TOTP token (one-time password)
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - password
+                - username
+                - token
+                - role
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        mrt:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - mrt
+              description: >-
+                ID of the Morio identity provider. Must always be 'mrt' for
+                authentication with the Morio Root Token
+            data:
+              type: object
+              properties:
+                mrt:
+                  type: string
+                  pattern: ^mrt\.[0-9a-z]+$
+                  minLength: 68
+                  maxLength: 68
+                  description: The Morio Root Token
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - mrt
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        ldap:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              description: ID of the Morio identity provider.
+            data:
+              type: object
+              properties:
+                password:
+                  type: string
+                  minLength: 3
+                  maxLength: 1024
+                  description: Password for the LDAP account
+                username:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: Username of the LDAP account
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - password
+                - username
+                - role
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+    Response:
+      login:
+        apikey:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: The ID of the identity provider to use for this account
+              required:
+                - role
+              additionalProperties: false
+          additionalProperties: false
+        local:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                available_roles:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - user
+                      - manager
+                      - operator
+                      - engineer
+                      - root
+                    description: >-
+                      The requested role to assign after authentication.  Must
+                      be one of: user, manager, operator, engineer, root.
+                      Although root can only be assigned by the MRT identity
+                      provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
+        mrt:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                available_roles:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - user
+                      - manager
+                      - operator
+                      - engineer
+                      - root
+                    description: >-
+                      The requested role to assign after authentication.  Must
+                      be one of: user, manager, operator, engineer, root.
+                      Although root can only be assigned by the MRT identity
+                      provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
+        ldap:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
   securitySchemes:
     api_key:
       type: http
