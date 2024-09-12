@@ -10,13 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [api] Added new `/pubkey` and `/pubkey.pem` endpoints to the API
+- [api] Added rate limiting and new `/limits` endpoint to the API
 - [core] Integration with Hashicorp Vault / OpenBao
 - [core] Support for preseeding
 - [core] New `MORIO_DOCKER_LOG_DRIVER` preset allows overriding the log driver
 - [core] New `MORIO_DOCKER_ADD_HOST` preset allows adding a custom host:ip mapping
 - [ui] Added a new cluster status page in the UI
 - [ui] Added preseeding support to UI setup wizard
-- [wather] Added the new Watcher service
+- [watcher] Added the new Watcher service
 
 ### Changed
 

@@ -8,7 +8,7 @@ import { routes } from '#routes/index'
 // Bootstrap configuration
 import { reloadConfiguration } from './reload.mjs'
 // Middleware
-import { guardRoutes, addRbacHeaders, session } from './middleware.mjs'
+import { guardRoutes, addRbacHeaders, session, limits } from './middleware.mjs'
 // Load logger and utils
 import { log, utils } from './lib/utils.mjs'
 
@@ -39,6 +39,26 @@ app.use(cookieParser())
 app.use(addRbacHeaders)
 
 /*
+ * We need to trust the proxy to allow proper rate limiting
+ */
+app.set('trust proxy', 1)
+
+/*
+ * Add rate limiting middleware and limits route
+ */
+app.use(limits)
+app.get(`/limits`, async (req, res) => {
+  const rate = await limits.getKey(req.ip)
+
+  return res.send({
+    ip: req.ip,
+    hits: rate.totalHits,
+    reset_time: rate.resetTime,
+    reset_seconds: Math.ceil((new Date(rate.resetTime).getTime() - new Date().getTime()) / 1000),
+  })
+})
+
+/*
  * Add session middleware to the authentication routes as
  * some identity providers (OIDC) require it.
  */
@@ -48,7 +68,7 @@ app.use(`/callback/oidc/:provider_id`, session)
 /*
  * Add content type for full page form requests to routes who handle this
  */
-app.use('/login-form', express.urlencoded({ extende: true }))
+app.use('/login-form', express.urlencoded({ extended: true }))
 
 /*
  * Load the API routes

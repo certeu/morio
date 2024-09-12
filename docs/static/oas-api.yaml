@@ -26,6 +26,10 @@ info:
     url: /downloads/morio-card-embed.svg
     backgroundColor: transparent
     altText: Morio Logo
+  contact:
+    name: Morio Team
+    url: https://github.com/certeu/morio
+    email: morio@morio.it
 externalDocs:
   description: Morio Online Documentation
   url: https://morio.it/
@@ -46,22 +50,561 @@ tags:
     description: Endpoints that leverage the Docker daemon API
   - name: settings
     description: Endpoints related to Morio settings
-servers: []
+servers:
+  - url: https://false/-/api
+    description: Morio management API on false
 components:
+  schemas:
+    Authentication:
+      apikey:
+        type: object
+        properties:
+          provider:
+            type: string
+            minLength: 2
+            maxLength: 255
+            enum:
+              - apikey
+            description: >-
+              ID of the Morio identity provider. Must always be 'apikey' for
+              authentication with an API key
+          data:
+            type: object
+            properties:
+              api_key:
+                type: string
+                minLength: 96
+                maxLength: 96
+                description: This is the API key (a UUID)
+              api_key_secret:
+                type: string
+                minLength: 36
+                maxLength: 36
+                description: This is the API key secret
+            required:
+              - api_key
+              - api_key_secret
+            additionalProperties: false
+            description: Holds data that is specific to the identity provider
+        required:
+          - provider
+          - data
+        additionalProperties: false
+      local:
+        type: object
+        properties:
+          provider:
+            type: string
+            minLength: 2
+            maxLength: 255
+            enum:
+              - local
+            description: >-
+              ID of the Morio identity provider. Must always be 'local' for
+              authentication with a local Morio account
+          data:
+            type: object
+            properties:
+              password:
+                type: string
+                minLength: 3
+                maxLength: 1024
+                description: The account's password
+              username:
+                type: string
+                minLength: 2
+                maxLength: 255
+                description: The username of the account
+              token:
+                type: string
+                minLength: 3
+                maxLength: 12
+                description: The TOTP token (one-time password)
+              role:
+                type: string
+                enum:
+                  - user
+                  - manager
+                  - operator
+                  - engineer
+                  - root
+                description: >-
+                  The requested role to assign after authentication.  Must be
+                  one of: user, manager, operator, engineer, root. Although root
+                  can only be assigned by the MRT identity provider.
+            required:
+              - password
+              - username
+              - token
+              - role
+            additionalProperties: false
+            description: Holds data that is specific to the identity provider
+        required:
+          - provider
+          - data
+        additionalProperties: false
+      mrt:
+        type: object
+        properties:
+          provider:
+            type: string
+            minLength: 2
+            maxLength: 255
+            enum:
+              - mrt
+            description: >-
+              ID of the Morio identity provider. Must always be 'mrt' for
+              authentication with the Morio Root Token
+          data:
+            type: object
+            properties:
+              mrt:
+                type: string
+                pattern: ^mrt\.[0-9a-z]+$
+                minLength: 68
+                maxLength: 68
+                description: The Morio Root Token
+              role:
+                type: string
+                enum:
+                  - user
+                  - manager
+                  - operator
+                  - engineer
+                  - root
+                description: >-
+                  The requested role to assign after authentication.  Must be
+                  one of: user, manager, operator, engineer, root. Although root
+                  can only be assigned by the MRT identity provider.
+            required:
+              - mrt
+            additionalProperties: false
+            description: Holds data that is specific to the identity provider
+        required:
+          - provider
+          - data
+        additionalProperties: false
+      ldap:
+        type: object
+        properties:
+          provider:
+            type: string
+            minLength: 2
+            maxLength: 255
+            description: ID of the Morio identity provider.
+          data:
+            type: object
+            properties:
+              password:
+                type: string
+                minLength: 3
+                maxLength: 1024
+                description: Password for the LDAP account
+              username:
+                type: string
+                minLength: 2
+                maxLength: 255
+                description: Username of the LDAP account
+              role:
+                type: string
+                enum:
+                  - user
+                  - manager
+                  - operator
+                  - engineer
+                  - root
+                description: >-
+                  The requested role to assign after authentication.  Must be
+                  one of: user, manager, operator, engineer, root. Although root
+                  can only be assigned by the MRT identity provider.
+            required:
+              - password
+              - username
+              - role
+            additionalProperties: false
+            description: Holds data that is specific to the identity provider
+        required:
+          - provider
+          - data
+        additionalProperties: false
+    Request:
+      login:
+        apikey:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - apikey
+              description: >-
+                ID of the Morio identity provider. Must always be 'apikey' for
+                authentication with an API key
+            data:
+              type: object
+              properties:
+                api_key:
+                  type: string
+                  minLength: 96
+                  maxLength: 96
+                  description: This is the API key (a UUID)
+                api_key_secret:
+                  type: string
+                  minLength: 36
+                  maxLength: 36
+                  description: This is the API key secret
+              required:
+                - api_key
+                - api_key_secret
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        local:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - local
+              description: >-
+                ID of the Morio identity provider. Must always be 'local' for
+                authentication with a local Morio account
+            data:
+              type: object
+              properties:
+                password:
+                  type: string
+                  minLength: 3
+                  maxLength: 1024
+                  description: The account's password
+                username:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: The username of the account
+                token:
+                  type: string
+                  minLength: 3
+                  maxLength: 12
+                  description: The TOTP token (one-time password)
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - password
+                - username
+                - token
+                - role
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        mrt:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              enum:
+                - mrt
+              description: >-
+                ID of the Morio identity provider. Must always be 'mrt' for
+                authentication with the Morio Root Token
+            data:
+              type: object
+              properties:
+                mrt:
+                  type: string
+                  pattern: ^mrt\.[0-9a-z]+$
+                  minLength: 68
+                  maxLength: 68
+                  description: The Morio Root Token
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - mrt
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+        ldap:
+          type: object
+          properties:
+            provider:
+              type: string
+              minLength: 2
+              maxLength: 255
+              description: ID of the Morio identity provider.
+            data:
+              type: object
+              properties:
+                password:
+                  type: string
+                  minLength: 3
+                  maxLength: 1024
+                  description: Password for the LDAP account
+                username:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: Username of the LDAP account
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+              required:
+                - password
+                - username
+                - role
+              additionalProperties: false
+              description: Holds data that is specific to the identity provider
+          required:
+            - provider
+            - data
+          additionalProperties: false
+    Response:
+      login:
+        apikey:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+                  minLength: 2
+                  maxLength: 255
+                  description: The ID of the identity provider to use for this account
+              required:
+                - role
+              additionalProperties: false
+          additionalProperties: false
+        local:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                available_roles:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - user
+                      - manager
+                      - operator
+                      - engineer
+                      - root
+                    description: >-
+                      The requested role to assign after authentication.  Must
+                      be one of: user, manager, operator, engineer, root.
+                      Although root can only be assigned by the MRT identity
+                      provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
+        mrt:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                available_roles:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - user
+                      - manager
+                      - operator
+                      - engineer
+                      - root
+                    description: >-
+                      The requested role to assign after authentication.  Must
+                      be one of: user, manager, operator, engineer, root.
+                      Although root can only be assigned by the MRT identity
+                      provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
+        ldap:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: The JSON Web Token
+            data:
+              type: object
+              properties:
+                user:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                highest_role:
+                  type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
+                provider:
+                  type: string
+              required:
+                - role
+                - highest_role
+              additionalProperties: false
+          additionalProperties: false
   securitySchemes:
-    API Key:
+    api_key:
       type: http
       scheme: basic
-    JWT in Header:
+    jwt_bearer:
       type: http
       scheme: bearer
-    JWT in Cookie:
+    jwt_cookie:
       type: apiKey
       in: cookie
       name: morio
 paths:
   /ca/certificates:
     get:
+      operationId: listCertificates
       tags:
         - anonymous
         - cryptography
@@ -79,6 +622,15 @@ paths:
                   50a3270a0988610145659cfb190121d1fcfd50141b953a783f354d840ad3bf9e
                 root_certificate: "-----BEGIN CERTIFICATE-----\r\nMIIGdDCCBFygAwIBAgIBATANBgkqhkiG9w0BAQsFADCBnzELMAkGA1UEBhMCQkUx\r\nETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ\r\nRW5naW5lZXJpbmcgVGVhbTEkMCIGA1UECxMbTW9yaW8gU3RhbmRhbG9uZSBTd2Fy\r\nbSBUZXN0MSkwJwYDVQQDEyBNb3JpbyBSb290IENlcnRpZmljYXRlIEF1dGhvcml0\r\neTAeFw0yNDA3MjgxMzE4MzZaFw00NDA3MjgxMzE4MzZaMIGfMQswCQYDVQQGEwJC\r\nRTERMA8GA1UECBMIQnJ1c3NlbHMxETAPBgNVBAcTCEJydXNzZWxzMRkwFwYDVQQK\r\nExBFbmdpbmVlcmluZyBUZWFtMSQwIgYDVQQLExtNb3JpbyBTdGFuZGFsb25lIFN3\r\nYXJtIFRlc3QxKTAnBgNVBAMTIE1vcmlvIFJvb3QgQ2VydGlmaWNhdGUgQXV0aG9y\r\naXR5MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAkK3oHb9U0thYdq2F\r\niOtXhsxIp+omgEczcYL6fE5B+y2Qy7vzWvOr1l9kZTPN6FkYlo0idXWa4RO9SgQ9\r\nBoOqR+NaOvYRvn836l9ohGztvPAfxdxB+BGoHcd3KFgeD8veedKaCTgeVWNUQMUK\r\nHPR3q8HQXs1bycJ15j9ktmhtCKnZvFJUXZrOskgWdE+0pXI8rfrBdXB2z9WrN9dr\r\n32bxLfsB+JycO1OLs/dJpkIyj1+nbAzdW6KpiDMTq9DJSQgGKbgYoz73cD6uSbnh\r\n+sLhSvpUy7Kz5O+L5Ne+q4LNI4Dt5St4FGBljDWxV1Oar2MRyhwbdeIb4yunIpgY\r\nr/iD4+vCDSEiIxwcS9H8n5qyHbhMO8Nh9zUsGsomBcB+UlPbdB3I0M1veLB2Eb3t\r\nJ/qf7mzdN4yO2i5gP3irvF6BYM4Yb1NNvBKioyWYsQYAl+xOWI7vLXB/1IKs3Xux\r\nFnKa8lTuo1PORwS8g+pXUMX2Otc6Ucf0r58YoZrvAFUQRfdf9uk1jAKGXLkhrWva\r\no+ZUDrB9VnjNUrCr6DoTam7mDRIlgkCpDje/alW5gLh5++l2gcG4Eht1I9L/O+Ug\r\nJptJ3gyrWm8RknXFqT3LsPwRYFFewjxfS0bsww/5+O5A3TKu/PKyINazT5SRYNI4\r\noXOSebu0b9WHMkYVqrmxoTGgd/sCAwEAAaOBuDCBtTAMBgNVHRMEBTADAQH/MAsG\r\nA1UdDwQEAwIC9DA7BgNVHSUENDAyBggrBgEFBQcDAQYIKwYBBQUHAwIGCCsGAQUF\r\nBwMDBggrBgEFBQcDBAYIKwYBBQUHAwgwEQYJYIZIAYb4QgEBBAQDAgD3MB0GA1Ud\r\nDgQWBBRLAieUVRyHBPxbwRQ05LyL7xSvNTApBgNVHREEIjAggh5wb2MtbW9yaW8t\r\nbm9kZTEuY2VydC5ldXJvcGEuZXUwDQYJKoZIhvcNAQELBQADggIBAHfuhwc9awm+\r\nnZy7l8iviAoFqo3ja6yt/efx9KoQOCWP0q7TX7YAqWs8JQGV1DxFE94j3flgSxx5\r\nEeNs1p7qFHpJ1wGoWbTS8X/ytAVjKQEzfzSNSIEfK5O7G9rKWnpMjI6ZnuAbB7MU\r\nA1h6vrA2373qj7VFJfupj6qanZ8/WmhEU6dfwL1Mp4trwY7g40FfQOq8+YyqWyU0\r\nZdO7DUJd+bO8KGV6l7z8U9CyVN3X4hAvpHZ4rhD5Kabq0o6pA3GaQaSWPJfAxCNF\r\n1uWR3rLH2aK68pKAUrGNXRibyhrWIuX5t/WTub9zZw7FMk01YSFwXnl46MHFTt/r\r\nZWJVVITPCLjAHJaBH7WX8KXAORuE1Lqm9Ynapj0+B8c3nGC4Th+BiHorB3+CF799\r\nEpRjHsNXQWLRgP09gl1g/yp4GYbImUN2tjkyb7OftF/F/AEIozFGeXK0ewk+gZKt\r\nlYyqKzOjNbL7pDVh3NWQlGV9ky6rr2XWvYFzb3vFkH5MNWMHE5kCpjuAU/tOzmpG\r\n55TpUcT2BY4rTM8mObGNiPu4Vy9VqCaTy+mUlyRHlUZIBaZTxqNmjHrQXDj/B9s9\r\n0ekS8ikHr7A3mYdbZrCi0dEfQTs9seiWfid59I4W7R7/J0czJHusKkpM/GE5lFcg\r\noUyCyR375Emn80zazBRiKvAey+gT1bPD\r\n-----END CERTIFICATE-----\r\n"
                 intermediate_certificate: "-----BEGIN CERTIFICATE-----\r\nMIIGfDCCBGSgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBnzELMAkGA1UEBhMCQkUx\r\nETAPBgNVBAgTCEJydXNzZWxzMREwDwYDVQQHEwhCcnVzc2VsczEZMBcGA1UEChMQ\r\nRW5naW5lZXJpbmcgVGVhbTEkMCIGA1UECxMbTW9yaW8gU3RhbmRhbG9uZSBTd2Fy\r\nbSBUZXN0MSkwJwYDVQQDEyBNb3JpbyBSb290IENlcnRpZmljYXRlIEF1dGhvcml0\r\neTAeFw0yNDA3MjgxMzE4NDFaFw0yOTA3MjgxMzE4NDFaMIGnMQswCQYDVQQGEwJC\r\nRTERMA8GA1UECBMIQnJ1c3NlbHMxETAPBgNVBAcTCEJydXNzZWxzMRkwFwYDVQQK\r\nExBFbmdpbmVlcmluZyBUZWFtMSQwIgYDVQQLExtNb3JpbyBTdGFuZGFsb25lIFN3\r\nYXJtIFRlc3QxMTAvBgNVBAMTKE1vcmlvIEludGVybWVkaWF0ZSBDZXJ0aWZpY2F0\r\nZSBBdXRob3JpdHkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoICAQDEbgzx\r\n0dF680J70HM+CwPDQM7owZf/nQnvHkxelrNOE1JE845kMbO+LC07WX8C1anizDJQ\r\npHiMzMWuCdziqUUSl19aAUfrP53ei3IvIC3R9mXusKLnrTEXauC7er1h2vsoz9F5\r\nmULW7Lsf/mdKu6MsXalJyDpWLBtZz3zznzoTd/rwKnFUnauy/rkTuwDqzRho1/89\r\n50sNdUgSQ14srXGxQmXyAeH9PZk3c40mLHmSYqJhP1H6O0t/snXbfO4s+5UDaTiF\r\n+3ANjeeJDUeDtXxg2hGiCPssrWeCGr331Jy4XU3nwaTGH7EmLep4IjE1+7qcOSl3\r\nkOWex7CmY991/PZSneHE0w4YAmudZTfHl7lA2RpVxFMkbIcbx7lMll/zfrvqax6W\r\nx7TIuqYoPwofr8hwxiKbxVCqW0UudxRrJXZLMlTavXIxVfEOmR7frfl/CmiyybwG\r\nzLqAsILof8azYWjqR+hwUKrj/UR05fiQfJmC8WGfGXWqM/YKUpIheG+FWs6jKHkm\r\nNcmANp+w6ucTbV++1vdhj8vLmjELFf9JRptSZxMQpUA2gVfF2Hbn+jyDQyhFSElk\r\n2K0KKQRHqMYRquRVZCHWZnaLyESh5bQGpt0q3+ZqlEfSM57h8eCmmd+ia1aVDeWU\r\nGlpe3mJPtNef9HBojkytvXqcQOOw0RDI6JBnuQIDAQABo4G4MIG1MAwGA1UdEwQF\r\nMAMBAf8wCwYDVR0PBAQDAgL0MDsGA1UdJQQ0MDIGCCsGAQUFBwMBBggrBgEFBQcD\r\nAgYIKwYBBQUHAwMGCCsGAQUFBwMEBggrBgEFBQcDCDARBglghkgBhvhCAQEEBAMC\r\nAPcwHQYDVR0OBBYEFEsCJ5RVHIcE/FvBFDTkvIvvFK81MCkGA1UdEQQiMCCCHnBv\r\nYy1tb3Jpby1ub2RlMS5jZXJ0LmV1cm9wYS5ldTANBgkqhkiG9w0BAQsFAAOCAgEA\r\nTN9kHQBILMqCQSpYINywlmnchGTsqzvisE9p3IzqDWNMuQybwAt6/3LetE1SomYc\r\nYmh2fS8MmAHs+xr7ZfldTSVBUMXj+R2p176d3AmToR4PQ2qFdLGT+JoMOk9qsMG6\r\nNyozmLKvT1TIAt2pwjGSfX0GLSy2RS+mUpxUHpaDKLozTk1YJZJnAzX9l6SJz+m/\r\n77XpmTxMTKCQY0WsKLtohlDAs9lrm9MAJir7XKbMyiHE0L4OiW1pgozxvPxeTBUz\r\ngEXz4laHvrbN/rRwzqdlZ1XFzgjuOT1Tfkn8fzbjqZVqs0muyTqsftkKUyi3rgY8\r\nH1RKqt4r+h86XSXTR3/M3Z7IZYQ9ts0qDhPyrya9S9V7ZPO7GWKcMIA2JhjAn5/0\r\nvcvrXFoE6bnXagxT6p+lUJqUycecpDgN4TFcRCTB/rvC7H6Qi7v7z3OU2kjYQp7n\r\nQjiAYmeXwoqB27hlBjKOpS3dgX34/HjhYJJ6JSZ5r89ZhSgQraIvNpf8HamrKtTz\r\nVsipAq4Ol2rkMwuiIRZGfE3eFppO4aWGs6nIwwrI00ttO241a8MVv95ruPFoULLS\r\nZJ3dD2kDgEZ3F9pDlJyty0T4PPNkwu35ysldWPXce9zy/7AFmxujMnd4bB+0tO0t\r\nDmghEeLnxtbFVX9qGQYM4a07Y7s7jFuIlXeZqMDxHgU=\r\n-----END CERTIFICATE-----\r\n"
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '503':
           description: Unable to load the requested data
           content:
@@ -91,6 +643,7 @@ paths:
                   internal state.
   /pubkey:
     get:
+      operationId: getPubkey
       tags:
         - anonymous
         - cryptography
@@ -132,6 +685,15 @@ paths:
                   2zVgK4iWU+nnSlpFGcwAxVUCAwEAAQ==
 
                   -----END PUBLIC KEY-----
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '503':
           description: Unable to load the requested data
           content:
@@ -139,6 +701,7 @@ paths:
               example: *ref_0
   /pubkey.pem:
     get:
+      operationId: getPubkeyPem
       tags:
         - anonymous
         - cryptography
@@ -166,6 +729,15 @@ paths:
                 ropJOuQ/yET5BtYVnalr4V9BfKmALfcYenIrk9sWLe3f+FG34kGF1egaWy2c4HFV
                 2zVgK4iWU+nnSlpFGcwAxVUCAwEAAQ==
                 -----END PUBLIC KEY-----
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '503':
           description: Unable to load the requested data
           content:
@@ -175,6 +747,7 @@ paths:
     get:
       tags: &ref_1
         - anonymous
+      operationId: listDownloads
       summary: List downloads
       description: >-
         Returns a list of files in the download folder that can be downloaded
@@ -191,6 +764,15 @@ paths:
                 - /downloads/certs/db.pem
                 - /downloads/certs/console.pem
                 - /downloads/certs/broker.pem
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '503':
           description: Unable to load the requested data
           content:
@@ -198,6 +780,7 @@ paths:
               example: *ref_0
   /idps:
     get:
+      operationId: listIdps
       tags:
         - anonymous
         - authentication
@@ -241,8 +824,18 @@ paths:
                     - local
                     - apikey
                     - mrt
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
   /jwks:
     get:
+      operationId: listJwks
       tags:
         - anonymous
         - authentication
@@ -263,8 +856,47 @@ paths:
                     'n': >-
                       yriNzCVnGQ56dyOVhoPn4J2xlq4_SW6YEoq2FAM1uXtY2FNg1nAtytdY7SKzyuSF1U5sOQ77RmACiXIX-tkuTTPl_kNZQ4udH-c2w01_So9uj9rjDSwvtilHOn4y-l9qYyqBM93jBnjWGFTBNpmDHO4ctVorI6zK1mE7ILDTEpz1lPiZUz22feLOSuCQfnGNJsoU5msSJCiOVtfi37yFQ-ZAQtcJGBe11xRkvjegQJv9UB67tnD3DkRt7FnNDWHJmIcPOyySHJ7CH_ajRZj6_S0BVdlTWNiarKGzTlRCpQCqVFaiu8g6H8ANSoWypIazoOA-iJ3n8VSgvxiVAX1vVzG_Z44Vd8JpEpOWeC36qfX2LNKg0KvUEgbdMt6NB4RUsXVgdIGT02h_RRVmTY5FZCcWtA6pqlJ9sd27f5t0IWAMLJLpUq6WjOVTidUxon7xVGLot26DP3S7KnVS1FHZFsUQn5uQ2kNbzWyr6gha3YbvYk1Ss6bRu9Zzv4mKXaXn-rASvuSHZClPo0k4wEfQ7kWRJgwNe9hbZRh_MGl4VbGhg0TbaPwqYucmffecjrhNEAPsjt5R7_Ukc4lg8y4miPn6QPsGBfNgiGfhdWLy_FXA-Nn2DJqsDJcieNJp0rOUDGRJSj64s8Y1dpOi14ZjErz3x9OZBHk1Nw1NAQ3Z96U
                     e: AQAB
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
+  /limits:
+    get:
+      operationId: rateLimits
+      tags:
+        - anonymous
+      summary: Get info on rate limits
+      description: >-
+        Returns information on your current rate limits. The API is rate-limited
+        per IP address, this endpoint lets you see how many requests you have
+        made within the rate limiting window, and how long before it will reset.
+      responses:
+        '200':
+          description: Rate limiting data
+          content:
+            application/json:
+              example:
+                ip: 10.13.22.6
+                hits: 6
+                reset_time: '2024-09-12T09:37:49.723Z'
+                reset_seconds: 899
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
   /status:
     get:
+      operationId: getStatus
       tags: *ref_1
       summary: Get status
       description: Returns information about how Morio is doing. Useful for monitoring.
@@ -327,6 +959,15 @@ paths:
                     reconfigure_count: 1
                     config_resolved: true
                     settings_serial: 1722172709838
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '503':
           description: Unable to load status data from Morio Core
           content:
@@ -339,6 +980,7 @@ paths:
                   503.
   /up:
     get:
+      operationId: upHealthcheck
       tags: *ref_1
       summary: API Healthcheck
       description: >-
@@ -349,6 +991,7 @@ paths:
           description: No response body
   /validate/settings:
     post:
+      operationId: validateSettings
       tags:
         - anonymous
         - settings
@@ -743,12 +1386,12 @@ paths:
               name: Morio Standalone Example
               broker_nodes:
                 - morio-node1.tokyo.morio.it
-              flags: &ref_27
+              flags: &ref_28
                 HEADLESS_MORIO: false
                 DISABLE_ROOT_TOKEN: false
-              secrets: &ref_28
+              secrets: &ref_29
                 AD_PASSWORD: aa;S009)) _S asd0AS
-              providers: &ref_29
+              providers: &ref_30
                 apikey:
                   provider: apikey
                   id: apikey
@@ -778,11 +1421,11 @@ paths:
                       attribute: samaccountname
                       regex: ^(?:joostdecock|sorchanidhubhghaill)$
                   verify_certificate: true
-              visibility: &ref_30
+              visibility: &ref_31
                 mrt: icon
                 local: icon
                 apikey: icon
-              order: &ref_31
+              order: &ref_32
                 - ad
                 - local
                 - apikey
@@ -806,6 +1449,15 @@ paths:
                   - 'Node 1 resolves to: 10.123.12.15'
                   - Node 1 is reachable over HTTPS
                 validated_settings: *ref_2
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -818,6 +1470,7 @@ paths:
                   schema. This means the request is invalid.
   /validate/preseed:
     post:
+      operationId: validatePreseedSettings
       tags:
         - anonymous
         - settings
@@ -1094,7 +1747,7 @@ paths:
                   additionalProperties: false
                 - type: string
             example:
-              base: &ref_32
+              base: &ref_33
                 github:
                   owner: morio
                   repo: preseed
@@ -1102,7 +1755,7 @@ paths:
                   ref: main
                   token: >-
                     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
-              overlays: &ref_33
+              overlays: &ref_34
                 - settings/overlays/idp-ad.yaml
                 - settings/overlays/idp-apikey.yaml
                 - settings/overlays/idp-local.yaml
@@ -1113,6 +1766,15 @@ paths:
           content:
             application/json:
               example: *ref_3
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -1122,10 +1784,11 @@ paths:
     get:
       tags: &ref_5
         - accounts
-      security: &ref_10
-        - API Key: []
-        - JWT in Header: []
-        - JWT in Cookie: []
+      security: &ref_11
+        - api_key: []
+        - jwt_bearer: []
+        - jwt_cookie: []
+      operationId: listAccounts
       summary: List local accounts
       description: >-
         Returns the list of accounts. Needs at least the `manager` role.
@@ -1154,6 +1817,15 @@ paths:
                   last_login: null
                   provider: local
                   username: testaccount1722178139692
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -1162,9 +1834,18 @@ paths:
                 status: 401
                 title: Authentication required
                 detail: The request was not properly authenticated.
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: &ref_7
+                status: 429
+                title: Rate limit exceeded
+                detail: You have made too many requests. Please try again later.
   /account:
     post:
       tags: *ref_5
+      operationId: createLocalAccount
       summary: Create local account
       description: >-
         Creates a local Morio account. The account needs to be activated via the
@@ -1189,7 +1870,16 @@ paths:
                   description: The ID of the identity provider to use for this account
                 role:
                   type: string
-                  description: The role of the account
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
+                  description: >-
+                    The requested role to assign after authentication.  Must be
+                    one of: user, manager, operator, engineer, root. Although
+                    root can only be assigned by the MRT identity provider.
                 username:
                   type: string
                   minLength: 2
@@ -1223,6 +1913,15 @@ paths:
                 invite: e7d7b6427378f9ddde77775160ac91dda8eea6c5ef0491c8
                 inviteUrl: >-
                   https://unit.test.morio.it/morio/invite/testAccount1722068362387-e7d7b6427378f9ddde77775160ac91dda8eea6c5ef0491c8
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: Multiple responses with this status code
           content:
@@ -1231,7 +1930,7 @@ paths:
                 This request violates the data schema:
                   value: *ref_4
                 Account state is invalid:
-                  value: &ref_7
+                  value: &ref_8
                     status: 400
                     title: Account state is invalid
                     detail: >-
@@ -1246,13 +1945,19 @@ paths:
           description: Conflict with an existing account
           content:
             application/problem+json:
-              example: &ref_16
+              example: &ref_17
                 status: 409
                 title: Conflict with an existing account
                 detail: The provided data conflicts with an existing account.
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_7
   /activate-account:
     post:
       tags: *ref_5
+      operationId: activateLocalAccount
       summary: Activate local account
       description: >-
         Activates an account based on its invite code.
@@ -1397,6 +2102,15 @@ paths:
                   0h1m2 0h4m1 0h1m1 0h2m1 0h3m1 0h2m4 0h2m1 0h1m2 0h2M4 60.5h7m1
                   0h4m1 0h3m2 0h1m3 0h1m1 0h3m1 0h1m2 0h1m3 0h1m1 0h1m2 0h2m1
                   0h1m2 0h3"/></svg>
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: Multiple responses with this status code
           content:
@@ -1405,7 +2119,7 @@ paths:
                 This request violates the data schema:
                   value: *ref_4
                 Account state is invalid:
-                  value: *ref_7
+                  value: *ref_8
         '401':
           description: Authentication required
           content:
@@ -1415,7 +2129,7 @@ paths:
           description: Denied by role-base access control
           content:
             application/problem+json:
-              example: &ref_8
+              example: &ref_9
                 status: 403
                 title: Denied by role-base access control
                 detail: The request did not pass the role based access control check.
@@ -1423,15 +2137,21 @@ paths:
           description: Account unknown
           content:
             application/problem+json:
-              example: &ref_9
+              example: &ref_10
                 status: 404
                 title: Account unknown
                 detail: >-
                   The provided account identifier could not be matched to an
                   existing account.
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_7
   /activate-mfa:
     post:
       tags: *ref_5
+      operationId: activateLocalAccountMfa
       summary: Activate local account MFA
       description: >-
         Activates MFA on a local Morio account, and provides scratch codes as
@@ -1500,11 +2220,24 @@ paths:
                     d21da1e5e7cf70b1044f11e06a39135fab248f7f4d849d964c81a7e9e72d498f
                   - >-
                     7c68b780d1c77d17d292780acc44564e374262c58193daf867c6011cce4a9bab
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
-          description: Account state is invalid
+          description: Multiple responses with this status code
           content:
             application/problem+json:
-              example: *ref_7
+              examples:
+                This request violates the data schema:
+                  value: *ref_4
+                Account state is invalid:
+                  value: *ref_8
         '401':
           description: Authentication required
           content:
@@ -1514,17 +2247,23 @@ paths:
           description: Denied by role-base access control
           content:
             application/problem+json:
-              example: *ref_8
+              example: *ref_9
         '404':
           description: Account unknown
           content:
             application/problem+json:
-              example: *ref_9
+              example: *ref_10
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_7
   /apikeys:
     get:
-      tags: &ref_11
+      tags: &ref_12
         - apikeys
-      security: *ref_10
+      security: *ref_11
+      operationId: listApiKeys
       summary: List API keys
       description: >-
         Returns the list of API keys.
@@ -1554,6 +2293,15 @@ paths:
                   updated_at: null
                   last_login: null
                   key: 68b04077-e103-4b8e-9e5f-7b5daff57b96
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -1561,7 +2309,8 @@ paths:
               example: *ref_6
   /apikey:
     post:
-      tags: *ref_11
+      tags: *ref_12
+      operationId: createApiKey
       summary: Create API key
       description: >-
         Creates a Morio API key. The role of the API key can not be higher than
@@ -1586,19 +2335,34 @@ paths:
                   description: Number of days before the API key expires
                 role:
                   type: string
+                  enum:
+                    - user
+                    - manager
+                    - operator
+                    - engineer
+                    - root
                   description: The role to assign to the API key
               required:
                 - name
                 - expires
                 - role
               additionalProperties: false
-            example: &ref_12 {}
+            example: &ref_13 {}
       responses:
         '200':
           description: API key details
           content:
             application/json:
-              example: *ref_12
+              example: *ref_13
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -1625,25 +2389,26 @@ paths:
                     title: Role unavailable
                     detail: The requested role is not available to this account.
                 Database Failure:
-                  value: &ref_13
+                  value: &ref_14
                     status: 403
                     title: Database Failure
                     detail: >-
                       Cannot authenticate because the database returned an
                       error.
-  /apikey/:id/rotate:
+  /apikey/{id}/rotate:
     patch:
-      tags: *ref_11
+      tags: *ref_12
+      operationId: rotateApiKey
       summary: Rotate API key
       description: Updates an existing API key.
-      parameters: &ref_14
+      parameters: &ref_15
         - in: path
           name: id
           schema:
             type: string
             format: uuid
             description: The ID of the API key
-          retuired: true
+          required: true
           description: The API key ID (a UUID)
       responses:
         '200':
@@ -1664,6 +2429,15 @@ paths:
                   90a28457c6bc7c5b5b40aa94730bf12b1f0bb726bfc015652147598ca781d3f7b61551716ffa8839cbad41e20ea76ffa
                 last_login: null
                 key: 600d03a3-573b-4f64-b127-96f0157cb6b0
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -1680,18 +2454,19 @@ paths:
             application/problem+json:
               examples:
                 Database Failure:
-                  value: *ref_13
+                  value: *ref_14
                 Role insufficient:
-                  value: &ref_15
+                  value: &ref_16
                     status: 403
                     title: Role insufficient
                     detail: This endpoint required a higher role.
-  /apikey/:id/enable:
+  /apikey/{id}/enable:
     patch:
-      tags: *ref_11
+      tags: *ref_12
+      operationId: enableApiKey
       summary: Enable API key
       description: Updates an existing API key.
-      parameters: *ref_14
+      parameters: *ref_15
       responses:
         '200':
           description: API key details
@@ -1709,6 +2484,15 @@ paths:
                 updated_at: '2024-07-29T06:47:58.048Z'
                 last_login: '2024-07-29T06:47:57.985Z'
                 key: 600d03a3-573b-4f64-b127-96f0157cb6b0
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -1725,15 +2509,16 @@ paths:
             application/problem+json:
               examples:
                 Database Failure:
-                  value: *ref_13
+                  value: *ref_14
                 Role insufficient:
-                  value: *ref_15
-  /apikey/:id/disable:
+                  value: *ref_16
+  /apikey/{id}/disable:
     patch:
-      tags: *ref_11
+      tags: *ref_12
+      operationId: disableApiKey
       summary: Disable API key
       description: Updates an existing API key.
-      parameters: *ref_14
+      parameters: *ref_15
       responses:
         '200':
           description: API key details
@@ -1751,6 +2536,15 @@ paths:
                 updated_at: '2024-07-29T06:47:58.020Z'
                 last_login: '2024-07-29T06:47:57.985Z'
                 key: 600d03a3-573b-4f64-b127-96f0157cb6b0
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -1767,15 +2561,16 @@ paths:
             application/problem+json:
               examples:
                 Database Failure:
-                  value: *ref_13
+                  value: *ref_14
                 Role insufficient:
-                  value: *ref_15
-  /apikey/:id:
+                  value: *ref_16
+  /apikey/{id}:
     delete:
-      tags: *ref_11
+      tags: *ref_12
+      operationId: deleteApiKey
       summary: Delete API key
       description: Removes a Morio API key.
-      parameters: *ref_14
+      parameters: *ref_15
       responses:
         '204':
           description: No response body
@@ -1795,13 +2590,14 @@ paths:
             application/problem+json:
               examples:
                 Database Failure:
-                  value: *ref_13
+                  value: *ref_14
                 Role insufficient:
-                  value: *ref_15
+                  value: *ref_16
   /login:
     post:
-      tags: &ref_17
+      tags: &ref_18
         - authentication
+      operationId: login
       summary: Authenticate
       description: >-
         Generates a JSON Web Token that can be used for subsequential API
@@ -1813,140 +2609,17 @@ paths:
           application/json:
             schema:
               oneOf:
-                - type: object
-                  properties:
-                    provider:
-                      type: string
-                      minLength: 2
-                      maxLength: 255
-                      enum:
-                        - apikey
-                      description: The ID of the identity provider to use for this account
-                    data:
-                      type: object
-                      properties:
-                        password:
-                          type: string
-                          minLength: 96
-                          maxLength: 96
-                        username:
-                          type: string
-                          minLength: 36
-                          maxLength: 36
-                      required:
-                        - username
-                      additionalProperties: false
-                  required:
-                    - provider
-                    - data
-                  additionalProperties: false
-                - type: object
-                  properties:
-                    provider:
-                      type: string
-                      minLength: 2
-                      maxLength: 255
-                      description: The ID of the identity provider to use for this account
-                    data:
-                      type: object
-                      properties:
-                        password:
-                          type: string
-                          minLength: 3
-                          maxLength: 1024
-                          description: The account's password
-                        username:
-                          type: string
-                          minLength: 2
-                          maxLength: 255
-                          description: The username of the account
-                        role:
-                          type: string
-                          description: The role of the account
-                      required:
-                        - password
-                        - username
-                        - role
-                      additionalProperties: false
-                  required:
-                    - provider
-                    - data
-                  additionalProperties: false
-                - type: object
-                  properties:
-                    provider:
-                      type: string
-                      minLength: 2
-                      maxLength: 255
-                      enum:
-                        - local
-                      description: The ID of the identity provider to use for this account
-                    data:
-                      type: object
-                      properties:
-                        password:
-                          type: string
-                          minLength: 3
-                          maxLength: 1024
-                          description: The account's password
-                        username:
-                          type: string
-                          minLength: 2
-                          maxLength: 255
-                          description: The username of the account
-                        token:
-                          type: string
-                          minLength: 3
-                          maxLength: 12
-                          description: The TOTP token (one-time password)
-                        role:
-                          type: string
-                          description: The role of the account
-                      required:
-                        - password
-                        - username
-                        - token
-                        - role
-                      additionalProperties: false
-                  required:
-                    - provider
-                    - data
-                  additionalProperties: false
-                - type: object
-                  properties:
-                    provider:
-                      type: string
-                      minLength: 2
-                      maxLength: 255
-                      enum:
-                        - mrt
-                      description: The ID of the identity provider to use for this account
-                    data:
-                      type: object
-                      properties:
-                        mrt:
-                          type: string
-                          pattern: ^mrt\.[0-9a-z]+$
-                          minLength: 68
-                          maxLength: 68
-                          description: The Morio Root Token
-                        role:
-                          type: string
-                          description: The role of the account
-                      required:
-                        - mrt
-                      additionalProperties: false
-                  required:
-                    - provider
-                    - data
-                  additionalProperties: false
+                - $ref: '#/components/schemas/Request/login/apikey'
+                - $ref: '#/components/schemas/Request/login/ldap'
+                - $ref: '#/components/schemas/Request/login/local'
+                - $ref: '#/components/schemas/Request/login/mrt'
             examples:
               apikey:
                 value:
                   provider: apikey
                   data:
-                    username: 724098e3-930a-4c93-9fac-9a55decfb735
-                    password: >-
+                    api_key: 724098e3-930a-4c93-9fac-9a55decfb735
+                    api_key_secret: >-
                       c0502771315e8239462adcccab7b6867e6d2742e3675c7aacac369f43a8f27b836292009b6badb7bc7a293b10e3275d2
               ldap:
                 value:
@@ -1984,7 +2657,7 @@ paths:
                       user: apikey.5e5858db-eef2-4c5a-98aa-1ed733ac88ae
                       role: user
                       provider: apikey
-                  title: banana
+                  title: apikey Example
                 ldap:
                   value:
                     jwt: >-
@@ -1994,7 +2667,7 @@ paths:
                       role: manager
                       highest_role: manager
                       provider: ldap
-                  title: banana
+                  title: ldap Example
                 local:
                   value:
                     jwt: >-
@@ -2006,7 +2679,7 @@ paths:
                         - user
                       highest_role: user
                       provider: local
-                  title: banana
+                  title: local Example
                 mrt:
                   value:
                     jwt: >-
@@ -2022,7 +2695,22 @@ paths:
                         - root
                       highest_role: root
                       provider: mrt
-                  title: banana
+                  title: mrt Example
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Response/login/apikey'
+                  - $ref: '#/components/schemas/Response/login/ldap'
+                  - $ref: '#/components/schemas/Response/login/local'
+                  - $ref: '#/components/schemas/Response/login/mrt'
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: Multiple responses with this status code
           content:
@@ -2031,7 +2719,7 @@ paths:
                 This request violates the data schema:
                   value: *ref_4
                 Account state is invalid:
-                  value: *ref_7
+                  value: *ref_8
         '401':
           description: Authentication required
           content:
@@ -2049,10 +2737,11 @@ paths:
           description: Conflict with an existing account
           content:
             application/problem+json:
-              example: *ref_16
+              example: *ref_17
   /token:
     get:
-      tags: *ref_17
+      tags: *ref_18
+      operationId: renewJwt
       summary: Renew JWT
       description: >-
         This will return a new JSON Web Token that can replace the current
@@ -2065,6 +2754,15 @@ paths:
               example:
                 jwt: >-
                   eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoibG9jYWwudGVzdEFjY291bnQxNzIyMTg2NzE0OTU0Iiwicm9sZSI6InVzZXIiLCJhdmFpbGFibGVfcm9sZXMiOltdLCJwcm92aWRlciI6ImxvY2FsIiwiaWF0IjoxNzIyMTg2NzE2LCJuYmYiOjE3MjIxODY3MTYsImV4cCI6MTcyMjIwMTExNiwiYXVkIjoibW9yaW8iLCJpc3MiOiJtb3JpbyIsInN1YiI6Im1vcmlvIn0.CR28Y2xIBtDPOGZSpfSnee7qkRBBG470g4BgcpknJee-VEePvJuorS0NZC43Ta1-4Vx2684K7RgPZNsgW-SAN5yF8PdFe5-y9XtgEn3N3ZmXUCogJoRBQxjGC4UaK6Nrse4dJcqpnxhvUv1yPBcTbS0ycPvMynUd0szkG92u6jyPoDuLFErmDlEgCDlDsPPig81N9zg3Bb0fP44Acc0RpBGybgijYBbPsVZBRSolAr6bBtwuoqcD3Q2pMrkovKduZ1Uob1Cgu8sdmB9DwWETKflEzkcafR96Upej7t1OIiM4AdlznURJvOo2CKffK4GNOsdltQysDF3_aEmRjIY9qJxygQ_sHmPf3-t3MuRvd8zcr9lupN4QRvXCjyUMSg_i25Zq-psnP_aNb0rf6qNCBigNPdsR6QR0V_SotKPNFV9OpkuC44f39-h0IV3ZTYuPoy0WVIRLCQCkTA_1nRnXAOXTjc7wRlLFJ00olYSOQudauuP_JJ8Xpfy_2up_24Mqn__x4ulbPjQpjjirNtEgHJwpzKEES-2E0FFsJEs5V9w-LOtrc7Xyn7HQ2hyuWYHvnTePa2qxpmcowiFC3jdkE1sxF8HU5v46a5xV6no7QAPN7E5wzVj5pE7zSWRRU4m06NjYgVARqa755XrpY-TvYifk9XDboS1ZHYSM0oZJ-jI
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2072,7 +2770,8 @@ paths:
               example: *ref_6
   /whoami:
     get:
-      tags: *ref_17
+      tags: *ref_18
+      operationId: whoami
       summary: Who am I?
       description: This will return info about the currently authenticated account
       responses:
@@ -2095,7 +2794,7 @@ paths:
                       aud: morio
                       iss: morio
                       sub: morio
-                  title: banana
+                  title: apikey Example
                 local:
                   value:
                     value:
@@ -2113,7 +2812,7 @@ paths:
                       aud: morio
                       iss: morio
                       sub: morio
-                  title: banana
+                  title: local Example
                 mrt:
                   value:
                     value:
@@ -2135,7 +2834,16 @@ paths:
                       aud: morio
                       iss: morio
                       sub: morio
-                  title: banana
+                  title: mrt Example
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2143,8 +2851,9 @@ paths:
               example: *ref_6
   /pkgs/clients/deb/build:
     post:
-      tags: &ref_18
+      tags: &ref_19
         - client packages
+      operationId: buildDebPkg
       summary: Build .deb package
       description: >-
         This will trigger the build of a .deb client package.
@@ -2289,6 +2998,15 @@ paths:
                       or event-driven automation.
                   Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
                   Version: 0.2.0-1
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -2301,7 +3019,8 @@ paths:
               example: *ref_6
   /pkgs/clients/deb/defaults:
     get:
-      tags: *ref_18
+      tags: *ref_19
+      operationId: getDebDefaults
       summary: Get .deb package defaults
       description: >-
         This will return the default values to create a new .deb client package.
@@ -2355,6 +3074,15 @@ paths:
                 Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
                 Version: 0.2.0
                 Revision: 1
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2362,8 +3090,9 @@ paths:
               example: *ref_6
   /ca/certificate:
     post:
-      tags: &ref_19
+      tags: &ref_20
         - cryptography
+      operationId: generateCertificate
       summary: Generate X.509 certificate
       description: >-
         Generates an X.509 certificate, issued by Morio's internal Certificate
@@ -2696,6 +3425,15 @@ paths:
                     maxVersion: 1.3
                     renegotiation: false
                 key: "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpQIBAAKCAQEAv5YSBpKRZoKod66DCzjVzZEs+lnoCpiO9lipsOIVATnXi4tM\r\n0prawVsY9fn+wAPZ4j1mlPkyErg+VeqUkxqmANEPnF9zDXv4SVJPoZ46IagEkbVu\r\nDF28bNMYmihi/Dt9Bewzz9mEywogMJ9pYxZAOYyOmLxYe5UjwyUTCQS+xpStl3yH\r\n2iQu/d1O+ZgdRkSUCelUtERF5IenxT18gNNROw4ZSwXJs0rFCsF6N+moHsFqagyF\r\nVrTQxughCVb7XYzkwseWg8rArHw8lWsdP7nwste+q8mpKq7uGGobbhQS3ZJoMNT0\r\n44SyjchnCW+fSbc2gtoJz0PYxkCxrvJQHtSI2QIDAQABAoIBAC0DD7Ienm20tesE\r\ng8JPtJ/LA4PAOs2+gRwswZWO0HuMwPEGpeJ3Qn0aL5efCDTJ0teeMGtAzvxp8C9U\r\nYVrccHMRqzbEkC3zWea0IYRpveOpa4VmWHgsT7hLsmSJp5P2UA3jrFqhktr3Qo/Z\r\n7DM9B5LdzKTi33ENnazcGYhNZpsV7Eg+GZI8oP4mLNJ6ARvEEk3xzV1bsmJxHKnt\r\nSGg4Vib+a8/Ac90rcXPztjOy6r1tnuXaeeKdfMyQ24t1wiD7KPuwU/0BCHUuORqn\r\n6WMpMeBbTTCuaRvvNvZdG5JIZ2GkZRn/XUDUSBi4l0WDfiCc2mcr7BQbGkMnQhOw\r\ncfkkK+cCgYEA4wzqMPKoGZ5uPSnyZpyxLwke8Mu0kFdvgq+wMhpNKq+ZqN1mq/nx\r\n6G7TiSbxF6Kqsht8lnWGVs3+psqcMTQPDklUKM6cVxbJrXNZqYENwsMqKqdBmRXR\r\nPPIWfjht5GSxCdMX0Pefo8qsB1nkC2+62lDPu6D3FUk3iDasUBj/cuMCgYEA2AOU\r\nA3POMiO8MstzvhCYo471WM7QmuORDETlQw9dt9OC0u9RMjJuAhHDl618onfo3ByP\r\nuKkUN4zdZ7fjG0B0pwjP92H763BtWSzXc4tJz4YzAo5zkPxtt5MLGb2eG1n3xsm7\r\n7CVlPNU9C0xf5gQM0ddW8GrqX2lszFkZY76alhMCgYEAr2xMCROCs4CH9fPR2Fwa\r\nPZgTcsJAuQEFI/iv7pYJpwBTfXfKGvebYxU1lRMkVTmWHtRD10/oQmsX5DBIq29o\r\nboZTYs/3VQZDPiMQVHlkc2Us0BW4BhooNqlonY7lwP/XFRsmnIqlqfwuG+Pk4L0r\r\npf+n8HS2UpjmMfTj/2LBAzcCgYEAtkdesQMZrgmll59CzdGnW+0Yb5YlRW5eSWIh\r\nq9LdnG8o5+H2PEt9tNVUnTtR/q78mjCnvoU+gBmoAwuS4r4jMYgoJXJTaDr4qtVC\r\nAUg6QpnVlYSrVF8OHmhAZ7owHphukxpML1rm8MxntI8AJVKplrEFtd4iY9zMaCuP\r\nVzHRtG0CgYEAm/BRJG7eVtBwzSKMJzdFgyIZFPZTrgkaZtnxrOarCkHwWbOW9i3y\r\nRBO4QuoVTU4XMUrQxQPDQLZ/Feo08qNuNSnbp3yTeQRIHhBnGqY2YjiRAIVPReDl\r\nCY9RafOlspqXqxQIEtz7rSS7Ezn46G158LvXGI+/1qHPxlejU/7uswc=\r\n-----END RSA PRIVATE KEY-----\r\n"
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -2708,7 +3446,8 @@ paths:
               example: *ref_6
   /decrypt:
     post:
-      tags: *ref_19
+      tags: *ref_20
+      operationId: decryptData
       summary: Decrypt data
       description: Decrypts data with Morio's internal key pair
       requestBody:
@@ -2729,17 +3468,17 @@ paths:
               additionalProperties: false
             examples:
               text:
-                value: &ref_22
+                value: &ref_23
                   iv: f098ed647cae1e2ddfc53240c786c3ab
                   ct: >-
                     43a24de68ca4e8625692e3b3dc8e586d5e146531d49a70c727bac838d57bcda0
-                title: banana
+                title: text Example
               json:
-                value: &ref_23
+                value: &ref_24
                   iv: de2ec1efba8dbbdfa85afd4a13319160
                   ct: >-
                     67aadb5e24d387f5ff4a9e6827590052ea0a78b015860a2b4f5c79801f6d3ec3294c29214a4e15cf90ba633f5df825c42f82e7c5ef14ace06a3b1981f7992991ee3816cd0c372629382966344431563ad1cffd50f444c35250806dccc36b88c0
-                title: banana
+                title: json Example
       responses:
         '200':
           description: Decrypted data
@@ -2747,15 +3486,24 @@ paths:
             application/json:
               examples:
                 text:
-                  value: &ref_20
-                    data: This is secret
-                  title: banana
-                json:
                   value: &ref_21
+                    data: This is secret
+                  title: text Example
+                json:
+                  value: &ref_22
                     data: >-
                       { "secret1": "Some string", "secret2": ["an", "array",
                       "of", "strings"] }
-                  title: banana
+                  title: json Example
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -2768,7 +3516,8 @@ paths:
               example: *ref_6
   /encrypt:
     post:
-      tags: *ref_19
+      tags: *ref_20
+      operationId: encryptData
       summary: Encrypt data
       description: Encrypts data with Morio's internal key pair
       requestBody:
@@ -2786,11 +3535,11 @@ paths:
               additionalProperties: false
             examples:
               text:
-                value: *ref_20
-                title: banana
-              json:
                 value: *ref_21
-                title: banana
+                title: text Example
+              json:
+                value: *ref_22
+                title: json Example
       responses:
         '200':
           description: Encrypted data
@@ -2798,11 +3547,20 @@ paths:
             application/json:
               examples:
                 text:
-                  value: *ref_22
-                  title: banana
-                json:
                   value: *ref_23
-                  title: banana
+                  title: text Example
+                json:
+                  value: *ref_24
+                  title: json Example
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -2815,7 +3573,7 @@ paths:
               example: *ref_6
   /docker/allcontainers:
     get:
-      tags: &ref_24
+      tags: &ref_25
         - docker
       summary: List containers
       description: >-
@@ -2825,12 +3583,22 @@ paths:
 
         To only get the running containers, use the `/docker/containers`
         endpoint instead.
+      operationId: allcontainersGet
       responses:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2840,7 +3608,7 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: &ref_25
+              example: &ref_26
                 status: 409
                 title: Not available in ephemeral mode
                 detail: >-
@@ -2849,7 +3617,7 @@ paths:
                   this endpoint is not yet available.
   /docker/containers:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: List running containers
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
@@ -2857,12 +3625,22 @@ paths:
 
 
         To get all containers, use the `/docker/allcontainers` endpoint instead.
+      operationId: containersGet
       responses:
         '200':
           description: >-
             [See **List Containers** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerList) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2872,10 +3650,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /docker/df:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Get storage metrics
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
@@ -2883,12 +3661,22 @@ paths:
 
 
         This endpoint is named after the the `df` command on Linux.
+      operationId: dfGet
       responses:
         '200':
           description: >-
             [See **Get data usage** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2898,20 +3686,30 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /docker/images:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: List images
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns the list of Docker images available on the host system.
+      operationId: imagesGet
       responses:
         '200':
           description: >-
             [See **List Images** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Image/operation/ImageList) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2921,20 +3719,30 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /docker/info:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Get Docker info
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns general information about the Docker daemon on the host system.
+      operationId: infoGet
       responses:
         '200':
           description: >-
             [See **Get system information** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemInfo) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2944,20 +3752,30 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /docker/networks:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: List networks
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns a list of Docker networks on the host system.
+      operationId: networksGet
       responses:
         '200':
           description: >-
             [See **List networks** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Network/operation/NetworkList) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2967,21 +3785,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /docker/version:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Get Docker version
       description: >-
         This is a proxy endpoint for the Docker API on the host system that
         returns information on the version of Docker that is running on the host
         system.
+      operationId: versionGet
       responses:
         '200':
           description: >-
             [See **Get version** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemVersion) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -2991,10 +3819,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/container/:id:
+              example: *ref_26
+  /docker/container/{id}:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Inspect container
       description: >
         This is a proxy endpoint for the Docker API on the host system that
@@ -3007,20 +3835,30 @@ paths:
 
 
         Note that Docker accepts an ID or (unambigious) name as input.
-      parameters: &ref_26
+      parameters: &ref_27
         - in: path
           name: id
           schema:
             type: string
             description: The ID (or name) of the relevant Docker object
-          retuired: true
+          required: true
           description: The ID (or name) of the relevant docker object
+      operationId: container/{id}Get
       responses:
         '200':
           description: >-
             [See **Inspect a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect/) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3030,10 +3868,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/container/:id/logs:
+              example: *ref_26
+  /docker/container/{id}/logs:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Get logs
       description: >
         This is a proxy endpoint for the Docker API on the host system that
@@ -3046,13 +3884,23 @@ paths:
 
 
         Note that Docker accepts an ID or (unambigious) name as input.
-      parameters: *ref_26
+      parameters: *ref_27
+      operationId: container/{id}/logsGet
       responses:
         '200':
           description: >-
             [See **Get container logs** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3062,10 +3910,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/container/:id/stats:
+              example: *ref_26
+  /docker/container/{id}/stats:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Get usage stats
       description: >
         This is a proxy endpoint for the Docker API on the host system that
@@ -3078,14 +3926,24 @@ paths:
 
 
         Note that Docker accepts an ID or (unambigious) name as input.
-      parameters: *ref_26
+      parameters: *ref_27
+      operationId: container/{id}/statsGet
       responses:
         '200':
           description: >-
             [See **Get container stats based on resource usages** in the Docker
             API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3095,10 +3953,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/image/:id:
+              example: *ref_26
+  /docker/image/{id}:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Inspect image
       description: >
         This is a proxy endpoint for the Docker API on the host system that
@@ -3111,13 +3969,23 @@ paths:
 
 
         Note that Docker accepts an ID or (unambigious) name as input.
-      parameters: *ref_26
+      parameters: *ref_27
+      operationId: image/{id}Get
       responses:
         '200':
           description: >-
             [See **Inspect an image** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3127,10 +3995,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/networks/:id:
+              example: *ref_26
+  /docker/networks/{id}:
     get:
-      tags: *ref_24
+      tags: *ref_25
       summary: Inspect network
       description: >
         This is a proxy endpoint for the Docker API on the host system that
@@ -3143,13 +4011,23 @@ paths:
 
 
         Note that Docker accepts an ID or (unambigious) name as input.
-      parameters: *ref_26
+      parameters: *ref_27
+      operationId: networks/{id}Get
       responses:
         '200':
           description: >-
             [See **Inspect a network** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerInspect) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3159,20 +4037,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/kill:
+              example: *ref_26
+  /docker/containers/{id}/kill:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerKill
       summary: Kill container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `kill` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Kill a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerKill) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3182,20 +4071,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/pause:
+              example: *ref_26
+  /docker/containers/{id}/pause:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerPause
       summary: Pause container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `pause` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Pause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerPause) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3205,20 +4105,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/restart:
+              example: *ref_26
+  /docker/containers/{id}/restart:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerRestart
       summary: Restart container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `restart` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Restart a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerRestart) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3228,20 +4139,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/start:
+              example: *ref_26
+  /docker/containers/{id}/start:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerStart
       summary: Start container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `start` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Start a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStart) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3251,20 +4173,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/stop:
+              example: *ref_26
+  /docker/containers/{id}/stop:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerStop
       summary: Stop container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `stop` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Stop a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerStop) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3274,20 +4207,31 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
-  /docker/containers/:id/unpause:
+              example: *ref_26
+  /docker/containers/{id}/unpause:
     put:
-      tags: *ref_24
+      tags: *ref_25
+      operationId: containerUnpause
       summary: Unpause container
       description: >-
         This changes, or attempts to change, the container state by issuing a
         `unpause` command.
+      parameters: *ref_27
       responses:
         '200':
           description: >-
             [See **Unpause a container** in the Docker API
-            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause)
+            docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/ContainerUnpause) 
           content: {}
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -3297,9 +4241,10 @@ paths:
           description: Not available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_25
+              example: *ref_26
   /setup:
     post:
+      operationId: setup
       tags:
         - settings
         - anonymous
@@ -3701,27 +4646,27 @@ paths:
             examples:
               cluster1:
                 value: *ref_2
-                title: banana
+                title: cluster1 Example
               cluster3:
-                value: &ref_37
+                value: &ref_38
                   name: Morio Cluster Test
                   broker_nodes:
                     - morio-node1.tokyo.morio.it
                     - morio-node2.tokyo.morio.it
                     - morio-node3.tokyo.morio.it
                   fqdn: morio-cluster.tokyo.morio.it
-                  flags: *ref_27
-                  secrets: *ref_28
-                  providers: *ref_29
-                  visibility: *ref_30
-                  order: *ref_31
-                title: banana
+                  flags: *ref_28
+                  secrets: *ref_29
+                  providers: *ref_30
+                  visibility: *ref_31
+                  order: *ref_32
+                title: cluster3 Example
       responses:
         '200':
           description: Setup result
           content:
             application/json:
-              example: &ref_34
+              example: &ref_35
                 result: success
                 uuids:
                   node: 40361cd8-a149-4675-bd46-11a2b48acd04
@@ -3733,6 +4678,15 @@ paths:
                     it in a safe space, as it will never be shown again.
                   value: >-
                     mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -3742,7 +4696,7 @@ paths:
           description: Only available in ephemeral mode
           content:
             application/problem+json:
-              example: &ref_35
+              example: &ref_36
                 status: 409
                 title: Only available in ephemeral mode
                 detail: >-
@@ -3751,6 +4705,7 @@ paths:
                   endpoint is no longer available.
   /preseed:
     post:
+      operationId: preseed
       tags:
         - settings
         - anonymous
@@ -4036,17 +4991,26 @@ paths:
                 - type: string
             examples:
               base:
-                value: *ref_32
-                title: banana
-              overlays:
                 value: *ref_33
-                title: banana
+                title: base Example
+              overlays:
+                value: *ref_34
+                title: overlays Example
       responses:
         '200':
           description: Setup result
           content:
             application/json:
-              example: *ref_34
+              example: *ref_35
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '400':
           description: This request violates the data schema
           content:
@@ -4056,10 +5020,11 @@ paths:
           description: Only available in ephemeral mode
           content:
             application/problem+json:
-              example: *ref_35
+              example: *ref_36
   /settings:
     get:
-      tags: &ref_36
+      operationId: getSettings
+      tags: &ref_37
         - settings
       summary: Get settings
       description: >-
@@ -4120,13 +5085,23 @@ paths:
                         operator:
                           attribute: employeetype
                           regex: ^admin$
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
             application/problem+json:
               example: *ref_6
     post:
-      tags: *ref_36
+      operationId: applySettings
+      tags: *ref_37
       summary: Apply settings
       description: >-
         This will take a full set of new Morio settings and, after validation,
@@ -4523,11 +5498,13 @@ paths:
             examples:
               cluster1:
                 value: *ref_2
-                title: banana
+                title: cluster1 Example
               cluster3:
-                value: *ref_37
-                title: banana
+                value: *ref_38
+                title: cluster3 Example
       responses:
+        '204':
+          description: No response body
         '400':
           description: This request violates the data schema
           content:
@@ -4540,7 +5517,8 @@ paths:
               example: *ref_6
   /presets:
     get:
-      tags: *ref_36
+      operationId: getPresets
+      tags: *ref_37
       summary: Get presets
       description: Returns the current presets.
       responses:
@@ -4623,6 +5601,15 @@ paths:
                 MORIO_X509_OU: Engineering Team
                 MORIO_X509_ST: Brussels
                 NODE_ENV: development
+          headers:
+            ratelimit:
+              description: Rate limit details
+              schema:
+                type: string
+            ratelimit-policy:
+              description: Rate limit policy details
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -4630,7 +5617,8 @@ paths:
               example: *ref_6
   /reload:
     get:
-      tags: *ref_36
+      operationId: reload
+      tags: *ref_37
       summary: Reload the API
       description: >-
         This will cause the API to re-initialize itself, including reaching out
@@ -4649,7 +5637,8 @@ paths:
               example: *ref_6
   /reseed:
     get:
-      tags: *ref_36
+      operationId: reseed
+      tags: *ref_37
       summary: Reseed Morio
       description: >-
         This will trigger reseeding of the settings, followed by a (soft)
@@ -4664,7 +5653,8 @@ paths:
               example: *ref_6
   /restart:
     get:
-      tags: *ref_36
+      operationId: restart
+      tags: *ref_37
       summary: Restart Morio
       description: >-
         This will cause a soft restart of core, re-bootstrapping itself based on
@@ -4677,3 +5667,4 @@ paths:
           content:
             application/problem+json:
               example: *ref_6
+security: *ref_11

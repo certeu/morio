@@ -43,6 +43,14 @@ export const errors = {
     detail: 'We were unable to resolve the preseed settings into a proper settings object.',
   },
   /*
+   * Failed to preseed the settings (load the preseed files)
+   */
+  'morio.api.ratelimit.exceeded': {
+    status: 429,
+    title: 'Rate limit exceeded',
+    detail: 'You have made too many requests. Please try again later.',
+  },
+  /*
    * Status issues coming from core
    */
   'morio.api.core.status.503': {
@@ -223,5 +231,14 @@ export const errors = {
     status: 403,
     title: 'Identity Provider Unknown',
     detail: 'Cannot authenticate because the identity provider is unknown.',
+  },
+  /*
+   * Error for when something goes wrong in a way we do know how to handle
+   */
+  'morio.api.internal.error': {
+    status: 500,
+    title: 'Internal server error',
+    detail:
+      'The request failed with an internal server error that we do not know how to recover from.',
   },
 }

@@ -1,5 +1,6 @@
 import { Joi, validate as sharedValidate, settings, preseed, uuid, mrt } from '#shared/schema'
 import { roles } from '#config/roles'
+import { statuses } from '#config/account-statuses'
 
 /*
  * Some re-usable schema blocks
@@ -9,18 +10,38 @@ const about = Joi.string()
   .max(255)
   .description('A description or nmemonic note for the acount')
   .optional()
+const accountStatus = Joi.string().valid(...statuses)
 const invite = Joi.string().length(48).description('The account invite code')
 const provider = Joi.string()
   .min(2)
   .max(255)
   .description('The ID of the identity provider to use for this account')
-const role = Joi.string().allow(roles.join()).description('The role of the account')
+const role = Joi.string()
+  .valid(...roles)
+  .required()
+  .description(
+    'The requested role to assign after authentication.  Must be one of: user, manager, operator, engineer, root. Although root can only be assigned by the MRT identity provider.'
+  )
 const username = Joi.string().min(2).max(255).description('The username of the account')
 const overwrite = Joi.boolean()
   .valid(true, false)
   .description('Whether to overwrite the account, if one has a sufficiently high role')
 const password = Joi.string().min(3).max(1024).description(`The account's password`)
 const token = Joi.string().min(3).max(12).description(`The TOTP token (one-time password)`)
+const jwt = Joi.string().base64().description(`The JSON Web Token`)
+const account = Joi.object({
+  id: Joi.string().required(),
+  about: Joi.string(),
+  status: accountStatus,
+  role,
+  created_by: Joi.string(),
+  created_at: Joi.string().isoDate(),
+  updated_by: Joi.string(),
+  updated_at: Joi.string().isoDate(),
+  last_login: Joi.string().isoDate(),
+  provider: Joi.string(),
+  username: Joi.string(),
+})
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -74,28 +95,44 @@ export const schema = {
     data: Joi.object().required().description('Data relevant for the chosen provider'),
   }),
   'req.auth.login.apikey': Joi.object({
-    provider: provider.valid('apikey').required(),
+    provider: provider
+      .valid('apikey')
+      .required()
+      .description(
+        "ID of the Morio identity provider. Must always be 'apikey' for authentication with an API key"
+      ),
     data: Joi.object({
-      password: Joi.string().length(96),
-      username: Joi.string().length(36).required(),
-    }).required(),
+      api_key: Joi.string().length(96).required().description('This is the API key (a UUID)'),
+      api_key_secret: Joi.string().length(36).required().description('This is the API key secret'),
+    })
+      .required()
+      .description('Holds data that is specific to the identity provider'),
   }),
   'req.auth.login.local': Joi.object({
-    provider: provider.valid('local').required(),
+    provider: provider
+      .valid('local')
+      .required()
+      .description(
+        "ID of the Morio identity provider. Must always be 'local' for authentication with a local Morio account"
+      ),
     data: Joi.object({
       password: password.required(),
       username: username.required(),
       token: token.required(),
       role: role.required(),
-    }).required(),
+    })
+      .required()
+      .description('Holds data that is specific to the identity provider'),
   }),
   'req.auth.login.ldap': Joi.object({
-    provider: provider.required(),
+    provider: provider.required().description('ID of the Morio identity provider.'),
     data: Joi.object({
-      password: password.required(),
-      username: username.required(),
+      password: password.required().description('Password for the LDAP account'),
+      username: username.required().description('Username of the LDAP account'),
       role: role.required(),
-    }).required(),
+    })
+      .required()
+      .description('Holds data that is specific to the identity provider'),
   }),
   'req.auth.login-form': Joi.object({
     provider: provider.required(),
@@ -106,11 +143,18 @@ export const schema = {
     role: role.required(),
   }),
   'req.auth.login.mrt': Joi.object({
-    provider: provider.valid('mrt').required(),
+    provider: provider
+      .valid('mrt')
+      .required()
+      .description(
+        "ID of the Morio identity provider. Must always be 'mrt' for authentication with the Morio Root Token"
+      ),
     data: Joi.object({
       mrt: mrt.required().description('The Morio Root Token'),
       role: role.optional(),
-    }).required(),
+    })
+      .required()
+      .description('Holds data that is specific to the identity provider'),
   }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({
@@ -178,6 +222,50 @@ export const schema = {
     uptime_seconds: Joi.number(),
     setup: Joi.bool(),
   }),
+  'res.auth.login.apikey': Joi.object({
+    jwt,
+    data: Joi.object({
+      user: Joi.string(),
+      role,
+      provider,
+    }),
+  }),
+  'res.auth.login.ldap': Joi.object({
+    jwt,
+    data: Joi.object({
+      user: Joi.string(),
+      role,
+      highest_role: role,
+      provider: Joi.string(),
+    }),
+  }),
+  'res.auth.login.local': Joi.object({
+    jwt,
+    data: Joi.object({
+      user: Joi.string(),
+      role,
+      available_roles: Joi.array().items(role),
+      highest_role: role,
+      provider: Joi.string(),
+    }),
+  }),
+  'res.auth.login.mrt': Joi.object({
+    jwt,
+    data: Joi.object({
+      user: Joi.string(),
+      role,
+      available_roles: Joi.array().items(role),
+      highest_role: role,
+      provider: Joi.string(),
+    }),
+  }),
+  'res.ratelimits': Joi.object({
+    ip: Joi.string().ip({ version: ['ipv4'], cidr: 'forbidden' }),
+    hits: Joi.number(),
+    reset_time: Joi.string().isoDate(),
+    reset_seconds: Joi.number(),
+  }),
+  'res.accountList': Joi.array().items(account),
 }
 
 /*

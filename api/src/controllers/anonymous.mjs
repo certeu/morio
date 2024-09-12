@@ -3,6 +3,7 @@ import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
 import { utils, log } from '../lib/utils.mjs'
 import { loadPreseededSettings } from '#shared/loaders'
+import { limits } from '../middleware.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -30,6 +31,16 @@ Controller.prototype.getCaCerts = async function (req, res) {
         intermediate_certificate: keys.icrt,
       })
     : utils.sendErrorResponse(res, `morio.api.info.unavailable`, req.url)
+}
+
+/**
+ * Gets the client IP to troubleshoot rate limiting
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getClientIp = async function (req, res) {
+  return res.send({ ip: req.ip, limits: limits.getKey(req.ip) })
 }
 
 /**

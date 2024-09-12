@@ -14,6 +14,8 @@ const allowedUrisBase = [
   `/status`,
   `/info`,
   `/info/`,
+  '/limits',
+  '/limits/',
   `/login`,
   `/login-form`,
   `/idps`,
