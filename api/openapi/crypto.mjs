@@ -9,6 +9,7 @@ export default function (api) {
 
   api.post('/ca/certificate', {
     ...shared,
+    operationId: `generateCertificate`,
     summary: `Generate X.509 certificate`,
     description: `Generates an X.509 certificate, issued by Morio's internal Certificate Authority`,
     requestBody: {
@@ -22,14 +23,23 @@ export default function (api) {
       },
     },
     responses: {
-      200: response('X.509 data', examples.res.createCertificate),
-      ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
+      200: response({
+        desc: 'X.509 data',
+        example: examples.res.createCertificate,
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        `morio.api.internal.error`,
+        `morio.api.ratelimit.exceeded`,
+      ]),
     },
   })
 
   for (const action of ['Decrypt', 'Encrypt']) {
     api.post(`/${action.toLowerCase()}`, {
       ...shared,
+      operationId: `${action.toLowerCase()}Data`,
       summary: `${action} data`,
       description: `${action}s data with Morio's internal key pair`,
       requestBody: {
@@ -43,12 +53,16 @@ export default function (api) {
         },
       },
       responses: {
-        200: response(
-          `${action}ed data`,
-          false,
-          formatResponseExamples(examples.res[action.toLowerCase()])
-        ),
-        ...errorResponses([`morio.api.schema.violation`, `morio.api.authentication.required`]),
+        200: response({
+          desc: `${action}ed data`,
+          examples: formatResponseExamples(examples.res[action.toLowerCase()]),
+        }),
+        ...errorResponses([
+          `morio.api.schema.violation`,
+          `morio.api.authentication.required`,
+          `morio.api.internal.error`,
+          `morio.api.ratelimit.exceeded`,
+        ]),
       },
     })
   }

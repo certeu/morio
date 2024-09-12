@@ -1,6 +1,6 @@
 import {
   OpenAPI,
-  response,
+  response as sharedResponse,
   errorResponse as sharedErrorResponse,
   errorResponses as sharedErrorResponses,
   formatResponseExamples,
@@ -15,37 +15,88 @@ import loadClientPackagesEndpoints from './pkgs.mjs'
 import loadCryptoEndpoints from './crypto.mjs'
 import loadDockerEndpoints from './docker.mjs'
 import loadSettingsEndpoints from './settings.mjs'
+import { components } from './components.mjs'
 
 /**
  * Helper array to add auth to the endpoint
  */
-const security = [{ 'API Key': [] }, { 'JWT in Header': [] }, { 'JWT in Cookie': [] }]
+const security = [{ api_key: [] }, { jwt_bearer: [] }, { jwt_cookie: [] }]
+
+/*
+ * Helper array for vaious login types
+ */
+const loginTypes = ['apikey', 'ldap', 'local', 'mrt']
 
 /**
  * Can't load the errors in the shared code as the are different per API
  * so instead, we wrap these methods and pass them in
  */
 function errorResponse(template) {
-  return sharedErrorResponse(template, errors)
+  const res = sharedErrorResponse(template, errors)
+  for (const code of Object.keys(res)) {
+    if (code[0] === '2' || code[0] === '4') {
+      res[code].headers = ratelimitHeaders
+    }
+  }
+
+  return res
 }
 
 function errorResponses(templates) {
-  return sharedErrorResponses(templates, errors)
+  const errs = sharedErrorResponses(templates, errors)
+  for (const code of Object.keys(errs)) {
+    if (code[0] === '2' || code[0] === '4') {
+      errs[code].headers = ratelimitHeaders
+    }
+    if (code === '429')
+      errs[code].headers['Retry-After'] = {
+        description: 'Tells you when to retry due to rate limiting',
+        schema: { type: 'string' },
+      }
+  }
+
+  return errs
 }
 
 /**
  * Setup a helper object to build out the OpenAPI specification
  */
 const api = new OpenAPI(utils, 'api', {
-  components: {
-    securitySchemes: {
-      'API Key': { type: 'http', scheme: 'basic' },
-      'JWT in Header': { type: 'http', scheme: 'bearer' },
-      'JWT in Cookie': { type: 'apiKey', in: 'cookie', name: 'morio' },
+  components,
+  servers: [
+    {
+      url: `https://${utils.getNodeFqdn()}/-/api`,
+      description: `Morio management API on ${utils.getNodeFqdn()}`,
     },
-  },
+  ],
   paths: {},
 })
+
+api.spec.security = security
+
+/*
+ * Rate limiting headers
+ */
+const ratelimitHeaders = {
+  ratelimit: {
+    description: 'Rate limit details',
+    schema: { type: 'string' },
+  },
+  'ratelimit-policy': {
+    description: 'Rate limit policy details',
+    schema: { type: 'string' },
+  },
+}
+
+/**
+ * Response helper that will add rate-limit headers
+ */
+const response = (props) => {
+  let { headers = {} } = props
+  headers = { ...headers, ...ratelimitHeaders }
+
+  return sharedResponse({ ...props, headers })
+}
 
 /*
  * Now pass the helper object and utils to the various groups of endpoints
@@ -76,4 +127,6 @@ export {
   errorResponse,
   errorResponses,
   formatResponseExamples,
+  loginTypes,
+  ratelimitHeaders,
 }

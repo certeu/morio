@@ -4,8 +4,8 @@
       "value": {
         "provider": "apikey",
         "data": {
-          "username": "724098e3-930a-4c93-9fac-9a55decfb735",
-          "password": "c0502771315e8239462adcccab7b6867e6d2742e3675c7aacac369f43a8f27b836292009b6badb7bc7a293b10e3275d2"
+          "api_key": "724098e3-930a-4c93-9fac-9a55decfb735",
+          "api_key_secret": "c0502771315e8239462adcccab7b6867e6d2742e3675c7aacac369f43a8f27b836292009b6badb7bc7a293b10e3275d2"
         }
       }
     },
