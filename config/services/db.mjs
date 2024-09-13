@@ -128,6 +128,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         secret TEXT,
         last_login DATETIME
       )`,
+      kv: `CREATE TABLE kv (
+        key TEXT NOT NULL PRIMARY KEY,
+        val TEXT
+      )`
     },
   }
 }

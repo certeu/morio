@@ -15,6 +15,7 @@ import loadClientPackagesEndpoints from './pkgs.mjs'
 import loadCryptoEndpoints from './crypto.mjs'
 import loadDockerEndpoints from './docker.mjs'
 import loadSettingsEndpoints from './settings.mjs'
+import loadKvEndpoints from './kv.mjs'
 import { components } from './components.mjs'
 
 /**
@@ -109,6 +110,7 @@ loadClientPackagesEndpoints(api, utils)
 loadCryptoEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
 loadSettingsEndpoints(api, utils)
+loadKvEndpoints(api, utils)
 
 /*
  * Finally, this is our spec

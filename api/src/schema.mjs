@@ -42,6 +42,18 @@ const account = Joi.object({
   provider: Joi.string(),
   username: Joi.string(),
 })
+const kv = {
+  key: Joi.string()
+    .pattern(/^(?!morio\/internal\/).+$/, 'no prefix')
+    .required(),
+  value: Joi.alternatives().try(
+    Joi.boolean(),
+    Joi.array(),
+    Joi.number(),
+    Joi.string(),
+    Joi.object()
+  ),
+}
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -195,6 +207,11 @@ export const schema = {
     iv: Joi.string().required(),
     ct: Joi.string().required(),
   }),
+  // This is for the request body
+  'req.kv.write': Joi.object({ value: kv.value }),
+  // This combines request body and request parameters
+  'req.kv.set': Joi.object(kv),
+  'req.kv.get': Joi.object({ key: kv.key }),
 
   /*
    * Responses
@@ -266,6 +283,10 @@ export const schema = {
     reset_seconds: Joi.number(),
   }),
   'res.accountList': Joi.array().items(account),
+  'res.kv.value': Joi.object({
+    key: Joi.string(),
+    value: Joi.any(),
+  }),
 }
 
 /*

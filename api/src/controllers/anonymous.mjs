@@ -4,6 +4,7 @@ import { keypairAsJwk } from '#shared/crypto'
 import { utils, log } from '../lib/utils.mjs'
 import { loadPreseededSettings } from '#shared/loaders'
 import { limits } from '../middleware.mjs'
+import { kv } from '../lib/kv.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -120,6 +121,8 @@ Controller.prototype.getJwks = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getPubkey = async function (req, res, pem = false) {
+  const ls = await kv.ls()
+  console.log(ls)
   return pem
     ? res.type('application/x-pem-file').send(utils.getKeys().public)
     : res.send({ pubkey: utils.getKeys().public })

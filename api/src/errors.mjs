@@ -8,6 +8,14 @@ export const errors = {
     detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
   },
   /*
+   * KV store 404 error, API style
+   */
+  'morio.api.kv.404': {
+    status: 404,
+    title: 'No such key',
+    detail: 'This is the API equivalent of a 404 page for the KV store. This key does not exist.',
+  },
+  /*
    * Error for only in ephemeral mode' errors
    */
   'morio.api.ephemeral.required': {
@@ -214,7 +222,7 @@ export const errors = {
   'morio.api.db.failure': {
     status: 403,
     title: 'Database Failure',
-    detail: 'Cannot authenticate because the database returned an error.',
+    detail: 'Could not complete the request because the database returned an error.',
   },
   /*
    * Error for when an identity provider is not available or caused an error
