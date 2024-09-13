@@ -3,40 +3,40 @@ import { providerMeta } from './index.mjs'
 import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
 
-const Roles = [
-  { tabs: {}, navs: false },
+
+// Add roles
+const Roles = []
+for (const role of roles) Roles.push(
+  <span key={`h-${role}`}><b>{role.toUpperCase()}</b> role</span>,
+  [
+    {
+      schema: Joi.string().allow('').label('OIDC Provider Attribute'),
+      label: `OIDC  Attribute`,
+      labelTR: role,
+      labelBL: 'The attribute to check',
+      key: `rbac.${role}.attribute`,
+      placeholder: 'email',
+    },
+    {
+      schema: Joi.string().allow('').label('Regex'),
+      label: 'Regex',
+      labelBL: `The regex to match`,
+      key: `rbac.${role}.regex`,
+      placeholder: `^(?:mario|luigi)$`,
+    },
+  ],
+)
+Roles.push(
   <Popout tip key="tip">
     <h5>Role-Based Access Control</h5>
     <p>
-      For each role, you can set an <b>LDAP attribute</b>, and a <b>regular expression</b> (regex)
+      For each role, you can set an <b>OIDC attribute</b>, and a <b>regular expression</b> (regex)
       to match that attribute&apos;s value against.
       <br />
       When the regex matches the value of the attribute, the role will be assigned.
     </p>
-  </Popout>,
-]
-
-// Add roles
-for (const role of roles)
-  Roles[0].tabs[role] = [
-    [
-      {
-        schema: Joi.string().allow('').label('OIDC Provider Attribute'),
-        label: `OIDC  Attribute`,
-        labelTR: role,
-        labelBL: 'The attribute to check',
-        key: `rbac.${role}.attribute`,
-        placeholder: 'email',
-      },
-      {
-        schema: Joi.string().allow('').label('Regex'),
-        label: 'Regex',
-        labelBL: `The regex to match`,
-        key: `rbac.${role}.regex`,
-        placeholder: `^(?:mario|luigi)$`,
-      },
-    ],
-  ]
+  </Popout>
+)
 
 /*
  * OIDC Authenticator Provider template
@@ -86,6 +86,24 @@ export const oidc = {
           },
         ],
         Roles,
+        Labels: [
+          {
+            schema: Joi.object().optional().label('Label attributes'),
+            label: 'OIDC Attributes',
+            labelBL: 'A comma-seperated list of OIDC attribute to add as labels',
+            key: 'label_attributes',
+            placeholder: "Enter the attribute name here, enter comma to add it",
+            inputType: 'labels',
+          },
+          <Popout tip key="tip">
+            <h5>Attribute-Based Access Control</h5>
+            <p>
+              You can enter one or more <b>OIDC attributes</b> to add their values as labels to the user identity.
+              <br />
+              You can then use those labels in fine-grained ABAC policies.
+            </p>
+          </Popout>,
+        ],
         Advanced: [
           'Typically we can use the default auto-discovery URL. However, some OIDC providers -- typically ones supporting mult-tenancy -- will require a custom autodiscovery URL. If that is the case, you can specify it below.',
           {
@@ -98,25 +116,6 @@ export const oidc = {
             placeholder:
               'https://keycloak.my-company.com/realms/my-realm/.well-known/openid-configuration',
           },
-          {
-            schema: Joi.boolean().default(true).label('Validate Certificate'),
-            label: 'Validate Certificate',
-            labelBL: 'Whether or not to validate the TLS certificate of the OIDC provider',
-            list: [true, false],
-            labels: ['Yes', 'No'],
-            dflt: true,
-            key: 'verify_certificate',
-          },
-          data && data.verify_certificate
-            ? {
-                schema: Joi.string().optional().label('Certificate'),
-                label: 'Certificate',
-                labelBL: 'A certificate that we should trust when connecting to the OIDC provider',
-                key: 'trust_certificate',
-                placeholder: 'Paste a PEM-encoded certificate here',
-                inputType: 'textarea',
-              }
-            : '',
         ],
       },
     },

@@ -4,6 +4,7 @@ import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'
 import { updateLastLoginTime } from '../lib/account.mjs'
+import { getLabels } from './oidc.mjs'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -107,19 +108,27 @@ export function ldap(id, data, req) {
         if (!allowed) return resolve([false, 'morio.api.account.role.unavailable'])
 
         /*
+         * Create data object to return
+         */
+        const info = {
+          user: username,
+          role: req.body.data.role,
+          highest_role: roles[maxLevel],
+          provider: id,
+        }
+
+        /*
+         * Add labels
+         */
+        const labels = getLabels(id, user)
+        if (labels) info.labels = labels
+
+        /*
          * Update the latest login time, but don't wait for it
          */
         updateLastLoginTime(id, username)
 
-        return resolve([
-          true,
-          {
-            user: username,
-            role: req.body.data.role,
-            highest_role: roles[maxLevel],
-            provider: id,
-          },
-        ])
+        return resolve([ true, info ])
       }
     })(req)
   })

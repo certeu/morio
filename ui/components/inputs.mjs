@@ -4,7 +4,8 @@ import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
+import { OkIcon, ResetIcon, WarningIcon, PlusIcon } from 'components/icons.mjs'
+import { Label } from './label.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -529,3 +530,79 @@ export const RoleInput = ({
     dflt="user"
   />
 )
+
+/*
+ * This is a special wrapper component around an input type that adds
+ * the ability to take one or more inputs of this type and manage them
+ * as an object with numberical keys.
+ *
+ * This is used in the settings where we want to avoid arrays because
+ * they are hard to manage in overlays. Yet we do want to give the user
+ * the option to add one or more strings/numbers/roles/whatever.
+ */
+export const LabelInput = (props) => {
+  const  {
+    label,
+    labelTR=false,
+    labelBR=false,
+    labelBL=false,
+    disabled=false,
+    update,
+    current={},
+    placeholder,
+    id='',
+    original,
+    valid=() => true,
+  } = props
+
+  const  [str, setStr] = useState('')
+  const  [obj, setObj] = useState(current)
+
+  const localUpdate = (val) => {
+    if (val.trim().slice(-1) === ',') {
+      const newObj = {...obj}
+      const label = val.slice(0, -1).trim()
+      newObj[label] = label
+      setObj(newObj)
+      setStr('')
+      props.update(newObj)
+    }
+    else setStr(val)
+  }
+
+  const removeLabel = (label) => {
+    const newObj = {...obj}
+    delete newObj[label]
+    setObj(newObj)
+    props.update(newObj)
+  }
+
+  const labels = Object.values(obj).map(val => (
+    <button onClick={() => removeLabel(val)} key={val} className="btn btn-info btn-xs hover:btn-error">
+      {val}
+    </button>
+  ))
+
+  return (
+    <>
+      <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} isValid={valid(current)}>
+        <input
+          id={id}
+          disabled={disabled}
+          type="text"
+          placeholder={placeholder}
+          value={str}
+          onChange={(evt) => localUpdate(evt.target.value)}
+          className={`input w-full bg-base-100 input-bordered ${
+              current === original
+                ? 'input-secondary'
+                : 'input-success'
+          }`}
+        />
+      </FormControl>
+    {labels.length > 0 ? (
+      <div className="flex flex-row flex-wrap gap-1">Current: {labels}</div>
+    ) : null}
+    </>
+  )
+}

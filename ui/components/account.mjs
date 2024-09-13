@@ -26,6 +26,7 @@ import { RoleInput, StringInput, FormControl } from 'components/inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DateTime } from 'luxon'
 import { AccountStatus } from './accounts.mjs'
+import { Label } from './label.mjs'
 
 export const AccountOverview = () => {
   const { account } = useAccount()
@@ -73,6 +74,12 @@ export const AccountOverview = () => {
           <td className="w-36 text-right font-bold">Identity Provider</td>
           <td>
             <span className="badge badge-neutral">{account.provider}</span>
+          </td>
+        </tr>
+        <tr>
+          <td className="w-36 text-right font-bold">Labels</td>
+          <td className="flex flex-row flex-wrap gap-1">
+            {(account.labels || []).map(label => <Label key={label}>{label}</Label>)}
           </td>
         </tr>
         <tr>

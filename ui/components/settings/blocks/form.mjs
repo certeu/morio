@@ -8,6 +8,7 @@ import {
   ListInput,
   SliderInput,
   HiddenInput,
+  LabelInput,
 } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
@@ -169,6 +170,7 @@ export const FormElement = (props) => {
   if (props.inputType === 'textarea') return <TextInput {...inputProps} />
   if (props.inputType === 'secret') return <TokenSelect {...inputProps} secrets={true} />
   if (props.inputType === 'variable') return <TokenSelect {...inputProps} secrets={false} />
+  if (props.inputType === 'labels') return <LabelInput {...inputProps} />
 
   switch (type) {
     case 'string':

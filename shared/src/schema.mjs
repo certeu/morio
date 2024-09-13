@@ -191,6 +191,7 @@ const settings = Joi.object({
       DISABLE_IDP_LDAP: Joi.boolean(),
       DISABLE_IDP_LOCAL: Joi.boolean(),
       DISABLE_IDP_MRT: Joi.boolean(),
+      DISABLE_IDP_OIDC: Joi.boolean(),
     }),
     secrets: Joi.object(),
     vars: Joi.object(),

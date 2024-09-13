@@ -130,15 +130,19 @@ export async function oidcCallbackHandler(req, res) {
   /*
    * Generate JSON Web Token
    */
+  const data = {
+    user: username,
+    role: pkce.role,
+    highest_role: roles[maxLevel],
+    provider: req.params.provider_id,
+    node: utils.getNodeUuid(),
+    cluster: utils.getClusterUuid(),
+  }
+  const labels = getLabels(req.params.provider_id, userInfo)
+  if (labels) data.labels = labels
+
   const jwt = await generateJwt({
-    data: {
-      user: username,
-      role: pkce.role,
-      highest_role: roles[maxLevel],
-      provider: req.params.provider_id,
-      node: utils.getNodeUuid(),
-      cluster: utils.getClusterUuid(),
-    },
+    data,
     key: utils.getKeys().private,
     passphrase: utils.getKeys().mrt,
   })
@@ -196,4 +200,35 @@ async function getClient(id) {
 
 function getOidcRedirectUrl(id) {
   return `https://${utils.getNodeFqdn()}/-/api/callback/oidc/${id}`
+}
+
+export function getLabels(provider_id, user) {
+  const provider = utils.getSettings(['iam', 'providers', provider_id], false)
+  if (!provider || typeof provider.label_attributes !== 'object') return false
+  const prefix = `${provider.provider}/${provider_id}/`
+  const labels = []
+  for (const attr of Object.values(provider.label_attributes)) {
+    if (user[attr]) labels.push(...asLabels(user[attr]).map(label => prefix+attr+'/'+label))
+  }
+
+  return labels
+}
+
+function asLabels(value, wrap=true) {
+  if (
+    typeof value === 'number' ||
+    typeof value === 'string' ||
+    typeof value === 'boolean'
+  ) return wrap
+    ? [value]
+    : value
+  if (Array.isArray(value)) {
+    const labels = []
+    for (const val of value) {
+      labels.push(asLabels(val, false))
+    }
+    return labels
+  }
+
+  return wrap ? [] : undefined
 }
