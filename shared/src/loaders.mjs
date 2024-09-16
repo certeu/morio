@@ -106,7 +106,7 @@ async function loadGitRepo(gitroot, id, config, log) {
     await rm(dir, { recursive: true, force: true }) // Do not mutate, just rm and re-clone
     await mkdir(dir, console.log)
   } catch (err) {
-    log.warn(`Unable to create folder for git: ${dir}`)
+    log.warn(err, `Unable to create folder for git: ${dir}`)
     return false
   }
 
@@ -118,7 +118,7 @@ async function loadGitRepo(gitroot, id, config, log) {
     if (config.ref) cloneOptions.push([`--branch=${config.ref}`])
     await git.clone(url, dir, cloneOptions)
   } catch (err) {
-    log.warn(`Unable to clone git repo ${config.id}: ${config.url}`)
+    log.warn(err, `Unable to clone git repo ${config.id}: ${config.url}`)
     return false
   }
 

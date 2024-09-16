@@ -392,7 +392,7 @@ Controller.prototype.reseed = async function (req, res) {
   /*
    * Load the preseeded settings so we can validate them
    */
-  const settings = await loadPreseededSettings(utils.getSettings('preseed'), log)
+  const settings = await loadPreseededSettings(utils.getSettings('preseed'), log, '/tmp')
 
   /*
    * Validate settings against the schema

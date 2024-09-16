@@ -139,7 +139,7 @@ export const service = {
       /*
        * Keep a fully templated version of the on-disk settings in memory
        * (this includes decrypted secrets)
-       * However, the templateSettings method will call utils.unwrapServer
+       * However, the templateSettings method will call utils.unwrapSecret
        * which, if Hashicorp Vault is used, will grab the FQDN from settings
        * to use as issuer in the JSON web token. But at this point, the
        * settings are not available yet. So we make them available, even
@@ -216,8 +216,13 @@ export async function templateSettings(settings) {
     tokens[key] = val
   }
   for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
-    const clear = await utils.unwrapSecret(key, val)
-    tokens[key] = clear
+    try {
+      const clear = await utils.unwrapSecret(key, val)
+      tokens[key] = clear
+    }
+    catch(err) {
+      if (val.vault) log.error(`Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: '+err.message : ''}`)
+    }
   }
 
   /*

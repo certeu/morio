@@ -2,18 +2,9 @@ import Joi from 'joi'
 import { Popout } from 'components/popout.mjs'
 
 /*
- * Cluster
- *
- * This holds the configuration wizard view settings
- * for the Morio deployment, which are high-level settings.
- * These are not about how to configure individual components,
- * but rather about how everything should work together
- *
- * When running the initial setup, these are the only choices
- * the user should make. So you can also think of this as the
- * setup template.
+ * Watcher service (heartbeat)
  */
-export const cluster = (context, toggleValidate) => {
+export const watcher = (context, toggleValidate) => {
   const template = {
     title: 'Cluster',
     type: 'info',

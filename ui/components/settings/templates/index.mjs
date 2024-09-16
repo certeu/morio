@@ -5,9 +5,9 @@ import { metadata } from './metadata.mjs'
 import { tokens } from './tokens.mjs'
 
 export const templates = {
+  cluster,
   iam,
   connector,
-  cluster,
-  metadata,
   tokens,
+  metadata,
 }

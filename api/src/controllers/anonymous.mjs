@@ -73,9 +73,13 @@ Controller.prototype.getIdps = async function (req, res) {
   const providers = utils.getSettings('iam.providers', {})
   if (providers) {
     for (const [id, conf] of Object.entries(providers)) {
+      let provider = conf.provider
+      if (id === 'mrt') provider = 'mrt'
+      else if (id === 'local') provider = 'local'
+      else if (id === 'apikey') provider = 'apikey'
       idps[id] = {
         id,
-        provider: id === 'mrt' ? 'mrt' : conf.provider,
+        provider,
         label: conf.label,
         about: conf.about || false,
       }
