@@ -27,15 +27,31 @@ export const resolveServiceConfiguration = ({ utils }) => {
       prefixes: [utils.getPreset('MORIO_API_PREFIX'), '/downloads', '/coverage'],
       priority: 666,
     })
+      /*
+       * Middleware to rewrite URL to strip prefix used for routing in Traefik
+       */
       .set(
         'http.middlewares.api-prefix.replacepathregex.regex',
         `^${utils.getPreset('MORIO_API_PREFIX')}/(.*)`
       )
       .set('http.middlewares.api-prefix.replacepathregex.replacement', '/$1')
+      /*
+       * Middleware to add Morio service header
+       */
+      .set('http.middlewares.api-service-header.headers.customRequestHeaders.X-Morio-Service', 'api')
+      /*
+       * Middleware for central authentication/access control
+       */
       .set(
-        'http.routers.api.middlewares',
-        utils.isEphemeral() ? ['api-prefix@file'] : ['api-prefix@file', 'api-auth@file']
-      ),
+        'http.middlewares.api-auth.forwardAuth.address',
+        `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+      )
+      .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+      /*
+       * Add middleware to router
+       * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
+       */
+      .set('http.routers.api.middlewares', ['api-prefix@file', 'api-service-header@file', 'api-auth@file'])
   }
   /*
    * To run unit tests, we need to modify the config slightly

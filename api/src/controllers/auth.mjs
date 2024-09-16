@@ -2,7 +2,7 @@ import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
-import { availableRoles } from '../rbac.mjs'
+import { availableRoles, isRoleAvailable } from '../rbac.mjs'
 import { oidcCallbackHandler } from '../idps/oidc.mjs'
 
 /**
@@ -113,20 +113,43 @@ Controller.prototype.authenticate = async function (req, res) {
   }
 
   /*
-   * If we have the payload, set roles in response header
-   * These will be injected by Traefik in the original request
+   * Do we have a payload and know what service it is?
    */
-  if (payload)
-    return res
+  const service = req.headers['x-morio-service']
+  if (payload && service) {
+    let allow = false
+    /*
+     * RedPanda console needs to be shielded from all but operator and up roles
+     * Since Console is not an API, rather than return JSON, we redirect to an error page
+     */
+    if (service === 'console') {
+      if (isRoleAvailable(payload.role, 'operator')) allow = true
+      else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
+    }
+    /*
+     * API will handle access control for each route
+     */
+    else if (service === 'api') allow = true
+
+   /*
+    * API endpoints will handle their own RBAC so we just
+    * set the role and user in headers which the proxy will forward
+    */
+    if (allow) return res
       .set('X-Morio-Role', payload.role)
       .set('X-Morio-User', payload.user)
       .set('X-Morio-Provider', payload.provider)
       .status(200)
       .end()
+  }
+
+  if (!payload && service === 'console') return res.redirect(redirectPath(req, '/http-errors/rbac/'))
 
   /*
-   * Is this just a bare request with no token, no headers, no nothing?
-   * If so, send a 401. If not, send a 403
+   * If we end up here, it is either a bare request
+   * with no token, no headers, no nothing. Or we do not know how to
+   * handle this request. In both cases, access will be denied.
+   * For a bare request, we send 401, other cases get 403.
    */
   return utils.sendErrorResponse(
     res,
@@ -344,3 +367,12 @@ const verifyToken = (token) =>
       (err, payload) => resolve(err ? false : payload)
     )
   )
+
+function redirectPath (req, to)  {
+  return `${
+    req.headers['x-forwarded-proto']}://${
+    req.headers['x-forwarded-host']}:${
+    req.headers['x-forwarded-port']}${to}?uri=${
+    req.headers['x-forwarded-uri']}`
+}
+

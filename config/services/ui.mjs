@@ -49,7 +49,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'ui',
         prefixes: ['/'],
         priority: 6,
-      }),
+      })
+      .set('http.middlewares.pretty-errors.errors', {
+        status: ["400-599"],
+        service: 'ui',
+        query: "/http-errors/{status}/"
+      })
+      .set('http.routers.ui.middlewares', ['pretty-errors@file'])
     },
   }
 }
