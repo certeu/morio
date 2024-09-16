@@ -32,6 +32,7 @@
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.18.0",
     "glob": "^11.0.0",
+    "is-in-subnet": "^4.0.1",
     "joi": "^17.13.3",
     "joi-to-swagger": "^6.2.0",
     "js-yaml": "^4.1.0",

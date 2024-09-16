@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
 import { availableRoles, isRoleAvailable } from '../rbac.mjs'
 import { oidcCallbackHandler } from '../idps/oidc.mjs'
+import { isInSubnet } from 'is-in-subnet'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -125,25 +126,51 @@ Controller.prototype.authenticate = async function (req, res) {
     if (service === 'console') {
       if (isRoleAvailable(payload.role, 'operator')) allow = true
       else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
-    }
+    } else if (service === 'api') allow = true
     /*
      * API will handle access control for each route
      */
-    else if (service === 'api') allow = true
 
-   /*
-    * API endpoints will handle their own RBAC so we just
-    * set the role and user in headers which the proxy will forward
-    */
-    if (allow) return res
-      .set('X-Morio-Role', payload.role)
-      .set('X-Morio-User', payload.user)
-      .set('X-Morio-Provider', payload.provider)
-      .status(200)
-      .end()
+    /*
+     * API endpoints will handle their own RBAC so we just
+     * set the role and user in headers which the proxy will forward
+     */
+    if (allow)
+      return res
+        .set('X-Morio-Role', payload.role)
+        .set('X-Morio-User', payload.user)
+        .set('X-Morio-Provider', payload.provider)
+        .status(200)
+        .end()
   }
 
-  if (!payload && service === 'console') return res.redirect(redirectPath(req, '/http-errors/rbac/'))
+  /*
+   * If service is console, this is a human
+   */
+  if (!payload && service === 'console') {
+    return res.redirect(redirectPath(req, '/http-errors/rbac/'))
+  }
+
+  /*
+   * When the console service starts, it will attempt to connect to all brokers
+   * To reach brokers on other nodes, it will go through the proxy and thus this
+   * will be treated as an external request. We would typically say access denied
+   * but if we do that, the service will not come up as console concludes it cannot
+   * reach the brokers.
+   * So, we need to let this request through, but we do run som additional checks:
+   * - Only allow GET /v1/brokers
+   * - Only if the x-real-ip header is an IP address in our internal docker range
+   * If not, it's probably a human trying to access console without authentication
+   * in which case we redirect to a pretty error page.
+   */
+  if (!payload && service === 'rpadmin') {
+    if (
+      req.method === 'GET' &&
+      uri === '/v1/brokers' &&
+      isInSubnet(req.headers['x-real-ip'], utils.getPreset('MORIO_NETWORK_SUBNET'))
+    )
+      return res.status(200).end()
+  }
 
   /*
    * If we end up here, it is either a bare request
@@ -368,11 +395,8 @@ const verifyToken = (token) =>
     )
   )
 
-function redirectPath (req, to)  {
-  return `${
-    req.headers['x-forwarded-proto']}://${
-    req.headers['x-forwarded-host']}:${
-    req.headers['x-forwarded-port']}${to}?uri=${
-    req.headers['x-forwarded-uri']}`
+function redirectPath(req, to) {
+  return `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host']}:${
+    req.headers['x-forwarded-port']
+  }${to}?uri=${req.headers['x-forwarded-uri']}`
 }
-
