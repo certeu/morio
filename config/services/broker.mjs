@@ -84,15 +84,51 @@ export const resolveServiceConfiguration = ({ utils }) => {
         prefixes: [`/v1/`],
         priority: 666,
         //backendTls: true,
-      }),
+      })
+        /*
+         * Middleware to add Morio service header
+         */
+        .set('http.middlewares.rpadmin-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpadmin')
+        /*
+         * Middleware for central authentication/access control
+         */
+        .set(
+          'http.middlewares.rpadmin-auth.forwardAuth.address',
+          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        )
+        .set('http.middlewares.rpadmin-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+        /*
+         * Add middleware to router
+         * The order in which middleware is loaded matters. Auth should go last.
+         */
+        .set('http.routers.rpadmin.middlewares', ['rpadmin-service-header@file', 'rpadmin-auth@file']),
       rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
         prefixes: [`/-/rpproxy/`],
         priority: 666,
       })
+        /*
+         * Middleware to rewrite the routing prefix
+         */
         .set('http.middlewares.rpproxy-prefix.replacepathregex.regex', `^/-/rpproxy/(.*)`)
         .set('http.middlewares.rpproxy-prefix.replacepathregex.replacement', '/$1')
-        .set('http.routers.rpproxy.middlewares', ['rpproxy-prefix@file']),
+        /*
+         * Middleware to add Morio service header
+         */
+        .set('http.middlewares.rpproxy-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpproxy')
+        /*
+         * Middleware for central authentication/access control
+         */
+        .set(
+          'http.middlewares.rpproxy-auth.forwardAuth.address',
+          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        )
+        .set('http.middlewares.rpproxy-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+        /*
+         * Add middleware to router
+         * The order in which middleware is loaded matters. Auth should go last.
+         */
+        .set('http.routers.rpadmin.middlewares', ['rprpoxy-prefix@file', 'rpproxy-service-header@file', 'rpproxy-auth@file']),
     },
     /*
      * RedPanda configuration file
