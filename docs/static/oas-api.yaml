@@ -50,6 +50,8 @@ tags:
     description: Endpoints that leverage the Docker daemon API
   - name: settings
     description: Endpoints related to Morio settings
+  - name: kv
+    description: Endpoints for Morio's persistent key/value store
 servers:
   - url: https://false/-/api
     description: Morio management API on false
@@ -470,7 +472,7 @@ paths:
           headers: &ref_2
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: &ref_42
+            Retry-After: &ref_48
               description: Tells you when to retry due to rate limiting
               schema:
                 type: string
@@ -1073,6 +1075,8 @@ paths:
                         DISABLE_IDP_LOCAL:
                           type: boolean
                         DISABLE_IDP_MRT:
+                          type: boolean
+                        DISABLE_IDP_OIDC:
                           type: boolean
                       additionalProperties: false
                     secrets:
@@ -2506,8 +2510,8 @@ paths:
                     status: 403
                     title: Database Failure
                     detail: >-
-                      Cannot authenticate because the database returned an
-                      error.
+                      Could not complete the request because the database
+                      returned an error.
           headers: *ref_2
         '429':
           description: Rate limit exceeded
@@ -4780,6 +4784,8 @@ paths:
                           type: boolean
                         DISABLE_IDP_MRT:
                           type: boolean
+                        DISABLE_IDP_OIDC:
+                          type: boolean
                       additionalProperties: false
                     secrets:
                       type: object
@@ -5096,7 +5102,7 @@ paths:
                 value: *ref_8
                 summary: cluster1 Example
               cluster3:
-                value: &ref_44
+                value: &ref_43
                   name: Morio Cluster Test
                   broker_nodes:
                     - morio-node1.tokyo.morio.it
@@ -5504,7 +5510,7 @@ paths:
   /settings:
     get:
       operationId: getSettings
-      tags: &ref_43
+      tags: &ref_42
         - settings
       summary: Get settings
       description: >-
@@ -5568,7 +5574,10 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_42
+            Retry-After: &ref_44
+              description: Tells you when to retry due to rate limiting
+              schema:
+                type: string
         '401':
           description: Authentication required
           content:
@@ -5588,7 +5597,7 @@ paths:
               example: *ref_5
     post:
       operationId: applySettings
-      tags: *ref_43
+      tags: *ref_42
       summary: Apply settings
       description: >-
         This will take a full set of new Morio settings and, after validation,
@@ -5670,6 +5679,8 @@ paths:
                         DISABLE_IDP_LOCAL:
                           type: boolean
                         DISABLE_IDP_MRT:
+                          type: boolean
+                        DISABLE_IDP_OIDC:
                           type: boolean
                       additionalProperties: false
                     secrets:
@@ -5987,7 +5998,7 @@ paths:
                 value: *ref_8
                 summary: cluster1 Example
               cluster3:
-                value: *ref_44
+                value: *ref_43
                 summary: cluster3 Example
       responses:
         '204':
@@ -6018,7 +6029,7 @@ paths:
   /presets:
     get:
       operationId: getPresets
-      tags: *ref_43
+      tags: *ref_42
       summary: Get presets
       description: Returns the current presets.
       responses:
@@ -6104,7 +6115,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_42
+            Retry-After: *ref_44
         '401':
           description: Authentication required
           content:
@@ -6125,7 +6136,7 @@ paths:
   /reload:
     get:
       operationId: reload
-      tags: *ref_43
+      tags: *ref_42
       summary: Reload the API
       description: >-
         This will cause the API to re-initialize itself, including reaching out
@@ -6157,7 +6168,7 @@ paths:
   /reseed:
     get:
       operationId: reseed
-      tags: *ref_43
+      tags: *ref_42
       summary: Reseed Morio
       description: >-
         This will trigger reseeding of the settings, followed by a (soft)
@@ -6185,7 +6196,7 @@ paths:
   /restart:
     get:
       operationId: restart
-      tags: *ref_43
+      tags: *ref_42
       summary: Restart Morio
       description: >-
         This will cause a soft restart of core, re-bootstrapping itself based on
@@ -6193,6 +6204,397 @@ paths:
       responses:
         '204':
           description: No response body
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+  /kv/keys/{key}:
+    get:
+      tags: &ref_45
+        - kv
+      security: *ref_16
+      operationId: readKey
+      summary: Read key
+      description: Returns the value stored under `key` in the KV store.
+      parameters: &ref_46
+        - in: path
+          name: key
+          schema:
+            type: string
+            description: The key in the KV store
+          required: true
+          description: The key in the KV store
+      responses:
+        '200':
+          description: Value under key
+          content:
+            application/json:
+              example:
+                key: my key
+                value: my value
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  value: {}
+                additionalProperties: false
+          headers:
+            ratelimit: *ref_0
+            ratelimit-policy: *ref_1
+            Retry-After: *ref_44
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_10
+          headers: *ref_2
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '403':
+          description: Database Failure
+          content:
+            application/problem+json:
+              example: *ref_20
+          headers: *ref_2
+        '404':
+          description: No such key
+          content:
+            application/problem+json:
+              example: &ref_47
+                status: 404
+                title: No such key
+                detail: >-
+                  This is the API equivalent of a 404 page for the KV store.
+                  This key does not exist.
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+    post:
+      tags: *ref_45
+      operationId: writeKey
+      summary: Write key
+      description: >-
+        Writes a value to `key` key in the KV store.
+
+        Values will be serialized as JSON, so you can write strucutured data.
+
+
+        This endpoint will use the remainder of the URL path after `/kv/keys/`
+        as the key. Examples:
+
+
+        - For `/kv/keys/example` the key is `example`
+
+        - For `/kv/keys/example/of/a/nested/key` the key is
+        `example/of/a/nested/key`
+
+        - For `/kv/keys/example/of/a/nested/key?with=query=params` the key is
+        `example/of/a/nested/key`
+
+        - For `/kv/keys/example/of/a/nested/key#with-anchor-data` the key is
+        `example/of/a/nested/key`
+
+
+        While you can use any approach to structure the keyspace, using a
+
+        pseudo-directory structure like is often beneficial to keep access
+        policies
+
+        intuitive.
+
+
+        The prefix `kv/keys/morio/internal/` is reserved for internal Morio use.
+
+        You can read these keys, but attempting to write to a key with this
+        prefix
+
+        via the API wil result in a schema violation.
+      parameters: *ref_46
+      requestBody:
+        description: The value to write
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  anyOf:
+                    - type: boolean
+                    - type: array
+                      items: {}
+                    - type: number
+                      format: float
+                    - type: string
+                    - type: object
+                      properties: {}
+                      additionalProperties: false
+              additionalProperties: false
+            example:
+              value: My value
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_10
+          headers: *ref_2
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '403':
+          description: Database Failure
+          content:
+            application/problem+json:
+              example: *ref_20
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+    delete:
+      tags: *ref_45
+      operationId: deleteKey
+      summary: Delete key
+      description: Removes the key `key` from the KV store.
+      parameters: *ref_46
+      responses:
+        '204':
+          description: No response body
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_10
+          headers: *ref_2
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '403':
+          description: Database Failure
+          content:
+            application/problem+json:
+              example: *ref_20
+          headers: *ref_2
+        '404':
+          description: No such key
+          content:
+            application/problem+json:
+              example: *ref_47
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+  /kv/keys:
+    get:
+      tags: *ref_45
+      security: *ref_16
+      operationId: listKeys
+      summary: List keys
+      description: Returns the list of keys in the KV store.
+      responses:
+        '200':
+          description: Key list
+          content:
+            application/json:
+              example:
+                - my key
+                - some other key
+                - better_name
+                - PIPELINE_RESULT
+              schema:
+                type: array
+                items: {}
+          headers:
+            ratelimit: *ref_0
+            ratelimit-policy: *ref_1
+            Retry-After: *ref_48
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+  /kv/glob/{pattern}:
+    get:
+      tags: *ref_45
+      security: *ref_16
+      operationId: globKeys
+      summary: Glob keys
+      description: Returns the list of keys in the KV store.
+      parameters:
+        - in: path
+          name: pattern
+          schema:
+            type: string
+            description: The glob pattern to filter keys
+          required: true
+          description: The glob pattern to filter keys with
+      responses:
+        '200':
+          description: Key list
+          content:
+            application/json:
+              example:
+                - better_name
+                - PIPELINE_RESULT
+              schema:
+                type: array
+                items: {}
+          headers:
+            ratelimit: *ref_0
+            ratelimit-policy: *ref_1
+            Retry-After: *ref_48
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+  /kv/dump:
+    get:
+      tags: *ref_45
+      security: *ref_16
+      operationId: dumpKvData
+      summary: Dump KV data
+      description: Returns all keys and values in the KV store
+      responses:
+        '200':
+          description: KV Data
+          content:
+            application/json:
+              example:
+                my key: My value
+                some other key: some other value
+                better_name: 12
+                PIPELINE_RESULT:
+                  status: success
+                  duration: 123
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    about:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                        - pending
+                        - active
+                        - disabled
+                    role:
+                      type: string
+                      enum:
+                        - user
+                        - manager
+                        - operator
+                        - engineer
+                        - root
+                      description: >-
+                        The requested role to assign after authentication.  Must
+                        be one of: user, manager, operator, engineer, root.
+                        Although root can only be assigned by the MRT identity
+                        provider.
+                    created_by:
+                      type: string
+                    created_at:
+                      type: string
+                      format: date-time
+                    updated_by:
+                      type: string
+                    updated_at:
+                      type: string
+                      format: date-time
+                    last_login:
+                      type: string
+                      format: date-time
+                    provider:
+                      type: string
+                    username:
+                      type: string
+                  required:
+                    - id
+                    - role
+                  additionalProperties: false
+          headers:
+            ratelimit: *ref_0
+            ratelimit-policy: *ref_1
+            Retry-After: *ref_48
         '401':
           description: Authentication required
           content:

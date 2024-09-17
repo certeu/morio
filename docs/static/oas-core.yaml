@@ -172,6 +172,8 @@ paths:
                                   type: boolean
                                 DISABLE_IDP_MRT:
                                   type: boolean
+                                DISABLE_IDP_OIDC:
+                                  type: boolean
                               additionalProperties: false
                             secrets:
                               type: object
@@ -1711,6 +1713,8 @@ paths:
                           type: boolean
                         DISABLE_IDP_MRT:
                           type: boolean
+                        DISABLE_IDP_OIDC:
+                          type: boolean
                       additionalProperties: false
                     secrets:
                       type: object
@@ -2177,6 +2181,8 @@ paths:
                         DISABLE_IDP_LOCAL:
                           type: boolean
                         DISABLE_IDP_MRT:
+                          type: boolean
+                        DISABLE_IDP_OIDC:
                           type: boolean
                       additionalProperties: false
                     secrets:

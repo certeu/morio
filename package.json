@@ -32,7 +32,8 @@
     "lint-staged": "^15.2.10",
     "nodemon": "^3.1.4",
     "pino-pretty": "^11.2.2",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "prettyjson": "^1.2.5"
   },
   "engines": {
     "node": ">=20"
@@ -86,6 +87,7 @@
     "reversion": "node scripts/reversion.mjs && npm run reconfigure",
     "rev": "npm run reversion",
     "spellcheck": "./scripts/spellcheck-docs.sh",
+    "subscribe": "node --no-warnings scripts/kafka-client.mjs",
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
