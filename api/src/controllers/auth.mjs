@@ -5,6 +5,7 @@ import { idps } from '../idps/index.mjs'
 import { availableRoles, isRoleAvailable } from '../rbac.mjs'
 import { oidcCallbackHandler } from '../idps/oidc.mjs'
 import { isInSubnet } from 'is-in-subnet'
+import Buffer from 'node:buffer'
 
 /**
  * List of allowListed URLs that do not require authentication
@@ -114,6 +115,21 @@ Controller.prototype.authenticate = async function (req, res) {
   }
 
   /*
+   * Is it perhaps a request without a token but with credentials?
+   */
+  if (req.headers.authorization && req.headers.authorization.includes('Basic ')) {
+    header = true
+    const credentials = Buffer.from(req.headers.authorization.split('Basic ')[1].trim(), 'base64')
+      .toString('utf-8')
+      .split(':')
+    const idpResult =
+      credentials[0] === 'root'
+        ? await idps.mrt('mrt', { role: 'root', mrt: credentials[1] })
+        : await idps.mrt('mrt', { api_key: credentials[0], api_key_secret: credentials[1] })
+    if (Array.isArray(idpResult) && idpResult[0] === true) payload = idpResult[1]
+  }
+
+  /*
    * Do we have a payload and know what service it is?
    */
   const service = req.headers['x-morio-service']
@@ -127,9 +143,6 @@ Controller.prototype.authenticate = async function (req, res) {
       if (isRoleAvailable(payload.role, 'operator')) allow = true
       else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
     } else if (service === 'api') allow = true
-    /*
-     * API will handle access control for each route
-     */
 
     /*
      * API endpoints will handle their own RBAC so we just
@@ -152,24 +165,16 @@ Controller.prototype.authenticate = async function (req, res) {
   }
 
   /*
-   * When the console service starts, it will attempt to connect to all brokers
-   * To reach brokers on other nodes, it will go through the proxy and thus this
-   * will be treated as an external request. We would typically say access denied
-   * but if we do that, the service will not come up as console concludes it cannot
-   * reach the brokers.
-   * So, we need to let this request through, but we do run som additional checks:
-   * - Only allow GET /v1/brokers
-   * - Only if the x-real-ip header is an IP address in our internal docker range
-   * If not, it's probably a human trying to access console without authentication
-   * in which case we redirect to a pretty error page.
+   * The RedPanda console will make internal connections to the RedPanda Admin API
+   * (rpadmin). We need to ensure these will work, or the console will not work
+   * properly. However, since these are triggered by JavaScript inside the console.
+   * we connaot control the request, so we need to make sure it comes from the inernal
+   * Docker network instead.
    */
   if (!payload && service === 'rpadmin') {
-    if (
-      req.method === 'GET' &&
-      uri === '/v1/brokers' &&
-      isInSubnet(req.headers['x-real-ip'], utils.getPreset('MORIO_NETWORK_SUBNET'))
-    )
+    if (isInSubnet(req.headers['x-real-ip'], utils.getPreset('MORIO_NETWORK_SUBNET'))) {
       return res.status(200).end()
+    }
   }
 
   /*
