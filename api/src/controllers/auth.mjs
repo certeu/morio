@@ -5,7 +5,7 @@ import { idps } from '../idps/index.mjs'
 import { availableRoles, isRoleAvailable } from '../rbac.mjs'
 import { oidcCallbackHandler } from '../idps/oidc.mjs'
 import { isInSubnet } from 'is-in-subnet'
-import Buffer from 'node:buffer'
+import { Buffer } from 'node:buffer'
 
 /**
  * List of allowListed URLs that do not require authentication
