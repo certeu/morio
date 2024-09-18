@@ -9,6 +9,11 @@ const Crypto = new Controller()
  */
 export function routes(app) {
   /*
+   * Get JWKS
+   */
+  app.get('/jwks', Crypto.getJwks)
+
+  /*
    * Create a new certificate
    */
   app.post('/ca/certificate', Crypto.createCertificate)

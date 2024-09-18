@@ -2,6 +2,7 @@ import { utils } from '../lib/utils.mjs'
 import { createX509Certificate } from '#lib/tls'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
+import { keypairAsJwk } from '#shared/crypto'
 
 /**
  * This crypto controller handles cryptography routes
@@ -9,6 +10,24 @@ import { schemaViolation } from '#lib/response'
  * @returns {object} Controller - The config controller object
  */
 export function Controller() {}
+
+/**
+ * This returns the JWKS info, used for Vault integration
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getJwks = async function (req, res) {
+  /*
+   * Get JWKS info from public key
+   */
+  const jwks = await keypairAsJwk({ public: utils.getKeys().public })
+
+  return res
+    .status(200)
+    .send({ keys: [jwks] })
+    .end()
+}
 
 /**
  * Create a new X.509 certificate
