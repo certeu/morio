@@ -95,14 +95,23 @@ export async function oidcCallbackHandler(req, res) {
   /*
    * Perform the callback for the Authorization Server's authorization response
    */
-  const tokenSet = await client.callback(
-    getOidcRedirectUrl(req.params.provider_id),
-    client.callbackParams(req),
-    {
-      state: req.query.state,
-      code_verifier: pkce.verifier,
-    }
-  )
+  let tokenSet
+  try {
+    tokenSet = await client.callback(
+      getOidcRedirectUrl(req.params.provider_id),
+      client.callbackParams(req),
+      {
+        state: req.query.state,
+        code_verifier: pkce.verifier,
+      }
+    )
+  } catch (err) {
+    /*
+     * This happen when OIDC is wrongly configured or we cannot unwarp the secret
+     */
+    log.warn(err, `OIDC callback failed for provider ${req.params.provider_id}`)
+    return res.redirect(`/?error=morio.api.oidc.callback.error`)
+  }
 
   /*
    * Use the tokenSet to get user information
@@ -208,20 +217,15 @@ export function getLabels(provider_id, user) {
   const prefix = `${provider.provider}/${provider_id}/`
   const labels = []
   for (const attr of Object.values(provider.label_attributes)) {
-    if (user[attr]) labels.push(...asLabels(user[attr]).map(label => prefix+attr+'/'+label))
+    if (user[attr]) labels.push(...asLabels(user[attr]).map((label) => prefix + attr + '/' + label))
   }
 
   return labels
 }
 
-function asLabels(value, wrap=true) {
-  if (
-    typeof value === 'number' ||
-    typeof value === 'string' ||
-    typeof value === 'boolean'
-  ) return wrap
-    ? [value]
-    : value
+function asLabels(value, wrap = true) {
+  if (typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean')
+    return wrap ? [value] : value
   if (Array.isArray(value)) {
     const labels = []
     for (const val of value) {
