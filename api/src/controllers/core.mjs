@@ -71,6 +71,22 @@ Controller.prototype.createDockerResource = async function (req, res, path) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.createCertificate = async function (req, res) {
+  /*
+   * Since we use mTLS on Kafka, we need to prevent people from generating
+   * a certificate that will give them superpowers (unless they are engineer or root)
+   */
+  const suffix = `${utils.getClusterUuid()}.morio.internal`
+  if (
+    !['engineer', 'root'].includes(req.headers['x-morio-role']) &&
+    (req.body.certificate.cn === `root.${suffix}` ||
+      req.body.certificate.cn.includes(`infra.${suffix}`))
+  ) {
+    return utils.sendErrorResponse(res, 'morio.api.rbac.denied', req.url)
+  }
+
+  /*
+   * Now pass it on to core
+   */
   const [status, result] = await utils.coreClient.post(`/ca/certificate`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
