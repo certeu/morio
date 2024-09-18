@@ -277,7 +277,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Enable audit log TODO
          */
-        audit_enabled: false,
+        //audit_enabled: false,
 
         /*
          * Disable SASL for Kafka connections (we use mTLS)
@@ -295,14 +295,22 @@ export const resolveServiceConfiguration = ({ utils }) => {
         default_topic_replications: utils.getSettings('cluster.broker_nodes').length < 4 ? 1 : 3,
 
         /*
-         * These were auto-added, but might not be a good fit for production
-        fetch_reads_debounce_timeout: 10,
-        group_initial_rebalance_delay: 0,
-        group_topic_partitions: 3,
-        log_segment_size_min: 1,
-        storage_min_free_bytes: 10485760,
-        topic_partitions_per_shard: 1000,
+         * Extract CN as principal in mTLS
          */
+        kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
+
+        /*
+         * Default topic partition count
+         */
+        default_topic_partitions: 12,
+
+        /*
+         * Disable unsafe log operations
+         */
+        legacy_permit_unsafe_log_operation: false,
+
+        superusers: [ `root.${utils.getClusterUuid()}.morio.internal` ],
+
       },
 
       /*

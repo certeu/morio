@@ -14,7 +14,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const paths = utils.isEphemeral()
     ? ['/status', '/cluster/join', '/cluster/heartbeat']
-    : ['/status', '/cluster/sync', '/cluster/elect', '/cluster/heartbeat']
+    : ['/status', '/cluster/sync', '/cluster/elect', '/cluster/heartbeat', '/jwks']
 
   return {
     /**
@@ -65,7 +65,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
     traefik: {
       core: generateTraefikConfig(utils, {
         service: 'core',
-        paths: paths.map((path) => `${utils.getPreset('MORIO_CORE_PREFIX')}${path}`),
+        paths: [
+          ...paths.map((path) => `${utils.getPreset('MORIO_CORE_PREFIX')}${path}`),
+          '/jwks'
+        ],
         priority: 666,
       })
         .set('http.middlewares.core-prefix.replacepathregex.regex', `^/-/core/(.*)`)

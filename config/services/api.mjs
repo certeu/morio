@@ -24,7 +24,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const traefik = {
     api: generateTraefikConfig(utils, {
       service: 'api',
-      prefixes: [utils.getPreset('MORIO_API_PREFIX'), '/downloads', '/coverage'],
+      prefixes: [utils.getPreset('MORIO_API_PREFIX'), '/downloads', '/coverage', '/pubkey'],
       priority: 666,
     })
       /*
