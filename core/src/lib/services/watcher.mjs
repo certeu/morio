@@ -72,7 +72,7 @@ async function ensureLocalPrerequisites() {
   /*
    * Generate key and certificate for mTLS
    */
-  await ensureServiceCertificate('watcher', true, false)
+  await ensureServiceCertificate('watcher', true)
 
   /*
    * Copy key and certificates into mounted folder

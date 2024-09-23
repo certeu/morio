@@ -482,15 +482,18 @@ export async function execContainerCommand(id, Cmd, callback) {
    * Command output is provided as a NodeJS stream so this needs some work
    */
   container.exec({ Cmd, AttachStdin: true, AttachStdout: true }, function (err, exec) {
-    exec.start({ hijack: true, stdin: true }, function (err, stream) {
-      const allData = []
-      stream.on('data', (data) => {
-        allData.push(data.toString())
+    if (exec && !err) {
+      exec.start({ hijack: true, stdin: true }, function (err, stream) {
+        const allData = []
+        stream.on('data', (data) => {
+          allData.push(data.toString())
+        })
+        stream.on('end', (err) => {
+          if (!err && callback && typeof callback === 'function')
+            return callback(allData.join('\n'))
+        })
       })
-      stream.on('end', (err) => {
-        if (!err && callback && typeof callback === 'function') return callback(allData.join('\n'))
-      })
-    })
+    } else log.warn(err, `Failed to run docker API command on container ${id}`)
   })
 }
 

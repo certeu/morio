@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'docker.redpanda.com/redpandadata/redpanda',
   // Image tag (version) to run
-  tag: 'v24.1.11',
+  tag: 'v24.2.4',
 }
 
 /*
@@ -75,7 +75,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `--kafka-addr external://0.0.0.0:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         `--rpc-addr 0.0.0.0:33145`,
-        //'--default-log-level=debug',
+        '--default-log-level=info',
+        '--logger-log-level=kafka=debug',
       ],
     },
     traefik: {
@@ -175,6 +176,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
             port: utils.getPreset('MORIO_BROKER_ADMIN_API_PORT'),
             name: 'external',
             advertise_address: utils.getNodeFqdn(),
+            /*
+             * Make sure the admin API uses mTLS to talk to the broker
+             */
+            tls: {
+              enabled: true,
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              key_file: '/etc/redpanda/superuser-key.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
+              require_client_auth: true,
+            },
           },
         ],
 
@@ -208,6 +219,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             advertise_address: utils.getNodeFqdn(),
             advertise_port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
+            //authentication_method: 'mtls_identity',
           },
         ],
 
@@ -264,28 +276,19 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
 
         /*
-         * Organisation name helps identify this as a Morio system
-         */
-        // This breaks, not expected here?
-        //organization: utils.getSettings('cluster.name') || 'Nameless Morio',
-
-        /*
          * Cluster ID helps differentiate different Morio clusters
          */
         cluster_id: utils.getClusterUuid(),
 
         /*
-         * Enable audit log TODO
+         * Do not enable authorization in the config as it risks locking ourselves out
+         * Instead, configure it with rpk later
+         * FIXME: Setting this to null as we are using SASL for now
          */
-        //audit_enabled: false,
+        kafka_enable_authorization: 'null',
 
         /*
-         * Disable SASL for Kafka connections (we use mTLS)
-         */
-        enable_sasl: false,
-
-        /*
-         * Do not auto-create topics, be explicit
+         * Allow auto-creation of topics (subject to ACL)
          */
         auto_create_topics_enabled: true,
 
@@ -297,7 +300,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Extract CN as principal in mTLS
          */
-        kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
+        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
+        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN *= *([^,]).*/$1/` ],
+        //kafka_mtls_principal_mapping_rules: ["DEFAULT"],
 
         /*
          * Default topic partition count
@@ -309,8 +314,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         legacy_permit_unsafe_log_operation: false,
 
-        superusers: [ `root.${utils.getClusterUuid()}.morio.internal` ],
-
+        superusers: [ `root.${utils.getClusterUuid()}.morio.internal`, 'root' ],
       },
 
       /*
@@ -375,8 +379,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       current_cloud_auth_kind: '',
       profiles: [
         {
-          name: 'morio',
-          description: 'rpk profile for Morio',
+          name: 'nosasl',
+          description: 'An rpk profile to connect to Morio during the initial cluster bootstraap when SASL is not yet enabled',
           prompt: '',
           from_cloud: false,
           kafka_api: {
@@ -384,12 +388,44 @@ export const resolveServiceConfiguration = ({ utils }) => {
               `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
             ],
             tls: {
-              key_file: '/etc/redpanda/tls-key.pem',
-              cert_file: '/etc/redpanda/tls-cert.pem',
-              ca_file: '/etc/redpanda/tls-ca.pem',
+              enabled: true,
+              key_file: '/etc/redpanda/superuser-key.pem',
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
             },
           },
-          admin_api: {},
+          admin_api: {
+            // Only connect locally
+            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+          },
+          schema_registry: {},
+          cloud_auth: [],
+        },
+        {
+          name: 'morio',
+          description: 'The default rpk profile for Morio to use once SASL is enabled',
+          prompt: '',
+          from_cloud: false,
+          kafka_api: {
+            brokers: [
+              `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+            ],
+            tls: {
+              enabled: true,
+              key_file: '/etc/redpanda/superuser-key.pem',
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
+            },
+            sasl: {
+              mechanism: 'SCRAM-SHA-512',
+              user: 'root',
+              password: utils.getKeys().mrt,
+            },
+          },
+          admin_api: {
+            // Only connect locally
+            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+          },
           schema_registry: {},
           cloud_auth: [],
         },

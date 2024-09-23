@@ -265,7 +265,8 @@ utils.getInfo = () => store.get('info')
  * @param {string} service - The service name
  * @return {string} fqdn - The internal CN (and fqdn)
  */
-utils.getInternalServiceCn = (service) => `${service}.${utils.getClusterUuid()}.morio.internal`
+utils.getInternalServiceCn = (service) =>
+  `${service}.infra.${utils.getClusterUuid()}.morio.internal`
 
 /**
  * Helper method to get the keys configuration
@@ -1151,7 +1152,8 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
 /**
  * Unwrap a secret
  */
-utils.unwrapSecret = async (key, val) => val?.vault ? await vaultGetSecret(key, val.vault) : utils.decrypt(val)
+utils.unwrapSecret = async (key, val) =>
+  val?.vault ? await vaultGetSecret(key, val.vault) : utils.decrypt(val)
 
 /**
  * Add validate method for eacy access
