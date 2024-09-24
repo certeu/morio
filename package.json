@@ -49,6 +49,7 @@
     "build:moriod-repo-deb": "./scripts/build-repo-deb.sh",
     "cdp": "npm run check-docs-page",
     "check-docs-page": "./scripts/check-docs-page.sh",
+    "check": "./scripts/check-doc.sh",
     "ci:build.api": "./scripts/ci-build-container.sh api",
     "ci:build.core": "./scripts/ci-build-container.sh core",
     "ci:build.dbuilder": "./scripts/ci-build-container.sh dbuilder",

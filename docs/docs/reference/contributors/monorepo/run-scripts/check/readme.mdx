@@ -1,0 +1,29 @@
+---
+title: check
+---
+
+The `check` _run script_ runs the [aspell](http://aspell.net/)
+spell checker on a single file from the documentation that you
+should pass it.
+
+Run `npm run check docs/docs/.../readme.mdx` in the _monorepo_ 
+root to trigger this script, making sure to provide the full path
+to the file as argument.
+
+This is an interactive script, the spell checker will promptly you what to
+do when an issue is found. If you instruct it to, it will make changes
+to the documentation to fix the found issues. It will not make backup
+files as aspell does by default.
+
+The spell checker will also check lines marked to be skipped, so you
+can ignore any issues found on those.
+
+Under the hood, this will run:
+
+```sh title="Terminal"
+./scripts/check-doc.sh
+```
+
+## Prerequisites
+
+This relies on the [aspell](http://aspell.net/) package being available.
