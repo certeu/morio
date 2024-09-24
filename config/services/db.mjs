@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'rqlite/rqlite',
   // Image tag (version) to run
-  tag: '8.26.7',
+  tag: '8.30.5',
 }
 
 /*
