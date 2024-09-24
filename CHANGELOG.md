@@ -27,12 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [connector] Upgraded connector from 8.13.3 to 8.15.0
 - [docs] Migrated docs content from `.md` to `.mdx`
 - [docs] Updated the term style in docs
+- [proxy] Upgraded Traefik to v3.1.4
 
 ### Fixed
 
 - [broker] Fixed broker to trust root and intermediate CA certs
 - [client] Fixed bug in the client CLI options
 - [proxy] Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
+
+### Security
+
+- [proxy] Upgraded Traefik to v3.1.4 which fixes [CVE-2024-45410](https://nvd.nist.gov/vuln/detail/CVE-2024-45410)
 
 ## [0.3.0] - 2024-08-08
 

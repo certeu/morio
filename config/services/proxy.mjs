@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'traefik',
   // Image tag (version) to run
-  tag: 'v3.0.4',
+  tag: 'v3.1.4',
 }
 
 /*
