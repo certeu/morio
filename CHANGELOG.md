@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
 - [broker] Upgraded RedPanda to v24.2.5
+- [ca] Upgraded SmallStep Step-CA to v0.27.4
 - [connector] Upgraded connector from 8.13.3 to 8.15.0
 - [docs] Migrated docs content from `.md` to `.mdx`
 - [docs] Updated the term style in docs
