@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { RightIcon, LeftIcon } from 'components/icons.mjs'
 import { MainMenu, iconProps } from 'components/navigation/main-menu.mjs'
 
-export const Sidebar = ({ page }) => {
+export const Sidebar = ({ page, role }) => {
   const [dense, setDense] = useState(false)
 
   return (
@@ -30,7 +30,7 @@ export const Sidebar = ({ page }) => {
               )}
             </div>
           </button>
-          <MainMenu current={page} dense={dense} />
+          <MainMenu current={page} dense={dense} role={role} />
         </div>
       </aside>
     </div>

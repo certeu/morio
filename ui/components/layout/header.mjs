@@ -1,3 +1,5 @@
+// Dependencies
+import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useAccount } from 'hooks/use-account.mjs'
 import { useEffect, useState } from 'react'
@@ -81,6 +83,8 @@ export const Header = ({
     [scrolled]
   )
 
+  const operator = rbac(account.role, 'operator')
+
   return (
     <>
       <header
@@ -95,9 +99,11 @@ export const Header = ({
             </Link>
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
-                <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
-                  Settings
-                </NavButton>
+                {operator ? (
+                  <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
+                    Settings
+                  </NavButton>
+                ) : null}
                 <NavButton
                   href="/status"
                   label="Status"

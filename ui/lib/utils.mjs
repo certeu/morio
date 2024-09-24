@@ -5,6 +5,7 @@ import mustache from 'mustache'
 import Joi from 'joi'
 import _slugify from 'slugify'
 import { jwtDecode } from 'jwt-decode'
+import { roles } from 'config/roles.mjs'
 
 export const decodeJwt = (token) => {
   let result
@@ -207,12 +208,26 @@ export const validatePreseed = async (api, preseed, setLoadingStatus) => {
 }
 
 /**
+ *  Helper method to determine whether a user has a given role
+ *
+ *  @param {string} role - The current role of the user
+ *  @param {string} min - The minimal required role
+ *  @return {bool} allowed - True if the user has the role
+ */
+export const rbac = (role=false, min='engineer') => {
+  if (!role || !roles.includes(role)) return false
+
+  return roles.indexOf(role) >= roles.indexOf(min)
+}
+
+
+/**
  * Helper method to determine whether a page has children
  */
 export const pageChildren = (page) => {
   const children = {}
   for (const [key, val] of Object.entries(page)) {
-    if (!['t', 'o'].includes(key)) children[key] = val
+    if (!['t', 'o', 'r'].includes(key)) children[key] = val
   }
 
   return Object.keys(children).length > 0 ? children : false
@@ -246,3 +261,5 @@ export const shortDate = (timestamp = false, withTime = true) => {
 
   return ts.toLocaleDateString('en', options)
 }
+
+

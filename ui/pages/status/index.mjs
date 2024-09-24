@@ -1,6 +1,9 @@
+// Dependencies
+import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useState, useEffect, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
+import { useAccount } from 'hooks/use-account.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -169,6 +172,7 @@ const StatusPage = (props) => {
   const { api } = useApi()
   const { pushModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
+  const { account } = useAccount()
 
   const updateStatus = async () => {
     const result = await api.getStatus()
@@ -196,48 +200,55 @@ const StatusPage = (props) => {
     else setLoadingStatus([true, 'Reseed initialized', true, true])
   }
 
+  // Does the user have an operator or higher role?
+  const operator = rbac(account.role, 'operator')
+
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={StatusIcon} title={props.title}>
-        <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl mb-4">
-          <button
-            title="Restart Morio..."
-            className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
-            onClick={() =>
-              pushModal(
-                <ModalWrapper>
-                  <RestartConfirmation restart={restart} />
-                </ModalWrapper>
-              )
-            }
-          >
-            <RestartIcon />
-            Restart Morio...
-          </button>
-          <button
-            title="Reseed Morio..."
-            className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
-            onClick={() =>
-              pushModal(
-                <ModalWrapper>
-                  <ReseedConfirmation reseed={reseed} />
-                </ModalWrapper>
-              )
-            }
-          >
-            <ReseedIcon />
-            Reseed Morio...
-          </button>
-        </div>
+        {operator ? (
+          <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl mb-4">
+            <button
+              title="Restart Morio..."
+              className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
+              onClick={() =>
+                pushModal(
+                  <ModalWrapper>
+                    <RestartConfirmation restart={restart} />
+                  </ModalWrapper>
+                )
+              }
+            >
+              <RestartIcon />
+              Restart Morio...
+            </button>
+            <button
+              title="Reseed Morio..."
+              className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
+              onClick={() =>
+                pushModal(
+                  <ModalWrapper>
+                    <ReseedConfirmation reseed={reseed} />
+                  </ModalWrapper>
+                )
+              }
+            >
+              <ReseedIcon />
+              Reseed Morio...
+            </button>
+          </div>
+        ) : null}
         <Status status={status} />
-        <div className="grid grid-cols-3 gap-4 items-center justify-between items-stretch max-w-4xl">
-          <Card
-            title="Docker"
-            href="/status/docker"
-            desc="Display running containers, available images, and configured networks."
-            width="w-full"
-            Icon={Docker}
-          />
+        <div className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}>
+          {operator ? (
+            <Card
+              title="Docker"
+              href="/status/docker"
+              desc="Display running containers, available images, and configured networks."
+              width="w-full"
+              Icon={Docker}
+            />
+          ) : null}
           <Card
             title="Traefik Dashboard"
             target="_blank"
@@ -246,14 +257,16 @@ const StatusPage = (props) => {
             width="w-full"
             Icon={Traefik}
           />
-          <Card
-            title="RedPanda Console"
-            target="_blank"
-            href="/console/overview"
-            desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
-            width="w-full"
-            Icon={RedPandaConsole}
-          />
+          {operator ? (
+            <Card
+              title="RedPanda Console"
+              target="_blank"
+              href="/console/overview"
+              desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
+              width="w-full"
+              Icon={RedPandaConsole}
+            />
+          ) : null}
         </div>
       </ContentWrapper>
     </PageWrapper>
