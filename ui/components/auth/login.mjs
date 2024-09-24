@@ -191,7 +191,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
             <thead>
               <tr>
                 <th className="text-right w-28">Required&nbsp;Role</th>
-                <th>Current&nbsp;Roles</th>
+                <th>Current&nbsp;Role</th>
               </tr>
             </thead>
             <tbody>
@@ -200,27 +200,16 @@ export const Login = ({ setAccount, account = false, role = false }) => {
                   <span className="badge badge-error ml-1">{role}</span>
                 </td>
                 <td>
-                  {account.roles &&
-                    account.roles.map((role) => (
-                      <span className="badge badge-success ml-1" key={role}>
-                        {role}
-                      </span>
-                    ))}
+                  <span className="badge badge-success ml-1">
+                    {account.role}
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
           <br />
           <Popout note compact dense noP>
-            You can{' '}
-            <a role="button" onClick={back}>
-              go back
-            </a>
-            , or{' '}
-            <a role="button" onClick={() => setAccount(null)}>
-              log out
-            </a>{' '}
-            to assume a different role.
+            You can sign in again to assume a different role, or <a role="button" onClick={back}>go back</a>
           </Popout>
         </>
       ) : null}
