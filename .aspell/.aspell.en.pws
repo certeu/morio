@@ -1,4 +1,4 @@
-personal_ws-1.1 en 221 
+personal_ws-1.1 en 227 
 ACL
 AMI
 API's
@@ -22,6 +22,7 @@ ETL
 EU's
 EUPL
 EditorConfig
+Entra
 FILEPATH
 FQDN
 FTW
@@ -49,6 +50,7 @@ KV
 Keycloak
 Kubernetes
 LDAP
+LDAPS
 LOMO
 LSW
 Lex
@@ -66,6 +68,7 @@ Mustache
 NPM
 NextJS
 NodeJS
+OAuth
 OCI
 OIDC
 OSI
@@ -81,6 +84,7 @@ Pre
 Preseeding
 RBuilder
 REPOS
+RPC
 RTT
 RedHat
 RedPanda
@@ -94,6 +98,7 @@ Scode
 SmallStep
 SmallStep's
 SubPages
+Subnet
 Symantecs
 TCP
 TLS
@@ -105,6 +110,7 @@ Traefik
 UI
 UI's
 UID
+URIs
 UUID
 VM
 VeriSign

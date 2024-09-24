@@ -56,6 +56,7 @@ the Morio Root Token.
 
 <Tabs>
 <TabItem value="a" label="Base Settings">
+
 ```yaml title="base-settings.yaml"
 iam:
   providers:
@@ -71,13 +72,16 @@ iam:
     order:
       mrt: 10
 ```
+
 </TabItem>
 <TabItem value="b" label="Settings Overlay">
+
 ```yaml title="overlays/idp-mrt.yaml"
 iam.ui.providers.mrt.label: Morio Root Token
 iam.ui.visibility.mrt: icon
 iam.ui.order.mrt: 10
 ```
+
 </TabItem>
 </Tabs>
 
@@ -130,6 +134,7 @@ Key and its matching secret.
 
 <Tabs>
 <TabItem value="a" label="Base Settings">
+
 ```yaml title="base-settings.yaml"
 iam:
   providers:
@@ -145,13 +150,16 @@ iam:
     order:
       apikey: 20
 ```
+
 </TabItem>
 <TabItem value="b" label="Settings Overlay">
+
 ```yaml title="overlays/idp-apikey.yaml"
 iam.providers.apikey.label: API Key
 iam.ui.visibility.mrt: icon
 iam.ui.order.mrt: 10
 ```
+
 </TabItem>
 </Tabs>
 
@@ -205,6 +213,7 @@ username, password, and TOTP token of a Local Morio User Account.
 
 <Tabs>
 <TabItem value="a" label="Base Settings">
+
 ```yaml title="base-settings.yaml"
 iam:
   providers:
@@ -220,13 +229,16 @@ iam:
     order:
       local: 3
 ```
+
 </TabItem>
 <TabItem value="b" label="Settings Overlay">
+
 ```yaml title="overlays/idp-local.yaml"
 iam.providers.local.label: Morio Account
 iam.ui.visibility.local: tab
 iam.ui.order.mrt: 3
 ```
+
 </TabItem>
 </Tabs>
 
@@ -271,6 +283,7 @@ The **LDAP** identity provider allows authentication against an LDAP backend.
 
 <Tabs>
 <TabItem value="a" label="Base Settings">
+
 ```yaml title="base-settings.yaml"
 iam:
   providers:
@@ -304,8 +317,10 @@ iam:
 secrets:
   AD_PASSWORD: "Your secret here"
 ```
+
 </TabItem>
 <TabItem value="b" label="Settings Overlay">
+
 ```yaml title="overlays/idp-local.yaml"
 iam.providers.ad: 
   provider: ldap
@@ -331,6 +346,7 @@ iam.ui.visibility.ad: tab
 iam.ui.order.ad: 2
 secrets.AD_PASSWORD: "Your secret here"
 ```
+
 </TabItem>
 </Tabs>
 
@@ -376,6 +392,7 @@ The **OpenID Connect** identity provider allows authentication against an OpenID
 
 <Tabs>
 <TabItem value="a" label="Base Settings">
+
 ```yaml title="base-settings.yaml"
 iam:
   providers:
@@ -406,8 +423,10 @@ iam:
 secrets:
   GITLAB_OIDC_SECRET: "Your GitLab secret here"
 ```
+
 </TabItem>
 <TabItem value="b" label="Settings Overlay">
+
 ```yaml title="overlays/idp-local.yaml"
 iam.providers.gitlab: 
   provider: oidc
@@ -430,6 +449,7 @@ iam.ui.visibility.gitlab: tab
 iam.ui.order.gitlab: 1
 secrets.GITLAB_OIDC_SECRET: "Your GitLab secret here"
 ```
+
 </TabItem>
 </Tabs>
 

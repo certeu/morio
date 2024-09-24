@@ -38,7 +38,7 @@ In the [Google Cloud Console](https://console.cloud.google.com/) create a new pr
     authenticate.
 
 The **Edit App registration** view will load, allowing you to further complete
-the configuation:
+the configuration:
 
 - Under **App Information**:
   - **App name**: This will be shown to the user, so make it meaningful.
@@ -49,12 +49,12 @@ the configuation:
   [the Morio logo](/img/morio-avatar.png)?
 - Under **App Domain**:
   - Set **Application home page** to the base URL of your Morio instance or
-    cluster. For examle: `https://morio.my-company.com/`
+    cluster. For example: `https://morio.my-company.com/`
   - Set **Application privacy policy** to the same URL unless you have a
     specific privacy policy URL.
   - Set **Application terms of service** to the same URL unless you have a
     specific terms of service URL.
-- Under **Authorized domain** Add the top domain your Morio is hosted under.
+- Under **Authorised domain** Add the top domain your Morio is hosted under.
   For example: `my-company.com`.
 - Under **Developer contact information** enter your email address.
 
@@ -73,7 +73,7 @@ and Continue** button.
 #### Configure test users for your app
 
 If this is a public app, your app will initially be published with a `testing`
-status during which time onyl pre-defined users can use (or test) the app.
+status during which time only pre-defined users can use (or test) the app.
 
 Click the **Add Users** button and add your own Google email, or those of other
 users you want to be able to test that app.
@@ -85,7 +85,7 @@ users you want to be able to test that app.
 - Under **Application Type** choose **Web application**
 - Give it a **Name**. This name is for display in the console, it will not be
   shown to users. Use `morio` when you're not sure what to use.
-- Under **Authorized redirect URIs**:
+- Under **Authorised redirect URIs**:
   - Enter `https://your-morio-fqdn/-/api/callback/oidc/google`
   where `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `google` is
   the ID of the identity provider we will create below.
@@ -97,8 +97,10 @@ Click the **Create** button to create the OAuth client ID.
 Copy the **Client ID** and **Client secret** for use below.
 
 <Note>
+
 Your app is in test. You'll need to submit it for review when you have verified
 everything is ok.
+
 </Note>
 
 ### Create a new identity provider in Morio
