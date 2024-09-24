@@ -6,7 +6,7 @@ export const pullConfig = {
   // Image to run
   image: 'docker.elastic.co/logstash/logstash',
   // Image tag (version) to run
-  tag: '8.15.0',
+  tag: '8.15.1',
 }
 
 /*

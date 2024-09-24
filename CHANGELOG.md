@@ -24,12 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
-- [broker] Upgraded RedPanda to v24.2.5
-- [ca] Upgraded SmallStep Step-CA to v0.27.4
-- [connector] Upgraded connector from 8.13.3 to 8.15.0
+- [broker] Upgraded RedPanda to v24.1.11 to v24.2.5
+- [ca] Upgraded SmallStep Step-CA to v.0.26.1 to v0.27.4
+- [connector] Upgraded connector from 8.13.3 to 8.15.1
 - [docs] Migrated docs content from `.md` to `.mdx`
 - [docs] Updated the term style in docs
-- [proxy] Upgraded Traefik to v3.1.4
+- [proxy] Upgraded Traefik from v3.0.4 to v3.1.4
 
 ### Fixed
 
@@ -39,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- [proxy] Upgraded Traefik to v3.1.4 which fixes [CVE-2024-45410](https://nvd.nist.gov/vuln/detail/CVE-2024-45410)
+- [proxy] Upgraded Traefik from v3.0.4 to v3.1.4. Fixes [CVE-2024-45410](https://nvd.nist.gov/vuln/detail/CVE-2024-45410)
 
 ## [0.3.0] - 2024-08-08
 
