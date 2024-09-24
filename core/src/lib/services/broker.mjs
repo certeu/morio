@@ -238,17 +238,17 @@ async function enforceAuthorization() {
     [`morio-client`, 'describe', utils.getPreset('MORIO_BROKER_CLIENT_TOPICS')],
     [`morio-client`, 'write', utils.getPreset('MORIO_BROKER_CLIENT_TOPICS')],
     // FIXME: This is for when mTLS authorization workds
-    //[`*.infra.${utils.getClusterUuid()}.morio.internal`, 'all', ['*']],
+    [`*.infra.${utils.getClusterUuid()}.morio.internal`, 'all', ['*']],
     //[`root.${utils.getClusterUuid()}.morio.internal`, 'all', ['*']],
-    [`root`, 'all', ['*']],
+    //[`root`, 'all', ['*']],
   ]
   for (const [user, operation, topics] of ACLs) {
     for (const topic of topics) {
       log.debug(`[broker] Creating ${operation} ACL on topic ${topic} for user ${user}`)
       await execContainerCommand('broker', [
         'rpk',
-        '--profile',
-        'nosasl',
+        //'--profile',
+        //'nosasl',
         'security',
         'acl',
         'create',
@@ -261,21 +261,6 @@ async function enforceAuthorization() {
       ])
     }
   }
-
-  /*
-   * With ACLs in place, enable authorization
-   */
-  log.debug(`[broker] Enabling SASL for authorization`)
-  await execContainerCommand('broker', [
-    'rpk',
-    '--profile',
-    'nosasl',
-    'cluster',
-    'config',
-    'set',
-    'enable_sasl',
-    'true',
-  ])
 }
 
 /**

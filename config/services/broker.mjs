@@ -219,7 +219,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             advertise_address: utils.getNodeFqdn(),
             advertise_port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
-            //authentication_method: 'mtls_identity',
+            //authentication_method: 'sasl',
           },
         ],
 
@@ -286,6 +286,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * FIXME: Setting this to null as we are using SASL for now
          */
         kafka_enable_authorization: 'null',
+        enable_sasl: true,
 
         /*
          * Allow auto-creation of topics (subject to ACL)
