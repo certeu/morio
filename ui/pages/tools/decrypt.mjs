@@ -106,7 +106,7 @@ const Decrypt = () => {
 
 const DecryptPage = (props) => {
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="engineer">
       <ContentWrapper {...props} Icon={ClosedLockIcon} title={props.title}>
         <div className="max-w-4xl">
           <Decrypt />
