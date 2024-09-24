@@ -1,0 +1,21 @@
+---
+title: build:moriod-repo-deb
+---
+
+The `build:moriod-repo-deb` _run script_ builds a Debian package (`.deb)
+that adds the morio APT repository to the system, as well as its public key
+to verify signatures.
+
+Run `npm run build:moriod-repo-deb` in the _monorepo_ root to trigger this script.
+
+Under the hood, this will run:
+
+```sh title="Terminal"
+./scripts/build-repo-deb.sh
+```
+
+This launches the `dbuilder` container, so make sure to run [the
+`build:dbuilder` run
+script](/docs/reference/contributors/monorepo/run-scripts/build-dbuilder/)
+first if that container is not yet available locally.
+
