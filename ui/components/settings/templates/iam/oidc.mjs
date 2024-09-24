@@ -46,7 +46,7 @@ export const oidc = {
   about: 'Provides authentication against an OpenID Connect provider',
   desc: 'Use this to authenticate through an external service',
   local: (data) => `iam.providers.${data.id}`,
-  form: ({ data }) => [
+  form: () => [
     {
       tabs: {
         Metadata: providerMeta(),

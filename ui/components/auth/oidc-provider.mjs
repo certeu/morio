@@ -4,7 +4,7 @@ import { RoleInput } from '../inputs.mjs'
 /**
  * The login for an OIDC provider
  */
-export const OidcProvider = ({ id, api, setLoadingStatus, setAccount, setError }) => {
+export const OidcProvider = ({ id }) => {
   const [role, setRole] = useState('user')
 
   return (

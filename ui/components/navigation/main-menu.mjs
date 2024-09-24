@@ -220,7 +220,8 @@ export const NavButton = ({
       {active && children
         ? Object.entries(children).map(([key, page]) => (
             <NavButton
-              {...{key, page, current, role }}
+              key={key}
+              {...{ page, current, role }}
               k={key}
               level={level + 1}
               parents={[...parents, k]}

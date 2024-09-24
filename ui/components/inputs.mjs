@@ -4,8 +4,7 @@ import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon, ResetIcon, WarningIcon, PlusIcon } from 'components/icons.mjs'
-import { Label } from './label.mjs'
+import { OkIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -565,7 +564,7 @@ export const LabelInput = (props) => {
       newObj[label] = label
       setObj(newObj)
       setStr('')
-      props.update(newObj)
+      update(newObj)
     }
     else setStr(val)
   }
