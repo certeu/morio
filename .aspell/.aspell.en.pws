@@ -1,4 +1,5 @@
-personal_ws-1.1 en 227 
+personal_ws-1.1 en 231 
+ABAC
 ACL
 AMI
 API's
@@ -7,6 +8,7 @@ AwsImages
 CAs
 CISO
 CN
+CVE
 ChatGPT
 Cybersecurity
 DBuilder
@@ -82,6 +84,7 @@ PKCE
 Podman
 Pre
 Preseeding
+RBAC
 RBuilder
 REPOS
 RPC
@@ -92,6 +95,7 @@ Redoc
 RepoFile
 RockyLinux
 Rqlite
+SASL
 SIEM
 SUBNET
 Scode
