@@ -7,6 +7,9 @@ notes.md
 # Data folder
 data/
 
+# Local folder
+local/
+
 # Auto-generated client files
 clients/linux/control
 clients/linux/etc/morio/audit/config-template.yml
