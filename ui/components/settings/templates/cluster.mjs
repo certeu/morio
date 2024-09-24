@@ -15,7 +15,7 @@ import { Popout } from 'components/popout.mjs'
  */
 export const cluster = (context, toggleValidate) => {
   const template = {
-    title: 'Cluster',
+    title: 'Cluster Setup',
     type: 'info',
     lockOnEdit: true,
     children: {

@@ -77,7 +77,7 @@ export const iam = () => ({
       <b>authorization</b> rules about who can access what within this Morio deploymnent.
     </>
   ),
-  title: 'IAM',
+  title: 'Identity & Access Management',
   type: 'info',
   children: {
     /*
