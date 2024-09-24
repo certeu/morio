@@ -27,7 +27,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'core',
       // Image to run (different in dev)
-      image: PROD ? 'morio/core' : utils.isUnitTest() ? 'morio/core-test' : 'morio/core-dev',
+      image: PROD ? 'itsmorio/core' : utils.isUnitTest() ? 'itsmorio/core-test' : 'itsmorio/core-dev',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network

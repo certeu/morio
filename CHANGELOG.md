@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added public key used to sign packages to repository
 - Added script to buid the moriod-repo .deb package
 - [api] Added initial `kv` implementation. This adds a persistent key/value store to Morio
 - [api] Added `oidc` identity provider
@@ -44,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Updated container images to use the `itsmore` namespace
 - [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
 - [api] Made `account.about` optional in the data schema
 - [api] Improved OpenAPI schema
@@ -67,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [broker] Fixed broker to trust root and intermediate CA certs
 - [client] Fixed bug in the client CLI options
 - [proxy] Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
+- [proxy] Always force restart so that the new certificate configuration is taken into account
 - [ui] Allow sign in when the MRT idenity provider is not explicitly configured
 - [ui] Do not spread the `key` prop to a React component
 - [ui] Account activation through the UI was broken
