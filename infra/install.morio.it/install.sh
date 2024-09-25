@@ -14,7 +14,7 @@
 #       - For API: apt.repo.morio.it
 #       - for ROM: rpm.repo.morio.it
 #     - Update dependencies
-#     - Install the moriod pacakge
+#     - Install the moriod package
 #
 #   To learn more about Morio, visit https://morio.it
 #
@@ -110,12 +110,12 @@ install_repo_pkg() {
   if [ $PACKAGE_FORMAT == "apt" ]; then
     sudo apt install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
     echo ""
-    echo "🛢️ Updating list of available pacakges..."
+    echo "🛢️ Updating list of available packages..."
     sudo apt update
   else
     sudo yum install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
     echo ""
-    echo "🛢️ Updating list of available pacakges..."
+    echo "🛢️ Updating list of available packages..."
     sudo yum clean expire-cache && sudo yum check-update
   fi
 }
