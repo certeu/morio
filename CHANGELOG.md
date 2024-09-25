@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixes
+
+- [core] Correct namespace in systemd unit file
+
 ## [0.4.0] - 2024-09-25
 
 ### Added
@@ -47,7 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated container images to use the `itsmore` namespace
+- Updated container images to use the `itsmorio` namespace
 - [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
 - [api] Made `account.about` optional in the data schema
 - [api] Improved OpenAPI schema
