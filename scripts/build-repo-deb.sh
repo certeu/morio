@@ -23,4 +23,4 @@ cp config/moriod-repos/deb/postinst build-context/
 docker run -it \
   -v ${MORIO_GIT_ROOT}/build-context:/morio/src \
   -v ${MORIO_GIT_ROOT}/data/data:/morio/dist \
-  morio/dbuilder
+  itsmorio/dbuilder

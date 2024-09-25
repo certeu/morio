@@ -1,0 +1,15 @@
+## Run in RockyLinux 9
+FROM rockylinux:9
+
+# Make this folder our working directory
+WORKDIR /morio
+
+# Install dependencies
+RUN yum update -y
+RUN yum install -y rpm-build rpmdevtools
+
+# Add builder script as custom entrypoint
+COPY ./entrypoint.sh /entrypoint.sh
+
+## Run the builder script
+CMD ["/entrypoint.sh"]
