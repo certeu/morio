@@ -69,6 +69,11 @@ function OpenAPI(utils, type = 'api', extra = {}) {
         backgroundColor: 'transparent',
         altText: 'Morio Logo',
       },
+      contact: {
+        name: "Morio Team",
+        url: "https://github.com/certeu/morio",
+        email: "morio@morio.it",
+      },
     },
     externalDocs: {
       description: 'Morio Online Documentation',
@@ -115,18 +120,22 @@ for (const method of ['get', 'post', 'patch', 'put', 'delete']) {
 /**
  * Helper method to define a response
  */
-export function response(
+export function response({
   desc,
-  example = false,
-  examples = false,
-  contentType = 'application/json'
-) {
+  example=false,
+  examples=false,
+  schema=false,
+  headers=false,
+  contentType='application/json'
+}) {
   const res = {
     description: desc,
     content: {},
   }
   if (example) res.content[contentType] = { example }
   else if (examples) res.content[contentType] = { examples }
+  if (schema) res.content[contentType].schema = schema
+  if (headers) res.headers = headers
 
   return res
 }
@@ -188,7 +197,7 @@ function errorResponses(templates, errors) {
  */
 function formatResponseExamples(obj) {
   const newObj = {}
-  for (const [key, value] of Object.entries(obj)) newObj[key] = { value, title: 'banana' }
+  for (const [key, value] of Object.entries(obj)) newObj[key] = { value, summary: `${key} Example` }
   return newObj
 }
 

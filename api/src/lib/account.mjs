@@ -69,7 +69,7 @@ export function asRole(data) {
  */
 function asProvider(data) {
   const p = String(data).toLowerCase()
-  if (Object.keys(utils.getSettings('iam.providers', {})).includes(p)) return p
+  if (['mrt', ...Object.keys(utils.getSettings('iam.providers', {}))].includes(p)) return p
   else {
     log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
     return ''
@@ -218,7 +218,33 @@ export async function listAccounts() {
  * @param {string} id - The id of the account (the username)
  */
 export async function updateLastLoginTime(provider, id, extraData = {}) {
-  return await saveAccount(provider, id, { last_login: 'datetime()', ...extraData })
+  /*
+   * We need at least an ID and provider
+   */
+  if (!id || !provider) {
+    log.warn('[api] updateLastLoginTime was called witout an id or provider')
+    return false
+  }
+
+  let result
+  const now = new Date().toISOString()
+  if (extraData) {
+    /*
+     * Need to add some extra data, so let's fetch the record and do a full write
+     */
+    const data = await loadAccount(provider, id)
+    result = await saveAccount(provider, id, { ...data, last_login: now, ...extraData })
+  } else {
+    /*
+     * A simple update of the last_login field will do
+     */
+    result = await db.write(`UPDATE accounts SET last_login=:now WHERE id=:id`, {
+      now,
+      id: fullId(provider, id),
+    })
+  }
+
+  return result
 }
 
 /**

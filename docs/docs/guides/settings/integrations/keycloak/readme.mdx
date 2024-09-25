@@ -1,0 +1,108 @@
+---
+title: "Integration guide: Morio and Keycloak"
+sidebar_label: Keycloak
+sidebar_position: 3000
+---
+
+[Keycloak](https://www.keycloak.org/) can be integrated with Morio to act as an
+identity provider with OpenID Connect.
+
+If you have user accounts in a Keycloak instance that you want to use to
+authenticate to Morio, you can do so by configuring [an OpenID Connect identity
+provider](/docs/guides/settings/idps/#openid-connect) with Keycloak as the
+backing OpenID provider.
+
+To do so requires configuring a new application on Keycloak, and then using those
+settings to set up a new identity provider in Morio. You also need to ensure
+Morio can talk HTTPS to Keycloak.
+
+### Ensure connectivity
+
+For this to work, Morio needs access to your GitLab instance on TCP port 443
+(HTTPS).
+
+### Create a Keycloak client
+
+What is often referred to as _an application_ in OpenID Connect is called
+a `OpenID-Connect Client` in Keycloak. Clients in Keycloak are applications
+or services that can request authentication of a user. So that's what we need.
+
+Follow these steps to get started:
+
+- Log in to Keycloak as an administrator
+- On the navigation menu, select **Clients**
+- Click the **Create client** button
+- Under **General Settings**:
+  - Set **Client type** to `OpenID Connect`
+  - Set the **Client ID** box to `morio` as name for the client (or whatever you want)
+  - Add a name and description if you like
+  - Click the **Next** button
+- Under **Capability config**:
+  - Ensure **Client Authentication** is enabled
+  - Make the **Authentication flow** is set to `Standard flow`
+  - Click the **Next** button
+- Under **Login settings**:
+  - Set the **Root URL** to the URL of the Morio instance or cluster, for example, `https://<your instance fqdn>/`
+  - Set the **Home URL** to the same
+  - For **Valid redirect URLs**, use
+   `https://your-morio-fqdn/-/api/callback/oidc/keycloak` where
+   `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `keycloak` is
+   the ID of the identity provider we will create below. If you have more than
+   1 broker node, enter the URL for each node on its own line, and also add a
+   line for a similar URL using the cluster _FQDN_.
+  - For **Web origins**, use `https://your-morio-fqdn/` where `your-morio-fqdn`
+    is the _FQDN_ of your Morio instance.  If you have more than 1 broker node,
+    enter the URL for each node on its own line, and also add a line for a
+    similar URL using the cluster _FQDN_.
+  - Click the **Save** button
+
+After saving, you’ll be taken to the client’s settings page. Here, under the
+**Settings** tab you can copy the client ID, whereas the client secret can be
+found under the **Credentials** tab,
+
+### Create a new identity provider in Morio
+
+Next, you need to add a new identity provider to Morio, specifically, [an
+OpenID Connect identity provider](/docs/guides/settings/idps/#openid-connect).
+
+Below is an example configuration:
+
+```yaml
+iam:
+  providers:
+    keycloak: # You can choose the ID of the oidc provider instance
+      provider: oidc # You cannot choose this, it must always be `oidc`
+      label: Keycloak
+      about: Use your Keycloakb account to sign in to Morio
+      issuer: https://keycloak.morio.it
+      client_id: morio-id-here
+      client_secret: "{{{ KEYCLOAK_CLIENT_SECRET }}}"
+      username_field: email
+      rbac:
+        user:
+          attribute: email
+          regex: .
+        engineer:
+          attribute: email
+          list:
+            - mario@morio.it
+            - luigi@morio.it
+  ui:
+    visibility:
+      # Use 'tab' to show the identity provider
+      # as a tab on the login page
+      keycloak: tab
+    order:
+      keycloak: 1
+secrets:
+  KEYCLOAK_CLIENT_SECRET: "Your Keycloak secret here"
+```
+
+<Tip>
+
+Refer to [the Identity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
+reference documentation on the `iam`
+settings](/docs/reference/settings/iam/#iamprovidersoidc-id) for more details.
+
+</Tip>
+

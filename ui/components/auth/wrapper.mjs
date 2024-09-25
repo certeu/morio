@@ -49,7 +49,7 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
      */
     const whoAmI = async () => {
       const result = await api.whoAmI()
-      if (result[1] === 401) logout()
+      if (result[1] !== 200) logout()
     }
     const ephemeral = async () => {
       const result = await api.getStatus()

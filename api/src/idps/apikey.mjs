@@ -16,25 +16,25 @@ export async function apikey(id, data) {
   /*
    * Authenticate
    */
-  if (id === 'apikey' && data?.username && data?.password) {
+  if (id === 'apikey' && data?.api_key && data?.api_key_secret) {
     /*
      * Look up the apikey
      */
-    const apikey = await loadApikey(data.username)
+    const apikey = await loadApikey(data.api_key)
     if (!apikey)
       return [false, { success: false, reason: 'Authentication failed', error: 'No such API key' }]
 
     /*
      * Verify the password
      */
-    const passwordOk = verifyPassword(data.password, apikey.secret)
+    const passwordOk = verifyPassword(data.api_key_secret, apikey.secret)
     if (!passwordOk)
       return [false, { success: false, reason: 'Authentication failed', error: 'Invalid password' }]
 
     /*
      * Update apikey with last login time
      */
-    updateLastLoginTime(data.username)
+    updateLastLoginTime(data.api_key)
 
     /*
      * All good, return
@@ -42,7 +42,7 @@ export async function apikey(id, data) {
     return [
       true,
       {
-        user: `apikey.${data.username}`,
+        user: `apikey.${data.api_key}`,
         role: apikey.role,
         provider: id,
       },

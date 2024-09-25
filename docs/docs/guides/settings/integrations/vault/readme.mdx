@@ -1,5 +1,7 @@
 ---
-title: Hashicorp Vault
+title: "Integration guide: Morio and Hashicorp Vault"
+sidebar_label: Hashicorp Vault
+sidebar_position: 2500
 ---
 
 <!-- start-spellcheck-skip -->
@@ -8,7 +10,7 @@ import OpenBao from '@site/includes/vault-openbao.mdx'
 
 <!-- endspellcheck-skip -->
 
-Morio con be integrated with [Hashicorp Vault](https://www.vaultproject.io/).
+Morio can be integrated with [Hashicorp Vault](https://www.vaultproject.io/).
 When doing so, Morio can be instructed to read secrets from Vault, rather
 than store them locally as encrypted data.
 
@@ -16,7 +18,13 @@ Morio cannot and will not write to Vault. It will only read secrets from it.
 
 <OpenBao />
 
-To make this happen, you need to configure both Morio and Vault.
+To make this happen, you need to configure both Morio and Vault, as well as
+ensure Morio has HTTPS access to Vault.
+
+### Ensure connectivity
+
+For this to work, Morio needs access to your Vault instance on the port Vault listens
+on HTTPS. That is `9200` by default in Vault, but is also often `443`.
 
 ## Morio configuration
 

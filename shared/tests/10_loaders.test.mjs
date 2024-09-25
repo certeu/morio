@@ -12,63 +12,66 @@ const log = logger(10, 'shared-tests')
 /*
  * Git root
  */
-const gitroot = "/tmp"
+const gitroot = '/tmp'
 
 const tests = {
-  anyJson: "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.json",
-  anyYaml: "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.yaml",
-  anyYml: "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.yml",
+  anyJson:
+    'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.json',
+  anyYaml:
+    'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.yaml',
+  anyYml:
+    'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/any.yml',
   github: {
     base: {
       github: {
-        owner: "certeu",
-        repo: "morio-test-data",
-        file_path: "unit-tests/shared/loaders/any.yml",
-        ref: "main",
-        token: process.env.GITHUB_TOKEN
-      }
-    }
+        owner: 'certeu',
+        repo: 'morio-test-data',
+        file_path: 'unit-tests/shared/loaders/any.yml',
+        ref: 'main',
+        token: process.env.GITHUB_TOKEN,
+      },
+    },
   },
   gitlab: {
     base: {
       gitlab: {
         project_id: 61397500,
-        file_path: "unit-tests/shared/loaders/any.yml",
-        ref: "main",
-        token: process.env.GITLAB_TOKEN
-      }
-    }
+        file_path: 'unit-tests/shared/loaders/any.yml',
+        ref: 'main',
+        token: process.env.GITLAB_TOKEN,
+      },
+    },
   },
   git: {
     github: {
-      url: "https://github.com/certeu/morio-test-data.git",
-      ref: "main",
-      user: "joostdecock",
-      token: process.env.GITHUB_TOKEN
+      url: 'https://github.com/certeu/morio-test-data.git',
+      ref: 'main',
+      user: 'joostdecock',
+      token: process.env.GITHUB_TOKEN,
     },
     gitlab: {
-      url: "https://gitlab.com/morio/test-data.git",
-      ref: "main",
-      user: "joostdecock",
-      token: process.env.GITLAB_TOKEN
+      url: 'https://gitlab.com/morio/test-data.git',
+      ref: 'main',
+      user: 'joostdecock',
+      token: process.env.GITLAB_TOKEN,
     },
-  }
+  },
 }
 
 tests.overlays = {
   url: {
     base: tests.anyJson,
-    overlays: "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay1.yml"
+    overlays:
+      'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay1.yml',
   },
   urls: {
     base: tests.anyJson,
     overlays: [
-      "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay1.yml",
-      "https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay2.yml"
-    ]
+      'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay1.yml',
+      'https://raw.githubusercontent.com/certeu/morio-test-data/main/unit-tests/shared/loaders/overlay2.yml',
+    ],
   },
 }
-
 
 //describe('Shared Loaders: Preseed Base Settings', () => {
 //  /*
@@ -278,23 +281,27 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * A fully configured GitHub object
    */
   it('Should load overlay from the GitHub API', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.overlays.url,
-      overlays: [
-        {
-          github: {
-            ...tests.github.base.github,
-            file_path: "unit-tests/shared/loaders/overlay1.yml",
-          }
-        },
-        {
-          github: {
-            ...tests.github.base.github,
-            file_path: "unit-tests/shared/loaders/overlay2.json",
-          }
-        },
-      ]
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.overlays.url,
+        overlays: [
+          {
+            github: {
+              ...tests.github.base.github,
+              file_path: 'unit-tests/shared/loaders/overlay1.yml',
+            },
+          },
+          {
+            github: {
+              ...tests.github.base.github,
+              file_path: 'unit-tests/shared/loaders/overlay2.json',
+            },
+          },
+        ],
+      },
+      log,
+      gitroot
+    )
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
     assert.equal(settings.nested.property, true)
@@ -306,13 +313,17 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * A reference to the base GitHub config
    */
   it('Should load overlay from the GitHub API (ref to base)', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.github,
-      overlays: [
-        "unit-tests/shared/loaders/overlay1.yml@github",
-        "unit-tests/shared/loaders/overlay2.json@github",
-      ]
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.github,
+        overlays: [
+          'unit-tests/shared/loaders/overlay1.yml@github',
+          'unit-tests/shared/loaders/overlay2.json@github',
+        ],
+      },
+      log,
+      gitroot
+    )
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
     assert.equal(settings.nested.property, true)
@@ -324,23 +335,27 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * A fully configured GitLab object
    */
   it('Should load overlay from the GitLab API', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.overlays.url,
-      overlays: [
-        {
-          gitlab: {
-            ...tests.gitlab.base.gitlab,
-            file_path: "unit-tests/shared/loaders/overlay1.yml",
-          }
-        },
-        {
-          gitlab: {
-            ...tests.gitlab.base.gitlab,
-            file_path: "unit-tests/shared/loaders/overlay2.json",
-          }
-        },
-      ]
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.overlays.url,
+        overlays: [
+          {
+            gitlab: {
+              ...tests.gitlab.base.gitlab,
+              file_path: 'unit-tests/shared/loaders/overlay1.yml',
+            },
+          },
+          {
+            gitlab: {
+              ...tests.gitlab.base.gitlab,
+              file_path: 'unit-tests/shared/loaders/overlay2.json',
+            },
+          },
+        ],
+      },
+      log,
+      gitroot
+    )
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
     assert.equal(settings.nested.property, true)
@@ -352,13 +367,17 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * A reference to the base GitLab config
    */
   it('Should load overlay from the GitLab API (ref to base)', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.gitlab,
-      overlays: [
-        "unit-tests/shared/loaders/overlay1.yml@gitlab",
-        "unit-tests/shared/loaders/overlay2.json@gitlab",
-      ]
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.gitlab,
+        overlays: [
+          'unit-tests/shared/loaders/overlay1.yml@gitlab',
+          'unit-tests/shared/loaders/overlay2.json@gitlab',
+        ],
+      },
+      log,
+      gitroot
+    )
 
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
@@ -371,14 +390,18 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * From git repos
    */
   it('Should load overlay from cloned git repositories', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.overlays.url,
-      git: tests.git,
-      overlays: [
-        "git:unit-tests/shared/loaders/overlay1.yml@github",
-        "git:unit-tests/shared/loaders/overlay2.json@gitlab",
-      ]
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.overlays.url,
+        git: tests.git,
+        overlays: [
+          'git:unit-tests/shared/loaders/overlay1.yml@github',
+          'git:unit-tests/shared/loaders/overlay2.json@gitlab',
+        ],
+      },
+      log,
+      gitroot
+    )
     assert.equal(typeof settings, 'object')
     assert.equal(settings.overlay, 2)
     assert.equal(settings.nested.property, true)
@@ -390,16 +413,18 @@ describe('Shared Loaders: Preseed Settings Overlays', () => {
    * From git repos (glob)
    */
   it('Should load overlay from cloned git repositories (glob)', async () => {
-    const settings = await loadPreseededSettings({
-      ...tests.overlays.url,
-      git: tests.git,
-      overlays: "git:unit-tests/shared/loaders/overlay*.yml@github",
-    }, log, gitroot)
+    const settings = await loadPreseededSettings(
+      {
+        ...tests.overlays.url,
+        git: tests.git,
+        overlays: 'git:unit-tests/shared/loaders/overlay*.yml@github',
+      },
+      log,
+      gitroot
+    )
     assert.equal(typeof settings, 'object')
     assert.equal(settings.nested.property, true)
     assert.equal(settings.nested.overlay.one, true)
     assert.equal(settings.nested.overlay.two, true)
   })
-
 })
-

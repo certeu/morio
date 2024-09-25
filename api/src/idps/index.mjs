@@ -2,6 +2,7 @@ import { mrt } from './mrt.mjs'
 import { ldap } from './ldap.mjs'
 import { local } from './local.mjs'
 import { apikey } from './apikey.mjs'
+import { oidc } from './oidc.mjs'
 
 /*
  * This object facilitates checking
@@ -12,4 +13,5 @@ export const idps = {
   ldap,
   local,
   apikey,
+  oidc,
 }

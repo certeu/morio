@@ -20,7 +20,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'ui',
       // Image to run (different in dev)
-      image: PROD ? 'morio/ui' : 'morio/ui-dev',
+      image: PROD ? 'itsmorio/ui' : 'itsmorio/ui-dev',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
@@ -49,7 +49,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'ui',
         prefixes: ['/'],
         priority: 6,
-      }),
+      })
+      .set('http.middlewares.pretty-errors.errors', {
+        status: ["400-599"],
+        service: 'ui',
+        query: "/http-errors/{status}/"
+      })
+      .set('http.routers.ui.middlewares', ['pretty-errors@file'])
     },
   }
 }

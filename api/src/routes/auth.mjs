@@ -20,6 +20,11 @@ export function routes(app) {
   app.post(`/login`, Auth.login)
 
   /*
+   * Public authentication / login route for form-based authentication (OIDC)
+   */
+  app.post(`/login-form`, (req, res) => Auth.login(req, res, true))
+
+  /*
    * Refresh token route
    */
   app.get(`/token`, rbac.user, Auth.renewToken)
@@ -28,4 +33,10 @@ export function routes(app) {
    * Whoami/ping check
    */
   app.get(`/whoami`, rbac.user, Auth.whoami)
+  app.get(`/whoami/`, rbac.user, Auth.whoami)
+
+  /*
+   * OIDC callback route
+   */
+  app.get(`/callback/oidc/:provider_id`, Auth.oidcCallback)
 }

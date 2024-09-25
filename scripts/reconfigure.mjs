@@ -1,5 +1,6 @@
 import { writeFile } from '@morio/shared/fs'
 import { resolveServiceConfiguration, getPreset } from '@morio/config'
+import { pullConfig } from '@morio/config'
 import { Store } from '@morio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
@@ -100,7 +101,7 @@ const cliOptions = (name, env) => `\\
   --label morio.service=${name} \\
   --log-driver=${MORIO_DOCKER_LOG_DRIVER} \\
   ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
-${MORIO_DOCKER_ADD_HOST ? '--add-host '+MORIO_DOCKER_ADD_HOST : ''} \\
+${MORIO_DOCKER_ADD_HOST ? '--add-host ' + MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
   --network-alias ${[name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
@@ -114,7 +115,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
   -e MORIO_DOCKER_LOG_DRIVER=${MORIO_DOCKER_LOG_DRIVER} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
-${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="'+MORIO_DOCKER_ADD_HOST+'"' : ''} \\
+${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
   }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
@@ -172,4 +173,18 @@ await writeFile(
 
 MORIO_VERSION=${pkg.version}
 `
+)
+
+/*
+ * also generate the pull-oci script
+ */
+const pulls = []
+for (const [service, config] of Object.entries(pullConfig)) {
+  pulls.push(`docker pull ${config.image}:${config.tag}`)
+}
+await writeFile(
+  `scripts/pull-oci-images.sh`,
+  '#!/usr/bin/env bash\n' + pulls.join('\n') + '\n',
+  false,
+  0o755
 )

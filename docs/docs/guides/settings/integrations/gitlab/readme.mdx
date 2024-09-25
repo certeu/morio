@@ -1,0 +1,181 @@
+---
+title: "Integration guide: Morio and GitLab"
+sidebar_label: GitLab
+sidebar_position: 2000
+---
+
+GitLab -- either [GitLab.com](https://gitlab.com/) or a self-hosted GitLab
+instance -- can be integrated with Morio for two different purposes:
+
+- [Preseeding Morio from GitLab](#preseeding-morio-from-gitlab)
+- [GitLab as identity provider with OpenID
+  Connect](#gitlab-as-identity-provider-with-openid-connect)
+
+## Preseeding Morio from GitLab
+
+When _preseeding_ Morio from GitLab, you have two choices:
+
+- [Preseed Morio by cloning a GitLab repository](#preseed-morio-by-cloning-a-gitlab-repository)
+- [Preseed Morio from the GitLab API](#preseed-morio-from-the-gitlab-api)
+
+We recommend the _cloning a GitLab repository_ approach for most users.
+
+### Preseed Morio by cloning a GitLab repository
+
+<Tip>
+
+This  way of preseeding is not specific to GitLab but works for any git hosting
+provider that supports cloning over HTTPS.
+
+</Tip>
+
+If your repository is accessible without authentication, all you need is the HTTPS clone URL.
+If not you also need to configure an access token so Morio can authenticate to be able to clone the repository.
+
+<Tabs>
+<TabItem value="a" label="Without Authentication">
+
+```yaml
+git:
+  gitlab:
+    url: "https://gitlab.morio.it/path/to/my-repo.git"
+preseed:
+  base: "git:base.yaml@gitlab"
+}
+```
+
+</TabItem>
+<TabItem value="b" label="With Authentication">
+
+```yaml
+git:
+  gitlab:
+    url: "https://gitlab.morio.it/path/to/my-repo.git"
+    token: "{{ GITLAB_TOKEN }}"
+preseed:
+  base: "git:base.yaml@gitlab"
+secrets:
+  GITLAB_TOKEN: "Your token here"
+```
+
+</TabItem>
+</Tabs>
+
+<Tip>
+Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
+reference documentation on the `preseed`
+settings](/docs/reference/settings/preseed/) for more details.
+</Tip>
+
+### Preseed Morio from the GitLab API
+
+If your repository is very large and you only need one or a few files from it,
+you can configure Morio to not clone the repository, but instead load specific
+files from the GitLab API. This does always require authentication with an
+access token.
+
+```yaml
+preseed:
+  base: 
+    gitlab:
+      url: "https://gitlab.morio.it"
+      project_id: 92332
+      file_path: settings/production.yaml
+      token: "{{ GITLAB_TOKEN }}"
+secrets:
+  GITLAB_TOKEN: "Your token here"
+```
+
+<Tip>
+
+Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
+reference documentation on the `preseed`
+settings](/docs/reference/settings/preseed/) for more details.
+
+</Tip>
+
+## GitLab as identity provider with OpenID Connect
+
+If you have user accounts in a GitLab instance that you want to use to
+authenticate to Morio, you can do so by configuring [an OpenID Connect identity
+provider](/docs/guides/settings/idps/#openid-connect) with GitLab as the
+backing OpenID provider.
+
+To do so requires configuring a new application on GitLab, and then using those
+settings to set up a new identity provider in Morio. You also need to ensure
+Morio can talk HTTPS to GitLab.
+
+### Ensure connectivity
+
+For this to work, Morio needs access to your GitLab instance on TCP port 443
+(HTTPS).
+
+### Create a GitLab application
+
+In the GitLab web interface, navigate to **Applications** under **User
+settings**, or use this relative URL: `/-/user_settings/applications`.
+
+Click the **Add new application** button and fill in the fields:
+
+- **Name**: Can be anything, but users will be presented this name when asking
+  for consent, so make it meaningful. `Morio` is a good default.
+- **Redirect URL**: Use `https://your-morio-fqdn/-/api/callback/oidc/gitlab`
+  where `your-morio-fqdn` is the _FQDN_ of your Morio instance, and `gitlab` is
+  the ID of the identity provider we will create below.
+- If you have more than 1 broker node, enter the URL for each node on its own
+  line, and also add a line for a similar URL using the cluster _FQDN_.
+- **Confidential**: Tick the confidential box as the client secret will not be
+  available in the Morio UI. (Despite that, Morio uses _PKCE_).
+- **Scopes**: Select `openid`, `profile`, and `email`
+
+When you are done, click the **Save Application** button. The page will reload
+and present you with the **Application ID** and **Secret**.  This is the only
+time you will get to see the secret, so make sure to copy it, along with the
+application ID.
+
+### Create a new identity provider in Morio
+
+Next, you need to add a new identity provider to Morio, specifically, [an
+OpenID Connect identity provider](/docs/guides/settings/idps/#openid-connect).
+
+Below is an example configuration:
+
+```yaml
+iam:
+  providers:
+    gitlab: # You can choose the ID of the oidc provider instance
+      provider: oidc # You cannot choose this, it must always be `oidc`
+      label: GitLab
+      about: Use your GitLab account to sign in to Morio
+      issuer: https://git.morio.it
+      client_id: 9f8afda548c112e70323ff60ff3d080b3216c691a05e69ca8b08e146085adf27
+      client_secret: "{{{ GITLAB_OIDC_SECRET }}}"
+      username_field: email
+      rbac:
+        user:
+          attribute: email
+          regex: .
+        engineer:
+          attribute: email
+          list:
+            - mario@morio.it
+            - luigi@morio.it
+  ui:
+    visibility:
+      # Use 'tab' to show the identity provider
+      # as a tab on the login page
+      gitlab: tab
+    order:
+      gitlab: 1
+secrets:
+  GITLAB_OIDC_SECRET: "Your GitLab secret here"
+```
+
+<Tip>
+
+Refer to [the Identity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
+reference documentation on the `iam`
+settings](/docs/reference/settings/iam/#iamprovidersoidc-id) for more details.
+
+</Tip>
+

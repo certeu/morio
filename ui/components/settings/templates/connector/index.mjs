@@ -43,7 +43,7 @@ const readOnlyForm = (type, name) => [
 export const connector = (context) => ({
   about:
     'This configuration allows you to connect this Morio to other Morio deployments, or other data processing or storgage systems.',
-  title: 'Connector',
+  title: 'Connector Service (Logstash)',
   type: 'info',
   children: {
     /*

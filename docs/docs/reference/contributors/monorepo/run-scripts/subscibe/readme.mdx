@@ -1,0 +1,23 @@
+---
+title: subscribe
+---
+
+The `subscribe` _run script_ will start a Kafka client and setup a 
+consumer for the topic you pass it as the first argument.
+It also takes a second optional argument `pretty` that will 
+pretty-print the output. 
+
+Run `npm run subscribe topic-name` in the _monorepo_ root to 
+trigger this script, or `npm run subscribe topic-name pretty` to
+run this with pretty-printed output..
+
+Under the hood, this will run:
+
+```sh title="Terminal"
+node scripts/kafka-client.mjs
+```
+
+This script will read the Morio root token from disk and use it to
+request an X509 certificate from the API. It will then use that 
+certificate to authenticate with mTLS.
+

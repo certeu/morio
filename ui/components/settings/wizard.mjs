@@ -102,7 +102,7 @@ const ShowSettingsValidation = ({
         <SettingsReport report={validationReport} />
         {validationReport.valid ? (
           <div className="text-center">
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
               <button
                 className="btn btn-primary btn-lg flex flex-row justify-between"
                 onClick={async () =>
@@ -136,7 +136,7 @@ const ShowSettingsValidation = ({
           After validation succeeds, you will be able to apply the settings.
         </p>
         <div className="text-center">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
             <button
               className="btn btn-primary btn-lg flex flex-row justify-between"
               onClick={async () =>
@@ -384,12 +384,10 @@ export const PrimedSettingsWizard = (props) => {
   const deploy = async () => {
     setLoadingStatus([true, 'Uploading settings'])
     setDeployOngoing(true)
-    const [data, status] = await api.deploy(mSettings)
-    if (data.result !== 'success' || status !== 200)
-      return setLoadingStatus([true, `Unable to deploy the settings`, true, false])
-    else {
-      setLoadingStatus([true, 'Cluster initialized', true, true])
-    }
+    const result = await api.deploy(mSettings)
+    return result[1] === 204
+      ? setLoadingStatus([true, 'Settings updated', true, true])
+      : setLoadingStatus([true, `Unable to deploy the settings`, true, false])
   }
 
   if (!mSettings.cluster) return null

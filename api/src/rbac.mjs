@@ -34,6 +34,11 @@ export function currentProvider(req) {
   const provider = req.headers['x-morio-provider']
 
   /*
+   * The MRT provider is always allowed unless disabled by a feature flag
+   */
+  if (provider === 'mrt') return utils.getFlag('DISABLE_IDP_MRT') ? false : 'mrt'
+
+  /*
    * Only allow providers that are currently configured
    */
   return providers.includes(provider) ? provider : false

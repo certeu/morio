@@ -8,6 +8,14 @@ export const errors = {
     detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
   },
   /*
+   * KV store 404 error, API style
+   */
+  'morio.api.kv.404': {
+    status: 404,
+    title: 'No such key',
+    detail: 'This is the API equivalent of a 404 page for the KV store. This key does not exist.',
+  },
+  /*
    * Error for only in ephemeral mode' errors
    */
   'morio.api.ephemeral.required': {
@@ -41,6 +49,14 @@ export const errors = {
     status: 400,
     title: 'Unable to preseed the Morio settings',
     detail: 'We were unable to resolve the preseed settings into a proper settings object.',
+  },
+  /*
+   * Failed to preseed the settings (load the preseed files)
+   */
+  'morio.api.ratelimit.exceeded': {
+    status: 429,
+    title: 'Rate limit exceeded',
+    detail: 'You have made too many requests. Please try again later.',
   },
   /*
    * Status issues coming from core
@@ -206,7 +222,7 @@ export const errors = {
   'morio.api.db.failure': {
     status: 403,
     title: 'Database Failure',
-    detail: 'Cannot authenticate because the database returned an error.',
+    detail: 'Could not complete the request because the database returned an error.',
   },
   /*
    * Error for when an identity provider is not available or caused an error
@@ -223,5 +239,14 @@ export const errors = {
     status: 403,
     title: 'Identity Provider Unknown',
     detail: 'Cannot authenticate because the identity provider is unknown.',
+  },
+  /*
+   * Error for when something goes wrong in a way we do know how to handle
+   */
+  'morio.api.internal.error': {
+    status: 500,
+    title: 'Internal server error',
+    detail:
+      'The request failed with an internal server error that we do not know how to recover from.',
   },
 }

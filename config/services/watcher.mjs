@@ -2,6 +2,17 @@ import { generateTraefikConfig } from './index.mjs'
 import { monitors } from '../monitors.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'docker.elastic.co/beats/heartbeat',
+  // Image tag (version) to run
+  tag: '8.15.1',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -23,19 +34,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'watcher',
-      // Image to run
-      image: 'docker.elastic.co/beats/heartbeat',
-      // Image tag (version) to run
-      tag: '8.15.0',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Environment
-      environment: {
-      },
+      environment: {},
       // Volumes
       volumes: PROD
         ? [
@@ -65,7 +72,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
           `^${utils.getPreset('MORIO_WATCHER_PREFIX')}/(.*)`
         )
         .set('http.middlewares.watcher-prefix.replacepathregex.replacement', '/$1')
-        .set('http.routers.watcher.middlewares', ['watcher-prefix@file'])
+        .set('http.routers.watcher.middlewares', ['watcher-prefix@file']),
     },
     /*
      * Heartbeat configuration file
@@ -91,7 +98,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           /*
            * Brokers
            */
-          hosts: utils.getBrokerFqdns().map(fqdn => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
+          hosts: utils
+            .getBrokerFqdns()
+            .map((fqdn) => `${fqdn}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`),
           /*
            * Use node UIUD for client_id
            */
@@ -114,18 +123,24 @@ export const resolveServiceConfiguration = ({ utils }) => {
             // Encrypt traffic
             enabled: true,
             // Trust the Morio CA
-            certificate_authorities: ["/usr/share/heartbeat/tls/tls-ca.pem"],
+            certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.pem'],
             // Verify certificates
             verification_mode: 'full',
             // Certificate to use for mTLS
-            certificate: "/usr/share/heartbeat/tls/tls-cert.pem",
+            certificate: '/usr/share/heartbeat/tls/tls-cert.pem',
             // Key to use for mTLS
-            key: "/usr/share//heartbeat/tls/tls-key.pem",
+            key: '/usr/share//heartbeat/tls/tls-key.pem',
           },
+          /*
+           * SASL configuration
+           */
+          sasl_mechanism: 'SCRAM-SHA-512',
+          sasl_jaas_config: `org.apache.kafka.common.security.scram.ScramLoginModule required username='root' password='${utils.getKeys().mrt}'`,
+          security_protocol: 'SASL_SSL',
           /*
            * Topic to publish to
            */
-          topic: "checks",
+          topic: 'checks',
           /*
            * Disable compression
            */
@@ -134,7 +149,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
            * Kafka API version
            */
           version: '2.0.0',
-
         },
       },
       /*

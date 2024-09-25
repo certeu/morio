@@ -179,7 +179,7 @@ export async function ensureServiceCertificate(service, internal = false, chain 
   if (json && missing < 1) {
     const days = Math.floor((new Date(json.expires).getTime() - Date.now()) / (1000 * 3600 * 24))
     if (days > 66) return true
-    else log.info(`Database TLS certificate will expire in ${days}. Renewing now.`)
+    else log.info(`[${service}] TLS certificate will expire in ${days}. Renewing now.`)
   }
 
   /*
@@ -187,7 +187,7 @@ export async function ensureServiceCertificate(service, internal = false, chain 
    * which means the CA has just been started.
    * So let's give it time to come up
    */
-  log.debug(`${service}: Requesting certificates for inter-node TLS`)
+  log.debug(`[${service}] Requesting certificates for inter-node TLS`)
   const certAndKey = await attempt({
     every: 5,
     timeout: 60,
@@ -206,18 +206,18 @@ export async function ensureServiceCertificate(service, internal = false, chain 
         notAfter: utils.getPreset('MORIO_CA_CERTIFICATE_LIFETIME_MAX'),
       }),
     onFailedAttempt: (s) =>
-      log.debug(`${service}: Waited ${s} seconds for CA, will continue waiting.`),
+      log.debug(`[${service}] Waited ${s} seconds for CA, will continue waiting.`),
   })
 
   if (!certAndKey?.certificate?.crt) {
-    log.error(`${service}: CA did not come up before timeout. Bailing out.`)
+    log.error(`[${service}] CA did not come up before timeout. Bailing out.`)
     return false
   }
 
   /*
    * Now write the certificates to disk
    */
-  log.debug(`${service}: Writing certificates for inter-node TLS`)
+  log.debug(`[${service}] Writing certificates for inter-node TLS`)
   await writeFile(
     `/etc/morio/${service}/tls-cert.pem`,
     chain

@@ -1,4 +1,5 @@
-personal_ws-1.1 en 212 
+personal_ws-1.1 en 231 
+ABAC
 ACL
 AMI
 API's
@@ -7,6 +8,7 @@ AwsImages
 CAs
 CISO
 CN
+CVE
 ChatGPT
 Cybersecurity
 DBuilder
@@ -22,6 +24,7 @@ ETL
 EU's
 EUPL
 EditorConfig
+Entra
 FILEPATH
 FQDN
 FTW
@@ -46,8 +49,10 @@ JargonList
 JargonTerms
 Joost
 KV
+Keycloak
 Kubernetes
 LDAP
+LDAPS
 LOMO
 LSW
 Lex
@@ -56,6 +61,7 @@ Logstash
 MBuilder
 MDX
 MTU
+MacOS
 MirrorMaker
 Modularity
 Morio
@@ -64,18 +70,24 @@ Mustache
 NPM
 NextJS
 NodeJS
+OAuth
 OCI
 OIDC
 OSI
 OU
 OpenAPI
 OpenBao
+OpenID
 OpenTelemetry
 PEM
+PKCE
+Podman
 Pre
 Preseeding
+RBAC
 RBuilder
 REPOS
+RPC
 RTT
 RedHat
 RedPanda
@@ -83,13 +95,16 @@ Redoc
 RepoFile
 RockyLinux
 Rqlite
+SASL
 SIEM
 SUBNET
 Scode
 SmallStep
 SmallStep's
 SubPages
+Subnet
 Symantecs
+TCP
 TLS
 TOTP
 TTL
@@ -99,6 +114,7 @@ Traefik
 UI
 UI's
 UID
+URIs
 UUID
 VM
 VeriSign
@@ -128,6 +144,7 @@ dbuilder
 de
 decrypt
 dev
+distros
 docusaurus
 env
 eslint
@@ -154,6 +171,7 @@ ldap
 lilianbaz
 linter
 linux
+loopback
 lowercased
 lts
 mDx
@@ -196,6 +214,7 @@ redoc
 redocusaurus
 redpanda
 rollout
+routable
 runtime
 sha
 stellene

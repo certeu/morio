@@ -191,6 +191,14 @@ const outputConfig = (type, utils) => ({
       key: '/etc/morio/key.pem',
     },
     /*
+     * SASL configuration (we currently use mTLS + SASL
+     */
+    sasl: {
+      mechanism: 'SCRAM-SHA-512'
+    },
+    username: 'morio-client',
+    password: utils.getClusterUuid(),
+    /*
      * Topic to publish to
      */
     topic: type,

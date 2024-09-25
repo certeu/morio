@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will build the .rpm package for moriod inside a rockylinux:9 container
 # This allows you to build the .rpm package on a non-rpm Linux distro.

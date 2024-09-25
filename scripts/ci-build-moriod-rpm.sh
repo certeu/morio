@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will build the .rpm package for moriod
 # It is created for a CI environment, but should also run fine

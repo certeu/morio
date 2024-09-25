@@ -34,11 +34,9 @@ There are two two types:
 
 <Warning>
 
-<!-- toc-heading: false -->
+<h3>The Morio root token _just works_</h3>
 
-### The Morio root token _just works_
-
-The [Morio root token provider (mrt)](/docs/guides/settings/idps/#mrt) is enabled by
+The [Morio root token provider (mrt)](/docs/guides/settings/idps/#morio-root-token) is enabled by
 default and does not require configuration. In other words, authenticating
 with the _Morio root token_ just works, even if not providers are set up.
 
@@ -51,7 +49,7 @@ flag](/docs/reference/flags/disable_idp_mrt/).
 
 ### `iam.providers.apikey`
 
-<Label>Optional</Label> This configures [the `apikey` identity provider](/docs/guides/settings/idps/#apikey).
+<Label>Optional</Label> This configures [the `apikey` identity provider](/docs/guides/settings/idps/#morio-api-keys).
 
 #### `iam.providers.apikey.provider`
 
@@ -89,7 +87,7 @@ iam:
 
 ### `iam.providers.local`
 
-<Label>Optional</Label> This configures [the `local` identity provider](/docs/guides/settings/idps/#local).
+<Label>Optional</Label> This configures [the `local` identity provider](/docs/guides/settings/idps/#morio-accounts).
 
 #### `iam.providers.local.provider`
 
@@ -137,7 +135,7 @@ This allows you to set up multiple identity providers of this type.
 <Note>
 
 We use `[ldap-id]` as a placeholder here. This is a freely chosen `id`, and we
-will use `ad` as our examples because using this to authenticate against Active
+will use `ad` in our examples because using this to authenticate against Active
 Directory is a common use-case.
 
 </Note>
@@ -394,9 +392,6 @@ regular expression with the `regex` key, or an explicit list with the `list` key
 When the expression matches the attribute value, **or** it is included in the list,
 that role will be assigned to the user.
 
-This system applies to all identity providers, giving you a lot of flexibility
-to define who gets what role(s).
-
 <Note compact>We will use the `user` role in our examples below</Note>
 
 ###### `iam.providers.[ldap-id].rbac.[role].attribute`
@@ -458,6 +453,197 @@ In the example above, the regex `.` matches anything. So every user who can
 successfully authenticate to LDAP will get the `user` role.
 
 </Note>
+
+### `iam.providers.[oidc-id]`
+
+<Label>Optional</Label> This configures [an `oidc` identity provider](/docs/guides/settings/idps/#openid-connect).
+
+<Note>
+
+We use `[oidc-id]` as a placeholder here. This is a freely chosen `id`, and we
+will use `gitlab` in our examples showing how to use GitLab as an OpenID
+Connect provider.
+
+</Note>
+
+#### `iam.providers.[oidc-id].provider`
+
+<Label style="danger">Mandatory</Label>
+To enable an `oidc` identity provider, this **must** be set to `oidc`.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      provider: oidc
+```
+
+#### `iam.providers.[oidc-id].label`
+
+<Label>Optional</Label> This is a label that will be shown to the user in the _UI Service_.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      label: GitLab Account
+```
+
+#### `iam.providers.[oidc-id].about`
+
+<Label>Optional</Label> This is a description that will be shown to the user in the _UI Service_.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      about: This will redirect you to GitLab for authentication.
+```
+
+#### `iam.providers.[oidc-id].username_field`
+
+<Label style="danger">Mandatory</Label>
+This sets the user property (field) provided by the OpenID provider that shall
+be used as the username.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      username_field: preferred_username
+```
+
+#### `iam.providers.[oidc-id].issuer`
+
+<Label style="danger">Mandatory</Label>
+This is the base URL of the OpenID provider (or issuer). It is typically
+sufficient to configure this, and not provide an `autodiscovery_url`.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      issuer: "https://gitlab.morio.it"
+```
+
+#### `iam.providers.[oidc-id].autodiscovery_url`
+
+<Label>Optional</Label>
+Configure this if your OpenID provider does not use the default auto discovery URL.
+This is typically the case for OpenID providers that support multi-tenancy, such
+as Keycloak or Microsoft Entra ID.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      autodiscovery_url: "https://gitlab.morio.it/.well-known/openid-configuration"
+```
+
+#### `iam.providers.[oidc-id].client_id`
+
+<Label style="danger">Mandatory</Label>
+The client ID (sometimes called application ID) as configured in the OpenID provider.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      client_id: 9f8afda548c112e70323ff60ff3d080b3216c691a05e69ca8b08e146085adf27
+```
+
+#### `iam.providers.[oidc-id].client_secret`
+
+<Label style="danger">Mandatory</Label>
+The client secret (sometimes called application secret) as configured in the OpenID provider.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      client_secret: "{{{ GITLAB_OIDC_SECRET }}}"
+secrets:
+  GITLAB_OIDC_SECRET: "Your client secret here"
+```
+
+#### `iam.providers.[oidc-id].rbac`
+
+<Label style="danger">Mandatory</Label>
+This controls role assignment to user accounts backed by an OpenID Connect identity provider.
+
+##### `iam.providers.[oidc-id].rbac.[role]`
+
+<Label>Optional</Label>
+There are 4 different roles that can be assigned: `user`, `manager`, `operator`, and `engineer`.
+They govern Morio-specific permissions, with `engineer` having the highest and `user` the lowest access.
+
+For each role, you can specify the attribute to match against, and either a
+regular expression with the `regex` key, or an explicit list with the `list` key.
+When the expression matches the attribute value, **or** it is included in the list,
+that role will be assigned to the user.
+
+<Note compact>We will use the `user` role in our examples below</Note>
+
+###### `iam.providers.[oidc-id].rbac.[role].attribute`
+
+<Label style="danger">Mandatory</Label>
+This defines the attribute to match against to determine whether or not to assign the role.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      rbac:
+        user:
+          attribute: preferred_username
+```
+
+###### `iam.providers.[oidc-id].rbac.[role].list`
+
+<Label style="danger">Optional</Label>
+This defines a list (an array) of values. If the attribute value is in the list, the role will be assigned.
+
+```yaml
+iam:
+  providers:
+    ad:
+      gitlab:
+        user:
+          list:
+            - mario
+            - luigi
+```
+
+<Tip>
+
+For higher-order roles, like `operator` or `engineer`, **we recommend defining
+an explicit list**, rather than using a regular expression. This makes it
+easier to see who has elevated access, as well as avoid issues with regular
+expressions matching broader than intended.
+
+</Tip>
+
+###### `iam.providers.[oidc-id].rbac.[role].regex`
+
+<Label style="danger">Optional</Label>
+This defines the attribute to match against to determine whether or not to assign the role.
+
+```yaml
+iam:
+  providers:
+    gitlab:
+      rbac:
+        user:
+          regex: .
+```
+
+<Note>
+
+In the example above, the regex `.` matches anything. So every user who can
+successfully authenticate to the OpenID provider will get the `user` role.
+
+</Note>
+
 
 ## `iam.ui`
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Sounce config variables
 source config/cli.sh
 #
@@ -49,8 +49,8 @@ else
   cd $MORIO_GIT_ROOT/$1
   tar -ch . | docker build \
     --file Containerfile.$TARGET \
-    --tag morio/$CONTAINER:latest \
-    --tag morio/$CONTAINER:$MORIO_VERSION \
+    --tag itsmorio/$CONTAINER:latest \
+    --tag itsmorio/$CONTAINER:$MORIO_VERSION \
     -
 fi
 

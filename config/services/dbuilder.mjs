@@ -23,7 +23,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'dbuilder',
       // Image to run (different in dev)
-      image: 'morio/dbuilder',
+      image: 'itsmorio/dbuilder',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network

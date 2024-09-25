@@ -5,6 +5,7 @@ ldap:
 local:
 moriod:
 mrt:
+oidc:
 # Service tags
 api:
 broker:
@@ -18,6 +19,7 @@ mbuilder:
 proxy:
 rbuilder:
 ui:
+watcher:
 wbuilder:
 # Various tags
 contributors:

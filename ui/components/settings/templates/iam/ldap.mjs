@@ -100,6 +100,24 @@ export const ldap = {
           },
         ],
         Roles,
+        Labels: [
+          {
+            schema: Joi.object().optional().label('Label attributes'),
+            label: 'LDAP Attributes',
+            labelBL: 'A comma-seperated list of LDAP attribute to add as labels',
+            key: 'label_attributes',
+            placeholder: "Enter the attribute name here, enter comma to add it",
+            inputType: 'labels',
+          },
+          <Popout tip key="tip">
+            <h5>Attribute-Based Access Control</h5>
+            <p>
+              You can enter one or more <b>OIDC attributes</b> to add their values as labels to the user identity.
+              <br />
+              You can then use those labels in fine-grained ABAC policies.
+            </p>
+          </Popout>,
+        ],
         Advanced: [
           {
             schema: Joi.boolean().default(true).label('Validate Certificate'),

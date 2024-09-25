@@ -63,12 +63,12 @@ const config = {
           // Management API docs from OpenAPI spec
           {
             spec: './static/oas-api.yaml',
-            route: '/oas-api/',
+            route: '/docs/reference/apis/api/',
           },
           // Core API docs from OpenAPI spec
           {
             spec: './static/oas-core.yaml',
-            route: '/oas-core/',
+            route: '/docs/reference/apis/core/',
           },
         ],
         // Theme Options for modifying how redoc renders them
@@ -143,6 +143,15 @@ const config = {
         theme: prismThemes.dracla,
         darkTheme: prismThemes.dracula,
         additionalLanguages: ['yaml'],
+      },
+      algolia: {
+        appId: 'UZ39NUY47C',
+        apiKey: 'f502f6d4701c9fbc8b735157198fbc0f',
+        indexName: 'morio',
+        contextualSearch: true,
+        searchParameters: {},
+        searchPagePath: 'search',
+        insights: false,
       },
     }),
 }

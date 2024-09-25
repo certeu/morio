@@ -1,0 +1,98 @@
+---
+title: "Integration guide: Morio and GitHub"
+sidebar_label: GitHub
+sidebar_position: 2000
+---
+
+GitHub can be used for _preseeding_ the Morio configuration. 
+
+<Note>
+
+Unlike
+[GitLab](/docs/guides/settings/integrations/gitlab/), GitHub cannot be
+used for authentication as GitHub does not support OpenID Connect.
+
+</Note>
+
+## Preseeding Morio from GitHub
+
+When _preseeding_ Morio from GitHub, you have two choices:
+
+- [Preseed Morio by cloning a GitHub
+  repository](#preseed-morio-by-cloning-a-github-repository)
+- [Preseed Morio from the GitHub API](#preseed-morio-from-the-github-api)
+
+We recommend the _cloning a GitHub repository_ approach for most users.
+
+### Preseed Morio by cloning a GitHub repository
+
+<Tip>
+This  way of preseeding is not specific to GitHub but works for any git hosting
+provider that supports cloning over HTTPS.
+</Tip>
+
+If your repository is accessible without authentication, all you need is the
+HTTPS clone URL.  If not you also need to configure an access token so Morio
+can authenticate to be able to clone the repository.
+
+<Tabs>
+<TabItem value="a" label="Without Authentication">
+
+```yaml
+git:
+  github:
+    url: "https://github.com/certeu/morio.git"
+preseed:
+  base: "git:base.yaml@github"
+}
+```
+
+</TabItem>
+<TabItem value="b" label="With Authentication">
+
+```yaml
+git:
+  github:
+    url: "https://github.com/certeu/morio.git"
+    token: "{{ GITHUB_TOKEN }}"
+preseed:
+  base: "git:base.yaml@github"
+secrets:
+  GITHUB_TOKEN: "Your token here"
+```
+
+</TabItem>
+</Tabs>
+
+<Tip>
+Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
+reference documentation on the `preseed`
+settings](/docs/reference/settings/preseed/) for more details.
+</Tip>
+
+### Preseed Morio from the GitHub API
+
+If your repository is very large and you only need one or a few files from it,
+you can configure Morio to not clone the repository, but instead load specific
+files from the GitHub API. This does always require authentication with an
+access token.
+
+```yaml
+preseed:
+  base: 
+    github:
+      url: "https://github.morio.it"
+      owner: certeu
+      project: morio
+      file_path: settings/production.yaml
+      token: "{{ GITHUB_TOKEN }}"
+secrets:
+  GITHUB_TOKEN: "Your token here"
+```
+
+<Tip>
+Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
+reference documentation on the `preseed`
+settings](/docs/reference/settings/preseed/) for more details.
+</Tip>
+

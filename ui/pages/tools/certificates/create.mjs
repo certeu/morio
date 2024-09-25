@@ -1,5 +1,5 @@
 // Dependencies
-import { certificate as certificateSchema } from '#schema/certificate'
+import Joi from 'joi'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
@@ -13,6 +13,19 @@ import { StringInput } from 'components/inputs.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
+
+/*
+ * X.509 certificate
+ */
+const certificateSchema = Joi.object({
+  cn: Joi.string().required().min(1),
+  c: Joi.string().required().min(2).max(2).description('Country'),
+  st: Joi.string().required().min(1),
+  l: Joi.string().required().min(1),
+  o: Joi.string().required().min(1),
+  ou: Joi.string().required().min(1),
+  san: Joi.array().required().unique().items(Joi.string().hostname()),
+})
 
 /*
  * Helper object to not have to type so much
@@ -55,7 +68,7 @@ const empty = () =>
       l: '',
       o: '',
       ou: '',
-      san: [''],
+      san: [],
     })
   )
 
@@ -89,8 +102,11 @@ const CreateCertificate = () => {
     if (status === 201) {
       setResult(body)
       setLoadingStatus([true, 'Certificate created', true, true])
+    }
+    else if (status === 403 && body.title) {
+      setLoadingStatus([true, body.title, true, false])
     } else {
-      setLoadingStatus([true, 'Certificate created', true, false])
+      setLoadingStatus([true, 'Certificate creation failed', true, false])
     }
   }
 

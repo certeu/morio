@@ -3,6 +3,8 @@ import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
 import { utils, log } from '../lib/utils.mjs'
 import { loadPreseededSettings } from '#shared/loaders'
+import { limits } from '../middleware.mjs'
+import { kv } from '../lib/kv.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -30,6 +32,16 @@ Controller.prototype.getCaCerts = async function (req, res) {
         intermediate_certificate: keys.icrt,
       })
     : utils.sendErrorResponse(res, `morio.api.info.unavailable`, req.url)
+}
+
+/**
+ * Gets the client IP to troubleshoot rate limiting
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getClientIp = async function (req, res) {
+  return res.send({ ip: req.ip, limits: limits.getKey(req.ip) })
 }
 
 /**
@@ -61,9 +73,13 @@ Controller.prototype.getIdps = async function (req, res) {
   const providers = utils.getSettings('iam.providers', {})
   if (providers) {
     for (const [id, conf] of Object.entries(providers)) {
+      let provider = conf.provider
+      if (id === 'mrt') provider = 'mrt'
+      else if (id === 'local') provider = 'local'
+      else if (id === 'apikey') provider = 'apikey'
       idps[id] = {
         id,
-        provider: id === 'mrt' ? 'mrt' : conf.provider,
+        provider,
         label: conf.label,
         about: conf.about || false,
       }
@@ -109,6 +125,8 @@ Controller.prototype.getJwks = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getPubkey = async function (req, res, pem = false) {
+  const ls = await kv.ls()
+  console.log(ls)
   return pem
     ? res.type('application/x-pem-file').send(utils.getKeys().public)
     : res.send({ pubkey: utils.getKeys().public })

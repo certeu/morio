@@ -1,7 +1,7 @@
 import { pkg } from './json-loader.mjs'
 import path from 'path'
-import "dotenv/config"
-import process from "node:process"
+import 'dotenv/config'
+import process from 'node:process'
 
 /*
  * A little helper file with named exports to get access to a bunch of configuration values.

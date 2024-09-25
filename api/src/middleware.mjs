@@ -1,6 +1,26 @@
 import { roles } from '#config/roles'
 import { log, utils } from './lib/utils.mjs'
 import { currentRole, currentProvider, currentUser, isRoleAvailable } from './rbac.mjs'
+import sessionMiddleware from 'express-session'
+import { rateLimit } from 'express-rate-limit'
+
+export const session = sessionMiddleware({
+  secret: 'test',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true },
+})
+
+export const limits = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 1000, // Limit each request to 1000 requests per 'window' (15m)
+  standardHeaders: 'draft-7', // https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-07
+  legacyHeaders: false,
+  message: {
+    title: 'Rate limit exceeded',
+    detail: 'You have made too many requests. Please try again later.',
+  },
+})
 
 /*
  * List of routes allowed in ephemeral mode

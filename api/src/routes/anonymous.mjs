@@ -24,6 +24,11 @@ export function routes(app) {
   app.get(`/idps`, Anonymous.getIdps)
 
   /*
+   * Return client IP to help troubleshoot rate limiting
+   */
+  app.get(`/ip`, Anonymous.getClientIp)
+
+  /*
    * Get the the JWKS config
    */
   app.get(`/jwks`, (req, res) => Anonymous.getJwks(req, res))

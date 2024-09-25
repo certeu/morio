@@ -45,7 +45,7 @@ export const service = {
      *
      * @return {boolean} success - Indicates lifecycle hook success
      */
-    prestart: async () => await ensureServiceCertificate('console'),
+    prestart: async () => await ensureServiceCertificate('console', true),
     /**
      * Lifecycle hook for anything to be done after to starting the container
      *

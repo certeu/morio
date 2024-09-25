@@ -1,4 +1,15 @@
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'docker.elastic.co/logstash/logstash',
+  // Image tag (version) to run
+  tag: '8.15.1',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -20,12 +31,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'connector',
-      // Image to run
-      image: 'docker.elastic.co/logstash/logstash',
-      // Image tag (version) to run
-      tag: '8.15.0',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

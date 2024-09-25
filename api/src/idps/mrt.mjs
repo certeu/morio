@@ -23,7 +23,7 @@ export async function mrt(id, data) {
     /*
      * Update the latest login time, but don't wait for it
      */
-    updateLastLoginTime('mrt', 'root')
+    await updateLastLoginTime('mrt', 'root')
 
     /*
      * Is the role available? Since this is the root token,

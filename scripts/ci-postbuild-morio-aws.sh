@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will run the postbuild steps for AWS images.
 # It is created for a CI environment, but should also run fine
