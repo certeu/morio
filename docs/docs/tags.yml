@@ -1,0 +1,29 @@
+# Identity providers
+idp:
+apikey:
+ldap:
+local:
+moriod:
+mrt:
+oidc:
+# Service tags
+api:
+broker:
+ca:
+connector:
+console:
+core:
+db:
+dbuilder:
+mbuilder:
+proxy:
+rbuilder:
+ui:
+watcher:
+wbuilder:
+# Various tags
+contributors:
+error:
+flag:
+flanking:
+preset:

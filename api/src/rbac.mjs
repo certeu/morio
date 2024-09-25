@@ -12,7 +12,7 @@ export const roles = allRoles
  * @param {object} req - The request object from express
  * @return {string} user - The current user as provider.username
  */
-export const currentUser = (req) => {
+export function currentUser(req) {
   const provider = currentProvider(req)
   const user = req.headers['x-morio-user']
   /*
@@ -29,9 +29,14 @@ export const currentUser = (req) => {
  * @param {object} req - The request object from express
  * @return {string} provider - The current provider id
  */
-export const currentProvider = (req) => {
+export function currentProvider(req) {
   const providers = utils.getProviderIds()
   const provider = req.headers['x-morio-provider']
+
+  /*
+   * The MRT provider is always allowed unless disabled by a feature flag
+   */
+  if (provider === 'mrt') return utils.getFlag('DISABLE_IDP_MRT') ? false : 'mrt'
 
   /*
    * Only allow providers that are currently configured
@@ -45,7 +50,7 @@ export const currentProvider = (req) => {
  * @param {object} req - The request object from express
  * @return {string} role - The current role
  */
-export const currentRole = (req) => {
+export function currentRole(req) {
   const role = req.headers['x-morio-role']
   /*
    * Only allow roles that exist
@@ -59,7 +64,7 @@ export const currentRole = (req) => {
  * @param {object} req - The request object from express
  * @return {string} username - The current username
  */
-export const currentUsername = (req) => {
+export function currentUsername(req) {
   const username = req.headers['x-morio-user']
 
   return !username || typeof username !== 'string' || username.length < 3 || username.length > 255
@@ -70,7 +75,7 @@ export const currentUsername = (req) => {
 /*
  * Helper method to get all roles available to a given role
  */
-export const availableRoles = (role) => {
+export function availableRoles(role) {
   const i = roles.indexOf(role)
   if (i < 0) return []
   return roles.slice(0, i + 1)
@@ -83,7 +88,7 @@ export const availableRoles = (role) => {
  * and API key with role B. Basically checking whther role A is higher
  * or equal to role B.
  */
-export const isRoleAvailable = (roleCurrent, roleDesired) => {
+export function isRoleAvailable(roleCurrent, roleDesired) {
   /*
    * To make it easier to call this method, we allow
    * passing in the req object as first parameter

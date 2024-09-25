@@ -115,6 +115,13 @@ utils.getInfo = () => store.get('info')
 utils.getKeys = () => store.get('keys')
 
 /**
+ * Helper method to get the FQDN of the local node
+ *
+ * @return {string} fqdn - The local node's FQDN
+ */
+utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
+
+/**
  * Helper method to get the node_serial of the local node
  *
  * @return {number} node_serial - The local node's serial
@@ -127,6 +134,22 @@ utils.getNodeSerial = () => store.get('state.node.serial', false)
  * @return {string} uuid - The local node's uuid
  */
 utils.getNodeUuid = () => store.get('state.node.uuid')
+
+/**
+ * Helper method to get an OIDC client for a given OIDC identity provider ID
+ *
+ * @param {string} id - The id of the oidc identity provider
+ * @returnb {object|bool} client - The client if found, or fase when not
+ */
+utils.getOidcClient = (id) => store.get(['oidc', 'clients', id], false)
+
+/**
+ * Helper method to get an OIDC PKCE data
+ *
+ * @param {string} id - The id of the oidc identity provider
+ * @returnb {object|bool} client - The client if found, or fase when not
+ */
+utils.getOidcPkce = (id, state) => store.get(['oidc', 'pkce', id, state], false)
 
 /**
  * Helper method to get the API prefix
@@ -267,6 +290,17 @@ utils.setKeys = (keys) => {
 }
 
 /**
+ * Helper method to store the node FQDN
+ *
+ * @param {string} fadn - The node's FQDN
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setNodeFqdn = (fqdn) => {
+  store.set('state.node.fqdn', fqdn)
+  return utils
+}
+
+/**
  * Helper method to store the node serial
  *
  * @param {number} serial - The node's serial
@@ -285,6 +319,30 @@ utils.setNodeSerial = (serial) => {
  */
 utils.setNodeUuid = (uuid) => {
   store.set('state.node.uuid', uuid)
+  return utils
+}
+
+/**
+ * Helper method to store OIDC clients
+ *
+ * @param {string} id - The id of the OIDC identity provider
+ * @param {string} state - The state parameter in the OIDC flow
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setOidcPkce = (id, state, data) => {
+  store.set(['oidc', 'pkce', id, state], data)
+  return utils
+}
+
+/**
+ * Helper method to store OIDC clients
+ *
+ * @param {string} id - The id of the OIDC identity provider
+ * @param {object} client - The OIDC cient
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setOidcClient = (id, client) => {
+  store.set(['oidc', 'clients', id], client)
   return utils
 }
 
@@ -400,6 +458,11 @@ utils.endReload = () => {
  * \___/\__|_||_\___|_|
  * Utility methods that do not use store data or presets
  */
+
+/**
+ * Clear OIDC PKCE data after an OICD flow
+ */
+utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
 
 /**
  * Returns a pre-configured API client, itself on object

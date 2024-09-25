@@ -230,7 +230,7 @@ const DisplayDockerRunningContainers = ({ data }) =>
  * Docker (all) containers component
  */
 export const DockerAllContainers = () => (
-  <DockerWrapper endpoint="docker/all-containers" Component={DisplayDockerAllContainers} />
+  <DockerWrapper endpoint="docker/containers" Component={DisplayDockerAllContainers} />
 )
 
 /*
@@ -255,7 +255,7 @@ const DisplayDockerAllContainers = ({ data }) =>
  */
 export const DockerSomeContainers = ({ filter, displayProps }) => (
   <DockerWrapper
-    endpoint="docker/all-containers"
+    endpoint="docker/containers"
     Component={DisplayDockerSomeContainers}
     {...{ filter, displayProps }}
   />
@@ -387,7 +387,7 @@ export const DisplayDockerContainer = ({ data }) => {
           <div className="stat place-items-center">
             <div className="stat-title">Last Started</div>
             <div className="stat-value capitalize">
-              <TimeAgoBrief date={data.State.StartedAt} />
+              <TimeAgoBrief time={new Date(data.State.StartedAt)} />
             </div>
             <div className="stat-desc">
               <TimeAgo date={data.State.StartedAt} />
@@ -631,6 +631,7 @@ export const ContainerStateActions = ({ data, methods }) => {
 
 /*
  * Docker container troubleshoot actions component
+ * FIXME: This does not do anything
  */
 export const ContainerTroubleshootActions = ({ data }) => {
   const btn = {
@@ -767,30 +768,20 @@ export const DisplayDockerImage = ({ data }) => {
             <div className="stat-desc"></div>
           </div>
         </StatsWrapper>
+        <StatsWrapper>
+          <div className="stat place-items-center">
+            <div className="stat-title">Created</div>
+            <div className="stat-value capitalize">
+              <TimeAgoBrief time={new Date(data.Created)} />
+            </div>
+            <div className="stat-desc"></div>
+          </div>
+        </StatsWrapper>
       </div>
+      <Highlight language="yaml" js={data} title="Image Info" />
     </div>
   )
 }
-
-/*
- * Docker image history component
- */
-export const DockerImageLayers = (props) => (
-  <DockerWrapper
-    endpoint={`docker/images/${props.id}/history`}
-    Component={DisplayDockerImageLayers}
-    {...props}
-  />
-)
-
-/*
- * Docker display image history component
- */
-export const DisplayDockerImageLayers = ({ data }) => (
-  <>
-    <Highlight language="docker" js={data} title="Image Layers" />
-  </>
-)
 
 /*
  * Docker networks component

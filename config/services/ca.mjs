@@ -1,11 +1,23 @@
 import { YamlConfig } from '../yaml-config.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'smallstep/step-ca',
+  // Image tag (version) to run
+  tag: '0.27.4',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
+      tag: '0.26.1',
    */
   const PROD = utils.isProduction()
 
@@ -23,12 +35,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * Container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'ca',
-      // Image to run (different in dev)
-      image: 'smallstep/step-ca',
-      // Image tag (version) to run
-      tag: '0.26.1',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -42,10 +51,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/ca/secrets:/home/step/secrets`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/ca:/home/step/config`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs:/home/step/certs`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/db:/home/step/db`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/ca:/home/step/config`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/certs:/home/step/certs`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/db:/home/step/db`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/secrets:/home/step/secrets`,
           ],
     },
     /*

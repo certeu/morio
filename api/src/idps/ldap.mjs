@@ -4,6 +4,7 @@ import passport from 'passport'
 import LdapStrategy from 'passport-ldapauth'
 import tls from 'tls'
 import { updateLastLoginTime } from '../lib/account.mjs'
+import { getLabels } from './oidc.mjs'
 
 /**
  * Initialize the Passport LDAP strategy
@@ -65,7 +66,7 @@ const strategy = (id) => {
  * @param {string} data.password - The password for said username to verify
  * @return {[Bool, Object]} [result, data] - An array indicating result and data
  */
-export const ldap = (id, data, req) => {
+export function ldap(id, data, req) {
   /*
    * Add strategy to passport if it hasn't been used yet
    */
@@ -107,25 +108,33 @@ export const ldap = (id, data, req) => {
         if (!allowed) return resolve([false, 'morio.api.account.role.unavailable'])
 
         /*
+         * Create data object to return
+         */
+        const info = {
+          user: username,
+          role: req.body.data.role,
+          highest_role: roles[maxLevel],
+          provider: id,
+        }
+
+        /*
+         * Add labels
+         */
+        const labels = getLabels(id, user)
+        if (labels) info.labels = labels
+
+        /*
          * Update the latest login time, but don't wait for it
          */
         updateLastLoginTime(id, username)
 
-        return resolve([
-          true,
-          {
-            user: username,
-            role: req.body.data.role,
-            highest_role: roles[maxLevel],
-            provider: id,
-          },
-        ])
+        return resolve([ true, info ])
       }
     })(req)
   })
 }
 
-const checkRole = (requestedRole = false, config = false, data = false) => {
+export function checkRole(requestedRole = false, config = false, data = false) {
   /*
    * Make sure we have everything to check the role
    * And if not, deny access
@@ -152,7 +161,7 @@ const checkRole = (requestedRole = false, config = false, data = false) => {
   return [Number(approvedLevel) >= Number(roles.indexOf(requestedRole)), approvedLevel]
 }
 
-const caseInsensitiveGet = (key, obj = {}) => {
+export function caseInsensitiveGet(key, obj = {}) {
   for (const k of Object.keys(obj)) {
     if (k.toLowerCase() === String(key).toLowerCase()) return obj[k]
   }

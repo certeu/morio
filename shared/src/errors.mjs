@@ -27,4 +27,6 @@ export const statusCodes = {
   19: 'There is an issue with the dbuilder service',
 }
 
-export const statusCodeAsColor = (code) => (code === 0 ? 'green' : code < 500 ? 'amber' : 'green')
+export function statusCodeAsColor(code) {
+  return code === 0 ? 'green' : code < 500 ? 'amber' : 'green'
+}

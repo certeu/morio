@@ -24,9 +24,24 @@ export function routes(app) {
   app.get(`/idps`, Anonymous.getIdps)
 
   /*
+   * Return client IP to help troubleshoot rate limiting
+   */
+  app.get(`/ip`, Anonymous.getClientIp)
+
+  /*
    * Get the the JWKS config
    */
   app.get(`/jwks`, (req, res) => Anonymous.getJwks(req, res))
+
+  /*
+   * Get the public key
+   */
+  app.get(`/pubkey`, (req, res) => Anonymous.getPubkey(req, res))
+
+  /*
+   * Get the public key
+   */
+  app.get(`/pubkey.pem`, (req, res) => Anonymous.getPubkey(req, res, 'pem'))
 
   /*
    * Get the Morio status
@@ -42,4 +57,9 @@ export function routes(app) {
    * Validates Morio settings
    */
   app.post(`/validate/settings`, Anonymous.validateSettings)
+
+  /*
+   * Validates Morio preseed settings
+   */
+  app.post(`/validate/preseed`, Anonymous.validatePreseed)
 }

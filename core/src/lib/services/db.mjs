@@ -103,7 +103,7 @@ async function ensureLocalPrerequisites() {
  *
  * @return {bool} result - True if the database is up, false if not
  */
-const isDbUp = async () => {
+async function isDbUp() {
   const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
     ignoreCertificate: true,
     // This endpoint does not return JSON
@@ -116,12 +116,40 @@ const isDbUp = async () => {
 /**
  * Helper method to create database tables
  */
-const ensureTablesExist = async () => {
+async function ensureTablesExist() {
+  let initial = false
   for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema || {})) {
-    log.debug(`Ensuring database schema: ${table}`)
+    log.debug(`[db] Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1]?.results?.[0]?.error && result[1].results[0].error.includes('already exists')) {
-      log.debug(`Table ${table} already existed`)
-    } else if (result[0] === 200) log.debug(`Table ${table} created`)
+      log.debug(`[db] Table ${table} already existed`)
+    } else if (result[0] === 200) {
+      log.debug(`[db] Table ${table} created`)
+      initial = true
+    }
+  }
+  if (initial) {
+    /*
+     * This means we have just bootstrapped the database
+     * we will also create the root account
+     */
+    const now = new Date().toISOString()
+    const root = await dbClient.post(`/db/execute`, [
+      [
+        `REPLACE INTO accounts(created_at, about, created_by, status, role, id, provider) ` +
+          `VALUES(:created_at, :about, :created_by, :status, :role, :id, :provider)`,
+        {
+          created_at: now,
+          about: 'Built-in Morio root account',
+          created_by: 'mrt.root',
+          status: 'active',
+          role: 'root',
+          id: 'mrt.root',
+          provider: 'mrt',
+        },
+      ],
+    ])
+    if (root[0] === 200) log.debug(`[db] Created root account`)
+    else log.warn(`[db] Failed to create root account`)
   }
 }

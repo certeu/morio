@@ -111,25 +111,28 @@ async function ensureLocalPrerequisites() {
  *
  * @return {Array} list - A list of filenames
  */
-const loadPipelinesFromDisk = async () =>
-  ((await readDirectory(`/etc/morio/connector/pipelines`)) || [])
+async function loadPipelinesFromDisk() {
+  return ((await readDirectory(`/etc/morio/connector/pipelines`)) || [])
     .filter((file) => extname(file) === '.config')
     .map((file) => basename(file).slice(0, -7))
     .sort()
+}
 
 /**
  * Helper method to generate the pipeline configuration filename
  *
  * @return {string} filename - The filename for the configuration
  */
-const pipelineFilename = (id) => `${id}.config`
+function pipelineFilename(id) {
+  return `${id}.config`
+}
 
 /*
  * Helper method to create the pipelines wanted by the user
  *
  * @param {Array} wantedPipelines - List of pipelines wanted by the user
  */
-const createWantedPipelines = async (wantedPipelines) => {
+async function createWantedPipelines(wantedPipelines) {
   const pipelines = []
   for (const id of wantedPipelines) {
     const config = generatePipelineConfiguration(
@@ -158,7 +161,7 @@ const createWantedPipelines = async (wantedPipelines) => {
  * @param {Array} currentPipelines - List of pipelines currently on disk
  * @param {Array} wantedPipelines - List of pipelines wanted by the user
  */
-const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
+async function removeUnwantedPipelines(currentPipelines, wantedPipelines) {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
       log.debug(`Removing pipeline: ${id}`)
@@ -174,7 +177,7 @@ const removeUnwantedPipelines = async (currentPipelines, wantedPipelines) => {
  * @param {string} pipelineId - The pipeline ID
  * @return {string} config - The generated pipeline configuration
  */
-const generatePipelineConfiguration = (pipeline, pipelineId) => {
+function generatePipelineConfiguration(pipeline, pipelineId) {
   const input = utils.getSettings(['connector', 'inputs', pipeline.input.id], false)
   if (!input) return false
   const output = utils.getSettings(['connector', 'outputs', pipeline.output.id], false)
@@ -198,8 +201,9 @@ ${generateXputConfig(output, pipeline, pipelineId, 'output')}
  * @param {string} plugin - The morip connector plugin name
  * @return {string} logStashplugin - The Logstash plugin name
  */
-const morioPluginAsLogstashPluginName = (plugin) =>
-  ['morio_local', 'morio_remote'].includes(plugin) ? 'kafka' : plugin
+function morioPluginAsLogstashPluginName(plugin) {
+  return ['morio_local', 'morio_remote'].includes(plugin) ? 'kafka' : plugin
+}
 
 /**
  * Generates an input or output (xput) configuration for Logstash
@@ -210,8 +214,8 @@ const morioPluginAsLogstashPluginName = (plugin) =>
  * @param {string} type - One of input our output
  * @return {string} config - the xput configuration
  */
-const generateXputConfig = (xput, pipeline, pipelineId, type) =>
-  logstash[type]?.[xput.plugin]
+function generateXputConfig(xput, pipeline, pipelineId, type) {
+  return logstash[type]?.[xput.plugin]
     ? logstash[type][xput.plugin](xput, pipeline, pipelineId)
     : `
 # ${type === 'input' ? 'Input' : 'Output'}, aka where to ${type === 'input' ? 'read data from' : 'write data to'}
@@ -220,6 +224,8 @@ ${type} {
 }
 
 `
+}
+
 /**
  * Generates a pipeline plugin configuration for Logstash
  *
@@ -230,7 +236,7 @@ ${type} {
  * @param {string} type - one of 'input' or 'output'
  * @return {string} config - the xput configuration
  */
-const generatePipelinePluginConfig = (plugin, xput, pipeline, pipelineId, type) => {
+function generatePipelinePluginConfig(plugin, xput, pipeline, pipelineId, type) {
   let config = ''
   for (const [key, val] of Object.entries(xput)) {
     if (!['id', 'type', 'plugin', 'about'].includes(key)) {

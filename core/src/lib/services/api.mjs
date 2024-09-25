@@ -50,7 +50,7 @@ export const service = {
  * reload the data to also reload itself. This message reaches out
  * to the API, asking it to reload itself.
  */
-export const reloadApi = async () => {
+export async function reloadApi() {
   /*
    * Since the API might still be starting up, we'll attempt this until it works
    */

@@ -1,0 +1,173 @@
+---
+title: 'Morio v0.4.0'
+authors: [joostdecock] # skip-spellcheck
+tags: [morio, release, alpha, v0.4.0]
+---
+
+We have released version 0.4.0 of Morio, which brings a range of new features,
+improvements, and fixes, along with a fix for
+[CVE-2024-45410][cve] mishandling of HTTP headers in Traefik, which is used in
+Morio for the _proxy service_.
+
+<!-- truncate -->
+
+If you merely want to know [what's new](#new-in-morio-04), you can [skip
+ahead](#new-in-morio-04).
+
+## Timing and cadence of Morio releases
+
+The cut-off point for this 0.4 release is a little bit arbitrary. There are
+some things we wanted to see in this release that haven't been implemented yet.
+However, even though Morio is currently in alpha, we felt it important
+to put out an update to address the [CVE in Traefik][cve], which has a rating
+of 9.8.
+
+While we could have back ported our fix -- which was a simple as upgrading 
+Traefik to 3.1.4 -- we felt we might as well push 0.4 out the door, even if
+it is a bit rough around the edges. We are in alpha after all.
+
+Up until this point we've limited ourselves to minor releases, cutting a new
+release whenever we have significant new features. Going forward, you can
+accept out release cadence to accelerate, as we'll be publishing patch releases
+with smaller updates. This will also allow us to streamline our release 
+workflows and artefact build pipelines.
+
+
+## New in Morio 0.4
+
+### Enable access control for all HTTP services
+
+In earlier releases of Morio, access control was not enforced on all HTTP
+services, for example the console service.
+
+With this release, all HTTP services are subject to access control.
+
+### Added access control on the Kafka API (with SASL, for now)
+
+Access control was a point of focus for us in this release, and we've also
+enabled it on the Kafka API where now in addition to authentication with mTLS,
+there is authorisation with SASL. Morio will automatically create a `root` and
+`morio-client` user for you and configure an access control list on the broker
+that allows the `morio-client` user to produce data, and grants full rights to
+the `root` user
+
+This is a bit of a intermediate solution as we prefer to avoid using SASL as it
+complicates client configuration. Alas, we hit an issue with using mTLS
+authorisation where we were unable to extract the user principal from the
+certificate. And issue for which a fix has so far eluded us. 
+
+Once we resolve this, we will switch authorisation back to mTLS and drop SASL.
+
+### Added support for OIDC identity providers
+
+We've added support for a new type of identity provider that allows to
+integrate Morio with any provider that support OpenID Connect (OIDC).  
+
+In addition, we've written guides for how to integrate with common providers
+that support OIDC, such as
+[GitLab](/docs/guides/settings/integrations/gitlab/#gitlab-as-identity-provider-with-openid-connect),
+[Google](/docs/guides/settings/integrations/google/), and
+[Keycloak](/docs/guides/settings/integrations/keycloak/).
+
+### Added initial support for account labels based on provider attributes
+
+We already had role based access control (RBAC) in Morio, but we plan to extend
+that with attribute based access control (ABAC).
+
+The driver behind is is that with the addition of the KV store, Morio will
+potentially start storing user data. And while we can decide which role can do
+what with regards to managing Morio, we cannot decide in your stead which user
+should have access to what data.
+
+This is why we plan to extend access control based on attributes, and while
+that is not fully implemented in this release yet, we do already have support
+for adding _labels_ to an account based on identity provider attributes. For
+example, you can configure Morio to add labels to an account based on the
+`groups` attribute in your identity provider, which will allow you (in the
+future) to configure access control based on group membership in your
+centralised identity provider.
+
+### Initial Key/Value store implementation
+
+Morio now ships with a key/value store on board. 
+This is already exposed through the API, although there is no UI component for it. 
+That is something we might add later.
+
+We needed a persistent KV store for our own purposes inside Morio, so we created
+in Morio's _management API_ backed by our _DB service_.
+
+This is a very simply KV store -- think a poor man's `etcd` -- but if it fully 
+distributed on clustered deployments.
+
+Refer to [the KV endpoints in the API reference
+documentation](/docs/reference/apis/api/#tag/kv) for more details.
+
+### Rate limiting on the management API
+
+We've added rate limiting to the management API, as part of our efforts to make
+Morio more resilient against abuse.
+
+### Allow basic authentication for mrt and apikey providers
+
+The _management API_ has an authentication endpoint where you can trade in your
+credentials for a JSON Web Token that you can then use in subsequent requests.
+This is the best way since authentication of requests with a JWT are much more
+efficient.
+
+However, you might need to only make a single API call, for example to get a value
+from the KV store in a CI pipeline. In such a use case, the extra
+sign in step adds friction and actually would be slower than making the initial
+request with credentials.
+
+We've made changes to allow basic authentication for the `apikey` and `mrt`
+identity providers, as those are the ones typically used in an automated way.
+
+### Prevent generating certificates that would grant elevated privileges
+
+Once we start using mTLS for authorisation on the Kafka API, the certificate's
+Common Name will determine what a user can do.  Given that Morio allows users
+to generate X.509 certificates, we've hardened this endpoint so that users
+cannot generate certificates that would grant them elevated permissions on the
+broker.
+
+### Support for preseeding and keeping the Morio settings under version control
+
+Morio can now load its settings from a git repository, or even directly from
+the GitLab or GitHub API. Both at the initial setup, and for later subsequent
+updates.
+
+Facilitating automation has been [one of Morio's design
+goals](/docs/guides/goals/) from the very start, so supporting
+infrastructure-as-code was something we wanted sooner rather than later.
+
+Refer to [the preseeding guide](/docs/guides/settings/preseed/) for all details.
+
+### Support for integration with Hashicorp Vault
+
+We now support Hashicorp Vault as a backing store for secrets. Refer to [The
+Hashicorp Vault integration guide](/docs/guides/settings/integrations/vault/)
+for all details.
+
+### New repositories for Moriod packages
+
+We've setup infrastructure to provide APT and RPM repositories from which you can install Morio.
+They are:
+
+- [api.repo.morio.it](https://apt.repo.morio.it/)
+- [rpm.repo.morio.it](https://rpm.repo.morio.it/)
+
+Apart from the `moriod` package which installs a morio node, we also provide a `moriod-repo`
+package which sets up the repository on your system (currently only supported for APT).
+This allows you then install Morio as any regular packages, and you will also get your
+updates that way.
+
+All packages will be signed with [Morio's key](https://apt.repo.morio.it/morio.asc).
+
+## Fixes and changes
+
+Apart from what's new, there's a bunch of changes and fixes in this release.
+For the full list, refer to [the
+change log](https://github.com/certeu/morio/blob/develop/CHANGELOG.md).
+
+
+[cve]: https://nvd.nist.gov/vuln/detail/CVE-2024-45410

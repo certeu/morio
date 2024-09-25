@@ -1,3 +1,5 @@
+// Dependencies
+import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useAccount } from 'hooks/use-account.mjs'
 import { useEffect, useState } from 'react'
@@ -5,9 +7,9 @@ import { useScrollPosition } from '@n8tb1t/use-scroll-position'
 import { useRouter } from 'next/router'
 // Components
 import Link from 'next/link'
-import { WarningIcon, MorioIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
+import { QuestionIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { GitHub } from 'components/brands.mjs'
-import pkg from 'ui/package.json'
+import { MorioBanner } from 'components/branding.mjs'
 
 export const NavButton = ({
   href,
@@ -41,15 +43,16 @@ export const NavButton = ({
   )
 }
 
-const BannerMessage = () => (
-  <div className="mt-14 -mb-12 text-center p-0.5">
-    <div className="flex flex-row gap-2 items-center justify-center w-full">
-      <WarningIcon className="w-5 h-5 text-warning" />
-      <span>Morio v{pkg.version} Ã¢ÂÂ this is alpha code</span>
-      <WarningIcon className="w-5 h-5 text-warning" />
-    </div>
-  </div>
-)
+const BannerMessage = () => null
+//(
+//  <div className="mt-14 -mb-12 text-center p-0.5">
+//    <div className="flex flex-row gap-2 items-center justify-center w-full">
+//      <WarningIcon className="w-5 h-5 text-warning" />
+//      <span>Morio v{pkg.version} | this is alpha code</span>
+//      <WarningIcon className="w-5 h-5 text-warning" />
+//    </div>
+//  </div>
+//)
 
 const isActive = (page, path) => path.slice(0, page.length) === page
 
@@ -80,6 +83,8 @@ export const Header = ({
     [scrolled]
   )
 
+  const operator = rbac(account.role, 'operator')
+
   return (
     <>
       <header
@@ -89,17 +94,16 @@ export const Header = ({
       >
         <div className="m-auto p-2 py-0 md:px-8">
           <div className="p-0 flex flex-row gap-0 justify-between items-center">
-            <NavButton href="/" label="Home" dense>
-              <div className="flex flex-row gap-2 items-center py-2">
-                <MorioIcon className="h-10 w-10" />
-                <span className="lowercase font-bold">morio</span>
-              </div>
-            </NavButton>
+            <Link href="/" label="Home" title="Home" className="text-current hover:text-primary">
+              <MorioBanner className="h-6" shadow />
+            </Link>
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
-                <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
-                  Settings
-                </NavButton>
+                {operator ? (
+                  <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
+                    Settings
+                  </NavButton>
+                ) : null}
                 <NavButton
                   href="/status"
                   label="Status"
@@ -134,6 +138,9 @@ export const Header = ({
             </div>
             <NavButton onClick={toggleTheme} label="Change theme" toggle>
               {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
+            </NavButton>
+            <NavButton href="https://morio.it/" label="Documentation on morio.it">
+              <QuestionIcon />
             </NavButton>
             <NavButton href="https://github.com/certeu/morio" label="Source code on Github">
               <GitHub />

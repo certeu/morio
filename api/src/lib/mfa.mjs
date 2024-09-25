@@ -20,7 +20,7 @@ export const mfa = {
    *
    * @param {string} username - The username
    */
-  enroll: async (username) => {
+  enroll: async function (username) {
     const secret = authenticator.generateSecret()
     const otpauth = authenticator.keyuri(
       username,
@@ -43,7 +43,7 @@ export const mfa = {
 
     return { secret, otpauth, qrcode: svg }
   },
-  verify: async (token, secret, hashedScratchCodes) => {
+  verify: async function (token, secret, hashedScratchCodes) {
     let result = authenticator.check(token, secret)
     /*
      *  If it's good, return early

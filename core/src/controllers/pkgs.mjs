@@ -21,7 +21,7 @@ export function Controller() {}
  * @param {object} res - The response object from Express
  * @param {object} type - The package type
  */
-Controller.prototype.getClientPackageDefaults = async (req, res) => {
+Controller.prototype.getClientPackageDefaults = async function (req, res) {
   /*
    * Load revision from disk
    */
@@ -37,7 +37,7 @@ Controller.prototype.getClientPackageDefaults = async (req, res) => {
  * @param {object} res - The response object from Express
  * @param {object} type - The package type
  */
-Controller.prototype.buildClientPackage = async (req, res, type) => {
+Controller.prototype.buildClientPackage = async function (req, res, type) {
   /*
    * The preBuild lifecycle hook will generate the control file
    * First we need to strip the headers from the body

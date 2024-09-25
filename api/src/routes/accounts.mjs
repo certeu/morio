@@ -22,10 +22,10 @@ export function routes(app) {
   /*
    * Activate account
    */
-  app.post(`/activate-account`, rbac.user, Accounts.activate)
+  app.post(`/activate-account`, Accounts.activate)
 
   /*
    * Activate MFA
    */
-  app.post(`/activate-mfa`, rbac.user, Accounts.activateMfa)
+  app.post(`/activate-mfa`, Accounts.activateMfa)
 }

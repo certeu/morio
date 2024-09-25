@@ -26,9 +26,9 @@ export const theme = {
   primary: c.mid,
   'primary-content': c.bg,
 
-  secondary: c.light,
-  'secondary-focus': colors.orange['300'],
-  'secondary-content': c.bg,
+  secondary: colors.teal['500'], //c.light,
+  'secondary-focus': colors.teal['500'],
+  'secondary-content': colors.teal['900'],
 
   accent: c.accent1,
   'accent-focus': colors.fuchsia['300'],
@@ -49,7 +49,7 @@ export const theme = {
   'error-content': colors.neutral[900],
 
   '--morio-heading': c.light,
-  '--morio-link': c.accent1,
+  '--morio-link': c.light,
   '--morio-light': '#8ecae6',
   '--morio-mid': '#219ebc',
   '--morio-dark': '#023047',

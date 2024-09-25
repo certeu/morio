@@ -35,7 +35,10 @@ export const useAccount = () => {
   /*
    * Helper method to log out/end the session
    */
-  const logout = () => setAccount(null)
+  const logout = () => {
+    console.log('Logging you out')
+    setAccount(null)
+  }
 
   /*
    * Helper method to renew the token

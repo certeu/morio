@@ -286,7 +286,7 @@ suggest_cc() {
 }
 
 manage_vars() {
-  while [[$# -gt 0]]; do
+  while [[ $# -gt 0 ]]; do
     case $1 in
     -h|--help)
       show_vars_help

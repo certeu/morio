@@ -1,6 +1,17 @@
 import { generateTraefikConfig } from './index.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'rqlite/rqlite',
+  // Image tag (version) to run
+  tag: '8.30.5',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -17,12 +28,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'db',
-      // Image to run
-      image: 'rqlite/rqlite',
-      // Image tag (version) to run
-      tag: '8.26.7',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -44,8 +52,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/db:/rqlite/file`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/db:/etc/rqlite`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/db:/rqlite/file`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/db:/etc/rqlite`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/db:/rqlite/file`,
           ],
       // Command
       command: utils.isDistributed()
@@ -93,33 +101,37 @@ export const resolveServiceConfiguration = ({ utils }) => {
     schema: {
       accounts: `CREATE TABLE accounts (
         id TEXT NOT NULL PRIMARY KEY,
-        provider TEXT NOT NULL,
+        provider TEXT,
         about TEXT,
         invite TEXT,
-        status TEXT NOT NULL,
-        role TEXT NOT NULL,
+        status TEXT,
+        role TEXT,
         created_by TEXT,
-        created_at TEXT,
+        created_at DATETIME,
         updated_by TEXT,
-        updated_at TEXT,
+        updated_at DATETIME,
         password TEXT,
         mfa TEXT,
         scratch_codes TEXT,
-        last_login TEXT
+        last_login DATETIME
       )`,
       apikeys: `CREATE TABLE apikeys (
         id TEXT NOT NULL PRIMARY KEY,
         name TEXT,
-        status TEXT NOT NULL,
-        role TEXT NOT NULL,
+        status TEXT,
+        role TEXT,
         created_by TEXT,
         created_at DATETIME,
         expires_at DATETIME,
         updated_by TEXT,
         updated_at DATETIME,
         secret TEXT,
-        last_login TEXT
+        last_login DATETIME
       )`,
+      kv: `CREATE TABLE kv (
+        key TEXT NOT NULL PRIMARY KEY,
+        val TEXT
+      )`
     },
   }
 }

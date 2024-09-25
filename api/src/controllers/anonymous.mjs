@@ -1,7 +1,10 @@
 import { globDir } from '#shared/fs'
 import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
-import { utils } from '../lib/utils.mjs'
+import { utils, log } from '../lib/utils.mjs'
+import { loadPreseededSettings } from '#shared/loaders'
+import { limits } from '../middleware.mjs'
+import { kv } from '../lib/kv.mjs'
 
 /**
  * This anonymous controller handles various public endpoints
@@ -19,7 +22,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getCaCerts = async (req, res) => {
+Controller.prototype.getCaCerts = async function (req, res) {
   const keys = utils.getKeys()
 
   return keys.rfpr && keys.rcrt && keys.icrt
@@ -32,12 +35,22 @@ Controller.prototype.getCaCerts = async (req, res) => {
 }
 
 /**
+ * Gets the client IP to troubleshoot rate limiting
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getClientIp = async function (req, res) {
+  return res.send({ ip: req.ip, limits: limits.getKey(req.ip) })
+}
+
+/**
  * List downloads
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.listDownloads = async (req, res) => {
+Controller.prototype.listDownloads = async function (req, res) {
   const list = await globDir('/morio/downloads')
 
   return list
@@ -51,7 +64,7 @@ Controller.prototype.listDownloads = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getIdps = async (req, res) => {
+Controller.prototype.getIdps = async function (req, res) {
   const idps = {}
 
   /*
@@ -60,9 +73,13 @@ Controller.prototype.getIdps = async (req, res) => {
   const providers = utils.getSettings('iam.providers', {})
   if (providers) {
     for (const [id, conf] of Object.entries(providers)) {
+      let provider = conf.provider
+      if (id === 'mrt') provider = 'mrt'
+      else if (id === 'local') provider = 'local'
+      else if (id === 'apikey') provider = 'apikey'
       idps[id] = {
         id,
-        provider: id === 'mrt' ? 'mrt' : conf.provider,
+        provider,
         label: conf.label,
         about: conf.about || false,
       }
@@ -89,7 +106,7 @@ Controller.prototype.getIdps = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getJwks = async (req, res) => {
+Controller.prototype.getJwks = async function (req, res) {
   /*
    * Get JWKS info from public key
    */
@@ -102,12 +119,26 @@ Controller.prototype.getJwks = async (req, res) => {
 }
 
 /**
+ * This returns the public key
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getPubkey = async function (req, res, pem = false) {
+  const ls = await kv.ls()
+  console.log(ls)
+  return pem
+    ? res.type('application/x-pem-file').send(utils.getKeys().public)
+    : res.send({ pubkey: utils.getKeys().public })
+}
+
+/**
  * Get status
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getStatus = async (req, res) => {
+Controller.prototype.getStatus = async function (req, res) {
   /*
    * Get the status from core to ensure we have the latest info
    */
@@ -134,6 +165,7 @@ Controller.prototype.getStatus = async (req, res) => {
       reload_count: utils.getReloadCount(),
       config_resolved: utils.isConfigResolved(),
       settings_serial: utils.getSettingsSerial(),
+      settings_preseeded: utils.getSettings('preseed', false) ? true : false,
     },
     core: utils.getCoreStatus(),
   })
@@ -148,7 +180,7 @@ Controller.prototype.getStatus = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.validateSettings = async (req, res) => {
+Controller.prototype.validateSettings = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -160,10 +192,52 @@ Controller.prototype.validateSettings = async (req, res) => {
   }
 
   /*
-   * Run the settings validation helper, which takes proposed
-   * and current settings and returns a report object
+   * Run the settings validation helper, which returns a report object
    */
   const report = await validateSettings(req.body)
+
+  return res.send(report).end()
+}
+
+/**
+ * Validate Morio preseed settings
+ *
+ * This allows people to validate a preseed object prior to applying it.
+ * Which should hopefully avoid at least some mistakes.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.validatePreseed = async function (req, res) {
+  /*
+   * Validate request against schema
+   */
+  const [valid, err] = await utils.validate(`req.preseed`, req.body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
+  /*
+   * Load the preseeded settings so we can validate them
+   */
+  const settings = await loadPreseededSettings(req.body, log)
+
+  /*
+   * Validate settings against the schema
+   */
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
+
+  /*
+   * Run the settings validation helper, which return a report object
+   */
+  const report = await validateSettings(settings)
 
   return res.send(report).end()
 }

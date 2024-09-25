@@ -7,20 +7,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2024-09-25
+
+### Added
+
+- Added public key used to sign packages to repository
+- Added script to buid the moriod-repo .deb package
+- [api] Added initial `kv` implementation. This adds a persistent key/value store to Morio
+- [api] Added `oidc` identity provider
+- [api] Added new `/pubkey` and `/pubkey.pem` endpoints to the API
+- [api] Added rate limiting and new `/limits` endpoint to the API
+- [api] Improved the OpenAPI specification
+- [api] Added new script to lint the OpenAPI spec
+- [api] Added support for account labels, based on IDP attributes
+- [api] Allow basic authentication for mrt and apikey providers
+- [api] Prevent users from generating X.509 certificates that would grant them elevated access
+- [broker] Enable (SASL) authorization on the Kafka API (workaround until we get mTLS auth to work)
+- [broker] Create initial ACL on startup
+- [broker] Added superuser configuration
+- [console] Added RBAC checks for console access
+- [core] Integration with Hashicorp Vault / OpenBao
+- [core] Support for preseeding
+- [core] New `MORIO_DOCKER_LOG_DRIVER` preset allows overriding the log driver
+- [core] New `MORIO_DOCKER_ADD_HOST` preset allows adding a custom host:ip mapping
+- [core] Create root account on intial setup
+- [core] JWKS endpoint is now served from core to ensure maximum availability
+- [docs] Added search to docs site
+- [ui] Added error pages for HTTP status errors
+- [ui] Added a new cluster status page in the UI
+- [ui] Added preseeding support to UI setup wizard
+- [ui] Guard against IDP order including IDPs that are not configured
+- [ui] Improved account page
+- [ui] Force logout when `whoami` check fails
+- [ui] Communicate more clearly why API keys are not available
+- [ui] Allow token refresh through the UI
+- [ui] Hide UI elements the user does not have access to with their current role
+- [proxy] Added RBAC middleware to rpproxy and pradmin
+- [watcher] Added the new Watcher service (disabled for now until SASL is removed in favor of mTLS)
+
 ### Changed
 
- - Updated dependencies in docs site (no breaking changes)
+- Updated container images to use the `itsmore` namespace
+- [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
+- [api] Made `account.about` optional in the data schema
+- [api] Improved OpenAPI schema
+- [broker] Upgraded RedPanda from v24.1.11 to v24.2.5
+- [ca] Upgraded SmallStep Step-CA to v.0.26.1 to v0.27.4
+- [connector] Upgraded Elastic Logstash from 8.13.3 to 8.15.1
+- [console] Upgraded RedPanda Console from v2.6.1 to v2.7.2
+- [core] Improved secret unwrap
+- [db] Upgraded RQLite to 8.26.7 to 8.30.5
+- [docs] Migrated docs content from `.md` to `.mdx`
+- [docs] Updated the term style in docs
+- [docs] Moved the API reference documentation (redoc) under the docs route
+- [docs] Improve prebuilt documentation pages
+- [proxy] Upgraded Traefik from v3.0.4 to v3.1.4
+- [ui] Improve settings wizard layout
+
+### Fixed
+
+- Call run scripts through env for improved cross-platform support
+- Call auto-generated scripts through env for improved cross-platform support
+- [broker] Fixed broker to trust root and intermediate CA certs
+- [client] Fixed bug in the client CLI options
+- [proxy] Fixed incorrect location of truststore causing certs to fail in proxy service (falling back to default)
+- [proxy] Always force restart so that the new certificate configuration is taken into account
+- [ui] Allow sign in when the MRT idenity provider is not explicitly configured
+- [ui] Do not spread the `key` prop to a React component
+- [ui] Account activation through the UI was broken
+- [ui] Guard against issue with IDP order
+- [ui] Do not make SAN manadatory for X.509 certificate generation
+- [ui] Show current role on missing role warning
+- [ui] Lock decrypt page below engineer role
+
+### Security
+
+- [proxy] Upgraded Traefik from v3.0.4 to v3.1.4. Fixes [CVE-2024-45410](https://nvd.nist.gov/vuln/detail/CVE-2024-45410)
 
 ## [0.3.0] - 2024-08-08
 
 ### Added
 
- - Initial support for clustering. Morio now support multi-node deployments. [7adc748](https://github.com/certeu/morio/commit/fadc7489e10672105915e38895fa6584ce7ded62)
- - We now publish the [itsmorio/api](https://hub.docker.com/r/itsmorio/api) container image and will do so for all future releases
- - We now publish the [itsmorio/core](https://hub.docker.com/r/itsmorio/core) container image and will do so for all future releases
- - We now publish the [itsmorio/dbuilder](https://hub.docker.com/r/itsmorio/dbuilder) container image and will do so for all future releases
- - We now publish the [itsmorio/ui](https://hub.docker.com/r/itsmorio/ui) container image and will do so for all future releases
-   
+- [api] We now publish the [itsmorio/api](https://hub.docker.com/r/itsmorio/api) container image and will do so for all future releases
+- [core] Initial support for clustering. Morio now support multi-node deployments. [7adc748](https://github.com/certeu/morio/commit/fadc7489e10672105915e38895fa6584ce7ded62)
+- [core] We now publish the [itsmorio/core](https://hub.docker.com/r/itsmorio/core) container image and will do so for all future releases
+- [dbuilder] We now publish the [itsmorio/dbuilder](https://hub.docker.com/r/itsmorio/dbuilder) container image and will do so for all future releases
+- [ui] We now publish the [itsmorio/ui](https://hub.docker.com/r/itsmorio/ui) container image and will do so for all future releases
+
 ### Changed
 
 - [api] Migrated API documentation to Redoc
@@ -86,7 +159,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Migrated accounts and apikeys from rpkv to db
 - [client] No pager when invoking systemctl
-- [core] Dropped BSON dependency
 - [core] Changes to the connector config generators
 - [connector] Changes to the connector configuration
 - [ui] Logout user when in ephemeral mode

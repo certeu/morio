@@ -21,11 +21,14 @@ function HomepageHeader() {
   return (
     <header className={clsx('hero', styles.heroBanner)}>
       <div className="container">
-        <div style={{maxWidth: "600px", margin: "auto", padding: "2rem 1rem"}}>
-        <Banner shadow iconColor="#1b88a2"/>
+        <div style={{ maxWidth: '600px', margin: 'auto', padding: '2rem 1rem' }}>
+          <Banner shadow iconColor="#1b88a2" />
         </div>
         <Heading as="h1">
-          {siteConfig.title}: <span className="hero__subtitle" style={{fontWeight: "normal"}}>{siteConfig.tagline}</span>
+          {siteConfig.title}:{' '}
+          <span className="hero__subtitle" style={{ fontWeight: 'normal' }}>
+            {siteConfig.tagline}
+          </span>
         </Heading>
         <div className={clsx('flex_wrapper', styles.flexWrapper)}>
           <div

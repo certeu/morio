@@ -1,6 +1,17 @@
 import { generateTraefikConfig } from './index.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'docker.redpanda.com/redpandadata/redpanda',
+  // Image tag (version) to run
+  tag: 'v24.2.5',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -13,10 +24,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * We'll re-use this a bunch of times, so let's keep things DRY
    */
   const NODE = utils.getNodeSerial() || 1
-  const PORTS = {
-    EXT: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
-    INT: utils.getPreset('MORIO_BROKER_KAFKA_API_INTERNAL_PORT'),
-  }
 
   return {
     /**
@@ -26,12 +33,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'broker',
-      // Image to run
-      image: 'docker.redpanda.com/redpandadata/redpanda',
-      // Image tag (version) to run
-      tag: 'v24.1.11',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -42,7 +46,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         '18082:18082',
         '19082:19082',
         '19644:19644',
-        `${PORTS.EXT}:${PORTS.EXT}`,
+        `${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         '33145:33145',
       ],
       // Environment
@@ -58,9 +62,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/broker:/var/lib/redpanda/data`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker:/etc/redpanda`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker:/etc/redpanda`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
           ],
       // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
       aliases: ['rpadmin', 'rpproxy'],
@@ -68,10 +72,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        `--kafka-addr external://0.0.0.0:${PORTS.EXT}`,
-        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${PORTS.EXT}`,
+        `--kafka-addr external://0.0.0.0:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
         `--rpc-addr 0.0.0.0:33145`,
-        //'--default-log-level=debug',
+        '--default-log-level=info',
+        '--logger-log-level=kafka=debug',
       ],
     },
     traefik: {
@@ -80,15 +85,51 @@ export const resolveServiceConfiguration = ({ utils }) => {
         prefixes: [`/v1/`],
         priority: 666,
         //backendTls: true,
-      }),
+      })
+        /*
+         * Middleware to add Morio service header
+         */
+        .set('http.middlewares.rpadmin-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpadmin')
+        /*
+         * Middleware for central authentication/access control
+         */
+        .set(
+          'http.middlewares.rpadmin-auth.forwardAuth.address',
+          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        )
+        .set('http.middlewares.rpadmin-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+        /*
+         * Add middleware to router
+         * The order in which middleware is loaded matters. Auth should go last.
+         */
+        .set('http.routers.rpadmin.middlewares', ['rpadmin-service-header@file', 'rpadmin-auth@file']),
       rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
         prefixes: [`/-/rpproxy/`],
         priority: 666,
       })
+        /*
+         * Middleware to rewrite the routing prefix
+         */
         .set('http.middlewares.rpproxy-prefix.replacepathregex.regex', `^/-/rpproxy/(.*)`)
         .set('http.middlewares.rpproxy-prefix.replacepathregex.replacement', '/$1')
-        .set('http.routers.rpproxy.middlewares', ['rpproxy-prefix@file']),
+        /*
+         * Middleware to add Morio service header
+         */
+        .set('http.middlewares.rpproxy-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpproxy')
+        /*
+         * Middleware for central authentication/access control
+         */
+        .set(
+          'http.middlewares.rpproxy-auth.forwardAuth.address',
+          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        )
+        .set('http.middlewares.rpproxy-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+        /*
+         * Add middleware to router
+         * The order in which middleware is loaded matters. Auth should go last.
+         */
+        .set('http.routers.rpadmin.middlewares', ['rprpoxy-prefix@file', 'rpproxy-service-header@file', 'rpproxy-auth@file']),
     },
     /*
      * RedPanda configuration file
@@ -132,9 +173,19 @@ export const resolveServiceConfiguration = ({ utils }) => {
         admin: [
           {
             address: '0.0.0.0',
-            port: 9644,
+            port: utils.getPreset('MORIO_BROKER_ADMIN_API_PORT'),
             name: 'external',
             advertise_address: utils.getNodeFqdn(),
+            /*
+             * Make sure the admin API uses mTLS to talk to the broker
+             */
+            tls: {
+              enabled: true,
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              key_file: '/etc/redpanda/superuser-key.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
+              require_client_auth: true,
+            },
           },
         ],
 
@@ -145,7 +196,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         rpc_server: {
           address: '0.0.0.0',
-          port: 33145,
+          port: utils.getPreset('MORIO_BROKER_RPC_SERVER_PORT'),
           name: 'external',
         },
 
@@ -155,7 +206,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         advertised_rpc_api: {
           address: utils.getNodeFqdn(),
-          port: 33145,
+          port: utils.getPreset('MORIO_BROKER_RPC_SERVER_PORT'),
         },
 
         /*
@@ -165,9 +216,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
           {
             name: 'external',
             address: '0.0.0.0',
-            port: PORTS.EXT,
+            port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             advertise_address: utils.getNodeFqdn(),
-            advertise_port: PORTS.EXT,
+            advertise_port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
+            //authentication_method: 'sasl',
           },
         ],
 
@@ -214,7 +266,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         advertised_kafka_api: [
           {
             address: utils.getNodeFqdn(),
-            port: PORTS.EXT,
+            port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             name: 'external',
           },
         ],
@@ -224,28 +276,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
 
         /*
-         * Organisation name helps identify this as a Morio system
-         */
-        // This breaks, not expected here?
-        //organization: utils.getSettings('cluster.name') || 'Nameless Morio',
-
-        /*
          * Cluster ID helps differentiate different Morio clusters
          */
         cluster_id: utils.getClusterUuid(),
 
         /*
-         * Enable audit log TODO
+         * Do not enable authorization in the config as it risks locking ourselves out
+         * Instead, configure it with rpk later
+         * FIXME: Setting this to null as we are using SASL for now
          */
-        audit_enabled: false,
+        kafka_enable_authorization: 'null',
+        enable_sasl: true,
 
         /*
-         * Disable SASL for Kafka connections (we use mTLS)
-         */
-        enable_sasl: false,
-
-        /*
-         * Do not auto-create topics, be explicit
+         * Allow auto-creation of topics (subject to ACL)
          */
         auto_create_topics_enabled: true,
 
@@ -255,14 +299,23 @@ export const resolveServiceConfiguration = ({ utils }) => {
         default_topic_replications: utils.getSettings('cluster.broker_nodes').length < 4 ? 1 : 3,
 
         /*
-         * These were auto-added, but might not be a good fit for production
-        fetch_reads_debounce_timeout: 10,
-        group_initial_rebalance_delay: 0,
-        group_topic_partitions: 3,
-        log_segment_size_min: 1,
-        storage_min_free_bytes: 10485760,
-        topic_partitions_per_shard: 1000,
+         * Extract CN as principal in mTLS
          */
+        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
+        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN *= *([^,]).*/$1/` ],
+        //kafka_mtls_principal_mapping_rules: ["DEFAULT"],
+
+        /*
+         * Default topic partition count
+         */
+        default_topic_partitions: 12,
+
+        /*
+         * Disable unsafe log operations
+         */
+        legacy_permit_unsafe_log_operation: false,
+
+        superusers: [ `root.${utils.getClusterUuid()}.morio.internal`, 'root' ],
       },
 
       /*
@@ -276,7 +329,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         pandaproxy_api: [
           {
             address: `broker_${NODE}`,
-            port: 8082,
+            port: utils.getPreset('MORIO_BROKER_REST_API_PORT'),
             name: 'internal',
           },
         ],
@@ -327,19 +380,53 @@ export const resolveServiceConfiguration = ({ utils }) => {
       current_cloud_auth_kind: '',
       profiles: [
         {
-          name: 'morio',
-          description: 'rpk profile for Morio',
+          name: 'nosasl',
+          description: 'An rpk profile to connect to Morio during the initial cluster bootstraap when SASL is not yet enabled',
           prompt: '',
           from_cloud: false,
           kafka_api: {
-            brokers: [`${utils.getNodeFqdn()}:${PORTS.EXT}`],
+            brokers: [
+              `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+            ],
             tls: {
-              key_file: '/etc/redpanda/tls-key.pem',
-              cert_file: '/etc/redpanda/tls-cert.pem',
-              ca_file: '/etc/redpanda/tls-ca.pem',
+              enabled: true,
+              key_file: '/etc/redpanda/superuser-key.pem',
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
             },
           },
-          admin_api: {},
+          admin_api: {
+            // Only connect locally
+            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+          },
+          schema_registry: {},
+          cloud_auth: [],
+        },
+        {
+          name: 'morio',
+          description: 'The default rpk profile for Morio to use once SASL is enabled',
+          prompt: '',
+          from_cloud: false,
+          kafka_api: {
+            brokers: [
+              `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+            ],
+            tls: {
+              enabled: true,
+              key_file: '/etc/redpanda/superuser-key.pem',
+              cert_file: '/etc/redpanda/superuser-cert.pem',
+              truststore_file: '/etc/redpanda/tls-ca.pem',
+            },
+            sasl: {
+              mechanism: 'SCRAM-SHA-512',
+              user: 'root',
+              password: utils.getKeys().mrt,
+            },
+          },
+          admin_api: {
+            // Only connect locally
+            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+          },
           schema_registry: {},
           cloud_auth: [],
         },

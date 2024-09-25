@@ -1,16 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Sounce config variables
+source config/cli.sh
 
 # Set this once
 CONTAINER=dbuilder
 
-# Figure out the repository root
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd ../.. && pwd )"
-
-# Grab the Morio version from package.json
-VERSION=`sed 's/\"version\"/\"VERSION\"/' $REPO/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
-
 docker build \
-  --tag morio/$CONTAINER:latest \
-  --tag morio/$CONTAINER:$VERSION \
-  $REPO/builders/dbuilder
+  --tag itsmorio/$CONTAINER:latest \
+  --tag itsmorio/$CONTAINER:$MORIO_VERSION \
+  $MORIO_GIT_ROOT/builders/dbuilder
 

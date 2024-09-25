@@ -9,7 +9,7 @@ const parameters = [
     schema: j2s(
       Joi.string().required().description('The ID (or name) of the relevant Docker object')
     ).swagger,
-    retuired: true,
+    required: true,
     description: 'The ID (or name) of the relevant docker object',
   },
 ]
@@ -19,7 +19,7 @@ const dockerGets = [
   {
     slug: 'allcontainers',
     spread: {
-      summary: 'List all Docker containers',
+      summary: 'List containers',
       description: `This is a proxy endpoint for the Docker API on the host system that returns list of all containers available on the host system.
 
 To only get the running containers, use the \`/docker/containers\` endpoint instead.`,
@@ -32,7 +32,7 @@ To only get the running containers, use the \`/docker/containers\` endpoint inst
   {
     slug: 'containers',
     spread: {
-      summary: 'List running Docker containers',
+      summary: 'List running containers',
       description: `This is a proxy endpoint for the Docker API on the host system that returns the list of containers currently running on the hoste sytem.
 
 To get all containers, use the \`/docker/allcontainers\` endpoint instead.`,
@@ -45,20 +45,20 @@ To get all containers, use the \`/docker/allcontainers\` endpoint instead.`,
   {
     slug: 'df',
     spread: {
-      summary: 'List Docker storage metrics',
+      summary: 'Get storage metrics',
       description: `This is a proxy endpoint for the Docker API on the host system that returns information on the used and available storage on the host sytem.
 
 This endpoint is named after the the \`df\` command on Linux.`,
     },
     api: {
-      title: 'Get data usage information',
+      title: 'Get data usage',
       url: 'https://docs.docker.com/engine/api/v1.37/#tag/System/operation/SystemDataUsage',
     },
   },
   {
     slug: 'images',
     spread: {
-      summary: 'List Docker images',
+      summary: 'List images',
       description: `This is a proxy endpoint for the Docker API on the host system that returns the list of Docker images available on the host system.`,
     },
     api: {
@@ -69,7 +69,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
   {
     slug: 'info',
     spread: {
-      summary: 'List Docker info',
+      summary: 'Get Docker info',
       description: `This is a proxy endpoint for the Docker API on the host system that returns general information about the Docker daemon on the host system.`,
     },
     api: {
@@ -80,7 +80,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
   {
     slug: 'networks',
     spread: {
-      summary: 'List Docker networks',
+      summary: 'List networks',
       description: `This is a proxy endpoint for the Docker API on the host system that returns a list of Docker networks on the host system.`,
     },
     api: {
@@ -91,7 +91,7 @@ This endpoint is named after the the \`df\` command on Linux.`,
   {
     slug: 'version',
     spread: {
-      summary: 'List Docker version information',
+      summary: 'Get Docker version',
       description: `This is a proxy endpoint for the Docker API on the host system that returns information on the version of Docker that is running on the host system.`,
     },
     api: {
@@ -101,9 +101,9 @@ This endpoint is named after the the \`df\` command on Linux.`,
   },
   // With parameters
   {
-    slug: 'container/:id',
+    slug: 'container/{id}',
     spread: {
-      summary: 'Inspect a Docker container',
+      summary: 'Inspect container',
       description: `This is a proxy endpoint for the Docker API on the host system that returns information on the container with the ID passed as a parameter in the URL.
 
 This endpoint is equivalent to running the \`inspect\` command on a container in the Docker CLI.
@@ -118,9 +118,9 @@ Note that Docker accepts an ID or (unambigious) name as input.
     },
   },
   {
-    slug: 'container/:id/logs',
+    slug: 'container/{id}/logs',
     spread: {
-      summary: 'Retrieve logs from a Docker container',
+      summary: 'Get logs',
       description: `This is a proxy endpoint for the Docker API on the host system that returns logs from the container with the ID passed as a parameter in the URL.
 
 This endpoint is equivalent to running the \`logs\` command on a container in the Docker CLI.
@@ -135,9 +135,9 @@ Note that Docker accepts an ID or (unambigious) name as input.
     },
   },
   {
-    slug: 'container/:id/stats',
+    slug: 'container/{id}/stats',
     spread: {
-      summary: 'Retrieve resource usage stats from a Docker container',
+      summary: 'Get usage stats',
       description: `This is a proxy endpoint for the Docker API on the host system that returns stats based on resource usage from the container with the ID passed as a parameter in the URL.
 
 These stats come from a container'se \`inspect\` command in the Docker CLI.
@@ -152,9 +152,9 @@ Note that Docker accepts an ID or (unambigious) name as input.
     },
   },
   {
-    slug: 'image/:id',
+    slug: 'image/{id}',
     spread: {
-      summary: 'Inspect a Docker image',
+      summary: 'Inspect image',
       description: `This is a proxy endpoint for the Docker API on the host system that returns information on the image with the ID passed as a parameter in the URL.
 
 This endpoint is equivalent to running the \`inspect\` command on an image in the Docker CLI.
@@ -169,9 +169,9 @@ Note that Docker accepts an ID or (unambigious) name as input.
     },
   },
   {
-    slug: 'networks/:id',
+    slug: 'networks/{id}',
     spread: {
-      summary: 'Inspect a Docker network',
+      summary: 'Inspect network',
       description: `This is a proxy endpoint for the Docker API on the host system that returns information on the network with the ID passed as a parameter in the URL.
 
 This endpoint is equivalent to running the \`inspect\` command on a network in the Docker CLI.
@@ -187,7 +187,7 @@ Note that Docker accepts an ID or (unambigious) name as input.
   },
 ]
 
-export default (api) => {
+export default function (api) {
   const shared = { tags: ['docker'] }
   api.tag('docker', 'Endpoints that leverage the Docker daemon API')
 
@@ -195,23 +195,38 @@ export default (api) => {
     api.get(`/docker/${d.slug}`, {
       ...shared,
       ...d.spread,
+      operationId: `${d.slug.replaceAll('{', '').replaceAll('}', '')}Get`,
       responses: {
-        200: response(`[See **${d.api.title}** in the Docker API docs](${d.api.url}) `),
-        ...errorResponses([`morio.api.authentication.required`, `morio.api.ephemeral.prohibited`]),
+        200: response({
+          desc: `[See **${d.api.title}** in the Docker API docs](${d.api.url}) `,
+        }),
+        ...errorResponses([
+          `morio.api.authentication.required`,
+          `morio.api.ephemeral.prohibited`,
+          `morio.api.internal.error`,
+          `morio.api.ratelimit.exceeded`,
+        ]),
       },
     })
   }
 
   for (const action of ['Kill', 'Pause', 'Restart', 'Start', 'Stop', 'Unpause']) {
-    api.put(`/docker/containers/:id/${action.toLowerCase()}`, {
+    api.put(`/docker/containers/{id}/${action.toLowerCase()}`, {
       ...shared,
-      summary: `${action} a container`,
+      operationId: `container${action}`,
+      summary: `${action} container`,
       description: `This changes, or attempts to change, the container state by issuing a \`${action.toLowerCase()}\` command.`,
+      parameters,
       responses: {
-        200: response(
-          `[See **${action} a container** in the Docker API docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/Container${action}) `
-        ),
-        ...errorResponses([`morio.api.authentication.required`, `morio.api.ephemeral.prohibited`]),
+        200: response({
+          desc: `[See **${action} a container** in the Docker API docs](https://docs.docker.com/engine/api/v1.37/#tag/Container/operation/Container${action}) `,
+        }),
+        ...errorResponses([
+          `morio.api.authentication.required`,
+          `morio.api.ephemeral.prohibited`,
+          `morio.api.internal.error`,
+          `morio.api.ratelimit.exceeded`,
+        ]),
       },
     })
   }

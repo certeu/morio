@@ -28,7 +28,7 @@ const apiCache = {
  * @param {object} config = The container config to pass to the Docker API
  * @returm {object|bool} options - The id of the created container or false if no container could be created
  */
-export const createDockerContainer = async (serviceName, config) => {
+export async function createDockerContainer(serviceName, config) {
   log.debug(`[${serviceName}] Creating container`)
   const [success, result] = await runDockerApiCommand('createContainer', config, true)
   if (success) {
@@ -63,7 +63,7 @@ export const createDockerContainer = async (serviceName, config) => {
 /**
  * Gets a service id, based on its name
  */
-export const getServiceId = async (serviceName) => {
+export async function getServiceId(serviceName) {
   /*
    * Update state with currently running services
    */
@@ -81,7 +81,7 @@ export const getServiceId = async (serviceName) => {
 /**
  * Stops a service. which just means it stops a container
  */
-export const stopService = async (serviceName) => {
+export async function stopService(serviceName) {
   const id = await getServiceId(serviceName)
   let result
   try {
@@ -96,14 +96,17 @@ export const stopService = async (serviceName) => {
 /**
  * Restarts a service. which just means it restarts a container
  */
-export const restartService = async (id) => await runContainerApiCommand(id, 'restart', {}, true)
+export async function restartService(id) {
+  return await runContainerApiCommand(id, 'restart', {}, true)
+}
+
 /**
  * Creates a docker network
  *
  * @param {string} name - The name of the network
  * @returm {object|bool} options - The id of the created network or false if no network could be created
  */
-export const createDockerNetwork = async (name) => {
+export async function createDockerNetwork(name) {
   log.debug(`Creating Docker network: ${name}`)
   const config = {
     Name: name,
@@ -124,7 +127,7 @@ export const createDockerNetwork = async (name) => {
 
   let success
   try {
-    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+    [success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
     log.warn({ err }, `Failed to run Docker \`createNetwork\` command`)
   }
@@ -178,7 +181,7 @@ export const createDockerNetwork = async (name) => {
  * @param {object} network - The network object (from dockerode)
  * @param {endpointConfig}
  */
-export const attachToDockerNetwork = async (serviceName, network, endpointConfig) => {
+export async function attachToDockerNetwork(serviceName, network, endpointConfig) {
   if (!network) {
     log.warn(`[${serviceName}] Attempt to attach to a network, but no network object was passed`)
     return false
@@ -224,7 +227,7 @@ export const attachToDockerNetwork = async (serviceName, network, endpointConfig
  * @param {object} config - The resolved service configuration
  * @retun {object} opts - The options object for the Docker API
  */
-export const generateContainerConfig = (serviceName) => {
+export function generateContainerConfig(serviceName) {
   const config = utils.getMorioServiceConfig(serviceName)
   /*
    * Basic options
@@ -238,7 +241,7 @@ export const generateContainerConfig = (serviceName) => {
       NetworkMode: utils.getNetworkName(),
       Binds: config.container.volumes,
       LogConfig: {
-        Type: 'journald', // All Morio services log via journald
+        Type: getPreset('MORIO_DOCKER_LOG_DRIVER'),
       },
     },
     Hostname: name,
@@ -294,9 +297,11 @@ export const generateContainerConfig = (serviceName) => {
   /*
    * Hosts
    */
+  const extraHost = getPreset('MORIO_DOCKER_ADD_HOST')
   if (config.container.hosts) {
     opts.HostConfig.ExtraHosts = config.container.hosts
-  }
+    if (extraHost) opts.HostConfig.ExtraHosts.push(extraHost)
+  } else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
 
   /*
    * Command
@@ -315,7 +320,7 @@ export const generateContainerConfig = (serviceName) => {
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runDockerApiCommand = async (cmd, options = {}, silent = false) => {
+export async function runDockerApiCommand(cmd, options = {}, silent = false) {
   let cache = false
   if (apiCache.api.includes(cmd)) {
     cache = `docker.api.${cmd}`
@@ -352,7 +357,7 @@ export const runDockerApiCommand = async (cmd, options = {}, silent = false) => 
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runContainerApiCommand = async (id, cmd, options = {}, silent = false) => {
+export async function runContainerApiCommand(id, cmd, options = {}, silent = false) {
   if (!id) {
     log.debug(`Attemted to run \`${cmd}\` command on a container but no container ID was passed`)
     return [false]
@@ -394,7 +399,7 @@ export const runContainerApiCommand = async (id, cmd, options = {}, silent = fal
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) => {
+export async function runNodeApiCommand(id, cmd, options = {}, silent = false) {
   if (!id) {
     log.debug(`Attemted to run \`${cmd}\` command on a node but no node ID was passed`)
     return [false]
@@ -436,7 +441,7 @@ export const runNodeApiCommand = async (id, cmd, options = {}, silent = false) =
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false) => {
+export async function runNetworkApiCommand(id, cmd, options = {}, silent = false) {
   if (!id) {
     log.debug(`Attemted to run \`${cmd}\` command on a netowk but no network ID was passed`)
     return [false]
@@ -469,7 +474,7 @@ export const runNetworkApiCommand = async (id, cmd, options = {}, silent = false
  * @param {array} Cmd - The command to run inside the container
  * @param {functino} callback - Callback to run when the stream ends
  */
-export const execContainerCommand = async (id, Cmd, callback) => {
+export async function execContainerCommand(id, Cmd, callback) {
   const [ready, container] = await runDockerApiCommand('getContainer', id)
   if (!ready) return false
 
@@ -477,15 +482,18 @@ export const execContainerCommand = async (id, Cmd, callback) => {
    * Command output is provided as a NodeJS stream so this needs some work
    */
   container.exec({ Cmd, AttachStdin: true, AttachStdout: true }, function (err, exec) {
-    exec.start({ hijack: true, stdin: true }, function (err, stream) {
-      const allData = []
-      stream.on('data', (data) => {
-        allData.push(data.toString())
+    if (exec && !err) {
+      exec.start({ hijack: true, stdin: true }, function (err, stream) {
+        const allData = []
+        stream.on('data', (data) => {
+          allData.push(data.toString())
+        })
+        stream.on('end', (err) => {
+          if (!err && callback && typeof callback === 'function')
+            return callback(allData.join('\n'))
+        })
       })
-      stream.on('end', (err) => {
-        if (!err && callback && typeof callback === 'function') return callback(allData.join('\n'))
-      })
-    })
+    } else log.warn(err, `Failed to run docker API command on container ${id}`)
   })
 }
 
@@ -495,7 +503,7 @@ export const execContainerCommand = async (id, Cmd, callback) => {
  * @param {string} id - The container id
  * @param {function} callback - Callback to run when the stream produces data
  */
-export const streamContainerLogs = async (id, onData, onEnd) => {
+export async function streamContainerLogs(id, onData, onEnd) {
   /*
    * First get the internal container id
    */
@@ -523,7 +531,7 @@ export const streamContainerLogs = async (id, onData, onEnd) => {
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runContainerImageApiCommand = async (id, cmd, silent = false) => {
+export async function runContainerImageApiCommand(id, cmd, silent = false) {
   const [ready, image] = await runDockerApiCommand('getImage', id)
   if (!ready) return [false, false]
 
@@ -557,7 +565,7 @@ export const runContainerImageApiCommand = async (id, cmd, silent = false) => {
  * @return {array} return - An array with a boolean indicating success or
  * failure, and the command return value
  */
-export const runDockerCliCommand = async (cmd, ...params) => {
+export async function runDockerCliCommand(cmd, ...params) {
   let result
   try {
     result = await docker[cmd](...params)
@@ -571,7 +579,7 @@ export const runDockerCliCommand = async (cmd, ...params) => {
 /*
  * This helper method saves a list of running services
  */
-export const updateRunningServicesState = async () => {
+export async function updateRunningServicesState() {
   /*
    * On follower nodes, running this on each heartbeat is ok.
    * But on a leader node, especially on a large cluster, this would scale poorly.
@@ -585,7 +593,7 @@ export const updateRunningServicesState = async () => {
 /**
  * This helper method saves a list of running services
  */
-const forceUpdateRunningServicesState = async () => {
+async function forceUpdateRunningServicesState() {
   /*
    * Clear state first, or services that went away would never be cleared
    */
@@ -605,13 +613,15 @@ const forceUpdateRunningServicesState = async () => {
  * @param {object} ds - Object returned from docker
  * @return {object} serviceState - Object we'll keep in state
  */
-const dockerStateToServiceState = (ds) => ({
-  name: ds.Names.pop(),
-  image: ds.Image,
-  labels: ds.Labels,
-  state: ds.State,
-  status: ds.Status,
-})
+function dockerStateToServiceState(ds) {
+  return {
+    name: ds.Names.pop(),
+    image: ds.Image,
+    labels: ds.Labels,
+    state: ds.State,
+    status: ds.Status,
+  }
+}
 
 /**
  * Helper method to get the container image for a service from the config
@@ -619,5 +629,6 @@ const dockerStateToServiceState = (ds) => ({
  * @param {object} config - The service config object
  * @return {string} imagee - The container image for this service
  */
-export const serviceContainerImageFromConfig = (config) =>
-  config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
+export function serviceContainerImageFromConfig(config) {
+  return config.container.image + (config.container.tag ? `:${config.container.tag}` : '')
+}

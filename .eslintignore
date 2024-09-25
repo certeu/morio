@@ -6,3 +6,5 @@
 **/Containerfile.*
 Containerfile
 json-loader.mjs
+control
+postinst

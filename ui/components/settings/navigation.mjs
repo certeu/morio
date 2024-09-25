@@ -53,7 +53,7 @@ export const NavButton = ({
   const className = `w-full flex flex-row items-center px-4 py-2 rounded-l-lg ${extraClasses} ${
     active
       ? here
-        ? 'bg-secondary bg-opacity-20 font-bold text-secondary-content'
+        ? 'bg-secondary bg-opacity-20 font-bold text-inherit border-secondary border border-r-0'
         : 'text-base-content '
       : ` text-base-content ${level > 0 ? 'font-thin text-sm italic' : 'font-medium'}`
   }`

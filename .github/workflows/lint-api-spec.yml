@@ -1,0 +1,46 @@
+#
+# This action submits the API's OpenAPI specification to
+# tht https://ratemyopenapi.com API.
+# It will consider a score below 95 to be a failure.
+# To run this locallly, you can run any of these two in the repository root:
+#   - npm run lint:api-spec
+#   - npm run ci:lint-api-spec
+#
+# This request the RMOA_API_KEY environment variable to be set
+# with an API key for https://ratemyopenapi.com
+#
+name: Lint OpenAPI/API
+
+on:
+  # We use branch protection, so run this on pull requests only
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Morio uses NodeJS 20 lts/iron
+        node-version: [20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        id: cache_node_modules
+        with:
+          path: '**/node_modules'
+          key: node_modules-${{ hashFiles('package-lock.json') }}
+
+      - name: Run RMOA
+        env:
+          RMOA_API_KEY: ${{ secrets.RMOA_API_KEY }}
+        run: npm run ci:lint-api-spec

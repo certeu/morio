@@ -1,6 +1,7 @@
 // Hooks
 import { useApi } from 'hooks/use-api.mjs'
 import { useEffect, useContext, useState } from 'react'
+import { useRouter } from 'next/router'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { ModalContext } from 'context/modal.mjs'
@@ -13,12 +14,26 @@ import { CloseIcon, QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'component
 import { BaseProvider } from './base-provider.mjs'
 import { LocalProvider } from './local-provider.mjs'
 import { MrtProvider } from './mrt-provider.mjs'
+import { OidcProvider } from './oidc-provider.mjs'
+
+/*
+ * For now this goes here, but this is not DRY
+ */
+const redirectErrors = {
+  'morio.api.oidc.discovery.failed': 'OIDC Discovery failed for this identity provider.',
+  'morio.api.oidc.client.init.failed': 'Failed to initialise OIDC client.',
+  'morio.api.oidc.userinfo.unavailable': 'User info not available from OIDC provider.',
+  'morio.api.oidc.callback.mismatch': 'OIDC callback mismatch.',
+  'morio.api.oidc.username.unmatched': 'Unable to match username to OIDC property.',
+  'morio.api.account.role.unavailable': 'The requested role is not available to you.',
+}
 
 const providers = {
   ldap: BaseProvider,
   apikey: (props) => <BaseProvider {...props} usernameLabel="API Key" passwordLabel="API Secret" />,
   local: LocalProvider,
   mrt: MrtProvider,
+  oidc: OidcProvider,
 }
 
 const UnknownIdp = ({ label }) => (
@@ -75,11 +90,18 @@ const tabOrder = (idps, ui, showAll) => {
 
 export const Login = ({ setAccount, account = false, role = false }) => {
   const [error, setError] = useState(false)
-  const [idps, setIdps] = useState({})
+  const [idps, setIdps] = useState(false)
   const [ui, setUi] = useState({})
   const [showAll, setShowAll] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const { clearModal } = useContext(ModalContext)
+  const router = useRouter()
+  const { error: redirectError = false } = router.query
+
+  /*
+   * Loading context
+   */
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   /*
    * API client
@@ -97,6 +119,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         setUi(result.ui)
         /*
          * Force closing modal windows and loading status when the login form initially loads
+         * unless there's a redirect error
          */
         setLoadingStatus([false])
         clearModal()
@@ -113,11 +136,6 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   }
 
   /*
-   * Loading context
-   */
-  const { setLoadingStatus } = useContext(LoadingStatusContext)
-
-  /*
    * Props shared by each idp
    */
   const providerProps = { api, setAccount, setLoadingStatus, setError }
@@ -125,7 +143,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   /*
    * Helper to get the tablist, and array of tabs with IDPs
    */
-  const tabList = tabOrder(idps, ui, showAll)
+  const tabList = tabOrder(idps, ui, showAll).filter(id => typeof idps[id] !== 'undefined')
 
   const tabs = tabList.map((id) => {
     const Idp = providers[idps[id].provider] || UnknownIdp
@@ -173,7 +191,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
             <thead>
               <tr>
                 <th className="text-right w-28">Required&nbsp;Role</th>
-                <th>Current&nbsp;Roles</th>
+                <th>Current&nbsp;Role</th>
               </tr>
             </thead>
             <tbody>
@@ -182,27 +200,16 @@ export const Login = ({ setAccount, account = false, role = false }) => {
                   <span className="badge badge-error ml-1">{role}</span>
                 </td>
                 <td>
-                  {account.roles &&
-                    account.roles.map((role) => (
-                      <span className="badge badge-success ml-1" key={role}>
-                        {role}
-                      </span>
-                    ))}
+                  <span className="badge badge-success ml-1">
+                    {account.role}
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
           <br />
           <Popout note compact dense noP>
-            You can{' '}
-            <a role="button" onClick={back}>
-              go back
-            </a>
-            , or{' '}
-            <a role="button" onClick={() => setAccount(null)}>
-              log out
-            </a>{' '}
-            to assume a different role.
+            You can sign in again to assume a different role, or <a role="button" onClick={back}>go back</a>
           </Popout>
         </>
       ) : null}
@@ -226,10 +233,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
               Morio supports a variety of authentication backends, or <b>identity providers</b>.
             </p>
             <h4>Identity Providers</h4>
-            <p>
-              You local Morio operator (<Term>LoMO</Term>) has configured the following identity
-              providers:
-            </p>
+            <p>This Morio instance is set up with the following providers:</p>
             <ul className="list list-inside list-disc ml-4">
               {tabList.map((id) => (
                 <li key={id}>
@@ -245,8 +249,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
               ))}
             </ul>
             <p>
-              Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
-              deployment.
+              Contact your Morio administrator for questions about how to authenticate to Morio.
             </p>
             {!showAll && tabList.length < Object.keys(idps).length ? (
               <Popout note>
@@ -281,13 +284,21 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         )
       ) : tabList.length > 0 ? (
         <Tabs tabs={tabList.map((id) => idps[id].label || id)}>{tabs}</Tabs>
+      ) : idps === false ? (
+        <Popout warning>Could not load identity providers from the API</Popout>
       ) : (
-        <Popout warning>Failed to load identity providers</Popout>
+        <Popout note>No identity providers are currently configured</Popout>
       )}
       {onlyMrt ? <MrtProvider label="Morio Root Token" {...providerProps} /> : null}
       {error ? (
         <Popout warning compact noP>
           {error}
+        </Popout>
+      ) : null}
+      {redirectError ? (
+        <Popout warning noP>
+          <h5>An error occured</h5>
+          {redirectErrors[redirectError] || redirectError}
         </Popout>
       ) : null}
     </div>

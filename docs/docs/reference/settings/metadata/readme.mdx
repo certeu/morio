@@ -1,0 +1,65 @@
+---
+title: 'Morio Settings: metadata'
+sidebar_label: metadata
+---
+
+The `metadata` key is <Label>optional</Label> but it allows you to add
+metadata to your settings.
+
+<Tip>
+#### Morio supports gitops
+We recommend keeping your settings under version control, and [preseeding 
+them](/docs/reference/settings/preseed). When that is not possible, the
+`metadata` key allows you to at least add some metadata to keep track of changes.
+
+</Tip>
+
+## `metadata.comment`
+
+<Label>Optional</Label>
+A comment, or a list of comments, to keep in your settings.
+
+<Tabs>
+  <TabItem value="a" label="Single comment" default>
+
+```yaml
+metadata:
+  comment: Added LDAP IDP for on-prem Active Directory
+```
+
+</TabItem>
+<TabItem value="b" label="List of comments">
+
+```yaml
+metadata:
+  comment:
+    - '20240825: Added LDAP IDP for on-prem Active Directory - @mario'
+    - '20240509: Initial deploy - @luigi'
+```
+
+</TabItem>
+</Tabs>
+
+## `metadata.version`
+
+<Label>Optional</Label>
+A string or number to indicate the _version_ of the settings.
+
+<Tabs>
+  <TabItem value="a" label="Version as number" default>
+
+```yaml
+metadata:
+  version: 20240825
+```
+
+</TabItem>
+<TabItem value="b" label="Version as string">
+
+```yaml
+metadata:
+  version: prod-7.12.3-rc.1
+```
+
+</TabItem>
+</Tabs>

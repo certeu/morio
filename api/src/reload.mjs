@@ -8,7 +8,7 @@ import process from 'node:process'
  *
  * @return {bool} true when everything is ok, false if not (API won't start)
  */
-export const reloadConfiguration = async () => {
+export async function reloadConfiguration() {
   /*
    * Load data from core
    */
@@ -53,6 +53,7 @@ export const reloadConfiguration = async () => {
      */
     utils.setNodeUuid(data.node.node)
     utils.setNodeSerial(data.node.node_serial)
+    utils.setNodeFqdn(data.nodes[data.node.node].fqdn)
     utils.setClusterUuid(data.node.cluster)
     utils.setSettingsSerial(data.node.settings_serial)
     utils.setKeys(data.keys)
@@ -89,7 +90,7 @@ export const reloadConfiguration = async () => {
 /**
  * Helper method to verify that a fetch to the core API was successful
  */
-const coreFetchOk = (data) => {
-  if (data.node?.ephemeral) return true
-  else return data.info && data.nodes && data.presets && data.settings && data.keys
+function coreFetchOk(data) {
+  if (data?.node?.ephemeral) return true
+  else return data?.info && data?.nodes && data?.presets && data?.settings && data?.keys
 }

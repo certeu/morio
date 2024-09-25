@@ -14,7 +14,7 @@ export const AmazonCloudWatch = (props) => (
 )
 
 /*
- * Apply - The apply logo
+ * Apple - The apple logo
  */
 export const Apple = (props) => (
   <IconWrapper {...props} fill stroke={0}>

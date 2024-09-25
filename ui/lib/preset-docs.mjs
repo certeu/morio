@@ -51,7 +51,7 @@ export const presetDocs = {
   - \`WARN\`
   - \`FATAL\`
   - \`PANIC\``,
-  MORIO_REPO_ROOT: 'Root folder of the Morio repo on the build host',
+  MORIO_GIT_ROOT: 'Root folder of the Morio git repository on the build host',
   MORIO_ROOT_CA_COMMON_NAME: 'Common Name (CN) of the Morio Root Certificate Authority',
   MORIO_ROOT_CA_VALID_YEARS: 'Validity of the root CA certificate, in years.',
   MORIO_UI_PORT: 'The port the Morio UI listens on inside the container',

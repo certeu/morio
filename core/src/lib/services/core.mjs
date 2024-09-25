@@ -139,8 +139,15 @@ export const service = {
       /*
        * Keep a fully templated version of the on-disk settings in memory
        * (this includes decrypted secrets)
+       * However, the templateSettings method will call utils.unwrapSecret
+       * which, if Hashicorp Vault is used, will grab the FQDN from settings
+       * to use as issuer in the JSON web token. But at this point, the
+       * settings are not available yet. So we make them available, even
+       * if they are not templated, and then template them, and overwrite.
        */
-      utils.setSettings(templateSettings(settings))
+      utils.setSettings(settings)
+      const templatedSettings = await templateSettings(settings)
+      utils.setSettings(templatedSettings)
 
       /*
        * Configure the proxy for core access
@@ -171,7 +178,7 @@ export const service = {
 /**
  * Loads the most recent Morio settings  file(s) from disk
  */
-const loadSettingsFromDisk = async () => {
+async function loadSettingsFromDisk() {
   /*
    * Find the most recent timestamp file that exists on disk
    */
@@ -202,22 +209,29 @@ const loadSettingsFromDisk = async () => {
   return { settings, keys, node, timestamp }
 }
 
-export const templateSettings = (settings) => {
+export async function templateSettings(settings) {
   const tokens = {}
   // Build the tokens object
   for (const [key, val] of Object.entries(settings.tokens?.vars || {})) {
     tokens[key] = val
   }
   for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
-    tokens[key] = utils.decrypt(val)
+    try {
+      const clear = await utils.unwrapSecret(key, val)
+      tokens[key] = clear
+    }
+    catch(err) {
+      if (val.vault) log.error(`Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: '+err.message : ''}`)
+    }
   }
 
   /*
-   * Replace any user of {{ username }} with  literal '{{username}}' (no spaces).
+   * Replace any use of {{ username }} or {{ dn }} with  literal '{{username}}' or '{{dn}}' (no spaces).
    * This is needed because it's not a mustache template, but instead hardcoded in:
    * https://github.com/vesse/node-ldapauth-fork/blob/8a461ea72e5d7b6af0b5bb4f272ebf881659a832/lib/ldapauth.js#L160
    */
   tokens.username = '{{username}}'
+  tokens.dn = '{{dn}}'
 
   // Now template the settings
   let newSettings
@@ -230,12 +244,19 @@ export const templateSettings = (settings) => {
   return newSettings
 }
 
-const generateDataChecksum = (data) => {
+function generateDataChecksum(data) {
   const keys = utils.getKeys()
   return hash(JSON.stringify(data) + keys.mrt + keys.cluster + keys.rpwd)
 }
 
-const validateDataChecksum = (data, checksum) => checksum === generateDataChecksum(data)
+function validateDataChecksum(data, checksum) {
+  return checksum === generateDataChecksum(data)
+}
 
-export const dataWithChecksum = (data) => ({ data, checksum: generateDataChecksum(data) })
-export const validDataWithChecksum = ({ data, checksum }) => validateDataChecksum(data, checksum)
+export function dataWithChecksum(data) {
+  return { data, checksum: generateDataChecksum(data) }
+}
+
+export function validDataWithChecksum({ data, checksum }) {
+  return validateDataChecksum(data, checksum)
+}

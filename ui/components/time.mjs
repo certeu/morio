@@ -24,7 +24,7 @@ export const TimeForHumans = ({ iso, future = false }) => {
   const minutes = Math.floor(i.minutes)
   if (years < 1 && months < 1 && days < 1 && hours < 1 && minutes < 1) return `seconds ${suffix}`
   else if (years < 1 && months < 1 && days < 1 && hours < 1)
-    return minutes < 2 ? `one minute ${suffix}` : `minutes minutes ${suffix}`
+    return minutes < 2 ? `one minute ${suffix}` : `${minutes} minutes ${suffix}`
   else if (i.years < 1 && i.months < 1 && i.days < 1)
     return hours < 2 ? `${hours * 60 + minutes} minutes ${suffix}` : `${hours} hours ${suffix}`
   else if (years < 1 && months < 1)

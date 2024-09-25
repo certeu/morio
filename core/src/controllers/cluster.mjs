@@ -23,7 +23,7 @@ export function Controller() {}
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.heartbeat = async (req, res) => {
+Controller.prototype.heartbeat = async function (req, res) {
   /*
    * Validate request against schema
    */
@@ -130,7 +130,7 @@ Controller.prototype.heartbeat = async (req, res) => {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.join = async (req, res) => {
+Controller.prototype.join = async function (req, res) {
   /*
    * We only allow this in ephemeral mode
    * However, we have to deal with a cluster node that restarted

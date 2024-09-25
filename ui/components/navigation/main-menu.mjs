@@ -1,5 +1,5 @@
 // Dependencies
-import { capitalize, pageChildren } from 'lib/utils.mjs'
+import { capitalize, pageChildren, rbac } from 'lib/utils.mjs'
 // Components
 import {
   CertificateIcon,
@@ -85,6 +85,7 @@ const icons = {
 export const links = {
   settings: {
     t: 'Settings',
+    r: 'operator',
     show: {
       t: 'Show Settings',
     },
@@ -97,16 +98,10 @@ export const links = {
   },
   status: {
     docker: {
+      r: 'operator',
       containers: {},
       images: {},
       networks: {},
-      nodes: {},
-      services: {},
-      tasks: {},
-      volumes: {},
-    },
-    logs: {
-      t: 'Status Logs',
     },
     dashboard: {
       t: 'Traefik Dashboard',
@@ -117,15 +112,20 @@ export const links = {
       t: 'RedPanda Console',
       href: `/console/`,
       target: '_BLANK',
+      r: 'operator',
     },
   },
   tools: {
-    accounts: {},
+    accounts: {
+      r: 'manager'
+    },
     pkgs: {
       t: 'Client Packages',
+      r: 'operator'
     },
     decrypt: {
       t: 'Decrypt Data',
+      r: 'engineer',
     },
     downloads: {},
     encrypt: {
@@ -167,12 +167,14 @@ export const NavButton = ({
   page,
   current,
   parents,
+  role,
   level = 0,
   onClick = false,
   href = false,
   target = '',
   extraClasses = 'lg:hover:bg-primary lg:hover:text-primary-content',
 }) => {
+  if (page.r && !rbac(role, page.r)) return null
   /*
    * Pre-calculate some things we need
    */
@@ -219,11 +221,10 @@ export const NavButton = ({
         ? Object.entries(children).map(([key, page]) => (
             <NavButton
               key={key}
-              page={page}
+              {...{ page, current, role }}
               k={key}
               level={level + 1}
               parents={[...parents, k]}
-              {...{ current, key }}
               {...page}
             />
           ))
@@ -257,11 +258,11 @@ const getHref = (page, parents = [], slug = false) =>
  * @param {level} number - An integer indicating the depth, used when called recursively to indent
  * @param {array} parent - An array holding the parents of the current page, allowing to construct the href
  */
-export const MainMenu = ({ current, navs = false, level = 0, parents = [] }) => {
+export const MainMenu = ({ role, current, navs = false, level = 0, parents = [] }) => {
   if (!navs) navs = links
   const list = []
   for (const [key, page] of Object.entries(navs))
-    list.push(<NavButton page={page} k={key} key={key} {...{ current, parents, level }} />)
+    list.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
 
   return list
 }

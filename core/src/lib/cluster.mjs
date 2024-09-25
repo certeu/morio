@@ -12,7 +12,7 @@ import { dataWithChecksum, validDataWithChecksum } from './services/core.mjs'
 /*
  * Helper method to update the cluster state
  */
-export const updateClusterState = async (force = false) => {
+export async function updateClusterState(force = false) {
   /*
    * Don't bother in ephemeral mode
    */
@@ -34,7 +34,7 @@ export const updateClusterState = async (force = false) => {
 /**
  * Helper method to update the cluster state
  */
-export const forceUpdateClusterState = async () => {
+export async function forceUpdateClusterState() {
   await updateNodeState()
   utils.resetClusterStatusAge()
 }
@@ -42,7 +42,7 @@ export const forceUpdateClusterState = async () => {
 /**
  * Helper method to gather the morio cluster state
  */
-const updateNodeState = async () => {
+async function updateNodeState() {
   /*
    * Run heartbeat hook on all services
    */
@@ -68,7 +68,7 @@ const updateNodeState = async () => {
   if (utils.isLeading()) consolidateClusterStatus()
 }
 
-const consolidateClusterStatus = () => {
+function consolidateClusterStatus() {
   const status = utils.getStatus()?.nodes?.[utils.getNodeFqdn()]
   let code = 0
   for (const service of [...serviceOrder]) {
@@ -81,7 +81,7 @@ const consolidateClusterStatus = () => {
   utils.setClusterStatus(code, statusColorFromCode(code))
 }
 
-const statusColorFromCode = (code) => {
+function statusColorFromCode(code) {
   if (code === 0) return 'green'
   if (code < 10) return 'amber'
   // TODO: handle more amber states
@@ -101,7 +101,7 @@ const statusColorFromCode = (code) => {
  *   - If we are leader, we reach out to all nodes asking them to sync
  *   - If we are not leader, we reach out to the lader asking them to initiate a sync
  */
-export const ensureMorioClusterConsensus = async () => {
+export async function ensureMorioClusterConsensus() {
   /*
    * Make sure we use the latest cluster state
    */
@@ -116,7 +116,7 @@ export const ensureMorioClusterConsensus = async () => {
 /**
  * Ensure a cluster heartbeat
  */
-const ensureClusterHeartbeat = async () => {
+async function ensureClusterHeartbeat() {
   /*
    * If we are leading the cluster, don't bother
    */
@@ -132,7 +132,7 @@ const ensureClusterHeartbeat = async () => {
 /**
  * Start a cluster heartbeat
  */
-export const runHeartbeat = async (broadcast = false, justOnce = false) => {
+export async function runHeartbeat(broadcast = false, justOnce = false) {
   /*
    * Run heartbeats locally if there are no remote nodes
    */
@@ -208,7 +208,7 @@ export const runHeartbeat = async (broadcast = false, justOnce = false) => {
  * will start to decay.
  *
  */
-export const runLocalHeartbeat = async (init = false) => {
+export async function runLocalHeartbeat(init = false) {
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -225,12 +225,12 @@ export const runLocalHeartbeat = async (init = false) => {
   utils.setHeartbeatLocal(setTimeout(async () => triggerLocalHeartbeat(), heartbeatDelay()))
 }
 
-const triggerLocalHeartbeat = async () => {
+async function triggerLocalHeartbeat() {
   log.debug(`Running local heartbeat`)
   runLocalHeartbeat(false)
 }
 
-const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
+async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   /*
    * If fqdn is not a thing, don't bother
    */
@@ -304,7 +304,7 @@ const sendHeartbeat = async (fqdn, broadcast = false, justOnce = false) => {
 /*
  * A method to get (and slowly increase) the heartbeat delay
  */
-const heartbeatDelay = () => {
+function heartbeatDelay() {
   const now = Number(utils.getHeartbeatInterval())
   const next = Math.ceil(now * 1.5)
   const max = utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')
@@ -326,7 +326,7 @@ const heartbeatDelay = () => {
  * @param {number} rtt - The request's round-trip-time (RTT) in ms
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
-const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
+function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
   /*
    * Is this an error?
    */
@@ -406,7 +406,7 @@ const verifyHeartbeatResponse = ({ fqdn, data, rtt = 0, error = false }) => {
   }
 }
 
-export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
+export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
   /*
    * Ensure we are comparing to up to date cluster state
    */
@@ -537,7 +537,7 @@ export const verifyHeartbeatRequest = async (data, type = 'heartbeat') => {
  * Note that Morio always runs in cluster mode
  * to ensure we can reach flanking nodes whne they are added.
  */
-export const ensureMorioCluster = async () => {
+export async function ensureMorioCluster() {
   utils.setCoreReady(false)
 
   /*
@@ -579,7 +579,7 @@ export const ensureMorioCluster = async () => {
  *
  * @param {string} fqdn - The fqdn of the remote node
  */
-export const inviteClusterNode = async (remote) => {
+export async function inviteClusterNode(remote) {
   /*
    * First, attempt a single call to join the cluster.
    * We will await this one because typically this works, and it
@@ -611,7 +611,7 @@ export const inviteClusterNode = async (remote) => {
  *
  * @params {string} remote - The FQDN of the remote node
  */
-const inviteClusterNodeAttempt = async (remote) => {
+async function inviteClusterNodeAttempt(remote) {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
@@ -641,60 +641,3 @@ const inviteClusterNodeAttempt = async (remote) => {
     return false
   }
 }
-
-/*
- * This loads the status from the API
- */
-// const getLocalEphemeralUuid = async () => {
-//   /*
-//    * This should only ever be used in ephemeral mode
-//    */
-//   if (!utils.isEphemeral()) return false
-//
-//
-//   /*
-//    * Reach out to 'api' in cleartext, which can only be access on the docker network
-//    */
-//   const result = await testUrl(
-//     `http://api:${utils.getPreset('MORIO_API_PORT')}${utils.getPreset('MORIO_API_PREFIX')}/status`,
-//     {
-//       method: 'GET',
-//       returnAs: 'json',
-//       returnError: true,
-//     }
-//   )
-//
-//   /*
-//    * Return local ephemeral UIUD if we found it
-//    */
-//   return result?.state?.core?.ephemeral_uuid
-//     ?  result.state.core.ephemeral_uuid
-//     : false
-// }
-
-/*
- * Finds out the fqdn of this node
- *
- * @param {array[string]} nodes - The list of node FQDNs
- * @return {string|bool} local - The FQDN or false if it wasn't found
- */
-//const getLocalNode = async (nodes) => {
-//  const localEphUuid = await getLocalEphemeralUuid()
-//
-//  let local = false
-//  for (const node of nodes) {
-//    const reachable = await testUrl(
-//      `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`,
-//      {
-//        method: 'GET',
-//        ignoreCertificate: true,
-//        timeout: 1500,
-//        returnAs: 'json',
-//        returnError: false,
-//      }
-//    )
-//    if (reachable?.state?.core?.ephemeral_uuid === localEphUuid) local = node
-//  }
-//
-//  return local
-//}

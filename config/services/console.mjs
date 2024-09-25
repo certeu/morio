@@ -1,6 +1,17 @@
 import { generateTraefikConfig } from './index.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'docker.redpanda.com/redpandadata/console',
+  // Image tag (version) to run
+  tag: 'v2.7.2',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => ({
@@ -11,12 +22,9 @@ export const resolveServiceConfiguration = ({ utils }) => ({
    * @return {object} container - The container configuration
    */
   container: {
+    ...pullConfig,
     // Name to use for the running container
     container_name: 'console',
-    // Image to run
-    image: 'docker.redpanda.com/redpandadata/console',
-    // Image tag (version) to run
-    tag: 'v2.6.1',
     // Don't attach to the default network
     networks: { default: null },
     // Instead, attach to the morio network
@@ -38,7 +46,24 @@ export const resolveServiceConfiguration = ({ utils }) => ({
       service: 'console',
       prefixes: [`/${utils.getPreset('MORIO_CONSOLE_PREFIX')}`],
       priority: 666,
-    }),
+    })
+      /*
+       * Middleware to add Morio service header
+       */
+      .set('http.middlewares.console-service-header.headers.customRequestHeaders.X-Morio-Service', 'console')
+      /*
+       * Middleware for central authentication/access control
+       */
+      .set(
+        'http.middlewares.console-auth.forwardAuth.address',
+        `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+      )
+      .set('http.middlewares.console-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+      /*
+       * Add middleware to router
+       * The order in which middleware is loaded matters. Auth should go last.
+       */
+      .set('http.routers.console.middlewares', ['console-service-header@file', 'console-auth@file', 'pretty-errors@file'])
   },
   /*
    * Console configuration
@@ -57,6 +82,13 @@ export const resolveServiceConfiguration = ({ utils }) => ({
         keyFilepath: '/etc/morio/console/tls-key.pem',
         insecureSkipTlsVerify: false,
       },
+      sasl: {
+        enabled: true,
+        mechanism: "SCRAM-SHA-512",
+        username: "root",
+        password: utils.getKeys().mrt,
+      },
+
     },
     redpanda: {
       adminApi: {

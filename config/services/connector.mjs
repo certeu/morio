@@ -1,4 +1,15 @@
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'docker.elastic.co/logstash/logstash',
+  // Image tag (version) to run
+  tag: '8.15.1',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -20,12 +31,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'connector',
-      // Image to run
-      image: 'docker.elastic.co/logstash/logstash',
-      // Image tag (version) to run
-      tag: '8.13.3',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -48,12 +56,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
             //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/connector:/usr/share/logstash/data`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
-            //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/connector:/usr/share/logstash/data`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
+            //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
           ],
     },
 

@@ -1,13 +1,14 @@
 {
   "name": "@morio/shared",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
   "author": "CERT-EU <services@cert.europa.eu>",
   "license": "EUPL",
   "scripts": {
     "lint": "eslint --fix 'src/**'",
-    "prettier": "npx prettier --ignore-unknown --write 'src/'"
+    "prettier": "npx prettier --ignore-unknown --write 'src/'",
+    "test": "node --no-warnings --test-concurrency=1 --test"
   },
   "repository": {
     "type": "git",
@@ -35,8 +36,8 @@
     "./utils": "./src/utils.mjs"
   },
   "dependencies": {
-    "bson": "^6.6.0",
-    "glob": "^10.3.12",
+    "bson": "^6.8.0",
+    "glob": "^11.0.0",
     "jsonwebtoken": "^9.0.2",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",

@@ -5,6 +5,7 @@ import { mrt } from './mrt.mjs'
 import { apikey } from './apikey.mjs'
 import { local } from './local.mjs'
 import { ldap } from './ldap.mjs'
+import { oidc } from './oidc.mjs'
 
 /*
  * Reuse this for the provider ID
@@ -76,7 +77,7 @@ export const iam = () => ({
       <b>authorization</b> rules about who can access what within this Morio deploymnent.
     </>
   ),
-  title: 'IAM',
+  title: 'Identity & Access Management',
   type: 'info',
   children: {
     /*
@@ -86,7 +87,7 @@ export const iam = () => ({
       type: 'authProviders',
       title: 'Identity Providers',
       about: 'Identity providers are services that allow users to prove their identity',
-      blocks: { apikey, ldap, local, mrt },
+      blocks: { apikey, ldap, local, mrt, oidc },
     },
     /*
      * Login form

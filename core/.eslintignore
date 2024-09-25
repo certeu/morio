@@ -6,3 +6,5 @@ Containerfile
 bin/*
 run-unit-tests.sh
 *.md
+control
+postinst

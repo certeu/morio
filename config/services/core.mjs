@@ -14,7 +14,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const paths = utils.isEphemeral()
     ? ['/status', '/cluster/join', '/cluster/heartbeat']
-    : ['/status', '/cluster/sync', '/cluster/elect', '/cluster/heartbeat']
+    : ['/status', '/cluster/sync', '/cluster/elect', '/cluster/heartbeat', '/jwks']
 
   return {
     /**
@@ -27,7 +27,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'core',
       // Image to run (different in dev)
-      image: PROD ? 'morio/core' : utils.isUnitTest() ? 'morio/core-test' : 'morio/core-dev',
+      image: PROD ? 'itsmorio/core' : utils.isUnitTest() ? 'itsmorio/core-test' : 'itsmorio/core-dev',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION'),
       // Don't attach to the default network
@@ -45,11 +45,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/morio`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
             `${utils.getPreset('MORIO_DOCKER_SOCKET')}:${utils.getPreset('MORIO_DOCKER_SOCKET')}`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config:/etc/morio`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data:/morio/data`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config:/etc/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data:/morio/data`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs:/var/log/morio`,
           ],
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
@@ -65,7 +65,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
     traefik: {
       core: generateTraefikConfig(utils, {
         service: 'core',
-        paths: paths.map((path) => `${utils.getPreset('MORIO_CORE_PREFIX')}${path}`),
+        paths: [
+          ...paths.map((path) => `${utils.getPreset('MORIO_CORE_PREFIX')}${path}`),
+          '/jwks'
+        ],
         priority: 666,
       })
         .set('http.middlewares.core-prefix.replacepathregex.regex', `^/-/core/(.*)`)
@@ -88,6 +91,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ['tokens.flags.DISABLE_IDP_MRT', false],
       ['tokens.flags.DISABLE_IDP_LOCAL', false],
       ['tokens.flags.DISABLE_IDP_LDAP', false],
+      ['tokens.flags.DISABLE_IDP_OIDC', false],
       ['tokens.flags.HEADLESS_MORIO', false],
     ],
   }

@@ -1,29 +1,24 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # This script will build the .deb package for moriod
 # It is created for a CI environment, but should also run fine
 # on a system that supports .deb (a Debian-based distribution)
 #
 
-#
-# Figure out the repository root
-#
-REPO="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
+# Sounce config variables
+source config/cli.sh
 
 #
 # Create a folder to hold the build context
 #
-rm -rf $REPO/build-context
-mkdir -p $REPO/build-context/dist
-cp -R $REPO/moriod $REPO/build-context/src
-SRC=$REPO/build-context/src
-DIST=$REPO/build-context/dist
-
-# Get the Morio version
-VERSION=`npm run -s get version`
+rm -rf $MORIO_GIT_ROOT/build-context
+mkdir -p $MORIO_GIT_ROOT/build-context/dist
+cp -R $MORIO_GIT_ROOT/moriod $MORIO_GIT_ROOT/build-context/src
+SRC=$MORIO_GIT_ROOT/build-context/src
+DIST=$MORIO_GIT_ROOT/build-context/dist
 
 # Write out the version file
-npm run -s get version > $SRC/etc/morio/moriod/version
+echo $MORIO_VERSION > $SRC/etc/morio/moriod/version
 
 # Write out the .deb control file
 npm run -s get moriod-deb-control > $SRC/control
@@ -35,7 +30,7 @@ npm run -s get moriod-version-env > $SRC/etc/morio/moriod/version.env
 npm run -s get moriod-moriod-env > $SRC/etc/morio/moriod/moriod.env
 
 # Build the package
-cd $REPO/build-context
+cd $MORIO_GIT_ROOT/build-context
 mkdir -p pkg/DEBIAN
 for FILE in control postinst; do
   if [ -f $SRC/$FILE ]
@@ -82,11 +77,11 @@ then
     -F "package[distro_version_id]=35" \
     -F "package[package_file]=@$DIST/$NAME" \
     -X POST \
-    https://packagecloud.io/api/v1/repos/morio/deb/packages.json)
+    https://packagecloud.io/api/v1/repos/morio/debian-12/packages.json)
 
   if [ "201" = ${RESPONSE: -3} ]
   then
-    echo "Package $NAME was published on packagecloud.io/morio/deb"
+    echo "Package $NAME was published on packagecloud.io/morio/debian-12"
     exit 0
   elif [ "422" = ${RESPONSE: -3} ]
   then

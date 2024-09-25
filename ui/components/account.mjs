@@ -14,7 +14,6 @@ import {
   CloseIcon,
   ResetIcon,
   TrashIcon,
-  WarningIcon,
   FingerprintIcon,
   KeyIcon,
   RestartIcon,
@@ -27,6 +26,7 @@ import { RoleInput, StringInput, FormControl } from 'components/inputs.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DateTime } from 'luxon'
 import { AccountStatus } from './accounts.mjs'
+import { Label } from './label.mjs'
 
 export const AccountOverview = () => {
   const { account } = useAccount()
@@ -62,8 +62,8 @@ export const AccountOverview = () => {
         ) : null}
         {account.available_roles ? (
           <tr>
-            <td className="w-36 text-right font-bold">Maximum role</td>
-            <td>
+            <td className="w-36 text-right font-bold">Available roles</td>
+            <td className="flex flex-row items-center gap-1">
               {account.available_roles.map((role) => (
                 <Role key={role} role={role} />
               ))}
@@ -74,6 +74,12 @@ export const AccountOverview = () => {
           <td className="w-36 text-right font-bold">Identity Provider</td>
           <td>
             <span className="badge badge-neutral">{account.provider}</span>
+          </td>
+        </tr>
+        <tr>
+          <td className="w-36 text-right font-bold">Labels</td>
+          <td className="flex flex-row flex-wrap gap-1">
+            {(account.labels || []).map(label => <Label key={label}>{label}</Label>)}
           </td>
         </tr>
         <tr>
@@ -136,13 +142,16 @@ export const RenewTokenButton = () => {
   )
 }
 
-const NoKeysForYou = () => (
-  <button className="btn btn-error" isabled>
-    <div className="flex flex-row gap-1">
-      <WarningIcon />
-      <span>This identity provider does not allow creating API keys</span>
-    </div>
-  </button>
+const NoKeysForYou = ({ provider }) => (
+  <Popout note>
+    <h5>
+      The <code>{provider}</code> identity provider does not allow creating API keys
+    </h5>
+    <p>
+      To create an API key, authenticate using a provider that is not the <code>mrt</code> or{' '}
+      <code>apikey</code> provider as they do not allow creating API keys.
+    </p>
+  </Popout>
 )
 
 export const NewApiKeyButton = () => {
@@ -336,6 +345,8 @@ export const AccountApiKeys = () => {
 
   const refresh = () => setRefresher(refresher + 1)
 
+  if (!keys || keys.length < 1) return null
+
   return (
     <table className="mdx table">
       <thead>
@@ -350,8 +361,7 @@ export const AccountApiKeys = () => {
         </tr>
       </thead>
       <tbody className="nostripes">
-        {keys &&
-          keys.map((data) => (
+        {keys.map((data) => (
             <tr
               key={data.key}
               className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"

@@ -1,6 +1,17 @@
 import { YamlConfig } from '../yaml-config.mjs'
 
 /*
+ * This is kept out of the full config to facilitate
+ * pulling images with the pull-oci run script
+ */
+export const pullConfig = {
+  // Image to run
+  image: 'traefik',
+  // Image tag (version) to run
+  tag: 'v3.1.4',
+}
+
+/*
  * Export a single method that resolves the service configuration
  */
 export const resolveServiceConfiguration = ({ utils }) => {
@@ -46,14 +57,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * @return {object} container - The container configuration
      */
     container: {
+      ...pullConfig,
       // Name to use for the running container
       container_name: 'proxy',
       // Aliases to use on the docker network (used to add unit test alias)
       aliases: !PROD ? ['unit.test.morio.it'] : [],
-      // Image to run
-      image: 'traefik',
-      // Image tag (version) to run
-      tag: 'v3.0.4',
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -74,11 +82,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_DATA_ROOT')}/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
           ]
         : [
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/logs:/var/log/morio`,
-            //`${utils.getPreset('MORIO_REPO_ROOT')}/data/config/shared:/etc/morio/shared`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/config/proxy:/etc/morio/proxy`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
-            `${utils.getPreset('MORIO_REPO_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs:/var/log/morio`,
+            //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/shared:/etc/morio/shared`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/proxy:/etc/morio/proxy`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/proxy/entrypoint.sh:/entrypoint.sh`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/ca/certs/root_ca.crt:/usr/local/share/ca-certificates/morio_root_ca.crt`,
           ],
       // Command
       command: [
@@ -133,7 +141,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
               //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
               '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
               // Point to root CA (will only work after CA is initialized)
-              '--serversTransport.rootcas=/morio/data/ca/certs/root_ca.crt',
+              '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
             ]
       ),
     },

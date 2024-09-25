@@ -114,7 +114,7 @@ const SettingsUploadPage = (props) => {
                     Below is the Morio Root Token which you can use to authenticate while no (other)
                     authentication provider has been setup.
                   </p>
-                  <Highlight>{deployResult.root_token}</Highlight>
+                  <Highlight>{deployResult.root_token.value}</Highlight>
                 </Popout>
                 <p className="text-center">
                   <Link className="btn btn-primary nt-4 btn-lg" href="/">

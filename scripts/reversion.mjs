@@ -3,7 +3,7 @@ import chalk from 'chalk'
 import readline from 'node:readline'
 import process from 'node:process'
 // Load various package.json files
-import { root, api, config, core, schema, shared, ui } from './json-loader.mjs'
+import { root, api, config, core, shared, ui } from './json-loader.mjs'
 
 /*
  * Object holding all files we need to update and their folder
@@ -13,7 +13,6 @@ const files = {
   api,
   config,
   core,
-  schema,
   shared,
   ui,
 }

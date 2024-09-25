@@ -1,6 +1,26 @@
 import { roles } from '#config/roles'
 import { log, utils } from './lib/utils.mjs'
 import { currentRole, currentProvider, currentUser, isRoleAvailable } from './rbac.mjs'
+import sessionMiddleware from 'express-session'
+import { rateLimit } from 'express-rate-limit'
+
+export const session = sessionMiddleware({
+  secret: 'test',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true },
+})
+
+export const limits = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 1000, // Limit each request to 1000 requests per 'window' (15m)
+  standardHeaders: 'draft-7', // https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-07
+  legacyHeaders: false,
+  message: {
+    title: 'Rate limit exceeded',
+    detail: 'You have made too many requests. Please try again later.',
+  },
+})
 
 /*
  * List of routes allowed in ephemeral mode
@@ -9,10 +29,12 @@ const ephemeralRoutes = [
   'GET:/status',
   'GET:/up',
   'POST:/setup',
+  'POST:/preseed',
   'GET:/reload',
   'GET:/info',
   'POST:/cluster/join',
   'POST:/validate/settings',
+  'POST:/validate/preseed',
 ]
 
 /*
@@ -43,7 +65,7 @@ const allowed = [
  * Middleware to handle endpoints that are not available
  * in ephemeral mode or while resolving the configuration
  */
-export const guardRoutes = (req, res, next) => {
+export function guardRoutes(req, res, next) {
   /*
    * Run the check and return an error if it's not allowed
    */
@@ -79,7 +101,7 @@ export const guardRoutes = (req, res, next) => {
 /*
  * Middleware to require a certain role for an endpoint
  */
-const requireRole = (req, res, next, role) => {
+function requireRole(req, res, next, role) {
   const realRole = currentRole(req)
   if (realRole) {
     const isOk = isRoleAvailable(realRole, role)
@@ -97,7 +119,7 @@ for (const role of roles) rbac[role] = (req, res, next) => requireRole(req, res,
 /*
  * Add custom middleware to load roles from header
  */
-export const addRbacHeaders = (req, res, next) => {
+export function addRbacHeaders(req, res, next) {
   /*
    * Attach forwardAuth headers to req.morio
    */

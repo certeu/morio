@@ -31,7 +31,7 @@ export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => 
         update={setMrt}
         valid={valid}
       />
-      <RoleInput {...{ role, setRole }} />
+      <RoleInput {...{ role, setRole }} hide={[]} />
       <button className="btn btn-lg btn-primary w-full" disabled={!valid(mrt)} onClick={submit}>
         Sign in
       </button>

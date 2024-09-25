@@ -1,13 +1,15 @@
 import { iam } from './iam/index.mjs'
 import { connector } from './connector/index.mjs'
-import { deployment } from './deployment.mjs'
+import { cluster } from './cluster.mjs'
 import { metadata } from './metadata.mjs'
 import { tokens } from './tokens.mjs'
+//import { watcher } from './watcher.mjs'
 
 export const templates = {
+  cluster,
   iam,
   connector,
-  deployment,
-  metadata,
+  //watcher,
   tokens,
+  metadata,
 }

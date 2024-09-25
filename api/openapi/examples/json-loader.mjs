@@ -15,6 +15,7 @@ import idps from './idps.json' with { type: 'json' }
 import jwks from './jwks.json' with { type: 'json' }
 import status from './status.json' with { type: 'json' }
 import validateSettings from './validate-settings.json' with { type: 'json' }
+import ratelimits from './ratelimits.json' with { type: 'json' }
 // Accounts
 import listAccounts from './list-accounts.json' with { type: 'json' }
 import createAccount from './create-account.json' with { type: 'json' }
@@ -45,19 +46,21 @@ import settingsTokens from './settings.tokens.json' with { type: 'json' }
 import settingsUi from './settings.ui.json' with { type: 'json' }
 import jwt from './jwt.json' with { type: 'json' }
 import pkgDefaults from './pkg-defaults.json' with { type: 'json' }
+import preseed from './preseed.json' with { type: 'json' }
+import pubkey from './pubkey.json' with { type: 'json' }
 
 export const settings = {
   cluster1: {
     ...settingsCluster1,
-    ...settingsTokens,
-    ...settingsIam,
-    ...settingsUi,
+    tokens: settingsTokens,
+    iam: settingsIam,
+    ui: settingsUi,
   },
   cluster3: {
     ...settingsCluster3,
-    ...settingsTokens,
-    ...settingsIam,
-    ...settingsUi,
+    tokens: settingsTokens,
+    iam: settingsIam,
+    ui: settingsUi,
   },
 }
 
@@ -66,6 +69,8 @@ export const examples = {
     jwt: jwt.jwt,
     settings,
     pkgDefaults,
+    preseed,
+    pubkey,
   },
   req: {
     activateAccount: activateAccount.req,
@@ -99,6 +104,7 @@ export const examples = {
       deb: pkgBuildDeb.res,
     },
     presets,
+    ratelimits,
     status,
     settingsSanitized,
     updateApikey,
