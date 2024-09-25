@@ -1,0 +1,180 @@
+---
+title: Morio Installation Guide
+---
+
+This guide covers the various ways you can install Morio, from fully automated,
+to completely manual.
+
+When we say _install Morio_ we mean install `moriod`, the Morio distribution
+that sets up a Morio node.
+
+## Fully automated
+
+To install a Morio node, run this command as a user with `sudo` permissions:
+
+```sh
+curl https://install.morio.it/ | bash
+```
+
+This will run through the following steps:
+
+- [Ensure `systemd` is available](#ensure-systemd-is-available)
+- [Detect the package type](#determine-the-package-type)
+- [Download and install the `moriod-repo` package](#download-and-install-the-moriod-repo-package)
+- [Update the list of available software](##update-the-list-of-available-sofware)
+- [Install the `moriod` package](#install-the-moriod-package)
+
+Alternatively, you can run all of these steps manually, as outlined below.
+
+## Manual using our packages
+
+To install manually, we will go through the same steps as the install script:
+
+- [Ensure `systemd` is available](#ensure-systemd-is-available)
+- [Detect the package type](#determine-the-package-type)
+- [Download the `moriod-repo` package](#download-the-moriod-repo-package)
+- [Update the list of available software](##update-the-list-of-available-sofware)
+- [Install the `moriod` package](#install-the-moriod-package)
+
+### Ensure `systemd` is available
+
+To install Morio using our packages, `systemd` is a dependency.
+
+Make sure your system has `systemd` by running:
+
+```sh
+systemctl -h
+```
+
+If you get a bunch of output on how to use `systemctl`, you have `systemd`.
+
+<Tip>
+
+If you do not have `systemd` on your system, you can still do [a fully manual
+install of Morio](#fully-manual).
+
+</Tip>
+
+### Determine the package type
+
+We provide `.deb` packages for APT-based systems, like Debian or Ubuntu, as well as `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora.
+
+```sh
+apt -h
+```
+
+If you get a bunch of output about the `apt` packages manager, you are on an APT-based system.
+If not, you are probably on an RPM-based system.
+
+### Download and install the `moriod-repo` package
+
+Download the `moriod-repo` package, and then install it:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+curl https://apt.repo.morio.it/setup-moriod-repo.deb -o ./setup-moriod-repo.deb
+sudo apt install -y ./setup-moriod-repo.deb
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+curl https://rpm.repo.morio.it/setup-moriod-repo.rpm -o ./setup-moriod-repo.rpm
+sudo yum install -y ./setup-moriod-repo.rpm
+```
+
+</TabItem>
+</Tabs>
+
+The first line downloads the package, from these URLS:
+
+- For APT-based systems: https://apt.repo.morio.it/setup-moriod-repo.deb
+- For RPM-based systems: https://rpm.repo.morio.it/setup-moriod-repo.rpm
+
+The second line installs it.
+
+### Update the list of available software
+
+The `moriod-repo` package we just install adds a new software repository.
+Before we can install software from it, we need to update the list of available packages:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt update
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum clean expire-cache
+sudo yum check-update
+```
+
+</TabItem>
+</Tabs>
+
+
+### Install the `moriod` package
+
+Now we can install the `moriod` package:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt install -y moriod
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum install -y moriod
+```
+
+</TabItem>
+</Tabs>
+
+This will create a new systemd service that will start Morio.
+
+## Fully manual
+
+For a fully manual install of Morio, we are going to create the Morio service
+by hand, as adjust some of its configuration.
+
+<Fixme>Explain this in more detail</Fixme>
+
+You can use the example below as-is, or update it according to your needs:
+
+```sh
+docker run --rm \
+  --name=core \
+  --hostname=core \
+  --network=morionet \
+  --network-alias=core \
+  --init \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  -v "/etc/morio:/etc/morio" \
+  -v "/usr/share/morio:/morio/data" \
+  -v "/var/log/morio:/var/log/morio" \
+  -e "MORIO_CORE_LOG_LEVEL=warn \
+  -e "NODE_ENV=production" \
+  itsmorio/core:latest
+```
+
+When the service is stopped, we recommend running:
+
+```
+docker rm -f api ui proxy
+```
+
+If not, the Morio UI and API will remain up, but won't function properly.
+
+
+
