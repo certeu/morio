@@ -49,7 +49,8 @@
     "passport-ldapauth": "^3.0.1",
     "pino": "^9.4.0",
     "qrcode": "^1.5.4",
-    "redoc-express": "^2.1.0"
+    "redoc-express": "^2.1.0",
+    "simple-git": "^3.27.0"
   },
   "devDependencies": {
     "esbuild": "^0.23.1"
