@@ -108,10 +108,7 @@ install_repo_pkg() {
   echo ""
   echo "📦 Installing moriod repo, which will add the ${PACKAGE_FORMAT} repository..."
   if [ $PACKAGE_FORMAT == "apt" ]; then
-    sudo apt install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
-    echo ""
-    echo "🛢️ Updating list of available packages..."
-    sudo apt update
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
   else
     sudo yum install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
     echo ""
@@ -127,7 +124,7 @@ install_moriod_pkg() {
   echo ""
   echo "📦 Installing moriod, which will install Morio..."
   if [ $PACKAGE_FORMAT == "apt" ]; then
-    sudo apt install -y moriod
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y moriod
   else
     sudo yum install -y moriod
   fi
