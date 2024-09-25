@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - [core] Correct namespace in systemd unit file
+- [ui] Fix incorrect import in React animations component
+- [ui] Remove unused symlink that broke the Docker build
+
+### Security
+
+- Morio's GPG key used to sign software packages is now signed by CERT-EU
 
 ## [0.4.0] - 2024-09-25
 
