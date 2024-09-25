@@ -28,7 +28,7 @@ it is a bit rough around the edges. We are in alpha after all.
 
 Up until this point we've limited ourselves to minor releases, cutting a new
 release whenever we have significant new features. Going forward, you can
-accept out release cadence to accelerate, as we'll be publishing patch releases
+accept our release cadence to accelerate, as we'll be publishing patch releases
 with smaller updates. This will also allow us to streamline our release 
 workflows and artefact build pipelines.
 
@@ -54,7 +54,7 @@ the `root` user
 This is a bit of a intermediate solution as we prefer to avoid using SASL as it
 complicates client configuration. Alas, we hit an issue with using mTLS
 authorisation where we were unable to extract the user principal from the
-certificate. And issue for which a fix has so far eluded us. 
+certificate. An issue for which a fix has so far eluded us. 
 
 Once we resolve this, we will switch authorisation back to mTLS and drop SASL.
 
@@ -94,7 +94,8 @@ This is already exposed through the API, although there is no UI component for i
 That is something we might add later.
 
 We needed a persistent KV store for our own purposes inside Morio, so we created
-in Morio's _management API_ backed by our _DB service_.
+one that you can access through Morio's _management API_ and is backed by 
+our _DB service_.
 
 This is a very simply KV store -- think a poor man's `etcd` -- but if it fully 
 distributed on clustered deployments.
@@ -111,16 +112,18 @@ Morio more resilient against abuse.
 
 The _management API_ has an authentication endpoint where you can trade in your
 credentials for a JSON Web Token that you can then use in subsequent requests.
-This is the best way since authentication of requests with a JWT are much more
-efficient.
+This is the recommended way to interact with the API when you require multiple
+request (like from our UI) since authentication of a request with a JWT is 
+much more efficient then checking credentials.
 
 However, you might need to only make a single API call, for example to get a value
 from the KV store in a CI pipeline. In such a use case, the extra
-sign in step adds friction and actually would be slower than making the initial
+sign in step adds friction and ends up being slower than making the initial
 request with credentials.
 
-We've made changes to allow basic authentication for the `apikey` and `mrt`
-identity providers, as those are the ones typically used in an automated way.
+For such use cases, we've made changes to allow basic authentication 
+for the `apikey` and `mrt` identity providers, as those are the ones 
+typically used in an automated way.
 
 ### Prevent generating certificates that would grant elevated privileges
 
@@ -153,13 +156,13 @@ for all details.
 We've setup infrastructure to provide APT and RPM repositories from which you can install Morio.
 They are:
 
-- [api.repo.morio.it](https://apt.repo.morio.it/)
+- [apt.repo.morio.it](https://apt.repo.morio.it/)
 - [rpm.repo.morio.it](https://rpm.repo.morio.it/)
 
 Apart from the `moriod` package which installs a morio node, we also provide a `moriod-repo`
 package which sets up the repository on your system (currently only supported for APT).
-This allows you then install Morio as any regular packages, and you will also get your
-updates that way.
+This allows you to install Morio as any regular package through your package manager,
+as well as receive future updates.
 
 All packages will be signed with [Morio's key](https://apt.repo.morio.it/morio.asc).
 
