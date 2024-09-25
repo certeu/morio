@@ -76,7 +76,7 @@ presets.MORIO_API_PORT = 3000
 // Hosts for which to forego the https validation check
 // Used in unit tests only
 predocs.MORIO_UNIT_TEST_HOST =
-  'Host for which to forego the https validation check. Used in unit tests only.'
+  'Host for which to forego the HTTPS validation check. Used in unit tests only'
 presets.MORIO_UNIT_TEST_HOST = 'unit.test.morio.it'
 
 /*
@@ -214,7 +214,7 @@ predocs.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL =
 presets.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL = 30
 
 predocs.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT =
-  'Amount of milliseconds above which we start logging hearbeat latency'
+  'Amount of milliseconds above which we start logging heartbeat latency'
 presets.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT = 150
 
 predocs.MORIO_CORE_CLUSTER_STATE_CACHE_TTL = 'Amount of seconds to cache the cluster state'
