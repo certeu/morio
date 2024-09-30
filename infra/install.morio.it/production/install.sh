@@ -35,17 +35,17 @@ PACKAGE_EXT=""
 #
 detect_package_manager() {
   echo ""
-  echo "🔎 Looking for apt or yum..."
+  echo -n "🔎 Looking for apt or yum..."
   if command -v apt-get &> /dev/null; then
-    echo "✅ Found apt, will use the APT repository."
+    echo -ne "\r✅ Found apt, will use the APT repository."
     PACKAGE_FORMAT="apt"
     PACKAGE_EXT="deb"
   elif command -v yum &> /dev/null || command -v dnf &> /dev/null; then
-    echo "✅ Found yum, will use the RPM repository."
+    echo -ne "\r✅ Found yum, will use the RPM repository."
     PACKAGE_FORMAT="rpm"
     PACKAGE_EXT="rpm"
   else
-    echo "❌ Failed to find either apt or yum. Not sure what that means, so bailing out here."
+    echo -ne "\r❌ Failed to find either apt or yum. Not sure what that means, so bailing out here."
     exit 1
   fi
 }
@@ -55,11 +55,11 @@ detect_package_manager() {
 #
 detect_systemd() {
   echo ""
-  echo "🔎 Looking for systemd..."
+  echo -n "🔎 Looking for systemd..."
   if pidof systemd &> /dev/null; then
-    echo "✅ Found systemd"
+    echo -ne "\r✅ Found systemd               "
   else
-    echo "❌ Failed to find systemd"
+    echo -ne "\r❌ Failed to find systemd"
     echo "Morio requires systemd for automated installation."
     echo "You can install Morio manually on systems without systemd."
     echo "Refer to https://morio.it/docs/guides/install for details."
@@ -77,11 +77,11 @@ download_repo_pkg() {
 
   # Use curl if it's available
   if command -v curl &> /dev/null; then
-    echo "⬇️  Downloading moriod repo package with curl"
+    echo -n "⬇️  Downloading moriod repo package with curl"
     curl -fsSL "$url" -o "$output"
   # Use wget if curl is not available
   elif command -v wget &> /dev/null; then
-    echo "⬇️  Downloading moriod repo package with wget"
+    echo -n "⬇️  Downloading moriod repo package with wget"
     wget -q "$url" -O "$output"
   # Without curl or wget, bail
   else
@@ -99,9 +99,9 @@ download_repo_pkg() {
 
   # Make sure the download is ok
   if [ -f "$output" ]; then
-    echo "✅ Download completed"
+    echo -ne "\r✅ Download completed: $url"
   else
-    echo "❌ Failed to download $url"
+    echo -ne "\r❌ Failed to download $url"
     return 1
   fi
 }
@@ -138,18 +138,17 @@ install_moriod_pkg() {
 #
 # Main install function that does what needs doing
 install() {
-  echo ""
   echo "    _ _ _  ___  _ _  _  ___ "
   echo "   | ' ' |/ . \| '_/| |/ . \ "
   echo "   |_|_|_|\___/|_|  |_|\___/ "
-  echo ""
   detect_systemd
   detect_package_manager
   download_repo_pkg \
     https://${PACKAGE_FORMAT}.repo.morio.it/setup-moriod-repo_${CHANNEL}.${PACKAGE_EXT} \
     /tmp/setup-moriod-repo.${PACKAGE_EXT}
-  install_repo_pkg
-  install_moriod_pkg
+  #install_repo_pkg
+  #install_moriod_pkg
+  echo ""
 }
 
 #
