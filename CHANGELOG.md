@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Prefix the version number with v in git and container image tags
+- Prefix the version number with v in git and container image tags, and systemd unit file
 - [core] Correct namespace in systemd unit file
 - [moriod] Installing moriod should ensure the folder to hold the proxy config exists on disk
 - [moriod] Do not attach core container to morionet in systemd unit file as it does not yet exists on intial setup
