@@ -50,7 +50,7 @@ else
   tar -ch . | docker build \
     --file Containerfile.$TARGET \
     --tag itsmorio/$CONTAINER:latest \
-    --tag itsmorio/$CONTAINER:$MORIO_VERSION \
+    --tag itsmorio/$CONTAINER:$MORIO_VERSION_TAG \
     -
 fi
 

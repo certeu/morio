@@ -92,7 +92,7 @@ else
     --label org.opencontainers.image.vendor="CERT-EU" \
     --label org.opencontainers.image.title="$TITLE" \
     --label org.opencontainers.image.description="$DESC" \
-    --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
+    --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION_TAG \
     --tag docker.io/itsmorio/$IMAGE:latest \
     ./build-context
 
@@ -130,12 +130,12 @@ else
       exit 1
     fi
 
-    buildah push docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
+    buildah push docker.io/itsmorio/$IMAGE:$MORIO_VERSION_TAG
     if [ $? -eq 0 ]
     then
-      echo "Successfully pushed image: itsmorio/$IMAGE:v$MORIO_VERSION"
+      echo "Successfully pushed image: itsmorio/$IMAGE:$MORIO_VERSION_TAG"
     else
-      echo "Failed to push image: itsmorio/$IMAGE:v$MORIO_VERSION"
+      echo "Failed to push image: itsmorio/$IMAGE:$MORIO_VERSION_TAG"
       exit 1
     fi
   else

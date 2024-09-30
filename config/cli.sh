@@ -12,6 +12,7 @@
 #   - MORIO_GITHUB_REPO
 #   - MORIO_GITHUB_REPO_URL
 #   - MORIO_VERSION
+#   - MORIO_VERSION_TAG
 #   - MORIO_WEBSITE
 #   - MORIO_WEBSITE_URL
 #
@@ -56,6 +57,11 @@ MORIO_GITHUB_REPO_URL="https://github.com/certeu/morio"
 # Current Morio version
 #
 MORIO_VERSION=`sed 's/\"version\"/\"VERSION\"/' $MORIO_GIT_ROOT/package.json | grep VERSION | tr -d 'VERSION [:blank:] ["] [:] [,]'`
+
+#
+# Current Morio version tag
+#
+MORIO_VERSION_TAG="v$MORIO_VERSION"
 
 #
 # Website (for documentation)

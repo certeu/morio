@@ -15,6 +15,7 @@ import process from 'node:process'
  *  - MORIO_GITHUB_REPO
  *  - MORIO_GITHUB_REPO_URL
  *  - MORIO_VERSION
+ *  - MORIO_VERSION_TAG
  *  - MORIO_WEBSITE
  *  - MORIO_WEBSITE_URL
  *
@@ -66,6 +67,11 @@ export const MORIO_GITHUB_REPO_URL = 'https://github.com/certeu/morio'
  * Morio version
  */
 export const MORIO_VERSION = pkg.version
+
+/*
+ * Morio version tag
+ */
+export const MORIO_VERSION_TAG = `v${pkg.version}`
 
 /*
  * Morio website
