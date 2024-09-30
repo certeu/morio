@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Support for building canary and testing container images (tagged as `canary` and `testing`)
+- Support `testing` and `canary` releases of the `moriod-repo` package
 
 ### Fixed
 
