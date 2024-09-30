@@ -146,8 +146,8 @@ install() {
   download_repo_pkg \
     https://${PACKAGE_FORMAT}.repo.morio.it/setup-moriod-repo_${CHANNEL}.${PACKAGE_EXT} \
     /tmp/setup-moriod-repo.${PACKAGE_EXT}
-  #install_repo_pkg
-  #install_moriod_pkg
+  install_repo_pkg
+  install_moriod_pkg
   echo ""
 }
 
