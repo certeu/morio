@@ -148,7 +148,7 @@ install() {
     /tmp/setup-moriod-repo.${PACKAGE_EXT}
   install_repo_pkg
   install_moriod_pkg
-  echo ""
+  sudo systemctl start moriod.service
 }
 
 #
