@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Prefix the version number with v in git and container image tags
+- [moriod] Installing moriod should ensure the folder to hold the proxy config exists on disk
 
 ## [0.4.0] - 2024-09-25
 
