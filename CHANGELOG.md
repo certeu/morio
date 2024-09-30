@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Support for building pre-release container images (tagged as `next`)
+- Support for building canary and testing container images (tagged as `canary` and `testing`)
 
 ### Fixed
 
