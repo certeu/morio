@@ -24,7 +24,7 @@ Environment=MORIO_DATA_ROOT=/var/lib/morio/moriod
 # Location of the Morio logs folder
 Environment=MORIO_LOGS_ROOT=/var/log/morio/moriod
 # Log level for Morio core
-Environment=MORIO_CORE_LOG_LEVEL=warn
+Environment=MORIO_CORE_LOG_LEVEL=debug
 # Node environment
 Environment=NODE_ENV=production
 

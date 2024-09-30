@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for building canary and testing container images (tagged as `canary` and `testing`)
 - Support `testing` and `canary` releases of the `moriod-repo` package
 
+### Changed
+
+- Set default core log level for moriod installs to debug  (in systemd unit file)
+
 ### Fixed
 
 - Prefix the version number with v in git and container image tags, and systemd unit file
