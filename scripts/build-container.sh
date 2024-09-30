@@ -45,11 +45,19 @@ else
   # Container to build
   CONTAINER="$1$SUFFIX"
 
+  # Release to tag this with
+  # Either `latest` for production or `next` for a pre-release
+  if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
+    MORIO_RELEASE="next"
+  else
+    MORIO_RELEASE="latest"
+  fi
+
   # Now build the container
   cd $MORIO_GIT_ROOT/$1
   tar -ch . | docker build \
     --file Containerfile.$TARGET \
-    --tag itsmorio/$CONTAINER:latest \
+    --tag itsmorio/$CONTAINER:$MORIO_RELEASE \
     --tag itsmorio/$CONTAINER:$MORIO_VERSION_TAG \
     -
 fi

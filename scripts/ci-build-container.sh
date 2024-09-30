@@ -68,6 +68,14 @@ else
   # Container to build
   CONTAINER="itsmorio/$IMAGE"
 
+  # Release to tag this with
+  # Either `latest` for production or `next` for a pre-release
+  if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
+    MORIO_RELEASE="next"
+  else
+    MORIO_RELEASE="latest"
+  fi
+
   # Create a folder for the build context
   rm -rf $MORIO_GIT_ROOT/build-context
   mkdir -p $MORIO_GIT_ROOT/build-context
@@ -93,7 +101,7 @@ else
     --label org.opencontainers.image.title="$TITLE" \
     --label org.opencontainers.image.description="$DESC" \
     --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION_TAG \
-    --tag docker.io/itsmorio/$IMAGE:latest \
+    --tag docker.io/itsmorio/$IMAGE:$MORIO_RELEASE \
     ./build-context
 
   if [ $? -eq 0 ]
