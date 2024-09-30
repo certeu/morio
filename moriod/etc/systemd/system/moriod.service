@@ -54,12 +54,12 @@ ExecStart=/usr/bin/docker run --rm \
   -v "${MORIO_LOGS_ROOT}:/var/log/morio" \
   -e "MORIO_CORE_LOG_LEVEL=${MORIO_CORE_LOG_LEVEL}" \
   -e "NODE_ENV=${NODE_ENV}" \
-  morio/core:${MORIO_VERSION}
+  itsmorio/core:${MORIO_VERSION}
 
 # When stopping, we stop & remove core, api, ui, and proxy
 # But we do not stop anything else. So a broker will keep
 # running (for example)
-ExecStop=/usr/bin/docker rm -f core api ui proxy
+ExecStop=/usr/bin/docker rm -f api ui proxy
 
 # Always restart
 Restart=always

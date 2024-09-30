@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { logoPath } from 'components/icons.mjs'
+import { iconPathString } from 'components/branding.mjs'
 
 export const Spinner = ({ className = 'h-6 w-6 animate-spin' }) => (
   <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -27,7 +27,7 @@ export const LogoSpinner = () => (
     viewBox="0 0 24 24"
     style={{ animation: 'spin 3s linear infinite' }}
   >
-    <path cx="12" cy="12" d={logoPath} fill="currentColor" strokeWidth="0" />
+    <path cx="12" cy="12" d={iconPathString} fill="currentColor" strokeWidth="0" />
   </svg>
 )
 
