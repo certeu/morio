@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.4.1-rc.1",
+  "version": "0.4.1",
   "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
