@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [dbuilder] Use correct container tag, rather than bare version number
 - [moriod] Remove all containers when service is stopped
+- [moriod] Force version file update in package postinstall step
 
 ## [0.4.1] - 2024-10-01
 
