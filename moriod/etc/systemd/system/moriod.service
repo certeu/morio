@@ -56,10 +56,12 @@ ExecStart=/usr/bin/docker run --rm \
   -e "NODE_ENV=${NODE_ENV}" \
   itsmorio/core:v${MORIO_VERSION}
 
-# When stopping, we stop & remove core, api, ui, and proxy
-# But we do not stop anything else. So a broker will keep
-# running (for example)
-ExecStop=/usr/bin/docker rm -f api ui proxy
+# When stopping, we stop & remove all containers as they are
+# ephemeral (their data is mounted from the host disk)
+# Core will recreate them when you start the service again.
+# We are listing all possible serviices. Some may not exist w
+# so we redirect stderr to /dev/null
+ExecStop=/usr/bin/docker rm -f api ca broker db console ui proxy connector dbuilder watcher 2> /dev/null
 
 # Always restart
 Restart=always

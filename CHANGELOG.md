@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2024-10-01
 
+### Fixed
+
+- [moriod] Remove all containers when service is stopped
+
+## [0.4.1] - 2024-10-01
+
 ### Added
 
 - Support `testing` and `canary` releases of the `moriod-repo` package
