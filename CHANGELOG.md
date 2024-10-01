@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2024-10-01
+
+### Added
+
+- Support `testing` and `canary` releases of the `moriod-repo` package
+- Support for building canary and testing container images (tagged as `canary` and `testing`)
+
+### Changed
+
+- Set default core log level for moriod installs to debug  (in systemd unit file)
+
+### Fixed
+
+- Prefix the version number with v in git and container image tags, and systemd unit file
+- [core] Correct namespace in systemd unit file
+- [moriod] Installing moriod should ensure the folder to hold the proxy config exists on disk
+- [moriod] Do not attach core container to morionet in systemd unit file as it does not yet exists on intial setup
+- [ui] Fix incorrect import in React animations component
+- [ui] Remove unused symlink that broke the Docker build
+
+### Security
+
+- Morio's GPG key used to sign software packages is now signed by CERT-EU
+
 ## [0.4.0] - 2024-09-25
 
 ### Added
@@ -47,7 +71,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated container images to use the `itsmore` namespace
+- Updated container images to use the `itsmorio` namespace
 - [api] Allow trailing slash in allowed URLs for browsers who tend to add them or have them cached
 - [api] Made `account.about` optional in the data schema
 - [api] Improved OpenAPI schema

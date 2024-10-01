@@ -22,14 +22,18 @@ The GitLab instance is a mirror, please use GitHub for contributions.
 Morio publishes both `.deb` and `.rpm` images to install _moriod_.  
 If you are looking to install Morio on a Linux system, these are the repositories for you.
 
-- `.deb`: [packagecloud.io/morio/debian-12](https://packagecloud.io/morio/debian-12)
-- `.rpm`: [packagecloud.io/morio/rocky-9](https://packagecloud.io/morio/rocky-9)
+- `.deb`: [apt.repo.morio.it](https://apt.repo.morio.it)
+- `.rpm`: [rpm.repo.morio.it](https://rpm.repo.morio.it)
 
 <Note>
 
-- Follow the links above for instructions on how to add these repositories to your system, or to download packages directly.
-- We build `.deb` packages on Debian 12, and `.rpm` packages on Rocky Linux 9, but they should work on other distributions too.
-- The moriod packages require docker and systemd
+- Refer to [the install guide](/docs/guides/install) for instructions on how to
+  add these repositories to your system.
+- We build `.deb` packages on Debian 12, and `.rpm` packages on Rocky Linux 9,
+  but they should work on other distributions too.
+- The moriod packages require `docker` and `systemd`, but you can [do a full
+  manual install](/docs/guides/install#fully-manual) to use Morio on a system
+  without `systemd`.
 
 </Note>
 

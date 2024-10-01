@@ -22,7 +22,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Image to run (different in dev)
       image: PROD ? 'itsmorio/ui' : 'itsmorio/ui-dev',
       // Image tag (version) to run
-      tag: utils.getPreset('MORIO_VERSION'),
+      tag: utils.getPreset('MORIO_VERSION_TAG'),
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

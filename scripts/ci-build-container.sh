@@ -68,6 +68,14 @@ else
   # Container to build
   CONTAINER="itsmorio/$IMAGE"
 
+  # Release to tag this with
+  # Either `latest` for production or `next` for a pre-release
+  if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
+    MORIO_RELEASE="next"
+  else
+    MORIO_RELEASE="latest"
+  fi
+
   # Create a folder for the build context
   rm -rf $MORIO_GIT_ROOT/build-context
   mkdir -p $MORIO_GIT_ROOT/build-context
@@ -92,8 +100,8 @@ else
     --label org.opencontainers.image.vendor="CERT-EU" \
     --label org.opencontainers.image.title="$TITLE" \
     --label org.opencontainers.image.description="$DESC" \
-    --tag docker.io/itsmorio/$IMAGE:v$MORIO_VERSION \
-    --tag docker.io/itsmorio/$IMAGE:latest \
+    --tag docker.io/itsmorio/$IMAGE:$MORIO_VERSION_TAG \
+    --tag docker.io/itsmorio/$IMAGE:$MORIO_RELEASE \
     ./build-context
 
   if [ $? -eq 0 ]
@@ -130,12 +138,12 @@ else
       exit 1
     fi
 
-    buildah push docker.io/itsmorio/$IMAGE:v$MORIO_VERSION
+    buildah push docker.io/itsmorio/$IMAGE:$MORIO_VERSION_TAG
     if [ $? -eq 0 ]
     then
-      echo "Successfully pushed image: itsmorio/$IMAGE:v$MORIO_VERSION"
+      echo "Successfully pushed image: itsmorio/$IMAGE:$MORIO_VERSION_TAG"
     else
-      echo "Failed to push image: itsmorio/$IMAGE:v$MORIO_VERSION"
+      echo "Failed to push image: itsmorio/$IMAGE:$MORIO_VERSION_TAG"
       exit 1
     fi
   else

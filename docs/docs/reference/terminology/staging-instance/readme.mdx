@@ -1,0 +1,62 @@
+---
+title: Staging Instance
+---
+
+When deploying Morio, we recommend to set up a **staging instance** using the
+_canary channel_.
+
+Doing so will allow you to validate new releases in your own environment, with
+your own data.
+
+## Staging architecture
+
+To make a staging instance useful, it should process real data that is a valid
+representation of your production data.
+
+We recommend to configure a limited number of pre-production, staging, or
+development systems to send their data to your staging instance.  Then, you can
+forward all data from this staging instance to your production instance using
+the _connector service_.
+
+<!-- start-skip-spellcheck -->
+
+```mermaid
+graph TD;
+  production("Morio Production")
+  staging("Morio Staging")
+  preprod["Pre-production/Staging\nclients"]
+  prod["Production\nclients"]
+
+  prod  --> production
+  preprod --> staging
+  staging -- Connector --> production
+
+  style production fill:#38BDF8, stroke:#0369A1,stroke-width:2px,color: #075985
+  style staging fill:#C4B5FD, stroke:#6D28D9,stroke-width:2px,color: #5B21B6
+```
+
+<!-- end-skip-spellcheck -->
+
+This way, all data still ends up in your centralised instance, but you have the
+full benefits and limited blast radius that comes with a staging instance.
+
+## Staging new clients
+
+Apart from providing guardrails to deploy Morio updates, a staging instance can
+also help you onboard new clients.
+
+In such a scenario, you may not want to use the connector service to forward
+staging data to production, but rather onboard clients on your staging
+instance, and after you've validated that everything is working as planned,
+migrate them to production.
+
+To facilitate this, you can preseed your staging instance with the keys of your
+production instance.  This allows you to use the same CA root certificate,
+which means you will be able to migrate clients from staging to production
+without having to reconfigure their credentials.
+
+:::tip
+Refer to [the preseeding guide](/docs/guides/settings/preseed/) for more details.
+:::
+
+
