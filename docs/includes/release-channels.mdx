@@ -1,0 +1,35 @@
+:::tip Morio release channels
+
+Morio releases are provided through different channels that each serve their
+specific purpose.
+
+### 📦 Production
+
+This is the default channel. It provides stable releases that have been tested
+and gone through an incubation period in the `canary` channel.
+
+**Use this channel unless you have specific reasons not to.**
+
+### 🐣 Canary
+
+The canary channel is where packages stay a while before they graduate to
+production. 
+A `canary` release allows you to ensure the upcoming release works as expected
+in your specific environment, and limits the blast radius in case a problem is
+not caught in testing. 
+
+When no issues come up during a `canary` release's incubation period,
+it is promoted to `production`.
+
+**We recommend to run the `canary` release on a _staging instance_.**
+
+### 💣 Testing
+
+This channel is used for our integration tests, as well as by developers of
+and contributors to Morio to validate fixes or new features.
+
+When a release in `testing` is validated, it graduates to `canary`.
+
+**The `testing` channel is not intended to be used for _real_ deployments.**
+
+:::
