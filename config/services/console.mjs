@@ -82,13 +82,6 @@ export const resolveServiceConfiguration = ({ utils }) => ({
         keyFilepath: '/etc/morio/console/tls-key.pem',
         insecureSkipTlsVerify: false,
       },
-      sasl: {
-        enabled: true,
-        mechanism: "SCRAM-SHA-512",
-        username: "root",
-        password: utils.getKeys().mrt,
-      },
-
     },
     redpanda: {
       adminApi: {

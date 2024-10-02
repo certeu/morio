@@ -132,12 +132,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
             key: '/usr/share//heartbeat/tls/tls-key.pem',
           },
           /*
-           * SASL configuration
-           */
-          sasl_mechanism: 'SCRAM-SHA-512',
-          sasl_jaas_config: `org.apache.kafka.common.security.scram.ScramLoginModule required username='root' password='${utils.getKeys().mrt}'`,
-          security_protocol: 'SASL_SSL',
-          /*
            * Topic to publish to
            */
           topic: 'checks',

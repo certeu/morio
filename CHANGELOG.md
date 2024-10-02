@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [watcher] We have enabled the watcher service which was disabled due to SASL
+
 ### Fixed
 
+- [broker] Fixed the issue with mTLS that was the reason for the SASL configuration as a temporary workaround
 - [core] Guard against untagged images when filtering docker image list
+
+### Removed
+
+- [broker] We have removed SASL since we now use mTLS based authentication and authorization
 
 ## [0.4.1] - 2024-10-01
 

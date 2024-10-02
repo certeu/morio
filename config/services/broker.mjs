@@ -72,9 +72,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        `--kafka-addr external://0.0.0.0:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
-        `--advertise-kafka-addr external://${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
-        `--rpc-addr 0.0.0.0:33145`,
         '--default-log-level=info',
         '--logger-log-level=kafka=debug',
       ],
@@ -84,7 +81,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'rpadmin',
         prefixes: [`/v1/`],
         priority: 666,
-        //backendTls: true,
       })
         /*
          * Middleware to add Morio service header
@@ -219,7 +215,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
             advertise_address: utils.getNodeFqdn(),
             advertise_port: utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT'),
-            //authentication_method: 'sasl',
+            authentication_method: 'mtls_identity',
           },
         ],
 
@@ -281,12 +277,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
         cluster_id: utils.getClusterUuid(),
 
         /*
-         * Do not enable authorization in the config as it risks locking ourselves out
-         * Instead, configure it with rpk later
-         * FIXME: Setting this to null as we are using SASL for now
+         $ Enable authorization with mTLS as the principal provider
          */
-        kafka_enable_authorization: 'null',
-        enable_sasl: true,
+        kafka_enable_authorization: true,
 
         /*
          * Allow auto-creation of topics (subject to ACL)
@@ -304,6 +297,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
         //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN *= *([^,]).*/$1/` ],
         //kafka_mtls_principal_mapping_rules: ["DEFAULT"],
+        kafka_mtls_principal_mapping_rules: [ "RULE:.*CN *= *([^,]+).*/$1/" ],
 
         /*
          * Default topic partition count
@@ -315,7 +309,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         legacy_permit_unsafe_log_operation: false,
 
-        superusers: [ `root.${utils.getClusterUuid()}.morio.internal`, 'root' ],
+        superusers: [ `root.${utils.getClusterUuid()}.morio.internal` ],
       },
 
       /*
@@ -380,31 +374,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       current_cloud_auth_kind: '',
       profiles: [
         {
-          name: 'nosasl',
-          description: 'An rpk profile to connect to Morio during the initial cluster bootstraap when SASL is not yet enabled',
-          prompt: '',
-          from_cloud: false,
-          kafka_api: {
-            brokers: [
-              `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
-            ],
-            tls: {
-              enabled: true,
-              key_file: '/etc/redpanda/superuser-key.pem',
-              cert_file: '/etc/redpanda/superuser-cert.pem',
-              truststore_file: '/etc/redpanda/tls-ca.pem',
-            },
-          },
-          admin_api: {
-            // Only connect locally
-            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
-          },
-          schema_registry: {},
-          cloud_auth: [],
-        },
-        {
           name: 'morio',
-          description: 'The default rpk profile for Morio to use once SASL is enabled',
+          description: 'The default rpk profile for Morio',
           prompt: '',
           from_cloud: false,
           kafka_api: {
@@ -416,11 +387,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
               key_file: '/etc/redpanda/superuser-key.pem',
               cert_file: '/etc/redpanda/superuser-cert.pem',
               truststore_file: '/etc/redpanda/tls-ca.pem',
-            },
-            sasl: {
-              mechanism: 'SCRAM-SHA-512',
-              user: 'root',
-              password: utils.getKeys().mrt,
             },
           },
           admin_api: {
