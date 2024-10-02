@@ -41,7 +41,7 @@ export const serviceOrder = [
   'proxy',
   'connector',
   'dbuilder',
-  //'watcher', // FIXME: Enable when SASL is gone
+  'watcher',
 ]
 
 /*
