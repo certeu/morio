@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2024-10-01
 
+### Fixed
+
+- [dbuilder] Use correct container tag, rather than bare version number
+- [moriod] Remove all containers when service is stopped
+- [moriod] Force version file update in package postinstall step
+
+### Removed
+
+- We no longer publish AMI images, use https//install.morio.it/ on your own based image instead
+
+## [0.4.1] - 2024-10-01
+
 ### Added
 
 - Support `testing` and `canary` releases of the `moriod-repo` package
