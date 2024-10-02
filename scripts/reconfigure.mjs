@@ -118,7 +118,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
-  }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
+  }${config[name][env].container.image}:v${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
 `
 
 const preApiTest = `

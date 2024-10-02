@@ -72,7 +72,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'api',
       // Image to run (different in dev)
-      image: PROD ? 'itsmorio/api' : 'itsmorio/api-dev',
+      image: PROD ? 'itsmorio/api' : 'devmorio/api',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION_TAG'),
       // Don't attach to the default network
