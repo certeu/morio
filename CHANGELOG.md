@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [core] Guard against untagged images when filtering docker image list
+
 ## [0.4.1] - 2024-10-01
 
 ### Fixed

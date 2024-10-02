@@ -76,7 +76,10 @@ async function createMorioService(serviceName) {
    */
   const [ok, list] = await runDockerApiCommand('listImages')
   if (!ok) log.warn(`Unable to load list of docker images`)
-  if (list.filter((img) => img.RepoTags.includes(config.Image)).length < 1) {
+  if (
+    list.filter((img) => Array.isArray(img.RepoTags) && img.RepoTags.includes(config.Image))
+      .length < 1
+  ) {
     log.info(`[${serviceName}] Image ${config.Image} is not available on disk. Attempting pull.`)
 
     return new Promise((resolve) => {
