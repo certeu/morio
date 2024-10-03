@@ -21,6 +21,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [broker] We have removed SASL since we now use mTLS based authentication and authorization
 
+### Security
+
+- [broker] We now use mTLS based authorization (ACL)
+- [core] Make console a broker superuser now that an ACL is enforced
+- [core] Configure broker ACL for watcher service
+
+
 ## [0.4.1] - 2024-10-01
 
 ### Fixed
