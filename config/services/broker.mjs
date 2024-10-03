@@ -309,7 +309,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         legacy_permit_unsafe_log_operation: false,
 
-        superusers: [ `root.${utils.getClusterUuid()}.morio.internal` ],
+        superusers: [
+          `root.${utils.getClusterUuid()}.morio.internal`,
+          `console.infra.${utils.getClusterUuid()}.morio.internal`,
+        ],
       },
 
       /*
