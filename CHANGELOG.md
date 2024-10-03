@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [broker] Fixed the issue with mTLS that was the reason for the SASL configuration as a temporary workaround
 - [core] Guard against untagged images when filtering docker image list
+- [dbuilder] Fix testing images as 'testing' rather than 'next'
 
 ### Removed
 
