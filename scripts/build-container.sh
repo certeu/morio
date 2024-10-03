@@ -48,7 +48,7 @@ else
   # Release to tag this with
   # Either `latest` for production or `next` for a pre-release
   if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
-    MORIO_RELEASE="next"
+    MORIO_RELEASE="testing"
   else
     MORIO_RELEASE="latest"
   fi
