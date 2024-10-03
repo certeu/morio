@@ -38,7 +38,7 @@ show_help() {
 }
 
 show_version() {
-  cat /etc/morio/version
+  cat /etc/morio/moriod/version
   exit 0
 }
 
