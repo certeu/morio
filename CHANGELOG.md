@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [dbuilder] Replace 'next' tag with 'testing'
 - [moriod] Correct location of version file
 - [ui] Replace 'next' tag with 'testing'
+- [ui] Use correct spinner in setup wizard
 
 ### Removed
 

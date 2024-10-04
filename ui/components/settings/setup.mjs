@@ -11,7 +11,7 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { SettingsReport } from './report.mjs'
 import { FormBlock } from './blocks/form.mjs'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { Box } from 'components/box.mjs'
 import { OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -41,7 +41,7 @@ const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate 
     ) : (
       <div className="text-center text-2xl">
         <div className="w-32 mx-auto mb-4 text-primary">
-          <LogoSpinner />
+          <Spinner />
         </div>
         One moment please
       </div>
@@ -103,7 +103,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
                 {deployResult.root_token?.value ? (
                   <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                 ) : (
-                  <LogoSpinner />
+                  <Spinner />
                 )}
               </div>
               {deployResult.root_token?.value ? (
