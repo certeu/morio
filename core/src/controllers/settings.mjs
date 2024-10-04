@@ -2,10 +2,12 @@ import { resolveHostAsIp } from '#shared/network'
 import { setIfUnset } from '#shared/store'
 import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import {
+  encryptionMethods,
   generateJwtKey,
   generateKeyPair,
+  hash,
+  hashPassword,
   randomString,
-  encryptionMethods,
   uuid,
 } from '#shared/crypto'
 import { reload } from '../index.mjs'
@@ -266,18 +268,9 @@ const initialSetup = async function (req, settings) {
   log.debug(`Initial settings will be tracked as: ${time}`)
 
   /*
-   * This is the initial deploy, there will be no key pair or UUID, so generate one.
+   * This is the initial deploy, generate keys, UUIDS and so on
    */
-  log.debug(`Generating root token`)
-  const morioRootToken = 'mrt.' + (await randomString(32))
-  log.debug(`Generating key pair`)
-  const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
-  const keys = {
-    jwt: generateJwtKey(),
-    mrt: morioRootToken,
-    public: publicKey,
-    private: privateKey,
-  }
+  const keys = {}
 
   /*
    * Generate UUIDs for node and cluster
@@ -287,6 +280,28 @@ const initialSetup = async function (req, settings) {
   keys.cluster = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
   log.debug(`Cluster UUID: ${keys.cluster}`)
+
+  /*
+   * generate the unseal secret and root token
+   */
+  keys.seal = await hashPassword(randomString(64))
+  log.debug(`Generating root token`)
+  const morioRootToken = 'mrt.' + (await randomString(32))
+  keys.mrt = hashPassword(morioRootToken)
+
+  /*
+   * Now generate the key pair
+   */
+  keys.unseal = hash(keys.cluster + keys.seal.hash)
+  log.debug(`Generating key pair`)
+  const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
+  keys.public = publicKey
+  keys.private = privateKey
+
+  /*
+   * Generate JWT
+   */
+  keys.jwt = generateJwtKey()
 
   /*
    * Complete the settings with the defaults that are configured
@@ -308,29 +323,17 @@ const initialSetup = async function (req, settings) {
   await generateCaConfig()
 
   /*
-   * Handle secrets - Which requires some extra work
-   * At this point, utils does not (yet) hold our encryption methods.
-   * So we need to add them prior to calling ensureTokenSecrecy.
-   * However, all of this is only required if/when the initial settings
-   * contain secrets. Soemthing which is not supported in the UI but can
-   * happen when people either use the API for initial setup, or upload a
-   * settings file.
-   *
-   * So let's first check whether there are any secrets, and if not just
-   * bypass the entire secret handling.
+   * Add encryption methods
+   */
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(keys.unseal, keys.cluster, log)
+  utils.encrypt = encrypt
+  utils.decrypt = decrypt
+  utils.isEncrypted = isEncrypted
+
+  /*
+   * Now ensure token secrecy before we write to disk
    */
   if (valid.tokens?.secrets) {
-    /*
-     * Add encryption methods
-     */
-    const { encrypt, decrypt, isEncrypted } = encryptionMethods(keys.mrt, 'Morio by CERT-EU', log)
-    utils.encrypt = encrypt
-    utils.decrypt = decrypt
-    utils.isEncrypted = isEncrypted
-
-    /*
-     * Now ensure token secrecy before we write to disk
-     */
     valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
   }
 
@@ -345,8 +348,15 @@ const initialSetup = async function (req, settings) {
    * Also write the keys to disk
    * Note that we're loading from the store, which was updated by generateCaConfig()
    */
-  log.debug(`Writing key data to keys.json`)
-  result = await writeJsonFile(`/etc/morio/keys.json`, utils.getKeys())
+  log.debug(`Writing key data to morio.keys`)
+  const keydata = {
+    cluster: keys.cluster,
+    key: keys.private,
+    seal: keys.seal,
+    data: await utils.encrypt(utils.getKeys()),
+  }
+
+  result = await writeJsonFile(`/etc/morio/keys.json`, keydata)
   if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
@@ -370,7 +380,7 @@ const initialSetup = async function (req, settings) {
       root_token: {
         about:
           'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-        value: keys.mrt,
+        value: morioRootToken,
       },
     },
     false,

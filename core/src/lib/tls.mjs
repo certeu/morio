@@ -104,7 +104,7 @@ export async function createX509Certificate(data) {
     },
     noDefaults: true,
     key: utils.getKeys().private,
-    passphrase: utils.getKeys().mrt,
+    passphrase: utils.getKeys().unseal,
   })
 
   /*

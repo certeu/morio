@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [broker] We now use mTLS based authorization (ACL)
 - [core] Make console a broker superuser now that an ACL is enforced
 - [core] Configure broker ACL for watcher service
+- [core] Store the salted&hashed the root token. Earlier, it was stored in clear on disk to facilitate development, no longer.
 
 
 ## [0.4.1] - 2024-10-01
