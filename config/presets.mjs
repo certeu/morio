@@ -267,6 +267,13 @@ predocs.MORIO_UI_TIMEOUT_URL_CHECK = 'Number of milliseconds before a URL check 
 presets.MORIO_UI_TIMEOUT_URL_CHECK = 1500
 
 /*
+ * Web presets
+ */
+
+predocs.MORIO_WEB_HTTP_PORT = 'TCP port for the HTTP service of the _web service_ to listen on'
+presets.MORIO_WEB_HTTP_PORT = 80
+
+/*
  * Watcher presets
  */
 
