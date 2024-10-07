@@ -1,6 +1,6 @@
 import { resolveHostAsIp } from '#shared/network'
 import { setIfUnset } from '#shared/store'
-import { writeYamlFile, writeJsonFile } from '#shared/fs'
+import { writeYamlFile, writeJsonFile, readJsonFile } from '#shared/fs'
 import {
   encryptionMethods,
   generateJwtKey,
@@ -195,6 +195,21 @@ Controller.prototype.reseed = async function (req, res) {
 }
 
 /**
+ * Export the keys
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.exportKeys = async function (req, res) {
+  /*
+   * Load the raw key data from disk
+   */
+  const keys = await readJsonFile(`/etc/morio/keys.json`)
+
+  return res.send({ keys })
+}
+
+/**
  * This is a helper method to figure who we are.
  * This is most relevant when we have a cluster.
  *
@@ -282,7 +297,7 @@ const initialSetup = async function (req, settings) {
   log.debug(`Cluster UUID: ${keys.cluster}`)
 
   /*
-   * generate the unseal secret and root token
+   * generate the seal secret and root token
    */
   keys.seal = await hashPassword(randomString(64))
   log.debug(`Generating root token`)
@@ -292,7 +307,7 @@ const initialSetup = async function (req, settings) {
   /*
    * Now generate the key pair
    */
-  keys.unseal = hash(keys.cluster + keys.seal.hash)
+  keys.unseal = hash(keys.seal.salt + keys.seal.hash)
   log.debug(`Generating key pair`)
   const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
   keys.public = publicKey
@@ -325,7 +340,11 @@ const initialSetup = async function (req, settings) {
   /*
    * Add encryption methods
    */
-  const { encrypt, decrypt, isEncrypted } = encryptionMethods(keys.unseal, keys.cluster, log)
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+    keys.unseal,
+    hash(keys.seal.salt + keys.unseal),
+    log
+  )
   utils.encrypt = encrypt
   utils.decrypt = decrypt
   utils.isEncrypted = isEncrypted
@@ -350,13 +369,11 @@ const initialSetup = async function (req, settings) {
    */
   log.debug(`Writing key data to morio.keys`)
   const keydata = {
-    cluster: keys.cluster,
+    data: await utils.encrypt(utils.getKeys()),
     key: keys.private,
     seal: keys.seal,
-    data: await utils.encrypt(utils.getKeys()),
   }
-
-  result = await writeJsonFile(`/etc/morio/keys.json`, keydata)
+  result = await writeJsonFile(`/etc/morio/keys.json`, keydata, log, 0o600)
   if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*

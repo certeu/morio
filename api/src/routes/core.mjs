@@ -111,4 +111,10 @@ export function routes(app) {
    * This route will cause core to reseed the configuration
    */
   app.get(`/reseed`, (req, res) => Core.reseed(req, res))
+
+  /*
+   * This route will export the key data
+   * Only root can do this
+   */
+  app.get(`/export/keys`, rbac.root, (req, res) => Core.exportKeys(req, res))
 }

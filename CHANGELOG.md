@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [api] Allow the export of key data
+- [core] Allow the export of key data
+- [ui] Allow the export of key data
 - [watcher] We have enabled the watcher service which was disabled due to SASL
 
 ### Fixed

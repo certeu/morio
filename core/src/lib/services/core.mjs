@@ -196,9 +196,10 @@ async function loadSettingsFromDisk() {
   /*
    * Add encryption methods to utils so we can template the settings
    */
+  const unseal = hash(keydata.seal.salt + keydata.seal.hash)
   const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-    hash(keydata.cluster + keydata.seal.hash),
-    keydata.cluster,
+    unseal,
+    hash(keydata.seal.salt + unseal),
     log
   )
   utils.encrypt = encrypt

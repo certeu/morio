@@ -288,6 +288,20 @@ Controller.prototype.settings = async function (req, res) {
 }
 
 /**
+ * Export keys
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.exportKeys = async function (req, res) {
+  /*
+   * Pass request to core
+   */
+  const [status, result] = await utils.coreClient.get(`/export/keys`)
+
+  return res.status(status).send(result)
+}
+/**
  * Stream service logs
  *
  * @param {object} req - The request object from Express

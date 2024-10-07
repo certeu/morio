@@ -50,6 +50,36 @@ MorioClient.prototype.call = async function (url, data, raw = false) {
 }
 
 /**
+ * Gets the certificates
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getCertificates = async function () {
+  return await this.call(`${morioConfig.api}/ca/certificates`)
+}
+
+/**
+ * Gets the public key
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getPublicKey = async function () {
+  return await this.call(`${morioConfig.api}/pubkey`)
+}
+
+/**
+ * Gets the exported key data
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.exportKeys = async function () {
+  return await this.call(`${morioConfig.api}/export/keys`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
  * Gets the current configuration
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
