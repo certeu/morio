@@ -14,6 +14,7 @@ import { reload } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
+import { unsealKeyData } from '../lib/services/core.mjs'
 import { resolveServiceConfiguration } from '#config'
 import { loadPreseededSettings } from '#shared/loaders'
 
@@ -285,7 +286,7 @@ const initialSetup = async function (req, settings) {
   /*
    * This is the initial deploy, generate keys, UUIDS and so on
    */
-  const keys = {}
+  const keys = settings.preseed?.keys ? unsealKeyData(settings.preseed.keys) : {}
 
   /*
    * Generate UUIDs for node and cluster
@@ -297,26 +298,35 @@ const initialSetup = async function (req, settings) {
   log.debug(`Cluster UUID: ${keys.cluster}`)
 
   /*
-   * generate the seal secret and root token
+   * Fenerate the seal secret unless it was provided in the preseeded key data
    */
-  keys.seal = await hashPassword(randomString(64))
-  log.debug(`Generating root token`)
-  const morioRootToken = 'mrt.' + (await randomString(32))
-  keys.mrt = hashPassword(morioRootToken)
+  if (!keys.seal) keys.seal = await hashPassword(randomString(64))
 
   /*
-   * Now generate the key pair
+   * Generate the Morio root token, unless it was provided in the preseeded key data
    */
-  keys.unseal = hash(keys.seal.salt + keys.seal.hash)
-  log.debug(`Generating key pair`)
-  const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
-  keys.public = publicKey
-  keys.private = privateKey
+  let morioRootToken = 'Use the preseeded root token'
+  if (!keys.mrt) {
+    log.debug(`Generating root token`)
+    morioRootToken = 'mrt.' + (await randomString(32))
+    keys.mrt = hashPassword(morioRootToken)
+  }
 
   /*
-   * Generate JWT
+   * Now generate the key pair, unless it was provided in the preseeded key data
    */
-  keys.jwt = generateJwtKey()
+  if (!keys.unseal) keys.unseal = hash(keys.seal.salt + keys.seal.hash)
+  if (!keys.private) {
+    log.debug(`Generating key pair`)
+    const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
+    keys.public = publicKey
+    keys.private = privateKey
+  }
+
+  /*
+   * Generate JWT, unles sit was providede in the preseeded key data
+   */
+  if (!keys.jwt) keys.jwt = generateJwtKey()
 
   /*
    * Complete the settings with the defaults that are configured
@@ -335,19 +345,21 @@ const initialSetup = async function (req, settings) {
    * We need to generate the CA config & certificates early so that
    * we can pass them along the join invite to cluster nodes
    */
-  await generateCaConfig()
+  await generateCaConfig(keys)
 
   /*
-   * Add encryption methods
+   * Add encryption methods, unless they are already added
    */
-  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-    keys.unseal,
-    hash(keys.seal.salt + keys.unseal),
-    log
-  )
-  utils.encrypt = encrypt
-  utils.decrypt = decrypt
-  utils.isEncrypted = isEncrypted
+  if (!utils.encrypt) {
+    const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+      keys.unseal,
+      hash(keys.seal.salt + keys.unseal),
+      log
+    )
+    utils.encrypt = encrypt
+    utils.decrypt = decrypt
+    utils.isEncrypted = isEncrypted
+  }
 
   /*
    * Now ensure token secrecy before we write to disk
@@ -385,7 +397,6 @@ const initialSetup = async function (req, settings) {
 
   /*
    * The data to return
-   * The Morio Root Token is actually the passphrase used to encrypt the private key
    */
   return [
     {
@@ -394,11 +405,17 @@ const initialSetup = async function (req, settings) {
         node: node.uuid,
         cluster: keys.cluster,
       },
-      root_token: {
-        about:
-          'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-        value: morioRootToken,
-      },
+      root_token: morioRootToken.includes('preseeded')
+        ? {
+            about:
+              'This Morio instance was preseeded with Key Data. No new Morio root token was generated. Use the preceeded root token instead.',
+            value: morioRootToken,
+          }
+        : {
+            about:
+              'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
+            value: morioRootToken,
+          },
     },
     false,
   ]

@@ -180,6 +180,9 @@ async function loadSettingsFromDisk() {
    */
   const node = await readJsonFile(`/etc/morio/node.json`)
 
+  /*
+   * If there's no settings on disk, we're in ephemeral mode
+   */
   if (!timestamp)
     return {
       settings: {},
@@ -194,22 +197,10 @@ async function loadSettingsFromDisk() {
   const keydata = await readJsonFile(`/etc/morio/keys.json`)
 
   /*
-   * Add encryption methods to utils so we can template the settings
-   */
-  const unseal = hash(keydata.seal.salt + keydata.seal.hash)
-  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-    unseal,
-    hash(keydata.seal.salt + unseal),
-    log
-  )
-  utils.encrypt = encrypt
-  utils.decrypt = decrypt
-  utils.isEncrypted = isEncrypted
-
-  /*
    * Decrypt key data
+   * This will also add encryption methods to utils so we can template the settings
    */
-  const keys = decrypt(keydata.data)
+  const keys = unsealKeyData(keydata)
 
   return { settings, keys, node, timestamp }
 }
@@ -266,4 +257,21 @@ export function dataWithChecksum(data) {
 
 export function validDataWithChecksum({ data, checksum }) {
   return validateDataChecksum(data, checksum)
+}
+
+export function unsealKeyData(keydata) {
+  const unseal = hash(keydata.seal.salt + keydata.seal.hash)
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+    unseal,
+    hash(keydata.seal.salt + unseal),
+    log
+  )
+  if (!utils.encrypt) utils.encrypt = encrypt
+  if (!utils.decrypt) utils.decrypt = decrypt
+  if (!utils.isEncrypted) utils.isEncrypted = isEncrypted
+
+  /*
+   * Return unsealed key data
+   */
+  return decrypt(keydata.data)
 }
