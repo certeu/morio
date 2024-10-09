@@ -109,7 +109,7 @@ const vaultInstance = Joi.object({
 /*
  * Preseeded key data
  */
-const preseedKeys = Joi.object({
+export const preseedKeys = Joi.object({
   data: Joi.string().required(),
   key: Joi.string().pattern(/.*ENCRYPTED PRIVATE KEY.*/).required(),
   seal: Joi.object({

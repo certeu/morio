@@ -2,41 +2,57 @@
 title: Preseeding Guide
 ---
 
-To _preseed_ the Morio config means to load it from an external source, rather
-than keep it within Morio itself.
+To _preseed_ the Morio config means to load it from an external source -- 
+typically a git repositoruy -- rather than keep it within Morio itself.
+This allows you to deploy Morio with an _infrastructe as code_ approach.
 
 This guide covers the general principle and best practices. For details about
 all possibilities, refer to [the reference documentation on the `preseed`
 settings](/docs/reference/settings/preseed/).
 
-## General principle and origin story
+## Preseeding and reseeding
 
-At CERT-EU we like to keep our configurations under version control.
-There are [so many reasons](/docs/training/git/) for this that we consider
-it common sense, and we have added the preseeding functionality to Morio
-so we could keep its settings in git too.
+Any time you update Morio settings, those settings can be preseeded.
+But some data -- in particular preseeding key data -- can only be
+provided at the initial setup of Morio.
 
-We also run several different Morio instances. We have a production instance,
-a staging instance, and a bunch of development instances that come and go as
-we work on or test out new features.
+Other changes can be made later, and when we update Morio settings
+by reloading them from a remote system as defined in the preseed
+settings, we call this __reseeding__.
 
-Often, a variety of settings are the same between these different instances and
-maintaining the same info in multiple places is error-prone, and no fun.
+So preseeding is the general principle of keeping your settings outside
+of Morio, whereas reseeding is the process of reloading Morio and 
+apply the preseeded settings.
 
-This is why we implemented the idea of the _base settings_ and one or more _overlays_.
-This allows you to create a modular Morio configuration.
+## Preseeding settings
 
-We'll typically store the node info in the base settings, and this would be
-different for every environment. Then, we add overlays like various identity
-providers, internal certificates that should be trusted, and so on.
+How Morio should go and get your data is determined by the
+`preseed` settings. Refer to [the reference documentation of the 
+`preseed` settings](/docs/reference/settings/preseed/) for all details, 
+but in general this defines a Git repository that Morio should use
+as the source of truth for its settings.
 
-Obviously, you know best what works in your environment. But understanding the
-reasons behind these preseeding settings will hopefully help you make the most
-of this powerful feature.
+Morio will load the base settings and then apply [any overlays you have 
+defined](#overlays).
 
-## Understanding overlays
+## Preseeding key data
 
-The base settings file is just that: the base on which we will construct our final settings object.
+At the intial setup of Morio -- and only at the initial setup -- you
+have the option to preseed Morio's key data.
+
+To do so, you should first [export the key
+data](/docs/reference/apis/api/#tag/export/operation/exportKeys) from an
+existing Morio instance, and then add it under `preseed.keys`.
+
+<Note>
+This is an advanced feature to faciliteate  blue/green deployments
+or other use cases. You can safely ignore this.
+</Note>
+
+## Base settings and overlays {#overlays}
+
+The base settings file is just that: the base on which we will construct our
+final settings object.
 
 An overlay then is a file that will _mutate_ the base settings.
 Typically by adding settings, but an overlay can also overwrite settings.
@@ -161,7 +177,7 @@ Because of the ways overlays use dot-notation to make changes to the settings ob
   something falsy or `null`, you cannot remove them, which is why it is best to
   keep your base settings to the strict minimum.
 
-## Recommended setup using a git repository
+## Example setup using a git repository {#example}
 
 We recommend placing your Morio settings and overlays for one or more different
 environments in a single repository and then let Morio clone this repository
@@ -311,7 +327,7 @@ secrets:
     vault: "morio:AD_PASSWORD"
 
 vault:
-url: https://vault.morio.it
+  url: https://vault.morio.it
 
 ```
 </TabItem>
@@ -344,4 +360,3 @@ In that case, you can configure Morio to fetch specific files from the GitLab AP
 
 Refer to [the `preseed` settings reference documentation](/docs/reference/settings/preseed/) for all details.
 
-```

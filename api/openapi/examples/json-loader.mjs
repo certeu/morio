@@ -33,6 +33,7 @@ import pkgBuildDeb from './pkg-build.deb.json' with { type: 'json' }
 // Cryptopgraphy
 import createCertificate from './create-certificate.json' with { type: 'json' }
 import encrypt from './encrypt.json' with { type: 'json' }
+import keys from './keys.json' with { type: 'json' }
 // Settings
 import settingsSanitized from './settings.sanitized.json' with { type: 'json' }
 import setupRes from './setup.res.json' with { type: 'json' }
@@ -97,6 +98,7 @@ export const examples = {
     encrypt: encrypt.res,
     idps,
     jwks,
+    keys,
     listAccounts,
     listApikeys,
     login: login.res,
