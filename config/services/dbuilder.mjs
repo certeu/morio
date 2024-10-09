@@ -79,21 +79,28 @@ or event-driven automation.`,
  * This generated a control file to build DEB packages.
  *
  * @param {object} settigns - Specific settings to build this package
+ * @param {object} utils - The utils object from core
  * @return {string} controlFile - The control file contents
  */
-export const resolveControlFile = (settings = {}) => {
+export const resolveControlFile = (settings = {}, utils) => {
   const s = {
     ...defaults,
     ...settings,
   }
 
   /*
-   * Add revision to version number (if there is one)
+   * If no version is specified, use the Morio version
+   */
+  if (!s.Version) s.Version = utils.getVersion()
+
+  /*
+   * Add revision to version number
    */
   if (settings.Revision) {
     s.Version += `-${s.Revision}`
     delete s.Revision
   }
+  else s.Version += `-0`
 
   /*
    * Construct more complex fields
@@ -108,8 +115,5 @@ export const resolveControlFile = (settings = {}) => {
   /*
    * Return control file structure/contents
    */
-  return {
-    control: [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n'),
-    settings: s,
-  }
+  return [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n')
 }

@@ -42,9 +42,9 @@ export const serviceOrder = [
   'ui',
   'proxy',
   'connector',
-  'dbuilder',
   'watcher',
   'web',
+  'dbuilder',
 ]
 
 /*
