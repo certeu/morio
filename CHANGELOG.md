@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [watcher] We have enabled the watcher service which was disabled due to SASL
 - [web] Added the web service to serve files over HTTP
 
+### Changed
+
+- [proxy] Redirect HTTP to HTTPS
+
 ### Fixed
 
 - [api] Replace 'next' tag with 'testing'

@@ -32,7 +32,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.dashboard.priority', 666)
       .set('http.routers.dashboard.service', 'api@internal')
       .set('http.routers.dashboard.tls', true)
-      .set('http.routers.dashboard.entrypoints', 'https'),
+      .set('http.routers.dashboard.entrypoints', 'https')
+      .set('http.routers.http.rule', '( PathPrefix(`/`) )')
+      .set('http.routers.http.priority', 666)
+      .set('http.routers.http.entrypoints', 'http')
+      .set('http.routers.http.service', 'api@file')
+      .set('http.middlewares.redirect-to-https.redirectscheme.scheme', 'https')
+      .set('http.routers.http.middlewares', ['redirect-to-https@file'])
   }
   if (!utils.isEphemeral())
     traefik.proxy
@@ -47,7 +53,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
-      .set('http.routers.api.middlewares', ['api-auth@file'])
+      .set('http.routers.api.middlewares', ['api-auth@file', 'redirect-to-https@file'])
 
   return {
     /**
