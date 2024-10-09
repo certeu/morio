@@ -13,7 +13,7 @@ import { Popout } from 'components/popout.mjs'
  * the user should make. So you can also think of this as the
  * setup template.
  */
-export const cluster = (context, toggleValidate) => {
+export const cluster = (context, toggleValidate, update) => {
   const template = {
     title: 'Cluster Setup',
     type: 'info',
@@ -130,6 +130,13 @@ export const cluster = (context, toggleValidate) => {
                   <button className="btn btn-primary btn-lg px-12 mt-4" onClick={toggleValidate}>
                     Validate Morio Settings
                   </button>
+                  <br />
+                  <button
+                    className="mt-2 btn btn-ghost"
+                    onClick={() => update('TMP.showMoreOptions', context.TMP?.showMoreOptions ? false : true)}
+                  >
+                    {context.TMP?.showMoreOptions ? 'Hide' : 'Show'} advanced settings
+                  </button>
                 </p>,
               ],
               'Key Data': [
@@ -178,7 +185,7 @@ export const cluster = (context, toggleValidate) => {
                       This allows running Morio in a blue/green deployment.
                     </p>
                   </Popout>,
-                ])
+                ]),
             },
           },
         ],
@@ -186,6 +193,7 @@ export const cluster = (context, toggleValidate) => {
     },
   }
 
+  if (!context.TMP?.showMoreOptions) delete template.children.setup.form[0].tabs['Key Data']
   if (!context.TMP?.node_count || context.TMP.node_count < 2) {
     delete template.children.setup.form[0].tabs.Cluster
   }
