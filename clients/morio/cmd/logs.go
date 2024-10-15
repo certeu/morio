@@ -24,7 +24,9 @@ Any parameters after this command will be passed to filebeat.`,
     path := viper.GetString("paths.filebeat")
 
     // Pass all arguments (after logs) to the filebeat binary
-		filebeat := exec.Command(path, args...)
+		// but also add the location of the Morio-specific config
+    configFlag := []string{"-c", "/etc/morio/logs/config.yml"}
+		filebeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams
 		filebeat.Stdout = os.Stdout

@@ -31,7 +31,7 @@ import (
 // varsCmd represents the vars command
 var varsCmd = &cobra.Command{
 	Use:   "vars",
-	Short: "Manage template variables for the Morio client configuration",
+	Short: "Manage configuration template variables",
 	Long: `The 'morio vars' command allows you to manage
 template variables for the Morio client configuration.
 

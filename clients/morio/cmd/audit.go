@@ -24,7 +24,9 @@ Any parameters after this command will be passed to auditbeat.`,
     path := viper.GetString("paths.auditbeat")
 
     // Pass all arguments (after audit) to the auditbeat binary
-		auditbeat := exec.Command(path, args...)
+		// but also add the location of the Morio-specific config
+    configFlag := []string{"-c", "/etc/morio/audit/config.yml"}
+		auditbeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams
 		auditbeat.Stdout = os.Stdout

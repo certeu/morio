@@ -23,8 +23,10 @@ Any parameters after this command will be passed to metricbeat.`,
     ensureMetricbeatPath()
     path := viper.GetString("paths.metricbeat")
 
-    // Pass all arguments (after metrics) to the metricbeat binary
-		metricbeat := exec.Command(path, args...)
+    // Pass all arguments (after logs) to the metricbeat binary
+		// but also add the location of the Morio-specific config
+    configFlag := []string{"-c", "/etc/morio/metrics/config.yml"}
+		metricbeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams
 		metricbeat.Stdout = os.Stdout
