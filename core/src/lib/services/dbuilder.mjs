@@ -40,6 +40,13 @@ export const service = {
        */
       await cp('/morio/core/clients/linux', '/morio/data/clients/linux', { recursive: true })
 
+      /*
+       * Ensure keys are in the container so dbuilder can sign packages
+       */
+      log.debug('[dbuilder] Writing key data')
+      await writeFile('/etc/morio/dbuilder/pub.key', utils.getKeys().pgpub, log)
+      await writeFile('/etc/morio/dbuilder/priv.key', utils.getKeys().pgpriv, log, 0o600)
+
       return true
     },
     /**

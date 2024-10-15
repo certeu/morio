@@ -12,7 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Allow the export of key data
 - [core] Allow the export of key data
 - [core] Allow preseeding key data
+- [core] Generate GPG key pair to sign packages
 - [core] Automatically build a client packages on initial setup
+- [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
 - [watcher] We have enabled the watcher service which was disabled due to SASL

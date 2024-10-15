@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.4.2",
+  "version": "0.4.3-rc.1",
   "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
@@ -47,6 +47,7 @@
     "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder && npm run build:rbuilder",
     "build:prod": "npm run ci:build.api && npm run ci:build.core && npm run ci:build.ui && npm run ci:build.dbuilder && npm run ci:build.rbuilder",
     "build:ui": "./scripts/build-container.sh ui",
+    "build:local-release": "./scripts/build-local-release.sh",
     "build:moriod-repo-deb": "./scripts/build-repo-deb.sh",
     "cdp": "npm run check-docs-page",
     "check-docs-page": "./scripts/check-docs-page.sh",

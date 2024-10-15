@@ -35,14 +35,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? [
             `${DIRS.data}/clients/linux:/morio/src`,
             `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/dist`,
+            `${DIRS.data}/aptly:/repo`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/dbuilder:/etc/dbuilder`,
           ]
         : [
             `${DIRS.repo}/data/data/clients/linux:/morio/src`,
             `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/dist`,
+            `${DIRS.repo}/data/data/aptly:/repo`,
+            `${DIRS.repo}/data/config/dbuilder:/etc/dbuilder`,
           ],
       // Don't keep container after it exits
       ephemeral: true,
-    },
+    }
   }
 }
 
@@ -117,3 +121,4 @@ export const resolveControlFile = (settings = {}, utils) => {
    */
   return [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n')
 }
+

@@ -9,6 +9,7 @@ import {
   randomUUID,
 } from 'crypto'
 import forge from 'node-forge'
+import openpgp from 'openpgp'
 import jose from 'node-jose'
 import { getPreset } from '#config'
 import jwt from 'jsonwebtoken'
@@ -149,6 +150,23 @@ export async function generateKeyPair(passphrase) {
       passphrase: passphrase.toString(),
     },
   })
+}
+
+export async function generateGpgKeyPair(uuid) {
+  const result = await openpgp.generateKey({
+    type: 'ecc',
+    curve: 'curve25519',
+    userIDs: [{
+      name: `Morio collector ${uuid}`,
+      email: `gpg@${uuid}.collectors.morio.it`
+    }],
+    passphrase: '', // helps signing in an automated way
+    format: 'armored'
+  })
+
+  return (result.privateKey && result.publicKey)
+    ? { public: result.publicKey, private: result.privateKey }
+    : false
 }
 
 /**

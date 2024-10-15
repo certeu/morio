@@ -5,6 +5,7 @@ import {
   encryptionMethods,
   generateJwtKey,
   generateKeyPair,
+  generateGpgKeyPair,
   hash,
   hashPassword,
   randomString,
@@ -317,10 +318,13 @@ const initialSetup = async function (req, settings) {
    */
   if (!keys.unseal) keys.unseal = hash(keys.seal.salt + keys.seal.hash)
   if (!keys.private) {
-    log.debug(`Generating key pair`)
+    log.debug(`Generating key pairs`)
     const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
+    const gpg = await generateGpgKeyPair(keys.cluster)
     keys.public = publicKey
     keys.private = privateKey
+    keys.pgpub = gpg.public
+    keys.pgpriv = gpg.private
   }
 
   /*
