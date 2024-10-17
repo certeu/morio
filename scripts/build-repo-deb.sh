@@ -26,9 +26,9 @@ rm -rf build-context/.*
 mkdir -p build-context/usr/share/keyrings
 mkdir -p build-context/etc/apt/sources.list.d
 mkdir -p build-context/var
-cp morio.gpg build-context/usr/share/keyrings/
+cp morio.gpg build-context/usr/share/keyrings/moriod.gpg
 echo "# Moriod repository. See https://apt.repo.morio.it/" > build-context/etc/apt/sources.list.d/moriod.list
-echo "deb [signed-by=/usr/share/keyrings/morio.gpg] https://apt.repo.morio.it/ $(lsb_release -cs) $CHANNEL" >> build-context/etc/apt/sources.list.d/moriod.list
+echo "deb [signed-by=/usr/share/keyrings/moriod.gpg] https://apt.repo.morio.it/ $(lsb_release -cs) $CHANNEL" >> build-context/etc/apt/sources.list.d/moriod.list
 cat config/moriod-repos/deb/control | sed "s/MORIO_VERSION/${MORIO_VERSION}/g" > build-context/control
 cp config/moriod-repos/deb/postinst build-context/
 

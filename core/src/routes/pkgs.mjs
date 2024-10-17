@@ -19,4 +19,16 @@ export function routes(app) {
    * Build a .deb client package
    */
   app.post(`/pkgs/clients/deb/build`, (req, res) => Pkgs.buildClientPackage(req, res, 'deb'))
+
+  /*
+   * Get the defaults for generating a .deb client-repo package
+   */
+  app.get(`/pkgs/repos/deb/defaults`, (req, res) =>
+    Pkgs.getRepoPackageDefaults(req, res, 'deb')
+  )
+
+  /*
+   * Build a .deb client package
+   */
+  app.post(`/pkgs/repos/deb/build`, (req, res) => Pkgs.buildRepoPackage(req, res, 'deb'))
 }

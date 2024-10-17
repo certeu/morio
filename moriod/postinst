@@ -3,7 +3,6 @@
 
 set -e
 
-
 # Force the correct version
 PACKAGE_VERSION=$(dpkg-query -W -f='${Version}' "moriod")
 echo $PACKAGE_VERSION > /etc/morio/moriod/version

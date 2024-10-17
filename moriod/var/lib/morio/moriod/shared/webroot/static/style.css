@@ -1,11 +1,15 @@
 :root {
   --txt: rgb(36, 37, 38);
   --bg: rgb(235, 237, 240);
+  --link: #1b88a2;
+  --logo: url("/static/logo.svg");
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --txt: rgb(235, 237, 240);
     --bg: rgb(36, 37, 38);
+    --link: #06B6D4;
+    --logo: url("/static/dmlogo.svg");
   }
 }
 
@@ -23,8 +27,19 @@ body {
   min-height: calc(100vh - 4rem);
   text-align: center;
 }
+h1:before {
+  content: ' ';
+  font-size: 1rem;
+  background-image: var(--logo);
+  background-repeat: no-repeat;
+  background-position-x: center;
+  display: block;
+  height: 2rem;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
 a, a:visited, a:active {
-  color: #1b88a2;
+  color: var(--link);
   text-decoration: underline;
   text-decoration-thickness: 1px;
 }

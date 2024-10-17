@@ -88,7 +88,7 @@ const CreatePackage = () => {
     const getDefaults = async () => {
       let result
       try {
-        result = await api.getClientPackageDefaults('deb')
+        result = await api.getClientRepoPackageDefaults('deb')
       } catch (err) {
         if (err) console.log(err)
       }
@@ -106,7 +106,7 @@ const CreatePackage = () => {
    */
   const buildPackage = async () => {
     setLoadingStatus([true, 'Contacting Morio Management API'])
-    const [body, status] = await api.buildClientPackage('deb', data)
+    const [body, status] = await api.buildClientRepoPackage('deb', data)
     if (status === 201) {
       setResult(body)
       // Force update of the revision
@@ -198,7 +198,7 @@ const CreatePackage = () => {
     <>
       <h2 className="flex flex-row justify-between items-center">
         <span>
-          Create <b>.deb</b> Morio client package
+          Create a <b>.deb</b> repo installer package
         </span>
         <div className="flex flex-row gap-2">
           <button className="btn btn-primary btn-outline btn-sm" onClick={empty}>
@@ -340,7 +340,7 @@ const CreatePackage = () => {
       </Tabs>
       <p className="text-center">
         <button onClick={buildPackage} className="btn btn-primary btn-lg">
-          Build .deb Package
+          Build Debian Repo Installer
         </button>
       </p>
     </>
@@ -363,7 +363,7 @@ export default DebPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Morio Debian client builder',
-    page: ['tools', 'pkgs', 'deb'],
+    title: 'Debian repo installer builder',
+    page: ['tools', 'pkgs', 'deb-repo'],
   },
 })

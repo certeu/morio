@@ -48,10 +48,10 @@ h1 {
 
 a, a:visited, a:active {
   color: var(--link);
-  text-decoration: none;
+  text-decoration: underline;
 }
 a:hover {
-  text-decoration: underline;
+  text-decoration-thickness: 3px;
 }
 
 hr {

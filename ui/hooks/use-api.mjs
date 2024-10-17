@@ -134,13 +134,26 @@ MorioClient.prototype.getCaRoot = async function () {
 }
 
 /**
- * Gets defaults for a package builder
+ * Gets defaults for a client package builder
  *
  * @param {string} type - The package type
  * @return {object} - The defaults for this package
  */
 MorioClient.prototype.getClientPackageDefaults = async function (type) {
   return await this.call(`${morioConfig.api}/pkgs/clients/${type}/defaults`, {
+    headers: this.jsonHeaders,
+    method: 'GET',
+  })
+}
+
+/**
+ * Gets defaults for a client repo package builder
+ *
+ * @param {string} type - The package type
+ * @return {object} - The defaults for this package
+ */
+MorioClient.prototype.getClientRepoPackageDefaults = async function (type) {
+  return await this.call(`${morioConfig.api}/pkgs/repos/${type}/defaults`, {
     headers: this.jsonHeaders,
     method: 'GET',
   })
@@ -336,6 +349,21 @@ MorioClient.prototype.decrypt = async function (data) {
  */
 MorioClient.prototype.buildClientPackage = async function (type, settings = {}) {
   return await this.call(`${morioConfig.api}/pkgs/clients/${type}/build`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify(settings),
+  })
+}
+
+/**
+ * Request the build of a client repo package
+ *
+ * @param {string} type - The package type
+ * @param {object} settings - The build settings
+ * @return {object} - The result
+ */
+MorioClient.prototype.buildClientRepoPackage = async function (type, settings = {}) {
+  return await this.call(`${morioConfig.api}/pkgs/repos/${type}/build`, {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(settings),
