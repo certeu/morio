@@ -1,4 +1,5 @@
 import { generateTraefikConfig } from './index.mjs'
+import { flags } from '../flags.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -86,13 +87,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
     /*
      * When the initial settings are created, these values will be merged in
      */
-    default_settings: [
-      ['tokens.flags.DISABLE_IDP_APIKEY', false],
-      ['tokens.flags.DISABLE_IDP_MRT', false],
-      ['tokens.flags.DISABLE_IDP_LOCAL', false],
-      ['tokens.flags.DISABLE_IDP_LDAP', false],
-      ['tokens.flags.DISABLE_IDP_OIDC', false],
-      ['tokens.flags.HEADLESS_MORIO', false],
-    ],
+    default_settings: Object.entries(flags).map(([name, val]) => ([`tokens.flags.${name}`, val]))
   }
 }
