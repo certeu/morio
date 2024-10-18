@@ -6,9 +6,24 @@ package cmd
 
 import (
 	"fmt"
-
+  "os"
 	"github.com/spf13/cobra"
 )
+
+// Simple error handler
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
+
+func readFile(path string) {
+    dat, err := os.ReadFile("/tmp/dat")
+    check(err)
+    fmt.Print(string(dat))
+}
+
+
     //echo "  Manage template variables for the Morio beats agents configuration."
     //echo ""
     //echo "Usage:"

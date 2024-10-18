@@ -1,11 +1,17 @@
-package agents
+package vars
 
 import (
-  "bufio"
-	"fmt"
-  "github.com/spf13/viper"
-  "os"
+    "bufio"
+    "fmt"
+    "io"
+    "os"
 )
+
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
+}
 
 // Makes sure that paths.auditbeat is set in the config
 func EnsureBeatPath(beat string) {
