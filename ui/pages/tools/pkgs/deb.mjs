@@ -28,7 +28,7 @@ const Docs = ({ field }) => (
 const fields = {
   basics: {
     Package: 'The name to use for the package',
-    'Changed-By': 'The person who created this build of the package',
+    Description: 'A one-liner short description',
     Version: 'The version number of the package',
     Revision: 'The revision number of the package',
   },
@@ -36,11 +36,11 @@ const fields = {
     Section: 'The Debian section the package belongs to',
     Priority: 'The Debian priority code for this package',
     Architecture: 'The Debian architecture code for the package',
-    Essential: 'Setting this to yes means the package cannot be removed',
-    'Installed-Size': 'Estimate of the disk space reuired (in MB)',
+    Essential: 'Setting this to Yes means that the package cannot be removed',
+    'Installed-Size': 'Estimate of the disk space required (in MB)',
     Maintainer: `The person or entity who maintains this package`,
+    'Changed-By': 'The person who created this build of the package',
     Homepage: 'Link to the homepage for the package',
-    Description: 'A one-liner short description',
     'Vcs-Git': 'Git repository info',
   },
 }

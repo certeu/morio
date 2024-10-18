@@ -1,6 +1,6 @@
 {
   "name": "@morio/config",
-  "version": "0.4.2",
+  "version": "0.4.3-rc.1",
   "description": "Morio Configuration",
   "private": true,
   "scripts": {

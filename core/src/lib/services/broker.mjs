@@ -208,47 +208,28 @@ async function ensureTopicsExist() {
  */
 async function enforceAuthorization() {
   /*
-   * Create the SASL superuser
-   */
-  log.debug(`[broker] Creating SASL user: root`)
-  let result = await utils.brokerAdminApi.post('/security/users', {
-    username: 'root',
-    password: utils.getKeys().mrt,
-    algorithm: 'SCRAM-SHA-512',
-  })
-  if (result[0] !== 200) log.warn(`[broker] Failed to create SASL user: root`)
-  else log.debug(`[broker] SASL User root created`)
-
-  /*
-   * Create the morio-client user
-   */
-  log.debug(`[broker] Creating SASL user: morio-client`)
-  result = await utils.brokerAdminApi.post('/security/users', {
-    username: 'morio-client',
-    password: utils.getClusterUuid(),
-    algorithm: 'SCRAM-SHA-512',
-  })
-  if (result[0] !== 200) log.warn(`[broker] Failed to create SASL user: morio-client`)
-  else log.debug(`[broker] SASL User morio-client created`)
-
-  /*
    * Add ACLs
    */
+  const produce = ['create', 'describe', 'write']
   const ACLs = [
-    [`morio-client`, 'describe', utils.getPreset('MORIO_BROKER_CLIENT_TOPICS')],
-    [`morio-client`, 'write', utils.getPreset('MORIO_BROKER_CLIENT_TOPICS')],
-    // FIXME: This is for when mTLS authorization workds
-    [`*.infra.${utils.getClusterUuid()}.morio.internal`, 'all', ['*']],
-    //[`root.${utils.getClusterUuid()}.morio.internal`, 'all', ['*']],
-    //[`root`, 'all', ['*']],
+    // Allow Morio clients to push data to the broker
+    ...produce.map((operation) => [
+      `*.clients.${utils.getClusterUuid()}.morio.internal`,
+      operation,
+      utils.getPreset('MORIO_BROKER_CLIENT_TOPICS'),
+    ]),
+    // Allow the watcher service to write to the checks topic
+    ...produce.map((operation) => [
+      `watcher.infra.${utils.getClusterUuid()}.morio.internal`,
+      operation,
+      ['checks'],
+    ]),
   ]
   for (const [user, operation, topics] of ACLs) {
     for (const topic of topics) {
       log.debug(`[broker] Creating ${operation} ACL on topic ${topic} for user ${user}`)
       await execContainerCommand('broker', [
         'rpk',
-        //'--profile',
-        //'nosasl',
         'security',
         'acl',
         'create',

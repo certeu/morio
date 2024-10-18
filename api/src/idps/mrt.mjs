@@ -2,6 +2,7 @@ import { roles } from '#config/roles'
 import { utils } from '../lib/utils.mjs'
 import { updateLastLoginTime } from '../lib/account.mjs'
 import { isRoleAvailable } from '../rbac.mjs'
+import { verifyPassword } from '#shared/crypto'
 
 /**
  * mrt: Morio Root Token identtiy/authentication provider
@@ -19,7 +20,8 @@ export async function mrt(id, data) {
    */
   const keys = utils.getKeys()
   if (!keys?.mrt) return false
-  if (id === 'mrt' && data.mrt === keys.mrt) {
+
+  if (verifyPassword(data.mrt, keys.mrt) === true) {
     /*
      * Update the latest login time, but don't wait for it
      */

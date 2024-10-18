@@ -20,7 +20,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Name to use for the running container
       container_name: 'ui',
       // Image to run (different in dev)
-      image: PROD ? 'itsmorio/ui' : 'itsmorio/ui-dev',
+      image: PROD ? 'itsmorio/ui' : 'devmorio/ui',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION_TAG'),
       // Don't attach to the default network

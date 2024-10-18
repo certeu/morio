@@ -4,8 +4,11 @@ FROM debian:12
 # Make this folder our working directory
 WORKDIR /morio
 
-## Install all the latest updates
-RUN apt-get update && apt-get upgrade -y
+## Install aptly and all the latest updates
+RUN apt update && apt install -y aptly gpg && apt upgrade -y
+
+# Add aptly config
+COPY ./aptly.conf /root/.aptly.conf
 
 # Add builder script as custom entrypoint
 COPY ./entrypoint.sh /entrypoint.sh

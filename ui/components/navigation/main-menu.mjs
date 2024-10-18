@@ -2,6 +2,7 @@
 import { capitalize, pageChildren, rbac } from 'lib/utils.mjs'
 // Components
 import {
+  BriefcaseIcon,
   CertificateIcon,
   CheckCircleIcon,
   ClosedLockIcon,
@@ -58,6 +59,7 @@ const icons = {
   download: DownloadIcon,
   downloads: DownloadIcon,
   encrypt: ClosedLockIcon,
+  export: BriefcaseIcon,
   faq: QuestionIcon,
   images: ContainerImageIcon,
   logs: StorageIcon,
@@ -131,10 +133,11 @@ export const links = {
     encrypt: {
       t: 'Enrypt Data',
     },
+    export: {
+      t: 'Export Data',
+    },
     certificates: {
       t: 'X.509 Certificates',
-      create: { t: 'Create a Certificate' },
-      download: { t: 'Download Certificates' },
     },
   },
 }

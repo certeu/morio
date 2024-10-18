@@ -1,5 +1,5 @@
 import { attempt } from '#shared/utils'
-import { encryptionMethods } from '#shared/crypto'
+import { encryptionMethods, hash } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
 import process from 'node:process'
 
@@ -71,9 +71,10 @@ export async function reloadConfiguration() {
    * On a hot-reload we'll already have done this so only do it if needed.
    */
   if (!utils.encrypt) {
+    const keydata = utils.getKeys()
     const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-      utils.getKeys().mrt,
-      'Morio by CERT-EU',
+      hash(keydata.cluster + keydata.seal.hash),
+      keydata.cluster,
       log
     )
     utils.encrypt = encrypt

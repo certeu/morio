@@ -427,6 +427,7 @@ export const FileInput = ({
   original, // The original value
   id = '', // An id to tie the input to the label
   dropzoneConfig = {}, // Configuration for react-dropzone
+  transform = data => data, // An optional transformer method for the loaded data
 }) => {
   /*
    * Ondrop handler

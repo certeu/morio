@@ -39,7 +39,7 @@ info:
     name: EUPL
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
-  version: 0.4.1
+  version: 0.4.3-rc.1
   x-logo:
     url: /downloads/morio-card-embed.svg
     backgroundColor: transparent
@@ -290,6 +290,29 @@ paths:
                                           type: object
                                           properties: {}
                                           additionalProperties: false
+                                        keys:
+                                          type: object
+                                          properties:
+                                            data:
+                                              type: string
+                                            key:
+                                              type: string
+                                              pattern: .*ENCRYPTED PRIVATE KEY.*
+                                            seal:
+                                              type: object
+                                              properties:
+                                                hash:
+                                                  type: string
+                                                salt:
+                                                  type: string
+                                              required:
+                                                - hash
+                                                - salt
+                                              additionalProperties: false
+                                          required:
+                                            - data
+                                            - key
+                                          additionalProperties: false
                                       required:
                                         - url
                                       additionalProperties: false
@@ -334,6 +357,29 @@ paths:
                                             - file_path
                                             - token
                                           additionalProperties: false
+                                        keys:
+                                          type: object
+                                          properties:
+                                            data:
+                                              type: string
+                                            key:
+                                              type: string
+                                              pattern: .*ENCRYPTED PRIVATE KEY.*
+                                            seal:
+                                              type: object
+                                              properties:
+                                                hash:
+                                                  type: string
+                                                salt:
+                                                  type: string
+                                              required:
+                                                - hash
+                                                - salt
+                                              additionalProperties: false
+                                          required:
+                                            - data
+                                            - key
+                                          additionalProperties: false
                                       additionalProperties: false
                                     - type: object
                                       properties:
@@ -377,6 +423,29 @@ paths:
                                             - file_path
                                             - token
                                           additionalProperties: false
+                                        keys:
+                                          type: object
+                                          properties:
+                                            data:
+                                              type: string
+                                            key:
+                                              type: string
+                                              pattern: .*ENCRYPTED PRIVATE KEY.*
+                                            seal:
+                                              type: object
+                                              properties:
+                                                hash:
+                                                  type: string
+                                                salt:
+                                                  type: string
+                                              required:
+                                                - hash
+                                                - salt
+                                              additionalProperties: false
+                                          required:
+                                            - data
+                                            - key
+                                          additionalProperties: false
                                       additionalProperties: false
                                     - type: string
                                 overlays:
@@ -391,6 +460,29 @@ paths:
                                               headers:
                                                 type: object
                                                 properties: {}
+                                                additionalProperties: false
+                                              keys:
+                                                type: object
+                                                properties:
+                                                  data:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                    pattern: .*ENCRYPTED PRIVATE KEY.*
+                                                  seal:
+                                                    type: object
+                                                    properties:
+                                                      hash:
+                                                        type: string
+                                                      salt:
+                                                        type: string
+                                                    required:
+                                                      - hash
+                                                      - salt
+                                                    additionalProperties: false
+                                                required:
+                                                  - data
+                                                  - key
                                                 additionalProperties: false
                                             required:
                                               - url
@@ -436,6 +528,29 @@ paths:
                                                   - file_path
                                                   - token
                                                 additionalProperties: false
+                                              keys:
+                                                type: object
+                                                properties:
+                                                  data:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                    pattern: .*ENCRYPTED PRIVATE KEY.*
+                                                  seal:
+                                                    type: object
+                                                    properties:
+                                                      hash:
+                                                        type: string
+                                                      salt:
+                                                        type: string
+                                                    required:
+                                                      - hash
+                                                      - salt
+                                                    additionalProperties: false
+                                                required:
+                                                  - data
+                                                  - key
+                                                additionalProperties: false
                                             additionalProperties: false
                                           - type: object
                                             properties:
@@ -479,9 +594,55 @@ paths:
                                                   - file_path
                                                   - token
                                                 additionalProperties: false
+                                              keys:
+                                                type: object
+                                                properties:
+                                                  data:
+                                                    type: string
+                                                  key:
+                                                    type: string
+                                                    pattern: .*ENCRYPTED PRIVATE KEY.*
+                                                  seal:
+                                                    type: object
+                                                    properties:
+                                                      hash:
+                                                        type: string
+                                                      salt:
+                                                        type: string
+                                                    required:
+                                                      - hash
+                                                      - salt
+                                                    additionalProperties: false
+                                                required:
+                                                  - data
+                                                  - key
+                                                additionalProperties: false
                                             additionalProperties: false
                                           - type: string
                                     - type: string
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               additionalProperties: false
                             - type: string
                       additionalProperties: false
@@ -1831,6 +1992,29 @@ paths:
                                   type: object
                                   properties: {}
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               required:
                                 - url
                               additionalProperties: false
@@ -1875,6 +2059,29 @@ paths:
                                     - file_path
                                     - token
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               additionalProperties: false
                             - type: object
                               properties:
@@ -1918,6 +2125,29 @@ paths:
                                     - file_path
                                     - token
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               additionalProperties: false
                             - type: string
                         overlays:
@@ -1932,6 +2162,29 @@ paths:
                                       headers:
                                         type: object
                                         properties: {}
+                                        additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
                                         additionalProperties: false
                                     required:
                                       - url
@@ -1977,6 +2230,29 @@ paths:
                                           - file_path
                                           - token
                                         additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
+                                        additionalProperties: false
                                     additionalProperties: false
                                   - type: object
                                     properties:
@@ -2020,9 +2296,55 @@ paths:
                                           - file_path
                                           - token
                                         additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
+                                        additionalProperties: false
                                     additionalProperties: false
                                   - type: string
                             - type: string
+                        keys:
+                          type: object
+                          properties:
+                            data:
+                              type: string
+                            key:
+                              type: string
+                              pattern: .*ENCRYPTED PRIVATE KEY.*
+                            seal:
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                salt:
+                                  type: string
+                              required:
+                                - hash
+                                - salt
+                              additionalProperties: false
+                          required:
+                            - data
+                            - key
+                          additionalProperties: false
                       additionalProperties: false
                     - type: string
               additionalProperties: false
@@ -2300,6 +2622,29 @@ paths:
                                   type: object
                                   properties: {}
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               required:
                                 - url
                               additionalProperties: false
@@ -2344,6 +2689,29 @@ paths:
                                     - file_path
                                     - token
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               additionalProperties: false
                             - type: object
                               properties:
@@ -2387,6 +2755,29 @@ paths:
                                     - file_path
                                     - token
                                   additionalProperties: false
+                                keys:
+                                  type: object
+                                  properties:
+                                    data:
+                                      type: string
+                                    key:
+                                      type: string
+                                      pattern: .*ENCRYPTED PRIVATE KEY.*
+                                    seal:
+                                      type: object
+                                      properties:
+                                        hash:
+                                          type: string
+                                        salt:
+                                          type: string
+                                      required:
+                                        - hash
+                                        - salt
+                                      additionalProperties: false
+                                  required:
+                                    - data
+                                    - key
+                                  additionalProperties: false
                               additionalProperties: false
                             - type: string
                         overlays:
@@ -2401,6 +2792,29 @@ paths:
                                       headers:
                                         type: object
                                         properties: {}
+                                        additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
                                         additionalProperties: false
                                     required:
                                       - url
@@ -2446,6 +2860,29 @@ paths:
                                           - file_path
                                           - token
                                         additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
+                                        additionalProperties: false
                                     additionalProperties: false
                                   - type: object
                                     properties:
@@ -2489,9 +2926,55 @@ paths:
                                           - file_path
                                           - token
                                         additionalProperties: false
+                                      keys:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: string
+                                          key:
+                                            type: string
+                                            pattern: .*ENCRYPTED PRIVATE KEY.*
+                                          seal:
+                                            type: object
+                                            properties:
+                                              hash:
+                                                type: string
+                                              salt:
+                                                type: string
+                                            required:
+                                              - hash
+                                              - salt
+                                            additionalProperties: false
+                                        required:
+                                          - data
+                                          - key
+                                        additionalProperties: false
                                     additionalProperties: false
                                   - type: string
                             - type: string
+                        keys:
+                          type: object
+                          properties:
+                            data:
+                              type: string
+                            key:
+                              type: string
+                              pattern: .*ENCRYPTED PRIVATE KEY.*
+                            seal:
+                              type: object
+                              properties:
+                                hash:
+                                  type: string
+                                salt:
+                                  type: string
+                              required:
+                                - hash
+                                - salt
+                              additionalProperties: false
+                          required:
+                            - data
+                            - key
+                          additionalProperties: false
                       additionalProperties: false
                     - type: string
               additionalProperties: false
@@ -2606,6 +3089,29 @@ paths:
                               type: object
                               properties: {}
                               additionalProperties: false
+                            keys:
+                              type: object
+                              properties:
+                                data:
+                                  type: string
+                                key:
+                                  type: string
+                                  pattern: .*ENCRYPTED PRIVATE KEY.*
+                                seal:
+                                  type: object
+                                  properties:
+                                    hash:
+                                      type: string
+                                    salt:
+                                      type: string
+                                  required:
+                                    - hash
+                                    - salt
+                                  additionalProperties: false
+                              required:
+                                - data
+                                - key
+                              additionalProperties: false
                           required:
                             - url
                           additionalProperties: false
@@ -2650,6 +3156,29 @@ paths:
                                 - file_path
                                 - token
                               additionalProperties: false
+                            keys:
+                              type: object
+                              properties:
+                                data:
+                                  type: string
+                                key:
+                                  type: string
+                                  pattern: .*ENCRYPTED PRIVATE KEY.*
+                                seal:
+                                  type: object
+                                  properties:
+                                    hash:
+                                      type: string
+                                    salt:
+                                      type: string
+                                  required:
+                                    - hash
+                                    - salt
+                                  additionalProperties: false
+                              required:
+                                - data
+                                - key
+                              additionalProperties: false
                           additionalProperties: false
                         - type: object
                           properties:
@@ -2693,6 +3222,29 @@ paths:
                                 - file_path
                                 - token
                               additionalProperties: false
+                            keys:
+                              type: object
+                              properties:
+                                data:
+                                  type: string
+                                key:
+                                  type: string
+                                  pattern: .*ENCRYPTED PRIVATE KEY.*
+                                seal:
+                                  type: object
+                                  properties:
+                                    hash:
+                                      type: string
+                                    salt:
+                                      type: string
+                                  required:
+                                    - hash
+                                    - salt
+                                  additionalProperties: false
+                              required:
+                                - data
+                                - key
+                              additionalProperties: false
                           additionalProperties: false
                         - type: string
                     overlays:
@@ -2707,6 +3259,29 @@ paths:
                                   headers:
                                     type: object
                                     properties: {}
+                                    additionalProperties: false
+                                  keys:
+                                    type: object
+                                    properties:
+                                      data:
+                                        type: string
+                                      key:
+                                        type: string
+                                        pattern: .*ENCRYPTED PRIVATE KEY.*
+                                      seal:
+                                        type: object
+                                        properties:
+                                          hash:
+                                            type: string
+                                          salt:
+                                            type: string
+                                        required:
+                                          - hash
+                                          - salt
+                                        additionalProperties: false
+                                    required:
+                                      - data
+                                      - key
                                     additionalProperties: false
                                 required:
                                   - url
@@ -2752,6 +3327,29 @@ paths:
                                       - file_path
                                       - token
                                     additionalProperties: false
+                                  keys:
+                                    type: object
+                                    properties:
+                                      data:
+                                        type: string
+                                      key:
+                                        type: string
+                                        pattern: .*ENCRYPTED PRIVATE KEY.*
+                                      seal:
+                                        type: object
+                                        properties:
+                                          hash:
+                                            type: string
+                                          salt:
+                                            type: string
+                                        required:
+                                          - hash
+                                          - salt
+                                        additionalProperties: false
+                                    required:
+                                      - data
+                                      - key
+                                    additionalProperties: false
                                 additionalProperties: false
                               - type: object
                                 properties:
@@ -2795,9 +3393,55 @@ paths:
                                       - file_path
                                       - token
                                     additionalProperties: false
+                                  keys:
+                                    type: object
+                                    properties:
+                                      data:
+                                        type: string
+                                      key:
+                                        type: string
+                                        pattern: .*ENCRYPTED PRIVATE KEY.*
+                                      seal:
+                                        type: object
+                                        properties:
+                                          hash:
+                                            type: string
+                                          salt:
+                                            type: string
+                                        required:
+                                          - hash
+                                          - salt
+                                        additionalProperties: false
+                                    required:
+                                      - data
+                                      - key
+                                    additionalProperties: false
                                 additionalProperties: false
                               - type: string
                         - type: string
+                    keys:
+                      type: object
+                      properties:
+                        data:
+                          type: string
+                        key:
+                          type: string
+                          pattern: .*ENCRYPTED PRIVATE KEY.*
+                        seal:
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                            salt:
+                              type: string
+                          required:
+                            - hash
+                            - salt
+                          additionalProperties: false
+                      required:
+                        - data
+                        - key
+                      additionalProperties: false
                   additionalProperties: false
                 - type: string
             examples:

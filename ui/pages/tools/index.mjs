@@ -6,6 +6,7 @@ import { useAccount } from 'hooks/use-account.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import {
+  BriefcaseIcon,
   CertificateIcon,
   CogIcon,
   PackageIcon,
@@ -66,6 +67,15 @@ const ToolsPage = (props) => {
               width="w-full"
               Icon={ClosedLockIcon}
             />
+            {engineer ? (
+              <Card
+                title="Export Data"
+                href="/tools/export"
+                desc="Export different types of Morio data, for backup or advanced configuration scenarios"
+                width="w-full"
+                Icon={BriefcaseIcon}
+              />
+            ) : null}
             <Card
               title="X.509 Certificates"
               href="/tools/certificates"

@@ -176,51 +176,77 @@ async function reloadCaConfiguration() {
   return true
 }
 
-export async function generateCaConfig() {
+/*
+ * @param {object} keys - The preseeded key data (optional)
+ */
+export async function generateCaConfig(keys = {}) {
   /*
-   * Let people know this will take a while
+   * Check for preseeded Key Data
    */
-  log.debug('Generating inital CA config - This will take a couple of seconds')
+  if (keys.jwk && keys.rfpr && keys.rcrt && keys.rkey && keys.rpwd && keys.icrt && keys.ikey) {
+    /*
+     * Store key data
+     */
+    utils.setKeys({
+      ...utils.getKeys(),
+      ...keys,
+    })
 
-  /*
-   * Generate keys and certificates
-   */
-  const init = await generateCaRoot(
-    utils.getSettings('cluster.broker_nodes'),
-    utils.getSettings('cluster.name')
-  )
+    /*
+     * Save root certificate and fingerprint in memory
+     */
+    utils.setCaConfig({
+      url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+      fingerprint: keys.rfpr,
+      jwk: keys.jwk,
+      certificate: keys.rcrt,
+      intermediate: keys.icrt,
+    })
+  } else {
+    /*
+     * Let people know this will take a while
+     */
+    log.debug('Generating inital CA config - This will take a couple of seconds')
 
-  /*
-   * Generate JWK
-   */
-  const jwk = await keypairAsJwk(utils.getKeys())
+    /*
+     * Generate keys and certificates
+     */
+    const init = await generateCaRoot(
+      utils.getSettings('cluster.broker_nodes'),
+      utils.getSettings('cluster.name')
+    )
 
-  /*
-   * Also store root, intermediate, and fingerprint in keys
-   * so it gets distributed accros the cluster (broker) nodes
-   */
-  utils.setKeys({
-    ...utils.getKeys(),
-    jwk,
-    rfpr: init.root.fingerprint,
-    rcrt: init.root.certificate,
-    rkey: init.root.keys.private,
-    rpwd: init.password,
-    icrt: init.intermediate.certificate,
-    ikey: init.intermediate.keys.private,
-  })
+    /*
+     * Generate JWK
+     */
+    const jwk = await keypairAsJwk(utils.getKeys())
 
-  /*
-   * Save root certificate and fingerprint in memory
-   */
-  const caConfig = {
-    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
-    fingerprint: init.root.fingerprint,
-    jwk,
-    certificate: init.root.certificate,
-    intermediate: init.intermediate.certificate,
+    /*
+     * Also store root, intermediate, and fingerprint in keys
+     * so it gets distributed accros the cluster (broker) nodes
+     */
+    utils.setKeys({
+      ...utils.getKeys(),
+      jwk,
+      rfpr: init.root.fingerprint,
+      rcrt: init.root.certificate,
+      rkey: init.root.keys.private,
+      rpwd: init.password,
+      icrt: init.intermediate.certificate,
+      ikey: init.intermediate.keys.private,
+    })
+
+    /*
+     * Save root certificate and fingerprint in memory
+     */
+    utils.setCaConfig({
+      url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+      fingerprint: init.root.fingerprint,
+      jwk,
+      certificate: init.root.certificate,
+      intermediate: init.intermediate.certificate,
+    })
   }
-  utils.setCaConfig(caConfig)
 
   /*
    * Ensure the config is on disk

@@ -1,4 +1,12 @@
-import { Joi, validate as sharedValidate, settings, preseed, uuid, mrt } from '#shared/schema'
+import {
+  Joi,
+  validate as sharedValidate,
+  settings,
+  preseed,
+  uuid,
+  mrt,
+  preseedKeys,
+} from '#shared/schema'
 import { roles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 
@@ -287,6 +295,7 @@ export const schema = {
     key: Joi.string(),
     value: Joi.any(),
   }),
+  'res.keys': Joi.object({ keys: preseedKeys }),
 }
 
 /*
