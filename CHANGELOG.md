@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [api] Allow the export of key data
+- [api] Allow building of client-repo packages
 - [core] Allow the export of key data
 - [core] Allow preseeding key data
 - [core] Generate GPG key pair to sign packages
@@ -17,14 +18,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Automatically build client installer packages on initial setup
 - [core] Provide automated install script for clients
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
+- [core] Allow building of client-repo packages
 - [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
+- [ui] Allow building of client-repo packages
 - [watcher] We have enabled the watcher service which was disabled due to SASL
 - [web] Added the web service to serve files over HTTP
 
 ### Changed
 
+- [core] Renamed the `HEADLESS_MORIO` feature flag to `DISABLE_SERVICE_UI`
 - [proxy] Redirect HTTP to HTTPS
 
 ### Fixed
@@ -48,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Make console a broker superuser now that an ACL is enforced
 - [core] Configure broker ACL for watcher service
 - [core] Store the salted&hashed the root token. Earlier, it was stored in clear on disk to facilitate development, no longer.
+- [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 
 
 ## [0.4.1] - 2024-10-01
