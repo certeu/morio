@@ -241,10 +241,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
           {
             name: 'external',
             enabled: false,
-            //cert_file: '/etc/redpanda/tls-cert.pem',
-            //key_file: '/etc/redpanda/tls-key.pem',
-            //truststore_file: '/etc/redpanda/tls-ca.pem',
-            //require_client_auth: false,
           },
         ],
         rpc_server_tls: {
@@ -294,9 +290,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Extract CN as principal in mTLS
          */
-        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN=([^,]).*/$1/L` ],
-        //kafka_mtls_principal_mapping_rules: [ `RULE:.*CN *= *([^,]).*/$1/` ],
-        //kafka_mtls_principal_mapping_rules: ["DEFAULT"],
         kafka_mtls_principal_mapping_rules: [ "RULE:.*CN *= *([^,]+).*/$1/" ],
 
         /*
