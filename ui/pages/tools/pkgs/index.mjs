@@ -32,7 +32,7 @@ const ClientsPage = (props) => (
         <Popout tip>
           <h5>Client packages are automatically built</h5>
           <p>
-            Morio will automatically build client repository pacakges during its initial setup and on subsequent upgrades.
+            Morio will automatically build client repository packages during its initial setup and on subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
           </p>
@@ -83,7 +83,7 @@ const ClientsPage = (props) => (
             href="/tools/pkgs/pkg"
             desc={
               <span>
-                Generate a <b>.pkg</b> package that you can deploy on MacOS systems.
+                Generate a <b>.pkg</b> package that you can deploy on macOS systems.
               </span>
             }
             width="w-full"
