@@ -1,9 +1,9 @@
 package cmd
 
 import (
-  "os"
-  "github.com/spf13/cobra"
-  "github.com/spf13/viper"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"os"
 )
 
 var configFile string
@@ -11,13 +11,13 @@ var configFile string
 // This is the root command which will show the help
 // Other comands will add themselves as children of the root
 var rootCmd = &cobra.Command{
-	Use:   "morio",
-  Version: "0.1",
-	Short: "The morio client",
-  Long: `morio: The Morio client
+	Use:     "morio",
+	Version: "0.1",
+	Short:   "The morio client",
+	Long: `morio: The Morio client
 
-This wraps the various local agents that gather
-observability data and ship it to a Morio instance.
+This client wraps different agents that each gather one type
+of observability data and ship it to a Morio collector.
 
 Use this to manage the various agents and their configuration.`,
 }
@@ -33,16 +33,15 @@ func Execute() {
 
 // When starting up, initialize the config file
 func init() {
-  cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(initConfig)
 }
 
 // Set up viper to manage the config file
 func initConfig() {
-  viper.SetEnvPrefix("morio")
-  viper.AddConfigPath("/etc/morio/")
-  viper.SetConfigType("yaml")
-  viper.SetConfigName("morio")
-  viper.AutomaticEnv()
-  viper.ReadInConfig()
+	viper.SetEnvPrefix("morio")
+	viper.AddConfigPath("/etc/morio/")
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("morio")
+	viper.AutomaticEnv()
+	viper.ReadInConfig()
 }
-

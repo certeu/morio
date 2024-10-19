@@ -9,7 +9,7 @@ import (
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Morio client version",
-	Long: `Shows the Morio client version`,
+	Long:  `Shows the Morio client version`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("version called")
 	},
