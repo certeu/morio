@@ -9,7 +9,7 @@ import (
   "os"
   "path/filepath"
   "strconv"
-  "strings"
+//  "strings"
 )
 
 // morio template
@@ -20,12 +20,19 @@ var templateCmd = &cobra.Command{
 	Long:  `Templates out the configuration for the different agents.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		context := GetVars()
-    // The main config file for each agent
+    // Audit
     TemplateOutFile("audit/config.yaml.mustache", "audit/config.yaml", context)
-    TemplateOutFile("metrics/config.yaml.mustache", "metrics/config.yaml", context)
-    TemplateOutFile("logs/config.yaml.mustache", "logs/config.yaml", context)
-    // All templates for each agent
     TemplateOutFolder("audit/module-templates.d", "audit/modules.d", context)
+    TemplateOutFolder("audit/rule-templates.d", "audit/rules.d", context)
+    // metrics
+    TemplateOutFile("metrics/config.yaml.mustache", "metrics/config.yaml", context)
+    TemplateOutFolder("metrics/module-templates.d", "metrics/modules.d", context)
+    // logs
+    TemplateOutFile("logs/config.yaml.mustache", "logs/config.yaml", context)
+    TemplateOutFolder("logs/module-templates.d", "logs/modules.d", context)
+    TemplateOutFolder("logs/input-templates.d", "logs/inputs.d", context)
+    // global vars
+    WriteGlobalVars()
 	},
 }
 
@@ -68,15 +75,34 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 }
 
 func TemplateOutFolder(from string, to string, context map[string]string) {
-  for source, dest := range TemplateList(from) {
-    TemplateOutFile(from + "/" + source, to + "/" + dest, context)
+  ClearFolder(to)
+  for _, file := range TemplateList(from) {
+    TemplateOutFile(from + "/" + file, to + "/" + file, context)
   }
 }
 
-func TemplateList(folder string) map[string]string {
-	// Create the map
-	found := make(map[string]string)
-  suffix := ".mustache"
+func ClearFolder(folder string) {
+  path := GetConfigPath(folder)
+	files, err := os.ReadDir(path)
+  if err != nil {
+    fmt.Println("Unable to read files from folder at " + path)
+		panic(err)
+  }
+
+	for _, file := range files {
+    filePath := filepath.Join(path, file.Name())
+    suffix := filepath.Ext(file.Name())
+		if !file.IsDir() && ( suffix  == ".yaml" || suffix == ".disabled" || suffix == ".rules" ) {
+      if err := os.Remove(filePath); err != nil {
+        fmt.Println("Failed to remove file " + filePath)
+        fmt.Print(err)
+      }
+    }
+	}
+}
+
+func TemplateList(folder string) []string {
+	var files []string
   path := filepath.Join([]string{ "/etc", "morio", folder }...)
 	templates, err := ioutil.ReadDir(path)
   if err != nil {
@@ -85,12 +111,13 @@ func TemplateList(folder string) map[string]string {
   }
 
 	for _, template := range templates {
-		if !template.IsDir() && filepath.Ext(template.Name()) == suffix  {
-			found[template.Name()] = strings.TrimSuffix(template.Name(), suffix)
+    suffix := filepath.Ext(template.Name())
+		if !template.IsDir() && suffix  == ".yaml" {
+			files = append(files, template.Name())
 		}
 	}
 
-  return found
+  return files
 }
 
 func ExtractTemplateDefaultVars(from string) map[string]string {
@@ -147,9 +174,42 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
   return result
 }
 
-func StoreTemplateDefaultVars(list map[string]string) {
+// FIXME: Make this platform agnostic
+func LoadGlobalVars() map[string]interface{} {
+  data, err := os.ReadFile("/etc/morio/global-vars.yaml")
+  if err != nil {
+    fmt.Println("Cannot read global variables file. Bailing out.")
+    panic(err)
+  }
+
+  var result map[string]interface{}
+  yaml.Unmarshal([]byte(data), &result)
+
+  return result
 }
 
+// FIXME: Make this platform agnostic
+func WriteGlobalVars() {
+  globals := LoadGlobalVars()
+  for key, nested := range globals {
+    entry, ok := nested.(map[string]interface{})
+    if ok {
+      val, _ := entry["default"]
+      switch v := val.(type) {
+      case string:
+        SetDefaultVar(key, v)
+      case bool:
+        SetDefaultVar(key, strconv.FormatBool(v))
+      case int:
+        SetDefaultVar(key, strconv.Itoa(v))
+      case float64:
+        SetDefaultVar(key, strconv.FormatFloat(v, 'f', -1, 64))
+      default:
+        SetDefaultVar(key, fmt.Sprintf("%v", v))
+      }
+    }
+  }
+}
 
 // FIXME: Make this platform agnostic
 func GetConfigPath(parts ...string) string {
