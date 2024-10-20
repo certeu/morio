@@ -16,7 +16,7 @@ var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Start agents",
 	Long:  "Starts all beats agents, or the one you pass it",
-  Example: `  Start all agents:
+	Example: `  Start all agents:
     morio start
 
   Start a specific agent:
@@ -34,7 +34,7 @@ var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stop agents",
 	Long:  "Stops all beats agents, or the one you pass it",
-  Example: `  Stops all agents:
+	Example: `  Stops all agents:
     morio stop
 
   Stop a specific agent:
@@ -52,7 +52,7 @@ var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restart agents",
 	Long:  "Restarts all beats agents, or the one you pass it",
-  Example: `  Restart all agents:
+	Example: `  Restart all agents:
     morio restart
 
   Restart a specific agent:
@@ -70,21 +70,21 @@ var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Shows agents status",
 	Long:  "Shows the status of all agents, or the one you pass it",
-  Example: `  Show the status of all agents:
+	Example: `  Show the status of all agents:
     morio status
 
   Show the status of a specific agent:
     morio status logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-    if args[0] == "audit" {
-	    PrintAgentStatus("audit")
-    } else if args[0] == "metrics" {
-	    PrintAgentStatus("metrics")
-    } else if args[0] == "logs" {
-	    PrintAgentStatus("logs")
-    } else {
-      ShowStatus()
-    }
+		if args[0] == "audit" {
+			PrintAgentStatus("audit")
+		} else if args[0] == "metrics" {
+			PrintAgentStatus("metrics")
+		} else if args[0] == "logs" {
+			PrintAgentStatus("logs")
+		} else {
+			ShowStatus()
+		}
 	},
 }
 

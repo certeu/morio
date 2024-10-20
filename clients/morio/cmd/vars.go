@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-  "strings"
+	"strings"
 )
 
 // morio vars
@@ -135,7 +135,7 @@ If you want the variable gone altogether, use 'morio vars clear' to
 set the var to an empty string and you cannot remove default variables,
 but you can override them.`,
 	Run: func(cmd *cobra.Command, args []string) {
-    RmVar(args[0])
+		RmVar(args[0])
 	},
 }
 
@@ -170,7 +170,7 @@ const DefaultVarFolder string = "/etc/morio/default.vars.d"
 // Helper for panic on error
 func check(e error) {
 	if e != nil {
-    panic(e)
+		panic(e)
 	}
 }
 
@@ -250,8 +250,8 @@ func SetDefaultVar(key string, value string) {
 func RmVar(key string) {
 	// Remove file
 	err := os.Remove(CustomVarFolder + "/" + key)
-  // Swallow errors if the file does not exist
+	// Swallow errors if the file does not exist
 	if err != nil && !strings.Contains(err.Error(), "no such file or directory") {
-    check(err)
-  }
+		check(err)
+	}
 }
