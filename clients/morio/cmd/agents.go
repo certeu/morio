@@ -12,8 +12,8 @@ import (
 // morio audit
 var auditCmd = &cobra.Command{
 	Use:   "audit",
-	Short: "Invoke auditbeat agent",
-	Long: `Invokes the auditbeat agent preconfigured for Morio.
+	Short: "Invoke the audit agent",
+	Long: `Invokes the audit agent.
 Any parameters after this command will be passed to auditbeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -42,8 +42,8 @@ Any parameters after this command will be passed to auditbeat.`,
 // morio logs
 var logsCmd = &cobra.Command{
 	Use:   "logs",
-	Short: "Invoke filebeat agent",
-	Long: `Invokes the filebeat agent preconfigured for Morio.
+	Short: "Invoke the logs agent",
+	Long: `Invokes the logs agent.
 Any parameters after this command will be passed to filebeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -72,8 +72,8 @@ Any parameters after this command will be passed to filebeat.`,
 // morio metrics
 var metricsCmd = &cobra.Command{
 	Use:   "metrics",
-	Short: "Invoke metricbeat agent",
-	Long: `Invokes the metricbeat agent preconfigured for Morio.
+	Short: "Invoke the metrics agent",
+	Long: `Invokes the metrics agent.
 Any parameters after this command will be passed to metricbeat.`,
 	Args: cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
