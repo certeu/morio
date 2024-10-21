@@ -1,0 +1,73 @@
+{{#MORIO_DOCS}}
+about: |-
+  A metricbeat module for Linux system
+
+  This leverages the `system` metricbeat module to gather basic data from a
+  Linux system.
+vars:
+  defaults:
+    LINUX_SYSTEM_FILESYSTEM_INTERVAL: 10m
+    LINUX_SYSTEM_INVENTORY_INTERVAL: 8h
+    LINUX_SYSTEM_METRICSETS_ALWAYS:
+      - cpu
+      - diskio
+      - load
+      - memory
+      - network
+      - service
+    LINUX_SYSTEM_MOUNTPOINTS_IGNORE_REGEX: '^/(snap|sys|cgroup|proc|dev|etc|host|lib)($|/)'
+  local:
+    LINUX_SYSTEM_FILESYSTEM_INTERVAL: The interval to use for filesystem data
+    LINUX_SYSTEM_INVENTORY_INTERVAL: The interval to use for inventory data
+    LINUX_SYSTEM_METRICSETS: The metricsets to collect on every tick
+    LINUX_SYSTEM_MOUNTPOINTS_IGNORE_REGEX: A regular expression of mountpoints for which to drop events
+  global:
+    - MORIO_TICK
+{{/MORIO_DOCS}}
+
+{{^MORIO_DOCS}}
+- module: system
+  period: {{ MORIO_TICK }}
+  metricsets:
+    - cpu
+    - diskio
+    - load
+    - memory
+    - network
+    - service
+  service.state_filter: [ failed ]
+  processors:
+    - add_fields:
+        target: morio
+        fields:
+          module: {{ MORIO_MODULE_NAME }}
+
+- module: system
+  period: {{ LINUX_SYSTEM_FILESYSTEM_INTERVAL }}
+  metricsets:
+    - filesystem
+  processors:
+    - drop_event.when.regexp:
+        system.filesystem.mount_point: {{{ LINUX_SYSTEM_MOUNTPOINTS_IGNORE_REGEX }}}
+    - add_fields:
+        target: morio
+        fields.module: lin-system
+
+{{#MORIO_TRACK_INVENTORY}}
+- module: system
+  period: {{ LINUX_SYSTEM_INVENTORY_INTERVAL }}
+  metricsets:
+    - load
+    - memory
+  processors:
+    - add_host_metadata:
+        netinfo.enabled: true
+        cache.ttl: 60m
+    - add_fields:
+        target: morio
+        fields:
+          module: {{ MORIO_MODULE_NAME }}
+          inventory_update: true
+{{/MORIO_TRACK_INVENTORY}}
+{{/MORIO_DOCS}}
+
