@@ -10,6 +10,7 @@ import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 import { service as watcherService } from './watcher.mjs'
+import { service as webService } from './web.mjs'
 // Dependencies
 import {
   resolveServiceConfiguration,
@@ -50,6 +51,7 @@ const services = {
   connector: connectorService,
   dbuilder: dbuilderService,
   watcher: watcherService,
+  web: webService,
 }
 
 /*
@@ -76,7 +78,10 @@ async function createMorioService(serviceName) {
    */
   const [ok, list] = await runDockerApiCommand('listImages')
   if (!ok) log.warn(`Unable to load list of docker images`)
-  if (list.filter((img) => img.RepoTags.includes(config.Image)).length < 1) {
+  if (
+    list.filter((img) => Array.isArray(img.RepoTags) && img.RepoTags.includes(config.Image))
+      .length < 1
+  ) {
     log.info(`[${serviceName}] Image ${config.Image} is not available on disk. Attempting pull.`)
 
     return new Promise((resolve) => {
@@ -192,7 +197,10 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
    * Generate morio service config
    * Docker config will be generated after the preCreate lifecycle hook
    */
-  utils.setMorioServiceConfig(serviceName, resolveServiceConfiguration(serviceName, { utils }))
+  utils.setMorioServiceConfig(
+    serviceName,
+    resolveServiceConfiguration(serviceName, { utils, hookParams })
+  )
 
   /*
    * Does the service need to be recreated?

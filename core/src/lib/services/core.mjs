@@ -67,6 +67,7 @@ export const service = {
 
       /*
        * Load existing settings, keys, node info and timestamp from disk
+       * This will also populate utils with the encryption methods
        */
       const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
 
@@ -120,20 +121,6 @@ export const service = {
       log.debug(`Found settings with serial ${timestamp}`)
       for (const [flagName, flagValue] of Object.entries(settings.tokens?.flags || {})) {
         if (flagValue) log.info(`Feature flag enabled: ${flagName}`)
-      }
-
-      /*
-       * Add encryption methods to utils so we can template the settings
-       */
-      if (!utils.encrypt) {
-        const { encrypt, decrypt, isEncrypted } = encryptionMethods(
-          keys.mrt,
-          'Morio by CERT-EU',
-          log
-        )
-        utils.encrypt = encrypt
-        utils.decrypt = decrypt
-        utils.isEncrypted = isEncrypted
       }
 
       /*
@@ -193,6 +180,9 @@ async function loadSettingsFromDisk() {
    */
   const node = await readJsonFile(`/etc/morio/node.json`)
 
+  /*
+   * If there's no settings on disk, we're in ephemeral mode
+   */
   if (!timestamp)
     return {
       settings: {},
@@ -204,7 +194,13 @@ async function loadSettingsFromDisk() {
    * Now read the settings file and keys
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
-  const keys = await readJsonFile(`/etc/morio/keys.json`)
+  const keydata = await readJsonFile(`/etc/morio/keys.json`)
+
+  /*
+   * Decrypt key data
+   * This will also add encryption methods to utils so we can template the settings
+   */
+  const keys = unsealKeyData(keydata)
 
   return { settings, keys, node, timestamp }
 }
@@ -219,9 +215,11 @@ export async function templateSettings(settings) {
     try {
       const clear = await utils.unwrapSecret(key, val)
       tokens[key] = clear
-    }
-    catch(err) {
-      if (val.vault) log.error(`Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: '+err.message : ''}`)
+    } catch (err) {
+      if (val.vault)
+        log.error(
+          `Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: ' + err.message : ''}`
+        )
     }
   }
 
@@ -246,7 +244,7 @@ export async function templateSettings(settings) {
 
 function generateDataChecksum(data) {
   const keys = utils.getKeys()
-  return hash(JSON.stringify(data) + keys.mrt + keys.cluster + keys.rpwd)
+  return hash(JSON.stringify(data) + keys.mrt.hash + keys.cluster + keys.rpwd)
 }
 
 function validateDataChecksum(data, checksum) {
@@ -259,4 +257,21 @@ export function dataWithChecksum(data) {
 
 export function validDataWithChecksum({ data, checksum }) {
   return validateDataChecksum(data, checksum)
+}
+
+export function unsealKeyData(keydata) {
+  const unseal = hash(keydata.seal.salt + keydata.seal.hash)
+  const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+    unseal,
+    hash(keydata.seal.salt + unseal),
+    log
+  )
+  if (!utils.encrypt) utils.encrypt = encrypt
+  if (!utils.decrypt) utils.decrypt = decrypt
+  if (!utils.isEncrypted) utils.isEncrypted = isEncrypted
+
+  /*
+   * Return unsealed key data
+   */
+  return decrypt(keydata.data)
 }

@@ -540,44 +540,47 @@ export const RoleInput = ({
  * the option to add one or more strings/numbers/roles/whatever.
  */
 export const LabelInput = (props) => {
-  const  {
+  const {
     label,
-    labelTR=false,
-    labelBR=false,
-    labelBL=false,
-    disabled=false,
+    labelTR = false,
+    labelBR = false,
+    labelBL = false,
+    disabled = false,
     update,
-    current={},
+    current = {},
     placeholder,
-    id='',
+    id = '',
     original,
-    valid=() => true,
+    valid = () => true,
   } = props
 
-  const  [str, setStr] = useState('')
-  const  [obj, setObj] = useState(current)
+  const [str, setStr] = useState('')
+  const [obj, setObj] = useState(current)
 
   const localUpdate = (val) => {
     if (val.trim().slice(-1) === ',') {
-      const newObj = {...obj}
+      const newObj = { ...obj }
       const label = val.slice(0, -1).trim()
       newObj[label] = label
       setObj(newObj)
       setStr('')
       update(newObj)
-    }
-    else setStr(val)
+    } else setStr(val)
   }
 
   const removeLabel = (label) => {
-    const newObj = {...obj}
+    const newObj = { ...obj }
     delete newObj[label]
     setObj(newObj)
     props.update(newObj)
   }
 
-  const labels = Object.values(obj).map(val => (
-    <button onClick={() => removeLabel(val)} key={val} className="btn btn-info btn-xs hover:btn-error">
+  const labels = Object.values(obj).map((val) => (
+    <button
+      onClick={() => removeLabel(val)}
+      key={val}
+      className="btn btn-info btn-xs hover:btn-error"
+    >
       {val}
     </button>
   ))
@@ -593,15 +596,13 @@ export const LabelInput = (props) => {
           value={str}
           onChange={(evt) => localUpdate(evt.target.value)}
           className={`input w-full bg-base-100 input-bordered ${
-              current === original
-                ? 'input-secondary'
-                : 'input-success'
+            current === original ? 'input-secondary' : 'input-success'
           }`}
         />
       </FormControl>
-    {labels.length > 0 ? (
-      <div className="flex flex-row flex-wrap gap-1">Current: {labels}</div>
-    ) : null}
+      {labels.length > 0 ? (
+        <div className="flex flex-row flex-wrap gap-1">Current: {labels}</div>
+      ) : null}
     </>
   )
 }

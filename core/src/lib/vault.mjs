@@ -39,7 +39,7 @@ async function getVaultToken(vconf) {
       kv_path: vconf.kv_path,
     },
     key: utils.getKeys().private,
-    passphrase: utils.getKeys().mrt,
+    passphrase: utils.getKeys().unseal,
     options: {
       expiresIn: '3m',
       issuer: utils.getClusterFqdn(),

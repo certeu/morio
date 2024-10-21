@@ -9,6 +9,7 @@ import {
   SliderInput,
   HiddenInput,
   LabelInput,
+  FileInput,
 } from 'components/inputs.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
 import Joi from 'joi'
@@ -171,6 +172,7 @@ export const FormElement = (props) => {
   if (props.inputType === 'secret') return <TokenSelect {...inputProps} secrets={true} />
   if (props.inputType === 'variable') return <TokenSelect {...inputProps} secrets={false} />
   if (props.inputType === 'labels') return <LabelInput {...inputProps} />
+  if (props.inputType === 'file') return <FileInput {...inputProps} />
 
   switch (type) {
     case 'string':

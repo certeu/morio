@@ -118,7 +118,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
-  }${config[name][env].container.image}:${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
+  }${config[name][env].container.image}:v${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
 `
 
 const preApiTest = `
@@ -144,6 +144,16 @@ echo "Stopping ephemeral LDAP server"
 ./api/tests/stop-ldap-server.sh
 `
 
+const coreWebConfig = `
+
+# Copy the webroot and config into the correct location for dev
+sudo mkdir -p ${MORIO_GIT_ROOT}/data/config/web
+sudo cp -R ${MORIO_GIT_ROOT}/moriod/etc/morio/moriod/web  ${MORIO_GIT_ROOT}/data/config
+sudo mkdir -p ${MORIO_GIT_ROOT}/data/data
+sudo cp -R ${MORIO_GIT_ROOT}/moriod/var/lib/morio/moriod/shared/webroot ${MORIO_GIT_ROOT}/data/data/webroot
+
+`
+
 const script = (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
@@ -151,6 +161,7 @@ const script = (name, env) => `#!/bin/bash
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
+${(name === 'core' && env === 'dev') ? coreWebConfig : ''}
 ${name === 'api' ? preApiTest : ''}
 docker run ${cliOptions(name, env)}
 ${name === 'api' ? postApiTest : ''}

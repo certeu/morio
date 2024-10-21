@@ -143,7 +143,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   /*
    * Helper to get the tablist, and array of tabs with IDPs
    */
-  const tabList = tabOrder(idps, ui, showAll).filter(id => typeof idps[id] !== 'undefined')
+  const tabList = tabOrder(idps, ui, showAll).filter((id) => typeof idps[id] !== 'undefined')
 
   const tabs = tabList.map((id) => {
     const Idp = providers[idps[id].provider] || UnknownIdp
@@ -200,16 +200,17 @@ export const Login = ({ setAccount, account = false, role = false }) => {
                   <span className="badge badge-error ml-1">{role}</span>
                 </td>
                 <td>
-                  <span className="badge badge-success ml-1">
-                    {account.role}
-                  </span>
+                  <span className="badge badge-success ml-1">{account.role}</span>
                 </td>
               </tr>
             </tbody>
           </table>
           <br />
           <Popout note compact dense noP>
-            You can sign in again to assume a different role, or <a role="button" onClick={back}>go back</a>
+            You can sign in again to assume a different role, or{' '}
+            <a role="button" onClick={back}>
+              go back
+            </a>
           </Popout>
         </>
       ) : null}

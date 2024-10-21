@@ -13,7 +13,7 @@ import { Popout } from 'components/popout.mjs'
  * the user should make. So you can also think of this as the
  * setup template.
  */
-export const cluster = (context, toggleValidate) => {
+export const cluster = (context, toggleValidate, update) => {
   const template = {
     title: 'Cluster Setup',
     type: 'info',
@@ -130,8 +130,66 @@ export const cluster = (context, toggleValidate) => {
                   <button className="btn btn-primary btn-lg px-12 mt-4" onClick={toggleValidate}>
                     Validate Morio Settings
                   </button>
+                  <br />
+                  <button
+                    className="mt-2 btn btn-ghost"
+                    onClick={() =>
+                      update('TMP.showMoreOptions', context.TMP?.showMoreOptions ? false : true)
+                    }
+                  >
+                    {context.TMP?.showMoreOptions ? 'Hide' : 'Show'} advanced settings
+                  </button>
                 </p>,
               ],
+              'Key Data': ['### Optional: Provide a Key Data file'].concat(
+                context.preseed?.keys?.data
+                  ? [<Popout tip title="Key Data file Loaded" compact key="a" />]
+                  : [
+                      <Popout compact note key="b">
+                        This tab is only relevant to advanced deployments.
+                      </Popout>,
+                      {
+                        key: 'preseed.keys',
+                        label: 'Key Data file (JSON)',
+                        schema: Joi.object({
+                          data: Joi.string().required(),
+                          key: Joi.string().required(),
+                          seal: Joi.object({
+                            hash: Joi.string().required(),
+                            salt: Joi.string().required(),
+                          }),
+                        }),
+                        inputType: 'file',
+                        original: undefined,
+                        dropzoneConfig: {
+                          accept: { 'application/json': ['.json'] },
+                          maxFiles: 1,
+                          multiple: false,
+                        },
+                        transform: (upload) => {
+                          let data
+                          try {
+                            const chunks = upload.split(',')
+                            data = JSON.parse(atob(chunks[1]))
+                          } catch (err) {
+                            data = {}
+                          }
+
+                          return data
+                        },
+                      },
+                      <Popout tip key="c">
+                        <h5>What is a Key Data file?</h5>
+                        <p>
+                          If you provide a Key Data file here that you exported from another Morio
+                          instance, this Morio instance will be set up with the same cryptographic
+                          DNA.
+                          <br />
+                          This allows running Morio in a blue/green deployment.
+                        </p>
+                      </Popout>,
+                    ]
+              ),
             },
           },
         ],
@@ -139,6 +197,7 @@ export const cluster = (context, toggleValidate) => {
     },
   }
 
+  if (!context.TMP?.showMoreOptions) delete template.children.setup.form[0].tabs['Key Data']
   if (!context.TMP?.node_count || context.TMP.node_count < 2) {
     delete template.children.setup.form[0].tabs.Cluster
   }

@@ -250,8 +250,8 @@ export async function writeYamlFile(filePath, data, log = false, mode = 0o666) {
  *
  * @return {bool} true of success, false in case of trouble
  */
-export async function writeJsonFile(filePath, data) {
-  return await writeFile(filePath, JSON.stringify(data, null, 2))
+export async function writeJsonFile(filePath, data, log, mode) {
+  return await writeFile(filePath, JSON.stringify(data, null, 2), log, mode)
 }
 
 /**

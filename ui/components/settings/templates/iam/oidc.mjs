@@ -3,29 +3,31 @@ import { providerMeta } from './index.mjs'
 import { roles } from 'config/roles.mjs'
 import { Popout } from 'components/popout.mjs'
 
-
 // Add roles
 const Roles = []
-for (const role of roles) Roles.push(
-  <span key={`h-${role}`}><b>{role.toUpperCase()}</b> role</span>,
-  [
-    {
-      schema: Joi.string().allow('').label('OIDC Provider Attribute'),
-      label: `OIDC  Attribute`,
-      labelTR: role,
-      labelBL: 'The attribute to check',
-      key: `rbac.${role}.attribute`,
-      placeholder: 'email',
-    },
-    {
-      schema: Joi.string().allow('').label('Regex'),
-      label: 'Regex',
-      labelBL: `The regex to match`,
-      key: `rbac.${role}.regex`,
-      placeholder: `^(?:mario|luigi)$`,
-    },
-  ],
-)
+for (const role of roles)
+  Roles.push(
+    <span key={`h-${role}`}>
+      <b>{role.toUpperCase()}</b> role
+    </span>,
+    [
+      {
+        schema: Joi.string().allow('').label('OIDC Provider Attribute'),
+        label: `OIDC  Attribute`,
+        labelTR: role,
+        labelBL: 'The attribute to check',
+        key: `rbac.${role}.attribute`,
+        placeholder: 'email',
+      },
+      {
+        schema: Joi.string().allow('').label('Regex'),
+        label: 'Regex',
+        labelBL: `The regex to match`,
+        key: `rbac.${role}.regex`,
+        placeholder: `^(?:mario|luigi)$`,
+      },
+    ]
+  )
 Roles.push(
   <Popout tip key="tip">
     <h5>Role-Based Access Control</h5>
@@ -92,13 +94,14 @@ export const oidc = {
             label: 'OIDC Attributes',
             labelBL: 'A comma-seperated list of OIDC attribute to add as labels',
             key: 'label_attributes',
-            placeholder: "Enter the attribute name here, enter comma to add it",
+            placeholder: 'Enter the attribute name here, enter comma to add it',
             inputType: 'labels',
           },
           <Popout tip key="tip">
             <h5>Attribute-Based Access Control</h5>
             <p>
-              You can enter one or more <b>OIDC attributes</b> to add their values as labels to the user identity.
+              You can enter one or more <b>OIDC attributes</b> to add their values as labels to the
+              user identity.
               <br />
               You can then use those labels in fine-grained ABAC policies.
             </p>

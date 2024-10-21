@@ -11,7 +11,7 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { SettingsReport } from './report.mjs'
 import { FormBlock } from './blocks/form.mjs'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { Box } from 'components/box.mjs'
 import { OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -31,6 +31,12 @@ const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate 
     {validationReport ? (
       <>
         <h3>Validation Results</h3>
+        {validationReport.status === 400 && validationReport.schema_violation ? (
+          <Popout tip>
+            <h4>{validationReport.title}</h4>
+            <p>{validationReport.schema_violation}</p>
+          </Popout>
+        ) : null}
         <SettingsReport report={validationReport} />
         {validationReport.valid ? (
           <button className="btn btn-accent btn-lg w-full mt-4" onClick={deploy}>
@@ -41,7 +47,7 @@ const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate 
     ) : (
       <div className="text-center text-2xl">
         <div className="w-32 mx-auto mb-4 text-primary">
-          <LogoSpinner />
+          <Spinner />
         </div>
         One moment please
       </div>
@@ -103,7 +109,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
                 {deployResult.root_token?.value ? (
                   <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                 ) : (
-                  <LogoSpinner />
+                  <Spinner />
                 )}
               </div>
               {deployResult.root_token?.value ? (
@@ -142,7 +148,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
     }
     setValidateView(!validateView)
   }
-  const formEl = cluster(mSettings, toggleValidate).children.setup.form
+  const formEl = cluster(mSettings, toggleValidate, update).children.setup.form
 
   return (
     <div className="w-full max-w-2xl mx-auto">

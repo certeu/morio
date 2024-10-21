@@ -288,6 +288,20 @@ Controller.prototype.settings = async function (req, res) {
 }
 
 /**
+ * Export keys
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.exportKeys = async function (req, res) {
+  /*
+   * Pass request to core
+   */
+  const [status, result] = await utils.coreClient.get(`/export/keys`)
+
+  return res.status(status).send(result)
+}
+/**
  * Stream service logs
  *
  * @param {object} req - The request object from Express
@@ -306,6 +320,19 @@ Controller.prototype.streamServiceLogs = async function (req, res) {
  */
 Controller.prototype.getClientPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/clients/${type}/defaults`)
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Loads defaults for client repo packages from core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ */
+Controller.prototype.getClientRepoPackageDefaults = async function (req, res, type) {
+  const [status, result] = await utils.coreClient.get(`/pkgs/repos/${type}/defaults`)
 
   return res.status(status).send(result)
 }
@@ -340,6 +367,22 @@ Controller.prototype.getPresets = async function (req, res) {
 Controller.prototype.buildClientPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
     `/pkgs/clients/${type}/build`,
+    bodyPlusHeaders(req)
+  )
+
+  return res.status(status).send(result)
+}
+
+/**
+ * Submits a build request for a client repo package to core
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ */
+Controller.prototype.buildClientRepoPackage = async function (req, res, type) {
+  const [status, result] = await utils.coreClient.post(
+    `/pkgs/repos/${type}/build`,
     bodyPlusHeaders(req)
   )
 

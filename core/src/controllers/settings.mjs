@@ -1,17 +1,21 @@
 import { resolveHostAsIp } from '#shared/network'
 import { setIfUnset } from '#shared/store'
-import { writeYamlFile, writeJsonFile } from '#shared/fs'
+import { writeYamlFile, writeJsonFile, readJsonFile } from '#shared/fs'
 import {
+  encryptionMethods,
   generateJwtKey,
   generateKeyPair,
+  generateGpgKeyPair,
+  hash,
+  hashPassword,
   randomString,
-  encryptionMethods,
   uuid,
 } from '#shared/crypto'
 import { reload } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
+import { unsealKeyData } from '../lib/services/core.mjs'
 import { resolveServiceConfiguration } from '#config'
 import { loadPreseededSettings } from '#shared/loaders'
 
@@ -193,6 +197,21 @@ Controller.prototype.reseed = async function (req, res) {
 }
 
 /**
+ * Export the keys
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.exportKeys = async function (req, res) {
+  /*
+   * Load the raw key data from disk
+   */
+  const keys = await readJsonFile(`/etc/morio/keys.json`)
+
+  return res.send({ keys })
+}
+
+/**
  * This is a helper method to figure who we are.
  * This is most relevant when we have a cluster.
  *
@@ -266,18 +285,9 @@ const initialSetup = async function (req, settings) {
   log.debug(`Initial settings will be tracked as: ${time}`)
 
   /*
-   * This is the initial deploy, there will be no key pair or UUID, so generate one.
+   * This is the initial deploy, generate keys, UUIDS and so on
    */
-  log.debug(`Generating root token`)
-  const morioRootToken = 'mrt.' + (await randomString(32))
-  log.debug(`Generating key pair`)
-  const { publicKey, privateKey } = await generateKeyPair(morioRootToken)
-  const keys = {
-    jwt: generateJwtKey(),
-    mrt: morioRootToken,
-    public: publicKey,
-    private: privateKey,
-  }
+  const keys = settings.preseed?.keys ? unsealKeyData(settings.preseed.keys) : {}
 
   /*
    * Generate UUIDs for node and cluster
@@ -287,6 +297,40 @@ const initialSetup = async function (req, settings) {
   keys.cluster = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
   log.debug(`Cluster UUID: ${keys.cluster}`)
+
+  /*
+   * Fenerate the seal secret unless it was provided in the preseeded key data
+   */
+  if (!keys.seal) keys.seal = await hashPassword(randomString(64))
+
+  /*
+   * Generate the Morio root token, unless it was provided in the preseeded key data
+   */
+  let morioRootToken = 'Use the preseeded root token'
+  if (!keys.mrt) {
+    log.debug(`Generating root token`)
+    morioRootToken = 'mrt.' + (await randomString(32))
+    keys.mrt = hashPassword(morioRootToken)
+  }
+
+  /*
+   * Now generate the key pair, unless it was provided in the preseeded key data
+   */
+  if (!keys.unseal) keys.unseal = hash(keys.seal.salt + keys.seal.hash)
+  if (!keys.private) {
+    log.debug(`Generating key pairs`)
+    const { publicKey, privateKey } = await generateKeyPair(keys.unseal)
+    const gpg = await generateGpgKeyPair(keys.cluster)
+    keys.public = publicKey
+    keys.private = privateKey
+    keys.pgpub = gpg.public
+    keys.pgpriv = gpg.private
+  }
+
+  /*
+   * Generate JWT, unles sit was providede in the preseeded key data
+   */
+  if (!keys.jwt) keys.jwt = generateJwtKey()
 
   /*
    * Complete the settings with the defaults that are configured
@@ -305,32 +349,26 @@ const initialSetup = async function (req, settings) {
    * We need to generate the CA config & certificates early so that
    * we can pass them along the join invite to cluster nodes
    */
-  await generateCaConfig()
+  await generateCaConfig(keys)
 
   /*
-   * Handle secrets - Which requires some extra work
-   * At this point, utils does not (yet) hold our encryption methods.
-   * So we need to add them prior to calling ensureTokenSecrecy.
-   * However, all of this is only required if/when the initial settings
-   * contain secrets. Soemthing which is not supported in the UI but can
-   * happen when people either use the API for initial setup, or upload a
-   * settings file.
-   *
-   * So let's first check whether there are any secrets, and if not just
-   * bypass the entire secret handling.
+   * Add encryption methods, unless they are already added
    */
-  if (valid.tokens?.secrets) {
-    /*
-     * Add encryption methods
-     */
-    const { encrypt, decrypt, isEncrypted } = encryptionMethods(keys.mrt, 'Morio by CERT-EU', log)
+  if (!utils.encrypt) {
+    const { encrypt, decrypt, isEncrypted } = encryptionMethods(
+      keys.unseal,
+      hash(keys.seal.salt + keys.unseal),
+      log
+    )
     utils.encrypt = encrypt
     utils.decrypt = decrypt
     utils.isEncrypted = isEncrypted
+  }
 
-    /*
-     * Now ensure token secrecy before we write to disk
-     */
+  /*
+   * Now ensure token secrecy before we write to disk
+   */
+  if (valid.tokens?.secrets) {
     valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
   }
 
@@ -345,8 +383,13 @@ const initialSetup = async function (req, settings) {
    * Also write the keys to disk
    * Note that we're loading from the store, which was updated by generateCaConfig()
    */
-  log.debug(`Writing key data to keys.json`)
-  result = await writeJsonFile(`/etc/morio/keys.json`, utils.getKeys())
+  log.debug(`Writing key data to morio.keys`)
+  const keydata = {
+    data: await utils.encrypt(utils.getKeys()),
+    key: keys.private,
+    seal: keys.seal,
+  }
+  result = await writeJsonFile(`/etc/morio/keys.json`, keydata, log, 0o600)
   if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
@@ -358,7 +401,6 @@ const initialSetup = async function (req, settings) {
 
   /*
    * The data to return
-   * The Morio Root Token is actually the passphrase used to encrypt the private key
    */
   return [
     {
@@ -367,11 +409,17 @@ const initialSetup = async function (req, settings) {
         node: node.uuid,
         cluster: keys.cluster,
       },
-      root_token: {
-        about:
-          'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-        value: keys.mrt,
-      },
+      root_token: morioRootToken.includes('preseeded')
+        ? {
+            about:
+              'This Morio instance was preseeded with Key Data. No new Morio root token was generated. Use the preceeded root token instead.',
+            value: morioRootToken,
+          }
+        : {
+            about:
+              'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
+            value: morioRootToken,
+          },
     },
     false,
   ]

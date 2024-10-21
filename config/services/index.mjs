@@ -10,6 +10,7 @@ import { resolveServiceConfiguration as dbuilder } from './dbuilder.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
 import { resolveServiceConfiguration as watcher } from './watcher.mjs'
+import { resolveServiceConfiguration as web } from './web.mjs'
 
 const resolvers = {
   api,
@@ -23,6 +24,7 @@ const resolvers = {
   proxy,
   ui,
   watcher,
+  web,
 }
 
 export const resolveServiceConfiguration = (name, helpers) =>
@@ -40,8 +42,9 @@ export const serviceOrder = [
   'ui',
   'proxy',
   'connector',
+  'watcher',
+  'web',
   'dbuilder',
-  //'watcher', // FIXME: Enable when SASL is gone
 ]
 
 /*
@@ -95,8 +98,13 @@ export const generateTraefikConfig = (
   } else {
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
-    // Include rules and config using the cluster's FQDNs/nodes
+    // Configure TLS
     tc.set([...ROUTER, 'tls'], true)
+    if (utils.getFlag('ENFORCE_HTTP_MTLS')) {
+      tc.set('tls.options.default.clientAuth.caFiles', ['/usr/local/share/ca-certificates/morio_root_ca.crt'])
+      tc.set('tls.options.default.clientAuth.clientAuthType', 'RequireAndVerifyClientCert')
+    }
+    // Include rules and config using the cluster's FQDNs/nodes
     if (paths.length > 0) tc.set(RULE, `( ${paths.map((p) => 'Path(`' + p + '`)').join(' || ')} )`)
     else if (prefixes.length > 0)
       tc.set(RULE, `( ${prefixes.map((p) => 'PathPrefix(`' + p + '`)').join(' || ')} )`)
@@ -125,4 +133,5 @@ const getServicePort = (service, utils) => {
   if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
   if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')
   if (service === 'watcher') return utils.getPreset('MORIO_WATCHER_HTTP_PORT')
+  if (service === 'web') return utils.getPreset('MORIO_WEB_HTTP_PORT')
 }

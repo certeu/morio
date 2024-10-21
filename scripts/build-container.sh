@@ -10,7 +10,7 @@ then
   echo "Building container for Morio development environment."
   echo ""
   TARGET="dev"
-  SUFFIX="-dev"
+  NAMESPACE="devmorio"
 else
   if [ "prod" == $2 ]
   then
@@ -18,20 +18,20 @@ else
     echo "Building container for Morio production environment."
     echo ""
     TARGET="prod"
-    SUFFIX=""
+    NAMESPACE="itsmorio"
   elif [ "test" == $2 ]
   then
     echo ""
     echo "Building container for Morio testing environment."
     echo ""
     TARGET="test"
-    SUFFIX="-test"
+    NAMESPACE="testmorio"
   else
     echo ""
     echo "Building container for Morio development environment."
     echo ""
     TARGET="dev"
-    SUFFIX="-dev"
+    NAMESPACE="devmorio"
   fi
 fi
 
@@ -43,12 +43,12 @@ then
   exit 0
 else
   # Container to build
-  CONTAINER="$1$SUFFIX"
+  CONTAINER="$1"
 
   # Release to tag this with
   # Either `latest` for production or `next` for a pre-release
   if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
-    MORIO_RELEASE="next"
+    MORIO_RELEASE="testing"
   else
     MORIO_RELEASE="latest"
   fi
@@ -57,8 +57,8 @@ else
   cd $MORIO_GIT_ROOT/$1
   tar -ch . | docker build \
     --file Containerfile.$TARGET \
-    --tag itsmorio/$CONTAINER:$MORIO_RELEASE \
-    --tag itsmorio/$CONTAINER:$MORIO_VERSION_TAG \
+    --tag $NAMESPACE/$CONTAINER:$MORIO_RELEASE \
+    --tag $NAMESPACE/$CONTAINER:$MORIO_VERSION_TAG \
     -
 fi
 
