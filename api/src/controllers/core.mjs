@@ -316,7 +316,7 @@ Controller.prototype.streamServiceLogs = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/clients/${type}/defaults`)
@@ -329,7 +329,7 @@ Controller.prototype.getClientPackageDefaults = async function (req, res, type) 
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientRepoPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/repos/${type}/defaults`)
@@ -362,7 +362,7 @@ Controller.prototype.getPresets = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
@@ -378,7 +378,7 @@ Controller.prototype.buildClientPackage = async function (req, res, type) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientRepoPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
@@ -418,7 +418,7 @@ Controller.prototype.reload = async function (req, res) {
    * data from core. Since NodeJS is single-threaded, this will
    * de-facto be a deadlock.
    */
-  log.debug('Reveived reload signal from core')
+  log.debug('Received reload signal from core')
   res.status(204).send()
 
   /*
@@ -450,7 +450,7 @@ Controller.prototype.reseed = async function (req, res) {
   log.info('Received request to reseed')
 
   /*
-   * Reseeding can happen even when the preseed settings doe
+   * Reseeding can happen even when the preseed settings do
    * not include a base entry, for example to update the list
    * of client templates. So we need to differentiate here
    * and we only enforce the schema when a base file is preseeded.
