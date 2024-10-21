@@ -367,7 +367,13 @@ const initialSetup = async function (req, settings) {
    * Make sure keys & settings exists in memory store so later steps can get them
    */
   utils.setKeys(keys)
-  utils.setSettings(cloneAsPojo(valid))
+
+  /*
+   * Keep preseeded keys out of the settings
+   */
+  const saveSettings = cloneAsPojo(valid)
+  if (typeof saveSettings.preseed?.keys !== 'undefined') delete saveSettings.preseed.keys
+  utils.setSettings(saveSettings)
 
   /*
    * We need to generate the CA config & certificates early so that
@@ -400,7 +406,7 @@ const initialSetup = async function (req, settings) {
    * Write the settings to disk
    */
   log.debug(`Writing initial settings to settings.${time}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, valid)
+  let result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, saveSettings)
   if (!result) return [false, ['morio.core.fs.write.failed']]
 
   /*
