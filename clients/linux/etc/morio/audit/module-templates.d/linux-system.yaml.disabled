@@ -10,7 +10,7 @@ vars:
     LINUX_SYSTEM_MITRE_AUDIT: false
   local:
     LINUX_SYSTEM_MULTICAST_AUDIT: Enables data collection on multicast sockets
-    LINUX_SYSTEM_MITRE_AUDIT: Adds data to map audit events to the MITRE attack framework
+    LINUX_SYSTEM_MITRE_AUDIT: Adds data to map audit events to the MITRE ATT&CK framework
   global:
     - MORIO_TRACK_INVENTORY
 {{/MORIO_DOCS}}
