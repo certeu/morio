@@ -17,7 +17,7 @@ var versionCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(versionCmd)
+	RootCmd.AddCommand(versionCmd)
 
 	// Here you will define your flags and configuration settings.
 

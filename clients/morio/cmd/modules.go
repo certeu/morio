@@ -28,7 +28,7 @@ var modulesListCmd = &cobra.Command{
 
 // morio modules enable
 var modulesEnableCmd = &cobra.Command{
-	Use:   "enable",
+	Use:   "enable [module-name]",
 	Short: "Enable a module",
 	Long:  `Enables a client module.`,
 	Args:  cobra.ExactArgs(1),
@@ -40,7 +40,7 @@ var modulesEnableCmd = &cobra.Command{
 
 // morio modules disable
 var modulesDisableCmd = &cobra.Command{
-	Use:   "disable",
+	Use:   "disable [module-name]",
 	Short: "Disable a module",
 	Long:  `Disables a client module.`,
 	Args:  cobra.ExactArgs(1),
@@ -52,7 +52,7 @@ var modulesDisableCmd = &cobra.Command{
 
 // morio modules info
 var modulesInfoCmd = &cobra.Command{
-	Use:     "info",
+	Use:     "info [module-name]",
 	Short:   "Show module info",
 	Long:    `Shows info about a client module.`,
 	Args:    cobra.ExactArgs(1),
@@ -64,7 +64,7 @@ var modulesInfoCmd = &cobra.Command{
 
 func init() {
 	// Add the commands
-	rootCmd.AddCommand(modulesCmd)
+	RootCmd.AddCommand(modulesCmd)
 	modulesCmd.AddCommand(modulesListCmd)
 	modulesCmd.AddCommand(modulesEnableCmd)
 	modulesCmd.AddCommand(modulesDisableCmd)
@@ -187,7 +187,8 @@ func disableModuleFile(base, module string) {
 }
 
 func ModuleNameFromFile(file string) string {
-	base := file[:len(file)-len(filepath.Ext(file))]
+  baseFile := filepath.Base(file)
+	base := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
 	// Disabled modules have a double extension
 	if strings.HasSuffix(base, ".yaml") {
 		return base[:len(base)-len(filepath.Ext(base))]

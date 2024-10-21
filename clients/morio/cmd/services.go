@@ -197,10 +197,10 @@ var restartMetricsCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(restartCmd)
-	rootCmd.AddCommand(startCmd)
-	rootCmd.AddCommand(stopCmd)
-	rootCmd.AddCommand(statusCmd)
+	RootCmd.AddCommand(restartCmd)
+	RootCmd.AddCommand(startCmd)
+	RootCmd.AddCommand(stopCmd)
+	RootCmd.AddCommand(statusCmd)
 	restartCmd.AddCommand(restartAuditCmd)
 	restartCmd.AddCommand(restartMetricsCmd)
 	restartCmd.AddCommand(restartLogsCmd)

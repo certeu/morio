@@ -37,7 +37,7 @@ var templateCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(templateCmd)
+	RootCmd.AddCommand(templateCmd)
 }
 
 func TemplateOutFile(from string, to string, context map[string]string) {
@@ -46,8 +46,10 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 	check(err)
 	defer file.Close()
 
-	// Inject source template file location
+	// Inject run-time vars
 	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
+	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
+
 
 	// Write value
 	output, err := mustache.RenderFileInLayout(GetConfigPath(from), GetConfigPath("template-layout.mustache"), context)

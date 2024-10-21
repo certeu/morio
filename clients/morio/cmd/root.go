@@ -10,7 +10,7 @@ var configFile string
 
 // This is the root command which will show the help
 // Other comands will add themselves as children of the root
-var rootCmd = &cobra.Command{
+var RootCmd = &cobra.Command{
 	Use:     "morio",
 	Version: "0.1",
 	Short:   "The morio client",
@@ -25,7 +25,7 @@ Use this to manage the various agents and their configuration.`,
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
-	err := rootCmd.Execute()
+	err := RootCmd.Execute()
 	if err != nil {
 		os.Exit(1)
 	}

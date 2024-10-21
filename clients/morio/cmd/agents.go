@@ -106,9 +106,9 @@ func init() {
 	metricsCmd.DisableFlagParsing = true
 
 	// Add the commands
-	rootCmd.AddCommand(auditCmd)
-	rootCmd.AddCommand(logsCmd)
-	rootCmd.AddCommand(metricsCmd)
+	RootCmd.AddCommand(auditCmd)
+	RootCmd.AddCommand(logsCmd)
+	RootCmd.AddCommand(metricsCmd)
 }
 
 // Makes sure that the path to the agent is set in the config

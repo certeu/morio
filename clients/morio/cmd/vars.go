@@ -152,7 +152,7 @@ This will always write a custom template variable.`,
 }
 
 func init() {
-	rootCmd.AddCommand(varsCmd)
+	RootCmd.AddCommand(varsCmd)
 	varsCmd.AddCommand(clearCmd)
 	varsCmd.AddCommand(disableCmd)
 	varsCmd.AddCommand(enableCmd)

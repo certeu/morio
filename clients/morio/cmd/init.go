@@ -33,5 +33,5 @@ than once without side-effects.`,
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(initCmd)
 }
