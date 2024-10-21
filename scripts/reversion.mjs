@@ -1,7 +1,8 @@
-import { writeFile } from '@morio/shared/fs'
+import { writeFile, readFile } from '@morio/shared/fs'
 import chalk from 'chalk'
 import readline from 'node:readline'
 import process from 'node:process'
+import mustache from 'mustache'
 // Load various package.json files
 import { root, api, config, core, shared, ui } from './json-loader.mjs'
 
@@ -34,6 +35,11 @@ rl.question(`Enter a new version number: `, async (version) => {
       writeFile(`${folder}/package.json`, JSON.stringify({ ...config, version }, null, 2) + '\n')
     )
   }
+  // Also update version in Go code
+  promises.push(writeFile(
+    "clients/morio/version/main.go",
+    "// This file is auto-generated\npackage version\nvar Version string = \"" + version + "\""
+  ))
   await Promise.all(promises)
   rl.close()
 })

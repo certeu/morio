@@ -15,6 +15,7 @@ clients/linux/control
 clients/linux/etc/morio/audit/config-template.yml
 clients/linux/etc/morio/metrics/config-template.yml
 clients/linux/etc/morio/logs/config-template.yml
+clients/morio/docs
 
 # Auto-generated moriod files
 moriod/control

@@ -1,0 +1,67 @@
+{{#MORIO_DOCS}}
+about: |-
+  An auditbeat module for Linux system
+
+  This combines the `system` and `auditd` auditbeat modules to gather basic data
+  from a Linux system.
+vars:
+  defaults:
+    LINUX_SYSTEM_MULTICAST_AUDIT: false
+    LINUX_SYSTEM_MITRE_AUDIT: false
+  local:
+    LINUX_SYSTEM_MULTICAST_AUDIT: Enables data collection on multicast sockets
+    LINUX_SYSTEM_MITRE_AUDIT: Adds data to map audit events to the MITRE ATT&CK framework
+  global:
+    - MORIO_TRACK_INVENTORY
+{{/MORIO_DOCS}}
+
+{{^MORIO_DOCS}}
+- module: auditd
+{{#LINUX_SYSTEM_MULTICAST_AUDIT}}
+  socket_type: multicast
+{{/LINUX_SYSTEM_MULTICAST_AUDIT}}
+  audit_rules: |
+    -w /etc/morio/audit/config.yml
+    -w /etc/morio/audit/modules.d/linux-system.yaml
+{{#LINUX_SYSTEM_MITRE_AUDIT}}
+    -w /etc/morio/audit/modules.d/linux-system.rules
+  audut_rule_files:
+    - /etc/morio/audit/rules.d/linux-system.rules
+{{/LINUX_SYSTEM_MITRE_AUDIT}}
+  ignore_errors: false
+  processors:
+    - add_fields:
+        target: morio
+        fields.module: linux-system
+
+- module: system
+  datasets:
+    - login
+    - user
+  period: 300s
+  state.period: 24h
+  login.wtmp_file_pattern: /var/log/wtmp*
+  login.btmp_file_pattern: /var/log/btmp*
+  user.detect_password_changes: true
+  processors:
+    - add_fields:
+        target: morio
+        fields.module: linux-system
+
+{{#MORIO_TRACK_INVENTORY}}
+- module: system
+  datasets:
+    - host
+    - package
+  period: 900s
+  state.period: 6h
+  login.wtmp_file_pattern: /var/log/wtmp*
+  login.btmp_file_pattern: /var/log/btmp*
+  user.detect_password_changes: true
+  processors:
+    - add_fields:
+        target: morio
+        fields.module: linux-system
+{{/MORIO_TRACK_INVENTORY}}
+{{/MORIO_DOCS}}
+
