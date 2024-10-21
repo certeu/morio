@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Provide automated install script for clients
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 - [core] Allow building of client-repo packages
-- [core] Suport preseeding of client templates
+- [core] Support preseeding of client templates
 - [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
