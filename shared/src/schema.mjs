@@ -43,6 +43,16 @@ const nodeSerial = Joi.number().valid(...brokerNodesNumbers, ...flankingNodesNum
 const brokerNodes = Joi.array().items(fqdn).min(1).max(9).required()
 
 /*
+ * settings.client
+ */
+const client = Joi.object({
+  templates: Joi.object().pattern(
+    Joi.string(), // keys should be string
+    Joi.string(), // values should be string
+  )
+})
+
+/*
  * settings.flanking_nodes
  */
 
@@ -221,6 +231,7 @@ const settings = Joi.object({
   }),
   vault: vaultInstance,
   preseed,
+  client,
 }).required()
 
 /**

@@ -38,7 +38,7 @@ export function routes(app) {
   /*
    * Hit this route to soft reseed Morio
    */
-  app.get('/reseed', (req, res) => Settings.restart(req, res))
+  app.get('/reseed', (req, res) => Settings.reseed(req, res))
 
   /*
    * Hit this route to export the key data

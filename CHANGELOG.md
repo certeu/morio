@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Provide automated install script for clients
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 - [core] Allow building of client-repo packages
+- [core] Support preseeding of client templates
 - [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
@@ -35,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [api] Replace 'next' tag with 'testing'
-- [core1] Replace 'next' tag with 'testing'
+- [core] Replace 'next' tag with 'testing'
+- [core] Allow reseeding when the base config is not preseeded
 - [broker] Fixed the issue with mTLS that was the reason for the SASL configuration as a temporary workaround
 - [core] Guard against untagged images when filtering docker image list
 - [dbuilder] Replace 'next' tag with 'testing'

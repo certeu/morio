@@ -316,7 +316,7 @@ Controller.prototype.streamServiceLogs = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/clients/${type}/defaults`)
@@ -329,7 +329,7 @@ Controller.prototype.getClientPackageDefaults = async function (req, res, type) 
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.getClientRepoPackageDefaults = async function (req, res, type) {
   const [status, result] = await utils.coreClient.get(`/pkgs/repos/${type}/defaults`)
@@ -362,7 +362,7 @@ Controller.prototype.getPresets = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
@@ -378,7 +378,7 @@ Controller.prototype.buildClientPackage = async function (req, res, type) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
- * @param {tring} type - The type of client package (one of deb, rpm, msi, or pkg)
+ * @param {string} type - The type of client package (one of deb, rpm, msi, or pkg)
  */
 Controller.prototype.buildClientRepoPackage = async function (req, res, type) {
   const [status, result] = await utils.coreClient.post(
@@ -418,7 +418,7 @@ Controller.prototype.reload = async function (req, res) {
    * data from core. Since NodeJS is single-threaded, this will
    * de-facto be a deadlock.
    */
-  log.debug('Reveived reload signal from core')
+  log.debug('Received reload signal from core')
   res.status(204).send()
 
   /*
@@ -448,45 +448,60 @@ Controller.prototype.restart = async function (req, res) {
  */
 Controller.prototype.reseed = async function (req, res) {
   log.info('Received request to reseed')
-  /*
-   * Load the preseeded settings so we can validate them
-   */
-  const settings = await loadPreseededSettings(utils.getSettings('preseed'), log, '/tmp')
 
   /*
-   * Validate settings against the schema
+   * Reseeding can happen even when the preseed settings do
+   * not include a base entry, for example to update the list
+   * of client templates. So we need to differentiate here
+   * and we only enforce the schema when a base file is preseeded.
+   *
+   * Checking the settings here is a matter of resilience.
+   * If core loads invalid settings, things will break. So these
+   * are guardrails against that.
    */
-  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
-  if (!validSettings) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: errSettings.message,
-    })
+  const preseedSettings = utils.getSettings('preseed')
+
+  if (preseedSettings.base) {
+    /*
+     * Load the preseeded settings so we can validate them
+     */
+    const settings = await loadPreseededSettings(utils.getSettings('preseed'), log, '/tmp')
+
+    /*
+     * Validate settings against the schema
+     */
+    const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+    if (!validSettings) {
+      return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+        schema_violation: errSettings.message,
+      })
+    }
+
+    /*
+     * Validate settings are deployable
+     */
+    const report = await validateSettings(settings)
+
+    /*
+     * Make sure setting are valid
+     */
+    if (!report.valid)
+      return utils.sendErrorResponse(
+        res,
+        'morio.api.settings.invalid',
+        req.url,
+        report.errors ? { validation_errors: report.errors } : false
+      )
+
+    /*
+     * Make sure settings are deployable
+     */
+    if (!report.deployable)
+      return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
   }
 
   /*
-   * Validate settings are deployable
-   */
-  const report = await validateSettings(settings)
-
-  /*
-   * Make sure setting are valid
-   */
-  if (!report.valid)
-    return utils.sendErrorResponse(
-      res,
-      'morio.api.settings.invalid',
-      req.url,
-      report.errors ? { validation_errors: report.errors } : false
-    )
-
-  /*
-   * Make sure settings are deployable
-   */
-  if (!report.deployable)
-    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
-
-  /*
-   * Looks good, pass the request to core
+   * Pass the request to core
    */
   const [status, result] = await utils.coreClient.get(`/reseed`)
 

@@ -17,7 +17,7 @@ import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { unsealKeyData } from '../lib/services/core.mjs'
 import { resolveServiceConfiguration } from '#config'
-import { loadPreseededSettings } from '#shared/loaders'
+import { loadPreseededSettings, ensurePreseededContent } from '#shared/loaders'
 
 /**
  * This settings controller handles settings routes
@@ -82,15 +82,26 @@ Controller.prototype.setup = async function (req, res) {
     return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
 
   /*
-   * Strip headers from body
+   * Validate request against schema, but strip headers from body first
    */
-  const settings = { ...req.body }
-  delete settings.headers
+  const body = { ...req.body }
+  delete body.headers
+  const [valid, err] = await utils.validate(`req.settings.deploy`, body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  } else log.info(`Processing request to setup Morio with initial settings`)
+
+  /*
+   * Ensure preseeded content
+   */
+  if (body.preseed?.git) await ensurePreseededContent(body.preseed, log)
 
   /*
    * Handle initial setup
    */
-  const [data, error] = await initialSetup(req, settings)
+  const [data, error] = await initialSetup(req, body)
 
   /*
    * Send error, or data
@@ -178,15 +189,28 @@ Controller.prototype.restart = async function (req, res) {
  */
 Controller.prototype.reseed = async function (req, res) {
   /*
-   * Load the preseeded settings
+   * Reseeding can happen even when the preseed settings does
+   * not include a base entry, for example to update the list
+   * of client templates. So we need to differentiate here.
    */
-  const settings = await loadPreseededSettings(utils.getSettings('preseed', log))
+  const preseedSettings = utils.getSettings('preseed')
+  if (preseedSettings.base) {
+    /*
+     * Load the preseeded settings
+     */
+    const settings = await loadPreseededSettings(utils.getSettings('preseed'), log)
 
-  /*
-   * Write to disk
-   */
-  const result = await deployNewSettings(settings)
-  if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
+    /*
+     * Write to disk
+     */
+    const result = await deployNewSettings(settings)
+    if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
+  } else {
+    /*
+     * Just update the preseeded content
+     */
+    await ensurePreseededContent(preseedSettings, log)
+  }
 
   /*
    * Don't await reload, just return

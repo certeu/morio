@@ -196,6 +196,25 @@ export async function loadPreseededSettings(preseed, log, gitroot = '/etc/morio/
 }
 
 /**
+ * Helper method to ensure preseeded content is available on disk
+ *
+ * @param {object} preseed - The preseed settings
+ * @param {object} log - A logger instance
+ * @param {string} gitroot - Folder in which to clone git repos
+ * @return {object} config - The loaded config
+ */
+export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio/shared') {
+  /*
+   * If there's a git config, we need to fetch it
+   */
+  if (preseed.git) {
+    for (const [id, config] of Object.entries(preseed.git)) {
+      await loadGitRepo(gitroot, id, config, log)
+    }
+  }
+}
+
+/**
  * Helper method to load a preseed file from the Github API
  *
  * @param {object} config - The preseed config
