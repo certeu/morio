@@ -10,7 +10,7 @@
 #   This install script will setup the Morio client.
 #   It will:
 #     - Make sure systemd is available
-#     - Detect whether it is a APT or RPM bacsed system
+#     - Detect whether it is a APT or RPM-based system
 #     - Setup the morio repository
 #     - Update dependencies
 #     - Install the morio package
