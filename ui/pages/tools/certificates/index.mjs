@@ -102,8 +102,7 @@ const CreateCertificate = () => {
     if (status === 201) {
       setResult(body)
       setLoadingStatus([true, 'Certificate created', true, true])
-    }
-    else if (status === 403 && body.title) {
+    } else if (status === 403 && body.title) {
       setLoadingStatus([true, body.title, true, false])
     } else {
       setLoadingStatus([true, 'Certificate creation failed', true, false])

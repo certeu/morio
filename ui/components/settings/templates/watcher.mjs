@@ -6,7 +6,8 @@ import { Popout } from 'components/popout.mjs'
 export const watcher = () => {
   const template = {
     title: 'Watcher (Heartbeat)',
-    about: 'Configure monitors to run hearlthchecks, which will be published to the `checks` topic.',
+    about:
+      'Configure monitors to run hearlthchecks, which will be published to the `checks` topic.',
     type: 'info',
     children: {
       monitors: {
@@ -18,15 +19,21 @@ export const watcher = () => {
             tabs: {
               HTTP: [
                 `### HTTP Monitors`,
-                <Popout fixme key='pop'>To be completed</Popout>,
+                <Popout fixme key="pop">
+                  To be completed
+                </Popout>,
               ],
               TCP: [
                 `### HTTP Monitors`,
-                <Popout fixme key='pop'>To be completed</Popout>,
+                <Popout fixme key="pop">
+                  To be completed
+                </Popout>,
               ],
               ICMP: [
                 `### HTTP Monitors`,
-                <Popout fixme key='pop'>To be completed</Popout>,
+                <Popout fixme key="pop">
+                  To be completed
+                </Popout>,
               ],
             },
           },

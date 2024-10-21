@@ -1,17 +1,17 @@
-// Hooks
-import { useState, useEffect } from 'react'
-import { useApi, morioConfig } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PackageIcon } from 'components/icons.mjs'
 import { Apple, Debian, Microsoft, RedHat } from 'components/brands.mjs'
-import { Link, WebLink } from 'components/link.mjs'
+import { Link } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Ext } from 'components/ext.mjs'
 
-const Card = ({ title, ext, desc, href, Icon = null, width = 'w-72', disabled=false }) => (
-  <div className={`${width} border px-4 pb-4 rounded shadow flex flex-col ${disabled ? 'opacity-50 grayscale' : ''}`} title={title}>
+const Card = ({ title, ext, desc, href, Icon = null, width = 'w-72', disabled = false }) => (
+  <div
+    className={`${width} border px-4 pb-4 rounded shadow flex flex-col ${disabled ? 'opacity-50 grayscale' : ''}`}
+    title={title}
+  >
     <h3 className="capitalize text-base-content flex flex-row gap-2 items-center justify-between text-2xl">
       {title}
       <Icon className="w-8 h-8 shrink-0 grow-0" />
@@ -32,7 +32,8 @@ const ClientsPage = (props) => (
         <Popout tip>
           <h5>Client packages are automatically built</h5>
           <p>
-            Morio will automatically build client repository packages during its initial setup and on subsequent upgrades.
+            Morio will automatically build client repository packages during its initial setup and
+            on subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
           </p>
@@ -44,7 +45,8 @@ const ClientsPage = (props) => (
             ext="deb"
             desc={
               <span>
-                Generate a <b>.deb</b> package that installs the Morio client on Debian-based Linux systems.
+                Generate a <b>.deb</b> package that installs the Morio client on Debian-based Linux
+                systems.
               </span>
             }
             width="w-full"
@@ -57,7 +59,8 @@ const ClientsPage = (props) => (
             href="/tools/pkgs/rpm"
             desc={
               <span>
-                Generate an <b>.rpm</b> package that installs the Morio client on RedHat-based Linux systems.
+                Generate an <b>.rpm</b> package that installs the Morio client on RedHat-based Linux
+                systems.
               </span>
             }
             width="w-full"
@@ -94,7 +97,8 @@ const ClientsPage = (props) => (
         <Popout tip>
           <h5>Repo(sitory) installer packages are automatically built</h5>
           <p>
-            Morio will automatically build repo installer packages during its initial setup and on subsequent upgrades.
+            Morio will automatically build repo installer packages during its initial setup and on
+            subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
           </p>
@@ -106,9 +110,9 @@ const ClientsPage = (props) => (
             ext="deb"
             desc={
               <span>
-                Generate a <b>.deb</b> package that will add <a href="/repos/apt/">
-                this Morio collector&apos;s APT repository</a> to Debian-based Linux systems,
-                so that you can install the Morio client from it.
+                Generate a <b>.deb</b> package that will add{' '}
+                <a href="/repos/apt/">this Morio collector&apos;s APT repository</a> to Debian-based
+                Linux systems, so that you can install the Morio client from it.
               </span>
             }
             width="w-full"
@@ -121,9 +125,9 @@ const ClientsPage = (props) => (
             ext="rpm"
             desc={
               <span>
-                Generate a <b>.rpm</b> package that will add <a href="/repos/rpm/">
-                this Morio collector&apos;s RPM repository</a> to RedHat-based Linux systems,
-                so that you can install the Morio client from it.
+                Generate a <b>.rpm</b> package that will add{' '}
+                <a href="/repos/rpm/">this Morio collector&apos;s RPM repository</a> to RedHat-based
+                Linux systems, so that you can install the Morio client from it.
               </span>
             }
             width="w-full"

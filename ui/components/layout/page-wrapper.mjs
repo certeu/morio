@@ -70,7 +70,13 @@ export const PageWrapper = ({
         <div className="flex flex-col justify-between bg-base-100 w-full">
           {header && <Header {...{ theme, toggleTheme, page }} />}
           <main className={`bg-base-100 grow ${header ? 'mt-12' : ''}`}>
-            {Layout ? <Layout {...{ title, page }} role={account.role}>{children}</Layout> : children}
+            {Layout ? (
+              <Layout {...{ title, page }} role={account.role}>
+                {children}
+              </Layout>
+            ) : (
+              children
+            )}
           </main>
           {footer && <Footer />}
         </div>

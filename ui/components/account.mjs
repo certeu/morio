@@ -79,7 +79,9 @@ export const AccountOverview = () => {
         <tr>
           <td className="w-36 text-right font-bold">Labels</td>
           <td className="flex flex-row flex-wrap gap-1">
-            {(account.labels || []).map(label => <Label key={label}>{label}</Label>)}
+            {(account.labels || []).map((label) => (
+              <Label key={label}>{label}</Label>
+            ))}
           </td>
         </tr>
         <tr>
@@ -362,56 +364,56 @@ export const AccountApiKeys = () => {
       </thead>
       <tbody className="nostripes">
         {keys.map((data) => (
-            <tr
-              key={data.key}
-              className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
-              onClick={() =>
-                pushModal(
-                  <ModalWrapper keepOpenOnClick>
-                    <EditApikey data={data} refresh={refresh} />
-                  </ModalWrapper>
-                )
-              }
-            >
-              <td>
-                <code>{data.key.slice(0, 8)}</code>
-              </td>
-              <td>
-                <b>{data.name}</b>
-              </td>
-              <td>
-                <AccountStatus status={data.status} />
-              </td>
-              <td>
-                <Role role={data.role} />
-              </td>
-              <td>
-                <span>
-                  <b>
-                    <TimeAgo iso={data.created_at} />
-                    <br />
-                    <small>
-                      <DateAndTime iso={data.created_at} />
-                    </small>
-                  </b>
-                </span>
-              </td>
-              <td>
-                <span>
-                  <b>
-                    <TimeToGo iso={data.expires_at} />
-                    <br />
-                    <small>
-                      <DateAndTime iso={data.expires_at} />
-                    </small>
-                  </b>
-                </span>
-              </td>
-              <td>
-                <b>{data.createdBy}</b>
-              </td>
-            </tr>
-          ))}
+          <tr
+            key={data.key}
+            className="hover:cursor-pointer hover:bg-primary hover:bg-opacity-20"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper keepOpenOnClick>
+                  <EditApikey data={data} refresh={refresh} />
+                </ModalWrapper>
+              )
+            }
+          >
+            <td>
+              <code>{data.key.slice(0, 8)}</code>
+            </td>
+            <td>
+              <b>{data.name}</b>
+            </td>
+            <td>
+              <AccountStatus status={data.status} />
+            </td>
+            <td>
+              <Role role={data.role} />
+            </td>
+            <td>
+              <span>
+                <b>
+                  <TimeAgo iso={data.created_at} />
+                  <br />
+                  <small>
+                    <DateAndTime iso={data.created_at} />
+                  </small>
+                </b>
+              </span>
+            </td>
+            <td>
+              <span>
+                <b>
+                  <TimeToGo iso={data.expires_at} />
+                  <br />
+                  <small>
+                    <DateAndTime iso={data.expires_at} />
+                  </small>
+                </b>
+              </span>
+            </td>
+            <td>
+              <b>{data.createdBy}</b>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   )

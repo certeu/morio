@@ -133,59 +133,63 @@ export const cluster = (context, toggleValidate, update) => {
                   <br />
                   <button
                     className="mt-2 btn btn-ghost"
-                    onClick={() => update('TMP.showMoreOptions', context.TMP?.showMoreOptions ? false : true)}
+                    onClick={() =>
+                      update('TMP.showMoreOptions', context.TMP?.showMoreOptions ? false : true)
+                    }
                   >
                     {context.TMP?.showMoreOptions ? 'Hide' : 'Show'} advanced settings
                   </button>
                 </p>,
               ],
-              'Key Data': [
-                '### Optional: Provide a Key Data file',
-              ].concat(context.preseed?.keys?.data
-                ? [ <Popout tip title='Key Data file Loaded' compact /> ]
-                : [
-                  <Popout compact note>This tab is only relevant to advanced deployments.</Popout>,
-                  {
-                    key: 'preseed.keys',
-                    label: 'Key Data file (JSON)',
-                    schema: Joi.object({
-                      data: Joi.string().required(),
-                      key: Joi.string().required(),
-                      seal: Joi.object({
-                        hash: Joi.string().required(),
-                        salt: Joi.string().required(),
-                      })
-                    }),
-                    inputType: 'file',
-                    original: undefined,
-                    dropzoneConfig: {
-                      accept: { 'application/json': ['.json'] },
-                      maxFiles: 1,
-                      multiple: false,
-                    },
-                    transform: (upload) => {
-                      let data
-                      try {
-                        const chunks = upload.split(',')
-                        data = JSON.parse(atob(chunks[1]))
-                      } catch (err) {
-                        data = {}
-                      }
+              'Key Data': ['### Optional: Provide a Key Data file'].concat(
+                context.preseed?.keys?.data
+                  ? [<Popout tip title="Key Data file Loaded" compact key="a" />]
+                  : [
+                      <Popout compact note key="b">
+                        This tab is only relevant to advanced deployments.
+                      </Popout>,
+                      {
+                        key: 'preseed.keys',
+                        label: 'Key Data file (JSON)',
+                        schema: Joi.object({
+                          data: Joi.string().required(),
+                          key: Joi.string().required(),
+                          seal: Joi.object({
+                            hash: Joi.string().required(),
+                            salt: Joi.string().required(),
+                          }),
+                        }),
+                        inputType: 'file',
+                        original: undefined,
+                        dropzoneConfig: {
+                          accept: { 'application/json': ['.json'] },
+                          maxFiles: 1,
+                          multiple: false,
+                        },
+                        transform: (upload) => {
+                          let data
+                          try {
+                            const chunks = upload.split(',')
+                            data = JSON.parse(atob(chunks[1]))
+                          } catch (err) {
+                            data = {}
+                          }
 
-                      return data
-                    },
-                  },
-                  <Popout tip>
-                    <h5>What is a Key Data file?</h5>
-                    <p>
-                      If you provide a Key Data file here that you exported from
-                      another Morio instance, this Morio instance will be set up with
-                      the same cryptographic DNA.
-                      <br />
-                      This allows running Morio in a blue/green deployment.
-                    </p>
-                  </Popout>,
-                ]),
+                          return data
+                        },
+                      },
+                      <Popout tip key="c">
+                        <h5>What is a Key Data file?</h5>
+                        <p>
+                          If you provide a Key Data file here that you exported from another Morio
+                          instance, this Morio instance will be set up with the same cryptographic
+                          DNA.
+                          <br />
+                          This allows running Morio in a blue/green deployment.
+                        </p>
+                      </Popout>,
+                    ]
+              ),
             },
           },
         ],

@@ -26,17 +26,17 @@ const withoutTMP = (obj) => ({ ...obj, TMP: undefined })
 /*
  * Displays configuration validation
  */
-const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate}) => (
+const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate }) => (
   <>
     {validationReport ? (
       <>
         <h3>Validation Results</h3>
         {validationReport.status === 400 && validationReport.schema_violation ? (
-        <Popout tip>
-          <h4>{validationReport.title}</h4>
-          <p>{validationReport.schema_violation}</p>
-        </Popout>
-        ) : null }
+          <Popout tip>
+            <h4>{validationReport.title}</h4>
+            <p>{validationReport.schema_violation}</p>
+          </Popout>
+        ) : null}
         <SettingsReport report={validationReport} />
         {validationReport.valid ? (
           <button className="btn btn-accent btn-lg w-full mt-4" onClick={deploy}>

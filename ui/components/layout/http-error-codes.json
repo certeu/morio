@@ -262,7 +262,7 @@
   "426": {
     "code": 426,
     "message": "Upgrade Required",
-    "description": "The client should switch to a different protocol such as TLS\/1.0, given in the Upgrade header field."
+    "description": "The client should switch to a different protocol such as TLS/1.0, given in the Upgrade header field."
   },
   "428": {
     "code": 428,
@@ -450,4 +450,3 @@
     "description": "Used by some HTTP proxies to signal a network read timeout behind the proxy to a client in front of the proxy."
   }
 }
-

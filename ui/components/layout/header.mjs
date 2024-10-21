@@ -100,7 +100,11 @@ export const Header = ({
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
                 {operator ? (
-                  <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
+                  <NavButton
+                    href="/settings"
+                    label="Settings"
+                    active={isActive('/settings', asPath)}
+                  >
                     Settings
                   </NavButton>
                 ) : null}

@@ -7,7 +7,7 @@ import { Popout } from 'components/popout.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useEffect, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 
 const warning = (
@@ -16,14 +16,15 @@ const warning = (
     <p>
       This data holds the cryptographic seeds that are required to bootstrap Morio.
       <br />
-      It is <b>not safe to backup or store this data on disk</b> without adequate protection or encryption.
+      It is <b>not safe to backup or store this data on disk</b> without adequate protection or
+      encryption.
     </p>
   </Popout>
 )
 
 const ExportKeysPage = (props) => {
-  const [keys, setKeys]  = useState()
-  const [error, setError]  = useState(false)
+  const [keys, setKeys] = useState()
+  const [error, setError] = useState(false)
   const { api } = useApi()
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
@@ -33,8 +34,7 @@ const ExportKeysPage = (props) => {
     if (result[1] === 200 && result[0].keys) {
       setKeys(result[0].keys)
       setLoadingStatus([true, 'Key data exported', true, true])
-    }
-    else {
+    } else {
       setError('Failed to export key data')
       setLoadingStatus([true, 'Failed to export key data', true, false])
     }
@@ -57,20 +57,25 @@ const ExportKeysPage = (props) => {
           ) : keys ? (
             <>
               <h2>Exported Morio Key Data</h2>
-              <Highlight title="Morio key data"><pre>{JSON.stringify(keys)}</pre></Highlight>
+              <Highlight title="Morio key data">
+                <pre>{JSON.stringify(keys)}</pre>
+              </Highlight>
               <Popout tip>
-              <h5>
-                Store this data in <code>preseed.keys</code> to preseed a Morio instance with it
-              </h5>
-              <p>
-                Refer to the <a href="https://morio.it/docs/guides/settings/preseed/">Preseeding Guide</a> for all details.
-              </p>
+                <h5>
+                  Store this data in <code>preseed.keys</code> to preseed a Morio instance with it
+                </h5>
+                <p>
+                  Refer to the{' '}
+                  <a href="https://morio.it/docs/guides/settings/preseed/">Preseeding Guide</a> for
+                  all details.
+                </p>
               </Popout>
               <p className="text-center">
-                <button className="btn btn-neutral btn-outline" onClick={clear}>Clear page</button>
+                <button className="btn btn-neutral btn-outline" onClick={clear}>
+                  Clear page
+                </button>
               </p>
               {warning}
-
             </>
           ) : (
             <>
@@ -79,19 +84,18 @@ const ExportKeysPage = (props) => {
                 cryptographic DNA.
               </p>
               <p>
-                This is an advanced use case that allows for blue/green deployments,
-                or seamless migration of Morio clients between staging and production environments.
+                This is an advanced use case that allows for blue/green deployments, or seamless
+                migration of Morio clients between staging and production environments.
               </p>
-              <p>
-                You can click the button below to start the export of the Morio key data.
-              </p>
+              <p>You can click the button below to start the export of the Morio key data.</p>
               <p className="text-center">
-                <button className="btn btn-primary btn-lg" onClick={exportKeys}>Export key data</button>
+                <button className="btn btn-primary btn-lg" onClick={exportKeys}>
+                  Export key data
+                </button>
               </p>
               {warning}
             </>
           )}
-
         </div>
       </ContentWrapper>
     </PageWrapper>
