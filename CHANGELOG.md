@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Allow the export of key data
 - [api] Allow building of client-repo packages
 - [core] Allow the export of key data
+- [client] Ported the Morio client to Go
 - [core] Allow preseeding key data
 - [core] Generate GPG key pair to sign packages
 - [core] Automatically build a client packages on initial setup
