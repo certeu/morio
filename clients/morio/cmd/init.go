@@ -22,9 +22,9 @@ than once without side-effects.`,
 			fmt.Println("Initializing Morio client.")
 			client = uuid.New().String()
 			SetDefaultVar("MORIO_CLIENT_UUID", client)
-			fmt.Println("Morio client initialized with UUID " + client)
+			fmt.Println("Morio client initialised with UUID " + client)
 		} else {
-			fmt.Println("This Morio client is already initialized.")
+			fmt.Println("This Morio client is already initialised.")
 			fmt.Println("Its UUID is " + client)
 		}
 		fmt.Println("\nAgent status:")
