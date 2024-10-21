@@ -17,7 +17,7 @@ var varsCmd = &cobra.Command{
 	Long: `The 'morio vars' command allows you to manage
 template variables for the Morio client configuration.
 
-The morio client wraps various beats agents that all have their own
+The Morio client wraps various beats agents that all have their own
 configuration and modules to manage. Morio ships these as templates
 that take various variables (vars). This command allows you to manage
 these vars.
