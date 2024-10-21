@@ -128,7 +128,7 @@ export function ldap(id, data, req) {
          */
         updateLastLoginTime(id, username)
 
-        return resolve([ true, info ])
+        return resolve([true, info])
       }
     })(req)
   })
