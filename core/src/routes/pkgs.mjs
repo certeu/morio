@@ -23,9 +23,7 @@ export function routes(app) {
   /*
    * Get the defaults for generating a .deb client-repo package
    */
-  app.get(`/pkgs/repos/deb/defaults`, (req, res) =>
-    Pkgs.getRepoPackageDefaults(req, res, 'deb')
-  )
+  app.get(`/pkgs/repos/deb/defaults`, (req, res) => Pkgs.getRepoPackageDefaults(req, res, 'deb'))
 
   /*
    * Build a .deb client package

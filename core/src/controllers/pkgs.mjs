@@ -1,4 +1,7 @@
-import { clientDefaults as debClientDefaults, repoDefaults as debRepoDefaults } from '#config/services/dbuilder'
+import {
+  clientDefaults as debClientDefaults,
+  repoDefaults as debRepoDefaults,
+} from '#config/services/dbuilder'
 import {
   loadRevision,
   buildClientPackage as buildDebianClientPackage,
