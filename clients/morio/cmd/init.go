@@ -9,8 +9,8 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize the Morio client",
-	Long: `This will initialize a new Morio client installation
+	Short: "Initialise the Morio client",
+	Long: `This will initialise a new Morio client installation
 by generating a unique UUID for the client and run some other
 housekeeping chores.
 
