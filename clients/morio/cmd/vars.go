@@ -132,7 +132,7 @@ If a default variable with the same name exists, this will restore
 the default value.
 
 If you want the variable gone altogether, use 'morio vars clear' to
-set the var to an empty string and you cannot remove default variables,
+set the var to an empty string. Note that you cannot remove default variables,
 but you can override them.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		RmVar(args[0])
