@@ -1,7 +1,7 @@
 import { cp, readFile, writeFile, writeYamlFile } from '#shared/fs'
 import { resolveControlFile } from '#config/services/dbuilder'
 import { isCaUp } from '#lib/services/ca'
-import { ensureMorioService, runHook } from '#lib/services/index'
+import { ensureMorioService } from '#lib/services/index'
 import { createX509Certificate } from '#lib/tls'
 import { resolveClientConfiguration } from '#config/clients/linux'
 import { log, utils } from '#lib/utils'
@@ -175,8 +175,17 @@ export async function buildRepoPackage(customSettings = {}) {
   /*
    * Write control file and postinst script to generate the .deb package
    */
-  await writeFile('/morio/data/installers/deb/control', resolveControlFile(customSettings, utils), log)
-  await writeFile('/morio/data/installers/deb/postinst', "#!/bin/bash\nupdate-ca-certificates\n", log, 0o755)
+  await writeFile(
+    '/morio/data/installers/deb/control',
+    resolveControlFile(customSettings, utils),
+    log
+  )
+  await writeFile(
+    '/morio/data/installers/deb/postinst',
+    '#!/bin/bash\nupdate-ca-certificates\n',
+    log,
+    0o755
+  )
 
   /*
    * Write package files to disk

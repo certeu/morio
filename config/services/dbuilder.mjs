@@ -1,7 +1,7 @@
 /*
  * Export a single method that resolves the service configuration
  */
-export const resolveServiceConfiguration = ({ utils, hookParams={} }) => {
+export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * Make it easy to test production containers in a dev environment
    */

@@ -96,8 +96,6 @@ export const generateTraefikConfig = (
     else if (prefixes.length > 0)
       tc.set(RULE, `( ${prefixes.map((p) => 'PathPrefix(`' + p + '`)').join(' || ')} )`)
   } else {
-    const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
-    const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('cluster.fqdn', false)
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
     // Configure TLS
