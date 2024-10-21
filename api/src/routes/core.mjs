@@ -78,9 +78,19 @@ export function routes(app) {
   app.get(`/pkgs/clients/deb/defaults`, rbac.operator, (req, res) => Core.getClientPackageDefaults(req, res, 'deb'))
 
   /*
+   * Get the defaults for generating a .deb client repo package
+   */
+  app.get(`/pkgs/repos/deb/defaults`, rbac.operator, (req, res) => Core.getClientRepoPackageDefaults(req, res, 'deb'))
+
+  /*
    * Build a .deb client package
    */
   app.post(`/pkgs/clients/deb/build`, rbac.operator, (req, res) => Core.buildClientPackage(req, res, 'deb'))
+
+  /*
+   * Build a .deb client repo package
+   */
+  app.post(`/pkgs/repos/deb/build`, rbac.operator, (req, res) => Core.buildClientRepoPackage(req, res, 'deb'))
 
   /*
    * Get the sanitized settings

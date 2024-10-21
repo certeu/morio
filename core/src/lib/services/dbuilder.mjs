@@ -1,7 +1,7 @@
 import { cp, readFile, writeFile, writeYamlFile } from '#shared/fs'
 import { resolveControlFile } from '#config/services/dbuilder'
 import { isCaUp } from '#lib/services/ca'
-import { ensureMorioService, runHook } from '#lib/services/index'
+import { ensureMorioService } from '#lib/services/index'
 import { createX509Certificate } from '#lib/tls'
 import { resolveClientConfiguration } from '#config/clients/linux'
 import { log, utils } from '#lib/utils'
@@ -40,23 +40,12 @@ export const service = {
        */
       await cp('/morio/core/clients/linux', '/morio/data/clients/linux', { recursive: true })
 
-      return true
-    },
-    /**
-     * Lifecycle hook for anything to be done prior to starting the build
-     *
-     * Generate and write control file for the build
-     */
-    preBuild: async ({ customSettings = {} }) => {
       /*
-       * Resolve settings and control file
+       * Ensure keys are in the container so dbuilder can sign packages
        */
-      const control = resolveControlFile(customSettings, utils)
-
-      /*
-       * Write control file to generate the .deb package
-       */
-      await writeFile('/morio/data/clients/linux/control', control)
+      log.debug('[dbuilder] Writing key data')
+      await writeFile('/etc/morio/dbuilder/pub.key', utils.getKeys().pgpub, log)
+      await writeFile('/etc/morio/dbuilder/priv.key', utils.getKeys().pgpriv, log, 0o600)
 
       return true
     },
@@ -103,9 +92,9 @@ export async function buildClientPackage(customSettings = {}) {
   }
 
   /*
-   * This hooks writes out the control file
+   * Write control file
    */
-  await runHook('prebuild', 'dbuilder', { customSettings })
+  await writeFile('/morio/data/clients/linux/control', resolveControlFile(customSettings, utils))
 
   /*
    * Generate a certificate and key for mTLS
@@ -164,12 +153,120 @@ export async function buildClientPackage(customSettings = {}) {
   }
 
   /*
+   * Write job file
+   */
+  await writeJobFile('client')
+
+  /*
    * Start the dbuilder service (but don't wait for it)
    */
-  ensureMorioService('dbuilder', { onDemandBuild: true })
+  ensureMorioService('dbuilder', { onDemandBuild: true, pkg: 'client' })
 
   /*
    * If revision is set, update it on disk
    */
   if (customSettings.Revision) await saveRevision(customSettings.Revision)
+}
+
+/*
+ * Build a repo package for Debian
+ */
+export async function buildRepoPackage(customSettings = {}) {
+  /*
+   * Write control file and postinst script to generate the .deb package
+   */
+  await writeFile(
+    '/morio/data/installers/deb/control',
+    resolveControlFile(customSettings, utils),
+    log
+  )
+  await writeFile(
+    '/morio/data/installers/deb/postinst',
+    '#!/bin/bash\nupdate-ca-certificates\n',
+    log,
+    0o755
+  )
+
+  /*
+   * Write package files to disk
+   */
+  const aptPriority = `# This repository is configured with half (250) of the default priority (500).
+# This ensures the Morio client's dependencies are available without breaking
+# any other Elastic packages or expectations on where apt will find them.
+# See: https://morio.it/docs/guides/install-client/#elastic-apt-repo-priority`
+
+  // Apt repo for the collector
+  await writeFile(
+    '/morio/data/installers/deb/etc/apt/sources.list.d/morio-collector.list',
+    `# Morio client repository, hosted by the local collector at https://${utils.getClusterFqdn()}/
+deb [signed-by=/usr/share/keyrings/morio-collector.gpg] https://${utils.getClusterFqdn()}/repos/apt/ bookworm main`,
+    log
+  )
+  // Apt repo for Elastic
+  await writeFile(
+    '/morio/data/installers/deb/etc/apt/sources.list.d/elastic-8-morio.list',
+    `# Elastic 8 repository - Added by the Morio for the Morio client dependencies
+${aptPriority}
+deb https://artifacts.elastic.co/packages/8.x/apt stable main`,
+    log
+  )
+  // Lower the priiority of the repo for Elastic
+  await writeFile(
+    '/morio/data/installers/deb/etc/apt/preferences.d/elastic-8-morio',
+    `${aptPriority}
+Package: *
+Pin: release o=elastic-8-morio
+Pin-Priority: 250`,
+    log
+  )
+  // Add the Morio collector softwre key
+  await writeFile(
+    '/morio/data/installers/deb/etc/apt/trusted.gpg.d/morio-collector.asc',
+    utils.getKeys().pgpub,
+    log
+  )
+  // Add the Elastic softwre key
+  await writeFile(
+    '/morio/data/installers/deb/etc/apt/trusted.gpg.d/elastic-8-morio.asc',
+    utils.getPreset('MORIO_ELASTIC_SOFTWARE_KEY'),
+    log
+  )
+  // Root certificate
+  await writeFile(
+    '/morio/data/installers/deb/usr/local/share/ca-certificates/morio-collector/morio-collector-root.crt',
+    utils.getKeys().rcrt,
+    log
+  )
+  // Intermediate certificate
+  await writeFile(
+    '/morio/data/installers/deb/usr/local/share/ca-certificates/morio-collector/morio-collector-intermediate.crt',
+    utils.getKeys().icrt,
+    log
+  )
+
+  /*
+   * Write job file
+   */
+  await writeJobFile('repo')
+
+  /*
+   * Start the dbuilder service (but don't wait for it)
+   */
+  ensureMorioService('dbuilder', { onDemandBuild: true, pkg: 'repo' })
+
+  /*
+   * If revision is set, update it on disk
+   */
+  if (customSettings.Revision) await saveRevision(customSettings.Revision)
+}
+
+async function writeJobFile(job) {
+  /*
+   * Don't just write any file
+   */
+  if (['repo', 'client'].includes(job)) {
+    return await writeFile('/etc/morio/dbuilder/DBUILDER_JOB', job, log)
+  }
+
+  return false
 }

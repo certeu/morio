@@ -214,12 +214,11 @@ export const validatePreseed = async (api, preseed, setLoadingStatus) => {
  *  @param {string} min - The minimal required role
  *  @return {bool} allowed - True if the user has the role
  */
-export const rbac = (role=false, min='engineer') => {
+export const rbac = (role = false, min = 'engineer') => {
   if (!role || !roles.includes(role)) return false
 
   return roles.indexOf(role) >= roles.indexOf(min)
 }
-
 
 /**
  * Helper method to determine whether a page has children
@@ -261,5 +260,3 @@ export const shortDate = (timestamp = false, withTime = true) => {
 
   return ts.toLocaleDateString('en', options)
 }
-
-

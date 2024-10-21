@@ -119,11 +119,11 @@ export const links = {
   },
   tools: {
     accounts: {
-      r: 'manager'
+      r: 'manager',
     },
     pkgs: {
       t: 'Client Packages',
-      r: 'operator'
+      r: 'operator',
     },
     decrypt: {
       t: 'Decrypt Data',

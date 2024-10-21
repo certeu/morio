@@ -40,7 +40,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.middlewares.redirect-to-https.redirectscheme.scheme', 'https')
       .set('http.routers.http.middlewares', ['redirect-to-https@file'])
   }
-  if (!utils.isEphemeral())
+  if (!utils.isEphemeral()) {
     traefik.proxy
       .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
       .set(
@@ -54,6 +54,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       .set('http.routers.api.middlewares', ['api-auth@file', 'redirect-to-https@file'])
+    if (utils.getFlag('ENFORCE_HTTP_MTLS'))
+      traefik.proxy
+        .set('tls.options.default.clientAuth.caFiles', ['/usr/local/share/ca-certificates/morio_root_ca.crt'])
+        .set('tls.options.default.clientAuth.clientAuthType', 'RequireAndVerifyClientCert')
+  }
 
   return {
     /**

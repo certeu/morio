@@ -98,8 +98,13 @@ export const generateTraefikConfig = (
   } else {
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
-    // Include rules and config using the cluster's FQDNs/nodes
+    // Configure TLS
     tc.set([...ROUTER, 'tls'], true)
+    if (utils.getFlag('ENFORCE_HTTP_MTLS')) {
+      tc.set('tls.options.default.clientAuth.caFiles', ['/usr/local/share/ca-certificates/morio_root_ca.crt'])
+      tc.set('tls.options.default.clientAuth.clientAuthType', 'RequireAndVerifyClientCert')
+    }
+    // Include rules and config using the cluster's FQDNs/nodes
     if (paths.length > 0) tc.set(RULE, `( ${paths.map((p) => 'Path(`' + p + '`)').join(' || ')} )`)
     else if (prefixes.length > 0)
       tc.set(RULE, `( ${prefixes.map((p) => 'PathPrefix(`' + p + '`)').join(' || ')} )`)

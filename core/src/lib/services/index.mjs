@@ -197,7 +197,10 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
    * Generate morio service config
    * Docker config will be generated after the preCreate lifecycle hook
    */
-  utils.setMorioServiceConfig(serviceName, resolveServiceConfiguration(serviceName, { utils }))
+  utils.setMorioServiceConfig(
+    serviceName,
+    resolveServiceConfiguration(serviceName, { utils, hookParams })
+  )
 
   /*
    * Does the service need to be recreated?

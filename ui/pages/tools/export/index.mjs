@@ -5,11 +5,7 @@ import { useAccount } from 'hooks/use-account.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import {
-  CertificateIcon,
-  CogIcon,
-  KeyIcon,
-} from 'components/icons.mjs'
+import { CertificateIcon, CogIcon, KeyIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
 const ExportPage = (props) => {

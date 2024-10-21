@@ -239,7 +239,9 @@ const StatusPage = (props) => {
           </div>
         ) : null}
         <Status status={status} />
-        <div className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}>
+        <div
+          className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}
+        >
           {operator ? (
             <Card
               title="Docker"

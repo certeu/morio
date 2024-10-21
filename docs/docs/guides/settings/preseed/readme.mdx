@@ -3,8 +3,8 @@ title: Preseeding Guide
 ---
 
 To _preseed_ the Morio config means to load it from an external source -- 
-typically a git repositoruy -- rather than keep it within Morio itself.
-This allows you to deploy Morio with an _infrastructe as code_ approach.
+typically a Git repository -- rather than keep it within Morio itself.
+This allows you to deploy Morio with an _infrastructure as code_ approach.
 
 This guide covers the general principle and best practices. For details about
 all possibilities, refer to [the reference documentation on the `preseed`
@@ -37,15 +37,15 @@ defined](#overlays).
 
 ## Preseeding key data
 
-At the intial setup of Morio -- and only at the initial setup -- you
+At the initial setup of Morio -- and only at the initial setup -- you
 have the option to preseed Morio's key data.
 
 To do so, you should first [export the key
 data](/docs/reference/apis/api/#tag/export/operation/exportKeys) from an
-existing Morio instance, and then add it under `preseed.keys`.
+existing Morio instance, then add it under `preseed.keys`.
 
 <Note>
-This is an advanced feature to faciliteate  blue/green deployments
+This is an advanced feature to facilitate blue/green deployments
 or other use cases. You can safely ignore this.
 </Note>
 
@@ -55,14 +55,14 @@ The base settings file is just that: the base on which we will construct our
 final settings object.
 
 An overlay then is a file that will _mutate_ the base settings.
-Typically by adding settings, but an overlay can also overwrite settings.
+Typically it is done by adding settings, but an overlay can also overwrite settings.
 
 To understand this process, we will use an example with fictional values.
 
 <Tabs>
   <TabItem value="a" label="base.yaml" default>
 
-The base settings file, whether it's provided as YAML or JSON will be
+The base settings file, whether it's provided as YAML or JSON, will be
 converted to a JavaScript object that will form the basis of our settings.
 
 ```yaml title="Provided YAML base"
@@ -177,10 +177,10 @@ Because of the ways overlays use dot-notation to make changes to the settings ob
   something falsy or `null`, you cannot remove them, which is why it is best to
   keep your base settings to the strict minimum.
 
-## Example setup using a git repository {#example}
+## Example setup using a Git repository {#example}
 
 We recommend placing your Morio settings and overlays for one or more different
-environments in a single repository and then let Morio clone this repository
+environments in a single repository, then let Morio clone this repository
 and reference files from it.
 
 Let's walk through an example step by step.
