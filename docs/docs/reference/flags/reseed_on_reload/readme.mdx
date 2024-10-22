@@ -1,0 +1,43 @@
+---
+title: RESEED_ON_RELOAD
+tags:
+  - flag
+---
+
+Enable this flag to _reseed_ Morio when reloading.
+
+This flag comes into play when you have have `preseed.git` settings that make
+Morio clone a git repository locally. This gives you various ways to keep your
+configuration under version control, as outlined in [the Preseeding 
+Guide](/docs/reference/settings/preseed/).
+
+By default, Morio will not re-clone the repository when you make a
+configuration change, or when you restart Morio. Instead, it will only update
+the git repository from the remote when you explicitly reseed Morio through
+[the `reseed` API
+endpoint](/docs/reference/apis/api/#tag/settings/operation/reseed), (or via the
+UI which uses this endpoint under the hood).
+
+When you enable this flag, Morio will reseed (thus update the local git content
+from the remote) whenever you restart it, or update it's configuration.
+
+<Warning>
+Even with this flag enabled, Morio will not reseed the data when it restarts
+in an unforeseen way, such as a server reboot.
+</Warning>
+
+<Note>
+#### Understanding then this flag takes effect
+
+When updating the Morio settings, there are three steps:
+
+- Core receives the configuration update request
+- Core will reseed if the `RESEED_ON_RELOAD` flag is set
+- Core will apply the new configuration
+
+This means that if you change this flag in an update to the settings, it will
+not take effect until the next update.
+
+In other words, the flag value of the **running configuration&& is used, not of
+the **new settings**.
+</Note>

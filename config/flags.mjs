@@ -38,3 +38,8 @@ flags.ENFORCE_HTTP_MTLS = false
  */
 flags.DISABLE_SERVICE_UI = false
 
+/*
+ * Reseed the config when reloading/restarting
+ */
+flags.RESEED_ON_RELOAD = false
+

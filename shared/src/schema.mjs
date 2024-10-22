@@ -219,6 +219,7 @@ const settings = Joi.object({
       DISABLE_IDP_OIDC: Joi.boolean(),
       DISABLE_SERVICE_UI: Joi.boolean(),
       ENFORCE_HTTP_MTLS: Joi.boolean(),
+      RESEED_ON_RELOAD: Joi.boolean(),
     }),
     secrets: Joi.object(),
     vars: Joi.object(),
