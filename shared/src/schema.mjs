@@ -211,13 +211,14 @@ const settings = Joi.object({
   connector: Joi.object(),
   tokens: Joi.object({
     flags: Joi.object({
-      HEADLESS_MORIO: Joi.boolean(),
       DISABLE_ROOT_TOKEN: Joi.boolean(),
       DISABLE_IDP_APIKEY: Joi.boolean(),
       DISABLE_IDP_LDAP: Joi.boolean(),
       DISABLE_IDP_LOCAL: Joi.boolean(),
       DISABLE_IDP_MRT: Joi.boolean(),
       DISABLE_IDP_OIDC: Joi.boolean(),
+      ENFORCE_HTTP_MTLS: Joi.boolean(),
+      HEADLESS_MORIO: Joi.boolean(),
     }),
     secrets: Joi.object(),
     vars: Joi.object(),
