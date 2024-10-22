@@ -94,7 +94,10 @@ export async function buildClientPackage(customSettings = {}) {
   /*
    * Write control file
    */
-  await writeFile('/morio/data/clients/linux/control', resolveControlFile(customSettings, utils))
+  await writeFile(
+    '/morio/data/clients/linux/control',
+    resolveControlFile(customSettings, utils, 'client')
+  )
 
   /*
    * Generate a certificate and key for mTLS
@@ -177,7 +180,7 @@ export async function buildRepoPackage(customSettings = {}) {
    */
   await writeFile(
     '/morio/data/installers/deb/control',
-    resolveControlFile(customSettings, utils),
+    resolveControlFile(customSettings, utils, 'repo'),
     log
   )
   await writeFile(

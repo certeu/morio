@@ -54,7 +54,8 @@ RUN \
   rm -f /morio/core/clients/linux/etc/morio/logs/config-template.yml && \
   rm -f /morio/core/clients/linux/etc/morio/logs/config.yml && \
   rm -f /morio/core/clients/linux/etc/morio/metrics/config-template.yml && \
-  rm -f /morio/core/clients/linux/etc/morio/metrics/config.yml
+  rm -f /morio/core/clients/linux/etc/morio/metrics/config.yml && \
+  rm -rf /morio/core/clients/morio
 
 ## Install the pm2 process manager for NodeJS
 RUN npm install pm2 -g

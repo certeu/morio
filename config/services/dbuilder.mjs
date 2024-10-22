@@ -33,6 +33,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Volumes
       volumes: PROD
         ? [
+            `${DIRS.data}/clients:/morio/client/bin`,
             `${DIRS.data}/clients/linux:/morio/client/src`,
             `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/client/dist`,
             `${DIRS.data}/installers/deb:/morio/repo/src`,
@@ -41,6 +42,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/dbuilder:/etc/dbuilder`,
           ]
         : [
+            `${DIRS.repo}/clients:/morio/client/bin`,
             `${DIRS.repo}/data/data/clients/linux:/morio/client/src`,
             `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/client/dist`,
             `${DIRS.repo}/data/data/installers/deb:/morio/repo/src`,
@@ -63,7 +65,6 @@ export const clientDefaults = {
   Source: 'morio-client',
   Section: 'utils',
   Priority: 'optional',
-  Architecture: 'amd64',
   Essential: 'no',
   Depends: [
     ['auditbeat', '>= 8.12'],
@@ -81,7 +82,20 @@ and collect their data on one or more centralized Morio instances
 for analysis, further processing, downstream routing & filtering,
 or event-driven automation.`,
   'Vcs-Git': 'https://github.com/certeu/morio -b main [clients/linux]',
+  Architecture: '__MORIO_CLIENT_ARCHITECTURE__' // This will be replaced by the builder
 }
+
+export const clientDefaultsYouCanEdit = [
+  'Depends',
+  'Installed-Size',
+  'Maintainer',
+  'Changed-By',
+  'Uploaders',
+  'Homepage',
+  'Description',
+  'DetailedDescription',
+  'Vcs-Git',
+]
 
 /*
  * These are the defaults that will be used to build the DEB client package.
@@ -112,13 +126,13 @@ Morio client and its updates via the OS package manager.`
  *
  * @param {object} settigns - Specific settings to build this package
  * @param {object} utils - The utils object from core
+ * @param {string} type - The package to build (repo or client)
  * @return {string} controlFile - The control file contents
  */
-export const resolveControlFile = (settings = {}, utils) => {
-  const s = {
-    ...repoDefaults,
-    ...settings,
-  }
+export const resolveControlFile = (settings = {}, utils, type='client') => {
+  const s = type === 'repo'
+    ? { ...repoDefaults, ...settings }
+    : { ...clientDefaults, ...settings }
 
   /*
    * If no version is specified, use the Morio version

@@ -7,6 +7,7 @@
 # Build the Debian package
 #
 build_package() {
+  local ARCH="$1"
   # Building the package is relatively simple
   # (one you know how to do it)
   cd /morio
@@ -17,11 +18,16 @@ build_package() {
       cp $SRC/$FILE pkg/DEBIAN/
     fi
   done
+  # fix architecture in control file
+  sed -i "s/__MORIO_CLIENT_ARCHITECTURE__/$ARCH/" pkg/DEBIAN/control
   for DIRPATH in $SRC/*/; do
     DIR=$(basename "$DIRPATH")
     echo "Copying $DIR"
     cp -R $SRC/$DIR pkg/
   done
+  # Copy the binary for this architecture
+  mkdir -p pkg/DEBIAN/usr/sbin/
+  cp $BIN/morio-linux-$ARCH pkg/DEBIAN/usr/sbin/morio
   dpkg-deb --build pkg $DIST
 }
 
@@ -36,20 +42,19 @@ update_apt_repo() {
   # For one thing, we need to figure out whether this is the
   # first time this runs in which case we should set up the
   # repo, or if we should merely update it.
-  if [ -d "/repo/public/pool" ]; then
+  if [ -d "/repo/public/pool/main/m" ]; then
     echo "Updating existing APT repository with new package"
     aptly repo add morio $DIST
-    aptly publish update bookworm
+    aptly publish -architectures="amd64,arm64" update bookworm
   else
     echo "Creating APT repository"
-    aptly repo create --distribution=bookworm -component=main morio 2>/dev/null
+    aptly repo create -distribution=bookworm -component=main morio 2>/dev/null
     aptly repo add morio $DIST
-    aptly publish repo morio
+    aptly publish -architectures="amd64,arm64" repo morio
   fi
 
   # Sym-link latest version of packages for easy access from install script
   mkdir -p /repo/public/latest
-  cp /repo/public/pool/main/m/morio-client/$(ls -1t  /repo/public/pool/main/m/morio-client/ | head -n 1) /repo/public/latest/morio-client.deb
   cp /repo/public/pool/main/m/morio-repo/$(ls -1t  /repo/public/pool/main/m/morio-repo/ | head -n 1) /repo/public/latest/morio-repo.deb
 }
 
@@ -64,10 +69,13 @@ BUILD_JOB=$(cat /etc/dbuilder/DBUILDER_JOB 2>/dev/null || echo "unknown")
 gpg --import /etc/dbuilder/pub.key
 
 if [ $BUILD_JOB == "client" ]; then
-  echo "Building client package for Debian"
   SRC=/morio/client/src
   DIST=/morio/client/dist
-  build_package
+  BIN=/morio/client/bin
+  echo "Building client package for Debian on amd64"
+  build_package amd64
+  echo "Building client package for Debian on arm64"
+  build_package arm64
   echo "Updating repository"
   update_apt_repo
 elif [ $BUILD_JOB == "repo" ]; then
