@@ -1,5 +1,6 @@
 import {
   clientDefaults as debClientDefaults,
+  clientDefaultsYouCanEdit,
   repoDefaults as debRepoDefaults,
 } from '#config/services/dbuilder'
 import {
@@ -30,7 +31,15 @@ Controller.prototype.getClientPackageDefaults = async function (req, res) {
    */
   const rev = await loadRevision()
 
-  return res.send({ ...debClientDefaults, Version: utils.getVersion(), Revision: rev + 1 })
+  /*
+   * Not all defaults can be changed
+   */
+  const defaults = {}
+  for (const key of clientDefaultsYouCanEdit) {
+    defaults[key] = debClientDefaults[key]
+  }
+
+  return res.send({ ...defaults, Version: utils.getVersion(), Revision: rev + 1 })
 }
 
 /**

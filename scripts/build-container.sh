@@ -45,6 +45,11 @@ else
   # Container to build
   CONTAINER="$1"
 
+  # If building core, build the clients first
+  if [[ "$CONTAINER" == "core" ]]; then
+    npm run build:clients
+  fi
+
   # Release to tag this with
   # Either `latest` for production or `next` for a pre-release
   if [[ "$MORIO_VERSION_TAG" == *-* ]]; then

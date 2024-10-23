@@ -160,8 +160,6 @@ paths:
                             flags:
                               type: object
                               properties:
-                                HEADLESS_MORIO:
-                                  type: boolean
                                 DISABLE_ROOT_TOKEN:
                                   type: boolean
                                 DISABLE_IDP_APIKEY:
@@ -173,6 +171,12 @@ paths:
                                 DISABLE_IDP_MRT:
                                   type: boolean
                                 DISABLE_IDP_OIDC:
+                                  type: boolean
+                                DISABLE_SERVICE_UI:
+                                  type: boolean
+                                ENFORCE_HTTP_MTLS:
+                                  type: boolean
+                                RESEED_ON_RELOAD:
                                   type: boolean
                               additionalProperties: false
                             secrets:
@@ -645,6 +649,15 @@ paths:
                                   additionalProperties: false
                               additionalProperties: false
                             - type: string
+                        client:
+                          type: object
+                          properties:
+                            templates:
+                              type: object
+                              properties: {}
+                              additionalProperties:
+                                type: string
+                          additionalProperties: false
                       additionalProperties: false
                   required:
                     - serial
@@ -1862,8 +1875,6 @@ paths:
                     flags:
                       type: object
                       properties:
-                        HEADLESS_MORIO:
-                          type: boolean
                         DISABLE_ROOT_TOKEN:
                           type: boolean
                         DISABLE_IDP_APIKEY:
@@ -1875,6 +1886,12 @@ paths:
                         DISABLE_IDP_MRT:
                           type: boolean
                         DISABLE_IDP_OIDC:
+                          type: boolean
+                        DISABLE_SERVICE_UI:
+                          type: boolean
+                        ENFORCE_HTTP_MTLS:
+                          type: boolean
+                        RESEED_ON_RELOAD:
                           type: boolean
                       additionalProperties: false
                     secrets:
@@ -2347,6 +2364,15 @@ paths:
                           additionalProperties: false
                       additionalProperties: false
                     - type: string
+                client:
+                  type: object
+                  properties:
+                    templates:
+                      type: object
+                      properties: {}
+                      additionalProperties:
+                        type: string
+                  additionalProperties: false
               additionalProperties: false
             examples:
               cluster1:
@@ -2492,8 +2518,6 @@ paths:
                     flags:
                       type: object
                       properties:
-                        HEADLESS_MORIO:
-                          type: boolean
                         DISABLE_ROOT_TOKEN:
                           type: boolean
                         DISABLE_IDP_APIKEY:
@@ -2505,6 +2529,12 @@ paths:
                         DISABLE_IDP_MRT:
                           type: boolean
                         DISABLE_IDP_OIDC:
+                          type: boolean
+                        DISABLE_SERVICE_UI:
+                          type: boolean
+                        ENFORCE_HTTP_MTLS:
+                          type: boolean
+                        RESEED_ON_RELOAD:
                           type: boolean
                       additionalProperties: false
                     secrets:
@@ -2977,6 +3007,15 @@ paths:
                           additionalProperties: false
                       additionalProperties: false
                     - type: string
+                client:
+                  type: object
+                  properties:
+                    templates:
+                      type: object
+                      properties: {}
+                      additionalProperties:
+                        type: string
+                  additionalProperties: false
               additionalProperties: false
             examples:
               cluster1:

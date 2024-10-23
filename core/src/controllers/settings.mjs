@@ -55,6 +55,14 @@ Controller.prototype.deploy = async function (req, res) {
     })
   } else log.info(`Processing request to deploy new settings`)
 
+  /*
+   * We might need to reseed on reload
+   */
+  await preseedHandler()
+
+  /*
+   * Do the actual deploy
+   */
   const result = await deployNewSettings(valid)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
 
@@ -96,7 +104,7 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Ensure preseeded content
    */
-  if (body.preseed?.git) await ensurePreseededContent(body.preseed, log)
+  await preseedHandler(body.preseed)
 
   /*
    * Handle initial setup
@@ -177,6 +185,11 @@ Controller.prototype.preseed = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.restart = async function (req, res) {
+  /*
+   * We might need to reseed on reload
+   */
+  await preseedHandler()
+
   reload({ restart: true })
   return res.status(204).send()
 }
@@ -475,4 +488,12 @@ const deployNewSettings = async function (settings) {
   const result = await writeYamlFile(`/etc/morio/settings.${time}.yaml`, settings)
 
   return result
+}
+
+const preseedHandler = async function (preseedSettings = false, force = false) {
+  if (!preseedSettings) preseedSettings = utils.getSettings('preseed', false)
+  if (preseedSettings && preseedSettings.git) {
+    if (force || (utils.getFlag('RESEED_ON_RELOAD', false) && preseedSettings.git))
+      await ensurePreseededContent(preseedSettings, log)
+  }
 }

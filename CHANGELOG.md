@@ -7,12 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0-rc.1] - 2024-10-22
+
 ### Added
 
 - [api] Allow the export of key data
 - [api] Allow building of client-repo packages
-- [core] Allow the export of key data
 - [client] Ported the Morio client to Go
+- [core] Allow the export of key data
 - [core] Allow preseeding key data
 - [core] Generate GPG key pair to sign packages
 - [core] Automatically build a client packages on initial setup
@@ -21,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 - [core] Allow building of client-repo packages
 - [core] Support preseeding of client templates
+- [core] Added support for the RESEED_ON_RELOAD feature flag
+- [core] Added support for Debian client packages for amd64 and arm64
 - [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
@@ -58,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 
 
-## [0.4.1] - 2024-10-01
+## [0.4.2] - 2024-10-02
 
 ### Fixed
 

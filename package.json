@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.4.3-rc.1",
+  "version": "0.5.0-rc.1",
   "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
@@ -42,6 +42,7 @@
     "build": "npm run build:dev",
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
+    "build:clients": "./scripts/build-clients.sh",
     "build:dbuilder": "./builders/dbuilder/build-container.sh",
     "build:rbuilder": "./builders/rbuilder/build-container.sh",
     "build:dev": "npm run build:api && npm run build:core && npm run build:ui && npm run build:dbuilder && npm run build:rbuilder",
