@@ -1,5 +1,5 @@
-import set from 'lodash.set'
-import unset from 'lodash.unset'
+import set from 'lodash/set.js'
+import unset from 'lodash/unset.js'
 import { useState } from 'react'
 
 /*
