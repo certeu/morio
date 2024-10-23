@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- [broker] Upgraded RedPanda rom v24.2.5 to v24.2.7
+- [broker] Upgraded RedPanda from v24.2.5 to v24.2.7
 - [ca] Upgraded Step CA from v0.27.4 to v0.27.5
 - [connector] Upgraded Logstash from v8.15.1 to v8.15.3
 - [db] Upgraded Rqlite from v8.30.5 to v8.32.3
