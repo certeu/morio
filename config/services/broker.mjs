@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'docker.redpanda.com/redpandadata/redpanda',
   // Image tag (version) to run
-  tag: 'v24.2.5',
+  tag: 'v24.2.7',
 }
 
 /*

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- [broker] Upgraded RedPanda rom v24.2.5 to v24.2.7
+- [ca] Upgraded Step CA from v0.27.4 to v0.27.5
+- [connector] Upgraded Logstash from v8.15.1 to v8.15.3
+- [db] Upgraded Rqlite from v8.30.5 to v8.32.3
+- [proxy] Upgraded Traefik from v3.1.4 to v3.1.6
+- [watcher] Upgraded Heartbeat from v8.15.1 to v8.15.3
+
 ## [0.5.0-rc.1] - 2024-10-22
 
 ### Added
