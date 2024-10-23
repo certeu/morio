@@ -1,4 +1,4 @@
-import set from 'lodash.set'
+import set from 'lodash/set.js'
 import { examples } from './openapi-examples/json-loader.mjs'
 
 const meta = {

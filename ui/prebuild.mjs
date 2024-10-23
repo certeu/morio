@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { exec } from 'node:child_process'
-//import orderBy from 'lodash.orderby'
-import set from 'lodash.set'
+//import orderBy from 'lodash/orderby.js'
+import set from 'lodash/set.js'
 
 /*
  * Shared header to include in written .mjs files

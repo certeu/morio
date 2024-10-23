@@ -1,5 +1,5 @@
 import { PageLink } from 'components/link.mjs'
-import get from 'lodash.get'
+import get from 'lodash/get.js'
 
 /**
  * Helper method to determine whether a page has children

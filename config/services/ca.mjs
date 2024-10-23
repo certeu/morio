@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'smallstep/step-ca',
   // Image tag (version) to run
-  tag: '0.27.4',
+  tag: '0.27.5',
 }
 
 /*

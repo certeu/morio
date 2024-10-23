@@ -1,5 +1,5 @@
 import { testUrl } from './network.mjs'
-import set from 'lodash.set'
+import set from 'lodash/set.js'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
