@@ -10,7 +10,7 @@ import { useAccount } from 'hooks/use-account.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { PlayIcon } from 'components/icons.mjs'
 import { TimeForHumans } from 'components/time.mjs'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { Popout } from 'components/popout.mjs'
 import { SecretInput, StringInput, TextInput, RoleInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -106,7 +106,7 @@ export const ListAccounts = () => {
     </table>
   ) : (
     <div className="w-24">
-      <LogoSpinner />
+      <Spinner />
     </div>
   )
 }

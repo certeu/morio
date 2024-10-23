@@ -21,7 +21,7 @@ import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
 import { viewAsSectionPath, sectionPathAsView } from './utils.mjs'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { Box } from 'components/box.mjs'
 
 const Welcome = ({ setView }) => (
@@ -199,7 +199,7 @@ const PleaseWait = () => (
           <SettingsIcon className="w-16 h-16" />
         </h1>
         <div className="w-36 mx-auto">
-          <LogoSpinner />
+          <Spinner />
         </div>
       </div>
     </div>
