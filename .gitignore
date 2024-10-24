@@ -15,6 +15,11 @@ clients/linux/control
 clients/linux/etc/morio/audit/config-template.yml
 clients/linux/etc/morio/metrics/config-template.yml
 clients/linux/etc/morio/logs/config-template.yml
+clients/linux/etc/morio/audit/module-templates.d/*
+clients/linux/etc/morio/audit/rule-templates.d/*
+clients/linux/etc/morio/logs/input-templates.d/*
+clients/linux/etc/morio/logs/module-templates.d/*
+clients/linux/etc/morio/metrics/module-templates.d/*
 clients/morio/morio
 clients/morio-*
 

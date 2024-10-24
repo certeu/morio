@@ -3,7 +3,7 @@ import { Login } from './login.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { roles } from 'config/roles.mjs'
 
 const OneMomentPlease = () => (
@@ -11,11 +11,11 @@ const OneMomentPlease = () => (
     <div className="bg-neutral w-full flex flex-col justify-center bg-opacity-60 px-8 pt-12 pb-24 lg:pt-4 lg:pt-4">
       <h1 className="flex flex-row gap-2 items-center justify-between w-full max-w-lg mx-auto">
         <div className="w-14 text-secondary">
-          <LogoSpinner />
+          <Spinner />
         </div>
         <div className="text-4xl text-center text-neutral-content">Morio</div>
         <div className="w-14 text-secondary">
-          <LogoSpinner />
+          <Spinner />
         </div>
       </h1>
       <div className="max-w-lg text-center mx-auto text-neutral-content opacity-80 italic">

@@ -19,7 +19,7 @@ import { OkIcon, MorioIcon, DarkThemeIcon, LightThemeIcon, WarningIcon } from 'c
 import { useTheme } from 'hooks/use-theme.mjs'
 import { EphemeralInfo } from 'pages/index.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { LogoSpinner } from 'components/animations.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { SettingsReport } from 'components/settings/report.mjs'
 import { EphemeralWrapper } from './index.mjs'
 
@@ -96,7 +96,7 @@ const SettingsUploadPage = (props) => {
                   {deployResult?.root_token ? (
                     <OkIcon className="w-6 h-6 text-success-content" stroke={4} />
                   ) : (
-                    <LogoSpinner />
+                    <Spinner />
                   )}
                 </div>
                 {deployResult.root_token ? (
@@ -152,9 +152,9 @@ const SettingsUploadPage = (props) => {
               <div className="py-12 px-4 max-w-xl m-auto">
                 {loading ? (
                   <div className="w-52 mx-auto text-center text-lg font-bold">
-                    <LogoSpinner />
+                    <Spinner className="w-8 h-8 text-primary animate-spin inline mb-4"/>
                     <br />
-                    One moment please
+                    <span className="animate-pulse">One moment please</span>
                   </div>
                 ) : null}
                 {!loading && report ? (

@@ -1,4 +1,5 @@
 import { cp, readFile, writeFile, writeYamlFile } from '#shared/fs'
+import { loadClientModules } from '#shared/loaders'
 import { resolveControlFile } from '#config/services/dbuilder'
 import { isCaUp } from '#lib/services/ca'
 import { ensureMorioService } from '#lib/services/index'
@@ -98,6 +99,11 @@ export async function buildClientPackage(customSettings = {}) {
     '/morio/data/clients/linux/control',
     resolveControlFile(customSettings, utils, 'client')
   )
+
+  /*
+   * Populate client with modules
+   */
+  await loadClientModules(utils.getSettings(), 'clients/linux/etc/morio', log)
 
   /*
    * Generate a certificate and key for mTLS
