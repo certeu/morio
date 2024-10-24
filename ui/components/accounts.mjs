@@ -1,4 +1,4 @@
-import orderBy from 'lodash/orderby.js'
+import orderBy from 'lodash/orderBy.js'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
