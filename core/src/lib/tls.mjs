@@ -83,7 +83,7 @@ export async function createX509Certificate(data) {
    *   - The key ID must match
    * - Data:
    *   - The `iss` field should be set to the Step CA provisioner name (admin)
-   *   - The `aud` field should be set to the URL of the Step CA API endpoint (https://ca:9000/1.0/sign)
+   *   - The `aud` field should be set to the URL of the Step CA API endpoint (https://morio-ca:9000/1.0/sign)
    *   - The `sans` field should match the SAN records in the certificate
    *
    * And obviously we should sign it with the cluster-wide private key,
@@ -94,7 +94,7 @@ export async function createX509Certificate(data) {
       sub: config.cn,
       iat: Math.floor(Date.now() / 1000) - 1,
       iss: 'admin',
-      aud: `https://ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
+      aud: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
       nbf: Math.floor(Date.now() / 1000) - 1,
       exp: Number(Date.now()) + 300000,
     },
@@ -113,7 +113,7 @@ export async function createX509Certificate(data) {
   let result
   try {
     result = await axios.post(
-      `https://ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
+      `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/1.0/sign`,
       {
         csr: csr.csr,
         ott: jwt,

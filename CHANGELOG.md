@@ -7,14 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0-rc.2] - 2024-10-22
+
+## Fixed
+
+- [core] Add missing git binary to itsmorio.core container image
+
 ## Changed
 
-- [broker] Upgraded RedPanda from v24.2.5 to v24.2.7
-- [ca] Upgraded Step CA from v0.27.4 to v0.27.5
-- [connector] Upgraded Logstash from v8.15.1 to v8.15.3
-- [db] Upgraded Rqlite from v8.30.5 to v8.32.3
-- [proxy] Upgraded Traefik from v3.1.4 to v3.1.6
-- [watcher] Upgraded Heartbeat from v8.15.1 to v8.15.3
+- All Morio containers have been updated to use the `morio-` prefix in their name
 
 ## [0.5.0-rc.1] - 2024-10-22
 
@@ -44,8 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- [broker] Upgraded RedPanda from v24.2.5 to v24.2.7
+- [db] Upgraded Rqlite from v8.30.5 to v8.32.3
+- [ca] Upgraded Step CA from v0.27.4 to v0.27.5
 - [core] Renamed the `HEADLESS_MORIO` feature flag to `DISABLE_SERVICE_UI`
+- [connector] Upgraded Logstash from v8.15.1 to v8.15.3
+- [proxy] Upgraded Traefik from v3.1.4 to v3.1.6
 - [proxy] Redirect HTTP to HTTPS
+- [watcher] Upgraded Heartbeat from v8.15.1 to v8.15.3
 
 ### Fixed
 

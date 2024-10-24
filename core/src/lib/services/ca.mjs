@@ -19,10 +19,13 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`, {
-        returnAs: 'json',
-        ignoreCertificate: true,
-      })
+      const result = await testUrl(
+        `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health`,
+        {
+          returnAs: 'json',
+          ignoreCertificate: true,
+        }
+      )
       const status = result?.status === 'ok' ? 0 : 1
       utils.setServiceStatus('ca', status)
 
@@ -118,10 +121,13 @@ export const service = {
  * @return {bool} result - True if the CA is up, false if not
  */
 export async function isCaUp() {
-  const result = await testUrl(`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`, {
-    ignoreCertificate: true,
-    returnAs: 'json',
-  })
+  const result = await testUrl(
+    `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health`,
+    {
+      ignoreCertificate: true,
+      returnAs: 'json',
+    }
+  )
   if (result && result.status && result.status === 'ok') return true
 
   return false
@@ -166,7 +172,7 @@ async function reloadCaConfiguration() {
    * Save fingerprint, JWK, and root certificate in memory for easy access
    */
   utils.setCaConfig({
-    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+    url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: caDefaults.fingerprint,
     jwk,
     certificate,
@@ -196,7 +202,7 @@ export async function generateCaConfig(keys = {}) {
      * Save root certificate and fingerprint in memory
      */
     utils.setCaConfig({
-      url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+      url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}`,
       fingerprint: keys.rfpr,
       jwk: keys.jwk,
       certificate: keys.rcrt,
@@ -240,7 +246,7 @@ export async function generateCaConfig(keys = {}) {
      * Save root certificate and fingerprint in memory
      */
     utils.setCaConfig({
-      url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+      url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}`,
       fingerprint: init.root.fingerprint,
       jwk,
       certificate: init.root.certificate,
@@ -260,7 +266,7 @@ export async function ensureCaConfig(clusterKeys = false) {
    */
   const keys = clusterKeys ? clusterKeys : utils.getKeys()
   utils.setCaConfig({
-    url: `https://ca:${utils.getPreset('MORIO_CA_PORT')}`,
+    url: `https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}`,
     fingerprint: keys.rfpr,
     jwk: keys.jwk,
     certificate: keys.rcrt,

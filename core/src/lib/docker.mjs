@@ -182,13 +182,14 @@ export async function createDockerNetwork(name) {
  * @param {endpointConfig}
  */
 export async function attachToDockerNetwork(serviceName, network, endpointConfig) {
+  const containerName = utils.getPreset('MORIO_CONTAINER_PREFIX') + serviceName
   if (!network) {
     log.warn(`[${serviceName}] Attempt to attach to a network, but no network object was passed`)
     return false
   }
 
   try {
-    await network.connect({ Container: serviceName, EndpointConfig: endpointConfig })
+    await network.connect({ Container: containerName, EndpointConfig: endpointConfig })
   } catch (err) {
     if (err?.json?.message && err.json.message.includes(' already ')) {
       log.debug(`[${serviceName}] Container is already attached to network ${network.id}`)
@@ -199,7 +200,7 @@ export async function attachToDockerNetwork(serviceName, network, endpointConfig
    * If exclusive is set, ensure the container is not attached
    * to any other networks
    */
-  const [success, result] = await runContainerApiCommand(serviceName, 'inspect')
+  const [success, result] = await runContainerApiCommand(containerName, 'inspect')
   if (success) {
     for (const netName in result.NetworkSettings.Networks) {
       if (netName !== network.id) {
@@ -208,7 +209,7 @@ export async function attachToDockerNetwork(serviceName, network, endpointConfig
         if (ok && net) {
           log.debug(`[${serviceName}] Disconnecting container from network ${netName}`)
           try {
-            await net.disconnect({ Container: serviceName, Force: true })
+            await net.disconnect({ Container: containerName, Force: true })
           } catch (err) {
             log.warn(err, `[${serviceName}] Disconnecting container from network ${netName} failed`)
           }
@@ -232,9 +233,9 @@ export function generateContainerConfig(serviceName) {
   /*
    * Basic options
    */
-  const name = config.container.container_name
+  const name = utils.getPreset('MORIO_CONTAINER_PREFIX') + config.container.container_name
   const aliases = config.container.aliases || []
-  log.debug(`[${name}] Generating container configuration`)
+  log.debug(`[${serviceName}] Generating container configuration`)
   const opts = {
     name,
     HostConfig: {

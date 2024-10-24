@@ -5,7 +5,7 @@ import yaml from 'js-yaml'
 import { spec as apiSpec } from '../api/openapi/index.mjs'
 import { spec as coreSpec } from '../core/openapi/index.mjs'
 // Presets
-import { presets, presetDocs, presetsSaveToEdit } from '../config/presets.mjs'
+import { presets, presetDocs, presetsSafeToEdit } from '../config/presets.mjs'
 // Errors
 import { errors as apiErrors } from '../api/src/errors.mjs'
 import { errors as coreErrors } from '../core/src/errors.mjs'
@@ -94,9 +94,9 @@ ${presetDocs[preset]}.
 <Note>
 
 The default value of this preset is ${renderPresetValue(presets[preset])}, ${
-        presetsSaveToEdit.includes(preset)
-          ? 'but it is <Label style="success">Save</Label> to change this.'
-          : 'and it is <Label style="danger">Not Save</Label> to change this.'
+        presetsSafeToEdit.includes(preset)
+          ? 'but it is <Label style="success">Safe</Label> to change this.'
+          : 'and it is <Label style="danger">Not Safe</Label> to change this.'
       }
 
 </Note>

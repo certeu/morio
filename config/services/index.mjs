@@ -88,7 +88,7 @@ export const generateTraefikConfig = (
     })
     .set(SERVICE, {
       loadBalancer: {
-        servers: [{ url: `${backendTls ? 'https' : 'http'}://${service}:${port}` }],
+        servers: [{ url: `${backendTls ? 'https' : 'http'}://${utils.getPreset('MORIO_CONTAINER_PREFIX')}${service}:${port}` }],
       },
     })
   if (utils.isEphemeral()) {

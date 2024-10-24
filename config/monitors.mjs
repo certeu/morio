@@ -23,7 +23,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio API Service: API on ${utils.getNodeFqdn()}`,
-      urls: [`http://api:${utils.getPreset('MORIO_API_PORT')}/status`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/status`],
       check: {
         response: { status: [200] },
       },
@@ -36,7 +36,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Broker Service: Admin API on ${utils.getNodeFqdn()}`,
-      urls: [`http://broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/status`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/status`],
       check: {
         response: { status: [200] },
       },
@@ -59,7 +59,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Broker Service: REST API on ${utils.getNodeFqdn()}`,
-      urls: [`http://broker:${utils.getPreset('MORIO_BROKER_REST_API_PORT')}/`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_REST_API_PORT')}/`],
       check: {
         response: { status: [200] },
       },
@@ -73,7 +73,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio CA API on ${utils.getNodeFqdn()}`,
-      urls: [`https://ca:${utils.getPreset('MORIO_CA_PORT')}/health`],
+      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health`],
       check: {
         request: { method: 'GET' },
         response: {
@@ -95,7 +95,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Console Service: UI on ${utils.getNodeFqdn()}`,
-      urls: [`http://console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/favicon-32.png`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}console:${utils.getPreset('MORIO_CONSOLE_PORT')}/console/favicon-32.png`],
       check: {
         response: {
           status: [200],
@@ -110,7 +110,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Core Service: API on ${utils.getNodeFqdn()}`,
-      urls: [`http://core:${utils.getPreset('MORIO_CORE_PORT')}/status`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}core:${utils.getPreset('MORIO_CORE_PORT')}/status`],
       check: {
         response: {
           status: [200],
@@ -126,7 +126,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio DB Service: API on ${utils.getNodeFqdn()}`,
-      urls: [`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`],
       check: {
         response: {
           status: [200],
@@ -143,7 +143,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
-      urls: [`https://db:${utils.getNodeFqdn()}/`],
+      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getNodeFqdn()}/`],
       check: {
         response: {
           status: [200],
@@ -158,7 +158,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio DB Service: API on ${utils.getNodeFqdn()}`,
-      urls: [`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz?noleader`],
       check: {
         response: {
           status: [200],
@@ -174,7 +174,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Watcher Service: HTTP metrics on ${utils.getNodeFqdn()}`,
-      urls: [`http://watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/watcher`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/watcher`],
       check: {
         response: {
           status: [200],

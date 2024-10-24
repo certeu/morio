@@ -17,7 +17,9 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(`http://ui:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`)
+      const result = await testUrl(
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ui:${utils.getPreset('MORIO_UI_PORT')}/favicon.svg`
+      )
       const status = result ? 0 : 1
       utils.setServiceStatus('ui', status)
 

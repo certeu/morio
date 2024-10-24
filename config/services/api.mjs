@@ -44,7 +44,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
        */
       .set(
         'http.middlewares.api-auth.forwardAuth.address',
-        `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       /*

@@ -67,7 +67,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
           ],
       // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
-      aliases: ['rpadmin', 'rpproxy'],
+      aliases: [`${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin`, `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy`],
       // Command
       command: [
         'redpanda',
@@ -91,7 +91,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         .set(
           'http.middlewares.rpadmin-auth.forwardAuth.address',
-          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+          `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
         )
         .set('http.middlewares.rpadmin-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
         /*
@@ -118,7 +118,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         .set(
           'http.middlewares.rpproxy-auth.forwardAuth.address',
-          `http://api:${utils.getPreset('MORIO_API_PORT')}/auth`
+          `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
         )
         .set('http.middlewares.rpproxy-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
         /*
@@ -318,7 +318,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
          */
         pandaproxy_api: [
           {
-            address: `broker_${NODE}`,
+            address: `${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker_${NODE}`,
             port: utils.getPreset('MORIO_BROKER_REST_API_PORT'),
             name: 'internal',
           },
@@ -387,7 +387,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
           },
           admin_api: {
             // Only connect locally
-            addresses: [ `broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+            addresses: [ `${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
           },
           schema_registry: {},
           cloud_auth: [],

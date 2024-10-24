@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.5.0-rc.1",
+  "version": "0.5.0-rc.2",
   "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
@@ -76,8 +76,8 @@
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
     "lint:api-spec": "scripts/lint-api-spec.sh",
-    "logs:api": "docker logs -n 20 -f api | pino-pretty -i pid,time,name,hostname",
-    "logs:core": "docker logs -n 20 -f core | pino-pretty -i pid,time,name,hostname",
+    "logs:api": "docker logs -n 20 -f morio-api | pino-pretty -i pid,time,name,hostname",
+    "logs:core": "docker logs -n 20 -f morio-core | pino-pretty -i pid,time,name,hostname",
     "packer:build": "packer build packer",
     "packer:build.aws.debian-12": "packer build packer/aws-debian-12.pkr.hcl",
     "packer:fmt": "packer fmt packer",

@@ -35,7 +35,7 @@ export const service = {
        * Get the status from the broker admin API
        */
       const result = await testUrl(
-        `http://rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
         { returnAs: 'json', returnError: true }
       )
       if (result?.message) {
@@ -154,7 +154,7 @@ export const service = {
        */
       if (typeof utils.brokerAdminApi === 'undefined') {
         utils.brokerAdminApi = restClient(
-          `http://broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1`
+          `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1`
         )
       }
 
@@ -200,7 +200,12 @@ async function ensureTopicsExist() {
 
   const toCreate = utils.getPreset('MORIO_BROKER_TOPICS').filter((topic) => !topics.includes(topic))
   log.info(`[debug] Creating topics ${toCreate.join(', ')}`)
-  await execContainerCommand('broker', ['rpk', 'topic', 'create', toCreate.join(' ')])
+  await execContainerCommand(`${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker`, [
+    'rpk',
+    'topic',
+    'create',
+    toCreate.join(' '),
+  ])
 }
 
 /**
@@ -228,7 +233,7 @@ async function enforceAuthorization() {
   for (const [user, operation, topics] of ACLs) {
     for (const topic of topics) {
       log.debug(`[broker] Creating ${operation} ACL on topic ${topic} for user ${user}`)
-      await execContainerCommand('broker', [
+      await execContainerCommand(`${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker`, [
         'rpk',
         'security',
         'acl',
@@ -251,7 +256,7 @@ async function enforceAuthorization() {
  */
 async function isBrokerUp() {
   const result = await testUrl(
-    `http://broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
@@ -268,10 +273,13 @@ async function isBrokerUp() {
  * @return {object} result - The JSON output as a POJO
  */
 async function getTopics() {
-  const result = await testUrl(`http://broker:8082/topics`, {
-    ignoreCertificate: true,
-    returnAs: 'json',
-  })
+  const result = await testUrl(
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:8082/topics`,
+    {
+      ignoreCertificate: true,
+      returnAs: 'json',
+    }
+  )
 
   return result
 }
@@ -283,7 +291,7 @@ async function getTopics() {
  */
 export async function isBrokerLeading() {
   const result = await testUrl(
-    `http://broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1/cluster/health_overview`,
     {
       ignoreCertificate: true,
       returnAs: 'json',
