@@ -2,7 +2,7 @@
 # Sounce config variables
 source config/cli.sh
 
-docker rm -fv core api ui proxy ca broker console connector db ldap watcher web
+docker rm -fv morio-core morio-api morio-ui morio-proxy morio-ca morio-broker morio-console morio-connector morio-db morio-ldap morio-watcher morio-web
 docker network rm morionet
 sudo rm -rf ${MORIO_GIT_ROOT}/data/* &> /dev/null
 # Also remove auto-generated files

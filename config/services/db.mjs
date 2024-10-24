@@ -61,8 +61,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `/bin/rqlited`,
             `-node-id`,
             String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
-            `-http-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-            `-raft-addr=db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-http-addr=${utils.getPreset('MORIO_CONTAINER_PREFIX')}db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-addr=${utils.getPreset('MORIO_CONTAINER_PREFIX')}db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
             `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
             `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
             `-node-ca-cert=/etc/rqlite/tls-ca.pem`,

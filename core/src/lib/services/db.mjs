@@ -9,7 +9,7 @@ import {
 } from './index.mjs'
 import { log, utils } from '../utils.mjs'
 
-const dbClient = restClient(`http://db:4001`)
+const dbClient = restClient(`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:4001`)
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -21,9 +21,12 @@ export const service = {
      * Lifecycle hook to determine the service status (runs every heartbeat)
      */
     heartbeat: async () => {
-      const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
-        returnAs: 'json',
-      })
+      const result = await testUrl(
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
+        {
+          returnAs: 'json',
+        }
+      )
 
       const status = result && result.indexOf('node ok') ? 0 : 1
       utils.setServiceStatus('db', status)
@@ -104,11 +107,14 @@ async function ensureLocalPrerequisites() {
  * @return {bool} result - True if the database is up, false if not
  */
 async function isDbUp() {
-  const result = await testUrl(`http://db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`, {
-    ignoreCertificate: true,
-    // This endpoint does not return JSON
-    returnAs: 'text',
-  })
+  const result = await testUrl(
+    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
+    {
+      ignoreCertificate: true,
+      // This endpoint does not return JSON
+      returnAs: 'text',
+    }
+  )
 
   return result && result.includes('node ok') ? true : false
 }

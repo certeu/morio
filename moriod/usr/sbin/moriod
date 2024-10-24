@@ -64,7 +64,7 @@ run_pm2_command() {
     api|core|ui)
     case $COMMAND in
       info|reload|status)
-      docker exec -it $CONTAINER $COMMAND
+      docker exec -it morio-$CONTAINER $COMMAND
       exit 0
       ;;
     esac
@@ -77,19 +77,19 @@ run_container_command() {
     api|broker|ca|connector|console|core|dbuilder|ui)
     case $2 in
       inspect)
-      docker inspect $1
+      docker inspect morio-$1
       exit 0
       ;;
       logs)
-      journalctl CONTAINER_NAME=$1 -o cat
+      journalctl CONTAINER_NAME=morio-$1 -o cat
       exit 0
       ;;
       kill)
       if [ "$1" = "core" ]; then
-        echo "The core container should not be killed. Run ${bold}moriod stop${base} instead."
+        echo "The morio-core container should not be killed. Run ${bold}moriod stop${base} instead."
         exit 1
       else
-        docker rm -f $1
+        docker rm -f morio-$1
         exit 0
       fi
       exit 0

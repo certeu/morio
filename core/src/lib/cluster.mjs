@@ -549,9 +549,11 @@ export async function ensureMorioCluster() {
       'core', // Service name
       {
         Aliases: [
-          'core',
-          'coredocs',
-          utils.isEphemeral() ? 'core_ephemeral' : `core_${utils.getNodeSerial()}`,
+          `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core`,
+          `${utils.getPreset('MORIO_CONTAINER_PREFIX')}coredocs`,
+          utils.isEphemeral()
+            ? `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_ephemeral`
+            : `${utils.getPreset('MORIO_CONTAINER_PREFIX')}core_${utils.getNodeSerial()}`,
         ],
       } // Endpoint config
     )

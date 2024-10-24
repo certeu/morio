@@ -467,7 +467,9 @@ utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
 /**
  * Returns a pre-configured API client, itself on object
  */
-utils.coreClient = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+utils.coreClient = restClient(
+  `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${getPreset('MORIO_CORE_PORT')}`
+)
 
 /**
  * Add helper method for sending RFC7807 error responses
@@ -496,7 +498,8 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
    * Add the instance
    */
   data.instance =
-    `http://api:${utils.getPreset('MORIO_API_PORT')}` + (data.route ? data.route : url ? url : '')
+    `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}` +
+    (data.route ? data.route : url ? url : '')
 
   return res
     .type('application/problem+json')

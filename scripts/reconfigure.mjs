@@ -96,14 +96,14 @@ const config = {
  */
 const cliOptions = (name, env) => `\\
   ${env === 'test' ? '-it --rm' : '-d'} \\
-  --name=${config[name][env].container.container_name} \\
-  --hostname=${config[name][env].container.container_name} \\
+  --name=morio-${config[name][env].container.container_name} \\
+  --hostname=morio-${config[name][env].container.container_name} \\
   --label morio.service=${name} \\
   --log-driver=${MORIO_DOCKER_LOG_DRIVER} \\
   ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
 ${MORIO_DOCKER_ADD_HOST ? '--add-host ' + MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${[name].concat(config[name][env].container?.aliases || []).join(',')} \\
+  --network-alias ${['morio-'+name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(' \\\n')} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(' \\\n')} \\

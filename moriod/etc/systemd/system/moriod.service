@@ -41,7 +41,7 @@ ExecStartPre=/usr/bin/docker rm -f core
 
 # Start the core container
 ExecStart=/usr/bin/docker run --rm \
-  --name=core \
+  --name=morio-core \
   --hostname=core \
   --label morio.service=core \
   --log-driver=journald \
@@ -61,7 +61,7 @@ ExecStart=/usr/bin/docker run --rm \
 # Core will recreate them when you start the service again.
 # We are listing all possible serviices. Some may not exist w
 # so we redirect stderr to /dev/null
-ExecStop=/usr/bin/docker rm -f api ca broker db console ui proxy connector dbuilder watcher 2> /dev/null
+ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2> /dev/null
 
 # Always restart
 Restart=always

@@ -1106,7 +1106,9 @@ utils.resetServicesStateAge = () => {
 /**
  * Returns a pre-configured API client, itself on object
  */
-utils.apiClient = restClient(`http://api:${getPreset('MORIO_API_PORT')}`)
+utils.apiClient = restClient(
+  `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${getPreset('MORIO_API_PORT')}`
+)
 
 /**
  * Used in resolveServiceConfiguration
@@ -1140,7 +1142,8 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
    * Add the instance
    */
   data.instance =
-    `http://core:${utils.getPreset('MORIO_CORE_PORT')}` + (data.route ? data.route : url ? url : '')
+    `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${utils.getPreset('MORIO_CORE_PORT')}` +
+    (data.route ? data.route : url ? url : '')
 
   return res
     .type('application/problem+json')

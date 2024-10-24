@@ -48,6 +48,9 @@ presets.MORIO_NETWORK_MTU = 1500
 predocs.MORIO_ERRORS_WEB_PREFIX = 'Web URL prefix for linking to errors'
 presets.MORIO_ERRORS_WEB_PREFIX = 'https://morio.it/docs/reference/errors/'
 
+predocs.MORIO_CONTAINER_PREFIX = "Prefix used in container images for Morio"
+presets.MORIO_CONTAINER_PREFIX = "morio-"
+
 /*
  * Docker presets
  */
