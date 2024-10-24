@@ -129,12 +129,12 @@ else
     fi
 
     echo "Attempting to publish image: Tag = latest"
-    buildah push docker.io/itsmorio/$IMAGE:latest
+    buildah push docker.io/itsmorio/$IMAGE:$MORIO_RELEASE
     if [ $? -eq 0 ]
     then
-      echo "Successfully pushed image: itsmorio/$IMAGE:latest"
+      echo "Successfully pushed image: itsmorio/$IMAGE:$MORIO_RELEASE"
     else
-      echo "Failed to push image: itsmorio/$IMAGE:latest"
+      echo "Failed to push image: itsmorio/$IMAGE:$MORIO_RELEASE"
       exit 1
     fi
 
