@@ -1,6 +1,6 @@
 ## Morio templates
 
-We do not keep these tempaltes in the main Morio repository. Instead, we have the
+We do not keep these templates in the main Morio repository. Instead, we use the
 [morio-templates](https://github.com/certeu/morio-templates) repository where we 
 curate various templates.
 
