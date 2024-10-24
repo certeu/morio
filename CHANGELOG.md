@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- All Morio containers have bene updated to use the `morio-` prefix in their name
+- All Morio containers have been updated to use the `morio-` prefix in their name
 - [broker] Upgraded RedPanda from v24.2.5 to v24.2.7
 - [ca] Upgraded Step CA from v0.27.4 to v0.27.5
 - [connector] Upgraded Logstash from v8.15.1 to v8.15.3
