@@ -21,7 +21,7 @@ info:
     name: EUPL
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
-  version: 0.4.3-rc.1
+  version: 0.5.0-rc.2
   x-logo:
     url: /downloads/morio-card-embed.svg
     backgroundColor: transparent
@@ -1558,7 +1558,7 @@ paths:
                 client:
                   type: object
                   properties:
-                    templates:
+                    modules:
                       type: object
                       properties: {}
                       additionalProperties:
@@ -5791,7 +5791,7 @@ paths:
                 client:
                   type: object
                   properties:
-                    templates:
+                    modules:
                       type: object
                       properties: {}
                       additionalProperties:
@@ -7022,7 +7022,7 @@ paths:
                 client:
                   type: object
                   properties:
-                    templates:
+                    modules:
                       type: object
                       properties: {}
                       additionalProperties:

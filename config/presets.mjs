@@ -427,7 +427,7 @@ export const loadAllPresets = () => {
  * Helper object to know which presets are safe to change
  * This is use to build the auto-generated documentation
  */
-export const presetsSaveToEdit = [
+export const presetsSafeToEdit = [
   'MORIO_DOCKER_SOCKET',
   'MORIO_CONFIG_ROOT',
   'MORIO_DATA_ROOT',
