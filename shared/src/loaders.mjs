@@ -1,5 +1,4 @@
 import fs from 'fs'
-import path from 'path'
 import { testUrl } from './network.mjs'
 import set from 'lodash/set.js'
 import yaml from 'js-yaml'
