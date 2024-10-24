@@ -104,7 +104,7 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Ensure preseeded content
    */
-  await preseedHandler(body.preseed)
+  await preseedHandler(body.preseed, true)
 
   /*
    * Handle initial setup

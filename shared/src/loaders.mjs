@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import { testUrl } from './network.mjs'
 import set from 'lodash/set.js'
 import yaml from 'js-yaml'
@@ -60,14 +62,15 @@ function fromRepo(url) {
 }
 
 /**
- * Determines whether a file should be read from a local git repo
+ * Loads a glob pattern of files from a repo as data
+ * (parses it as JSON or YAML)
  *
  * @param {string} pattern - The glob pattern
  * @param {string} repo - The repo ID (key in the preseed.git object)
  * @param {string} gitroot - Folder holding the cloned git repos
  * @param {array} found - Found files
  */
-async function globFromRepo(pattern, repo, gitroot) {
+async function globDataFromRepo(pattern, repo, gitroot) {
   const found = await globDir(`${gitroot}/${sanitizeGitFolder(repo)}`, pattern)
 
   const data = []
@@ -361,7 +364,7 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
         log.warn(`Cannot find repo to glob from: ${preseed.overlays}`)
         return false
       }
-      const found = await globFromRepo(preseed.overlays.slice(4).split('@')[0], repo, gitroot)
+      const found = await globDataFromRepo(preseed.overlays.slice(4).split('@')[0], repo, gitroot)
       for (const overlay of found) {
         if (overlay) overlays.push(overlay)
       }
@@ -396,6 +399,24 @@ async function readFileFromRepo(id, path, gitroot) {
 }
 
 /**
+ * Loads a glob pattern over files from a repo
+ *
+ * @param {string} pattern - The glob pattern
+ * @param {string} repo - The repo ID (key in the preseed.git object)
+ * @param {string} gitroot - Folder holding the cloned git repos
+ * @param {array} found - Found files
+ */
+async function globFilesFromRepo(pattern, repo, gitroot) {
+  const base = `${gitroot}/${sanitizeGitFolder(repo)}`
+  const files = await globDir(`${gitroot}/${sanitizeGitFolder(repo)}`, pattern)
+
+  return {
+    base,
+    files,
+  }
+}
+
+/**
  * Helper method to sanitize a git folder
  *
  * @param {string} id - The key under preseed.git
@@ -404,3 +425,64 @@ async function readFileFromRepo(id, path, gitroot) {
 function sanitizeGitFolder(id) {
   return hash(id)
 }
+
+export async function loadClientModules(settings, targetFolder, log) {
+  if (typeof settings?.client?.modules !== 'object') return
+
+  /*
+   * Create client folder structure
+   */
+  const folders = [
+    'audit/module-templates.d',
+    'audit/rule-templates.d',
+    'logs/module-templates.d',
+    'logs/input-templates.d',
+    'metrics/module-templates.d',
+  ]
+  for (const folder of folders) {
+    const dir = `${targetFolder}/${folder}`
+    try {
+      log.trace(`Removing ${dir}`)
+      await rm(dir, { recursive: true, force: true }) // Do not mutate, just rm and recreate
+      await mkdir(dir, log)
+    } catch (err) {
+      log.warn(err, `Unable to create folder for client modules: ${dir}`)
+    }
+  }
+
+  /*
+   * We should load these in alphabetic order
+   */
+  const sources = Object.keys(settings.client.modules).sort()
+  const promises = []
+  for (const id of sources) {
+    const source = settings.client.modules[id]
+    if (source.slice(0,4) === 'git:') {
+      const [folder, repo] = source.slice(4).split('@')
+      if (settings.preseed?.git?.[repo]) {
+        const { base, files } = await globFilesFromRepo(`${folder}/**`, repo, '/etc/morio/shared')
+        for (const file of files) promises.push(loadClientModuleFile(base, targetFolder, file, log))
+      }
+    }
+  }
+
+  return await Promise.all(promises)
+}
+
+function loadClientModuleFile(base, folder, file, log) {
+  let promise = true
+  if (file.slice(0, base.length + 9) === `${base}/modules/`) {
+    const template = file.slice(base.length + 9)
+    if (file.slice(-5) === ".yaml" || file.slice(-5) === ".rules") {
+      log.trace(`Loading client template ${template}`)
+      try {
+        promise = fs.promises.cp(file, `/morio/core/${folder}/${template}.disabled`)
+      } catch (err) {
+        return false
+      }
+    }
+  }
+
+  return promise
+}
+

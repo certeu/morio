@@ -46,7 +46,7 @@ const brokerNodes = Joi.array().items(fqdn).min(1).max(9).required()
  * settings.client
  */
 const client = Joi.object({
-  templates: Joi.object().pattern(
+  modules: Joi.object().pattern(
     Joi.string(), // keys should be string
     Joi.string(), // values should be string
   )

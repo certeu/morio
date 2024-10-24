@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Support preseeding of client templates
 - [core] Added support for the RESEED_ON_RELOAD feature flag
 - [core] Added support for Debian client packages for amd64 and arm64
+- [core] Support to bundle seeded client templates in built packages
 - [dbuilder] Maintain APT repository of client packages
 - [ui] Allow the export of key data
 - [ui] Allow loading key data file in setup wizard
