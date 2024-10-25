@@ -33,7 +33,7 @@ const presetGetters = {
         MORIO_CORE_LOG_LEVEL: 'info',
       },
     }),
-  prod: getPreset,
+  prod: (key, opts) => getPreset(key, { ...opts, force: { NODE_ENV: 'production' } }),
 }
 
 /*
@@ -60,7 +60,7 @@ const getHelpers = (env) => {
   const utils = new Store(logger)
   utils.getPreset = presetGetters[env]
   utils.isEphemeral = () => true
-  utils.isProduction = () => false
+  utils.isProduction = () => env === "prod" ? true : false
   utils.isUnitTest = () => false
   utils.isSwarm = () => false
   utils.getAllFqdns = () => []
