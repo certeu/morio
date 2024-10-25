@@ -7,29 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.0-rc.3] - 2024-10-25
+## [0.5.0] - 2024-10-25
 
-### Changed
-
-- Make it easier to run production containers in dev
-
-### Fixed
-
-- [dbuilder] Do not resolve MORIO_GIT_ROOT preset in production
-- [core] Fix an incorrect path when templating out the webroot
-
-
-## [0.5.0-rc.2] - 2024-10-24
-
-## Fixed
-
-- [core] Add missing git binary to itsmorio.core container image
-
-## Changed
-
-- All Morio containers have been updated to use the `morio-` prefix in their name
-
-## [0.5.0-rc.1] - 2024-10-24
+Since this is a minor release, here's what's new since 0.4.0:
 
 ### Added
 
@@ -57,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- All Morio containers have been updated to use the `morio-` prefix in their name
+- Make it easier to run production containers in dev
 - [broker] Upgraded RedPanda from v24.2.5 to v24.2.7
 - [db] Upgraded Rqlite from v8.30.5 to v8.32.3
 - [ca] Upgraded Step CA from v0.27.4 to v0.27.5
@@ -71,9 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Replace 'next' tag with 'testing'
 - [core] Replace 'next' tag with 'testing'
 - [core] Allow reseeding when the base config is not preseeded
+- [core] Fix an incorrect path when templating out the webroot
+- [core] Add missing git binary to itsmorio.core container image
 - [broker] Fixed the issue with mTLS that was the reason for the SASL configuration as a temporary workaround
 - [core] Guard against untagged images when filtering docker image list
 - [dbuilder] Replace 'next' tag with 'testing'
+- [dbuilder] Do not resolve MORIO_GIT_ROOT preset in production
 - [moriod] Correct location of version file
 - [ui] Replace 'next' tag with 'testing'
 - [ui] Use correct spinner in setup wizard
