@@ -1,4 +1,4 @@
-personal_ws-1.1 en 232 
+personal_ws-1.1 en 234 
 ABAC
 ACL
 AMI
@@ -146,6 +146,7 @@ decrypt
 dev
 distros
 docusaurus
+dogfooding
 env
 eslint
 facto
@@ -223,6 +224,7 @@ subfolder
 subgraph
 systemd
 tellene
+templating
 todo
 ui
 undeployable
