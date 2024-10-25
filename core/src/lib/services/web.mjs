@@ -51,7 +51,7 @@ async function ensureLocalPrerequisites() {
   const tokens = { MORIO_CLUSTER_FQDN: utils.getClusterFqdn() }
 
   for (const file of ['index.html', 'install.sh']) {
-    const path = `/morio/data/webroot/install/${file}`
+    const path = `/morio/data/shared/webroot/install/${file}`
     const orig = await readFile(path)
     let updated
     try {
