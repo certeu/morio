@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [dbuilder] Do nto resolve MORIO_GIT_ROOT preset in production
+- [dbuilder] Do not resolve MORIO_GIT_ROOT preset in production
 - [core] Fix an incorrect path when templating out the webroot
 
 
