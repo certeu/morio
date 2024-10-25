@@ -7,7 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.0-rc.2] - 2024-10-22
+## [0.5.0-rc.3] - 2024-10-25
+
+### Changed
+
+- Make it easier to run production containers in dev
+
+### Fixed
+
+- [dbuilder] Do nto resolve MORIO_GIT_ROOT preset in production
+- [core] Fix an incorrect path when templating out the webroot
+
+
+## [0.5.0-rc.2] - 2024-10-24
 
 ## Fixed
 
@@ -17,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - All Morio containers have been updated to use the `morio-` prefix in their name
 
-## [0.5.0-rc.1] - 2024-10-22
+## [0.5.0-rc.1] - 2024-10-24
 
 ### Added
 
