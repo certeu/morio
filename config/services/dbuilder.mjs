@@ -9,7 +9,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const DIRS = {
     data: utils.getPreset('MORIO_DATA_ROOT'),
     dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),
-    repo: utils.getPreset('MORIO_GIT_ROOT'),
   }
 
   return {
@@ -42,13 +41,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/dbuilder:/etc/dbuilder`,
           ]
         : [
-            `${DIRS.repo}/clients:/morio/client/bin`,
-            `${DIRS.repo}/data/data/clients/linux:/morio/client/src`,
-            `${DIRS.repo}/data/data/${DIRS.dl}/clients/deb:/morio/client/dist`,
-            `${DIRS.repo}/data/data/installers/deb:/morio/repo/src`,
-            `${DIRS.repo}/data/data/${DIRS.dl}/installers/deb:/morio/repo/dist`,
-            `${DIRS.repo}/data/data/aptly:/repo`,
-            `${DIRS.repo}/data/config/dbuilder:/etc/dbuilder`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/clients:/morio/client/bin`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/clients/linux:/morio/client/src`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/${DIRS.dl}/clients/deb:/morio/client/dist`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/installers/deb:/morio/repo/src`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/${DIRS.dl}/installers/deb:/morio/repo/dist`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/aptly:/repo`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/dbuilder:/etc/dbuilder`,
           ],
       // Don't keep container after it exits
       ephemeral: true,
