@@ -48,65 +48,52 @@ ${sidebarTitle ? 'sidebar_label: "' + sidebarTitle + '"' : ''}
 /*
  * Helper method to create/ensure pages for all presets
  */
-const ensurePresetPages = async () => {
-  const root = path.resolve('./docs/reference/presets')
-  const pages = (await globDir(root)).map((page) => page.split(`${root}/`).pop())
+const ensurePresetPage = async () => {
+  const content = []
+  /*
+   * Iterate over presets
+   */
+  for (const key of presetsSafeToEdit) content.push(`
+## ${key}
+
+${presetDocs[key]}
+
+\`\`\`txt title="${key} default value:"
+${renderPresetValue(presets[key])}
+\`\`\`
+`)
 
   /*
-   * Make sure all presets have their page
+   * Write out page
    */
-  for (const [key, val] of Object.entries(presets)) {
-    const slug = key.toLowerCase()
-    /*
-     * Create the folder if it does not exist
-     */
-    if (!pages.includes(`/${slug}`)) await mkdir(`${root}/${slug}`)
-    /*
-     * Create the page if it does not exist
-     */
-    if (!pages.includes(`/${key.toLowerCase()}/readme.mdx`)) await createPresetPage(key, slug, root)
-  }
-
-  /*
-   * Make sure only existing presets have their page under /docs/reference/presets
-   */
-  const allPresets = Object.keys(presets)
-  for (const page of pages) {
-    const name = page.split('/').shift()
-    if (name !== 'readme.mdx' && !allPresets.includes(name.toUpperCase()))
-      console.log(
-        `🔥🔥 Preset page ${name} exists, but there is no such Morio preset. Remove page? 🔥🔥`
-      )
-  }
+  await createPresetPage(content.join("\n"))
 }
 
 /*
+
  * Helper method to create a preset page
  */
-const createPresetPage = async (preset, slug, root) =>
+const createPresetPage = async (presets) =>
   await writeFile(
-    `${root}/${slug}/readme.mdx`,
-    pageTitle(`Preset: ${preset}`, ['preset'], preset) +
-      '\n' +
-      `
-${presetDocs[preset]}.
+    `./docs/reference/presets/readme.mdx`,
+    `---
+title: Presets
+---
 
-<Note>
+Morio presets are pre-configured settings.
 
-The default value of this preset is ${renderPresetValue(presets[preset])}, ${
-        presetsSafeToEdit.includes(preset)
-          ? 'but it is <Label style="success">Safe</Label> to change this.'
-          : 'and it is <Label style="danger">Not Safe</Label> to change this.'
-      }
+They can be changed, but whether that can be done on a running Morio instance
+or only during the initial setup depends on the specific preset.
 
-</Note>
-`
-  )
+Refer to the documentation of the various presets below for more details.
+
+${presets}
+`)
 
 const renderPresetValue = (val) => {
-  if (['number', 'string'].includes(typeof val)) return `\`${val}\``
-  if (Array.isArray(val)) return `<ul>${val.map((item) => '<li>' + item + '</li>').join(' ')}</ul>`
-  else return `<pre>${JSON.stringify(val, null, 2)}</pre>`
+  if (['number', 'string'].includes(typeof val)) return val
+  if (Array.isArray(val)) return val.join("\n")
+  else return JSON.stringify(val, null, 2)
 }
 
 /*
@@ -265,9 +252,8 @@ export const prebuildDocs = async () => {
 
   /*
    * Presets
-   * This is commented out because it rarely needs to run
    */
-  await ensurePresetPages()
+  await ensurePresetPage()
 
   /*
    * Errors

@@ -15,19 +15,56 @@ export const presetDocs = predocs
 predocs.MORIO_VERSION = `The Morio version number`
 presets.MORIO_VERSION = pkg.version
 
-predocs.MORIO_VERSION_TAG = `The Morio version tag, which is the version number prefixed with 'v'`
+predocs.MORIO_VERSION_TAG = `The Morio version tag, which is the version number
+prefixed with 'v'`
 presets.MORIO_VERSION_TAG = `v${pkg.version}`
 
-predocs.MORIO_DOCKER_SOCKET = 'Location of the Docker socket on the host OS'
+predocs.MORIO_DOCKER_SOCKET = `The location of the Docker socket on the host
+OS.
+
+You typically would change this on a fresh Morio install, although technically
+it can also be changed on a running Morio system.  To do so:
+
+  - Update the \`/etc/morio/moriod/moriod.env\` file and set your custom
+  location for the Docker socket
+  - Run \`sudo systemctl daemon-reload\` to reload the systemd unit files
+  - Restart Morio by running: \`sudo morio restart\`
+`
 presets.MORIO_DOCKER_SOCKET = '/var/run/docker.sock'
 
-predocs.MORIO_CONFIG_ROOT = 'Location of the Morio configuration folder on the host OS'
+predocs.MORIO_CONFIG_ROOT = `Location of the Morio configuration folder on the
+host OS
+
+You can only change this on a fresh Morio install. To do so:
+
+  - Update the \`/etc/morio/moriod/moriod.env\` file and set your custom
+  location for the config root
+  - Run \`sudo systemctl daemon-reload\` to reload the systemd unit files
+  - Restart Morio by running: \`sudo morio restart\`
+`
 presets.MORIO_CONFIG_ROOT = '/etc/morio/moriod'
 
-predocs.MORIO_DATA_ROOT = 'Location of the Morio data folder on the host OS'
+predocs.MORIO_DATA_ROOT = `Location of the Morio data folder on the host OS
+
+You can only change this on a fresh Morio install. To do so:
+
+  - Update the \`/etc/morio/moriod/moriod.env\` file and set your custom
+  location for the data root
+  - Run \`sudo systemctl daemon-reload\` to reload the systemd unit files
+  - Restart Morio by running: \`sudo morio restart\`
+`
 presets.MORIO_DATA_ROOT = '/var/lib/morio/moriod'
 
-predocs.MORIO_LOGS_ROOT = 'Location of the Morio logs folder on the host OS'
+predocs.MORIO_LOGS_ROOT = `Location of the Morio logs folder on the host OS
+
+You would typically change this on a fresh Morio install, but it can also be
+changed on a running Morio instance. To do so:
+
+  - Update the \`/etc/morio/moriod/moriod.env\` file and set your custom
+  location for the logs root
+  - Run \`sudo systemctl daemon-reload\` to reload the systemd unit files
+  - Restart Morio by running: \`sudo morio restart\`
+`
 presets.MORIO_LOGS_ROOT = '/var/log/morio/moriod'
 
 predocs.MORIO_DOWNLOADS_FOLDER = 'Name of the Morio public downloads folder'
@@ -39,10 +76,28 @@ presets.MORIO_REPOS_FOLDER = 'repos'
 predocs.MORIO_NETWORK = 'Name of the internal Morio Docker network'
 presets.MORIO_NETWORK = 'morionet'
 
-predocs.MORIO_NETWORK_SUBNET = 'Subnet to use for the internal Morio Docker network'
+predocs.MORIO_NETWORK_SUBNET = `Subnet to use for the internal Morio Docker
+network.
+
+You may need to change this if you have clients that connect from a network
+that shares the same subnet.  In this case, the client will not be able to
+communicate since it will seem to be local when it is not.
+
+In this case, and probably only in this case, you should change the subnet to
+any other private network.
+
+To change this, set \`tokens.presets.MORIO_NETWORK_SUBNET\` in your Morio
+settings.`
 presets.MORIO_NETWORK_SUBNET = '192.168.144.32/28'
 
-predocs.MORIO_NETWORK_MTU = 'MTU to configure on the internal Morio Docker network'
+predocs.MORIO_NETWORK_MTU = `MTU to configure on the internal Morio Docker
+network.
+
+If you are considering changing the MTU you probably know what you're doing.
+But in general this can be useful to avoid fragmentation.
+
+  To change this, set \`tokens.presets.MORIO_NETWORK_MTU\` in your Morio
+settings.`
 presets.MORIO_NETWORK_MTU = 1500
 
 predocs.MORIO_ERRORS_WEB_PREFIX = 'Web URL prefix for linking to errors'
@@ -55,25 +110,61 @@ presets.MORIO_CONTAINER_PREFIX = "morio-"
  * Docker presets
  */
 
-predocs.MORIO_DOCKER_LOG_DRIVER = 'The Docker log driver to use for created containers'
+predocs.MORIO_DOCKER_LOG_DRIVER = `The Docker log driver to use for created
+containers.
+
+Morio assumes \`systemd\` is present, and so we use the \`journald\` log
+driver for Docker. If you are running Morio on a system without \`systemd\`
+you will need to change this.
+
+You should change this on a fresh Morio install. To do so:
+
+  - Update the \`/etc/morio/moriod/moriod.env\` file and set your custom
+  log driver for Docker
+  - Run \`sudo systemctl daemon-reload\` to reload the systemd unit files
+  - Restart Morio by running: \`sudo morio restart\`
+
+:::warning FIXME
+This is not yet implemented
+:::
+`
 presets.MORIO_DOCKER_LOG_DRIVER = 'journald'
 
-predocs.MORIO_DOCKER_ADD_HOST = 'Optional `host:ip` resolution to add to the containers configuration'
+predocs.MORIO_DOCKER_ADD_HOST = `Optional \`host:ip\` resolution to add to the
+containers configuration.
+
+This is typically used in faciliate development or testing of Morio.
+It is not the kind of thing you want to run use production, use DNS instead.
+
+To update this, set the \`MORIO_DOCKER_ADD_HOST\` environment variable when
+launching the Morio core container.`
 presets.MORIO_DOCKER_ADD_HOST = false
 
 /*
  * API presets
  */
 
-predocs.MORIO_API_JWT_EXPIRY = 'Maximum lifetime of a JSON Web Token generated by Morio'
+predocs.MORIO_API_JWT_EXPIRY = `Maximum lifetime of a JSON Web Token generated
+by Morio.
+
+The notation here is the one use by [Go's time
+package](https://pkg.go.dev/time#ParseDuration).
+
+To change this, set \`tokens.presets.MORIO_API_JWT_EXPIRY\` in your Morio
+settings.`
 // Lifetime of an API JSON Web Token
 presets.MORIO_API_JWT_EXPIRY = '12h'
 
-predocs.MORIO_API_PREFIX = 'URL prefix for accessing the API service through the proxy service'
+predocs.MORIO_API_PREFIX = `URL prefix for accessing the API service through
+the proxy service`
 presets.MORIO_API_PREFIX = '/-/api'
 
-predocs.MORIO_API_LOG_LEVEL =
-  'Log level of the API service. One of trace, debug, info, warn, error, fatal, or silent'
+predocs.MORIO_API_LOG_LEVEL = `Log level of the API service.
+One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
+\`silent\`.
+
+To change this, set \`tokens.presets.MORIO_API_LOG_LEVEL\` in your Morio
+settings.`
 presets.MORIO_API_LOG_LEVEL = 'trace'
 
 predocs.MORIO_API_PORT = 'TCP port for the API service to listen on'
@@ -81,16 +172,20 @@ presets.MORIO_API_PORT = 3000
 
 // Hosts for which to forego the https validation check
 // Used in unit tests only
-predocs.MORIO_UNIT_TEST_HOST =
-  'Host for which to forego the HTTPS validation check. Used in unit tests only'
+predocs.MORIO_UNIT_TEST_HOST = `Host for which to forego the HTTPS validation
+check. Used in unit tests only`
 presets.MORIO_UNIT_TEST_HOST = 'unit.test.morio.it'
 
 /*
  * Broker presets
  */
 
-predocs.MORIO_BROKER_LOG_LEVEL =
-  'Log level of the broker service. Once of all, trace, debug, info, warn, error, or fatal'
+predocs.MORIO_BROKER_LOG_LEVEL = `Log level of the broker service.
+One of \`all\`, \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, or
+\`fatal\`.
+
+To change this, set \`tokens.presets.MORIO_API_LOG_LEVEL\` in your Morio
+settings.`
 presets.MORIO_BROKER_LOG_LEVEL = 'warn'
 
 predocs.MORIO_BROKER_TOPICS = 'Broker topics to be created when starting Morio'
@@ -110,7 +205,8 @@ presets.MORIO_BROKER_TOPICS = [
   //'cron.monthly', // For roughly daily triggers
 ]
 
-predocs.MORIO_BROKER_CLIENT_TOPICS = 'Broker topics that are writable by the Morio client'
+predocs.MORIO_BROKER_CLIENT_TOPICS = `Broker topics that are writable by the
+Morio client`
 presets.MORIO_BROKER_CLIENT_TOPICS = [
   'alarms', // For alarms
   'audit', // For audit info/logs (think auditbeat)
@@ -143,11 +239,19 @@ presets.MORIO_BROKER_RPC_SERVER_PORT = 33145
  * CA presets
  */
 
-predocs.MORIO_ROOT_CA_COMMON_NAME = 'Common Name (CN) for the Morio Root Certificate Authority'
+predocs.MORIO_ROOT_CA_COMMON_NAME = `Common Name (CN) for the Morio Root
+Certificate Authority.
+
+You can only change this at the initial setup. To do so, set
+\`tokens.presets.MORIO_ROOT_CA_COMMON_NAME\` in your initial Morio settings.`
 presets.MORIO_ROOT_CA_COMMON_NAME = 'Morio Root Certificate Authority'
 
-predocs.MORIO_INTERMEDIATE_CA_COMMON_NAME =
-  'Common Name (CN) for the Morio Intermediate Certificate Authority'
+predocs.MORIO_INTERMEDIATE_CA_COMMON_NAME = `Common Name (CN) for the Morio
+Intermediate Certificate Authority.
+
+You can only change this at the initial setup. To do so, set
+\`tokens.presets.MORIO_INTERMEDIATE_CA_COMMON_NAME\` in your initial Morio
+settings.`
 presets.MORIO_INTERMEDIATE_CA_COMMON_NAME = 'Morio Intermediate Certificate Authority'
 
 predocs.MORIO_ROOT_CA_VALID_YEARS =
@@ -158,16 +262,28 @@ predocs.MORIO_INTERMEDIATE_CA_VALID_YEARS =
   'Lifetime of the certificate of the Morio Intermediate Certificate Authority'
 presets.MORIO_INTERMEDIATE_CA_VALID_YEARS = 5
 
-predocs.MORIO_CA_CERTIFICATE_LIFETIME_MIN =
-  'Minimum lifetime of a certificate generated by the Morio Certificate Authority'
+predocs.MORIO_CA_CERTIFICATE_LIFETIME_MIN = `Minimum lifetime of a certificate
+generated by the Morio Certificate Authority.
+
+You can only change this at the initial setup. To do so, set
+\`tokens.presets.MORIO_CA_CERTIFICATE_LIFETIME_MIN\` in your initial Morio
+settings.`
 presets.MORIO_CA_CERTIFICATE_LIFETIME_MIN = '5m'
 
-predocs.MORIO_CA_CERTIFICATE_LIFETIME_MAX =
-  'Maximum lifetime of a certificate generated by the Morio Certificate Authority'
+predocs.MORIO_CA_CERTIFICATE_LIFETIME_MAX = `Maximum lifetime of a certificate
+generated by the Morio Certificate Authority.
+
+You can only change this at the initial setup. To do so, set
+\`tokens.presets.MORIO_CA_CERTIFICATE_LIFETIME_MAX\` in your initial Morio
+settings.`
 presets.MORIO_CA_CERTIFICATE_LIFETIME_MAX = '17544h'
 
-predocs.MORIO_CA_CERTIFICATE_LIFETIME_DFLT =
-  'Default lifetime of a certificate generated by the Morio Certificate Authority'
+predocs.MORIO_CA_CERTIFICATE_LIFETIME_DFLT = `Default lifetime of a certificate
+generated by the Morio Certificate Authority.
+
+You can only change this at the initial setup. To do so, set
+\`tokens.presets.MORIO_CA_CERTIFICATE_LIFETIME_DFLT\` in your initial Morio
+settings.`
 presets.MORIO_CA_CERTIFICATE_LIFETIME_DFLT = '750h'
 
 predocs.MORIO_CA_PORT = 'TCP port for the CA service to listen on'
@@ -202,8 +318,12 @@ predocs.MORIO_CORE_CONFIG_FOLDER =
   'Location of the Morio configuration folder inside the core container'
 presets.MORIO_CORE_CONFIG_FOLDER = '/etc/morio'
 
-predocs.MORIO_CORE_LOG_LEVEL =
-  'Log level of the API service. One of trace, debug, info, warn, error, fatal, or silent'
+predocs.MORIO_CORE_LOG_LEVEL = `Log level of the Core service.
+One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
+\`silent\`.
+
+To change this, set \`tokens.presets.MORIO_CORE_LOG_LEVEL\` in your Morio
+settings.`
 presets.MORIO_CORE_LOG_LEVEL = 'trace'
 
 // TCP port core should listen on
@@ -219,8 +339,12 @@ predocs.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL =
   'Amount of seconds to wait between cluster heartbeats'
 presets.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL = 30
 
-predocs.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT =
-  'Amount of milliseconds above which we start logging heartbeat latency'
+predocs.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT = `Amount of milliseconds above
+which we start logging heartbeat latency.
+
+You may want to increase this if you have cluster nodes behind a slower link.
+
+To do so, set \`MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT\` in your Morio settings.`
 presets.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT = 150
 
 predocs.MORIO_CORE_CLUSTER_STATE_CACHE_TTL = 'Amount of seconds to cache the cluster state'
@@ -244,8 +368,10 @@ presets.MORIO_DB_RAFT_PORT = 4002
  * Proxy presets
  */
 
-predocs.MORIO_PROXY_LOG_LEVEL =
-  'Log level for the _proxy service_. One of TRACE, DEBUG, INFO, WARN, or ERROR'
+predocs.MORIO_PROXY_LOG_LEVEL = `Log level for the _proxy service_. One of
+\`TRACE\`, \`DEBUG\`, \`INFO\`, \`WARN\`, or \`ERROR\`.
+
+To change this, set \`MORIO_PROXY_LOG_LEVEL\` in your Morio settings.`
 presets.MORIO_PROXY_LOG_LEVEL = 'DEBUG'
 
 predocs.MORIO_PROXY_ACCESS_LOG_FILEPATH =
@@ -294,35 +420,48 @@ presets.MORIO_WATCHER_UID = 1000
  * X509 presets
  */
 
-predocs.MORIO_X509_CN =
-  'The default Common Name (CN) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_CN = `The default Common Name (CN) attribute for X.509
+certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_CN\` in your Morio settings.`
 presets.MORIO_X509_CN = 'Morio'
 
-predocs.MORIO_X509_C =
-  'The default Country (C) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_C = `The default Country (C) attribute for X.509
+certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_C\` in your Morio settings.`
 presets.MORIO_X509_C = 'BE'
 
-predocs.MORIO_X509_ST =
-  'The default state/locality (ST) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_ST = `The default state/locality (ST) attribute for X.509
+certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_ST\` in your Morio settings.`
 presets.MORIO_X509_ST = 'Brussels'
 
-predocs.MORIO_X509_L =
-  'The default Location (L) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_L = `The default Location (L) attribute for X.509
+certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_L\` in your Morio settings.`
 presets.MORIO_X509_L = 'Brussels'
 
-predocs.MORIO_X509_O =
-  'The default Organisation (O) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_O = `The default Organisation (O) attribute for X.509
+certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_O\` in your Morio settings.`
 presets.MORIO_X509_O = 'CERT-EU'
 
-// The default OU (organizational unit) attribute for X.509 certificates
-predocs.MORIO_X509_OU =
-  'The default Organisational Unit (OU) attribute for X.509 certificates generated by the _CA service_ of Morio'
+predocs.MORIO_X509_OU = `The default Organisational Unit (OU) attribute for
+X.509 certificates generated by the _CA service_ of Morio.
+
+To change this, set \`tokens.presets.MORIO_X509_OU\` in your Morio settings.`
 presets.MORIO_X509_OU = 'Engineering Team'
 
 /*
  * Putting this here, not sure where is the best place
  */
-predocs.MORIO_ELASTIC_SOFTWARE_KEY = `The key used to sign software released by Elastic. This is used by the client installer to set up the Elastic repository which contains the dependencies of the client (the various Beats agents).`
+predocs.MORIO_ELASTIC_SOFTWARE_KEY = `The key used to sign software released by
+Elastic. This is used by the client installer to set up the Elastic repository
+which contains the dependencies of the client (the various Beats agents).`
 presets.MORIO_ELASTIC_SOFTWARE_KEY = `-----BEGIN PGP PUBLIC KEY BLOCK-----
 
 mQENBFI3HsoBCADXDtbNJnxbPqB1vDNtCsqhe49vFYsZN9IOZsZXgp7aHjh6CJBD
@@ -444,7 +583,6 @@ export const presetsSafeToEdit = [
   'MORIO_CA_CERTIFICATE_LIFETIME_MIN',
   'MORIO_CA_CERTIFICATE_LIFETIME_MAX',
   'MORIO_CA_CERTIFICATE_LIFETIME_DFLT',
-  'MORIO_CORE_CONFIG_FOLDER',
   'MORIO_CORE_LOG_LEVEL',
   'MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT',
   'MORIO_PROXY_LOG_LEVEL',
