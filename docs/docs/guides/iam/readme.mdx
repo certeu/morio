@@ -1,0 +1,321 @@
+---
+title: Morio Identity and Access Management (IAM) Guide
+sidebar_label: IAM Guide
+---
+
+This _IAM_ guide for Morio provides an overview of how authentication and
+authorization is handled in Morio.   
+If you are wondering _who can do what? And how is that decided?_, this guide
+should provide answers.
+
+When discussing _IAM_ in Morio, we always need to start by making it clear
+which _wire protocol_ we are talking about. You see, there are two different
+ways to comminicate with a Morio instance:
+
+- [Kafka](https://kafka.apache.org/protocol.html): This is the protocol to talk
+  to a Morio broker
+- [HTTP](https://en.wikipedia.org/wiki/HTTP): This is the ubiquitous web
+  protocol used to talk to the various Morio APIs and the web interface.
+
+Each of the sections in this guide will be split up by wire protocol because
+the technical implementation of those protocols is so vastly different that
+they require their own approach to IAM.
+
+## Authentication
+
+Authentication is the process of establishing who a user is.
+
+### Kafka Authentication
+
+Kafka uses _mTLS_ for authentication. You need a certificate issued by Morio's
+_CA_ to be able to connect. The value of the certificate's `CN` field (common
+name) will be used as username.
+
+You can generate your own (client) certificates to connect to a Kafka broker,
+and you can choose the value of the CN freely.
+
+However, the most common use case is to use the Morio client which is created
+by your Morio instance and will come bundled with a client certificate. Below
+is an example of the username (the value of the `CN` field) from a client
+certificate that is auto-generated and bundled with the client installer
+packages:
+
+```
+1729850558315.clients.8ad0d33a-f283-4cdb-80b9-7f1f5ce622ae.morio.internal
+```
+
+This is the user identity that is used to apply authorization.
+
+:::tip Good to know
+The value of the certificate CN for the Morio client is constructed as:
+
+```
+[timestamp].clients[cluster-uuid].morio.internal
+```
+
+- Including the timestamp ensures every client version has its own `CN` value.
+- Including the cluster UUID ensures that clients certificates are linked to the
+  Morio instance that generated them.
+- Only accepting certificates from Morio's CA prevents users from generating a
+  client certificate from a different CA with a `CN` value designed to bypass
+  authorization controls.
+:::
+
+### HTTP Authentication
+
+For HTTP connections to Morio, all authentication is handled by the _API_.
+It provides a modular way to configure various authentication backends through
+the use of [identity providers](/docs/guides/settings/idps/).
+
+:::tip mTLS is available behind a feature flag
+
+As an extra layer of protection, you can enable the `ENFORCE_HTTP_MTLS` feature
+flag, to enforce mTLS on all HTTP endpoints.  This will apply **in addition** to
+the authentication described below.
+
+Refer to [the reference documentation of the `ENFORCE_HTTP_MTLS` feature
+flag](/docs/reference/flags/enforce_http_mtls/) for more details.
+:::
+
+
+A user's identity is established by combining the username used by the
+identity provider with the ID of the identity provider. Below is 
+an example:
+
+```
+ad.aswartz
+```
+
+This is the user identity that is used to apply authorization.
+
+
+:::tip Good to know
+The user identity for HTTP access in Morio is constructed as:
+
+```
+[Identity Provider ID].[Identity Provider Username]
+```
+
+The internal identity providers have a fixed ID. For example `mrt`, `local`, or
+`apikey`. Other identity providers, like `ldap` or `oidc` have an ID assigned
+when configuring that identity provider.
+
+If we assume a scenario where a identity provider of type `ldap` is configured
+with ID `ad`, then a user logging in as `aswartz` would be know to morio as
+`ad.aswartz`.
+:::
+
+## Authorization
+
+Authorization is the process of establishing what a user can (or cannot) do.
+
+### Kafka Authorization
+
+When connecting over the Kafka protocol, authorization is governed by the
+access control list (ACL) that is configured on the broker.
+
+[The RedPanda ACL
+documentation](https://docs.redpanda.com/current/manage/security/authorization/acl/)
+is the authoritative reference on the finer details of ACLs inside a broker
+node.
+
+Below is an example if (a subset of) the default ACL configured by Morio:
+
+```
+PRINCIPAL                                                           HOST  RESOURCE-TYPE  RESOURCE-NAME  RESOURCE-PATTERN-TYPE  OPERATION  PERMISSION
+User:*.clients.3ffcd9cd-a8a9-42ce-a29b-b9e0d0102f6f.morio.internal  *     TOPIC          logs           LITERAL                WRITE      ALLOW
+User:*.clients.3ffcd9cd-a8a9-42ce-a29b-b9e0d0102f6f.morio.internal  *     TOPIC          logs           LITERAL                CREATE     ALLOW
+User:*.clients.3ffcd9cd-a8a9-42ce-a29b-b9e0d0102f6f.morio.internal  *     TOPIC          logs           LITERAL                DESCRIBE   ALLOW
+```
+
+For the purpose of this guide, it sufficient to understand the various fields
+used in the ACL:
+
+**PRINCIPAL**
+
+This is made up of `type:value` where `type` is **always** `User` so in
+practice this always is `User:id`, and it describes the user identity.
+
+:::tip
+Keep in mind that customizes the broker configuration to extract the value of
+the `CN` as user identification. This is different from the examples you see in
+the RedPanda documentation where the entire certificate string is used.
+
+So in the RedPanda documentation, you might see something like
+this as the user id:
+
+```
+C=UK,ST=London,L=London,O=Redpanda,OU=engineering,CN=__schema_registry
+```
+
+In morio, the same user would be known as:
+```
+__schema_registry
+```
+
+:::
+
+**HOST**
+
+This allows one to limit the host(s) from which clients are allowed to connect.
+We typically set this to `*` to not impose any restrictions.
+
+**RESOURCE-TYPE**
+
+This describes the type of resouce. It can be one of `TOPIC`, `CLUSTER`,
+`GROUP`, or `TRANSACTIONAL_ID`. 
+
+You can almost certainly ignore all but `TOPIC` since that is the reource type
+that controls who can read and write data to the topics.
+
+**RESOURCE-NAME**
+
+This is the name of the resource, so its exact meaning depends on the resource
+type.  For example, when the resource type of `TOPIC`, this will be the topic
+name.
+
+**RESOURCE-PATTERN-TYPE**
+
+This controls how the resource name will be matched. Possible options are:
+
+- `match`: Check a wildcard match. Using `bana*` will match `banana`.
+- `prefix`: Check a prefix. Using `bana` will match `banana`.
+- `literal`: Match only exactly. Only `banana` will match `banana`.
+- `any`: Combines `prefix` and `literal`.
+
+:::tip
+Using `literal` is the safest option. 
+So it is also what Morio uses in the auto-generated ACL rules.
+:::
+
+**OPERATION**
+
+The operation describes the action taken on a resource. It is one of 
+`READ`, `WRITE`, `CREATE`, `DELETE`, `ALTER`, `DESCRIBE`, `DESCRIBE_CONFIGS`,
+`ALTER_CONFIGS`, or `ALL`.
+
+:::tip
+To produce to a topic, or to write data to the broker if you will, you need the
+`WRITE`, and `DESCRIBE` rights.  If the topic needs to be created if it does
+not already exist, you also need the `CREATE` operation.
+:::
+
+**PERMISSION**
+
+Permission can be one of `ALLOW` or `DENY`. Given that `DENY` is the default,
+you typically will never use it unless you need to deny something specific
+before hitting a broader allow rule in your ACL.
+
+#### Managing Kafka authorization
+
+You can manage the broker ACL through RedPanda console.
+
+In the Morio web interface, click **Status** and then **RedPanda Console**.
+In the console, click **Security** in the sidebar, then the **ACLs** tab.
+You can also get there directly by navigating to `/console/security/acls`.
+
+Alternatively, you can manage the ACL directly on the broker via the command line.
+For example, to see the current ACL, run this command on a _broker node_:
+
+```sh
+docker exec -it morio-broker rpk security acl list
+```
+
+To learn how to manage the ACL from the command line, run: 
+
+```sh
+docker exec -it morio-broker rpk security acl -h
+```
+
+:::warning Sadly no API
+There is currently no API to manage the broker ACL
+:::
+
+### HTTP Authorization
+
+Authorization for HTTP is divided in two different approaches:
+
+- _RBAC_: Role Based Access Control governs who can manage Morio
+- _ABAC_: Attribute Based Access Control governs who can use Morio
+
+The reasons for this split will become clear when we look at both.
+
+#### RBAC
+
+Role-based access control governs which roles can do what when it comes to
+managing Morio. For example, creating users, or updating the Morio settings,
+or restarting a container. These are all things where RBAC is used.
+
+There is the base `user` role, and then there are various roles that elevate
+permissions to allow users to make changes to the system.
+
+Another way to look at this is that RBAC governs everything where the Morio
+developers can unilaterally decide which role can do what. Like, updating the
+settings of a Morio instance is not something that can ever be done by the
+`user` role. That is decided by the developers, and you cannot change that.
+Our only job is to decide which user gets what role.
+
+To do that, we need to know what role can do what.
+Note that roles are commulative, so every higher role can do everything the
+roles below it can. The _lowest_ role is `user`, the highest role is `root`.
+The table below includes all roles, from lowest to highest:
+
+| Role | Description | Audience |
+| ---- | ----------- | ---- |
+| `user` | Minimal role needed to be able to sign in to Morio | All users in your organisation |
+| `manager` | Allows the creation of local Morio user accounts | Team leaders, IT support staff |
+| `operator` | Allows changing the Morio settings | IT Operations staff |
+| `engineer` | Allows decrypting Morio data | IT Engineers, or staff doing Morio troubleshooting |
+| `root` | Allows exporting key data | Break-glass access |
+
+:::tip Use gitops rather than the operator role
+
+We recommend using _gitops_ to manage your Morio deployments.
+This not only negates the need to have a bunch of people who have the ability
+to update the Morio settings, it also creates an audit trail and keeps your
+settings under version control.
+
+Refer to [the gitops guide](/docs/guides/gitops/) for more details.
+:::
+
+##### Assigning roles to identities
+
+Now that we know which roles are available, there's still the matter of how to
+assign a given role to a specific user.
+
+The exact process differs based on the identity provider in use:
+
+- `mrt`: You cannot assign any roles with this provider. There is only one user
+  (`root`) and its role is always `root`.
+- `local`: When you create a new account, you decide on its (maximum) role. You
+  can never create an account with a role higher than your own.
+- `local`: When you create a new API key, you decide on its (maximum) role. You
+  can never create an API key with a role higher than your own.
+- `ldap`: The `ldap` identity provider allows configuring the assignment of
+  Morio roles based on any field of the LDAP user object. Refer to the
+  [Identity Providers Guide](/docs/guides/settings/idps/#ldap) for details.
+- `oidc`: The `oidc` (OpenID Connect) identity provider allows configuring the
+  assignment of Morio roles based on any property provided by the OpenID
+  provider. Refer to the [Identity Providers
+  Guide](/docs/guides/settings/idps/#openid-connect) for details.
+
+
+#### ABAC
+
+Attribute-based access control governs which users can do what when it comes to
+using Morio. Or more accurately, accessing the data inside Morio.
+
+When you start putting data in a Morio system, you may want to grant some users
+access to this data, and other users access to that data.  None of these users
+should have any elevated privileges to change the Morio system, so we don't
+want to give them a role that is higher than `user`. However, we still want
+control over who can do (or rather see) what. This is where ABAC comes in.
+
+Another way to look at this is that when you start putting your data in Morio,
+the Morio developers cannot make a decision on your behalf about which user can
+see what. So **ABAC is something you have to configure yourself**.
+
+:::warning FIXME
+Complete these docs
+:::
+

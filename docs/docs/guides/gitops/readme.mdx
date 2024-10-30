@@ -1,0 +1,207 @@
+---
+title: GitOps Guide
+---
+
+We recommend using _gitops_ to manage your Morio deployments.
+By which we mean: Rather than configure your Morio instances via the UI or
+through the API, keep your settings under version control with git, and then let
+Morio load them from there.
+
+That's right, you do not even need to write a CI/CD pipeline to update the
+settings. All you need to do is let Morio know it should update its settings
+from git, and it will do so.
+
+## Repository layout
+
+### Base settings and overlays
+
+Morio expects a base settings file, and optionally one or more overlays.  Where
+you place them in your repository is your own choice. The base file is
+configured with the exact path to it, and the (optional) overlays are
+configured with a glob pattern. So you have flexibility.
+
+A common way to structure such a repository is as such:
+
+```
+- settings
+  - production
+     - base.yaml
+  - staging
+     - base.yaml
+  - testing
+     - base.yaml
+- overlays
+  - client-modules.yaml
+  - idp-sso.yaml
+  - idp-ldap.yaml
+  - ui-login-settings.yaml
+  - vault-ingration.yaml
+```
+
+The idea here is that different Morio deployments have their own base file, yet
+the overlays can be used by each of them.
+
+You know best what works for your use case, it's just an example.
+
+### Client modules
+
+The Morio client needs to be configured with modules to tell it what data to
+collect. You _can_ do that manually on each system. Or you could keep those
+files in git and then distribute them with Ansible or some other automation
+tool. But you don't have to.
+
+Morio can load client modules from git, and will bundle them with the client
+package when building client packages.  This way, when you install the client,
+it will come with all your modules, you just need to enable the ones you want.
+
+The structure here is not something you can choose freely. It needs to follow
+the structure of [the `morio-templates`
+repository](https://github.com/certeu/morio-templates).
+
+Specifically, it should look like this:
+
+```
+- modules
+  - audit
+    - module-templates.d
+      - module1.yaml
+      - module2.yaml
+    - rule-templates.d
+      - module1.rules
+      - module2.rules
+  - logs
+    - input-templates.d
+      - module1.yaml
+      - module2.yaml
+    - module-templates.d
+      - module1.yaml
+      - module2.yaml
+  - metrics
+    - module-templates.d
+      - module1.yaml
+      - module2.yaml
+```
+
+### Watchers
+
+:::warning FIXME
+Write these docs
+:::
+
+## GitOps workflow
+
+Before we dive into how this all works and how we can configure it, let's look
+at the high-level workflow of deploying and managing Morio through gitops.
+
+### Initial setup
+
+:::warning Perhaps not for your first time?
+If this is your first Morio deployment, perhaps consider configuring Morio
+manually, and then migrate your settings to a gitops workflow. Here's why:
+
+- The UI can guide you through the setup process, which is a lot easier than
+  writing a settings file from scratch.
+- When you inevitably need to add _secrets_ to your settings, you have a
+  chicken/egg situtation where you do not want to store secrets in git, but
+  until it is setup, Morio cannot encrypt them for you. Likewise when you 
+  use the Vault/OpenBao integration, you cannot configure it fully until the
+  Morio public key is known.
+
+For these reasons, we advice against cold-starting a Morio deployment via
+gitops if this is your first time setting up Morio.
+:::
+
+For the initial Morio setup, you should use [the `/preseed` endpoint of the
+API](/docs/reference/apis/api#tag/settings/operation/preseed), and not [the
+`/setup` endpoint](/docs/reference/apis/api#tag/settings/operation/setup).
+
+The reason is that `/setup` expects valid settings, whereas `/preseed` only
+expects the preseed settings and will then reach out to git to get the rest.
+
+You can refer to [the `settings.preseed` reference
+documentation](/docs/reference/settings/preseed/) for all details, but we'll
+use an example below that is probably close to what you might want to use:
+
+<Tabs>
+<TabItem value="a" label="From GitHub">
+Replace the following in the example below:
+
+- `https://github.com/certeu/repo`: The URL to your GitHub repository
+- `USERNAME`: The username that the `PERSONAL_ACCESS_TOKEN` belows to. This
+  needs to be a user that can clone the respository.
+- `PAT`: The GitHub personal access token (pat)
+- `settings/production/base.yaml`: The location of your base settings file in
+  the repository
+- `settings/overlays/*.yaml`: An optional glob pattern for any overlays you
+  want to load from your repository.
+
+```json title="Example preseed settings for GitHub"
+{
+  "git": {
+    "config": {
+      "url": "https://github.com/certeu/repo",
+      "user": "USERNAME",
+      "token": "PAT"
+    },
+    "templatehub": {
+      "url": "https://github.com/certeu/morio-templates.git"
+    }
+  },
+  "base": "git:settings/production/base.yaml@config",
+  "overlays": "git:settings/overlays/*.yaml@config"
+}
+```
+
+</TabItem>
+<TabItem value="b" label="From GitLab">
+Replace the following in the example below:
+
+- `https://gitlab.com/certeu/repo`: The URL to your GitLab repository (self-hosted is ok too)
+- `USERNAME`: The username does not matter for GitLab project tokens
+- `PAT`: The GitLab Project Access Token (PAT)
+
+```json title="Example preseed settings for GitLab"
+{
+  "git": {
+    "config": {
+      "url": "https://gitlab.com/certeu/repo",
+      "user": "USERNAME",
+      "token": "PAT"
+    },
+    "templatehub": {
+      "url": "https://github.com/certeu/morio-templates.git"
+    }
+  }
+}
+```
+</TabItem>
+</Tabs>
+
+If we assume you save these settings in a file name `preseed.json` you can now
+setup Morio with this curl command:
+
+```sh
+curl -k -H "Content-Type: application/json"  \
+ -d@preseed.json \
+ https://example.morio.it/-/api/preseed 
+```
+
+### Updating Morio settings
+
+To update Morio settings, you update the data in your git repository. Then when
+you're happy, you hit [the `/reseed` endpoint of the
+API](/docs/reference/apis/api#tag/settings/operation/reseed).
+
+:::tip
+This endpoint requires authentication, so you probably want to create an API
+key for this.
+:::
+
+In your CI/CD pipeline, running the following curl command is sufficient:
+
+```sh
+curl -k -u "API_KEY_ID:API_KEY_SECRET" https://example.morio.it/-/api/reseed
+```
+
+Where `API_KEY_ID` and `API_KEY_SECRET` should be replaced with real values.
+
