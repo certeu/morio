@@ -1,6 +1,7 @@
 ---
 title: Morio Installation Guide
 sidebar_label: Install Guide
+toc_max_heading_level: 5
 ---
 
 import ReleaseChannels from '@site/includes/release-channels.mdx'; /* skip-spellcheck */
@@ -8,18 +9,71 @@ import ReleaseChannels from '@site/includes/release-channels.mdx'; /* skip-spell
 This guide covers the various ways you can install Morio, from fully automated,
 to completely manual.
 
-When we say _install Morio_ we mean install `moriod`, the Morio distribution
-that sets up a Morio node.
+## Before you start
+
+### Morio collector vs Morio client
+
+This guide covers the installation of a Morio collector, also known as
+`moriod`.
+
+For installation of the Morio client, please refer to [the Morio client install
+guide](/docs/guides/install/client/).
+
+### Morio Release Channels
 
 <ReleaseChannels />
 
-## Fully automated
+### Filesystem Layout
 
-To install a Morio node, run this command as a user with `sudo` permissions:
+Morio utilizes one folder for configuration, one for data, and another one for
+its logs. By default, they are laid out as such:
 
+- Configuration resides in `/etc/morio/moriod`.  See [the `MORIO_CONFIG_ROOT`
+  preset](/docs/reference/presets/#morio_config_root) for details.
+- Data resides in `/var/lib/morio/moriod`.  See [the `MORIO_DATA_ROOT`
+  preset](/docs/reference/presets/#morio_data_root) for details.
+- Logs are written to `/var/log/morio/moriod`. See [the `MORIO_LOGS_ROOT`
+  preset](/docs/reference/presets/#morio_logs_root) for details.
+
+In addition, Morio needs access to the Docker socket. See [the
+`MORIO_DOCKER_SOCKET`](/docs/reference/presets/#morio_docker_socket) for
+details.
+
+## Install Morio
+
+There are 3 ways to install Morio, and a bonus fourth way allows you to run it
+without any install step:
+
+- [Install Morio via the installer script](#auto)
+- [Install Morio from packages](#pkg)
+- [Install Morio by hand](#manual)
+- [Run Morio without installing it](#ephemeral)
+
+### Install Morio via the installer script {#auto}
+
+:::tip
+This is the recommended way to install a Morio node. 
+:::
+
+To install Morio, run this command as a user with `sudo` permissions:
+
+<Tabs>
+<TabItem value="production" label="Production Channel">
 ```sh
 curl https://install.morio.it/ | bash
 ```
+</TabItem>
+<TabItem value="canary" label="Canary Channel">
+```sh
+curl https://install.morio.it/canary/ | bash
+```
+</TabItem>
+<TabItem value="testing" label="Testing Channel">
+```sh
+curl https://install.morio.it/testing/ | bash
+```
+</TabItem>
+</Tabs>
 
 This will run through the following steps:
 
@@ -31,9 +85,10 @@ This will run through the following steps:
 
 Alternatively, you can run all of these steps manually, as outlined below.
 
-## Manual using our packages
+### Install Morio from packages {#pkg}
 
-To install manually, we will go through the same steps as the install script:
+To install Morio from packages, we will go through the same steps as the
+install script, but instead run them by hand:
 
 - [Ensure `systemd` is available](#ensure-systemd-is-available)
 - [Detect the package type](#determine-the-package-type)
@@ -41,7 +96,7 @@ To install manually, we will go through the same steps as the install script:
 - [Update the list of available software](##update-the-list-of-available-sofware)
 - [Install the `moriod` package](#install-the-moriod-package)
 
-### Ensure `systemd` is available
+#### Ensure `systemd` is available
 
 To install Morio using our packages, `systemd` is a dependency.
 
@@ -60,7 +115,7 @@ install of Morio](#fully-manual).
 
 </Tip>
 
-### Determine the package type
+#### Determine the package type
 
 We provide `.deb` packages for APT-based systems, like Debian or Ubuntu, as well as `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora.
 
@@ -71,7 +126,7 @@ apt -h
 If you get a bunch of output about the `apt` packages manager, you are on an APT-based system.
 If not, you are probably on an RPM-based system.
 
-### Download and install the `moriod-repo` package
+#### Download and install the `moriod-repo` package
 
 Download the `moriod-repo` package, and then install it:
 
@@ -101,7 +156,7 @@ The first line downloads the package, from these URLS:
 
 The second line installs it.
 
-### Update the list of available software
+#### Update the list of available software
 
 The `moriod-repo` package we just install adds a new software repository.
 Before we can install software from it, we need to update the list of available packages:
@@ -124,8 +179,7 @@ sudo yum check-update
 </TabItem>
 </Tabs>
 
-
-### Install the `moriod` package
+#### Install the `moriod` package
 
 Now we can install the `moriod` package:
 
@@ -148,38 +202,251 @@ sudo yum install -y moriod
 
 This will create a new systemd service that will start Morio.
 
-## Fully manual
+### Install Morio by hand {#manual}
 
-For a fully manual install of Morio, we are going to create the Morio service
-by hand, as well as adjust some of its configuration.
+Installing Morio by hand gives you even more control, and allows installing
+Morio on systems that do not support APT or RPM packages, or do not use
+`systemd`.
 
-<Fixme>Explain this in more detail</Fixme>
+Let's see how we can accmplish that.
 
-You can use the example below as-is, or update it according to your needs:
+#### Create folder structure
 
-```sh
-docker run --rm \
-  --name=core \
+You'll need to create Morio's [Filesystem Layout](#filesystem-layout).
+To do so, you can run these commands:
+
+```
+sudo mkdir -p /etc/morio/moriod
+sudo mkdir -p /var/lib/morio/moriod
+sudo mkdir -p /var/log/morio/moriod
+```
+
+For each of these folders, holding configuration, data, and logs respectively,
+you can change their location.  However, if you do so, you should also update
+them in the commands below.
+
+#### Create the moriod service
+
+We'll need some way to start our moriod service. Below are options for both
+systemd and a traditional init script.
+
+<Tabs>
+<TabItem value="systemd" label="systemd unit">
+
+```
+# /etc/systemd/system/moriod.service
+[Unit]
+Description=Morio distribution core service
+Documentation=https://github.com/certeu/morio
+# Make sure the Docker service is available
+After=docker.service
+Requires=docker.service
+
+[Service]
+# Make sure to stop & remove the core container if it's running
+ExecStartPre=/usr/bin/docker rm -f morio-core
+
+# Start the morio-core container
+ExecStart=/usr/bin/docker run --rm \
+  --name=morio-core \
   --hostname=core \
-  --network=morionet \
+  --label morio.service=core \
+  --log-driver=journald \
+  --log-opt labels=morio.service \
   --network-alias=core \
   --init \
   -v "/var/run/docker.sock:/var/run/docker.sock" \
-  -v "/etc/morio:/etc/morio" \
-  -v "/usr/share/morio:/morio/data" \
-  -v "/var/log/morio:/var/log/morio" \
-  -e "MORIO_CORE_LOG_LEVEL=warn \
+  -v "/etc/morio/moriod:/etc/morio" \
+  -v "/var/lib/morio/moriod:/morio/data" \
+  -v "/var/log/morio/moriod:/var/log/morio" \
+  -e "MORIO_CORE_LOG_LEVEL=info" \
   -e "NODE_ENV=production" \
   itsmorio/core:latest
+
+# When stopping, we stop & remove all containers as they are
+# ephemeral (their data is mounted from the host disk)
+# Core will recreate them when you start the service again.
+# We are listing all possible serviices. Some may not exist w
+# so we redirect stderr to /dev/null
+ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2> /dev/null
+
+# Always restart
+Restart=always
+
+# Idenitifier for syslog
+SyslogIdentifier=moriod
+
+[Install]
+WantedBy=default.target
 ```
 
-When the service is stopped, we recommend running:
+</TabItem>
+<TabItem value="init" label="init script">
 
 ```
-docker rm -f api ui proxy
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          moriod
+# Required-Start:    docker
+# Required-Stop:     docker
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Morio distribution core service
+# Description:       Starts the Morio core service in a Docker container
+### END INIT INFO
+
+# Variables
+NAME="morio-core"
+DOCKER="/usr/bin/docker"
+CONTAINER_IMAGE="itsmorio/core:latest"
+SYSLOG_IDENTIFIER="moriod"
+
+# Mounts
+MOUNT_SOCKET="/var/run/docker.sock:/var/run/docker.sock"
+MOUNT_ETC="/etc/morio/moriod:/etc/morio"
+MOUNT_LIB="/var/lib/morio/moriod:/morio/data"
+MOUNT_LOG="/var/log/morio/moriod:/var/log/morio"
+
+# Environment variables
+ENV_VARS="-e MORIO_CORE_LOG_LEVEL=info -e NODE_ENV=production"
+
+# Functions
+start() {
+    echo "Starting $NAME container..."
+
+    # Remove the container if it exists
+    $DOCKER rm -f $NAME 2>/dev/null
+
+    # Start the container
+    $DOCKER run --rm --name=$NAME \
+      --hostname=core \
+      --label $LOG_LABEL=core \
+      --network-alias=core \
+      --init \
+      -v "$MOUNT_SOCKET" \
+      -v "$MOUNT_ETC" \
+      -v "$MOUNT_LIB" \
+      -v "$MOUNT_LOG" \
+      $ENV_VARS \
+      $CONTAINER_IMAGE &
+
+    echo "$NAME started."
+}
+
+stop() {
+    echo "Stopping $NAME and related containers..."
+
+    # Stop the core container
+    $DOCKER rm -f $NAME 2>/dev/null
+
+    # Stop all associated containers
+    for service in morio-api morio-ca morio-broker morio-db morio-console morio-ui \
+                   morio-proxy morio-connector morio-dbuilder morio-watcher morio-web
+    do
+        $DOCKER rm -f $service 2>/dev/null
+    done
+
+    echo "$NAME stopped."
+}
+
+restart() {
+    stop
+    start
+}
+
+# Check the command-line arguments
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0
 ```
 
-If not, the Morio UI and API will remain up, but won't function properly.
+</TabItem>
+</Tabs>
 
+Morio is now installed, you can start the moriod service.
+
+As a bonus, if you are running systemd, you can place [this `moriod`
+script](https://github.com/certeu/morio/blob/develop/moriod/usr/sbin/moriod)
+somewhere in your PATH.
+
+### Run Morio without installing it {#ephemeral}
+
+Last but not least, you can run Morio without installing anything.
+
+<Tabs>
+<TabItem value="eph" label="Without data persistence">
+
+To kick the tires, all you need to start Morio is this command:
+```
+docker run --rm --init \
+  --name=morio-core \
+  --hostname=core \
+  --network-alias=core \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  itsmorio/core:latest
+```
+</TabItem>
+<TabItem value="map" label="With data persistence">
+Map in folders for config and data to persist your data after the container exists:
+```
+docker run --rm --init \
+  --name=morio-core \
+  --hostname=core \
+  --network-alias=core \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  -v "/etc/morio/moriod:/etc/morio" \
+  -v "/var/lib/morio/moriod:/morio/data" \
+  itsmorio/core:latest
+```
+</TabItem>
+</Tabs>
+
+If you want to clean up after stopping Morio, make sure to remove all its contaiers:
+
+```
+docker rm -f morio-core morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2>/dev/null
+```
+
+## Uninstall Morio
+
+To uninstall morio and remove from your system, follow these steps:
+
+- Stop moriod: 
+```
+sudo moriod stop
+````
+- Remove all containers with a `morio-` prefix:
+```
+docker rm -f morio-core morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2>/dev/null
+```
+
+- Remove the `moriod-repo` and `moriod` packages (if you installed using our packages):
+```
+sudo apt purge -y moriod-repo moriod
+```
+- Remove the 3 folders holding configuration, data, and logs. If you do not
+  have the Morio client installed, you can remove everything under `morio`: 
+```
+sudo rm -rf /etc/morio /var/log/morio /var/lib/morio
+```
+- If you do have the Morio client installed (and want to keep it), remove
+  everything under `morio/moriod`:
+```
+sudo rm -rf /etc/morio/moriod /var/log/morio/moriod /var/lib/morio/moriod
+```
 
 
