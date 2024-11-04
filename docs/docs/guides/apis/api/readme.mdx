@@ -5,12 +5,11 @@ title: Management API Guide
 The Morio Management API is a [OpenAPI v3.1](https://swagger.io/specification/)
 compliant API, and the main user-facing API in Morio.
 
-<Tip>
-### Management API reference documentation
+:::tip Management API reference documentation
 If you're already familiar with the API, and are merely looking
 for answers on which endpoint to use or what data to expect, refer to
 [/docs/reference/apis/api](/docs/reference/apis/api).
-</Tip>
+:::
 
 ## Purpose of Morio's Management API
 
@@ -53,14 +52,13 @@ curl --insecure https://example.morio.it/-/api/status
 
 ## Authentication
 
-<Tip>
-### JWT FTW
+:::tip JWT FTW
 Grab a JSON Web Token from [the `/login`
 endpoint](/docs/reference/apis/api#tag/authentication/paths/~1login/post) and
 use it in subsequent API calls as your Bearer token.  Pre-expiry, tokens can be
 renewed at [the `/token`
 endpoint](/docs/reference/apis/api#tag/authentication/paths/~1token/get).
-</Tip>
+:::
 
 ### Identity Providers
 

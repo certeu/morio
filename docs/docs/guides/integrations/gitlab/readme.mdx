@@ -22,12 +22,10 @@ We recommend the _cloning a GitLab repository_ approach for most users.
 
 ### Preseed Morio by cloning a GitLab repository
 
-<Tip>
-
+:::tip
 This  way of preseeding is not specific to GitLab but works for any git hosting
 provider that supports cloning over HTTPS.
-
-</Tip>
+:::
 
 If your repository is accessible without authentication, all you need is the HTTPS clone URL.
 If not you also need to configure an access token so Morio can authenticate to be able to clone the repository.
@@ -61,11 +59,11 @@ secrets:
 </TabItem>
 </Tabs>
 
-<Tip>
+:::tip
 Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
 reference documentation on the `preseed`
 settings](/docs/reference/settings/preseed/) for more details.
-</Tip>
+:::
 
 ### Preseed Morio from the GitLab API
 
@@ -86,13 +84,11 @@ secrets:
   GITLAB_TOKEN: "Your token here"
 ```
 
-<Tip>
-
+:::tip
 Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
 reference documentation on the `preseed`
 settings](/docs/reference/settings/preseed/) for more details.
-
-</Tip>
+:::
 
 ## GitLab as identity provider with OpenID Connect
 
@@ -171,11 +167,9 @@ secrets:
   GITLAB_OIDC_SECRET: "Your GitLab secret here"
 ```
 
-<Tip>
-
+:::tip
 Refer to [the Identity Providers Guide](/docs/guides/settings/idps/#openid-connect) and [the
 reference documentation on the `iam`
 settings](/docs/reference/settings/iam/#iamprovidersoidc-id) for more details.
-
-</Tip>
+:::
 

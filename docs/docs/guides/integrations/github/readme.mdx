@@ -6,13 +6,11 @@ sidebar_position: 2000
 
 GitHub can be used for _preseeding_ the Morio configuration. 
 
-<Note>
-
+:::warning
 Unlike
 [GitLab](/docs/guides/integrations/gitlab/), GitHub cannot be
 used for authentication as GitHub does not support OpenID Connect.
-
-</Note>
+::: 
 
 ## Preseeding Morio from GitHub
 
@@ -26,10 +24,10 @@ We recommend the _cloning a GitHub repository_ approach for most users.
 
 ### Preseed Morio by cloning a GitHub repository
 
-<Tip>
+:::tip
 This  way of preseeding is not specific to GitHub but works for any git hosting
 provider that supports cloning over HTTPS.
-</Tip>
+:::
 
 If your repository is accessible without authentication, all you need is the
 HTTPS clone URL.  If not you also need to configure an access token so Morio
@@ -64,11 +62,11 @@ secrets:
 </TabItem>
 </Tabs>
 
-<Tip>
+:::tip
 Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
 reference documentation on the `preseed`
 settings](/docs/reference/settings/preseed/) for more details.
-</Tip>
+:::
 
 ### Preseed Morio from the GitHub API
 
@@ -90,9 +88,10 @@ secrets:
   GITHUB_TOKEN: "Your token here"
 ```
 
-<Tip>
+:::tip
 Refer to [the Preseeding Guide](/docs/guides/settings/preseed/) and [the
 reference documentation on the `preseed`
 settings](/docs/reference/settings/preseed/) for more details.
-</Tip>
+:::
+
 

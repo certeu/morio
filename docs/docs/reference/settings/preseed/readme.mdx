@@ -41,7 +41,9 @@ preseed:
       url: 'https://github.com/certeu/morio-settings.git'
 ```
 
-<Note compact>Morio does not support cloning over SSH</Note>
+:::info
+Morio does not support cloning over SSH.
+:::
 
 #### `preseed.git.[repo-id].ref`
 
@@ -68,7 +70,9 @@ preseed:
       user: bot
 ```
 
-<Note compact>This will only take effect when `token` is also set</Note>
+:::info
+This will only take effect when `token` is also set.
+:::
 
 #### `preseed.git.[repo-id].token`
 
@@ -109,7 +113,9 @@ preseed:
 </TabItem>
 </Tabs>
 
-<Note compact>This will only take effect when `user` is also set</Note>
+:::info
+This will only take effect when `user` is also set.
+:::
 
 ```yaml
 preseed:
@@ -303,9 +309,10 @@ preseed:
       project_id: 61397500
 ```
 
-<Tip compact>
-You can find this under **Settings** → **General** on your repository page in the GitLab UI.
-</Tip>
+:::tip
+You can find this under **Settings** → **General** on your repository page in
+the GitLab UI.
+:::
 
 #### `preseed.base.gitlab.file_path`
 
@@ -378,14 +385,10 @@ In addition to preseeding a base settings file (via the `preseed.base` setting)
 you can apply one or more _overlays_ to these base settings.
 This allows you to store your settings in a modular way.
 
-<Tip>
-
-<!-- Using HTML keeps the title out of the TOC -->
-<h3 id="preseed-guide">Learn more about preseeding and overlays</h3>
-
-For all details about preseeding, refer to the [Preseeding Guide](/docs/guides/settings/preseed).
-
-</Tip>
+:::tip Learn more about preseeding and overlays
+For all details about preseeding, refer to the [Preseeding
+Guide](/docs/guides/settings/preseed).
+:::
 
 ### When `preseed.overlays` is a string
 

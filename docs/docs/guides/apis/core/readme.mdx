@@ -6,25 +6,20 @@ The Morio Core API is an [OpenAPI v3.1](https://swagger.io/specification/)
 compliant API internal to Morio and -- with the exception of a few endpoints --
 is not accessible to users.
 
-<Note>
-#### This API is safe to ignore
+:::tip Core API Reference Documentation
+If you're already familiar with the API, and are merely looking
+for for answers on which endpoint to use or what data to expect, refer to
+[/docs/reference/apis/core](/docs/reference/apis/core).
+:::
+
+:::info This API is safe to ignore
 The most important thing to know about the Core API is that
 you can safely ignore it. It is internal to Morio, and users or even
 administrators of Morio should never have to use it.
 
-</Note>
-
 This guide is intended for (aspiring) contributors, or anyone who would like to
 gain a deeper understanding of how Morio works under the hood.
-
-<Tip>
-#### Core API Reference Documentation
-
-If you're already familiar with the API, and are merely looking
-for for answers on which endpoint to use or what data to expect, refer to
-[/docs/reference/apis/core](/docs/reference/apis/core).
-</Tip>
-
+:::
 
 ## Purpose of Morio's Core API
 
@@ -39,11 +34,10 @@ Morio's Core API (the API) provides functionality that spans various domains:
 
 ## Accessing the API
 
-<Note>
-### Most Core API endpoints are not exposed
+:::info Most Core API endpoints are not exposed
 As this is an internal API, the only endpoints that are available from the network are
 the `/status` endpoint and the `/cluster/join` and `/cluster/heartbeat` endpoints.
-</Note>
+:::
 
 The API itself is available on all Morio nodes, and can be accessed under the
 prefix `/-/core/`.
@@ -82,14 +76,12 @@ used:
 Just as in [the Management API](/docs/guides/apis/api), this is a public or
 anonymous route. So no authentication is required.
 
-<Note>
-#### Included in the `/status` endpoint of the Management API
+:::info Included in the `/status` endpoint of the Management API
 
 The [Management API](/docs/guides/apis/api) includes the core status in its own
 `/status` endpoint. So you do not need to hit this endpoint, you can use the
 regular API and check the `core` key for the core-specific status.
-
-</Note>
+:::
 
 ### The `/cluster/join` endpoint
 
@@ -115,3 +107,4 @@ internal secret key.
 
 The checksum will be verified on both ends, thus guarding this endpoint against
 abuse.
+

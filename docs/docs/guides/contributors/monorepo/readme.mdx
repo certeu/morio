@@ -25,9 +25,7 @@ If not, read on.
 software development. It is what we use to keep the Morio source code under
 version control.
 
-<Tip>
-#### How to git good
-
+:::tip How to git good
 If you are new to git, or feel uncomfortable about using it, there is no need
 to worry, we've all been there.
 
@@ -36,7 +34,7 @@ that explains how it works, and helps you getting things done.
 **Chapter 7** deals specifically with **Installing git**.
 
 It comes highly recommended: [Git Training](/docs/training/git).
-</Tip>
+:::
 
 - If you are on **linux**, git is probably already installed, and if not you should
   be able to install it from your distribution's package manager. One of
@@ -49,14 +47,13 @@ It comes highly recommended: [Git Training](/docs/training/git).
 Once installed, type `git` in a terminal window.
 If you get a bunch of output, we are good to go.
 
-<Warning>
-#### Windows users beware
+:::warning Windows users beware
 
 The instructions on this page should work for both Linux and Mac systems.  
 Windows users using the [Linux Subsystem for Windows
 (LSW)](https://learn.microsoft.com/en-us/windows/wsl/install) will _probably_
 be OK, but we do not test or support this.
-</Warning>
+:::
 
 ### Install NodeJS
 
@@ -137,10 +134,10 @@ Given that it is your own copy, you will be allowed to make changes in it.
 
 ### Clone the repository
 
-<Note>
+:::tip
 If you did fork the `certeu/morio` repository, replace `certeu/morio` by
 `username/morio`, where `username` is your GitHub username.
-</Note>
+:::
 
 Open a terminal window, and navigate to a place where you are happy to keep
 your git content.
@@ -286,14 +283,12 @@ Morio node using `192-168-1-4.nip.io` as FQDN.
 
 If you have a DNS zone you control, you can also create a record yourself.
 
-<Tip>
-#### Were you thinking of just editing `/etc/hosts`?
+:::tip Were you thinking of just editing `/etc/hosts`?
 
 You could update `/etc/host` to add the IP/FQDN mapping, but that requires some
 extra steps.  Refer to [Run Morio without network
 access](#run-morio-without-network-access) for details.
-</Tip>
-
+:::
 
 
 ### Run Morio on MacOS
@@ -490,8 +485,7 @@ To use this, run the following command in the _monorepo_ root:
 npm run logs:core
 ```
 
-<Note>
-#### Requires pino-pretty
+:::info Requires pino-pretty
 
 This requires [the pino-pretty NPM
 package](https://www.npmjs.com/package/pino-pretty) to be installed.
@@ -500,8 +494,7 @@ To install it, run:
 ```sh title="Terminal"
 npm install --global pino-pretty
 ```
-
-</Note>
+:::
 
 ### npm run logs\:api
 
@@ -515,8 +508,7 @@ To use this, run the following command in the _monorepo_ root:
 npm run logs:api
 ```
 
-<Note>
-#### Requires pino-pretty
+:::info Requires pino-pretty
 
 This requires [the pino-pretty NPM
 package](https://www.npmjs.com/package/pino-pretty) to be installed.
@@ -525,8 +517,7 @@ To install it, run:
 ```sh title="Terminal"
 npm install --global pino-pretty
 ```
-
-</Note>
+:::
 
 ### npm run destroy
 
@@ -539,9 +530,9 @@ To use this, run the following command in the _monorepo_ root:
 npm run destroy
 ```
 
-<Note>
+:::info
 You will not lose any code changes you made.
-</Note>
+:::
 
 ### npm run redev
 
@@ -552,9 +543,9 @@ It combines `npm run destroy` with `npm run dev`.
 npm run redev
 ```
 
-<Note>
+:::info
 You will not lose any code changes you made.
-</Note>
+:::
 
 ### npm run test\:api
 
@@ -566,12 +557,12 @@ To use this, run the following command in the _monorepo_ root:
 npm run test:api
 ```
 
-<Note>
+:::danger
 This will __destroy__ your local development environment,
 although it will set it up again after the tests have completed.
 
 You will not lose any code changes you made.
-</Note>
+:::
 
 ### npm run test\:core
 
@@ -583,12 +574,12 @@ To use this, run the following command in the _monorepo_ root:
 npm run test:core
 ```
 
-<Note>
+:::danger
 This will __destroy__ your local development environment,
 although it will set it up again after the tests have completed.
 
 You will not lose any code changes you made.
-</Note>
+:::
 
 ### npm run pull-oci <!-- skip-spellcheck -->
 

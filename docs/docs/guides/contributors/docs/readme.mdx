@@ -16,8 +16,7 @@ do not hesitate to do so.
 
 This guide will show you how you can do that.
 
-<Tip>
-### Making quick edits
+:::tip Making quick edits
 
 The easiest way to make changes to the documentation is via the **Edit this
 page** link that you can find at the bottom of every documentation page.
@@ -25,7 +24,7 @@ page** link that you can find at the bottom of every documentation page.
 This will take you to the GitHub online editor where you can propose changes
 directly.  
 <small><b>Note:</b> You need a GitHub account to do this, but they are free.</small>
-</Tip>
+:::
 
 ## Where to find our documentation
 
@@ -82,11 +81,11 @@ As in YAML, you do not have to wrap your title in quotes, unless when it holds
 characters that would trip up the YAML parser (like when your title itself
 includes quotations marks).
 
-<Note title="Supported front matter"> 
+:::info Supported front matter
 For an overview of all supported front matter, see [the Docusaurus documentation
 on front matter in
 docs](https://docusaurus.io/docs/api/plugins/@docusaurus/plugin-content-docs#markdown-front-matter)
-</Note>
+:::
 
 ### Tags
 
@@ -120,9 +119,9 @@ pages.
 Tags are most useful as a carefully curated collection of pointers.
 To ensure that, all tags must be defined in the `docs/docs/tags.yml` file.
 
-<Scode>
+:::tip Source Code
 [github.com/certeu/morio/blob/develop/docs/docs/tags.yml](https://github.com/certeu/morio/blob/develop/docs/docs/tags.yml)
-</Scode>
+:::
 
 The file holds tags that can be defined as such (using our `contributors` tag as
 an example):
@@ -144,9 +143,9 @@ contributors:
 
 To add a tag, place it on a new line followed by `:`.
 
-<Tip>
+:::tip
 An overview of all tags is available at [/docs/tags](/docs/tags).
-</Tip>
+:::
 
 ### Keywords
 
@@ -173,143 +172,8 @@ Docusaurus supports _MDX_ which is markdown with support for custom components.
 A number of MDX components are supported out of the box, like [the tabs used on
 this page](https://docusaurus.io/docs/markdown-features/tabs).
 
-In addition, we provide some MDX components that you can use in documentation pages. They provide various ways to engage the reader with the material.
-
-### Comment
-
-The `Comment` custom component allows you to insert a comment.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Comment by='joost'>
-  Comments are most useful when something is opinion, rather than fact.
-</Comment>
-
-<Comment by='Joost' title="My title" compact>
-  Compact view with custom title
-</Comment>
-
-<Comment>The `by` prop is mandatory</Comment>
-
-````
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Comment by='joost'>
-  Comments are most useful when something is opinion, rather than fact.
-</Comment>
-
-<Comment by='joost' title="My title" compact>
-  Compact view with custom title
-</Comment>
-
-<Comment>The `by` prop is mandatory</Comment>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default   |
-| ------------ | --------------------------- | --------- |
-| `by`         | The comment author          | `false`   |
-| `compact`    | Renders a compact view      | `false`   |
-| `title`      | Overrides the default title | `COMMENT` |
-  </TabItem>
-</Tabs>
-
-### Fixme
-
-The `Fixme` custom component allows you to insert a message indicating something needs work.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Fixme>
-Use this to indicate something needs work or is incomplete.
-</Fixme>
-
-<Fixme by='joost' title="My title" compact>
-  Compact view with custom title
-</Fixme>
-````
-
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Fixme>
-Use this to indicate something needs work or is incomplete.
-</Fixme>
-
-<Fixme by='Joost' title="My title" compact>
-  Compact view with custom title
-</Fixme>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default |
-| ------------ | --------------------------- | ------- |
-| `by`         | The `Fixme` author          | `false` |
-| `compact`    | Renders a compact view      | `false` |
-| `title`      | Overrides the default title | `FIXME` |
-  </TabItem>
-</Tabs>
-
-### Important
-
-The `Important` custom component allows you to insert a message indicating something is important.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Important>Drink plenty of fluids</Important>
-
-<Important by='Joost' title="My title" compact>
-  Compact view with custom title
-</Important>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Important>Drink plenty of fluids</Important>
-
-<Important by='Joost' title="My title" compact>
-  Compact view with custom title
-</Important>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default |
-| ------------ | --------------------------- | ------- |
-| `compact`    | Renders a compact view      | `false` |
-| `title`      | Overrides the default title | `FIXME` |
-  </TabItem>
-</Tabs>
-
-### Note
-
-The `Note` custom component allows you to insert something you want to draw the reader's attention to.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Note>
-This is a good way to draw the reader's attention to additional information.
-</Note>
-
-<Note by='Joost' title="My title" compact>
-  Compact view with custom title
-</Note>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Note>
-This is a good way to draw the reader's attention to additional information.
-</Note>
-
-<Note by='Joost' title="My title" compact>
-  Compact view with custom title
-</Note>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default |
-| ------------ | --------------------------- | ------- |
-| `compact`    | Renders a compact view      | `false` |
-| `title`      | Overrides the default title | `NOTE`  |
-  </TabItem>
-</Tabs>
+In addition, we provide some MDX components that you can use in documentation
+pages. They are listed below.
 
 ### RepoFile
 
@@ -325,100 +189,6 @@ To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.m
   </TabItem>
   <TabItem value="html" label="HTML">
 To see this example, check out <RepoFile>/docs/guides/contributors/docs/readme.mdx</RepoFile>.
-  </TabItem>
-</Tabs>
-
-### Scode
-
-The `Scode` custom component allows you to insert a message with links to the relevant source code.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Scode>
-The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
-</Scode>
-
-<Scode by='Joost' title="My title" compact>
-  Compact view with custom title
-</Scode>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Scode>
-The Morio source code is available at [github.com/certeu/morio](https://github.com/certeu/morio).
-</Scode>
-<Scode by='joost' title="My title" compact>
-  Compact view with custom title
-</Scode>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default        |
-| ------------ | --------------------------- | -------------- |
-| `compact`    | Renders a compact view      | `false`        |
-| `title`      | Overrides the default title | `Source Code`  |
-  </TabItem>
-</Tabs>
-
-### Tip
-
-The `Tip` custom component allows you to insert a message with one or more tips for the reader.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Tip>Good advice goes here</Tip>
-
-<Tip by='Joost' title="My title" compact>
-  Compact view with custom title
-</Tip>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Tip>Good advice goes here</Tip>
-
-<Tip by='Joost' title="My title" compact>
-  Compact view with custom title
-</Tip>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default |
-| ------------ | --------------------------- | ------- |
-| `compact`    | Renders a compact view      | `false` |
-| `title`      | Overrides the default title | `TIP`   |
-  </TabItem>
-</Tabs>
-
-### Warning
-
-The `Warning` custom component allows you to insert a message that warns the reader about potential consequences.
-
-<Tabs>
-  <TabItem value="mdx" label="MDX" default>
-```markup
-<Warning>
-Use this when a certain action is potentially destructive or problems are likely to occur.
-</Warning>
-
-<Warning by='Joost' title="My title" compact>
-  Compact view with custom title
-</Warning>
-```
-  </TabItem>
-  <TabItem value="html" label="HTML">
-<Warning>
-Use this when a certain action is potentially destructive or problems are likely to occur.
-</Warning>
-
-<Warning by='Joost' title="My title" compact>
-  Compact view with custom title
-</Warning>
-  </TabItem>
-  <TabItem value="props" label="Props" default>
-| Name         | Description                 | Default     |
-| ------------ | --------------------------- | ----------- |
-| `compact`    | Renders a compact view      | `false`     |
-| `title`      | Overrides the default title | `WARNING`   |
   </TabItem>
 </Tabs>
 
@@ -449,12 +219,11 @@ especially when those terms are specific to Morio.
 
 To address this, we have extended Docusaurus with two custom features that help you demystify this type of content: **jargon** and **terminology**.
 
-<Note>
-#### Jargon vs Terminology
+:::info Jargon vs Terminology
 
 Both jargon and terminology can be anything that needs explaining.
 The difference is that jargon does not warrant or require its own dedicated documentation page.
-</Note>
+:::
 
 ### Jargon
 
@@ -563,13 +332,10 @@ I have no idea what _mdx_ is.
 The jargon term will be turned into a button that you can click to reveal the
 meaning of the term.
 
-<Tip>
-
-#### Jargon terms are case-insensitive
+:::tip Jargon terms are case-insensitive
 You can write _mdx_, _MDX_, or even _mDx_, they will all trigger rendering the
 `mdx` jargon term.
-
-</Tip>
+:::
 
 #### List of jargon terms
 
@@ -636,10 +402,10 @@ Will render as:
 
 I want to learn more about _core_. Is it the same as the _core service_?
 
-<Tip>
-#### Terminology terms are case-insensitive
-You can write _core_, _CORE_, or even _cORe_, they will all trigger rendering the `core` terminology link.
-</Tip>
+:::tip Terminology terms are case-insensitive
+You can write _core_, _CORE_, or even _cORe_, they will all trigger rendering
+the `core` terminology link.
+:::
 
 #### List of terminology pages
 
@@ -704,10 +470,10 @@ Here is some friendly advice to help you write great documentation:
 
 Writing yourself will make you a better writer.
 
-<Note>
+:::info No Gen-AI please
 We take pride in the fact that all of Morio's documentation is written by actual human beings.  
 Please respect that and don't reach for ChatGPT or whatever the generative AI flavour of the day is.
-</Note>
+:::
 
 #### Write now, edit later
 
@@ -758,9 +524,9 @@ Remember that the worst possible documentation is the documentation that is neve
 
 ## Running the documentation site locally
 
-<Note>
+:::note
 We assume you have git and NodeJS installed.
-</Note>
+:::
 
 To run a local instance of the documentation site -- highly recommended if
 you're looking to make non-trivial changes to the documentation -- you can
@@ -783,12 +549,11 @@ In other words:
 The docs site will now be running on http://localhost:3000 and any changes you
 make will be hot-reloaded.
 
-<Warning>
-#### Untested on Windows
-
-While we support Microsoft Windows as a platform for the Morio client, no Microsoft Windows is used in the development of Morio.
-If you are on Windows, your mileage may vary.
-</Warning>
+:::warning Untested on Windows
+While we support Microsoft Windows as a platform for the Morio client, no
+Microsoft Windows is used in the development of Morio.  If you are on Windows,
+your mileage may vary.
+:::
 
 ## Redoc Integration
 

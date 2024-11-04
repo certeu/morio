@@ -9,12 +9,10 @@ Specifically, they allow you to [configure
 _identity providers_](#iamproviders) and control [how they are
 displayed in the UI](#iamui).
 
-<Note>
-
+:::info
 The `iam` settings only apply to **HTTP-based access to Morio**.
 Access to Morio's Kafka API is always authenticated by _mTLS_.
-
-</Note>
+:::
 
 ## `iam.providers`
 
@@ -32,9 +30,7 @@ There are two two types:
   that can be freely chosen and will serve as the IDP's `id`. The `ldap` IDP
   falls into this category.
 
-<Warning>
-
-<h3>The Morio root token _just works_</h3>
+:::warning The Morio root token _just works_
 
 The [Morio root token provider (mrt)](/docs/guides/settings/idps/#morio-root-token) is enabled by
 default and does not require configuration. In other words, authenticating
@@ -44,10 +40,8 @@ You can configure the inclusion or appearance of the `mrt` provider on the UI’
 login page through [the `iam.ui` settings](#fixme), or disable it altogether
 with [the `DISABLE_IDP_MRT` feature
 flag](/docs/reference/flags/disable_idp_mrt/).
+:::
 
-</Warning>
-
-### `iam.providers.apikey`
 
 <Label>Optional</Label> This configures [the `apikey` identity provider](/docs/guides/settings/idps/#morio-api-keys).
 
@@ -132,13 +126,11 @@ This allows you to set up multiple identity providers of this type.
 
 <Label>Optional</Label> This configures [an `ldap` identity provider](/docs/guides/settings/idps/#ldap).
 
-<Note>
-
+:::info
 We use `[ldap-id]` as a placeholder here. This is a freely chosen `id`, and we
 will use `ad` in our examples because using this to authenticate against Active
 Directory is a common use-case.
-
-</Note>
+:::
 
 #### `iam.providers.[ldap-id].provider`
 
@@ -225,12 +217,10 @@ iam:
 <Label>Optional</Label>
 Set this to `false` to skip verification of the LDAP server's TLS certificate.
 
-<Tip compact>
-
+:::tip
 Rather than disable verification, set [the `trust_certificate`
 setting](#iamprovidersldap-idtrust_certificate) instead.
-
-</Tip>
+:::
 
 <Tabs>
   <TabItem value="a" label="Default" default>
@@ -279,9 +269,10 @@ iam:
         url: "ldaps://dc1.tokyo.morio.it
 ```
 
-<Tip>
-While both `ldap://` and `ldaps://` are supported, you should really only use `ldaps://` for in production.
-</Tip>
+:::tip
+While both `ldap://` and `ldaps://` are supported, you should really only use
+`ldaps://` for in production.
+:::
 
 ##### `iam.providers.[ldap-id].server.bindDN`
 
@@ -296,15 +287,13 @@ iam:
         bindDN: "CN=morio-ldap,OU=Users,DC=tokyo,DC=morio,DC=it",
 ```
 
-<Note>
-
+:::info
 LDAP servers typically do not allow an anonymous search.
 So we need to bind to the LDAP server to be able to find the user.
 This `bindDN` is the LDAP-equivalent of the username used for that initial bind.
 You should probably create a dedicated service account for this that does not
 have any privileges apart from looking up information.
-
-</Note>
+:::
 
 ##### `iam.providers.[ldap-id].server.bindCredentials`
 
@@ -392,7 +381,9 @@ regular expression with the `regex` key, or an explicit list with the `list` key
 When the expression matches the attribute value, **or** it is included in the list,
 that role will be assigned to the user.
 
-<Note compact>We will use the `user` role in our examples below</Note>
+:::info
+We will use the `user` role in our examples below.
+:::
 
 ###### `iam.providers.[ldap-id].rbac.[role].attribute`
 
@@ -424,14 +415,12 @@ iam:
             - luigi
 ```
 
-<Tip>
-
+:::tip
 For higher-order roles, like `operator` or `engineer`, **we recommend defining
 an explicit list**, rather than using a regular expression. This makes it
 easier to see who has elevated access, as well as avoid issues with regular
 expressions matching broader than intended.
-
-</Tip>
+:::
 
 ###### `iam.providers.[ldap-id].rbac.[role].regex`
 
@@ -447,24 +436,20 @@ iam:
           regex: .
 ```
 
-<Note>
-
+:::info
 In the example above, the regex `.` matches anything. So every user who can
 successfully authenticate to LDAP will get the `user` role.
-
-</Note>
+:::
 
 ### `iam.providers.[oidc-id]`
 
 <Label>Optional</Label> This configures [an `oidc` identity provider](/docs/guides/settings/idps/#openid-connect).
 
-<Note>
-
+:::info
 We use `[oidc-id]` as a placeholder here. This is a freely chosen `id`, and we
 will use `gitlab` in our examples showing how to use GitLab as an OpenID
 Connect provider.
-
-</Note>
+:::
 
 #### `iam.providers.[oidc-id].provider`
 
@@ -582,7 +567,9 @@ regular expression with the `regex` key, or an explicit list with the `list` key
 When the expression matches the attribute value, **or** it is included in the list,
 that role will be assigned to the user.
 
-<Note compact>We will use the `user` role in our examples below</Note>
+:::info
+We will use the `user` role in our examples below.
+:::
 
 ###### `iam.providers.[oidc-id].rbac.[role].attribute`
 
@@ -614,14 +601,12 @@ iam:
             - luigi
 ```
 
-<Tip>
-
+:::tip
 For higher-order roles, like `operator` or `engineer`, **we recommend defining
 an explicit list**, rather than using a regular expression. This makes it
 easier to see who has elevated access, as well as avoid issues with regular
 expressions matching broader than intended.
-
-</Tip>
+:::
 
 ###### `iam.providers.[oidc-id].rbac.[role].regex`
 
@@ -637,12 +622,10 @@ iam:
           regex: .
 ```
 
-<Note>
-
+:::info
 In the example above, the regex `.` matches anything. So every user who can
 successfully authenticate to the OpenID provider will get the `user` role.
-
-</Note>
+:::
 
 
 ## `iam.ui`
