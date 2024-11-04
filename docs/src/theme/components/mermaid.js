@@ -1,6 +1,5 @@
 import BaseMermaid from '@theme/Mermaid'
 import { useState } from 'react'
-import { Popout } from './popout.js'
 import Link from '@docusaurus/Link'
 
 /*
@@ -63,7 +62,7 @@ const Eph = () => <Link href="/docs/reference/terminology/ephemeral-state/">ephe
  * The legend for the node styles
  */
 const Legend = () => (
-  <Popout type="note">
+  <>
     <p style={{ marginBottom: '1rem' }}>This diagram uses the following conventions:</p>
     <ul>
       <li>
@@ -79,7 +78,7 @@ const Legend = () => (
         <b>started on-demand</b>.
       </li>
     </ul>
-  </Popout>
+  </>
 )
 
 /*
