@@ -88,6 +88,10 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [
+        { name: 'title', content: 'Morio: Observability Plumbing' },
+        { name: 'keywords', content: 'observability, cybersecurity, streaming data, stream processing' },
+      ],
       image: 'img/morio-social-card.png',
       announcementBar: {
         content:
