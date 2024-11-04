@@ -133,7 +133,7 @@ presets.MORIO_DOCKER_LOG_DRIVER = 'journald'
 predocs.MORIO_DOCKER_ADD_HOST = `Optional \`host:ip\` resolution to add to the
 containers configuration.
 
-This is typically used in faciliate development or testing of Morio.
+This is typically used in facilitate development or testing of Morio.
 It is not the kind of thing you want to run use production, use DNS instead.
 
 To update this, set the \`MORIO_DOCKER_ADD_HOST\` environment variable when

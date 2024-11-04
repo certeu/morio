@@ -54,6 +54,7 @@ This may very well already be active, but just in case: the first thing to do is
 
 <Tabs>
 <TabItem value="a" label="Command">
+
 ```sh title="Enable the KV secrets engine under /secret"
 curl \
   --header "X-Vault-Token: VAULT_TOKEN" \
@@ -63,6 +64,7 @@ curl \
   }' \
   https://vault.morio.it/v1/sys/mounts/secret
 ```
+
 </TabItem>
 <TabItem value="b" label="Mandatory Replacements">
 
@@ -89,12 +91,14 @@ Morio only supports version 2 of the `kv` secrets engine.
 
 <Tabs>
 <TabItem value="a" label="Command">
+
 ```sh title="Create a JWT authentication method under /secret"
 curl \
   --header "X-Vault-Token: VAULT_TOKEN" \
   --data '{"type": "jwt"}' \
   https://vault.morio.it/v1/sys/auth/morio
 ```
+
 </TabItem>
 <TabItem value="b" label="Mandatory Replacements">
 
@@ -139,6 +143,7 @@ We will configure the Vault authentication method to trust JSON Web Tokens
 
 <Tabs>
 <TabItem value="a" label="Command">
+
 ```sh title="Configure the Morio JWT authentication method in Vault"
 curl \
   --header "X-Vault-Token: VAULT_TOKEN" \
@@ -149,6 +154,7 @@ curl \
   }' \
   https://vault.morio.it/v1/sys/auth/morio/config
 ```
+
 </TabItem>
 <TabItem value="b" label="Mandatory Replacements">
 
@@ -185,6 +191,7 @@ Adapt it accordingly if you deviated from the defaults.
 
 <Tabs>
 <TabItem value="a" label="Command">
+
 ```sh title="Create a role under our JWT authentication method in Vault"
 curl  \
   --header "X-Vault-Token: VAULT_TOKEN" \
@@ -228,6 +235,7 @@ Next we create a role for Morio under our new JWT authentication method and assi
 
 <Tabs>
 <TabItem value="a" label="Command">
+
 ```sh title="Create a role under our JWT authentication method in Vault"
 curl  \
   --header "X-Vault-Token: VAULT_TOKEN" \
@@ -241,6 +249,7 @@ curl  \
   }' \
   https://vault.morio.it/v1/sys/auth/morio/role/morio
 ```
+
 </TabItem>
 <TabItem value="b" label="Mandatory Replacements">
 
