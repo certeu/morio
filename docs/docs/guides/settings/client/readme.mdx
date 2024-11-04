@@ -7,8 +7,8 @@ FIXME
 
 ## About the Morio client
 
-Before we dive into configuration of the Morio client, let us take a moment to
-ensure we have a good mental modal if what the client is and does.
+Before we dive into the configuration of the Morio client, let us take a moment to
+ensure we have a good mental model of what the client is and does.
 
 ### One client, multiple observability agents
 
@@ -33,8 +33,8 @@ flowchart TD
 
 The Morio client bundles various observability agents, based on the [Beats
 framework](https://www.elastic.co/beats) by Elastic.
-When you install the Morio client, you will have the various beats agents on
-your system, and can interact with them directly if you so wish.
+When you install the Morio client, the various Beats agents will be installed on
+your system as well, and you will be able to interact with them directly if you so wish.
 
 :::tip Already using Beats?
 If you are already using Beats on a system, you can still install the Morio
@@ -47,8 +47,8 @@ use of Beats agents.
 ### Templates and vars
 
 As Morio uses several specialised agents under the hood, we have further
-facilitated management of the client's configuration through a higher level
-configuration abstraction that leverages _templates_ and _vars_.
+facilitated the management of the client's configuration through a higher 
+configuration abstraction level that leverages _templates_ and _vars_.
 
 #### Morio client templates
 
@@ -69,8 +69,8 @@ For example, why does everyone running an NGINX web server have to come up
 with their configuration? They shouldn't, not when you can use a template
 instead, and just enable the `nginx` module (as an example).
 
-If at this point you are wondering _but you don't know where I store my NGINX
-logs_ then thank you for providing the perfect segue to our next point.
+If at this point you are thinking _But you don't know where I store my NGINX
+logs!_, then thank you for providing the perfect segue to our next point.
 
 #### Morio client vars
 
@@ -298,7 +298,7 @@ Flags:
 Use "auditbeat [command] --help" for more information about a command.
 ```
 
-You can use this every time you need low-level access one of the agents.
+You can use this every time you need low-level access to one of the agents.
 
 ## Client configuration folder
 
