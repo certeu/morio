@@ -36,7 +36,7 @@ A common way to structure such a repository is as such:
   - idp-sso.yaml
   - idp-ldap.yaml
   - ui-login-settings.yaml
-  - vault-ingration.yaml
+  - vault-integration.yaml
 ```
 
 The idea here is that different Morio deployments have their own base file, yet
@@ -128,7 +128,7 @@ use an example below that is probably close to what you might want to use:
 Replace the following in the example below:
 
 - `https://github.com/certeu/repo`: The URL to your GitHub repository
-- `USERNAME`: The username that the `PERSONAL_ACCESS_TOKEN` below to. This
+- `USERNAME`: The username that the `PERSONAL_ACCESS_TOKEN` belongs to. This
   needs to be a user that can clone the repository.
 - `PAT`: The GitHub personal access token (pat)
 - `settings/production/base.yaml`: The location of your base settings file in
@@ -157,7 +157,7 @@ Replace the following in the example below:
 <TabItem value="b" label="From GitLab">
 Replace the following in the example below:
 
-- `https://gitlab.com/certeu/repo`: The URL to your GitLab repository (self-hosted is ok too)
+- `https://gitlab.com/certeu/repo`: The URL to your GitLab repository (self-hosted is OK too)
 - `USERNAME`: The username does not matter for GitLab project tokens
 - `PAT`: The GitLab Project Access Token (PAT)
 
@@ -204,5 +204,5 @@ In your CI/CD pipeline, running the following curl command is sufficient:
 curl -k -u "API_KEY_ID:API_KEY_SECRET" https://example.morio.it/-/api/reseed
 ```
 
-Where `API_KEY_ID` and `API_KEY_SECRET` should be replaced with real values.
+where `API_KEY_ID` and `API_KEY_SECRET` should be replaced with real values.
 
