@@ -103,7 +103,7 @@ manually, and then migrate your settings to a gitops workflow. Here's why:
 - The UI can guide you through the setup process, which is a lot easier than
   writing a settings file from scratch.
 - When you inevitably need to add _secrets_ to your settings, you have a
-  chicken/egg situtation where you do not want to store secrets in git, but
+  chicken/egg situation where you do not want to store secrets in git, but
   until it is setup, Morio cannot encrypt them for you. Likewise when you 
   use the Vault/OpenBao integration, you cannot configure it fully until the
   Morio public key is known.
@@ -128,8 +128,8 @@ use an example below that is probably close to what you might want to use:
 Replace the following in the example below:
 
 - `https://github.com/certeu/repo`: The URL to your GitHub repository
-- `USERNAME`: The username that the `PERSONAL_ACCESS_TOKEN` belows to. This
-  needs to be a user that can clone the respository.
+- `USERNAME`: The username that the `PERSONAL_ACCESS_TOKEN` below to. This
+  needs to be a user that can clone the repository.
 - `PAT`: The GitHub personal access token (pat)
 - `settings/production/base.yaml`: The location of your base settings file in
   the repository

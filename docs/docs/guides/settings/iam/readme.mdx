@@ -4,13 +4,13 @@ sidebar_label: IAM Guide
 ---
 
 This _IAM_ guide for Morio provides an overview of how authentication and
-authorization is handled in Morio.   
+authorisation is handled in Morio.   
 If you are wondering _who can do what? And how is that decided?_, this guide
 should provide answers.
 
 When discussing _IAM_ in Morio, we always need to start by making it clear
 which _wire protocol_ we are talking about. You see, there are two different
-ways to comminicate with a Morio instance:
+ways to communicate with a Morio instance:
 
 - [Kafka](https://kafka.apache.org/protocol.html): This is the protocol to talk
   to a Morio broker
@@ -44,21 +44,21 @@ packages:
 1729850558315.clients.8ad0d33a-f283-4cdb-80b9-7f1f5ce622ae.morio.internal
 ```
 
-This is the user identity that is used to apply authorization.
+This is the user identity that is used to apply authorisation.
 
 :::tip Good to know
 The value of the certificate CN for the Morio client is constructed as:
 
 ```
-[timestamp].clients[cluster-uuid].morio.internal
+[timestamp].clients.[cluster-uuid].morio.internal
 ```
 
 - Including the timestamp ensures every client version has its own `CN` value.
 - Including the cluster UUID ensures that clients certificates are linked to the
-  Morio instance that generated them.
+  Morio collector that generated them.
 - Only accepting certificates from Morio's CA prevents users from generating a
   client certificate from a different CA with a `CN` value designed to bypass
-  authorization controls.
+  authorisation controls.
 :::
 
 ### HTTP Authentication
@@ -86,7 +86,7 @@ an example:
 ad.aswartz
 ```
 
-This is the user identity that is used to apply authorization.
+This is the user identity that is used to apply authorisation.
 
 
 :::tip Good to know
@@ -105,13 +105,13 @@ with ID `ad`, then a user logging in as `aswartz` would be know to morio as
 `ad.aswartz`.
 :::
 
-## Authorization
+## Authorisation
 
-Authorization is the process of establishing what a user can (or cannot) do.
+Authorisation is the process of establishing what a user can (or cannot) do.
 
-### Kafka Authorization
+### Kafka Authorisation
 
-When connecting over the Kafka protocol, authorization is governed by the
+When connecting over the Kafka protocol, authorisation is governed by the
 access control list (ACL) that is configured on the broker.
 
 [The RedPanda ACL
@@ -137,7 +137,7 @@ This is made up of `type:value` where `type` is **always** `User` so in
 practice this always is `User:id`, and it describes the user identity.
 
 :::tip
-Keep in mind that customizes the broker configuration to extract the value of
+Keep in mind that customises the broker configuration to extract the value of
 the `CN` as user identification. This is different from the examples you see in
 the RedPanda documentation where the entire certificate string is used.
 
@@ -162,10 +162,10 @@ We typically set this to `*` to not impose any restrictions.
 
 **RESOURCE-TYPE**
 
-This describes the type of resouce. It can be one of `TOPIC`, `CLUSTER`,
+This describes the type of resource. It can be one of `TOPIC`, `CLUSTER`,
 `GROUP`, or `TRANSACTIONAL_ID`. 
 
-You can almost certainly ignore all but `TOPIC` since that is the reource type
+You can almost certainly ignore all but `TOPIC` since that is the resource type
 that controls who can read and write data to the topics.
 
 **RESOURCE-NAME**
@@ -206,7 +206,7 @@ Permission can be one of `ALLOW` or `DENY`. Given that `DENY` is the default,
 you typically will never use it unless you need to deny something specific
 before hitting a broader allow rule in your ACL.
 
-#### Managing Kafka authorization
+#### Managing Kafka authorisation
 
 You can manage the broker ACL through RedPanda console.
 
@@ -231,9 +231,9 @@ docker exec -it morio-broker rpk security acl -h
 There is currently no API to manage the broker ACL
 :::
 
-### HTTP Authorization
+### HTTP Authorisation
 
-Authorization for HTTP is divided in two different approaches:
+Authorisation for HTTP is divided in two different approaches:
 
 - _RBAC_: Role Based Access Control governs who can manage Morio
 - _ABAC_: Attribute Based Access Control governs who can use Morio
@@ -256,7 +256,7 @@ settings of a Morio instance is not something that can ever be done by the
 Our only job is to decide which user gets what role.
 
 To do that, we need to know what role can do what.
-Note that roles are commulative, so every higher role can do everything the
+Note that roles are cumulative, so every higher role can do everything the
 roles below it can. The _lowest_ role is `user`, the highest role is `root`.
 The table below includes all roles, from lowest to highest:
 
@@ -265,7 +265,7 @@ The table below includes all roles, from lowest to highest:
 | `user` | Minimal role needed to be able to sign in to Morio | All users in your organisation |
 | `manager` | Allows the creation of local Morio user accounts | Team leaders, IT support staff |
 | `operator` | Allows changing the Morio settings | IT Operations staff |
-| `engineer` | Allows decrypting Morio data | IT Engineers, or staff doing Morio troubleshooting |
+| `engineer` | Allows decryption of Morio data | IT Engineers, or staff doing Morio troubleshooting |
 | `root` | Allows exporting key data | Break-glass access |
 
 :::tip Use gitops rather than the operator role

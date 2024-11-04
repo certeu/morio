@@ -20,7 +20,7 @@ However, for all of these the same principle applies:
 Unless you have a specific reason you need the _bare_ client, you should use
 the client packages made available by your Morio instance.
 
-:::warning The bare client is not avialable yet
+:::warning The bare client is not available yet
 We do currently not (yet) publish a bare client, but it's on our todo list
 :::
 
@@ -31,10 +31,12 @@ guide](/docs/guides/settings/client/) for info on how to configure the client.
 
 ### Pre-configured client from a Morio instance
 
-Run the following command from an account with sudo rights:
+To install the Morio client, run the command below from an account with `sudo`
+rights, making sure to replace `example.morio.it` with the _FQDN_ of your Morio
+collector.:
 
 ```sh
-curl -k https://{{ MORIO_CLUSTER_FQDN }}/install/ | bash
+curl -k https://example.morio.it/install/ | bash
 ```
 
 ### Bare Morio client
@@ -47,7 +49,7 @@ Download the bare client package suitable for your distribution:
 Install the package.
 
 
-## Installing the Morio client on MacOS {#macos}
+## Installing the Morio client on MacOS {#macos} <!-- skip-spellcheck -->
 
 :::warning FIXME
 Write these docs

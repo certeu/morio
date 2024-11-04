@@ -46,15 +46,16 @@ use of Beats agents.
 
 ### Templates and vars
 
-As Morio uses several specialized agents under the hood, we have further
+As Morio uses several specialised agents under the hood, we have further
 facilitated management of the client's configuration through a higher level
 configuration abstraction that leverages _templates_ and _vars_.
 
 #### Morio client templates
 
 A Morio client template is a modular piece of agent configuration. It can
-describe what logfiles to collect (for Filebeat), what files to watch for
-changes (for Auditbeat), or what metrics to collect (for Metricbeat).
+describe what log files to collect (for Filebeat), what files to watch for
+changes (for Auditbeat), or what metrics to collect (for Metricbeat), and 
+so on.
 As we like to [keep things simple](/docs/guides/goals/#design-goals), we
 _bundle_ templates for the various agents into a single _module_ by naming
 convention. Then, the Morio client can enable or disable such a _module_,
@@ -63,13 +64,13 @@ one single integrated configuration.
 
 We maintain a curated list of templates in [the Morio template
 hub](https://github.com/certeu/morio-templates). We consider this a communal 
-effort to take the drudge out of configurating observability.
+effort to take the drudge out of configuring observability.
 For example, why does everyone running an NGINX web server have to come up
 with their configuration? They shouldn't, not when you can use a template
 instead, and just enable the `nginx` module (as an example).
 
 If at this point you are wondering _but you don't know where I store my NGINX
-logs_ then thank you for providing the perfect segway to our next point.
+logs_ then thank you for providing the perfect segue to our next point.
 
 #### Morio client vars
 
@@ -163,7 +164,7 @@ Flags:
 ### morio status/start/restart/stop
 
 This allows you to start/stop/restart or check the status of all agents, or of
-a specific agent you specify.  It's a convencience method that allows you to
+a specific agent you specify.  It's a convenience method that allows you to
 control all agents as one.
 
 Run any of the commands with the `-h` flag to get the help. For example,
@@ -248,13 +249,13 @@ Flags:
 
 :::note
 You need to run `sudo morio template` since the Morio configuration is only
-writeable by the root user.
+writable by the root user.
 :::
 
 ### morio audit/logs/metrics
 
 Running any of these commands will pass-through your command options to the
-repective agent. It has the benefit that the agent will be invoked with the
+respective agent. It has the benefit that the agent will be invoked with the
 Morio-specific configuration, which won't be the case if you invoke it
 directly.
 
@@ -301,7 +302,7 @@ You can use this every time you need low-level access one of the agents.
 
 ## Client configuration folder
 
-All the high-level tempates and vars work is mapped to file operations in the Morio client configuration folder.
+All the high-level templates and vars work is mapped to file operations in the Morio client configuration folder.
 You will find the following folders there:
 
 | Agent | Configuration Templates      | Configuration files | Description |
@@ -316,10 +317,11 @@ You will find the following folders there:
 
 
 If you want to manage vars manually, you can do so by writing/updating the
-files in the `vars.d` folder.  If you would like to forego the who
+files in the `vars.d` folder.  If you would like to bypass Morio's
 templates/vars system altogether and configure the various agents yourself, you
-can drop your `.yml` files in the various configuration folders. The Morio
-client only uses `.yaml` files, and will ignore all `.yml` files.
+can add your configuration as `.yml` files in the various configuration
+folders. The Morio client only uses `.yaml` files, and will ignore all `.yml`
+files.
 
 [auditmod]: https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-modules.html
 [auditrules]: https://www.elastic.co/guide/en/beats/auditbeat/master/auditbeat-module-auditd.html#audit-rules

@@ -1,10 +1,14 @@
 ---
 title: Morio Installation Guide
 sidebar_label: Install Guide
-toc_max_heading_level: 5
+toc_max_heading_level: 5 # skip-spellcheck
 ---
 
-import ReleaseChannels from '@site/includes/release-channels.mdx'; /* skip-spellcheck */
+<!-- skip-spellcheck-start -->
+ 
+import ReleaseChannels from '@site/includes/release-channels.mdx';
+
+<!-- skip-spellcheck-end -->
 
 This guide covers the various ways you can install Morio, from fully automated,
 to completely manual.
@@ -25,7 +29,7 @@ guide](/docs/guides/install/client/).
 
 ### Filesystem Layout
 
-Morio utilizes one folder for configuration, one for data, and another one for
+Morio utilises one folder for configuration, one for data, and another one for
 its logs. By default, they are laid out as such:
 
 - Configuration resides in `/etc/morio/moriod`.  See [the `MORIO_CONFIG_ROOT`
@@ -59,19 +63,25 @@ To install Morio, run this command as a user with `sudo` permissions:
 
 <Tabs>
 <TabItem value="production" label="Production Channel">
+
 ```sh
 curl https://install.morio.it/ | bash
 ```
+
 </TabItem>
 <TabItem value="canary" label="Canary Channel">
+
 ```sh
 curl https://install.morio.it/canary/ | bash
 ```
+
 </TabItem>
 <TabItem value="testing" label="Testing Channel">
+
 ```sh
 curl https://install.morio.it/testing/ | bash
 ```
+
 </TabItem>
 </Tabs>
 
@@ -158,7 +168,7 @@ The second line installs it.
 
 #### Update the list of available software
 
-The `moriod-repo` package we just install adds a new software repository.
+The `moriod-repo` package we just installed adds a new software repository.
 Before we can install software from it, we need to update the list of available packages:
 
 <Tabs>
@@ -208,7 +218,7 @@ Installing Morio by hand gives you even more control, and allows installing
 Morio on systems that do not support APT or RPM packages, or do not use
 `systemd`.
 
-Let's see how we can accmplish that.
+Let's see how we can accomplish that.
 
 #### Create folder structure
 
@@ -415,7 +425,7 @@ docker run --rm --init \
 </TabItem>
 </Tabs>
 
-If you want to clean up after stopping Morio, make sure to remove all its contaiers:
+If you want to clean up after stopping Morio, make sure to remove all its containers:
 
 ```
 docker rm -f morio-core morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2>/dev/null

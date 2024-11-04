@@ -1,9 +1,12 @@
-personal_ws-1.1 en 234 
+personal_ws-1.1 en 249 
 ABAC
 ACL
+ACLs
 AMI
 API's
 APIs
+Ansible
+Auditbeat
 AwsImages
 CAs
 CISO
@@ -15,6 +18,7 @@ DBuilder
 DFLT
 DN
 DNS
+DevOps
 DockerBuildEnvDiffs
 Docusaurus
 Dqlite
@@ -23,18 +27,22 @@ ESLint
 ETL
 EU's
 EUPL
+Ebook
 EditorConfig
 Entra
 FILEPATH
 FQDN
 FTW
+Filebeat
 Fixme
 ForwardAuth
 GPT
 GitLab
+GitOps
 GlobalSign
 HTTPS
 Hashicorp
+IAM
 IDP
 IDP's
 IDPs
@@ -62,11 +70,13 @@ MBuilder
 MDX
 MTU
 MacOS
+Metricbeat
 MirrorMaker
 Modularity
 Morio
 Morio's
 Mustache
+NGINX
 NPM
 NextJS
 NodeJS
@@ -127,6 +137,7 @@ api
 apikey
 apis
 aspell
+auditd
 backend
 backends
 basename
@@ -158,6 +169,7 @@ frontend
 git's
 github
 gitops
+hostname
 http
 idp
 init
@@ -201,6 +213,7 @@ pino
 pre
 prebuild
 precommit
+preconfigured
 predev
 prem
 preseed
@@ -220,8 +233,10 @@ routable
 runtime
 sha
 stellene
+subcommands
 subfolder
 subgraph
+subnet
 systemd
 tellene
 templating
