@@ -5,10 +5,145 @@ title: Feature Flags
 Feature flags -- or Flags for short -- allow you to enable or disable certain
 features inside Morio.
 
-Note that all flags are disabled by default, so you can only ever _enable_ flags, even if that flag disables something.
+Note that all flags are disabled by default, so you can only ever _enable_
+flags, even if that flag disables something.
 
-For example, to **disable** the UI service, you can **enable** the `HEADLESS_MORIO` flag.
+For example, to **disable** the UI service, you can **enable** the
+`HEADLESS_MORIO` flag.
 
-The full list of feature flags is included below:
+The full list of feature flags is included below.
 
-<SubPages />
+## `DISABLE_IDP_APIKEY`
+
+Enable this flag to disable [the `apikey` identity
+provider](/docs/guides/settings/idps#apikey) thereby blocking authentication
+via API Keys.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+## `DISABLE_IDP_LDAP`
+
+Enable this flag to disable [the `ldap` identity
+provider](/docs/guides/settings/idps#ldap) thereby blocking authentication via
+any LDAP backend.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+## `DISABLE_IDP_LOCAL`
+
+Enable this flag to disable [the `local` identity
+provider](/docs/guides/settings/idps#local) thereby blocking authentication via
+local Morio accounts.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+## `DISABLE_IDP_MRT`
+
+Enable this flag to disable [the `mrt` identity
+provider](/docs/guides/settings/idps#mrt) thereby blocking authentication via
+the _Morio Root Token_.
+
+Note that if you enable this flag in your initial settings, you will have
+effectively locked yourself out of your Morio deployment unless you have also
+included an alternative identity provider.
+
+As such, we recommend to not enable this flag until after you have made sure
+you have an alternative identity provider that you know is functioning as
+expected.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+<Fixme>
+##### You currently cannot rotate the root token
+
+You cannot -- at this time -- rotate the Morio Root Token.  We plan to add
+support for rotating the root token in the future, but for the time being it is
+not supported.
+
+So this flag can be used as a short-term solution in case your root token is
+compromised.
+</Fixme>
+
+
+## `DISABLE_IDP_OIDC`
+
+Enable this flag to disable [the `oidc` identity
+provider](/docs/guides/settings/idps#openid-connect) thereby blocking
+authentication via any OpenID Connect backend.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+## `DISABLE_SERVICE_UI`
+
+Enable this flag to disable [the UI service](/docs/guides/services/ui) and run
+Morio in headless mode where you can only use [the API](/docs/guides/apis/api)
+to manage it.
+
+<Comment by="joost">
+This flag is not implemented yet, but it's on our todo list. 
+</Comment>
+
+## `ENFORCE_HTTP_MTLS`
+
+Enable this feature flag to enforce _mTLS_ on all HTTP endpoints.
+
+The purpose of this feature flag is to add an extra layer of defence so prevent
+anyone from being able to establish an HTTP connection to your Morio instance.
+This is useful when deploying Morio in hostile environments, such as on the
+internet.
+ 
+The extra mTLS authentication is in addition to Morio's standard HTTP
+authentication, as described in [the IAM guide](/docs/guides/settings/iam/).
+In other words, this is not a replacement for any other authentication, but
+adds an extra authentication layer.
+
+## `RESEED_ON_RELOAD`
+
+Enable this flag to _reseed_ Morio when reloading.
+
+This flag comes into play when you have have `preseed.git` settings that make
+Morio clone a git repository locally. This gives you various ways to keep your
+configuration under version control, as outlined in [the Preseeding 
+Guide](/docs/reference/settings/preseed/).
+
+By default, Morio will not re-clone the repository when you make a
+configuration change, or when you restart Morio. Instead, it will only update
+the git repository from the remote when you explicitly reseed Morio through
+[the `reseed` API
+endpoint](/docs/reference/apis/api/#tag/settings/operation/reseed), (or via the
+UI which uses this endpoint under the hood).
+
+When you enable this flag, Morio will reseed (thus update the local git content
+from the remote) whenever you restart it, or update it's configuration.
+
+<Warning>
+Even with this flag enabled, Morio will not reseed the data when it restarts
+in an unforeseen way, such as a server reboot.
+</Warning>
+
+<Note>
+#### Understanding then this flag takes effect
+
+When updating the Morio settings, there are three steps:
+
+- Core receives the configuration update request
+- Core will reseed if the `RESEED_ON_RELOAD` flag is set
+- Core will apply the new configuration
+
+This means that if you change this flag in an update to the settings, it will
+not take effect until the next update.
+
+In other words, the flag value of the **running configuration** is used, not of
+the **new settings**.
+</Note>
+
