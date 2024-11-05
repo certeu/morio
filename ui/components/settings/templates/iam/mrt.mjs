@@ -35,7 +35,7 @@ export const mrt = {
         <p>Keep in mind that this merely enables the Root Token provider for UI logins.</p>
         <p>
           The Root Token provider is always active for API access, although you can disabled that
-          with the <code>DISABLE_ROOT_TOKEN</code> feature flag.
+          with the <code>DISABLE_IDP_MRT</code> feature flag.
         </p>
       </Popout>
     </>,

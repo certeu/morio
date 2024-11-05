@@ -568,6 +568,15 @@ export const UlIcon = (props) => (
 )
 
 /*
+ * UnavailableIcon - Looks like a forbidden sign
+ */
+export const UnavailableIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+  </IconWrapper>
+)
+
+/*
  * UserIcon - Looks like a face in a circle
  */
 export const UserIcon = (props) => (

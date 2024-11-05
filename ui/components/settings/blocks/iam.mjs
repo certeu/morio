@@ -6,10 +6,12 @@ import {
   KeyIcon,
   MorioIcon,
   StorageIcon,
+  UnavailableIcon,
   UserIcon,
   PlayIcon,
 } from 'components/icons.mjs'
 import { ModalContext } from 'context/modal.mjs'
+import { Popout } from 'components/popout.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { FormWrapper, loadFormDefaults } from './form.mjs'
 
@@ -38,6 +40,7 @@ const AddProvider = (props) => {
   return (
     <div className="max-w-2xl w-full">
       <ProviderHeader id={props.id} title={props.title} />
+      <ProviderDisabled provider={props.id} flags={props.data.tokens?.flags} />
       {props.form ? (
         <FormWrapper
           {...props}
@@ -48,9 +51,22 @@ const AddProvider = (props) => {
       ) : (
         <p>No form for this type of identity provider</p>
       )}
+
     </div>
   )
 }
+
+const ProviderDisabled = ({ provider, flags={} }) => flags[`DISABLE_IDP_${provider.toUpperCase()}`]
+  ? (
+      <Popout important noP>
+        <h5>This provider type is disabled</h5>
+        <p>The <code>DISABLE_IDP_{provider.toUpperCase()}</code> feature flag is currently active.
+        <br />
+        This disables the <code>{provider}</code> identity provider.
+        </p>
+      </Popout>
+  )
+  : null
 
 const UpdateProvider = (props) => {
   const { provider } = props
@@ -67,6 +83,7 @@ const UpdateProvider = (props) => {
   return (
     <div className="max-w-2xl w-full">
       <ProviderHeader id={props.id} title={props.title} />
+      <ProviderDisabled provider={provider} flags={props.data.tokens?.flags} />
       {props.blocks?.[provider]?.form ? (
         <FormWrapper
           {...props}
@@ -84,7 +101,7 @@ const UpdateProvider = (props) => {
   )
 }
 
-const ProviderButton = ({ title, about, id, type, onClick }) => (
+const ProviderButton = ({ title, about, id, type, onClick, flags={} }) => (
   <div className="indicator w-full">
     <button
       className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer w-full
@@ -95,7 +112,14 @@ const ProviderButton = ({ title, about, id, type, onClick }) => (
         <span className="capitalize text-lg font-bold">{title ? title : id}</span>
         <span className="-mt-1 text-sm italic opacity-80">{about}</span>
       </div>
-      <div>{brands[type] ? brands[type] : <FingerprintIcon {...iconProps} />}</div>
+      <div>
+        {flags[`DISABLE_IDP_${type.toUpperCase()}`]
+          ? <UnavailableIcon className="w-8 h-8 text-error" stroke={2.5}/>
+          : brands[type]
+            ? brands[type]
+            : <FingerprintIcon {...iconProps} />
+          }
+        </div>
     </button>
   </div>
 )
@@ -112,6 +136,7 @@ export const AuthProviders = (props) => {
         <div className="grid grid-cols-2 gap-4 mt-4">
           <ProviderButton
             available
+            flags={data.tokens?.flags}
             id="mrt"
             type="mrt"
             title="Morio Root Token"
@@ -136,6 +161,7 @@ export const AuthProviders = (props) => {
               <ProviderButton
                 available
                 key={id}
+                flags={data.tokens?.flags}
                 id={id}
                 title={data.iam.providers[id].label}
                 type={data.iam.providers[id].provider}
@@ -169,6 +195,7 @@ export const AuthProviders = (props) => {
               key={id}
               id={id}
               type={id}
+              flags={data.tokens?.flags}
               {...blocks[id]}
               onClick={() =>
                 pushModal(
@@ -194,6 +221,7 @@ export const LoginUi = ({ data, update }) => {
 }
 
 const ProviderOrder = ({ data, update }) => {
+  const { pushModal } = useContext(ModalContext)
   /*
    * We need to handle things like providers being removed and so on
    */
@@ -219,18 +247,35 @@ const ProviderOrder = ({ data, update }) => {
 
   return (
     <div className="flex flex-col gap-1">
-      {[...order].map((id, i) => (
-        <div key={id} className="flex flex-row gap-2 items-center p-2 px-4">
-          <span className="w-8 text-center block font-bold opacity-70">{i + 1}</span>
-          <button className="btn btn-ghost btn-sm" disabled={i === 0} onClick={() => moveUp(i)}>
-            <PlayIcon className="w-5 h-5 -rotate-90" fill />
-          </button>
-          <div className="font-bold grow p-1 px-4">{data.iam?.providers?.[id]?.label || id}</div>
-          <div className="w-3/5">
-            <FormWrapper form={providerVisibilityForm(id, data)} update={update} />
+      {[...order].map((id, i) => {
+        const type = (data.iam.providers[id].type || id).toUpperCase()
+        const flag = `DISABLE_IDP_${type}`
+
+        return (
+          <div key={id} className="flex flex-row gap-2 items-center p-2 px-4">
+            <span className="w-8 text-center block font-bold opacity-70">{i + 1}</span>
+            <button className="btn btn-ghost btn-sm" disabled={i === 0} onClick={() => moveUp(i)}>
+              <PlayIcon className="w-5 h-5 -rotate-90" fill />
+            </button>
+            <div className="font-bold grow p-1 px-4 flex flex-row gap-1 items-center">
+              {data.tokens.flags?.[flag]
+                ? <button onClick={() => pushModal(
+                  <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                    <h4>This identity provider is disabled by a feature flag</h4>
+                    <p>The <code>{flag}</code> feature flag is active which
+                  disables all identity providers of type
+                  <code>{type.toLowerCase()}, including this one.</code>.</p>
+                  </ModalWrapper>
+                )}><UnavailableIcon className="w-5 h-5 text-error" stroke={3}/></button>
+                : null
+              }
+              {data.iam?.providers?.[id]?.label || id}
+            </div>
+            <div className="w-3/5">
+              <FormWrapper form={providerVisibilityForm(id, data)} update={update} />
+            </div>
           </div>
-        </div>
-      ))}
+        )})}
     </div>
   )
 }
