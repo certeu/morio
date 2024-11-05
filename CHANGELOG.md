@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [ui] Added feature flag settings to the UI
+
 ### Removed
 
 - We no longer provide AMI images, and removed the docs, config and tooling for them

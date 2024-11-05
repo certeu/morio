@@ -16,6 +16,8 @@ import { slugify } from 'lib/utils.mjs'
 import { FormControl } from '../../inputs.mjs'
 import SecretSelectDocs from 'mdx/secret-select.mdx'
 import VariableSelectDocs from 'mdx/variable-select.mdx'
+import { flags, fdocs } from 'config/flags.mjs'
+import Markdown from 'react-markdown'
 
 const TokenHelp = ({ secrets, pushModal }) => (
   <button
@@ -264,44 +266,48 @@ export const Tokens = ({ update, data, secrets = false }) => {
 export const Vars = Tokens
 export const Secrets = (props) => <Tokens {...props} secrets />
 
-const flags = {
-  DISABLE_ROOT_TOKEN: 'Block authentication with the Morio Root Token',
-  HEADLESS_MORIO: 'Run Morio in headless mode, where the UI is not available',
-}
-
 export const Flags = ({ update, data }) => (
   <>
     <div className="flex flex-col gap-2">
+      <div className='flex flex-row items-center gap-2 flex-wrap mb-4'>
+        <ul className="list list-inside ml-4 list-disc">
+        {Object.keys(data?.tokens?.flags || {})
+          .sort()
+          .map((key) => <li key={key} className='flex flex-row items-center gap-2 flex-wrap py-0.5'>
+            {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
+            <a href={`#${key.toLowerCase()}`} className="textsm">{key}</a>
+          </li>)
+        }
+        </ul>
+      </div>
       {Object.keys(data?.tokens?.flags || {})
         .sort()
         .map((key) => (
-          <label
-            className={`hover:cursor-pointer border-4 border-y-0 border-r-0 p-2
-            hover:border-primary hover:bg-primary hover:bg-opacity-10`}
+          <label id={key.toLowerCase()}
+            className={`scroll-mt-20 hover:cursor-pointer border-4 border-y-0 border-r-0 p-2 px-4 shadow
+            hover:bg-base-100 hover:bg-opacity-10 rounded bg-opacity-10
+            ${data?.tokens?.flags?.[key] ? 'border-success bg-success' : 'border-error bg-error'}
+            `}
             key={key}
             htmlFor={key}
           >
-            <div htmlFor={key} className="flex flex-row gap-2 items-center">
-              {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
-              <span
-                className={`badge badge-lg badge-${data.tokens.flags[key] ? 'success' : 'error'}`}
-              >
-                {key}
-              </span>
-            </div>
-            <div className="flex flex-row gap-2 items-center">
+            <div htmlFor={key} className="flex flex-row gap-4 items-center">
+              <h5 className={data?.tokens?.flags?.[key] ? '' : ''}>{key}</h5>
+              <span className='grow'></span>
               <input
                 id={key}
                 type="checkbox"
                 value={data.tokens.flags[key]}
                 onChange={() => update(`tokens.flags.${key}`, !data.tokens.flags[key])}
-                className="toggle my-3 toggle-primary"
+                className="toggle my-3 toggle-success"
                 checked={data.tokens.flags[key]}
               />
               <label className="hover:cursor-pointer" htmlFor={key}>
                 {flags[key]}
               </label>
+              {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
             </div>
+            <Markdown>{fdocs[key]}</Markdown>
           </label>
         ))}
     </div>
