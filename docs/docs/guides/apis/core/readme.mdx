@@ -7,8 +7,8 @@ compliant API internal to Morio and -- with the exception of a few endpoints --
 is not accessible to users.
 
 :::tip Core API Reference Documentation
-If you're already familiar with the API, and are merely looking
-for for answers on which endpoint to use or what data to expect, refer to
+If you are already familiar with the API and are merely looking
+for answers about which endpoint to use or what data to expect, please refer to
 [/docs/reference/apis/core](/docs/reference/apis/core).
 :::
 
@@ -25,9 +25,9 @@ gain a deeper understanding of how Morio works under the hood.
 
 Morio's Core API (the API) provides functionality that spans various domains:
 
-- **Cluster**: Accept Morio cluster invites from other nodes, and process the cluster heartbeat.
+- **Cluster**: Accept Morio cluster invites from other nodes, and process the cluster heartbeat
 - **Cryptography**: Generate X.509 certificates and encrypt or decrypt data on demand
-- **Docker**: Getting information from the Docker Daemon, restarting containers, and other Docker-related tasks
+- **Docker**: Getting information from the Docker daemon, restarting containers, and other Docker-related tasks
 - **Client Packages**: Build client packages or provide their defaults
 - **Settings**: Handle initial setup as well as updates to the Morio settings
 - **Status**: Provide a consolidated status of all Morio services
@@ -49,7 +49,7 @@ https://[your-server-name]/-/core/status
 ```
 
 If your server's DNS name
-is `example.morio.it` , you could run this curl command to get the `/status`
+is `example.morio.it`, you could run the following curl command to get the `/status`
 endpoint:
 
 ```title=curl
@@ -73,13 +73,13 @@ used:
 
 ### The `/status` endpoint
 
-Just as in [the Management API](/docs/guides/apis/api), this is a public or
-anonymous route. So no authentication is required.
+Just as in [the Management API](/docs/guides/apis/api), this is a public and
+anonymous route, so no authentication is required.
 
 :::info Included in the `/status` endpoint of the Management API
 
 The [Management API](/docs/guides/apis/api) includes the core status in its own
-`/status` endpoint. So you do not need to hit this endpoint, you can use the
+`/status` endpoint. So you do not need to hit this endpoint: you can use the
 regular API and check the `core` key for the core-specific status.
 :::
 
@@ -87,13 +87,12 @@ regular API and check the `core` key for the core-specific status.
 
 Perhaps counter-intuitively, this too is a public or anonymous route.
 However, it is only available while Morio is running in _ephemeral mode_.
-While in _ephemeral mode_ Morio will eagerly await either its initial setup, or
+While being in _ephemeral mode_, Morio will eagerly await either its initial setup or
 a cluster join request.
 
 In other words, once Morio has received its initial settings, this endpoint
-will no longer be available, and instead return [an error response of type
-`morio.core.ephemeral.required`
-](/docs/reference/errors/morio.core.ephemeral.required/).
+will no longer be available and will instead return [an error response of type
+`morio.core.ephemeral.required`](/docs/reference/errors/morio.core.ephemeral.required/).
 
 ### The `/cluster/heartbeat` endpoint
 
@@ -101,7 +100,7 @@ While this too is a public or anonymous route -- by which we mean that no
 authentication headers are required -- the cluster heartbeat payload will be
 cryptographically signed and verified on each end.
 
-This is done by including a checksum that holds a sha-256 hash of the
+This is done by including a checksum that holds a SHA-256 hash of the
 combination of the payload data, the Morio Root Token, and the password of the
 internal secret key.
 
