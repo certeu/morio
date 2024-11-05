@@ -30,7 +30,7 @@ provider](/docs/guides/settings/idps#ldap) thereby blocking authentication via
 any LDAP backend.
 
 :::warning FIXME 
-This flag is not implemented yet, but it's on our todo list. 
+This flag is not implemented yet, but  on our todo list. 
 :::
 
 ## `DISABLE_IDP_LOCAL`
@@ -40,7 +40,7 @@ provider](/docs/guides/settings/idps#local) thereby blocking authentication via
 local Morio accounts.
 
 :::warning FIXME 
-This flag is not implemented yet, but it's on our todo list. 
+This flag is not implemented yet, but  on our todo list. 
 :::
 
 ## `DISABLE_IDP_MRT`
@@ -58,7 +58,7 @@ you have an alternative identity provider that you know is functioning as
 expected.
 
 :::warning FIXME 
-This flag is not implemented yet, but it's on our todo list. 
+This flag is not implemented yet, but  on our todo list. 
 :::
 
 :::info You currently cannot rotate the root token
@@ -78,7 +78,7 @@ provider](/docs/guides/settings/idps#openid-connect) thereby blocking
 authentication via any OpenID Connect backend.
 
 :::warning FIXME 
-This flag is not implemented yet, but it's on our todo list. 
+This flag is not implemented yet, but  on our todo list. 
 :::
 
 ## `DISABLE_SERVICE_UI`
@@ -88,7 +88,7 @@ Morio in headless mode where you can only use [the API](/docs/guides/apis/api)
 to manage it.
 
 :::warning FIXME 
-This flag is not implemented yet, but it's on our todo list. 
+This flag is not implemented yet, but  on our todo list. 
 :::
 
 ## `ENFORCE_HTTP_MTLS`
@@ -122,11 +122,11 @@ endpoint](/docs/reference/apis/api/#tag/settings/operation/reseed), (or via the
 UI which uses this endpoint under the hood).
 
 When you enable this flag, Morio will reseed (thus update the local git content
-from the remote) whenever you restart it, or update it's configuration.
+from the remote) whenever you restart it, or update its configuration.
 
 :::warning
 Even with this flag enabled, Morio will not reseed the data when it restarts
-in an unforeseen way, such as a server reboot.
+in an unforeseen way, such as with a server reboot.
 :::
 
 :::info Understanding then this flag takes effect
@@ -140,7 +140,7 @@ When updating the Morio settings, there are three steps:
 This means that if you change this flag in an update to the settings, it will
 not take effect until the next update.
 
-In other words, the flag value of the **running configuration** is used, not of
-the **new settings**.
+In other words, the flag value of the **running configuration** is used, not 
+the flag value of the **new settings**.
 :::
 
