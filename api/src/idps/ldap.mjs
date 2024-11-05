@@ -68,6 +68,11 @@ const strategy = (id) => {
  */
 export function ldap(id, data, req) {
   /*
+   * Check feature flag
+   */
+  if (utils.getFlag(`DISABLE_IDP_LDAP`, false)) return [false, `morio.api.idp.disabled`]
+
+  /*
    * Add strategy to passport if it hasn't been used yet
    */
   if (passport._strategies[id] === undefined) {

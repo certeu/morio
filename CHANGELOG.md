@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [api] Implemented the various `DISABLE_IDP_[type]` feature flags
 - [ui] Added feature flag settings to the UI
 
 ### Removed

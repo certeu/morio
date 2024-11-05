@@ -40,6 +40,12 @@ import { checkRole, caseInsensitiveGet } from './ldap.mjs'
  */
 export async function oidc(id, req, res) {
   /*
+   * Check feature flag
+   */
+  if (utils.getFlag(`DISABLE_IDP_OICD`, false))
+    return utils.sendErrorResponse(res, 'morio.api.idp.disabled', req.url)
+
+  /*
    * Get the OIDC client
    */
   const client = await getClient(id)

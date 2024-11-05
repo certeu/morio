@@ -22,6 +22,11 @@ export async function local(id, data) {
    */
   if (id === 'local' && data?.username && data?.password && data?.token && data?.role) {
     /*
+     * Check feature flag
+     */
+    if (utils.getFlag(`DISABLE_IDP_LOCAL`, false)) return [false, `morio.api.idp.disabled`]
+
+    /*
      * Look up the account
      */
     const account = await loadAccount('local', data.username)

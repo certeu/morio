@@ -1,5 +1,6 @@
 import { updateLastLoginTime, loadApikey } from '../lib/apikey.mjs'
 import { verifyPassword } from '#shared/crypto'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * apikey: API key identity/authentication provider
@@ -17,6 +18,19 @@ export async function apikey(id, data) {
    * Authenticate
    */
   if (id === 'apikey' && data?.api_key && data?.api_key_secret) {
+    /*
+     * Check feature flag
+     */
+    if (utils.getFlag(`DISABLE_IDP_APIKEY`, false))
+      return [
+        false,
+        {
+          success: false,
+          reason: 'Authentication failed',
+          error: 'Identity provider disabled by feature flag',
+        },
+      ]
+
     /*
      * Look up the apikey
      */

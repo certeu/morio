@@ -77,21 +77,15 @@ Controller.prototype.getIdps = async function (req, res) {
       if (id === 'mrt') provider = 'mrt'
       else if (id === 'local') provider = 'local'
       else if (id === 'apikey') provider = 'apikey'
-      idps[id] = {
-        id,
-        provider,
-        label: conf.label,
-        about: conf.about || false,
+      if (!utils.getFlag(`DISABLE_IDP_${provider.toUpperCase()}`, false)) {
+        idps[id] = {
+          id,
+          provider,
+          label: conf.label,
+          about: conf.about || false,
+        }
       }
     }
-  }
-
-  /*
-   * Add the root token IDP, unless it's disabled by a feature flag
-   */
-  if (!utils.getFlag('DISABLE_ROOT_TOKEN')) {
-    // TODO: Why is this commented out?
-    //idps['Root Token'] = { id: 'mrt', provider: 'mrt' }
   }
 
   /*

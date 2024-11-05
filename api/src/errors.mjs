@@ -8,6 +8,14 @@ export const errors = {
     detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
   },
   /*
+   * Identity provider is disabled by a feature flag
+   */
+  'morio.api.idp.disabled': {
+    status: 400,
+    title: 'Provider Disabled',
+    detail: 'This identity provider is disabled by a feature flag.',
+  },
+  /*
    * KV store 404 error, API style
    */
   'morio.api.kv.404': {

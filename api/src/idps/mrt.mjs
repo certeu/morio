@@ -16,6 +16,11 @@ import { verifyPassword } from '#shared/crypto'
  */
 export async function mrt(id, data) {
   /*
+   * Check feature flag
+   */
+  if (utils.getFlag(`DISABLE_IDP_MRT`, false)) return [false, `morio.api.idp.disabled`]
+
+  /*
    * Authenticate
    */
   const keys = utils.getKeys()
