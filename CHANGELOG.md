@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- We no longer provide AMI images, and removed the docs, config and tooling for them
+
 ## [0.5.0] - 2024-10-25
 
 Since this is a minor release, here's what's new since 0.4.0:
