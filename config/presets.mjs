@@ -33,7 +33,7 @@ it can also be changed on a running Morio system.  To do so:
 presets.MORIO_DOCKER_SOCKET = '/var/run/docker.sock'
 
 predocs.MORIO_CONFIG_ROOT = `Location of the Morio configuration folder on the
-host OS
+host OS.
 
 You can only change this on a fresh Morio install. To do so:
 
@@ -44,7 +44,7 @@ You can only change this on a fresh Morio install. To do so:
 `
 presets.MORIO_CONFIG_ROOT = '/etc/morio/moriod'
 
-predocs.MORIO_DATA_ROOT = `Location of the Morio data folder on the host OS
+predocs.MORIO_DATA_ROOT = `Location of the Morio data folder on the host OS.
 
 You can only change this on a fresh Morio install. To do so:
 
@@ -55,7 +55,7 @@ You can only change this on a fresh Morio install. To do so:
 `
 presets.MORIO_DATA_ROOT = '/var/lib/morio/moriod'
 
-predocs.MORIO_LOGS_ROOT = `Location of the Morio logs folder on the host OS
+predocs.MORIO_LOGS_ROOT = `Location of the Morio logs folder on the host OS.
 
 You would typically change this on a fresh Morio install, but it can also be
 changed on a running Morio instance. To do so:
@@ -93,10 +93,10 @@ presets.MORIO_NETWORK_SUBNET = '192.168.144.32/28'
 predocs.MORIO_NETWORK_MTU = `MTU to configure on the internal Morio Docker
 network.
 
-If you are considering changing the MTU you probably know what you're doing.
-But in general this can be useful to avoid fragmentation.
+If you are considering changing the MTU, you probably know what you're doing.
+In general, this can be useful to avoid fragmentation.
 
-  To change this, set \`tokens.presets.MORIO_NETWORK_MTU\` in your Morio
+To change this, set \`tokens.presets.MORIO_NETWORK_MTU\` in your Morio
 settings.`
 presets.MORIO_NETWORK_MTU = 1500
 
@@ -113,7 +113,7 @@ presets.MORIO_CONTAINER_PREFIX = "morio-"
 predocs.MORIO_DOCKER_LOG_DRIVER = `The Docker log driver to use for created
 containers.
 
-Morio assumes \`systemd\` is present, and so we use the \`journald\` log
+Morio assumes that \`systemd\` is present, and so we use the \`journald\` log
 driver for Docker. If you are running Morio on a system without \`systemd\`
 you will need to change this.
 
@@ -133,8 +133,8 @@ presets.MORIO_DOCKER_LOG_DRIVER = 'journald'
 predocs.MORIO_DOCKER_ADD_HOST = `Optional \`host:ip\` resolution to add to the
 containers configuration.
 
-This is typically used in facilitate development or testing of Morio.
-It is not the kind of thing you want to run use production, use DNS instead.
+This is typically used to facilitate the development or testing of Morio.
+It is not the kind of thing that you want to run in production: use DNS instead.
 
 To update this, set the \`MORIO_DOCKER_ADD_HOST\` environment variable when
 launching the Morio core container.`
@@ -147,7 +147,7 @@ presets.MORIO_DOCKER_ADD_HOST = false
 predocs.MORIO_API_JWT_EXPIRY = `Maximum lifetime of a JSON Web Token generated
 by Morio.
 
-The notation here is the one use by [Go's time
+The notation here is the one used by [Go's time
 package](https://pkg.go.dev/time#ParseDuration).
 
 To change this, set \`tokens.presets.MORIO_API_JWT_EXPIRY\` in your Morio
@@ -336,10 +336,10 @@ predocs.MORIO_CORE_PREFIX =
 presets.MORIO_CORE_PREFIX = '/-/core'
 
 predocs.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL =
-  'Amount of seconds to wait between cluster heartbeats'
+  'Number of seconds to wait between cluster heartbeats'
 presets.MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL = 30
 
-predocs.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT = `Amount of milliseconds above
+predocs.MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT = `Number of milliseconds above
 which we start logging heartbeat latency.
 
 You may want to increase this if you have cluster nodes behind a slower link.
