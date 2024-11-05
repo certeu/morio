@@ -248,7 +248,7 @@ const ProviderOrder = ({ data, update }) => {
   return (
     <div className="flex flex-col gap-1">
       {[...order].map((id, i) => {
-        const type = (data.iam.providers[id].type || id).toUpperCase()
+        const type = (data.iam.providers[id].provider || id).toUpperCase()
         const flag = `DISABLE_IDP_${type}`
 
         return (
