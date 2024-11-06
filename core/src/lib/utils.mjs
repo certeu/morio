@@ -6,6 +6,8 @@ import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
 import { vaultGetSecret } from './vault.mjs'
+import { db } from './db.mjs'
+import { kv as kvClient } from '#shared/kv'
 
 /*
  * Export a log object for logging via the logger
@@ -48,7 +50,11 @@ store.presets = loadAllPresets()
 /*
  * Export an utils object to hold utility methods
  */
-export const utils = { hooks: { services: {} } }
+export const utils = {
+  db,
+  kv: kvClient(db, log),
+  hooks: { services: {} },
+}
 
 /*           _   _
  *  __ _ ___| |_| |_ ___ _ _ ___

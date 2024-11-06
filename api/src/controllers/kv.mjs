@@ -1,6 +1,5 @@
 //import { currentUser } from '../rbac.mjs'
 import { utils } from '../lib/utils.mjs'
-import { kv } from '../lib/kv.mjs'
 
 /**
  * This KV controller handles API access to the KV store.
@@ -31,7 +30,7 @@ Controller.prototype.writeKey = async function (req, res) {
   /*
    * Write to KV
    */
-  const result = await kv.set(valid.key, valid.value)
+  const result = await utils.kv.set(valid.key, valid.value)
 
   return result
     ? res.status(204).send()
@@ -57,7 +56,7 @@ Controller.prototype.readKey = async function (req, res) {
   /*
    * Read from KV
    */
-  const result = await kv.get(valid.key)
+  const result = await utils.kv.get(valid.key)
 
   /*
    * Be expicit when a key cannot be found
@@ -88,7 +87,7 @@ Controller.prototype.deleteKey = async function (req, res) {
   /*
    * Delete from KV
    */
-  const result = await kv.del(valid.key)
+  const result = await utils.kv.del(valid.key)
 
   /*
    * Be expicit when a key cannot be found
@@ -107,7 +106,7 @@ Controller.prototype.deleteKey = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.listKeys = async function (req, res) {
-  const list = await kv.ls()
+  const list = await utils.kv.ls()
 
   return Array.isArray(list)
     ? res.send(list)
@@ -130,7 +129,7 @@ Controller.prototype.globKeys = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const list = await kv.glob(valid.key)
+  const list = await utils.kv.glob(valid.key)
 
   return Array.isArray(list)
     ? res.send(list)
@@ -144,5 +143,7 @@ Controller.prototype.globKeys = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.dumpData = async function (req, res) {
-  return res.send({})
+  const data = await utils.kv.dump()
+
+  return data ? res.send(data) : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }

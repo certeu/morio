@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- [api] Fixed a thown error  in the `GET /token` endpoint due to passing in the wrong attibute
+- [api] Fixed a thrown error  in the `GET /token` endpoint due to passing in the wrong attibute
+- [api] Implemented the `/kv/dump` endpoint (it always returned an empty object before)
 
 ### Removed
 

@@ -4,6 +4,8 @@ import { getPreset, inProduction } from '#config'
 import { errors } from '../errors.mjs'
 import { validate as validateMethod } from '../schema.mjs'
 import { restClient } from '#shared/network'
+import { db } from './db.mjs'
+import { kv as kvClient } from '#shared/kv'
 
 /*
  * Export a log object for logging via the logger
@@ -41,6 +43,11 @@ const store = new Store(log)
  * Export an utils instance to hold utility methods
  */
 export const utils = new Store(log)
+
+/*
+ * Attach kv helper
+ */
+utils.kv = kvClient(db, log)
 
 /*           _   _
  *  __ _ ___| |_| |_ ___ _ _ ___
