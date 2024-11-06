@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Implemented the various `DISABLE_IDP_[type]` feature flags
 - [ui] Added feature flag settings to the UI
 
+### Fixed
+
+- [api] Fixed a thown error  in the `GET /token` endpoint due to passing in the wrong attibute
+
 ### Removed
 
 - We no longer provide AMI images, and removed the docs, config and tooling for them

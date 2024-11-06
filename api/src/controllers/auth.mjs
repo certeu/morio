@@ -320,7 +320,7 @@ Controller.prototype.renewToken = async function (req, res) {
   /*
    * If the JWT is not in the cookie, check the Authorization header
    */
-  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+  if (!payload && req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
   }
@@ -341,7 +341,7 @@ Controller.prototype.renewToken = async function (req, res) {
         provider: payload.provider,
       },
       key: utils.getKeys().private,
-      passphrase: utils.getKeys().mrt,
+      passphrase: utils.getKeys().unseal,
     })
 
     return res.send({ jwt })
