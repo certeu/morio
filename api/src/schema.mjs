@@ -220,6 +220,7 @@ export const schema = {
   // This combines request body and request parameters
   'req.kv.set': Joi.object(kv),
   'req.kv.get': Joi.object({ key: kv.key }),
+  'req.rotate.mrt': Joi.object({ mrt }),
 
   /*
    * Responses

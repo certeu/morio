@@ -290,6 +290,17 @@ utils.setKeys = (keys) => {
 }
 
 /**
+ * Helper method to store a new Morio Root Token
+ *
+ * @param {string} mrtHash - The password hash of the new Morio root token
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setKeysMrt = (mrtHash) => {
+  store.set('keys.mrt', mrtHash)
+  return utils
+}
+
+/**
  * Helper method to store the node FQDN
  *
  * @param {string} fadn - The node's FQDN

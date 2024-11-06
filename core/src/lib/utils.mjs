@@ -682,6 +682,17 @@ utils.setKeys = (keys) => {
 }
 
 /**
+ * Helper method to store a new Morio Root Token
+ *
+ * @param {string} mrtHash - The password hash of the new Morio root token
+ * @return {object} utils - The utils instance, making this method chainable
+ */
+utils.setKeysMrt = (mrtHash) => {
+  store.set('config.keys.mrt', mrtHash)
+  return utils
+}
+
+/**
  * Helper method to store the cluster leader
  *
  * @param {object} params - The node_serial of the leading node

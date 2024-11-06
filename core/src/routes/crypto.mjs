@@ -27,4 +27,9 @@ export function routes(app) {
    * Decrypt data
    */
   app.post('/decrypt', Crypto.decrypt)
+
+  /*
+   * Rotate the root token
+   */
+  app.post('/rotate/mrt', Crypto.rotateRootToken)
 }

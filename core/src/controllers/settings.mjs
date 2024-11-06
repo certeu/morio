@@ -8,7 +8,6 @@ import {
   generateGpgKeyPair,
   hash,
   hashPassword,
-  randomString,
   uuid,
 } from '#shared/crypto'
 import { reload } from '../index.mjs'
@@ -18,6 +17,7 @@ import { generateCaConfig } from '../lib/services/ca.mjs'
 import { unsealKeyData } from '../lib/services/core.mjs'
 import { resolveServiceConfiguration } from '#config'
 import { loadPreseededSettings, ensurePreseededContent } from '#shared/loaders'
+import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 
 /**
  * This settings controller handles settings routes
@@ -206,7 +206,7 @@ Controller.prototype.reseed = async function (req, res) {
    * not include a base entry, for example to update the list
    * of client templates. So we need to differentiate here.
    */
-  const preseedSettings = utils.getSettings('preseed')
+  const preseedSettings = utils.getSettings('preseed', {})
   if (preseedSettings.base) {
     /*
      * Load the preseeded settings
@@ -338,7 +338,7 @@ const initialSetup = async function (req, settings) {
   /*
    * Fenerate the seal secret unless it was provided in the preseeded key data
    */
-  if (!keys.seal) keys.seal = await hashPassword(randomString(64))
+  if (!keys.seal) keys.seal = await generateKeySeal()
 
   /*
    * Generate the Morio root token, unless it was provided in the preseeded key data
@@ -346,7 +346,7 @@ const initialSetup = async function (req, settings) {
   let morioRootToken = 'Use the preseeded root token'
   if (!keys.mrt) {
     log.debug(`Generating root token`)
-    morioRootToken = 'mrt.' + (await randomString(32))
+    morioRootToken = await generateRootToken()
     keys.mrt = hashPassword(morioRootToken)
   }
 
@@ -458,11 +458,7 @@ const initialSetup = async function (req, settings) {
               'This Morio instance was preseeded with Key Data. No new Morio root token was generated. Use the preceeded root token instead.',
             value: morioRootToken,
           }
-        : {
-            about:
-              'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-            value: morioRootToken,
-          },
+        : formatRootTokenResponseData(morioRootToken),
     },
     false,
   ]

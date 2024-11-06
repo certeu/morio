@@ -2,6 +2,7 @@ import { validateSettings } from '#lib/validate-settings'
 import { utils, log } from '../lib/utils.mjs'
 import { reload } from '../index.mjs'
 import { loadPreseededSettings } from '#shared/loaders'
+import { hashPassword } from '#shared/crypto'
 
 /**
  * This core controller provides access to morio core
@@ -459,7 +460,7 @@ Controller.prototype.reseed = async function (req, res) {
    * If core loads invalid settings, things will break. So these
    * are guardrails against that.
    */
-  const preseedSettings = utils.getSettings('preseed')
+  const preseedSettings = utils.getSettings('preseed', {})
 
   if (preseedSettings.base) {
     /*
@@ -498,7 +499,7 @@ Controller.prototype.reseed = async function (req, res) {
      */
     if (!report.deployable)
       return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
-  }
+  } else return res.status(204).send()
 
   /*
    * Pass the request to core
@@ -506,6 +507,40 @@ Controller.prototype.reseed = async function (req, res) {
   const [status, result] = await utils.coreClient.get(`/reseed`)
 
   return res.status(status).send(result)
+}
+
+/**
+ * Rotate Morio Root Token
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.rotateMrt = async function (req, res) {
+  /*
+   * Validate settings against the schema
+   */
+  const [valid, err] = await utils.validate(`req.rotate.mrt`, req.body)
+  if (!valid) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  }
+
+  /*
+   * Pass the request to core
+   */
+  const [status, result] = await utils.coreClient.post(`/rotate/mrt`, valid)
+
+  /*
+   * If a new root token was generated, also store its hashed version in memory
+   * since we need it for the MRT identity provider
+   */
+  if (status === 200 && result?.root_token?.value) {
+    utils.setKeysMrt(hashPassword(result.root_token.value))
+    return res.send(result)
+  }
+
+  return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
 }
 
 const bodyPlusHeaders = (req) => ({ ...req.body, headers: req.headers })

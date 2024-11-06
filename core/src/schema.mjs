@@ -6,6 +6,7 @@ import {
   jsTime,
   uuid,
   keys,
+  mrt,
   version,
   nodeSerial,
   settings,
@@ -102,6 +103,8 @@ export const schema = {
     iv: Joi.string().required(),
     ct: Joi.string().required(),
   }),
+  'req.rotate.mrt': Joi.object({ mrt }),
+
   /*
    * Responses
    */

@@ -65,7 +65,7 @@ function OpenAPI(utils, type = 'api', extra = {}) {
       },
       version: this.utils.getPreset('MORIO_VERSION'),
       'x-logo': {
-        url: '/downloads/morio-card-embed.svg',
+        url: 'https://morio.it/img/morio-social-card.png',
         backgroundColor: 'transparent',
         altText: 'Morio Logo',
       },

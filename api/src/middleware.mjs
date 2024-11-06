@@ -13,7 +13,7 @@ export const session = sessionMiddleware({
 
 export const limits = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 1000, // Limit each request to 1000 requests per 'window' (15m)
+  limit: 10000, // Limit each request to 10000 requests per 'window' (15m)
   standardHeaders: 'draft-7', // https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-07
   legacyHeaders: false,
   message: {

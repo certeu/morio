@@ -127,4 +127,10 @@ export function routes(app) {
    * Only root can do this
    */
   app.get(`/export/keys`, rbac.root, (req, res) => Core.exportKeys(req, res))
+
+  /*
+   * This route will rotate the Morio Root Token
+   * Only operators can do this
+   */
+  app.post(`/rotate/mrt`, rbac.operator, (req, res) => Core.rotateMrt(req, res))
 }
