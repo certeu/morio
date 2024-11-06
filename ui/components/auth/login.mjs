@@ -124,7 +124,6 @@ export const Login = ({ setAccount, account = false, role = false }) => {
         setLoadingStatus([false])
         clearModal()
       }
-      else console.log({result, status})
     }
     getIdps()
   }, [])
