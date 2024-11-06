@@ -460,7 +460,7 @@ utils.endReload = () => {
  */
 
 /**
- * Clear OIDC PKCE data after an OICD flow
+ * Clear OIDC PKCE data after an OIDC flow
  */
 utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
 

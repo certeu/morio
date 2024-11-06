@@ -42,7 +42,7 @@ export async function oidc(id, req, res) {
   /*
    * Check feature flag
    */
-  if (utils.getFlag(`DISABLE_IDP_OICD`, false))
+  if (utils.getFlag(`DISABLE_IDP_OIDC`, false))
     return utils.sendErrorResponse(res, 'morio.api.idp.disabled', req.url)
 
   /*
