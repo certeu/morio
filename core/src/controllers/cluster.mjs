@@ -176,7 +176,7 @@ Controller.prototype.join = async function (req, res) {
   let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing key data to keys.json`)
-  result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys)
+  result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys.data)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing node data to node.json`)
   const nodeUuid = uuid()
