@@ -95,6 +95,7 @@ const keys = Joi.object({
   icrt: Joi.string().required(),
   ikey: Joi.string().required(),
   seal: passwordHash.required(),
+  unseal: Joi.string().required(),
 })
 
 /*
