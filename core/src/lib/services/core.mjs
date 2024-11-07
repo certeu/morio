@@ -272,7 +272,7 @@ export async function templateSettings(settings) {
 
 function generateDataChecksum(data) {
   const keys = utils.getKeys()
-  return hash(JSON.stringify(data) + keys.mrt.hash + keys.cluster + keys.rpwd)
+  return hash(JSON.stringify(data) + keys.cluster + keys.rpwd)
 }
 
 function validateDataChecksum(data, checksum) {
