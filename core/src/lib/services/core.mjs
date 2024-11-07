@@ -112,7 +112,7 @@ export const service = {
       // TODO: do we need this next line?
       utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
       utils.setKeys(keys)
-      utils.setSettingsSerial(Number(timestamp))
+      utils.setSettingsSerial(timestamp)
       utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
@@ -162,18 +162,24 @@ export const service = {
   },
 }
 
-/**
- * Loads the most recent Morio settings  file(s) from disk
+/*
+ * Find the most recent timestamp file that exists on disk
  */
-async function loadSettingsFromDisk() {
-  /*
-   * Find the most recent timestamp file that exists on disk
-   */
+async function getSettingsTimestamp() {
   const timestamp = ((await readDirectory(`/etc/morio`)) || [])
     .filter((file) => new RegExp('settings.[0-9]+.yaml').test(file))
     .map((file) => file.split('.')[1])
     .sort()
     .pop()
+
+  return timestamp
+}
+
+/**
+ * Loads the most recent Morio settings  file(s) from disk
+ */
+async function loadSettingsFromDisk(timestamp = false) {
+  if (!timestamp) timestamp = await getSettingsTimestamp()
 
   /*
    * Node data is created even in ephemeral mode
@@ -203,6 +209,25 @@ async function loadSettingsFromDisk() {
   const keys = unsealKeyData(keydata)
 
   return { settings, keys, node, timestamp }
+}
+
+/**
+ * Loads the data required to join a cluster node from disk
+ * This is only used for the initial cluster join
+ * Rather than an elaborate scheme to sync state, we merely
+ * provide what is written to disk, and let the other node
+ * figure it out.
+ */
+export async function loadClusterDataFromDisk(timestamp = false) {
+  if (!timestamp) timestamp = await getSettingsTimestamp()
+
+  /*
+   * Now read the settings file and keys
+   */
+  const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
+  const keys = await readJsonFile(`/etc/morio/keys.json`)
+
+  return { settings, keys }
 }
 
 export async function templateSettings(settings) {

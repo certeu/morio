@@ -74,7 +74,7 @@ const passwordHash = Joi.object({
 })
 
 /*
- * The contents of the keys file/object
+ * The contents of the keys object
  */
 const keys = Joi.object({
   cluster: uuid.required(),
@@ -99,6 +99,16 @@ const keys = Joi.object({
   seal: passwordHash.required(),
   unseal: Joi.string().required(),
 })
+
+/*
+ * The contents of the keys object
+ */
+const keysFile = Joi.object({
+  data: Joi.string().required(),
+  key: Joi.string().required(),
+  seal: passwordHash.required(),
+})
+
 
 /*
  * A vault secret
@@ -276,4 +286,4 @@ async function validate(key, input, schema) {
 /*
  * Named exports
  */
-export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, passwordHash, version, nodeSerial, settings, preseed }
+export { Joi, validate, id, fqdn, jsTime, uuid, keys, keysFile,  mrt, passwordHash, version, nodeSerial, settings, preseed }

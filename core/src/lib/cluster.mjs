@@ -7,7 +7,11 @@ import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { isBrokerLeading } from './services/broker.mjs'
 import { log, utils } from './utils.mjs'
-import { dataWithChecksum, validDataWithChecksum } from './services/core.mjs'
+import {
+  dataWithChecksum,
+  validDataWithChecksum,
+  loadClusterDataFromDisk,
+} from './services/core.mjs'
 
 /*
  * Helper method to update the cluster state
@@ -588,7 +592,6 @@ export async function inviteClusterNode(remote) {
    * prevents us from having to run this in the background.
    */
   const opportunisticJoin = await inviteClusterNodeAttempt(remote)
-  //const opportunisticJoin = false
 
   /*
    * If that didn't work, keep trying, but don't block the request
@@ -617,6 +620,17 @@ async function inviteClusterNodeAttempt(remote) {
   log.debug(`Inviting ${remote} to join the cluster`)
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
+  /*
+   * Load data from disk becauise what we sync between cluster nodes
+   * is what is written to disk.
+   */
+  const timestamp = utils.getSettingsSerial()
+  if (!timestamp)
+    log.err(
+      'Unable to load timestamp. This is unexpected and may impact cluster formation. Will try anyway.'
+    )
+  const onDisk = await loadClusterDataFromDisk(timestamp)
+
   const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
     method: 'POST',
     data: {
@@ -626,9 +640,9 @@ async function inviteClusterNodeAttempt(remote) {
       cluster: utils.getClusterUuid(),
       settings: {
         serial: Number(utils.getSettingsSerial()),
-        data: utils.getSanitizedSettings(),
+        data: onDisk.settings,
       },
-      keys: utils.getKeys(),
+      keys: onDisk.keys,
     },
     ignoreCertificate: true,
     timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')) * 900, // *0.9 * 1000 to go from ms to s

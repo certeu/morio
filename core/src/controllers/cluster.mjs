@@ -5,7 +5,7 @@ import { writeYamlFile, writeJsonFile } from '#shared/fs'
 import { reload } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
-import { dataWithChecksum, validDataWithChecksum } from '../lib/services/core.mjs'
+import { dataWithChecksum, validDataWithChecksum, unsealKeyData } from '../lib/services/core.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -166,7 +166,7 @@ Controller.prototype.join = async function (req, res) {
     )
 
   /*
-   * To join the cluster, we write settings to disk and reload
+   * To join the cluster, we write settings and keys to disk and reload
    * But first make sure to cast the serial to a number as we'll use it to
    * construct the path to write to disk, and join cluster is an unauthenticated
    * request. So we can't trust this input.
@@ -194,14 +194,13 @@ Controller.prototype.join = async function (req, res) {
    * We need to generate the CA config before we trigger a reload event
    * We also need to pre-seed it with the cluster keys or it will generate its own
    */
-  //utils.setKeys(valid.keys)
-  //utils.setSettings(valid.settings.data)
-  await ensureCaConfig(valid.keys)
+  const keyData = unsealKeyData(valid.keys)
+  await ensureCaConfig(keyData)
 
   /*
    * Don't forget to finalize the request
    */
-  res.status(200).send({ cluster: valid.keys.cluster, node: nodeUuid, serial })
+  res.status(200).send({ cluster: keyData.cluster, node: nodeUuid, serial })
 
   /*
    * Now return as reload
