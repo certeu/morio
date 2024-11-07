@@ -467,6 +467,17 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
   }
 
   /*
+   * Verify keys_hash
+   * If there's a mismatch, ask to re-sync the cluster.
+   */
+  if (data.keys_hash !== utils.getKeysHash()) {
+    const err = 'KEYS_HASH_MISMATCH'
+    errors.push(err)
+    action = 'SYNC'
+    log.debug(`Keys hash mismatch in ${type} from ${data.from.fqdn}: ${err}`)
+  }
+
+  /*
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster leader.
    */
