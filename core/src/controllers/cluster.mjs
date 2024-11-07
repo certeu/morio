@@ -194,7 +194,7 @@ Controller.prototype.join = async function (req, res) {
    * We need to generate the CA config before we trigger a reload event
    * We also need to pre-seed it with the cluster keys or it will generate its own
    */
-  const keyData = unsealKeyData(valid.keys)
+  const keyData = unsealKeyData(valid.keys.data)
   await ensureCaConfig(keyData)
 
   /*
