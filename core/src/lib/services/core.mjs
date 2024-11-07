@@ -112,7 +112,6 @@ export const service = {
       // TODO: do we need this next line?
       utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
       utils.setKeys(keys)
-      utils.setSettingsSerial(timestamp)
       utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
@@ -165,12 +164,14 @@ export const service = {
 /*
  * Find the most recent timestamp file that exists on disk
  */
-async function getSettingsTimestamp() {
+async function getSettingsTimestamp(updateState = true) {
   const timestamp = ((await readDirectory(`/etc/morio`)) || [])
     .filter((file) => new RegExp('settings.[0-9]+.yaml').test(file))
     .map((file) => file.split('.')[1])
     .sort()
     .pop()
+
+  if (updateState) utils.setSettingsSerial(timestamp)
 
   return timestamp
 }
@@ -178,8 +179,8 @@ async function getSettingsTimestamp() {
 /**
  * Loads the most recent Morio settings  file(s) from disk
  */
-async function loadSettingsFromDisk(timestamp = false) {
-  if (!timestamp) timestamp = await getSettingsTimestamp()
+async function loadSettingsFromDisk(timestamp = false, updateState = true) {
+  if (!timestamp) timestamp = await getSettingsTimestamp(updateState)
 
   /*
    * Node data is created even in ephemeral mode
@@ -201,6 +202,7 @@ async function loadSettingsFromDisk(timestamp = false) {
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keydata = await readJsonFile(`/etc/morio/keys.json`)
+  if (updateState) utils.setKeysHash(hash(JSON.stringify(keydata)))
 
   /*
    * Decrypt key data
@@ -226,8 +228,9 @@ export async function loadClusterDataFromDisk(timestamp = false) {
    */
   const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
   const keys = await readJsonFile(`/etc/morio/keys.json`)
+  const keysHash = hash(JSON.stringify(keys))
 
-  return { settings, keys }
+  return { settings, keys, keysHash }
 }
 
 export async function templateSettings(settings) {

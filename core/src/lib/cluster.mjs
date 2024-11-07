@@ -629,7 +629,7 @@ async function inviteClusterNodeAttempt(remote) {
     log.err(
       'Unable to load timestamp. This is unexpected and may impact cluster formation. Will try anyway.'
     )
-  const onDisk = await loadClusterDataFromDisk(timestamp)
+  const clusterData = await loadClusterDataFromDisk(timestamp)
 
   const result = await testUrl(`https://${remote}/-/core/cluster/join`, {
     method: 'POST',
@@ -640,9 +640,12 @@ async function inviteClusterNodeAttempt(remote) {
       cluster: utils.getClusterUuid(),
       settings: {
         serial: Number(utils.getSettingsSerial()),
-        data: onDisk.settings,
+        data: clusterData.settings,
       },
-      keys: onDisk.keys,
+      keys: {
+        hash: clusterData.keysHash,
+        data: clusterData.keys,
+      },
     },
     ignoreCertificate: true,
     timeout: Number(utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL')) * 900, // *0.9 * 1000 to go from ms to s

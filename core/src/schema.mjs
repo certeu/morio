@@ -52,7 +52,10 @@ export const schema = {
       serial: jsTime.required(),
       data: settings,
     }),
-    keys: keysFile,
+    keys: {
+      data: keysFile,
+      hash: Joi.string().required(),
+    },
     headers: Joi.object(),
   }),
   'req.docker.pull': Joi.object({ tag: id }),
