@@ -266,6 +266,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
         },
         version: utils.getVersion(),
         settings_serial: Number(utils.getSettingsSerial()),
+        keys_hash: utils.getKeysHash(),
         status: utils.getStatus(),
         nodes: utils.getClusterNodes(),
         broadcast,

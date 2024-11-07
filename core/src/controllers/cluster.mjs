@@ -83,7 +83,7 @@ Controller.prototype.heartbeat = async function (req, res) {
   }
 
   /*
-   * Verify the heartbeat request which will determin the action to take
+   * Verify the heartbeat request which will determine the action to take
    */
   const { action, errors } = await verifyHeartbeatRequest(valid.data)
 
