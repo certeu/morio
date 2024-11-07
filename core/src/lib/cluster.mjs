@@ -250,6 +250,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   let data
   try {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
+    log.warn(`Sending heartbeat with key hash: ${utils.getKeysHash()}`)
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: dataWithChecksum({
@@ -470,6 +471,7 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    * Verify keys_hash
    * If there's a mismatch, ask to re-sync the cluster.
    */
+  log.warn(`Reveived heartbeat with key hash: ${data.keys_hash} (ours: ${utils.getKeysHash()})`)
   if (data.keys_hash !== utils.getKeysHash()) {
     const err = 'KEYS_HASH_MISMATCH'
     errors.push(err)

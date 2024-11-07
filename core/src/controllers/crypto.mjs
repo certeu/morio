@@ -2,7 +2,7 @@ import { log, utils } from '../lib/utils.mjs'
 import { createX509Certificate } from '#lib/tls'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
-import { keypairAsJwk, hashPassword } from '#shared/crypto'
+import { keypairAsJwk, hashPassword, hash } from '#shared/crypto'
 import { generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 import { writeJsonFile } from '#shared/fs'
 
@@ -128,9 +128,11 @@ Controller.prototype.rotateRootToken = async function (req, res) {
 
   /*
    * If it was written to disk, also update the (hash of the) Root Token in memory
+   * as well as the keys_hash value
    * Then return the new Root Token
    */
   utils.setKeysMrt(keys.mrt)
+  utils.setKeysHash(hash(JSON.stringify(keydata)))
 
   return res.send({ root_token: formatRootTokenResponseData(mrt) })
 }
