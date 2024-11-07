@@ -77,23 +77,25 @@ const passwordHash = Joi.object({
  * The contents of the keys file/object
  */
 const keys = Joi.object({
-  jwt: Joi.string().required(),
-  mrt: passwordHash.required(),
-  public: Joi.string().required(),
-  private: Joi.string().required(),
   cluster: uuid.required(),
+  icrt: Joi.string().required(),
+  ikey: Joi.string().required(),
   jwk: Joi.object({
     kty: Joi.string().required(),
     kid: Joi.string().required(),
     n: Joi.string().required(),
     e: Joi.string().required(),
   }),
-  rfpr: Joi.string().base64().required(),
+  jwt: Joi.string().required(),
+  mrt: passwordHash.required(),
+  pgpriv: Joi.string().required(),
+  pgpub: Joi.string().required(),
+  private: Joi.string().required(),
+  public: Joi.string().required(),
   rcrt: Joi.string().required(),
+  rfpr: Joi.string().base64().required(),
   rkey: Joi.string().required(),
   rpwd: Joi.string().required(),
-  icrt: Joi.string().required(),
-  ikey: Joi.string().required(),
   seal: passwordHash.required(),
   unseal: Joi.string().required(),
 })
