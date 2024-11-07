@@ -66,14 +66,19 @@ const mrt = Joi.string()
   .pattern(/^mrt\.[0-9a-z]+$/)
 
 /*
+ * The hash of any password or secret is structured like this
+ */
+const passwordHash = Joi.object({
+  hash: Joi.string(),
+  salt: Joi.string(),
+})
+
+/*
  * The contents of the keys file/object
  */
 const keys = Joi.object({
   jwt: Joi.string().required(),
-  mrt: Joi.string()
-    .length(68, 'utf8')
-    .pattern(/^mrt\.[0-9a-z]+$/)
-    .required(),
+  mrt: passwordHash.required(),
   public: Joi.string().required(),
   private: Joi.string().required(),
   cluster: uuid.required(),
@@ -89,6 +94,7 @@ const keys = Joi.object({
   rpwd: Joi.string().required(),
   icrt: Joi.string().required(),
   ikey: Joi.string().required(),
+  seal: passwordHash.required(),
 })
 
 /*
@@ -267,4 +273,4 @@ async function validate(key, input, schema) {
 /*
  * Named exports
  */
-export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, version, nodeSerial, settings, preseed }
+export { Joi, validate, id, fqdn, jsTime, uuid, keys, mrt, passwordHash, version, nodeSerial, settings, preseed }
