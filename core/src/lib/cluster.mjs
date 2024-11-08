@@ -12,6 +12,7 @@ import {
   validDataWithChecksum,
   loadClusterDataFromDisk,
 } from './services/core.mjs'
+import { validate } from '#lib/validation'
 
 /*
  * Helper method to update the cluster state
@@ -670,14 +671,13 @@ async function inviteClusterNodeAttempt(remote) {
     returnAs: 'json',
     returnError: true,
   })
-  if (result.status === 200) {
-    log.info(`Node ${result.response.data.node} will join the cluster`)
-    return true
-  } else if (result.status === 409) {
-    log.info(`Node ${result.response.data.node} is reloading, cluster join attempt abandoned`)
-  } else {
-    log.todo(Object.keys(result), `Handle cluster join failure. Status was ${result.status}`)
-    log.todo(result.message)
-    return false
-  }
+
+  /*
+   * Validate response
+   */
+  const [valid, err] = await validate(`res.cluster.join`, result)
+  if (valid) log.info(`Node ${result.response.data.node} will join the cluster`)
+  else log.todo(err, `Handle cluster join failure.`)
+
+  return valid ? true : false
 }

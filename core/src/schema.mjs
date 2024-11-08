@@ -113,6 +113,10 @@ export const schema = {
   /*
    * Responses
    */
+  'res.cluster.join': Joi.object({
+    cluster: uuid.required(),
+    node: uuid.required(),
+  }),
   'res.cluster.heartbeat': Joi.object({
     data: Joi.object({
       cluster: uuid.required(),
