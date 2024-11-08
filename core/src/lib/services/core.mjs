@@ -129,7 +129,7 @@ export const service = {
         log.debug(`Found keys with serial ${keysData.serial}`)
         const keys = unsealKeyData(keysData.keys)
         utils.setKeys(keys)
-      } else log.err(`Unable to load keys. This is unexpected.`)
+      } else log.error(`Unable to load keys. This is unexpected.`)
 
       /*
        * Keep a fully templated version of the on-disk settings in memory

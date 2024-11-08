@@ -59,6 +59,10 @@ export const schema = {
     },
     headers: Joi.object(),
   }),
+  'req.cluster.pullKeys': Joi.object({
+    node_uuid: uuid.required(),
+    keys_serial: jsTime.required(),
+  }),
   'req.docker.pull': Joi.object({ tag: id }),
   'req.docker.container.id': Joi.object({ id }),
   'req.docker.container.inspect': Joi.object({ id }),

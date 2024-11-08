@@ -377,7 +377,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
   if (Array.isArray(data?.errors) && data.errors.length > 0) {
     utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
     for (const err of data.errors) {
-      log.warn(`Heartbeat error from ${fqdn}: ${err}`)
+      log.warn(`Irregular heartbeat error from ${fqdn}: ${err}`)
     }
   } else {
     utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
@@ -469,12 +469,12 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    */
   if (data.settings_serial !== utils.getSettingsSerial()) {
     errors.push('SETTINGS_SERIAL_MISMATCH')
-    action = 'SYNC_SETTINGS'
-    log.debug(
-      `Settings serial is ${
-        Number(data.settings_serial) > Number(utils.getSettingsSerial()) ? 'newer' : 'older'
-      } than ours in ${type} from ${data.from.fqdn}`
-    )
+    action = 'SYNC'
+    if (Number(data.settings_serial) > Number(utils.getSettingsSerial())) {
+      log.debug(`Settings serial is ahead in ${type} from ${data.from.fqdn}`)
+    } else {
+      log.debug(`Settings serial is behind in ${type} from ${data.from.fqdn}`)
+    }
   }
 
   /*
@@ -483,13 +483,12 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    */
   if (data.keys_serial !== utils.getKeysSerial()) {
     errors.push('KEYS_SERIAL_MISMATCH')
-    action = 'SYNC_KEYS'
     action = 'SYNC'
-    log.debug(
-      `KEys serial is ${
-        Number(data.keys_serial) > Number(utils.getKeysSerial()) ? 'newer' : 'older'
-      } than ours in ${type} from ${data.from.fqdn}`
-    )
+    if (Number(data.keys_serial) > Number(utils.getKeysSerial())) {
+      log.debug(`Keys serial is ahead in ${type} from ${data.from.fqdn}`)
+    } else {
+      log.debug(`Keys serial is behind in ${type} from ${data.from.fqdn}`)
+    }
   }
 
   /*
@@ -688,4 +687,26 @@ async function inviteClusterNodeAttempt(remote) {
   else log.todo(err, `Handle cluster join failure.`)
 
   return valid ? true : false
+}
+
+export async function pullClusterData(remote) {
+  log.debug(`Pulling cluster data from ${remote}`)
+
+  const result = await testUrl(`https://${remote}/-/core/cluster/sync`, {
+    ignoreCertificate: true,
+    timeout: 5000,
+    returnAs: 'json',
+    returnError: true,
+  })
+
+  log.todo(result)
+
+  /*
+   * Validate response
+  const [valid, err] = await validate(`res.cluster.join`, result)
+  if (valid) log.info(`Node ${valid.node} will join the cluster`)
+  else log.todo(err, `Handle cluster join failure.`)
+
+  return valid ? true : false
+   */
 }

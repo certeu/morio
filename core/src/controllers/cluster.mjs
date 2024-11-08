@@ -1,11 +1,16 @@
 import { log, utils } from '../lib/utils.mjs'
-import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
+import { verifyHeartbeatRequest, pullClusterData } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
 import { writeJsonFile } from '#shared/fs'
 import { reload } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
-import { dataWithChecksum, validDataWithChecksum, unsealKeyData } from '../lib/services/core.mjs'
+import {
+  dataWithChecksum,
+  validDataWithChecksum,
+  unsealKeyData,
+  loadKeysFromDisk,
+} from '../lib/services/core.mjs'
 
 /**
  * This status controller handles the MORIO cluster endpoints
@@ -15,7 +20,7 @@ import { dataWithChecksum, validDataWithChecksum, unsealKeyData } from '../lib/s
 export function Controller() {}
 
 /**
- * Sync (heartbeat or re-sync cluster when a node gets out of sync)
+ * Cluster heartbeat
  *
  * This gets send to the leader by by any node that
  * wakes up and find itself a follower in the cluster
@@ -45,7 +50,7 @@ Controller.prototype.heartbeat = async function (req, res) {
     })
 
   /*
-   * If now, then validate the checksum before we continue
+   * If not, validate the checksum before we continue
    */
   if (!validDataWithChecksum(valid)) {
     log.warn(`Received heartbeat with invalid checksum from ${req.body.data.from.fqdn}`)
@@ -88,7 +93,24 @@ Controller.prototype.heartbeat = async function (req, res) {
    */
   if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
     if (action === 'SYNC') {
-      log.todo('Handle heartbeat SYNC action')
+      if (Number(valid.data.settings_serial) > Number(utils.getSettingsSerial())) {
+        log.debug(`Settings serial is ahead on ${valid.data.from.fqdn}`)
+        /*
+         * Do not run this while handling a request, instead defer
+         */
+        setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
+      } else {
+        log.debug(`Settings serial is behind on ${valid.data.from.fqdn}`)
+      }
+      if (Number(valid.data.keys_serial) > Number(utils.getKeysSerial())) {
+        log.debug(`Keys serial is ahead on ${valid.data.from.fqdn}`)
+        /*
+         * Do not run this while handling a request, instead defer
+         */
+        setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
+      } else {
+        log.debug(`Keys serial is ahead on ${valid.data.from.fqdn}`)
+      }
     } else if (action === 'INVITE') {
       log.todo('Handle heartbeat INVITE action')
     } else if (action === 'LEADER_CHANGE') {
@@ -207,4 +229,49 @@ Controller.prototype.join = async function (req, res) {
    * Now return as reload
    */
   return reload({ joinCluster: true })
+}
+
+/**
+ * Sync keys or settings when cluster nodes get out of sync.
+ *
+ * This gets send to the leader by by any node that
+ * wakes up and find itself a follower in the cluster
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getKeys = async function (req, res) {
+  /*
+   * Validate request against schema
+   * data: {
+   *  node_uuid
+   *  keys_serial
+   *  }
+   *  checksuym
+   */
+  const [valid, err] = await validate(`req.cluster.pullKeys`, req.body)
+  if (!valid) {
+    log.warn(`Received invalid pullKeys request ${req.body.node}`)
+    return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+  }
+
+  /*
+   * Validate the checksum before we continue
+   */
+  if (!validDataWithChecksum(valid)) {
+    log.warn(`Received pullKeys request with invalid checksum from ${req.body.data.node_uuid}`)
+    return utils.sendErrorResponse(res, 'morio.core.checksum.mismatch', req.url)
+  }
+
+  /*
+   * Looks good. Load key data from disk
+   */
+  const data = await loadKeysFromDisk()
+
+  /*
+   * And return
+   */
+  return res.status(200).send(dataWithChecksum(data))
 }
