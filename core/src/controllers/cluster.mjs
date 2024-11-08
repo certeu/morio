@@ -61,7 +61,7 @@ Controller.prototype.heartbeat = async function (req, res) {
      */
     utils.setHeartbeatInterval(1)
     log.info(
-      `Received a broadcast heartbeat from ${valid.data.from.fqdn}, indicating a node restart or reload. Increasing heartbeat rate to stabilize the cluster.`
+      `Received a broadcast heartbeat from ${valid.data.from.fqdn}. Increasing heartbeat rate to stabilize the cluster.`
     )
   } else log.debug(`Incoming heartbeat from ${valid.data.from.fqdn}`)
 
@@ -93,6 +93,8 @@ Controller.prototype.heartbeat = async function (req, res) {
       log.todo('Handle heartbeat INVITE action')
     } else if (action === 'LEADER_CHANGE') {
       log.todo('Handle hearbeat LEADER_CHANGE action')
+    } else if (action) {
+      log.todo(`Handle hearbeat ${action} action`)
     }
   }
 

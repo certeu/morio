@@ -240,7 +240,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
    * If fqdn is not a thing, don't bother
    */
   if (!fqdn) {
-    log.warn(`Cannot send heartbeat to ${fqdn}`)
+    log.warn(`Cannot send heartbeat to an FQDN that is falsy`)
     return
   }
 
@@ -464,13 +464,17 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
 
   /*
    * Verify settings_serial
-   * If there's a mismatch, ask to re-sync the cluster.
+   * If there's a mismatch, we need to sync the most recent settings,
+   * which are the ones with the highest serial.
    */
   if (data.settings_serial !== utils.getSettingsSerial()) {
-    const err = 'SETTINGS_SERIAL_MISMATCH'
-    errors.push(err)
-    action = 'SYNC'
-    log.debug(`Settings serial mismatch in ${type} from ${data.from.fqdn}: ${err}`)
+    errors.push('SETTINGS_SERIAL_MISMATCH')
+    action = 'SYNC_SETTINGS'
+    log.debug(
+      `Settings serial is ${
+        Number(data.settings_serial) > Number(utils.getSettingsSerial()) ? 'newer' : 'older'
+      } than ours in ${type} from ${data.from.fqdn}`
+    )
   }
 
   /*
@@ -478,10 +482,14 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    * If there's a mismatch, ask to re-sync the cluster.
    */
   if (data.keys_serial !== utils.getKeysSerial()) {
-    const err = 'KEYS_SERIAL_MISMATCH'
-    errors.push(err)
+    errors.push('KEYS_SERIAL_MISMATCH')
+    action = 'SYNC_KEYS'
     action = 'SYNC'
-    log.debug(`Keys hash mismatch in ${type} from ${data.from.fqdn}: ${err}`)
+    log.debug(
+      `KEys serial is ${
+        Number(data.keys_serial) > Number(utils.getKeysSerial()) ? 'newer' : 'older'
+      } than ours in ${type} from ${data.from.fqdn}`
+    )
   }
 
   /*
