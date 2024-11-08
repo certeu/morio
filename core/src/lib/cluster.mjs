@@ -676,7 +676,7 @@ async function inviteClusterNodeAttempt(remote) {
    * Validate response
    */
   const [valid, err] = await validate(`res.cluster.join`, result)
-  if (valid) log.info(`Node ${result.response.data.node} will join the cluster`)
+  if (valid) log.info(`Node ${valid.node} will join the cluster`)
   else log.todo(err, `Handle cluster join failure.`)
 
   return valid ? true : false
