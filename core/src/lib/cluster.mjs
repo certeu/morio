@@ -357,6 +357,11 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
     }
 
     return
+  } else if (data.status && data.status === 209) {
+  /*
+   * If the node is busy, we just try again later
+   */
+    log.todo(`Node is reloading, will ask to join later`)
   } else if (data.data && data.checksum) {
     if (validDataWithChecksum(data)) data = data.data
     else log.todo(data, `Heartbeat checksum failure`)

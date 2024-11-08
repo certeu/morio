@@ -172,12 +172,16 @@ Controller.prototype.join = async function (req, res) {
    * construct the path to write to disk, and join cluster is an unauthenticated
    * request. So we can't trust this input.
    */
-  const serial = Number(valid.settings.serial)
-  log.debug(`Joining cluster, writing new settings to settings.${serial}.json`)
-  let result = await writeJsonFile(`/etc/morio/settings.${serial}.json`, valid.settings.data)
+  const settings_serial = Number(valid.settings.serial)
+  const keys_serial = Number(valid.keys.serial)
+  log.debug(`Joining cluster, writing new settings to settings.${settings_serial}.json`)
+  let result = await writeJsonFile(
+    `/etc/morio/settings.${settings_serial}.json`,
+    valid.settings.data
+  )
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
-  log.debug(`Writing key data to keys.${serial}.json`)
-  result = await writeJsonFile(`/etc/morio/keys.${serial}.json`, valid.keys.data)
+  log.debug(`Writing key data to keys.${keys_serial}.json`)
+  result = await writeJsonFile(`/etc/morio/keys.${keys_serial}.json`, valid.keys.data)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing node data to node.json`)
   const nodeUuid = uuid()
@@ -201,7 +205,7 @@ Controller.prototype.join = async function (req, res) {
   /*
    * Don't forget to finalize the request
    */
-  res.status(200).send({ cluster: keyData.cluster, node: nodeUuid, serial })
+  res.status(200).send({ cluster: keyData.cluster, node: nodeUuid })
 
   /*
    * Now return as reload
