@@ -600,10 +600,13 @@ async function forceUpdateRunningServicesState() {
    */
   utils.clearServicesState()
 
-  const [ok, runningServices] = await runDockerApiCommand('listContainers')
+  const [ok, runningContainers] = await runDockerApiCommand('listContainers')
   if (ok) {
-    for (const service of runningServices) {
-      utils.setServiceState(service.Names[0].split('/').pop(), dockerStateToServiceState(service))
+    for (const container of runningContainers) {
+      const name = container.Names[0]
+      if (name.slice(0, 7) === '/morio-') {
+        utils.setServiceState(name.slice(7), dockerStateToServiceState(container))
+      }
     }
   }
 }
@@ -618,7 +621,6 @@ function dockerStateToServiceState(ds) {
   return {
     name: ds.Names.pop(),
     image: ds.Image,
-    labels: ds.Labels,
     state: ds.State,
     status: ds.Status,
   }
