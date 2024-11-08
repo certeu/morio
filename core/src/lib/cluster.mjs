@@ -349,21 +349,21 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
       if (error.code === 'ECONNREFUSED') {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
-        log.warn(error, `Unspecified error when sending heartbeat to node ${fqdn}.`)
+        log.todo(`Unspecified error when sending heartbeat to node ${fqdn}.`)
       }
     }
 
     return
   } else if (data.data && data.checksum) {
     if (validDataWithChecksum(data)) data = data.data
-    else log.warn(data, `Heartbeat checksum failure`)
+    else log.todo(data, `Heartbeat checksum failure`)
   } else {
     /*
      * It is normal for nodes to not be able to properly sign/checksum the heartbeats
      * when the cluster just came up, since they may not have the required data yet
      * So below 1 minute of uptime, let's swallow these warnings
      */
-    if (utils.getUptime() > 60) log.warn(`Received an invalid heartbeat response`)
+    if (utils.getUptime() > 60) log.todo(`Received an invalid heartbeat response`)
   }
 
   /*
@@ -372,7 +372,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
   if (Array.isArray(data?.errors) && data.errors.length > 0) {
     utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
     for (const err of data.errors) {
-      log.warn(`Heartbeat error from ${fqdn}: ${err}`)
+      log.todo(`Heartbeat error from ${fqdn}: ${err}`)
     }
   } else {
     utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
