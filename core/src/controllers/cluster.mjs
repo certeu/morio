@@ -29,10 +29,7 @@ Controller.prototype.heartbeat = async function (req, res) {
    */
   const [valid, err] = await validate(`req.cluster.heartbeat`, req.body)
   if (!valid) {
-    log.todo(
-      { body: req.body, err: err?.message },
-      `Received invalid heartbeat from ${req.body.data.from.fqdn}`
-    )
+    log.warn(`Received invalid heartbeat from ${req.body.data.from.fqdn}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err?.message,
     })
@@ -51,10 +48,7 @@ Controller.prototype.heartbeat = async function (req, res) {
    * If now, then validate the checksum before we continue
    */
   if (!validDataWithChecksum(valid)) {
-    log.todo(
-      { body: req.body, err: err?.message },
-      `Received heartbeat with invalid checksum from ${req.body.data.from.fqdn}`
-    )
+    log.warn(`Received heartbeat with invalid checksum from ${req.body.data.from.fqdn}`)
     return utils.sendErrorResponse(res, 'morio.core.checksum.mismatch', req.url)
   }
 
@@ -151,14 +145,14 @@ Controller.prototype.join = async function (req, res) {
    */
   const [valid, err] = await validate(`req.cluster.join`, req.body)
   if (!valid) {
-    log.info(
+    log.warn(
       err,
       `Refused request to join cluster ${String(req.body.cluster)} as ${String(req.body.as)} as it violates the schema`
     )
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.err, {
       schema_violation: err.message,
     })
-  } else log.todo(valid, 'Join request data')
+  }
   log.info(
     `Accepted request to join cluster ${valid.cluster.slice(
       0,

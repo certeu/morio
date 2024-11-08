@@ -476,9 +476,6 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    * Verify keys_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  log.warn(
-    `Reveived heartbeat with keys serial: ${data.keys_serial} (ours: ${utils.getKeysSerial()})`
-  )
   if (data.keys_serial !== utils.getKeysSerial()) {
     const err = 'KEYS_SERIAL_MISMATCH'
     errors.push(err)
