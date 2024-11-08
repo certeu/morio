@@ -134,7 +134,7 @@ predocs.MORIO_DOCKER_ADD_HOST = `Optional \`host:ip\` resolution to add to the
 containers configuration.
 
 This is typically used to facilitate the development or testing of Morio.
-It is not the kind of thing that you want to run in production: use DNS instead.
+It is not the kind of setup that you want to run in production: use DNS instead.
 
 To update this, set the \`MORIO_DOCKER_ADD_HOST\` environment variable when
 launching the Morio core container.`
