@@ -250,7 +250,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   let data
   try {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
-    log.warn(`Sending heartbeat with key serial: ${utils.getKeysSerial()}`) // REMOVEME
+    log.todo(`Sending heartbeat with key serial: ${utils.getKeysSerial()}`) // REMOVEME
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: dataWithChecksum({
@@ -282,7 +282,6 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
     // Help the debug party
     const rtt = Date.now() - start
     log.debug(
-      error,
       `${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
     )
     // Verify heartbeat (this will log a warning for the error)
@@ -676,7 +675,6 @@ async function inviteClusterNodeAttempt(remote) {
   } else {
     log.todo(Object.keys(result), 'Handle cluster join failure')
     log.todo(result.message)
-    log.todo(result.response.data)
     return false
   }
 }
