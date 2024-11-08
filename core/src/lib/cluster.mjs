@@ -335,7 +335,7 @@ function heartbeatDelay() {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
-  log.todo({ data }) // REMOVEME
+  log.todo({ data_keys: Object.keys(data) }, 'This was annoying') // REMOVEME
   /*
    * Is this an error?
    */
