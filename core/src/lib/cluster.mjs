@@ -358,9 +358,9 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
 
     return
   } else if (data.status && data.status === 209) {
-  /*
-   * If the node is busy, we just try again later
-   */
+    /*
+     * If the node is busy, we just try again later
+     */
     log.todo(`Node is reloading, will ask to join later`)
   } else if (data.data && data.checksum) {
     if (validDataWithChecksum(data)) data = data.data
@@ -680,8 +680,10 @@ async function inviteClusterNodeAttempt(remote) {
   if (result.status === 200) {
     log.info(`Node ${result.response.data.node} will join the cluster`)
     return true
+  } else if (result.status === 409) {
+    log.info(`Node ${result.response.data.node} is reloading, cluster join attempt abandoned`)
   } else {
-    log.todo(Object.keys(result), 'Handle cluster join failure')
+    log.todo(Object.keys(result), `Handle cluster join failure. Status was ${result.status}`)
     log.todo(result.message)
     return false
   }
