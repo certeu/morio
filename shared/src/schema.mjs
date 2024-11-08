@@ -107,7 +107,6 @@ const keysFile = Joi.object({
   data: Joi.string().required(),
   key: Joi.string().required(),
   seal: passwordHash.required(),
-  serial: Joi.number().required(),
 })
 
 

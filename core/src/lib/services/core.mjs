@@ -124,8 +124,12 @@ export const service = {
       /*
        * Also load and unseal key data
        */
-      const keys = unsealKeyData((await loadKeysFromDisk()).keys)
-      utils.setKeys(keys)
+      const keysData = await loadKeysFromDisk()
+      if (keysData.serial) {
+        log.debug(`Found keys with serial ${keysData.serial}`)
+        const keys = unsealKeyData(keysData.keys)
+        utils.setKeys(keys)
+      } else log.err(`Unable to load keys. This is unexpected.`)
 
       /*
        * Keep a fully templated version of the on-disk settings in memory

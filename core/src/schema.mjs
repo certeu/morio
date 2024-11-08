@@ -54,8 +54,8 @@ export const schema = {
       data: settings,
     }),
     keys: {
+      serial: jsTime.required(),
       data: keysFile,
-      hash: Joi.string().required(),
     },
     headers: Joi.object(),
   }),

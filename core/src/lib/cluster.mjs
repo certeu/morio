@@ -250,7 +250,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   let data
   try {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
-    log.warn(`Sending heartbeat with key hash: ${utils.getKeysHash()}`)
+    log.warn(`Sending heartbeat with key serial: ${utils.getKeysSerial()}`) // REMOVEME
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: dataWithChecksum({
@@ -282,6 +282,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
     // Help the debug party
     const rtt = Date.now() - start
     log.debug(
+      error,
       `${broadcast ? 'Broadcast heartbeat' : 'Heartbeat'} to ${fqdn} took ${rtt}ms and resulted in an error.`
     )
     // Verify heartbeat (this will log a warning for the error)
@@ -333,6 +334,7 @@ function heartbeatDelay() {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
+  log.todo({ data }) // REMOVEME
   /*
    * Is this an error?
    */
@@ -659,7 +661,7 @@ async function inviteClusterNodeAttempt(remote) {
         data: clusterData.settings,
       },
       keys: {
-        hash: clusterData.keysHash,
+        serial: Number(utils.getKeysSerial()),
         data: clusterData.keys,
       },
     },
@@ -668,11 +670,13 @@ async function inviteClusterNodeAttempt(remote) {
     returnAs: 'json',
     returnError: true,
   })
-  if (result) {
-    log.info(`Node ${result.node} will join the cluster`)
+  if (result.status === 200) {
+    log.info(`Node ${result.response.data.node} will join the cluster`)
     return true
   } else {
-    log.todo('Handle cluster join failure')
+    log.todo(Object.keys(result), 'Handle cluster join failure')
+    log.todo(result.message)
+    log.todo(result.response.data)
     return false
   }
 }

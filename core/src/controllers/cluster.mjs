@@ -117,7 +117,7 @@ Controller.prototype.heartbeat = async function (req, res) {
       node: utils.getNodeUuid(),
       node_serial: Number(utils.getNodeSerial()),
       settings_serial: Number(utils.getSettingsSerial()),
-      keys_hash: utils.getKeysHash(),
+      keys_serial: Number(utils.getKeysSerial()),
       version: utils.getVersion(),
       nodes: utils.getClusterNodes(),
       status: utils.getStatus(),
