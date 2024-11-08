@@ -101,8 +101,6 @@ Controller.prototype.heartbeat = async function (req, res) {
       log.todo('Handle heartbeat INVITE action')
     } else if (action === 'LEADER_CHANGE') {
       log.todo('Handle hearbeat LEADER_CHANGE action')
-    } else if (action) {
-      log.todo(`Handle hearbeat ${action} action`)
     }
   }
 
