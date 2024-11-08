@@ -434,11 +434,8 @@ export function defaultRecreateServiceHook(service) {
    */
   const config = utils.getMorioServiceConfig(service).container
   const container = utils.getServiceState(service, false)
-  if (
-    container.name !== `/${config.container_name}` ||
-    container.image !== `${config.image}:${config.tag}`
-  ) {
-    log.debug(`[${service}] The service name or image has changed`)
+  if (container.image !== `${config.image}:${config.tag}`) {
+    log.debug(`[${service}] The container image has changed, recreating service`)
     return true
   }
 
