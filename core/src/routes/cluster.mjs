@@ -27,4 +27,9 @@ export function routes(app) {
    * This route invites this node to join a Morio cluster
    */
   app.post('/cluster/join', (req, res) => Cluster.join(req, res))
+
+  /*
+   * This route pull cluster data to sync the cluster
+   */
+  app.post('/cluster/sync', (req, res) => Cluster.sync(req, res))
 }

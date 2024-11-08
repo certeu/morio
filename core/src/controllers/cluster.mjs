@@ -9,7 +9,7 @@ import {
   dataWithChecksum,
   validDataWithChecksum,
   unsealKeyData,
-  loadKeysFromDisk,
+  loadClusterDataFromDisk,
 } from '../lib/services/core.mjs'
 
 /**
@@ -232,7 +232,7 @@ Controller.prototype.join = async function (req, res) {
 }
 
 /**
- * Sync keys or settings when cluster nodes get out of sync.
+ * Sync keys and settings when cluster nodes get out of sync.
  *
  * This gets send to the leader by by any node that
  * wakes up and find itself a follower in the cluster
@@ -240,18 +240,22 @@ Controller.prototype.join = async function (req, res) {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.getKeys = async function (req, res) {
+Controller.prototype.sync = async function (req, res) {
   /*
    * Validate request against schema
    * data: {
-   *  node_uuid
-   *  keys_serial
-   *  }
+      from: {
+        fqdn: utils.getNodeFqdn(),
+        serial: Number(utils.getNodeSerial()),
+        uuid: utils.getNodeUuid(),
+        keys_serial: Number(utils.getKeysSerial),
+        settings_serial: Number(utils.getSettingsSerial),
+      },
    *  checksuym
    */
-  const [valid, err] = await validate(`req.cluster.pullKeys`, req.body)
+  const [valid, err] = await validate(`req.cluster.sync`, req.body)
   if (!valid) {
-    log.warn(`Received invalid pullKeys request ${req.body.node}`)
+    log.warn(`Received invalid sync request ${req.body.from.fqdn}`)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err?.message,
     })
@@ -261,14 +265,14 @@ Controller.prototype.getKeys = async function (req, res) {
    * Validate the checksum before we continue
    */
   if (!validDataWithChecksum(valid)) {
-    log.warn(`Received pullKeys request with invalid checksum from ${req.body.data.node_uuid}`)
+    log.warn(`Received sync request with invalid checksum from ${req.body.data.node_uuid}`)
     return utils.sendErrorResponse(res, 'morio.core.checksum.mismatch', req.url)
   }
 
   /*
    * Looks good. Load key data from disk
    */
-  const data = await loadKeysFromDisk()
+  const data = await loadClusterDataFromDisk()
 
   /*
    * And return

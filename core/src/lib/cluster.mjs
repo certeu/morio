@@ -693,6 +693,16 @@ export async function pullClusterData(remote) {
   log.debug(`Pulling cluster data from ${remote}`)
 
   const result = await testUrl(`https://${remote}/-/core/cluster/sync`, {
+    method: 'POST',
+    data: dataWithChecksum({
+      from: {
+        fqdn: utils.getNodeFqdn(),
+        serial: Number(utils.getNodeSerial()),
+        uuid: utils.getNodeUuid(),
+        keys_serial: Number(utils.getKeysSerial),
+        settings_serial: Number(utils.getSettingsSerial),
+      },
+    }),
     ignoreCertificate: true,
     timeout: 5000,
     returnAs: 'json',
