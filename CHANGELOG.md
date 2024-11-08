@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- We no longer provide AMI images, and removed the docs, config and tooling for them
+- We have discontinued support for AMI images and have removed the related documentation, configurations, and tools.
 
 ## [0.5.0] - 2024-10-25
 
