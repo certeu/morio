@@ -60,12 +60,14 @@ export const schema = {
     headers: Joi.object(),
   }),
   'req.cluster.sync': Joi.object({
-    from: Joi.object({
-      fqdn: fqdn.required(),
-      uuid: uuid.required(),
-      serial: nodeSerial.required(),
-      settings_serial: jsTime.required(),
-      keys_serial: jsTime.required(),
+    data: Joi.object({
+      from: Joi.object({
+        fqdn: fqdn.required(),
+        uuid: uuid.required(),
+        serial: nodeSerial.required(),
+        settings_serial: jsTime.required(),
+        keys_serial: jsTime.required(),
+      }),
     }),
     checksum: Joi.string().required(),
   }),

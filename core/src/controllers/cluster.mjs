@@ -97,6 +97,9 @@ Controller.prototype.heartbeat = async function (req, res) {
        * Do not run this while handling a request, instead defer
        */
       setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
+      /*
+       * Overwrite the action, as we are the ones doing the work
+       */
     } else if (action === 'INVITE') {
       log.todo('Handle heartbeat INVITE action')
     } else if (action === 'LEADER_CHANGE') {
@@ -109,7 +112,8 @@ Controller.prototype.heartbeat = async function (req, res) {
    */
   return res.status(200).send(
     dataWithChecksum({
-      action,
+      // Respond with SYNC when action is START_SYNC
+      action: action === 'START_SYNC' ? 'SYNC' : action,
       errors,
       cluster: utils.getClusterUuid(),
       cluster_leader: {
@@ -239,7 +243,8 @@ Controller.prototype.sync = async function (req, res) {
    */
   const [valid, err] = await validate(`req.cluster.sync`, req.body)
   if (!valid) {
-    log.warn(`Received invalid sync request ${req.body.from.fqdn}`)
+    log.warn(err, `Received invalid sync request ${req.body?.from?.fqdn}`)
+    log.todo(req.body)
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.url, {
       schema_violation: err?.message,
     })
