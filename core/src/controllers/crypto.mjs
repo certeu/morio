@@ -2,7 +2,7 @@ import { log, utils } from '../lib/utils.mjs'
 import { createX509Certificate } from '#lib/tls'
 import { validate } from '#lib/validation'
 import { schemaViolation } from '#lib/response'
-import { keypairAsJwk, hashPassword, hash } from '#shared/crypto'
+import { keypairAsJwk, hashPassword } from '#shared/crypto'
 import { generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 import { writeJsonFile } from '#shared/fs'
 
@@ -117,22 +117,23 @@ Controller.prototype.rotateRootToken = async function (req, res) {
   log.debug(`Writing updated key data to morio.keys`)
   const keys = utils.getKeys()
   keys.mrt = hashPassword(mrt)
+  const newKeysSerial = Date.now()
   const keydata = {
     data: await utils.encrypt(keys),
     key: keys.private,
     seal: keys.seal,
   }
-  const result = await writeJsonFile(`/etc/morio/keys.json`, keydata, log, 0o600)
+  const result = await writeJsonFile(`/etc/morio/keys.${newKeysSerial}.json`, keydata, log, 0o600)
   if (!result)
     return res.status(500).send({ errors: ['Failed to write key data. Root token not updated.'] })
 
   /*
    * If it was written to disk, also update the (hash of the) Root Token in memory
-   * as well as the keys_hash value
+   * as well as the keys_serial value
    * Then return the new Root Token
    */
   utils.setKeysMrt(keys.mrt)
-  utils.setKeysHash(hash(JSON.stringify(keydata)))
+  utils.setKeysSerial(newKeysSerial)
 
   return res.send({ root_token: formatRootTokenResponseData(mrt) })
 }

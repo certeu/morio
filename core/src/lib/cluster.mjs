@@ -267,7 +267,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
         },
         version: utils.getVersion(),
         settings_serial: Number(utils.getSettingsSerial()),
-        keys_hash: utils.getKeysHash(),
+        keys_serial: Number(utils.getKeysSerial()),
         status: utils.getStatus(),
         nodes: utils.getClusterNodes(),
         broadcast,
@@ -468,12 +468,14 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
   }
 
   /*
-   * Verify keys_hash
+   * Verify keys_serial
    * If there's a mismatch, ask to re-sync the cluster.
    */
-  log.warn(`Reveived heartbeat with key hash: ${data.keys_hash} (ours: ${utils.getKeysHash()})`)
-  if (data.keys_hash !== utils.getKeysHash()) {
-    const err = 'KEYS_HASH_MISMATCH'
+  log.warn(
+    `Reveived heartbeat with keys serial: ${data.keys_serial} (ours: ${utils.getKeysSerial()})`
+  )
+  if (data.keys_serial !== utils.getKeysSerial()) {
+    const err = 'KEYS_SERIAL_MISMATCH'
     errors.push(err)
     action = 'SYNC'
     log.debug(`Keys hash mismatch in ${type} from ${data.from.fqdn}: ${err}`)

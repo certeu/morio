@@ -305,6 +305,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         superusers: [
           `root.${utils.getClusterUuid()}.morio.internal`,
           `console.infra.${utils.getClusterUuid()}.morio.internal`,
+          utils.getClusterFqdn(),
         ],
       },
 

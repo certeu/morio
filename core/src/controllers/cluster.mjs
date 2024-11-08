@@ -1,7 +1,7 @@
 import { log, utils } from '../lib/utils.mjs'
 import { verifyHeartbeatRequest } from '../lib/cluster.mjs'
 import { validate } from '#lib/validation'
-import { writeYamlFile, writeJsonFile } from '#shared/fs'
+import { writeJsonFile } from '#shared/fs'
 import { reload } from '../index.mjs'
 import { uuid } from '#shared/crypto'
 import { ensureCaConfig } from '../lib/services/ca.mjs'
@@ -173,8 +173,8 @@ Controller.prototype.join = async function (req, res) {
    * request. So we can't trust this input.
    */
   const serial = Number(valid.settings.serial)
-  log.debug(`Joining cluster, writing new settings to settings.${serial}.yaml`)
-  let result = await writeYamlFile(`/etc/morio/settings.${serial}.yaml`, valid.settings.data)
+  log.debug(`Joining cluster, writing new settings to settings.${serial}.json`)
+  let result = await writeJsonFile(`/etc/morio/settings.${serial}.json`, valid.settings.data)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing key data to keys.json`)
   result = await writeJsonFile(`/etc/morio/keys.json`, valid.keys.data)

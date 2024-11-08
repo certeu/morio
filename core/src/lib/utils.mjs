@@ -282,13 +282,13 @@ utils.getInternalServiceCn = (service) =>
 utils.getKeys = () => store.get('config.keys')
 
 /**
- * Helper method to get the keys_hash
+ * Helper method to get the keys_serial
  *
- * See setKeysHash for more info
+ * See setKeysSerial for more info
  *
- * @return {number} serial - The keys hash
+ * @return {number} serial - The keys serial
  */
-utils.getKeysHash = () => store.get('state.keys_hash')
+utils.getKeysSerial = () => store.get('state.keys_serial')
 
 /**
  * Helper method to get the node_serial of the leading node
@@ -697,24 +697,24 @@ utils.setKeys = (keys) => {
 }
 
 /**
- * Helper method to store the hash for the keys data on disk
+ * Helper method to store the serial for the keys data on disk
  *
  * This matters because there are two main chunks for data that we need
  * to keep in sync between cluster nodes:
  *  - The settings, here we use the settings serial to indidate a change
  *  - They keys, here we use the hash of the JSON.stirngified data on disk
  *
- *  Cluster hearbeat includes the settings serial + key hash thus allowing
+ *  Cluster hearbeat includes the settings serial and keys serial, allowing
  *  nodes to detect any updates. This means we do not need any custom logic
  *  when (for example) rotating the morio root token. It will change the
- *  hash and on the next cluster heartbeat, this change will cause the other
- *  nodes to re-sync.
+ *  keys serial and on the next cluster heartbeat, this change will cause the
+ *  other nodes to re-sync.
  *
  * @param {number|bool} hash - The hash of the keys data on disk
  * @return {object} utils - The utils instance, making this method chainable
  */
-utils.setKeysHash = (hash) => {
-  store.set('state.keys_hash', hash)
+utils.setKeysSerial = (serial) => {
+  store.set('state.keys_serial', serial)
   return utils
 }
 

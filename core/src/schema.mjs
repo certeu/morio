@@ -36,7 +36,7 @@ export const schema = {
       }),
       version: version.required(),
       settings_serial: jsTime.required(),
-      keys_hash: Joi.string().required(),
+      keys_serial: jsTime.required(),
       status: Joi.object(), // TODO: Make this more detailed
       nodes: Joi.object(), // TODO: Make this more detailed
       broadcast: Joi.bool().required(),

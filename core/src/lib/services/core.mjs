@@ -1,5 +1,5 @@
 // Required for config file management
-import { readYamlFile, readJsonFile, readDirectory } from '#shared/fs'
+import { readJsonFile, readDirectory } from '#shared/fs'
 // Avoid objects pointing to the same memory
 import { cloneAsPojo } from '#shared/utils'
 // Required to generated X.509 certificates
@@ -66,16 +66,16 @@ export const service = {
         log.trace(`Preset ${key} = ${val}`)
 
       /*
-       * Load existing settings, keys, node info and timestamp from disk
+       * Load existing settings, node info and serial from disk
        * This will also populate utils with the encryption methods
        */
-      const { settings, keys, node, timestamp } = await loadSettingsFromDisk()
+      const { settings, node, serial } = await loadSettingsFromDisk()
 
       /*
-       * If timestamp is false, no on-disk settings exist and we
+       * If serial is false, no on-disk settings exist and we
        * are running in ephemeral mode. In which case we return early.
        */
-      if (!timestamp) {
+      if (!serial) {
         log.info('Morio is running in ephemeral mode')
         utils.setEphemeral(true)
         utils.setEphemeralUuid(uuid())
@@ -104,23 +104,28 @@ export const service = {
       }
 
       /*
-       * If we reach this point, a timestamp exists, and we are not in ephemeral mode
+       * If we reach this point, a serial exists, and we are not in ephemeral mode
        * Save data from disk in memory
        */
       utils.setEphemeral(false)
-      utils.setNode({ ...node, settings: Number(timestamp) })
+      utils.setNode({ ...node, settings: Number(serial) })
       // TODO: do we need this next line?
-      utils.setClusterNode(node.uuid, { ...node, settings: Number(timestamp) })
-      utils.setKeys(keys)
+      utils.setClusterNode(node.uuid, { ...node, settings: Number(serial) })
       utils.setSanitizedSettings(cloneAsPojo(settings))
 
       /*
        * Log some info, for debugging
        */
-      log.debug(`Found settings with serial ${timestamp}`)
+      log.debug(`Found settings with serial ${serial}`)
       for (const [flagName, flagValue] of Object.entries(settings.tokens?.flags || {})) {
         if (flagValue) log.info(`Feature flag enabled: ${flagName}`)
       }
+
+      /*
+       * Also load and unseal key data
+       */
+      const keys = unsealKeyData((await loadKeysFromDisk()).keys)
+      utils.setKeys(keys)
 
       /*
        * Keep a fully templated version of the on-disk settings in memory
@@ -162,25 +167,47 @@ export const service = {
 }
 
 /*
- * Find the most recent timestamp file that exists on disk
+ * Find the most recent timestamp config file that exists on disk
  */
-async function getSettingsTimestamp(updateState = true) {
-  const timestamp = ((await readDirectory(`/etc/morio`)) || [])
-    .filter((file) => new RegExp('settings.[0-9]+.yaml').test(file))
+async function getConfigFileSerial(filename = 'settings') {
+  // Do not allow reading anything else but what we expect
+  const files = ['settings', 'keys']
+  if (!files.includes(filename)) throw `Not reading ${filename} from disk. Rather die instead.`
+
+  const serial = ((await readDirectory(`/etc/morio`)) || [])
+    .filter((file) => new RegExp(`${filename}.[0-9]+.json`).test(file))
     .map((file) => file.split('.')[1])
     .sort()
     .pop()
 
-  if (updateState) utils.setSettingsSerial(timestamp)
+  return Number(serial)
+}
 
-  return timestamp
+/*
+ * Find the most recent settings serial file that exists on disk
+ */
+async function getSettingsSerial(updateState = true) {
+  const serial = await getConfigFileSerial('settings')
+  if (updateState) utils.setSettingsSerial(serial)
+
+  return serial
+}
+
+/*
+ * Find the most recent keys serial file that exists on disk
+ */
+async function getKeysSerial(updateState = true) {
+  const serial = await getConfigFileSerial('keys')
+  if (updateState) utils.setKeysSerial(serial)
+
+  return serial
 }
 
 /**
- * Loads the most recent Morio settings  file(s) from disk
+ * Loads the most recent Morio settings file from disk
  */
-async function loadSettingsFromDisk(timestamp = false, updateState = true) {
-  if (!timestamp) timestamp = await getSettingsTimestamp(updateState)
+async function loadSettingsFromDisk(updateState = true) {
+  const serial = await getSettingsSerial(updateState)
 
   /*
    * Node data is created even in ephemeral mode
@@ -190,27 +217,32 @@ async function loadSettingsFromDisk(timestamp = false, updateState = true) {
   /*
    * If there's no settings on disk, we're in ephemeral mode
    */
-  if (!timestamp)
+  if (!serial)
     return {
       settings: {},
-      keys: {},
-      timestamp: false,
+      serial: false,
     }
 
   /*
-   * Now read the settings file and keys
+   * Now read the settings file
    */
-  const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
-  const keydata = await readJsonFile(`/etc/morio/keys.json`)
-  if (updateState) utils.setKeysHash(hash(JSON.stringify(keydata)))
+  const settings = await readJsonFile(`/etc/morio/settings.${serial}.json`)
+
+  return { settings, node, serial }
+}
+
+/**
+ * Loads the most recent Morio keys file from disk
+ */
+export async function loadKeysFromDisk(updateState = true) {
+  const serial = await getKeysSerial(updateState)
 
   /*
-   * Decrypt key data
-   * This will also add encryption methods to utils so we can template the settings
+   * Now read the keys file
    */
-  const keys = unsealKeyData(keydata)
+  const keys = await readJsonFile(`/etc/morio/keys.${serial}.json`)
 
-  return { settings, keys, node, timestamp }
+  return { keys, serial }
 }
 
 /**
@@ -220,17 +252,16 @@ async function loadSettingsFromDisk(timestamp = false, updateState = true) {
  * provide what is written to disk, and let the other node
  * figure it out.
  */
-export async function loadClusterDataFromDisk(timestamp = false) {
-  if (!timestamp) timestamp = await getSettingsTimestamp()
+export async function loadClusterDataFromDisk() {
+  const settingsData = await loadSettingsFromDisk()
+  const keysData = await loadKeysFromDisk()
 
-  /*
-   * Now read the settings file and keys
-   */
-  const settings = await readYamlFile(`/etc/morio/settings.${timestamp}.yaml`)
-  const keys = await readJsonFile(`/etc/morio/keys.json`)
-  const keysHash = hash(JSON.stringify(keys))
-
-  return { settings, keys, keysHash }
+  return {
+    settings: settingsData.settings,
+    settings_serial: settingsData.serial,
+    keys: keysData.keys,
+    keys_serial: keysData.serial,
+  }
 }
 
 export async function templateSettings(settings) {
