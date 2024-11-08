@@ -250,7 +250,6 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   let data
   try {
     if (broadcast) log.trace(`Broadcast heartbeat to ${fqdn}`)
-    log.todo(`Sending heartbeat with key serial: ${utils.getKeysSerial()}`) // REMOVEME
     data = await testUrl(`https://${fqdn}/-/core/cluster/heartbeat`, {
       method: 'POST',
       data: dataWithChecksum({
@@ -289,8 +288,6 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
     // And trigger a new heartbeat
     runHeartbeat(false, false)
   }
-  log.todo({ checktype: typeof data })
-  if (typeof data === 'object') log.todo(Object.keys(data), 'Data keys after checktype')
 
   /*
    * Help the debug party
@@ -335,7 +332,6 @@ function heartbeatDelay() {
  * @param {object} error - If the request errored out, this will hold the Axios error
  */
 function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
-  log.todo({ data_keys: Object.keys(data) }, 'This was annoying') // REMOVEME
   /*
    * Is this an error?
    */
@@ -351,8 +347,9 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
       if (error.code === 'ECONNREFUSED') {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
-        log.todo(`Unspecified error when sending heartbeat to node ${fqdn}.`)
-        if (typeof data === 'object') log.todo(Object.keys(data), 'Data keys')
+        log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
+        if (typeof data === 'object')
+          log.todo(Object.keys(data), 'Data keys in verifyHeartbeatResponse')
       }
     }
 
@@ -361,17 +358,16 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
     /*
      * If the node is busy, we just try again later
      */
-    log.todo(`Node is reloading, will ask to join later`)
   } else if (data.data && data.checksum) {
     if (validDataWithChecksum(data)) data = data.data
-    else log.todo(data, `Heartbeat checksum failure`)
+    else log.warn(`Heartbeat checksum failure`)
   } else {
     /*
      * It is normal for nodes to not be able to properly sign/checksum the heartbeats
      * when the cluster just came up, since they may not have the required data yet
-     * So below 1 minute of uptime, let's swallow these warnings
+     * So below 1.5 minute of uptime, let's swallow these warnings
      */
-    if (utils.getUptime() > 60) log.todo(`Received an invalid heartbeat response`)
+    if (utils.getUptime() > 90) log.warn(`Received an invalid heartbeat response`)
   }
 
   /*
@@ -380,7 +376,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
   if (Array.isArray(data?.errors) && data.errors.length > 0) {
     utils.setHeartbeatIn(fqdn, { up: true, ok: false, data })
     for (const err of data.errors) {
-      log.todo(`Heartbeat error from ${fqdn}: ${err}`)
+      log.warn(`Heartbeat error from ${fqdn}: ${err}`)
     }
   } else {
     utils.setHeartbeatIn(fqdn, { up: true, ok: true, data })
