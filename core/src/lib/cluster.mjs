@@ -349,8 +349,10 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
         log.warn(`Unspecified error when sending heartbeat to node ${fqdn}.`)
-        if (typeof data === 'object')
+        if (typeof data === 'object') {
           log.todo(Object.keys(data), 'Data keys in verifyHeartbeatResponse')
+          if (data.message) log.todo(data.message)
+        }
       }
     }
 
