@@ -106,7 +106,9 @@ export async function validateSettings(newSettings) {
   }
 
   const httpPromises = []
+  i = 0
   for (const node of newSettings.cluster.broker_nodes) {
+    i++
     /*
      * Try contacting nodes over HTTPS, ignore certificate
      * We bypass this when it's the unit test node

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Fixed a thrown error  in the `GET /token` endpoint due to passing in the wrong attibute
 - [api] Implemented the `/kv/dump` endpoint (it always returned an empty object before)
+- [api] Fixed incorrect node index in setup validation report
 - [core] Fix an issue where the running services detection was not updated to reflect the container name prefix causing unneeded service restarts
 
 ### Removed
