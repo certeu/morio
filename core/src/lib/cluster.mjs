@@ -289,6 +289,8 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
     // And trigger a new heartbeat
     runHeartbeat(false, false)
   }
+  log.todo({ checktype: typeof data })
+  if (typeof data === 'object') log.todo(Object.keys(data), 'Data keys after checktype')
 
   /*
    * Help the debug party
@@ -350,6 +352,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
         log.warn(`Connection refused when sending heartbeat to ${fqdn}. Is this node up?`)
       } else {
         log.todo(`Unspecified error when sending heartbeat to node ${fqdn}.`)
+        if (typeof data === 'object') log.todo(Object.keys(data), 'Data keys')
       }
     }
 

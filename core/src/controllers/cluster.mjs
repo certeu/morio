@@ -158,13 +158,13 @@ Controller.prototype.join = async function (req, res) {
     return utils.sendErrorResponse(res, 'morio.core.schema.violation', req.err, {
       schema_violation: err.message,
     })
-  } else
-    log.info(
-      `Accepted request to join cluster ${valid.cluster.slice(
-        0,
-        utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH')
-      )} as ${valid.as}`
-    )
+  } else log.todo(valid, 'Join request data')
+  log.info(
+    `Accepted request to join cluster ${valid.cluster.slice(
+      0,
+      utils.getPreset('MORIO_CORE_UUID_FINGERPRINT_LENGTH')
+    )} as ${valid.as}`
+  )
 
   /*
    * To join the cluster, we write settings and keys to disk and reload
