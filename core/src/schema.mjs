@@ -146,6 +146,15 @@ export const schema = {
     }),
     checksum: Joi.string().required(),
   }),
+  'res.cluster.sync': Joi.object({
+    data: Joi.object({
+      keys: keysFile.required(),
+      settings,
+      settings_serial: jsTime.required(),
+      keys_serial: jsTime.required(),
+    }),
+    checksum: Joi.string().required(),
+  }),
   'res.status': Joi.object({
     name: Joi.string(),
     about: Joi.string(),

@@ -13,6 +13,8 @@ import {
   loadClusterDataFromDisk,
 } from './services/core.mjs'
 import { validate } from '#lib/validation'
+import { reload } from '../index.mjs'
+import { writeJsonFile } from '#shared/fs'
 
 /*
  * Helper method to update the cluster state
@@ -715,14 +717,33 @@ export async function pullClusterData(remote) {
     returnError: true,
   })
 
-  log.todo(result)
-
   /*
    * Validate response
-  const [valid, err] = await validate(`res.cluster.join`, result)
-  if (valid) log.info(`Node ${valid.node} will join the cluster`)
-  else log.todo(err, `Handle cluster join failure.`)
-
-  return valid ? true : false
    */
+  const [valid, err] = await validate(`res.cluster.sync`, result)
+  if (!valid) log.error(err, `Invalid sync response, discarding update`)
+  else {
+    log.info(`Updating cluster config from sync result`)
+    log.debug(`Writing updated key data to morio.keys`)
+    let written = false
+    try {
+      await writeJsonFile(
+        `/etc/morio/keys.${result.data.keys_serial}.json`,
+        result.data.keys,
+        log,
+        0o600
+      )
+      await writeJsonFile(
+        `/etc/morio/settings.${result.data.settings_serial}.json`,
+        result.data.settings,
+        log,
+        0o600
+      )
+      written = true
+    } catch (err) {
+      log.error(err, `Failed to write synced data to disk`)
+    }
+
+    if (written) reload()
+  }
 }
