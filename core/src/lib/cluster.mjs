@@ -394,8 +394,10 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
    * Do we need to take any action?
    */
   if (data?.action) {
-    if (data.action === 'INVITE') inviteClusterNode(fqdn)
-    if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
+    if (data.action === 'SYNC') pullClusterData(fqdn)
+    else if (data.action === 'INVITE') inviteClusterNode(fqdn)
+    else if (data.action === 'LEADER_CHANGE') log.todo('Implement LEADER_CHANGE')
+    else log.todo(`Unsupported action in heartbeat response: ${data.action}`)
   } else if (Array.isArray(data?.nodes)) {
     for (const uuid in data.nodes) {
       /*
@@ -469,11 +471,12 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    */
   if (data.settings_serial !== utils.getSettingsSerial()) {
     errors.push('SETTINGS_SERIAL_MISMATCH')
-    action = 'SYNC'
     if (Number(data.settings_serial) > Number(utils.getSettingsSerial())) {
-      log.debug(`Settings serial is ahead in ${type} from ${data.from.fqdn}`)
+      action = 'START_SYNC'
+      log.debug(`Settings serial is ahead in ${type} from ${data.from.fqdn}. Will start sync.`)
     } else {
-      log.debug(`Settings serial is behind in ${type} from ${data.from.fqdn}`)
+      action = 'SYNC'
+      log.debug(`Settings serial is behind in ${type} from ${data.from.fqdn}. Asking to sync.`)
     }
   }
 
@@ -483,11 +486,12 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
    */
   if (data.keys_serial !== utils.getKeysSerial()) {
     errors.push('KEYS_SERIAL_MISMATCH')
-    action = 'SYNC'
     if (Number(data.keys_serial) > Number(utils.getKeysSerial())) {
-      log.debug(`Keys serial is ahead in ${type} from ${data.from.fqdn}`)
+      action = 'START_SYNC'
+      log.debug(`Keys serial is ahead in ${type} from ${data.from.fqdn}. Will start sync.`)
     } else {
-      log.debug(`Keys serial is behind in ${type} from ${data.from.fqdn}`)
+      action = 'SYNC'
+      log.debug(`Keys serial is behind in ${type} from ${data.from.fqdn}. Will ask to sync.`)
     }
   }
 

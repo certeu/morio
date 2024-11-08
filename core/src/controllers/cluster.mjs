@@ -92,25 +92,11 @@ Controller.prototype.heartbeat = async function (req, res) {
    * clink into place.
    */
   if (utils.getUptime() > utils.getPreset('MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL') * 2) {
-    if (action === 'SYNC') {
-      if (Number(valid.data.settings_serial) > Number(utils.getSettingsSerial())) {
-        log.debug(`Settings serial is ahead on ${valid.data.from.fqdn}`)
-        /*
-         * Do not run this while handling a request, instead defer
-         */
-        setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
-      } else {
-        log.debug(`Settings serial is behind on ${valid.data.from.fqdn}`)
-      }
-      if (Number(valid.data.keys_serial) > Number(utils.getKeysSerial())) {
-        log.debug(`Keys serial is ahead on ${valid.data.from.fqdn}`)
-        /*
-         * Do not run this while handling a request, instead defer
-         */
-        setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
-      } else {
-        log.debug(`Keys serial is ahead on ${valid.data.from.fqdn}`)
-      }
+    if (action === 'START_SYNC') {
+      /*
+       * Do not run this while handling a request, instead defer
+       */
+      setTimeout(() => pullClusterData(valid.data.from.fqdn), 666)
     } else if (action === 'INVITE') {
       log.todo('Handle heartbeat INVITE action')
     } else if (action === 'LEADER_CHANGE') {
