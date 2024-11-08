@@ -13,9 +13,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   /*
    * The allowerd paths differ between ephemeral and regular mode
    */
-  const paths = utils.isEphemeral()
-    ? ['/status', '/cluster/join', '/cluster/heartbeat']
-    : ['/status', '/cluster/sync', '/cluster/elect', '/cluster/heartbeat', '/jwks']
+  const paths = ['/status', '/cluster/join', '/cluster/heartbeat', '/cluster/sync', '/cluster/elect', '/jwks']
 
   return {
     /**
