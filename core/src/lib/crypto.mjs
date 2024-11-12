@@ -15,10 +15,10 @@ export const generateKeySeal = async () => await hashPassword(randomString(64))
 export const generateRootToken = async () => 'mrt.' + (await randomString(32))
 
 /*
- * A description to go with the generated root token
+ * A description to go with the generated Root Token
  */
 export const formatRootTokenResponseData = (mrt) => ({
-  about: `This is the Morio root token.
+  about: `This is the Morio Root Token.
 You can use it to authenticate before any authentication providers have been
 set up. Store it in a safe space, as it will never be shown again.`,
   value: mrt,
