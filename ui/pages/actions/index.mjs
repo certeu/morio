@@ -60,11 +60,11 @@ const RotateRootTokenConfirmation = ({ rotateRootToken }) => {
     <div className="max-w-xl">
       <h2>Rotate the Morio Root Token?</h2>
       <p>
-        Enter the current root token, then click the button to generate a new one.
+        Enter the current Root Token, then click the button to generate a new one.
       </p>
       <b>What will happen?</b>
       <p>
-        Morio Core will generate a new Root token and store its cryptographic hash.
+        Morio Core will generate a new Root Token and store its cryptographic hash.
         <br />
         There will be no downtime or service interruptions.
       </p>
