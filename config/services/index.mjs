@@ -2,6 +2,7 @@ import { YamlConfig } from '../yaml-config.mjs'
 import { resolveServiceConfiguration as api } from './api.mjs'
 import { resolveServiceConfiguration as broker } from './broker.mjs'
 import { resolveServiceConfiguration as ca } from './ca.mjs'
+import { resolveServiceConfiguration as cache } from './cache.mjs'
 import { resolveServiceConfiguration as console } from './console.mjs'
 import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
@@ -16,6 +17,7 @@ const resolvers = {
   api,
   broker,
   ca,
+  cache,
   console,
   connector,
   core,
@@ -38,6 +40,7 @@ export const serviceOrder = [
   'ca',
   'broker',
   'db',
+  'cache',
   'console',
   'ui',
   'proxy',
@@ -55,7 +58,7 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = ['db', 'ui', 'connector', 'dbuilder', 'watcher']
+export const optionalServices = ['db', 'cache', 'connector', 'dbuilder', 'ui', 'watcher']
 
 /**
  * Helper method to generate the Traefik configuration

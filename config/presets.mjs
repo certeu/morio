@@ -293,6 +293,12 @@ predocs.MORIO_CA_UID = 'User ID (UID) of the user running the CA service'
 presets.MORIO_CA_UID = 1000
 
 /*
+ * Cache presets
+ */
+predocs.MORIO_CACHE_PORT = 'TCP port for the internal cache service to listen on'
+presets.MORIO_CACHE_PORT = 6379
+
+/*
  * Connnector presets
  */
 

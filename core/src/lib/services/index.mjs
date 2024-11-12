@@ -4,6 +4,7 @@ import { service as apiService } from './api.mjs'
 import { service as dbService } from './db.mjs'
 import { service as uiService } from './ui.mjs'
 import { service as caService } from './ca.mjs'
+import { service as cacheService } from './cache.mjs'
 import { service as brokerService } from './broker.mjs'
 import { service as connectorService } from './connector.mjs'
 import { service as consoleService } from './console.mjs'
@@ -43,6 +44,7 @@ const services = {
   core: coreService,
   db: dbService,
   ca: caService,
+  cache: cacheService,
   proxy: proxyService,
   api: apiService,
   ui: uiService,
