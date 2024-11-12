@@ -14,7 +14,7 @@ import { statuses } from '#config/account-statuses'
  * Some re-usable schema blocks
  */
 const about = Joi.string()
-  .min(2)
+  .min(0)
   .max(255)
   .description('A description or nmemonic note for the acount')
   .optional()
@@ -35,7 +35,7 @@ const overwrite = Joi.boolean()
   .valid(true, false)
   .description('Whether to overwrite the account, if one has a sufficiently high role')
 const password = Joi.string().min(3).max(1024).description(`The account's password`)
-const token = Joi.string().min(3).max(12).description(`The TOTP token (one-time password)`)
+const token = Joi.string().min(3).max(64).description(`The TOTP token (one-time password)`)
 const jwt = Joi.string().base64().description(`The JSON Web Token`)
 const account = Joi.object({
   id: Joi.string().required(),
