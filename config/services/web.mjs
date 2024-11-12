@@ -36,7 +36,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ? [
             `${utils.getPreset('MORIO_LOGS_ROOT')}:/var/log/nginx`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/web/conf.d:/etc/nginx/conf.d`,
-            `${utils.getPreset('MORIO_DATA_ROOT')}/shared/webroot:/usr/share/nginx/html`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/webroot:/usr/share/nginx/html`,
             `${utils.getPreset('MORIO_DATA_ROOT')}/aptly/public:/usr/share/nginx/html/repos/apt`,
             `${utils.getPreset('MORIO_DATA_ROOT')}/downloads:/usr/share/nginx/html/downloads`,
           ]

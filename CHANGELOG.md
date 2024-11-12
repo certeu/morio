@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Implemented the `/kv/dump` endpoint (it always returned an empty object before)
 - [api] Fixed incorrect node index in setup validation report
 - [core] Fix an issue where the running services detection was not updated to reflect the container name prefix causing unneeded service restarts
+- [core] Fix incorrect path leading to the APT repo not being properly setup
 - [ui] Guard against cluster leader being unknown in status view
 
 ### Removed
