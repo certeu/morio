@@ -103,9 +103,9 @@ const ActionsPage = (props) => {
   }
 
   const rotateRootToken = async (mrt) => {
-    setLoadingStatus([true, 'Rorating the Morio Root Token, this should not take long'])
+    setLoadingStatus([true, 'Rotating the Morio Root Token, this should not take long'])
     const result = await api.rotateMrt(mrt)
-    if (result[1] !== 200) return setLoadingStatus([true, `Unable to rorate the Morio Root Token`, true, false])
+    if (result[1] !== 200) return setLoadingStatus([true, `Unable to rotate the Morio Root Token`, true, false])
     else {
       setLoadingStatus([true, 'Sucessfully rotated the Morio Root Token', true, true])
       pushModal(
