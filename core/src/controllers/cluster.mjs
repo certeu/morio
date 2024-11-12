@@ -231,15 +231,6 @@ Controller.prototype.join = async function (req, res) {
 Controller.prototype.sync = async function (req, res) {
   /*
    * Validate request against schema
-   * data: {
-      from: {
-        fqdn: utils.getNodeFqdn(),
-        serial: Number(utils.getNodeSerial()),
-        uuid: utils.getNodeUuid(),
-        keys_serial: Number(utils.getKeysSerial),
-        settings_serial: Number(utils.getSettingsSerial),
-      },
-   *  checksuym
    */
   const [valid, err] = await validate(`req.cluster.sync`, req.body)
   if (!valid) {

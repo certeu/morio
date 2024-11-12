@@ -98,7 +98,7 @@ export function kv(db, log) {
     /*
      * Make sure it worked
      */
-    if (result[0] !== 200) return galse
+    if (result[0] !== 200) return false
 
     /*
      * Transform data to a POJO, then return
