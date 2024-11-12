@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Implemented the various `DISABLE_IDP_[type]` feature flags
 - [core] Added the ability to rotate the Morio Root Token
 - [ui] Added feature flag settings to the UI
-- [core] Added new actions page including the UI to rotate the root token
+- [core] Added new actions page including the UI to rotate the Root Token
 
 ### Fixed
 
-- [api] Fixed a thrown error  in the `GET /token` endpoint due to passing in the wrong attibute
+- [api] Fixed a thrown error in the `GET /token` endpoint due to passing in the wrong attibute
 - [api] Implemented the `/kv/dump` endpoint (it always returned an empty object before)
 - [api] Fixed incorrect node index in setup validation report
 - [core] Fix an issue where the running services detection was not updated to reflect the container name prefix causing unneeded service restarts
