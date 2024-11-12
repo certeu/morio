@@ -101,6 +101,15 @@ export const Header = ({
               <div className="grow pl-4 justify-start flex flex-row">
                 {operator ? (
                   <NavButton
+                    href="/actions"
+                    label="Actions"
+                    active={isActive('/actions', asPath)}
+                  >
+                    Actions
+                  </NavButton>
+                ) : null}
+                {operator ? (
+                  <NavButton
                     href="/settings"
                     label="Settings"
                     active={isActive('/settings', asPath)}

@@ -46,3 +46,8 @@ export const MrtProvider = ({ api, setLoadingStatus, setAccount, setError }) => 
  */
 const valid = (token) =>
   typeof token === 'string' && token.length === 68 && token.slice(0, 4) === 'mrt.'
+
+/*
+ * Also export this
+ */
+export const mrtValid = valid

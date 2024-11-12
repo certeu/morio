@@ -44,6 +44,7 @@ export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
  */
 const icons = {
   accounts: UserIcon,
+  actions: WrenchIcon,
   api: CodeIcon,
   broker: RedPanda,
   ca: CertificateIcon,
@@ -85,6 +86,10 @@ const icons = {
  * This object represents the navigation structure
  */
 export const links = {
+  actions: {
+    t: 'Actions',
+    r: 'operator',
+  },
   settings: {
     t: 'Settings',
     r: 'operator',

@@ -588,6 +588,21 @@ MorioClient.prototype.createCertificate = async function (data) {
   })
 }
 
+/**
+ * Rotate Morio Root Token
+ *
+ * @param {string} providerId - ID of the authentication provider
+ * @param {object} data - The login data to submit
+ * @return {object} - The result
+ */
+MorioClient.prototype.rotateMrt = async function (mrt) {
+  return await this.call(`${morioConfig.api}/rotate/mrt`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ mrt }),
+  })
+}
+
 /*
  * Don't recreate the client on each call
  */

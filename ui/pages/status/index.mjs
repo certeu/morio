@@ -1,20 +1,15 @@
 // Dependencies
 import { rbac } from 'lib/utils.mjs'
 // Hooks
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
-// Context
-import { ModalContext } from 'context/modal.mjs'
-import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { StatusIcon, OkIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 import { Docker, Traefik, RedPandaConsole } from 'components/brands.mjs'
-import { RestartIcon, ReseedIcon } from 'components/icons.mjs'
 import { Echart } from 'components/echarts.mjs'
 
 const statusColors = { green: 'success', amber: 'warning', red: 'error' }
@@ -41,7 +36,7 @@ const ClusterInfo = ({ status }) => {
   if (!status?.core?.status?.cluster_leader) return null
 
   const node = status.core.nodes[status.core.node.node].fqdn
-  const leader = status.core.nodes[status.core.status.cluster_leader.uuid].fqdn
+  const leader = status.core.nodes?.[status.core.status.cluster_leader.uuid]?.fqdn
 
   return (
     <div className={`p-2 px-4 flex flex-row items-center gap-2`}>
@@ -133,45 +128,9 @@ const Status = ({ status }) => {
   )
 }
 
-const RestartConfirmation = ({ restart }) => (
-  <>
-    <h2>Restart Morio?</h2>
-    <p>Click the button below to trigger a soft restart of Morio</p>
-    <b>What will happen?</b>
-    <p>
-      Morio Core will reload the settings on disk and re-bootstrap itself.
-      <br />
-      One or more services will potentially be restarted.
-    </p>
-    <button className="btn btn-primary w-full" onClick={restart}>
-      Restart Morio now
-    </button>
-  </>
-)
-
-const ReseedConfirmation = ({ reseed }) => (
-  <>
-    <h2>Reseed Morio?</h2>
-    <p>Click the button below to trigger a reseed of Morio</p>
-    <b>What will happen?</b>
-    <p>
-      Morio Core will use the current preseed settings to construct a new settings file.
-      <br />
-      It will then write that file to disk, and trigger a soft restart.
-      <br />
-      One or more services will likely be restarted.
-    </p>
-    <button className="btn btn-primary w-full" onClick={reseed}>
-      Reseed Morio now
-    </button>
-  </>
-)
-
 const StatusPage = (props) => {
   const [status, setStatus] = useState()
   const { api } = useApi()
-  const { pushModal } = useContext(ModalContext)
-  const { setLoadingStatus } = useContext(LoadingStatusContext)
   const { account } = useAccount()
 
   const updateStatus = async () => {
@@ -186,58 +145,12 @@ const StatusPage = (props) => {
     updateStatus()
   }, [])
 
-  const restart = async () => {
-    setLoadingStatus([true, 'Restarting Morio, this will take a while'])
-    const result = await api.restart()
-    if (result[1] !== 204) return setLoadingStatus([true, `Unable to restart Morio`, true, false])
-    else setLoadingStatus([true, 'Restart initialized', true, true])
-  }
-
-  const reseed = async () => {
-    setLoadingStatus([true, 'Reseeding Morio, this will take a while'])
-    const result = await api.reseed()
-    if (result[1] !== 204) return setLoadingStatus([true, `Unable to reseed Morio`, true, false])
-    else setLoadingStatus([true, 'Reseed initialized', true, true])
-  }
-
   // Does the user have an operator or higher role?
   const operator = rbac(account.role, 'operator')
 
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={StatusIcon} title={props.title}>
-        {operator ? (
-          <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl mb-4">
-            <button
-              title="Restart Morio..."
-              className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
-              onClick={() =>
-                pushModal(
-                  <ModalWrapper>
-                    <RestartConfirmation restart={restart} />
-                  </ModalWrapper>
-                )
-              }
-            >
-              <RestartIcon />
-              Restart Morio...
-            </button>
-            <button
-              title="Reseed Morio..."
-              className="w-full btn btn-warning btn-outline flex flex-row items-center justify-between"
-              onClick={() =>
-                pushModal(
-                  <ModalWrapper>
-                    <ReseedConfirmation reseed={reseed} />
-                  </ModalWrapper>
-                )
-              }
-            >
-              <ReseedIcon />
-              Reseed Morio...
-            </button>
-          </div>
-        ) : null}
         <Status status={status} />
         <div
           className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}
