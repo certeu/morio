@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - We have discontinued support for AMI images and have removed the related documentation, configurations, and tools.
+- [core] We no longer create broker topics on startup. Note that auto-create is enabled by default
 
 ## [0.5.0] - 2024-10-25
 

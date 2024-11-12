@@ -188,23 +188,6 @@ To change this, set \`tokens.presets.MORIO_API_LOG_LEVEL\` in your Morio
 settings.`
 presets.MORIO_BROKER_LOG_LEVEL = 'warn'
 
-predocs.MORIO_BROKER_TOPICS = 'Broker topics to be created when starting Morio'
-presets.MORIO_BROKER_TOPICS = [
-  '_redpanda.audit_log', // For RedPanda internal audit logging,
-  'alarms', // For alarms
-  'audit', // For audit info/logs (think auditbeat)
-  'checks', // For healthchecks
-  'events', // For events (typically generated from other sources)
-  'logs', // For logs
-  'metrics', // For metrics
-  'notifications', // For notifications
-  //'traces', // For distributed tracing / spans
-  //'cron.hourly', // For roughly hourly triggers
-  //'cron.daily', // For roughly daily triggers
-  //'cron.weekly', // For roughly daily triggers
-  //'cron.monthly', // For roughly daily triggers
-]
-
 predocs.MORIO_BROKER_CLIENT_TOPICS = `Broker topics that are writable by the
 Morio client`
 presets.MORIO_BROKER_CLIENT_TOPICS = [
