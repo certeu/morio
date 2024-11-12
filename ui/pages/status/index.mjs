@@ -35,6 +35,8 @@ const ClusterStatus = ({ status }) => {
 const ClusterInfo = ({ status }) => {
   if (!status?.core?.status?.cluster_leader) return null
 
+  if (!status.core.status.cluster_leader.uuid) return <p>Cluster leader not (yet) known</p>
+
   const node = status.core.nodes[status.core.node.node].fqdn
   const leader = status.core.nodes?.[status.core.status.cluster_leader.uuid]?.fqdn
 
