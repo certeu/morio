@@ -60,11 +60,11 @@ const RotateRootTokenConfirmation = ({ rotateRootToken }) => {
     <div className="max-w-xl">
       <h2>Rotate the Morio Root Token?</h2>
       <p>
-        Enter the current root token, then click the button to generate a new one.
+        Enter the current Root Token, then click the button to generate a new one.
       </p>
       <b>What will happen?</b>
       <p>
-        Morio Core will generate a new Root token and store its cryptographic hash.
+        Morio Core will generate a new Root Token and store its cryptographic hash.
         <br />
         There will be no downtime or service interruptions.
       </p>
@@ -103,9 +103,9 @@ const ActionsPage = (props) => {
   }
 
   const rotateRootToken = async (mrt) => {
-    setLoadingStatus([true, 'Rorating the Morio Root Token, this should not take long'])
+    setLoadingStatus([true, 'Rotating the Morio Root Token, this should not take long'])
     const result = await api.rotateMrt(mrt)
-    if (result[1] !== 200) return setLoadingStatus([true, `Unable to rorate the Morio Root Token`, true, false])
+    if (result[1] !== 200) return setLoadingStatus([true, `Unable to rotate the Morio Root Token`, true, false])
     else {
       setLoadingStatus([true, 'Sucessfully rotated the Morio Root Token', true, true])
       pushModal(
