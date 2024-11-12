@@ -105,7 +105,7 @@ export function kv(db, log) {
      */
     const data = {}
     if (Array.isArray(result[1].results?.[0]?.values)) {
-      for (const [key, val] of result[1].results?.[0]?.values) data[key] = val
+      for (const [key, val] of result[1].results[0].values) data[key] = val
     }
 
     return data
