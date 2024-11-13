@@ -36,7 +36,7 @@ const ToolsPage = (props) => (
           <Card
             title="Decrypt Data"
             href="/tools/decrypt"
-            desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio"
+            desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio."
             width="w-full"
             Icon={OpenLockIcon}
             role="engineer"
@@ -44,21 +44,21 @@ const ToolsPage = (props) => (
           <Card
             title="Downloads"
             href="/tools/downloads"
-            desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio"
+            desc="High-level overview of files available in the <Link href="/downloads/">/downloads</Link> folder."
             width="w-full"
             Icon={OpenLockIcon}
           />
           <Card
             title="Encrypt Data"
             href="/tools/encrypt"
-            desc="Encrypt data using Morio's symmetric encryption key, allowing decryption by Morio at a later time"
+            desc="Encrypt data using Morio's symmetric encryption key, allowing decryption by Morio at a later time."
             width="w-full"
             Icon={ClosedLockIcon}
           />
           <Card
             title="Export Data"
             href="/tools/export"
-            desc="Export different types of Morio data, for backup or advanced configuration scenarios"
+            desc="Export different types of Morio data, for backup or advanced configuration scenarios."
             width="w-full"
             Icon={BriefcaseIcon}
             role="user"
