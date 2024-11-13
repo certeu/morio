@@ -28,7 +28,7 @@ const ToolsPage = (props) => (
           <Card
             title="Client Packages"
             href="/tools/pkgs"
-            desc="Generate morio-client packages that are pre-configured to integration with this Morio deployment."
+            desc="Generate morio-client packages that are pre-configured to integrate with this Morio deployment."
             width="w-full"
             Icon={PackageIcon}
             role="operator"
@@ -66,7 +66,7 @@ const ToolsPage = (props) => (
           <Card
             title="X.509 Certificates"
             href="/tools/certificates"
-            desc="Sign certificate signing requests, or generate certificates  with the internal Morio Certificate Authority."
+            desc="Sign certificate signing requests, or generate certificates with the internal Morio Certificate Authority."
             width="w-full"
             Icon={CertificateIcon}
           />
