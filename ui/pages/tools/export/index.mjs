@@ -13,7 +13,7 @@ const ExportPage = (props) => (
             role="user"
             title="Morio Certificates"
             href="/tools/export/certificates"
-            desc="Export the root and intermediate certificate of the Morio Certificate Authority (CA)"
+            desc="Export the root and intermediate certificates of the Morio Certificate Authority (CA)"
             width="w-full"
             Icon={CertificateIcon}
           />
