@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2024-11-13
+
+### Changed
+
+- [ui] Do not hide what's not available to the current role
+
+### Fixed
+
+- [api] Missing optional chaining check in core controller
+- [core] Missing optional chaining check in settings controller
+
 ## [0.5.2] - 2024-11-13
 
 ### Fixed

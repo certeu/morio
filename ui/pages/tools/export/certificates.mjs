@@ -23,7 +23,7 @@ const X509DownloadPage = (props) => {
   }, [])
 
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="user">
       <ContentWrapper {...props} Icon={CertificateIcon} title={props.title}>
         <div className="max-w-4xl">
           {error ? (

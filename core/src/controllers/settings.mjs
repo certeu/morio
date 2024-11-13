@@ -236,7 +236,7 @@ const initialSetup = async function (req, settings) {
    * If settings.preseed.base is set, resolve the settings first
    */
   let valid, err
-  if (settings.preseed.base) {
+  if (settings.preseed?.base) {
     /*
      * Load the preseeded settings so we can validate them
      */

@@ -60,17 +60,8 @@ export const Header = ({
   theme, // Name of the current theme (light or dark)
   toggleTheme, // Method to change the theme
 }) => {
-  const { account } = useAccount()
-  const [user, setUser] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { asPath } = useRouter()
-
-  /*
-   * Avoid hydration errros
-   */
-  useEffect(() => {
-    if (!user && account) setUser(true)
-  }, [account])
 
   /*
    * Style header differently upon scroll (add shadow)
@@ -82,8 +73,6 @@ export const Header = ({
     },
     [scrolled]
   )
-
-  const operator = rbac(account.role, 'operator')
 
   return (
     <>
@@ -99,24 +88,20 @@ export const Header = ({
             </Link>
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
-                {operator ? (
-                  <NavButton
-                    href="/actions"
-                    label="Actions"
-                    active={isActive('/actions', asPath)}
-                  >
-                    Actions
-                  </NavButton>
-                ) : null}
-                {operator ? (
-                  <NavButton
-                    href="/settings"
-                    label="Settings"
-                    active={isActive('/settings', asPath)}
-                  >
-                    Settings
-                  </NavButton>
-                ) : null}
+                <NavButton
+                  href="/actions"
+                  label="Actions"
+                  active={isActive('/actions', asPath)}
+                >
+                  Actions
+                </NavButton>
+                <NavButton
+                  href="/settings"
+                  label="Settings"
+                  active={isActive('/settings', asPath)}
+                >
+                  Settings
+                </NavButton>
                 <NavButton
                   href="/status"
                   label="Status"
@@ -138,15 +123,13 @@ export const Header = ({
                 >
                   About Morio
                 </NavButton>
-                {user ? (
-                  <NavButton
-                    href="/account"
-                    label="Your Account"
-                    active={isActive('/account', asPath)}
-                  >
-                    Your Account
-                  </NavButton>
-                ) : null}
+                <NavButton
+                  href="/account"
+                  label="Your Account"
+                  active={isActive('/account', asPath)}
+                >
+                  Your Account
+                </NavButton>
               </div>
             </div>
             <NavButton onClick={toggleTheme} label="Change theme" toggle>

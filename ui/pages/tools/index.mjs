@@ -26,33 +26,30 @@ const ToolsPage = (props) => {
       <ContentWrapper {...props} Icon={CogIcon} title={props.title}>
         <div className="max-w-4xl">
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
-            {manager ? (
-              <Card
-                title="Accounts"
-                href="/tools/accounts"
-                desc="Manage local Morio accounts or list accounts from various identity providers."
-                width="w-full"
-                Icon={UserIcon}
-              />
-            ) : null}
-            {operator ? (
-              <Card
-                title="Client Packages"
-                href="/tools/pkgs"
-                desc="Generate morio-client packages that are pre-configured to integration with this Morio deployment."
-                width="w-full"
-                Icon={PackageIcon}
-              />
-            ) : null}
-            {engineer ? (
-              <Card
-                title="Decrypt Data"
-                href="/tools/decrypt"
-                desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio"
-                width="w-full"
-                Icon={OpenLockIcon}
-              />
-            ) : null}
+            <Card
+              title="Accounts"
+              href="/tools/accounts"
+              desc="Manage local Morio accounts or list accounts from various identity providers."
+              width="w-full"
+              Icon={UserIcon}
+              role="manager"
+            />
+            <Card
+              title="Client Packages"
+              href="/tools/pkgs"
+              desc="Generate morio-client packages that are pre-configured to integration with this Morio deployment."
+              width="w-full"
+              Icon={PackageIcon}
+              role="operator"
+            />
+            <Card
+              title="Decrypt Data"
+              href="/tools/decrypt"
+              desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio"
+              width="w-full"
+              Icon={OpenLockIcon}
+              role="engineer"
+            />
             <Card
               title="Downloads"
               href="/tools/downloads"
@@ -67,15 +64,14 @@ const ToolsPage = (props) => {
               width="w-full"
               Icon={ClosedLockIcon}
             />
-            {engineer ? (
-              <Card
-                title="Export Data"
-                href="/tools/export"
-                desc="Export different types of Morio data, for backup or advanced configuration scenarios"
-                width="w-full"
-                Icon={BriefcaseIcon}
-              />
-            ) : null}
+            <Card
+              title="Export Data"
+              href="/tools/export"
+              desc="Export different types of Morio data, for backup or advanced configuration scenarios"
+              width="w-full"
+              Icon={BriefcaseIcon}
+              role="user"
+            />
             <Card
               title="X.509 Certificates"
               href="/tools/certificates"

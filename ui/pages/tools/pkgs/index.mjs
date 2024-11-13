@@ -26,7 +26,7 @@ const Card = ({ title, ext, desc, href, Icon = null, width = 'w-72', disabled = 
 )
 
 const ClientsPage = (props) => (
-  <PageWrapper {...props}>
+  <PageWrapper {...props} role="operator">
     <ContentWrapper {...props} Icon={PackageIcon} title={props.title}>
       <div className="max-w-4xl">
         <Popout tip>

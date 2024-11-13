@@ -146,7 +146,7 @@ Controller.prototype.setup = async function (req, res) {
    * If preseed.base is set, resolve the settings first
    */
   let valid, err
-  if (body.preseed.base) {
+  if (body.preseed?.base) {
     /*
      * Load the preseeded settings so we can validate them
      */

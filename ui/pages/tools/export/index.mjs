@@ -12,26 +12,26 @@ const ExportPage = (props) => {
   const { account } = useAccount()
   const root = rbac(account.role, 'root')
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="user">
       <ContentWrapper {...props} Icon={CogIcon} title={props.title}>
         <div className="max-w-4xl">
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             <Card
+              role="user"
               title="Morio Certificates"
               href="/tools/export/certificates"
               desc="Export the root and intermediate certificate of the Morio Certificate Authority (CA)"
               width="w-full"
               Icon={CertificateIcon}
             />
-            {root ? (
-              <Card
-                title="Morio Keys"
-                href="/tools/export/keys"
-                desc="Export the cryptographic DNA of this Morio instance, this allows blue/green deployments"
-                width="w-full"
-                Icon={KeyIcon}
-              />
-            ) : null}
+            <Card
+              role="root"
+              title="Morio Keys"
+              href="/tools/export/keys"
+              desc="Export the cryptographic DNA of this Morio instance, this allows blue/green deployments"
+              width="w-full"
+              Icon={KeyIcon}
+            />
           </div>
         </div>
       </ContentWrapper>
