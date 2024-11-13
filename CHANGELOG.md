@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2] - 2024-11-13
+
 ### Fixed
 
+- [api] Fix incorrect key property when creating JWT in OIDC identity provider
 - [core] Do not assume preseed.base is a string, handle objects too
 
 ## [0.5.1] - 2024-11-12
