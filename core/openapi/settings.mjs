@@ -62,27 +62,4 @@ In other words, once Morio is set up, this endpoint becomes unavailable.`,
       ...errorResponses([`morio.core.schema.violation`, `morio.core.ephemeral.required`]),
     },
   })
-
-  api.post('/preseed', {
-    ...shared,
-    summary: `Preseed Morio`,
-    description: `This will set up Morio with the provided preseed settings.
-
-This endpoint is only available in ephemeral Mode.
-In other words, once Morio is set up, this endpoint becomes unavailable.`,
-    requestBody: {
-      description: 'The Morio preseed settings to use for the intial setup',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(schema['req.settings.preseed']).swagger,
-          examples: formatResponseExamples(examples.obj.preseed),
-        },
-      },
-    },
-    responses: {
-      200: response('Setup result', examples.res.setup),
-      ...errorResponses([`morio.core.schema.violation`, `morio.core.ephemeral.required`]),
-    },
-  })
 }

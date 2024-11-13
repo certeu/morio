@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [core] Do not assume preseed.base is a string, handle objects too
+
 ## [0.5.1] - 2024-11-12
 
 ### Added

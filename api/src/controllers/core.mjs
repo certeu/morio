@@ -141,7 +141,22 @@ Controller.prototype.setup = async function (req, res) {
    */
   const body = { ...req.body }
   delete body.headers
-  const [valid, err] = await utils.validate(`req.setup`, body)
+
+  /*
+   * If preseed.base is set, resolve the settings first
+   */
+  let valid, err
+  if (body.preseed.base) {
+    /*
+     * Load the preseeded settings so we can validate them
+     */
+    const settings = await loadPreseededSettings(body.preseed, log, '/tmp')
+    if (!settings) err = { message: 'Failed to construct settings from preseed data' }
+    else [valid, err] = await utils.validate(`req.setup`, settings)
+  } else {
+    ;[valid, err] = await utils.validate(`req.setup`, body)
+  }
+
   if (!valid) {
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
@@ -151,7 +166,7 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Validate settings are deployable
    */
-  const report = await validateSettings(req.body)
+  const report = await validateSettings(valid)
 
   /*
    * Make sure setting are valid
@@ -174,77 +189,6 @@ Controller.prototype.setup = async function (req, res) {
    * Settings are valid and deployable, pass them to core
    */
   const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req))
-
-  return res.status(status).send(result)
-}
-
-/**
- * Handles the initial preseeding
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.preseed = async function (req, res) {
-  /*
-   * This route is only accessible when running in ephemeral mode
-   */
-  if (!utils.isEphemeral())
-    return utils.sendErrorResponse(res, 'morio.api.ephemeral.required', req.url)
-
-  /*
-   * Validate preseed request against schema, but strip headers from body first
-   */
-  const body = { ...req.body }
-  delete body.headers
-  const [valid, err] = await utils.validate(`req.preseed`, body)
-  if (!valid) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-  }
-
-  /*
-   * Load the preseeded settings so we can validate them
-   */
-  const settings = await loadPreseededSettings(body, log, '/tmp')
-  if (!settings) return utils.sendErrorResponse(res, 'morio.api.preseed.failed', req.url)
-
-  /*
-   * Validate settings against the schema
-   */
-  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
-  if (!validSettings) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: errSettings.message,
-    })
-  }
-
-  /*
-   * Validate settings are deployable
-   */
-  const report = await validateSettings(settings)
-
-  /*
-   * Make sure setting are valid
-   */
-  if (!report.valid)
-    return utils.sendErrorResponse(
-      res,
-      'morio.api.settings.invalid',
-      req.url,
-      report.errors ? { validation_errors: report.errors } : false
-    )
-
-  /*
-   * Make sure settings are deployable
-   */
-  if (!report.deployable)
-    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
-
-  /*
-   * Settings are valid and deployable, pass them to core
-   */
-  const [status, result] = await utils.coreClient.post(`/preseed`, bodyPlusHeaders(req))
 
   return res.status(status).send(result)
 }

@@ -40,39 +40,6 @@ In other words, once Morio is set up, this endpoint becomes unavailable.`,
     },
   })
 
-  api.post('/preseed', {
-    operationId: 'preseed',
-    tags: ['settings', 'anonymous'],
-    summary: `Preseed Morio`,
-    description: `This will handle the initial setup of Morio via preseeded settings. Or rather, it will ask Morio Core to do so after validation.
-
-This endpoint does not require authentication. However, it is only available in ephemeral Mode.
-In other words, once Morio is set up, this endpoint becomes unavailable.`,
-    requestBody: {
-      description: 'The Morio preseed settings to use for the initial setup',
-      required: true,
-      content: {
-        'application/json': {
-          schema: j2s(schema['req.preseed']).swagger,
-          examples: formatResponseExamples(examples.obj.preseed),
-        },
-      },
-    },
-    responses: {
-      200: response({
-        desc: 'Setup result',
-        example: examples.res.setup,
-      }),
-      ...errorResponses([
-        `morio.api.schema.violation`,
-        `morio.api.ephemeral.required`,
-        `morio.api.authentication.required`,
-        `morio.api.internal.error`,
-        `morio.api.ratelimit.exceeded`,
-      ]),
-    },
-  })
-
   api.get('/settings', {
     operationId: 'getSettings',
     ...shared,

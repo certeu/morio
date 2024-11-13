@@ -125,60 +125,6 @@ Controller.prototype.setup = async function (req, res) {
 }
 
 /**
- * Preseed initial settings
- *
- * This will write the preseed config to disk and restart Morio
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.preseed = async function (req, res) {
-  /*
-   * Only allow this endpoint when running in ephemeral mode
-   */
-  if (!utils.isEphemeral())
-    return utils.sendErrorResponse(res, 'morio.core.ephemeral.required', req.url)
-
-  /*
-   * Validate request against schema, but strip headers from body first
-   */
-  const body = { ...req.body }
-  delete body.headers
-  const [preseed, err] = await utils.validate(`req.settings.preseed`, body)
-  if (!preseed?.base) {
-    return utils.sendErrorResponse(
-      res,
-      'morio.core.schema.violation',
-      req.url,
-      err?.message ? { schema_violation: err.message } : undefined
-    )
-  }
-
-  /*
-   * Load the preseeded settings
-   */
-  const settings = await loadPreseededSettings(body, log)
-
-  /*
-   * From here on, handle it like a regular setup
-   */
-  const [data, error] = await initialSetup(req, settings)
-
-  /*
-   * Send error, or data
-   */
-
-  if (data === false && error) return utils.sendErrorResponse(res, error[0], req.url, error?.[1])
-  else res.send(data)
-
-  /*
-   * Trigger a reload, but don't await it.
-   */
-  log.info(`Bring Morio out of ephemeral mode`)
-  return reload({ initialSetup: true })
-}
-
-/**
  * Soft restart core (aka reload)
  *
  * @param {object} req - The request object from Express
@@ -287,21 +233,31 @@ const localNodeInfo = async function (body) {
 
 const initialSetup = async function (req, settings) {
   /*
-   * Validate settings against schema
+   * If settings.preseed.base is set, resolve the settings first
    */
-  const [valid, err] = await utils.validate(`req.settings.setup`, settings)
-  if (!valid?.cluster) {
+  let valid, err
+  if (settings.preseed.base) {
+    /*
+     * Load the preseeded settings so we can validate them
+     */
+    const preseededSettings = await loadPreseededSettings(settings.preseed, log)
+    if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
+    else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
+  } else {
+    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
+  }
+
+  if (!valid?.cluster)
     return [
       false,
       ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
     ]
-  }
 
   /*
    * Check whether we can figure out who we are
    * Need to merge the loaded settings with the request headers
    */
-  const node = await localNodeInfo({ ...settings, headers: req.body.headers })
+  const node = await localNodeInfo({ ...valid, headers: req.body.headers })
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
     return [
@@ -324,7 +280,7 @@ const initialSetup = async function (req, settings) {
   /*
    * This is the initial deploy, generate keys, UUIDS and so on
    */
-  const keys = settings.preseed?.keys ? unsealKeyData(settings.preseed.keys) : {}
+  const keys = valid.preseed?.keys ? unsealKeyData(valid.preseed.keys) : {}
 
   /*
    * Generate UUIDs for node and cluster
