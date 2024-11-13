@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] We no longer have a dedicated `/preseed` endpoint, use the `/setup` endpoint instead
 - [api] We no longer have a dedicated `/validate/preseed` endpoint, use the `/validate/settings` endpoint instead
 - [core] We no longer have a dedicated `/preseed` endpoint, use the `/setup` endpoint instead
+- [ui] Removed preseed upload UI
 
 ## [0.5.1] - 2024-11-12
 
