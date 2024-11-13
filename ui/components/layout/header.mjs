@@ -1,8 +1,5 @@
-// Dependencies
-import { rbac } from 'lib/utils.mjs'
 // Hooks
-import { useAccount } from 'hooks/use-account.mjs'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useScrollPosition } from '@n8tb1t/use-scroll-position'
 import { useRouter } from 'next/router'
 // Components

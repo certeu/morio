@@ -1,5 +1,3 @@
-// Dependencies
-import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
