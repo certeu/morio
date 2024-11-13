@@ -1,8 +1,7 @@
 import { globDir } from '#shared/fs'
 import { validateSettings } from '#lib/validate-settings'
 import { keypairAsJwk } from '#shared/crypto'
-import { utils, log } from '../lib/utils.mjs'
-import { loadPreseededSettings } from '#shared/loaders'
+import { utils } from '../lib/utils.mjs'
 import { limits } from '../middleware.mjs'
 
 /**
@@ -186,49 +185,6 @@ Controller.prototype.validateSettings = async function (req, res) {
    * Run the settings validation helper, which returns a report object
    */
   const report = await validateSettings(req.body)
-
-  return res.send(report).end()
-}
-
-/**
- * Validate Morio preseed settings
- *
- * This allows people to validate a preseed object prior to applying it.
- * Which should hopefully avoid at least some mistakes.
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.validatePreseed = async function (req, res) {
-  /*
-   * Validate request against schema
-   */
-  const [valid, err] = await utils.validate(`req.preseed`, req.body)
-  if (!valid) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-  }
-
-  /*
-   * Load the preseeded settings so we can validate them
-   */
-  const settings = await loadPreseededSettings(req.body, log)
-
-  /*
-   * Validate settings against the schema
-   */
-  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
-  if (!validSettings) {
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: errSettings.message,
-    })
-  }
-
-  /*
-   * Run the settings validation helper, which return a report object
-   */
-  const report = await validateSettings(settings)
 
   return res.send(report).end()
 }
