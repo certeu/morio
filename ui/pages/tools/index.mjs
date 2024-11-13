@@ -44,7 +44,7 @@ const ToolsPage = (props) => (
           <Card
             title="Downloads"
             href="/tools/downloads"
-            desc="High-level overview of files available in the <Link href="/downloads/">/downloads</Link> folder."
+            desc="High-level overview of files available in the /downloads/ folder."
             width="w-full"
             Icon={OpenLockIcon}
           />
