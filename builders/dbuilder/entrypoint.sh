@@ -18,16 +18,27 @@ build_package() {
       cp $SRC/$FILE pkg/DEBIAN/
     fi
   done
-  # fix architecture in control file
-  sed -i "s/__MORIO_CLIENT_ARCHITECTURE__/$ARCH/" pkg/DEBIAN/control
-  for DIRPATH in $SRC/*/; do
-    DIR=$(basename "$DIRPATH")
-    echo "Copying $DIR"
-    cp -R $SRC/$DIR pkg/
-  done
-  # Copy the binary for this architecture
-  mkdir -p pkg/DEBIAN/usr/sbin/
-  cp $BIN/morio-linux-$ARCH pkg/DEBIAN/usr/sbin/morio
+
+  # Client and repo packages require different preparation
+  if [ $BUILD_JOB == "client" ]; then
+    # fix architecture in control file
+    sed -i "s/__MORIO_CLIENT_ARCHITECTURE__/$ARCH/" pkg/DEBIAN/control
+    for DIRPATH in $SRC/*/; do
+      DIR=$(basename "$DIRPATH")
+      echo "Copying $DIR"
+      cp -R $SRC/$DIR pkg/
+    done
+    # Copy the binary for this architecture
+    mkdir -p pkg/DEBIAN/usr/sbin/
+    cp $BIN/morio-linux-$ARCH pkg/DEBIAN/usr/sbin/morio
+  elif [ $BUILD_JOB == "repo" ]; then
+    for DIRPATH in $SRC/*/; do
+      DIR=$(basename "$DIRPATH")
+      echo "Copying $DIR"
+      cp -R $SRC/$DIR pkg/
+    done
+  fi
+  # Build the pacakge
   dpkg-deb --build pkg $DIST
 }
 
