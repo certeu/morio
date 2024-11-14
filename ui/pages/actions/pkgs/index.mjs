@@ -29,7 +29,7 @@ const ClientsPage = (props) => (
   <PageWrapper {...props} role="operator">
     <ContentWrapper {...props} Icon={PackageIcon} title={props.title}>
       <div className="max-w-4xl">
-        <h2>Build Morio Client Packages</h2>
+        <h2>Build Client Packages</h2>
         <Popout tip>
           <h5>Client packages are automatically built</h5>
           <p>
@@ -94,12 +94,12 @@ const ClientsPage = (props) => (
             Icon={Apple}
           />
         </div>
-        <h2>Build Morio Repository Setup Packages</h2>
+        <h2>Build Repository Installer Packages</h2>
         <Popout tip>
-          <h5>Repo(sitory) setup packages are automatically built</h5>
+          <h5>Repo(sitory) Installer Packages are automatically built</h5>
           <p>
-            Morio will automatically build repo setup packages during its initial setup and on
-            subsequent upgrades.
+            Morio will automatically build repository installer packages during
+            its initial setup and on subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
           </p>

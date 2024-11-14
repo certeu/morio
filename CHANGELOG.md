@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [ui] Downloads page now lists the Repository Installer packages
+
+
 ## [0.5.3] - 2024-11-13
 
 ### Changed
