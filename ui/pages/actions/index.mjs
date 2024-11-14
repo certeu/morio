@@ -8,8 +8,8 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CardButton } from 'components/card.mjs'
-import { RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
+import { Card, CardButton } from 'components/card.mjs'
+import { PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
 import { SecretInput } from 'components/inputs.mjs'
 import { mrtValid } from 'components/auth/mrt-provider.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -128,19 +128,13 @@ const ActionsPage = (props) => {
         <div
           className={`grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl`}
         >
-          <CardButton
-            role="operator"
-            title="Restart Morio"
-            onClick={() =>
-              pushModal(
-                <ModalWrapper>
-                  <RestartConfirmation restart={restart} />
-                </ModalWrapper>
-              )
-            }
-            desc="Restarts Morio Core (soft restart). One or more services will potentially be restarted."
+          <Card
+            title="Build Packages"
+            href="/actions/pkgs"
+            desc="Trigger builds of packages pre-configured to integrate with this Morio collector."
             width="w-full"
-            Icon={RestartIcon}
+            Icon={PackageIcon}
+            role="operator"
           />
           <CardButton
             role="operator"
@@ -155,6 +149,20 @@ const ActionsPage = (props) => {
             desc="Use the current preseed settings to construct a new settings file. Then perform a soft restart."
             width="w-full"
             Icon={ReseedIcon}
+          />
+          <CardButton
+            role="operator"
+            title="Restart Morio"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper>
+                  <RestartConfirmation restart={restart} />
+                </ModalWrapper>
+              )
+            }
+            desc="Restarts Morio Core (soft restart). One or more services will potentially be restarted."
+            width="w-full"
+            Icon={RestartIcon}
           />
           <CardButton
             role="engineer"

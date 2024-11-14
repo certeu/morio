@@ -29,6 +29,7 @@ const ClientsPage = (props) => (
   <PageWrapper {...props} role="operator">
     <ContentWrapper {...props} Icon={PackageIcon} title={props.title}>
       <div className="max-w-4xl">
+        <h2>Build Morio Client Packages</h2>
         <Popout tip>
           <h5>Client packages are automatically built</h5>
           <p>
@@ -41,7 +42,7 @@ const ClientsPage = (props) => (
         <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
           <Card
             title="For Debian Linux"
-            href="/tools/pkgs/deb"
+            href="/actions/pkgs/deb"
             ext="deb"
             desc={
               <span>
@@ -56,7 +57,7 @@ const ClientsPage = (props) => (
             disabled
             title="For RedHat Linux"
             ext="rpm"
-            href="/tools/pkgs/rpm"
+            href="/actions/pkgs/rpm"
             desc={
               <span>
                 Generate an <b>.rpm</b> package that installs the Morio client on RedHat-based Linux
@@ -70,7 +71,7 @@ const ClientsPage = (props) => (
             disabled
             title="For Microsoft Windows"
             ext="msi"
-            href="/tools/pkgs/msi"
+            href="/actions/pkgs/msi"
             desc={
               <span>
                 Generate an <b>.msi</b> package that you can deploy on Windows systems.
@@ -83,7 +84,7 @@ const ClientsPage = (props) => (
             disabled
             title="For Apple MacOS"
             ext="pkg"
-            href="/tools/pkgs/pkg"
+            href="/actions/pkgs/pkg"
             desc={
               <span>
                 Generate a <b>.pkg</b> package that you can deploy on macOS systems.
@@ -93,11 +94,11 @@ const ClientsPage = (props) => (
             Icon={Apple}
           />
         </div>
-        <h2>Repository installer packages</h2>
+        <h2>Build Morio Repository Setup Packages</h2>
         <Popout tip>
-          <h5>Repo(sitory) installer packages are automatically built</h5>
+          <h5>Repo(sitory) setup packages are automatically built</h5>
           <p>
-            Morio will automatically build repo installer packages during its initial setup and on
+            Morio will automatically build repo setup packages during its initial setup and on
             subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
@@ -106,7 +107,7 @@ const ClientsPage = (props) => (
         <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
           <Card
             title="For Debian Linux"
-            href="/tools/pkgs/deb-repo"
+            href="/actions/pkgs/deb-repo"
             ext="deb"
             desc={
               <span>
@@ -121,7 +122,7 @@ const ClientsPage = (props) => (
           <Card
             disabled
             title="For RedHat Linux"
-            href="/tools/pkgs/rpm-repo"
+            href="/actions/pkgs/rpm-repo"
             ext="rpm"
             desc={
               <span>
@@ -143,7 +144,7 @@ export default ClientsPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Client Packages',
-    page: ['tools', 'clients'],
+    title: 'Build Packages',
+    page: ['actions', ['pkgs', 'Build Packages'] ],
   },
 })

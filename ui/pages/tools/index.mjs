@@ -26,14 +26,6 @@ const ToolsPage = (props) => (
             role="manager"
           />
           <Card
-            title="Client Packages"
-            href="/tools/pkgs"
-            desc="Generate morio-client packages that are pre-configured to integrate with this Morio deployment."
-            width="w-full"
-            Icon={PackageIcon}
-            role="operator"
-          />
-          <Card
             title="Decrypt Data"
             href="/tools/decrypt"
             desc="Decrypt data using Morio's symmetric encryption key, which will decrypt data encrypted by Morio."
