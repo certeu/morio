@@ -76,7 +76,6 @@ show_help() {
 }
 
 show_postinstall_help() {
-  clear
   echo ""
   echo "Congratulations, the Morio client is now installed on this system 🎉"
   echo ""
@@ -199,19 +198,27 @@ install_morio_pkg() {
 install() {
   local MODE=$1
 
-  if [ $MODE != "auto" ]; then
-    echo "    _ _ _  ___  _ _  _  ___ "
-    echo "   | ' ' |/ . \| '_/| |/ . \ "
-    echo "   |_|_|_|\___/|_|  |_|\___/ "
-    echo " "
-    show_steps
-    echo " "
-    read -p "Do you want to continue with these steps? (y/N): " CONFIRM
-    if [ "$CONFIRM" != "y" ]; then
-      echo ""
-      echo "Exiting installer."
-      exit 0
+  if [ -t 0 ]; then
+    # Standard input is a terminal, greet the user and prompt for confirmation
+    # unless 'auto' was passed as a flag in which case run fully non-interactive
+    if [ $MODE != "auto" ]; then
+      echo "    _ _ _  ___  _ _  _  ___ "
+      echo "   | ' ' |/ . \| '_/| |/ . \ "
+      echo "   |_|_|_|\___/|_|  |_|\___/ "
+      echo " "
+      show_steps
+      echo " "
+      read -p "Do you want to continue with these steps? (Y/n): " CONFIRM < /dev/tty
+      if [ "$CONFIRM" == "n" ]; then
+        echo ""
+        echo "Exiting installer."
+        exit 0
+      fi
     fi
+  else
+    # Standard input is a not a terminal, run fully non-interactive
+    # but perhaps let the user know just in case
+    echo "Standard input is not a terminal. Using non-interactive setup."
   fi
   detect_systemd
   detect_package_manager

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [ui] Downloads page now lists the Repository Installer packages
 - [dbuilder] Fix issue with the repo installer package build
+- [moriod] Detect non-interactive invovation in install script
 
 ## [0.5.3] - 2024-11-13
 
