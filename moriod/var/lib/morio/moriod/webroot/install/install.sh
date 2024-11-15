@@ -79,10 +79,9 @@ show_postinstall_help() {
   echo ""
   echo "Congratulations, the Morio client is now installed on this system 🎉"
   echo ""
-  echo "Run ${bold}sudo morio init${normal} to get started with the next steps"
-  echo "or learn about all available options with: ${bold}sudo morio help${normal}"
+  echo "Run ${bold}sudo morio help${normal} to learn about all available options"
   echo ""
-  echo "The full Morio documentation is available at: ${bold}https://morio.it/docs/guides/client${normal}"
+  echo "All Morio documentation is available at: ${bold}https://morio.it/${normal}"
   echo ""
 }
 
