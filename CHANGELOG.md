@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2024-11-15
+
 ### Added
 
 - [client] Run morio init on install
@@ -21,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [dbuilder] Fix issue with the repo installer package build
 - [moriod] Detect non-interactive invovation in install script
 - [ui] Downloads page now lists the Repository Installer packages
+- [web] Handle non-interactive terminal in installer script
 
 ## [0.5.3] - 2024-11-13
 

@@ -21,9 +21,9 @@ info:
     name: EUPL
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
-  version: 0.5.0
+  version: 0.5.3
   x-logo:
-    url: /downloads/morio-card-embed.svg
+    url: https://morio.it/img/morio-social-card.png
     backgroundColor: transparent
     altText: Morio Logo
   contact:
@@ -123,7 +123,7 @@ components:
                 token:
                   type: string
                   minLength: 3
-                  maxLength: 12
+                  maxLength: 64
                   description: The TOTP token (one-time password)
                 role:
                   type: string
@@ -474,7 +474,7 @@ paths:
           headers: &ref_2
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: &ref_48
+            Retry-After: &ref_45
               description: Tells you when to retry due to rate limiting
               schema:
                 type: string
@@ -2110,7 +2110,7 @@ paths:
                   additionalProperties: false
                 - type: string
             example:
-              base: &ref_38
+              base:
                 github:
                   owner: morio
                   repo: preseed
@@ -2118,7 +2118,7 @@ paths:
                   ref: main
                   token: >-
                     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
-              overlays: &ref_39
+              overlays:
                 - settings/overlays/idp-ad.yaml
                 - settings/overlays/idp-apikey.yaml
                 - settings/overlays/idp-local.yaml
@@ -2287,7 +2287,7 @@ paths:
               properties:
                 about:
                   type: string
-                  minLength: 2
+                  minLength: 0
                   maxLength: 255
                   description: A description or nmemonic note for the acount
                 provider:
@@ -2621,7 +2621,7 @@ paths:
                 token:
                   type: string
                   minLength: 3
-                  maxLength: 12
+                  maxLength: 64
                   description: The TOTP token (one-time password)
                 password:
                   type: string
@@ -4150,6 +4150,81 @@ paths:
           content:
             application/problem+json:
               example: *ref_3
+          headers: *ref_2
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/problem+json:
+              example: *ref_4
+          headers: *ref_2
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              example: *ref_5
+  /rotate/mrt:
+    post:
+      tags: *ref_27
+      operationId: rotateRootToken
+      summary: Rotate Root Token
+      description: >-
+        Rotate the Morio Root Token. Requires the `operator` role, as well as
+        the current Morio Root Token.
+      requestBody:
+        description: The current Morio Root Token
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mrt:
+                  type: string
+                  pattern: ^mrt\.[0-9a-z]+$
+                  minLength: 68
+                  maxLength: 68
+              additionalProperties: false
+            example:
+              mrt: >-
+                mrt.14887e49a38949f0d82915f4becdf7d700e3dcfacf64fcec00681a5f74b1a600
+      responses:
+        '200':
+          description: The new Morio Root Token
+          content:
+            application/json:
+              example:
+                result: success
+                root_token: &ref_38
+                  about: >-
+                    This is the Morio root token. You can use it to authenticate
+                    before any authentication providers have been set up. Store
+                    it in a safe space, as it will never be shown again.
+                  value: >-
+                    mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43
+          headers:
+            ratelimit: *ref_0
+            ratelimit-policy: *ref_1
+            Retry-After:
+              description: Tells you when to retry due to rate limiting
+              schema:
+                type: string
+        '400':
+          description: This request violates the data schema
+          content:
+            application/problem+json:
+              example: *ref_10
+          headers: *ref_2
+        '401':
+          description: Authentication required
+          content:
+            application/problem+json:
+              example: *ref_3
+          headers: *ref_2
+        '403':
+          description: Denied by role-base access control
+          content:
+            application/problem+json:
+              example: *ref_14
           headers: *ref_2
         '429':
           description: Rate limit exceeded
@@ -5803,7 +5878,7 @@ paths:
                 value: *ref_8
                 summary: cluster1 Example
               cluster3:
-                value: &ref_43
+                value: &ref_40
                   name: Morio Cluster Test
                   broker_nodes:
                     - morio-node1.tokyo.morio.it
@@ -5819,18 +5894,12 @@ paths:
           description: Setup result
           content:
             application/json:
-              example: &ref_40
+              example:
                 result: success
                 uuids:
                   node: 40361cd8-a149-4675-bd46-11a2b48acd04
                   cluster: 26e66c95-c342-49fc-8e3a-f5ca69b392ba
-                root_token:
-                  about: >-
-                    This is the Morio root token. You can use it to authenticate
-                    before any authentication providers have been set up. Store
-                    it in a safe space, as it will never be shown again.
-                  value: >-
-                    mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43
+                root_token: *ref_38
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
@@ -5854,7 +5923,7 @@ paths:
           description: Only available in ephemeral mode
           content:
             application/problem+json:
-              example: &ref_41
+              example:
                 status: 409
                 title: Only available in ephemeral mode
                 detail: >-
@@ -5873,506 +5942,10 @@ paths:
           content:
             application/problem+json:
               example: *ref_5
-  /preseed:
-    post:
-      operationId: preseed
-      tags:
-        - settings
-        - anonymous
-      summary: Preseed Morio
-      description: >-
-        This will handle the initial setup of Morio via preseeded settings. Or
-        rather, it will ask Morio Core to do so after validation.
-
-
-        This endpoint does not require authentication. However, it is only
-        available in ephemeral Mode.
-
-        In other words, once Morio is set up, this endpoint becomes unavailable.
-      requestBody:
-        description: The Morio preseed settings to use for the initial setup
-        required: true
-        content:
-          application/json:
-            schema:
-              anyOf:
-                - type: object
-                  properties:
-                    url:
-                      type: string
-                    git:
-                      type: object
-                      properties: {}
-                      additionalProperties:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          url:
-                            type: string
-                          ref:
-                            type: string
-                          user:
-                            anyOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  vault:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          path:
-                                            type: string
-                                          key:
-                                            type: string
-                                          instance:
-                                            type: string
-                                        required:
-                                          - path
-                                          - key
-                                        additionalProperties: false
-                                additionalProperties: false
-                          token:
-                            anyOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  vault:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          path:
-                                            type: string
-                                          key:
-                                            type: string
-                                          instance:
-                                            type: string
-                                        required:
-                                          - path
-                                          - key
-                                        additionalProperties: false
-                                additionalProperties: false
-                        additionalProperties: false
-                    base:
-                      anyOf:
-                        - type: object
-                          properties:
-                            url:
-                              type: string
-                            headers:
-                              type: object
-                              properties: {}
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          required:
-                            - url
-                          additionalProperties: false
-                        - type: object
-                          properties:
-                            gitlab:
-                              type: object
-                              properties:
-                                url:
-                                  type: string
-                                project_id:
-                                  type: number
-                                  format: float
-                                file_path:
-                                  type: string
-                                ref:
-                                  type: string
-                                token:
-                                  anyOf:
-                                    - type: string
-                                    - type: object
-                                      properties:
-                                        vault:
-                                          anyOf:
-                                            - type: string
-                                            - type: object
-                                              properties:
-                                                path:
-                                                  type: string
-                                                key:
-                                                  type: string
-                                                instance:
-                                                  type: string
-                                              required:
-                                                - path
-                                                - key
-                                              additionalProperties: false
-                                      additionalProperties: false
-                              required:
-                                - url
-                                - project_id
-                                - file_path
-                                - token
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          additionalProperties: false
-                        - type: object
-                          properties:
-                            github:
-                              type: object
-                              properties:
-                                url:
-                                  type: string
-                                owner:
-                                  type: string
-                                repo:
-                                  type: string
-                                file_path:
-                                  type: string
-                                ref:
-                                  type: string
-                                token:
-                                  anyOf:
-                                    - type: string
-                                    - type: object
-                                      properties:
-                                        vault:
-                                          anyOf:
-                                            - type: string
-                                            - type: object
-                                              properties:
-                                                path:
-                                                  type: string
-                                                key:
-                                                  type: string
-                                                instance:
-                                                  type: string
-                                              required:
-                                                - path
-                                                - key
-                                              additionalProperties: false
-                                      additionalProperties: false
-                              required:
-                                - owner
-                                - repo
-                                - file_path
-                                - token
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          additionalProperties: false
-                        - type: string
-                    overlays:
-                      anyOf:
-                        - type: array
-                          items:
-                            anyOf:
-                              - type: object
-                                properties:
-                                  url:
-                                    type: string
-                                  headers:
-                                    type: object
-                                    properties: {}
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                required:
-                                  - url
-                                additionalProperties: false
-                              - type: object
-                                properties:
-                                  gitlab:
-                                    type: object
-                                    properties:
-                                      url:
-                                        type: string
-                                      project_id:
-                                        type: number
-                                        format: float
-                                      file_path:
-                                        type: string
-                                      ref:
-                                        type: string
-                                      token:
-                                        anyOf:
-                                          - type: string
-                                          - type: object
-                                            properties:
-                                              vault:
-                                                anyOf:
-                                                  - type: string
-                                                  - type: object
-                                                    properties:
-                                                      path:
-                                                        type: string
-                                                      key:
-                                                        type: string
-                                                      instance:
-                                                        type: string
-                                                    required:
-                                                      - path
-                                                      - key
-                                                    additionalProperties: false
-                                            additionalProperties: false
-                                    required:
-                                      - url
-                                      - project_id
-                                      - file_path
-                                      - token
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                additionalProperties: false
-                              - type: object
-                                properties:
-                                  github:
-                                    type: object
-                                    properties:
-                                      url:
-                                        type: string
-                                      owner:
-                                        type: string
-                                      repo:
-                                        type: string
-                                      file_path:
-                                        type: string
-                                      ref:
-                                        type: string
-                                      token:
-                                        anyOf:
-                                          - type: string
-                                          - type: object
-                                            properties:
-                                              vault:
-                                                anyOf:
-                                                  - type: string
-                                                  - type: object
-                                                    properties:
-                                                      path:
-                                                        type: string
-                                                      key:
-                                                        type: string
-                                                      instance:
-                                                        type: string
-                                                    required:
-                                                      - path
-                                                      - key
-                                                    additionalProperties: false
-                                            additionalProperties: false
-                                    required:
-                                      - owner
-                                      - repo
-                                      - file_path
-                                      - token
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                additionalProperties: false
-                              - type: string
-                        - type: string
-                    keys:
-                      type: object
-                      properties:
-                        data:
-                          type: string
-                        key:
-                          type: string
-                          pattern: .*ENCRYPTED PRIVATE KEY.*
-                        seal:
-                          type: object
-                          properties:
-                            hash:
-                              type: string
-                            salt:
-                              type: string
-                          required:
-                            - hash
-                            - salt
-                          additionalProperties: false
-                      required:
-                        - data
-                        - key
-                      additionalProperties: false
-                  additionalProperties: false
-                - type: string
-            examples:
-              base:
-                value: *ref_38
-                summary: base Example
-              overlays:
-                value: *ref_39
-                summary: overlays Example
-      responses:
-        '200':
-          description: Setup result
-          content:
-            application/json:
-              example: *ref_40
-          headers:
-            ratelimit: *ref_0
-            ratelimit-policy: *ref_1
-            Retry-After:
-              description: Tells you when to retry due to rate limiting
-              schema:
-                type: string
-        '400':
-          description: This request violates the data schema
-          content:
-            application/problem+json:
-              example: *ref_10
-          headers: *ref_2
-        '401':
-          description: Authentication required
-          content:
-            application/problem+json:
-              example: *ref_3
-          headers: *ref_2
-        '409':
-          description: Only available in ephemeral mode
-          content:
-            application/problem+json:
-              example: *ref_41
-          headers: *ref_2
-        '429':
-          description: Rate limit exceeded
-          content:
-            application/problem+json:
-              example: *ref_4
-          headers: *ref_2
-        '500':
-          description: Internal server error
-          content:
-            application/problem+json:
-              example: *ref_5
   /settings:
     get:
       operationId: getSettings
-      tags: &ref_42
+      tags: &ref_39
         - settings
       summary: Get settings
       description: >-
@@ -6436,7 +6009,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: &ref_44
+            Retry-After: &ref_41
               description: Tells you when to retry due to rate limiting
               schema:
                 type: string
@@ -6459,7 +6032,7 @@ paths:
               example: *ref_5
     post:
       operationId: applySettings
-      tags: *ref_42
+      tags: *ref_39
       summary: Apply settings
       description: >-
         This will take a full set of new Morio settings and, after validation,
@@ -7034,7 +6607,7 @@ paths:
                 value: *ref_8
                 summary: cluster1 Example
               cluster3:
-                value: *ref_43
+                value: *ref_40
                 summary: cluster3 Example
       responses:
         '204':
@@ -7065,7 +6638,7 @@ paths:
   /presets:
     get:
       operationId: getPresets
-      tags: *ref_42
+      tags: *ref_39
       summary: Get presets
       description: Returns the current presets.
       responses:
@@ -7151,7 +6724,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_44
+            Retry-After: *ref_41
         '401':
           description: Authentication required
           content:
@@ -7172,7 +6745,7 @@ paths:
   /reload:
     get:
       operationId: reload
-      tags: *ref_42
+      tags: *ref_39
       summary: Reload the API
       description: >-
         This will cause the API to re-initialize itself, including reaching out
@@ -7204,7 +6777,7 @@ paths:
   /reseed:
     get:
       operationId: reseed
-      tags: *ref_42
+      tags: *ref_39
       summary: Reseed Morio
       description: >-
         This will trigger reseeding of the settings, followed by a (soft)
@@ -7232,7 +6805,7 @@ paths:
   /restart:
     get:
       operationId: restart
-      tags: *ref_42
+      tags: *ref_39
       summary: Restart Morio
       description: >-
         This will cause a soft restart of core, re-bootstrapping itself based on
@@ -7259,13 +6832,13 @@ paths:
               example: *ref_5
   /kv/keys/{key}:
     get:
-      tags: &ref_45
+      tags: &ref_42
         - kv
       security: *ref_16
       operationId: readKey
       summary: Read key
       description: Returns the value stored under `key` in the KV store.
-      parameters: &ref_46
+      parameters: &ref_43
         - in: path
           name: key
           schema:
@@ -7291,7 +6864,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_44
+            Retry-After: *ref_41
         '400':
           description: This request violates the data schema
           content:
@@ -7314,7 +6887,7 @@ paths:
           description: No such key
           content:
             application/problem+json:
-              example: &ref_47
+              example: &ref_44
                 status: 404
                 title: No such key
                 detail: >-
@@ -7333,7 +6906,7 @@ paths:
             application/problem+json:
               example: *ref_5
     post:
-      tags: *ref_45
+      tags: *ref_42
       operationId: writeKey
       summary: Write key
       description: >-
@@ -7372,7 +6945,7 @@ paths:
         prefix
 
         via the API wil result in a schema violation.
-      parameters: *ref_46
+      parameters: *ref_43
       requestBody:
         description: The value to write
         required: true
@@ -7428,11 +7001,11 @@ paths:
             application/problem+json:
               example: *ref_5
     delete:
-      tags: *ref_45
+      tags: *ref_42
       operationId: deleteKey
       summary: Delete key
       description: Removes the key `key` from the KV store.
-      parameters: *ref_46
+      parameters: *ref_43
       responses:
         '204':
           description: No response body
@@ -7458,7 +7031,7 @@ paths:
           description: No such key
           content:
             application/problem+json:
-              example: *ref_47
+              example: *ref_44
           headers: *ref_2
         '429':
           description: Rate limit exceeded
@@ -7473,7 +7046,7 @@ paths:
               example: *ref_5
   /kv/keys:
     get:
-      tags: *ref_45
+      tags: *ref_42
       security: *ref_16
       operationId: listKeys
       summary: List keys
@@ -7494,7 +7067,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_48
+            Retry-After: *ref_45
         '401':
           description: Authentication required
           content:
@@ -7514,7 +7087,7 @@ paths:
               example: *ref_5
   /kv/glob/{pattern}:
     get:
-      tags: *ref_45
+      tags: *ref_42
       security: *ref_16
       operationId: globKeys
       summary: Glob keys
@@ -7541,7 +7114,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_48
+            Retry-After: *ref_45
         '401':
           description: Authentication required
           content:
@@ -7561,7 +7134,7 @@ paths:
               example: *ref_5
   /kv/dump:
     get:
-      tags: *ref_45
+      tags: *ref_42
       security: *ref_16
       operationId: dumpKvData
       summary: Dump KV data
@@ -7630,7 +7203,7 @@ paths:
           headers:
             ratelimit: *ref_0
             ratelimit-policy: *ref_1
-            Retry-After: *ref_48
+            Retry-After: *ref_45
         '401':
           description: Authentication required
           content:
