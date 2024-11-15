@@ -4,7 +4,7 @@ on:
   release:
     types: [published]
   pull_request:
-    types: [edited]
+    types: [synchronize, openened]
 
 jobs:
   build_and_push_to_registry:
