@@ -56,6 +56,30 @@ build_repo_package() {
 }
 
 #
+# Build the Moriod repo Debian package
+#
+build_moriodrepo_package() {
+  cd /morio
+  mkdir -p pkg/DEBIAN
+  for FILE in control postinst; do
+    if [ -f $SRC/$FILE ]
+      then
+      echo "Copying $SRC/$FILE"
+      cp $SRC/$FILE pkg/DEBIAN/
+    fi
+  done
+
+  for DIRPATH in $SRC/*/; do
+    DIR=$(basename "$DIRPATH")
+    echo "Copying $DIR"
+    cp -R $SRC/$DIR pkg/
+  done
+
+  # Build the package
+  dpkg-deb --build pkg $DIST
+}
+
+#
 # Update the APT repository
 #
 update_apt_repo() {
@@ -128,7 +152,12 @@ elif [ $BUILD_JOB == "repo" ]; then
   build_repo_package
   echo "Updating repository"
   update_apt_repo
+elif [ $BUILD_JOB == "moriodrepo" ]; then
+  echo "Building moriod repo package for Debian"
+  SRC=/morio/src
+  DIST=/morio/dist
+  build_moriodrepo_package
 else
-  echo "Unknown build job, not running a build. Please specify 'client' or 'repo'"
+  echo "Unknown build job, not running a build. Please specify 'client', 'repo', or 'moriodrepo'"
 fi
 
