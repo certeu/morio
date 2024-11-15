@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [client] Handle status subcommand when no arguments are passed
 - [dbuilder] Fixed issue in the client package build step that resolved in an invalid APT package
 - [dbuilder] Fix issue with the repo installer package build
-- [moriod] Detect non-interactive invovation in install script
+- [moriod] Detect non-interactive invocation in install script
 - [ui] Downloads page now lists the Repository Installer packages
 - [web] Handle non-interactive terminal in installer script
 
