@@ -85,13 +85,13 @@ Pin: release o=elastic-8-morio
 Pin-Priority: 250`,
     log
   )
-  // Add the Morio collector softwre key
+  // Add the Morio collector software key
   await writeFile(
     '/morio/data/installers/deb/etc/apt/trusted.gpg.d/morio-collector.asc',
     utils.getKeys().pgpub,
     log
   )
-  // Add the Elastic softwre key
+  // Add the Elastic software key
   await writeFile(
     '/morio/data/installers/deb/etc/apt/trusted.gpg.d/elastic-8-morio.asc',
     utils.getPreset('MORIO_ELASTIC_SOFTWARE_KEY'),
