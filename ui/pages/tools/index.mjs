@@ -5,7 +5,6 @@ import {
   BriefcaseIcon,
   CertificateIcon,
   CogIcon,
-  PackageIcon,
   OpenLockIcon,
   ClosedLockIcon,
   UserIcon,
