@@ -18,4 +18,4 @@ jobs:
         env:
           DOCKER_USERNAME: ${{ vars.DOCKER_USERNAME }}
           DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
-        run: 'npm run ci:build.dbuilder publish'
+        run: 'npm run build:clients && npm run ci:build.dbuilder publish'
