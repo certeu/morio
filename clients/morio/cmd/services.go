@@ -76,7 +76,9 @@ var statusCmd = &cobra.Command{
   Show the status of a specific agent:
     morio status logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if args[0] == "audit" {
+    if len(args) == 0 {
+			ShowStatus()
+    } else if args[0] == "audit" {
 			PrintAgentStatus("audit")
 		} else if args[0] == "metrics" {
 			PrintAgentStatus("metrics")
