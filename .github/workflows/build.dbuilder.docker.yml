@@ -3,6 +3,8 @@ name: Publish itsmorio/dbuilder OCI image
 on:
   release:
     types: [published]
+  pull_request:
+    types: [edited]
 
 jobs:
   build_and_push_to_registry:
