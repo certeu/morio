@@ -16,40 +16,13 @@ export const service = {
      *
      * We simply return the passed in value here
      */
-    wanted: (hookParams) => (hookParams?.onDemandBuild || hookParams?.initialSetup ? true : false),
+    wanted: (hookParams) => (hookParams?.onDemandBuild ? true : false),
     /*
      * This is an ephemeral container
      * It should only be recreated/restarted if this is an on-demand build request
      */
-    recreate: (hookParams) =>
-      hookParams?.onDemandBuild || hookParams?.initialSetup ? true : false,
-    restart: (hookParams) => {
-      // FIXME: There's certainly a better way to handle this
-      if (hookParams?.initialSetup) buildClientPackage()
-
-      return hookParams?.onDemandBuild || hookParams?.initialSetup ? true : false
-    },
-    /**
-     * Lifecycle hook for anything to be done prior to creating the container
-     *
-     * We need to make sure the client code is in the right place on the host OS
-     * so that it will be mapped and available in the builder.
-     */
-    precreate: async () => {
-      /*
-       * Recursively copy the client code in the data folder
-       */
-      await cp('/morio/core/clients/linux', '/morio/data/clients/linux', { recursive: true })
-
-      /*
-       * Ensure keys are in the container so dbuilder can sign packages
-       */
-      log.debug('[dbuilder] Writing key data')
-      await writeFile('/etc/morio/dbuilder/pub.key', utils.getKeys().pgpub, log)
-      await writeFile('/etc/morio/dbuilder/priv.key', utils.getKeys().pgpriv, log, 0o600)
-
-      return true
-    },
+    recreate: (hookParams) => (hookParams?.onDemandBuild ? true : false),
+    restart: (hookParams) => (hookParams?.onDemandBuild ? true : false),
   },
 }
 
@@ -74,7 +47,7 @@ export async function saveRevision(revision) {
 /*
  * Build a client package for Debian
  */
-export async function buildClientPackage(customSettings = {}) {
+export async function buildPackage(customSettings = {}) {
   /*
    * Make sure CA is up
    * We build a client package as soon as Morio start,
@@ -86,11 +59,22 @@ export async function buildClientPackage(customSettings = {}) {
     run: async () => await isCaUp(),
     onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for CA, will continue waiting.`),
   })
-  if (up) log.warn('[dbuilder] CA IS UP')
   if (!up) {
     log.warn('[dbuilder] Not building .deb client package as CA is not up')
     return false
   }
+
+  /*
+   * Recursively copy the client code in the data folder
+   */
+  await cp('/morio/core/clients/linux', '/morio/data/clients/linux', { recursive: true })
+
+  /*
+   * Ensure keys are in the container so dbuilder can sign packages
+   */
+  log.debug('[dbuilder] Writing key data')
+  await writeFile('/etc/morio/dbuilder/pub.key', utils.getKeys().pgpub, log)
+  await writeFile('/etc/morio/dbuilder/priv.key', utils.getKeys().pgpriv, log, 0o600)
 
   /*
    * Write control file
@@ -162,120 +146,12 @@ export async function buildClientPackage(customSettings = {}) {
   }
 
   /*
-   * Write job file
-   */
-  await writeJobFile('client')
-
-  /*
    * Start the dbuilder service (but don't wait for it)
    */
-  ensureMorioService('dbuilder', { onDemandBuild: true, pkg: 'client' })
+  ensureMorioService('dbuilder', { onDemandBuild: true })
 
   /*
    * If revision is set, update it on disk
    */
   if (customSettings.Revision) await saveRevision(customSettings.Revision)
-}
-
-/*
- * Build a repo package for Debian
- */
-export async function buildRepoPackage(customSettings = {}) {
-  /*
-   * Write control file and postinst script to generate the .deb package
-   */
-  await writeFile(
-    '/morio/data/installers/deb/control',
-    resolveControlFile(customSettings, utils, 'repo'),
-    log
-  )
-  await writeFile(
-    '/morio/data/installers/deb/postinst',
-    '#!/bin/bash\nupdate-ca-certificates\n',
-    log,
-    0o755
-  )
-
-  /*
-   * Write package files to disk
-   */
-  const aptPriority = `# This repository is configured with half (250) of the default priority (500).
-# This ensures the Morio client's dependencies are available without breaking
-# any other Elastic packages or expectations on where apt will find them.
-# See: https://morio.it/docs/guides/install-client/#elastic-apt-repo-priority`
-
-  // Apt repo for the collector
-  await writeFile(
-    '/morio/data/installers/deb/etc/apt/sources.list.d/morio-collector.list',
-    `# Morio client repository, hosted by the local collector at https://${utils.getClusterFqdn()}/
-deb [signed-by=/usr/share/keyrings/morio-collector.gpg] https://${utils.getClusterFqdn()}/repos/apt/ bookworm main`,
-    log
-  )
-  // Apt repo for Elastic
-  await writeFile(
-    '/morio/data/installers/deb/etc/apt/sources.list.d/elastic-8-morio.list',
-    `# Elastic 8 repository - Added by the Morio for the Morio client dependencies
-${aptPriority}
-deb https://artifacts.elastic.co/packages/8.x/apt stable main`,
-    log
-  )
-  // Lower the priiority of the repo for Elastic
-  await writeFile(
-    '/morio/data/installers/deb/etc/apt/preferences.d/elastic-8-morio',
-    `${aptPriority}
-Package: *
-Pin: release o=elastic-8-morio
-Pin-Priority: 250`,
-    log
-  )
-  // Add the Morio collector softwre key
-  await writeFile(
-    '/morio/data/installers/deb/etc/apt/trusted.gpg.d/morio-collector.asc',
-    utils.getKeys().pgpub,
-    log
-  )
-  // Add the Elastic softwre key
-  await writeFile(
-    '/morio/data/installers/deb/etc/apt/trusted.gpg.d/elastic-8-morio.asc',
-    utils.getPreset('MORIO_ELASTIC_SOFTWARE_KEY'),
-    log
-  )
-  // Root certificate
-  await writeFile(
-    '/morio/data/installers/deb/usr/local/share/ca-certificates/morio-collector/morio-collector-root.crt',
-    utils.getKeys().rcrt,
-    log
-  )
-  // Intermediate certificate
-  await writeFile(
-    '/morio/data/installers/deb/usr/local/share/ca-certificates/morio-collector/morio-collector-intermediate.crt',
-    utils.getKeys().icrt,
-    log
-  )
-
-  /*
-   * Write job file
-   */
-  await writeJobFile('repo')
-
-  /*
-   * Start the dbuilder service (but don't wait for it)
-   */
-  ensureMorioService('dbuilder', { onDemandBuild: true, pkg: 'repo' })
-
-  /*
-   * If revision is set, update it on disk
-   */
-  if (customSettings.Revision) await saveRevision(customSettings.Revision)
-}
-
-async function writeJobFile(job) {
-  /*
-   * Don't just write any file
-   */
-  if (['repo', 'client'].includes(job)) {
-    return await writeFile('/etc/morio/dbuilder/DBUILDER_JOB', job, log)
-  }
-
-  return false
 }

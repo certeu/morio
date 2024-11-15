@@ -8,6 +8,7 @@ import { service as brokerService } from './broker.mjs'
 import { service as connectorService } from './connector.mjs'
 import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
+import { service as drbuilderService } from './drbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 import { service as watcherService } from './watcher.mjs'
 import { service as webService } from './web.mjs'
@@ -50,6 +51,7 @@ const services = {
   console: consoleService,
   connector: connectorService,
   dbuilder: dbuilderService,
+  drbuilder: drbuilderService,
   watcher: watcherService,
   web: webService,
 }

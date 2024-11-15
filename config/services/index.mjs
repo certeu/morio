@@ -7,6 +7,7 @@ import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as db } from './db.mjs'
 import { resolveServiceConfiguration as dbuilder } from './dbuilder.mjs'
+import { resolveServiceConfiguration as drbuilder } from './drbuilder.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
 import { resolveServiceConfiguration as watcher } from './watcher.mjs'
@@ -21,6 +22,7 @@ const resolvers = {
   core,
   db,
   dbuilder,
+  drbuilder,
   proxy,
   ui,
   watcher,
@@ -45,6 +47,7 @@ export const serviceOrder = [
   'watcher',
   'web',
   'dbuilder',
+  'drbuilder',
 ]
 
 /*
@@ -55,7 +58,7 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = ['db', 'ui', 'connector', 'dbuilder', 'watcher']
+export const optionalServices = ['db', 'ui', 'connector', 'dbuilder', 'drbuilder', 'watcher']
 
 /**
  * Helper method to generate the Traefik configuration
