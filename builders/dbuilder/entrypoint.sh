@@ -9,7 +9,7 @@
 build_client_package() {
   local ARCH="$1"
   # Building the package is relatively simple
-  # (one you know how to do it)
+  # (once you know how to do it)
   cd /morio
   mkdir -p pkg/DEBIAN
   for FILE in control postinst; do
