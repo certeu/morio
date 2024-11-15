@@ -111,7 +111,7 @@ Pin-Priority: 250`,
   )
 
   /*
-   * Start the debuilder service (but don't wait for it)
+   * Start the drbuilder service (but don't wait for it)
    */
   ensureMorioService('drbuilder', { onDemandBuild: true })
 
