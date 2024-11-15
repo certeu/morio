@@ -344,6 +344,6 @@ export default DebPage
 export const getStaticProps = () => ({
   props: {
     title: 'Morio Debian client builder',
-    page: ['actions', ['pkgs', 'Build Packages'], ['deb', 'Morio Debuan Client Builder']],
+    page: ['actions', ['pkgs', 'Build Packages'], ['deb', 'Morio Debian Client Builder']],
   },
 })
