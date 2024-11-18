@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [client] Added `morio vars list` command
+
 ### Fixed
 
 - Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4

@@ -187,7 +187,7 @@ func disableModuleFile(base, module string) {
 }
 
 func ModuleNameFromFile(file string) string {
-  baseFile := filepath.Base(file)
+	baseFile := filepath.Base(file)
 	base := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
 	// Disabled modules have a double extension
 	if strings.HasSuffix(base, ".yml") {

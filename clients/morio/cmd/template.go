@@ -50,7 +50,6 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
 	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
 
-
 	// Write value
 	output, err := mustache.RenderFileInLayout(GetConfigPath(from), GetConfigPath("template-layout.mustache"), context)
 	if err != nil {
