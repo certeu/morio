@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4
 - [client] Fix name of the configuration file template
+- [client] Use client UUID as Kafa client ID
 
 ## [0.5.4] - 2024-11-15
 

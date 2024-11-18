@@ -155,7 +155,7 @@ const outputConfig = (type, utils) => ({
     /*
      * It's a me, Morio
      */
-    client_id: '{{ CLIENT_ID }}',
+    client_id: '{{ MORIO_CLIENT_UUID }}',
     /*
      * Enable this output
      */
