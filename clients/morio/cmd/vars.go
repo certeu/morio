@@ -247,7 +247,7 @@ func GetVars() map[string]string {
 		}
 	}
 
-	// Let's return with the  keys in alphabetic order
+	// Let's return with the keys in alphabetic order
 	keys := make([]string, 0, len(found))
 	orderedVars := make(map[string]string)
 	for key := range found {
