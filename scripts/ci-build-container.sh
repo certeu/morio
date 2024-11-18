@@ -103,14 +103,16 @@ else
       echo "Building clients"
       npm run build:clients
       cd -
-      echo "Symlinking client binaries"
-      mkdir -p $MORIO_GIT_ROOT/builders/$IMAGE/clients
-      cd $MORIO_GIT_ROOT/builders/$IMAGE/clients
-      cp ../../../clients/morio-* .
-      cd -
     else
       echo "All client binaries are available"
     fi
+
+    echo "Copying client binaries"
+    mkdir -p $MORIO_GIT_ROOT/builders/$IMAGE/clients
+    cd $MORIO_GIT_ROOT/builders/$IMAGE/clients
+    cp ../../../clients/morio-* .
+    ls -l .
+    cd -
 
   else
     cd $MORIO_GIT_ROOT/$IMAGE
