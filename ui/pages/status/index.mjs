@@ -1,9 +1,6 @@
-// Dependencies
-import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
@@ -133,7 +130,6 @@ const Status = ({ status }) => {
 const StatusPage = (props) => {
   const [status, setStatus] = useState()
   const { api } = useApi()
-  const { account } = useAccount()
 
   const updateStatus = async () => {
     const result = await api.getStatus()
@@ -147,25 +143,30 @@ const StatusPage = (props) => {
     updateStatus()
   }, [])
 
-  // Does the user have an operator or higher role?
-  const operator = rbac(account.role, 'operator')
-
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={StatusIcon} title={props.title}>
         <Status status={status} />
         <div
-          className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}
+          className={`grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl`}
         >
-          {operator ? (
-            <Card
-              title="Docker"
-              href="/status/docker"
-              desc="Display running containers, available images, and configured networks."
-              width="w-full"
-              Icon={Docker}
-            />
-          ) : null}
+          <Card
+            role="operator"
+            title="Docker"
+            href="/status/docker"
+            desc="Display running containers, available images, and configured networks."
+            width="w-full"
+            Icon={Docker}
+          />
+          <Card
+            role="operator"
+            title="RedPanda Console"
+            target="_blank"
+            href="/console/overview"
+            desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
+            width="w-full"
+            Icon={RedPandaConsole}
+          />
           <Card
             title="Traefik Dashboard"
             target="_blank"
@@ -174,16 +175,6 @@ const StatusPage = (props) => {
             width="w-full"
             Icon={Traefik}
           />
-          {operator ? (
-            <Card
-              title="RedPanda Console"
-              target="_blank"
-              href="/console/overview"
-              desc="Display RedPanda cluster & broker data, and manage their configuration including ACLs."
-              width="w-full"
-              Icon={RedPandaConsole}
-            />
-          ) : null}
         </div>
       </ContentWrapper>
     </PageWrapper>

@@ -18,7 +18,7 @@ const SettingsPage = (props) => {
   }, [])
 
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="operator">
       <ContentWrapper {...props}>
         <div className="max-w-4xl mx-auto">
           {settings ? <Highlight js={settings} title="Morio Settings" /> : null}

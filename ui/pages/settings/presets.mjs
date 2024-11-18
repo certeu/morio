@@ -18,7 +18,7 @@ const ConfigPage = (props) => {
   }, [])
 
   return (
-    <PageWrapper {...props}>
+    <PageWrapper {...props} role="operator">
       <ContentWrapper {...props}>
         <div className="max-w-4xl mx-auto">
           <Highlight js={presets} title="Morio Settings" />

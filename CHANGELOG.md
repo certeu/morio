@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4
+
+## [0.5.4] - 2024-11-15
+
+### Added
+
+- [client] Run morio init on install
+- [drbuilder] Added new drbuilder service
+- [core] Build both client and repo installer package on initial setup
+
+### Fixed
+
+- [client] Do not attempt to enable services at install
+- [client] Handle status subcommand when no arguments are passed
+- [dbuilder] Fixed issue in the client package build step that resolved in an invalid APT package
+- [dbuilder] Fix issue with the repo installer package build
+- [moriod] Detect non-interactive invocation in install script
+- [ui] Downloads page now lists the Repository Installer packages
+- [web] Handle non-interactive terminal in installer script
+
+## [0.5.3] - 2024-11-13
+
+### Changed
+
+- [ui] Do not hide what's not available to the current role
+
+### Fixed
+
+- [api] Missing optional chaining check in core controller
+- [core] Missing optional chaining check in settings controller
+
+## [0.5.2] - 2024-11-13
+
+### Fixed
+
+- [api] Fix incorrect key property when creating JWT in OIDC identity provider
+- [core] Do not assume preseed.base is a string, handle objects too
+
+### Removed
+
+- [api] We no longer have a dedicated `/preseed` endpoint, use the `/setup` endpoint instead
+- [api] We no longer have a dedicated `/validate/preseed` endpoint, use the `/validate/settings` endpoint instead
+- [core] We no longer have a dedicated `/preseed` endpoint, use the `/setup` endpoint instead
+- [ui] Removed preseed upload UI
+
+## [0.5.1] - 2024-11-12
+
 ### Added
 
 - [api] Implemented the various `DISABLE_IDP_[type]` feature flags
@@ -19,12 +68,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Fixed a thrown error in the `GET /token` endpoint due to passing in the wrong attibute
 - [api] Implemented the `/kv/dump` endpoint (it always returned an empty object before)
 - [api] Fixed incorrect node index in setup validation report
+- [api] Allow scratch codes length in schema when validating OTP tokens
 - [core] Fix an issue where the running services detection was not updated to reflect the container name prefix causing unneeded service restarts
 - [ui] Guard against cluster leader being unknown in status view
+- [ui] Show scratch codes after activating MFA on a local account
 
 ### Removed
 
 - We have discontinued support for AMI images and have removed the related documentation, configurations, and tools.
+- [core] We no longer create broker topics on startup. Note that auto-create is enabled by default
 
 ## [0.5.0] - 2024-10-25
 

@@ -19,16 +19,19 @@ const clients = {
 
 const DownloadsPage = (props) => {
   const { api } = useApi()
-  const [pkgs, setPkgs] = useState({})
+  const [clientPkgs, setClientPkgs] = useState({})
+  const [repoPkgs, setRepoPkgs] = useState({})
   const [certs, setCerts] = useState([])
 
   useEffect(() => {
     const loadFiles = async () => {
       const types = ['deb', 'rpm', 'msi', 'pkg']
       const match1 = '/downloads/clients/'
-      const match2 = '/downloads/certs/'
+      const match2 = '/downloads/installers/'
+      const match3 = '/downloads/certs/'
       const files = await api.listDownloads()
-      const obj = {}
+      const cp = {}
+      const rp = {}
       const arr = []
       if (files[1] === 200) {
         for (const file of files[0]) {
@@ -36,12 +39,22 @@ const DownloadsPage = (props) => {
             const type = file.slice(-4)
             const ext = file.slice(-3)
             if (types.map((t) => `.${t}`).includes(type)) {
-              if (typeof obj[ext] === 'undefined') obj[ext] = []
-              obj[ext].push(file)
+              if (typeof cp[ext] === 'undefined') cp[ext] = []
+              cp[ext].push(file)
             }
-          } else if (file.slice(0, match2.length) === match2) arr.push(file)
+          }
+          else if (file.slice(0, match2.length) === match2) {
+            const type = file.slice(-4)
+            const ext = file.slice(-3)
+            if (types.map((t) => `.${t}`).includes(type)) {
+              if (typeof rp[ext] === 'undefined') rp[ext] = []
+              rp[ext].push(file)
+            }
+          }
+          else if (file.slice(0, match3.length) === match3) arr.push(file)
         }
-        setPkgs(obj)
+        setClientPkgs(cp)
+        setRepoPkgs(rp)
         setCerts(arr)
       }
     }
@@ -82,8 +95,8 @@ const DownloadsPage = (props) => {
                   <span>For {clients[ext][0]}</span>
                 </h3>
                 <ul className="list list-inside ml-10">
-                  {pkgs[ext] && pkgs[ext].length > 0 ? (
-                    pkgs[ext]
+                  {clientPkgs[ext] && clientPkgs[ext].length > 0 ? (
+                    clientPkgs[ext]
                       .sort()
                       .filter((pkg) => pkg.includes('morio-client'))
                       .map((pkg) => (
@@ -101,7 +114,7 @@ const DownloadsPage = (props) => {
           })}
           <h2 className="flex flex-row gap-2 items-center pl-2" id="packages">
             <PackageIcon className="w-10 h-10" />
-            <span>Client Repository Packages</span>
+            <span>Repository Installer Packages</span>
           </h2>
           {Object.keys(clients).map((ext) => {
             const Icon = clients[ext][1]
@@ -112,8 +125,8 @@ const DownloadsPage = (props) => {
                   <span>For {clients[ext][0]}</span>
                 </h3>
                 <ul className="list list-inside ml-10">
-                  {pkgs[ext] && pkgs[ext].length > 0 ? (
-                    pkgs[ext]
+                  {repoPkgs[ext] && repoPkgs[ext].length > 0 ? (
+                    repoPkgs[ext]
                       .sort()
                       .filter((pkg) => pkg.includes('morio-repo'))
                       .map((pkg) => (

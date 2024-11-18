@@ -159,7 +159,7 @@ export async function oidcCallbackHandler(req, res) {
   const jwt = await generateJwt({
     data,
     key: utils.getKeys().private,
-    passphrase: utils.getKeys().mrt,
+    passphrase: utils.getKeys().unseal,
   })
 
   /*

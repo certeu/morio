@@ -39,9 +39,9 @@ info:
     name: EUPL
     url: >-
       https://joinup.ec.europa.eu/collection/eupl/eupl-guidelines-faq-infographics
-  version: 0.5.0
+  version: 0.5.3
   x-logo:
-    url: /downloads/morio-card-embed.svg
+    url: https://morio.it/img/morio-social-card.png
     backgroundColor: transparent
     altText: Morio Logo
   contact:
@@ -666,61 +666,33 @@ paths:
                 keys:
                   type: object
                   properties:
-                    jwt:
-                      type: string
-                    mrt:
-                      type: string
-                      pattern: ^mrt\.[0-9a-z]+$
-                      minLength: 68
-                      maxLength: 68
-                    public:
-                      type: string
-                    private:
-                      type: string
-                    cluster:
-                      type: string
-                      format: uuid
-                    jwk:
+                    serial:
+                      type: number
+                      format: float
+                      minimum: 1720000000000
+                      maximum: 1990000000000
+                    data:
                       type: object
                       properties:
-                        kty:
+                        data:
                           type: string
-                        kid:
+                        key:
                           type: string
-                        'n':
-                          type: string
-                        e:
-                          type: string
+                        seal:
+                          type: object
+                          properties:
+                            hash:
+                              type: string
+                            salt:
+                              type: string
+                          additionalProperties: false
                       required:
-                        - kty
-                        - kid
-                        - 'n'
-                        - e
+                        - data
+                        - key
+                        - seal
                       additionalProperties: false
-                    rfpr:
-                      type: string
-                    rcrt:
-                      type: string
-                    rkey:
-                      type: string
-                    rpwd:
-                      type: string
-                    icrt:
-                      type: string
-                    ikey:
-                      type: string
                   required:
-                    - jwt
-                    - mrt
-                    - public
-                    - private
-                    - cluster
-                    - rfpr
-                    - rcrt
-                    - rkey
-                    - rpwd
-                    - icrt
-                    - ikey
+                    - serial
                   additionalProperties: false
                 headers:
                   type: object
@@ -1062,6 +1034,11 @@ paths:
                       format: float
                       minimum: 1720000000000
                       maximum: 1990000000000
+                    keys_serial:
+                      type: number
+                      format: float
+                      minimum: 1720000000000
+                      maximum: 1990000000000
                     status:
                       type: object
                       properties: {}
@@ -1080,6 +1057,7 @@ paths:
                     - cluster
                     - version
                     - settings_serial
+                    - keys_serial
                     - broadcast
                     - uptime
                   additionalProperties: false
@@ -3036,487 +3014,16 @@ paths:
           description: Only available in ephemeral mode
           content:
             application/problem+json:
-              example: &ref_15
+              example:
                 status: 409
                 title: Only available in ephemeral mode
                 detail: >-
                   This endpoint is only available when Morio is running in
                   ephemeral mode. Since this system has been set up, this
                   endpoint is no longer available.
-  /preseed:
-    post:
-      tags: *ref_7
-      summary: Preseed Morio
-      description: |-
-        This will set up Morio with the provided preseed settings.
-
-        This endpoint is only available in ephemeral Mode.
-        In other words, once Morio is set up, this endpoint becomes unavailable.
-      requestBody:
-        description: The Morio preseed settings to use for the intial setup
-        required: true
-        content:
-          application/json:
-            schema:
-              anyOf:
-                - type: object
-                  properties:
-                    url:
-                      type: string
-                    git:
-                      type: object
-                      properties: {}
-                      additionalProperties:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                          url:
-                            type: string
-                          ref:
-                            type: string
-                          user:
-                            anyOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  vault:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          path:
-                                            type: string
-                                          key:
-                                            type: string
-                                          instance:
-                                            type: string
-                                        required:
-                                          - path
-                                          - key
-                                        additionalProperties: false
-                                additionalProperties: false
-                          token:
-                            anyOf:
-                              - type: string
-                              - type: object
-                                properties:
-                                  vault:
-                                    anyOf:
-                                      - type: string
-                                      - type: object
-                                        properties:
-                                          path:
-                                            type: string
-                                          key:
-                                            type: string
-                                          instance:
-                                            type: string
-                                        required:
-                                          - path
-                                          - key
-                                        additionalProperties: false
-                                additionalProperties: false
-                        additionalProperties: false
-                    base:
-                      anyOf:
-                        - type: object
-                          properties:
-                            url:
-                              type: string
-                            headers:
-                              type: object
-                              properties: {}
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          required:
-                            - url
-                          additionalProperties: false
-                        - type: object
-                          properties:
-                            gitlab:
-                              type: object
-                              properties:
-                                url:
-                                  type: string
-                                project_id:
-                                  type: number
-                                  format: float
-                                file_path:
-                                  type: string
-                                ref:
-                                  type: string
-                                token:
-                                  anyOf:
-                                    - type: string
-                                    - type: object
-                                      properties:
-                                        vault:
-                                          anyOf:
-                                            - type: string
-                                            - type: object
-                                              properties:
-                                                path:
-                                                  type: string
-                                                key:
-                                                  type: string
-                                                instance:
-                                                  type: string
-                                              required:
-                                                - path
-                                                - key
-                                              additionalProperties: false
-                                      additionalProperties: false
-                              required:
-                                - url
-                                - project_id
-                                - file_path
-                                - token
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          additionalProperties: false
-                        - type: object
-                          properties:
-                            github:
-                              type: object
-                              properties:
-                                url:
-                                  type: string
-                                owner:
-                                  type: string
-                                repo:
-                                  type: string
-                                file_path:
-                                  type: string
-                                ref:
-                                  type: string
-                                token:
-                                  anyOf:
-                                    - type: string
-                                    - type: object
-                                      properties:
-                                        vault:
-                                          anyOf:
-                                            - type: string
-                                            - type: object
-                                              properties:
-                                                path:
-                                                  type: string
-                                                key:
-                                                  type: string
-                                                instance:
-                                                  type: string
-                                              required:
-                                                - path
-                                                - key
-                                              additionalProperties: false
-                                      additionalProperties: false
-                              required:
-                                - owner
-                                - repo
-                                - file_path
-                                - token
-                              additionalProperties: false
-                            keys:
-                              type: object
-                              properties:
-                                data:
-                                  type: string
-                                key:
-                                  type: string
-                                  pattern: .*ENCRYPTED PRIVATE KEY.*
-                                seal:
-                                  type: object
-                                  properties:
-                                    hash:
-                                      type: string
-                                    salt:
-                                      type: string
-                                  required:
-                                    - hash
-                                    - salt
-                                  additionalProperties: false
-                              required:
-                                - data
-                                - key
-                              additionalProperties: false
-                          additionalProperties: false
-                        - type: string
-                    overlays:
-                      anyOf:
-                        - type: array
-                          items:
-                            anyOf:
-                              - type: object
-                                properties:
-                                  url:
-                                    type: string
-                                  headers:
-                                    type: object
-                                    properties: {}
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                required:
-                                  - url
-                                additionalProperties: false
-                              - type: object
-                                properties:
-                                  gitlab:
-                                    type: object
-                                    properties:
-                                      url:
-                                        type: string
-                                      project_id:
-                                        type: number
-                                        format: float
-                                      file_path:
-                                        type: string
-                                      ref:
-                                        type: string
-                                      token:
-                                        anyOf:
-                                          - type: string
-                                          - type: object
-                                            properties:
-                                              vault:
-                                                anyOf:
-                                                  - type: string
-                                                  - type: object
-                                                    properties:
-                                                      path:
-                                                        type: string
-                                                      key:
-                                                        type: string
-                                                      instance:
-                                                        type: string
-                                                    required:
-                                                      - path
-                                                      - key
-                                                    additionalProperties: false
-                                            additionalProperties: false
-                                    required:
-                                      - url
-                                      - project_id
-                                      - file_path
-                                      - token
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                additionalProperties: false
-                              - type: object
-                                properties:
-                                  github:
-                                    type: object
-                                    properties:
-                                      url:
-                                        type: string
-                                      owner:
-                                        type: string
-                                      repo:
-                                        type: string
-                                      file_path:
-                                        type: string
-                                      ref:
-                                        type: string
-                                      token:
-                                        anyOf:
-                                          - type: string
-                                          - type: object
-                                            properties:
-                                              vault:
-                                                anyOf:
-                                                  - type: string
-                                                  - type: object
-                                                    properties:
-                                                      path:
-                                                        type: string
-                                                      key:
-                                                        type: string
-                                                      instance:
-                                                        type: string
-                                                    required:
-                                                      - path
-                                                      - key
-                                                    additionalProperties: false
-                                            additionalProperties: false
-                                    required:
-                                      - owner
-                                      - repo
-                                      - file_path
-                                      - token
-                                    additionalProperties: false
-                                  keys:
-                                    type: object
-                                    properties:
-                                      data:
-                                        type: string
-                                      key:
-                                        type: string
-                                        pattern: .*ENCRYPTED PRIVATE KEY.*
-                                      seal:
-                                        type: object
-                                        properties:
-                                          hash:
-                                            type: string
-                                          salt:
-                                            type: string
-                                        required:
-                                          - hash
-                                          - salt
-                                        additionalProperties: false
-                                    required:
-                                      - data
-                                      - key
-                                    additionalProperties: false
-                                additionalProperties: false
-                              - type: string
-                        - type: string
-                    keys:
-                      type: object
-                      properties:
-                        data:
-                          type: string
-                        key:
-                          type: string
-                          pattern: .*ENCRYPTED PRIVATE KEY.*
-                        seal:
-                          type: object
-                          properties:
-                            hash:
-                              type: string
-                            salt:
-                              type: string
-                          required:
-                            - hash
-                            - salt
-                          additionalProperties: false
-                      required:
-                        - data
-                        - key
-                      additionalProperties: false
-                  additionalProperties: false
-                - type: string
-            examples:
-              base:
-                value:
-                  github:
-                    owner: morio
-                    repo: preseed
-                    file_path: settings/standalone.yaml
-                    ref: main
-                    token: >-
-                      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
-                summary: base Example
-              overlays:
-                value:
-                  - settings/overlays/idp-ad.yaml
-                  - settings/overlays/idp-apikey.yaml
-                  - settings/overlays/idp-local.yaml
-                  - settings/overlays/idp-mrt.yaml
-                summary: overlays Example
-      responses:
-        '200':
-          content: {}
-        '400':
-          description: This request violates the data schema
-          content:
-            application/problem+json:
-              example: *ref_1
-        '409':
-          description: Only available in ephemeral mode
-          content:
-            application/problem+json:
-              example: *ref_15
   /status:
     get:
-      tags: &ref_16
+      tags: &ref_15
         - status
       summary: Get status
       description: Returns information about the current status of Morio core.
@@ -3525,7 +3032,7 @@ paths:
           content: {}
   /reload:
     get:
-      tags: *ref_16
+      tags: *ref_15
       summary: Reload API data
       description: >-
         This will return all the data required to bootstrap the Morio Management

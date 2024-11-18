@@ -20,7 +20,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     container: {
       // Name to use for the running container
-      container_name: 'dbuilder',
+      container_name: 'drbuilder',
       // Image to run (different in dev)
       image: 'itsmorio/dbuilder',
       // Image tag (version) to run
@@ -32,22 +32,20 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Volumes
       volumes: PROD
         ? [
-            `${DIRS.data}/clients:/morio/client/bin`,
-            `${DIRS.data}/clients/linux:/morio/client/src`,
-            `${DIRS.data}/${DIRS.dl}/clients/deb:/morio/client/dist`,
+            `${DIRS.data}/installers/deb:/morio/repo/src`,
+            `${DIRS.data}/${DIRS.dl}/installers/deb:/morio/repo/dist`,
             `${DIRS.data}/aptrepo:/repo`,
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/dbuilder:/etc/dbuilder`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/drbuilder:/etc/drbuilder`,
           ]
         : [
-            `${utils.getPreset('MORIO_GIT_ROOT')}/clients:/morio/client/bin`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/clients/linux:/morio/client/src`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/${DIRS.dl}/clients/deb:/morio/client/dist`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/installers/deb:/morio/repo/src`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/${DIRS.dl}/installers/deb:/morio/repo/dist`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/aptrepo:/repo`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/dbuilder:/etc/dbuilder`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/drbuilder:/etc/drbuilder`,
           ],
       command: [
         '/entrypoint.sh',
-        'client',
+        'repo',
       ],
       // Don't keep container after it exits
       ephemeral: true,
@@ -60,41 +58,24 @@ export const resolveServiceConfiguration = ({ utils }) => {
  * You can override them by passing them in to the control method.
  */
 export const packageDefaults = {
-  Package: 'morio-client',
-  Source: 'morio-client',
-  Section: 'utils',
+  Package: 'morio-repo',
+  Source: 'morio-repo',
+  Section: 'misc',
   Priority: 'optional',
+  Architecture: 'all',
   Essential: 'no',
-  Depends: [
-    ['auditbeat', '>= 8.12'],
-    ['filebeat', '>= 8.12'],
-    ['metricbeat', '>= 8.12'],
-  ],
-  'Installed-Size': 5000,
+  Depends: [ ['apt-transport-https', '>=2'] ],
+  'Installed-Size': 50000,
   Maintainer: 'CERT-EU <services@cert.europa.eu>',
   'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
+  Homepage: 'https://morio.it',
+  Description: `Adds Morio repository and GPG key`,
+  'Vcs-Git': 'https://github.com/certeu/morio -b main',
   Uploaders: ['Joost De Cock <joost.decock@cert.europa.eu>'],
-  Homepage: 'https://github.com/certeu/morio',
-  Description: `The Morio client collects and ships observability data to a Morio instance.`,
-  DetailedDescription: `Deploy this Morio client (based on Elastic Beats) on your endpoints,
-and collect their data on one or more centralized Morio instances
-for analysis, further processing, downstream routing & filtering,
-or event-driven automation.`,
-  'Vcs-Git': 'https://github.com/certeu/morio -b main [clients/linux]',
-  Architecture: '__MORIO_CLIENT_ARCHITECTURE__' // This will be replaced by the builder
+  DetailedDescription: `Install this package to set up the apt
+repository on your Morio collector. This allows you to install the
+Morio client and its updates via the OS package manager.`
 }
-
-export const packageDefaultsYouCanEdit = [
-  'Depends',
-  'Installed-Size',
-  'Maintainer',
-  'Changed-By',
-  'Uploaders',
-  'Homepage',
-  'Description',
-  'DetailedDescription',
-  'Vcs-Git',
-]
 
 /**
  * This generated a control file to build a DEB package.
@@ -136,5 +117,4 @@ export const resolveControlFile = (settings = {}, utils) => {
    */
   return [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n')
 }
-
 

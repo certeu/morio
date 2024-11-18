@@ -150,7 +150,7 @@ const coreWebConfig = `
 sudo mkdir -p ${MORIO_GIT_ROOT}/data/config/web
 sudo cp -R ${MORIO_GIT_ROOT}/moriod/etc/morio/moriod/web  ${MORIO_GIT_ROOT}/data/config
 sudo mkdir -p ${MORIO_GIT_ROOT}/data/data
-sudo cp -R ${MORIO_GIT_ROOT}/moriod/var/lib/morio/moriod/shared/webroot ${MORIO_GIT_ROOT}/data/data/webroot
+sudo cp -R ${MORIO_GIT_ROOT}/moriod/var/lib/morio/moriod/webroot ${MORIO_GIT_ROOT}/data/data/webroot
 
 `
 

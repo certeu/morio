@@ -1,0 +1,53 @@
+---
+title: DRBuilder Service Guide
+tags:
+  - drbuilder
+---
+
+The **Morio Debian Repository Builder Service** (drbuilder) is an on-demand 
+service that builds Morio repository packages in `.deb` format, the package 
+format used by Debian-based Linux distributions.
+
+As an on-demand service, it is not running all the time, instead it is started
+by [the core service](/docs/guides/services/core) whenever a `.deb` repository
+package needs to be built.
+
+## DRBuilder service responsibilities
+
+The drbuilder service is present on every Morio [broker node
+](/docs/reference/terminology/broker-node/), and handles the following
+responsibilities:
+
+### Building .deb Morio repository packages
+
+The drbuilder service has one job and one job only: building repository packages
+for Debian-based Linux distributions.
+
+These repository packages go by the name `morio-repo` and they exist to
+facilitate the installation of the Morio client on Debian based Linux systems.
+Specifically, they setup the APT repository that is hosted by the Morio
+collector, and add its key as a trusted key to apt. This allows to install the
+Morio client and get all updates from this repository hosted on the collector.
+
+### Maintaining an APT software repository
+
+Upon building packages, this service will update the APT repository hosted by
+the Morio collector at `/repos/apt`.
+
+:::tip Using this repository
+
+You can add this repository to your system:
+
+```
+deb https://[your-collector]/repos/apt/ bookworm main
+```
+
+Or go to `/install` on your collector for an automated install script that will
+set up this repository.
+:::
+
+:::note
+Under the hood, this services uses the `itsmorio/dbuilder` container image, the
+same image used by [the DBuilder Service](/docs/guides/services/dbuilder).
+:::
+

@@ -22,6 +22,7 @@ clients/linux/etc/morio/logs/module-templates.d/*
 clients/linux/etc/morio/metrics/module-templates.d/*
 clients/morio/morio
 clients/morio-*
+builders/dbuilder/clients
 
 # Auto-generated moriod files
 moriod/control

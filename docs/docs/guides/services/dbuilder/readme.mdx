@@ -20,5 +20,29 @@ responsibilities:
 
 ### Building .deb Morio client packages
 
-The dbuilder service has one job and one job only: Building client packages
+The dbuilder service has one job and one job only: building client packages
 for Debian-based Linux distributions.
+
+### Maintaining an APT software repository
+
+Upon building packages, this service will update the APT repository hosted by
+the Morio collector at `/repos/apt`.
+
+:::tip Using this repository
+
+You can add this repository to your system:
+
+```
+deb https://[your-collector]/repos/apt/ bookworm main
+```
+
+Or go to `/install` on your collector for an automated install script that will
+set up this repository.
+:::
+
+:::note
+Under the hood, this services uses the `itsmorio/dbuilder` container image, the
+same image used by [the DBuilder Service](/docs/guides/services/dbuilder).
+:::
+
+

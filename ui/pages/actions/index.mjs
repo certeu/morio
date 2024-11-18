@@ -1,9 +1,6 @@
-// Dependencies
-import { rbac } from 'lib/utils.mjs'
 // Hooks
 import { useState, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -11,8 +8,8 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CardButton } from 'components/card.mjs'
-import { RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
+import { Card, CardButton } from 'components/card.mjs'
+import { PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
 import { SecretInput } from 'components/inputs.mjs'
 import { mrtValid } from 'components/auth/mrt-provider.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -86,7 +83,6 @@ const ActionsPage = (props) => {
   const { api } = useApi()
   const { pushModal, clearModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
-  const { account } = useAccount()
 
   const restart = async () => {
     setLoadingStatus([true, 'Restarting Morio, this will take a while'])
@@ -126,32 +122,22 @@ const ActionsPage = (props) => {
     }
   }
 
-  // Does the user have an operator or higher role?
-  const operator = rbac(account.role, 'operator')
-  const engineer = rbac(account.role, 'engineer')
-
   return (
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={WrenchIcon} title={props.title}>
         <div
-          className={`grid grid-cols-${operator ? 3 : 1} gap-4 items-center justify-between items-stretch max-w-4xl`}
+          className={`grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl`}
         >
-          {operator ? (
-            <CardButton
-              title="Restart Morio"
-              onClick={() =>
-                pushModal(
-                  <ModalWrapper>
-                    <RestartConfirmation restart={restart} />
-                  </ModalWrapper>
-                )
-              }
-              desc="Restarts Morio Core (soft restart). One or more services will potentially be restarted."
-              width="w-full"
-              Icon={RestartIcon}
-            />
-          ) : null}
+          <Card
+            title="Build Packages"
+            href="/actions/pkgs"
+            desc="Trigger builds of packages pre-configured to integrate with this Morio collector."
+            width="w-full"
+            Icon={PackageIcon}
+            role="operator"
+          />
           <CardButton
+            role="operator"
             title="Reseed Morio"
             onClick={() =>
               pushModal(
@@ -164,21 +150,34 @@ const ActionsPage = (props) => {
             width="w-full"
             Icon={ReseedIcon}
           />
-          {engineer ? (
-            <CardButton
-              title="Rotate Root Token"
-              onClick={() =>
-                pushModal(
-                  <ModalWrapper keepOpenOnClick>
-                    <RotateRootTokenConfirmation rotateRootToken={rotateRootToken} />
-                  </ModalWrapper>
-                )
-              }
-              desc="Generate a new Root Token and replace the current Morio Root Token with it."
-              width="w-full"
-              Icon={KeyIcon}
-            />
-          ) : null}
+          <CardButton
+            role="operator"
+            title="Restart Morio"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper>
+                  <RestartConfirmation restart={restart} />
+                </ModalWrapper>
+              )
+            }
+            desc="Restarts Morio Core (soft restart). One or more services will potentially be restarted."
+            width="w-full"
+            Icon={RestartIcon}
+          />
+          <CardButton
+            role="engineer"
+            title="Rotate Root Token"
+            onClick={() =>
+              pushModal(
+                <ModalWrapper keepOpenOnClick>
+                  <RotateRootTokenConfirmation rotateRootToken={rotateRootToken} />
+                </ModalWrapper>
+              )
+            }
+            desc="Generate a new Root Token and replace the current Morio Root Token with it."
+            width="w-full"
+            Icon={KeyIcon}
+          />
         </div>
       </ContentWrapper>
     </PageWrapper>

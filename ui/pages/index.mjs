@@ -81,10 +81,7 @@ const Setup = ({ pageProps }) => {
               <Link className="btn btn-primary btn-lg" href="/setup">
                 Use the Setup Wizard
               </Link>
-              <div className="grid grid-cols-2 items-center flex-wrap">
-                <Link href="/setup/preseed" className="btn btn-ghost">
-                  Upload a Preseed File
-                </Link>
+              <div className="text-center">
                 <Link href="/setup/upload" className="btn btn-ghost">
                   Upload a Settings File
                 </Link>

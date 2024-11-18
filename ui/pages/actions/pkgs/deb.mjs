@@ -27,17 +27,11 @@ const Docs = ({ field }) => (
 
 const fields = {
   basics: {
-    Package: 'The name to use for the package',
     Description: 'A one-liner short description',
     Version: 'The version number of the package',
     Revision: 'The revision number of the package',
   },
   advanced: {
-    Section: 'The Debian section the package belongs to',
-    Priority: 'The Debian priority code for this package',
-    Architecture: 'The Debian architecture code for the package',
-    Essential: 'Setting this to yes means the package cannot be removed',
-    'Installed-Size': 'Estimate of the disk space reuired (in MB)',
     Maintainer: `The person or entity who maintains this package`,
     'Changed-By': 'The person who created this build of the package',
     Homepage: 'Link to the homepage for the package',
@@ -49,6 +43,23 @@ const altDocsFields = {
   revision: 'version',
 }
 
+
+const Field = ({ field, fields, defaults, data, setData }) => (
+  <StringInput
+    key={field}
+    placeholder={defaults[field]}
+    label={field}
+    labelBL={fields[field]}
+    labelBR={<Docs field={field.toLowerCase()} />}
+    valid={() => true}
+    current={data[field]}
+    update={(val) => {
+      const newData = { ...data }
+      newData[field] = val
+      setData(newData)
+    }}
+  />
+)
 /**
  * The actual component, in case we want to extract it for re-use later
  */
@@ -88,7 +99,7 @@ const CreatePackage = () => {
     const getDefaults = async () => {
       let result
       try {
-        result = await api.getClientRepoPackageDefaults('deb')
+        result = await api.getClientPackageDefaults('deb')
       } catch (err) {
         if (err) console.log(err)
       }
@@ -106,7 +117,7 @@ const CreatePackage = () => {
    */
   const buildPackage = async () => {
     setLoadingStatus([true, 'Contacting Morio Management API'])
-    const [body, status] = await api.buildClientRepoPackage('deb', data)
+    const [body, status] = await api.buildClientPackage('deb', data)
     if (status === 201) {
       setResult(body)
       // Force update of the revision
@@ -198,7 +209,7 @@ const CreatePackage = () => {
     <>
       <h2 className="flex flex-row justify-between items-center">
         <span>
-          Create a <b>.deb</b> repo installer package
+          Create <b>.deb</b> Morio client package
         </span>
         <div className="flex flex-row gap-2">
           <button className="btn btn-primary btn-outline btn-sm" onClick={empty}>
@@ -214,51 +225,20 @@ const CreatePackage = () => {
       </h2>
       <Tabs tabs="basics,advanced">
         <Tab tabId="basics" key="basics">
+          {Object.keys(fields.basics).slice(0,1).map(field => (
+            <Field key={field} fields={fields.basics} {...{ defaults, data, setData, field }} />
+          ))}
+
           <div className="grid grid-cols-2 gap-4 items-end">
-            {Object.keys(fields.basics).map((field) => (
-              <StringInput
-                key={field}
-                placeholder={defaults[field]}
-                label={field}
-                labelBL={fields.basics[field]}
-                labelBR={<Docs field={field.toLowerCase()} />}
-                valid={() => true}
-                current={data[field]}
-                update={(val) => {
-                  const newData = { ...data }
-                  newData[field] = val
-                  setData(newData)
-                }}
-              />
+            {Object.keys(fields.basics).slice(1,3).map(field => (
+              <Field key={field} fields={fields.basics} {...{ defaults, data, setData, field }} />
             ))}
           </div>
         </Tab>
         <Tab tabId="advanced" key="advanced">
           <div className="grid grid-cols-2 gap-4 items-end">
-            <StringInput
-              placeholder={defaults.Source}
-              label="Source Package Name"
-              labelBL="The name to use for the source package"
-              labelBR={<Docs field="source" />}
-              valid={() => true}
-              current={data.Source}
-              update={(Source) => setData({ ...data, Source })}
-            />
-            {Object.keys(fields.advanced).map((field) => (
-              <StringInput
-                key={field}
-                placeholder={defaults[field]}
-                label={field}
-                labelBL={fields.advanced[field]}
-                labelBR={<Docs field={field.toLowerCase()} />}
-                valid={() => true}
-                current={data[field]}
-                update={(val) => {
-                  const newData = { ...data }
-                  newData[field] = val
-                  setData(newData)
-                }}
-              />
+            {Object.keys(fields.advanced).map(field => (
+              <Field key={field} fields={fields.advanced} {...{ defaults, data, setData, field }} />
             ))}
           </div>
           <TextInput
@@ -340,7 +320,7 @@ const CreatePackage = () => {
       </Tabs>
       <p className="text-center">
         <button onClick={buildPackage} className="btn btn-primary btn-lg">
-          Build Debian Repo Installer
+          Build .deb Package
         </button>
       </p>
     </>
@@ -363,7 +343,7 @@ export default DebPage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Debian repo installer builder',
-    page: ['tools', 'pkgs', 'deb-repo'],
+    title: 'Morio Debian client builder',
+    page: ['actions', ['pkgs', 'Build Packages'], ['deb', 'Morio Debian Client Builder']],
   },
 })

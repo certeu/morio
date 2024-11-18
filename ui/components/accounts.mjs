@@ -306,7 +306,7 @@ const InviteResult = ({ data }) => (
   </div>
 )
 
-export const ActivateAccount = ({ invite = '', user = '' }) => {
+export const ActivateAccount = ({ invite = '', user = '', hidden=false }) => {
   const [inviteCode, setInviteCode] = useState(invite)
   const [username, setUsername] = useState(user)
   const { api } = useApi()
@@ -336,7 +336,7 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
     })
     if (result[1] === 200 && result[0]) {
       setLoadingStatus([true, 'Account activated', true, true])
-      setScratchCodes(result[0].scratchCodes)
+      setScratchCodes(result[0].scratch_codes)
     } else
       return setLoadingStatus([
         true,
@@ -410,21 +410,39 @@ export const ActivateAccount = ({ invite = '', user = '' }) => {
     </div>
   ) : (
     <div className="">
-      <StringInput
-        label="Username"
-        current={username}
-        update={setUsername}
-        valid={(val) => (val.length > 0 ? true : { error: true })}
-      />
-      <StringInput
-        label="Invite Code"
-        current={inviteCode}
-        update={setInviteCode}
-        valid={(val) => (val.length === 48 ? true : { error: true })}
-      />
-      <p className="text-center">
+      {hidden ? (
+        <Popout tip>
+          <p>
+            Clicking the button below will activate the Morio account with the following details:
+          </p>
+          <p>
+            <b>Username:</b> <code>{username}</code>
+            <br />
+            <b>Invite Code:</b> <code>{inviteCode}</code>
+          </p>
+          <p>
+            You will be asked to setup MFA as a prerequisite to activate the account.
+          </p>
+        </Popout>
+      ) : (
+        <>
+          <StringInput
+            label="Username"
+            current={username}
+            update={setUsername}
+            valid={(val) => (val.length > 0 ? true : { error: true })}
+          />
+          <StringInput
+            label="Invite Code"
+            current={inviteCode}
+            update={setInviteCode}
+            valid={(val) => (val.length === 48 ? true : { error: true })}
+          />
+        </>
+      )}
+      <p className={hidden ? '' : "text-center"}>
         <button
-          className="btn btn-primary btn-lg"
+          className="btn btn-primary"
           onClick={activateAccount}
           disabled={inviteCode.length !== 48 || username.length < 1}
         >

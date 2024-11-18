@@ -6,18 +6,20 @@
 #
 # Build the Debian package
 #
-build_package() {
+build_client_package() {
   local ARCH="$1"
   # Building the package is relatively simple
-  # (one you know how to do it)
+  # (once you know how to do it)
   cd /morio
   mkdir -p pkg/DEBIAN
   for FILE in control postinst; do
     if [ -f $SRC/$FILE ]
       then
+      echo "Copying $SRC/$FILE"
       cp $SRC/$FILE pkg/DEBIAN/
     fi
   done
+
   # fix architecture in control file
   sed -i "s/__MORIO_CLIENT_ARCHITECTURE__/$ARCH/" pkg/DEBIAN/control
   for DIRPATH in $SRC/*/; do
@@ -26,8 +28,54 @@ build_package() {
     cp -R $SRC/$DIR pkg/
   done
   # Copy the binary for this architecture
-  mkdir -p pkg/DEBIAN/usr/sbin/
-  cp $BIN/morio-linux-$ARCH pkg/DEBIAN/usr/sbin/morio
+  mkdir -p pkg/usr/sbin/
+  cp $BIN/morio-linux-$ARCH pkg/usr/sbin/morio
+
+  # Build the package
+  dpkg-deb --build pkg $DIST
+}
+
+build_repo_package() {
+  cd /morio
+  mkdir -p pkg/DEBIAN
+  for FILE in control postinst; do
+    if [ -f $SRC/$FILE ]
+      then
+      echo "Copying $SRC/$FILE"
+      cp $SRC/$FILE pkg/DEBIAN/
+    fi
+  done
+
+  for DIRPATH in $SRC/*/; do
+    DIR=$(basename "$DIRPATH")
+    echo "Copying $DIR"
+    cp -R $SRC/$DIR pkg/
+  done
+  # Build the package
+  dpkg-deb --build pkg $DIST
+}
+
+#
+# Build the Moriod repo Debian package
+#
+build_moriodrepo_package() {
+  cd /morio
+  mkdir -p pkg/DEBIAN
+  for FILE in control postinst; do
+    if [ -f $SRC/$FILE ]
+      then
+      echo "Copying $SRC/$FILE"
+      cp $SRC/$FILE pkg/DEBIAN/
+    fi
+  done
+
+  for DIRPATH in $SRC/*/; do
+    DIR=$(basename "$DIRPATH")
+    echo "Copying $DIR"
+    cp -R $SRC/$DIR pkg/
+  done
+
+  # Build the package
   dpkg-deb --build pkg $DIST
 }
 
@@ -36,65 +84,80 @@ build_package() {
 #
 update_apt_repo() {
   #  Container is ephemeral, so always import private key for signing
-  gpg --import /etc/dbuilder/priv.key
-
-  # Generating/Updating the APT repository is a bit more work
-  # For one thing, we need to figure out whether this is the
-  # first time this runs in which case we should set up the
-  # repo, or if we should merely update it.
-  if [ -d "/repo/public/pool/main/m" ]; then
-    echo "Updating existing APT repository with new package"
-    aptly repo add morio $DIST
-    aptly publish -architectures="amd64,arm64" update bookworm
+  if [ $BUILD_JOB == "client" ]; then
+    gpg --import /etc/dbuilder/priv.key
   else
-    echo "Creating APT repository"
-    aptly repo create -distribution=bookworm -component=main morio 2>/dev/null
-    aptly repo add morio $DIST
-    aptly publish -architectures="amd64,arm64" repo morio
+    gpg --import /etc/drbuilder/priv.key
   fi
 
-  # Sym-link latest version of packages for easy access from install script
-  mkdir -p /repo/public/latest
-  cp /repo/public/pool/main/m/morio-repo/$(ls -1t  /repo/public/pool/main/m/morio-repo/ | head -n 1) /repo/public/latest/morio-repo.deb
+  # Does repo morio exist?
+  aptly repo show morio
+  REPO_EXISTS=$?
+  if [ $REPO_EXISTS != "0" ]; then
+    # Need to create the repository
+    echo "Creating APT repository"
+    aptly repo create -distribution=bookworm -component=main morio
+  fi
+
+  # Add packages
+  aptly repo add morio $DIST
+
+  if [ $REPO_EXISTS != "0" ]; then
+    echo "Publishing repository"
+    aptly publish repo -batch -component="main" -distribution="bookworm" -label="Morio Client" -architectures="amd64,arm64" morio .
+  else
+    echo "Updating published repository"
+    aptly publish update bookworm .
+  fi
+
+  if [ $BUILD_JOB == "repo" ]; then
+    # Sym-link latest version of packages for easy access from install script
+    mkdir -p /repo/public/latest
+    cp /repo/public/pool/main/m/morio-repo/$(ls -1t  /repo/public/pool/main/m/morio-repo/ | head -n 1) /repo/public/latest/morio-repo.deb
+  fi
 }
 
 #
 # Figure out what to build
 #
-BUILD_JOB=$(cat /etc/dbuilder/DBUILDER_JOB 2>/dev/null || echo "unknown")
+BUILD_JOB="$1"
+echo "Build job is $BUILD_JOB"
 
 #
 # Always import the public key
 #
-gpg --import /etc/dbuilder/pub.key
 
 if [ $BUILD_JOB == "client" ]; then
+  gpg --import /etc/dbuilder/pub.key
   SRC=/morio/client/src
   DIST=/morio/client/dist
-  BIN=/morio/client/bin
+  BIN=/morio-clients
   echo "Building client package for Debian on amd64"
-  build_package amd64
+  build_client_package amd64
   echo "Building client package for Debian on arm64"
-  build_package arm64
+  build_client_package arm64
   echo "Updating repository"
   update_apt_repo
 elif [ $BUILD_JOB == "repo" ]; then
+  gpg --import /etc/drbuilder/pub.key
   #
   # We need to export the public key and add it to the build
   # as it needs to be in this binary GPG format for APT to be happy
   #
   #mkdir -p /morio/repo/src/usr/share/keyrings
   #gpg --export > /morio/repo/src/etc/apt/usr/share/keyrings/morio-collector.gpg
-  echo "Building client repo package for Debian"
+  echo "Building repo package for Debian"
   SRC=/morio/repo/src
   DIST=/morio/repo/dist
-  build_package
+  build_repo_package
   echo "Updating repository"
   update_apt_repo
-else
-  echo "Unknown build job, running build from /morio/src folder"
+elif [ $BUILD_JOB == "moriodrepo" ]; then
+  echo "Building moriod repo package for Debian"
   SRC=/morio/src
   DIST=/morio/dist
-  build_package
+  build_moriodrepo_package
+else
+  echo "Unknown build job, not running a build. Please specify 'client', 'repo', or 'moriodrepo'"
 fi
 

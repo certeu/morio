@@ -169,14 +169,9 @@ export const service = {
       })
       if (up) log.debug(`Broker is up.`)
       else {
-        log.warn(`Broker did not come up before timeout. Not creating topics.`)
+        log.warn(`Broker did not come up before timeout.`)
         return
       }
-
-      /*
-       * Ensure topics exist
-       */
-      await ensureTopicsExist()
 
       /*
        * Ensure ACL are present, once they are, enable authorization
@@ -186,26 +181,6 @@ export const service = {
       return true
     },
   },
-}
-
-/**
- * Helper method to create topics on the broker
- */
-async function ensureTopicsExist() {
-  const topics = await getTopics()
-  if (!topics) {
-    log.warn(`Failed to ensure broker topics: Unable to fetch list of current topics from broker.`)
-    return false
-  }
-
-  const toCreate = utils.getPreset('MORIO_BROKER_TOPICS').filter((topic) => !topics.includes(topic))
-  log.info(`[debug] Creating topics ${toCreate.join(', ')}`)
-  await execContainerCommand(`${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker`, [
-    'rpk',
-    'topic',
-    'create',
-    toCreate.join(' '),
-  ])
 }
 
 /**
@@ -265,23 +240,6 @@ async function isBrokerUp() {
   if (result && result.is_healthy) return true
 
   return false
-}
-
-/**
- * Get the list of topics from RedPanda
- *
- * @return {object} result - The JSON output as a POJO
- */
-async function getTopics() {
-  const result = await testUrl(
-    `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:8082/topics`,
-    {
-      ignoreCertificate: true,
-      returnAs: 'json',
-    }
-  )
-
-  return result
 }
 
 /**

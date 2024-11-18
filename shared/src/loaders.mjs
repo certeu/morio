@@ -134,17 +134,21 @@ async function loadGitRepo(gitroot, id, config, log) {
  * @param {string} gitroot - Path to the root where git repos are stored
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedBaseFile(preseed, gitroot) {
-  if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed)
-  if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed)
+async function loadPreseedBaseFile(preseed, gitroot, log) {
+  if (typeof preseed === 'string') return await loadPreseedFileFromUrl(preseed, log)
+  if (typeof preseed.url === 'string') return await loadPreseedFileFromUrl(preseed, log)
   if (typeof preseed.base === 'string') {
     if (preseed.git && fromRepo(preseed.base))
-      return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot)
-    else return await loadPreseedFileFromUrl(preseed.base)
+      return await loadPreseedFileFromRepo(preseed.base, preseed, gitroot, log)
+    else return await loadPreseedFileFromUrl(preseed.base, log)
   }
-  if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base)
-  if (preseed.base?.github) return await loadPreseedFileFromGithub(preseed.base)
-  if (preseed.base?.url) return await loadPreseedFileFromUrl(preseed.base)
+  if (preseed.base?.gitlab) return await loadPreseedFileFromGitlab(preseed.base, log)
+  if (preseed.base?.github) return await loadPreseedFileFromGithub(preseed.base, log)
+  if (preseed.base?.url) {
+    if (preseed.git && fromRepo(preseed.base))
+      return await loadPreseedFileFromRepo(preseed.base.url, preseed, gitroot, log)
+    else return await loadPreseedFileFromUrl(preseed.base, log)
+  }
 
   return false
 }
@@ -170,7 +174,7 @@ export async function loadPreseededSettings(preseed, log, gitroot = '/etc/morio/
   /*
    * Attempt to load the preseed base file
    */
-  const settings = await loadPreseedBaseFile(preseed, gitroot)
+  const settings = await loadPreseedBaseFile(preseed, gitroot, log)
   if (!settings) {
     log.warn(`Failed to load preseed base file`)
     return false
@@ -222,21 +226,23 @@ export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio
  * @param {object} config - The preseed config
  * @return {object} config - The loaded config
  */
-async function loadPreseedFileFromGithub(config) {
-  const result = await testUrl(
-    `${config.github.url || 'https://api.github.com'}/repos/${config.github.owner}/${config.github.repo}/contents/${encodeURIComponent(config.github.file_path)}?ref=${config.github.ref}`,
-    {
-      returnError: true,
-      ignoreCertificate: config.verify_certificate === false ? true : false,
-      timeout: 4500,
-      returnAs: 'json',
-      headers: {
-        Accept: 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-        Authorization: config.github.token ? `Bearer ${config.github.token}` : undefined,
-      },
-    }
-  )
+async function loadPreseedFileFromGithub(config, log) {
+  const url = `${config.github.url || 'https://api.github.com'}/repos/${
+    config.github.owner}/${config.github.repo}/contents/${
+      encodeURIComponent(config.github.file_path)}?ref=${config.github.ref}`
+  const result = await testUrl(url, {
+    returnError: true,
+    ignoreCertificate: config.verify_certificate === false ? true : false,
+    timeout: 4500,
+    returnAs: 'json',
+    headers: {
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28',
+      Authorization: config.github.token ? `Bearer ${config.github.token}` : undefined,
+    },
+  })
+
+  log.debug(`Preseeding ${url}`)
 
   return typeof result.content === 'string' ? asJsonOrYaml(result.content, true) : false
 }
@@ -247,16 +253,18 @@ async function loadPreseedFileFromGithub(config) {
  * @param {object} config - The preseed config
  * @return {object} config - The loaded config
  */
-async function loadPreseedFileFromGitlab(config) {
-  const result = await testUrl(
-    `${config.gitlab.url || 'https://gitlab.com'}/api/v4/projects/${config.gitlab.project_id}/repository/files/${encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`,
-    {
-      ignoreCertificate: config.verify_certificate === false ? true : false,
-      timeout: 4500,
-      returnAs: 'json',
-      headers: config.gitlab.token ? { 'PRIVATE-TOKEN': config.gitlab.token } : undefined,
-    }
-  )
+async function loadPreseedFileFromGitlab(config, log) {
+  const url = `${config.gitlab.url || 'https://gitlab.com'}/api/v4/projects/${
+    config.gitlab.project_id}/repository/files/${
+      encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`
+  const result = await testUrl(url, {
+    ignoreCertificate: config.verify_certificate === false ? true : false,
+    timeout: 4500,
+    returnAs: 'json',
+    headers: config.gitlab.token ? { 'PRIVATE-TOKEN': config.gitlab.token } : undefined,
+  })
+
+  log.debug(`Preseeding ${url}`)
 
   return typeof result.content === 'string' ? asJsonOrYaml(result.content, true) : false
 }
@@ -269,13 +277,15 @@ async function loadPreseedFileFromGitlab(config) {
  * @param {string} gitroot - Path to the root where git repos are stored
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedFileFromRepo(config, preseed, gitroot) {
+async function loadPreseedFileFromRepo(config, preseed, gitroot, log) {
   const chunks = config.slice(4).split('@')
   const repo = chunks[1] ? chunks[1] : Object.keys(preseed.git)[0]
   const content = await readFileFromRepo(repo, chunks[0], gitroot)
-  const data = asJsonOrYaml(content)
 
-  return data ? data : false
+  if (content) log.debug(`Preseeded ${config}`)
+  else log.warn(`Failed to preseed ${config}`)
+
+  return content ?  asJsonOrYaml(content) : false
 }
 
 /**
@@ -284,13 +294,16 @@ async function loadPreseedFileFromRepo(config, preseed, gitroot) {
  * @param {object|string} config - The preseed config
  * @return {object} config - The loaded config
  */
-async function loadPreseedFileFromUrl(config) {
-  const result = await testUrl(typeof config === 'string' ? config : config.url, {
+async function loadPreseedFileFromUrl(config, log) {
+  const url = typeof config === 'string' ? config : config.url
+  const result = await testUrl(url, {
     ignoreCertificate: config.verify_certificate === false ? false : true,
     timeout: 4500,
     returnAs: 'json',
     headers: config.headers ? config.headers : undefined,
   })
+
+  log.debug(`Preseeding ${url}`)
 
   /*
    * Handle YAML or JSON
