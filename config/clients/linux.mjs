@@ -63,12 +63,10 @@ const beatConfig = (type, utils) => {
          */
         path: `/etc/morio/${type}/modules.d/*.yml`,
         /*
-         * Do not reload when config changes on disk as that
-         * leads to unpredictable behaviour. Instead, be explicit
-         * if you want to update the configuration.
+         * Reload the agent config on changes
          */
         reload: {
-          enabled: false,
+          enabled: true,
         },
       },
     },
@@ -190,14 +188,6 @@ const outputConfig = (type, utils) => ({
       // Key to use for mTLS
       key: '/etc/morio/key.pem',
     },
-    /*
-     * SASL configuration (we currently use mTLS + SASL
-     */
-    sasl: {
-      mechanism: 'SCRAM-SHA-512'
-    },
-    username: 'morio-client',
-    password: utils.getClusterUuid(),
     /*
      * Topic to publish to
      */
