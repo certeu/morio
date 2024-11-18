@@ -23,7 +23,7 @@ Any parameters after this command will be passed to auditbeat.`,
 
 		// Pass all arguments (after audit) to the auditbeat binary
 		// but also add the location of the Morio-specific config
-		configFlag := []string{"-c", "/etc/morio/audit/config.yaml"}
+		configFlag := []string{"-c", "/etc/morio/audit/config.yml"}
 		auditbeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams
@@ -53,7 +53,7 @@ Any parameters after this command will be passed to filebeat.`,
 
 		// Pass all arguments (after logs) to the filebeat binary
 		// but also add the location of the Morio-specific config
-		configFlag := []string{"-c", "/etc/morio/logs/config.yaml"}
+		configFlag := []string{"-c", "/etc/morio/logs/config.yml"}
 		filebeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams
@@ -83,7 +83,7 @@ Any parameters after this command will be passed to metricbeat.`,
 
 		// Pass all arguments (after logs) to the metricbeat binary
 		// but also add the location of the Morio-specific config
-		configFlag := []string{"-c", "/etc/morio/metrics/config.yaml"}
+		configFlag := []string{"-c", "/etc/morio/metrics/config.yml"}
 		metricbeat := exec.Command(path, append(configFlag, args...)...)
 
 		// Re-use I/O streams

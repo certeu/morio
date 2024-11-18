@@ -21,14 +21,14 @@ var templateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		context := GetVars()
 		// Audit
-		TemplateOutFile("audit/config-template.yml", "audit/config.yaml", context)
+		TemplateOutFile("audit/config-template.yml", "audit/config.yml", context)
 		TemplateOutFolder("audit/module-templates.d", "audit/modules.d", context)
 		TemplateOutFolder("audit/rule-templates.d", "audit/rules.d", context)
 		// metrics
-		TemplateOutFile("metrics/config-template.yml", "metrics/config.yaml", context)
+		TemplateOutFile("metrics/config-template.yml", "metrics/config.yml", context)
 		TemplateOutFolder("metrics/module-templates.d", "metrics/modules.d", context)
 		// logs
-		TemplateOutFile("logs/config-template.yml", "logs/config.yaml", context)
+		TemplateOutFile("logs/config-template.yml", "logs/config.yml", context)
 		TemplateOutFolder("logs/module-templates.d", "logs/modules.d", context)
 		TemplateOutFolder("logs/input-templates.d", "logs/inputs.d", context)
 		// global vars
@@ -94,7 +94,7 @@ func ClearFolder(folder string) {
 	for _, file := range files {
 		filePath := filepath.Join(path, file.Name())
 		suffix := filepath.Ext(file.Name())
-		if !file.IsDir() && (suffix == ".yaml" || suffix == ".disabled" || suffix == ".rules") {
+		if !file.IsDir() && (suffix == ".yml" || suffix == ".disabled" || suffix == ".rules") {
 			if err := os.Remove(filePath); err != nil {
 				fmt.Println("Failed to remove file " + filePath)
 				fmt.Print(err)
@@ -114,7 +114,7 @@ func TemplateList(folder string) []string {
 
 	for _, template := range templates {
 		suffix := filepath.Ext(template.Name())
-		if !template.IsDir() && suffix == ".yaml" {
+		if !template.IsDir() && suffix == ".yml" {
 			files = append(files, template.Name())
 		}
 	}
@@ -178,7 +178,7 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 
 // FIXME: Make this platform agnostic
 func LoadGlobalVars() map[string]interface{} {
-	data, err := os.ReadFile("/etc/morio/global-vars.yaml")
+	data, err := os.ReadFile("/etc/morio/global-vars.yml")
 	if err != nil {
 		fmt.Println("Cannot read global variables file. Bailing out.")
 		panic(err)
