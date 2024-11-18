@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4
+- [client] Fix name of the configuration file template
 
 ## [0.5.4] - 2024-11-15
 

@@ -21,14 +21,14 @@ var templateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		context := GetVars()
 		// Audit
-		TemplateOutFile("audit/config.yaml.mustache", "audit/config.yaml", context)
+		TemplateOutFile("audit/config-template.yml", "audit/config.yaml", context)
 		TemplateOutFolder("audit/module-templates.d", "audit/modules.d", context)
 		TemplateOutFolder("audit/rule-templates.d", "audit/rules.d", context)
 		// metrics
-		TemplateOutFile("metrics/config.yaml.mustache", "metrics/config.yaml", context)
+		TemplateOutFile("metrics/config-template.yml", "metrics/config.yaml", context)
 		TemplateOutFolder("metrics/module-templates.d", "metrics/modules.d", context)
 		// logs
-		TemplateOutFile("logs/config.yaml.mustache", "logs/config.yaml", context)
+		TemplateOutFile("logs/config-template.yml", "logs/config.yaml", context)
 		TemplateOutFolder("logs/module-templates.d", "logs/modules.d", context)
 		TemplateOutFolder("logs/input-templates.d", "logs/inputs.d", context)
 		// global vars
