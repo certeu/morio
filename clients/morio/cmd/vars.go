@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
@@ -74,11 +75,16 @@ var exportCmd = &cobra.Command{
 This will always write a custom template variable.`,
 	Example: "  morio vars export",
 	Run: func(cmd *cobra.Command, args []string) {
-		allVarsAsJson, err := json.MarshalIndent(GetVars(), "", "  ")
+		stringVars := GetVars()
+		typedVars := make(map[string]interface{})
+		for key, val := range stringVars {
+			typedVars[key], _ = parseYAMLValue(val)
+		}
+		typedVarsAsJson, err := json.MarshalIndent(typedVars, "", "  ")
 		if err != nil {
 			fmt.Println("export failed JSON")
 		}
-		fmt.Print(string(allVarsAsJson))
+		fmt.Print(string(typedVarsAsJson))
 	},
 }
 
@@ -196,7 +202,7 @@ func check(e error) {
 	}
 }
 
-// Read the value of a variable
+// Read the value of a variable (always returns a string)
 func GetVar(key string) string {
 	// Read entire file in one gulp
 	value, err := os.ReadFile(CustomVarFolder + "/" + key)
@@ -255,6 +261,16 @@ func GetVars() map[string]string {
 	}
 
 	return orderedVars
+}
+
+// Takes a string and parses it as YAML
+func parseYAMLValue(input string) (interface{}, error) {
+	var result interface{}
+	err := yaml.Unmarshal([]byte(input), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Write a value to a variable
