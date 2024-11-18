@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2024-11-18
+
+### Added
+
+- [client] Added `morio vars list` command
+
+### Changed
+
+- [client] The `morio vars list` and `morio vars export` commands now return vars in alphabetical order
+
 ### Fixed
 
 - Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4
+- [client] Fix name of the configuration file template
+- [client] Use client UUID as Kafka client ID
+- [client] Drop SASL in favor of mTLS
+- [client] Properly handle arrays in client vars
+- [client] When exporting vars, parse them to their correct type
 
 ## [0.5.4] - 2024-11-15
 

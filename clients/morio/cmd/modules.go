@@ -116,7 +116,7 @@ func ModuleList(folder string) ([]string, []string) {
 	for _, template := range templates {
 		suffix := filepath.Ext(template.Name())
 		if !template.IsDir() {
-			if suffix == ".yaml" {
+			if suffix == ".yml" {
 				enabled = append(enabled, template.Name())
 			}
 			if suffix == ".disabled" {
@@ -152,7 +152,7 @@ func enableModuleFile(base, module string) {
 	for _, name := range disabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigPath(base+"/"+name), GetConfigPath(base+"/"+moduleName+".yaml"))
+			os.Rename(GetConfigPath(base+"/"+name), GetConfigPath(base+"/"+moduleName+".yml"))
 		}
 	}
 }
@@ -181,16 +181,16 @@ func disableModuleFile(base, module string) {
 	for _, name := range enabled {
 		moduleName := ModuleNameFromFile(name)
 		if moduleName == module {
-			os.Rename(GetConfigPath(base+"/"+moduleName+".yaml"), GetConfigPath(base+"/"+moduleName+".yaml.disabled"))
+			os.Rename(GetConfigPath(base+"/"+moduleName+".yml"), GetConfigPath(base+"/"+moduleName+".yml.disabled"))
 		}
 	}
 }
 
 func ModuleNameFromFile(file string) string {
-  baseFile := filepath.Base(file)
+	baseFile := filepath.Base(file)
 	base := baseFile[:len(baseFile)-len(filepath.Ext(baseFile))]
 	// Disabled modules have a double extension
-	if strings.HasSuffix(base, ".yaml") {
+	if strings.HasSuffix(base, ".yml") {
 		return base[:len(base)-len(filepath.Ext(base))]
 	} else {
 		return base

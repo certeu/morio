@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -33,6 +35,7 @@ var clearCmd = &cobra.Command{
 	Long: `Stores an empty string as a new value for a template variable,
 This will always write a custom template variable.`,
 	Example: "  morio vars clear WARP_DRIVE",
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		SetVar(args[0], "false")
 	},
@@ -45,6 +48,7 @@ var disableCmd = &cobra.Command{
 	Long: `Stores 'false' as a new value for a template variable,
 This will always write a custom template variable.`,
 	Example: "  morio vars disable WARP_DRIVE",
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		SetVar(args[0], "false")
 	},
@@ -57,6 +61,7 @@ var enableCmd = &cobra.Command{
 	Long: `Stores 'true' as a new value for a template variable,
 This will always write a custom template variable.`,
 	Example: "  morio vars enable WARP_DRIVE",
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		SetVar(args[0], "true")
 	},
@@ -70,11 +75,16 @@ var exportCmd = &cobra.Command{
 This will always write a custom template variable.`,
 	Example: "  morio vars export",
 	Run: func(cmd *cobra.Command, args []string) {
-		allVarsAsJson, err := json.MarshalIndent(GetVars(), "", "  ")
+		stringVars := GetVars()
+		typedVars := make(map[string]interface{})
+		for key, val := range stringVars {
+			typedVars[key], _ = parseYAMLValue(val)
+		}
+		typedVarsAsJson, err := json.MarshalIndent(typedVars, "", "  ")
 		if err != nil {
 			fmt.Println("export failed JSON")
 		}
-		fmt.Print(string(allVarsAsJson))
+		fmt.Print(string(typedVarsAsJson))
 	},
 }
 
@@ -86,6 +96,7 @@ var getCmd = &cobra.Command{
 If var NAME is not set, this will return an empty string.
 A custom NAME var has precedence over a default NAME var.`,
 	Example: "  morio vars get WARP_DRIVE",
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		value := GetVar(args[0])
 		fmt.Print(string(value))
@@ -121,6 +132,20 @@ Run 'morio vars export' to see the JSON structure`,
 	},
 }
 
+// morio vars list
+var listCmd = &cobra.Command{
+	Use:     "list",
+	Short:   "List all vars",
+	Long:    "Lists all template variables and their values",
+	Example: "  morio vars list",
+	Run: func(cmd *cobra.Command, args []string) {
+		allVars := GetVars()
+		for key, val := range allVars {
+			fmt.Printf("%s: %v\n", key, val)
+		}
+	},
+}
+
 // morio vars rm
 var rmCmd = &cobra.Command{
 	Use:     "rm NAME",
@@ -134,6 +159,7 @@ the default value.
 If you want the variable gone altogether, use 'morio vars clear' to
 set the var to an empty string. Note that you cannot remove default variables,
 but you can override them.`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		RmVar(args[0])
 	},
@@ -146,6 +172,7 @@ var setCmd = &cobra.Command{
 	Long: `Stores a new value for a template variable,
 This will always write a custom template variable.`,
 	Example: "  morio vars set WARP_DRIVE 9",
+	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		SetVar(args[0], args[1])
 	},
@@ -159,6 +186,7 @@ func init() {
 	varsCmd.AddCommand(exportCmd)
 	varsCmd.AddCommand(getCmd)
 	varsCmd.AddCommand(importCmd)
+	varsCmd.AddCommand(listCmd)
 	varsCmd.AddCommand(rmCmd)
 	varsCmd.AddCommand(setCmd)
 }
@@ -174,7 +202,7 @@ func check(e error) {
 	}
 }
 
-// Read the value of a variable
+// Read the value of a variable (always returns a string)
 func GetVar(key string) string {
 	// Read entire file in one gulp
 	value, err := os.ReadFile(CustomVarFolder + "/" + key)
@@ -203,17 +231,46 @@ func GetVars() map[string]string {
 	for _, file := range defaults {
 		if !file.IsDir() {
 			name := file.Name()
-			found[name] = GetVar(name)
+			// Skip files that start with a .
+			if len(name) > 0 && name[0] != '.' {
+				found[name] = GetVar(name)
+			}
 		}
 	}
 	for _, file := range customs {
 		if !file.IsDir() {
 			name := file.Name()
-			found[name] = GetVar(name)
+			// Skip files that start with a .
+			if len(name) > 0 && name[0] != '.' {
+				found[name] = GetVar(name)
+			}
 		}
 	}
 
-	return found
+	// Let's return with the keys in alphabetic order
+	keys := make([]string, 0, len(found))
+	orderedVars := make(map[string]string)
+	for key := range found {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		val := found[key]
+		orderedVars[key] = val
+	}
+
+	return orderedVars
+}
+
+// Takes a string and parses it as YAML
+func parseYAMLValue(input string) (interface{}, error) {
+	var result interface{}
+	err := yaml.Unmarshal([]byte(input), &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Write a value to a variable

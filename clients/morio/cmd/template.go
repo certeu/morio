@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	// "strings"
+	"strings"
 )
 
 // morio template
@@ -21,14 +21,14 @@ var templateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		context := GetVars()
 		// Audit
-		TemplateOutFile("audit/config.yaml.mustache", "audit/config.yaml", context)
+		TemplateOutFile("audit/config-template.yml", "audit/config.yml", context)
 		TemplateOutFolder("audit/module-templates.d", "audit/modules.d", context)
 		TemplateOutFolder("audit/rule-templates.d", "audit/rules.d", context)
 		// metrics
-		TemplateOutFile("metrics/config.yaml.mustache", "metrics/config.yaml", context)
+		TemplateOutFile("metrics/config-template.yml", "metrics/config.yml", context)
 		TemplateOutFolder("metrics/module-templates.d", "metrics/modules.d", context)
 		// logs
-		TemplateOutFile("logs/config.yaml.mustache", "logs/config.yaml", context)
+		TemplateOutFile("logs/config-template.yml", "logs/config.yml", context)
 		TemplateOutFolder("logs/module-templates.d", "logs/modules.d", context)
 		TemplateOutFolder("logs/input-templates.d", "logs/inputs.d", context)
 		// global vars
@@ -49,7 +49,6 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 	// Inject run-time vars
 	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
 	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
-
 
 	// Write value
 	output, err := mustache.RenderFileInLayout(GetConfigPath(from), GetConfigPath("template-layout.mustache"), context)
@@ -94,7 +93,7 @@ func ClearFolder(folder string) {
 	for _, file := range files {
 		filePath := filepath.Join(path, file.Name())
 		suffix := filepath.Ext(file.Name())
-		if !file.IsDir() && (suffix == ".yaml" || suffix == ".disabled" || suffix == ".rules") {
+		if !file.IsDir() && (suffix == ".yml" || suffix == ".disabled" || suffix == ".rules") {
 			if err := os.Remove(filePath); err != nil {
 				fmt.Println("Failed to remove file " + filePath)
 				fmt.Print(err)
@@ -114,7 +113,7 @@ func TemplateList(folder string) []string {
 
 	for _, template := range templates {
 		suffix := filepath.Ext(template.Name())
-		if !template.IsDir() && suffix == ".yaml" {
+		if !template.IsDir() && suffix == ".yml" {
 			files = append(files, template.Name())
 		}
 	}
@@ -147,6 +146,15 @@ func ExtractTemplateDefaultVars(from string) map[string]string {
 			convertedData[key] = strconv.Itoa(v)
 		case float64:
 			convertedData[key] = strconv.FormatFloat(v, 'f', -1, 64)
+    case []interface{}:
+			// Handle arrays
+			var elements []string
+			for _, item := range v {
+        // Convert each element to a string
+				elements = append(elements, fmt.Sprintf("%v", item))
+			}
+      // Join elements with commas
+			convertedData[key] = "[ " + strings.Join(elements, ",") + " ]"
 		default:
 			convertedData[key] = fmt.Sprintf("%v", v)
 		}
@@ -178,7 +186,7 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 
 // FIXME: Make this platform agnostic
 func LoadGlobalVars() map[string]interface{} {
-	data, err := os.ReadFile("/etc/morio/global-vars.yaml")
+	data, err := os.ReadFile("/etc/morio/global-vars.yml")
 	if err != nil {
 		fmt.Println("Cannot read global variables file. Bailing out.")
 		panic(err)

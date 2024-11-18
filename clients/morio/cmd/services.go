@@ -22,10 +22,24 @@ var startCmd = &cobra.Command{
   Start a specific agent:
     morio start logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ChangeAgentState("audit", "start")
-		ChangeAgentState("metrics", "start")
-		ChangeAgentState("logs", "start")
-		ShowStatus()
+		if len(args) == 0 {
+			ChangeAgentState("audit", "start")
+			ChangeAgentState("logs", "start")
+			ChangeAgentState("metrics", "start")
+			ShowStatus()
+			_ = cmd.Help()
+		} else if args[0] == "audit" {
+			ChangeAgentState("audit", "start")
+			ShowStatus()
+		} else if args[0] == "logs" {
+			ChangeAgentState("logs", "start")
+			ShowStatus()
+		} else if args[0] == "metrics" {
+			ChangeAgentState("metrics", "start")
+			ShowStatus()
+		} else {
+			_ = cmd.Help()
+		}
 	},
 }
 
@@ -40,10 +54,24 @@ var stopCmd = &cobra.Command{
   Stop a specific agent:
     morio stop logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ChangeAgentState("audit", "stop")
-		ChangeAgentState("metrics", "stop")
-		ChangeAgentState("logs", "stop")
-		ShowStatus()
+		if len(args) == 0 {
+			ChangeAgentState("audit", "stop")
+			ChangeAgentState("logs", "stop")
+			ChangeAgentState("metrics", "stop")
+			ShowStatus()
+			_ = cmd.Help()
+		} else if args[0] == "audit" {
+			ChangeAgentState("audit", "stop")
+			ShowStatus()
+		} else if args[0] == "logs" {
+			ChangeAgentState("logs", "stop")
+			ShowStatus()
+		} else if args[0] == "metrics" {
+			ChangeAgentState("metrics", "stop")
+			ShowStatus()
+		} else {
+			_ = cmd.Help()
+		}
 	},
 }
 
@@ -58,10 +86,24 @@ var restartCmd = &cobra.Command{
   Restart a specific agent:
     morio restart logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ChangeAgentState("audit", "restart")
-		ChangeAgentState("metrics", "restart")
-		ChangeAgentState("logs", "restart")
-		ShowStatus()
+		if len(args) == 0 {
+			ChangeAgentState("audit", "restart")
+			ChangeAgentState("logs", "restart")
+			ChangeAgentState("metrics", "restart")
+			ShowStatus()
+			_ = cmd.Help()
+		} else if args[0] == "audit" {
+			ChangeAgentState("audit", "restart")
+			ShowStatus()
+		} else if args[0] == "logs" {
+			ChangeAgentState("logs", "restart")
+			ShowStatus()
+		} else if args[0] == "metrics" {
+			ChangeAgentState("metrics", "restart")
+			ShowStatus()
+		} else {
+			_ = cmd.Help()
+		}
 	},
 }
 
@@ -76,9 +118,9 @@ var statusCmd = &cobra.Command{
   Show the status of a specific agent:
     morio status logs`,
 	Run: func(cmd *cobra.Command, args []string) {
-    if len(args) == 0 {
+		if len(args) == 0 {
 			ShowStatus()
-    } else if args[0] == "audit" {
+		} else if args[0] == "audit" {
 			PrintAgentStatus("audit")
 		} else if args[0] == "metrics" {
 			PrintAgentStatus("metrics")
