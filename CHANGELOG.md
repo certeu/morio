@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [client] Added `morio vars list` command
 
+### Changed
+
+- [client] The `morio vars list` and `morio vars export` commands now return vars in alphabetical order
+
 ### Fixed
 
 - Fix `build:moriod-repo-deb` runscript after changes to the dbuilder container image in 0.5.4

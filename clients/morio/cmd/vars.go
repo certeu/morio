@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -136,7 +137,6 @@ var listCmd = &cobra.Command{
 		for key, val := range allVars {
 			fmt.Printf("%s: %v\n", key, val)
 		}
-
 	},
 }
 
@@ -241,7 +241,20 @@ func GetVars() map[string]string {
 		}
 	}
 
-	return found
+	// Let's return with the  keys in alphabetic order
+	keys := make([]string, 0, len(found))
+	orderedVars := make(map[string]string)
+	for key := range found {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		val := found[key]
+		orderedVars[key] = val
+	}
+
+	return orderedVars
 }
 
 // Write a value to a variable
