@@ -106,7 +106,7 @@ else
       echo "Symlinking client binaries"
       mkdir -p $MORIO_GIT_ROOT/builders/$IMAGE/clients
       cd $MORIO_GIT_ROOT/builders/$IMAGE/clients
-      ln -s ../../../clients/morio-* .
+      cp ../../../clients/morio-* .
       cd -
     else
       echo "All client binaries are available"
