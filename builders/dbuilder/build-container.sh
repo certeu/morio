@@ -26,7 +26,7 @@ for BIN in morio-linux-amd64 morio-linux-arm64 morio-macos-amd64 morio-macos-arm
     NEEDS_CLIENT_BUILD=1
   fi
 done
-cd
+cd -
 
 # Prebuild clients if needed
 if [ $NEEDS_CLIENT_BUILD != "0" ]; then
