@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	// "strings"
+	"strings"
 )
 
 // morio template
@@ -146,6 +146,15 @@ func ExtractTemplateDefaultVars(from string) map[string]string {
 			convertedData[key] = strconv.Itoa(v)
 		case float64:
 			convertedData[key] = strconv.FormatFloat(v, 'f', -1, 64)
+    case []interface{}:
+			// Handle arrays
+			var elements []string
+			for _, item := range v {
+        // Convert each element to a string
+				elements = append(elements, fmt.Sprintf("%v", item))
+			}
+      // Join elements with commas
+			convertedData[key] = "[ " + strings.Join(elements, ",") + " ]"
 		default:
 			convertedData[key] = fmt.Sprintf("%v", v)
 		}

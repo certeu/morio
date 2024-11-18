@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [client] Fix name of the configuration file template
 - [client] Use client UUID as Kafa client ID
 - [client] Drop SASL in favor of mTLS
+- [client] Properly handle arrays in client vars
 
 ## [0.5.4] - 2024-11-15
 
