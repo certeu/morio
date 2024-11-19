@@ -375,6 +375,18 @@ predocs.MORIO_PROXY_LOG_FORMAT =
 presets.MORIO_PROXY_LOG_FORMAT = 'json'
 
 /*
+ * Tap presets
+ */
+
+predocs.MORIO_TAP_LOG_LEVEL = `Log level of the Tap service.
+One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
+\`silent\`.
+
+To change this, set \`tokens.presets.MORIO_TAP_LOG_LEVEL\` in your Morio
+settings.`
+presets.MORIO_TAP_LOG_LEVEL = 'trace'
+
+/*
  * UI presets
  */
 
