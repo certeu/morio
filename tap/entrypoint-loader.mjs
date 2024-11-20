@@ -2,14 +2,6 @@ import fs from 'fs/promises'
 import path from 'path'
 
 /*
- * These are built-in message handlers
- */
-const builtInHandlers = [
-  'example',
-]
-const builtInTopics = ['checks']
-
-/*
  * Add a banner to clarify where this code comes from
  */
 const banner = `/*

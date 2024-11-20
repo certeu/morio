@@ -54,12 +54,6 @@ async function ensureLocalPrerequisites() {
   await ensureServiceCertificate('tap', false)
 
   /*
-   * Copy key and certificates into mounted folder
-   */
-  //for (const file of ['tls-ca.pem', 'tls-cert.pem', 'tls-key.pem'])
-  //  await cp(`/etc/morio/tap/${file}`, `/etc/morio/watcher/tls/${file}`)
-
-  /*
    * Write  the tap config file
    */
   const config = {

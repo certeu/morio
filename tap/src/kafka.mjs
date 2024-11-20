@@ -113,7 +113,7 @@ async function createProducer(client, clientId, topics) {
 /*
  * Properly close kafka connections when exiting
  */
-async function exitHandler(force=true) {
+async function exitHandler() {
   log.info('Exiting; Closing Kafka connection...')
   try {
     await tools.consumer.disconnect()
@@ -129,7 +129,7 @@ async function exitHandler(force=true) {
 }
 
 /*
- * Gracefully handle tap exist
+ * Gracefully handle a tap exit
  */
 process.on('exit', exitHandler.bind())
 process.on('SIGINT', exitHandler.bind())

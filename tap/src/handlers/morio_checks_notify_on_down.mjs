@@ -5,6 +5,7 @@ const handler = {
   topic: 'checks',
   filter: ({ data={} }) => data.summary?.status === "down",
   method: ({ data }, tools) => {
+    // Do something clever here
     tools.log.warn(data.summary, 'Something is down!')
   }
 }
