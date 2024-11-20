@@ -3,9 +3,9 @@
  * and will be overwritten at the next restart
  */
 import { log } from './src/tools.mjs'
-import morio_checks_notify_on_down from './src/handlers/morio_checks_notify_on_down.mjs'
+import morio_healthchecks from './src/handlers/morio_healthchecks.mjs'
 
-const allHandlers = { morio_checks_notify_on_down }
+const allHandlers = { morio_healthchecks }
 /*
  * We organise the message handlers per topic
  * This allows us to dispatch faster when there are

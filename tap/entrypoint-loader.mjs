@@ -29,7 +29,7 @@ async function loadHandlers(directory) {
   const handlers = new Set()
   const files = await fs.readdir(folder.pathname)
 
-  for (const file of files.filter(file => file.endsWith('.mjs'))) {
+  for (const file of files.filter(file => (file.endsWith('.mjs') && !file.endsWith('.config.mjs')))) {
     const fullPath = path.join(folder.pathname, file)
 
     // Dynamically import the file

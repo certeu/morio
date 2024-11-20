@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "esbuild": "^0.24.0",
+    "ioredis": "^5.4.1",
     "kafkajs": "^2.2.4",
     "pino": "^9.5.0"
   },
