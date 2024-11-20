@@ -47,10 +47,7 @@ async function ensureLocalPrerequisites() {
    * Write  the ValKey config file
    */
   const config = utils.getMorioServiceConfig('cache').valkey
-  log.todo(config)
-  const result = await writeFile(`/etc/morio/valkey/valkey.conf`, config, log)
-
-  log.todo(result)
+  await writeFile(`/etc/morio/valkey/valkey.conf`, config, log)
 
   return true
 }

@@ -34,10 +34,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Volumes
       volumes: PROD
         ? [
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/tap/config`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/morio/tap/config`,
           ]
         : [
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/tap:/tap/config`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/tap:/morio/tap/config`,
           ],
     },
     /*
@@ -50,9 +51,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ],
       ssl: {
         rejectUnauthorized: false,
-        ca: utils.getKeys().rcrt,
-        key: false, // Will be injected in container lifecycle hook
-        cert: false, // Will be injected in container lifecycle hook
+        ca: '/tap/config/tls-ca.pem',
+        key: '/tap/config/tls-key.pem',
+        cert: '/tap/config/tls-cert.pem',
       }
     }
   }

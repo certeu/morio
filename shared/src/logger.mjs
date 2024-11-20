@@ -1,5 +1,5 @@
 /*
- * Pino is the logging library we uyse
+ * Pino is the logging library we use
  * See: https://github.com/pinojs/pino
  */
 import pino from 'pino'

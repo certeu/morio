@@ -1,0 +1,32 @@
+{
+  "name": "@morio/tap",
+  "version": "0.5.5",
+  "description": "Morio Tap",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs",
+    "clean": "rimraf dist",
+    "dev": "nodemon dist/index.mjs -w dist --quiet -- --no-warnings",
+    "lint": "eslint --fix 'src/**'",
+    "prettier": "npx prettier --ignore-unknown --write ."
+  },
+  "dependencies": {
+    "esbuild": "^0.24.0",
+    "kafkajs": "^2.2.4",
+    "pino": "^9.5.0"
+  },
+  "imports": {
+    "#shared/*": "./shared/*.mjs"
+  },
+  "module": "src/index.mjs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/certeu/morio.git"
+  },
+  "author": "CERT-EU <services@cert.europa.eu>",
+  "license": "EUPL",
+  "bugs": {
+    "url": "https://github.com/certeu/morio/issues"
+  },
+  "homepage": "https://github.com/certeu/morio#readme"
+}
