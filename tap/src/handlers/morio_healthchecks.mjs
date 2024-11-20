@@ -14,10 +14,10 @@ const handler = {
     /*
      * Figure out what's going on.
      *   up: Whether the healthcheck is up (ok) or not (0 or 1)
-     *   took: Time in milliseconds that it took (useful observability signal)
+     *   ms: Time in milliseconds that it took (useful observability signal)
      *   dbce: Days before certificate expires (only for https checks)
      */
-    const [up, took, dbce] = healthcheckSummary(data, tools)
+    const [up, ms, dbce] = healthcheckSummary(data, tools)
     const time = tools.time.when(data)
     if (!up && ['alarm', 'notification'].includes(config.onDownProduce)) {
       // Prepare the nessage data
@@ -37,12 +37,12 @@ const handler = {
     /*
      * Update the cache
      */
-    if (config.cache) tools.cache.healthcheck(data, { time, up, took, dbce })
+    if (config.cache) tools.cache.healthcheck(data, { time, up, ms, dbce })
 
     /*
      * Can't do a simple if (!dbce) here because dbce can be zero
      */
-    if (dbce !== null) {
+    if (dbce !== undefined) {
       // FIXME: Make this treshold configurable
       if (dbce < 5) tools.produce.alarm({
         context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
@@ -73,16 +73,16 @@ export default handler
  * @param {object} data - The healthcheck data
  * @return {array} summary - An array holding:
  *   - up (1 or 0)
- *   - the ms it took
+ *   - the ms it took to complete the healthcheck
  *   - days until the certificate expires
  */
 function healthcheckSummary (data, tools) {
   return [
     (config.upValues.indexOf(data.monitor.status.toLowerCase()) !== -1) ? 1 : 0,
     Math.ceil(data.monitor.duration.us/1000),
-    (config.checkCertificates && data.monitor.type === 'http' && data.tls && data.url?.schema === 'https')
+    (config.checkCertificates && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
       ? checkCertificateExpiry(data, tools)
-      : null
+      : undefined
   ]
 }
 

@@ -44,7 +44,7 @@ export async function subscribe() {
 function createClient(clientId) {
   log.debug(`Creating kafka client with clientId ${clientId}`)
 
-  return new Kafka(config)
+  return new Kafka({...config, logLevel: lolLevel.ERROR })
 }
 
 /*

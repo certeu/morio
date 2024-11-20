@@ -156,7 +156,7 @@ function logCacheErrors (err, result) {
  * @param {obhject} summary - An object holding the summary data of the healthcheck
  * @param {number} summary.time - The original time of the event (optional)
  * @param {number} summary.up - Wheter the healthcheck succeeded (1) or failed (0)
- * @param {number} summary.took - Amount of milliseconds the healtcheck took
+ * @param {number} summary.ms - Amount of milliseconds the healtcheck took
  * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
  */
 function cacheHealthcheck (msg, summary) {
@@ -164,7 +164,7 @@ function cacheHealthcheck (msg, summary) {
   const time = summary.time || when(msg)
     tools.valkey
       .multi()
-      .zadd(key, time, JSON.stringify({ time, from: msg.agent?.name || 'unknown', ...summary }))
+      .zadd(key, time, JSON.stringify({ time, by: msg.agent?.name || 'unknown', ...summary }))
       .zremrangebyscore(key, '-inf', tools.time.now() - 1800)
       .expire(key, 3600)
       .sadd('checks', key)
