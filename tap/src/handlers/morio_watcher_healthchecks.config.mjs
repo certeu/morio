@@ -1,6 +1,5 @@
 /*
- * Configuration for the morio_healthchecks handler
- * This handler relies on the Morio Tap server to tap into the data stream
+ * Configuration for the morio_watcher_healthchecks handler
  */
 export const config = {
   handler: {
