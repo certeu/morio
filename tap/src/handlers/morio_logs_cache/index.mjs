@@ -1,68 +1,47 @@
 import { config } from "./config.mjs"
 
 /*
- * This is a Morio handler to cache logs
+ * This is a Morio handler to cache recent log lines
+ *
+ * It will set two cache keys:
+ *
+ *   - log|[data.host.id]|[data.morio.module.name]|[data.log.file.path]
+ *     => Will hold the recent log lines
+ *   - log|[host.id\
+ *     => Will hold a hash with
+ *        - module names as fields
+ *        - a list of log files as value
  */
 const handler = config.enabled ? {
   ...config.handler,
   method: ({ data }, tools) => {
-    return false
     /*
-     * Only handle data that is in the correct format
+     * Only handle data that has a log message
      */
-    if (!data?.monitor?.id || !data?.monitor?.name) return tools.log.debug(data, 'Invalid healthcheck data')
+    if (!data?.message) return tools.cache.note('Invalid log data', data)
 
     /*
-     * Figure out what's going on.
-     *   up: Whether the healthcheck is up (ok) or not (0 or 1)
-     *   ms: Time in milliseconds that it took (useful observability signal)
-     *   dbce: Days before certificate expires (only for https checks)
+     * Figure out what cache key to use
      */
-    const [up, ms, dbce] = healthcheckSummary(data, tools)
-    const time = tools.time.when(data)
-    if (!up && ['alarm', 'notification'].includes(config.onDownProduce)) {
-      // Prepare the nessage data
-      const msg_data = {
-        context: tools.create.context('healthcheck', data.monitor.type, data.monitor.id, tools.format.escape(data.url?.full)),
-        host: data.host?.id,
-        module: data.morio?.module?.name,
-        tags: [ 'healthcheck', 'down', data.monitor.type, data.monitor.id ],
-        time,
-        title: `Healthcheck failed: ${data.url?.full}`,
-        type: `${data.monitor.type}.healthcheck.down`,
-      }
-      if (config.onDownProduce === 'notification') tools.produce.notification(msg_data)
-      else tools.produce.alarm(msg_data)
+    let logId = false
+    // Regular logs read from a file
+    if (data?.log?.file?.path) logId = data.log.file.path
+    // Logs from journald
+    if (data?.input?.type === 'journald') {
+      if (data?.container?.name) logId = `journald.container.${data.container.name}`
+      else if (data?.journald?.process?.name) logId = `journald.process.${data.journald.process.name}`
+      else `journald.generic`
     }
+
+    /*
+     * Only cache what we understand
+     */
+    if (!logId) return tools.cache.note('Failed to extract logId from data', data)
 
     /*
      * Update the cache
      */
-    if (config.cache) tools.cache.healthcheck(data, { time, up, ms, dbce })
-
-    /*
-     * Can't do a simple if (!dbce) here because dbce can be zero
-     */
-    if (dbce !== undefined) {
-      // FIXME: Make this treshold configurable
-      if (dbce < 5) tools.produce.alarm({
-        context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
-        host: data?.url?.domain,
-        module: data?.morio?.module?.name,
-        title: `⏳ Certificate will expire in ${dbce} days: ${data?.url?.full}`,
-        type: 'tls.certificate.expiry.imminent',
-        tags: ['tls','certificate','expiry'],
-      })
-      // FIXME: Make this treshold configurable
-      else if (dbce < 15) tools.produce.notification({
-        context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
-        host: data?.url?.domain,
-        module: data?.morio?.module?.name,
-        tags: ['tls','certificate','expiry'],
-        title: `⏳ Certificate will expire in ${dbce} days: ${data?.url?.full}`,
-        type: 'tls.certificate.expiry.approaching',
-      })
-    }
+    tools.cache.logline(logId, data, config.cache_lines, config.expire_seconds)
   }
 } : null
 

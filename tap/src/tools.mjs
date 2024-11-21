@@ -17,6 +17,11 @@ export const tools = {
   cache: {
     healthcheck:cacheHealthcheck,
     logErrors: logCacheErrors,
+    // Use logline here (all lowercase) to avoid confusion with logErrors
+    // Because logErrors logs errors. Whereas loglines caches loglines and does not log
+    logline: cacheLogLine,
+    note: cacheNote,
+    trimStream,
   },
   valkey,
   create: {
@@ -158,22 +163,100 @@ function logCacheErrors (err, result) {
  * @param {number} summary.up - Wheter the healthcheck succeeded (1) or failed (0)
  * @param {number} summary.ms - Amount of milliseconds the healtcheck took
  * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
+ * @param {number } remrange - How long (in seconds) to keep healthcheck data
+ * @param {number} expire - How long a healthcheck can go without data before it's expired
  */
-function cacheHealthcheck (msg, summary) {
+function cacheHealthcheck (msg, summary, remrange=1800, expire=3600) {
   const key = createKey('check', msg.url?.full)
   const time = summary.time || when(msg)
-    tools.valkey
-      .multi()
-      .zadd(key, time, JSON.stringify({ time, by: msg.agent?.name || 'unknown', ...summary }))
-      .zremrangebyscore(key, '-inf', tools.time.now() - 1800)
-      .expire(key, 3600)
-      .sadd('checks', key)
-      .exec(logCacheErrors)
+  valkey
+    .multi()
+    .zadd(key, time, JSON.stringify({ time, by: msg.agent?.name || 'unknown', ...summary }))
+    .zremrangebyscore(key, '-inf', tools.time.now() - remrange)
+    .expire(key, expire)
+    .sadd('checks', key)
+    .exec(logCacheErrors)
+}
+
+/*
+ * Cache a log line
+ *
+ * @param {object} logId - An identifier that is unique to the log source on that host, like the file path
+ * @param {object} msg - The original message data as received by the handler
+ * @param {obhject} summary - An object holding the summary data of the healthcheck
+ * @param {number} summary.time - The original time of the event (optional)
+ * @param {number} summary.up - Wheter the healthcheck succeeded (1) or failed (0)
+ * @param {number} summary.ms - Amount of milliseconds the healtcheck took
+ * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
+ */
+async function cacheLogLine (logId, data, ltrim=10, expire=3600) {
+  const hostId = data?.host?.id || 'unknown-host-id'
+  const moduleId = data?.morio?.module || 'unknown-module-id'
+  const key = createKey('log', hostId, moduleId, logId)
+  // Cache the log line itself
+  valkey
+    .multi()
+    .lpush(key, data.message)
+    .ltrim(key, 0, ltrim)
+    .expire(key, expire)
+    .exec(logCacheErrors)
+  // Keep track of log files collected for this host
+  const lkey = createKey('logs', hostId)
+  const logs = JSON.parse(await valkey.hget(lkey, moduleId))
+  valkey.hset(lkey, moduleId, JSON.stringify((logs === null)
+    // First log we see for this host, start new list
+    ? [logId]
+    // Add to list of logs for this host, making sure to avoid duplicates
+    : [...new Set([...logs, logId])]
+  ))
+  valkey.expire(lkey, expire)
+}
+
+/*
+ * Notes are only kept in cache (not ingested)
+ * They are meant for internal Morio things
+ * They also make it easier to debug as logging on a system that is running
+ * Morio can result in a exponential snowball when also processing logs
+ */
+function cacheNote (title="No note title", data={}) {
+  if (typeof title !== 'string' || typeof data !== 'object') return false
+  valkey.xadd('notestream', '*', ...asValKeyParams({ title, data }))
+  trimStream('notestream', 50)
+}
+
+/*
+ * Trims a ValKey stream to a given length
+ */
+function trimStream (key=false, len=100) {
+ return key
+  ? valkey.xtrim(key, 'MAXLEN', '~', len)
+  : false
 }
 
 /*
  * Non-exported helper methods
  */
+
+/*
+ * Flattens an object to [prop, val, prop, val, ... ] array for valkey commands
+ */
+function asValKeyParams (obj) {
+  const params = []
+  for (const [prop, val] of Object.entries(obj)) params.push(prop, valKeySafe(val))
+
+  return params
+}
+
+function valKeySafe (value) {
+  if (value === null) return 'null';
+  if (typeof value === 'function') return 'function';
+  if (
+    Array.isArray(value) ||
+    typeof value === 'object'
+  ) return JSON.stringify(value)
+
+  return value
+}
 
 /**
  * This generates a key, which is a string value
@@ -182,7 +265,7 @@ function cacheHealthcheck (msg, summary) {
  * This message is variadic, so you can pass as many params as you want.
  */
 function generateKey(data, spacer) {
-  return data.map(p => p ? String(p).replace(/\./, '_') : 'undefined')
+  return data.map(p => p ? String(p).replace(/\./, '_').replace(/\|/, '_') : 'undefined')
     .join(spacer)
     .toLowerCase()
 }

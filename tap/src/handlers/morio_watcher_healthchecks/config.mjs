@@ -7,10 +7,13 @@ export const config = {
     topic: 'checks',
     filter: false,
   },
-  upValues: [ "1", "up", "green" ],
-  onDownProduce: 'notification',
   cache: true,
-  checkCertificates: true,
+  cache_seconds: 3600, // 1 hour of healtcheck data
+  check_certificates: true,
+  expire_seconds: 86400, // 24 hours
+  on_down_produce: 'notification',
+  up_values: [ "1", "up", "green" ],
+
 }
 
 export const docs = {
@@ -23,11 +26,12 @@ It can also check certificate expiry and cache the healthcheck results for dashb
 
 This handler can be further configured to control its behaviour.`,
   config: {
-    upValues: "These are all the values that are considered a success for a healthcheck.",
-    topic: "The topic to subscribe to. Typically 'checks'.",
-    filter: "An optional filter message to use to filter messages in the topic.",
-    onDownProduce: "What type of message to produce when a healthcheck fails. One of 'notification' or 'alarm'",
     cache: "Whether or not to cache healthcheck results.",
-    checkCertificates: "Whether or not to verify the expiration date of TLS certificates (HTTP only)",
+    cache_seconds: "The number of seconds for which to keep healthcheck data in the cache",
+    check_certificates: "Whether or not to verify the expiration date of TLS certificates (HTTP only)",
+    enabled: "Set this to false to prevent this handler from being loaded by the Morio Tap service",
+    expire_seconds: "The time before the cache key will expire. Healthchecks see no updates during this time span will be dropped from the cache.",
+    on_down_produce: "What type of message to produce when a healthcheck fails. One of 'notification' or 'alarm'",
+    up_values: "These are all the values that are considered a success for a healthcheck.",
   }
 }
