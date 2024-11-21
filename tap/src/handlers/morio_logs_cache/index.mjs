@@ -7,7 +7,7 @@ import { config } from "./config.mjs"
  *
  *   - log|[data.host.id]|[data.morio.module.name]|[data.log.file.path]
  *     => Will hold the recent log lines
- *   - log|[host.id\
+ *   - log|[host.id]
  *     => Will hold a hash with
  *        - module names as fields
  *        - a list of log files as value
