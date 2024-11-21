@@ -2,6 +2,7 @@
  * Configuration for the morio_watcher_healthchecks handler
  */
 export const config = {
+  enabled: true,
   handler: {
     topic: 'checks',
     filter: false,

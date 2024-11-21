@@ -1,5 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
+import { glob } from 'glob'
 
 /*
  * Add a banner to clarify where this code comes from
@@ -9,6 +10,20 @@ const banner = `/*
  * and will be overwritten at the next restart
  */`
 
+/*
+ * Helper function to glob a folder
+ */
+export async function globDir(folderPath, pattern = '*/index.mjs') {
+  let list = []
+  try {
+    list = await glob(path.resolve(folderPath) + '/' + pattern)
+  } catch (err) {
+    if (err) console.log(err)
+    return false
+  }
+
+  return list
+}
 /*
  * This creates a file that loads any handlers that are
  * available under /tap/handlers.
@@ -27,17 +42,18 @@ async function loadHandlers(directory) {
   const folder = new URL(directory, import.meta.url)
 
   const handlers = new Set()
-  const files = await fs.readdir(folder.pathname)
+  const files = await globDir(folder.pathname)
 
-  for (const file of files.filter(file => (file.endsWith('.mjs') && !file.endsWith('.config.mjs')))) {
-    const fullPath = path.join(folder.pathname, file)
-
+  for (const file of files) {
     // Dynamically import the file
-    const module = await import(fullPath)
+    const module = await import(file)
 
     // Make sure the default export is a message handler
     if (module.default && typeof module.default.topic === 'string' && typeof module.default.method === 'function') {
-      handlers.add({ name: path.basename(file, '.mjs'), topic: module.default.topic })
+      handlers.add({
+        name: path.basename(path.dirname(file)),
+        topic: module.default.topic
+      })
     }
   }
 
@@ -53,13 +69,13 @@ async function ensureHandlerLoader() {
   const handlers = new Set()
   for (const { name, topic } of builtIn) {
     if (!custom.has(name)) {
-      code += `import ${name} from './src/handlers/${name}.mjs'` + "\n"
+      code += `import ${name} from './src/handlers/${name}/index.mjs'` + "\n"
       topics.add(topic)
       handlers.add(name)
     }
   }
   for (const { name, topic } of custom) {
-    code += `import ${name} from './handlers/${name}.mjs` + "\n"
+    code += `import ${name} from './handlers/${name}/index.mjs` + "\n"
     topics.add(topic)
     handlers.add(name)
   }

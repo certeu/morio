@@ -29,5 +29,8 @@
   "bugs": {
     "url": "https://github.com/certeu/morio/issues"
   },
-  "homepage": "https://github.com/certeu/morio#readme"
+  "homepage": "https://github.com/certeu/morio#readme",
+  "devDependencies": {
+    "glob": "^11.0.0"
+  }
 }
