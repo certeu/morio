@@ -65,7 +65,7 @@ async function createConsumer(client, clientId, topics) {
   await consumer.subscribe({ topics })
 
   /*
-   * Add logging on specific events emited by the consumer
+   * Add logging on specific events emitted by the consumer
    */
   consumer.on(consumer.events.CONNECT, () => log.info('Kafka consumer connected'))
   consumer.on(consumer.events.DISCONNECT, () => log.info('Kafka consumer disconnected'))
@@ -74,8 +74,8 @@ async function createConsumer(client, clientId, topics) {
   /*
    * This would be hard to debug if we do not log it
    * It happens when a consumer group has multiple consumers subscribing
-   * to different topics. It should not happens, but when it does we should
-   * learn about it which is why we are logging this here as a warning
+   * to different topics. It should not happen, but when it does we should
+   * learn about it, which is why we are logging this here as a warning
    */
   consumer.on(consumer.events.RECEIVED_UNSUBSCRIBED_TOPICS, err => () => log.warn(err, 'Kafka consumer received unsubscribed topics'))
 
