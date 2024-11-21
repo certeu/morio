@@ -1,5 +1,5 @@
 import { Kafka, logLevel } from 'kafkajs'
-import { readJsonFile, readYamlFile, globDir } from '../shared/src/fs.mjs'
+import { readFile, readJsonFile, readYamlFile, globDir } from '../shared/src/fs.mjs'
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { MORIO_GIT_ROOT } from '../config/cli.mjs'
@@ -46,27 +46,26 @@ if (onCli) {
   if (!settings) log('Failed to load settings')
 
   /*
-   * Load keys from disk
+   * Load the mrt from disk (needs to be under local/mrt)
    */
-  log('Loading keys...')
-  const keys = await loadKeys()
-  if (!keys) log('Failed to load keys')
+  log('Loading root token...')
+  const mrt = (await loadMrt()).trim()
+  if (!mrt) log('Failed to load root token')
 
   /*
    * Load certificate from API
    */
   log('Requesting certificate...')
-  const x509 = await loadCertificate({
-    node: settings?.cluster?.broker_nodes?.[0],
-    mrt: keys?.mrt,
-    ca: keys?.rcrt
-  })
+  const x509 = await loadCertificate({ node: settings?.cluster?.broker_nodes?.[0], mrt })
   if (!x509) log('Failed to load certificate')
+  console.log(x509.certificate.crt)
+  console.log(x509.key)
+  console.log(x509.certificate.ca)
 
   /*
    * Do not continue if we do not have what it takes
    */
-  if (!settings || !keys || !x509) process.exit(1)
+  if (!settings || !mrt || !x509) process.exit(1)
 
   /*
    * Instantiate Kafka client
@@ -74,7 +73,7 @@ if (onCli) {
   const clientId = 'morio-dev-client'
   const ssl = {
     rejectUnauthorized: false,
-    ca: keys.rcrt,
+    ca: x509.certificate.ca,
     key: x509.key,
     cert: x509.certificate.crt,
   }
@@ -142,23 +141,23 @@ if (onCli) {
  * To make sure this 'just works' we load the MRT straight from disk.
  * We use it to load the settings, and a certificate for mTLS.
  */
-async function loadKeys () {
-  return await readJsonFile(`${MORIO_GIT_ROOT}/data/config/keys.json`)
+async function loadMrt () {
+  return await readFile(`${MORIO_GIT_ROOT}/local/mrt`)
 }
 
 /*
  * To make sure this 'just works' we load the settings from disk.
  */
 async function loadSettings () {
-  const files = await globDir(`${MORIO_GIT_ROOT}/data/config`, 'settings.*.yaml')
+  const files = await globDir(`${MORIO_GIT_ROOT}/data/config`, 'settings.*.json')
 
-  if (Array.isArray(files) && files.length > 0) return await readYamlFile(files.sort().pop())
+  if (Array.isArray(files) && files.length > 0) return await readJsonFile(files.sort().pop())
 
   return false
 }
 
-async function loadCertificate ({ node, mrt, ca }) {
-  const httpsAgent = new https.Agent({ ca })
+async function loadCertificate ({ node, mrt }) {
+  const httpsAgent = new https.Agent({ rejectUnauthorized: false })
   let result
   try {
     result = await axios.post(
