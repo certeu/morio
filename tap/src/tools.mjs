@@ -18,7 +18,7 @@ export const tools = {
     healthcheck:cacheHealthcheck,
     logErrors: logCacheErrors,
     // Use logline here (all lowercase) to avoid confusion with logErrors
-    // Because logErrors logs errors. Whereas loglines caches loglines and does not log
+    // because logErrors logs errors, whereas loglines caches loglines and does not log
     logline: cacheLogLine,
     note: cacheNote,
     trimStream,
@@ -107,7 +107,7 @@ function timestamp () {
 }
 
 /*
- * Figure out when an message happened
+ * Figure out when a message happened
  */
 function when (data) {
   return (data?.['@timestamp'])
@@ -160,10 +160,10 @@ function logCacheErrors (err, result) {
  * @param {object} msg - The original message data as received by the handler
  * @param {obhject} summary - An object holding the summary data of the healthcheck
  * @param {number} summary.time - The original time of the event (optional)
- * @param {number} summary.up - Wheter the healthcheck succeeded (1) or failed (0)
+ * @param {number} summary.up - Whether the healthcheck succeeded (1) or failed (0)
  * @param {number} summary.ms - Amount of milliseconds the healtcheck took
  * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
- * @param {number } remrange - How long (in seconds) to keep healthcheck data
+ * @param {number } remrange - How long (in seconds) to keep healthcheck data for
  * @param {number} expire - How long a healthcheck can go without data before it's expired
  */
 function cacheHealthcheck (msg, summary, remrange=1800, expire=3600) {
@@ -185,7 +185,7 @@ function cacheHealthcheck (msg, summary, remrange=1800, expire=3600) {
  * @param {object} msg - The original message data as received by the handler
  * @param {obhject} summary - An object holding the summary data of the healthcheck
  * @param {number} summary.time - The original time of the event (optional)
- * @param {number} summary.up - Wheter the healthcheck succeeded (1) or failed (0)
+ * @param {number} summary.up - Whether the healthcheck succeeded (1) or failed (0)
  * @param {number} summary.ms - Amount of milliseconds the healtcheck took
  * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
  */
@@ -215,8 +215,8 @@ async function cacheLogLine (logId, data, ltrim=10, expire=3600) {
 /*
  * Notes are only kept in cache (not ingested)
  * They are meant for internal Morio things
- * They also make it easier to debug as logging on a system that is running
- * Morio can result in a exponential snowball when also processing logs
+ * They also make it easier to debug, since logging on a system that is running
+ * Morio can result in an exponential snowball when also processing logs
  */
 function cacheNote (title="No note title", data={}) {
   if (typeof title !== 'string' || typeof data !== 'object') return false
@@ -261,7 +261,7 @@ function valKeySafe (value) {
 /**
  * This generates a key, which is a string value
  *
- * This is used to consistently generate reproducable IDs from data
+ * This is used to consistently generate reproducible IDs from data
  * This message is variadic, so you can pass as many params as you want.
  */
 function generateKey(data, spacer) {
