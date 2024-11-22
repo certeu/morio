@@ -131,7 +131,51 @@ export const resolveServiceConfiguration = ({ utils }) => {
       kv: `CREATE TABLE kv (
         key TEXT NOT NULL PRIMARY KEY,
         val TEXT
-      )`
+      )`,
+      inventory_hosts: `CREATE table inventory_hosts (
+        id TEXT NOT NULL PRIMARY KEY,
+        arch: TEXT,
+        cores: INTEGER,
+        fqdn: TEXT,
+        memory: INTEGER,
+        name: TEXT,
+        notes: TEXT,
+        os: TEXT,
+        tags: TEXT,
+        last_update: DATETIME
+      )`,
+      inventory_oss: `CREATE table inventory_oss (
+        id TEXT NOT NULL PRIMARY_KEY,
+        codename TEXT,
+        family TEXT,
+        kernel TEXT,
+        name TEXT
+        notes: TEXT,
+        platform TEXT,
+        tags: TEXT,
+        type: TEXT,
+        version TEXT,
+        last_update: DATETIME
+      )`,
+      inventory_host_ips: `CREATE table inventory_host_ips (
+        id: INTEGER PRIMARY KEY,
+        ip: TEXT,
+        host: TEXT
+        notes: TEXT,
+        tags: TEXT,
+        version: INTEGER,
+        last_update: DATETIME
+      )`,
+      inventory_host_macs: `CREATE table inventory_host_macs (
+        id: INTEGER PRIMARY KEY,
+        mac: TEXT,
+        host: TEXT
+        notes: TEXT,
+        tags: TEXT,
+        last_update: DATETIME
+      )`,
     },
   }
 }
+
+
