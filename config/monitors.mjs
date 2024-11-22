@@ -143,7 +143,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getNodeFqdn()}/`],
+      urls: [`https://${utils.getNodeFqdn()}/`],
       check: {
         response: {
           status: [200],
