@@ -7,8 +7,8 @@ export const config = {
     topic: 'logs',
     filter: false,
   },
-  cache_lines: 30, // 30 most recent lines
-  expire_seconds: 86400, // 24 hours
+  cap: 30, // 30 most recent lines
+  ttl: 86400, // 24 hours
 }
 
 export const docs = {
@@ -22,8 +22,8 @@ It can also check certificate expiry and cache the healthcheck results for dashb
 This handler can be further configured to control its behaviour.`,
   config: {
     enabled: "Set this to false to disable this handler.",
-    cache_lines: "The number of most recent loglines to keep in the cache",
-    expire_seconds: "The time before the log key will expire. Log files that see no updates during this time span will be dropped from the cache.",
+    cap: "The maximum number of entries to keep in the cache for this logset",
+    ttl: "The time before the logset key will expire. Log sets that see no updates during this time span will be dropped from the cache.",
   }
 }
 

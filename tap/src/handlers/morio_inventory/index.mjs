@@ -77,26 +77,13 @@ function normalizeDataFields (obj={}, fields) {
  */
 function normalizeIp(ip, data={host: 'unknown'}, tools) {
   if (typeof ip !== 'string' && !ipaddr.isValid(ip)) {
-    return tools.cache.note('Invalid IP address', { ip, host: data.host })
+    const address = ipaddr.parse()
+    return address.kind() === "ipv4"
+      ? address.toString()
+      : address.toNormalizedString()
   }
 
-  /*
-   * Especially IPv6 addresses get complicated, so defer to the ipaddr.js library
-   * since it's smart enough to handle both IPv4 and IPv6 addresses,
-   */
-  try {
-    const address = ipaddr.parse(ip)
-    tools.cache.note('IP Address parse result', address)
-
-    return ip
-
-    //return (addr.kind() === 'ipv6' && addr.isIPv4MappedAddress())
-    //  ? addr.toIPv4Address().toString()
-    //  : addr.toNormalizedString().toLowerCase();
-    //return stringify(parse(ip)).toLowerCase()
-  } catch (e) {
-    return tools.cache.note('Cannot parse IP address', { ip, host: data.host })
-  }
+  return tools.cache.note('Cannot parse IP address', { ip })
 }
 
 /**

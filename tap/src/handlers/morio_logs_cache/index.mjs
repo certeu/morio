@@ -42,7 +42,7 @@ const handler = config.enabled ? {
     /*
      * Update the cache
      */
-    tools.cache.logline(logId, data, config.cache_lines, config.expire_seconds)
+    tools.cache.logline(logId, data.message, data, config)
   }
 } : null
 

@@ -31,6 +31,15 @@ const handler = config.enabled ? {
      */
     const [up, ms, dbce] = healthcheckSummary(data, tools)
     const time = tools.time.when(data)
+
+    /*
+     * Update the cache
+     */
+    if (config.cache) tools.cache.healthcheck({ time, up, ms, dbce }, data, config)
+
+    /*
+     * Escalate if needed
+     */
     if (!up && ['alarm', 'notification'].includes(config.on_down_produce)) {
       // Prepare the nessage data
       const msg_data = {
@@ -45,11 +54,6 @@ const handler = config.enabled ? {
       if (config.on_down_produce === 'notification') tools.produce.notification(msg_data)
       else tools.produce.alarm(msg_data)
     }
-
-    /*
-     * Update the cache
-     */
-    if (config.cache) tools.cache.healthcheck(data, { time, up, ms, dbce }, config.cache_seconds, config.expire_seconds)
 
     /*
      * Can't do a simple if (!dbce) here because dbce can be zero

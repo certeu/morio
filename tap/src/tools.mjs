@@ -19,7 +19,8 @@ export const tools = {
     logErrors: logCacheErrors,
     // Use logline here (all lowercase) to avoid confusion with logErrors
     // because logErrors logs errors, whereas loglines caches loglines and does not log
-    logline: cacheLogLine,
+    logline: cacheLogline,
+    metricset: cacheMetricset,
     note: cacheNote,
     trimStream,
   },
@@ -28,6 +29,14 @@ export const tools = {
     context: createContext,
     hash: createHash,
     key: createKey,
+  },
+  extract: {
+    by: (data) => (data?.msg?.agent?.name || 'unknown-agent'),
+    check: (data) => (data?.url?.full || 'unknown-check'),
+    host: (data) => (data?.host?.id || 'unknown-host'),
+    metricset: (data) => (data?.metricset?.name || 'unknown-metricset'),
+    module: (data) => (data?.morio?.module || 'unknown-module'),
+    timestamp: when,
   },
   format: {
     escape: querystring.escape,
@@ -167,16 +176,39 @@ function logCacheErrors (err, result) {
  * @param {number } remrange - How long (in seconds) to keep healthcheck data for
  * @param {number} expire - How long a healthcheck can go without data before it's expired
  */
-function cacheHealthcheck (msg, summary, remrange=1800, expire=3600) {
-  const key = createKey('check', msg.url?.full)
-  const time = summary.time || when(msg)
+async function cacheHealthcheck (checkData, data, overrides={}) {
+  // Extract overrides or use defaults
+  const {
+    ttl=3600,
+    check=tools.extract.check(data),
+    host=tools.extract.host(data),
+    module=tools.extract.module(data),
+    time=when(tools.time.when(data)),
+    by=tools.extract.by(data),
+  } = overrides
+
+  // Create cache key
+  const key = createKey('check', host, module, check)
+
+  // Cache the health check itself
   valkey
     .multi()
-    .zadd(key, time, JSON.stringify({ time, by: msg.agent?.name || 'unknown', ...summary }))
-    .zremrangebyscore(key, '-inf', tools.time.now() - remrange)
-    .expire(key, expire)
+    .zadd(key, time, JSON.stringify({ time, by, ...checkData }))
+    .zremrangebyscore(key, '-inf', time - ttl)
+    .expire(key, ttl)
     .sadd('checks', key)
     .exec(logCacheErrors)
+
+  // Keep track of healthchecks collected for this host
+  const lkey = createKey('checks', host)
+  const checks = JSON.parse(await valkey.hget(lkey, module))
+  valkey.hset(lkey, module, JSON.stringify((checks === null)
+    // First log we see for this host, start new list
+    ? [check]
+    // Add to list of checks for this host, making sure to avoid duplicates
+    : [...new Set([...checks, check])]
+  ))
+  valkey.expire(lkey, ttl)
 }
 
 /*
@@ -190,27 +222,76 @@ function cacheHealthcheck (msg, summary, remrange=1800, expire=3600) {
  * @param {number} summary.ms - Amount of milliseconds the healtcheck took
  * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
  */
-async function cacheLogLine (logId, data, ltrim=10, expire=3600) {
-  const hostId = data?.host?.id || 'unknown-host-id'
-  const moduleId = data?.morio?.module || 'unknown-module-id'
-  const key = createKey('log', hostId, moduleId, logId)
+async function cacheLogline (logId, logData, data, overrides={}) {
+  // Extract overrides or use defaults
+  const {
+    cap=10,
+    ttl=3600,
+    host=tools.extract.host(data),
+    module=tools.extract.module(data),
+  } = overrides
+
+  // Create cache key
+  const key = createKey('log', host, module, logId)
+
   // Cache the log line itself
   valkey
     .multi()
-    .lpush(key, data.message)
-    .ltrim(key, 0, ltrim)
-    .expire(key, expire)
+    .lpush(key, logData)
+    .ltrim(key, 0, cap)
+    .expire(key, ttl)
     .exec(logCacheErrors)
+
   // Keep track of log files collected for this host
-  const lkey = createKey('logs', hostId)
-  const logs = JSON.parse(await valkey.hget(lkey, moduleId))
-  valkey.hset(lkey, moduleId, JSON.stringify((logs === null)
+  const lkey = createKey('logs', host)
+  const logs = JSON.parse(await valkey.hget(lkey, module))
+  valkey.hset(lkey, module, JSON.stringify((logs === null)
     // First log we see for this host, start new list
     ? [logId]
     // Add to list of logs for this host, making sure to avoid duplicates
     : [...new Set([...logs, logId])]
   ))
-  valkey.expire(lkey, expire)
+  valkey.expire(lkey, ttl)
+}
+
+/*
+ * Cache a metricset
+ *
+ * @param {object} msg - The original message data as received by the handler
+ * @param {obhject} metrics - The metrics to cache
+ */
+async function cacheMetricset (metrics, data, overrides={}) {
+  // Extract overrides or use defaults
+  const {
+    cap=150,
+    ttl=1800,
+    host=tools.extract.host(data),
+    module=tools.extract.module(data),
+    metricset=tools.extract.metricset(data),
+  } = overrides
+
+  // Create cache key
+  const key = createKey( 'metric', host, module, metricset)
+
+  // Cache the metrics
+  valkey
+    .multi()
+    .zadd(key, when(data), JSON.stringify(metrics))
+    .zremrangebyscore(key, '-inf', now() - ttl)
+    .zremrangebyrank(key, 0, cap * -1)
+    .expire(key, ttl * 1.5)
+    .exec(logCacheErrors)
+
+  // Keep track of metricsets collected for this host
+  const lkey = createKey('metrics', host)
+  const metricsets = JSON.parse(await valkey.hget(lkey, module))
+  valkey.hset(lkey, module, JSON.stringify((metricsets === null)
+    // First log we see for this host, start new list
+    ? [metricset]
+    // Add to list of logs for this host, making sure to avoid duplicates
+    : [...new Set([...metricsets, metricset])]
+  ))
+  valkey.expire(lkey, ttl)
 }
 
 /*
