@@ -5,9 +5,10 @@
 import { log } from './src/tools.mjs'
 import morio_watcher_healthchecks from './src/handlers/morio_watcher_healthchecks/index.mjs'
 import morio_logs_cache from './src/handlers/morio_logs_cache/index.mjs'
-import morio_inventory from './src/handlers/morio_inventory/index.mjs'
+import morio_inventory__0 from './src/handlers/morio_inventory__0/index.mjs'
+import mod_metrics_morio-tap from './src/handlers/mod_metrics_morio-tap/index.mjs'
 
-const allHandlers = { morio_watcher_healthchecks,morio_logs_cache,morio_inventory }
+const allHandlers = { morio_watcher_healthchecks,morio_logs_cache,morio_inventory__0,mod_metrics_morio-tap }
 /*
  * We organise the message handlers per topic
  * This allows us to dispatch faster when there are

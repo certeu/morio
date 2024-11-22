@@ -5,7 +5,7 @@ export const config = {
   enabled: true,
   handler: {
     topic: 'metrics',
-    filter: ({ data }) => data?.morio?.module === 'morio-tap'),
+    filter: ({ data }) => (data?.morio?.module === 'morio-tap'),
   },
   ttl: 3600, // 1 hour
   cap: 300, // max sets
@@ -20,7 +20,7 @@ The morio-tap module is a bit unlike other modules which are typically client mo
 Morio-tap however does not expose metrics to the Morio client to collect and ingest.
 Instead, it directly ingests its own metrics data into the kafka topic.
 
-Once ingested, everything works the same, butit's important to understand that this works without any Morio client running.`
+Once ingested, everything works the same, butit's important to understand that this works without any Morio client running.`,
   config: {
     enabled: "Set this to false to disable this handler.",
     ttl: "The number of seconds before the metricset will expire from the cache.",

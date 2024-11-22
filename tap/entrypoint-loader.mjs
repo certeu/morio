@@ -45,16 +45,30 @@ async function loadHandlers(directory) {
   const files = await globDir(folder.pathname)
 
   for (const file of files) {
+    const folder = path.basename(path.dirname(file))
     // Dynamically import the file
     const module = await import(file)
 
     // Make sure the default export is a message handler
     if (module.default && typeof module.default.topic === 'string' && typeof module.default.method === 'function') {
       handlers.add({
-        name: path.basename(path.dirname(file)),
+        folder,
+        name: folder,
         topic: module.default.topic
       })
+    } else if (Array.isArray(module.default)) {
+      for (const i in module.default) {
+        const mod = module.default[i]
+        if (typeof mod.topic === 'string' && typeof mod.method === 'function') {
+          handlers.add({
+            folder,
+            name: `${folder}__${mod.name || i}`,
+            topic: mod.topic
+          })
+        }
+      }
     }
+
   }
 
   return handlers
