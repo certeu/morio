@@ -55,8 +55,7 @@ const handler = config.enabled ? {
      * Can't do a simple if (!dbce) here because dbce can be zero
      */
     if (dbce !== undefined) {
-      // FIXME: Make this treshold configurable
-      if (dbce < 5) tools.produce.alarm({
+      if (dbce < config.certificate_expires_days_alarm) tools.produce.alarm({
         context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
         host: data?.url?.domain,
         module: data?.morio?.module?.name,
@@ -64,8 +63,7 @@ const handler = config.enabled ? {
         type: 'tls.certificate.expiry.imminent',
         tags: ['tls','certificate','expiry'],
       })
-      // FIXME: Make this treshold configurable
-      else if (dbce < 15) tools.produce.notification({
+      else if (dbce < config.certificate_expires_days_notify) tools.produce.notification({
         context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
         host: data?.url?.domain,
         module: data?.morio?.module?.name,
@@ -92,7 +90,7 @@ function healthcheckSummary (data, tools) {
   return [
     (config.up_values.indexOf(data.monitor.status.toLowerCase()) !== -1) ? 1 : 0,
     Math.ceil(data.monitor.duration.us/1000),
-    (config.check_certificates && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
+    (config.check_certificate && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
       ? checkCertificateExpiry(data, tools)
       : undefined
   ]

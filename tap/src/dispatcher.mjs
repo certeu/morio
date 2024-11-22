@@ -1,5 +1,6 @@
 import { log } from './tools.mjs'
-import { handlers } from '../loader.mjs'
+import { handlers, topics } from '../loader.mjs'
+import { count } from './counters.mjs'
 
 /*
  * This dispatch method handles all Kafka messages
@@ -7,6 +8,11 @@ import { handlers } from '../loader.mjs'
  * that have subscribed to them
  */
 export function dispatch(topic, message, tools) {
+  /*
+   * Count every message
+   */
+  count.message(topic)
+
   /*
    * Return early if we do not have any handlers for this topic
    */
@@ -17,10 +23,23 @@ export function dispatch(topic, message, tools) {
    */
   for (const handler of handlers[topic]) {
     const msg = { topic, ...parseMessageData(message)}
+    /*
+     * Run filter method if there is one
+     */
     if (
       !handler.filter ||
       (typeof handler.filter === 'function' && handler.filter(msg))
-    ) handler.method(msg, tools)
+    ) {
+      /*
+       * Count every handled message
+       */
+      count.handler(handler.name)
+
+      /*
+       * Hand over to handler method
+       */
+      handler.method(msg, tools)
+    }
   }
 }
 
@@ -44,3 +63,4 @@ function parseMessageData(message) {
 
   return data
 }
+

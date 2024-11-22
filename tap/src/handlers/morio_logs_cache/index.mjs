@@ -18,7 +18,7 @@ const handler = config.enabled ? {
     /*
      * Only handle data that has a log message
      */
-    if (!data?.message) return tools.cache.note('Invalid log data', data)
+    if (!data?.message) return
 
     /*
      * Figure out what cache key to use
@@ -30,6 +30,7 @@ const handler = config.enabled ? {
     if (data?.input?.type === 'journald') {
       if (data?.container?.name) logId = `journald.container.${data.container.name}`
       else if (data?.journald?.process?.name) logId = `journald.process.${data.journald.process.name}`
+      else if (data?.syslog?.identifier) logId = `jounrnald.syslog.${data?.syslog?.identifier}`
       else `journald.generic`
     }
 

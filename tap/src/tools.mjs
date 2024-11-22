@@ -43,6 +43,7 @@ export const tools = {
     alarm,
     event,
     notification,
+    inventoryUpdate: produceInventoryUpdate,
   },
 }
 
@@ -268,6 +269,21 @@ function generateKey(data, spacer) {
   return data.map(p => p ? String(p).replace(/\./, '_').replace(/\|/, '_') : 'undefined')
     .join(spacer)
     .toLowerCase()
+}
+
+/*
+ * Helper message to produce an inventory update to Kafka
+ */
+function produceInventoryUpdate(data) {
+  /*
+   * Don't bother without a host ID*
+   */
+  if (!data?.host?.id) return tools.cache.note('Inventory update lacks host ID', data)
+
+  return tools.producer.send({
+    topic: 'inventory',
+    messages: [{ value: JSON.stringify(data) }]
+  })
 }
 
 /*

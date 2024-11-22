@@ -3,7 +3,7 @@ import { Kafka, logLevel } from 'kafkajs'
 import { log, tools } from './tools.mjs'
 import { topics } from '../loader.mjs'
 import { dispatch } from './dispatcher.mjs'
-import config from '../config/tap.mjs' // Needs to be mounted in the container
+import { config, node } from '../config/tap.mjs' // Needs to be mounted in the container
 
 /*
  * Subscribe to topics and dispatch messages
@@ -16,8 +16,9 @@ export async function subscribe() {
    */
   if (!config.brokers || !Array.isArray(config.brokers)) throw(new Error("Invalid broker configuration"))
 
-  const client = createClient(config.clientId)
-  const consumer = await createConsumer(client, config.clientId, topics)
+  const clientId = `${config.clientId}.${node.uuid}`
+  const client = createClient(clientId)
+  const consumer = await createConsumer(client, topics)
   const producer = await createProducer(client)
 
   /*
@@ -44,8 +45,7 @@ export async function subscribe() {
 function createClient(clientId) {
   log.debug(`Creating kafka client with clientId ${clientId}`)
 
-  //return new Kafka({...config, logLevel: lolLevel.ERROR })
-  return new Kafka(config)
+  return new Kafka({ ...config, clientId })
 }
 
 /*
@@ -58,8 +58,8 @@ function createClient(clientId) {
  * @param {array} topics - The list of topics to subscribe to
  * @return {object} client - The KafkaJS client instance
  */
-async function createConsumer(client, clientId, topics) {
-  const consumer = client.consumer({ groupId: clientId })
+async function createConsumer(client, topics) {
+  const consumer = client.consumer({ groupId: config.clientId })
   await consumer.connect()
   for (const topic of topics) log.debug(`Subscribing to Kafka topic: ${topic}`)
   await consumer.subscribe({ topics })
@@ -116,6 +116,7 @@ async function createProducer(client, clientId, topics) {
  */
 async function exitHandler() {
   log.info('Exiting; Closing Kafka connection...')
+  clearInterval(tools.counter)
   try {
     await tools.consumer.disconnect()
     await tools.producer.disconnect()

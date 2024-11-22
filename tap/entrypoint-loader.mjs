@@ -90,10 +90,12 @@ export const handlers = {}
 for (const [name, handler] of Object.entries(allHandlers)) {
   log.debug(\`Message handler \${name} loaded for topic \${handler.topic}\`)
   if (typeof handlers[handler.topic] === 'undefined') handlers[handler.topic] = new Set()
-  handlers[handler.topic].add(handler)
+  handlers[handler.topic].add({ ...handler, name })
 }
 
 export const topics = ${JSON.stringify([...topics])}
+
+export const handlerList = Object.keys(allHandlers)
 `
 
   await fs.writeFile('./loader.mjs', code)
