@@ -2,10 +2,18 @@
  * Configuration for the morio_inventory handler
  */
 export const config = {
-  enabled: true,
-  handler: {
-    topic: 'metrics',
-    filter: ({ data }) => data?.morio?.inventory_update ? true : false,
+  handlers: {
+    metrics: {
+      name: 'metrics',
+      topic: 'metrics',
+      filter: ({ data }) => data?.morio?.inventory_update ? true : false,
+      enabled: true,
+    },
+    inventory: {
+      name: 'inventory',
+      topic: 'inventory',
+      enabled: true,
+    }
   },
 }
 

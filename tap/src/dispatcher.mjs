@@ -1,5 +1,5 @@
 import { log } from './tools.mjs'
-import { handlers, topics } from '../loader.mjs'
+import { handlersPerTopic, topics } from '../loader.mjs'
 import { count } from './counters.mjs'
 
 /*
@@ -16,12 +16,12 @@ export function dispatch(topic, message, tools) {
   /*
    * Return early if we do not have any handlers for this topic
    */
-  if (!handlers[topic] || !(handlers[topic] instanceof Set)) return
+  if (!handlersPerTopic[topic] || !(handlersPerTopic[topic] instanceof Set)) return
 
   /*
    * Do the actual dispatching for every message handler subscribed to this topic
    */
-  for (const handler of handlers[topic]) {
+  for (const handler of handlersPerTopic[topic]) {
     const msg = { topic, ...parseMessageData(message)}
     /*
      * Run filter method if there is one

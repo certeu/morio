@@ -15,42 +15,49 @@ const hostFields = ['name', 'hostname', 'architecture', 'id']
  */
 const osFields = ['codename', 'family', 'kernel', 'name', 'platform', 'type', 'version']
 
-/*
- * This is a Morio handler to build an inventory from all Morio clients
- */
-const handlers = config.enabled ? [
-  {
-    ...config.handler,
-    method: ({ data }, tools) => {
-      /*
-       * Construct inventory update data
-       */
-      const invup = {
-        host: {
-          ...normalizeDataFields(data?.host, hostFields),
-          ip: data?.host?.ip ? data.host.ip.map(mac => normalizeIp(mac, data, tools)) : [],
-          mac: data?.host?.mac ? data.host.mac.map(mac => normalizeMac(mac, data, tools)) : [],
-          os: { ...normalizeDataFields(data?.host?.os, osFields) },
-        },
-        morio: {
-          inventory_update: true,
-          module: tools.extract.module(data),
-        }
+const metricsHandler = config.handlers.metrics.enabled ? {
+  topic: config.handlers.metrics.topic,
+  method: ({ data }, tools) => {
+    /*
+     * Construct inventory update data
+     */
+    const invup = {
+      host: {
+        ...normalizeDataFields(data?.host, hostFields),
+        ip: data?.host?.ip ? data.host.ip.map(mac => normalizeIp(mac, data, tools)) : [],
+        mac: data?.host?.mac ? data.host.mac.map(mac => normalizeMac(mac, data, tools)) : [],
+        os: { ...normalizeDataFields(data?.host?.os, osFields) },
+      },
+      morio: {
+        inventory_update: true,
+        module: tools.extract.module(data),
       }
-      /*
-       * Add somee of the source data
-       */
-      if (data['@timestamp']) invup['@timestamp'] = data['@timestamp']
-      if (data.ecs) invup.ecs = data.ecs
-
-      /*
-       * Now run the update
-       */
-      tools.produce.inventoryUpdate(invup)
     }
-  }
-] : null
+    /*
+     * Add somee of the source data
+     */
+    if (data['@timestamp']) invup['@timestamp'] = data['@timestamp']
+    if (data.ecs) invup.ecs = data.ecs
 
+    /*
+     * Now run the update
+     */
+    tools.produce.inventoryUpdate(invup)
+  }
+} : null
+
+const inventoryHandler = config.handlers.inventory.enabled ? {
+  topic: config.handlers.inventory.topic,
+  method: ({ data }, tools) => {
+    return
+  }
+} : null
+
+/*
+ * This is the default export that bundles are various handlers
+ * but only if they are enabled :)
+ */
+const handlers = [ metricsHandler, inventoryHandler ]
 export default handlers
 
 /**
