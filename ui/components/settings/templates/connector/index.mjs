@@ -2,6 +2,7 @@ import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
 // Connectors
 import { elasticsearch } from './elasticsearch.mjs'
+import { http } from './http.mjs'
 import { imap } from './imap.mjs'
 import { morio } from './morio.mjs'
 import { rss } from './rss.mjs'
@@ -18,6 +19,7 @@ export const xputMeta = (type) => [
     labelBR: <span className="italic opacity-70">Input will be slugified</span>,
     key: 'id',
     transform: slugify,
+    help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-id',
   },
   {
     schema: Joi.string().optional().allow('').label('Description'),
@@ -126,11 +128,7 @@ export const connector = (context) => ({
       about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
         elasticsearch: elasticsearch.out(context),
-        http: {
-          title: 'HTTP',
-          about: 'Writes data to an HTTP endpoint',
-          desc: 'Use this to send data to an HTTP endpoint.',
-        },
+        http: http.out(context),
         kafka: {
           title: 'Kafka',
           about: 'Writes data to a Kafka topic',
