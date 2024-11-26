@@ -4,16 +4,28 @@ import { Popout } from 'components/popout.mjs'
 import { httpMethods, outputCodecs } from 'config/services/connector.mjs'
 import { PlusIcon } from 'components/icons.mjs'
 
-const addHeader = (headers, update) => {
-  const i = Object.keys(headers).length
-  const newHeaders = {...headers}
-  newHeaders[i] = { name: '', value: ''}
-  return update('headers', newHeaders)
+const addKvEntry = (obj, setter) => {
+  const i = Object.keys(obj).length
+  const newObj = {...obj}
+  newObj[i] = { key: '', val: ''}
+  return setter(newObj)
 }
-const removeHeader = (i, headers, update) => {
-  const newHeaders = {...headers}
-  delete newHeaders[i]
-  return update('headers', newHeaders)
+const removeKvEntry = (i, obj, setter) => {
+  const newObj = {...obj}
+  delete newObj[i]
+  return setter(newObj)
+}
+
+const addEntry = (obj, setter) => {
+  const i = Object.keys(obj).length
+  const newObj = {...obj}
+  newObj[i] = ''
+  return setter(newObj)
+}
+const removeEntry = (i, obj, setter) => {
+  const newObj = {...obj}
+  delete newObj[i]
+  return setter(newObj)
 }
 
 
@@ -28,63 +40,7 @@ export const http = {
     local: (data) => `connector.outputs.${data.id}`,
     pipeline_form: (pipelineContext) => {
       const form = [
-        {
-          label: 'Index Type',
-          labelBL: 'The type of Elasticsearch index',
-          schema: Joi.string().required().valid('stream', 'docs').label('Index Type'),
-          key: 'output.index_type',
-          dflt: 'stream',
-          current: pipelineContext.data.output.index_type,
-          inputType: 'buttonList',
-          list: [
-            {
-              val: 'stream',
-              label: 'Data Stream',
-              about: [
-                '- Choose this for append-only timeseries data like logs, metrics, or events',
-                '- Routes automatically to a backing index based on the timestamp',
-              ].join('\n'),
-            },
-            {
-              val: 'docs',
-              label: 'Document Index',
-              about: [
-                '- Choose this to use a classic index for Elasticsearch documents',
-                '- Avoid using this for logs, metrics, and other continuously generated data',
-              ].join('\n'),
-            },
-          ],
-        },
-        {
-          schema: Joi.string().required().label('Index'),
-          label: 'Index',
-          labelBL: (
-            <span>
-              Name of the index to use. Supports dynamic values using <code>{'%{field}'}</code>{' '}
-              formatting
-            </span>
-          ),
-          key: 'output.index',
-          dflt: pipelineContext.pipelineSettings?.outut?.index || '',
-          current: pipelineContext.data.output.index,
-          update: pipelineContext.data.output.index,
-        },
-        {
-          label: 'Enforce ECS Compatibility',
-          labelBL:
-            'Whether or not to enforce the Elastic Common Schema (ECS), and if so, which version',
-          schema: Joi.string().required().valid('disabled', 'v1', 'v8').label('Enforce ECS'),
-          key: 'output.enforce_ecs',
-          dflt: 'v8',
-          current: pipelineContext.data.output.enforce_ecs,
-          inputType: 'buttonList',
-          list: [
-            { val: 'disabled', label: 'Disabled' },
-            { val: 'v1', label: 'Enabled: v1' },
-            { val: 'v8', label: 'Enabled: v8' },
-          ],
-          dir: 'row',
-        },
+        <p>This output does not take any settings.</p>,
       ]
       //if (pipelineContext.data?.output?.index === 'stream') form.push(<p>Stream shit here</p>)
       //else if (pipelineContext.data?.output?.index === 'docs') form.push(<p>docsj shit here</p>)
@@ -130,9 +86,36 @@ export const http = {
               dir: "row",
               help: 'https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html#codec',
             },
+            [
+              {
+                label: 'Support Cookies',
+                labelBL: 'Choose "Yes" to persist cookies across requests',
+                schema: Joi.bool().required().label('Cookies'),
+                key: 'cookies',
+                dflt: true,
+                list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                inputType: 'buttonList',
+                dense: true,
+                dir: "row",
+                help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-cookies',
+              },
+              {
+                label: 'Follow Redirects',
+                labelBL: 'Choose "Yes" to follow HTTP redirects',
+                schema: Joi.bool().required().label('Follow Redirects'),
+                key: 'follow_redirects',
+                dflt: true,
+                list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                inputType: 'buttonList',
+                dense: true,
+                dir: "row",
+                help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-follow_redirects',
+              },
+            ]
           ],
-          Data: ({ data = {} }) => {
-            const headers = data.headers ? {...data.headers } : { 0: ['',''] }
+          Data: ({ data = {}, update }) => {
+            const mapping = data.mapping ? {...data.mapping } : { 0: { key: '', val: '' } }
+            const headers = (data.headers ? {...data.headers } : { 0: { name: '', value: '' } })
 
             return [
               {
@@ -202,20 +185,46 @@ export const http = {
                 dflt: '',
                 placeholder: 'text/plain',
               } : '',
-              <h4>Headers</h4>,
-            ]
-          },
-          Headers: ({ data = {}, update }) => {
-            const headers = (data.headers ? {...data.headers } : { 0: { name: '', value: '' } })
-            const remove = <button
-              onClick={(i) => removeHeader(i, headers, update)}
-              className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
-            >Remove header</button>
+              <label>Mapping</label>,
+              ...Object.keys(mapping).map(i => [
+                {
+                  label: `Key`,
+                  // This button is here to enforce the same vertical spacing as the value input
+                  labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove mapping</button>,
+                  schema: Joi.string().required().label('Key'),
+                  key: `mapping.${i}.name`,
+                  dflt: '',
+                  placeholder: 'foo',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-mapping',
+                },
+                {
+                  label: `Value`,
+                  // This button allows to remove a mapping
+                  labelTR: <button
+                    onClick={() => removeKvEntry(i, mapping, (val) => update('mapping', val))}
+                    className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
+                  >Remove mapping</button>,
+                  schema: Joi.string().required().label('Value'),
+                  key: `mapping.${i}.value`,
+                  dflt: '',
+                  placeholder: '%{host}',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-mapping',
+                },
+              ]),
+              // This button allows to add a mapping
+              <p className="text-right">
+                <button
+                  onClick={() => addKvEntry(mapping, (val) => update('mapping', val))}
+                  className="btn btn-sm btn-success mt-4"
+                ><PlusIcon /> Add Mapping</button>
+              </p>,
 
-            return [
+              <label>Headers</label>,
               ...Object.keys(headers).map(i => [
                 {
                   label: `Name`,
+                  // This button is here to enforce the same vertical spacing as the value input
+                  labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove header</button>,
                   schema: Joi.string().required().label('Name'),
                   key: `headers.${i}.name`,
                   dflt: '',
@@ -223,8 +232,9 @@ export const http = {
                 },
                 {
                   label: `Value`,
+                  // This button allows to remove a header
                   labelTR: <button
-                    onClick={() => removeHeader(i, headers, update)}
+                    onClick={() => removeKvEntry(i, headers, (val) => update('headers', val))}
                     className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
                   >Remove header</button>,
                   schema: Joi.string().required().label('Value'),
@@ -233,9 +243,79 @@ export const http = {
                   placeholder: 'Bearer ${ACCESS_TOKEN}',
                 },
               ]),
+              // This button allows to add a header
               <p className="text-right">
-              <button onClick={() => addHeader(headers, update)} className="btn btn-sm btn-success mt-4"><PlusIcon /> Add Header</button>
+                <button
+                  onClick={() => addKvEntry(headers, (val) => update('headers', val))}
+                  className="btn btn-sm btn-success mt-4"
+                ><PlusIcon /> Add Header</button>
               </p>
+            ]
+          },
+          Retries: ({ data = {}, update }) => {
+            return [
+              [
+                {
+                  label: 'Automatic Retries',
+                  labelBL: 'How many times to automatically retry a failed request',
+                  schema: Joi.number().required().label('Retries'),
+                  key: 'automatic_retries',
+                  dflt: 1,
+                  current: data.automatic_retries ? Number(data.automatic_retries) : 1,
+                  inputType: 'number',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-automatic_retries',
+                },
+              ],
+              [
+                {
+                  label: 'Indefinite Retries',
+                  labelBL: 'Whether to keep trying forever',
+                  schema: Joi.bool().required().label('Indefinite Retries'),
+                  key: 'retry_failed',
+                  dflt: true,
+                  list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                  inputType: 'buttonList',
+                  dense: true,
+                  dir: "row",
+                  dflt: true,
+                  current: data.automatic_retries ? true : false,
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-automatic_retries',
+                },
+                {
+                  label: 'Non-Idempotent Retries',
+                  labelBL: 'Choose "Yes" to also retry non-idempotent requests',
+                  schema: Joi.bool().required().label('Non-Idempotent Retries'),
+                  key: 'retry_non_idempotent',
+                  dflt: false,
+                  list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                  inputType: 'buttonList',
+                  dense: true,
+                  dir: "row",
+                  current: data.automatic_retries === true ? true : false,
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-retry_non_idempotent',
+                },
+              ],
+              [
+                {
+                  label: 'Indefinite Retry Status Codes',
+                  labelBL: 'Status codes for which too keep on trying',
+                  schema: Joi.string().label('Status codes'),
+                  key: 'retryable_codes',
+                  dflt: '429, 500, 502, 503, 504',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-retryable_codes',
+                  current: data.retryable_codes ? data.retryable_codes : '429, 500, 502, 503, 504',
+                },
+                {
+                  label: 'Additional Successful Status Codes',
+                  labelBL: 'Status codes apart from 2xx that are a success',
+                  schema: Joi.string().allow('').label('Status codes'),
+                  key: 'ignorable_codes',
+                  dflt: '',
+                  placeholder: '418',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ignorable_codes',
+                  current: data.ignorable_codes || ''
+                },
+              ],
             ]
           },
           SSL: ({ data = {} }) => [
@@ -290,19 +370,6 @@ export const http = {
               }
             : '',
           ],
-          /*
-           * Still TODO:
-           *
-           * cookies: true
-           * mapping:
-           *
-           * follow_redirects: true
-           * ignorable_odes: []
-           * retry_files: true ?? plugins only
-           * retry_non_idempotent: false
-           * retryable_codes [429, 500, 502, 503, 504]
-           *
-           */
           Advanced: ({ data = {} }) => [
             {
               label: 'Proxy',
@@ -316,17 +383,17 @@ export const http = {
             },
             [
               {
-                label: 'KeepAlive',
+                label: 'Keep Alive',
                 labelBL: 'Enable HTTP keepalive support',
-                schema: Joi.bool().required().label('Retries'),
+                schema: Joi.bool().required().label('Keep alive'),
                 key: 'keepalive',
                 dflt: true,
                 inputType: 'toggle',
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-keepalive',
               },
               {
-                label: 'Retries',
-                labelBL: 'How many times to retry a failing URL',
+                label: 'Automatic Retries',
+                labelBL: 'How many times to retry a failing URL (same setting as under Retries)',
                 schema: Joi.number().required().label('Retries'),
                 key: 'automatic_retries',
                 dflt: 1,
