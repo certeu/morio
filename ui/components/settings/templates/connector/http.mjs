@@ -5,9 +5,8 @@ import { httpMethods, outputCodecs } from 'config/services/connector.mjs'
 import { PlusIcon } from 'components/icons.mjs'
 
 const addKvEntry = (obj, setter) => {
-  const i = Object.keys(obj).length
   const newObj = {...obj}
-  newObj[i] = { key: '', val: ''}
+  newObj[`i_${new Date().getTime()}`] = { key: '', val: ''}
   return setter(newObj)
 }
 const removeKvEntry = (i, obj, setter) => {
@@ -17,9 +16,8 @@ const removeKvEntry = (i, obj, setter) => {
 }
 
 const addEntry = (obj, setter) => {
-  const i = Object.keys(obj).length
   const newObj = {...obj}
-  newObj[i] = ''
+  newObj[`i_${new Date().getTime()}`] = ''
   return setter(newObj)
 }
 const removeEntry = (i, obj, setter) => {
@@ -57,7 +55,7 @@ export const http = {
               label: 'URL',
               labelBL: 'The URL to send the data to',
               schema: Joi.string().uri().required().label('URL'),
-              key: 'uri',
+              key: 'url',
               placeholder: 'https://splunk.examples.morio.it:8094/services/collector/raw',
               inputType: 'text',
               help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-url',
@@ -114,8 +112,8 @@ export const http = {
             ]
           ],
           Data: ({ data = {}, update }) => {
-            const mapping = data.mapping ? {...data.mapping } : { 0: { key: '', val: '' } }
-            const headers = (data.headers ? {...data.headers } : { 0: { name: '', value: '' } })
+            const mapping = data.mapping ? {...data.mapping } : { init: { key: '', val: '' } }
+            const headers = (data.headers ? {...data.headers } : { init: { key: '', val: '' } })
 
             return [
               {
@@ -192,7 +190,7 @@ export const http = {
                   // This button is here to enforce the same vertical spacing as the value input
                   labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove mapping</button>,
                   schema: Joi.string().required().label('Key'),
-                  key: `mapping.${i}.name`,
+                  key: `mapping.${i}.key`,
                   dflt: '',
                   placeholder: 'foo',
                   help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-mapping',
@@ -205,7 +203,7 @@ export const http = {
                     className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
                   >Remove mapping</button>,
                   schema: Joi.string().required().label('Value'),
-                  key: `mapping.${i}.value`,
+                  key: `mapping.${i}.val`,
                   dflt: '',
                   placeholder: '%{host}',
                   help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-mapping',
@@ -226,7 +224,7 @@ export const http = {
                   // This button is here to enforce the same vertical spacing as the value input
                   labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove header</button>,
                   schema: Joi.string().required().label('Name'),
-                  key: `headers.${i}.name`,
+                  key: `headers.${i}.key`,
                   dflt: '',
                   placeholder: 'Authorization',
                 },
@@ -238,7 +236,7 @@ export const http = {
                     className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
                   >Remove header</button>,
                   schema: Joi.string().required().label('Value'),
-                  key: `headers.${i}.value`,
+                  key: `headers.${i}.val`,
                   dflt: '',
                   placeholder: 'Bearer ${ACCESS_TOKEN}',
                 },
