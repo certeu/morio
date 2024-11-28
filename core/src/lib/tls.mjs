@@ -245,5 +245,9 @@ export async function ensureServiceCertificate(service, internal = false, chain 
     ),
   })
 
-  return true
+  return {
+    cert: certAndKey.certificate.crt,
+    key: certAndKey.key,
+  }
 }
+

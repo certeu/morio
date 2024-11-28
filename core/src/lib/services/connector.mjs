@@ -1,5 +1,7 @@
 import { readDirectory, writeFile, writeYamlFile, chown, mkdir, rm } from '#shared/fs'
+import { createP12Keystore, convertPkcs1ToPkcs8 } from '#shared/crypto'
 import { extname, basename } from 'node:path'
+import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
@@ -30,13 +32,13 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreate: () => defaultRecreateServiceHook('connector'),
+    recreate: () => true, //defaultRecreateServiceHook('connector'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
      * was recreated or is not running.
      */
-    restart: (hookParams) => defaultRestartServiceHook('connector', hookParams),
+    restart: (hookParams) => true, //defaultRestartServiceHook('connector', hookParams),
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
@@ -110,6 +112,21 @@ async function ensureLocalPrerequisites() {
    * Make sure pipelines.yml file exists, so it can be mounted
    */
   await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
+
+  /*
+   * Make sure we have a keystore on disk to connect to Kafka
+   */
+  const x509 = await ensureServiceCertificate('connector', true)
+  const caCerts = [utils.getCaConfig().intermediate, utils.getCaConfig().certificate]
+  const keystore = '/etc/morio/connector/pipeline_assets/local-keystore.pem'
+  await writeFile(keystore, convertPkcs1ToPkcs8(x509.key) + x509.cert + utils.getCaConfig().intermediate , log, 0o600)
+  await chown(keystore, uid, uid)
+
+  /*
+   * Also add a truststore, which is just the CA root PEM
+   */
+  const truststore = '/etc/morio/connector/pipeline_assets/local-truststore.pem'
+  await writeFile(truststore, utils.getCaConfig().certificate , log, 0o644)
 
   return true
 }
@@ -279,7 +296,7 @@ const logstash = {
 # Read data from a local Morio broker
 input {
   kafka {
-    codec => json
+    codec => "json"
     topics => ["${pipeline.input.topic}"]
     bootstrap_servers => "${utils
       .getBrokerFqdns()
@@ -287,8 +304,12 @@ input {
       .join(',')}"
     client_id => "morio_connector_input"
     id => "${pipelineId}_${xput.id}"
-    ssl_endpoint_identification_algorithm => "https"
-
+    security_protocol => "SSL"
+    ssl_endpoint_identification_algorithm => ""
+    ssl_keystore_location => "/usr/share/logstash/config/pipeline_assets/local-keystore.pem"
+    ssl_keystore_type => "PEM"
+    ssl_truststore_location => "/usr/share/logstash/config/pipeline_assets/local-truststore.pem"
+    ssl_truststore_type => "PEM"
   }
 }
 `,
@@ -328,6 +349,7 @@ output {
      * HTTP output, which takes a lot of options
      */
     http: async (xput, pipeline, pipelineId) => {
+      // FIXME: This is here for debugging, and can be removed
       await writeFile(
         `/etc/morio/connector/pipeline_assets/${pipelineId}_output.json`,
         JSON.stringify(xput, null, 2)
@@ -356,7 +378,7 @@ output {
 
       /*
        * Numbers
-       * This is an array with [field_name, default_value] structure
+       * This is an array with [field_name, default_value] elements
        */
       const numFields = [
         ['automatic_retries', 1],
@@ -371,7 +393,7 @@ output {
 
       /*
        * Booleans
-       * This is an array with [field_name, default_value] structure
+       * This is an array with [field_name, default_value] elements
        */
       const boolFields = [
         ['cookies', true],
@@ -384,7 +406,7 @@ output {
 
       /*
        * Strings
-       * This is an array with [field_name, default_value] structure
+       * This is an array with [field_name, default_value] elements
        */
       const stringFields = [
         ['content_type', undefined],
@@ -430,6 +452,11 @@ output {
         )}${nl}`
 
       /*
+       * SSL verification
+       */
+      if (xput.url.toLowerCase().slice(0, 5) === 'https') config += `    ssl_verification_mode => "${xput._ssl_validate ? 'full' : 'none'}"${nl}`
+
+      /*
        * Close braces
        */
       config += `  }${nl}}${nl}`
@@ -451,6 +478,14 @@ output {
       .join(',')}"
     client_id => "morio_connector_output"
     id => "${pipelineId}_${xput.id}"
+    security_protocol => "SSL"
+    ssl_endpoint_identification_algorithm => "https"
+    ssl_keystore_location => "/usr/share/logstash/config/pipeline_assets/guistore.p12"
+    ssl_keystore_password => "${utils.getPreset('MORIO_CONNECTOR_P12_PASSWORD')}"
+    ssl_keystore_type => "PKCS12"
+    ssl_truststore_location => "/usr/share/logstash/config/pipeline_assets/guistore.p12"
+    ssl_truststore_password => "${utils.getPreset('MORIO_CONNECTOR_P12_PASSWORD')}"
+    ssl_truststore_type => "PKCS12"
   }
 }
 `,
