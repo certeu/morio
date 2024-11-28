@@ -356,6 +356,49 @@ output {
       )
 
       let config = `
+# Move the entire event to the 'event' key
+filter {
+  ruby {
+    code => "event.set('event', event.to_hash)"
+  }
+}
+
+# Remove all keys but the event key
+filter {
+  prune {
+    whitelist_names => [ "event" ]
+  }
+}
+
+# Add required Splunk HEC fields
+filter {
+  mutate {
+    add_field => {
+      "host" => "%{[event][host][hostname]}"
+      "sourcetype" => "_json"
+    }
+  }
+}
+
+# Convert ECS @timestamp to Splunk's ;time; field in epoch format
+filter {
+  ruby {
+    code => "
+      timestamp = event.get('event')['@timestamp']
+      if timestamp
+        formatted_time = '%.3f' % timestamp.to_f
+        event.set('time', formatted_time)
+      end
+    "
+
+    # code => "event.set('time', event.get('[event][@timestamp]').to_f)"
+  }
+}
+`
+
+      config += `
+
+
 # Output data to an HTTP endpoint
 output {
   http {
@@ -365,16 +408,16 @@ output {
        * Files
        * Certificate data is passed in directly, but logstash expects a path to a file
        */
-      const sslFields = ['ssl_certificate', 'ssl_certificate_authorities', 'ssl_key']
-      for (const field of sslFields) {
-        if (xput[field])
-          await writeFile(
-            `/etc/morio/connector/pipeline_assets/${pipelineId}_${field}`,
-            xput[field],
-            log
-          )
-        config += fileField(field, xput, pipelineId, field === 'ssl_certificate_authorities')
-      }
+      //const sslFields = ['ssl_certificate', 'ssl_certificate_authorities', 'ssl_key']
+      //for (const field of sslFields) {
+      //  if (xput[field])
+      //    await writeFile(
+      //      `/etc/morio/connector/pipeline_assets/${pipelineId}_${field}`,
+      //      xput[field],
+      //      log
+      //    )
+      //  config += fileField(field, xput, pipelineId, field === 'ssl_certificate_authorities')
+      //}
 
       /*
        * Numbers
@@ -428,7 +471,7 @@ output {
       /*
        * mapping
        */
-      if (xput.mapping) {
+      if (xput.mapping && Object.keys(xput.mapping).length > 0) {
         let mapping = `    mapping => {${nl}`
         for (const i of Object.keys(xput.mapping))
           mapping += `      "${xput.mapping[i].key}" => "${xput.mapping[i].val}"${nl}`
@@ -460,6 +503,7 @@ output {
        * Close braces
        */
       config += `  }${nl}}${nl}`
+
 
       return config
     },
