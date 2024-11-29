@@ -31,7 +31,7 @@ const removeEntry = (i, obj, setter) => {
  * HTTP input & output Connector templates
  */
 export const http = {
-  out: () => ({
+  output: () => ({
     title: 'HTTP',
     about: 'Post data to an HTTP endpoint',
     desc: 'Use this to send data to an HTTP endpoint',

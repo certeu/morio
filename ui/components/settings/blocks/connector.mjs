@@ -34,7 +34,7 @@ const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
 const brands = {
   amazon_cloudwatch: <AmazonCloudWatch {...brandProps} />,
   azure_event_hubs: <Azure {...brandProps} />,
-  custom: <CodeIcon {...iconProps} />,
+  lscl: <CodeIcon {...iconProps} />,
   elasticsearch: <Elasticsearch {...brandProps} />,
   http: <HttpIcon {...brandProps} />,
   http_poller: <HttpIcon {...brandProps} />,
@@ -244,6 +244,7 @@ export const ConnectorXputs = (props) => (
   </>
 )
 export const ConnectorInputs = (props) => <ConnectorXputs {...props} type="input" />
+export const ConnectorFilters = (props) => <ConnectorXputs {...props} type="filter" />
 export const ConnectorOutputs = (props) => <ConnectorXputs {...props} type="output" />
 
 const PipelineHeader = ({ id }) => (
