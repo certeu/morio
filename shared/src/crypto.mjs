@@ -531,36 +531,6 @@ export function verifyPassword(userInput, storedPassword) {
   return false
 }
 
-/**
- * Creates a p12 JKS keystore as used by Logstash
- *
- * @param {string|array} cert - The certificate(s)
- * @param {string} key - The Private key
- * @param {string} password - The password for the keystore
- * @return {onject} p12 - The p12 JKS data
- */
-export async function createP12Keystore (cert, key, password='', log=false) {
-  const certs = Array.isArray(cert) ? cert : [cert]
-  let p12 = false
-  try {
-    p12 = forge.pkcs12.toPkcs12Asn1(
-      forge.pki.privateKeyFromPem(key),
-      certs, //certs.map(crt => forge.pki.certificateFromPem(crt)),
-      password,
-      {
-        algorithm: '3des',
-        friendlyName: 'morio',
-      }
-    )
-  }
-  catch (err) {
-    if (log) log.error(err, `Failed to generate pkcs12 keystore`)
-  }
-
-  return p12
-    ? forge.asn1.toDer(p12).getBytes()
-    : false
-}
 
 /**
  * Convert a key in PKCS#1 format to PKCS#8 which is what Java wants
@@ -580,32 +550,6 @@ export function convertPkcs1ToPkcs8(key) {
       forge.pki.privateKeyToAsn1(
         forge.pki.privateKeyFromPem(key)
       )
-    )
-  )
-
-
-
-
-
-  // Parse the PKCS#1 private key from PEM
-  const pkcs1Key = forge.pki.privateKeyFromPem(key);
-
-  const rsaPrivateKey = forge.pki.privateKeyToAsn1(pkcs1Key);
-
-  // Convert to PKCS#8
-  const pkcs8Asn1 = forge.pki.wrapRsaPrivateKey(rsaPrivateKey);
-
-  // Encode to PEM format with PKCS#8 headers
-  const pkcs8Pem = forge.pki.privateKeyInfoToPem(pkcs8Asn1);
-  console.log({pkcs8Pem}, 'convertPkcs')
-  return pkcs8Pem;
-
-
-
-  // PEM to node-forge, then convert, then back to PEM
-  return forge.pki.privateKeyToPem(
-    forge.pki.wrapRsaPrivateKey(
-      forge.pki.privateKeyFromPem(key)
     )
   )
 }
