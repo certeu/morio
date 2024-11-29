@@ -329,6 +329,7 @@ export const TextInput = ({
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
+  code = false, // Allows using fixed-width font for input
 }) => (
   <FormControl {...{ label, labelTR, labelBL, labelBR, help }} forId={id} isValid={valid(current)}>
     <textarea
@@ -338,9 +339,9 @@ export const TextInput = ({
       placeholder={placeholder}
       value={current}
       onChange={(evt) => update(evt.target.value)}
-      className={`input w-full bg-base-100 input-bordered h-36 py-2 ${
+      className={`input w-full bg-base-100 input-bordered py-2 ${
         current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
-      }`}
+      } ${code ? 'font-mono h-96' : 'h-36'}`}
     />
   </FormControl>
 )
