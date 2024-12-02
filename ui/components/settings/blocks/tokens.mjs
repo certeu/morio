@@ -269,21 +269,25 @@ export const Secrets = (props) => <Tokens {...props} secrets />
 export const Flags = ({ update, data }) => (
   <>
     <div className="flex flex-col gap-2">
-      <div className='flex flex-row items-center gap-2 flex-wrap mb-4'>
+      <div className="flex flex-row items-center gap-2 flex-wrap mb-4">
         <ul className="list list-inside ml-4 list-disc">
-        {Object.keys(data?.tokens?.flags || {})
-          .sort()
-          .map((key) => <li key={key} className='flex flex-row items-center gap-2 flex-wrap py-0.5'>
-            {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
-            <a href={`#${key.toLowerCase()}`} className="textsm">{key}</a>
-          </li>)
-        }
+          {Object.keys(data?.tokens?.flags || {})
+            .sort()
+            .map((key) => (
+              <li key={key} className="flex flex-row items-center gap-2 flex-wrap py-0.5">
+                {data.tokens.flags[key] ? <BoolYesIcon /> : <BoolNoIcon />}
+                <a href={`#${key.toLowerCase()}`} className="textsm">
+                  {key}
+                </a>
+              </li>
+            ))}
         </ul>
       </div>
       {Object.keys(data?.tokens?.flags || {})
         .sort()
         .map((key) => (
-          <label id={key.toLowerCase()}
+          <label
+            id={key.toLowerCase()}
             className={`scroll-mt-20 hover:cursor-pointer border-4 border-y-0 border-r-0 p-2 px-4 shadow
             hover:bg-base-100 hover:bg-opacity-10 rounded bg-opacity-10
             ${data?.tokens?.flags?.[key] ? 'border-success bg-success' : 'border-error bg-error'}
@@ -293,7 +297,7 @@ export const Flags = ({ update, data }) => (
           >
             <div htmlFor={key} className="flex flex-row gap-4 items-center">
               <h5 className={data?.tokens?.flags?.[key] ? '' : ''}>{key}</h5>
-              <span className='grow'></span>
+              <span className="grow"></span>
               <input
                 id={key}
                 type="checkbox"

@@ -43,7 +43,6 @@ const altDocsFields = {
   revision: 'version',
 }
 
-
 const Field = ({ field, fields, defaults, data, setData }) => (
   <StringInput
     key={field}
@@ -225,19 +224,23 @@ const CreatePackage = () => {
       </h2>
       <Tabs tabs="basics,advanced">
         <Tab tabId="basics" key="basics">
-          {Object.keys(fields.basics).slice(0,1).map(field => (
-            <Field key={field} fields={fields.basics} {...{ defaults, data, setData, field }} />
-          ))}
-
-          <div className="grid grid-cols-2 gap-4 items-end">
-            {Object.keys(fields.basics).slice(1,3).map(field => (
+          {Object.keys(fields.basics)
+            .slice(0, 1)
+            .map((field) => (
               <Field key={field} fields={fields.basics} {...{ defaults, data, setData, field }} />
             ))}
+
+          <div className="grid grid-cols-2 gap-4 items-end">
+            {Object.keys(fields.basics)
+              .slice(1, 3)
+              .map((field) => (
+                <Field key={field} fields={fields.basics} {...{ defaults, data, setData, field }} />
+              ))}
           </div>
         </Tab>
         <Tab tabId="advanced" key="advanced">
           <div className="grid grid-cols-2 gap-4 items-end">
-            {Object.keys(fields.advanced).map(field => (
+            {Object.keys(fields.advanced).map((field) => (
               <Field key={field} fields={fields.advanced} {...{ defaults, data, setData, field }} />
             ))}
           </div>

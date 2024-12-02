@@ -152,7 +152,7 @@ const SettingsUploadPage = (props) => {
               <div className="py-12 px-4 max-w-xl m-auto">
                 {loading ? (
                   <div className="w-52 mx-auto text-center text-lg font-bold">
-                    <Spinner className="w-8 h-8 text-primary animate-spin inline mb-4"/>
+                    <Spinner className="w-8 h-8 text-primary animate-spin inline mb-4" />
                     <br />
                     <span className="animate-pulse">One moment please</span>
                   </div>

@@ -19,17 +19,22 @@ export const FormControl = ({
   isValid = false, // Result of validation
   help = false, // An optional URL to link to help/docs
 }) => {
-  const helpLink = help
-    ? <a href={help} target="_BLANK" rel="nofollow" title="Show help/docs"><QuestionIcon className="w-5 hj5"/></a>
-    : null
+  const helpLink = help ? (
+    <a href={help} target="_BLANK" rel="nofollow" title="Show help/docs">
+      <QuestionIcon className="w-5 hj5" />
+    </a>
+  ) : null
 
   const topLabelChildren = (
     <>
-      {label
-        ? <span className="label-text-alt font-bold -mb-1 flex flex-row items-center gap-2">{label} {helpLink}</span>
-        : <span>{helpLink}</span>
-      }
-      {labelTR ? <span className="label-text-alt -mb-1">{labelTR}</span> : null }
+      {label ? (
+        <span className="label-text-alt font-bold -mb-1 flex flex-row items-center gap-2">
+          {label} {helpLink}
+        </span>
+      ) : (
+        <span>{helpLink}</span>
+      )}
+      {labelTR ? <span className="label-text-alt -mb-1">{labelTR}</span> : null}
     </>
   )
   const bottomLabelChildren = (
@@ -285,7 +290,7 @@ export const SecretInput = ({
   )
 
   return (
-    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid, help}} forId={id}>
+    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid, help }} forId={id}>
       <input
         id={id}
         disabled={disabled}
@@ -605,7 +610,11 @@ export const LabelInput = (props) => {
 
   return (
     <>
-      <FormControl {...{ label, labelTR, labelBL, labelBR, help }} forId={id} isValid={valid(current)}>
+      <FormControl
+        {...{ label, labelTR, labelBL, labelBR, help }}
+        forId={id}
+        isValid={valid(current)}
+      >
         <input
           id={id}
           disabled={disabled}

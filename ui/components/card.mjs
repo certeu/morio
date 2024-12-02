@@ -12,11 +12,11 @@ import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 
 const MissingRole = ({ role }) => (
   <div className="flex flex-row text-error items-center gap-2">
-    <WarningIcon className="h-5 w-5"/> Role required: <code>{role}</code>
+    <WarningIcon className="h-5 w-5" /> Role required: <code>{role}</code>
   </div>
 )
 
-export const Card = ({ desc, Icon = null, width = 'w-72', role=false, ...aProps }) => {
+export const Card = ({ desc, Icon = null, width = 'w-72', role = false, ...aProps }) => {
   const { account } = useAccount()
   const hasRole = role ? rbac(account.role, role) : true
 
@@ -25,7 +25,9 @@ export const Card = ({ desc, Icon = null, width = 'w-72', role=false, ...aProps 
       className={`${width} border px-4 pb-4 rounded shadow hover:bg-secondary hover:bg-opacity-20 flex flex-col ${hasRole ? 'hover:bg-secondary' : 'hover:bg-error opacity-50'}`}
       {...aProps}
     >
-      <h3 className={`capitalize text-base-content flex flex-row gap-2 items-center justify-between text-2xl`}>
+      <h3
+        className={`capitalize text-base-content flex flex-row gap-2 items-center justify-between text-2xl`}
+      >
         {aProps.title}
         <Icon className="w-8 h-8 shrink-0 grow-0" />
       </h3>
@@ -35,7 +37,7 @@ export const Card = ({ desc, Icon = null, width = 'w-72', role=false, ...aProps 
   )
 }
 
-export const CardButton = ({ desc, Icon = null, width = 'w-72', role=false, ...btnProps }) => {
+export const CardButton = ({ desc, Icon = null, width = 'w-72', role = false, ...btnProps }) => {
   const { account } = useAccount()
   const hasRole = role ? rbac(account.role, role) : true
   const { pushModal } = useContext(ModalContext)
@@ -44,12 +46,16 @@ export const CardButton = ({ desc, Icon = null, width = 'w-72', role=false, ...b
     <button
       className={`${width} border px-4 pb-4 rounded shadow hover:bg-secondary hover:bg-opacity-20 flex flex-col ${hasRole ? 'hover:bg-secondary' : 'hover:bg-error opacity-50'}`}
       {...btnProps}
-      onClick={hasRole ? btnProps.onClick : () => pushModal(
+      onClick={
+        hasRole
+          ? btnProps.onClick
+          : () =>
+              pushModal(
                 <ModalWrapper>
                   <MissingRole role={role} />
                 </ModalWrapper>
               )
-            }
+      }
     >
       <h3 className="capitalize text-base-content flex flex-row gap-2 items-center justify-between text-2xl">
         {btnProps.title}
@@ -60,4 +66,3 @@ export const CardButton = ({ desc, Icon = null, width = 'w-72', role=false, ...b
     </button>
   )
 }
-
