@@ -1,6 +1,8 @@
 import { useState, useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
 import { AmazonCloudWatch, Azure, Elasticsearch, Kafka } from 'components/brands.mjs'
+import orderBy from 'lodash/orderBy.js'
+import unset from 'lodash/unset.js'
 // Templates
 import { connector as connectorTemplates } from '../templates/connector/index.mjs'
 import {
@@ -9,6 +11,7 @@ import {
   EmailIcon,
   HttpIcon,
   InputIcon,
+  FilterIcon,
   MorioIcon,
   OutputIcon,
   PuzzleIcon,
@@ -254,14 +257,24 @@ const PipelineHeader = ({ id }) => (
   </h3>
 )
 
-const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
+const PipelineConnectors = ({ pipelineSettings, data, localUpdate, update }) => {
   const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
+
+  /*
+   * We user orderBy() to sort the different filters
+   * but in doing so we loose the ID so we add it as a property here
+   */
+  const filters = {}
+  for (const id of Object.keys(pipelineSettings.filters || {})) {
+    filters[id] = { id, ...pipelineSettings.filters[id] }
+  }
+  const filterOrder = orderBy(filters, 'order', 'asc')
 
   return (
     <>
-      <div className="flex flex-row justify-center w-full items-center">
+      <div className="flex flex-row justify-center items-center w-full gap-4">
         <button
-          className={`btn btn-ghost btn-primary text-lg italic ${
+          className={`btn btn-ghost btn-sm btn-primary italic ${
             pipelineSettings.input?.id ? 'text-success hover:text-error' : 'opacity-70'
           }`}
           onClick={() => localUpdate('input.id', null)}
@@ -273,8 +286,29 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
           <RightIcon className="h-5 w-5 -ml-4" />
           <RightIcon className="h-5 w-5 -ml-4" />
         </div>
+        <div className="flex flex-col items-center my-4 w-1/3">
+          {filterOrder.map(({ id=false }, i) => id ? [
+              i > 10 ? <RightIcon key="icon" className="rotate-90 w-4 h-4" stroke="3"/> : null,
+              <button key="btn"
+                className={`w-full btn btn-sm btn-ghost btn-primary italic flex flex-row items-center justify-between ${
+                  pipelineSettings.filters?.[id] ? 'text-success hover:text-error' : 'opacity-70'
+                }`}
+                onClick={() => localUpdate(['filters', id], undefined)}
+              >
+                <FilterIcon className="w-5 h-5" />
+                {id}
+                <FilterIcon className="w-5 h-5" />
+              </button>
+            ] : null
+          )}
+        </div>
+        <div className="col-span-1 flex flex-row gap-1 items-end justify-center">
+          <RightIcon className="h-5 w-5" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+        </div>
         <button
-          className={`btn btn-ghost btn-primary text-lg italic ${
+          className={`btn btn-ghost btn-primary italic ${
             pipelineSettings.output?.id ? 'text-success hover:text-error' : 'opacity-70'
           }`}
           onClick={() => localUpdate('output.id', null)}
@@ -282,7 +316,7 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
           {pipelineSettings.output?.id || 'Select an output below'}
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <div className="flex flex-col gap-1">
           <h4>Pipeline Inputs</h4>
           {Object.keys(data?.connector?.inputs || {}).map((id) => (
@@ -295,6 +329,22 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
             >
               {id}
               <InputIcon stroke={1.5} className="w-8 h-8" />
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h4>Pipeline Filters</h4>
+          {Object.keys(data?.connector?.filters || {}).map((id) => (
+            <button
+              className={`${btnClasses} ${
+                pipelineSettings.filters?.[id] ? 'btn-success' : 'btn-neutral btn-outline'
+              }`}
+              onClick={() => localUpdate(['filters', id], { order: Date.now() })}
+              key={id}
+            >
+              <FilterIcon className="w-5 h-5" />
+              {id}
+              <FilterIcon className="w-5 h-5" />
             </button>
           ))}
         </div>
@@ -454,7 +504,8 @@ const BuildPipeline = (props) => {
   }
   const localUpdate = (key, val) => {
     const newSettings = { ...pipelineSettings }
-    set(newSettings, key, val)
+    if (val === undefined) unset(newSettings, key)
+    else set(newSettings, key, val)
     setPipelineSettings(newSettings)
   }
   const inputPlugin = props.data?.connector?.inputs?.[pipelineSettings.input?.id]?.plugin
