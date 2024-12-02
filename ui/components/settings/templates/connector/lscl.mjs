@@ -15,28 +15,29 @@ export const lscl = {
   output: (context) => lsclForm('output', context),
 }
 
-const nl = "\n"
-const t = "  "
+const nl = '\n'
+const t = '  '
 
 const examples = {
-  input: `input {${nl+t}exec {${nl+t+t}command => "echo 'hi!'"${nl+t+t}interval => 30${nl+t}}${nl}}`,
-  filter: `filter {${nl+t}mutate {${nl+t+t}add_field => {${nl+t+t+t}"sourcetype" => "_json"${nl+t+t}}${nl+t}}${nl}}`,
-  output: `output {${nl+t}sink { }${nl}}`,
+  input: `input {${nl + t}exec {${nl + t + t}command => "echo 'hi!'"${nl + t + t}interval => 30${nl + t}}${nl}}`,
+  filter: `filter {${nl + t}mutate {${nl + t + t}add_field => {${nl + t + t + t}"sourcetype" => "_json"${nl + t + t}}${nl + t}}${nl}}`,
+  output: `output {${nl + t}sink { }${nl}}`,
 }
 
-const lsclForm = (type, context) => ({
+const lsclForm = (type) => ({
   title: 'LSCL',
   about: `Write a custom ${type} in LSCL`,
   desc: `Use this if Morio does not provide a preconfigured ${type} for your use case.`,
   local: (data) => `connector.inputs.${data.id}`,
   form: [
-    <Popout tip>
-      <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage.
-      It is unfortunately <a
-        href="https://discuss.elastic.co/t/is-lscl-documented/353178/2"
-        target="_BLANK"
-      >undocumented</a>, but if you are familiar with it or if you have an existing
-      Logstash {type} you want to re-use in Morio, you can include it below.
+    <Popout tip key="tip">
+      <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage. It is
+      unfortunately{' '}
+      <a href="https://discuss.elastic.co/t/is-lscl-documented/353178/2" target="_BLANK">
+        undocumented
+      </a>
+      , but if you are familiar with it or if you have an existing Logstash {type} you want to
+      re-use in Morio, you can include it below.
     </Popout>,
     {
       tabs: {
@@ -52,10 +53,8 @@ const lsclForm = (type, context) => ({
             code: true,
             key: 'lscs',
           },
-        ]
-      }
-    }
+        ],
+      },
+    },
   ],
 })
-
-

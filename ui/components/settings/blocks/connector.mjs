@@ -11,7 +11,6 @@ import {
   InputIcon,
   MorioIcon,
   OutputIcon,
-  PlusIcon,
   PuzzleIcon,
   RightIcon,
   RssIcon,
@@ -322,12 +321,6 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
 const WritePipeline = (props) => {
   const [pipelineSettings, setPipelineSettings] = useState(props.edit ? props.settings : {})
 
-  const templates = connectorTemplates({
-    mSettings: props.data,
-    update: props.update,
-    pipelineSettings,
-  })
-
   const create = () => {
     // Keep the id out of the settings as the key will be the id
     const settings = { ...pipelineSettings }
@@ -344,8 +337,6 @@ const WritePipeline = (props) => {
     set(newSettings, key, val)
     setPipelineSettings(newSettings)
   }
-  const inputPlugin = props.data?.connector?.inputs?.[pipelineSettings.input?.id]?.plugin
-  const outputPlugin = props.data?.connector?.outputs?.[pipelineSettings.output?.id]?.plugin
 
   const form = [
     {
@@ -375,13 +366,14 @@ const WritePipeline = (props) => {
           },
         ],
         LSCL: [
-          <Popout tip>
-            <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage.
-            It is unfortunately <a
-              href="https://discuss.elastic.co/t/is-lscl-documented/353178/2"
-              target="_BLANK"
-            >undocumented</a>, but if you are familiar with it or if you have an existing
-            Logstash pipeline you want to re-use to Morio, you can include it below.
+          <Popout tip key="tip">
+            <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage. It is
+            unfortunately{' '}
+            <a href="https://discuss.elastic.co/t/is-lscl-documented/353178/2" target="_BLANK">
+              undocumented
+            </a>
+            , but if you are familiar with it or if you have an existing Logstash pipeline you want
+            to re-use to Morio, you can include it below.
           </Popout>,
           {
             schema: Joi.string().required().label('lscl'),
@@ -439,7 +431,6 @@ output {
     </MaxWidthWrapper>
   )
 }
-
 
 const BuildPipeline = (props) => {
   const [pipelineSettings, setPipelineSettings] = useState(props.edit ? props.settings : {})
@@ -565,10 +556,11 @@ const ShowPipeline = (props) => {
       onClick={() =>
         props.pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
-            {lscl
-              ? <WritePipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
-              : <BuildPipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
-            }
+            {lscl ? (
+              <WritePipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+            ) : (
+              <BuildPipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+            )}
           </ModalWrapper>
         )
       }
@@ -580,32 +572,33 @@ const ShowPipeline = (props) => {
         {props.id}
       </div>
       <div className="col-span-2 flex flex-row items-center justify-start">
-        {lscl
-          ?  <b><em>LSCL</em></b>
-          : (
-            <>
-              <b>
-                <em>{pipeline.input.id}</em>
-              </b>
-              <div className="flex flex-row items-center justify-center">
-                <RightIcon
-                  className={`h-4 w-4 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-                  stroke={2}
-                />
-                <RightIcon
-                  className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-                  stroke={2}
-                />
-                <RightIcon
-                  className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-                  stroke={2}
-                />
-              </div>
-              <b>{pipeline.output.id}</b>
-            </>
-          )
-        }
-        </div>
+        {lscl ? (
+          <b>
+            <em>LSCL</em>
+          </b>
+        ) : (
+          <>
+            <b>
+              <em>{pipeline.input.id}</em>
+            </b>
+            <div className="flex flex-row items-center justify-center">
+              <RightIcon
+                className={`h-4 w-4 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+              <RightIcon
+                className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+              <RightIcon
+                className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+            </div>
+            <b>{pipeline.output.id}</b>
+          </>
+        )}
+      </div>
     </button>
   )
 }

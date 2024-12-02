@@ -31,10 +31,12 @@ export const xputMeta = (type) => [
     inputType: 'textarea',
   },
 ]
+/*
 const readOnlyForm = (type, name) => [
   `##### You cannot update or remove this connector ${type}`,
   `The __${name}__ connector ${type} does not require any configuration and cannot be removed.`,
 ]
+*/
 
 /*
  * Connector

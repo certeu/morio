@@ -5,16 +5,17 @@ import { httpMethods, outputCodecs } from 'config/services/connector.mjs'
 import { PlusIcon } from 'components/icons.mjs'
 
 const addKvEntry = (obj, setter) => {
-  const newObj = {...obj}
-  newObj[`i_${new Date().getTime()}`] = { key: '', val: ''}
+  const newObj = { ...obj }
+  newObj[`i_${new Date().getTime()}`] = { key: '', val: '' }
   return setter(newObj)
 }
 const removeKvEntry = (i, obj, setter) => {
-  const newObj = {...obj}
+  const newObj = { ...obj }
   delete newObj[i]
   return setter(newObj)
 }
 
+/*
 const addEntry = (obj, setter) => {
   const newObj = {...obj}
   newObj[`i_${new Date().getTime()}`] = ''
@@ -25,7 +26,7 @@ const removeEntry = (i, obj, setter) => {
   delete newObj[i]
   return setter(newObj)
 }
-
+*/
 
 /*
  * HTTP input & output Connector templates
@@ -36,15 +37,7 @@ export const http = {
     about: 'Post data to an HTTP endpoint',
     desc: 'Use this to send data to an HTTP endpoint',
     local: (data) => `connector.outputs.${data.id}`,
-    pipeline_form: (pipelineContext) => {
-      const form = [
-        <p>This output does not take any settings.</p>,
-      ]
-      //if (pipelineContext.data?.output?.index === 'stream') form.push(<p>Stream shit here</p>)
-      //else if (pipelineContext.data?.output?.index === 'docs') form.push(<p>docsj shit here</p>)
-
-      return form
-    },
+    pipeline_form: () => [<p key="p">This output does not take any settings.</p>],
     form: [
       `##### Create a new HTTP connector output`,
       {
@@ -63,25 +56,31 @@ export const http = {
             {
               label: 'HTTP Method',
               labelBL: 'The HTTP verb to use to send the data',
-              schema: Joi.string().required().valid(...httpMethods).label('HTTP Method'),
+              schema: Joi.string()
+                .required()
+                .valid(...httpMethods)
+                .label('HTTP Method'),
               key: 'http_method',
               dflt: 'post',
               inputType: 'buttonList',
-              list: httpMethods.map(val => ({ val, label: val.toUpperCase() })),
+              list: httpMethods.map((val) => ({ val, label: val.toUpperCase() })),
               dense: true,
-              dir: "row",
+              dir: 'row',
               help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-http_method',
             },
             {
               label: 'Codec',
               labelBL: 'The codec to use when sending data',
-              schema: Joi.string().required().valid(...outputCodecs).label('Output Codec'),
+              schema: Joi.string()
+                .required()
+                .valid(...outputCodecs)
+                .label('Output Codec'),
               key: 'codec',
               dflt: 'json',
               inputType: 'buttonList',
-              list: outputCodecs.map(val => ({ val, label: val.toUpperCase() })),
+              list: outputCodecs.map((val) => ({ val, label: val.toUpperCase() })),
               dense: true,
-              dir: "row",
+              dir: 'row',
               help: 'https://www.elastic.co/guide/en/logstash/current/configuration-file-structure.html#codec',
             },
             [
@@ -91,10 +90,10 @@ export const http = {
                 schema: Joi.bool().required().label('Cookies'),
                 key: 'cookies',
                 dflt: true,
-                list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                list: [true, false].map((val) => ({ val, label: val ? 'Yes' : 'No' })),
                 inputType: 'buttonList',
                 dense: true,
-                dir: "row",
+                dir: 'row',
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-cookies',
               },
               {
@@ -103,23 +102,26 @@ export const http = {
                 schema: Joi.bool().required().label('Follow Redirects'),
                 key: 'follow_redirects',
                 dflt: true,
-                list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                list: [true, false].map((val) => ({ val, label: val ? 'Yes' : 'No' })),
                 inputType: 'buttonList',
                 dense: true,
-                dir: "row",
+                dir: 'row',
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-follow_redirects',
               },
-            ]
+            ],
           ],
           Data: ({ data = {}, update }) => {
-            const mapping = data.mapping ? {...data.mapping } : { init: { key: '', val: '' } }
-            const headers = (data.headers ? {...data.headers } : { init: { key: '', val: '' } })
+            const mapping = data.mapping ? { ...data.mapping } : { init: { key: '', val: '' } }
+            const headers = data.headers ? { ...data.headers } : { init: { key: '', val: '' } }
 
             return [
               {
                 label: 'Format',
                 labelBL: 'The format to use for the HTTP body',
-                schema: Joi.string().required().valid('json', 'json_batch', 'form', 'message').label('Format'),
+                schema: Joi.string()
+                  .required()
+                  .valid('json', 'json_batch', 'form', 'message')
+                  .label('Format'),
                 key: 'format',
                 dflt: 'json',
                 inputType: 'buttonList',
@@ -146,14 +148,15 @@ export const http = {
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-format',
               },
               data.format === 'message'
-              ? {
-                label: 'Message Template',
-                labelBL: 'Create your custom message template here',
-                schema: Joi.string().allow('').label('Message Template'),
-                key: 'message',
-                dflt: '',
-                inputType: 'textarea',
-              } : '',
+                ? {
+                    label: 'Message Template',
+                    labelBL: 'Create your custom message template here',
+                    schema: Joi.string().allow('').label('Message Template'),
+                    key: 'message',
+                    dflt: '',
+                    inputType: 'textarea',
+                  }
+                : '',
               {
                 label: 'Content Type',
                 labelBL: 'The content type to use for the request',
@@ -175,20 +178,25 @@ export const http = {
                 dir: 'row',
               },
               data._content_type === 'custom'
-              ? {
-                label: 'Custom Content Type',
-                labelBL: 'The custom content type to use for the request',
-                schema: Joi.string().required().label('Content Type'),
-                key: 'content_type',
-                dflt: '',
-                placeholder: 'text/plain',
-              } : '',
-              <label>Mapping</label>,
-              ...Object.keys(mapping).map(i => [
+                ? {
+                    label: 'Custom Content Type',
+                    labelBL: 'The custom content type to use for the request',
+                    schema: Joi.string().required().label('Content Type'),
+                    key: 'content_type',
+                    dflt: '',
+                    placeholder: 'text/plain',
+                  }
+                : '',
+              <label key="maplbl">Mapping</label>,
+              ...Object.keys(mapping).map((i) => [
                 {
                   label: `Key`,
                   // This button is here to enforce the same vertical spacing as the value input
-                  labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove mapping</button>,
+                  labelTR: (
+                    <button className="btn btn-ghost btn-xs opacity-0" disabled>
+                      Remove mapping
+                    </button>
+                  ),
                   schema: Joi.string().required().label('Key'),
                   key: `mapping.${i}.key`,
                   dflt: '',
@@ -198,10 +206,14 @@ export const http = {
                 {
                   label: `Value`,
                   // This button allows to remove a mapping
-                  labelTR: <button
-                    onClick={() => removeKvEntry(i, mapping, (val) => update('mapping', val))}
-                    className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
-                  >Remove mapping</button>,
+                  labelTR: (
+                    <button
+                      onClick={() => removeKvEntry(i, mapping, (val) => update('mapping', val))}
+                      className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
+                    >
+                      Remove mapping
+                    </button>
+                  ),
                   schema: Joi.string().required().label('Value'),
                   key: `mapping.${i}.val`,
                   dflt: '',
@@ -210,19 +222,25 @@ export const http = {
                 },
               ]),
               // This button allows to add a mapping
-              <p className="text-right">
+              <p className="text-right" key="mapbtn">
                 <button
                   onClick={() => addKvEntry(mapping, (val) => update('mapping', val))}
                   className="btn btn-sm btn-success mt-4"
-                ><PlusIcon /> Add Mapping</button>
+                >
+                  <PlusIcon /> Add Mapping
+                </button>
               </p>,
 
-              <label>Headers</label>,
-              ...Object.keys(headers).map(i => [
+              <label key="headers">Headers</label>,
+              ...Object.keys(headers).map((i) => [
                 {
                   label: `Name`,
                   // This button is here to enforce the same vertical spacing as the value input
-                  labelTR: <button className="btn btn-ghost btn-xs opacity-0" disabled>Remove header</button>,
+                  labelTR: (
+                    <button className="btn btn-ghost btn-xs opacity-0" disabled>
+                      Remove header
+                    </button>
+                  ),
                   schema: Joi.string().required().label('Name'),
                   key: `headers.${i}.key`,
                   dflt: '',
@@ -231,10 +249,14 @@ export const http = {
                 {
                   label: `Value`,
                   // This button allows to remove a header
-                  labelTR: <button
-                    onClick={() => removeKvEntry(i, headers, (val) => update('headers', val))}
-                    className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
-                  >Remove header</button>,
+                  labelTR: (
+                    <button
+                      onClick={() => removeKvEntry(i, headers, (val) => update('headers', val))}
+                      className="btn btn-ghost btn-xs text-warning hover:btn-warning hover:btn-outline"
+                    >
+                      Remove header
+                    </button>
+                  ),
                   schema: Joi.string().required().label('Value'),
                   key: `headers.${i}.val`,
                   dflt: '',
@@ -242,15 +264,17 @@ export const http = {
                 },
               ]),
               // This button allows to add a header
-              <p className="text-right">
+              <p className="text-right" key="addbtn">
                 <button
                   onClick={() => addKvEntry(headers, (val) => update('headers', val))}
                   className="btn btn-sm btn-success mt-4"
-                ><PlusIcon /> Add Header</button>
-              </p>
+                >
+                  <PlusIcon /> Add Header
+                </button>
+              </p>,
             ]
           },
-          Retries: ({ data = {}, update }) => {
+          Retries: ({ data = {} }) => {
             return [
               [
                 {
@@ -271,11 +295,10 @@ export const http = {
                   schema: Joi.bool().required().label('Indefinite Retries'),
                   key: 'retry_failed',
                   dflt: true,
-                  list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                  list: [true, false].map((val) => ({ val, label: val ? 'Yes' : 'No' })),
                   inputType: 'buttonList',
                   dense: true,
-                  dir: "row",
-                  dflt: true,
+                  dir: 'row',
                   current: data.automatic_retries ? true : false,
                   help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-automatic_retries',
                 },
@@ -285,10 +308,10 @@ export const http = {
                   schema: Joi.bool().required().label('Non-Idempotent Retries'),
                   key: 'retry_non_idempotent',
                   dflt: false,
-                  list: [true, false].map(val => ({ val, label: val ? 'Yes' : 'No' })),
+                  list: [true, false].map((val) => ({ val, label: val ? 'Yes' : 'No' })),
                   inputType: 'buttonList',
                   dense: true,
-                  dir: "row",
+                  dir: 'row',
                   current: data.automatic_retries === true ? true : false,
                   help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-retry_non_idempotent',
                 },
@@ -311,7 +334,7 @@ export const http = {
                   dflt: '',
                   placeholder: '418',
                   help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ignorable_codes',
-                  current: data.ignorable_codes || ''
+                  current: data.ignorable_codes || '',
                 },
               ],
             ]
@@ -336,37 +359,38 @@ export const http = {
               },
             ],
             data._ssl_validate
-            ? {
-              label: 'CA Certificate',
-              labelBL: 'SSL certificate to trust',
-              schema: Joi.string().allow('').uri().label('CA Certificate'),
-              key: 'ssl_certificate',
-              dflt: '',
-              inputType: 'textarea',
-              help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_certificate_authorities',
-            } : '',
+              ? {
+                  label: 'CA Certificate',
+                  labelBL: 'SSL certificate to trust',
+                  schema: Joi.string().allow('').uri().label('CA Certificate'),
+                  key: 'ssl_certificate',
+                  dflt: '',
+                  inputType: 'textarea',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_certificate_authorities',
+                }
+              : '',
             data._mtls
-            ?  {
-                label: 'SSL Client Certificate',
-                labelBL: 'SSL certificate to use to authenticate the client',
-                schema: Joi.string().allow('').uri().label('Certificate'),
-                key: 'ssl_certificate',
-                dflt: '',
-                inputType: 'textarea',
-                help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_certificate',
-              }
-            : '',
+              ? {
+                  label: 'SSL Client Certificate',
+                  labelBL: 'SSL certificate to use to authenticate the client',
+                  schema: Joi.string().allow('').uri().label('Certificate'),
+                  key: 'ssl_certificate',
+                  dflt: '',
+                  inputType: 'textarea',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_certificate',
+                }
+              : '',
             data._mtls
-            ? {
-                label: 'SSL Client Key',
-                labelBL: 'SSL key to use to authenticate the client',
-                schema: Joi.string().allow('').uri().label('Key'),
-                key: 'ssl_key',
-                dflt: '',
-                inputType: 'textarea',
-                help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_key',
-              }
-            : '',
+              ? {
+                  label: 'SSL Client Key',
+                  labelBL: 'SSL key to use to authenticate the client',
+                  schema: Joi.string().allow('').uri().label('Key'),
+                  key: 'ssl_key',
+                  dflt: '',
+                  inputType: 'textarea',
+                  help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-ssl_key',
+                }
+              : '',
           ],
           Advanced: ({ data = {} }) => [
             {
@@ -399,16 +423,19 @@ export const http = {
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-automatic_retries',
               },
             ],
-            data.keepalive && (!data.automatic_retries || data.automatic_retries === "0") ? (
+            data.keepalive && (!data.automatic_retries || data.automatic_retries === '0') ? (
               <Popout warning>
                 <h5>You should enable Retries when KeepAlive is active</h5>
                 <p>
-                  Enabling KeepAlive and disabling Retries is a dangerous combination.
-                  A buggy KeepAlive implementation of the web endpoint will cause connections to fail and data to be lost.
+                  Enabling KeepAlive and disabling Retries is a dangerous combination. A buggy
+                  KeepAlive implementation of the web endpoint will cause connections to fail and
+                  data to be lost.
                 </p>
                 <p>We strongly recommend setting Retries to at least 1 when KeepAlive is active.</p>
               </Popout>
-            ) : <span></span>,
+            ) : (
+              <span></span>
+            ),
             [
               {
                 label: 'Socket Timeout',
@@ -447,7 +474,7 @@ export const http = {
                 dflt: 200,
                 inputType: 'number',
                 help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-request_timeout',
-              }
+              },
             ],
             [
               {
