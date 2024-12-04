@@ -262,7 +262,7 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
 
   /*
    * We user orderBy() to sort the different filters
-   * but in doing so we loose the ID so we add it as a property here
+   * but in doing so we lose the ID so we add it as a property here
    */
   const filters = {}
   for (const id of Object.keys(pipelineSettings.filters || {})) {
