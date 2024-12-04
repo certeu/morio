@@ -60,6 +60,7 @@ export async function reloadApi() {
     run: async () => await isApiUp(true),
     onFailedAttempt: (s) => log.debug(`Waited ${s} seconds for API, will continue waiting.`),
   })
+
   if (up) log.debug(`API notified of reload event.`)
   else log.warn(`API did not come up before timeout`)
 }

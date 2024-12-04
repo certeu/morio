@@ -152,6 +152,9 @@ export async function startMorio(hookParams = {}) {
    * and handling the others in parallel
    */
   const promises = []
+  /*
+   * Services that we need to await have an await property set
+   */
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
     if (resolveServiceConfiguration(service, { utils }).await) {
       /*

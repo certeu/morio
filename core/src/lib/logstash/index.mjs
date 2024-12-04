@@ -154,7 +154,7 @@ ${outputLscl}
  * @return {string} lscl - the LSCL code
  */
 async function generateXputConfig(xput, pipeline, pipelineId, type) {
-  return (typeof logstash[type]?.[xput.plugin] === 'function')
+  return typeof logstash[type]?.[xput.plugin] === 'function'
     ? await logstash[type][xput.plugin](xput, pipeline, pipelineId)
     : `${nl}${nl}#${nl}# A ${type} plugin of type ${xput?.plugin} is not supported${nl}#${nl}`
 }
@@ -172,16 +172,16 @@ async function generateFilterConfig(pipeline, pipelineId) {
    * OrderBy will strip the id, so we need to inject it
    */
   const filters = {}
-  for (const id of Object.keys(pipeline.filters || {})) filters[id] = { ...pipeline.filters[id], id }
+  for (const id of Object.keys(pipeline.filters || {}))
+    filters[id] = { ...pipeline.filters[id], id }
 
   for (const { id } of orderBy(filters, 'order', 'ASC')) {
     const filter = utils.getSettings(['connector', 'filters', id])
-    console.log(filter, 'generateFilterConfig')
-    lscl += (typeof logstash.filter[filter.plugin] === 'function')
-      ? logstash.filter[filter.plugin](filter, pipeline, pipelineId)
-      : `${nl}${nl}#${nl}# A filter of plugin type ${filter.plugin} is not supported${nl}#${nl}`
+    lscl +=
+      typeof logstash.filter[filter.plugin] === 'function'
+        ? logstash.filter[filter.plugin](filter, pipeline, pipelineId)
+        : `${nl}${nl}#${nl}# A filter of plugin type ${filter.plugin} is not supported${nl}#${nl}`
   }
 
   return lscl
 }
-
