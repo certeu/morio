@@ -257,7 +257,7 @@ const PipelineHeader = ({ id }) => (
   </h3>
 )
 
-const PipelineConnectors = ({ pipelineSettings, data, localUpdate, update }) => {
+const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
   const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
 
   /*

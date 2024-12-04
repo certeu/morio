@@ -27,7 +27,7 @@ const examples = {
 const wrappedExamples = {
   input: `input {${nl}${examples.input('  ')}${nl}}`,
   filter: `filter {${nl}${examples.filter('  ')}${nl}}${nl + nl}filter {${nl}  # More filtering here...${nl}}`,
-  input: `output {${nl}${examples.output('  ')}${nl}}`,
+  output: `output {${nl}${examples.output('  ')}${nl}}`,
 }
 
 const lsclForm = (type) => ({
