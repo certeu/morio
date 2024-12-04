@@ -9,7 +9,7 @@ import { utils } from '../utils.mjs'
  * @param {string} pipelineID - The pipeline ID
  * @return {string} lscl - The LSCL code
  */
-export function localInput(input, pipeline, pipelineId) {
+export function localMorioInput(input, pipeline, pipelineId) {
   return `
 # Read data from a local Morio broker
 input {
@@ -41,7 +41,7 @@ input {
  * @param {string} pipelineID - The pipeline ID
  * @return {string} lscl - The LSCL code
  */
-export function localOutput(output, pipeline, pipelineId) {
+export function localMorioOutput(output, pipeline, pipelineId) {
   return `
 # Output data to a local Morio broker
 output {

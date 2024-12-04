@@ -24,6 +24,9 @@ export const service = {
     wanted: async () => {
       const pipelines = utils.getSettings('connector.pipelines', false)
 
+      // FIXME: remove this?
+      await ensurePipelines()
+
       return pipelines && Object.values(pipelines).filter((pipe) => !pipe.disabled).length > 0
         ? true
         : false

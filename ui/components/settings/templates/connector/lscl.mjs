@@ -68,7 +68,7 @@ const lsclForm = (type) => ({
             placeholder: data?.wrap ? examples[type]() : wrappedExamples[type],
             inputType: 'textarea',
             code: true,
-            key: 'lscs',
+            key: 'lscl',
           },
         ],
       },

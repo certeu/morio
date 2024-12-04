@@ -8,7 +8,7 @@ import { nl } from './lib.mjs'
  * @param {object} pipeline - The pipeline configuration
  * #return {string} lscl - The LSCL code
  */
-export function output(output, pipeline) {
+export function elasticsearchOutput(output, pipeline) {
   //data_stream => ${pipeline.output.index_type === 'docs' ? "false" : "true"}
   //data_stream_auto_routing => false
   let config = `

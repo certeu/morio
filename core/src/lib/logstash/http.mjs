@@ -12,7 +12,7 @@ import { nl, boolField, fileField, numberField, stringField } from './lib.mjs'
  * @param {string} pipelineID - The pipeline ID
  * #return {string} lscl - The LSCL code
  */
-export async function output(output, pipeline, pipelineId) {
+export async function httpOutput(output, pipeline, pipelineId) {
   let config = `
 # Output data to an HTTP endpoint
 output {
