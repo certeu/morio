@@ -159,7 +159,12 @@ async function ensureHandlerLoader() {
   let hpt = `${nl}/*${nl} * Same tap handlers but grouped by topic${nl} */${nl}export const handlersPerTopic = {`
   for (const [topic, handlers] of Object.entries(hpts)) {
     hpt += `${nl}  ${topic}: [`
-    hpt += [...handlers].map(h => `${nl}    allHandlers.${h},`)
+    for (const h of [...handlers]) {
+      if (Array.isArray(h)) {
+        for (const hh of h) hpt += `${nl}    allHandlers.${hh},`
+      }
+      else hpt += `${nl}    allHandlers.${h},`
+    }
     hpt += `${nl}  ],`
   }
   hpt += `${nl}}`

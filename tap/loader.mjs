@@ -42,7 +42,7 @@ export const handlersPerTopic = {
     allHandlers.morio_logs_cache,
   ],
   metrics: [
-    allHandlers.morio_inventory__0,,
+    allHandlers.morio_inventory__0,
     allHandlers.mod_metrics_morio_tap,
   ],
   inventory: [
