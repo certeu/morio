@@ -283,7 +283,7 @@ predocs.MORIO_CONNECTOR_UID = 'User ID (UID) of the user running the Connector s
 presets.MORIO_CONNECTOR_UID = 1000
 
 predocs.MORIO_CONNECTOR_P12_PASSWORD = 'A password to protect PKCS12 keystores. Does not provide actual security.'
-presets.MORIO_CONNECTOR_P12_PASSWORD = 'JavaSucks'
+presets.MORIO_CONNECTOR_P12_PASSWORD = 'Butterflies and zebras and moonbeams'
 
 /*
  * Console presets

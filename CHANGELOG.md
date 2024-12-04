@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
+
+### Added
+
+- [ui] Added support for filters to the connector settings
+- [ui] Added support for specifying input, output, or filter as and LSCL block
+- [ui] Added support for writing a connector/logstash pipeline as raw LSCL
+
 ## [0.5.5] - 2024-11-18
 
 ### Added
