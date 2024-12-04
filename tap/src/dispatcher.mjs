@@ -16,7 +16,7 @@ export function dispatch(topic, message, tools) {
   /*
    * Return early if we do not have any handlers for this topic
    */
-  if (!handlersPerTopic[topic] || !(handlersPerTopic[topic] instanceof Set)) return
+  if (!handlersPerTopic[topic]) return
 
   /*
    * Do the actual dispatching for every message handler subscribed to this topic
