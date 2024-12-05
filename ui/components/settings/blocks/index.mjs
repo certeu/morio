@@ -6,6 +6,7 @@ import { Markdown } from 'components/markdown.mjs'
 import { AuthProviders, LoginUi } from './iam.mjs'
 import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
 import { Flags, Vars, Secrets } from './tokens.mjs'
+import { Tap } from './tap.mjs'
 import { FormWrapper } from './form.mjs'
 import { MdxWrapper } from './mdx.mjs'
 
@@ -23,6 +24,7 @@ const blocks = {
   form: FormWrapper,
   loginUi: LoginUi,
   mdx: ({ viewConfig }) => <MdxWrapper>{viewConfig.mdx}</MdxWrapper>,
+  tap: Tap,
 }
 
 const LockedOnEdit = () => (
