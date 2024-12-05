@@ -16,6 +16,14 @@ export const errors = {
     detail: 'This identity provider is disabled by a feature flag.',
   },
   /*
+   * Cache 404 error, API style
+   */
+  'morio.api.cache.404': {
+    status: 404,
+    title: 'No such key',
+    detail: 'This is the API equivalent of a 404 page for the cache. This key does not exist.',
+  },
+  /*
    * KV store 404 error, API style
    */
   'morio.api.kv.404': {
@@ -223,6 +231,14 @@ export const errors = {
     status: 401,
     title: 'Authentication required',
     detail: 'The request was not properly authenticated.',
+  },
+  /*
+   * Error for when a database backend is not available or caused an error
+   */
+  'morio.api.cache.failure': {
+    status: 403,
+    title: 'Cache Failure',
+    detail: 'Could not complete the request because the cache returned an error.',
   },
   /*
    * Error for when a database backend is not available or caused an error

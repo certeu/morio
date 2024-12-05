@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- [api] Added cache endpoints. Currently we support reading these key types: hash, list, set, string, stream, zset
 - [client] Added `morio vars list` command
 
 ### Changed

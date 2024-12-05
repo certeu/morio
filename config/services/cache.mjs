@@ -1,5 +1,3 @@
-import { generateTraefikConfig } from './index.mjs'
-
 /*
  * This is kept out of the full config to facilitate
  * pulling images with the pull-oci run script

@@ -176,6 +176,9 @@ export const schema = {
       .required()
       .description('Holds data that is specific to the identity provider'),
   }),
+  'req.cache.readKey': Joi.object({ key: Joi.string().required() }),
+  'req.cache.listKeys': Joi.object({ glob: Joi.string().required() }),
+  'req.cache.readKeys': Joi.object({ keys: Joi.array().required().items(Joi.string()) }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({
     Package: Joi.string().required(),
@@ -292,6 +295,12 @@ export const schema = {
     reset_seconds: Joi.number(),
   }),
   'res.accountList': Joi.array().items(account),
+  'res.cache.value': Joi.object({
+    key: Joi.string(),
+    value: Joi.any(),
+    type: Joi.string(),
+  }),
+  'res.cache.listKeys': Joi.array(),
   'res.kv.value': Joi.object({
     key: Joi.string(),
     value: Joi.any(),
