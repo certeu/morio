@@ -46,10 +46,10 @@ if (onCli) {
   if (!settings) log('Failed to load settings')
 
   /*
-   * Load the mrt from disk (needs to be under local/mrt)
+   * Load mrt from disk
    */
-  log('Loading root token...')
-  const mrt = (await loadMrt()).trim()
+  log('Loading mrt...')
+  const mrt = await loadMrt()
   if (!mrt) log('Failed to load root token')
 
   /*
@@ -58,9 +58,6 @@ if (onCli) {
   log('Requesting certificate...')
   const x509 = await loadCertificate({ node: settings?.cluster?.broker_nodes?.[0], mrt })
   if (!x509) log('Failed to load certificate')
-  console.log(x509.certificate.crt)
-  console.log(x509.key)
-  console.log(x509.certificate.ca)
 
   /*
    * Do not continue if we do not have what it takes
@@ -73,7 +70,6 @@ if (onCli) {
   const clientId = 'morio-dev-client'
   const ssl = {
     rejectUnauthorized: false,
-    ca: x509.certificate.ca,
     key: x509.key,
     cert: x509.certificate.crt,
   }
@@ -142,7 +138,7 @@ if (onCli) {
  * We use it to load the settings, and a certificate for mTLS.
  */
 async function loadMrt () {
-  return await readFile(`${MORIO_GIT_ROOT}/local/mrt`)
+  return (await readFile(`${MORIO_GIT_ROOT}/local/mrt`)).trim()
 }
 
 /*
@@ -156,7 +152,31 @@ async function loadSettings () {
   return false
 }
 
+async function login (node, mrt) {
+  const httpsAgent = new https.Agent({ rejectUnauthorized: false })
+  let result
+  try {
+    result = await axios.post(
+      `https://${node}/-/api/login`,
+      {
+        provider: "mrt",
+        data: { mrt, role: "user" }
+      },
+      { httpsAgent }
+    )
+  }
+  catch (err) {
+    console.log(err)
+    return false
+  }
+
+  //console.log(result.data)
+
+  return result.data.jwt
+}
+
 async function loadCertificate ({ node, mrt }) {
+  const token = await login(node, mrt)
   const httpsAgent = new https.Agent({ rejectUnauthorized: false })
   let result
   try {
@@ -174,15 +194,13 @@ async function loadCertificate ({ node, mrt }) {
         }
       },
       {
-        auth: {
-          username: 'root',
-          password: mrt
-        },
+        headers: { Authorization: `Bearer ${token}` },
         httpsAgent,
       }
     )
   }
   catch (err) {
+    console.log(err.response)
     return false
   }
 

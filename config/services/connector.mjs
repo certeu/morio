@@ -53,6 +53,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipeline_assets/:/usr/share/logstash/config/pipeline_assets/`,
             //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
           ]
         : [
@@ -61,6 +62,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipeline_assets:/usr/share/logstash/config/pipeline_assets/`,
             //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
           ],
     },
@@ -132,3 +134,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
     },
   }
 }
+
+/*
+ * These exports are used by the connector settings UI
+ */
+export const httpMethods = [ 'delete', 'get', 'head', 'patch', 'post', 'put' ]
+export const outputCodecs = [ 'avro', 'cef', 'es_bulk', 'json', 'json_lines', 'line', 'multiline', 'plain', 'rubydebug' ]
+

@@ -72,8 +72,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       command: [
         'redpanda',
         'start',
-        '--default-log-level=info',
-        '--logger-log-level=kafka=debug',
+        `--default-log-level=${utils.getPreset('MORIO_BROKER_LOG_LEVEL')}`,
+        //'--logger-log-level=kafka=debug',
       ],
     },
     traefik: {

@@ -12,9 +12,7 @@ export const Breadcrumbs = ({ page }) => {
         </PageLink>
       </li>
       {page.map((crumb, i) => {
-        const [slug,label] = Array.isArray(crumb)
-          ? crumb
-          : [crumb, crumb]
+        const [slug, label] = Array.isArray(crumb) ? crumb : [crumb, crumb]
         path.push(slug)
         return [
           <li className="inline" key={slug + '-'}>
@@ -24,7 +22,7 @@ export const Breadcrumbs = ({ page }) => {
             {i + 1 === page.length ? (
               <span className="capitalize">{label}</span>
             ) : (
-              <PageLink href={`/${path.map(p => p.toLowerCase()).join('/')}`}>
+              <PageLink href={`/${path.map((p) => p.toLowerCase()).join('/')}`}>
                 <span className="capitalize">{label}</span>
               </PageLink>
             )}

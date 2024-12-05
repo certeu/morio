@@ -4,7 +4,7 @@ import { xputMeta } from './index.mjs'
  * Sink output Connector templates
  */
 export const sink = {
-  out: () => ({
+  output: () => ({
     title: 'Trash',
     about: 'Discards data (useful for pipeline testing)',
     desc: 'Use this to throw out the pipeline output',
