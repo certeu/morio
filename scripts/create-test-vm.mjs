@@ -1,18 +1,14 @@
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { resolve } from 'path';
+import { MORIO_GIT_ROOT } from '../config/cli.mjs'
 
 // Function to run Terraform commands
 const runTerraform = (prId) => {
   try {
     console.log(`Starting to create the test VM with PR ID: ${prId}`);
 
-    // Resolve the current directory of this file
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-
     // Define the path to the Terraform configuration
-    const terraformDir = resolve(__dirname, '../terraform');  // Assuming the terraform directory is at the root level
+    const terraformDir = resolve(MORIO_GIT_ROOT, 'terraform');  // Assuming the terraform directory is at the root level
 
     // Change the working directory to the terraform folder
     console.log('Initializing Terraform...');

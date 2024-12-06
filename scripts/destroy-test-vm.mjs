@@ -1,18 +1,14 @@
 import { execSync } from 'child_process';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import { resolve } from 'path';
+import { MORIO_GIT_ROOT } from '../config/cli.mjs'
 
 // Function to run Terraform destroy command
 const destroyTerraform = (prId) => {
   try {
     console.log(`Starting to destroy the test VM with PR ID: ${prId}`);
 
-    // Resolve the current directory of this file
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = dirname(__filename);
-
     // Define the path to the Terraform configuration
-    const terraformDir = resolve(__dirname, '../terraform'); // Adjust path as necessary
+    const terraformDir = resolve(MORIO_GIT_ROOT, 'terraform'); // Adjust path as necessary
 
     console.log('Initializing Terraform...');
     execSync('terraform init', { cwd: terraformDir, stdio: 'inherit' });
