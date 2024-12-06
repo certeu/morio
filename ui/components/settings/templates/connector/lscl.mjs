@@ -43,7 +43,7 @@ const lsclForm = (type) => ({
         undocumented
       </a>
       , but if you are familiar with it or if you have an existing Logstash {type} you want to
-      re-use in Morio, you can include it below.
+      reuse in Morio, you can include it below.
     </Popout>,
     {
       tabs: {
