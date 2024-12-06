@@ -227,7 +227,7 @@ export const http = {
                   onClick={() => addKvEntry(mapping, (val) => update('mapping', val))}
                   className="btn btn-sm btn-success mt-4"
                 >
-                  <PlusIcon /> Add Mapping
+                  <PlusIcon /> Add mapping
                 </button>
               </p>,
 
@@ -269,7 +269,7 @@ export const http = {
                   onClick={() => addKvEntry(headers, (val) => update('headers', val))}
                   className="btn btn-sm btn-success mt-4"
                 >
-                  <PlusIcon /> Add Header
+                  <PlusIcon /> Add header
                 </button>
               </p>,
             ]
@@ -319,7 +319,7 @@ export const http = {
               [
                 {
                   label: 'Indefinite Retry Status Codes',
-                  labelBL: 'Status codes for which too keep on trying',
+                  labelBL: 'Status codes for which to keep on trying',
                   schema: Joi.string().label('Status codes'),
                   key: 'retryable_codes',
                   dflt: '429, 500, 502, 503, 504',
@@ -342,7 +342,7 @@ export const http = {
           SSL: ({ data = {} }) => [
             [
               {
-                label: 'Validate certificate',
+                label: 'Validate Certificate',
                 labelBL: 'Validate trust chain',
                 schema: Joi.bool().required().label('Validate Certificate'),
                 key: '_ssl_validate',
@@ -395,7 +395,7 @@ export const http = {
           Advanced: ({ data = {} }) => [
             {
               label: 'Proxy',
-              labelBL: 'Use this to configure a HTTP proxy server',
+              labelBL: 'Use this to configure an HTTP proxy server',
               schema: Joi.string().allow('').uri().label('Proxy'),
               key: 'proxy',
               dflt: '',
