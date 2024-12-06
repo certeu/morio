@@ -39,6 +39,8 @@
     "node": ">=20"
   },
   "scripts": {
+    "create:testvm": "node ./scripts/create-test-vm.mjs",
+    "destroy:testvm": "node ./scripts/destroy-test-vm.mjs",
     "build": "npm run build:dev",
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
