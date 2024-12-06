@@ -56,7 +56,7 @@ export async function ensurePipelines() {
  * @return {Array} list - A list of filenames
  */
 async function loadPipelinesFromDisk() {
-  return ((await readDirectory(`/etc/morio/connector/pipelines`)) || [])
+  return ((await readDirectory(utils.getPreset('MORIO_CORE_LOGSTASH_PIPELINES_FOLDER'))) || [])
     .filter((file) => extname(file) === '.config')
     .map((file) => basename(file).slice(0, -7))
     .sort()
@@ -79,21 +79,36 @@ function pipelineFilename(id) {
 async function createWantedPipelines(wantedPipelines) {
   const pipelines = []
   for (const id of wantedPipelines) {
-    const config = await generatePipelineConfiguration(
-      utils.getSettings(['connector', 'pipelines', id]),
-      id
-    )
-    if (config) {
-      const file = pipelineFilename(id)
-      await writeFile(`/etc/morio/connector/pipelines/${file}`, config, log)
-      log.debug(`Created connector pipeline ${id}`)
-      pipelines.push({
-        'pipeline.id': id,
-        'path.config': `/usr/share/logstash/config/pipeline/${file}`,
-      })
+    try {
+      const config = await generatePipelineConfiguration(
+        utils.getSettings(['connector', 'pipelines', id]),
+        id
+      )
+      if (config) {
+        const file = pipelineFilename(id)
+        await writeFile(
+          `${utils.getPreset('MORIO_CORE_LOGSTASH_PIPELINES_FOLDER')}/${file}`,
+          config,
+          log
+        )
+        log.debug(`Created connector pipeline ${id}`)
+        pipelines.push({
+          'pipeline.id': id,
+          'path.config': `${utils.getPreset('MORIO_CONNECTOR_LOGSTAHS_PIPELINE_FOLDER')}/${file}`,
+        })
+      }
+    } catch (err) {
+      return log.error(
+        err,
+        `Failed to generated logstash pipeline with ID ${id}. The pipeline will not be active.`
+      )
     }
   }
-  await writeYamlFile(`/etc/morio/connector/pipelines.yml`, pipelines, log)
+  await writeYamlFile(
+    utils.getPreset('MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE'),
+    pipelines,
+    log
+  )
 }
 
 /**
@@ -109,7 +124,7 @@ async function removeUnwantedPipelines(currentPipelines, wantedPipelines) {
   for (const id of currentPipelines) {
     if (!wantedPipelines.includes(id)) {
       log.debug(`Removing pipeline: ${id}`)
-      await rm(`/etc/morio/connector/pipelines/${id}.config`)
+      await rm(`${utils.getPreset('MORIO_CORE_LOGSTASH_PIPELINES_FOLDER')}/${id}.config`)
     }
   }
 }
