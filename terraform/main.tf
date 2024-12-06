@@ -8,6 +8,8 @@ resource "aws_instance" "test_vm" {
   subnet_id     = "subnet-04faec9c5fe410b3e"
 
   tags = {
-    Name = "test-vm-${var.pr_id}"
+    name = "test-vm-${var.pr_id}"
+    morio => "true"
+    pull_request  = "${var.pr_id}"
   }
 }
