@@ -26,7 +26,7 @@ const RestartConfirmation = ({ restart }) => (
       One or more services will potentially be restarted.
     </p>
     <button className="btn btn-primary w-full" onClick={restart}>
-      Restart Morio now
+      Restart Morio Now
     </button>
   </>
 )
@@ -44,7 +44,7 @@ const ReseedConfirmation = ({ reseed }) => (
       One or more services will likely be restarted.
     </p>
     <button className="btn btn-primary w-full" onClick={reseed}>
-      Reseed Morio now
+      Reseed Morio Now
     </button>
   </>
 )
@@ -105,7 +105,7 @@ const ActionsPage = (props) => {
     if (result[1] !== 200)
       return setLoadingStatus([true, `Unable to rotate the Morio Root Token`, true, false])
     else {
-      setLoadingStatus([true, 'Sucessfully rotated the Morio Root Token', true, true])
+      setLoadingStatus([true, 'Successfully rotated the Morio Root Token', true, true])
       pushModal(
         <ModalWrapper keepOpenOnClick>
           <h3>Morio Root Token Rotated</h3>
