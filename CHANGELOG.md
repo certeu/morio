@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [connector] Added support for HTTP output
 - [connector] Added support for LSCL input, filters, output, and pipelines
-- [ui] Added support for filters to the connector settin
+- [ui] Added support for filters to the connector setting
 - [ui] Added support for specifying input, output, or filter as and LSCL block
 - [ui] Added support for writing a connector/logstash pipeline as raw LSCL
 - [ui] Added support for HTTP input in connector settings
