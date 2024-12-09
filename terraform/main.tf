@@ -9,7 +9,7 @@ resource "aws_instance" "test_vm" {
 
   tags = {
     name = "test-vm-${var.pr_id}"
-    morio => "true"
+    morio = "true"
     pull_request  = "${var.pr_id}"
   }
 }
