@@ -1,11 +1,7 @@
 import { readFile, writeFile } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
-import {
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-  defaultServiceWantedHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -21,8 +17,16 @@ export const service = {
      * @return {boolean} wanted - Wanted or not
      */
     wanted: () => {
-      ensureLocalPrerequisites()
-      return defaultServiceWantedHook
+      /*
+       * Only run the tap service if any of the built-in handlers are enabled
+       * FIXME: At some point we will also have to check for custom handlers
+       */
+      if (isTapWanted()) {
+        ensureLocalPrerequisites()
+        return true
+      }
+
+      return false
     },
     /*
      * Lifecycle hook to determine whether to recreate the container
@@ -80,4 +84,15 @@ export const node = ${JSON.stringify(utils.getNode(), null, 2)}
   )
 
   return true
+}
+
+/**
+ * Helper method to determine whether the tap service is wanted
+ *
+ * @return {bool} wanted - True if wanted, false if not
+ */
+export function isTapWanted() {
+  const handlers = utils.getSettings('tap.builtin', {})
+
+  return Object.keys(handlers).length > 0
 }

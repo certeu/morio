@@ -195,7 +195,13 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
        * No need to wait for that, we can continue with other services.
        * So we're letting this run its course async, rather than waiting for it.
        */
-      if (running) stopMorioService(serviceName)
+      log.debug(`[${serviceName}] Optional service is running, but not wanted. Shutting down...`)
+      if (running)
+        stopMorioService(serviceName).then((result) => {
+          if (result[0] === true)
+            log.debug(`[${serviceName}] Stopped service as it is no longer wanted`)
+          else log.warn(`[${serviceName}] Unexpected result when attempting to stop the service`)
+        })
 
       // Not wanted, return early
       return true
@@ -363,8 +369,10 @@ export async function runHook(hookName, serviceName, hookParams) {
 async function stopMorioService(serviceName) {
   await runHook('prestop', serviceName)
   log.debug(`[${serviceName}] Stopping service`)
-  await stopService(serviceName)
+  const result = await stopService(serviceName)
   await runHook('poststop', serviceName)
+
+  return result
 }
 
 function isContainerRunning(serviceName) {

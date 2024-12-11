@@ -289,7 +289,7 @@ predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_FOLDER = 'The location of the pipeline
 presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_FOLDER = '/usr/share/logstash/config/pipeline'
 
 predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = 'The location of the central pipeline configuration file within the Logstash container.'
-presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
+presets.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
 
 predocs.MORIO_CONNECTOR_UID = 'User ID (UID) of the user running the Connector service'
 presets.MORIO_CONNECTOR_UID = 1000

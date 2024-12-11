@@ -1,12 +1,10 @@
 import { writeFile } from '#shared/fs'
 // Default hooks
-import {
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-  defaultServiceWantedHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
+// Wanted helper from Tap
+import { isTapWanted } from './tap.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -19,7 +17,7 @@ export const service = {
      *
      * @return {boolean} wanted - Wanted or not
      */
-    wanted: defaultServiceWantedHook,
+    wanted: isTapWanted,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

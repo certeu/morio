@@ -1,7 +1,11 @@
 import { readFile, writeFile, writeYamlFile, mkdir } from '#shared/fs'
 import { testUrl } from '#shared/network'
 // Default hooks
-import { alwaysWantedHook, defaultRestartServiceHook } from './index.mjs'
+import {
+  defaultRecreateServiceHook,
+  alwaysWantedHook,
+  defaultRestartServiceHook,
+} from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -34,9 +38,9 @@ export const service = {
     wanted: alwaysWantedHook,
     /*
      * Lifecycle hook to determine whether to recreate the container.
-     * We always recreate the proxy container.
+     * FIXME: Do we need to always recreate this?
      */
-    recreate: () => true,
+    recreate: () => defaultRecreateServiceHook('proxy'),
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
