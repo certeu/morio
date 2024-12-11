@@ -609,7 +609,7 @@ export const LabelInput = (props) => {
   ))
 
   return (
-    <>
+    <div>
       <FormControl
         {...{ label, labelTR, labelBL, labelBR, help }}
         forId={id}
@@ -628,8 +628,12 @@ export const LabelInput = (props) => {
         />
       </FormControl>
       {labels.length > 0 ? (
-        <div className="flex flex-row flex-wrap gap-1">Current: {labels}</div>
+        <div className="flex flex-row flex-wrap gap-1 items-center">
+          <span className="text-sm font-bold">Current:</span>
+          {labels}
+          {labels.length > 0 ? <span className="text-sm opacity-60 italic">(click to remove)</span> : null}
+        </div>
       ) : null}
-    </>
+    </div>
   )
 }

@@ -17,7 +17,7 @@ const osFields = ['codename', 'family', 'kernel', 'name', 'platform', 'type', 'v
 
 const metricsHandler = config.handlers.metrics.enabled ? {
   topic: config.handlers.metrics.topic,
-  method: ({ data }, tools) => {
+  method: (data, tools, topic) => {
     /*
      * Construct inventory update data
      */
@@ -48,7 +48,7 @@ const metricsHandler = config.handlers.metrics.enabled ? {
 
 const inventoryHandler = config.handlers.inventory.enabled ? {
   topic: config.handlers.inventory.topic,
-  method: ({ data }, tools) => {
+  method: (data, tools, topic) => {
     return
   }
 } : null

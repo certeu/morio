@@ -22,13 +22,13 @@ export function dispatch(topic, message, tools) {
    * Do the actual dispatching for every message handler subscribed to this topic
    */
   for (const handler of handlersPerTopic[topic]) {
-    const msg = { topic, ...parseMessageData(message)}
+    const data = parseMessageData(message)
     /*
      * Run filter method if there is one
      */
     if (
       !handler.filter ||
-      (typeof handler.filter === 'function' && handler.filter(msg))
+      (typeof handler.filter === 'function' && handler.filter(data, topic))
     ) {
       /*
        * Count every handled message
@@ -38,7 +38,7 @@ export function dispatch(topic, message, tools) {
       /*
        * Hand over to handler method
        */
-      handler.method(msg, tools)
+      handler.method(data, tools, topic)
     }
   }
 }

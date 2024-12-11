@@ -6,11 +6,11 @@ import { config } from "./config.mjs"
  */
 const handler = config.enabled ? {
   ...config.handler,
-  method: ({ data }, tools) => {
+  method: (data, tools, topic) => {
     /*
      * Metricset: throughput
      */
-    if (data.metricset.name === 'throughput') tools.cache.metricset(data.morio.tap.throughput, data, config)
+    if (data.metricset?.name === 'throughput') tools.cache.metricset(data.morio.tap.throughput, data, config)
   }
 } : null
 
