@@ -412,15 +412,17 @@ export function defaultServiceWantedHook() {
 }
 
 /**
- * The 'always' wanted lifecycle hook
+ * The 'always true' method
  *
- * Containers need to specify this hook, but several containers should always
- * be running. So rather than create that hook for each service, we reuse this
+ * Containers need to specify various lifecycle hooks.
+ * But some containers should always be running, or always be
+ * restarted and so on.
+ * So rather than create that hook for each service, we reuse this
  * method.
  *
- * @retrun {boolean} result - True to indicate the container is wanted
+ * @retrun {boolean} result - always true
  */
-export function alwaysWantedHook() {
+export function alwaysTrue() {
   return true
 }
 
