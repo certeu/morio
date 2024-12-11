@@ -2,10 +2,12 @@ import Joi from 'joi'
 import { slugify } from 'lib/utils.mjs'
 // Connectors
 import { elasticsearch } from './elasticsearch.mjs'
+import { http } from './http.mjs'
 import { imap } from './imap.mjs'
 import { morio } from './morio.mjs'
 import { rss } from './rss.mjs'
 import { sink } from './sink.mjs'
+import { lscl } from './lscl.mjs'
 
 /*
  * Reuse this for the input ID
@@ -18,6 +20,7 @@ export const xputMeta = (type) => [
     labelBR: <span className="italic opacity-70">Input will be slugified</span>,
     key: 'id',
     transform: slugify,
+    help: 'https://www.elastic.co/guide/en/logstash/current/plugins-outputs-http.html#plugins-outputs-http-id',
   },
   {
     schema: Joi.string().optional().allow('').label('Description'),
@@ -28,10 +31,12 @@ export const xputMeta = (type) => [
     inputType: 'textarea',
   },
 ]
+/*
 const readOnlyForm = (type, name) => [
   `##### You cannot update or remove this connector ${type}`,
   `The __${name}__ connector ${type} does not require any configuration and cannot be removed.`,
 ]
+*/
 
 /*
  * Connector
@@ -54,66 +59,23 @@ export const connector = (context) => ({
       title: 'Connector Inputs',
       about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
-        amazon_cloudwatch: {
-          title: 'Amazon Cloudwatch',
-          about: 'Reads data from Amazon Cloudwatch',
-          desc: 'Use this to pull events from the Amazon Web Services CloudWatch API.',
-        },
-        azure_event_hubs: {
-          title: 'Azure Event Hubs',
-          about: 'Read data from Azure Event Hubs',
-          desc: `Use this to read data from Azure Event Hubs`,
-        },
-        http_poller: {
-          title: 'HTTP',
-          about: 'Reads data over HTTP',
-          desc: `Use this to have Morio poll data from an HTTP API. If you can, it's better to push data to Morio instead.`,
-        },
-        custom: {
-          title: 'Custom',
-          about: 'Includes a custom input configuration',
-          desc: 'Use this if Morio does not provide a preconfigured input for your use case.',
-          forms: {
-            add: [
-              `##### Create your custom connector input below`,
-              {
-                schema: Joi.string().required(),
-                label: 'Name',
-                labelBL: 'Give this input a name to tell it apart form other inputs',
-                placeholder: 'My custom input ',
-              },
-              {
-                schema: Joi.string().required(),
-                label: 'Configuration',
-                labelBL: 'Morio will not validate this configuration, and use it as-is',
-                labelTR: 'Use Logstash configuration language (LSCL)',
-                placeholder: `input {
-  tcp {
-    port => 12345
-    codec => json
-  }
-}`,
-                textarea: true,
-              },
-            ],
-          },
-        },
-        imap: imap.in(context),
-        rss: rss.in(context),
-        generator: {
-          title: 'Generator',
-          about: 'Generates messages (useful for testing)',
-          desc: 'Use this to genenate test data',
-          form: readOnlyForm('input', 'generator'),
-          readOnly: true,
-        },
-        kafka: {
-          title: 'Kafka',
-          about: 'Reads data from a Kafka topic',
-          desc: 'Use this to read data from one or more Kafka topics',
-        },
-        morio_local: morio.local.in(context),
-        morio_remote: morio.remote.in(context),
+        imap: imap.input(context),
+        lscl: lscl.input(context),
+        morio_local: morio.local.input(context),
+        morio_remote: morio.remote.input(context),
+        rss: rss.input(context),
+      },
+    },
+
+    /*
+     * Filters
+     */
+    filters: {
+      type: 'connectorFilters',
+      title: 'Connector Filters',
+      about: `Connector filters can be used to transform the data in your connector pipelines.`,
+      blocks: {
+        lscl: lscl.filter(context),
       },
     },
 
@@ -125,20 +87,17 @@ export const connector = (context) => ({
       title: 'Connector Outputs',
       about: `Connector inputs can be used as a __source__ for your connector pipelines.`,
       blocks: {
-        elasticsearch: elasticsearch.out(context),
-        http: {
-          title: 'HTTP',
-          about: 'Writes data to an HTTP endpoint',
-          desc: 'Use this to send data to an HTTP endpoint.',
-        },
+        elasticsearch: elasticsearch.output(context),
+        http: http.output(context),
         kafka: {
           title: 'Kafka',
           about: 'Writes data to a Kafka topic',
           desc: 'Use this to write data to a Kafka broker or cluster',
         },
-        morio_local: morio.local.out(context),
-        morio_remote: morio.remote.out(context),
-        sink: sink.out(context),
+        lscl: lscl.output(context),
+        morio_local: morio.local.output(context),
+        morio_remote: morio.remote.output(context),
+        sink: sink.output(context),
       },
     },
 

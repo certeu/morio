@@ -279,8 +279,17 @@ presets.MORIO_CA_UID = 1000
  * Connnector presets
  */
 
+predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_FOLDER = 'The location of the pipeline configurations within the Logstash container.'
+presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_FOLDER = '/usr/share/logstash/config/pipeline'
+
+predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = 'The location of the central pipeline configuration file within the Logstash container.'
+presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
+
 predocs.MORIO_CONNECTOR_UID = 'User ID (UID) of the user running the Connector service'
 presets.MORIO_CONNECTOR_UID = 1000
+
+predocs.MORIO_CONNECTOR_P12_PASSWORD = 'A password to protect PKCS12 keystores. Does not provide actual security.'
+presets.MORIO_CONNECTOR_P12_PASSWORD = 'Butterflies and zebras and moonbeams'
 
 /*
  * Console presets
@@ -308,6 +317,10 @@ One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
 To change this, set \`tokens.presets.MORIO_CORE_LOG_LEVEL\` in your Morio
 settings.`
 presets.MORIO_CORE_LOG_LEVEL = 'trace'
+
+// Location of the logstash pipelines.folder
+predocs.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER = "Location of the Logstash pipelines config folder within the core container."
+presets.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER = "/etc/morio/connector/pipelines"
 
 // TCP port core should listen on
 predocs.MORIO_CORE_PORT = 'TCP port for the _core service_ to listen on'

@@ -13,7 +13,7 @@ const MorioInvitePage = (props) => {
     <PageWrapper {...props} role={false}>
       <ContentWrapper {...props} Icon={MorioIcon} title={props.title}>
         <div className="max-w-2xl">
-          <ActivateAccount invite={invite} user={user} hidden/>
+          <ActivateAccount invite={invite} user={user} hidden />
         </div>
       </ContentWrapper>
     </PageWrapper>

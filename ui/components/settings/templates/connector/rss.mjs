@@ -5,16 +5,11 @@ import { xputMeta } from './index.mjs'
  * RSS input & output Connector templates
  */
 export const rss = {
-  in: () => ({
+  input: () => ({
     title: 'RSS',
     about: 'Reads items from an RSS or Atom feed',
     desc: 'Use this to read content from a website feed',
     local: (data) => `connector.inputs.${data.id}`,
-    btn: {
-      create: 'Create RSS Input',
-      update: 'Update RSS Input',
-      remove: 'Remove RSS Input',
-    },
     form: [
       {
         tabs: {

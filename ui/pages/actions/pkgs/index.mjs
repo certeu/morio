@@ -98,8 +98,8 @@ const ClientsPage = (props) => (
         <Popout tip>
           <h5>Repo(sitory) Installer Packages are automatically built</h5>
           <p>
-            Morio will automatically build repository installer packages during
-            its initial setup and on subsequent upgrades.
+            Morio will automatically build repository installer packages during its initial setup
+            and on subsequent upgrades.
             <br />
             As such, there is typically no reason to trigger a manual build.
           </p>
@@ -145,6 +145,6 @@ export default ClientsPage
 export const getStaticProps = () => ({
   props: {
     title: 'Build Packages',
-    page: ['actions', ['pkgs', 'Build Packages'] ],
+    page: ['actions', ['pkgs', 'Build Packages']],
   },
 })

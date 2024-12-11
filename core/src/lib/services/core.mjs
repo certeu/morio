@@ -7,7 +7,7 @@ import { encryptionMethods, hash } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysWantedHook, ensureMorioService } from './index.mjs'
+import { alwaysWantedHook } from './index.mjs'
 // Cluster code
 import { ensureMorioCluster } from '#lib/cluster'
 // log & utils
@@ -91,8 +91,7 @@ export const service = {
          * We do this here because it happens in the restart lifecycle hook
          * but core is never restarted
          */
-        const coreConfig = resolveServiceConfiguration('core', { utils })
-        ensureTraefikDynamicConfiguration(coreConfig)
+        ensureTraefikDynamicConfiguration(resolveServiceConfiguration('core', { utils }))
 
         /*
          * If we are in ephemeral mode, this may very well be the first cold boot.
@@ -156,8 +155,11 @@ export const service = {
 
       /*
        * We need a CA before we can do anything fancy
+       * This caused the CA service to restart on each reload because we do
+       * not yet have the state of running services at this point.
+       * Commented out instead of removed in case of a regression
        */
-      await ensureMorioService('ca')
+      //await ensureMorioService('ca')
 
       /*
        * Morio always runs as a cluster, because even a stand-alone

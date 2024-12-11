@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
+import { OkIcon, QuestionIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -17,10 +17,23 @@ export const FormControl = ({
   labelBR = false, // Optional bottom-right label
   forId = false, // ID of the for element we are wrapping
   isValid = false, // Result of validation
+  help = false, // An optional URL to link to help/docs
 }) => {
+  const helpLink = help ? (
+    <a href={help} target="_BLANK" rel="nofollow" title="Show help/docs">
+      <QuestionIcon className="w-5 hj5" />
+    </a>
+  ) : null
+
   const topLabelChildren = (
     <>
-      {label ? <span className="label-text-alt font-bold -mb-1">{label}</span> : <span></span>}
+      {label ? (
+        <span className="label-text-alt font-bold -mb-1 flex flex-row items-center gap-2">
+          {label} {helpLink}
+        </span>
+      ) : (
+        <span>{helpLink}</span>
+      )}
       {labelTR ? <span className="label-text-alt -mb-1">{labelTR}</span> : null}
     </>
   )
@@ -33,7 +46,7 @@ export const FormControl = ({
 
   return (
     <div className="form-control w-full mt-2">
-      {label || labelTR ? (
+      {label || labelTR || help ? (
         forId ? (
           <label className="label" htmlFor={forId}>
             {topLabelChildren}
@@ -134,9 +147,10 @@ export const ToggleInput = ({
   labelTR = false, // Top-Right label
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
+  help = false, // Optional link to help / docs
 }) => (
   <FormControl
-    {...{ labelBL, labelBR, labelTR }}
+    {...{ labelBL, labelBR, labelTR, help }}
     label={`${label} (${current === on ? labels[0] : labels[1]})`}
     forId={id}
   >
@@ -176,12 +190,13 @@ export const NumberInput = ({
   min = 220,
   step = 1,
   inputType = 'input',
+  help = false, // Optional link to help / docs
 }) => {
   const isValid = valid(current)
   if (inputType === 'range') label += ` (${current})`
 
   return (
-    <FormControl {...{ label, labelBL, labelBR, labelTR, isValid }} forId={id}>
+    <FormControl {...{ label, labelBL, labelBR, labelTR, isValid, help }} forId={id}>
       <input
         id={id}
         disabled={disabled}
@@ -219,11 +234,12 @@ export const StringInput = ({
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
+  help = false, // Optional link to help / docs
 }) => {
   const isValid = valid(current)
 
   return (
-    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid }} forId={id}>
+    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid, help }} forId={id}>
       <input
         id={id}
         disabled={disabled}
@@ -257,6 +273,7 @@ export const SecretInput = ({
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
+  help = false, // Optional link to help / docs
 }) => {
   const isValid = valid(current)
   const [reveal, setReveal] = useState(false)
@@ -273,7 +290,7 @@ export const SecretInput = ({
   )
 
   return (
-    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid }} forId={id}>
+    <FormControl {...{ label, labelTR, labelBL, labelBR, isValid, help }} forId={id}>
       <input
         id={id}
         disabled={disabled}
@@ -316,8 +333,10 @@ export const TextInput = ({
   labelBL = false, // Bottom-Left label
   labelBR = false, // Bottom-Right label
   disabled = false, // Allows rendering a disabled view
+  help = false, // Optional link to help / docs
+  code = false, // Allows using fixed-width font for input
 }) => (
-  <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} isValid={valid(current)}>
+  <FormControl {...{ label, labelTR, labelBL, labelBR, help }} forId={id} isValid={valid(current)}>
     <textarea
       id={id}
       disabled={disabled}
@@ -325,9 +344,9 @@ export const TextInput = ({
       placeholder={placeholder}
       value={current}
       onChange={(evt) => update(evt.target.value)}
-      className={`input w-full bg-base-100 input-bordered h-36 py-2 ${
+      className={`input w-full bg-base-100 input-bordered py-2 ${
         current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
-      }`}
+      } ${code ? 'font-mono h-96' : 'h-36'}`}
     />
   </FormControl>
 )
@@ -347,8 +366,9 @@ export const ListInput = ({
   disabled = false, // Allows rendering a disabled view
   dir = 'col', // Allows to change the direction
   dense = false,
+  help = false, // Optional link to help / docs
 }) => (
-  <FormControl {...{ label, labelTR, labelBL, labelBR }} isValid={valid(current)}>
+  <FormControl {...{ label, labelTR, labelBL, labelBR, help }} isValid={valid(current)}>
     <div className={`flex flex-${dir} flex-wrap`}>
       {list.map((item, i) => {
         const entry =
@@ -427,6 +447,7 @@ export const FileInput = ({
   original, // The original value
   id = '', // An id to tie the input to the label
   dropzoneConfig = {}, // Configuration for react-dropzone
+  help = false, // Optional link to help / docs
 }) => {
   /*
    * Ondrop handler
@@ -450,7 +471,7 @@ export const FileInput = ({
    */
   if (current)
     return (
-      <FormControl label={label} isValid={valid(current)}>
+      <FormControl label={label} isValid={valid(current)} help={help}>
         <div className="bg-base-100 w-full h-36 mb-2 mx-auto flex flex-col items-center text-center justify-center">
           <button
             type="button"
@@ -511,10 +532,11 @@ export const RoleInput = ({
   labelBR,
   labelTR,
   hide = ['root'],
+  help = false, // Optional link to help / docs
 }) => (
   <ListInput
     label={label}
-    {...{ labelBL, labelBR, labelTR }}
+    {...{ labelBL, labelBR, labelTR, help }}
     dense
     dir="row"
     update={(val) => (role === val ? setRole(false) : setRole(val))}
@@ -552,6 +574,7 @@ export const LabelInput = (props) => {
     id = '',
     original,
     valid = () => true,
+    help = false, // Optional link to help / docs
   } = props
 
   const [str, setStr] = useState('')
@@ -587,7 +610,11 @@ export const LabelInput = (props) => {
 
   return (
     <>
-      <FormControl {...{ label, labelTR, labelBL, labelBR }} forId={id} isValid={valid(current)}>
+      <FormControl
+        {...{ label, labelTR, labelBL, labelBR, help }}
+        forId={id}
+        isValid={valid(current)}
+      >
         <input
           id={id}
           disabled={disabled}

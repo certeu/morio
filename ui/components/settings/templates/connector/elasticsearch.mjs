@@ -6,7 +6,7 @@ import { Popout } from 'components/popout.mjs'
  * Elasticsearch input & output Connector templates
  */
 export const elasticsearch = {
-  out: () => ({
+  output: () => ({
     title: 'ElasticSearch',
     about: 'Index data to an Elasticsearch node or cluster',
     desc: 'Use this to read data from an Elasticsearch index',

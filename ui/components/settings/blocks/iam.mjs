@@ -51,22 +51,21 @@ const AddProvider = (props) => {
       ) : (
         <p>No form for this type of identity provider</p>
       )}
-
     </div>
   )
 }
 
-const ProviderDisabled = ({ provider, flags={} }) => flags[`DISABLE_IDP_${provider.toUpperCase()}`]
-  ? (
-      <Popout important noP>
-        <h5>This provider type is disabled</h5>
-        <p>The <code>DISABLE_IDP_{provider.toUpperCase()}</code> feature flag is currently active.
+const ProviderDisabled = ({ provider, flags = {} }) =>
+  flags[`DISABLE_IDP_${provider.toUpperCase()}`] ? (
+    <Popout important noP>
+      <h5>This provider type is disabled</h5>
+      <p>
+        The <code>DISABLE_IDP_{provider.toUpperCase()}</code> feature flag is currently active.
         <br />
         This disables the <code>{provider}</code> identity provider.
-        </p>
-      </Popout>
-  )
-  : null
+      </p>
+    </Popout>
+  ) : null
 
 const UpdateProvider = (props) => {
   const { provider } = props
@@ -101,7 +100,7 @@ const UpdateProvider = (props) => {
   )
 }
 
-const ProviderButton = ({ title, about, id, type, onClick, flags={} }) => (
+const ProviderButton = ({ title, about, id, type, onClick, flags = {} }) => (
   <div className="indicator w-full">
     <button
       className={`rounded-lg p-0 px-2 shadow hover:bg-secondary hover:bg-opacity-20 hover:cursor-pointer w-full
@@ -113,13 +112,14 @@ const ProviderButton = ({ title, about, id, type, onClick, flags={} }) => (
         <span className="-mt-1 text-sm italic opacity-80">{about}</span>
       </div>
       <div>
-        {flags[`DISABLE_IDP_${type.toUpperCase()}`]
-          ? <UnavailableIcon className="w-8 h-8 text-error" stroke={2.5}/>
-          : brands[type]
-            ? brands[type]
-            : <FingerprintIcon {...iconProps} />
-          }
-        </div>
+        {flags[`DISABLE_IDP_${type.toUpperCase()}`] ? (
+          <UnavailableIcon className="w-8 h-8 text-error" stroke={2.5} />
+        ) : brands[type] ? (
+          brands[type]
+        ) : (
+          <FingerprintIcon {...iconProps} />
+        )}
+      </div>
     </button>
   </div>
 )
@@ -258,24 +258,32 @@ const ProviderOrder = ({ data, update }) => {
               <PlayIcon className="w-5 h-5 -rotate-90" fill />
             </button>
             <div className="font-bold grow p-1 px-4 flex flex-row gap-1 items-center">
-              {data.tokens.flags?.[flag]
-                ? <button onClick={() => pushModal(
-                  <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-                    <h4>This identity provider is disabled by a feature flag</h4>
-                    <p>The <code>{flag}</code> feature flag is active which
-                  disables all identity providers of type
-                  <code>{type.toLowerCase()}, including this one.</code>.</p>
-                  </ModalWrapper>
-                )}><UnavailableIcon className="w-5 h-5 text-error" stroke={3}/></button>
-                : null
-              }
+              {data.tokens.flags?.[flag] ? (
+                <button
+                  onClick={() =>
+                    pushModal(
+                      <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                        <h4>This identity provider is disabled by a feature flag</h4>
+                        <p>
+                          The <code>{flag}</code> feature flag is active which disables all identity
+                          providers of type
+                          <code>{type.toLowerCase()}, including this one.</code>.
+                        </p>
+                      </ModalWrapper>
+                    )
+                  }
+                >
+                  <UnavailableIcon className="w-5 h-5 text-error" stroke={3} />
+                </button>
+              ) : null}
               {data.iam?.providers?.[id]?.label || id}
             </div>
             <div className="w-3/5">
               <FormWrapper form={providerVisibilityForm(id, data)} update={update} />
             </div>
           </div>
-        )})}
+        )
+      })}
     </div>
   )
 }

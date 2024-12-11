@@ -1,16 +1,20 @@
 import { useState, useContext } from 'react'
 import { Markdown } from 'components/markdown.mjs'
 import { AmazonCloudWatch, Azure, Elasticsearch, Kafka } from 'components/brands.mjs'
+import orderBy from 'lodash/orderBy.js'
+import unset from 'lodash/unset.js'
 // Templates
 import { connector as connectorTemplates } from '../templates/connector/index.mjs'
 import {
   CodeIcon,
+  DocumentIcon,
   EmailIcon,
   HttpIcon,
   InputIcon,
+  FilterIcon,
   MorioIcon,
   OutputIcon,
-  PlusIcon,
+  PuzzleIcon,
   RightIcon,
   RssIcon,
   SparklesIcon,
@@ -24,6 +28,7 @@ import set from 'lodash/set.js'
 import { FormWrapper, loadFormDefaults } from './form.mjs'
 import { slugify } from 'lib/utils.mjs'
 import { reduceFormValidation } from './form.mjs'
+import { MaxWidthWrapper } from './utils.mjs'
 
 const brandProps = { fill: 1, stroke: 0, className: 'w-8 h-8' }
 const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
@@ -31,7 +36,7 @@ const iconProps = { fill: 0, stroke: 1.5, className: 'w-8 h-8' }
 const brands = {
   amazon_cloudwatch: <AmazonCloudWatch {...brandProps} />,
   azure_event_hubs: <Azure {...brandProps} />,
-  custom: <CodeIcon {...iconProps} />,
+  lscl: <CodeIcon {...iconProps} />,
   elasticsearch: <Elasticsearch {...brandProps} />,
   http: <HttpIcon {...brandProps} />,
   http_poller: <HttpIcon {...brandProps} />,
@@ -69,14 +74,14 @@ const AddXput = (props) => {
   )
 
   return (
-    <div className="max-w-2xl w-full">
+    <MaxWidthWrapper>
       <XputHeader id={props.id} title={props.title} type={props.type} />
       {props.form ? (
         <FormWrapper {...props} defaults={defaults} action="create" />
       ) : (
         <p>No form for this type of connector</p>
       )}
-    </div>
+    </MaxWidthWrapper>
   )
 }
 
@@ -111,7 +116,7 @@ const UpdateXput = (props) => {
 
   if (formProps)
     return (
-      <div className="max-w-2xl w-full">
+      <MaxWidthWrapper>
         <XputHeader id={props.plugin} title={props.id} type={props.type} action="update" />
         <FormWrapper
           {...props}
@@ -136,16 +141,16 @@ const UpdateXput = (props) => {
             </small>
           </Popout>
         ) : null}
-      </div>
+      </MaxWidthWrapper>
     )
 
   return (
-    <div className="max-w-2xl w-full">
+    <MaxWidthWrapper>
       <XputHeader id={props.id} title={props.title} type={props.type} />
       <Popout note compact noP>
         The <b>{props.title}</b> {props.type} does not require any configuration
       </Popout>
-    </div>
+    </MaxWidthWrapper>
   )
 }
 
@@ -196,7 +201,7 @@ const BlockItems = (props) => {
                   {...allXputs[id]}
                   onClick={() =>
                     pushModal(
-                      <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                      <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
                         <UpdateXput
                           {...props}
                           {...{ type, id, pushModal, popModal, pipelines }}
@@ -221,7 +226,7 @@ const BlockItems = (props) => {
               {...blocks[id]}
               onClick={() =>
                 pushModal(
-                  <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+                  <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
                     <AddXput {...props} {...{ type, id, pushModal, popModal }} {...blocks[id]} />
                   </ModalWrapper>
                 )
@@ -241,6 +246,7 @@ export const ConnectorXputs = (props) => (
   </>
 )
 export const ConnectorInputs = (props) => <ConnectorXputs {...props} type="input" />
+export const ConnectorFilters = (props) => <ConnectorXputs {...props} type="filter" />
 export const ConnectorOutputs = (props) => <ConnectorXputs {...props} type="output" />
 
 const PipelineHeader = ({ id }) => (
@@ -254,11 +260,21 @@ const PipelineHeader = ({ id }) => (
 const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
   const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
 
+  /*
+   * We use orderBy() to sort the different filters
+   * but in doing so we lose the ID so we add it as a property here
+   */
+  const filters = {}
+  for (const id of Object.keys(pipelineSettings.filters || {})) {
+    filters[id] = { id, ...pipelineSettings.filters[id] }
+  }
+  const filterOrder = orderBy(filters, 'order', 'asc')
+
   return (
     <>
-      <div className="flex flex-row justify-center w-full items-center">
+      <div className="flex flex-row justify-center items-center w-full gap-4">
         <button
-          className={`btn btn-ghost btn-primary text-lg italic ${
+          className={`btn btn-ghost btn-sm btn-primary italic ${
             pipelineSettings.input?.id ? 'text-success hover:text-error' : 'opacity-70'
           }`}
           onClick={() => localUpdate('input.id', null)}
@@ -270,8 +286,29 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
           <RightIcon className="h-5 w-5 -ml-4" />
           <RightIcon className="h-5 w-5 -ml-4" />
         </div>
+        <div className="flex flex-col items-center my-4 w-1/3">
+          {filterOrder.map(({ id=false }, i) => id ? [
+              i > 10 ? <RightIcon key="icon" className="rotate-90 w-4 h-4" stroke="3"/> : null,
+              <button key="btn"
+                className={`w-full btn btn-sm btn-ghost btn-primary italic flex flex-row items-center justify-between ${
+                  pipelineSettings.filters?.[id] ? 'text-success hover:text-error' : 'opacity-70'
+                }`}
+                onClick={() => localUpdate(['filters', id], undefined)}
+              >
+                <FilterIcon className="w-5 h-5" />
+                {id}
+                <FilterIcon className="w-5 h-5" />
+              </button>
+            ] : null
+          )}
+        </div>
+        <div className="col-span-1 flex flex-row gap-1 items-end justify-center">
+          <RightIcon className="h-5 w-5" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+          <RightIcon className="h-5 w-5 -ml-4" />
+        </div>
         <button
-          className={`btn btn-ghost btn-primary text-lg italic ${
+          className={`btn btn-ghost btn-primary italic ${
             pipelineSettings.output?.id ? 'text-success hover:text-error' : 'opacity-70'
           }`}
           onClick={() => localUpdate('output.id', null)}
@@ -279,7 +316,7 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
           {pipelineSettings.output?.id || 'Select an output below'}
         </button>
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         <div className="flex flex-col gap-1">
           <h4>Pipeline Inputs</h4>
           {Object.keys(data?.connector?.inputs || {}).map((id) => (
@@ -292,6 +329,22 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
             >
               {id}
               <InputIcon stroke={1.5} className="w-8 h-8" />
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h4>Pipeline Filters</h4>
+          {Object.keys(data?.connector?.filters || {}).map((id) => (
+            <button
+              className={`${btnClasses} ${
+                pipelineSettings.filters?.[id] ? 'btn-success' : 'btn-neutral btn-outline'
+              }`}
+              onClick={() => localUpdate(['filters', id], { order: Date.now() })}
+              key={id}
+            >
+              <FilterIcon className="w-5 h-5" />
+              {id}
+              <FilterIcon className="w-5 h-5" />
             </button>
           ))}
         </div>
@@ -315,7 +368,121 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
   )
 }
 
-const AddPipeline = (props) => {
+const WritePipeline = (props) => {
+  const [pipelineSettings, setPipelineSettings] = useState(props.edit ? props.settings : {})
+
+  const create = () => {
+    // Keep the id out of the settings as the key will be the id
+    const settings = { ...pipelineSettings }
+    delete settings.id
+    props.update(`connector.pipelines.${pipelineSettings.id}`, settings, props.data)
+    props.popModal()
+  }
+  const remove = (id) => {
+    props.update(`connector.pipelines.${id}`, 'MORIO_UNSET', props.data)
+    props.popModal()
+  }
+  const localUpdate = (key, val) => {
+    const newSettings = { ...pipelineSettings }
+    set(newSettings, key, val)
+    setPipelineSettings(newSettings)
+  }
+
+  const form = [
+    {
+      tabs: {
+        Metadata: [
+          {
+            schema: Joi.string().required().label('ID'),
+            update: (val) => localUpdate('id', slugify(val)),
+            current: pipelineSettings?.id,
+            placeholder: 'my-pipeline',
+            label: 'ID',
+            labelBL: 'A unique ID to reference this pipeline',
+            labelBR: <span className="italic opacity-70">Input will be slugified</span>,
+            key: 'id',
+            disabled: props.edit,
+            transform: slugify,
+          },
+          {
+            schema: Joi.string().optional().allow('').label('Description'),
+            epdate: (val) => localUpdate('about', val),
+            label: 'Description',
+            labelBL: 'A description to help understand the purpose of this pipeline',
+            labelBR: <span className="italic opacity-70">Optional</span>,
+            key: 'about',
+            current: pipelineSettings?.about,
+            inputType: 'textarea',
+          },
+        ],
+        LSCL: [
+          <Popout tip key="tip">
+            <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage. It is
+            unfortunately{' '}
+            <a href="https://discuss.elastic.co/t/is-lscl-documented/353178/2" target="_BLANK">
+              undocumented
+            </a>
+            , but if you are familiar with it or if you have an existing Logstash pipeline you want
+            to re-use to Morio, you can include it below.
+          </Popout>,
+          {
+            schema: Joi.string().required().label('lscl'),
+            update: (val) => localUpdate('lscl', val),
+            current: pipelineSettings?.lscl,
+            placeholder: `input {
+  rss {
+    interval => 3600
+    id => "example_feed"
+    url => "https://morio.it/blog/rss.xml"
+  }
+}
+
+output {
+  sink {
+    id => "example_trash"
+  }
+}`,
+            label: 'ID',
+            labelBL: 'Your pipeline config',
+            key: 'lscl',
+            inputType: 'textarea',
+            code: true,
+          },
+        ],
+      },
+    },
+  ]
+  const valid = reduceFormValidation(form, pipelineSettings)
+
+  return (
+    <MaxWidthWrapper>
+      <PipelineHeader id={props.id} />
+      <FormWrapper {...props} form={form} update={localUpdate} />
+      <div className="mt-2 flex flex-row gap-2 items-center justify-center">
+        {props.edit ? (
+          <button
+            className={`btn btn-outline ${
+              pipelineSettings.disabled ? 'btn-success' : 'btn-warning'
+            }`}
+            onClick={() => localUpdate('disabled', pipelineSettings.disabled ? false : true)}
+          >
+            {pipelineSettings.disabled ? 'Enable Pipeline' : 'Disable Pipeline'}
+          </button>
+        ) : null}
+        <button className="btn btn-primary px-12" onClick={create} disabled={!valid}>
+          {props.edit ? 'Update' : 'Create'} Pipeline
+        </button>
+        {props.edit ? (
+          <button className="btn btn-error" onClick={() => remove(props.id)}>
+            <TrashIcon />
+          </button>
+        ) : null}
+      </div>
+    </MaxWidthWrapper>
+  )
+}
+
+const BuildPipeline = (props) => {
   const [pipelineSettings, setPipelineSettings] = useState(props.edit ? props.settings : {})
 
   const templates = connectorTemplates({
@@ -337,7 +504,8 @@ const AddPipeline = (props) => {
   }
   const localUpdate = (key, val) => {
     const newSettings = { ...pipelineSettings }
-    set(newSettings, key, val)
+    if (val === undefined) unset(newSettings, key)
+    else set(newSettings, key, val)
     setPipelineSettings(newSettings)
   }
   const inputPlugin = props.data?.connector?.inputs?.[pipelineSettings.input?.id]?.plugin
@@ -399,7 +567,7 @@ const AddPipeline = (props) => {
   const valid = reduceFormValidation(form, pipelineSettings)
 
   return (
-    <div className="max-w-2xl w-full">
+    <MaxWidthWrapper>
       <PipelineHeader id={props.id} />
       <FormWrapper {...props} form={form} update={localUpdate} />
       <div className="mt-2 flex flex-row gap-2 items-center justify-center">
@@ -422,12 +590,14 @@ const AddPipeline = (props) => {
           </button>
         ) : null}
       </div>
-    </div>
+    </MaxWidthWrapper>
   )
 }
 
 const ShowPipeline = (props) => {
   const pipeline = props.data.connector.pipelines[props.id]
+
+  const lscl = pipeline.lscl ? true : false
 
   return (
     <button
@@ -436,8 +606,12 @@ const ShowPipeline = (props) => {
         ${pipeline.disabled ? 'opacity-50' : ''}`}
       onClick={() =>
         props.pushModal(
-          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <AddPipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+          <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
+            {lscl ? (
+              <WritePipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+            ) : (
+              <BuildPipeline {...props} settings={{ ...pipeline, id: props.id }} edit />
+            )}
           </ModalWrapper>
         )
       }
@@ -449,24 +623,32 @@ const ShowPipeline = (props) => {
         {props.id}
       </div>
       <div className="col-span-2 flex flex-row items-center justify-start">
-        <b>
-          <em>{pipeline.input.id}</em>
-        </b>
-        <div className="flex flex-row items-center justify-center">
-          <RightIcon
-            className={`h-4 w-4 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-            stroke={2}
-          />
-          <RightIcon
-            className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-            stroke={2}
-          />
-          <RightIcon
-            className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
-            stroke={2}
-          />
-        </div>
-        <b>{pipeline.output.id}</b>
+        {lscl ? (
+          <b>
+            <em>LSCL</em>
+          </b>
+        ) : (
+          <>
+            <b>
+              <em>{pipeline.input.id}</em>
+            </b>
+            <div className="flex flex-row items-center justify-center">
+              <RightIcon
+                className={`h-4 w-4 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+              <RightIcon
+                className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+              <RightIcon
+                className={`h-4 w-4 -ml-3 ${pipeline.disabled ? 'text-error' : 'text-success'}`}
+                stroke={2}
+              />
+            </div>
+            <b>{pipeline.output.id}</b>
+          </>
+        )}
       </div>
     </button>
   )
@@ -481,18 +663,32 @@ export const ConnectorPipelines = (props) => {
       {Object.keys(props.data?.connector?.pipelines || {}).map((id) => {
         return <ShowPipeline key={id} {...props} id={id} {...{ pushModal, popModal }} />
       })}
-      <button
-        className="btn btn-primary"
-        onClick={() =>
-          pushModal(
-            <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-              <AddPipeline {...props} pushModal={pushModal} popModal={popModal} edit={false} />
-            </ModalWrapper>
-          )
-        }
-      >
-        <PlusIcon className="w-6 h-6 mr-4" stroke={3} /> Add Pipeline
-      </button>
+      <div className="flex flex-row flex-wrap items-center gap-4 mt-4 justify-end">
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            pushModal(
+              <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
+                <BuildPipeline {...props} pushModal={pushModal} popModal={popModal} edit={false} />
+              </ModalWrapper>
+            )
+          }
+        >
+          <PuzzleIcon className="w-6 h-6 mr-4" /> Build Pipeline
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            pushModal(
+              <ModalWrapper keepOpenOnClick wClass="max-w-4xl w-full">
+                <WritePipeline {...props} pushModal={pushModal} popModal={popModal} edit={false} />
+              </ModalWrapper>
+            )
+          }
+        >
+          <DocumentIcon className="w-6 h-6 mr-4" /> Write LSCL
+        </button>
+      </div>
     </>
   )
 }

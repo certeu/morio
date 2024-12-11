@@ -306,7 +306,7 @@ const InviteResult = ({ data }) => (
   </div>
 )
 
-export const ActivateAccount = ({ invite = '', user = '', hidden=false }) => {
+export const ActivateAccount = ({ invite = '', user = '', hidden = false }) => {
   const [inviteCode, setInviteCode] = useState(invite)
   const [username, setUsername] = useState(user)
   const { api } = useApi()
@@ -420,9 +420,7 @@ export const ActivateAccount = ({ invite = '', user = '', hidden=false }) => {
             <br />
             <b>Invite Code:</b> <code>{inviteCode}</code>
           </p>
-          <p>
-            You will be asked to setup MFA as a prerequisite to activate the account.
-          </p>
+          <p>You will be asked to setup MFA as a prerequisite to activate the account.</p>
         </Popout>
       ) : (
         <>
@@ -440,7 +438,7 @@ export const ActivateAccount = ({ invite = '', user = '', hidden=false }) => {
           />
         </>
       )}
-      <p className={hidden ? '' : "text-center"}>
+      <p className={hidden ? '' : 'text-center'}>
         <button
           className="btn btn-primary"
           onClick={activateAccount}

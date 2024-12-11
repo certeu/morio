@@ -35,7 +35,7 @@ export async function updateClusterState(force = false) {
   /*
    * Now get to work
    */
-  await forceUpdateClusterState()
+  return await forceUpdateClusterState()
 }
 
 /**

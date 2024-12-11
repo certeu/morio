@@ -4,7 +4,12 @@ import { Popout } from 'components/popout.mjs'
 import { Markdown } from 'components/markdown.mjs'
 // Blocks (which are also components)
 import { AuthProviders, LoginUi } from './iam.mjs'
-import { ConnectorInputs, ConnectorOutputs, ConnectorPipelines } from './connector.mjs'
+import {
+  ConnectorInputs,
+  ConnectorFilters,
+  ConnectorOutputs,
+  ConnectorPipelines,
+} from './connector.mjs'
 import { Flags, Vars, Secrets } from './tokens.mjs'
 import { FormWrapper } from './form.mjs'
 import { MdxWrapper } from './mdx.mjs'
@@ -15,6 +20,7 @@ import { MdxWrapper } from './mdx.mjs'
 const blocks = {
   authProviders: AuthProviders,
   connectorInputs: ConnectorInputs,
+  connectorFilters: ConnectorFilters,
   connectorOutputs: ConnectorOutputs,
   connectorPipelines: ConnectorPipelines,
   flags: Flags,

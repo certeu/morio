@@ -530,3 +530,27 @@ export function verifyPassword(userInput, storedPassword) {
 
   return false
 }
+
+
+/**
+ * Convert a key in PKCS#1 format to PKCS#8 which is what Java wants
+ *
+ * @param {string} key - The private key in PKCS#1/PEM format
+ * @return {string} key8 - The private key in PKCS#8/PEM format
+ */
+export function convertPkcs1ToPkcs8(key) {
+  /*
+   *  - Convert from PEM to Forge private key
+   *  - Convert private key to ASN.1 RSAPrivateKey
+   *  - Convert to PKCS8
+   *  - Convert back to PEM
+   */
+  return forge.pki.privateKeyInfoToPem(
+    forge.pki.wrapRsaPrivateKey(
+      forge.pki.privateKeyToAsn1(
+        forge.pki.privateKeyFromPem(key)
+      )
+    )
+  )
+}
+

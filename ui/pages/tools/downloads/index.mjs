@@ -42,16 +42,14 @@ const DownloadsPage = (props) => {
               if (typeof cp[ext] === 'undefined') cp[ext] = []
               cp[ext].push(file)
             }
-          }
-          else if (file.slice(0, match2.length) === match2) {
+          } else if (file.slice(0, match2.length) === match2) {
             const type = file.slice(-4)
             const ext = file.slice(-3)
             if (types.map((t) => `.${t}`).includes(type)) {
               if (typeof rp[ext] === 'undefined') rp[ext] = []
               rp[ext].push(file)
             }
-          }
-          else if (file.slice(0, match3.length) === match3) arr.push(file)
+          } else if (file.slice(0, match3.length) === match3) arr.push(file)
         }
         setClientPkgs(cp)
         setRepoPkgs(rp)
