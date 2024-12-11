@@ -8,7 +8,7 @@ export const morio = {
   local: {
     input: (context) => ({
       title: 'Local Morio',
-      about: 'Reads data from this Morio deployment',
+      about: 'Reads data from this Morio collector',
       desc: 'Use this to read data from this very Morio system',
       local: (data) => `connector.inputs.${data.id}`,
       form: xputMeta('input'),
@@ -26,7 +26,7 @@ export const morio = {
     }),
     output: (context) => ({
       title: 'Local Morio',
-      about: 'Writes data to this Morio deployment',
+      about: 'Writes data to this Morio collector',
       desc: 'Use this to write data to this very Morio system',
       local: (data) => `connector.outputs.${data.id}`,
       form: xputMeta('output'),
@@ -46,14 +46,14 @@ export const morio = {
   remote: {
     input: () => ({
       title: 'Remote Morio',
-      about: 'Reads data from a different Morio deployment',
+      about: 'Reads data from a different Morio collector',
       desc: 'Use this to read data from a remote Morio system',
       local: (data) => `connector.inputs.${data.id}`,
       form: xputMeta('input'),
     }),
     output: () => ({
       title: 'Remote Morio',
-      about: 'Writes data to a remote Morio deployment',
+      about: 'Writes data to a remote Morio collector',
       desc: 'Use this to write data to a different Morio system',
       local: (data) => `connector.outputs.${data.id}`,
       form: xputMeta('output'),

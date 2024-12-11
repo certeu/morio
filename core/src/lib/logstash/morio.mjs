@@ -2,7 +2,7 @@
 import { utils } from '../utils.mjs'
 
 /**
- * Generates a logstash intput configuration for the local Morio broker
+ * Generates a logstash input configuration for the local Morio broker
  *
  * @param {object} input - The input configuration
  * @param {object} pipeline - The pipeline configuration

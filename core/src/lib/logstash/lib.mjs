@@ -1,7 +1,7 @@
 // VARS
 
 /*
- * A helper var to include a linebrek
+ * A helper var to include a linebreak
  */
 export const nl = '\n'
 

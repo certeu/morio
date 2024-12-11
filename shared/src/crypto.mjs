@@ -535,8 +535,8 @@ export function verifyPassword(userInput, storedPassword) {
 /**
  * Convert a key in PKCS#1 format to PKCS#8 which is what Java wants
  *
- * @param {string} key - The private key in P{KCS#1/PEM format
- * @return {string} key8 - The private key in P{KCS#8/PEM format
+ * @param {string} key - The private key in PKCS#1/PEM format
+ * @return {string} key8 - The private key in PKCS#8/PEM format
  */
 export function convertPkcs1ToPkcs8(key) {
   /*

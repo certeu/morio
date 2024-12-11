@@ -261,7 +261,7 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
   const btnClasses = 'btn btn-sm w-full flex flex-row justify-between items-center'
 
   /*
-   * We user orderBy() to sort the different filters
+   * We use orderBy() to sort the different filters
    * but in doing so we lose the ID so we add it as a property here
    */
   const filters = {}

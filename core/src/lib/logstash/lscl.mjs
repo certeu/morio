@@ -1,7 +1,7 @@
 import { nl } from './lib.mjs'
 
 /**
- * Generates a logstash intput configuration based on LSCL
+ * Generates a logstash input configuration based on LSCL
  *
  * @param {object} input - The input configuration
  * @return {string} lscl - The LSCL code
@@ -32,7 +32,7 @@ export function lsclOutput(output) {
 }
 
 /**
- * Generates a logstash output block  based on LSCL
+ * Generates a logstash output block based on LSCL
  *
  * @param {object} config - The input/output/filter configuration
  * @param {string} type - The type of block (input, output, or filter)
