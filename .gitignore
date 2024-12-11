@@ -90,3 +90,10 @@ ui/playwright-report/
 ui/blob-report/
 ui/playwright/.cache/
 
+#added by levi
+#awszip file
+awscliv2.zip
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
