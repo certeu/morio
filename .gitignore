@@ -38,6 +38,9 @@ core/run-prod-container.sh
 core/run-test-container.sh
 api/run-test-container.sh
 
+# Auto-generated tap handler config files
+tap/handlers/*/config.mjs
+
 # Test artifacts
 core/coverage
 api/coverage
