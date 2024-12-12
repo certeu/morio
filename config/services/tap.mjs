@@ -55,6 +55,27 @@ export const resolveServiceConfiguration = ({ utils }) => {
         key: '/tap/config/tls-key.pem',
         cert: '/tap/config/tls-cert.pem',
       }
+    },
+    /*
+     * Builting tap handlers config for some
+     */
+    handlers: {
+      inventory: {
+        handlers: {
+          metrics: {
+            enabled: true,
+            name: 'metrics',
+            topic: 'metrics',
+            filter: ({ data }) => data?.morio?.inventory_update ? true : false,
+          },
+          inventory: {
+            name: 'inventory',
+            topic: 'inventory',
+            enabled: true,
+            filter: false,
+          }
+        }
+      }
     }
   }
 }

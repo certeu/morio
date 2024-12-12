@@ -253,6 +253,46 @@ const settings = Joi.object({
   vault: vaultInstance,
   preseed,
   client,
+  tap: Joi.object({
+    builtin: Joi.object({
+      audit: Joi.object({
+        enabled: Joi.boolean(),
+        topics: Joi.object(),
+        modules: Joi.object(),
+        cache: Joi.boolean(),
+        ttl: Joi.number(),
+        eventify: Joi.boolean(),
+      }),
+      healthchecks: Joi.object({
+        enabled: Joi.boolean(),
+        topics: Joi.object(),
+        modules: Joi.object(),
+        cache: Joi.boolean(),
+        ttl: Joi.number(),
+        up_values: Joi.object(),
+        on_down: Joi.string().allow('alarm', 'event', 'notification'),
+        certificate_check: Joi.boolean(),
+        certificate_notification_days: Joi.number(),
+        certificate_alarm_days: Joi.number(),
+        certificate_event_days: Joi.number(),
+      }),
+      logs: Joi.object({
+        enabled: Joi.boolean(),
+        topics: Joi.object(),
+        modules: Joi.object(),
+        cache: Joi.boolean(),
+        ttl: Joi.number(),
+      }),
+      metrics: Joi.object({
+        enabled: Joi.boolean(),
+        topics: Joi.object(),
+        modules: Joi.object(),
+        cache: Joi.boolean(),
+        ttl: Joi.number(),
+        cap: Joi.number(),
+      }),
+    })
+  }).optional(),
 }).required()
 
 /**

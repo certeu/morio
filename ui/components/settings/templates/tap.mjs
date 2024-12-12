@@ -1,5 +1,8 @@
 import Joi from 'joi'
 import { Popout } from 'components/popout.mjs'
+import { FilterIcon, TrashIcon } from 'components/icons.mjs'
+
+const tapFilterExample = "(data) => (data.morio?.tags || []).includes('example')\n"
 
 const enableToggle = ({ key, dflt=false, list, label, help=false, current }) => ({
   schema: Joi.boolean().default(dflt),
@@ -28,7 +31,7 @@ const filterInput = ({ type, filter, dflt, current }) => {
 
   return {
     schema: Joi.object().optional().label(filter),
-    key: `tap.builtin.${type}.${filter}`,
+    key: `tap.builtin.${type}.handler.${filter}`,
     label: `Only invake the handler for these ${filter}`,
     inputType: 'labels',
     labelBL: 'Enter a comma to add a new entry',
@@ -41,7 +44,7 @@ const filterInput = ({ type, filter, dflt, current }) => {
 function builtinForm (type, mSettings, update, init) {
   const data = mSettings?.tap?.builtin?.[type] || {}
   const configForm = data.enabled
-    ?  handlerConfigForms[type] ? handlerConfigForms[type](data) : []
+    ?  handlerConfigForms[type] ? handlerConfigForms[type](data, update) : []
     : [<p>more</p>]
   const title = <h4 className="capitalize">{type} handler</h4>
 
@@ -55,7 +58,7 @@ function builtinForm (type, mSettings, update, init) {
   if (data.enabled) return [
     title,
     <p>{builtin[type]}</p>,
-    ...handlerConfigForms[type](data),
+    ...handlerConfigForms[type](data, update),
     <p className="text-center">
       <button className="btn btn-error btn-outline" onClick={toggle}>Disable the {type} handler</button>
     </p>
@@ -97,32 +100,17 @@ function builtinForm (type, mSettings, update, init) {
 
 const builtin = {
   audit: 'Cache audit events, and optionally notify based on conditions you specify.',
-  healthchecks: 'The healthchecks Tap handler caches healthcheck data. It will also notify on expiring certificates.',
+  checks: 'The checks Tap handler caches healthcheck data. It will also notify on expiring certificates.',
   inventory: 'The inventory Tap handler builds an inventory based on data reported by Morio clients.',
   metrics: 'The metrics Tap handler caches metrics data. It underpins the UI dashboards using metrics data.',
   logs: 'The log Tap handler Caches log data. It underpins the UI dashboards using logs data.',
 }
 
 const handlerConfigForms = {
-  audit: (data) => ([
+  audit: (data, update) => ([
     {
       tabs: {
-        filters: [
-          [
-            filterInput({
-              type: 'audit',
-              filter: 'topics',
-              dflt: { audit: 'audit' },
-              current: data.topics ? data.topics : { audit: 'audit' }
-            }),
-            filterInput({
-              type: 'audit',
-              filter: 'modules',
-              dflt: {},
-              current: data.modules ? data.modules : false,
-            }),
-          ]
-        ],
+        filters: tapFilters('audit', data, update),
         features: [
           <h4>Cache audit data</h4>,
           enableToggle({
@@ -146,7 +134,7 @@ const handlerConfigForms = {
             : {
                 schema: Joi.number(),
                 label: 'Cache TTL in hours',
-                key: `tap.builtin.healthchecks.ttl`,
+                key: `tap.builtin.checks.ttl`,
                 labelBL: 'How many hours of healthcheck data should be cached?',
                 dflt: 60,
                 current: data.ttl || 60
@@ -173,25 +161,10 @@ const handlerConfigForms = {
       }
     }
   ]),
-  healthchecks: (data) => ([
+  checks: (data, update) => ([
     {
       tabs: {
-        filters: [
-          [
-            filterInput({
-              type: 'healthchecks',
-              filter: 'topics',
-              dflt: asObj('checks'),
-              current: data.topics ? data.topics : asObj('checks')
-            }),
-            filterInput({
-              type: 'healthchecks',
-              filter: 'modules',
-              dflt: {},
-              current: data.modules ? data.modules : false,
-            }),
-          ]
-        ],
+        filters: tapFilters('checks', data, update),
         features: [
           <h4>Settings</h4>,
           <Popout tip>
@@ -213,7 +186,7 @@ const handlerConfigForms = {
               schema: Joi.string().allow('alarm', 'event', 'notification', 'silent').label('on_down'),
               inputType: 'buttonList',
               label: 'On down',
-              key: `tap.builtin.healthchecks.on_down`,
+              key: `tap.builtin.checks.on_down`,
               dflt: true,
               dense: true,
               dir: 'row',
@@ -239,7 +212,7 @@ const handlerConfigForms = {
             },
             {
               schema: Joi.object().optional().label('up_values'),
-              key: `tap.builtin.healthchecks.up_values`,
+              key: `tap.builtin.checks.up_values`,
               label: `Up values`,
               inputType: 'labels',
               labelBL: 'Enter a comma to add a new entry',
@@ -250,7 +223,7 @@ const handlerConfigForms = {
           ],
           <h4>Cache healthcheck data</h4>,
           enableToggle({
-            key: `tap.builtin.healthchecks.cache`,
+            key: `tap.builtin.checks.cache`,
             dflt: true,
             list: [
               {
@@ -270,7 +243,7 @@ const handlerConfigForms = {
             : {
                 schema: Joi.number(),
                 label: 'Cache TTL in hours',
-                key: `tap.builtin.healthchecks.ttl`,
+                key: `tap.builtin.checks.ttl`,
                 labelBL: 'How many hours of healthcheck data should be cached?',
                 dflt: 1,
                 current: data.ttl || 1
@@ -279,7 +252,7 @@ const handlerConfigForms = {
           <h4>Verify certificate expiry</h4>,
           enableToggle({
             label: 'Verify certificate expiry',
-            key: `tap.builtin.healthchecks.certificate_check`,
+            key: `tap.builtin.checks.certificate_check`,
             dflt: true,
             list: [
               {
@@ -302,7 +275,7 @@ const handlerConfigForms = {
               ? {
                 schema: Joi.number(),
                 label: 'Certificate event days',
-                key: `tap.builtin.healthchecks.certificate_event_days`,
+                key: `tap.builtin.checks.certificate_event_days`,
                 labelBL: 'How many days before a certificate expires should an event be generated?',
                 dflt: 21,
                 current: data.certificate_event_days || 15
@@ -310,7 +283,7 @@ const handlerConfigForms = {
                   {
                     schema: Joi.number(),
                     label: 'Certificate notification days',
-                    key: `tap.builtin.healthchecks.certificate_notification_days`,
+                    key: `tap.builtin.checks.certificate_notification_days`,
                     labelBL: 'How many days before a certificate expires should a notification be generated?',
                     dflt: 15,
                     current: data.certificate_notification_days || 15
@@ -318,7 +291,7 @@ const handlerConfigForms = {
                   {
                    schema: Joi.number(),
                     label: 'Certificate alarm days',
-                    key: `tap.builtin.healthchecks.certificate_alarm_days`,
+                    key: `tap.builtin.checks.certificate_alarm_days`,
                     labelBL: 'How many days before a certificate expires should an alarm be generated?',
                     dflt: 5,
                   }
@@ -328,25 +301,10 @@ const handlerConfigForms = {
       }
     }
   ]),
-  logs: (data) => ([
+  logs: (data, update) => ([
     {
       tabs: {
-        filters: [
-          [
-            filterInput({
-              type: 'logs',
-              filter: 'topics',
-              dflt: asObj('logs'),
-              current: data.topics ? data.topics : asObj('logs'),
-            }),
-            filterInput({
-              type: 'logs',
-              filter: 'modules',
-              dflt: {},
-              current: data.modules ? data.modules : false,
-            }),
-          ]
-        ],
+        filters: tapFilters('logs', data, update),
         features: [
           <h4>Cache log data</h4>,
           enableToggle({
@@ -379,25 +337,10 @@ const handlerConfigForms = {
       }
     }
   ]),
-  metrics: (data) => ([
+  metrics: (data, update) => ([
     {
       tabs: {
-        filters: [
-          [
-            filterInput({
-              type: 'metrics',
-              filter: 'topics',
-              dflt: asObj('metrics'),
-              current: data.topics ? data.topics : asObj('metrics'),
-            }),
-            filterInput({
-              type: 'metrics',
-              filter: 'modules',
-              dflt: {},
-              current: data.modules ? data.modules : false,
-            }),
-          ]
-        ],
+        filters: tapFilters('metrics', data, update),
         features: [
           <h4>Cache metrics data</h4>,
           enableToggle({
@@ -466,20 +409,26 @@ export const tap = ({ mSettings={}, update }) => ({
       title: 'Audit Handler',
       form: builtinForm('audit', mSettings, update, {
         enabled: true,
-        topics: asObj('audit'),
-        modules: {},
+        handler: {
+          topics: asObj('audit'),
+          modules: {},
+          filter: false,
+        },
         cache: true,
         ttl: 12,
         eventify: true,
       })
     },
-    healthchecks: {
+    checks: {
       type: 'form',
-      title: 'Healthchecks Handler',
-      form: builtinForm('healthchecks', mSettings, update, {
+      title: 'Checks Handler',
+      form: builtinForm('checks', mSettings, update, {
         enabled: true,
-        topics: asObj('checks'),
-        modules: {},
+        handler: {
+          topics: asObj('checks'),
+          modules: {},
+          filter: false,
+        },
         cache: true,
         ttl: 1,
         up_values: asObj([1, 'green', 'up']),
@@ -522,8 +471,11 @@ export const tap = ({ mSettings={}, update }) => ({
       title: 'Logs Handler',
       form: builtinForm('logs', mSettings, update, {
         enabled: true,
-        topics: asObj('logs'),
-        modules: {},
+        handler: {
+          topics: asObj('logs'),
+          modules: {},
+          filter: false,
+        },
         cache: true,
         ttl: 1,
       })
@@ -533,8 +485,11 @@ export const tap = ({ mSettings={}, update }) => ({
       title: 'Metrics Handler',
       form: builtinForm('metrics', mSettings, update, {
         enabled: true,
-        topics: asObj('metrics'),
-        modules: {},
+        handler: {
+          topics: asObj('metrics'),
+          modules: {},
+          filter: false,
+        },
         cache: true,
         ttl: 1,
         cap: 300
@@ -570,4 +525,80 @@ function asObj (topic) {
   return data
 }
 
+/**
+ * This generates the form for tap filters
+ *
+ * @param {string} type - The type/id of the tap handler
+ * @param {object} data - The current config data
+ * @param {function} update - The update method
+ * @return {object} form - The form for the UI
+ */
+function tapFilters (type, data, update) {
+  return [
+    [
+      filterInput({
+        type,
+        filter: 'topics',
+        dflt: asObj(type),
+        current: data.topics ? data.topics : asObj(type),
+      }),
+      filterInput({
+        type,
+        filter: 'modules',
+        dflt: {},
+        current: data.modules ? data.modules : false,
+      }),
+    ],
+    data.handler?.filter || data.handler?.filter === ''
+      ? {
+        schema: Joi.string().label('Filter'),
+        key: `tap.builtin.${type}.handler.filter`,
+        current: data.handler.filter || '',
+        inputType: 'textarea',
+        label: 'Filter method',
+        labelBL: 'Write a custom JavaScript method to filter data',
+        code: true,
+        placeholder: tapFilterExample,
+        labelTR: (
+          <button
+            className="btn btn-sm btn-error btn-outline"
+            onClick={() => update(`tap.builtin.${type}.handler.filter`, false)}
+          >
+            <TrashIcon className="w-5 h-5"/>
+            Remove custom filter
+          </button>
+        )
+      }
+      : (
+        <p className="text-right">
+          <button
+            className="btn btn-primary btn-outline btn-sm"
+            onClick={() => update(`tap.builtin.${type}.handler.filter`, '')}
+          ><FilterIcon className="w-5 h-5" /> <span>Write a custom filter</span></button>
+        </p>
+      ),
+    data.handler?.filter || data.handler?.filter === ''
+    ? (
+      <Popout tip>
+        <h4>How to write a filter method</h4>
+        <p>
+          To filter data that is to be passed to a handler, you can provide a custom filter method.
+          <br />
+          This method will receive the data from Kafka as the only parameter, and should return:
+        </p>
+        <ul>
+          <li><code>true</code> if the data should be passed to the handler for processing</li>
+          <li><code>false</code> if the data should be skipped (filtered out)</li>
+        </ul>
+        <p>Your method will be included in the Tap handler config as such:</p>
+        <pre>{`{\n  enabled: ${data.enabled ? 'true' : 'false'},\n  handler: {\n    topics: ${JSON.stringify(data.topics)},\n    filter: YOUR_CUSTOM_FILTER_METHOD_HERE\n  }\n}`}</pre>
+        <p>
+          Please to keep this in mind and avoid breaking your Tap handler&apos;s configuration.
+          <br />
+          For example, if you want to include comments, do so inside your function body, and not above it.
+        </p>
+      </Popout>
+    ) : ' ',
+  ]
+}
 

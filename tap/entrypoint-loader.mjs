@@ -90,10 +90,7 @@ async function loadHandlerFiles(directory) {
 }
 
 async function ensureHandlerLoader() {
-  const files = [
-    ...(await loadHandlerFiles('./src/handlers')),
-    ...(await loadHandlerFiles('./handlers')),
-  ]
+  const files = await loadHandlerFiles('./handlers')
   const imports = {}
   const topics = new Set()
   for (const file of files) {
