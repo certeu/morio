@@ -15,8 +15,9 @@ const hostFields = ['name', 'hostname', 'architecture', 'id']
  */
 const osFields = ['codename', 'family', 'kernel', 'name', 'platform', 'type', 'version']
 
-const metricsHandler = config.handlers.metrics.enabled ? {
-  topic: config.handlers.metrics.topic,
+const metricsHandler = config.enabled ? {
+  ...config.metrics,
+  enabled: true,
   method: (data, tools, topic) => {
     /*
      * Construct inventory update data
@@ -46,9 +47,11 @@ const metricsHandler = config.handlers.metrics.enabled ? {
   }
 } : null
 
-const inventoryHandler = config.handlers.inventory.enabled ? {
-  topic: config.handlers.inventory.topic,
+const inventoryHandler = config.enabled ? {
+  ...config.inventory,
+  enabled: true,
   method: (data, tools, topic) => {
+    tools.log.debug(`Received inventory message in ${topic}`)
     return
   }
 } : null

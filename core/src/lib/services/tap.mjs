@@ -54,10 +54,33 @@ export const service = {
 
 async function ensureLocalPrerequisites() {
   const promises = []
+
+  /*
+   * Grab the tap serial from disk
+   */
+  const tapSerial = await getTapSerial()
+  const settingsSerial = utils.getSettingsSerial()
+  const age = Math.floor((Date.now() - tapSerial) / (1000 * 3600 * 24)) // in days
+
   /*
    * Generate key and certificate for mTLS
+   * Certificates expire, but service certificates have a pretty long lifetime
+   * So unless age climbs above 120 days, we do nothing.
    */
-  promises.push(ensureServiceCertificate('tap', false))
+  if (!tapSerial || age > 120) promises.push(ensureServiceCertificate('tap', false))
+
+  /*
+   * If the serial is current, we do not need to re-create the config and restart the container
+   */
+  if (tapSerial === settingsSerial) {
+    log.debug(`[tap] Serial on disk is current. Not updating config`)
+    return
+  }
+
+  /*
+   * And write the new serial to disk
+   */
+  promises.push(writeFile(`/etc/morio/tap/serial`, `${settingsSerial}`, log))
 
   /*
    * Generate config for the built-in handlers
@@ -105,7 +128,7 @@ function ensureBuiltinHandlers() {
   const handlers = [
     'audit',
     'events',
-    'healthchecks',
+    'checks',
     'inventory',
     'logs',
     'metrics',
@@ -147,3 +170,15 @@ export function isTapWanted() {
   return Object.keys(handlers).length > 0
 }
 
+
+/**
+ * Helper method to read the tap serial from disk
+ *
+ * @return {bool} current - True if the serial is current, false if not
+ */
+async function getTapSerial() {
+
+  const serial = await readFile('/etc/morio/tap/serial')
+
+  return serial ? Number(serial) : false
+}

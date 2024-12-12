@@ -13,8 +13,9 @@ import { config } from "./config.mjs"
  *        - a list of log files as value
  */
 const handler = config.enabled ? {
-  ...config.handler,
+  ...config,
   method: (data, tools, topic) => {
+    tools.log.debug(`Received a log message in topic ${topic}`)
     /*
      * Only handle data that has a log message
      */

@@ -5,8 +5,9 @@ import { config } from "./config.mjs"
  * the morio-tap client module
  */
 const handler = config.enabled ? {
-  ...config.handler,
+  ...config,
   method: (data, tools, topic) => {
+    tools.log.debug(`Received a metrics message in topic ${topic}`)
     /*
      * Metricset: throughput
      */

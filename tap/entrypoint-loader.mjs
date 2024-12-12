@@ -32,61 +32,19 @@ export async function globDir(folderPath, pattern = '*/index.mjs') {
 
   return list
 }
-/*
- * This creates a file that loads any handlers that are
- * available under /tap/handlers.
- *
- * It also makes sure that they can be loaded and have
- * the proper structure for a message handler.
- *
- * Note that files need to end with .mjs and be named in
- * a way that makes their basename suitable for use as an
- * object key name in Javascript.
- *
- * @param {string} directory - The folder to look for handlers
- * @return {object} code - The code to load topics and handlers
- */
-async function loadHandlers(directory) {
-  const folder = new URL(directory, import.meta.url)
-
-  const handlers = {}
-  const files = await globDir(folder.pathname)
-
-  for (const file of files) {
-    const folder = path.basename(path.dirname(file))
-    handlers[folder] = new Set()
-    // Dynamically import the file
-    const module = await import(file)
-
-    // Make sure the default export is a message handler
-    if (module.default && typeof module.default.topic === 'string' && typeof module.default.method === 'function') {
-      handlers[folder].add({
-        name: folder,
-        topic: module.default.topic,
-        exports: 'object',
-      })
-    } else if (Array.isArray(module.default)) {
-      for (const i in module.default) {
-        const mod = module.default[i]
-        if (typeof mod.topic === 'string' && typeof mod.method === 'function') {
-          handlers[folder].add({
-            name: `${folder}__${mod.name || i}`,
-            topic: mod.topic,
-            exports: 'array',
-          })
-        }
-      }
-    }
-
-  }
-
-  return handlers
-}
 
 async function loadHandlerFiles(directory) {
   const folder = new URL(directory, import.meta.url)
 
   return await globDir(folder.pathname)
+}
+
+function asTopicList (input) {
+  if (typeof input === 'string') return [input]
+  if (Array.isArray(input)) return input
+  if (typeof input === 'object') return Object.values(input)
+
+  return []
 }
 
 async function ensureHandlerLoader() {
@@ -95,23 +53,30 @@ async function ensureHandlerLoader() {
   const topics = new Set()
   for (const file of files) {
     const folder = path.basename(path.dirname(file))
-    // Dynamically import the file
+
+    /*
+     * Dynamically import the file. ESM is nice these days.
+     */
     const module = await import(file)
-    // Is the default export a tap handler?
-    if (module.default && typeof module.default.topic === 'string' && typeof module.default.method === 'function') {
-      imports[folder] = [ folder, module.default.topic ]
-      topics.add(module.default.topic)
-    }
-    // Or is it an array of tap handlers?
-    else if (Array.isArray(module.default)) {
+
+    /*
+     * Handlers can be a single handler object, or an array of them
+     */
+    if (Array.isArray(module.default)) {
       for (const i in module.default) {
         const mod = module.default[i]
-        if (typeof mod.topic === 'string' && typeof mod.method === 'function') {
+        if (mod.enabled){
+          const subs = asTopicList(mod.topics)
+          for (const topic of subs) topics.add(topic)
           if (typeof imports[folder] === 'undefined') imports[folder] = []
-          imports[folder].push([`${folder}__${mod.name || i}`, mod.topic])
-          topics.add(mod.topic)
+          imports[folder].push([`${folder}__${i}`, subs])
         }
       }
+    }
+    else if (module.default.enabled){
+      const subs = asTopicList(module.default.topics)
+      for (const topic of subs) topics.add(topic)
+      imports[folder] = [ folder, subs ]
     }
   }
 
@@ -129,20 +94,22 @@ async function ensureHandlerLoader() {
 
   const hpts = {}
   for (const folder in imports) {
-    imp += `${nl}import ${folder} from './src/handlers/${folder}/index.mjs'`
-    // Single import
-    if (typeof imports[folder][1] === 'string') {
-      const [handler, topic] = imports[folder]
-      if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
-      hpts[topic].add(handler)
-      ah += `${nl}  ${folder},`
-    }
-    else if (Array.isArray(imports[folder][1])) {
-      let i = 0
-      for (const [handler, topic] of imports[folder]) {
+    imp += `${nl}import ${folder} from './handlers/${folder}/index.mjs'`
+    if (typeof imports[folder][0] === 'string') {
+      for (const topic of imports[folder][1]) {
         if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
-        hpts[topic].add(handler)
-        ah += `${nl}  ${handler}: ${folder}[${i}], `
+        hpts[topic].add(folder)
+      }
+      ah += `${nl}  ${folder}: ${folder}, `
+    }
+    else if (Array.isArray(imports[folder][0])) {
+      let i = 0
+      for (const entry of imports[folder]) {
+        for (const topic of entry[1]) {
+          if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
+          hpts[topic].add(entry[0])
+        }
+        ah += `${nl}  ${folder}__${i}: ${folder}[${i}], `
         i++
       }
     }

@@ -5,8 +5,9 @@ import { cache as valkey } from './cache.mjs'
 
 /*
  * Export log object on its own
+ * Not that the logger is async (non-blocking)
  */
-export const log = pino({ name: 'tap', level: 20 })
+export const log = pino({ name: 'tap', level: 20, sync: false })
 
 /*
  * Tools are exported as a single object

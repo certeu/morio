@@ -61,19 +61,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
      */
     handlers: {
       inventory: {
-        handlers: {
-          metrics: {
-            enabled: true,
-            name: 'metrics',
-            topic: 'metrics',
-            filter: ({ data }) => data?.morio?.inventory_update ? true : false,
-          },
-          inventory: {
-            name: 'inventory',
-            topic: 'inventory',
-            enabled: true,
-            filter: false,
-          }
+        enabled: utils.getSettings('tap.builtin.inventory.enabled', false),
+        metrics: {
+          topics: { metrics: 'metrics' },
+          filter: ({ data }) => data?.morio?.inventory_update ? true : false,
+        },
+        inventory: {
+          topics: { inventory: 'inventory' },
         }
       }
     }

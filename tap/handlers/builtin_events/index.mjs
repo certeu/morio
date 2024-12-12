@@ -5,7 +5,7 @@ import { config } from "./config.mjs"
  * It can create events to highlight relevant events, and cache audit data.
  */
 const handler = config.enabled ? {
-  ...config.handler,
+  ...config,
   method: (data, tools, topic) => {
     /*
      * FIXME: Write this handler

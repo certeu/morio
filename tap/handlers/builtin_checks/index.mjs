@@ -14,7 +14,7 @@ import { config } from "./config.mjs"
  *
  */
 const handler = config.enabled ? {
-  ...config.handler,
+  ...config,
   method: (data, tools, topic) => {
     /*
      * Only handle data that is in the correct format

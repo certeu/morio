@@ -1,4 +1,3 @@
-import { log } from './tools.mjs'
 import { handlersPerTopic, topics } from '../loader.mjs'
 import { count } from './counters.mjs'
 
@@ -57,7 +56,7 @@ function parseMessageData(message) {
     data.data = JSON.parse(message.value)
   }
   catch (err) {
-    log.warn(`Failed to parse message value as JSON: ${message.value}`)
+    tools.log.warn(`Failed to parse message value as JSON: ${message.value}`)
     data.data = message?.value ? message.value : null
   }
 
