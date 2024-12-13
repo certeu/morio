@@ -1,0 +1,186 @@
+import { utils, log } from './utils.mjs'
+// Load the database client
+import { db } from './db.mjs'
+// Shared code from accounts
+import {
+  asJson,
+  asNull,
+  asString,
+  asTime,
+  clean,
+  fromJson,
+} from './account.mjs'
+
+/*
+ * This maps the fields to a method to format the field
+ */
+const fields = {
+  id: clean,
+  arch: clean,
+  cores: Number,
+  fqdn: clean,
+  memory: Number,
+  name: clean,
+  notes: (val) => val.map(item => clean(item)),
+  os: clean,
+  tags: (val) => val.map(item => clean(item)),
+  last_update: asTime,
+}
+
+/*
+ * This maps the fields to a method to unserialize the value
+ */
+const values = {
+  password: fromJson,
+  scratch_codes: fromJson,
+}
+
+/**
+ * Helper method to list hosts in the inventory
+ *
+ * @return {object} keys - The API keys saved for the account
+ */
+export async function listHosts() {
+  const query = `SELECT * FROM inventory_hosts`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? hostsAsList(result) : false
+}
+
+/**
+ * Helper method to load a inventory host (or rather its data)
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHost(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
+    id: fields.id(id),
+  })
+
+  if (status !== 200) return false
+  const found = accountsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one account in loadAccount. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load API keys for a given account
+ *
+ * @param {string} provider - The ID of the identity provider
+ * @param {string} id - The unique id (the username)
+ * @return {object} keys - The API keys saved for the account
+ */
+export async function loadAccountApikeys(provider, id) {
+  return await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
+    id: fields.id(fullId(provider, id)),
+  })
+}
+
+/**
+ * Helper method to create an inventory host
+ *
+ * @param {object} id - The id of the host
+ * @param {object} data - The data to save for the account
+ */
+export async function saveHost(id, data) {
+  /*
+   * We need at least an ID
+   */
+  if (!id) {
+    log.warn('saveHost was called witout an id')
+    return false
+  }
+
+  /*
+   * Now construct the query
+   */
+  data.id = id
+  const updates = []
+  const params = {}
+  for (const [key, val] of Object.entries(data)) {
+    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
+      updates.push(key)
+      let dbval = fields[key](val)
+      if (typeof dbval === 'object') {
+        try {
+          dbval = JSON.stringify(dbval)
+        }
+        catch {
+          log.warn(`Failed to parse field ${key} to JSON in saveHost()`)
+        }
+      }
+      params[key] = dbval
+    }
+  }
+  // Store last_update
+  updates.push('last_update')
+  params.last_update = asTime()
+
+  const result = await db.write(
+    `REPLACE INTO inventory_hosts(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
+    params
+  )
+
+  return result
+}
+
+/**
+ * Helper method to save the last login time in the account data
+ *
+ * @param {string} provider - The ID of the identity provider
+ * @param {string} id - The id of the account (the username)
+ */
+export async function updateLastLoginTime(provider, id, extraData = {}) {
+  /*
+   * We need at least an ID and provider
+   */
+  if (!id || !provider) {
+    log.warn('[api] updateLastLoginTime was called witout an id or provider')
+    return false
+  }
+
+  let result
+  const now = new Date().toISOString()
+  if (extraData) {
+    /*
+     * Need to add some extra data, so let's fetch the record and do a full write
+     */
+    const data = await loadAccount(provider, id)
+    result = await saveAccount(provider, id, { ...data, last_login: now, ...extraData })
+  } else {
+    /*
+     * A simple update of the last_login field will do
+     */
+    result = await db.write(`UPDATE accounts SET last_login=:now WHERE id=:id`, {
+      now,
+      id: fullId(provider, id),
+    })
+  }
+
+  return result
+}
+
+/**
+ * Helper method to parse results into an array of objects
+ */
+function hostsAsList(result) {
+  const cols = result?.results?.[0]?.columns
+  const list = (result?.results?.[0]?.values || []).map((entry) => {
+    const host = {}
+    for (const i in cols)
+      host[cols[i]] =
+        values[cols[i]] && typeof values[cols[i]] === 'function'
+          ? values[cols[i]](entry[i])
+          : entry[i]
+
+    return host
+  })
+
+  return list
+}

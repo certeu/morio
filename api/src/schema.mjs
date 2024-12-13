@@ -218,6 +218,17 @@ export const schema = {
     iv: Joi.string().required(),
     ct: Joi.string().required(),
   }),
+  // Inventory
+  'req.inventory.writeHost': Joi.object({
+    arch: Joi.string(),
+    cores: Joi.number(),
+    fqdn: Joi.string().hostname(),
+    memory: Joi.number(),
+    name: Joi.string(),
+    notes: Joi.array().items(Joi.string()),
+    os: Joi.string(),
+    tags: Joi.array().items(Joi.string()),
+  }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),
   // This combines request body and request parameters

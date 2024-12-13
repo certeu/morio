@@ -41,18 +41,23 @@ const types = {
   },
 }
 
+const meta = {
+  title: 'Morio Dashboards',
+  page: ['dashboards'],
+  Icon: FlipoverIcon
+}
 
-const DashboardsPage = (props) => {
+export default function  DashboardsPage () {
   return (
-    <PageWrapper {...props}>
-      <ContentWrapper {...props} Icon={FlipoverIcon}>
+    <PageWrapper {...meta}>
+      <ContentWrapper {...meta}>
         <div className="max-w-4xl">
           <h3>Top Picks</h3>
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             <Card
               role="user"
               title={<span className="capitalize">Search Dashboards</span>}
-              href={`/dashboards/search/`}
+              href={`/boards/search/`}
               desc="Find dashboards based on hostname, Morio module name, or other criteria"
               width="w-full"
               Icon={SearchIcon}
@@ -60,7 +65,7 @@ const DashboardsPage = (props) => {
             <Card
               role="user"
               title={<span className="capitalize">Custom Dashboards</span>}
-              href={`/dashboards/custom/`}
+              href={`/boards/custom/`}
               desc="Create your own dashboards, or browse dashboards created by others"
               width="w-full"
               Icon={FixmeIcon}
@@ -74,7 +79,7 @@ const DashboardsPage = (props) => {
                 <Card
                   role="user"
                   title={<span className="capitalize">{type}</span>}
-                  href={`/dashboards/${type}/`}
+                  href={`/boards/${type}/`}
                   desc={about}
                   width="w-full"
                   Icon={Icon}
@@ -87,12 +92,3 @@ const DashboardsPage = (props) => {
     </PageWrapper>
   )
 }
-
-export default DashboardsPage
-
-export const getStaticProps = () => ({
-  props: {
-    title: 'Morio Dashboards',
-    page: ['dashboards'],
-  },
-})

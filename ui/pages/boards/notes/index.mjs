@@ -5,7 +5,7 @@ import { TipIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
-import { Note  } from 'components/dashboards/note.mjs'
+import { Note  } from 'components/boards/note.mjs'
 
 const key = 'notestream'
 

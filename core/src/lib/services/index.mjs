@@ -182,6 +182,15 @@ export async function startMorio(hookParams = {}) {
  * @return {bool} ok = Whether or not the service was started
  */
 export async function ensureMorioService(serviceName, hookParams = {}) {
+  /*
+   * Start by generating the  morio service config so it's available in all hooks
+   * Docker config will be generated after the preCreate lifecycle hook
+   */
+  utils.setMorioServiceConfig(
+    serviceName,
+    resolveServiceConfiguration(serviceName, { utils, hookParams })
+  )
+
   if (optionalServices.includes(serviceName)) {
     /*
      * If the service optional, not wanted, yet running, stop it
@@ -207,15 +216,6 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
       return true
     } else log.debug(`[${serviceName}] Optional service is wanted`)
   }
-
-  /*
-   * Generate morio service config
-   * Docker config will be generated after the preCreate lifecycle hook
-   */
-  utils.setMorioServiceConfig(
-    serviceName,
-    resolveServiceConfiguration(serviceName, { utils, hookParams })
-  )
 
   /*
    * Does the service need to be recreated?

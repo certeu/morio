@@ -613,6 +613,15 @@ MorioClient.prototype.getCacheKey = async function (key) {
   return await this.call(`${morioConfig.api}/cache/keys/${key}`)
 }
 
+/*t
+ * Get all hosts from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHosts = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts`)
+}
+
 /*
  * Don't recreate the client on each call
  */

@@ -54,6 +54,7 @@ const icons = {
   actions: WrenchIcon,
   api: CodeIcon,
   audit: FingerprintIcon,
+  boards: FlipoverIcon,
   broker: RedPanda,
   ca: CertificateIcon,
   certificates: CertificateIcon,
@@ -64,7 +65,6 @@ const icons = {
   console: RedPandaConsole,
   custom: FixmeIcon,
   dashboard: Traefik,
-  dashboards: FlipoverIcon,
   decrypt: OpenLockIcon,
   docker: Docker,
   download: DownloadIcon,
@@ -75,6 +75,7 @@ const icons = {
   faq: QuestionIcon,
   healthchecks: CheckCircleIcon,
   images: ContainerImageIcon,
+  inventory: ServersIcon,
   logs: StorageIcon,
   metrics: StatusIcon,
   morio: MorioIcon,
@@ -105,7 +106,7 @@ export const links = {
     t: 'Actions',
     r: 'operator',
   },
-  dashboards: {
+  boards: {
     t: 'Dashboards',
     r: 'user',
     search: {
@@ -140,6 +141,10 @@ export const links = {
       t: 'Notes',
       r: 'user'
     },
+  },
+  inventory: {
+    t: 'Inventory',
+    r: 'operator',
   },
   settings: {
     t: 'Settings',
