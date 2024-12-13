@@ -46,8 +46,8 @@ const runAnsiblePlaybook = async () => {
       execSync(ansibleCommand, { cwd: ansibleDir, stdio: 'inherit' });
     }
 
-    // console.log('Waiting for the installation to complete...');
-    // await new Promise(resolve => setTimeout(resolve, 60000)); // Wait for 60 seconds
+    console.log('Waiting for the installation to complete...');
+    await new Promise(resolve => setTimeout(resolve, 60000)); // Wait for 60 seconds
 
     // Configure Morio via API for the first node
     console.log(`Configuring Morio API for the first node: ${firstDns}`);
