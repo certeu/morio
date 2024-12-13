@@ -21,6 +21,7 @@
     "@n8tb1t/use-scroll-position": "^2.0.3",
     "@next/mdx": "^14.2.10",
     "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
+    "@tanstack/react-query": "^5.62.7",
     "@types/mdx": "^2.0.13",
     "diff": "^5.2.0",
     "echarts": "^5.5.1",

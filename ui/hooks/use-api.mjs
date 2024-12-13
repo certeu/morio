@@ -603,6 +603,16 @@ MorioClient.prototype.rotateMrt = async function (mrt) {
   })
 }
 
+/**
+ * Get a (single) cache key
+ *
+ * @param {string} key - The cache key to retrieve
+ * @return {object} - The result
+ */
+MorioClient.prototype.getCacheKey = async function (key) {
+  return await this.call(`${morioConfig.api}/cache/keys/${key}`)
+}
+
 /*
  * Don't recreate the client on each call
  */
