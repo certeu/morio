@@ -36,7 +36,7 @@
         state: absent
       ignore_errors: true
 
-    - name: Remove Morio database files
+    - name: Copy Back Version Files
       ansible.builtin.copy:
         src: "{{ ansible_env.HOME }}/.moriod/version*"
         dest: /etc/morio/moriod/
