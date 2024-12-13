@@ -5,25 +5,40 @@
   become_method: sudo
   tasks:
     - name: Make backup directory
-      shell: mkdir -p ~/.moriod
+      ansible.builtin.file:
+        path: "{{ ansible_env.HOME }}/.moriod"
+        state: directory
+        mode: '0755'
       ignore_errors: true
 
     - name: Backup version info
-      shell: cp /etc/morio/moriod/version* ~/.moriod/
+      ansible.builtin.copy:
+        src: /etc/morio/moriod/version*
+        dest: "{{ ansible_env.HOME }}/.moriod/"
+        remote_src: yes
       ignore_errors: true
 
     - name: Remove Morio configuration files
-      shell: rm -rf /etc/morio/moriod/*
+      ansible.builtin.file:
+        path: /etc/morio/moriod/*
+        state: absent
       ignore_errors: true
 
     - name: Remove Morio logs
-      shell: rm -rf /var/log/morio/moriod/*
+      ansible.builtin.file:
+        path: /var/log/morio/moriod/*
+        state: absent
       ignore_errors: true
 
     - name: Remove Morio database files
-      shell: rm -rf /var/lib/morio/moriod/*
+      ansible.builtin.file:
+        path: /var/lib/morio/moriod/*
+        state: absent
       ignore_errors: true
 
     - name: Remove Morio database files
-      shell: cp ~/.moriod/version* /etc/morio/moriod/
+      ansible.builtin.copy:
+        src: "{{ ansible_env.HOME }}/.moriod/version*"
+        dest: /etc/morio/moriod/
+        remote_src: yes
       ignore_errors: true

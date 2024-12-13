@@ -5,7 +5,10 @@
   become_method: sudo
   tasks:
     - name: Start Morio service
-      shell: moriod start
+      ansible.builtin.systemd:
+        name: moriod
+        state: started
+        enabled: yes  # Ensure the service is enabled to start on boot
       register: start_result
 
     - name: Log result of starting Morio service
