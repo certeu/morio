@@ -1,0 +1,13 @@
+---
+- name: Start Morio on the EC2 instances
+  hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Start Morio service
+      shell: moriod start
+      register: start_result
+
+    - name: Log result of starting Morio service
+      debug:
+        msg: "Morio service start result: {{ start_result.stdout | default('No output') }}"

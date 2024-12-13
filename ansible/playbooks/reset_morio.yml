@@ -1,0 +1,29 @@
+---
+- name: Reset Morio configuration on the EC2 instances
+  hosts: all
+  become: yes
+  become_method: sudo
+  tasks:
+    - name: Make backup directory
+      shell: mkdir -p ~/.moriod
+      ignore_errors: true
+
+    - name: Backup version info
+      shell: cp /etc/morio/moriod/version* ~/.moriod/
+      ignore_errors: true
+
+    - name: Remove Morio configuration files
+      shell: rm -rf /etc/morio/moriod/*
+      ignore_errors: true
+
+    - name: Remove Morio logs
+      shell: rm -rf /var/log/morio/moriod/*
+      ignore_errors: true
+
+    - name: Remove Morio database files
+      shell: rm -rf /var/lib/morio/moriod/*
+      ignore_errors: true
+
+    - name: Remove Morio database files
+      shell: cp ~/.moriod/version* /etc/morio/moriod/
+      ignore_errors: true

@@ -2,52 +2,14 @@
 - name: Install Morio on the EC2 instance
   hosts: all
   become: yes
-  vars:
-    instance_dns: "{{ instance_dns }}"
   tasks:
     - name: Download and install Morio
-      shell: curl https://install.morio.it/ | bash
+      shell: |
+        curl https://install.morio.it/ | bash && wait
       register: result
+      args:
+        executable: /bin/bash
 
     - name: Show installation result
       debug:
         msg: "{{ result.stdout }}"
-
-    - name: Configure Morio via API
-      shell: |
-        curl -k -d '{
-          "cluster": {
-            "name": "Morio Test Instance",
-            "broker_nodes": [
-              "{{ instance_dns }}"
-            ]
-          },
-          "iam": {
-            "providers": {
-              "apikey": {
-                "provider": "apikey",
-                "id": "apikey",
-                "label": "API Key"
-              },
-              "mrt": {},
-              "local": {
-                "provider": "local",
-                "id": "local",
-                "label": "Morio Account"
-              }
-            }
-          }
-        }' -H "Content-Type: application/json" https://{{ instance_dns }}/-/api/setup
-      register: api_result
-
-    - name: Show API result
-      debug:
-        msg: "{{ api_result.stdout }}"
-
-    - name: Extract root_token value
-      set_fact:
-        root_token: "{{ (api_result.stdout | from_json).root_token.value }}"
-
-    - name: Show extracted root_token
-      debug:
-        msg: "Extracted root_token: {{ root_token }}"

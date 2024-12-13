@@ -23,7 +23,7 @@
     "ui"
   ],
   "devDependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "esbuild": "^0.23.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -39,7 +39,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "deploy:testvm": "node ./scripts/deploy-test-vm.mjs",
+    "reset:testvm": "node ./scripts/reset-test-vm.mjs",
+    "setup:testvm": "node ./scripts/setup-test-vm.mjs",
     "create:testvm": "node ./scripts/create-test-vm.mjs",
     "destroy:testvm": "node ./scripts/destroy-test-vm.mjs",
     "build": "npm run build:dev",
