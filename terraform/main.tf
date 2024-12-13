@@ -5,7 +5,7 @@ provider "aws" {
 # Random string generator for DNS names
 resource "random_string" "dns_name" {
   count   = var.node_count  # Create a random string for each instance
-  length  = 6
+  length  = 3
   special = false
   upper   = false
 }
@@ -65,7 +65,7 @@ resource "aws_route53_record" "test_instance" {
 # Generate a random string for FQDN
 resource "random_string" "fqdn_name" {
   count   = var.node_count > 1 ? 1 : 0
-  length  = 8
+  length  = 3
   special = false
   upper   = false
 }
