@@ -7,7 +7,6 @@ import { config } from "./config.mjs"
 const handler = config.enabled ? {
   ...config,
   method: (data, tools, topic) => {
-    tools.log.debug(`Received a metrics message in topic ${topic}`)
     /*
      * Metricset: throughput
      */

@@ -14,6 +14,10 @@ import {
   DesktopIcon,
   DocumentIcon,
   DownloadIcon,
+  FingerprintIcon,
+  FixmeIcon,
+  FlagIcon,
+  FlipoverIcon,
   LayersIcon,
   MorioIcon,
   OpenLockIcon,
@@ -21,11 +25,13 @@ import {
   PlusCircleIcon,
   QuestionIcon,
   RightIcon,
+  SearchIcon,
   ServersIcon,
   SettingsIcon,
   StatusIcon,
   StorageIcon,
   TaskIcon,
+  TipIcon,
   UlIcon,
   UserIcon,
   WifiIcon,
@@ -39,6 +45,7 @@ import { Link } from 'components/link'
  */
 export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
 
+
 /*
  * Object to map icons to page
  */
@@ -46,6 +53,7 @@ const icons = {
   accounts: UserIcon,
   actions: WrenchIcon,
   api: CodeIcon,
+  audit: FingerprintIcon,
   broker: RedPanda,
   ca: CertificateIcon,
   certificates: CertificateIcon,
@@ -54,23 +62,30 @@ const icons = {
   components: ComponentIcon,
   containers: ContainerIcon,
   console: RedPandaConsole,
+  custom: FixmeIcon,
   dashboard: Traefik,
+  dashboards: FlipoverIcon,
   decrypt: OpenLockIcon,
   docker: Docker,
   download: DownloadIcon,
   downloads: DownloadIcon,
   encrypt: ClosedLockIcon,
+  events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
+  healthchecks: CheckCircleIcon,
   images: ContainerImageIcon,
   logs: StorageIcon,
+  metrics: StatusIcon,
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
+  notes: TipIcon,
   pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
   reference: UlIcon,
+  search: SearchIcon,
   services: LayersIcon,
   settings: SettingsIcon,
   show: DocumentIcon,
@@ -89,6 +104,42 @@ export const links = {
   actions: {
     t: 'Actions',
     r: 'operator',
+  },
+  dashboards: {
+    t: 'Dashboards',
+    r: 'user',
+    search: {
+      t: 'Search Dashboards',
+      r: 'user'
+    },
+    custom: {
+      t: 'Custom Dashboards',
+      r: 'user'
+    },
+    audit: {
+      t: 'Audit',
+      r: 'user'
+    },
+    events: {
+      t: 'Events',
+      r: 'user'
+    },
+    healthchecks: {
+      t: 'Healthchecks',
+      r: 'user'
+    },
+    logs: {
+      t: 'Logs',
+      r: 'user'
+    },
+    metrics: {
+      t: 'Metrics',
+      r: 'user'
+    },
+    notes: {
+      t: 'Notes',
+      r: 'user'
+    },
   },
   settings: {
     t: 'Settings',

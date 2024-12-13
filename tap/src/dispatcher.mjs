@@ -21,7 +21,7 @@ export function dispatch(topic, message, tools) {
    * Do the actual dispatching for every message handler subscribed to this topic
    */
   for (const handler of handlersPerTopic[topic]) {
-    const data = parseMessageData(message)
+    const { data } = parseMessageData(message)
     /*
      * Run filter method if there is one
      */

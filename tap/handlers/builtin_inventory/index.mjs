@@ -51,7 +51,6 @@ const inventoryHandler = config.enabled ? {
   ...config.inventory,
   enabled: true,
   method: (data, tools, topic) => {
-    tools.log.debug(`Received inventory message in ${topic}`)
     return
   }
 } : null
