@@ -1,6 +1,10 @@
 import { utils } from '../lib/utils.mjs'
 import {
+  getStats,
   listHosts,
+  loadHost,
+  loadHostIps,
+  loadHostMacs,
   saveHost,
 } from '../lib/inventory.mjs'
 
@@ -48,22 +52,27 @@ Controller.prototype.readHost = async function (req, res) {
   /*
    * Validate input
    */
-  const [valid, err] = await utils.validate(`req.inventory.readHost`, { key: req.params[0] })
+  const [valid, err] = await utils.validate(`req.inventory.readHost`, { id: req.params.id })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
 
   /*
-   * Read from KV
+   * Read from inventory
    */
-  //const result = await utils.kv.get(valid.key)
-  const result = false
+  const result = await loadHost(valid.id)
 
   /*
    * Be expicit when a key cannot be found
    */
   if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  /*
+   * Add IP and MAC addresses
+   */
+  const ips = await loadHostIps(valid.id)
+  const macs = await loadHostMacs(valid.id)
 
   return result[1] === null
     ? res.send({ key: valid.key, value: result[0] })
@@ -117,6 +126,20 @@ Controller.prototype.listHosts = async function (req, res) {
 }
 
 /**
+ * Read stats, gather statistics about the inventory
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getStats = async function (req, res) {
+  const stats = await getStats()
+
+  return stats
+    ? res.send(stats)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
  * Search inventory
  *
  * @param {object} req - The request object from Express
@@ -138,3 +161,5 @@ Controller.prototype.search = async function (req, res) {
     ? res.send(list)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+
+

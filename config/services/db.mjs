@@ -140,7 +140,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         memory INTEGER,
         name TEXT,
         notes TEXT,
-        os TEXT,
         tags TEXT,
         last_update DATETIME
       )`,
@@ -150,28 +149,22 @@ export const resolveServiceConfiguration = ({ utils }) => {
         family TEXT,
         kernel TEXT,
         name TEXT
-        notes TEXT,
         platform TEXT,
-        tags TEXT,
         type TEXT,
         version TEXT,
         last_update DATETIME
       )`,
-      inventory_host_ips: `CREATE table inventory_host_ips (
+      inventory_ips: `CREATE table inventory_ips (
         id INTEGER PRIMARY KEY,
         ip TEXT,
         host TEXT
-        notes TEXT,
-        tags TEXT,
         version INTEGER,
         last_update DATETIME
       )`,
-      inventory_host_macs: `CREATE table inventory_host_macs (
+      inventory_macs: `CREATE table inventory_macs (
         id INTEGER PRIMARY KEY,
         mac TEXT,
         host TEXT
-        notes TEXT,
-        tags TEXT,
         last_update DATETIME
       )`,
     },

@@ -54,20 +54,112 @@ export async function listHosts() {
  * @return {object} data - The data saved for the host
  */
 export async function loadHost(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
-    id: fields.id(id),
-  })
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_hosts WHERE id=:id`,
+    { id: clean(id) }
+  )
 
   if (status !== 200) return false
-  const found = accountsAsList(result)
+  const found = hostsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
   else {
-    log.warn(`Found more than one account in loadAccount. This is unexpected.`)
+    log.warn(`Found more than one host in loadHost. This is unexpected.`)
     return false
   }
 }
+
+/**
+ * Helper method to load IP addresses for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostIps(id) {
+    const q = `SELECT * FROM inventory_ips WHERE host=:id`
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_ips WHERE host=:id`,
+    { id: clean(id) }
+  )
+  console.log(JSON.stringify({q,result, params: { id }}, null, 2))
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
+  console.log(found)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load MAC addresses for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostMacs(id) {
+    const q = `SELECT * FROM inventory_macs WHERE host=:id`
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_macs WHERE host=:id`,
+    { id: clean(id) }
+  )
+  console.log(JSON.stringify({q,result, params: { id }}, null, 2))
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
+  console.log(found)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to get info about the inventory
+ * @return {object} stats - The stats
+ */
+export async function getStats() {
+  // Count hosts
+  let query = `SELECT COUNT(id) as count FROM inventory_hosts`
+  const [hostStatus, hostResult] = await db.read(query)
+  // Count IPs
+  query = `SELECT COUNT(id) as count FROM inventory_ips`
+  const [ipStatus, ipResult] = await db.read(query)
+  console.log(ipResult)
+  query = `SELECT COUNT(id) as count FROM inventory_macs`
+  const [macStatus, macResult] = await db.read(query)
+
+  return {
+    hosts: getFields(hostResult).pop().count,
+    ips: getFields(ipResult).pop().count,
+    macs: getFields(macResult).pop().count,
+  }
+}
+
+/*
+ * Helper method to extract results from a SELECT query result
+ *
+ * @param {object} result - The result from Rqlite
+ * @resturn {array} list - The list of field values
+ */
+function getFields(result={}) {
+  const cols = result?.results?.[0]?.columns
+  const list = (result?.results?.[0]?.values || []).map((entry) => {
+    const data = {}
+    for (const i in cols)
+      data[cols[i]] =
+        values[cols[i]] && typeof values[cols[i]] === 'function'
+          ? values[cols[i]](entry[i])
+          : entry[i]
+
+    return data
+  })
+
+  return list
+}
+
 
 /**
  * Helper method to load API keys for a given account

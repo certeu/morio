@@ -15,7 +15,6 @@ import { config } from "./config.mjs"
 const handler = config.enabled ? {
   ...config,
   method: (data, tools, topic) => {
-    tools.log.debug(`Received a log message in topic ${topic}`)
     /*
      * Only handle data that has a log message
      */
@@ -38,7 +37,7 @@ const handler = config.enabled ? {
     /*
      * Only cache what we understand
      */
-    if (!logId) return tools.cache.note('Failed to extract logId from data', data)
+    if (!logId) return tools.note('Failed to extract logId from data', data)
 
     /*
      * Update the cache

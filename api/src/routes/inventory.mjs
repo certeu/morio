@@ -30,6 +30,11 @@ export function routes(app) {
   //app.get(`/inventory/host-ips/`, rbac.operator, inventory.listHostMacs)
 
   /*
+   * Get inventory stats
+   */
+  app.get(`/inventory/stats`, rbac.user, inventory.getStats)
+
+  /*
    * Read all hosts
    */
   app.get(`/inventory/hosts`, rbac.user, inventory.listHosts)

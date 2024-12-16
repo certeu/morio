@@ -613,13 +613,32 @@ MorioClient.prototype.getCacheKey = async function (key) {
   return await this.call(`${morioConfig.api}/cache/keys/${key}`)
 }
 
-/*t
+/**
  * Get all hosts from the inventory
  *
  * @return {object} - The result
  */
 MorioClient.prototype.getInventoryHosts = async function () {
   return await this.call(`${morioConfig.api}/inventory/hosts`)
+}
+
+/**
+ * Get a host from the inventory
+ *
+ * @param {string} - The uuid of the host
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHost = async function (uuid) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${uuid}`)
+}
+
+/**
+ * Get stats for the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryStats = async function () {
+  return await this.call(`${morioConfig.api}/inventory/stats`)
 }
 
 /*

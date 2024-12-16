@@ -1,7 +1,9 @@
 import crypto from 'crypto'
 import querystring from 'querystring'
 import pino from 'pino'
+import axios from 'axios'
 import { cache as valkey } from './cache.mjs'
+import { inventory } from './inventory.mjs'
 
 /*
  * Export log object on its own
@@ -15,6 +17,7 @@ export const log = pino({ name: 'tap', level: 20, sync: false })
  * Functions are defined lower down
  */
 export const tools = {
+  axios,
   cache: {
     healthcheck:cacheHealthcheck,
     logErrors: logCacheErrors,
@@ -25,6 +28,9 @@ export const tools = {
     note: cacheNote,
     trimStream,
   },
+  clean,
+  inventory,
+  note: cacheNote,
   valkey,
   create: {
     context: createContext,
@@ -55,6 +61,7 @@ export const tools = {
     notification,
     inventoryUpdate: produceInventoryUpdate,
   },
+  rawUuid,
 }
 
 /*
@@ -63,6 +70,15 @@ export const tools = {
  *
  */
 
+/**
+ * Helper method to lowercase + trim input strings
+ *
+ * @param {string} input - The input (eg: 'Tony Soprano ')
+ * @return {string} cleaned - The cleaned output (eg: 'tony soprano')
+ */
+function clean(input) {
+  return input === null ? null : String(input).toLowerCase().trim()
+}
 /*
  * Generates a context key
  * This is the same as a cache key, but uses '.' as spacer
@@ -91,6 +107,17 @@ function createHash (input) {
 function createKey (...data) {
   return generateKey(data, '|')
 }
+
+/*
+ * This removes dashes from input, and lowercases it. Intended for UUIDs
+ *
+ * @param {string} input - The input
+ * @return {string} output - The string without dashes, lowercases, and trimmed
+ */
+function rawUuid (id)  {
+  return clean(id).replaceAll('-','')
+}
+
 
 /*
  * Converts milliseconds to seconds

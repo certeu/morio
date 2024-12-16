@@ -64,7 +64,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         enabled: utils.getSettings('tap.builtin.inventory.enabled', false),
         metrics: {
           topics: { metrics: 'metrics' },
-          filter: ({ data }) => data?.morio?.inventory_update ? true : false,
+          modules: { 'linux-system': 'linux-system' },
         },
         inventory: {
           topics: { inventory: 'inventory' },

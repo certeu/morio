@@ -74,6 +74,7 @@ const icons = {
   export: BriefcaseIcon,
   faq: QuestionIcon,
   healthchecks: CheckCircleIcon,
+  hosts: ServersIcon,
   images: ContainerImageIcon,
   inventory: ServersIcon,
   logs: StorageIcon,
@@ -145,6 +146,10 @@ export const links = {
   inventory: {
     t: 'Inventory',
     r: 'operator',
+    hosts: {
+      t: 'Hosts',
+      r: 'user'
+    },
   },
   settings: {
     t: 'Settings',
