@@ -39,6 +39,7 @@
     "node": ">=20"
   },
   "scripts": {
+    "ephemeral:testvm": "node ./tests/10_ephemeral.test.mjs",
     "reset:testvm": "node ./scripts/reset-test-vm.mjs",
     "setup:testvm": "node ./scripts/setup-test-vm.mjs",
     "create:testvm": "node ./scripts/create-test-vm.mjs",

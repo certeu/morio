@@ -11,34 +11,69 @@
         mode: '0755'
       ignore_errors: true
 
-    - name: Backup version info
+    - name: Find version files
+      ansible.builtin.find:
+        paths: /etc/morio/moriod
+        patterns: version*
+      register: version_files
+
+    - name: Backup version files
       ansible.builtin.copy:
-        src: /etc/morio/moriod/version*
+        src: "{{ item.path }}"
         dest: "{{ ansible_env.HOME }}/.moriod/"
         remote_src: yes
+      with_items: "{{ version_files.files }}"
       ignore_errors: true
 
-    - name: Remove Morio configuration files
+    - name: Find all files in the directory
+      ansible.builtin.find:
+        paths: /etc/morio/moriod
+        file_type: file
+      register: files_to_remove
+
+    - name: Remove all files in the directory
       ansible.builtin.file:
-        path: /etc/morio/moriod/*
+        path: "{{ item.path }}"
         state: absent
+      with_items: "{{ files_to_remove.files }}"
       ignore_errors: true
 
-    - name: Remove Morio logs
+    - name: Find all log files in the directory
+      ansible.builtin.find:
+        paths: /var/log/morio/moriod
+        file_type: file
+      register: log_files
+
+    - name: Remove all log files
       ansible.builtin.file:
-        path: /var/log/morio/moriod/*
+        path: "{{ item.path }}"
         state: absent
+      with_items: "{{ log_files.files }}"
       ignore_errors: true
 
-    - name: Remove Morio database files
+    - name: Find all database files in the directory
+      ansible.builtin.find:
+        paths: /var/lib/morio/moriod
+        file_type: file
+      register: db_files
+
+    - name: Remove all database files
       ansible.builtin.file:
-        path: /var/lib/morio/moriod/*
+        path: "{{ item.path }}"
         state: absent
+      with_items: "{{ db_files.files }}"
       ignore_errors: true
 
-    - name: Copy Back Version Files
+    - name: Find version files in backup
+      ansible.builtin.find:
+        paths: "{{ ansible_env.HOME }}/.moriod"
+        patterns: version*
+      register: backup_version_files
+
+    - name: Copy back version files
       ansible.builtin.copy:
-        src: "{{ ansible_env.HOME }}/.moriod/version*"
+        src: "{{ item.path }}"
         dest: /etc/morio/moriod/
         remote_src: yes
+      with_items: "{{ backup_version_files.files }}"
       ignore_errors: true

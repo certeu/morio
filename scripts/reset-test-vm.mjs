@@ -25,15 +25,15 @@ const runAnsiblePlaybooks = async () => {
     }
 
     for (const dns of dnsNames) {
-      runPlaybook('stop_morio.yml', ansibleDir, dns);
+      runPlaybook('stop_moriod.yml', ansibleDir, dns);
     }
 
     for (const dns of dnsNames) {
-      runPlaybook('reset_morio.yml', ansibleDir, dns);
+      runPlaybook('reset_moriod.yml', ansibleDir, dns);
     }
 
     for (const dns of dnsNames) {
-      runPlaybook('start_morio.yml', ansibleDir, dns);
+      runPlaybook('start_moriod.yml', ansibleDir, dns);
     }
   } catch (error) {
     console.error('Error running Ansible playbooks:', error);

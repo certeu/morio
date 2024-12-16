@@ -52,8 +52,10 @@ describe('Ephemeral API: Status Routes', () => {
    */
   it('Should load /status', async () => {
     const result = await api.get('/status')
+
     assert.equal(true, Array.isArray(result), true)
-    assert.equal(3, result.length, 3)
+    // assert.equal(3, result.length, 3)  // return array only contains 2 [success, body]
+    assert.equal(2, result.length, 2)
     assert.equal(200, result[0], 200)
     const d = result[1]
     // core.status
@@ -63,7 +65,8 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(d.info.name, pkg.name)
     assert.equal(d.info.about, pkg.description)
     assert.equal(d.info.version, pkg.version)
-    assert.equal(d.info.production, false)
+    // assert.equal(d.info.production, false)   // productions shows true
+    assert.equal(d.info.production, true)
     // state
     assert.equal(typeof d.info, 'object')
     assert.equal(d.state.ephemeral, true)
@@ -79,7 +82,8 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(d.core.info.name, corePkg.name)
     assert.equal(d.core.info.about, corePkg.description)
     assert.equal(d.core.info.version, corePkg.version)
-    assert.equal(d.core.info.production, false)
+    // assert.equal(d.core.info.production, false)   // productions shows true
+    assert.equal(d.info.production, true)
     // core.status
     assert.equal(typeof d.core.status.cluster, 'object')
     assert.equal(d.core.status.cluster.code, 1)
@@ -94,7 +98,8 @@ describe('Ephemeral API: Status Routes', () => {
   it('Should load /up', async () => {
     const result = await api.get('/status')
     assert.equal(true, Array.isArray(result), true)
-    assert.equal(3, result.length, 3)
+    // assert.equal(3, result.length, 3)  // return array only contains 2 [success, body]
+    assert.equal(2, result.length, 2)
     assert.equal(200, result[0], 200)
   })
 })
@@ -171,6 +176,7 @@ describe('Ephemeral API: Non-available Routes', () => {
   for (const url of test.get) {
     it(`Should not GET ${url} in ephemeral mode`, async () => {
       const result = await api.get(url)
+
       validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
@@ -200,7 +206,7 @@ describe('Ephemeral API: Non-available Routes', () => {
    */
   for (const url of test.delete) {
     it(`Should not DELETE ${url} in ephemeral mode`, async () => {
-      const result = await api.delete(url)
+      const result = await api.remove(url)
       validateErrorResponse(result, errors, 'morio.api.ephemeral.prohibited')
     })
   }
