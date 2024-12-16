@@ -42,7 +42,7 @@ const runAnsiblePlaybook = async () => {
     // Run Ansible playbook for each node
     for (const dns of dnsNames) {
       console.log(`Running Ansible playbook for node: ${dns}`);
-      const ansibleCommand = `ansible-playbook -i ${dns}, --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args='-o StrictHostKeyChecking=no'" ../ansible/playbooks/install_morio.yml`;
+      const ansibleCommand = `ansible-playbook -i ${dns}, --extra-vars "ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args='-o StrictHostKeyChecking=no'" ../ansible/playbooks/install_moriod.yml`;
       execSync(ansibleCommand, { cwd: ansibleDir, stdio: 'inherit' });
     }
 
