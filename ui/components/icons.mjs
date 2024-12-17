@@ -262,6 +262,15 @@ export const FlipoverIcon = (props) => (
 )
 
 /*
+ * HardwareIcon - Looks like a chip
+ */
+export const HardwareIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
+  </IconWrapper>
+)
+
+/*
  * HttpIcon - Looks like a globe with the text 'http' in front of it
  */
 export const HttpIcon = (props) => (
@@ -322,6 +331,16 @@ export const LeftIcon = (props) => (
 export const LinkIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+  </IconWrapper>
+)
+
+/*
+ * LocationIcon - Looks like a map pin
+ */
+export const LocationIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
   </IconWrapper>
 )
 

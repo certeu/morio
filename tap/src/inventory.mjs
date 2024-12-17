@@ -19,8 +19,6 @@ async function updateHost (data, tools) {
    * Only run queries if we have enough host data
    */
   const hq = hostQuery(data, tools)
-
-  tools.note(`Q: ${JSON.stringify(hq)}`)
   if (hq) {
     let result
     try {
@@ -28,17 +26,16 @@ async function updateHost (data, tools) {
         `${db}/db/execute`,
         [
           hq,
-          //...ipQueries(data, tools),
-          //...macQueries(data, tools),
+          ...ipQueries(data, tools),
+          ...macQueries(data, tools),
         ]
       )
     }
     catch (err) {
       tools.note(`Failed to update host ${data.host.id} in DB`)
-      console.log(err)
     }
 
-    if (result?.status !== 200) tools.log(`Error when trying to update inventory`)
+    if (result?.status !== 200) tools.note(`Error when trying to update inventory`)
   }
 }
 
@@ -63,9 +60,7 @@ function hostQuery (data, tools, update=true) {
   if (data.host?.fqdn) params.fqdn = tools.clean(data.host.fqdn)
   if (data.host?.memory) params.memory = Number(data.host.memory)
 
-  tools.note(`host params: ${JSON.stringify(params)}, DATA: ${JSON.stringify(data)}`)
-
-  return buildQuery(`inventory_hosts`, params)
+  return upsertQuery(`inventory_hosts`, params)
 }
 
 /*
@@ -77,16 +72,13 @@ function hostQuery (data, tools, update=true) {
  * @return {array} query - The query and its parameters
  */
 function ipQuery (hostId, ip, tools) {
-  return buildQuery(
-    `inventory_ips`,
-    {
-      id: `${tools.clean(hostId)}_${tools.clean(ip)}`,
-      ip: tools.clean(ip),
-      host: tools.clean(hostId),
-      version: ip.includes(':') ? 6 : 4,
-      last_update: new Date().toISOString(),
-    }
-  )
+  return replaceQuery(`inventory_ips`, {
+    id: `${tools.clean(hostId)}_${tools.clean(ip)}`,
+    ip: tools.clean(ip),
+    host: tools.clean(hostId),
+    version: ip.includes(':') ? 6 : 4,
+    last_update: new Date().toISOString(),
+  })
 }
 
 /*
@@ -111,15 +103,14 @@ function ipQueries (data, tools) {
  * @return {array} query - The query and its parameters
  */
 function macQuery (hostId, mac, tools) {
-  return buildQuery(
-    `inventory_macs`,
-    {
-      id: `${tools.clean(hostId)}_${tools.clean(mac)}`,
-      mac: tools.clean(mac),
-      host: tools.clean(hostId),
-      last_update: new Date().toISOString(),
-    }
-  )
+  const params = {
+    id: `${tools.clean(hostId)}_${tools.clean(mac)}`,
+    mac: tools.clean(mac),
+    host: tools.clean(hostId),
+    last_update: new Date().toISOString(),
+  }
+
+  return replaceQuery(`inventory_macs`, params)
 }
 
 /*
@@ -135,13 +126,23 @@ function macQueries (data, tools) {
   return queries
 }
 
-function buildQuery(table, params) {
+function upsertQuery(table, params) {
   const keys = Object.keys(params)
   const vals = keys.map((key) => ':' + key).join()
   const uvals = keys.map((key) => `${key} = :${key}`).join()
 
   return [
     `INSERT INTO ${table}(${keys.join()}) VALUES(${vals}) ON CONFLICT(id) DO UPDATE SET ${uvals}`,
+    params,
+  ]
+}
+
+function replaceQuery(table, params) {
+  const keys = Object.keys(params)
+  const vals = keys.map((key) => ':' + key).join()
+
+  return [
+    `REPLACE INTO ${table}(${keys.join()}) VALUES(${vals})`,
     params,
   ]
 }

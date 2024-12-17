@@ -1,10 +1,17 @@
 import { utils } from '../lib/utils.mjs'
 import {
+  deleteIp,
+  deleteMac,
+  deleteHost,
   getStats,
   listHosts,
+  listIps,
+  listMacs,
   loadHost,
   loadHostIps,
   loadHostMacs,
+  loadIp,
+  loadMac,
   saveHost,
 } from '../lib/inventory.mjs'
 
@@ -66,7 +73,7 @@ Controller.prototype.readHost = async function (req, res) {
   /*
    * Be expicit when a key cannot be found
    */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
   /*
    * Add IP and MAC addresses
@@ -80,7 +87,7 @@ Controller.prototype.readHost = async function (req, res) {
 }
 
 /**
- * Delete key
+ * Delete host
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -96,7 +103,7 @@ Controller.prototype.deleteHost = async function (req, res) {
     })
 
   /*
-   * Delete from KV
+   * Delete from KV FIXME
    */
   //const result = await utils.kv.del(valid.key)
   const result = false
@@ -119,6 +126,157 @@ Controller.prototype.deleteHost = async function (req, res) {
  */
 Controller.prototype.listHosts = async function (req, res) {
   const list = await listHosts()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Read IP address
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readIp = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readIp`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadIp(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return result[1] === null
+    ? res.send({ key: valid.key, value: result[0] })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete IP
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteIp = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readIp`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteIp(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List IP addresses
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listIps = async function (req, res) {
+  const list = await listIps()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Read MAC address
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMac`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadMac(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return result[1] === null
+    ? res.send({ key: valid.key, value: result[0] })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete MAC
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMac`, { key: req.params[0] })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database FIXME
+   */
+  const result = false
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List MAC addresses
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listMacs = async function (req, res) {
+  const list = await listMacs()
 
   return Array.isArray(list)
     ? res.send(list)

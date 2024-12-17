@@ -232,6 +232,12 @@ export const schema = {
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required()
   }),
+  'req.inventory.readIp': Joi.object({
+    id: Joi.string().required()
+  }),
+  'req.inventory.readMac': Joi.object({
+    id: Joi.string().required()
+  }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),
   // This combines request body and request parameters

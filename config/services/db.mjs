@@ -148,23 +148,23 @@ export const resolveServiceConfiguration = ({ utils }) => {
         codename TEXT,
         family TEXT,
         kernel TEXT,
-        name TEXT
+        name TEXT,
         platform TEXT,
         type TEXT,
         version TEXT,
         last_update DATETIME
       )`,
       inventory_ips: `CREATE table inventory_ips (
-        id INTEGER PRIMARY KEY,
+        id TEXT NOT NULL PRIMARY KEY,
         ip TEXT,
-        host TEXT
+        host TEXT,
         version INTEGER,
         last_update DATETIME
       )`,
       inventory_macs: `CREATE table inventory_macs (
-        id INTEGER PRIMARY KEY,
+        id TEXT NOT NULL PRIMARY KEY,
         mac TEXT,
-        host TEXT
+        host TEXT,
         last_update DATETIME
       )`,
     },

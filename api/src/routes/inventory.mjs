@@ -50,6 +50,36 @@ export function routes(app) {
   app.delete(`/inventory/hosts/:id`, rbac.user, inventory.deleteHost)
 
   /*
+   * Read all IP addresses
+   */
+  app.get(`/inventory/ips`, rbac.user, inventory.listIps)
+
+  /*
+   * Read an IP address
+   */
+  //app.get(`/inventory/ips/:id`, rbac.user, inventory.readIp)
+
+  /*
+   * Delete an IP address
+   */
+  app.delete(`/inventory/ips/:id`, rbac.user, inventory.deleteIp)
+
+  /*
+   * Read all MAC addresses
+   */
+  app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
+
+  /*
+   * Read a MAC address
+   */
+  //app.get(`/inventory/macs/:id`, rbac.user, inventory.readMac)
+
+  /*
+   * Delete a MAC address
+   */
+  //app.delete(`/inventory/macs/:id`, rbac.user, inventory.deleteMac)
+
+  /*
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)

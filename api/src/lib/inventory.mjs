@@ -38,10 +38,34 @@ const values = {
 /**
  * Helper method to list hosts in the inventory
  *
- * @return {object} keys - The API keys saved for the account
+ * @return {object} keys - The hosts in the inventory
  */
 export async function listHosts() {
   const query = `SELECT * FROM inventory_hosts`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? hostsAsList(result) : false
+}
+
+/**
+ * Helper method to list IP addresses in the inventory
+ *
+ * @return {object} keys - The IP addresses in the inventory
+ */
+export async function listIps() {
+  const query = `SELECT * FROM inventory_ips`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? hostsAsList(result) : false
+}
+
+/**
+ * Helper method to list MAC addresses in the inventory
+ *
+ * @return {object} keys - The MAC addresses in the inventory
+ */
+export async function listMacs() {
+  const query = `SELECT * FROM inventory_macs`
   const [status, result] = await db.read(query)
 
   return status === 200 ? hostsAsList(result) : false
@@ -66,6 +90,52 @@ export async function loadHost(id) {
   if (found.length === 1) return found[0]
   else {
     log.warn(`Found more than one host in loadHost. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory IP address
+ *
+ * @param {string} id - The ID of the IP address
+ * @return {object} data - The data saved for the IP address
+ */
+export async function loadIp(id) {
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_ips WHERE id=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadIp. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory MAC address
+ *
+ * @param {string} id - The ID of the MAC address
+ * @return {object} data - The data saved for the MAC address
+ */
+export async function loadMac(id) {
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_macs WHERE id=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadIp. This is unexpected.`)
     return false
   }
 }
@@ -127,7 +197,6 @@ export async function getStats() {
   // Count IPs
   query = `SELECT COUNT(id) as count FROM inventory_ips`
   const [ipStatus, ipResult] = await db.read(query)
-  console.log(ipResult)
   query = `SELECT COUNT(id) as count FROM inventory_macs`
   const [macStatus, macResult] = await db.read(query)
 
@@ -135,6 +204,56 @@ export async function getStats() {
     hosts: getFields(hostResult).pop().count,
     ips: getFields(ipResult).pop().count,
     macs: getFields(macResult).pop().count,
+  }
+}
+
+/**
+ * Helper function to delete a record from a table
+ *
+ * @param {string} table - The table to delete from
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+async function deleteRecord (table=false, id=false) {
+  if (!id || !table) return false
+
+  const result = await db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
+
+  return true
+}
+
+/**
+ * Helper method to delete an IP address
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteIp (id=false) {
+  return await deleteRecord('inventory_ips', id)
+}
+
+/**
+ * Helper method to delete a MAC address
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteMac (id=false) {
+  return await deleteRecord('inventory_macs', id)
+}
+
+/**
+ * Helper method to delete a host
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteHost (id=false) {
+  return await deleteRecord('inventory_hosts', id)
+
+  // Also remove IPs, MACs, and OS beloonging to this host
+  for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
+    await db.write(`DELETE FROM :table WHERE host = :id`, { table, id })
   }
 }
 

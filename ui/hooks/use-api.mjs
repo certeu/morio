@@ -633,6 +633,15 @@ MorioClient.prototype.getInventoryHost = async function (uuid) {
 }
 
 /**
+ * Get all IP addresses from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryIps = async function () {
+  return await this.call(`${morioConfig.api}/inventory/ips`)
+}
+
+/**
  * Get stats for the inventory
  *
  * @return {object} - The result
@@ -640,6 +649,19 @@ MorioClient.prototype.getInventoryHost = async function (uuid) {
 MorioClient.prototype.getInventoryStats = async function () {
   return await this.call(`${morioConfig.api}/inventory/stats`)
 }
+
+/**
+ * Removes an IP address
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeIp = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
 
 /*
  * Don't recreate the client on each call

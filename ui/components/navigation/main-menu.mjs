@@ -18,7 +18,9 @@ import {
   FixmeIcon,
   FlagIcon,
   FlipoverIcon,
+  HardwareIcon,
   LayersIcon,
+  LocationIcon,
   MorioIcon,
   OpenLockIcon,
   PackageIcon,
@@ -77,7 +79,9 @@ const icons = {
   hosts: ServersIcon,
   images: ContainerImageIcon,
   inventory: ServersIcon,
+  ips: LocationIcon,
   logs: StorageIcon,
+  macs: HardwareIcon,
   metrics: StatusIcon,
   morio: MorioIcon,
   networks: WifiIcon,
@@ -148,6 +152,14 @@ export const links = {
     r: 'operator',
     hosts: {
       t: 'Hosts',
+      r: 'user'
+    },
+    ips: {
+      t: 'IP Addresses',
+      r: 'user'
+    },
+    macs: {
+      t: 'MAC Addresses',
       r: 'user'
     },
   },

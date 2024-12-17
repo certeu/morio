@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
+import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { ServersIcon } from 'components/icons.mjs'
+import { HardwareIcon, LocationIcon, ServersIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
@@ -23,13 +24,19 @@ const Stat = ({ title, nr, Icon, link }) => (
 
 export default function InventoryPage() {
   const { api } = useApi()
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   const [data, setData] = useState()
   const [count, setCount] = useState(0)
 
   useEffect(() => {
     runApiCall(api).then(result => {
-      if (result[1] === 200) setData(result[0])
+      setLoadingStatus([true, "Loading inventory data"])
+      if (result[1] === 200) {
+        setData(result[0])
+        setLoadingStatus([true, "Inventory data loaded", true, true])
+      }
+      else setLoadingStatus([true, "Failed to load inventory data", true, false])
     })
   },[count])
 
@@ -39,8 +46,8 @@ export default function InventoryPage() {
         <div className="max-w-4xl">
           <div className="stats shadow w-full">
             <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts"/>
-            <Stat title="IP Addresses" nr={data?.ips} Icon={ServersIcon} link="/inventory/ips"/>
-            <Stat title="MAC Addresses" nr={data?.macs} Icon={ServersIcon} link="/inventory/macs"/>
+            <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips"/>
+            <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs"/>
           </div>
           <Popout fixme>
             <h4>Apologies, but this is a work in progress</h4>

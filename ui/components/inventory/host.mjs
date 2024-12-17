@@ -1,4 +1,4 @@
-import { formatBytes } from 'lib/utils.mjs'
+import { formatBytes, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { useState} from 'react'
 // Components
@@ -55,10 +55,10 @@ export const HostsTable = ({ hosts }) => {
     <table className="table table-auto">
       <thead>
         <tr>
-          {['name', 'cores', 'memory', 'id'].map(field => (
+          {['id', 'name', 'cores', 'memory', 'last_update'].map(field => (
             <th key={field}>
               <button
-                className="btn btn-link capitalize"
+                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
               >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
               </button>
@@ -69,10 +69,11 @@ export const HostsTable = ({ hosts }) => {
       <tbody>
         {sorted.map(host => (
           <tr key={host.id}>
-            <td><PageLink href={`/inventory/hosts/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
-            <td>{host.cores}</td>
-            <td>{formatBytes(host.memory)}</td>
-            <td><PageLink href={`/inventory/hosts/${host.id}`}>{shortUuid(host.id)}</PageLink></td>
+            <td className=""><PageLink href={`/inventory/hosts/${host.id}`}>{shortUuid(host.id)}</PageLink></td>
+            <td className=""><PageLink href={`/inventory/hosts/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
+            <td className="">{host.cores}</td>
+            <td className="">{formatBytes(host.memory)}</td>
+            <td className="">{timeAgo(host.last_update)}</td>
           </tr>
         ))}
       </tbody>
