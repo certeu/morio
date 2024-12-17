@@ -18,31 +18,35 @@ const handler = config.enabled ? {
     /*
      * Only handle data that has a log message
      */
-    if (!data?.message) return
+    if (!data?.message) {
+      tools.note(`No message field in data: ${JSON.stringify(data)}`)
+      return
+    }
 
     /*
      * Figure out what cache key to use
      */
-    let logId = false
+    let logType = false
     // Regular logs read from a file
-    if (data?.log?.file?.path) logId = data.log.file.path
+    if (data?.log?.file?.path) logType = data.log.file.path
     // Logs from journald
     if (data?.input?.type === 'journald') {
-      if (data?.container?.name) logId = `journald.container.${data.container.name}`
-      else if (data?.journald?.process?.name) logId = `journald.process.${data.journald.process.name}`
-      else if (data?.syslog?.identifier) logId = `jounrnald.syslog.${data?.syslog?.identifier}`
-      else `journald.generic`
+      if (data?.container?.name) logType = `journald.container.${data.container.name}`
+      else if (data?.journald?.process?.name) logType = `journald.process.${data.journald.process.name}`
+      else if (data?.syslog?.identifier) logType = `jounrnald.syslog.${data?.syslog?.identifier}`
+      else logType = `journald.generic`
     }
+    tools.note(`${logType}: ${JSON.stringify(data)}`)
 
     /*
      * Only cache what we understand
      */
-    if (!logId) return tools.note('Failed to extract logId from data', data)
+    if (!logType) return tools.note(`Failed to extract logType from data: ${JSON.stringify(data)}`)
 
     /*
      * Update the cache
      */
-    tools.cache.logline(logId, data.message, data, config)
+    tools.cache.logline(logType, data.message, data, config)
   }
 } : null
 

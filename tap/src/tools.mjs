@@ -242,32 +242,31 @@ async function cacheHealthcheck (checkData, data, overrides={}) {
 /*
  * Cache a log line
  *
- * @param {object} logId - An identifier that is unique to the log source on that host, like the file path
+ * @param {object} logType - An identifier that tells us what type of log it is
  * @param {object} msg - The original message data as received by the handler
- * @param {obhject} summary - An object holding the summary data of the healthcheck
- * @param {number} summary.time - The original time of the event (optional)
- * @param {number} summary.up - Whether the healthcheck succeeded (1) or failed (0)
- * @param {number} summary.ms - Amount of milliseconds the healtcheck took
- * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
+ * @param {obhject} data - The full data from kafka
+ * @param {object} overrides - The handler config and any other overrides
  */
-async function cacheLogline (logId, logData, data, overrides={}) {
-  // Extract overrides or use defaults
+async function cacheLogline (logType, logData, data, overrides={}) {
+  // Extract settings from config or use defaults
   const {
-    cap=10,
-    ttl=3600,
-    host=tools.extract.host(data),
-    module=tools.extract.module(data),
+    cache = true,
+    ttl = 1,
+    host = tools.extract.host(data),
+    module = tools.extract.module(data),
+    cap = 25
   } = overrides
 
+
   // Create cache key
-  const key = createKey('log', host, module, logId)
+  const key = createKey('log', host, module, logType)
 
   // Cache the log line itself
   valkey
     .multi()
     .lpush(key, logData)
     .ltrim(key, 0, cap)
-    .expire(key, ttl)
+    .expire(key, ttl*3600)
     .exec(logCacheErrors)
 
   // Keep track of log files collected for this host
@@ -275,11 +274,11 @@ async function cacheLogline (logId, logData, data, overrides={}) {
   const logs = JSON.parse(await valkey.hget(lkey, module))
   valkey.hset(lkey, module, JSON.stringify((logs === null)
     // First log we see for this host, start new list
-    ? [logId]
+    ? [logType]
     // Add to list of logs for this host, making sure to avoid duplicates
-    : [...new Set([...logs, logId])]
+    : [...new Set([...logs, logType])]
   ))
-  valkey.expire(lkey, ttl)
+  valkey.expire(lkey, ttl*3600)
 }
 
 /*

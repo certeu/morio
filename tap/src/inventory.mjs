@@ -26,6 +26,7 @@ async function updateHost (data, tools) {
         `${db}/db/execute`,
         [
           hq,
+          ...osQuery(data, tools),
           ...ipQueries(data, tools),
           ...macQueries(data, tools),
         ]
@@ -62,6 +63,40 @@ function hostQuery (data, tools, update=true) {
 
   return upsertQuery(`inventory_hosts`, params)
 }
+
+/*
+ * Creates the query to add an operating system
+ *
+ * @param {string} hostId - The host ID
+ * @param {object} os - The OS data
+ * @param {object} tools - The tools object
+ * @return {array} query - The query and its parameters
+ */
+function osQuery (data, tools) {
+  const params = {
+    id: tools.clean(data.host.id),
+    last_update: new Date().toISOString(),
+  }
+  if (data.host?.os) {
+    for (const field of [
+      'codename',
+      'family',
+      'kernel',
+      'name',
+      'platform',
+      'type',
+      'version'
+    ]) {
+      if (data.host?.os[field]) params[field] = data.host.os[field]
+    }
+  }
+
+  // We will spread these results, so an empty array means nothing will be done
+  return  Object.keys(params).length > 3
+    ? [replaceQuery(`inventory_oss`, params)]
+    : []
+}
+
 
 /*
  * Creates the query to add an IP address to the inventory

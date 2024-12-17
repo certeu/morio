@@ -642,6 +642,24 @@ MorioClient.prototype.getInventoryIps = async function () {
 }
 
 /**
+ * Get all MAC addresses from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMacs = async function () {
+  return await this.call(`${morioConfig.api}/inventory/macs`)
+}
+
+/**
+ * Get all opearting systems from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryOss = async function () {
+  return await this.call(`${morioConfig.api}/inventory/oss`)
+}
+
+/**
  * Get stats for the inventory
  *
  * @return {object} - The result
@@ -651,12 +669,48 @@ MorioClient.prototype.getInventoryStats = async function () {
 }
 
 /**
+ * Removes an Host from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryHost = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
  * Removes an IP address
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeIp = async function (id) {
+MorioClient.prototype.removeInventoryIp = async function (id) {
   return await this.call(`${morioConfig.api}/inventory/ips/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Removes an MAC address
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryMac = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/macs/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Removes an operating system
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryOs = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
     headers: this.jsonHeaders,
     method: 'DELETE',
   }, true)

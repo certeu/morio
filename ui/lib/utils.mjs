@@ -162,6 +162,14 @@ export const formatNumber = (num, suffix = '') => {
  */
 export const iconSize = 'h-8 w-8'
 
+/*
+ * Shorten a UUID
+ *
+ * @param {string} uuid - The input UUID
+ * @return {string} short - The shortened UUID
+ */
+export const shortUuid = (uuid) => uuid.slice(0,6)
+
 /**
  * Wrapper around mustache's render method to render templated strings
  *

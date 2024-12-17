@@ -469,6 +469,15 @@ export const PlusIcon = (props) => (
 )
 
 /*
+ * PowerIcon - Looks like a on/off icon
+ */
+export const PowerIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+  </IconWrapper>
+)
+
+/*
  * PuzzleIcon - Looks like a piece of a jigsaw puzzle
  */
 export const PuzzleIcon = (props) => (

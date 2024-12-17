@@ -3,10 +3,12 @@ import {
   deleteIp,
   deleteMac,
   deleteHost,
+  deleteOs,
   getStats,
   listHosts,
   listIps,
   listMacs,
+  listOss,
   loadHost,
   loadHostIps,
   loadHostMacs,
@@ -96,17 +98,16 @@ Controller.prototype.deleteHost = async function (req, res) {
   /*
    * Validate input
    */
-  const [valid, err] = await utils.validate(`req.inventory.readHost`, { key: req.params[0] })
+  const [valid, err] = await utils.validate(`req.inventory.readHost`, { id: req.params.id })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
 
   /*
-   * Delete from KV FIXME
+   * Delete from inventory
    */
-  //const result = await utils.kv.del(valid.key)
-  const result = false
+  const result = await deleteHost(valid.id)
 
   /*
    * Be expicit when a key cannot be found
@@ -248,16 +249,16 @@ Controller.prototype.deleteMac = async function (req, res) {
   /*
    * Validate input
    */
-  const [valid, err] = await utils.validate(`req.inventory.readMac`, { key: req.params[0] })
+  const [valid, err] = await utils.validate(`req.inventory.readMac`, { id: req.params.id })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
 
   /*
-   * Delete from database FIXME
+   * Delete from database
    */
-  const result = false
+  const result = await deleteMac(valid.id)
 
   /*
    * Be expicit when a key cannot be found
@@ -277,6 +278,81 @@ Controller.prototype.deleteMac = async function (req, res) {
  */
 Controller.prototype.listMacs = async function (req, res) {
   const list = await listMacs()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Read OS
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadOs(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return result[1] === null
+    ? res.send({ key: valid.key, value: result[0] })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete OS
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readIp`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteOs(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Operating Systems
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listOss = async function (req, res) {
+  const list = await listOss()
 
   return Array.isArray(list)
     ? res.send(list)

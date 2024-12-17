@@ -72,6 +72,18 @@ export async function listMacs() {
 }
 
 /**
+ * Helper method to list OSs in the inventory
+ *
+ * @return {object} keys - The OSes in the inventory
+ */
+export async function listOss() {
+  const query = `SELECT * FROM inventory_oss`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? hostsAsList(result) : false
+}
+
+/**
  * Helper method to load a inventory host (or rather its data)
  *
  * @param {string} id - The ID of the host
@@ -141,22 +153,42 @@ export async function loadMac(id) {
 }
 
 /**
+ * Helper method to load an OS
+ *
+ * @param {string} id - The ID of the OS
+ * @return {object} data - The data saved for the MAC address
+ */
+export async function loadOs(id) {
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_oss WHERE id=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadOs. This is unexpected.`)
+    return false
+  }
+}
+
+/**
  * Helper method to load IP addresses for a given host
  *
  * @param {string} id - The ID of the host
  * @return {object} data - The data saved for the host
  */
 export async function loadHostIps(id) {
-    const q = `SELECT * FROM inventory_ips WHERE host=:id`
   const [status, result] = await db.read(
     `SELECT * FROM inventory_ips WHERE host=:id`,
     { id: clean(id) }
   )
-  console.log(JSON.stringify({q,result, params: { id }}, null, 2))
 
   if (status !== 200) return false
   const found = hostsAsList(result)
-  console.log(found)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -170,16 +202,33 @@ export async function loadHostIps(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostMacs(id) {
-    const q = `SELECT * FROM inventory_macs WHERE host=:id`
   const [status, result] = await db.read(
     `SELECT * FROM inventory_macs WHERE host=:id`,
     { id: clean(id) }
   )
-  console.log(JSON.stringify({q,result, params: { id }}, null, 2))
 
   if (status !== 200) return false
   const found = hostsAsList(result)
-  console.log(found)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load the OS for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostOs(id) {
+  const [status, result] = await db.read(
+    `SELECT * FROM inventory_oss WHERE id=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = hostsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -197,13 +246,18 @@ export async function getStats() {
   // Count IPs
   query = `SELECT COUNT(id) as count FROM inventory_ips`
   const [ipStatus, ipResult] = await db.read(query)
+  // Count Macs
   query = `SELECT COUNT(id) as count FROM inventory_macs`
   const [macStatus, macResult] = await db.read(query)
+  // Count OSs
+  query = `SELECT COUNT(id) as count FROM inventory_oss`
+  const [osStatus, osResult] = await db.read(query)
 
   return {
     hosts: getFields(hostResult).pop().count,
     ips: getFields(ipResult).pop().count,
     macs: getFields(macResult).pop().count,
+    oss: getFields(osResult).pop().count,
   }
 }
 
@@ -243,18 +297,30 @@ export async function deleteMac (id=false) {
 }
 
 /**
+ * Helper method to delete an operating system
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteOs (id=false) {
+  return await deleteRecord('inventory_oss', id)
+}
+
+/**
  * Helper method to delete a host
  *
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deleteHost (id=false) {
-  return await deleteRecord('inventory_hosts', id)
+  const result = await deleteRecord('inventory_hosts', id)
 
   // Also remove IPs, MACs, and OS beloonging to this host
   for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
-    await db.write(`DELETE FROM :table WHERE host = :id`, { table, id })
+    const result = await db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
   }
+
+  return result
 }
 
 /*

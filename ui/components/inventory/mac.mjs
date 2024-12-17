@@ -14,11 +14,11 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/inventory/shared.mjs'
 
 /**
- * This compnent renders a table with all IP address and allow removal
+ * This compnent renders a table with all MAC address and allow removal
  */
-export const IpsTable = () => {
+export const MacsTable = () => {
   // State
-  const [ips, setIps] = useState({})
+  const [macs, setMacs] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
@@ -28,14 +28,14 @@ export const IpsTable = () => {
 
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(ips, [order], [(desc ? 'desc' : 'asc')])
+  const sorted = orderBy(macs, [order], [(desc ? 'desc' : 'asc')])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
   const { account } = useAccount()
   const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
-    runIpsTableApiCall(api).then(result => setIps(result))
+    runMacsTableApiCall(api).then(result => setMacs(result))
   },[refresh])
 
   // Helper to delete one or more entries
@@ -43,10 +43,10 @@ export const IpsTable = () => {
     let i = 0
     for (const id in selection) {
       i++
-      await api.removeInventoryIp(id)
+      await api.removeInventoryMac(id)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Removing IP Addresses" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Removing MAC Addresses" key="linter" />,
       ])
     }
     setSelection({})
@@ -56,13 +56,13 @@ export const IpsTable = () => {
 
   return (
     <>
-      {ips.length > 0 ? (
+      {macs.length > 0 ? (
         <button
           className="btn btn-error"
           onClick={removeSelectedEntries}
           disabled={count < 1}
         >
-          <TrashIcon /> {count} IP Addresses
+          <TrashIcon /> {count} MAC Addresses
         </button>
       ) : null}
     <table className="table table-auto">
@@ -73,10 +73,10 @@ export const IpsTable = () => {
               type="checkbox"
               className="checkbox checkbox-primary"
               onClick={toggleAll}
-              checked={ips.length === count}
+              checked={macs.length === count}
             />
           </th>
-          {['ip', 'host', 'version', 'last_update'].map(field => (
+          {['mac', 'host', 'last_update'].map(field => (
             <th key={field}>
               <button
                 className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -88,20 +88,19 @@ export const IpsTable = () => {
         </tr>
       </thead>
       <tbody>
-        {sorted.map(ip => (
-          <tr key={ip.id}>
+        {sorted.map(mac => (
+          <tr key={mac.id}>
             <td className="text-base font-medium">
               <input
                 type="checkbox"
-                checked={selection[ip.id] ? true : false}
+                checked={selection[mac.id] ? true : false}
                 className="checkbox checkbox-primary"
-                onClick={() => toggle(ip.id)}
+                onClick={() => toggle(mac.id)}
               />
             </td>
-            <td className=""><PageLink href={`/inventory/ips/${ip.id}`}>{ip.ip}</PageLink></td>
-            <td className=""><PageLink href={`/inventory/ips/${ip.id}`}>{ip.host}</PageLink></td>
-            <td className="">{ip.version}</td>
-            <td className="">{timeAgo(ip.last_update)}</td>
+            <td className=""><PageLink href={`/inventory/macs/${mac.id}`}>{mac.mac}</PageLink></td>
+            <td className=""><PageLink href={`/inventory/macs/${mac.id}`}>{mac.host}</PageLink></td>
+            <td className="">{timeAgo(mac.last_update)}</td>
           </tr>
         ))}
       </tbody>
@@ -111,8 +110,8 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall (api) {
-  const result = await api.getInventoryIps()
+async function runMacsTableApiCall (api) {
+  const result = await api.getInventoryMacs()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }

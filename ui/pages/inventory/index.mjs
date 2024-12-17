@@ -2,10 +2,11 @@ import { useState, useEffect, useContext } from 'react'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { HardwareIcon, LocationIcon, ServersIcon } from 'components/icons.mjs'
+import { HardwareIcon, LocationIcon, PowerIcon, ServersIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
+import { ReloadDataButton } from 'components/inventory/shared.mjs'
 
 const meta = {
   title: 'Inventory',
@@ -48,18 +49,14 @@ export default function InventoryPage() {
             <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts"/>
             <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips"/>
             <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs"/>
+            <Stat title="Operating Systems" nr={data?.oss} Icon={({className}) => <PowerIcon className={className} stroke={2.5}/>} link="/inventory/oss"/>
           </div>
-          <Popout fixme>
-            <h4>Apologies, but this is a work in progress</h4>
-            <p>This page is here to indicate the direction we are going in, but we are not there yet.</p>
-          </Popout>
-          <button className="btn btn-primary" onClick={() => setCount(count+1)}>Trigger Update</button>
+          <ReloadDataButton onClick={() => setCount(count+1)} />
         </div>
       </ContentWrapper>
     </PageWrapper>
   )
 }
-
 
 async function runApiCall (api) {
   const result = api.getInventoryStats()

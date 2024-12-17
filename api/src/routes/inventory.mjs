@@ -47,7 +47,7 @@ export function routes(app) {
   /*
    * Delete a host
    */
-  app.delete(`/inventory/hosts/:id`, rbac.user, inventory.deleteHost)
+  app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
 
   /*
    * Read all IP addresses
@@ -62,7 +62,7 @@ export function routes(app) {
   /*
    * Delete an IP address
    */
-  app.delete(`/inventory/ips/:id`, rbac.user, inventory.deleteIp)
+  app.delete(`/inventory/ips/:id`, rbac.operator, inventory.deleteIp)
 
   /*
    * Read all MAC addresses
@@ -77,7 +77,22 @@ export function routes(app) {
   /*
    * Delete a MAC address
    */
-  //app.delete(`/inventory/macs/:id`, rbac.user, inventory.deleteMac)
+  app.delete(`/inventory/macs/:id`, rbac.operator, inventory.deleteMac)
+
+  /*
+   * Read all Operating Systems
+   */
+  app.get(`/inventory/oss`, rbac.user, inventory.listOss)
+
+  /*
+   * Read an Operating System
+   */
+  //app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
 
   /*
    * Search the inventory
