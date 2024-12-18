@@ -13,9 +13,7 @@ export default function InventoryHostsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          <HostsTable />
-        </div>
+        <HostsTable />
       </ContentWrapper>
     </PageWrapper>
   )

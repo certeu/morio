@@ -44,15 +44,13 @@ export default function InventoryPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          <div className="stats shadow w-full">
-            <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts"/>
-            <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips"/>
-            <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs"/>
-            <Stat title="Operating Systems" nr={data?.oss} Icon={({className}) => <PowerIcon className={className} stroke={2.5}/>} link="/inventory/oss"/>
-          </div>
-          <ReloadDataButton onClick={() => setCount(count+1)} />
+        <div className="stats shadow w-full">
+          <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts"/>
+          <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips"/>
+          <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs"/>
+          <Stat title="Operating Systems" nr={data?.oss} Icon={({className}) => <PowerIcon className={className} stroke={2.5}/>} link="/inventory/oss"/>
         </div>
+        <ReloadDataButton onClick={() => setCount(count+1)} />
       </ContentWrapper>
     </PageWrapper>
   )

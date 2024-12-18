@@ -61,7 +61,6 @@ export const tools = {
     notification,
     inventoryUpdate: produceInventoryUpdate,
   },
-  rawUuid,
 }
 
 /*
@@ -107,17 +106,6 @@ function createHash (input) {
 function createKey (...data) {
   return generateKey(data, '|')
 }
-
-/*
- * This removes dashes from input, and lowercases it. Intended for UUIDs
- *
- * @param {string} input - The input
- * @return {string} output - The string without dashes, lowercases, and trimmed
- */
-function rawUuid (id)  {
-  return clean(id).replaceAll('-','')
-}
-
 
 /*
  * Converts milliseconds to seconds
@@ -279,6 +267,16 @@ async function cacheLogline (logType, logData, data, overrides={}) {
     : [...new Set([...logs, logType])]
   ))
   valkey.expire(lkey, ttl*3600)
+
+  // Finally, keep track of the hosts for which we have logs
+  const hkey = 'logs|hosts'
+  valkey
+    .multi()
+    .zadd(hkey, when(data), host)
+    .zremrangebyscore(hkey, '-inf', now() - ttl*3600)
+    .zremrangebyrank(key, 0, 10000)
+    .expire(key, ttl * 1.5 * 3600)
+    .exec(logCacheErrors)
 }
 
 /*

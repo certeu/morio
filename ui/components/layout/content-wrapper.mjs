@@ -10,7 +10,7 @@ export const ContentWrapper = ({ page, title, Icon, children = null }) => {
     <div className="p-8 w-full">
       <div className={`flex flex-row items-start justify-between ${wClass}`}>
         <Breadcrumbs page={page} />
-        <button className="" onClick={() => setWide(!wide)}>
+        <button className="btn btn-ghost btn-sm" onClick={() => setWide(!wide)} title="Toggle between wide or contraint view">
           {wide ? <NarrowIcon /> : <WideIcon />}
         </button>
       </div>

@@ -623,6 +623,15 @@ MorioClient.prototype.getInventoryHosts = async function () {
 }
 
 /**
+ * Get all hosts from the inventory as an object
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostsObject = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts.obj`)
+}
+
+/**
  * Get a host from the inventory
  *
  * @param {string} - The uuid of the host

@@ -143,7 +143,7 @@ const extractHost = {
           //os: tools.clean,
     const host = {
       // data.host.id is always set when we get to this point
-      id: tools.rawUuid(data.host.id),
+      id: data.host.id,
     }
 
     // Host name

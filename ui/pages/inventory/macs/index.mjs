@@ -13,9 +13,7 @@ export default function InventoryMacsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          <MacsTable />
-        </div>
+        <MacsTable />
       </ContentWrapper>
     </PageWrapper>
   )

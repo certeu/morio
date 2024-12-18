@@ -124,13 +124,22 @@ Controller.prototype.deleteHost = async function (req, res) {
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
  */
-Controller.prototype.listHosts = async function (req, res) {
+Controller.prototype.listHosts = async function (req, res, format="array") {
   const list = await listHosts()
 
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+
+  if (format !== 'object')  return res.send(list)
+
+  /*
+   * Transform list into an obhject
+   */
+  const hosts = {}
+  for (const host of list) hosts[host.id] = host
+
+  return res.send(hosts)
 }
 
 /**

@@ -319,6 +319,7 @@ export async function deleteHost (id=false) {
   for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
     const result = await db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
   }
+  await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
 
   return result
 }

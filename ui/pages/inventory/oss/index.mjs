@@ -13,9 +13,7 @@ export default function InventoryOssPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          <OssTable />
-        </div>
+        <OssTable />
       </ContentWrapper>
     </PageWrapper>
   )

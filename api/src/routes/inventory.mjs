@@ -35,9 +35,15 @@ export function routes(app) {
   app.get(`/inventory/stats`, rbac.user, inventory.getStats)
 
   /*
-   * Read all hosts
+   * Read all hosts (returns an array)
    */
   app.get(`/inventory/hosts`, rbac.user, inventory.listHosts)
+
+  /*
+   * Read all hosts (returns an object)
+   */
+  app.get(`/inventory/hosts.obj`, rbac.user, (req, res) => inventory.listHosts(req, res, 'object'))
+
 
   /*
    * Read a host

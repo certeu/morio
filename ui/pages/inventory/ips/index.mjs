@@ -13,9 +13,7 @@ export default function InventoryIpsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          <IpsTable />
-        </div>
+        <IpsTable />
       </ContentWrapper>
     </PageWrapper>
   )

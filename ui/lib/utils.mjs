@@ -168,7 +168,7 @@ export const iconSize = 'h-8 w-8'
  * @param {string} uuid - The input UUID
  * @return {string} short - The shortened UUID
  */
-export const shortUuid = (uuid) => uuid.slice(0,6)
+export const shortUuid = (uuid) => uuid.slice(0,5)
 
 /**
  * Wrapper around mustache's render method to render templated strings
