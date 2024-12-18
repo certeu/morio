@@ -1,1 +1,0 @@
-ami_id = "ami-0c2a1f58a3414ec50"  # Replace with your desired AMI ID, e.g., the Debian 12 AMI ID
