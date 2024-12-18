@@ -230,12 +230,12 @@ async function cacheHealthcheck (checkData, data, overrides={}) {
 /*
  * Cache a log line
  *
- * @param {object} logType - An identifier that tells us what type of log it is
+ * @param {object} logset - An identifier that tells us what type of log it is
  * @param {object} msg - The original message data as received by the handler
  * @param {obhject} data - The full data from kafka
  * @param {object} overrides - The handler config and any other overrides
  */
-async function cacheLogline (logType, logData, data, overrides={}) {
+async function cacheLogline (logset, logData, data, overrides={}) {
   // Extract settings from config or use defaults
   const {
     cache = true,
@@ -247,7 +247,8 @@ async function cacheLogline (logType, logData, data, overrides={}) {
 
 
   // Create cache key
-  const key = createKey('log', host, module, logType)
+  const key = createKey('log', host, module, logset)
+  tools.note(logset, key)
 
   // Cache the log line itself
   valkey
@@ -262,9 +263,9 @@ async function cacheLogline (logType, logData, data, overrides={}) {
   const logs = JSON.parse(await valkey.hget(lkey, module))
   valkey.hset(lkey, module, JSON.stringify((logs === null)
     // First log we see for this host, start new list
-    ? [logType]
+    ? [logset]
     // Add to list of logs for this host, making sure to avoid duplicates
-    : [...new Set([...logs, logType])]
+    : [...new Set([...logs, logset])]
   ))
   valkey.expire(lkey, ttl*3600)
 
@@ -372,7 +373,7 @@ function valKeySafe (value) {
  * This message is variadic, so you can pass as many params as you want.
  */
 function generateKey(data, spacer) {
-  return data.map(p => p ? String(p).replace(/\./, '_').replace(/\|/, '_') : 'undefined')
+  return data.map(p => p ? String(p).replace(/\|/g, '_') : 'undefined')
     .join(spacer)
     .toLowerCase()
 }

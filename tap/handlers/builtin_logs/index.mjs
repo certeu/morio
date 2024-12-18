@@ -26,27 +26,27 @@ const handler = config.enabled ? {
     /*
      * Figure out what cache key to use
      */
-    let logType = false
+    let logset = false
     // Regular logs read from a file
-    if (data?.log?.file?.path) logType = data.log.file.path
+    if (data?.log?.file?.path) logset = data.log.file.path
     // Logs from journald
     if (data?.input?.type === 'journald') {
-      if (data?.container?.name) logType = `journald.container.${data.container.name}`
-      else if (data?.journald?.process?.name) logType = `journald.process.${data.journald.process.name}`
-      else if (data?.syslog?.identifier) logType = `jounrnald.syslog.${data?.syslog?.identifier}`
-      else logType = `journald.generic`
+      const t = 'journald'
+      if (data?.container?.name) logset = `${t}.container.${data.container.name}`
+      else if (data?.journald?.process?.name) logset = `${t}.process.${data.journald.process.name}`
+      else if (data?.syslog?.identifier) logset = `${t}.syslog.${data?.syslog?.identifier}`
+      else logset = `${t}.generic`
     }
-    tools.note(`${logType}: ${JSON.stringify(data)}`)
 
     /*
      * Only cache what we understand
      */
-    if (!logType) return tools.note(`Failed to extract logType from data: ${JSON.stringify(data)}`)
+    if (!logset) return tools.note(`Failed to extract logset from data: ${JSON.stringify(data)}`)
 
     /*
      * Update the cache
      */
-    tools.cache.logline(logType, data.message, data, config)
+    tools.cache.logline(logset, data.message, data, config)
   }
 } : null
 

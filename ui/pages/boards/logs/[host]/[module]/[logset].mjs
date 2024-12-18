@@ -1,20 +1,21 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { LogsIcon } from 'components/icons.mjs'
-import { HostLogsTable } from 'components/boards/logs.mjs'
+import { ShowLogs } from 'components/boards/logs.mjs'
 import { Uuid } from 'components/uuid.mjs'
+import { shortUuid } from 'lib/utils.mjs'
 
-export default function DashboardsHostLogsPage ({ uuid }) {
+export default function DashboardsHostLogsPage ({ host, module, logset }) {
   const meta = {
     title: 'Cached host logs',
-    page: ['dashboards', 'logs', 'host', <Uuid uuid={uuid}/>],
+    page: ['boards', 'logs', shortUuid(host), module, logset],
     Icon: LogsIcon
   }
 
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <HostLogsTable />
+        <ShowLogs host={host} module={module} logset={logset} />
       </ContentWrapper>
     </PageWrapper>
   )
@@ -22,7 +23,9 @@ export default function DashboardsHostLogsPage ({ uuid }) {
 
 export const getStaticProps = ({ params }) => ({
   props: {
-    uuid: params.uuid,
+    host: params.host,
+    module: params.module,
+    logset: params.logset,
   },
 })
 

@@ -12,6 +12,7 @@ import {
   loadHost,
   loadHostIps,
   loadHostMacs,
+  loadHostOs,
   loadIp,
   loadMac,
   saveHost,
@@ -73,19 +74,18 @@ Controller.prototype.readHost = async function (req, res) {
   const result = await loadHost(valid.id)
 
   /*
-   * Be expicit when a key cannot be found
+   * Do not continue if it didn't work
    */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
   /*
    * Add IP and MAC addresses
    */
   const ips = await loadHostIps(valid.id)
   const macs = await loadHostMacs(valid.id)
+  const os = await loadHostOs(valid.id)
 
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return res.send({ ...result, ips, macs, os })
 }
 
 /**

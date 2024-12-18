@@ -4,7 +4,8 @@ import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
@@ -14,6 +15,9 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/inventory/shared.mjs'
 import { Loading } from 'components/animations.mjs'
 import { Uuid } from 'components/uuid.mjs'
+import { Host } from 'components/inventory/host.mjs'
+import { KeyVal } from 'components/keyval.mjs'
+import { Popout } from 'components/popout.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
@@ -82,8 +86,8 @@ export const LogsTable = ({ cacheKey = 'logs|hosts' }) => {
       <tbody>
         {sorted.map(host => (
           <tr key={host.id}>
-            <td className=""><Uuid uuid={host.id} href={`/boards/logs/hosts/${host.id}`}/></td>
-            <td className=""><PageLink href={`/boards/logs/hosts/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
+            <td className=""><Uuid uuid={host.id} href={`/boards/logs/${host.id}`}/></td>
+            <td className=""><PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
             <td className="">{host.cores}</td>
             <td className="">{formatBytes(host.memory)}</td>
             <td className="">{timeAgo(host.last_update)}</td>
@@ -110,7 +114,8 @@ async function runLogsTableApiCall (api, key) {
 /**
  * This compnent renders a table with all cached logs for a given host
  */
-export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
+export const HostLogsTable = ({ host, module=false }) => {
+
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
@@ -128,7 +133,7 @@ export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
 
   // Effects
   useEffect(() => {
-    runLogsTableApiCall(api, cacheKey).then(result => {
+    runHostLogsTableApiCall(api, host).then(result => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory(result.inventory)
     })
@@ -143,7 +148,7 @@ export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
   )
 
   // Don't bother if there's nothing in the caceh
-  if (cache.length < 1) return (
+  if (Object.keys(cache).length < 1) return (
     <>
       <Loading />
       <p>Nothing in the cache to show you here.</p>
@@ -151,16 +156,24 @@ export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
   )
 
   // Only keep what is in the cache, but use the inventory data
-  const hosts = {}
-  for (const id of cache) hosts[id] = inventory[id]
-  const sorted = orderBy(hosts, [order], [(desc ? 'desc' : 'asc')])
+  const data = []
+  for (const mod in cache) {
+    if (!module || mod === module) {
+      for (const logset of JSON.parse(cache[mod])) {
+        data.push({ module: mod, logset, host })
+      }
+    }
+  }
+  const sorted = orderBy(data, [order], [(desc ? 'desc' : 'asc')])
+  const cols = module ? ['logset'] : ['module', 'logset']
 
   return (
     <>
+    <Host uuid={host} />
     <table className="table table-auto">
       <thead>
         <tr>
-          {['host', 'name', 'cores', 'memory', 'last_seen'].map(field => (
+          {cols.map(field => (
             <th key={field}>
               <button
                 className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -172,13 +185,10 @@ export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
         </tr>
       </thead>
       <tbody>
-        {sorted.map(host => (
-          <tr key={host.id}>
-            <td className=""><Uuid uuid={host.id} href={`/boards/logs/hosts/${host.id}`}/></td>
-            <td className=""><PageLink href={`/boards/logs/hosts/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
-            <td className="">{host.cores}</td>
-            <td className="">{formatBytes(host.memory)}</td>
-            <td className="">{timeAgo(host.last_update)}</td>
+        {sorted.map(entry => (
+          <tr key={entry.lolset+entry.host+entry.module}>
+            {module ? null : <td className=""><PageLink href={`/boards/logs/${host}/${entry.module}/`}>{entry.module}</PageLink></td>}
+            <td className=""><MorioLogset name={entry.logset} href={`/boards/logs/${host}/${entry.module}/${entry.logset}`}/></td>
           </tr>
         ))}
       </tbody>
@@ -188,4 +198,149 @@ export const HostLogsTable = ({ cacheKey = 'logs|hosts' }) => {
   )
 }
 
+async function runHostLogsTableApiCall (api, host) {
+  const data = {}
+  let result = await api.getCacheKey(`logs|${host}`)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
+  result = await api.getInventoryHost(host)
+  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
 
+  return data
+}
+
+const MorioLogset = ({ name, href }) => {
+  const chunks = name.split('.')
+
+  return href
+    ? <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
+    : <span>{name.split('.').join(' / ')}</span>
+}
+
+/**
+ * This compnent renders a table with all cached logs for a given host
+ */
+export const ShowLogs = ({ host, module, logset }) => {
+
+  // State
+  const [cache, setCache] = useState(false)
+  const [inventory, setInventory] = useState({})
+  const [refresh, setRefresh] = useState(0)
+  const [order, setOrder] = useState('name')
+  const [desc, setDesc] = useState(false)
+
+  // Context
+  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+
+  // Hooks
+  const { api } = useApi()
+  const { account } = useAccount()
+  const hasRole = rbac(account.role, 'operator')
+  const { data, isLoading, error } = useQuery ({
+    queryKey: [`${host}|${module}|${logset}`],
+    queryFn: () => {
+      runShowLogsApiCall(api, host, module, logset).then(result => {
+        if (result.cache) setCache(result.cache)
+        if (result.inventory) setInventory(result.inventory)
+      })
+    },
+    refetchInterval: 15000,
+    refetchIntervalInBackground: false,
+  })
+
+  // Don't bother if there's nothing in the caceh
+  if (!cache || cache.length < 1) return (
+    <>
+      <Loading />
+      <p>Nothing in the cache to show you here.</p>
+    </>
+  )
+
+  // Can we figure out the field names?
+  let fields = false
+  try {
+    fields = Object.keys(JSON.parse(cache[0]))
+  }
+  catch (err) {
+    // ah well
+  }
+
+  return (
+    <>
+      <Host uuid={host} />
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center justify-between gap-2">
+          <KeyVal k='module' val={module} />
+          <KeyVal k='logset' val={logset} />
+        </div>
+        <ReloadDataButton onClick={() => setRefresh(refresh+1)} animate={15} />
+      </div>
+      {fields
+        ? <LogLines fields={fields} lines={cache} />
+        : (
+          <>
+            <Popout note>
+              We were unable to parse this log entry into fields, so we show the raw data
+            </Popout>
+            {cache.map(line => <LogLine key={line} data={line} />)}
+          </>
+        )
+      }
+    </>
+  )
+}
+
+async function runShowLogsApiCall (api, host, module, logset) {
+  const data = {}
+  let result = await api.getCacheKey(`log|${host}|${module}|${logset}`)
+  if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
+  result = await api.getInventoryHost(host)
+  if (Array.isArray(result) && result[1] === 200) data.inventory = result[0]
+
+  return data
+}
+
+
+const LogLine = ({ data }) => {
+  let parsed
+  try {
+    parsed = JSON.parse(`${data}`)
+  }
+  catch (err) {
+    parsed = `${data}`
+  }
+
+  return <pre>{JSON.stringify(parsed, null, 2)}</pre>
+}
+
+const LogLines = ({ fields, lines }) => {
+  // State
+  const [order, setOrder] = useState('name')
+  const [desc, setDesc] = useState(false)
+
+  const sorted = orderBy(lines.map(line => JSON.parse(line)), [order], [(desc ? 'desc' : 'asc')])
+
+  return (
+    <table className="table table-auto">
+      <thead>
+        <tr>
+          {fields.map(field => (
+            <th key={field}>
+              <button
+                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
+              >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
+              </button>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {sorted.map((entry, i) => (
+          <tr key={i}>
+            {fields.map(field => <td key={field}>{field === 'time' ? timeAgo(entry[field]) : entry[field]}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}

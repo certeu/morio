@@ -23,6 +23,6 @@ export default FixmeDashboardsPage
 export const getStaticProps = () => ({
   props: {
     title: 'Search Dashboards',
-    page: ['dashboards', 'search'],
+    page: ['boards', 'search'],
   },
 })

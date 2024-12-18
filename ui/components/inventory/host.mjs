@@ -9,9 +9,11 @@ import { useApi } from 'hooks/use-api.mjs'
 import { useAccount } from 'hooks/use-account.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
-import { RightIcon, TrashIcon } from 'components/icons.mjs'
+import { RightIcon, ServersIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
+import { KeyVal } from 'components/keyval.mjs'
 import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { Linux, Debian } from 'components/brands.mjs'
 
 /**
  * This compnent renders a table with all IP address and allow removal
@@ -132,35 +134,42 @@ async function runHostsTableApiCall (api) {
  * @param {object} props - All React props
  * @param {object] data - The inventory data for this host
  */
-export const Host = ({ data }) => {
+export const Host = ({ uuid }) => {
+  const [host, setHost] = useState(false)
+  const [refresh, setRefresh] = useState(0)
+  const { api } = useApi()
 
-  let notes
-  try {
-    notes = JSON.parse(data.notes)
-  }
-  catch (err) {
-    notes = ["Notes were malformed"]
-  }
-  if (!Array.isArray(notes)) notes = ["Notes should be an array"]
+  useEffect(() => {
+    if (uuid) api.getInventoryHost(uuid).then((result) => setHost(result[0]))
+  },[uuid, refresh])
+
+  let Icon = ServersIcon
+  if (host.os?.type === 'linux') Icon = Linux
+  if (host.os?.family === 'debian') Icon = Debian
+
+
 
   return (
-    <details className="group">
-      <summary className="flex flex-row rounded my-1 py-1 hover:cursor-pointer hover:bg-primary hover:bg-opacity-20 px-2 group-open:bg-primary group-open:bg-opacity-20">
-        <h6 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full">
-          <ServersIcon className="w-6 h-6 text-warning group-open:text-primary"/>
-          <span>{data.name}</span>
-          <KeyVal k="cores" val={data.cores} />
-          <KeyVal k="memory" val={formatBytes(data.memory)} />
-          <KeyVal k="#" val={shortUuid(data.id)} />
-        </h6>
-      </summary>
-      <div className="ml-4 border-l-4 pl-4  flex flex-col border-primary flex-wrap items-start gap-2 justify-between">
-        <h4>notes</h4>
-        {notes.map((note, i) => <div className="ml-2 border-l-2 border-base-300 shadow w-full pl-4 py-2" key={i}><Markdown>{note}</Markdown></div>)}
-        <pre>{JSON.stringify(data, null ,2)}</pre>
-
+    <div className="p-2 px-4 rounded-lg shadow border border-base-300">
+      <div className="flex flex-row items-center gap-2 justify-start w-full">
+        <Icon className="w-16 h-16"/>
+        <div className="w-full">
+          <h4 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full mt-0 pt-0 w-full">
+            <span className="flex flex-row gap-2 items-center">
+              {host.fqdn ? host.fqdn : host.name}
+            </span>
+            <button className="btn btn-ghost btn-sm opacity-50" onClick={() => setRefresh(refresh+1)}>{timeAgo(host.last_update)}</button>
+          </h4>
+          <div className="flex flex-row flex-wrap gap-2">
+            <KeyVal k="os" val={(host.os?.family)} />
+            <KeyVal k="cores" val={host.cores} />
+            <KeyVal k="memory" val={formatBytes(host.memory)} />
+            <KeyVal k="ips" val={(host.ips || []).length} />
+            <KeyVal k="macs" val={(host.macs || []).length} />
+          </div>
+        </div>
       </div>
-    </details>
+    </div>
   )
 }
 
