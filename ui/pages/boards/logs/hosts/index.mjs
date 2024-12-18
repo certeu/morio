@@ -16,6 +16,6 @@ export default function DashboardsLogsPage (props) {
 export const getStaticProps = () => ({
   props: {
     title: 'Logs',
-    page: ['boards', 'logs'],
+    page: ['boards', 'logs', 'hosts'],
   },
 })

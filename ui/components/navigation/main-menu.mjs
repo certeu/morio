@@ -21,6 +21,7 @@ import {
   HardwareIcon,
   LayersIcon,
   LocationIcon,
+  LogsIcon,
   MorioIcon,
   OpenLockIcon,
   PackageIcon,
@@ -80,7 +81,7 @@ const icons = {
   images: ContainerImageIcon,
   inventory: ServersIcon,
   ips: LocationIcon,
-  logs: StorageIcon,
+  logs: LogsIcon,
   macs: HardwareIcon,
   metrics: StatusIcon,
   morio: MorioIcon,
@@ -114,14 +115,6 @@ export const links = {
   boards: {
     t: 'Dashboards',
     r: 'user',
-    search: {
-      t: 'Search Dashboards',
-      r: 'user'
-    },
-    custom: {
-      t: 'Custom Dashboards',
-      r: 'user'
-    },
     audit: {
       t: 'Audit',
       r: 'user'
@@ -144,6 +137,14 @@ export const links = {
     },
     notes: {
       t: 'Notes',
+      r: 'user'
+    },
+    search: {
+      t: 'Search Dashboards',
+      r: 'user'
+    },
+    custom: {
+      t: 'Custom Dashboards',
       r: 'user'
     },
   },

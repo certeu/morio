@@ -6,9 +6,9 @@ import {
   FixmeIcon,
   FlagIcon,
   FlipoverIcon,
+  LogsIcon,
   SearchIcon,
   StatusIcon,
-  StorageIcon,
   TipIcon,
   WrenchIcon,
 } from 'components/icons.mjs'
@@ -29,7 +29,7 @@ const types = {
   },
   logs: {
     about: <>Like <code>tail -f</code> but without a need to have access to the machine where the logs are generated</>,
-    Icon: StorageIcon,
+    Icon: LogsIcon,
   },
   metrics: {
     about: `Probably the most satisfying dashboards to look at, great for investigations too`,
@@ -43,7 +43,7 @@ const types = {
 
 const meta = {
   title: 'Morio Dashboards',
-  page: ['dashboards'],
+  page: ['boards'],
   Icon: FlipoverIcon
 }
 
