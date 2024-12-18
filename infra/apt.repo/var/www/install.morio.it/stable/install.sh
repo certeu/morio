@@ -22,7 +22,7 @@
 #
 # Which distribution channel to use?
 # Alternatives are canary or testing
-CHANNEL="production"
+CHANNEL="stable"
 
 #
 # Store the package format
@@ -155,4 +155,3 @@ install() {
 # Run the install function
 #
 install
-
