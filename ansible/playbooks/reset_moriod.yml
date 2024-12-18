@@ -4,6 +4,17 @@
   become: yes
   become_method: sudo
   tasks:
+    - name: Stop Morio service
+      ansible.builtin.systemd:
+        name: moriod
+        state: stopped
+      ignore_errors: true
+      register: stop_result
+
+    - name: Log result of stopping Morio service
+      debug:
+        msg: "Morio service stop result: {{ stop_result.stdout | default('No output') }}"
+
     - name: Make backup directory
       ansible.builtin.file:
         path: "{{ ansible_env.HOME }}/.moriod"
@@ -51,13 +62,13 @@
       with_items: "{{ log_files.files }}"
       ignore_errors: true
 
-    - name: Find all database files in the directory
+    - name: Find all data files in the directory
       ansible.builtin.find:
         paths: /var/lib/morio/moriod
         file_type: file
       register: db_files
 
-    - name: Remove all database files
+    - name: Remove all data files
       ansible.builtin.file:
         path: "{{ item.path }}"
         state: absent
@@ -77,3 +88,14 @@
         remote_src: yes
       with_items: "{{ backup_version_files.files }}"
       ignore_errors: true
+
+    - name: Start Morio service
+      ansible.builtin.systemd:
+        name: moriod
+        state: started
+        enabled: yes  # Ensure the service is enabled to start on boot
+      register: start_result
+
+    - name: Log result of starting Morio service
+      debug:
+        msg: "Morio service start result: {{ start_result.stdout | default('No output') }}"

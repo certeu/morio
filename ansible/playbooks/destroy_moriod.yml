@@ -1,0 +1,71 @@
+---
+- name: Destroy EC2 instances and remove .env file
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - amazon.aws
+    - community.general
+
+  tasks:
+    # Read DNS names and FQDN from .env file
+    - name: Load .env file
+      slurp:
+        src: "../../.env"
+      register: env_file_content
+
+    # Decode the content and set DNS names and FQDN from .env file
+    - name: Set DNS names and FQDN from .env file
+      set_fact:
+        # Decode the content from base64
+        decoded_content: "{{ env_file_content.content | b64decode }}"
+
+    # Parse DNS names and FQDN from decoded content
+    - name: Parse DNS names and FQDN from decoded content
+      set_fact:
+        morio_test_keys_list: "{{ decoded_content | regex_search('MORIO_TEST_KEYS=([^\n]+)', '\\1') | default('') | trim}}"
+        instance_ids_list: "{{ decoded_content | regex_search('MORIO_TEST_IDS=([^\n]+)', '\\1') | default('') | trim}}"
+        fqdn_instance_id_list: "{{ decoded_content | regex_search('MORIO_TEST_FQDN_ID=([^\n]+)', '\\1') | default('') | trim}}"
+      when: decoded_content is defined
+
+    # Parse DNS names and FQDN from decoded content
+    - name: Parse DNS names and FQDN from decoded content
+      set_fact:
+        morio_test_keys: "{{ morio_test_keys_list[0] | split(',') }}"
+        instance_ids: "{{ instance_ids_list[0] | split(',') }}"
+        fqdn_instance_id: "{{ fqdn_instance_id_list[0] }}"
+      when: decoded_content is defined
+
+    #Terminate the filtered EC2 instances with instance_ids
+    - name: Terminate EC2 instances
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ item }}"
+        region: "eu-central-1"
+        state: "absent"
+      loop: "{{ instance_ids }}"
+      loop_control:
+        label: "{{ item }}"
+      when: instance_ids | length > 0
+
+    # Terminate the filtered EC2 instances with fqdn_instance_id
+    - name: Terminate FQDN EC2 instance
+      amazon.aws.ec2_instance:
+        instance_ids: "{{ fqdn_instance_id }}"
+        region: "eu-central-1"
+        state: "absent"
+      when: fqdn_instance_id is defined
+
+    # Remove Key Pairs
+    - name: Remove created EC2 key pairs
+      amazon.aws.ec2_key:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ morio_test_keys }}"
+      loop_control:
+        label: "{{ item }}"
+
+    # Remove .env file
+    - name: Remove .env file
+      file:
+        path: "../../.env"
+        state: absent
+      when: env_file_content is defined

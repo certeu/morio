@@ -24,6 +24,7 @@
   ],
   "devDependencies": {
     "dotenv": "^16.4.7",
+    "dotenv-cli": "^7.4.4",
     "esbuild": "^0.23.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -39,11 +40,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "ephemeral:testvm": "node ./tests/10_ephemeral.test.mjs",
-    "reset:testvm": "node ./scripts/reset-test-vm.mjs",
-    "setup:testvm": "node ./scripts/setup-test-vm.mjs",
-    "create:testvm": "node ./scripts/create-test-vm.mjs",
-    "destroy:testvm": "node ./scripts/destroy-test-vm.mjs",
+    "isetup": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_DNS_NAMES\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/install_moriod.yml'",
+    "ireset": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_DNS_NAMES\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/reset_moriod.yml'",
+    "itest": "node ./tests/test-runner.mjs",
+    "iconfigure": "node ./scripts/configure-test-vm.mjs",
+    "ideploy": "ansible-playbook ./ansible/playbooks/deploy_moriod.yml --extra-vars @json-templates/deploy.json",
+    "idestroy": "ansible-playbook ./ansible/playbooks/destroy_moriod.yml",
     "build": "npm run build:dev",
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
@@ -98,5 +100,8 @@
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
+  },
+  "dependencies": {
+    "mocha": "^11.0.1"
   }
 }

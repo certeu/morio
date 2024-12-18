@@ -2,7 +2,6 @@ import dns from 'dns';
 import https from 'https';
 import axios from 'axios';
 import { strict as assert } from 'node:assert'
-import { pipeline } from 'node:stream/promises'
 import { getPreset } from '../config/index.mjs'
 
 const dnsOptions = {
@@ -70,39 +69,25 @@ export async function testUrl(url, customOptions = {}) {
   }
 }
 
-export async function get(url, raw = false, log = false, ignoreCertificate = true) {
-  const requestConfig = ignoreCertificate
-    ? { httpsAgent: globalHttpsAgent }
-    : {};
+export async function __withoutBody(method, url, raw = false, log = false, ignoreCertificate = true) {
+  const requestConfig = {
+    method: method.toUpperCase(), // Accepts "GET" or "DELETE"
+    url: url,
+    ...(ignoreCertificate ? { httpsAgent: globalHttpsAgent } : {}),
+  };
 
   try {
-    const response = await axios.get(url, requestConfig);
+    const response = await axios(requestConfig);
 
     const body = raw ? response.data : response.data;
     return [response.status, body];
   } catch (err) {
     if (log) console.error({ url, err });
-    return [err.status, err.response.data];
+    return [err.response?.status || 500, err.response?.data || "An error occurred"];
   }
 }
 
-export async function streamGet(url, res, ignoreCertificate = true) {
-  const requestConfig = ignoreCertificate
-    ? { httpsAgent: globalHttpsAgent, responseType: 'stream' }
-    : { responseType: 'stream' };
-
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Transfer-Encoding', 'chunked');
-
-  try {
-    const response = await axios.get(url, requestConfig);
-    await pipeline(response.data, res);
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function __postput(method, url, data, raw = false, log = false, ignoreCertificate = true) {
+async function __withBody(method, url, data, raw = false, log = false, ignoreCertificate = true) {
   const requestConfig = {
     method,
     url,
@@ -118,35 +103,34 @@ async function __postput(method, url, data, raw = false, log = false, ignoreCert
     const parsedData = raw ? response.data : response.data;
     return [response.status, parsedData];
   } catch (err) {
-    if (log) console.error(err);
-    return [err.status, err.response.data];
+    if (log) console.error({url, err});
+    return [err.response?.status || 500, err.response?.data || "An error occurred"];
   }
 }
 
-export async function post(url, data, ignoreCertificate = true) {
-  return __postput('POST', url, data, false, false, ignoreCertificate);
-}
+// export async function post(url, data, ignoreCertificate = true) {
+//   return __withBody('POST', url, data, false, false, ignoreCertificate);
+// }
 
-export async function put(url, data, ignoreCertificate = true) {
-  return __postput('PUT', url, data, false, false, ignoreCertificate);
-}
+// export async function put(url, data, ignoreCertificate = true) {
+//   return __withBody('PUT', url, data, false, false, ignoreCertificate);
+// }
 
-export async function patch(url, data, ignoreCertificate = true) {
-  return __postput('PATCH', url, data, false, false, ignoreCertificate);
-}
+// export async function patch(url, data, ignoreCertificate = true) {
+//   return __withBody('PATCH', url, data, false, false, ignoreCertificate);
+// }
 
-export async function remove(url, data, ignoreCertificate = true) {
-  return __postput('DELETE', url, data, false, false, ignoreCertificate);
-}
+// export async function remove(url, data, ignoreCertificate = true) {
+//   return __withBody('DELETE', url, data, false, false, ignoreCertificate);
+// }
 
 export function restClient(api) {
   return {
-    get: (url, raw, log, ignoreCertificate) => get(api + url, raw, log, ignoreCertificate),
-    post: (url, data, raw, log, ignoreCertificate) => __postput('POST', api + url, data, raw, log, ignoreCertificate),
-    put: (url, data, raw, log, ignoreCertificate) => __postput('PUT', api + url, data, raw, log, ignoreCertificate),
-    patch: (url, data, raw, log, ignoreCertificate) => __postput('PATCH', api + url, data, raw, log, ignoreCertificate),
-    remove: (url, data, raw, log, ignoreCertificate) => __postput('DELETE', api + url, data, raw, log, ignoreCertificate),
-    streamGet: (url, res, ignoreCertificate) => streamGet(api + url, res, ignoreCertificate),
+    get: (url, raw, log, ignoreCertificate) => __withoutBody('GET', api + url, raw, log, ignoreCertificate),
+    post: (url, data, raw, log, ignoreCertificate) => __withBody('POST', api + url, data, raw, log, ignoreCertificate),
+    put: (url, data, raw, log, ignoreCertificate) => __withBody('PUT', api + url, data, raw, log, ignoreCertificate),
+    patch: (url, data, raw, log, ignoreCertificate) => __withBody('PATCH', api + url, data, raw, log, ignoreCertificate),
+    remove: (url, raw, log, ignoreCertificate) => __withoutBody('DELETE', api + url, raw, log, ignoreCertificate),
   };
 }
 

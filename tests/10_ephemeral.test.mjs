@@ -10,46 +10,6 @@ dotenv.config();
 const api = restClient(`https://${process.env.MORIO_TEST_HOST}/-/api`)
 
 describe('Ephemeral API: Status Routes', () => {
-  /*
-   * GET /status
-   * Example response:
-   * {
-   *   info: {
-   *     about: 'Morio Management API',
-   *     name: '@morio/api',
-   *     production: false,
-   *     version: '0.2.0'
-   *   },
-   *   state: {
-   *     ephemeral: true,
-   *     uptime: 11,
-   *     start_time: 1721909714669,
-   *     reload_count: 1,
-   *     config_resolved: true,
-   *     settings_serial: 0
-   *   },
-   *   core: {
-   *     info: {
-   *       about: 'Morio Core',
-   *       name: '@morio/core',
-   *       production: false,
-   *       version: '0.2.0'
-   *     },
-   *     status: {
-   *       cluster: { code: 2, color: 'amber', time: 1721907766101 },
-   *     },
-   *     nodes: {},
-   *     node: {
-   *       uptime: 1960,
-   *       ephemeral: true,
-   *       ephemeral_uuid: '4a207d56-728b-472f-8d20-52326c118661',
-   *       reconfigure_count: 1,
-   *       config_resolved: true,
-   *       settings_serial: 0
-   *     }
-   *   }
-   * }
-   */
   it('Should load /status', async () => {
     const result = await api.get('/status')
 
