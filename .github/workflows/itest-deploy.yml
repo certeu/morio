@@ -1,7 +1,9 @@
 name: Deploy and Configure Morio
 
 on:
-  workflow_dispatch:  # This allows the workflow to be triggered manually
+  workflow_dispatch:  # Allow manual triggering for a test
+  issue_comment:
+    types: [created]  # Trigger when a comment is created on a PR
 
 jobs:
   deploy:
@@ -11,38 +13,63 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '20'  # Replace with the Node.js version you need
+      - name: Check if Comment Matches Deploy Key and User is Allowed
+        id: check_trigger
+        run: |
+          echo "Checking deploy key and allowed users..."
+
+          # Initialize match to false
+          echo "match=false" >> $GITHUB_ENV
+
+          # Ensure the event is triggered for a pull request
+          if [[ "${{ github.event.issue.pull_request }}" == "" ]]; then
+            echo "Not a pull request. Proceeding with PR_ID=32 for manual testing."
+          else
+            ALLOWED_USERS=$(cat allowed_users.txt)
+            COMMENT_BODY="${{ github.event.comment.body }}"
+            COMMENT_USER="${{ github.event.comment.user.login }}"
+            ITEST_DEPLOY_KEY="${{ secrets.ITEST_DEPLOY_KEY }}"
+
+            if [[ "$COMMENT_BODY" == "$ITEST_DEPLOY_KEY" && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
+              echo "match=true" >> $GITHUB_ENV
+            fi
+          fi
+        env:
+          ITEST_DEPLOY_KEY: ${{ secrets.ITEST_DEPLOY_KEY }}
+
+      - name: Exit if Not Triggered by Allowed User or Matching Deploy Key
+        if: ${{ env.match != 'true' }}
+        run: echo "Comment does not match deploy key or user is not allowed. Exiting..."
+        continue-on-error: true
+
+      - name: Set PR ID as Environment Variable
+        run: |
+          if [ "${{ github.event.pull_request.number }}" ]; then
+            echo "PR_ID=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          else
+            echo "PR_ID=32" >> $GITHUB_ENV
+          fi
 
       - name: Configure AWS CLI
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region eu-central-1 # You can specify the region here, e.g., 'us-west-2'
-          aws configure set output json  # Set the output format to JSON
+          aws configure set region eu-central-1
+          aws configure set output json
 
       - name: Install Ansible
-        run: |
-          sudo apt-get install -y ansible
+        run: sudo apt-get install -y ansible
 
       - name: Install required Ansible collections
-        run: |
-          ansible-galaxy collection install amazon.aws community.general
+        run: ansible-galaxy collection install amazon.aws community.general
 
       - name: Install Python dependencies for Ansible
-        run: |
-          pip3 install boto boto3
+        run: pip3 install boto boto3 botocore
 
       - name: Install Node.js dependencies
         run: |
           npm install
-          npm install dotenv  # Install dotenv package for environment configuration
-
-      - name: Set PR ID as Environment Variable
-        if: ${{ github.event.pull_request.number }}
-        run: echo "PR_ID=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          npm install dotenv
 
       - name: Generate SSH Key Pair
         run: |
@@ -51,8 +78,7 @@ jobs:
           echo "SSH Key Pair generated and stored in ~/.ssh/id_rsa"
 
       - name: Run ideploy (Deploy to the environment)
-        run: |
-          npm run ideploy
+        run: npm run ideploy
         env:
           PR_ID: ${{ env.PR_ID }}
           ITEST_AWS_SUBNET_ID: ${{ secrets.ITEST_AWS_SUBNET_ID }}
@@ -63,17 +89,13 @@ jobs:
           ITEST_AWS_SSH_PUBKEY_2_ID: ${{ secrets.AWS_SSH_PUBKEY2 }}
 
       - name: Run isetup (Deploy and setup)
-        run: |
-          npm run isetup
+        run: npm run isetup
 
       - name: Run itest (Testing)
-        run: |
-          npm run itest ephemeral
+        run: npm run itest ephemeral
 
       - name: Run iconfigure (Configure)
-        run: |
-          npm run iconfigure
+        run: npm run iconfigure
 
       - name: Run idestroy (Destroy resources)
-        run: |
-          npm run idestroy
+        run: npm run idestroy
