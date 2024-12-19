@@ -20,7 +20,7 @@ jobs:
         run: |
           aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region ${{ secrets.AWS_REGION }}  # You can specify the region here, e.g., 'us-west-2'
+          aws configure set region eu-central-1 # You can specify the region here, e.g., 'us-west-2'
           aws configure set output json  # Set the output format to JSON
 
       - name: Install Ansible
