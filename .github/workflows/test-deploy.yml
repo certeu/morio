@@ -52,6 +52,10 @@ jobs:
           npm install
           npm install dotenv  # Install dotenv package for environment configuration
 
+      - name: Run ideploy (Deploy to the environment)
+        run: |
+          npm run ideploy
+
       - name: Run isetup (Deploy and setup)
         run: |
           npm run isetup
@@ -63,10 +67,6 @@ jobs:
       - name: Run iconfigure (Configure)
         run: |
           npm run iconfigure
-
-      - name: Run ideploy (Deploy to the environment)
-        run: |
-          npm run ideploy
 
       - name: Run idestroy (Destroy resources)
         run: |
