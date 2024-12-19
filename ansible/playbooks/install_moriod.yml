@@ -3,6 +3,10 @@
   hosts: all
   become: yes
   tasks:
+    - name: Update the apt package list
+      apt:
+        update_cache: yes
+
     - name: Download and install Morio
       shell: |
         curl https://install.morio.it/ | bash && wait

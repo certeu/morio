@@ -6,11 +6,14 @@
     - amazon.aws
     - community.general
   vars:
+    pr_id: "{{ lookup('env', 'PR_ID') }}"
     region: "eu-central-1"
-    subnet_id: "subnet-04faec9c5fe410b3e"
-    security_group_id: "sg-09a11726f166660ca"
-    zone_id: "Z04114953S6ELFC6IJG0T"  # Replace with your Route 53 hosted zone ID
-    ami_id: "ami-0552f4006d8da5f5f"  # Replace with your preferred AMI ID
+    subnet_id: "{{ lookup('env', 'ITEST_AWS_SUBNET_ID') }}"
+    security_group_id: "{{ lookup('env', 'ITEST_AWS_SECURITY_GROUP_ID') }}"
+    zone_id: "{{ lookup('env', 'ITEST_AWS_ROUTE53_ZONE_ID') }}"
+    ami_id: "{{ lookup('env', 'ITEST_AWS_DEBIAN12_AMI_ID') }}"  # Replace dynamically during testing if needed
+    ssh_pubkey_1: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_1_ID') }}"
+    ssh_pubkey_2: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_2_ID') }}"
 
   tasks:
     - name: Generate random DNS names for instances
@@ -24,14 +27,14 @@
 
     - name: Create an SSH Key Pair
       amazon.aws.ec2_key:
-        name: "morio_test_{{ pr_id }}-{{ item }}"
+        name: "morio_itest_{{ pr_id }}-{{ item }}"
         key_material: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
       loop: "{{ dns_names }}"
 
     - name: Create EC2 instances
       amazon.aws.ec2_instance:
-        name: "morio-test-{{ pr_id }}-{{ item }}"
-        key_name: "morio_test_{{ pr_id }}-{{ item }}"
+        name: "morio_itest-{{ pr_id }}-{{ item }}"
+        key_name: "morio_itest_{{ pr_id }}-{{ item }}"
         instance_type: "t3.medium"
         image_id: "{{ ami_id }}"
         region: "{{ region }}"
@@ -41,13 +44,13 @@
           assign_public_ip: true
         wait: yes
         tags:
-          Name: "morio-test-{{ pr_id }}-{{ item }}"
+          Name: "morio_itest-{{ pr_id }}-{{ item }}"
           morio: "true"
           pull_request: "{{ pr_id }}"
         user_data: |
           #!/bin/bash
-          echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEe3xiWGZ6u7h4/Z+MHmvk81uYNVSTlXIGR1bpyUEoa6 admin@cert.europa.eu" >> /home/admin/.ssh/authorized_keys
-          echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCzR7U6E+BcPdn6Y0NVYoCVbY3+cokh+NBrvfLL/7EiuaqjPLcMB5wp/de8nuUO/BF2WfBpEckwbwmd2UOWZXu5CvICJmq0An3wJ0bY4MlsGAw8bhhYYr+IOl10//6ZX76fmhzSIc3n1i1NEj3K9rHX7dF0qnAeRWaHDGYal3piGHSD7vVH71ruz6628jj7UzzelYErk3S9K5ca4im5kXQZqsgOaZEGLS4st07svPvTgsXSyH8Te9/R2my4uqeAsmfpbCFPKAafX5SCBQFBS1zvP0Y23vWI1YtlrdNitLh8TONP0KO1BgDPP8psljq6dJZ55QCus1mbt44HzHRcfgafMmRX5MzvAwR2nGJ6vCLJyzoe1640iknWxvFr4fUTP3DCdIOrEreeA5G8EoRo8D+AIMALIBsgp4uaqC5pSsZN1T9uZe42Ebh0nIClnwYgK7bdc2bACmQ11Odw3RgfcTUQ0hP9BxP822WLvTYWxWWRYCTNDLk5bXCAMAxZbcIfMcc= admin@levi-virtual-machine" >> /home/admin/.ssh/authorized_keys
+          echo "{{ ssh_pubkey_1 }}" >> /home/admin/.ssh/authorized_keys
+          echo "{{ ssh_pubkey_2 }}" >> /home/admin/.ssh/authorized_keys
       loop: "{{ dns_names }}"
       register: ec2_instances
 
@@ -104,12 +107,12 @@
           MORIO_TEST_DNS_NAMES={{ dns_names[0] }}.test.morio.it
           MORIO_TEST_IDS={{ ec2_instances.results[0].instances[0].instance_id }}
           MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
-          MORIO_TEST_KEYS=morio_test_{{ pr_id }}-{{ dns_names[0] }}
+          MORIO_TEST_KEYS=morio_itest_{{ pr_id }}-{{ dns_names[0] }}
           {% else %}
           MORIO_TEST_DNS_NAMES={% for dns in dns_names %}{{ dns }}.test.morio.it{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_IDS={% for instance in ec2_instances.results | map(attribute='instances') | map('first') | list %}{{ instance.instance_id }}{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
-          MORIO_TEST_KEYS={% for dns in dns_names %}morio_test_{{ pr_id }}-{{ dns }}{% if not loop.last %},{% endif %}{% endfor %}
+          MORIO_TEST_KEYS={% for dns in dns_names %}morio_itest_{{ pr_id }}-{{ dns }}{% if not loop.last %},{% endif %}{% endfor %}
           {% endif %}
           {% if fqdn_name is defined and fqdn_name %}
           MORIO_TEST_FQDN={{ fqdn_name }}-cluster.test.morio.it
