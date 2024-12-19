@@ -44,6 +44,12 @@ jobs:
         if: ${{ github.event.pull_request.number }}
         run: echo "PR_ID=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
+      - name: Generate SSH Key Pair
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+          echo "SSH Key Pair generated and stored in ~/.ssh/id_rsa"
+
       - name: Run ideploy (Deploy to the environment)
         run: |
           npm run ideploy
