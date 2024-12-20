@@ -14,8 +14,13 @@
     ami_id: "{{ lookup('env', 'ITEST_AWS_DEBIAN12_AMI_ID') }}"  # Replace dynamically during testing if needed
     ssh_pubkey_1: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_1_ID') }}"
     ssh_pubkey_2: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_2_ID') }}"
+    ansible_python_interpreter: "/usr/bin/python3"  # Adjust to your Python path
 
   tasks:
+    - name: Debug Python interpreter
+      debug:
+        msg: "Using Python interpreter: {{ ansible_python_interpreter }}"
+
     - name: Generate random DNS names for instances
       set_fact:
         dns_names: []
