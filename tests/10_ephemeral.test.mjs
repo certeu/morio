@@ -13,10 +13,10 @@ describe('Ephemeral API: Status Routes', () => {
   it('Should load /status', async () => {
     const result = await api.get('/status')
 
-    assert.equal(true, Array.isArray(result), true)
+    assert.equal(true, Array.isArray(result))
     // assert.equal(3, result.length, 3)  // return array only contains 2 [success, body]
-    assert.equal(2, result.length, 2)
-    assert.equal(200, result[0], 200)
+    assert.equal(2, result.length)
+    assert.equal(200, result[0])
     const d = result[1]
     // core.status
     assert.equal(typeof d, 'object')
@@ -59,8 +59,8 @@ describe('Ephemeral API: Status Routes', () => {
     const result = await api.get('/status')
     assert.equal(true, Array.isArray(result), true)
     // assert.equal(3, result.length, 3)  // return array only contains 2 [success, body]
-    assert.equal(2, result.length, 2)
-    assert.equal(200, result[0], 200)
+    assert.equal(2, result.length)
+    assert.equal(200, result[0])
   })
 })
 

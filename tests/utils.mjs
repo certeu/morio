@@ -141,7 +141,7 @@ export function validateErrorResponse (result, errors, template) {
   else {
     assert.equal(Array.isArray(result), true)
     // assert.equal(3, result.length, 3)  // return array only contains 2 [success, body]
-    assert.equal(2, result.length, 2)
+    assert.equal(2, result.length)
     assert.equal(result[0], err.status)
     assert.equal(typeof result[1], 'object')
     assert.equal(result[1].title, err.title)
