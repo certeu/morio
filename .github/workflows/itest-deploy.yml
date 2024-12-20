@@ -105,9 +105,18 @@ jobs:
           ITEST_AWS_SSH_PUBKEY_1: ${{ secrets.AWS_SSH_PUBKEY_1 }}
           ITEST_AWS_SSH_PUBKEY_2: ${{ secrets.AWS_SSH_PUBKEY_2 }}
 
-      - name: Run isetup (Deploy and setup)
-        run: npm run isetup
-
+      - name: Run isetup (Deploy and setup with SSH retry)
+        run: |
+          for i in {1..10}; do
+            npm run isetup && break
+            echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
+            sleep 10
+          done
+          if [ $i -eq 10 ]; then
+            echo "SSH authentication failed after 10 attempts. Exiting."
+            exit 1
+          fi
+        
       - name: Run itest (Testing)
         run: npm run itest ephemeral
 
