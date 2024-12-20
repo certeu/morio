@@ -116,6 +116,9 @@ jobs:
             echo "SSH authentication failed after 10 attempts. Exiting."
             exit 1
           fi
+        
+      - name: Wait for 30 seconds
+        run: sleep 30
 
       - name: Run itest (Testing)
         run: npm run itest ephemeral
