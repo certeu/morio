@@ -61,8 +61,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
-          python3 -m pip install --upgrade pip
-          python3 -m pip install boto boto3 botocore
+          pip3 install --upgrade pip
+          pip3 install boto3 botocore
+
+      - name: Verify Python Version
+        run: python3 --version
+
+      - name: Verify boto3 and botocore installation
+        run: |
+          python3 -c "import boto3; print(boto3.__version__)"
+          python3 -c "import botocore; print(botocore.__version__)"
 
       - name: Install Ansible
         run: sudo apt-get install -y ansible
