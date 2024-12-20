@@ -12,8 +12,8 @@
     security_group_id: "{{ lookup('env', 'ITEST_AWS_SECURITY_GROUP_ID') }}"
     zone_id: "{{ lookup('env', 'ITEST_AWS_ROUTE53_ZONE_ID') }}"
     ami_id: "{{ lookup('env', 'ITEST_AWS_DEBIAN12_AMI_ID') }}"  # Replace dynamically during testing if needed
-    ssh_pubkey_1: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_1_ID') }}"
-    ssh_pubkey_2: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_2_ID') }}"
+    ssh_pubkey_1: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_1') }}"
+    ssh_pubkey_2: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_2') }}"
     ansible_python_interpreter: "/usr/bin/python3"  # Adjust to your Python path
 
   tasks:
@@ -112,22 +112,6 @@
       debug:
         msg: "SSH Public Key 2: {{ ssh_pubkey_2 }}"
 
-    - name: Check if SSH Public Key 1 exists on the instances
-      amazon.aws.ec2_metadata_facts:
-        region: "{{ region }}"
-      register: ec2_metadata
-      when: ec2_instances is defined
-
-    - name: Debug SSH Public Key 1 on instance
-      debug:
-        msg: "Public Key 1 added to instance (instance_id: {{ ec2_instances.results[0].instances[0].instance_id }}): {{ ec2_metadata.ansible_facts.ec2_metadata['public-key'] }}"
-      when: ec2_instances is defined
-
-    - name: Debug SSH Public Key 2 on instance
-      debug:
-        msg: "Public Key 2 added to instance (instance_id: {{ ec2_instances.results[0].instances[0].instance_id }}): {{ ec2_metadata.ansible_facts.ec2_metadata['public-key'] }}"
-      when: ec2_instances is defined
-
     - name: Check if the id_rsa.pub and id_rsa are correctly set up
       shell: |
         if [[ -f "/home/admin/.ssh/id_rsa.pub" ]]; then
@@ -144,22 +128,19 @@
       become: yes
       when: ec2_instances is defined
 
-    - name: Debug SSH Key Check Results
-      debug:
-        msg: "{{ ssh_key_check.stdout }}"
-      when: ec2_instances is defined
-
     - name: Export DNS names and FQDN to .env file
       copy:
         dest: "../../.env"
         content: |
           {% if dns_names | length == 1 %}
           MORIO_TEST_DNS_NAMES={{ dns_names[0] }}.test.morio.it
+          MORIO_TEST_PUBLIC_IPS={{ ec2_instances.results[0].instances[0].public_ip_address }}
           MORIO_TEST_IDS={{ ec2_instances.results[0].instances[0].instance_id }}
           MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
           MORIO_TEST_KEYS=morio_itest_{{ pr_id }}-{{ dns_names[0] }}
           {% else %}
           MORIO_TEST_DNS_NAMES={% for dns in dns_names %}{{ dns }}.test.morio.it{% if not loop.last %},{% endif %}{% endfor %} 
+          MORIO_TEST_PUBLIC_IPS={% for instance in ec2_instances.results | map(attribute='instances') | map('first') | list %}{{ instance.public_ip_address }}{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_IDS={% for instance in ec2_instances.results | map(attribute='instances') | map('first') | list %}{{ instance.instance_id }}{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
           MORIO_TEST_KEYS={% for dns in dns_names %}morio_itest_{{ pr_id }}-{{ dns }}{% if not loop.last %},{% endif %}{% endfor %}

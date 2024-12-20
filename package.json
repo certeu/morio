@@ -40,8 +40,8 @@
     "node": ">=20"
   },
   "scripts": {
-    "isetup": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_DNS_NAMES\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/install_moriod.yml'",
-    "ireset": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_DNS_NAMES\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/reset_moriod.yml'",
+    "isetup": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_PUBLIC_IPS\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/install_moriod.yml'",
+    "ireset": "dotenv -e .env -- sh -c 'echo \"[instances]\n$MORIO_TEST_PUBLIC_IPS\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/reset_moriod.yml'",
     "itest": "node ./tests/test-runner.mjs",
     "iconfigure": "node ./scripts/configure-test-vm.mjs",
     "ideploy": "ansible-playbook ./ansible/playbooks/deploy_moriod.yml --extra-vars @json-templates/deploy.json",

@@ -102,8 +102,8 @@ jobs:
           ITEST_AWS_SECURITY_GROUP_ID: ${{ secrets.ITEST_AWS_SECURITY_GROUP_ID }}
           ITEST_AWS_ROUTE53_ZONE_ID: ${{ secrets.ITEST_AWS_ROUTE53_ZONE_ID }}
           ITEST_AWS_DEBIAN12_AMI_ID: ${{ secrets.ITEST_AWS_DEBIAN12_AMI_ID }}
-          ITEST_AWS_SSH_PUBKEY_1_ID: ${{ secrets.AWS_SSH_PUBKEY1 }}
-          ITEST_AWS_SSH_PUBKEY_2_ID: ${{ secrets.AWS_SSH_PUBKEY2 }}
+          ITEST_AWS_SSH_PUBKEY_1: ${{ secrets.AWS_SSH_PUBKEY_1 }}
+          ITEST_AWS_SSH_PUBKEY_2: ${{ secrets.AWS_SSH_PUBKEY_2 }}
 
       - name: Run isetup (Deploy and setup)
         run: npm run isetup
