@@ -104,6 +104,51 @@
         ttl: 86400
         value: "{{ ec2_instances.results | map(attribute='instances') | map('first') | map(attribute='public_ip_address') | list }}"
 
+    - name: Debug SSH Public Key 1
+      debug:
+        msg: "SSH Public Key 1: {{ ssh_pubkey_1 }}"
+
+    - name: Debug SSH Public Key 2
+      debug:
+        msg: "SSH Public Key 2: {{ ssh_pubkey_2 }}"
+
+    - name: Check if SSH Public Key 1 exists on the instances
+      amazon.aws.ec2_metadata_facts:
+        region: "{{ region }}"
+      register: ec2_metadata
+      when: ec2_instances is defined
+
+    - name: Debug SSH Public Key 1 on instance
+      debug:
+        msg: "Public Key 1 added to instance (instance_id: {{ ec2_instances.results[0].instances[0].instance_id }}): {{ ec2_metadata.ansible_facts.ec2_metadata['public-key'] }}"
+      when: ec2_instances is defined
+
+    - name: Debug SSH Public Key 2 on instance
+      debug:
+        msg: "Public Key 2 added to instance (instance_id: {{ ec2_instances.results[0].instances[0].instance_id }}): {{ ec2_metadata.ansible_facts.ec2_metadata['public-key'] }}"
+      when: ec2_instances is defined
+
+    - name: Check if the id_rsa.pub and id_rsa are correctly set up
+      shell: |
+        if [[ -f "/home/admin/.ssh/id_rsa.pub" ]]; then
+          echo "id_rsa.pub exists."
+        else
+          echo "id_rsa.pub does not exist."
+        fi
+        if [[ -f "/home/admin/.ssh/id_rsa" ]]; then
+          echo "id_rsa exists."
+        else
+          echo "id_rsa does not exist."
+        fi
+      register: ssh_key_check
+      become: yes
+      when: ec2_instances is defined
+
+    - name: Debug SSH Key Check Results
+      debug:
+        msg: "{{ ssh_key_check.stdout }}"
+      when: ec2_instances is defined
+
     - name: Export DNS names and FQDN to .env file
       copy:
         dest: "../../.env"
