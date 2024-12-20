@@ -58,7 +58,11 @@ jobs:
           aws configure set output json
 
       - name: Install Python Dependencies for Ansible
-        run: python3 -m pip install --user boto boto3 botocore
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          python3 -m pip install --upgrade pip
+          python3 -m pip install boto boto3 botocore
 
       - name: Install Ansible
         run: sudo apt-get install -y ansible
