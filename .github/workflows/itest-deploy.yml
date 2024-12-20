@@ -57,14 +57,19 @@ jobs:
           aws configure set region eu-central-1
           aws configure set output json
 
+      - name: Install Python Dependencies for Ansible
+        run: python3 -m pip install --user boto boto3 botocore
+
       - name: Install Ansible
         run: sudo apt-get install -y ansible
 
+      - name: Create Inventory File
+        run: |
+          echo "[localhost]" > inventory
+          echo "127.0.0.1 ansible_python_interpreter=$(which python3)" >> inventory
+
       - name: Install required Ansible collections
         run: ansible-galaxy collection install amazon.aws community.general
-
-      - name: Install Python dependencies for Ansible
-        run: pip3 install boto boto3 botocore
 
       - name: Install Node.js dependencies
         run: |
