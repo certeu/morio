@@ -15,6 +15,8 @@ const ssl = { ssl: { certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.
  * This is a method so we get access to utils
  */
 export function monitors(utils) {
+  const cluster = utils.getClusterUuid()
+
   return {
     /*
      * API Service
@@ -27,6 +29,7 @@ export function monitors(utils) {
       check: {
         response: { status: [200] },
       },
+      id: `morio.${cluster}.internal.api`,
     },
 
     /*
@@ -40,6 +43,7 @@ export function monitors(utils) {
       check: {
         response: { status: [200] },
       },
+      id: `morio.${cluster}.internal.broker-admin`,
     },
     broker_rpc: {
       ...imd,
@@ -47,6 +51,7 @@ export function monitors(utils) {
       name: `Morio Broker Service: RPC Server on ${utils.getNodeFqdn()}`,
       hosts: ['broker'],
       ports: [utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')],
+      id: `morio.${cluster}.internal.broker-rpc`,
     },
     broker_kafka: {
       ...imd,
@@ -54,6 +59,7 @@ export function monitors(utils) {
       name: `Morio Broker Service: Kafka API on ${utils.getNodeFqdn()}`,
       hosts: ['broker'],
       ports: [utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')],
+      id: `morio.${cluster}.internal.broker-kafka`,
     },
     broker_proxy: {
       ...imd,
@@ -63,6 +69,7 @@ export function monitors(utils) {
       check: {
         response: { status: [200] },
       },
+      id: `morio.${cluster}.internal.broker-proxy`,
     },
 
     /*
@@ -81,6 +88,7 @@ export function monitors(utils) {
           json: [{ expression: 'status == "ok"' }],
         },
       },
+      id: `morio.${cluster}.internal.ca`,
     },
 
     /*
@@ -101,6 +109,7 @@ export function monitors(utils) {
           status: [200],
         },
       },
+      id: `morio.${cluster}.internal.console`,
     },
 
     /*
@@ -116,6 +125,7 @@ export function monitors(utils) {
           status: [200],
           json: [{ expression: 'status.cluster.color == "green"' }],
         },
+      id: `morio.${cluster}.internal.core`,
       },
     },
 
@@ -133,6 +143,7 @@ export function monitors(utils) {
           body: ['node ok'],
         },
       },
+      id: `morio.${cluster}.internal.db`,
     },
 
     /*
@@ -149,6 +160,7 @@ export function monitors(utils) {
           status: [200],
         },
       },
+      id: `morio.${cluster}.internal.proxy`,
     },
 
     /*
@@ -165,6 +177,7 @@ export function monitors(utils) {
           body: ['node ok'],
         },
       },
+      id: `morio.${cluster}.internal.ui`,
     },
 
     /*
@@ -181,6 +194,7 @@ export function monitors(utils) {
           json: [{ expression: 'beat == "heartbeat"' }],
         },
       },
+      id: `morio.${cluster}.internal.watcher`,
     },
   }
 }

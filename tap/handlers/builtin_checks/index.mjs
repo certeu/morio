@@ -22,28 +22,25 @@ const handler = config.enabled ? {
     /*
      * Only handle data that is in the correct format
      */
-    if (!data?.monitor?.id || !data?.monitor?.name) return tools.log.debug(data, 'Invalid healthcheck data')
+    if (!data?.monitor?.id || !data?.monitor?.name) return tools.note('Invalid healthcheck data', data)
 
     if (!data.url?.full) return tools.cache.note(`Healtcheck has no full URL`, data)
 
     /*
-     * Figure out what's going on.
-     *   up: Whether the healthcheck is up (ok) or not (0 or 1)
-     *   ms: Time in milliseconds that it took (useful observability signal)
-     *   dbce: Days before certificate expires (only for https checks)
+     * Summarize the healthcheck for the cache
      */
-    const [up, ms, dbce] = healthcheckSummary(data, tools)
-    const time = tools.time.when(data)
+    const summary = healthcheckSummary(data, tools)
 
     /*
      * Update the cache
      */
-    if (config.cache) tools.cache.healthcheck({ time, up, ms, dbce }, data, config)
+    if (config.cache) tools.cache.healthcheck(summary, data, config)
 
+    return
     /*
      * Escalate if needed
      */
-    if (!up && ['alarm', 'notification'].includes(config.on_down_produce)) {
+    if (!summary.up && ['alarm', 'notification'].includes(config.on_down_produce)) {
       // Prepare the nessage data
       const msg_data = {
         context: tools.create.context('healthcheck', data.monitor.type, data.monitor.id, tools.format.escape(data.url?.full)),
@@ -94,13 +91,36 @@ export default handler
  *   - days until the certificate expires
  */
 function healthcheckSummary (data, tools) {
-  return [
-    (config.up_values.indexOf(data.monitor.status.toLowerCase()) !== -1) ? 1 : 0,
-    Math.ceil(data.monitor.duration.us/1000),
-    (config.check_certificate && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
+  return {
+    // Up or not?
+    up: (config.up_values.indexOf(data.monitor.status.toLowerCase()) !== -1) ? 1 : 0,
+    // Milliseconds the healthcheck took
+    ms: Math.ceil(data.monitor.duration.us/1000),
+    // Days before certificate expiry
+    dbce: (config.check_certificate && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
       ? checkCertificateExpiry(data, tools)
-      : undefined
-  ]
+      : undefined,
+    // Uptime from historic healthchecks
+    uptime: data.state.up / data.state.checks,
+    // Start of the historic healthchecks
+    uptime_since: data.state.started_at,
+    // Time of this specific healthcheck
+    time: tools.time.when(data),
+    // Type of healthcheck
+    type: data.monitor.type,
+    // ID of the healthcheck
+    id: data.monitor.id,
+    // Name of the healthcheck
+    name: data.monitor.name,
+    // URL of the healthcheck
+    url: data.url.full,
+    /*
+     * Name/ID of the agent
+     * This helps us differentiate when running the same healthcheck from 2 places
+     * Something tha tis very useful when your infra spans multiple sites
+     */
+    from: data.agent.name || agent.id,
+  }
 }
 
 /*

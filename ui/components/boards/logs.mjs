@@ -18,11 +18,12 @@ import { Uuid } from 'components/uuid.mjs'
 import { Host } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
+import { ToggleLiveButton } from 'components/boards/shared.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
  */
-export const LogsTable = ({ cacheKey = 'logs|hosts' }) => {
+export const LogsTable = ({ cacheKey = 'logs' }) => {
   // State
   const [cache, setCache] = useState(false)
   const [inventory, setInventory] = useState({})
@@ -227,6 +228,7 @@ export const ShowLogs = ({ host, module, logset }) => {
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
+  const [paused, setPaused] = useState(false)
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
@@ -243,7 +245,7 @@ export const ShowLogs = ({ host, module, logset }) => {
         if (result.inventory) setInventory(result.inventory)
       })
     },
-    refetchInterval: 15000,
+    refetchInterval: paused ? false : 15000,
     refetchIntervalInBackground: false,
   })
 
@@ -268,11 +270,11 @@ export const ShowLogs = ({ host, module, logset }) => {
     <>
       <Host uuid={host} />
       <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center justify-between gap-2">
+        <div className="flex flex-row items-center justify-between gap-2 mt-4">
+          <ToggleLiveButton { ...{paused, setPaused }} />
           <KeyVal k='module' val={module} />
           <KeyVal k='logset' val={logset} />
         </div>
-        <ReloadDataButton onClick={() => setRefresh(refresh+1)} animate={15} />
       </div>
       {fields
         ? <LogLines fields={fields} lines={cache} />

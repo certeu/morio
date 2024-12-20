@@ -61,6 +61,7 @@ const icons = {
   broker: RedPanda,
   ca: CertificateIcon,
   certificates: CertificateIcon,
+  checks: CheckCircleIcon,
   create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
@@ -76,7 +77,6 @@ const icons = {
   events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
-  healthchecks: CheckCircleIcon,
   hosts: ServersIcon,
   images: ContainerImageIcon,
   inventory: ServersIcon,
@@ -123,8 +123,8 @@ export const links = {
       t: 'Events',
       r: 'user'
     },
-    healthchecks: {
-      t: 'Healthchecks',
+    checks: {
+      t: 'Health Checks',
       r: 'user'
     },
     logs: {

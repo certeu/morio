@@ -85,6 +85,15 @@ export const CheckCircleIcon = (props) => (
 )
 
 /*
+ * CircleIcon - Looks like a circle
+ */
+export const CircleIcon = (props) => (
+  <IconWrapper {...props}>
+    <circle cx="12" cy="12" r="9" />
+  </IconWrapper>
+)
+
+/*
  * ClosedLockIcon - Looks like a closed lock
  */
 export const ClosedLockIcon = (props) => (

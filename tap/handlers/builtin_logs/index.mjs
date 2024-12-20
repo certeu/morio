@@ -18,10 +18,7 @@ const handler = config.enabled ? {
     /*
      * Only handle data that has a log message
      */
-    if (!data?.message) {
-      tools.note(`No message field in data: ${JSON.stringify(data)}`)
-      return
-    }
+    if (!data?.message) return
 
     /*
      * Figure out what cache key to use

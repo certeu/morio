@@ -52,7 +52,6 @@ export const tools = {
   time: {
     ms2s,
     now,
-    timestamp,
     when,
   },
   produce: {
@@ -115,20 +114,11 @@ function ms2s (ms) {
 }
 
 /*
- * Returns current timestamp in seconds
- *
- * @return {number} s - Current timestamp in seconds
- */
-function now () {
-  return Math.floor(Date.now() / 1000)
-}
-
-/*
  * Returns current timestamp in milliseconds
  *
  * @return {number} ms - Current timestamp in milliseconds
  */
-function timestamp () {
+function now () {
   return Date.now()
 }
 
@@ -137,7 +127,7 @@ function timestamp () {
  */
 function when (data) {
   return (data?.['@timestamp'])
-    ? Math.floor(new Date(data['@timestamp']).getTime()/1000)
+    ? new Date(data['@timestamp']).getTime()
     : now()
 }
 
@@ -176,7 +166,7 @@ function notification (data) {
  */
 function logCacheErrors (err, result) {
   return err
-    ? log.error(err, `ValKey pipeline exec error`)
+    ? tools.note(`ValKey pipeline exec error`, err)
     : null
 }
 
@@ -195,36 +185,20 @@ function logCacheErrors (err, result) {
 async function cacheHealthcheck (checkData, data, overrides={}) {
   // Extract overrides or use defaults
   const {
-    ttl=3600,
-    check=tools.extract.check(data),
-    host=tools.extract.host(data),
-    module=tools.extract.module(data),
-    time=when(tools.time.when(data)),
-    by=tools.extract.by(data),
+    ttl=2,
   } = overrides
 
   // Create cache key
-  const key = createKey('check', host, module, check)
+  const key = createKey('check', checkData.id)
 
-  // Cache the health check itself
+  // Cache the health check itself, as well as its ID
   valkey
     .multi()
-    .zadd(key, time, JSON.stringify({ time, by, ...checkData }))
-    .zremrangebyscore(key, '-inf', time - ttl)
-    .expire(key, ttl)
+    .zadd(key, checkData.time, JSON.stringify(checkData))
+    .zremrangebyscore(key, '-inf', checkData.time - (ttl * 3600 * 1000))
+    .expire(key, ttl * 3600)
     .sadd('checks', key)
     .exec(logCacheErrors)
-
-  // Keep track of healthchecks collected for this host
-  const lkey = createKey('checks', host)
-  const checks = JSON.parse(await valkey.hget(lkey, module))
-  valkey.hset(lkey, module, JSON.stringify((checks === null)
-    // First log we see for this host, start new list
-    ? [check]
-    // Add to list of checks for this host, making sure to avoid duplicates
-    : [...new Set([...checks, check])]
-  ))
-  valkey.expire(lkey, ttl)
 }
 
 /*
@@ -270,11 +244,11 @@ async function cacheLogline (logset, logData, data, overrides={}) {
   valkey.expire(lkey, ttl*3600)
 
   // Finally, keep track of the hosts for which we have logs
-  const hkey = 'logs|hosts'
+  const hkey = 'logs'
   valkey
     .multi()
     .zadd(hkey, when(data), host)
-    .zremrangebyscore(hkey, '-inf', now() - ttl*3600)
+    .zremrangebyscore(hkey, '-inf', now()/1000 - ttl*3600)
     .zremrangebyrank(key, 0, 10000)
     .expire(key, ttl * 1.5 * 3600)
     .exec(logCacheErrors)

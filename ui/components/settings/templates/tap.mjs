@@ -100,7 +100,7 @@ function builtinForm (type, mSettings, update, init) {
 
 const builtin = {
   audit: 'Cache audit events, and optionally notify based on conditions you specify.',
-  checks: 'The checks Tap handler caches healthcheck data. It will also notify on expiring certificates.',
+  checks: 'The checks Tap handler caches health check data. It will also notify on expiring certificates.',
   inventory: 'The inventory Tap handler builds an inventory based on data reported by Morio clients.',
   metrics: 'The metrics Tap handler caches metrics data. It underpins the UI dashboards using metrics data.',
   logs: 'The log Tap handler Caches log data. It underpins the UI dashboards using logs data.',
@@ -135,7 +135,7 @@ const handlerConfigForms = {
                 schema: Joi.number(),
                 label: 'Cache TTL in hours',
                 key: `tap.builtin.checks.ttl`,
-                labelBL: 'How many hours of healthcheck data should be cached?',
+                labelBL: 'How many hours of health check data should be cached?',
                 dflt: 60,
                 current: data.ttl || 60
               },
@@ -168,16 +168,16 @@ const handlerConfigForms = {
         features: [
           <h4>Settings</h4>,
           <Popout tip>
-            <h5>We recommend generating events from failing healthchecks</h5>
+            <h5>We recommend generating events from failing health checks</h5>
             <p>
-              Receiving an alarm (or notification) for each failing healthcheck can quickly lead to alarm fatigue.
+              Receiving an alarm (or notification) for each failing health check can quickly lead to alarm fatigue.
               <br />
               Use one of these options if you are routing Morio&apos; alarms to your own alarm
               handler that provides grouping and supression.
             </p>
             <p>
               If you want Morio to handle grouping and supression for you, go with the
-              recommended approach of generating an event for each failing healthcheck,
+              recommended approach of generating an event for each failing health check,
               and let the events Tap handler handle escalation for you.
             </p>
           </Popout>,
@@ -221,19 +221,19 @@ const handlerConfigForms = {
               current: data.up_values
             },
           ],
-          <h4>Cache healthcheck data</h4>,
+          <h4>Cache health check data</h4>,
           enableToggle({
             key: `tap.builtin.checks.cache`,
             dflt: true,
             list: [
               {
                 val: false,
-                label: 'Do not cache healthcheck data (disable)',
+                label: 'Do not cache health check data (disable)',
               },
               {
                 val: true,
-                label: 'Cache recent healthcheck data',
-                about: 'Caching healthcheck data allows consulting it through the dashboards provided by Morio&apos;s UI service'
+                label: 'Cache recent health check data',
+                about: 'Caching health check data allows consulting it through the dashboards provided by Morio&apos;s UI service'
               },
             ],
             current: data.cache === false ? false : true,
@@ -244,7 +244,7 @@ const handlerConfigForms = {
                 schema: Joi.number(),
                 label: 'Cache TTL in hours',
                 key: `tap.builtin.checks.ttl`,
-                labelBL: 'How many hours of healthcheck data should be cached?',
+                labelBL: 'How many hours of health check data should be cached?',
                 dflt: 1,
                 current: data.ttl || 1
               },

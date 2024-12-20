@@ -23,7 +23,7 @@ const types = {
     about: 'Keep track of events throughout your infrastructure, such as logins, software changes, and so on',
     Icon: FlagIcon,
   },
-  healthchecks: {
+  checks: {
     about: `Keep track of what matters through Morio's watcher service, then go here to see what's up (or down)`,
     Icon: CheckCircleIcon,
   },
