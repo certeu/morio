@@ -5,8 +5,14 @@
   collections:
     - amazon.aws
     - community.general
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"  # Adjust to your Python path
 
   tasks:
+    - name: Debug Python interpreter
+      debug:
+        msg: "Using Python interpreter: {{ ansible_python_interpreter }}"
+
     # Read DNS names and FQDN from .env file
     - name: Load .env file
       slurp:
