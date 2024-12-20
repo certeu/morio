@@ -39,9 +39,9 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Broker Service: Admin API on ${utils.getNodeFqdn()}`,
-      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/status`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/`],
       check: {
-        response: { status: [200] },
+        response: { status: [404] },
       },
       id: `morio.${cluster}.internal.broker-admin`,
     },
@@ -49,7 +49,7 @@ export function monitors(utils) {
       ...imd,
       type: 'tcp',
       name: `Morio Broker Service: RPC Server on ${utils.getNodeFqdn()}`,
-      hosts: ['broker'],
+      hosts: ['morio-broker'],
       ports: [utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')],
       id: `morio.${cluster}.internal.broker-rpc`,
     },
@@ -57,7 +57,7 @@ export function monitors(utils) {
       ...imd,
       type: 'tcp',
       name: `Morio Broker Service: Kafka API on ${utils.getNodeFqdn()}`,
-      hosts: ['broker'],
+      hosts: ['morio-broker'],
       ports: [utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')],
       id: `morio.${cluster}.internal.broker-kafka`,
     },
@@ -67,7 +67,7 @@ export function monitors(utils) {
       name: `Morio Broker Service: REST API on ${utils.getNodeFqdn()}`,
       urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_REST_API_PORT')}/`],
       check: {
-        response: { status: [200] },
+        response: { status: [404] },
       },
       id: `morio.${cluster}.internal.broker-proxy`,
     },
@@ -123,7 +123,6 @@ export function monitors(utils) {
       check: {
         response: {
           status: [200],
-          json: [{ expression: 'status.cluster.color == "green"' }],
         },
       id: `morio.${cluster}.internal.core`,
       },
@@ -187,7 +186,7 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Watcher Service: HTTP metrics on ${utils.getNodeFqdn()}`,
-      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/watcher`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/`],
       check: {
         response: {
           status: [200],

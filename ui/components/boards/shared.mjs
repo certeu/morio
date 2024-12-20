@@ -1,3 +1,34 @@
+/**
+ * A helper method to parse a Redis/ValKey stream into an object
+ *
+ * @param {array} stream - The Data from the cache in stream format
+ * @return {object} data - The same data pased into an object structure
+ */
+export const cacheStreamAsObj = (stream) => {
+  if (!stream) return false
+  const data = {}
+  for (const entry of stream) {
+    const [id, d] = entry
+    data[id] = {}
+    for (let i=0; i < d.length; i += 2) {
+      if (d[i] === 'data')  {
+        let parsed
+        try {
+          parsed = JSON.parse(d[i+1])
+          data[id][d[i]] = parsed
+        }
+        catch (err) {
+          console.log(`Failed to parse JSON`, d[i+1], err)
+          data[id][d[i]] = d[i+1]
+        }
+      }
+      else data[id][d[i]] = d[i+1]
+    }
+  }
+
+  return data
+}
+
 /*
  * A button to show/toggle whether a view is live or not
  */

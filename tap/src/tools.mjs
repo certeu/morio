@@ -19,6 +19,7 @@ export const log = pino({ name: 'tap', level: 20, sync: false })
 export const tools = {
   axios,
   cache: {
+    event: cacheEvent,
     healthcheck:cacheHealthcheck,
     logErrors: logCacheErrors,
     // Use logline here (all lowercase) to avoid confusion with logErrors
@@ -149,6 +150,7 @@ function alarm (data) {
  * Creates an event
  */
 function event (data) {
+  tools.note('event', data)
   return produceStructuredMessage('event', data)
 }
 
@@ -168,6 +170,14 @@ function logCacheErrors (err, result) {
   return err
     ? tools.note(`ValKey pipeline exec error`, err)
     : null
+}
+
+/*
+ * Cache an event
+ */
+async function cacheEvent (data, overrides={}) {
+  valkey.xadd('events', '*', ...asValKeyParams({ data }))
+  trimStream('events', 150)
 }
 
 /*
@@ -302,8 +312,8 @@ async function cacheMetricset (metrics, data, overrides={}) {
  */
 function cacheNote (title="No note title", data={}) {
   if (typeof title !== 'string' || typeof data !== 'object') return false
-  valkey.xadd('notestream', '*', ...asValKeyParams({ title, data }))
-  trimStream('notestream', 50)
+  valkey.xadd('notes', '*', ...asValKeyParams({ title, data }))
+  trimStream('notes', 50)
 }
 
 /*
@@ -377,7 +387,7 @@ function produceStructuredMessage(msgType, msgData) {
   const {
     context=`${msgType}.context.missing`,
     data=null,
-    host='hostIdUnavailable',
+    host='unknown',
     tags=[],
     time=now(),
     title=`Untitled ${msgType}`,

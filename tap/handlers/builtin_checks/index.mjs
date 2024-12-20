@@ -36,44 +36,34 @@ const handler = config.enabled ? {
      */
     if (config.cache) tools.cache.healthcheck(summary, data, config)
 
-    return
     /*
      * Escalate if needed
      */
-    if (!summary.up && ['alarm', 'notification'].includes(config.on_down_produce)) {
-      // Prepare the nessage data
-      const msg_data = {
-        context: tools.create.context('healthcheck', data.monitor.type, data.monitor.id, tools.format.escape(data.url?.full)),
-        host: data.host?.id,
-        module: data.morio?.module?.name,
-        tags: [ 'healthcheck', 'down', data.monitor.type, data.monitor.id ],
-        time,
-        title: `Healthcheck failed: ${data.url?.full}`,
-        type: `${data.monitor.type}.healthcheck.down`,
-      }
-      if (config.on_down_produce === 'notification') tools.produce.notification(msg_data)
-      else tools.produce.alarm(msg_data)
-    }
+    if (!summary.up && config.escalate_when_down) tools.produce.event({
+      context: tools.create.context('check', summary.id, summary.from),
+      href: `https://${tools.node.cluster}/boards/checks/${summary.id}`,
+      time: summary.time,
+      title: `Health check failed: ${summary.name}`,
+      type: `${summary.type}.healthcheck.down`,
+      data: {
+        from: summary.from,
+        id: summary.id,
+        type: summary.type,
+      },
+    })
 
     /*
      * Can't do a simple if (!dbce) here because dbce can be zero
      */
-    if (dbce !== undefined) {
-      if (dbce < config.certificate_expires_days_alarm) tools.produce.alarm({
+    if (summary.dbce !== undefined) {
+      const { certificate_days = 21 } = config
+      if (summary.dbce < certificate_days) tools.produce.event({
         context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
-        host: data?.url?.domain,
-        module: data?.morio?.module?.name,
-        title: `⏳ Certificate will expire in ${dbce} days: ${data?.url?.full}`,
-        type: 'tls.certificate.expiry.imminent',
-        tags: ['tls','certificate','expiry'],
-      })
-      else if (dbce < config.certificate_expires_days_notify) tools.produce.notification({
-        context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
-        host: data?.url?.domain,
-        module: data?.morio?.module?.name,
-        tags: ['tls','certificate','expiry'],
-        title: `⏳ Certificate will expire in ${dbce} days: ${data?.url?.full}`,
-        type: 'tls.certificate.expiry.approaching',
+        href: `https://${tools.node.cluster}/boards/checks/${summary.id}`,
+        title: `⏳ Certificate will expire in ${summary.dbce} days: ${data?.url?.full}`,
+        time: summary.time,
+        type: 'tls.certificate.expiry',
+        data: { days_before_expiry: summary.dbce }
       })
     }
   }
@@ -97,7 +87,7 @@ function healthcheckSummary (data, tools) {
     // Milliseconds the healthcheck took
     ms: Math.ceil(data.monitor.duration.us/1000),
     // Days before certificate expiry
-    dbce: (config.check_certificate && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
+    dbce: (config.certificate_check && data.monitor.type === 'http' && data.tls && data.url?.scheme === 'https')
       ? checkCertificateExpiry(data, tools)
       : undefined,
     // Uptime from historic healthchecks
@@ -130,9 +120,13 @@ function healthcheckSummary (data, tools) {
  */
 const checkCertificateExpiry = (data, tools) => {
   const seconds = Math.floor(
-    (new Date(data.tls.certificate_not_valid_after).getTime()/1000)
+    (new Date(data.tls.certificate_not_valid_after).getTime())
     - tools.time.now()
   )
+  tools.note('cert check', {
+    seconds,
+    exp: data.tls.certificate_not_valid_after
+  })
 
   return Math.floor(seconds / (24 * 3600))
 }

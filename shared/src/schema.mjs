@@ -267,16 +267,12 @@ const settings = Joi.object({
       checks: Joi.object({
         enabled: Joi.boolean(),
         topics: Joi.object(),
-        modules: Joi.object(),
-        filter: Joi.alternatives().try(Joi.string(), Joi.boolean()),
         cache: Joi.boolean(),
         ttl: Joi.number(),
         up_values: Joi.object(),
-        on_down: Joi.string().allow('alarm', 'event', 'notification'),
+        escalate_when_down: Joi.boolean(),
         certificate_check: Joi.boolean(),
-        certificate_notification_days: Joi.number(),
-        certificate_alarm_days: Joi.number(),
-        certificate_event_days: Joi.number(),
+        certificate_days: Joi.number(),
       }),
       events: Joi.object({
         enabled: Joi.boolean(),

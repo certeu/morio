@@ -74,7 +74,8 @@ async function ensureLocalPrerequisites() {
    */
   if (tapSerial === settingsSerial) {
     log.debug(`[tap] Serial on disk is current. Not updating config`)
-    return
+    // FIXME
+    //return
   }
 
   /*
@@ -112,7 +113,10 @@ async function ensureLocalPrerequisites() {
       `export const config = ${JSON.stringify(config, null, 2)}`,
       '',
       '// Node info',
-      `export const node = ${JSON.stringify(utils.getNode(), null, 2)}`
+      `export const node = ${JSON.stringify({
+        ...utils.getNode(),
+        cluster: utils.getClusterFqdn(),
+      }, null, 2)}`,
     ].join("\n")
   ))
 

@@ -28,6 +28,12 @@ export async function subscribe() {
   tools.producer = producer
 
   /*
+   * Also attach config and node
+   */
+  tools.config = config
+  tools.node = node
+
+  /*
    * Invoke dispatch method on each message
    * and pass along the tools object
    */

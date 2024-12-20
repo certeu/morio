@@ -167,60 +167,16 @@ const handlerConfigForms = {
         filters: tapFilters('checks', data, update),
         features: [
           <h4>Settings</h4>,
-          <Popout tip>
-            <h5>We recommend generating events from failing health checks</h5>
-            <p>
-              Receiving an alarm (or notification) for each failing health check can quickly lead to alarm fatigue.
-              <br />
-              Use one of these options if you are routing Morio&apos; alarms to your own alarm
-              handler that provides grouping and supression.
-            </p>
-            <p>
-              If you want Morio to handle grouping and supression for you, go with the
-              recommended approach of generating an event for each failing health check,
-              and let the events Tap handler handle escalation for you.
-            </p>
-          </Popout>,
-          [
-            {
-              schema: Joi.string().allow('alarm', 'event', 'notification', 'silent').label('on_down'),
-              inputType: 'buttonList',
-              label: 'On down',
-              key: `tap.builtin.checks.on_down`,
-              dflt: true,
-              dense: true,
-              dir: 'row',
-              list: [
-                {
-                  val: 'alarm',
-                  label: 'Alarm',
-                },
-                {
-                  val: 'event',
-                  label: 'Event (recommended)',
-                },
-                {
-                  val: 'notification',
-                  label: 'Notification',
-                },
-                {
-                  val: 'silent',
-                  label: 'Silent (disabled)',
-                },
-              ],
-              current: data.cache === false ? false : true,
-            },
-            {
-              schema: Joi.object().optional().label('up_values'),
-              key: `tap.builtin.checks.up_values`,
-              label: `Up values`,
-              inputType: 'labels',
-              labelBL: 'Enter a comma to add a new entry',
-              labelTR: 'Add all values that should be considered a success',
-              dflt: { up: 'up', 1: 1, green: 'green' },
-              current: data.up_values
-            },
-          ],
+          {
+            schema: Joi.object().optional().label('up_values'),
+            key: `tap.builtin.checks.up_values`,
+            label: `Up values`,
+            inputType: 'labels',
+            labelBL: 'Enter a comma to add a new entry',
+            labelTR: 'Add all values that should be considered a success',
+            dflt: { up: 'up', 1: 1, green: 'green' },
+            current: data.up_values
+          },
           <h4>Cache health check data</h4>,
           enableToggle({
             key: `tap.builtin.checks.cache`,
@@ -248,7 +204,6 @@ const handlerConfigForms = {
                 dflt: 1,
                 current: data.ttl || 1
               },
-
           <h4>Verify certificate expiry</h4>,
           enableToggle({
             label: 'Verify certificate expiry',
@@ -258,9 +213,7 @@ const handlerConfigForms = {
               {
                 val: true,
                 label: 'Notify when TLS certificates approach their expiration date',
-                about: data.on_down === 'event'
-                  ? 'Raise an event when certificate expiry drops below a given number of days'
-                  : 'Raise a notification or alarm when certificate expiry drops below a given number of days'
+                about: 'Produce an event when certificate expiry drops below a given number of days'
               },
               {
                 val: false,
@@ -271,32 +224,32 @@ const handlerConfigForms = {
           }),
           data.certificate_check === false
             ? <span></span>
-            : ['event', 'silent'].includes(data.on_down)
-              ? {
-                schema: Joi.number(),
-                label: 'Certificate event days',
-                key: `tap.builtin.checks.certificate_event_days`,
-                labelBL: 'How many days before a certificate expires should an event be generated?',
-                dflt: 21,
-                current: data.certificate_event_days || 15
-              } : [
-                  {
-                    schema: Joi.number(),
-                    label: 'Certificate notification days',
-                    key: `tap.builtin.checks.certificate_notification_days`,
-                    labelBL: 'How many days before a certificate expires should a notification be generated?',
-                    dflt: 15,
-                    current: data.certificate_notification_days || 15
-                  },
-                  {
-                   schema: Joi.number(),
-                    label: 'Certificate alarm days',
-                    key: `tap.builtin.checks.certificate_alarm_days`,
-                    labelBL: 'How many days before a certificate expires should an alarm be generated?',
-                    dflt: 5,
-                  }
-              ]
-
+            : {
+              schema: Joi.number(),
+              label: 'Certificate event days',
+              key: `tap.builtin.checks.certificate_days`,
+              labelBL: 'How many days before a certificate expires should an event be generated?',
+              dflt: 21,
+              current: data.certificate_days || 21
+            },
+          <h4>Escalate when down</h4>,
+          enableToggle({
+            label: 'Escalate when down',
+            key: `tap.builtin.checks.escalate_when_down`,
+            dflt: true,
+            list: [
+              {
+                val: true,
+                label: 'Escalate failing health checks',
+                about: 'Produce an event when a health check fails'
+              },
+              {
+                val: false,
+                label: 'Take no action when a health check fails (disable)',
+              },
+            ],
+            current: data.escalate_when_down === false ? false : true,
+          }),
         ],
       }
     }
@@ -470,10 +423,9 @@ export const tap = ({ mSettings={}, update }) => ({
         cache: true,
         ttl: 1,
         up_values: asObj([1, 'green', 'up']),
-        on_down: 'event',
+        escalate_when_down: true,
         certificate_check: true,
-        certificate_notification_days: 15,
-        certificate_alarm_days: 5,
+        certificate_days: 21,
       })
     },
     events: {
