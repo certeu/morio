@@ -33,10 +33,10 @@ async function updateHost (data, tools) {
       )
     }
     catch (err) {
-      tools.note(`Failed to update host ${data.host.id} in DB`)
+      tools.note(`Failed to update host ${data.host.id} in DB`, { err, result })
     }
 
-    if (result?.status !== 200) tools.note(`Error when trying to update inventory`)
+    if (result?.status !== 200) tools.note(`Error when trying to update inventory`, result)
   }
 }
 

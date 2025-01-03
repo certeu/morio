@@ -62,6 +62,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
     handlers: {
       inventory: {
         enabled: utils.getSettings('tap.builtin.inventory.enabled', false),
+        audit: {
+          topics: { audit: 'audit' },
+          modules: { 'linux-system': 'linux-system' },
+        },
         metrics: {
           topics: { metrics: 'metrics' },
           modules: { 'linux-system': 'linux-system' },

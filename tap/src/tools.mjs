@@ -19,6 +19,7 @@ export const log = pino({ name: 'tap', level: 20, sync: false })
 export const tools = {
   axios,
   cache: {
+    audit: cacheAudit,
     event: cacheEvent,
     healthcheck:cacheHealthcheck,
     logErrors: logCacheErrors,
@@ -42,6 +43,7 @@ export const tools = {
     by: (data) => (data?.msg?.agent?.name || 'unknown-agent'),
     check: (data) => (data?.url?.full || 'unknown-check'),
     host: (data) => (data?.host?.id || 'unknown-host'),
+    id: (data) => (data?.['@metadata']._id || 'unknown-id'),
     metricset: (data) => (data?.metricset?.name || 'unknown-metricset'),
     module: (data) => (data?.morio?.module || 'unknown-module'),
     timestamp: when,
@@ -61,6 +63,7 @@ export const tools = {
     notification,
     inventoryUpdate: produceInventoryUpdate,
   },
+  shortUuid: (uuid) => typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0,5) : 'xxxxx',
 }
 
 /*
@@ -175,9 +178,17 @@ function logCacheErrors (err, result) {
 /*
  * Cache an event
  */
-async function cacheEvent (data, overrides={}) {
-  valkey.xadd('events', '*', ...asValKeyParams({ data }))
+async function cacheEvent (data) {
+  valkey.xadd('events', '*', ...asValKeyParams(data))
   trimStream('events', 150)
+}
+
+/*
+ * Cache an audit event
+ */
+async function cacheAudit (data, overrides={}) {
+  valkey.xadd('audit', '*', ...asValKeyParams(data))
+  trimStream('audit', 150)
 }
 
 /*

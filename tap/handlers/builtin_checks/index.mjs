@@ -57,14 +57,23 @@ const handler = config.enabled ? {
      */
     if (summary.dbce !== undefined) {
       const { certificate_days = 21 } = config
-      if (summary.dbce < certificate_days) tools.produce.event({
-        context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
-        href: `https://${tools.node.cluster}/boards/checks/${summary.id}`,
-        title: `⏳ Certificate will expire in ${summary.dbce} days: ${data?.url?.full}`,
-        time: summary.time,
-        type: 'tls.certificate.expiry',
-        data: { days_before_expiry: summary.dbce }
-      })
+      if (
+        summary.dbce < certificate_days &&
+        /*
+         * This is a way to supress escalation of super short-lived certificates
+         * like Morio's own internal CA which rotates its cert ever couple of hours
+         */
+        data.url.full.indexOf('MORIO_IGNORE_CERTIFICATE_EXPIRY') === -1
+      ) {
+        tools.produce.event({
+          context: tools.create.context(`tls.certificate.${tools.format.escape(data.url.full)}`),
+          href: `https://${tools.node.cluster}/boards/checks/${summary.id}`,
+          title: `⏳ Certificate will expire in ${summary.dbce} days: ${data?.url?.full}`,
+          time: summary.time,
+          type: 'tls.certificate.expiry',
+          data: { days_before_expiry: summary.dbce }
+        })
+      }
     }
   }
 } : false
@@ -117,16 +126,14 @@ function healthcheckSummary (data, tools) {
  * Checks certificate validity
  *
  * @param {object} data - The healthcheck data
+ * @param {object} tools - The tools object
+ * @return {number} days - The number of days until expiry
  */
 const checkCertificateExpiry = (data, tools) => {
-  const seconds = Math.floor(
+  const ms = Math.floor(
     (new Date(data.tls.certificate_not_valid_after).getTime())
     - tools.time.now()
   )
-  tools.note('cert check', {
-    seconds,
-    exp: data.tls.certificate_not_valid_after
-  })
 
-  return Math.floor(seconds / (24 * 3600))
+  return Math.floor(ms / (24 * 3600000))
 }

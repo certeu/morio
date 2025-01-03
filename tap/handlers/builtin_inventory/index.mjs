@@ -15,6 +15,58 @@ const hostFields = ['name', 'hostname', 'architecture', 'id']
  */
 const osFields = ['codename', 'family', 'kernel', 'name', 'platform', 'type', 'version']
 
+const auditHandler = config.enabled ? {
+  ...config.audit,
+  enabled: true,
+  method: (data, tools, topic) => {
+
+    /*
+     * FIXME: Is there any audit event we should track for the inventory?
+     * for example, the 'existing_user' action could be tracked to compile
+     * a list of user accounts on a given system:
+      case 'existing_user':
+        evt.title = `Existing user ${data.user?.name} (${data.user?.id}) on ${tools.shortUuid(summary.host)}`
+        evt.data = {
+          user: data.user?.name,
+          uid: data.user?.id,
+          group: data.user?.group?.name,
+          gid: data.user?.group?.id,
+          home: data.system?.audit?.user?.dir,
+          shell: data.system?.audit?.user?.shell,
+        }
+        break;
+     */
+    return
+
+    /*
+     * Do not handle hosts that lack an ID
+     */
+    if (!data.host.id) tools.note(`Host lacks ID: : ${JSON.stringify(data)}`)
+
+    /*
+     * Only handle hosts when we know how to
+     * transform data from the Morio module that generated it
+     */
+    if (!data?.morio?.module || typeof extractInventoryDataFromAudit[data.morio.module] !== 'function') return
+
+    /*
+     * Transform host data
+     */
+    const host = extractInventoryDataFromAudit[data.morio.module](data, tools)
+
+    /*
+     * Only update if we have data
+     */
+    if (host) tools.produce.inventoryUpdate({
+      host,
+      morio: {
+        inventory_update: true,
+        module: data.morio.module,
+      }
+    })
+  }
+} : null
+
 const metricsHandler = config.enabled ? {
   ...config.metrics,
   enabled: true,
@@ -33,12 +85,12 @@ const metricsHandler = config.enabled ? {
      * Only handle hosts when we know how to
      * transform data from the Morio module that generated it
      */
-    if (!data?.morio?.module || typeof extractHost[data.morio.module] !== 'function') return
+    if (!data?.morio?.module || typeof extractInventoryDataFromMetrics[data.morio.module] !== 'function') return
 
     /*
      * Transform host data
      */
-    const host = extractHost[data.morio.module](data, tools)
+    const host = extractInventoryDataFromMetrics[data.morio.module](data, tools)
 
     /*
      * Only update if we have data
@@ -65,7 +117,7 @@ const inventoryHandler = config.enabled ? {
  * This is the default export that bundles are various handlers
  * but only if they are enabled :)
  */
-const handlers = [ metricsHandler, inventoryHandler ]
+const handlers = [ auditHandler, metricsHandler, inventoryHandler ]
 export default handlers
 
 /**
@@ -129,7 +181,7 @@ function normalizeMac (mac, tools ) {
     .join(':'); // Glue back together with ':' characters
 }
 
-const extractHost = {
+const extractInventoryDataFromMetrics = {
   /**
    * Extract inventory data from the linux-system module
    *
@@ -137,10 +189,8 @@ const extractHost = {
    * @param {object} tools - The tools object
    * @return {object} host - The inventory host data
    */
-  'linux-system': function linuxSystemHost (data={}, tools) {
+  'linux-system': function linuxSystemMetrics (data={}, tools) {
 
-          //cores: Number,
-          //os: tools.clean,
     const host = {
       // data.host.id is always set when we get to this point
       id: data.host.id,
@@ -152,7 +202,7 @@ const extractHost = {
     // Host fqdn
     if (data.host?.name) host.fqdn = tools.clean(data.host.name)
 
-    // architecture
+    // Architecture
     if (data.host?.architecture) host.arch = tools.clean(data.host.architecture)
 
     // Memory
@@ -167,10 +217,65 @@ const extractHost = {
     // OS
     if (data.host?.os) host.os = data.host.os
 
-    // cores
+    // Cores
     if (data.system?.load?.cores) host.cores = data.system.load.cores
 
     // Do not update the inventory unless we've got sufficient data
     return (Object.keys(host).length > 5) ? host : false
   },
 }
+
+const extractInventoryDataFromAudit = {
+  /**
+   * Extract inventory data from the linux-system audit module
+   *
+   * @param {object} data - The data from kafka
+   * @param {object} tools - The tools object
+   * @return {object} host - The inventory host data
+   */
+  'linux-system': function linuxSystemAudit (data={}, tools) {
+
+    /*
+     * Re-use logic from metrics data, if possible
+     */
+    const hostDataFromMetrics = extractInventoryDataFromMetrics['linux-system'](data, tools)
+    const host = hostDataFromMetrics
+      ? hostDataFromMetrics
+      : {
+        // data.host.id is always set when we get to this point
+        id: data.host.id,
+      }
+
+    // Inventory state update for a host includes the timezone
+    //if (data.event?.kind === 'state' && data.event?.dataset === 'host' && data.system?.audit?.host?.fixme) {
+    //  if (typeof host.pkgs === 'undefined') host.pkgs = new Set()
+    //  host.pkgs.add(data.package)
+    //
+    //  tools.note('Audit inventory existing package', host)
+    //  return host
+    //}
+
+    // Existing packages
+    if (data.event?.action === 'existing_package' && data.package) {
+      if (typeof host.pkgs === 'undefined') host.pkgs = new Set()
+      host.pkgs.add(data.package)
+
+      tools.note('Audit inventory existing package', host)
+
+      return host
+    }
+
+    // Things we ignore
+    if ([
+      "changed-audit-configuration",
+      "existing_user",
+      "network_flow",
+    ].includes(data.event?.action)) return false
+
+    tools.note(`Audit/Inventory: ${data.event?.action}`, { host, data })
+
+    // Do not update the inventory with only host info
+    return false
+  }
+}
+

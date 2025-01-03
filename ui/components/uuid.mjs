@@ -5,6 +5,9 @@ import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
 
 export const Uuid = ({ uuid, href }) => {
   const [full, setFull] = useState()
+
+  if (!uuid) return <MissingUuid />
+
   const short = shortUuid(uuid)
 
   if (href === false) return (
@@ -26,3 +29,8 @@ export const Uuid = ({ uuid, href }) => {
   )
 }
 
+const MissingUuid = () => (
+  <span className="flex flex-row items-center">
+    <span className="badge badge-warning font-mono"> {shortUuid()}</span>
+  </span>
+)

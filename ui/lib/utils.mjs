@@ -7,6 +7,18 @@ import _slugify from 'slugify'
 import { jwtDecode } from 'jwt-decode'
 import { roles } from 'config/roles.mjs'
 
+export const asJson = (data, pretty = true) => {
+  const json = {}
+  for (const [key, val] of Object.entries(data)) {
+    if (typeof val === 'string' && val.trim()[0] === '{') json[key] = JSON.parse(val)
+    else json[key] = val
+  }
+
+  return pretty
+    ? JSON.stringify(json, null ,2)
+    : JSON.stringify(json)
+}
+
 export const decodeJwt = (token) => {
   let result
   try {
@@ -168,7 +180,9 @@ export const iconSize = 'h-8 w-8'
  * @param {string} uuid - The input UUID
  * @return {string} short - The shortened UUID
  */
-export const shortUuid = (uuid) => uuid.slice(0,5)
+export const shortUuid = (uuid) => typeof uuid === 'string' && uuid.length > 5
+  ? uuid.slice(0,5)
+  : 'xxxxx'
 
 /**
  * Wrapper around mustache's render method to render templated strings

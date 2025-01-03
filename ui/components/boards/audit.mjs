@@ -22,40 +22,26 @@ import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { linkClasses } from 'components/link.mjs'
 
-export const Note = ({ note }) => {
-  const { title, data } = note
-
-  return (
-    <div>
-      <h2>{title}</h2>
-        <Highlight title={title} language="json">{JSON.stringify(data, null, 2)}</Highlight>
-    </div>
-  )
-}
-
-export const Notes = () => {
+export const Audit = () => {
   const [paused, setPaused] = useState(false)
   const [desc, setDesc] = useState(true)
   const { api } = useApi()
   const { pushModal } = useContext(ModalContext)
 
   const { data, isLoading, error } = useQuery ({
-    queryKey: ['notes'],
-    queryFn: () => runNotesCall(api),
+    queryKey: ['audit'],
+    queryFn: () => runAuditCall(api),
     refetchInterval: paused ? false : 15000,
     refetchIntervalInBackground: false,
   })
 
   const sorted = data
     ? orderBy(
-        Object.entries(cacheStreamAsObj(data.value)).map(([id, note]) => ({ note, id, timestamp: id.split('-')[0] })),
+        Object.entries(cacheStreamAsObj(data.value)).map(([id, audit]) => ({ audit, id, timestamp: id.split('-')[0] })),
         'timestamp',
         desc ? 'desc' : 'asc'
     )
     : false
-
-      //<Note key={id} id={id} note={note} />)
-  //  : false
 
   return (
     <>
@@ -64,7 +50,7 @@ export const Notes = () => {
         <button
           className="btn btn-xs btn-primary btn-outline border-2"
           onClick={() => pushModal(<About />)}
-        >What are notes?</button>
+        >What is audit?</button>
       </div>
       <table className="table table-fixed">
         <thead>
@@ -82,22 +68,22 @@ export const Notes = () => {
         </thead>
         <tbody>
           {sorted
-            ? sorted.map(({ note, id, timestamp }, i) => (
+            ? sorted.map(({ audit, id, timestamp }, i) => (
               <tr key={i} className={` ${i%2 === 0 ? 'bg-neutral bg-opacity-10' : ''} p-0 m-0`}>
                 <td className="py-0"><TimeAgoBrief time={timestamp} /></td>
                 <td className="py-0">
                   <button
-                    className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                    className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2 normal-case"
                     onClick={() => pushModal(
                       <ModalWrapper keepOpenOnClick>
-                        <Highlight title={note.title} language="json">{asJson(note.data)}</Highlight>
+                        <Highlight title={audit.title} language="json">{asJson(audit)}</Highlight>
                       </ModalWrapper>
                     )}
                   >
-                    {note.title}
+                    {audit.title}
                   </button>
                 </td>
-                <td className="py-0">{note.data?.host?.id ? <Uuid uuid={note.data.host.id} /> : <Uuid uuid={false} />}</td>
+                <td className="py-0">{audit.host ? <Uuid uuid={audit.host} /> : <Uuid uuid={false} />}</td>
               </tr>
             ))
             : null
@@ -109,35 +95,25 @@ export const Notes = () => {
   )
 }
 
-const runNotesCall = async (api) => {
-  const result = await api.getCacheKey('notes')
+const runAuditCall = async (api) => {
+  const result = await api.getCacheKey('audit')
   return result[1] === 200 ? result[0] : false
 }
 
 const About = () => (
   <ModalWrapper>
-    <h2>What are notes? <small>And why are notes?</small></h2>
+    <h4>What is audit? <small>Or what is audit data?</small></h4>
     <p>
-      Notes are specific to the Tap service.
-      This service handles stream processing and in that capacity,
-      it typically handles all log entries flowing through Morio.
+      Audit data can be anything that can help establish an <em>audit trail</em>,
+      although in Morio it is typically derived from data collected by the auditbeat agent.
     </p>
     <p>
-      This creates a potential feedback loop when logging inside a Tap handler
-      will cause these log lines to be ingested and also processed by the same Tap
-      handler, which will log more data, and things will snowball from there.
+      In general, audit data is used to provide accountability.
+      For example, a configuration files being changed, a user logging in on a production
+      server, or <code>sudo</code> invocation are all typically audited events.
     </p>
     <p>
-      Because of this potential snowball effect, tap handlers never
-      engage in logging based on data flowing through the system.
-      <br />
-      Without such logs, developing or debugging stream processing is no fun.
-      So notes exist as a sort of <em>out-of-band logging channel</em> that
-      is specific to tap handlers.
-    </p>
-    <p>
-      As a result, these notes typically provide information about
-      unexptected data or formatting issues detected by a Tap handler.
+      All audit events are cached, and a subset of them may be further escalated.
     </p>
   </ModalWrapper>
 )

@@ -80,7 +80,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio CA API on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health`],
+      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health#MORIO_IGNORE_CERTIFICATE_EXPIRY`],
       check: {
         request: { method: 'GET' },
         response: {

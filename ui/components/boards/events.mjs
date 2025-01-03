@@ -59,7 +59,7 @@ export const Events = () => {
             </p>
           </Popout>
         ) : (
-          <button className="btn btn-xs btn-primary btn-outline border-2" onClick={() => setTip(!tip)}>What are notes?</button>
+          <button className="btn btn-xs btn-primary btn-outline border-2" onClick={() => setTip(!tip)}>What are events?</button>
         )}
       </div>
       {data
