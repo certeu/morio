@@ -9,14 +9,19 @@ const banner = `/*
  * This file is auto-generated every time the morio-tap container starts.
  * It will be overwritten at the next restart.
  *
- * Tap handlers can be loaded dynamically, which is handled by the
- * containers entrypoint which will auto-generate this file which
- * loads all tap handlers.
- *
  * A tap handler is a handler for Morio's Tap service that allows
  * you to 'tap into' the streaming data without having to write code
  * to handle streaming data.
+ *
+ * Tap handlers can dynamically be extended, and load code that is
+ * (for example) preseeded from a git repository.
+ * This is handled by the containers entrypoint script which will
+ * auto-generate files like this one.
  */`
+
+// Whitespace to re-use
+const nl = "\n"
+const tab = "  "
 
 /*
  * Helper function to glob a folder
@@ -33,10 +38,10 @@ export async function globDir(folderPath, pattern = '*/index.mjs') {
   return list
 }
 
-async function loadHandlerFiles(directory) {
+async function loadHandlerFiles(directory, pattern) {
   const folder = new URL(directory, import.meta.url)
 
-  return await globDir(folder.pathname)
+  return await globDir(folder.pathname, pattern)
 }
 
 function asTopicList (input) {
@@ -80,8 +85,6 @@ async function ensureHandlerLoader() {
     }
   }
 
-  const nl = "\n"
-  const tab = "  "
   /*
    * Holds import code
    */
@@ -143,5 +146,40 @@ export const handlerList = Object.keys(allHandlers)
   await fs.writeFile('./loader.mjs', code)
 }
 
+async function ensureModuleLoaders() {
+  const files = await loadHandlerFiles('./handlers', '*/modules/*.mjs')
+  const imports = {}
+  for (const file of files) {
+    /*
+     * We glob all files in one pass,
+     * but we need to manage them per handler
+     */
+    const handler = path.basename(path.dirname(path.dirname(file)))
+    if (typeof imports[handler] === 'undefined') imports[handler] = {}
+    const filename = path.basename(file)
+    if (filename.slice(-4) === '.mjs') {
+      const module = filename.slice(0,-4)
+      if (module !== 'index') {
+        const importName = module.replaceAll('-', '_')
+        imports[handler][module] = {
+          imp: `import ${importName} from './${filename}'`,
+          exp: `  "${module}": ${importName}`
+        }
+      }
+    }
+  }
+
+  /*
+   * Now write out the index.mjs loader files
+   */
+  for (const handler in imports) {
+    const code = `${banner}
+${Object.values(imports[handler]).map(h => h.imp).join(nl)}${nl}
+export default {${nl}${Object.values(imports[handler]).map(h => h.exp).join(nl)}${nl}}${nl}`
+    await fs.writeFile(`./handlers/${handler}/modules/index.mjs`, code)
+  }
+}
+
 ensureHandlerLoader()
+ensureModuleLoaders()
 
