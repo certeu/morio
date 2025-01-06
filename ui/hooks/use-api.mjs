@@ -734,6 +734,15 @@ MorioClient.prototype.removeInventoryOs = async function (id) {
   }, true)
 }
 
+/**
+ * Gets the tap config from the UI endpoint
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getDynamicTapConfig = async function () {
+  return await this.call(`${morioConfig.api}/dconf/tap`)
+}
+
 
 /*
  * Don't recreate the client on each call

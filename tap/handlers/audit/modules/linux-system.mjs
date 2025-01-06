@@ -107,8 +107,9 @@ function auditSummary (data, tools) {
   if (data.user) {
     summary.user = data.user
     // This is too chatty
-    if (summary.user.audit) delete (summary.user.audit)
-    if (summary.user.selinux) delete (summary.user.selinux)
+    for (const field of ['audit', 'selinux', 'saved', 'filesystem']) {
+      if (summary.user[field]) delete (summary.user[field])
+    }
   }
   // Process
   if (data.process) summary.process = data.process
@@ -120,4 +121,7 @@ function auditSummary (data, tools) {
   return summary
 }
 
-
+export const info = {
+  name: 'Audit module: linux-system',
+  about: `This stream processor plugin will process audit data from the linux-system module.`,
+}

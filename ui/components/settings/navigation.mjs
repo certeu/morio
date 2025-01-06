@@ -7,6 +7,7 @@ export const SettingsNavigation = ({
   loadView, // Method to load a view
   mSettings, // The current mSettings
   lead = [], // Lead for looking up IDs
+  dconf = {}, // Dyamic configuration
   level = 0,
 }) => (
   <ul className="list list-inside pl-2">
@@ -26,6 +27,14 @@ export const SettingsNavigation = ({
             <SettingsNavigation
               {...{ view, loadView, mSettings }}
               nav={entry.children}
+              lead={[...lead, entry.id]}
+              level={level + 1}
+            />
+          )}
+          {dconf?.[entry.id] && (
+            <SettingsNavigation
+              {...{ view, loadView, mSettings }}
+              nav={dconf[entry.id]}
               lead={[...lead, entry.id]}
               level={level + 1}
             />

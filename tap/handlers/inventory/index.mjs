@@ -279,3 +279,28 @@ const extractInventoryDataFromAudit = {
   }
 }
 
+export const info = {
+  title: 'Inventory stream processor',
+  about: `This stream processor will process audit and metrics data to build out an inventory of your infrastructure.
+
+It can only be enabled or disabled, and requires no configuration.`,
+  settings: {
+    enabled: {
+      title: 'Enable inventory stream processor',
+      dflt: true,
+      type: 'list',
+      list: [
+        {
+          val: false,
+          label: 'Disabled',
+          about: 'Select this to completely disabled this stream processor',
+        },
+        {
+          val: true,
+          label: 'Enabled',
+          about: 'Select this to enable this stream processor',
+        },
+      ]
+    },
+  }
+}

@@ -279,16 +279,25 @@ async function cacheLogline (logset, logData, data, overrides={}) {
  * Cache a metricset
  *
  * @param {object} msg - The original message data as received by the handler
- * @param {obhject} metrics - The metrics to cache
+ * @param {string} metricset - The metricset name to cache under
+ * @param {object} metrics - The metrics to cache
+ * @param {object} data - The full data from RedPanda
+ * @param {object} overrides - The handler config
  */
-async function cacheMetricset (metrics, data, overrides={}) {
+async function cacheMetricset (metricset, metrics, data, overrides={}) {
+  /*
+   * Don't bother if we do not have the data
+   */
+  if (!metricset || !metrics) {
+    return tools.cache.note('Cannot cache metrics, lacking data', { metricset, metrics })
+  }
+
   // Extract overrides or use defaults
   const {
     cap=150,
     ttl=1800,
     host=tools.extract.host(data),
     module=tools.extract.module(data),
-    metricset=tools.extract.metricset(data),
   } = overrides
 
   // Create cache key
