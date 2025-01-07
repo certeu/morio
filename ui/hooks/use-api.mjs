@@ -743,6 +743,15 @@ MorioClient.prototype.getDynamicTapConfig = async function () {
   return await this.call(`${morioConfig.api}/dconf/tap`)
 }
 
+/**
+ * Gets the flags config from the UI endpoint
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getDynamicFlagsConfig = async function () {
+  return await this.call(`${morioConfig.api}/dconf/flags`)
+}
+
 
 /*
  * Don't recreate the client on each call

@@ -6,6 +6,7 @@ import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, globDir } from './fs.mjs'
+import { cloneAsPojo } from './utils.mjs'
 
 /*
  * A collection of utils to load various files
@@ -157,11 +158,12 @@ async function loadPreseedBaseFile(preseed, gitroot, log) {
  * Helper method to load preseeded settings
  *
  * @param {object} preseed - The preseed settings
+ * @param {object} currentSettings - The full settings
  * @param {object} log - A logger instance
  * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export async function loadPreseededSettings(preseed, log, gitroot = '/etc/morio/shared') {
+export async function loadPreseededSettings(preseed, currentSettings=false, log, gitroot = '/etc/morio/shared') {
   /*
    * If there's a git config, we need to handle that first
    */
@@ -172,11 +174,17 @@ export async function loadPreseededSettings(preseed, log, gitroot = '/etc/morio/
   }
 
   /*
-   * Attempt to load the preseed base file
+   * Attempt to load the preseed base file (if there is one)
+   * Else, start from the current settings
    */
-  const settings = await loadPreseedBaseFile(preseed, gitroot, log)
+  const settings = preseed.base
+    ? await loadPreseedBaseFile(preseed, gitroot, log)
+    : cloneAsPojo(currentSettings)
   if (!settings) {
-    log.warn(`Failed to load preseed base file`)
+    log.warn(preseed.base
+      ? `Failed to load preseed base file`
+      : `Failed to construct initial settings`
+    )
     return false
   } else log.debug(`Loaded preseed base file`)
 

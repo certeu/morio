@@ -332,13 +332,6 @@ const initialSetup = async function (req, settings) {
   if (!keys.jwt) keys.jwt = generateJwtKey()
 
   /*
-   * Complete the settings with the defaults that are configured
-   */
-  for (const [key, val] of resolveServiceConfiguration('core', { utils }).default_settings) {
-    setIfUnset(valid, key, val)
-  }
-
-  /*
    * Make sure keys & settings exists in memory store so later steps can get them
    */
   utils.setKeys(keys)

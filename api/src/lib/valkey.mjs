@@ -1,4 +1,4 @@
-import { log } from './utils.mjs'
+import { log, utils } from './utils.mjs'
 import { Redis as Valkey } from 'ioredis'
 
 /*
@@ -6,12 +6,14 @@ import { Redis as Valkey } from 'ioredis'
  *
  * FIXME: For now we only support connecting over the local docker network
  */
-export const valkey = new Valkey({ host: 'morio-cache' })
+export const valkey = Object.keys(utils.getSettings('tap', {})).length > 0
+  ? new Valkey({ host: 'morio-cache' })
+  : false
 
 /*
  * Say hi
  */
-valkey.on('ready', () => log.debug('ValKey client ready'))
+if (valkey) valkey.on('ready', () => log.debug('ValKey client ready'))
 
 /**
  * This is a helper object that abstracts the low-level ValKey/Redis API
