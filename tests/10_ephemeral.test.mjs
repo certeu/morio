@@ -1,13 +1,8 @@
-import { restClient, validateErrorResponse } from './utils.mjs'
+import { api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg, corePkg } from '../api/tests/json-loader.mjs'
 import { errors } from '../api/src/errors.mjs'
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const api = restClient(`https://${process.env.MORIO_TEST_HOST}/-/api`)
 
 describe('Ephemeral API: Status Routes', () => {
   it('Should load /status', async () => {

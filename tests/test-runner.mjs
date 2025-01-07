@@ -15,7 +15,9 @@ const testName = args[0];
 // Map test names to file paths
 const testFiles = {
   ephemeral: './tests/10_ephemeral.test.mjs',
-  otherTest: './tests/20_other_test.mjs', // Add other tests here
+  setup: './tests/20_setup.test.mjs',
+  create: './tests/25_create-test-account.test.mjs',
+  anonymous: './tests/30_anonymous.test.mjs',
 };
 
 const testFile = testFiles[testName];
