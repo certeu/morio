@@ -472,7 +472,7 @@ MorioClient.prototype.deploy = async function (settings) {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(settings),
-  })
+  }, true)
 }
 
 /**

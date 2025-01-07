@@ -1,9 +1,9 @@
-import { handlersPerTopic, topics } from '../loader.mjs'
+import { processorsPerTopic, topics } from '../loader.mjs'
 import { count } from './counters.mjs'
 
 /*
- * This dispatch method handles all Kafka messages
- * and routes them through the message handlers
+ * This dispatch method received all Kafka messages
+ * and routes them through the (stream) processors
  * that have subscribed to them
  */
 export function dispatch(topic, message, tools) {
@@ -13,31 +13,33 @@ export function dispatch(topic, message, tools) {
   count.message(topic)
 
   /*
-   * Return early if we do not have any handlers for this topic
+   * Return early if we do not have any stream processors
+   * subscribed to this topic
    */
-  if (!handlersPerTopic[topic]) return
+  if (!processorsPerTopic[topic]) return
 
   /*
-   * Do the actual dispatching for every message handler subscribed to this topic
+   * Do the actual dispatching for every (stream) processor
+   * subscribed to this topic
    */
-  for (const handler of handlersPerTopic[topic]) {
+  for (const processor of processorsPerTopic[topic]) {
     const { data } = parseMessageData(message)
     /*
      * Run filter method if there is one
      */
     if (
-      !handler.filter ||
-      (typeof handler.filter === 'function' && handler.filter(data, topic))
+      !processor.filter ||
+      (typeof processor.filter === 'function' && processor.filter(data, topic))
     ) {
       /*
-       * Count every handled message
+       * Count every processed message
        */
-      count.handler(handler.name)
+      count.processor(processor.name)
 
       /*
-       * Hand over to handler method
+       * Hand over to stream processor method
        */
-      handler.method(data, tools, topic)
+      processor.method(data, tools, topic)
     }
   }
 }

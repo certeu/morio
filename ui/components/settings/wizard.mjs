@@ -88,7 +88,7 @@ const Nr = ({ children, disabled = false, color = 'primary' }) => (
 /**
  * Displays settings validation
  */
-const ShowSettingsValidation = ({
+export const ShowSettingsValidation = ({
   api,
   mSettings,
   deploy,
@@ -163,7 +163,7 @@ const ShowSettingsValidation = ({
 /**
  * Displays settings preview (or a button to show it)
  */
-const ShowSettingsPreview = ({ preview, mSettings }) =>
+export const ShowSettingsPreview = ({ preview, mSettings }) =>
   preview ? (
     <div className="w-full mt-8 max-w-4xl">
       <h3>Settings Preview</h3>
@@ -206,7 +206,7 @@ const PleaseWait = () => (
   </div>
 )
 
-const getRunningSettings = async (api, setOk, setKo) => {
+export const getRunningSettings = async (api, setOk, setKo) => {
   const result = await api.getCurrentSettings()
   if (result[1] === 200 && result[0].cluster) {
     const newMSettings = { ...result[0] }
@@ -214,7 +214,7 @@ const getRunningSettings = async (api, setOk, setKo) => {
   } else setKo(true)
 }
 
-const getDynamicConfig = async (api, setOk) => {
+export const getDynamicConfig = async (api, setOk) => {
   // Tap config
   const dconf = {}
   const result = await api.getDynamicTapConfig()

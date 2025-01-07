@@ -20,8 +20,8 @@ export const service = {
      */
     wanted: () => {
       /*
-       * Only run the tap service if any of the built-in handlers are enabled
-       * FIXME: At some point we will also have to check for custom handlers
+       * Only run the tap service if any stream processors are loaded & enabled
+       * FIXME: Handle dynamic loading of processors
        */
       if (isTapWanted()) {
         ensureLocalPrerequisites()
@@ -84,9 +84,9 @@ async function ensureLocalPrerequisites() {
   promises.push(writeFile(`/etc/morio/tap/serial`, `${settingsSerial}`, log))
 
   /*
-   * Generate config for the built-in handlers
+   * Generate config for all stream processors
    */
-  promises.push(ensureBuiltinHandlers())
+  promises.push(ensureStreamProcessors())
 
   /*
    * Generate the tap config file
@@ -125,25 +125,16 @@ async function ensureLocalPrerequisites() {
   return
 }
 
-function ensureBuiltinHandlers() {
+function ensureStreamProcessors() {
   /*
-   * These are all the built-in handlers
+   * FIXME: Load stream processors
    */
-  const handlers = [
-    'audit',
-    'events',
-    'checks',
-    'inventory',
-    'logs',
-    'metrics',
-  ]
-
+  const processors = []
   const promises = []
 
   /*
    * For each of them, generate the config and write it to disk
-   */
-  const customHandlersConfig = resolveServiceConfiguration('tap', { utils }).handlers
+  const streamProcessorConfig = resolveServiceConfiguration('tap', { utils }).handlers
   for (const handler of handlers) {
     const config = customHandlersConfig[handler]
       ? customHandlersConfig[handler]
@@ -159,6 +150,7 @@ function ensureBuiltinHandlers() {
       log
     ))
   }
+   */
 
   return Promise.all(promises)
 }
@@ -169,9 +161,9 @@ function ensureBuiltinHandlers() {
  * @return {bool} wanted - True if wanted, false if not
  */
 export function isTapWanted() {
-  const handlers = utils.getSettings('tap.builtin', {})
+  const processors = utils.getSettings('tap', {})
 
-  return Object.keys(handlers).length > 0
+  return Object.keys(processors).length > 0
 }
 
 

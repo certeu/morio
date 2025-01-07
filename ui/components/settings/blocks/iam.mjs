@@ -229,12 +229,23 @@ const ProviderOrder = ({ data, update }) => {
 
   //  data.iam?.ui?.order || orderBy(Object.keys(data.iam?.providers) || {}, 'label', 'asc')
 
-  for (const id of data.iam.ui?.order || []) {
+  for (const id of data.iam?.ui?.order || []) {
     if (data.iam.providers[id]) order.add(id)
   }
-  for (const id in data.iam.providers) {
+  for (const id in data.iam?.providers) {
     if (!order.has(id)) order.add(id)
   }
+
+  if (order.size === 0) return (
+    <Popout note>
+      <h4>You cannot order what you do not (yet) have</h4>
+      <p>
+        Once you have configured identity providers,
+        you will be able to configure here how they are to be
+        presented on the sign in page.
+      </p>
+    </Popout>
+  )
 
   const moveUp = (i) => {
     const newOrder = [...order]

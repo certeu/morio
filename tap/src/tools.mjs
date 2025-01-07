@@ -194,7 +194,7 @@ async function cacheAudit (data, overrides={}) {
 /*
  * Cache a healtcheck
  *
- * @param {object} msg - The original message data as received by the handler
+ * @param {object} msg - The original message data as received from RedPanda
  * @param {obhject} summary - An object holding the summary data of the healthcheck
  * @param {number} summary.time - The original time of the event (optional)
  * @param {number} summary.up - Whether the healthcheck succeeded (1) or failed (0)
@@ -226,9 +226,9 @@ async function cacheHealthcheck (checkData, data, overrides={}) {
  * Cache a log line
  *
  * @param {object} logset - An identifier that tells us what type of log it is
- * @param {object} msg - The original message data as received by the handler
+ * @param {object} msg - The original message data as received from RedPanda
  * @param {obhject} data - The full data from kafka
- * @param {object} overrides - The handler config and any other overrides
+ * @param {object} overrides - The processor configuration and any other overrides
  */
 async function cacheLogline (logset, logData, data, overrides={}) {
   // Extract settings from config or use defaults
@@ -278,11 +278,11 @@ async function cacheLogline (logset, logData, data, overrides={}) {
 /*
  * Cache a metricset
  *
- * @param {object} msg - The original message data as received by the handler
+ * @param {object} msg - The original message data as received from RedPanda
  * @param {string} metricset - The metricset name to cache under
  * @param {object} metrics - The metrics to cache
  * @param {object} data - The full data from RedPanda
- * @param {object} overrides - The handler config
+ * @param {object} overrides - The stream processor configuration and any other overrides
  */
 async function cacheMetricset (metricset, metrics, data, overrides={}) {
   /*

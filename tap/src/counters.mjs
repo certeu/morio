@@ -1,4 +1,4 @@
-import { handlerList, topics } from '../loader.mjs'
+import { processorList, topics } from '../loader.mjs'
 import { tools } from './tools.mjs'
 import { node } from '../config/tap.mjs' // Needs to be mounted in the container
 
@@ -16,8 +16,8 @@ export const count = {
   message: function (topic) {
     counters.topics[topic]++
   },
-  handler: function (name) {
-    counters.handlers[name]++
+  processor: function (name) {
+    counters.processors[name]++
   }
 }
 
@@ -28,7 +28,7 @@ function startCount () {
   /*
    * Start with a clean slate
    */
-  resetCounters(handlerList, topics)
+  resetCounters(processorList, topics)
 
   /*
    * Then collect data ever tick (30s)
@@ -80,21 +80,21 @@ function countersAsEcs (throughput) {
 /**
  * Reset counters on every tick
  *
- * @param {object} handlers - The handlers that are loaded
+ * @param {object} processors - The stream processors that are loaded
  * @param {array} topics - The topics we are subscribed to
  */
-function resetCounters(handlers=false, topics=false) {
+function resetCounters(processors=false, topics=false) {
   /*
-   * Only on initial startup will handlers and topics be set
+   * Only on initial startup will stream processors and topics be set
    */
-  const init = (handlers && topics) ? true : false
+  const init = (processors && topics) ? true : false
 
   /*
-   * Handlers and topics are only passed in at the initial startup
+   * Stream processors and topics are only passed in at the initial startup
    * So at that time, we use them, later on we re-use the keys in counters
    */
   const list = {
-    handlers: init ? handlers : Object.keys(counters.handlers),
+    processors: init ? processors : Object.keys(counters.processors),
     topics: init ? topics : Object.keys(counters.topics)
   }
 
@@ -113,7 +113,7 @@ function resetCounters(handlers=false, topics=false) {
     /*
      * Counter snapshot. We will extract the currect counters data and convert to msg/s
      */
-    const data = { topics: {}, handlers: {} }
+    const data = { topics: {}, processors: {} }
     for (const type of Object.keys(list)) {
       const reset = {}
       for (const name of list[type]) {

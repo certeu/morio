@@ -56,25 +56,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
         cert: '/tap/config/tls-cert.pem',
       }
     },
-    /*
-     * Builting tap handlers config for some
-     */
-    handlers: {
-      inventory: {
-        enabled: utils.getSettings('tap.builtin.inventory.enabled', false),
-        audit: {
-          topics: { audit: 'audit' },
-          modules: { 'linux-system': 'linux-system' },
-        },
-        metrics: {
-          topics: { metrics: 'metrics' },
-          modules: { 'linux-system': 'linux-system' },
-        },
-        inventory: {
-          topics: { inventory: 'inventory' },
-        }
-      }
-    }
   }
 }
 

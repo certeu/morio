@@ -23,6 +23,7 @@ import {
   LocationIcon,
   LogsIcon,
   MorioIcon,
+  NoteIcon,
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
@@ -73,6 +74,7 @@ const icons = {
   docker: Docker,
   download: DownloadIcon,
   downloads: DownloadIcon,
+  edit: NoteIcon,
   encrypt: ClosedLockIcon,
   events: FlagIcon,
   export: BriefcaseIcon,
@@ -167,6 +169,9 @@ export const links = {
   settings: {
     t: 'Settings',
     r: 'operator',
+    edit: {
+      t: 'Edit Settings',
+    },
     show: {
       t: 'Show Settings',
     },
