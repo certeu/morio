@@ -103,7 +103,7 @@ const icons = {
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
-  start: WrenchIcon,
+  start: SettingsIcon,
 }
 
 /*

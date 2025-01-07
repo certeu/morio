@@ -201,6 +201,8 @@ const preseed = Joi.alternatives().try(
     base: preseedFile,
     overlays: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
     keys: preseedKeys,
+    processors: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
+    modules: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
   }),
   Joi.string()
 )

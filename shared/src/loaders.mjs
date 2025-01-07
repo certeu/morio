@@ -215,6 +215,7 @@ export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio
    */
   if (preseed.git) {
     for (const [id, config] of Object.entries(preseed.git)) {
+      log.todo({id, config}, 'loadGitRepo()')
       await loadGitRepo(gitroot, id, config, log)
     }
   }

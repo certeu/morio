@@ -7,7 +7,7 @@ const EditSettingsPage = (props) => {
   return (
     <PageWrapper {...props} role="operator">
       <ContentWrapper {...props} Icon={NoteIcon}>
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full">
           <SettingsEditor />
         </div>
       </ContentWrapper>

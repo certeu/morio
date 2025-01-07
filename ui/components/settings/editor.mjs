@@ -58,7 +58,7 @@ export const PrimedSettingsEditor = (props) => {
   /*
    * React state
    */
-  const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings this wizard builds
+  const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [showDelta, setShowDelta] = useState(false)
   const [deployOngoing, setDeployOngoing] = useState(false)
@@ -66,6 +66,8 @@ export const PrimedSettingsEditor = (props) => {
   const [doValidate, setDoValidate] = useState(false)
   const [json, setJson] = useState(false)
   const [kiosk, setKiosk] = useState(false)
+  const [localJson, setLocalJson] = useState(JSON.stringify(runningSettings, null ,2)) // Holds the settings as JSON
+  const [localYaml, setLocalYaml] = useState(yaml.stringify(runningSettings)) // Holds the settings as YAML
 
   /*
    * Method to revert to running settings
@@ -121,15 +123,28 @@ export const PrimedSettingsEditor = (props) => {
     let newSettings
     try {
       newSettings = yaml.parse(input)
-      if (newSettings) setMSettings(newSettings)
+      if (newSettings) {
+        setLocalYaml(input)
+        setMSettings(newSettings)
+      }
+    }
+    catch (err) {
+      // This is fine
+    }
+  }
+  const onChangeJson = (input) => {
+    let newSettings
+    try {
+      newSettings = JSON.parse(input)
+      if (newSettings) {
+        setLocalJson(input)
+        setMSettings(newSettings)
+      }
     }
     catch (err) {
       console.log(err)
-      setLoadingStatus([true, 'Failed to parse settings. No changes made.'])
+      // This is fine
     }
-  }
-  const onChangeJson = (...params) => {
-    console.log(params)
   }
 
 
@@ -174,17 +189,17 @@ export const PrimedSettingsEditor = (props) => {
             ? "absolute top-12 left-0 w-screen h-screen z-50 bg-base-100"
             : ""
           }>
-            <Tabs tabs="yaml, json">
-              <Tab id="json" label="As YAML">
+            <Tabs tabs="YAML, JSON">
+              <Tab id="json" name="test" label="As YAML">
                 <CodeMirror
-                  value={yaml.stringify(mSettings)}
+                  value={localYaml}
                   height={kiosk ? "90vh" : "70vh"}
                   onChange={onChangeYaml}
                 />
               </Tab>
               <Tab id="yaml" label="As JSON">
                 <CodeMirror
-                  value={JSON.stringify(mSettings, null, 2)}
+                  value={localJson}
                   height={kiosk ? "90vh" : "70vh"}
                   extensions={[jsonLang()]}
                   onChange={onChangeJson}
@@ -210,7 +225,7 @@ export const PrimedSettingsEditor = (props) => {
           <h4>You have made changes that are yet to be deployed</h4>
           <p>The settings have been edited, and are now different from the deployed settings.</p>
           {showDelta ? (
-            <div className="my-4 max-w-4xl overflow-scroll">
+            <div className="my-4 w-full overflow-scroll">
               <DiffViewer
                 from={yaml.stringify(runningSettings)}
                 to={yaml.stringify(mSettings)}
