@@ -39,7 +39,7 @@ core/run-test-container.sh
 api/run-test-container.sh
 
 # Auto-generated tap handler config files
-tap/handlers/*/config.mjs
+tap/processors/*
 tap/loader.mjs
 
 # Test artifacts

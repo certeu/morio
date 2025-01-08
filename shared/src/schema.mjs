@@ -199,10 +199,10 @@ const preseed = Joi.alternatives().try(
     url: Joi.string(),
     git: Joi.object().pattern(Joi.string(), gitRepo),
     base: preseedFile,
-    overlays: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
+    overlays: Joi.array().items(preseedFile),
     keys: preseedKeys,
-    processors: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
-    modules: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
+    processors: Joi.array().items(preseedFile),
+    modules: Joi.array().items(preseedFile),
   }),
   Joi.string()
 )
@@ -256,57 +256,7 @@ const settings = Joi.object({
   vault: vaultInstance,
   preseed,
   client,
-  tap: Joi.object({
-    builtin: Joi.object({
-      audit: Joi.object({
-        enabled: Joi.boolean(),
-        topics: Joi.object(),
-        modules: Joi.object(),
-        filter: Joi.alternatives().try(Joi.string(), Joi.boolean()),
-        cache: Joi.boolean(),
-        ttl: Joi.number(),
-        eventify: Joi.boolean(),
-      }),
-      checks: Joi.object({
-        enabled: Joi.boolean(),
-        topics: Joi.object(),
-        cache: Joi.boolean(),
-        ttl: Joi.number(),
-        up_values: Joi.object(),
-        escalate_when_down: Joi.boolean(),
-        certificate_check: Joi.boolean(),
-        certificate_days: Joi.number(),
-      }),
-      events: Joi.object({
-        enabled: Joi.boolean(),
-        topics: Joi.object(),
-        modules: Joi.object(),
-        filter: Joi.alternatives().try(Joi.string(), Joi.boolean()),
-        cache: Joi.boolean(),
-        ttl: Joi.number(),
-      }),
-      inventory: Joi.object({
-        enabled: Joi.boolean(),
-      }),
-      logs: Joi.object({
-        enabled: Joi.boolean(),
-        topics: Joi.object(),
-        modules: Joi.object(),
-        filter: Joi.alternatives().try(Joi.string(), Joi.boolean()),
-        cache: Joi.boolean(),
-        ttl: Joi.number(),
-      }),
-      metrics: Joi.object({
-        enabled: Joi.boolean(),
-        topics: Joi.object(),
-        modules: Joi.object(),
-        filter: Joi.alternatives().try(Joi.string(), Joi.boolean()),
-        cache: Joi.boolean(),
-        ttl: Joi.number(),
-        cap: Joi.number(),
-      }),
-    })
-  }).optional(),
+  tap: Joi.object().optional(),
 }).required()
 
 /**

@@ -4,6 +4,7 @@ import pino from 'pino'
 import axios from 'axios'
 import { cache as valkey } from './cache.mjs'
 import { inventory } from './inventory.mjs'
+import ipaddr from 'ipaddr.js'
 
 /*
  * Export log object on its own
@@ -32,6 +33,7 @@ export const tools = {
   },
   clean,
   inventory,
+  ipaddr,
   note: cacheNote,
   valkey,
   create: {
