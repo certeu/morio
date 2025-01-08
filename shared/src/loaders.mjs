@@ -547,7 +547,7 @@ export async function loadStreamProcessors(settings, log) {
               sourceFile,
               targetFile,
               targetFolder,
-            })
+            }, 2112) // 2112 is the user id of the user inside the tap container
             if (copy) {
               log.debug(`Seeding stream processing file: ${targetFile}`)
               /*
@@ -599,11 +599,14 @@ function ensureStreamProcessorSettings(seededSettings, morioSettings) {
   return morioSettings
 }
 
-async function copyPreseedFile ({ sourceFile, targetFile, targetFolder }) {
+async function copyPreseedFile ({ sourceFile, targetFile, targetFolder }, chownId=false) {
   try {
     await mkdir(targetFolder)
+    if (chownId) await fs.promises.chown(targetFolder, chownId, chownId)
     await fs.promises.cp(sourceFile, `${targetFolder}/${targetFile}`)
+    if (chownId) await fs.promises.chown(`${targetFolder}/${targetFile}`, chownId, chownId)
   } catch (err) {
+    console.log(err)
     return false
   }
 

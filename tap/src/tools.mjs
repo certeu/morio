@@ -1,3 +1,4 @@
+import { settings } from '../settings.mjs'
 import crypto from 'crypto'
 import querystring from 'querystring'
 import pino from 'pino'
@@ -5,6 +6,9 @@ import axios from 'axios'
 import { cache as valkey } from './cache.mjs'
 import { inventory } from './inventory.mjs'
 import ipaddr from 'ipaddr.js'
+import get from 'lodash/get.js'
+import set from 'lodash/set.js'
+import unset from 'lodash/unset.js'
 
 /*
  * Export log object on its own
@@ -19,6 +23,7 @@ export const log = pino({ name: 'tap', level: 20, sync: false })
  */
 export const tools = {
   axios,
+  get, set, unset,
   cache: {
     audit: cacheAudit,
     event: cacheEvent,
@@ -65,6 +70,8 @@ export const tools = {
     notification,
     inventoryUpdate: produceInventoryUpdate,
   },
+  settings,
+  getSettings: (path, dflt) => get(settings, path, dflt),
   shortUuid: (uuid) => typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0,5) : 'xxxxx',
 }
 

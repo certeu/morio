@@ -592,7 +592,7 @@ export const LabelInput = (props) => {
       newObj[label] = label
       setObj(newObj)
       setStr('')
-      update(newObj)
+      update(Object.values(newObj))
     } else setStr(val)
   }
 
@@ -600,7 +600,7 @@ export const LabelInput = (props) => {
     const newObj = { ...obj }
     delete newObj[label]
     setObj(newObj)
-    props.update(newObj)
+    update(Object.values(newObj))
   }
 
   const labels = Object.values(obj).map((val) => (

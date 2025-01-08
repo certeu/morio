@@ -25,22 +25,14 @@ export function dispatch(topic, message, tools) {
   for (const processor of processorsPerTopic[topic]) {
     const { data } = parseMessageData(message)
     /*
-     * Run filter method if there is one
+     * Count every processed message
      */
-    if (
-      !processor.filter ||
-      (typeof processor.filter === 'function' && processor.filter(data, topic))
-    ) {
-      /*
-       * Count every processed message
-       */
-      count.processor(processor.name)
+    count.processor(processor.name)
 
-      /*
-       * Hand over to stream processor method
-       */
-      processor.method(data, tools, topic)
-    }
+    /*
+     * Hand over to stream processor method
+     */
+    processor(data, tools, topic)
   }
 }
 

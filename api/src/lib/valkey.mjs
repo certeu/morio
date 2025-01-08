@@ -2,18 +2,27 @@ import { log, utils } from './utils.mjs'
 import { Redis as Valkey } from 'ioredis'
 
 /*
- * Create client
- *
- * FIXME: For now we only support connecting over the local docker network
+ * The ValKey client can only be created when the cache service is running
+ * But on initial startup,it's not there yet, nor do we have the settings.
+ * So we do not create it at startup, instead just do so later when it's needed
  */
-export const valkey = Object.keys(utils.getSettings('tap', {})).length > 0
-  ? new Valkey({ host: 'morio-cache' })
-  : false
+export const valkey = {
+  client: false
+}
+valkey.connect = () => {
+  /*
+   * FIXME: For now we only support connecting over the local docker network
+   */
+  valkey.client = new Valkey({ host: 'morio-cache' })
+  if (valkey.client) log.debug('ValKey client initialized')
+}
 
 /*
- * Say hi
+ * A shared method to make sure the client is available
  */
-if (valkey) valkey.on('ready', () => log.debug('ValKey client ready'))
+function ensureClient() {
+  if (!valkey.client) valkey.connect()
+}
 
 /**
  * This is a helper object that abstracts the low-level ValKey/Redis API
@@ -26,7 +35,8 @@ export const cache = {}
  * @return {object} result - The result with key, value, and type, or false
  */
 cache.listKeys = async function (pattern = '*') {
-  const result = await valkey.keys(pattern)
+  ensureClient()
+  const result = await valkey.client.keys(pattern)
 
   return Array.isArray(result) ? result : false
 }
@@ -40,6 +50,7 @@ cache.listKeys = async function (pattern = '*') {
 cache.read = async function (key = false) {
   if (!key) return cache.invalid
 
+  ensureClient()
   const type = await cache.type(key)
 
   if (type === 'none') return { morio_cache_error: 404 }
@@ -62,7 +73,8 @@ cache.read = async function (key = false) {
  */
 cache.readHash = async function (key = false) {
   if (key) {
-    const value = await valkey.hgetall(key)
+    ensureClient()
+    const value = await valkey.client.hgetall(key)
     // Hash keys return an object
     if (typeof value === 'object') return { key, value, type: 'hash' }
   }
@@ -78,8 +90,9 @@ cache.readHash = async function (key = false) {
  */
 cache.readList = async function (key = false) {
   if (key) {
+    ensureClient()
     // Using 1e6 as upper limit here, that should be enough
-    const value = await valkey.lrange(key, 0, 1e6)
+    const value = await valkey.client.lrange(key, 0, 1e6)
     // List keys return an array
     if (Array.isArray(value)) return { key, value, type: 'list' }
   }
@@ -95,7 +108,8 @@ cache.readList = async function (key = false) {
  */
 cache.readSet = async function (key = false) {
   if (key) {
-    const value = await valkey.smembers(key)
+    ensureClient()
+    const value = await valkey.client.smembers(key)
     // set keys return an array
     if (Array.isArray(value)) return { key, value, type: 'set' }
   }
@@ -111,7 +125,8 @@ cache.readSet = async function (key = false) {
  */
 cache.readString = async function (key = false) {
   if (key) {
-    const value = await valkey.get(key)
+    ensureClient()
+    const value = await valkey.client.get(key)
     // string keys return a string
     if (typeof value === 'string') return { key, value, type: 'string' }
   }
@@ -127,7 +142,8 @@ cache.readString = async function (key = false) {
  */
 cache.readStream = async function (key = false) {
   if (key) {
-    const value = await valkey.xrange(key, '-', '+')
+    ensureClient()
+    const value = await valkey.client.xrange(key, '-', '+')
     // set keys return an array
     if (Array.isArray(value)) return { key, value, type: 'stream' }
   }
@@ -143,8 +159,9 @@ cache.readStream = async function (key = false) {
  */
 cache.readZset = async function (key = false) {
   if (key) {
+    ensureClient()
     // Using 1e6 as upper limit here, that should be enough
-    const value = await valkey.zrange(key, 0, 1e6)
+    const value = await valkey.client.zrange(key, 0, 1e6)
     // zset keys return an array
     if (Array.isArray(value)) return { key, value, type: 'zset' }
   }
@@ -161,7 +178,8 @@ cache.readZset = async function (key = false) {
 
 cache.type = async function (key = false) {
   if (!key) return false
-  const type = await valkey.type(key)
+  ensureClient()
+  const type = await valkey.client.type(key)
 
   return type === 'none' ? false : type
 }

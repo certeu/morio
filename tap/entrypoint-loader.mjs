@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import { glob } from 'glob'
+import axios from 'axios'
 
 /*
  * Add a banner to clarify where this code comes from
@@ -43,43 +44,27 @@ function asTopicList (input) {
   return []
 }
 
-async function ensureProcessorLoader() {
+async function ensureProcessorLoader(settings) {
   const files = await loadProcessorFiles('./processors')
   const imports = {}
   const topics = new Set()
   for (const file of files) {
-    const folder = path.basename(path.dirname(file))
-
-    /*
-     * Dynamically import the file. ESM is nice these days.
-     */
-    const module = await import(file)
-
-    /*
-     * Processors can be a single processors object, or an array of them
-     */
-    if (Array.isArray(module.default)) {
-      for (const i in module.default) {
-        const mod = module.default[i]
-        if (mod.enabled){
-          const subs = asTopicList(mod.topics)
-          for (const topic of subs) topics.add(topic)
-          if (typeof imports[folder] === 'undefined') imports[folder] = []
-          imports[folder].push([`${folder}__${i}`, subs])
-        }
-      }
-    }
-    else if (module.default.enabled){
-      const subs = asTopicList(module.default.topics)
+    const processor = path.basename(path.dirname(file))
+    if (settings.tap?.[processor]?.enabled) {
+      const subs = asTopicList(settings.tap?.[processor]?.topics || [])
       for (const topic of subs) topics.add(topic)
-      imports[folder] = [ folder, subs ]
+      imports[processor] = [ processor, subs ]
     }
   }
 
   /*
    * Holds import code
    */
-  let imp = `${banner}${nl}${nl}// We need a logger${nl}import { log } from './src/tools.mjs'${nl}${nl}// Stream processors`
+  let imp = `${banner}${nl}
+// We need a logger
+import { log } from './src/tools.mjs'
+
+// Stream processors`
 
   /*
    * Holds allProcessors code
@@ -87,26 +72,13 @@ async function ensureProcessorLoader() {
   let ah = `${nl}${nl}/*${nl} * Simple object with all stream processors${nl} */${nl}export const allProcessors = {`
 
   const hpts = {}
-  for (const folder in imports) {
+  for (const folder of Object.keys(imports).sort()) {
     imp += `${nl}import ${folder} from './processors/${folder}/index.mjs'`
-    if (typeof imports[folder][0] === 'string') {
-      for (const topic of imports[folder][1]) {
-        if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
-        hpts[topic].add(folder)
-      }
-      ah += `${nl}  ${folder}: ${folder}, `
+    for (const topic of imports[folder][1]) {
+      if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
+      hpts[topic].add(folder)
     }
-    else if (Array.isArray(imports[folder][0])) {
-      let i = 0
-      for (const entry of imports[folder]) {
-        for (const topic of entry[1]) {
-          if (typeof hpts[topic] === 'undefined') hpts[topic] = new Set()
-          hpts[topic].add(entry[0])
-        }
-        ah += `${nl}  ${folder}__${i}: ${folder}[${i}], `
-        i++
-      }
-    }
+    ah += `${nl}  ${folder}, `
   }
 
   ah += `${nl}}${nl}`
@@ -137,7 +109,7 @@ export const processorList = Object.keys(allProcessors)
   await fs.writeFile('./loader.mjs', code)
 }
 
-async function ensureModuleLoaders() {
+async function ensureModuleLoaders(settings) {
   const files = await loadProcessorFiles('./processors', '*/modules/*.mjs')
   const imports = {}
   for (const file of files) {
@@ -171,6 +143,33 @@ export default {${nl}${Object.values(imports[processor]).map(h => h.exp).join(nl
   }
 }
 
-ensureProcessorLoader()
-ensureModuleLoaders()
+/*
+ * This loads the settings from core over the internal docker network
+ */
+async function loadSettings (settings) {
+  let result
+  try {
+    result = await axios.get(`http://morio-core:3007/settings`)
+  }
+  catch(err) {
+    console.log(`Failed to load settings from core`, err)
+  }
+
+  return result?.data
+    ? result.data
+    : false
+}
+
+/*
+ * Get to work
+ */
+const settings = await loadSettings()
+if (settings) {
+  await fs.writeFile('./settings.mjs', `${banner}${nl}export const settings = ${JSON.stringify(settings)}`)
+
+  ensureProcessorLoader(settings)
+  ensureModuleLoaders(settings)
+} else {
+  console.log(`Core did not provide settings. Tap service cannot start.`)
+}
 
