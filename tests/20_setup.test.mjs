@@ -6,7 +6,7 @@ import {
   isApiReady,
   api,
   validateErrorResponse,
-  storage
+  sharedStorage,
 } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
@@ -51,9 +51,7 @@ describe('API Setup Tests', () => {
      * Note that we also need to fake them to make core accept
      * this setup request as if we're talking to host unit.test.morio.it.
      */
-    const result = await api.post('/setup', setup);
-
-    console.log('result', result);
+    const result = await api.post('/setup', setup)
 
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 2)
@@ -82,15 +80,12 @@ describe('API Setup Tests', () => {
      * Keep root token in store
      */
 
-    storage.set('mrt', d.root_token.value);
+    sharedStorage.set('mrt', d.root_token.value)
 
-    console.log('root_token', d.root_token.value);
-    
     store.mrt = d.root_token.value
     store.mrtAuth = {
       Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),
     }
-
   })
 })
 

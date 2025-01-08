@@ -1,5 +1,5 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, accounts, attempt, isApiReady, api, storage } from './utils.mjs'
+import { store, accounts, attempt, isApiReady, api, sharedStorage } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -22,8 +22,8 @@ describe('Wait for API reload', async () => {
 })
 
 describe('Create Test Account', async () => {
-  const mrt = storage.get('mrt');
-  store.mrt = mrt;
+  const mrt = sharedStorage.get('mrt')
+  store.mrt = mrt
 
   /*
    * POST /login
@@ -69,9 +69,9 @@ describe('Create Test Account', async () => {
    * }
    */
   it(`Should POST /account`, { timeout }, async () => {
-    const jwt = store.get('accounts.mrt');
+    const jwt = store.get('accounts.mrt')
 
-    const result = await api.post(`/account`, accounts.user, false, false, true, jwt);
+    const result = await api.post(`/account`, accounts.user, false, false, true, jwt)
 
     const d = result[1]
     assert.equal(typeof d, 'object')
@@ -95,7 +95,7 @@ describe('Create Test Account', async () => {
    * }
    */
   it(`Should POST /activate-account`, async () => {
-    const jwt = store.get('accounts.mrt');
+    const jwt = store.get('accounts.mrt')
 
     const data = {
       username: store.accounts.user.username,
@@ -128,7 +128,7 @@ describe('Create Test Account', async () => {
    * }
    */
   it(`Should POST /activate-mfa`, async () => {
-    const jwt = store.get('accounts.mrt');
+    const jwt = store.get('accounts.mrt')
 
     const data = {
       username: store.accounts.user.username,

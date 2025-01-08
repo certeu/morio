@@ -1,27 +1,27 @@
-import https from 'https';
-import axios from 'axios';
+import https from 'https'
+import axios from 'axios'
 import { strict as assert } from 'node:assert'
 import { getPreset } from '../config/index.mjs'
 import { Store } from '../shared/src/store.mjs'
 import { logger } from '../shared/src/logger.mjs'
 import { attempt, sleep } from '../shared/src/utils.mjs'
-import storage from './disk-storage.mjs'
-import dotenv from 'dotenv';
+import { sharedStorage } from './disk-storage.mjs'
+import dotenv from 'dotenv'
 
-dotenv.config();
+dotenv.config()
 
 const store = new Store().set('log', logger('trace'))
 
 // Create a global httpsAgent for requests with ignored SSL certificates
-const globalHttpsAgent = new https.Agent({ rejectUnauthorized: false });
+const globalHttpsAgent = new https.Agent({ rejectUnauthorized: false })
 
 const brokerNodes = process.env.MORIO_TEST_DNS_NAMES
   ? process.env.MORIO_TEST_DNS_NAMES.split(',').map((name) => name.trim())
-  : [];
+  : []
 
-const fqdn = process.env.MORIO_TEST_FQDN ? process.env.MORIO_TEST_FQDN : process.env.MORIO_TEST_HOST;
+const fqdn = process.env.MORIO_TEST_FQDN ? process.env.MORIO_TEST_FQDN : process.env.MORIO_TEST_HOST
 
-const hostName = fqdn.split('.')[0];
+const hostName = fqdn.split('.')[0]
 
 const setup = {
   cluster: {
@@ -31,29 +31,25 @@ const setup = {
   iam: {
     providers: {
       apikey: {
-        provider: "apikey",
-        id: "apikey",
-        label: "API Key"
+        provider: 'apikey',
+        id: 'apikey',
+        label: 'API Key',
       },
-      mrt: { },
+      mrt: {},
       local: {
-        provider: "local",
-        id: "local",
-        label: "Morio Account"
-      }
+        provider: 'local',
+        id: 'local',
+        label: 'Morio Account',
+      },
     },
     ui: {
       visibility: {
-        local: "full",
-        mrt: "icon",
-        apikey: "icon"
+        local: 'full',
+        mrt: 'icon',
+        apikey: 'icon',
       },
-      order: [
-        "local",
-        "apikey",
-        "mrt"
-      ]
-    }
+      order: ['local', 'apikey', 'mrt'],
+    },
   },
 }
 
@@ -62,51 +58,67 @@ async function __withoutBody(method, url, raw = false, log = false, ignoreCertif
     method: method.toUpperCase(), // Accepts "GET" or "DELETE"
     url: url,
     ...(ignoreCertificate ? { httpsAgent: globalHttpsAgent } : {}),
-  };
+  }
 
   try {
-    const response = await axios(requestConfig);
+    const response = await axios(requestConfig)
 
-    const body = raw ? response.data : response.data;
-    return [response.status, body];
+    const body = raw ? response.data : response.data
+    return [response.status, body]
   } catch (err) {
-    if (log) console.error({ url, err });
-    return [err.response?.status || 500, err.response?.data || "An error occurred"];
+    if (log) console.error({ url, err })
+    return [err.response?.status || 500, err.response?.data || 'An error occurred']
   }
 }
 
-async function __withBody(method, url, data, raw = false, log = false, ignoreCertificate = true, jwtToken = null) {
+async function __withBody(
+  method,
+  url,
+  data,
+  raw = false,
+  log = false,
+  ignoreCertificate = true,
+  jwtToken = null
+) {
   const requestConfig = {
     method,
     url,
-    headers: { 'Content-Type': 'application/json', ...(jwtToken && { 'Authorization': `Bearer ${jwtToken.jwt}` }) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jwtToken && { Authorization: `Bearer ${jwtToken.jwt}` }),
+    },
     data,
     ...(ignoreCertificate && { httpsAgent: globalHttpsAgent }),
-  };
+  }
 
   try {
-    const response = await axios(requestConfig);
+    const response = await axios(requestConfig)
 
-    if (response.status === 204) return [response.status, {}];
-    const parsedData = raw ? response.data : response.data;
-    return [response.status, parsedData];
+    if (response.status === 204) return [response.status, {}]
+    const parsedData = raw ? response.data : response.data
+    return [response.status, parsedData]
   } catch (err) {
-    if (log) console.error({url, err});
-    return [err.response?.status || 500, err.response?.data || "An error occurred"];
+    if (log) console.error({ url, err })
+    return [err.response?.status || 500, err.response?.data || 'An error occurred']
   }
 }
 
 function restClient(api) {
   return {
-    get: (url, raw, log, ignoreCertificate) => __withoutBody('GET', api + url, raw, log, ignoreCertificate),
-    post: (url, data, raw, log, ignoreCertificate, jwtToken) => __withBody('POST', api + url, data, raw, log, ignoreCertificate, jwtToken),
-    put: (url, data, raw, log, ignoreCertificate) => __withBody('PUT', api + url, data, raw, log, ignoreCertificate),
-    patch: (url, data, raw, log, ignoreCertificate) => __withBody('PATCH', api + url, data, raw, log, ignoreCertificate),
-    remove: (url, raw, log, ignoreCertificate) => __withoutBody('DELETE', api + url, raw, log, ignoreCertificate),
-  };
+    get: (url, raw, log, ignoreCertificate) =>
+      __withoutBody('GET', api + url, raw, log, ignoreCertificate),
+    post: (url, data, raw, log, ignoreCertificate, jwtToken) =>
+      __withBody('POST', api + url, data, raw, log, ignoreCertificate, jwtToken),
+    put: (url, data, raw, log, ignoreCertificate) =>
+      __withBody('PUT', api + url, data, raw, log, ignoreCertificate),
+    patch: (url, data, raw, log, ignoreCertificate) =>
+      __withBody('PATCH', api + url, data, raw, log, ignoreCertificate),
+    remove: (url, raw, log, ignoreCertificate) =>
+      __withoutBody('DELETE', api + url, raw, log, ignoreCertificate),
+  }
 }
 
-function validateErrorResponse (result, errors, template) {
+function validateErrorResponse(result, errors, template) {
   const err = errors[template]
 
   if (!err) assert.equal('This is not a known error template', template)
@@ -150,7 +162,7 @@ const accounts = {
 
 export {
   accounts,
-  storage,
+  sharedStorage,
   core,
   store,
   isCoreReady,
@@ -164,5 +176,5 @@ export {
   api,
   brokerNodes,
   fqdn,
-  hostName
+  hostName,
 }

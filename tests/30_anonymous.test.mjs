@@ -96,7 +96,7 @@ describe('Anonymous Routes Tests', () => {
     // core.status.cluster
     assert.equal(typeof d.core.status.cluster, 'object')
     // Cluster can come up faster or slower, can't be sure
-    // **** Should change code to true and color except red in the future after fix the issue **** //
+    // **** FIXME - Should change code to true and color except red in the future after fix the issue **** //
     assert.equal(typeof [0, 2].includes(d.core.status.cluster.code), 'boolean')
     assert.equal(['amber', 'green', 'red'].includes(d.core.status.cluster.color), true)
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,8 +130,6 @@ describe('Anonymous Routes Tests', () => {
    */
   it('Should GET /up', async () => {
     const result = await api.get('/up')
-
-    console.log('result', result);
 
     assert.equal(result[0], 204)
   })
@@ -167,8 +165,6 @@ describe('Anonymous Routes Tests', () => {
   it('Should GET /idps', async () => {
     const result = await api.get('/idps')
 
-    console.log('result', result);
-
     const d = result[1]
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 2)
@@ -193,15 +189,11 @@ describe('Anonymous Routes Tests', () => {
     // ui
     assert.deepEqual(d.ui, {
       visibility: {
-        local: "full",
-        mrt: "icon",
-        apikey: "icon"
+        local: 'full',
+        mrt: 'icon',
+        apikey: 'icon',
       },
-      order: [
-        "local",
-        "apikey",
-        "mrt"
-      ]
+      order: ['local', 'apikey', 'mrt'],
     })
   })
 
