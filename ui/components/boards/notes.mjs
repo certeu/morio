@@ -111,28 +111,28 @@ const runNotesCall = async (api) => {
 
 const About = () => (
   <ModalWrapper>
-    <h2>What are notes? <small>And why are notes?</small></h2>
+    <h2>What are notes? <small>And why are there notes?</small></h2>
     <p>
       Notes are specific to the Tap service.
       This service handles stream processing and in that capacity,
       it typically handles all log entries flowing through Morio.
     </p>
     <p>
-      This creates a potential feedback loop when logging inside a Tap handler
+      This creates a potential feedback loop: logging inside a Tap handler
       will cause these log lines to be ingested and also processed by the same Tap
       handler, which will log more data, and things will snowball from there.
     </p>
     <p>
-      Because of this potential snowball effect, tap handlers never
+      Because of this potential snowball effect, Tap handlers never
       engage in logging based on data flowing through the system.
       <br />
       Without such logs, developing or debugging stream processing is no fun.
       So notes exist as a sort of <em>out-of-band logging channel</em> that
-      is specific to tap handlers.
+      is specific to Tap handlers.
     </p>
     <p>
       As a result, these notes typically provide information about
-      unexptected data or formatting issues detected by a Tap handler.
+      unexpected data or formatting issues detected by a Tap handler.
     </p>
   </ModalWrapper>
 )
