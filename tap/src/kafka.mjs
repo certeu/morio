@@ -22,7 +22,7 @@ export async function subscribe() {
   const producer = await createProducer(client)
 
   /*
-   * Attache both consumer & producer to tools
+   * Attach both consumer & producer to tools
    */
   tools.consumer = consumer
   tools.producer = producer
