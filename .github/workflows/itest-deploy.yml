@@ -1,0 +1,130 @@
+name: Deploy and Configure Morio
+
+on:
+  workflow_dispatch:  # Allow manual triggering for a test
+  issue_comment:
+    types: [created]  # Trigger when a comment is created on a PR
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check if Comment Matches Deploy Key and User is Allowed
+        id: check_trigger
+        run: |
+          echo "Checking deploy key and allowed users..."
+
+          # Initialize match to false
+          echo "match=false" >> $GITHUB_ENV
+
+          # Ensure the event is triggered for a pull request
+          if [[ "${{ github.event.issue.pull_request }}" == "" ]]; then
+            echo "Not a pull request. Proceeding with PR_ID=32 for manual testing."
+          else
+            ALLOWED_USERS=$(cat allowed_users.txt)
+            COMMENT_BODY="${{ github.event.comment.body }}"
+            COMMENT_USER="${{ github.event.comment.user.login }}"
+            ITEST_DEPLOY_KEY="${{ secrets.ITEST_DEPLOY_KEY }}"
+
+            if [[ "$COMMENT_BODY" == "$ITEST_DEPLOY_KEY" && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
+              echo "match=true" >> $GITHUB_ENV
+            fi
+          fi
+        env:
+          ITEST_DEPLOY_KEY: ${{ secrets.ITEST_DEPLOY_KEY }}
+
+      - name: Exit if Not Triggered by Allowed User or Matching Deploy Key
+        if: ${{ env.match != 'true' }}
+        run: echo "Comment does not match deploy key or user is not allowed. Exiting..."
+        continue-on-error: true
+
+      - name: Set PR ID as Environment Variable
+        run: |
+          if [ "${{ github.event.pull_request.number }}" ]; then
+            echo "PR_ID=${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+          else
+            echo "PR_ID=32" >> $GITHUB_ENV
+          fi
+
+      - name: Configure AWS CLI
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region eu-central-1
+          aws configure set output json
+
+      - name: Install Python Dependencies for Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+          pip3 install --upgrade pip
+          pip3 install boto3 botocore
+
+      - name: Verify Python Version
+        run: python3 --version
+
+      - name: Verify boto3 and botocore installation
+        run: |
+          python3 -c "import boto3; print(boto3.__version__)"
+          python3 -c "import botocore; print(botocore.__version__)"
+
+      - name: Install Ansible
+        run: sudo apt-get install -y ansible
+
+      - name: Create Inventory File
+        run: |
+          echo "[localhost]" > inventory
+          echo "127.0.0.1 ansible_python_interpreter=$(which python3)" >> inventory
+
+      - name: Install required Ansible collections
+        run: ansible-galaxy collection install amazon.aws community.general
+
+      - name: Install Node.js dependencies
+        run: |
+          npm install
+          npm install dotenv
+
+      - name: Generate SSH Key Pair
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
+          echo "SSH Key Pair generated and stored in ~/.ssh/id_rsa"
+
+      - name: Run ideploy (Deploy to the environment)
+        run: npm run ideploy
+        env:
+          PR_ID: ${{ env.PR_ID }}
+          ITEST_AWS_SUBNET_ID: ${{ secrets.ITEST_AWS_SUBNET_ID }}
+          ITEST_AWS_SECURITY_GROUP_ID: ${{ secrets.ITEST_AWS_SECURITY_GROUP_ID }}
+          ITEST_AWS_ROUTE53_ZONE_ID: ${{ secrets.ITEST_AWS_ROUTE53_ZONE_ID }}
+          ITEST_AWS_DEBIAN12_AMI_ID: ${{ secrets.ITEST_AWS_DEBIAN12_AMI_ID }}
+          ITEST_AWS_SSH_PUBKEY_1: ${{ secrets.AWS_SSH_PUBKEY_1 }}
+          ITEST_AWS_SSH_PUBKEY_2: ${{ secrets.AWS_SSH_PUBKEY_2 }}
+
+      - name: Run isetup (Deploy and setup with SSH retry)
+        run: |
+          for i in {1..10}; do
+            npm run isetup && break
+            echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
+            sleep 10
+          done
+          if [ $i -eq 10 ]; then
+            echo "SSH authentication failed after 10 attempts. Exiting."
+            exit 1
+          fi
+        
+      - name: Wait for 30 seconds
+        run: sleep 30
+
+      - name: Run itest (Testing)
+        run: npm run itest ephemeral
+
+      - name: Run iconfigure (Configure)
+        run: npm run iconfigure
+
+      - name: Run idestroy (Destroy resources)
+        run: npm run idestroy
