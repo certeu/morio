@@ -45,13 +45,11 @@ export const Events = () => {
           <Popout tip>
             <h4>What are events?</h4>
             <p>
-              Events are things that happen throughout your infrastructure.
-              Things like logins, reboots, but also health checks that fail, and so on.
+              Events are things that happen throughout your infrastructure: things like logins, reboots, but also health checks that fail and so on.
             </p>
             <p>
-              Events are typically an intermediate step between the raw data streams, and highly filteres streams such as notifications or alarms.
-              For example, a failing health check will trigger an event for every consecutive failure.
-              But it should not trigger an alarm each time, as that would lead to alarm fatigue.
+              Events are typically an intermediate step between the raw data streams, and highly filtered streams such as notifications or alarms.
+              For example, a failing health check will trigger an event for every consecutive failure but it should not trigger an alarm each time, as that would lead to alarm fatigue.
             </p>
             <p className="text-right">
               <button className="btn btn-primary btn-outline" onClick={() => setTip(false)}>Dismiss Tip</button>
