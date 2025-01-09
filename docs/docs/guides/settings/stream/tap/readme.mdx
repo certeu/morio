@@ -1,0 +1,81 @@
+---
+title: Tap Stream Processing Guide
+sidebar_label: Low-code stream processing
+sidebar_position: 1
+---
+
+The _Tap service_ unlocks the power of stream processing inside Morio without
+the complexity. It provides a low-code way to write your own stream processing
+logic and have Morio run it for you.
+
+This guide provides an overview of how you can leverage this functionality.
+
+## Your first stream processor
+
+Before we talk about how it all works, let us start with a simple example that
+is nevertheless a fully functional stream processor:
+
+```js
+/*
+ * A minimal Morio stream processor
+ * This function will be called for ever incoming message
+ *
+ * @param {object} data - The data from RedPanda
+ * @param {obectt} tools - The tools object
+ * @param {string} topic - The topic the data came from
+ */
+export default function exampleStreamProcessor (data, tools, topic) {
+  /*
+   * Do something here
+   * For now, this does nothing
+   */
+}
+
+/*
+ * This name export is used to manage the stream processor settings
+ */
+export const info = {
+  title: 'Example stream processor',
+  about: `This stream processor does nothing, successfully.`
+  settings: {
+    enabled: {
+      title: 'Enable example stream processor',
+      dflt: true,
+      type: 'list',
+      list: [
+        {
+          val: false,
+          label: 'Disabled',
+          about: 'Select this to completely disabled this stream processor',
+        },
+        {
+          val: true,
+          label: 'Enabled',
+          about: 'Select this to enable this stream processor',
+        },
+      ]
+    },
+    topics: {
+      dflt: ['metrics'],
+      title: 'List of topics to subscribe to',
+      about: `You can change this if you like`,
+      type: 'labels',
+    },
+  }
+}
+```
+
+
+
+## Before you start
+
+With morio, you can _BYOBL_ and write your own stream processor in JavaScript.
+
+If you are not familiar with JavaScript, rest assured that it is not very hard,
+and you will not have to deal with advanced topics such as handling async code.
+Furthermore, we provide a range of tools that further abstract the complexities
+of common use-cases such as writing to a Kafka topic or the Morio cache.
+
+If you prefer another language, you can always handle these aspects yourself and [talk directly to Kafka](/docs/guides/settings/stream/kafka/).
+
+
