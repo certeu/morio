@@ -9,9 +9,8 @@ import { Spinner } from 'components/animations.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { Popout } from 'components/popout.mjs'
 import { FlagIcon } from 'components/icons.mjs'
-import { KeyVal } from 'components/keyval.mjs'
 
-export const Event = ({ id, event }) => (
+export const Event = ({ event }) => (
   <details className="group">
     <summary className="flex flex-row gap-2 rounded my-1 hover:cursor-pointer hover:bg-secondary hover:bg-opacity-20 px-2 group-open:bg-secondary group-open:bg-opacity-30">
       <h6 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full">
@@ -31,7 +30,7 @@ export const Events = () => {
   const [paused, setPaused] = useState(false)
   const { api } = useApi()
 
-  const { data, isLoading, error } = useQuery ({
+  const { data } = useQuery ({
     queryKey: ['events'],
     queryFn: () => runEventsCall(api),
     refetchInterval: paused ? false : 15000,

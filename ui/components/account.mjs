@@ -284,6 +284,7 @@ const ExpiryPicker = ({ days, setDays }) => {
   const [expires, setExpires] = useState()
 
   // Run update when component mounts
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
   useEffect(() => update(days), [])
 
   const update = (evt) => {
@@ -343,6 +344,7 @@ export const AccountApiKeys = () => {
       if (result[1] === 200) setKeys(result[0])
     }
     getApikeys()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresher])
 
   const refresh = () => setRefresher(refresher + 1)

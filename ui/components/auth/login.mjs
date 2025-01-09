@@ -142,6 +142,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
       }
     }
     getIdps()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   /*

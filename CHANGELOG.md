@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Added support for writing a connector/logstash pipeline as raw LSCL
 - [ui] Added support for HTTP input in connector settings
 
+### Changed
+
+- We renamed the `production` release channel to `stable` 
+
 ### Fixed
 
 - [broker] Respect broker log level set in preset rather than always use debug

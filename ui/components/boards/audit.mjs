@@ -10,17 +10,12 @@ import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { RightIcon, TrashIcon, TipIcon } from 'components/icons.mjs'
-import { PageLink } from 'components/link.mjs'
-import { ReloadDataButton } from 'components/button.mjs'
-import { Loading, Spinner } from 'components/animations.mjs'
-import { KeyVal } from 'components/keyval.mjs'
+import { RightIcon } from 'components/icons.mjs'
+import { Spinner } from 'components/animations.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
-import { Popout } from 'components/popout.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
-import { linkClasses } from 'components/link.mjs'
 
 export const Audit = () => {
   const [paused, setPaused] = useState(false)
@@ -28,7 +23,7 @@ export const Audit = () => {
   const { api } = useApi()
   const { pushModal } = useContext(ModalContext)
 
-  const { data, isLoading, error } = useQuery ({
+  const { data } = useQuery ({
     queryKey: ['audit'],
     queryFn: () => runAuditCall(api),
     refetchInterval: paused ? false : 15000,
@@ -68,7 +63,7 @@ export const Audit = () => {
         </thead>
         <tbody>
           {sorted
-            ? sorted.map(({ audit, id, timestamp }, i) => (
+            ? sorted.map(({ audit, timestamp }, i) => (
               <tr key={i} className={` ${i%2 === 0 ? 'bg-neutral bg-opacity-10' : ''} p-0 m-0`}>
                 <td className="py-0"><TimeAgoBrief time={timestamp} /></td>
                 <td className="py-0">

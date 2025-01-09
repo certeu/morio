@@ -85,3 +85,16 @@ Controller.prototype.flags = async function (req, res) {
 
   return res.send(allFlags)
 }
+
+async function dynamicImport(file, key='info') {
+  let data = false
+  try {
+    const result = await import(file)
+    if (typeof result[key] !== 'undefined') data = result[key]
+  }
+  catch (err) {
+    log.warn({file, err}, `Failed to import file`)
+  }
+
+  return data
+}

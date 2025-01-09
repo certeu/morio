@@ -1,24 +1,17 @@
 // Dependencies
-import { formatBytes, rbac, timeAgo } from 'lib/utils.mjs'
+import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-// Context
-import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useContext, useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
-import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import Link from 'next/link'
-import { CircleIcon, RightIcon, TrashIcon, NoIcon, OkIcon } from 'components/icons.mjs'
+import { RightIcon, NoIcon, OkIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading, Spinner } from 'components/animations.mjs'
-import { Uuid } from 'components/uuid.mjs'
-import { Host } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
-import { Popout } from 'components/popout.mjs'
 import { ListInput } from 'components/inputs.mjs'
 import { Echart } from 'components/echarts.mjs'
 import { Highlight } from 'components/highlight.mjs'
@@ -27,22 +20,16 @@ import { ToggleGraphButton, ToggleLiveButton } from 'components/boards/shared.mj
 /**
  * This compnent renders a table with the host for which we have cached logs
  */
-export const ChecksTable = ({ onlyFrom  = false }) => {
+export const ChecksTable = () => {
   // State
   const [cache, setCache] = useState(false)
-  const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
   const [show, setShow] = useState('all')
 
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
   // Hooks
   const { api } = useApi()
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
@@ -56,6 +43,7 @@ export const ChecksTable = ({ onlyFrom  = false }) => {
         setCache(all)
       }
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Tell people  we are still lading
@@ -156,11 +144,10 @@ async function runChecksTableApiCall (api, key) {
 export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
   // State
   const [cache, setCache] = useState(false)
-  const [refresh, setRefresh] = useState(0)
 
   // Hooks
   const { api } = useApi()
-  const { data, isLoading, error } = useQuery ({
+  const { isLoading } = useQuery ({
     queryKey: [cacheKey],
     queryFn: () => {
       runCheckApiCall(api, cacheKey).then(result => {
@@ -207,17 +194,15 @@ async function runCheckApiCall (api, key) {
 
 export const Check = ({ id=false, cacheKey=false }) => {
   if (!cacheKey && id) cacheKey = `check|${id}`
-  if (!cacheKey) return  null
 
   // State
   const [graph, setGraph] = useState(true)
   const [cache, setCache] = useState(false)
-  const [refresh, setRefresh] = useState(0)
   const [paused, setPaused] = useState(false)
 
   // Hooks
   const { api } = useApi()
-  const { data, isLoading, error } = useQuery ({
+  useQuery ({
     queryKey: [cacheKey],
     queryFn: () => {
       runCheckApiCall(api, cacheKey).then(result => {
@@ -228,6 +213,7 @@ export const Check = ({ id=false, cacheKey=false }) => {
     refetchIntervalInBackground: false,
   })
 
+  if (!cacheKey) return  null
   if (!Array.isArray(cache)) return <Spinner />
 
   /*

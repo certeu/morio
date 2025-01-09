@@ -1,4 +1,4 @@
-import { log, utils } from './utils.mjs'
+import { log } from './utils.mjs'
 import { Redis as Valkey } from 'ioredis'
 
 /*

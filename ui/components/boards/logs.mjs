@@ -1,16 +1,12 @@
 // Dependencies
-import { formatBytes, rbac, timeAgo } from 'lib/utils.mjs'
+import { formatBytes, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-// Context
-import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useContext, useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
-import { useSelection } from 'hooks/use-selection.mjs'
 // Components
-import { RightIcon, TrashIcon } from 'components/icons.mjs'
+import { RightIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
@@ -31,13 +27,8 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
   // Hooks
   const { api } = useApi()
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
@@ -45,6 +36,7 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory(result.inventory)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Tell people  we are still lading
@@ -119,25 +111,19 @@ export const HostLogsTable = ({ host, module=false }) => {
 
   // State
   const [cache, setCache] = useState(false)
-  const [inventory, setInventory] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
   // Hooks
   const { api } = useApi()
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
     runHostLogsTableApiCall(api, host).then(result => {
       if (result.cache) setCache(result.cache)
-      if (result.inventory) setInventory(result.inventory)
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Tell people  we are still lading
@@ -209,13 +195,9 @@ async function runHostLogsTableApiCall (api, host) {
   return data
 }
 
-const MorioLogset = ({ name, href }) => {
-  const chunks = name.split('.')
-
-  return href
-    ? <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
-    : <span>{name.split('.').join(' / ')}</span>
-}
+const MorioLogset = ({ name, href }) => href
+  ? <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
+  : <span>{name.split('.').join(' / ')}</span>
 
 /**
  * This compnent renders a table with all cached logs for a given host
