@@ -85,7 +85,7 @@ Instead, give your cache entries deterministic IDs so you can access them withou
     summary: `Read key`,
     description: `Returns the value stored under \`key\` in the cache.
 
-This will also include the type of key, which hints at how the type of data held by it.`,
+This will also include the type of key, which hints at the type of data held by it.`,
     parameters,
     responses: {
       200: response({
@@ -115,7 +115,7 @@ This will also include the type of key, which hints at how the type of data held
     summary: `Read keys`,
     description: `Returns the value of multiple keys stored in the cache.
 
-This will also include the type of key, which hints at how the type of data held by it.`,
+This will also include the type of key, which hints at the type of data held by it.`,
     requestBody: {
       description: 'The keys to retrieve',
       required: true,
