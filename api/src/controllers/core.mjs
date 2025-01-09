@@ -154,7 +154,7 @@ Controller.prototype.setup = async function (req, res) {
     if (!settings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.setup`, settings)
   } else {
-    ;[valid, err] = await utils.validate(`req.setup`, body)
+    [valid, err] = await utils.validate(`req.setup`, body)
   }
 
   if (!valid) {
@@ -395,7 +395,6 @@ Controller.prototype.reseed = async function (req, res) {
   /*
    * Load the preseeded settings so we can validate them
    */
-  const preseed = utils.getSettings('preseed')
   const settings = await loadPreseededSettings(
     utils.getSettings('preseed'),
     utils.getSettings(),

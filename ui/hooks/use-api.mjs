@@ -752,7 +752,6 @@ MorioClient.prototype.getDynamicFlagsConfig = async function () {
   return await this.call(`${morioConfig.api}/dconf/flags`)
 }
 
-
 /*
  * Don't recreate the client on each call
  */

@@ -3,7 +3,7 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { CheckInCircleIcon } from 'components/icons.mjs'
 import { Check } from 'components/boards/checks.mjs'
 
-export default function HealthcheckPage ({ from, id }) {
+export default function HealthcheckPage ({ id }) {
   const meta = {
     title: `Health check`,
     page: ['boards', 'checks', id],

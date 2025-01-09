@@ -12,7 +12,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
-import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { Host } from 'components/inventory/host.mjs'
@@ -224,25 +224,15 @@ export const ShowLogs = ({ host, module, logset }) => {
 
   // State
   const [cache, setCache] = useState(false)
-  const [inventory, setInventory] = useState({})
-  const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
-  const [desc, setDesc] = useState(false)
   const [paused, setPaused] = useState(false)
-
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
   // Hooks
   const { api } = useApi()
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
-  const { data, isLoading, error } = useQuery ({
+  useQuery ({
     queryKey: [`${host}|${module}|${logset}`],
     queryFn: () => {
       runShowLogsApiCall(api, host, module, logset).then(result => {
         if (result.cache) setCache(result.cache)
-        if (result.inventory) setInventory(result.inventory)
       })
     },
     refetchInterval: paused ? false : 15000,

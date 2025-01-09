@@ -1,15 +1,8 @@
-import { utils, log } from './utils.mjs'
+import { log } from './utils.mjs'
 // Load the database client
 import { db } from './db.mjs'
 // Shared code from accounts
-import {
-  asJson,
-  asNull,
-  asString,
-  asTime,
-  clean,
-  fromJson,
-} from './account.mjs'
+import { asTime, clean, fromJson } from './account.mjs'
 
 /*
  * This maps the fields to a method to format the field
@@ -242,22 +235,22 @@ export async function loadHostOs(id) {
 export async function getStats() {
   // Count hosts
   let query = `SELECT COUNT(id) as count FROM inventory_hosts`
-  const [hostStatus, hostResult] = await db.read(query)
+  const hostResult = await db.read(query)
   // Count IPs
   query = `SELECT COUNT(id) as count FROM inventory_ips`
-  const [ipStatus, ipResult] = await db.read(query)
+  const ipResult = await db.read(query)
   // Count Macs
   query = `SELECT COUNT(id) as count FROM inventory_macs`
-  const [macStatus, macResult] = await db.read(query)
+  const macResult = await db.read(query)
   // Count OSs
   query = `SELECT COUNT(id) as count FROM inventory_oss`
-  const [osStatus, osResult] = await db.read(query)
+  const osResult = await db.read(query)
 
   return {
-    hosts: getFields(hostResult).pop().count,
-    ips: getFields(ipResult).pop().count,
-    macs: getFields(macResult).pop().count,
-    oss: getFields(osResult).pop().count,
+    hosts: getFields(hostResult[1]).pop().count,
+    ips: getFields(ipResult[1]).pop().count,
+    macs: getFields(macResult[1]).pop().count,
+    oss: getFields(osResult[1]).pop().count,
   }
 }
 
@@ -271,7 +264,7 @@ export async function getStats() {
 async function deleteRecord (table=false, id=false) {
   if (!id || !table) return false
 
-  const result = await db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
+  await db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
 
   return true
 }
@@ -317,7 +310,7 @@ export async function deleteHost (id=false) {
 
   // Also remove IPs, MACs, and OS beloonging to this host
   for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
-    const result = await db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
+    await db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
   }
   await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
 
@@ -344,20 +337,6 @@ function getFields(result={}) {
   })
 
   return list
-}
-
-
-/**
- * Helper method to load API keys for a given account
- *
- * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
- * @return {object} keys - The API keys saved for the account
- */
-export async function loadAccountApikeys(provider, id) {
-  return await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
-    id: fields.id(fullId(provider, id)),
-  })
 }
 
 /**
@@ -404,42 +383,6 @@ export async function saveHost(id, data) {
     `REPLACE INTO inventory_hosts(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
     params
   )
-
-  return result
-}
-
-/**
- * Helper method to save the last login time in the account data
- *
- * @param {string} provider - The ID of the identity provider
- * @param {string} id - The id of the account (the username)
- */
-export async function updateLastLoginTime(provider, id, extraData = {}) {
-  /*
-   * We need at least an ID and provider
-   */
-  if (!id || !provider) {
-    log.warn('[api] updateLastLoginTime was called witout an id or provider')
-    return false
-  }
-
-  let result
-  const now = new Date().toISOString()
-  if (extraData) {
-    /*
-     * Need to add some extra data, so let's fetch the record and do a full write
-     */
-    const data = await loadAccount(provider, id)
-    result = await saveAccount(provider, id, { ...data, last_login: now, ...extraData })
-  } else {
-    /*
-     * A simple update of the last_login field will do
-     */
-    result = await db.write(`UPDATE accounts SET last_login=:now WHERE id=:id`, {
-      now,
-      id: fullId(provider, id),
-    })
-  }
 
   return result
 }

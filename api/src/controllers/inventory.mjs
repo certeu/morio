@@ -15,6 +15,7 @@ import {
   loadHostOs,
   loadIp,
   loadMac,
+  loadOs,
   saveHost,
 } from '../lib/inventory.mjs'
 

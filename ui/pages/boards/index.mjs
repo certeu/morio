@@ -10,7 +10,6 @@ import {
   SearchIcon,
   StatusIcon,
   TipIcon,
-  WrenchIcon,
 } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
@@ -77,6 +76,7 @@ export default function  DashboardsPage () {
               const { about, Icon } = types[type]
               return (
                 <Card
+                  key={type}
                   role="user"
                   title={<span className="capitalize">{type}</span>}
                   href={`/boards/${type}/`}

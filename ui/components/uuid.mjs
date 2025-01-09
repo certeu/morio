@@ -1,14 +1,9 @@
 import { shortUuid } from 'lib/utils.mjs'
-import { useState } from 'react'
 import { PageLink } from 'components/link.mjs'
 import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
 
 export const Uuid = ({ uuid, href }) => {
-  const [full, setFull] = useState()
-
   if (!uuid) return <MissingUuid />
-
-  const short = shortUuid(uuid)
 
   if (href === false) return (
     <span className="flex flex-row items-center">

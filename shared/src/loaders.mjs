@@ -1,5 +1,4 @@
 import fs from 'node:fs'
-import path from 'node:path'
 import { testUrl } from './network.mjs'
 import set from 'lodash/set.js'
 import yaml from 'js-yaml'
@@ -483,7 +482,7 @@ export async function loadClientModules(settings, log) {
     if (entry.slice(0,4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
-        const { base, files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
         for (const sourceFile of files) {
           const targetFile = findPreseedTarget(sourceFile, 'modules')
           if (targetFile && (
@@ -539,7 +538,7 @@ export async function loadStreamProcessors(settings, log) {
     if (entry.slice(0,4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
-        const { base, files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
         for (const sourceFile of files.sort()) {
           const targetFile = findPreseedTarget(sourceFile, 'processors')
           if (targetFile && sourceFile.slice(-4) === ".mjs") {

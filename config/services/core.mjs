@@ -1,5 +1,4 @@
 import { generateTraefikConfig } from './index.mjs'
-import { flags } from '../flags.mjs'
 
 /*
  * Export a single method that resolves the service configuration

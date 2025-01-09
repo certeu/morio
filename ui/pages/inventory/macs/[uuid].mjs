@@ -5,6 +5,7 @@ import { ServersIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { HostsTable } from 'components/inventory/host.mjs'
 import { useApi } from 'hooks/use-api.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 
 export default function InventoryHostsPage({ uuid = false }) {
   const { api } = useApi()
@@ -19,6 +20,7 @@ export default function InventoryHostsPage({ uuid = false }) {
 
   useEffect(() => {
     if (uuid) runApiCall(api, uuid).then(result => setData(result))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[count, uuid])
 
   return (
@@ -29,6 +31,7 @@ export default function InventoryHostsPage({ uuid = false }) {
             ? <LoadFailed />
             : <HostsTable hosts={data} />
           }
+          <ReloadDataButton onClick={() => setCount(count+1)} />
         </div>
       </ContentWrapper>
     </PageWrapper>

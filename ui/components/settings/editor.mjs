@@ -1,15 +1,14 @@
 // Dependencies
-import { validateSettings, cloneAsPojo } from 'lib/utils.mjs'
+import { cloneAsPojo } from 'lib/utils.mjs'
 import yaml from 'yaml'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useState, useContext, useEffect, useCallback } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
-import { SettingsReport } from './report.mjs'
-import { NoteIcon, ExpandIcon, SettingsIcon, OkIcon, CheckCircleIcon, RightIcon } from 'components/icons.mjs'
+import { NoteIcon, ExpandIcon, OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { Box } from 'components/box.mjs'
@@ -53,18 +52,17 @@ export const PrimedSettingsEditor = (props) => {
   /*
    * Destructure props
    */
-  const { runningSettings, dconf } = props
+  const { runningSettings } = props
 
   /*
    * React state
    */
+  /* eslint-disable-next-line no-unused-vars */
   const [mSettings, update, setMSettings] = useStateObject(runningSettings) // Holds the settings
   const [validationReport, setValidationReport] = useState(false) // Holds the validatino report
   const [showDelta, setShowDelta] = useState(false)
   const [deployOngoing, setDeployOngoing] = useState(false)
-  const [preValidate, setPreValidate] = useState(false)
   const [doValidate, setDoValidate] = useState(false)
-  const [json, setJson] = useState(false)
   const [kiosk, setKiosk] = useState(false)
   const [localJson, setLocalJson] = useState(JSON.stringify(runningSettings, null ,2)) // Holds the settings as JSON
   const [localYaml, setLocalYaml] = useState(yaml.stringify(runningSettings)) // Holds the settings as YAML

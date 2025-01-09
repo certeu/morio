@@ -1,12 +1,11 @@
 // Dependencies
-import { timeAgo, rbac } from 'lib/utils.mjs'
+import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { RightIcon, TrashIcon } from 'components/icons.mjs'
@@ -30,12 +29,11 @@ export const MacsTable = () => {
   const { api } = useApi()
   const sorted = orderBy(macs, [order], [(desc ? 'desc' : 'asc')])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
     runMacsTableApiCall(api).then(result => setMacs(result))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Helper to delete one or more entries

@@ -1,6 +1,6 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { NoteIcon, SettingsIcon, DocumentIcon, CheckCircleIcon, WrenchIcon } from 'components/icons.mjs'
+import { NoteIcon, SettingsIcon, DocumentIcon, CheckCircleIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
 const SettingsPage = (props) => {

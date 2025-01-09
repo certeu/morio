@@ -3,10 +3,9 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { HardwareIcon, LocationIcon, PowerIcon, ServersIcon } from 'components/icons.mjs'
-import { Popout } from 'components/popout.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
-import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 
 const meta = {
   title: 'Inventory',
@@ -39,6 +38,7 @@ export default function InventoryPage() {
       }
       else setLoadingStatus([true, "Failed to load inventory data", true, false])
     })
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[count])
 
   return (

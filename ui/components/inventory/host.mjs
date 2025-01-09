@@ -1,18 +1,17 @@
 // Dependencies
-import { formatBytes, rbac, shortUuid, timeAgo } from 'lib/utils.mjs'
+import { formatBytes, shortUuid, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { RightIcon, ServersIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { KeyVal } from 'components/keyval.mjs'
-import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 import { Linux, Debian } from 'components/brands.mjs'
 
 /**
@@ -32,12 +31,11 @@ export const HostsTable = () => {
   const { api } = useApi()
   const sorted = orderBy(hosts, [order], [(desc ? 'desc' : 'asc')])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
     runHostsTableApiCall(api).then(result => setHosts(result))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Helper to delete one or more entries
@@ -141,6 +139,7 @@ export const Host = ({ uuid }) => {
 
   useEffect(() => {
     if (uuid) api.getInventoryHost(uuid).then((result) => setHost(result[0]))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[uuid, refresh])
 
   let Icon = ServersIcon

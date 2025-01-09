@@ -1,5 +1,4 @@
 import { resolveHostAsIp } from '#shared/network'
-import { setIfUnset } from '#shared/store'
 import { writeJsonFile } from '#shared/fs'
 import {
   encryptionMethods,
@@ -15,7 +14,6 @@ import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { unsealKeyData, loadKeysFromDisk } from '../lib/services/core.mjs'
-import { resolveServiceConfiguration } from '#config'
 import { loadPreseededSettings, ensurePreseededContent, loadClientModules, loadStreamProcessors } from '#shared/loaders'
 import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 
@@ -238,7 +236,7 @@ const initialSetup = async function (req, settings) {
     if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
   } else {
-    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
+    [valid, err] = await utils.validate(`req.settings.setup`, settings)
   }
 
   if (!valid?.cluster)

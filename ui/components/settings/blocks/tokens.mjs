@@ -17,7 +17,7 @@ import { slugify } from 'lib/utils.mjs'
 import { FormControl } from '../../inputs.mjs'
 import SecretSelectDocs from 'mdx/secret-select.mdx'
 import VariableSelectDocs from 'mdx/variable-select.mdx'
-import { flags, fdocs } from 'config/flags.mjs'
+import { fdocs } from 'config/flags.mjs'
 import Markdown from 'react-markdown'
 
 const TokenHelp = ({ secrets, pushModal }) => (
@@ -277,6 +277,7 @@ export const Flags = ({ update, data }) => {
       if (status === 200 && body) setFlags(body)
     }
     loadFlags()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[data])
 
   const mergedFlags = {

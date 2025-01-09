@@ -2,7 +2,6 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { LogsIcon } from 'components/icons.mjs'
 import { ShowLogs } from 'components/boards/logs.mjs'
-import { Uuid } from 'components/uuid.mjs'
 import { shortUuid } from 'lib/utils.mjs'
 
 export default function DashboardsHostLogsPage ({ host, module, logset }) {

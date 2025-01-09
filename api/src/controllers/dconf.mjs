@@ -1,7 +1,7 @@
 import { log, utils } from '../lib/utils.mjs'
 import { globDir } from '#shared/fs'
-import path from 'path'
 import { flags } from '#config/flags'
+import path from 'path'
 
 /**
  * This Dconf controller handles API access to dynamic configuration
@@ -78,24 +78,10 @@ async function loadTapUiConfig() {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.flags = async function (req, res) {
-  const tap = await loadTapUiConfig()
   const allFlags = {
     ...flags,
     ...utils.getSettings('flags', {}),
   }
 
   return res.send(allFlags)
-}
-
-async function dynamicImport(file, key='info') {
-  let data = false
-  try {
-    const result = await import(file)
-    if (typeof result[key] !== 'undefined') data = result[key]
-  }
-  catch (err) {
-    log.warn({file, err}, `Failed to import file`)
-  }
-
-  return data
 }

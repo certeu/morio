@@ -1,17 +1,16 @@
 // Dependencies
-import { formatBytes, rbac, shortUuid, timeAgo } from 'lib/utils.mjs'
+import { shortUuid, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
-import { useAccount } from 'hooks/use-account.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
-import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 
 /**
  * This compnent renders a table with all IP address and allow removal
@@ -30,12 +29,11 @@ export const OssTable = () => {
   const { api } = useApi()
   const sorted = orderBy(oss, [order], [(desc ? 'desc' : 'asc')])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
-  const { account } = useAccount()
-  const hasRole = rbac(account.role, 'operator')
 
   // Effects
   useEffect(() => {
     runOssTableApiCall(api).then(result => setOss(result))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   },[refresh])
 
   // Helper to delete one or more entries

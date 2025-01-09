@@ -1,13 +1,12 @@
-import { useState, useContext } from 'react'
+import { useContext } from 'react'
 import { CopyToClipboard as Copy } from 'react-copy-to-clipboard'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 
 export const KeyVal = ({ k, val, color="primary", small=false }) => {
-  const [copied, setCopied] = useState(false)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   return (
-    <Copy text={val} onCopy={() => handleCopied(setCopied, setLoadingStatus, k)}>
+    <Copy text={val} onCopy={() => handleCopied(setLoadingStatus, k)}>
     <button>
       <span className={`${sharedClasses} rounded-l${small ? '' : '-lg'} text-${color}-content bg-${color} border-${color} ${small ? 'text-xs' : ''}`}>
         {k}
@@ -22,9 +21,7 @@ export const KeyVal = ({ k, val, color="primary", small=false }) => {
 
 const sharedClasses = `px-1 text-sm font-medium whitespace-nowrap border-2`
 
-const handleCopied = (setCopied, setLoadingStatus, label) => {
-  setCopied(true)
+const handleCopied = (setLoadingStatus, label) => {
   setLoadingStatus([true, label ? `${label} copied to clipboard` : 'Copied to clipboard', true, true])
-  setTimeout(() => setCopied(false), 1000)
 }
 
