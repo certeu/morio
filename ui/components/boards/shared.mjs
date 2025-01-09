@@ -1,7 +1,7 @@
 /**
  * A helper method to parse a Redis/ValKey stream into an object
  *
- * @param {array} stream - The Data from the cache in stream format
+ * @param {array} stream - The data from the cache in stream format
  * @return {object} data - The same data pased into an object structure
  */
 export const cacheStreamAsObj = (stream) => {
