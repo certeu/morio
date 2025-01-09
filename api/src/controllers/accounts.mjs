@@ -1,7 +1,7 @@
 import { isRoleAvailable, currentUser } from '../rbac.mjs'
 import { randomString, hash, hashPassword } from '#shared/crypto'
 import { log, utils } from '../lib/utils.mjs'
-import { listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
+import { clean, listAccounts, loadAccount, saveAccount } from '../lib/account.mjs'
 import { mfa } from '../lib/mfa.mjs'
 
 /**
@@ -91,6 +91,8 @@ Controller.prototype.create = async function (req, res) {
 
   return res.send({
     ...valid,
+    // Make sure to returned the cleaned version of the username
+    username: clean(valid.username),
     invite,
     inviteUrl: `https://${utils.getClusterFqdn()}/morio/invite/${valid.username}-${invite}`,
   })

@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [api] Return the cleaned version of the username when creating a local account
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
