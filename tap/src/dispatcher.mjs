@@ -19,11 +19,15 @@ export function dispatch(topic, message, tools) {
   if (!processorsPerTopic[topic]) return
 
   /*
+   * Extract message data from raw RedPanda message
+   */
+  const { data } = parseMessageData(message)
+
+  /*
    * Do the actual dispatching for every (stream) processor
    * subscribed to this topic
    */
   for (const processor of processorsPerTopic[topic]) {
-    const { data } = parseMessageData(message)
     /*
      * Count every processed message
      */

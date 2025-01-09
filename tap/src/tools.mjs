@@ -12,7 +12,7 @@ import unset from 'lodash/unset.js'
 
 /*
  * Export log object on its own
- * Not that the logger is async (non-blocking)
+ * Note that the logger is async (non-blocking)
  */
 export const log = pino({ name: 'tap', level: 20, sync: false })
 

@@ -3,7 +3,7 @@ import { tools } from './tools.mjs'
 import { node } from '../config/tap.mjs' // Needs to be mounted in the container
 
 /*
- * Take a measurement over 30s
+ * Take a measurement over 30s (value in ms)
  */
 const tick = 30000
 
@@ -31,7 +31,7 @@ function startCount () {
   resetCounters(processorList, topics)
 
   /*
-   * Then collect data ever tick (30s)
+   * Then collect data every tick (30s)
    */
   tools.counter = setInterval(() => {
     /*

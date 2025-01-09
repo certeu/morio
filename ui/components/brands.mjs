@@ -77,7 +77,7 @@ export const Kafka = (props) => (
 )
 
 /*
- * Linux - The 4 squares (not the workdmark)
+ * Linux - Tux
  */
 export const Linux = (props) => (
   <IconWrapper {...props} fill stroke={0}>
