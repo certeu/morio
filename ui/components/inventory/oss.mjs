@@ -13,7 +13,7 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 
 /**
- * This compnent renders a table with all IP address and allow removal
+ * This compnent renders a table with all IP addresses and allows removal
  */
 export const OssTable = () => {
   // State
