@@ -104,7 +104,7 @@ const About = () => (
     </p>
     <p>
       In general, audit data is used to provide accountability.
-      For example, a configuration files being changed, a user logging in on a production
+      For example, a configuration file being changed, a user logging in on a production
       server, or <code>sudo</code> invocation are all typically audited events.
     </p>
     <p>
