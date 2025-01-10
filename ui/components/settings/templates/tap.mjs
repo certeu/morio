@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import { BoolYesIcon, BoolNoIcon } from 'components/icons.mjs'
+import { Popout } from 'components/popout.mjs'
 
 /*
  * Tap (stream processing)
@@ -30,7 +31,7 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
    * Basic structure for this template
    */
   const template = {
-    title: 'test',
+    title: 'Stream Processing',
     about: `Morio's __Tap__ service facilitates __stream processing__ of data flowing through a Morio collector.
 
 It abstracts the tricky parts of stream processing away,
@@ -50,20 +51,29 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
    * Iterate over the tap handlers to add the children
    */
   for (const [name, conf] of Object.entries(dconf.tap)) {
-    const docs = conf.docs
+    const title = conf.title ? conf.title : name
+    const docs = conf.docs ? conf.docs : (
+      <Popout note>
+        <h4>This stream processor does not provide this info</h4>
+        <p>The <code>{name}</code> stream processor does not provide any <b>about</b> info.</p>
+      </Popout>
+    )
+    const href = conf.href
       ? [
-        `### Documentation`,
-        `The ${conf.title} documentation is available at: [${conf.docs}](${conf.docs}).`,
+        <Popout link>
+          <h5>Learn more about this stream processor</h5>
+          <a href={conf.href}>{conf.href}</a>
+        </Popout>
       ] : []
     const child = {
       type: 'form',
-      title: conf.title,
-      about: conf.about,
+      title,
+      docs,
       form: [
-        `### About the ${conf.title}`,
-        conf.about,
-        ...docs,
-        ...dynamicForm({ conf, dkey: name, mSettings, update }),
+        `### About`,
+        docs,
+        ...href,
+        ...dynamicForm({ conf, dkey: name, mSettings, update, name }),
       ]
     }
     template.children[name] = child
@@ -72,10 +82,47 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
   return template
 }
 
-function dynamicForm ({ conf, dkey, mSettings, update }) {
+function dynamicForm ({ conf, dkey, mSettings, update, name }) {
   if (!conf.settings) return null
 
+  // Start the form
   const form = [ '### Settings' ]
+
+  // First, inject the enabled setting
+  if (typeof conf.settings?.enabled === 'undefined') {
+    const val = {
+      title: `Enable the ${name} stream processor`,
+      dflt: true,
+      type: 'list',
+      list: [
+        {
+          val: false,
+          label: 'Disabled',
+          about: `This completely disables the ${name} stream processor`
+        },
+        {
+          val: true,
+          label: 'Enabled',
+          about: `Enables the ${name} stream processor`
+        },
+      ]
+    }
+    form.push(...dynamicFormSetting('enabled', val, dkey, mSettings, update))
+  }
+
+  // Next, inject the topics setting in case it's a simple array
+  if (typeof conf.settings?.topics === 'undefined' || Array.isArray(conf.settings?.topics)) {
+    const val = {
+      title: 'List of topics to subscribe to',
+      dflt: conf.settings?.topics || [],
+      type: 'labels',
+    }
+    form.push(...dynamicFormSetting('topics', val, dkey, mSettings, update))
+    // Do not show this twice
+    if (conf.settings.topics) delete conf.settings.topics
+  }
+
+  // Now add the rest of the settings
   for (const [key, val] of Object.entries(conf.settings)) {
     form.push(...dynamicFormSetting(key, val, dkey, mSettings, update))
   }
