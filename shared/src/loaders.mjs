@@ -1,12 +1,11 @@
 import fs from 'node:fs'
 import { testUrl } from './network.mjs'
-import set from 'lodash/set.js'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, globDir } from './fs.mjs'
-import { cloneAsPojo } from './utils.mjs'
+import { cloneAsPojo, set, setIfUnset, reverseString } from './utils.mjs'
 
 /*
  * A collection of utils to load various files
@@ -539,6 +538,10 @@ export async function loadStreamProcessors(settings, log) {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
         const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        /*
+         * By sorting the list of files, we can ensure that the main
+         * file is always loaded before any modules it uses.
+         */
         for (const sourceFile of files.sort()) {
           const targetFile = findPreseedTarget(sourceFile, 'processors')
           if (targetFile && sourceFile.slice(-4) === ".mjs") {
@@ -550,8 +553,9 @@ export async function loadStreamProcessors(settings, log) {
             if (copy) {
               log.debug(`Seeding stream processing file: ${targetFile}`)
               /*
-               * We need to dynamically load its settings too
-               * Or at least, if there are none.
+               * We need to dynamically load the stream processor's settings too
+               * For this, we will dynamically import the file and check for the
+               * named 'info' export which can hold a 'settings' key
                */
               const chunks = targetFile.split('/')
               const processor = chunks[0]
@@ -559,23 +563,26 @@ export async function loadStreamProcessors(settings, log) {
                 ? chunks[2].slice(0, -4)
                 : false
               const load = await import(sourceFile)
-              if (load?.info?.settings) {
-                if (typeof settings.tap === 'undefined') settings.tap = {}
-                if (typeof settings.tap?.[processor] === 'undefined') settings.tap[processor] = {}
-                /*
-                 * Is it a stream processor module?
-                 */
-                if (mod) {
-                  if (typeof settings.tap[processor]?.modules === 'undefined') {
-                    settings.tap[processor].modules = {}
-                  }
-                  settings.tap[processor].modules[mod] = ensureStreamProcessorSettings(
-                    load.info.settings,
-                    settings.tap[processor].modules[mod]
-                  )
-                } else {
-                  settings.tap[processor] = ensureStreamProcessorSettings(load.info.settings, settings.tap[processor])
-                }
+              /*
+               * Is it a stream processor module?
+               * And if so, does it expose any settings?
+               */
+              if (mod && mod !== 'index' && load.info?.settings) {
+                setIfUnset(settings, ['tap', processor, 'modules', mod], {})
+                settings.tap[processor].modules[mod] = ensureStreamProcessorSettings(
+                  load.info?.settings,
+                  settings.tap[processor].modules[mod]
+                )
+              }
+              /*
+               * Or is it a stream processor itself?
+               * (these should always have settings)
+               */
+              else {
+                setIfUnset(settings, ['tap', processor], {})
+                settings.tap[processor] = ensureStreamProcessorSettings(load.info?.settings, settings.tap[processor])
+                // Enabled is implied  unless explicitly disabled
+                setIfUnset(settings, ['tap', processor, 'enabled'], true)
               }
             }
             else log.warn(`Failed to seed stream processing file: ${targetFile}`)
@@ -588,10 +595,15 @@ export async function loadStreamProcessors(settings, log) {
   return settings
 }
 
-function ensureStreamProcessorSettings(seededSettings, morioSettings) {
+function ensureStreamProcessorSettings(seededSettings={}, morioSettings) {
   for (const [key, val] of Object.entries(seededSettings)) {
-    if (typeof val.dflt !== 'undefined') {
-      if (typeof morioSettings[key] === 'undefined') morioSettings[key] = val.dflt
+    if (['enabled', 'topics'].includes(key) && typeof val !== 'undefined') {
+      // These two fields take a simple value
+      setIfUnset(morioSettings, key, val)
+    }
+    else if (typeof val.dflt !== 'undefined') {
+      // These take a UI config object, with the default value stored in the `dflt` key
+      setIfUnset(morioSettings, key, val.dflt)
     }
   }
 
@@ -617,9 +629,4 @@ function findPreseedTarget (file, root) {
   if (start === -1) return false
   else return file.slice(-1 * start)
 }
-
-function reverseString (str) {
-  return str.split('').reverse().join('')
-}
-
 
