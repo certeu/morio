@@ -1,5 +1,5 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, accounts, attempt, isApiReady, api, sharedStorage } from './utils.mjs'
+import { clean, store, accounts, attempt, isApiReady, api, sharedStorage } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
@@ -54,6 +54,7 @@ describe('Create Test Account', async () => {
     assert.equal(d.data.role, 'engineer')
 
     store.set('accounts.mrt', { jwt: d.jwt })
+    sharedStorage.set('accounts.mrt', { jwt: d.jwt })
   })
 
   /*
@@ -75,7 +76,7 @@ describe('Create Test Account', async () => {
 
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.username, clean(accounts.user.username))
     assert.equal(d.about, accounts.user.about)
     assert.equal(d.provider, accounts.user.provider)
     assert.equal(d.role, accounts.user.role)
@@ -83,6 +84,7 @@ describe('Create Test Account', async () => {
     assert.equal(typeof d.inviteUrl, 'string')
     assert.equal(d.inviteUrl.slice(0, 8), 'https://')
     store.set('accounts.user', d)
+    sharedStorage.set('accounts.user', d)
   })
 
   /*
@@ -114,6 +116,7 @@ describe('Create Test Account', async () => {
     assert.equal(d.otpauth.includes('otpauth://totp/'), true)
     assert.equal(d.qrcode.includes('<svg class="qrcode"'), true)
     store.set('accounts.user.secret', d.secret)
+    sharedStorage.set('accounts.user.secret', d.secret)
   })
 
   /*
@@ -141,6 +144,7 @@ describe('Create Test Account', async () => {
     const result = await api.post(`/activate-mfa`, data, false, false, true, jwt)
 
     assert.equal(result[0], 200)
+
     const d = result[1]
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 1)
@@ -148,5 +152,31 @@ describe('Create Test Account', async () => {
     assert.equal(d.scratch_codes.length, 3)
     for (const code of d.scratch_codes) assert.equal(typeof code, 'string')
     store.set('accounts.user.scratch_codes', d.scratch_codes)
+    sharedStorage.set('accounts.user.scratch_codes', d.scratch_codes)
+  })
+
+  it(`Should POST /login`, async () => {
+    const data = {
+      provider: 'local',
+      data: {
+        username: store.accounts.user.username,
+        password: 'password',
+        role: 'engineer',
+        token: authenticator.generate(store.accounts.user.secret),
+      },
+    }
+    const result = await api.post(`/login`, data)
+
+    /*
+     * TODO: This test is sometimes flaky, this is here to debug
+     */
+    assert.equal(result[0], 200)
+    const d = result[1]
+    assert.equal(Object.keys(d).length, 2)
+    assert.equal(typeof d.jwt, 'string')
+    assert.equal(d.data.user, `local.${store.accounts.user.username}`)
+    assert.equal(d.data.role, 'engineer')
+
+    sharedStorage.set('personal.mrt', { jwt: d.jwt })
   })
 })

@@ -6,7 +6,13 @@ function DiskStorage(storageFile = 'storage.json') {
     return DiskStorage.instance
   }
 
-  this.filePath = path.resolve(storageFile)
+  // Ensure the 'local' directory exists
+  const localDir = path.resolve('local')
+  if (!fs.existsSync(localDir)) {
+    fs.mkdirSync(localDir, { recursive: true }) // Create the directory if it doesn't exist
+  }
+
+  this.filePath = path.join(localDir, storageFile)
 
   // Initialize the file if it doesn't exist
   if (!fs.existsSync(this.filePath)) {
