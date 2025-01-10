@@ -70,6 +70,21 @@ authentication, but adds an extra authentication layer.`
 flags.ENFORCE_HTTP_MTLS = false
 
 /*
+ * Always run the cache service, even if Morio does not need it
+ */
+fdocs.ENFORCE_SERVICE_CACHE = `Forces the cache service to always run, even when Morio does not require it.
+
+By default, the cache service will only be started when Morio requires it.
+Typically, it is started as a dependency of the Tap service, so if you do
+not run any stream processors, it will not be started.
+
+However, the cache service is also exposed through the API, so you may have
+other reasons to run it. If you enable this feature flag, this service will
+always be started once Morio is set up.`
+flags.ENFORCE_SERVICE_CACHE = false
+
+
+/*
  * Reseed the config when reloading/restarting
  */
 fdocs.RESEED_ON_RELOAD = `Enable this flag to reseed Morio when reloading.

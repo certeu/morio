@@ -15,6 +15,7 @@
   },
   "imports": {
     "#config": "./config/index.mjs",
+    "#config/flags": "./config/flags.mjs",
     "#config/roles": "./config/roles.mjs",
     "#config/account-statuses": "./config/account-statuses.mjs",
     "#config/services/*": "./config/services/*.mjs",

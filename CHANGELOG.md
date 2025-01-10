@@ -9,23 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Started work on integration tests
+- Added the new `ENFORCE_SERVICE_CACH` feature flag
+- [api] Added endpoints to read cache data
+- [api] Added endpoints to manage the inventory
+- [api] Added endpoints to retrieve flags and dynamic config
+- [cache] Added the new cache service (ValKey)
 - [connector] Added support for HTTP output
 - [connector] Added support for LSCL input, filters, output, and pipelines
+- [core] Support preseeding of client modules
+- [core] Support preseeding of stream processors
+- [core] Handle reseeding of client modules and stream processors
+- [core] We now create ACL broker entries for tap service
+- [db] Added tables for storing inventory data
+- [tap] Added the new tap service for stream processing
 - [ui] Added support for filters to the connector setting
 - [ui] Added support for specifying input, output, or filter as an LSCL block
 - [ui] Added support for writing a connector/logstash pipeline as raw LSCL
 - [ui] Added support for HTTP input in connector settings
+- [ui] Implemented the `DISABLE_SERVICE_UI` feature flag
+- [ui] Added the `force_mrt` query parameter to force the sign in form to show the root token identity provider
+- [ui] Added dashboarding (wip)
+- [ui] Added inventory views (wip)
+- [watcher] Added the `MORIO_IGNORE_CERTIFICATE_EXPIRY` escape hatch
+
+
+### Changed
+
+- We renamed the `production` release channel to `stable` 
+- [core] We no longer populate settings with all (disabled) feature flags
+- [shared] `mkdir` is now recursive
+- [watcher] Added the cluster UUID to internal monitor IDs
 
 ### Fixed
 
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
+- [watcher] Update internal hostnames with new Docker container prefix
 
 ## [0.5.5] - 2024-11-18
 
 ### Added
 
+- [api] Added cache endpoints. Currently we support reading these key types: hash, list, set, string, stream, zset
 - [client] Added `morio vars list` command
 
 ### Changed

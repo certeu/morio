@@ -88,7 +88,7 @@ const Nr = ({ children, disabled = false, color = 'primary' }) => (
 /**
  * Displays settings validation
  */
-const ShowSettingsValidation = ({
+export const ShowSettingsValidation = ({
   api,
   mSettings,
   deploy,
@@ -163,7 +163,7 @@ const ShowSettingsValidation = ({
 /**
  * Displays settings preview (or a button to show it)
  */
-const ShowSettingsPreview = ({ preview, mSettings }) =>
+export const ShowSettingsPreview = ({ preview, mSettings }) =>
   preview ? (
     <div className="w-full mt-8 max-w-4xl">
       <h3>Settings Preview</h3>
@@ -206,7 +206,7 @@ const PleaseWait = () => (
   </div>
 )
 
-const getRunningSettings = async (api, setOk, setKo) => {
+export const getRunningSettings = async (api, setOk, setKo) => {
   const result = await api.getCurrentSettings()
   if (result[1] === 200 && result[0].cluster) {
     const newMSettings = { ...result[0] }
@@ -214,24 +214,37 @@ const getRunningSettings = async (api, setOk, setKo) => {
   } else setKo(true)
 }
 
+export const getDynamicConfig = async (api, setOk) => {
+  // Tap config
+  const dconf = {}
+  const result = await api.getDynamicTapConfig()
+  if (result[1] === 200 && result[0]) {
+    dconf.tap = result[0]
+  }
+  setOk(JSON.parse(JSON.stringify(dconf)))
+}
+
 /**
  * This is the React component for the settings wizard itself
  */
 export const SettingsWizard = (props) => {
   const [runningSettings, setRunningSettings] = useState(false) // Holds the current running settings
+  const [dconf, setDconf] = useState(false) // Holds the dynamic configuration
   const [notCool, setNotCool] = useState(false)
   const { api } = useApi()
 
   /*
    * Effect for loading the running settings
+   * This also loads the dynamic tap settings
    */
   useEffect(() => {
     getRunningSettings(api, setRunningSettings, setNotCool)
+    getDynamicConfig(api, setDconf)
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   return runningSettings?.cluster ? (
-    <PrimedSettingsWizard {...props} {...{ runningSettings }} />
+    <PrimedSettingsWizard {...props} {...{ runningSettings, dconf }} />
   ) : notCool ? (
     <NotCool />
   ) : (
@@ -252,6 +265,7 @@ const WizardWrapper = ({
   preview,
   setPreview,
   children,
+  dconf,
 }) => (
   <div className="flex flex-row justify-between gap-8 max-w-full">
     <div className="p-8 grow shrink min-w-0 flex-auto">
@@ -280,6 +294,7 @@ const WizardWrapper = ({
           loadView={loadView}
           nav={templates}
           mSettings={mSettings}
+          dconf={dconf}
           edit
         />
       </details>
@@ -322,7 +337,7 @@ export const PrimedSettingsWizard = (props) => {
   /*
    * Destructure props
    */
-  const { prefix = '/settings', runningSettings } = props
+  const { prefix = '/settings', runningSettings, dconf } = props
 
   /*
    * React state
@@ -396,7 +411,7 @@ export const PrimedSettingsWizard = (props) => {
    * Load the template and section
    */
   const [group, section] = sectionPath.split('.')
-  const template = templates[group] ? templates[group]({ mSettings, update }) : false
+  const template = templates[group] ? templates[group]({ mSettings, update, dconf }) : false
   const doValidate = group === 'validate'
 
   /*
@@ -440,6 +455,7 @@ export const PrimedSettingsWizard = (props) => {
     mSettings,
     preview,
     setPreview,
+    dconf,
   }
 
   if (deployOngoing)

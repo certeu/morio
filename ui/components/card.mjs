@@ -16,13 +16,13 @@ const MissingRole = ({ role }) => (
   </div>
 )
 
-export const Card = ({ desc, Icon = null, width = 'w-72', role = false, ...aProps }) => {
+export const Card = ({ desc, Icon = null, width = 'w-72', role = false, extraClasses = '', ...aProps }) => {
   const { account } = useAccount()
   const hasRole = role ? rbac(account.role, role) : true
 
   return (
     <Link
-      className={`${width} border px-4 pb-4 rounded shadow hover:bg-secondary hover:bg-opacity-20 flex flex-col ${hasRole ? 'hover:bg-secondary' : 'hover:bg-error opacity-50'}`}
+      className={`${width} border px-4 pb-4 rounded shadow hover:bg-secondary hover:bg-opacity-20 flex flex-col ${hasRole ? 'hover:bg-secondary' : 'hover:bg-error opacity-50'} ${extraClasses}`}
       {...aProps}
     >
       <h3

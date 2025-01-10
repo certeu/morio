@@ -1,0 +1,43 @@
+## Stage 1: Build in NodeJS v20 (builder)
+## We keep this in the builder image because tap
+## supports loading custom code which will be built
+## prior to launch
+FROM node:20-slim as builder
+
+## Make this folder our working directory
+WORKDIR /morio/tap
+
+## Install all the latest updates
+RUN apt-get update && apt-get upgrade -y
+
+## Set environment variable to indicate this is production code
+ENV NODE_ENV production
+
+## Copy in source
+COPY . .
+
+## Copy in entrypoint.sh
+COPY ./entrypoint.sh /entrypoint.sh
+
+## Install dependencies
+RUN npm i
+
+## Install esbuild & glob
+RUN npm install esbuild glob
+
+## Install the pm2 process manager for NodeJS
+RUN npm install pm2 -g
+
+## Add a morio user to run the NodeJS code
+RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
+  && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio} \
+  && chown -R morio:morio /morio/tap
+
+## Copy the various PM2 scripts into the PATH
+##COPY /morio/tap/bin/* /usr/local/bin/
+
+## Drop privleges
+USER ${USER:-morio}
+
+## Run entrypoint script
+ENTRYPOINT ["/entrypoint.sh"]

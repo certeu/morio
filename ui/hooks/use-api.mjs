@@ -472,7 +472,7 @@ MorioClient.prototype.deploy = async function (settings) {
     headers: this.jsonHeaders,
     method: 'POST',
     body: JSON.stringify(settings),
-  })
+  }, true)
 }
 
 /**
@@ -601,6 +601,155 @@ MorioClient.prototype.rotateMrt = async function (mrt) {
     method: 'POST',
     body: JSON.stringify({ mrt }),
   })
+}
+
+/**
+ * Get a (single) cache key
+ *
+ * @param {string} key - The cache key to retrieve
+ * @return {object} - The result
+ */
+MorioClient.prototype.getCacheKey = async function (key) {
+  return await this.call(`${morioConfig.api}/cache/keys/${key}`)
+}
+
+/**
+ * Get a host from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHost = async function (host) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${host}`)
+}
+
+/**
+ * Get all hosts from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHosts = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts`)
+}
+
+/**
+ * Get all hosts from the inventory as an object
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostsObject = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hosts.obj`)
+}
+
+/**
+ * Get a host from the inventory
+ *
+ * @param {string} - The uuid of the host
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHost = async function (uuid) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${uuid}`)
+}
+
+/**
+ * Get all IP addresses from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryIps = async function () {
+  return await this.call(`${morioConfig.api}/inventory/ips`)
+}
+
+/**
+ * Get all MAC addresses from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMacs = async function () {
+  return await this.call(`${morioConfig.api}/inventory/macs`)
+}
+
+/**
+ * Get all opearting systems from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryOss = async function () {
+  return await this.call(`${morioConfig.api}/inventory/oss`)
+}
+
+/**
+ * Get stats for the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryStats = async function () {
+  return await this.call(`${morioConfig.api}/inventory/stats`)
+}
+
+/**
+ * Removes an Host from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryHost = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Removes an IP address
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryIp = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Removes an MAC address
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryMac = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/macs/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Removes an operating system
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryOs = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'DELETE',
+  }, true)
+}
+
+/**
+ * Gets the tap config from the UI endpoint
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getDynamicTapConfig = async function () {
+  return await this.call(`${morioConfig.api}/dconf/tap`)
+}
+
+/**
+ * Gets the flags config from the UI endpoint
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.getDynamicFlagsConfig = async function () {
+  return await this.call(`${morioConfig.api}/dconf/flags`)
 }
 
 /*

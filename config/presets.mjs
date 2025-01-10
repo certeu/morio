@@ -276,6 +276,12 @@ predocs.MORIO_CA_UID = 'User ID (UID) of the user running the CA service'
 presets.MORIO_CA_UID = 1000
 
 /*
+ * Cache presets
+ */
+predocs.MORIO_CACHE_PORT = 'TCP port for the internal cache service to listen on'
+presets.MORIO_CACHE_PORT = 6379
+
+/*
  * Connnector presets
  */
 
@@ -283,7 +289,7 @@ predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_FOLDER = 'The location of the pipeline
 presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_FOLDER = '/usr/share/logstash/config/pipeline'
 
 predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = 'The location of the central pipeline configuration file within the Logstash container.'
-presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
+presets.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
 
 predocs.MORIO_CONNECTOR_UID = 'User ID (UID) of the user running the Connector service'
 presets.MORIO_CONNECTOR_UID = 1000
@@ -380,6 +386,18 @@ presets.MORIO_PROXY_LOG_FILEPATH = '/var/log/morio/traefik.log'
 predocs.MORIO_PROXY_LOG_FORMAT =
   'Log format for the _proxy service_. One of json or common. Common is plain text.'
 presets.MORIO_PROXY_LOG_FORMAT = 'json'
+
+/*
+ * Tap presets
+ */
+
+predocs.MORIO_TAP_LOG_LEVEL = `Log level of the Tap service.
+One of \`trace\`, \`debug\`, \`info\`, \`warn\`, \`error\`, \`fatal\`, or
+\`silent\`.
+
+To change this, set \`tokens.presets.MORIO_TAP_LOG_LEVEL\` in your Morio
+settings.`
+presets.MORIO_TAP_LOG_LEVEL = 'trace'
 
 /*
  * UI presets

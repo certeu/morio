@@ -1,5 +1,4 @@
 import { resolveHostAsIp } from '#shared/network'
-import { setIfUnset } from '#shared/store'
 import { writeJsonFile } from '#shared/fs'
 import {
   encryptionMethods,
@@ -15,8 +14,7 @@ import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
 import { unsealKeyData, loadKeysFromDisk } from '../lib/services/core.mjs'
-import { resolveServiceConfiguration } from '#config'
-import { loadPreseededSettings, ensurePreseededContent } from '#shared/loaders'
+import { loadPreseededSettings, ensurePreseededContent, loadClientModules, loadStreamProcessors } from '#shared/loaders'
 import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 
 /**
@@ -58,12 +56,12 @@ Controller.prototype.deploy = async function (req, res) {
   /*
    * We might need to reseed on reload
    */
-  await preseedHandler()
+  const settings = await reseedHandler(valid)
 
   /*
    * Do the actual deploy
    */
-  const result = await deployNewSettings(valid)
+  const result = await deployNewSettings(settings)
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
 
   /*
@@ -131,10 +129,17 @@ Controller.prototype.setup = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.restart = async function (req, res) {
-  /*
-   * We might need to reseed on reload
-   */
-  await preseedHandler()
+  if (utils.getFlag('RESEED_ON_RELOAD')) {
+    const currentSettings = utils.getSettings()
+    const seededSettings = await reseedHandler(currentSettings)
+    if (JSON.stringify(currentSettings) !== JSON.stringify(seededSettings)) {
+      /*
+       * Settings update, write to disk
+       */
+      const result = await deployNewSettings(seededSettings)
+      if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
+    }
+  }
 
   reload({ restart: true })
   return res.status(204).send()
@@ -147,28 +152,15 @@ Controller.prototype.restart = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.reseed = async function (req, res) {
-  /*
-   * Reseeding can happen even when the preseed settings does
-   * not include a base entry, for example to update the list
-   * of client templates. So we need to differentiate here.
-   */
-  const preseedSettings = utils.getSettings('preseed', {})
-  if (preseedSettings.base) {
-    /*
-     * Load the preseeded settings
-     */
-    const settings = await loadPreseededSettings(utils.getSettings('preseed'), log)
+  const currentSettings = utils.getSettings()
+  const seededSettings = await reseedHandler(currentSettings)
 
+  if (JSON.stringify(currentSettings) !== JSON.stringify(seededSettings)) {
     /*
-     * Write to disk
+     * Settings update, write to disk
      */
-    const result = await deployNewSettings(settings)
+    const result = await deployNewSettings(seededSettings)
     if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
-  } else {
-    /*
-     * Just update the preseeded content
-     */
-    await ensurePreseededContent(preseedSettings, log)
   }
 
   /*
@@ -240,11 +232,11 @@ const initialSetup = async function (req, settings) {
     /*
      * Load the preseeded settings so we can validate them
      */
-    const preseededSettings = await loadPreseededSettings(settings.preseed, log)
+    const preseededSettings = await loadPreseededSettings(settings.preseed, settings, log)
     if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
   } else {
-    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
+    [valid, err] = await utils.validate(`req.settings.setup`, settings)
   }
 
   if (!valid?.cluster)
@@ -330,13 +322,6 @@ const initialSetup = async function (req, settings) {
    * Generate JWT, unles sit was providede in the preseeded key data
    */
   if (!keys.jwt) keys.jwt = generateJwtKey()
-
-  /*
-   * Complete the settings with the defaults that are configured
-   */
-  for (const [key, val] of resolveServiceConfiguration('core', { utils }).default_settings) {
-    setIfUnset(valid, key, val)
-  }
 
   /*
    * Make sure keys & settings exists in memory store so later steps can get them
@@ -454,4 +439,53 @@ const preseedHandler = async function (preseedSettings = false, force = false) {
     if (force || (utils.getFlag('RESEED_ON_RELOAD', false) && preseedSettings.git))
       await ensurePreseededContent(preseedSettings, log)
   }
+}
+
+const reseedHandler = async function (newSettings = false) {
+  /*
+   * Load the preseeded settings
+   */
+  let settings = await loadPreseededSettings(
+    (newSettings ? newSettings.preseed : utils.getSettings('preseed')),
+    (newSettings ? newSettings : utils.getSettings()),
+    log
+  )
+
+  /*
+   * Ensure preseeded client module are in place
+   */
+  await ensureClientModules(settings)
+
+  /*
+   * Ensure preseeded stream processors are in place
+   */
+  settings = await ensureStreamProcessors(settings)
+
+  return settings
+}
+
+/**
+ * This distributes the client modules that are preseeded
+ *
+ * @param {object} settings - The settings to use (could be different from the running settings)
+ * @param {object} settings - The (potentially) updated settings
+ */
+export async function ensureClientModules (settings) {
+  return await loadClientModules(settings, log)
+}
+
+/**
+ * This distributes the stream processors that are preseeded
+ *
+ * @param {object} settings - The current settings
+ * @param {object} settings - The (potentially) updated settings
+ */
+export async function ensureStreamProcessors (settings) {
+  /*
+   * This will not only load stream processors, but also
+   * merge their (default) settings into  the settings object
+   */
+  settings = await loadStreamProcessors(settings, log)
+
+  return settings
 }

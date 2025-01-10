@@ -154,7 +154,7 @@ Controller.prototype.setup = async function (req, res) {
     if (!settings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.setup`, settings)
   } else {
-    ;[valid, err] = await utils.validate(`req.setup`, body)
+    [valid, err] = await utils.validate(`req.setup`, body)
   }
 
   if (!valid) {
@@ -392,58 +392,47 @@ Controller.prototype.restart = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.reseed = async function (req, res) {
-  log.info('Received request to reseed')
+  /*
+   * Load the preseeded settings so we can validate them
+   */
+  const settings = await loadPreseededSettings(
+    utils.getSettings('preseed'),
+    utils.getSettings(),
+    log,
+    '/tmp'
+  )
 
   /*
-   * Reseeding can happen even when the preseed settings do
-   * not include a base entry, for example to update the list
-   * of client templates. So we need to differentiate here
-   * and we only enforce the schema when a base file is preseeded.
-   *
-   * Checking the settings here is a matter of resilience.
-   * If core loads invalid settings, things will break. So these
-   * are guardrails against that.
+   * Validate settings against the schema
    */
-  const preseedSettings = utils.getSettings('preseed', {})
+  const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
+  if (!validSettings) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: errSettings.message,
+    })
+  }
 
-  if (preseedSettings.base) {
-    /*
-     * Load the preseeded settings so we can validate them
-     */
-    const settings = await loadPreseededSettings(utils.getSettings('preseed'), log, '/tmp')
+  /*
+   * Validate settings are deployable
+   */
+  const report = await validateSettings(settings)
 
-    /*
-     * Validate settings against the schema
-     */
-    const [validSettings, errSettings] = await utils.validate(`req.setup`, settings)
-    if (!validSettings) {
-      return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-        schema_violation: errSettings.message,
-      })
-    }
+  /*
+   * Make sure setting are valid
+   */
+  if (!report.valid)
+    return utils.sendErrorResponse(
+      res,
+      'morio.api.settings.invalid',
+      req.url,
+      report.errors ? { validation_errors: report.errors } : false
+    )
 
-    /*
-     * Validate settings are deployable
-     */
-    const report = await validateSettings(settings)
-
-    /*
-     * Make sure setting are valid
-     */
-    if (!report.valid)
-      return utils.sendErrorResponse(
-        res,
-        'morio.api.settings.invalid',
-        req.url,
-        report.errors ? { validation_errors: report.errors } : false
-      )
-
-    /*
-     * Make sure settings are deployable
-     */
-    if (!report.deployable)
-      return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
-  } else return res.status(204).send()
+  /*
+   * Make sure settings are deployable
+   */
+  if (!report.deployable)
+    return utils.sendErrorResponse(res, 'morio.api.settings.undeployable', req.url)
 
   /*
    * Pass the request to core

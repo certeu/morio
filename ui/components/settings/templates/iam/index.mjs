@@ -90,11 +90,11 @@ export const iam = () => ({
       blocks: { apikey, ldap, local, mrt, oidc },
     },
     /*
-     * Login form
+     * Sign In form
      */
     ui: {
-      label: 'Login Page',
-      title: 'Login Page',
+      label: 'Sign In Page',
+      title: 'Sign In Page',
       type: 'loginUi',
     },
   },
