@@ -60,7 +60,7 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
     )
     const href = conf.href
       ? [
-        <Popout link>
+        <Popout link key="popout">
           <h5>Learn more about this stream processor</h5>
           <a href={conf.href}>{conf.href}</a>
         </Popout>
