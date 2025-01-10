@@ -1,6 +1,6 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { SettingsIcon, DocumentIcon, CheckCircleIcon, WrenchIcon } from 'components/icons.mjs'
+import { NoteIcon, SettingsIcon, DocumentIcon, CheckCircleIcon } from 'components/icons.mjs'
 import { Card } from 'components/card.mjs'
 
 const SettingsPage = (props) => {
@@ -11,9 +11,17 @@ const SettingsPage = (props) => {
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             <Card
               role="operator"
+              title={<span>Edit Settings</span>}
+              href="/settings/edit"
+              desc="Edit the Morio settings as YAML or JSON."
+              width="w-full"
+              Icon={NoteIcon}
+            />
+            <Card
+              role="operator"
               title={<span>Show Settings</span>}
               href="/settings/show"
-              desc="Display the currently running Morio configuration, including services and container configurations."
+              desc="Display the currently deployed Morio settings."
               width="w-full"
               Icon={DocumentIcon}
             />
@@ -21,7 +29,7 @@ const SettingsPage = (props) => {
               role="operator"
               title={<span>Show Presets</span>}
               href="/settings/presets"
-              desc="Display the current values of the various environment variables you can use to configure Morio."
+              desc="Display the current values of the Morio presets."
               width="w-full"
               Icon={CheckCircleIcon}
             />
@@ -29,9 +37,9 @@ const SettingsPage = (props) => {
               role="operator"
               title={<span>Update Settings</span>}
               href="/settings/wizard"
-              desc="Change Morio settings. Will not cause any changes to running services, until you apply the new settings."
+              desc="Update the Morio settings using the settings wizard."
               width="w-full"
-              Icon={WrenchIcon}
+              Icon={SettingsIcon}
             />
           </div>
         </div>

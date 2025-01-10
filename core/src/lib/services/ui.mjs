@@ -1,11 +1,7 @@
 import { testUrl } from '#shared/network'
 import { utils } from '../utils.mjs'
 // Default hooks
-import {
-  alwaysWantedHook,
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -29,7 +25,7 @@ export const service = {
      * Lifecycle hook to determine whether the container is wanted
      * We just reuse the default hook here, checking for ephemeral state
      */
-    wanted: alwaysWantedHook,
+    wanted: () => !utils.getFlag('DISABLE_SERVICE_UI', false),
     /*
      * Lifecycle hook to determine whether to recreate the container
      */

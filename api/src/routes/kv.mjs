@@ -4,7 +4,7 @@ import { rbac } from '../middleware.mjs'
 const KV = new Controller()
 
 /**
- * This method adds the accounts endpoints to Express
+ * This method adds the KV endpoints to Express
  *
  * @param {abject} app - The ExpressJS app
  */

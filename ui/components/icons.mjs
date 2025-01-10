@@ -85,6 +85,15 @@ export const CheckCircleIcon = (props) => (
 )
 
 /*
+ * CircleIcon - Looks like a circle
+ */
+export const CircleIcon = (props) => (
+  <IconWrapper {...props}>
+    <circle cx="12" cy="12" r="9" />
+  </IconWrapper>
+)
+
+/*
  * ClosedLockIcon - Looks like a closed lock
  */
 export const ClosedLockIcon = (props) => (
@@ -208,6 +217,15 @@ export const EmailIcon = (props) => (
 )
 
 /*
+ * ExpandIcon - Looks like arrows pointing outwards
+ */
+export const ExpandIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+  </IconWrapper>
+)
+
+/*
  * DesktopIcon - Looks like a (mac) desktop
  */
 export const DesktopIcon = (props) => (
@@ -235,11 +253,38 @@ export const FingerprintIcon = (props) => (
 )
 
 /*
- * FixmeIcon - Looks like the sun
+ * FixmeIcon - Looks like a crossed screwdriver and wrench
  */
 export const FixmeIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z" />
+  </IconWrapper>
+)
+
+/*
+ * FlagIcon - Looks like a flag
+ */
+export const FlagIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5" />
+  </IconWrapper>
+)
+
+/*
+ * FlipoverIcon - Looks like a flipover
+ */
+export const FlipoverIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M3.75 3v11.25A2.25 2.25 0 0 0 6 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0 1 18 16.5h-2.25m-7.5 0h7.5m-7.5 0-1 3m8.5-3 1 3m0 0 .5 1.5m-.5-1.5h-9.5m0 0-.5 1.5m.75-9 3-3 2.148 2.148A12.061 12.061 0 0 1 16.5 7.605" />
+  </IconWrapper>
+)
+
+/*
+ * HardwareIcon - Looks like a chip
+ */
+export const HardwareIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25H6.75A2.25 2.25 0 0 0 4.5 6.75v10.5a2.25 2.25 0 0 0 2.25 2.25Zm.75-12h9v9h-9v-9Z" />
   </IconWrapper>
 )
 
@@ -308,11 +353,30 @@ export const LinkIcon = (props) => (
 )
 
 /*
+ * LocationIcon - Looks like a map pin
+ */
+export const LocationIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+    <path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+  </IconWrapper>
+)
+
+/*
  * LogoutIcon - Looks like a door with an arrow pointing outwards to the right
  */
 export const LogoutIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+  </IconWrapper>
+)
+
+/*
+ * LogsIcon - Looks like a paper archive box
+ */
+export const LogsIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="m20.25 7.5-.625 10.632a2.25 2.25 0 0 1-2.247 2.118H6.622a2.25 2.25 0 0 1-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125Z" />
   </IconWrapper>
 )
 
@@ -432,6 +496,15 @@ export const PlusIcon = (props) => (
 )
 
 /*
+ * PowerIcon - Looks like a on/off icon
+ */
+export const PowerIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
+  </IconWrapper>
+)
+
+/*
  * PuzzleIcon - Looks like a piece of a jigsaw puzzle
  */
 export const PuzzleIcon = (props) => (
@@ -493,6 +566,16 @@ export const RssIcon = (props) => (
     <path d="M12.75 19.5v-.75a7.5 7.5 0 0 0-7.5-7.5H4.5m0-6.75h.75c7.87 0 14.25 6.38 14.25 14.25v.75M6 18.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
   </IconWrapper>
 )
+
+/*
+ * SearchIcon - Looks like a magnifying glass
+ */
+export const SearchIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+  </IconWrapper>
+)
+
 
 /*
  * ServersIcon - Looks like 2 rack servers stacked

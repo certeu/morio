@@ -1,4 +1,12 @@
 import { setTimeout } from 'node:timers/promises'
+import _get from 'lodash/get.js'
+import _set from 'lodash/set.js'
+
+/*
+ * Re-export these lodash helpers
+ */
+export const get = _get
+export const set = _set
 
 /**
  * Capitalize the first character of a string
@@ -21,7 +29,31 @@ export function cloneAsPojo(obj) {
 }
 
 /**
- * Sleeps for a number of seconds in a async way
+ * A set helper that will only set if there's no value yet
+ *
+ * @param {object} obj - The object to mutate
+ * @param {string|array} path - The path/key to update
+ * @param {mixed} value - The value to set, if it is currently not set
+ * @return {obhect} obj - The mutated object
+ */
+export function setIfUnset(obj, path, val) {
+  if (typeof get(obj, path) === 'undefined') set(obj, path, val)
+
+  return obj
+}
+
+/**
+ * Reverses a string
+ *
+ * @param {string} str - The input string
+ * @return {string} rts - The reversed string
+ */
+export function reverseString (str) {
+  return str.split('').reverse().join('')
+}
+
+/**
+ * Sleeps for a number of seconds in an async way
  *
  * This is a helper method to wait for a given amount of time
  * without blocking the even loop. This is typically used to

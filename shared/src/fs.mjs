@@ -114,7 +114,7 @@ export async function mkdir(
   let dir
   try {
     dir = path.resolve(root, dirPath)
-    await fs.promises.mkdir(dir)
+    await fs.promises.mkdir(dir, { recursive: true })
   } catch (err) {
     if (onError) onError(err)
 

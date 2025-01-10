@@ -176,6 +176,9 @@ export const schema = {
       .required()
       .description('Holds data that is specific to the identity provider'),
   }),
+  'req.cache.readKey': Joi.object({ key: Joi.string().required() }),
+  'req.cache.listKeys': Joi.object({ glob: Joi.string().required() }),
+  'req.cache.readKeys': Joi.object({ keys: Joi.array().required().items(Joi.string()) }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({
     Package: Joi.string().required(),
@@ -214,6 +217,26 @@ export const schema = {
   'req.decrypt': Joi.object({
     iv: Joi.string().required(),
     ct: Joi.string().required(),
+  }),
+  // Inventory
+  'req.inventory.writeHost': Joi.object({
+    arch: Joi.string(),
+    cores: Joi.number(),
+    fqdn: Joi.string().hostname(),
+    memory: Joi.number(),
+    name: Joi.string(),
+    notes: Joi.array().items(Joi.string()),
+    os: Joi.string(),
+    tags: Joi.array().items(Joi.string()),
+  }),
+  'req.inventory.readHost': Joi.object({
+    id: Joi.string().required()
+  }),
+  'req.inventory.readIp': Joi.object({
+    id: Joi.string().required()
+  }),
+  'req.inventory.readMac': Joi.object({
+    id: Joi.string().required()
   }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),
@@ -292,6 +315,12 @@ export const schema = {
     reset_seconds: Joi.number(),
   }),
   'res.accountList': Joi.array().items(account),
+  'res.cache.value': Joi.object({
+    key: Joi.string(),
+    value: Joi.any(),
+    type: Joi.string(),
+  }),
+  'res.cache.listKeys': Joi.array(),
   'res.kv.value': Joi.object({
     key: Joi.string(),
     value: Joi.any(),

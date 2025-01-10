@@ -1,5 +1,4 @@
 import { generateTraefikConfig } from './index.mjs'
-import { flags } from '../flags.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -82,9 +81,5 @@ export const resolveServiceConfiguration = ({ utils }) => {
         .set('http.middlewares.coredocs-prefix.replacepathregex.replacement', '/$1')
         .set('http.routers.coredocs.middlewares', ['coredocs-prefix@file']),
     },
-    /*
-     * When the initial settings are created, these values will be merged in
-     */
-    default_settings: Object.entries(flags).map(([name, val]) => ([`tokens.flags.${name}`, val]))
   }
 }

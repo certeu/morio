@@ -55,7 +55,7 @@ export const Tabs = ({ tabs = '', active = 0, navs = false, linearTabs = false, 
         {tablist.map((title, tabId) => (
           <button
             key={tabId}
-            className={`text-lg font-bold capitalize tab h-auto tab-bordered grow py-2 ${
+            className={`text-lg font-bold capitalize tab h-auto tab-bordered grow py-2 hover:cursor-pointer ${
               activeTab === tabId ? 'tab-active' : ''
             }`}
             onClick={() => setActiveTab(tabId)}

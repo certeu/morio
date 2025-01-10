@@ -81,6 +81,7 @@ export const ButtonFrame = ({
   dense = false, // Use less padding
   disabled = false, // Allows rendering a disabled view
   dir = 'col',
+  activeIcon = false, // Allows setting a custom active icon
 }) => (
   <button
     type="button"
@@ -98,12 +99,14 @@ export const ButtonFrame = ({
     onClick={onClick}
   >
     {children}
-    {active ? (
-      <OkIcon
-        className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
-        stroke={4}
-      />
-    ) : null}
+    {active
+      ? activeIcon
+        ? <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>{activeIcon}</div>
+        : <OkIcon
+            className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
+            stroke={4}
+          />
+     : null}
   </button>
 )
 
@@ -367,6 +370,7 @@ export const ListInput = ({
   dir = 'col', // Allows to change the direction
   dense = false,
   help = false, // Optional link to help / docs
+  activeIcon = false, // Allows setting a custom active icon
 }) => (
   <FormControl {...{ label, labelTR, labelBL, labelBR, help }} isValid={valid(current)}>
     <div className={`flex flex-${dir} flex-wrap`}>
@@ -409,6 +413,7 @@ export const ListInput = ({
               onClick={() => update(item.val)}
               dir={dir}
               disabled={item.disabled}
+              activeIcon={activeIcon}
             >
               <div className={`w-full ${dir === 'col' ? 'text-lg leading-5' : 'text-sm'}`}>
                 {item.label}
@@ -587,7 +592,7 @@ export const LabelInput = (props) => {
       newObj[label] = label
       setObj(newObj)
       setStr('')
-      update(newObj)
+      update(Object.values(newObj))
     } else setStr(val)
   }
 
@@ -595,7 +600,7 @@ export const LabelInput = (props) => {
     const newObj = { ...obj }
     delete newObj[label]
     setObj(newObj)
-    props.update(newObj)
+    update(Object.values(newObj))
   }
 
   const labels = Object.values(obj).map((val) => (
@@ -609,7 +614,7 @@ export const LabelInput = (props) => {
   ))
 
   return (
-    <>
+    <div>
       <FormControl
         {...{ label, labelTR, labelBL, labelBR, help }}
         forId={id}
@@ -628,8 +633,12 @@ export const LabelInput = (props) => {
         />
       </FormControl>
       {labels.length > 0 ? (
-        <div className="flex flex-row flex-wrap gap-1">Current: {labels}</div>
+        <div className="flex flex-row flex-wrap gap-1 items-center">
+          <span className="text-sm font-bold">Current:</span>
+          {labels}
+          {labels.length > 0 ? <span className="text-sm opacity-60 italic">(click to remove)</span> : null}
+        </div>
       ) : null}
-    </>
+    </div>
   )
 }

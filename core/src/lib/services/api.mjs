@@ -3,11 +3,7 @@ import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 
 // Default hooks
-import {
-  alwaysWantedHook,
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-} from './index.mjs'
+import { alwaysTrue, defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -26,9 +22,9 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We reuse the always method here, since this should always be running
+     * We reuse the alwaysTrue method here, since the api should always be running
      */
-    wanted: alwaysWantedHook,
+    wanted: alwaysTrue,
     /*
      * Lifecycle hook to determine whether to recreate the service
      * We just reuse the default hook here, telling it we need TLS configured.

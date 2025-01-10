@@ -7,6 +7,18 @@ import _slugify from 'slugify'
 import { jwtDecode } from 'jwt-decode'
 import { roles } from 'config/roles.mjs'
 
+export const asJson = (data, pretty = true) => {
+  const json = {}
+  for (const [key, val] of Object.entries(data)) {
+    if (typeof val === 'string' && val.trim()[0] === '{') json[key] = JSON.parse(val)
+    else json[key] = val
+  }
+
+  return pretty
+    ? JSON.stringify(json, null ,2)
+    : JSON.stringify(json)
+}
+
 export const decodeJwt = (token) => {
   let result
   try {
@@ -162,6 +174,16 @@ export const formatNumber = (num, suffix = '') => {
  */
 export const iconSize = 'h-8 w-8'
 
+/*
+ * Shorten a UUID
+ *
+ * @param {string} uuid - The input UUID
+ * @return {string} short - The shortened UUID
+ */
+export const shortUuid = (uuid) => typeof uuid === 'string' && uuid.length > 5
+  ? uuid.slice(0,5)
+  : 'xxxxx'
+
 /**
  * Wrapper around mustache's render method to render templated strings
  *
@@ -174,6 +196,36 @@ export const iconSize = 'h-8 w-8'
  */
 export const template = (input, replace = {}) =>
   typeof input === 'undefined' ? input : mustache.render(input, replace)
+
+/*
+ * A simple method to display how long ago something was
+ *
+ * @param {string/number} timestamp - The time to parse
+ * @return {string} timeago - How long ago it was
+ */
+export function timeAgo(timestamp, terse = true) {
+  const delta = new Date() - new Date(timestamp)
+
+  const seconds = Math.floor(delta / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+  const months = Math.floor(days / 30)
+  const years = Math.floor(days / 365)
+  const suffix = ' ago'
+
+  if (seconds < 1) return 'Now'
+  if (seconds === 1) return `${terse ? '1s' : '1 second'}${suffix}`
+  if (seconds === 60) return `${terse ? '1m' : '1 minute'}${suffix}`
+  if (seconds < 91) return `${seconds}${terse ? 's' : ' seconds'}${suffix}`
+  if (minutes === 60) return `${terse ? '1h' : '1 hour'}${suffix}`
+  if (minutes < 120) return `${minutes}${terse ? 'm' : ' minutes'}${suffix}`
+  if (hours === 24) return `${terse ? '1d' : '1 day'}${suffix}`
+  if (hours < 48) return `${hours}${terse ? 'h' : ' hours'}${suffix}`
+  if (days < 61) return `${days}${terse ? 'd' : ' days'}${suffix}`
+  if (months < 25) return `${months}${terse ? 'M' : ' months'}${suffix}`
+  return `${years}${terse ? 'Y' : ' years'}${suffix}`
+}
 
 /**
  * Helper method to validate the settings

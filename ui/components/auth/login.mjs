@@ -109,23 +109,40 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   const { api } = useApi()
 
   /*
+   * People can lock themselves out of the UI
+   * so we check for the 'force_mrt' query parameter and if
+   * it is there we hard-force the login for the MRT only
+   */
+  let forceMrt = false
+  if (window) {
+    const queryParams = new URLSearchParams(window.location.search)
+    forceMrt = queryParams.get("force_mrt")
+  }
+
+  /*
    * Load available identity providers from API
    */
   useEffect(() => {
     const getIdps = async () => {
-      const [result, status] = await api.getIdps()
-      if (status === 200 && result.idps) {
-        setIdps(result.idps)
-        setUi(result.ui)
-        /*
-         * Force closing modal windows and loading status when the login form initially loads
-         * unless there's a redirect error
-         */
-        setLoadingStatus([false])
-        clearModal()
+      if (forceMrt) {
+        setIdps({ mrt: { id: 'mrt', provider: 'mrt', label: 'Morio Root Token (forced via query parameter)' } })
+        setUi({ mrt: 'full' })
+      } else {
+        const [result, status] = await api.getIdps()
+        if (status === 200 && result.idps) {
+          setIdps(result.idps)
+          setUi(result.ui)
+          /*
+           * Force closing modal windows and loading status when the login form initially loads
+           * unless there's a redirect error
+           */
+          setLoadingStatus([false])
+          clearModal()
+        }
       }
     }
     getIdps()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   /*

@@ -193,18 +193,21 @@ async function enforceAuthorization() {
   const produce = ['create', 'describe', 'write']
   const ACLs = [
     // Allow Morio clients to push data to the broker
-    ...produce.map((operation) => [
-      `*.clients.${utils.getClusterUuid()}.morio.internal`,
-      operation,
-      utils.getPreset('MORIO_BROKER_CLIENT_TOPICS'),
-    ]),
+    ...produce.map((operation) => [`*`, operation, utils.getPreset('MORIO_BROKER_CLIENT_TOPICS')]),
     // Allow the watcher service to write to the checks topic
     ...produce.map((operation) => [
       `watcher.infra.${utils.getClusterUuid()}.morio.internal`,
       operation,
       ['checks'],
     ]),
+    // Allow Tap service to produce to and read from all topics
+    ...[...produce, 'read'].map((operation) => [
+      `tap.infra.${utils.getClusterUuid()}.morio.internal`,
+      operation,
+      `*`,
+    ]),
   ]
+
   for (const [user, operation, topics] of ACLs) {
     for (const topic of topics) {
       log.debug(`[broker] Creating ${operation} ACL on topic ${topic} for user ${user}`)

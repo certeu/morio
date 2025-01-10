@@ -7,6 +7,7 @@ export const SettingsNavigation = ({
   loadView, // Method to load a view
   mSettings, // The current mSettings
   lead = [], // Lead for looking up IDs
+  dconf = {}, // Dyamic configuration
   level = 0,
 }) => (
   <ul className="list list-inside pl-2">
@@ -17,15 +18,19 @@ export const SettingsNavigation = ({
       .filter((entry) => !entry.hide)
       .map((entry) => (
         <li key={entry.id}>
-          <NavButton {...{ lead, entry, loadView, view, level }}>
-            <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
-              {entry.title ? entry.title : entry.label}
-            </span>
-          </NavButton>
+          <NavButton {...{ lead, entry, loadView, view, level }} />
           {entry.children && (
             <SettingsNavigation
               {...{ view, loadView, mSettings }}
               nav={entry.children}
+              lead={[...lead, entry.id]}
+              level={level + 1}
+            />
+          )}
+          {dconf?.[entry.id] && (
+            <SettingsNavigation
+              {...{ view, loadView, mSettings }}
+              nav={dconf[entry.id]}
               lead={[...lead, entry.id]}
               level={level + 1}
             />
@@ -63,7 +68,7 @@ export const NavButton = ({
    */
   return (
     <button onClick={() => loadView([...lead, entry.id].join('/'))} className={className}>
-      {entry.title ? entry.title : entry.label}
+      {entry.title ? entry.title : entry.label ? entry.label : entry.id}
     </button>
   )
 }

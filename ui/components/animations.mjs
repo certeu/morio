@@ -81,3 +81,7 @@ export const CountdownCircle = ({ className = '', duration = 1, stroke = 3 }) =>
     </svg>
   )
 }
+
+export const Loading = () => (
+  <Spinner className="w-24 h-24 text-primary animate-spin" />
+)

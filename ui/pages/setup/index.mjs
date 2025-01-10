@@ -37,6 +37,7 @@ export const EphemeralWrapper = ({ children }) => {
       if (result[1] === 200 && result[0].state?.ephemeral === true) setEphemeral(true)
     }
     if (!ephemeral) checkState()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   return ephemeral === false ? (
