@@ -53,7 +53,7 @@ export function reverseString (str) {
 }
 
 /**
- * Sleeps for a number of seconds in a async way
+ * Sleeps for a number of seconds in an async way
  *
  * This is a helper method to wait for a given amount of time
  * without blocking the even loop. This is typically used to
