@@ -19,20 +19,21 @@ var templateCmd = &cobra.Command{
 	Example: "  morio template",
 	Long:    `Templates out the configuration for the different agents.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		// First ensure all vars are present
+		EnsureTemplateVars()
+		// Then load the vars
 		context := GetVars()
 		// Audit
-		TemplateOutFile("audit/config-template.yml", "audit/config.yml", context)
-		TemplateOutFolder("audit/module-templates.d", "audit/modules.d", context)
-		TemplateOutFolder("audit/rule-templates.d", "audit/rules.d", context)
+		TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
+		TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
+		TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
 		// metrics
-		TemplateOutFile("metrics/config-template.yml", "metrics/config.yml", context)
-		TemplateOutFolder("metrics/module-templates.d", "metrics/modules.d", context)
+		TemplateOutConfigFile("metrics/config-template.yml", "metrics/config.yml", context)
+		TemplateOutInputFolder("metrics/module-templates.d", "metrics/modules.d", context)
 		// logs
-		TemplateOutFile("logs/config-template.yml", "logs/config.yml", context)
-		TemplateOutFolder("logs/module-templates.d", "logs/modules.d", context)
-		TemplateOutFolder("logs/input-templates.d", "logs/inputs.d", context)
-		// global vars
-		WriteGlobalVars()
+		TemplateOutConfigFile("logs/config-template.yml", "logs/config.yml", context)
+		TemplateOutInputFolder("logs/module-templates.d", "logs/modules.d", context)
+		TemplateOutInputFolder("logs/input-templates.d", "logs/inputs.d", context)
 	},
 }
 
@@ -40,7 +41,31 @@ func init() {
 	RootCmd.AddCommand(templateCmd)
 }
 
-func TemplateOutFile(from string, to string, context map[string]string) {
+func EnsureTemplateVars() {
+	EnsureGlobalVars()
+	EnsureTemplateFolderVars("audit/module-templates.d")
+	EnsureTemplateFolderVars("metrics/module-templates.d")
+	EnsureTemplateFolderVars("logs/module-templates.d")
+	EnsureTemplateFolderVars("logs/input-templates.d")
+}
+
+// FIXME: make this platform agnostic
+func EnsureTemplateFolderVars(folder string) {
+	for _, file := range TemplateList(folder) {
+		EnsureTemplateFileVars(folder + "/" + file)
+	}
+}
+
+func EnsureTemplateFileVars(file string) {
+	// Load defaults from template file
+	defaults := ExtractTemplateDefaultVars(file)
+	// Iterate over them an write them to disk
+	for key, val := range defaults {
+		SetDefaultVar(key, val)
+	}
+}
+
+func TemplateOutConfigFile(from string, to string, context map[string]string) {
 	// Open file
 	file, err := os.Create(GetConfigPath(to))
 	check(err)
@@ -48,7 +73,6 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 
 	// Inject run-time vars
 	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
-	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
 
 	// Write value
 	output, err := mustache.RenderFileInLayout(GetConfigPath(from), GetConfigPath("template-layout.mustache"), context)
@@ -67,18 +91,70 @@ func TemplateOutFile(from string, to string, context map[string]string) {
 
 	// Sync
 	file.Sync()
+}
 
-	// Also extract the default vars and write them to disk
-	defaults := ExtractTemplateDefaultVars(from)
-	for key, value := range defaults {
-		SetDefaultVar(key, value)
+func TemplateOutInputFile(from string, to string, context map[string]string) {
+	// Read the template from disk
+	template, err := os.ReadFile(GetConfigPath(from))
+	if err != nil {
+		fmt.Printf("Failed to read template: %v\n", err)
+		panic(err)
+	}
+
+	// Inject run-time vars
+	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
+	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
+
+	// Render with mustache
+	templated, err := mustache.Render(string(template), context)
+
+	// Convert back to Yaml
+	var result []map[string]interface{}
+	yaml.Unmarshal([]byte(templated), &result)
+	if err != nil {
+		fmt.Println("Failed to parse templated YAML data. Bailing out.")
+		panic(err)
+	}
+
+	// Filter out moriodata
+	var inputs = StripMoriodataFromInputs(result)
+
+	// Convert back to a YAML string
+	yamlData, err := yaml.Marshal(inputs)
+	if err != nil {
+		fmt.Println("Unable to parse YAML inputs from template file. Bailing out.")
+		panic(err)
+	}
+
+	// Open file
+	file, err := os.Create(GetConfigPath(to))
+	check(err)
+	defer file.Close()
+
+	// Write to disk
+	_, err = file.WriteString(string(yamlData))
+	if err != nil {
+		fmt.Println("Failed to write to " + GetConfigPath(to))
+		panic(err)
+	} else {
+		fmt.Println(GetConfigPath(to))
+	}
+
+	// Sync
+	file.Sync()
+}
+
+func TemplateOutConfigFolder(from string, to string, context map[string]string) {
+	ClearFolder(to)
+	for _, file := range TemplateList(from) {
+		TemplateOutConfigFile(from+"/"+file, to+"/"+file, context)
 	}
 }
 
-func TemplateOutFolder(from string, to string, context map[string]string) {
+func TemplateOutInputFolder(from string, to string, context map[string]string) {
 	ClearFolder(to)
 	for _, file := range TemplateList(from) {
-		TemplateOutFile(from+"/"+file, to+"/"+file, context)
+		TemplateOutInputFile(from+"/"+file, to+"/"+file, context)
 	}
 }
 
@@ -122,45 +198,92 @@ func TemplateList(folder string) []string {
 }
 
 func ExtractTemplateDefaultVars(from string) map[string]string {
-	docs := TemplateDocsAsYaml(from)
+	// Get the moriodata from the template
+	moriodata := TemplateDocsAsYaml(from)
 
-	// Access the nested map at "keys.defaults"
-	nested, ok := docs["vars"].(map[string]interface{})
-	if !ok {
-		return map[string]string{}
-	}
-	defaults, ok := nested["defaults"].(map[string]interface{})
-	if !ok {
-		return map[string]string{}
+	// Prepare a map to hold our defaults
+	// Note that they will all be converted to strings
+	defaults := make(map[string]string)
+
+	// Access the nested map at "moriodata.vars"
+	vars, hasVars := moriodata["vars"].(map[string]interface{})
+	if !hasVars {
+		return defaults
 	}
 
-	// Convert all values to strings in "defaults"
-	convertedData := make(map[string]string)
-	for key, value := range defaults {
-		switch v := value.(type) {
-		case string:
-			convertedData[key] = v
-		case bool:
-			convertedData[key] = strconv.FormatBool(v)
-		case int:
-			convertedData[key] = strconv.Itoa(v)
-		case float64:
-			convertedData[key] = strconv.FormatFloat(v, 'f', -1, 64)
-    case []interface{}:
-			// Handle arrays
-			var elements []string
-			for _, item := range v {
-        // Convert each element to a string
-				elements = append(elements, fmt.Sprintf("%v", item))
+	// Iterate over the vars map
+	for key, value := range vars {
+		// Type assert value to map[string]interface{}
+		if varMap, ok := value.(map[string]interface{}); ok {
+			// Extract the "dflt" value if it exists
+			// and then convert it to string, depending on its type
+			if dflt, exists := varMap["dflt"]; exists {
+				switch v := dflt.(type) {
+				case string:
+					defaults[key] = v
+				case bool:
+					defaults[key] = strconv.FormatBool(v)
+				case int:
+					defaults[key] = strconv.Itoa(v)
+				case float64:
+					defaults[key] = strconv.FormatFloat(v, 'f', -1, 64)
+				case []interface{}:
+					// Handle arrays
+					var elements []string
+					for _, item := range v {
+						// Convert each element to a string
+						elements = append(elements, fmt.Sprintf("%q", item))
+					}
+					// Join elements with commas
+					defaults[key] = "[ " + strings.Join(elements, ",") + " ]"
+				default:
+					defaults[key] = fmt.Sprintf("%v", v)
+				}
 			}
-      // Join elements with commas
-			convertedData[key] = "[ " + strings.Join(elements, ",") + " ]"
-		default:
-			convertedData[key] = fmt.Sprintf("%v", v)
 		}
 	}
 
-	return convertedData
+	return defaults
+}
+
+func ExtractDefaultsFromVars(vars map[string]interface{}) map[string]string {
+	// Prepare a map to hold our defaults
+	// Note that they will all be converted to strings
+	defaults := make(map[string]string)
+
+	// Iterate over the vars map
+	for key, value := range vars {
+		// Type assert value to map[string]interface{}
+		if varMap, ok := value.(map[string]interface{}); ok {
+			// Extract the "dflt" value if it exists
+			// and then convert it to string, depending on its type
+			if dflt, exists := varMap["dflt"]; exists {
+				switch v := dflt.(type) {
+				case string:
+					defaults[key] = v
+				case bool:
+					defaults[key] = strconv.FormatBool(v)
+				case int:
+					defaults[key] = strconv.Itoa(v)
+				case float64:
+					defaults[key] = strconv.FormatFloat(v, 'f', -1, 64)
+				case []interface{}:
+					// Handle arrays
+					var elements []string
+					for _, item := range v {
+						// Convert each element to a string
+						elements = append(elements, fmt.Sprintf("%v", item))
+					}
+					// Join elements with commas
+					defaults[key] = "[ " + strings.Join(elements, ",") + " ]"
+				default:
+					defaults[key] = fmt.Sprintf("%v", v)
+				}
+			}
+		}
+	}
+
+	return defaults
 }
 
 func isString(val interface{}) bool {
@@ -168,57 +291,69 @@ func isString(val interface{}) bool {
 	return ok
 }
 
+// FIXME: Make this platform agnostic
 func TemplateDocsAsYaml(path string) map[string]interface{} {
-	// First render the template with MORIO_DOCS as true
-	context := map[string]bool{"MORIO_DOCS": true}
-	template, err := mustache.RenderFile(GetConfigPath(path), context)
+	template, err := os.ReadFile(GetConfigPath(path))
 	if err != nil {
+		fmt.Println("Cannot read template file. Bailing out.")
 		panic(err)
 	}
 
 	// Now parse the result as YAML
-	var result map[string]interface{}
-	// Parse the YAML string
-	yaml.Unmarshal([]byte(template), &result)
+	var result []map[string]interface{}
+	yaml.Unmarshal(template, &result)
+	if err != nil {
+		fmt.Println("Failed to parse YAML data in template. Bailing out.")
+		panic(err)
+	}
 
-	return result
+	// Find and return the moriodata value
+	for _, item := range result {
+		if moriodata, hasMoriodata := item["moriodata"]; hasMoriodata {
+			if moriodataMap, ok := moriodata.(map[string]interface{}); ok {
+				return moriodataMap
+			}
+			fmt.Println("Moriodata value is not a map. Bailing out.")
+			panic("Invalid moriodata structure")
+		}
+	}
+
+	return nil
+}
+
+func StripMoriodataFromInputs(inputs []map[string]interface{}) []map[string]interface{} {
+	filteredInputs := make([]map[string]interface{}, 0)
+	for _, input := range inputs {
+		if _, hasMoriodata := input["moriodata"]; !hasMoriodata {
+			filteredInputs = append(filteredInputs, input)
+		}
+	}
+
+	return filteredInputs
 }
 
 // FIXME: Make this platform agnostic
-func LoadGlobalVars() map[string]interface{} {
+func EnsureGlobalVars() map[string]string {
+	// Read the file from disk
 	data, err := os.ReadFile("/etc/morio/global-vars.yml")
 	if err != nil {
 		fmt.Println("Cannot read global variables file. Bailing out.")
 		panic(err)
 	}
 
-	var result map[string]interface{}
-	yaml.Unmarshal([]byte(data), &result)
+	// Parse as YAML into vars
+	var vars map[string]interface{}
+	yaml.Unmarshal([]byte(data), &vars)
 
-	return result
-}
+	// Parse for default values and store then as strings
+	defaults := ExtractDefaultsFromVars(vars)
 
-// FIXME: Make this platform agnostic
-func WriteGlobalVars() {
-	globals := LoadGlobalVars()
-	for key, nested := range globals {
-		entry, ok := nested.(map[string]interface{})
-		if ok {
-			val, _ := entry["default"]
-			switch v := val.(type) {
-			case string:
-				SetDefaultVar(key, v)
-			case bool:
-				SetDefaultVar(key, strconv.FormatBool(v))
-			case int:
-				SetDefaultVar(key, strconv.Itoa(v))
-			case float64:
-				SetDefaultVar(key, strconv.FormatFloat(v, 'f', -1, 64))
-			default:
-				SetDefaultVar(key, fmt.Sprintf("%v", v))
-			}
-		}
+	// Iterate over them an write them to disk
+	for key, val := range defaults {
+		SetDefaultVar(key, val)
 	}
+
+	return defaults
 }
 
 // FIXME: Make this platform agnostic
