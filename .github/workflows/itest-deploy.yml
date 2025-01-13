@@ -30,7 +30,7 @@ jobs:
             COMMENT_USER="${{ github.event.comment.user.login }}"
             ITEST_DEPLOY_TRIGGER="${{ vars.ITEST_DEPLOY_TRIGGER }}"
 
-            if [[ "$COMMENT_BODY" == "$ITEST_DEPLOY_TRIGGER" && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
+            if [[ "$COMMENT_BODY" == *"$ITEST_DEPLOY_TRIGGER"* && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
               echo "match=true" >> $GITHUB_ENV
             fi
           fi
