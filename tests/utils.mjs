@@ -27,6 +27,7 @@ const setup = {
   cluster: {
     name: 'Morio Unit Tests',
     broker_nodes: brokerNodes,
+    ...(brokerNodes.length > 1 && { fqdn: fqdn }),
   },
   iam: {
     providers: {
@@ -41,38 +42,43 @@ const setup = {
         id: 'local',
         label: 'Morio Account',
       },
-      ldap: {
-        provider: 'ldap',
-        about: 'Test LDAP server',
-        server: {
-          url: 'ldap://ldap:10389',
-          bindDN: 'uid=admin,ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
-          bindCredentials: 'secret',
-          searchBase: 'ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
-          searchFilter: '(&(objectClass=user)(uid={{username}}))',
-        },
-        username_field: 'username',
-        label: 'LDAP Test Server',
-        rbac: {
-          user: {
-            attribute: 'uid',
-            regex: '.',
-          },
-          root: {
-            attribute: 'employeeType',
-            regex: 'admin',
-          },
-        },
-      },
+      // ldap: {
+      //   provider: 'ldap',
+      //   about: 'Test LDAP server',
+      //   server: {
+      //     url: 'ldap://ldap:10389',
+      //     bindDN: 'uid=admin,ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
+      //     bindCredentials: 'secret',
+      //     searchBase: 'ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
+      //     searchFilter: '(&(objectClass=user)(uid={{username}}))',
+      //   },
+      //   username_field: 'username',
+      //   label: 'LDAP Test Server',
+      //   rbac: {
+      //     user: {
+      //       attribute: 'uid',
+      //       regex: '.',
+      //     },
+      //     root: {
+      //       attribute: 'employeeType',
+      //       regex: 'admin',
+      //     },
+      //   },
+      // },
     },
     ui: {
       visibility: {
         local: 'full',
         mrt: 'icon',
         apikey: 'icon',
-        ldap: 'icon',
+        // ldap: 'icon',
       },
-      order: ['local', 'apikey', 'mrt', 'ldap'],
+      order: [
+        'local',
+        'apikey',
+        'mrt',
+        // , 'ldap'
+      ],
     },
   },
   tokens: {
@@ -197,7 +203,7 @@ async function isApiReady() {
 
 const accounts = {
   user: {
-    username: `testAccount${Date.now()}`,
+    username: `testaccount${Date.now()}`,
     about: 'This account was created as part of a test',
     provider: 'local',
     role: 'engineer',

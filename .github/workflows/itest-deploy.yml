@@ -1,9 +1,9 @@
 name: Deploy and Configure Morio
 
 on:
-  workflow_dispatch:  # Allow manual triggering for a test
+  workflow_dispatch: # Allow manual triggering for a test
   issue_comment:
-    types: [created]  # Trigger when a comment is created on a PR
+    types: [created] # Trigger when a comment is created on a PR
 
 jobs:
   deploy:
@@ -28,14 +28,14 @@ jobs:
             ALLOWED_USERS=$(cat allowed_users.txt)
             COMMENT_BODY="${{ github.event.comment.body }}"
             COMMENT_USER="${{ github.event.comment.user.login }}"
-            ITEST_DEPLOY_KEY="${{ secrets.ITEST_DEPLOY_KEY }}"
+            ITEST_DEPLOY_TRIGGER="${{ vars.ITEST_DEPLOY_TRIGGER }}"
 
-            if [[ "$COMMENT_BODY" == "$ITEST_DEPLOY_KEY" && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
+            if [[ "$COMMENT_BODY" == "$ITEST_DEPLOY_TRIGGER" && "$ALLOWED_USERS" == *"$COMMENT_USER"* ]]; then
               echo "match=true" >> $GITHUB_ENV
             fi
           fi
         env:
-          ITEST_DEPLOY_KEY: ${{ secrets.ITEST_DEPLOY_KEY }}
+          ITEST_DEPLOY_TRIGGER: ${{ vars.ITEST_DEPLOY_TRIGGER }}
 
       - name: Exit if Not Triggered by Allowed User or Matching Deploy Key
         if: ${{ env.match != 'true' }}
@@ -116,15 +116,45 @@ jobs:
             echo "SSH authentication failed after 10 attempts. Exiting."
             exit 1
           fi
-        
+
       - name: Wait for 30 seconds
         run: sleep 30
 
       - name: Run itest (Testing)
         run: npm run itest ephemeral
 
-      - name: Run iconfigure (Configure)
-        run: npm run iconfigure
+      - name: Run setup configure (with test)
+        run: npm run itest setup
+
+      - name: Wait for 30 seconds
+        run: sleep 30
+
+      - name: Run account create test
+        run: npm run itest create
+
+      - name: Run anonymous test
+        run: npm run itest anonymous
+
+      - name: Run settings test
+        run: npm run itest settings
+
+      - name: Run docker test
+        run: npm run itest docker
+
+      - name: Run idp-local test
+        run: npm run itest local
+
+      - name: Run idp-apikey test
+        run: npm run itest apikey
+
+      - name: Run idp-mrt test
+        run: npm run itest mrt
+
+      - name: Run crypto test
+        run: npm run itest crypto
+
+      - name: Run kv test
+        run: npm run itest kv
 
       - name: Run idestroy (Destroy resources)
         run: npm run idestroy
