@@ -62,6 +62,7 @@ export const AuthWrapper = ({ role = 'user', account, setAccount, children, logo
     }
     whoAmI()
     ephemeral()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [user])
 
   /*

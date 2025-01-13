@@ -199,8 +199,10 @@ const preseed = Joi.alternatives().try(
     url: Joi.string(),
     git: Joi.object().pattern(Joi.string(), gitRepo),
     base: preseedFile,
-    overlays: Joi.alternatives().try(Joi.array().items(preseedFile), Joi.string()),
+    overlays: Joi.array().items(preseedFile),
     keys: preseedKeys,
+    processors: Joi.array().items(preseedFile),
+    modules: Joi.array().items(preseedFile),
   }),
   Joi.string()
 )
@@ -238,6 +240,7 @@ const settings = Joi.object({
       DISABLE_IDP_OIDC: Joi.boolean(),
       DISABLE_SERVICE_UI: Joi.boolean(),
       ENFORCE_HTTP_MTLS: Joi.boolean(),
+      ENFORCE_SERVICE_CACHE: Joi.boolean(),
       RESEED_ON_RELOAD: Joi.boolean(),
     }),
     secrets: Joi.object(),
@@ -253,6 +256,7 @@ const settings = Joi.object({
   vault: vaultInstance,
   preseed,
   client,
+  tap: Joi.object().optional(),
 }).required()
 
 /**

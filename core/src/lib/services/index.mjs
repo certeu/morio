@@ -4,12 +4,14 @@ import { service as apiService } from './api.mjs'
 import { service as dbService } from './db.mjs'
 import { service as uiService } from './ui.mjs'
 import { service as caService } from './ca.mjs'
+import { service as cacheService } from './cache.mjs'
 import { service as brokerService } from './broker.mjs'
 import { service as connectorService } from './connector.mjs'
 import { service as consoleService } from './console.mjs'
 import { service as dbuilderService } from './dbuilder.mjs'
 import { service as drbuilderService } from './drbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
+import { service as tapService } from './tap.mjs'
 import { service as watcherService } from './watcher.mjs'
 import { service as webService } from './web.mjs'
 // Dependencies
@@ -44,6 +46,7 @@ const services = {
   core: coreService,
   db: dbService,
   ca: caService,
+  cache: cacheService,
   proxy: proxyService,
   api: apiService,
   ui: uiService,
@@ -52,6 +55,7 @@ const services = {
   connector: connectorService,
   dbuilder: dbuilderService,
   drbuilder: drbuilderService,
+  tap: tapService,
   watcher: watcherService,
   web: webService,
 }
@@ -178,6 +182,15 @@ export async function startMorio(hookParams = {}) {
  * @return {bool} ok = Whether or not the service was started
  */
 export async function ensureMorioService(serviceName, hookParams = {}) {
+  /*
+   * Start by generating the  morio service config so it's available in all hooks
+   * Docker config will be generated after the preCreate lifecycle hook
+   */
+  utils.setMorioServiceConfig(
+    serviceName,
+    resolveServiceConfiguration(serviceName, { utils, hookParams })
+  )
+
   if (optionalServices.includes(serviceName)) {
     /*
      * If the service optional, not wanted, yet running, stop it
@@ -191,21 +204,18 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
        * No need to wait for that, we can continue with other services.
        * So we're letting this run its course async, rather than waiting for it.
        */
-      if (running) stopMorioService(serviceName)
+      log.debug(`[${serviceName}] Optional service is running, but not wanted. Shutting down...`)
+      if (running)
+        stopMorioService(serviceName).then((result) => {
+          if (result[0] === true)
+            log.debug(`[${serviceName}] Stopped service as it is no longer wanted`)
+          else log.warn(`[${serviceName}] Unexpected result when attempting to stop the service`)
+        })
 
       // Not wanted, return early
       return true
     } else log.debug(`[${serviceName}] Optional service is wanted`)
   }
-
-  /*
-   * Generate morio service config
-   * Docker config will be generated after the preCreate lifecycle hook
-   */
-  utils.setMorioServiceConfig(
-    serviceName,
-    resolveServiceConfiguration(serviceName, { utils, hookParams })
-  )
 
   /*
    * Does the service need to be recreated?
@@ -359,8 +369,10 @@ export async function runHook(hookName, serviceName, hookParams) {
 async function stopMorioService(serviceName) {
   await runHook('prestop', serviceName)
   log.debug(`[${serviceName}] Stopping service`)
-  await stopService(serviceName)
+  const result = await stopService(serviceName)
   await runHook('poststop', serviceName)
+
+  return result
 }
 
 function isContainerRunning(serviceName) {
@@ -400,15 +412,17 @@ export function defaultServiceWantedHook() {
 }
 
 /**
- * The 'always' wanted lifecycle hook
+ * The 'always true' method
  *
- * Containers need to specify this hook, but several containers should always
- * be running. So rather than create that hook for each service, we reuse this
+ * Containers need to specify various lifecycle hooks.
+ * But some containers should always be running, or always be
+ * restarted and so on.
+ * So rather than create that hook for each service, we reuse this
  * method.
  *
- * @retrun {boolean} result - True to indicate the container is wanted
+ * @retrun {boolean} result - always true
  */
-export function alwaysWantedHook() {
+export function alwaysTrue() {
   return true
 }
 

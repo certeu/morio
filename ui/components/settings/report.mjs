@@ -10,6 +10,7 @@ import { Box } from 'components/box.mjs'
  */
 export const SettingsReport = ({ report }) => (
   <div className="py-2">
+    <div className="lg:grid lg:grid-cols-2 lg:gap-2">
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}
@@ -30,6 +31,16 @@ export const SettingsReport = ({ report }) => (
         </div>
       </div>
     </Box>
+    </div>
+    {report.title === "This request violates the data schema" ? (
+      <div className="p-4">
+        <h5>{report.title}</h5>
+        <p>
+          {report.detail ? report.detail : null}
+          {report.schema_violation ? <span className="text-lg font-bold"><br />{report.schema_violation}</span> : null}
+        </p>
+      </div>
+    ) : null}
     {['errors', 'warnings', 'info'].map((type) =>
       report[type] && report[type].length > 0 ? (
         <div key={type} className="mt-3">

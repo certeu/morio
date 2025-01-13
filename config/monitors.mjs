@@ -15,6 +15,8 @@ const ssl = { ssl: { certificate_authorities: ['/usr/share/heartbeat/tls/tls-ca.
  * This is a method so we get access to utils
  */
 export function monitors(utils) {
+  const cluster = utils.getClusterUuid()
+
   return {
     /*
      * API Service
@@ -27,6 +29,7 @@ export function monitors(utils) {
       check: {
         response: { status: [200] },
       },
+      id: `morio.${cluster}.internal.api`,
     },
 
     /*
@@ -36,24 +39,27 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Broker Service: Admin API on ${utils.getNodeFqdn()}`,
-      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/status`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/`],
       check: {
-        response: { status: [200] },
+        response: { status: [404] },
       },
+      id: `morio.${cluster}.internal.broker-admin`,
     },
     broker_rpc: {
       ...imd,
       type: 'tcp',
       name: `Morio Broker Service: RPC Server on ${utils.getNodeFqdn()}`,
-      hosts: ['broker'],
+      hosts: ['morio-broker'],
       ports: [utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')],
+      id: `morio.${cluster}.internal.broker-rpc`,
     },
     broker_kafka: {
       ...imd,
       type: 'tcp',
       name: `Morio Broker Service: Kafka API on ${utils.getNodeFqdn()}`,
-      hosts: ['broker'],
+      hosts: ['morio-broker'],
       ports: [utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')],
+      id: `morio.${cluster}.internal.broker-kafka`,
     },
     broker_proxy: {
       ...imd,
@@ -61,8 +67,9 @@ export function monitors(utils) {
       name: `Morio Broker Service: REST API on ${utils.getNodeFqdn()}`,
       urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_REST_API_PORT')}/`],
       check: {
-        response: { status: [200] },
+        response: { status: [404] },
       },
+      id: `morio.${cluster}.internal.broker-proxy`,
     },
 
     /*
@@ -73,7 +80,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio CA API on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health`],
+      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/health#MORIO_IGNORE_CERTIFICATE_EXPIRY`],
       check: {
         request: { method: 'GET' },
         response: {
@@ -81,6 +88,7 @@ export function monitors(utils) {
           json: [{ expression: 'status == "ok"' }],
         },
       },
+      id: `morio.${cluster}.internal.ca`,
     },
 
     /*
@@ -101,6 +109,7 @@ export function monitors(utils) {
           status: [200],
         },
       },
+      id: `morio.${cluster}.internal.console`,
     },
 
     /*
@@ -114,8 +123,8 @@ export function monitors(utils) {
       check: {
         response: {
           status: [200],
-          json: [{ expression: 'status.cluster.color == "green"' }],
         },
+      id: `morio.${cluster}.internal.core`,
       },
     },
 
@@ -133,6 +142,7 @@ export function monitors(utils) {
           body: ['node ok'],
         },
       },
+      id: `morio.${cluster}.internal.db`,
     },
 
     /*
@@ -143,12 +153,13 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getNodeFqdn()}/`],
+      urls: [`https://${utils.getNodeFqdn()}/`],
       check: {
         response: {
           status: [200],
         },
       },
+      id: `morio.${cluster}.internal.proxy`,
     },
 
     /*
@@ -165,6 +176,7 @@ export function monitors(utils) {
           body: ['node ok'],
         },
       },
+      id: `morio.${cluster}.internal.ui`,
     },
 
     /*
@@ -174,13 +186,14 @@ export function monitors(utils) {
       ...imd,
       type: 'http',
       name: `Morio Watcher Service: HTTP metrics on ${utils.getNodeFqdn()}`,
-      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/watcher`],
+      urls: [`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}watcher:${utils.getPreset('MORIO_WATCHER_HTTP_PORT')}/`],
       check: {
         response: {
           status: [200],
           json: [{ expression: 'beat == "heartbeat"' }],
         },
       },
+      id: `morio.${cluster}.internal.watcher`,
     },
   }
 }

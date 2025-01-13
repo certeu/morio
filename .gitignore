@@ -38,6 +38,11 @@ core/run-prod-container.sh
 core/run-test-container.sh
 api/run-test-container.sh
 
+# Auto-generated tap handler config files
+tap/processors/*
+tap/loader.mjs
+tap/settings.mjs
+
 # Test artifacts
 core/coverage
 api/coverage
@@ -97,6 +102,3 @@ terraform/.terraform/
 terraform/.terraform.lock.hcl
 terraform/terraform.tfstate
 terraform/terraform.tfstate.backup
-
-#temporary files
-storage.json

@@ -24,12 +24,16 @@ export const service = {
     wanted: async () => {
       const pipelines = utils.getSettings('connector.pipelines', false)
 
-      // FIXME: remove this?
-      await ensurePipelines()
+      // Without pipelines, this service should not be started
+      if (
+        pipelines === false ||
+        Object.values(pipelines).filter((pipe) => !pipe.disabled).length < 1
+      )
+        return false
+      // Always update pipeline config until we have a way to diff them
+      else await ensurePipelines()
 
-      return pipelines && Object.values(pipelines).filter((pipe) => !pipe.disabled).length > 0
-        ? true
-        : false
+      return true
     },
     /*
      * Lifecycle hook to determine whether to recreate the container

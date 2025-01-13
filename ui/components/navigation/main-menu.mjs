@@ -14,18 +14,28 @@ import {
   DesktopIcon,
   DocumentIcon,
   DownloadIcon,
+  FingerprintIcon,
+  FixmeIcon,
+  FlagIcon,
+  FlipoverIcon,
+  HardwareIcon,
   LayersIcon,
+  LocationIcon,
+  LogsIcon,
   MorioIcon,
+  NoteIcon,
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
   QuestionIcon,
   RightIcon,
+  SearchIcon,
   ServersIcon,
   SettingsIcon,
   StatusIcon,
   StorageIcon,
   TaskIcon,
+  TipIcon,
   UlIcon,
   UserIcon,
   WifiIcon,
@@ -39,6 +49,7 @@ import { Link } from 'components/link'
  */
 export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
 
+
 /*
  * Object to map icons to page
  */
@@ -46,31 +57,44 @@ const icons = {
   accounts: UserIcon,
   actions: WrenchIcon,
   api: CodeIcon,
+  audit: FingerprintIcon,
+  boards: FlipoverIcon,
   broker: RedPanda,
   ca: CertificateIcon,
   certificates: CertificateIcon,
+  checks: CheckCircleIcon,
   create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
   containers: ContainerIcon,
   console: RedPandaConsole,
+  custom: FixmeIcon,
   dashboard: Traefik,
   decrypt: OpenLockIcon,
   docker: Docker,
   download: DownloadIcon,
   downloads: DownloadIcon,
+  edit: NoteIcon,
   encrypt: ClosedLockIcon,
+  events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
+  hosts: ServersIcon,
   images: ContainerImageIcon,
-  logs: StorageIcon,
+  inventory: ServersIcon,
+  ips: LocationIcon,
+  logs: LogsIcon,
+  macs: HardwareIcon,
+  metrics: StatusIcon,
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
+  notes: TipIcon,
   pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
   reference: UlIcon,
+  search: SearchIcon,
   services: LayersIcon,
   settings: SettingsIcon,
   show: DocumentIcon,
@@ -79,7 +103,7 @@ const icons = {
   ui: DesktopIcon,
   volumes: StorageIcon,
   status: StatusIcon,
-  start: WrenchIcon,
+  start: SettingsIcon,
 }
 
 /*
@@ -90,9 +114,64 @@ export const links = {
     t: 'Actions',
     r: 'operator',
   },
+  boards: {
+    t: 'Dashboards',
+    r: 'user',
+    audit: {
+      t: 'Audit',
+      r: 'user'
+    },
+    events: {
+      t: 'Events',
+      r: 'user'
+    },
+    checks: {
+      t: 'Health Checks',
+      r: 'user'
+    },
+    logs: {
+      t: 'Logs',
+      r: 'user'
+    },
+    metrics: {
+      t: 'Metrics',
+      r: 'user'
+    },
+    notes: {
+      t: 'Notes',
+      r: 'user'
+    },
+    search: {
+      t: 'Search Dashboards',
+      r: 'user'
+    },
+    custom: {
+      t: 'Custom Dashboards',
+      r: 'user'
+    },
+  },
+  inventory: {
+    t: 'Inventory',
+    r: 'operator',
+    hosts: {
+      t: 'Hosts',
+      r: 'user'
+    },
+    ips: {
+      t: 'IP Addresses',
+      r: 'user'
+    },
+    macs: {
+      t: 'MAC Addresses',
+      r: 'user'
+    },
+  },
   settings: {
     t: 'Settings',
     r: 'operator',
+    edit: {
+      t: 'Edit Settings',
+    },
     show: {
       t: 'Show Settings',
     },

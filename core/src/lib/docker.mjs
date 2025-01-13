@@ -72,7 +72,7 @@ export async function getServiceId(serviceName) {
   /*
    * Make sure to log a warning if the Id is not found as that should not happen
    */
-  const id = utils.getServiceState(serviceName)?.Id || false
+  const id = utils.getServiceState(serviceName)?.id || false
   if (!id) log.warn(`Running getServiceId failed for service ${serviceName}`)
 
   return id
@@ -83,6 +83,8 @@ export async function getServiceId(serviceName) {
  */
 export async function stopService(serviceName) {
   const id = await getServiceId(serviceName)
+  if (!id) return false
+
   let result
   try {
     result = await runContainerApiCommand(id, 'stop', {}, true)
@@ -127,7 +129,7 @@ export async function createDockerNetwork(name) {
 
   let success
   try {
-    ;[success] = await runDockerApiCommand('createNetwork', config, true)
+    [success] = await runDockerApiCommand('createNetwork', config, true)
   } catch (err) {
     log.warn({ err }, `Failed to run Docker \`createNetwork\` command`)
   }
@@ -619,6 +621,7 @@ async function forceUpdateRunningServicesState() {
  */
 function dockerStateToServiceState(ds) {
   return {
+    id: ds.Id,
     name: ds.Names.pop(),
     image: ds.Image,
     state: ds.State,

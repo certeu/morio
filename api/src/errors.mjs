@@ -12,8 +12,16 @@ export const errors = {
    */
   'morio.api.idp.disabled': {
     status: 400,
-    title: 'Provider Disabled',
+    title: 'Provider disabled',
     detail: 'This identity provider is disabled by a feature flag.',
+  },
+  /*
+   * Cache 404 error, API style
+   */
+  'morio.api.cache.404': {
+    status: 404,
+    title: 'No such key',
+    detail: 'This is the API equivalent of a 404 page for the cache. This key does not exist.',
   },
   /*
    * KV store 404 error, API style
@@ -81,7 +89,7 @@ export const errors = {
     status: 503,
     title: 'Unable to load data from Morio Core',
     detail:
-      'When reaching out to Morio Core, we did not receive a response, indicating that core may be down.',
+      'When reaching out to Morio Core, we did not receive a response, indicating that Core may be down.',
   },
   /*
    * Status issues coming from core when it rejects connections
@@ -90,7 +98,7 @@ export const errors = {
     status: 503,
     title: 'Unable to connect to Morio Core',
     detail:
-      'When reaching out to Morio Core, the connection was refused. This indicates core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.',
+      'When reaching out to Morio Core, the connection was refused. This indicates that Core is not listening on its service port, something that should only happen when it is in the middle of a hard restart.',
   },
   /*
    * Status issues coming from core
@@ -115,7 +123,7 @@ export const errors = {
     status: 503,
     title: 'Unable to load the list of API keys from the database',
     detail:
-      'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request',
+      'When reaching out to the Morio Database, we were unable to retrieve the data to complete this request.',
   },
   /*
    * Specific error for schema violations
@@ -198,15 +206,15 @@ export const errors = {
   'morio.api.account.role.insufficient': {
     status: 403,
     title: 'Role insufficient',
-    detail: 'This endpoint required a higher role.',
+    detail: 'This endpoint requires a higher role.',
   },
   /*
    * Error for when a role is not sufficient to access and endpoint
    */
   'morio.api.rbac.denied': {
     status: 403,
-    title: 'Denied by role-base access control',
-    detail: 'The request did not pass the role based access control check.',
+    title: 'Denied by role-based access control',
+    detail: 'The request did not pass the role-based access control check.',
   },
   /*
    * Error for when a nominative account is required (no API key or MRT)
@@ -227,9 +235,17 @@ export const errors = {
   /*
    * Error for when a database backend is not available or caused an error
    */
+  'morio.api.cache.failure': {
+    status: 403,
+    title: 'Cache failure',
+    detail: 'Could not complete the request because the cache returned an error.',
+  },
+  /*
+   * Error for when a database backend is not available or caused an error
+   */
   'morio.api.db.failure': {
     status: 403,
-    title: 'Database Failure',
+    title: 'Database failure',
     detail: 'Could not complete the request because the database returned an error.',
   },
   /*
@@ -237,7 +253,7 @@ export const errors = {
    */
   'morio.api.idp.failure': {
     status: 403,
-    title: 'Identity Provider Failure',
+    title: 'Identity provider failure',
     detail: 'Cannot authenticate because the identity provider returned an error.',
   },
   /*
@@ -245,11 +261,11 @@ export const errors = {
    */
   'morio.api.idp.unknown': {
     status: 403,
-    title: 'Identity Provider Unknown',
+    title: 'Identity provider unknown',
     detail: 'Cannot authenticate because the identity provider is unknown.',
   },
   /*
-   * Error for when something goes wrong in a way we do know how to handle
+   * Error for when something goes wrong in a way we do not know how to handle
    */
   'morio.api.internal.error': {
     status: 500,

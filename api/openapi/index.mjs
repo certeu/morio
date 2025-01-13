@@ -11,12 +11,13 @@ import loadAnonymousEndpoints from './anonymous.mjs'
 import loadAccountsEndpoints from './accounts.mjs'
 import loadApikeysEndpoints from './apikeys.mjs'
 import loadAuthEndpoints from './auth.mjs'
+import loadCacheEndpoints from './cache.mjs'
 import loadClientPackagesEndpoints from './pkgs.mjs'
 import loadCryptoEndpoints from './crypto.mjs'
 import loadDockerEndpoints from './docker.mjs'
 import loadExportEndpoints from './export.mjs'
-import loadSettingsEndpoints from './settings.mjs'
 import loadKvEndpoints from './kv.mjs'
+import loadSettingsEndpoints from './settings.mjs'
 import { components } from './components.mjs'
 
 /**
@@ -107,12 +108,13 @@ loadAnonymousEndpoints(api, utils)
 loadAccountsEndpoints(api, utils)
 loadApikeysEndpoints(api, utils)
 loadAuthEndpoints(api, utils)
+loadCacheEndpoints(api, utils)
 loadClientPackagesEndpoints(api, utils)
 loadCryptoEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
 loadExportEndpoints(api, utils)
-loadSettingsEndpoints(api, utils)
 loadKvEndpoints(api, utils)
+loadSettingsEndpoints(api, utils)
 
 /*
  * Finally, this is our spec

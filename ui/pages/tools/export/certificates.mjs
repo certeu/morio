@@ -20,6 +20,7 @@ const X509DownloadPage = (props) => {
       else setError('Failed to load certificates')
     }
     getCerts()
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   return (
