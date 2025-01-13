@@ -247,7 +247,6 @@ func PrintModuleInfoHeader(module, status string) {
 }
 
 func PrintModuleInfoData(agent, folder, file string) {
-	//globalVars := LoadGlobalVars()
 	moriodata := TemplateDocsAsYaml(agent + "/" + folder + "/" + file)
 
 	// We want this in alphabetical order
@@ -257,7 +256,6 @@ func PrintModuleInfoData(agent, folder, file string) {
 	}
 	sort.Strings(sorted)
 
-	//fmt.Printf("Value and type: %+v\n", moriodata)
 	if len(moriodata) > 0 {
 		fmt.Print("  [ " + agent + " ]")
 	}

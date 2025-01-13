@@ -142,12 +142,6 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 
 	// Sync
 	file.Sync()
-
-	// Also extract the default vars and write them to disk
-	//defaults := ExtractTemplateDefaultVars(from)
-	//for key, value := range defaults {
-	//	SetDefaultVar(key, value)
-	//}
 }
 
 func TemplateOutConfigFolder(from string, to string, context map[string]string) {
