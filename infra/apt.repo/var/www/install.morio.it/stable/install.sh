@@ -21,8 +21,8 @@
 
 #
 # Which distribution channel to use?
-# Alternatives are canary or stable
-CHANNEL="testing"
+# Alternatives are canary or testing
+CHANNEL="stable"
 
 #
 # Store the package format
