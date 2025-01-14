@@ -15,12 +15,6 @@ jobs:
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
 
-      # Step 2: Debug: Log event payload for inspection
-      - name: Log Event Payload
-        run: |
-          echo "=== EVENT PAYLOAD ==="
-          echo "${{ toJSON(github.event) }}" > event_payload.json
-
       # Step 3: Debug: Print repository details
       - name: Print Repository Info
         run: |
