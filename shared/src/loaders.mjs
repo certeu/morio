@@ -1,12 +1,13 @@
 import fs from 'node:fs'
 import { testUrl } from './network.mjs'
-import set from 'lodash/set.js'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, globDir } from './fs.mjs'
-import { cloneAsPojo } from './utils.mjs'
+import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
+import merge from 'lodash/merge.js'
+import unset from 'lodash/unset.js'
 
 /*
  * A collection of utils to load various files
@@ -190,19 +191,9 @@ export async function loadPreseededSettings(preseed, currentSettings=false, log,
   const overlays = await loadPreseedOverlays(preseed, gitroot, log)
 
   /*
-   * Now merge overlays into base settings
+   * Now merge overlays into base settings and return
    */
-  const count = overlays.length
-  let i = 0
-  for (const overlayConfig of overlays) {
-    i++
-    log.debug(`Loaded preseed overlay ${i}/${count}`)
-    for (const [path, value] of Object.entries(overlayConfig)) {
-      set(settings, path, value)
-    }
-  }
-
-  return settings
+  return applyOverlays(settings, overlays, log)
 }
 
 /**
@@ -321,11 +312,12 @@ async function loadPreseedFileFromUrl(config, log) {
  * @param {object|string} overlay - The preseed settings for this overlay
  * @param {object} preseed - The preseed settings
  * @param {string} gitroot - Path to the root where git repos are stored
+ * @param {object} log - The logger object
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedOverlay(overlay, preseed, gitroot) {
+async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
   if (typeof overlay === 'string') {
-    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot)
+    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot, log)
     const api = fromApi(overlay)
     if (api === 'github')
       return await loadPreseedFileFromGithub({
@@ -385,17 +377,21 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
         if (overlay) overlays.push(overlay)
       }
     } else {
-      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot)
+      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
       if (overlay) overlays.push(overlay)
     }
   } else if (Array.isArray(preseed.overlays)) {
-
-  /*
-   * Handle array
-   */
+    /*
+     * If overlays holds an array, that array can still hold a glob pattern.
+     * Rather than duplicate the logic, we call this function recursively to
+     * handle each array entry individually. To make that work, we just need
+     * to adapt the preseed object a bit.
+     * Note that this also means we support nested arrays
+     * although we don't tend to advocate for it. But it's possible.
+     */
     for (const config of preseed.overlays) {
-      const overlay = await loadPreseedOverlay(config, preseed, gitroot)
-      if (overlay) overlays.push(overlay)
+      const sublays = await loadPreseedOverlays({ ...preseed, overlays: config }, gitroot, log)
+      if (sublays) overlays.push(...sublays)
     }
   }
 
@@ -539,6 +535,10 @@ export async function loadStreamProcessors(settings, log) {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
         const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        /*
+         * By sorting the list of files, we can ensure that the main
+         * file is always loaded before any modules it uses.
+         */
         for (const sourceFile of files.sort()) {
           const targetFile = findPreseedTarget(sourceFile, 'processors')
           if (targetFile && sourceFile.slice(-4) === ".mjs") {
@@ -550,8 +550,9 @@ export async function loadStreamProcessors(settings, log) {
             if (copy) {
               log.debug(`Seeding stream processing file: ${targetFile}`)
               /*
-               * We need to dynamically load its settings too
-               * Or at least, if there are none.
+               * We need to dynamically load the stream processor's settings too
+               * For this, we will dynamically import the file and check for the
+               * named 'info' export which can hold a 'settings' key
                */
               const chunks = targetFile.split('/')
               const processor = chunks[0]
@@ -559,23 +560,26 @@ export async function loadStreamProcessors(settings, log) {
                 ? chunks[2].slice(0, -4)
                 : false
               const load = await import(sourceFile)
-              if (load?.info?.settings) {
-                if (typeof settings.tap === 'undefined') settings.tap = {}
-                if (typeof settings.tap?.[processor] === 'undefined') settings.tap[processor] = {}
-                /*
-                 * Is it a stream processor module?
-                 */
-                if (mod) {
-                  if (typeof settings.tap[processor]?.modules === 'undefined') {
-                    settings.tap[processor].modules = {}
-                  }
-                  settings.tap[processor].modules[mod] = ensureStreamProcessorSettings(
-                    load.info.settings,
-                    settings.tap[processor].modules[mod]
-                  )
-                } else {
-                  settings.tap[processor] = ensureStreamProcessorSettings(load.info.settings, settings.tap[processor])
-                }
+              /*
+               * Is it a stream processor module?
+               * And if so, does it expose any settings?
+               */
+              if (mod && mod !== 'index' && load.info?.settings) {
+                setIfUnset(settings, ['tap', processor, 'modules', mod], {})
+                settings.tap[processor].modules[mod] = ensureStreamProcessorSettings(
+                  load.info?.settings,
+                  settings.tap[processor].modules[mod]
+                )
+              }
+              /*
+               * Or is it a stream processor itself?
+               * (these should always have settings)
+               */
+              else {
+                setIfUnset(settings, ['tap', processor], {})
+                settings.tap[processor] = ensureStreamProcessorSettings(load.info?.settings, settings.tap[processor])
+                // Enabled is implied  unless explicitly disabled
+                setIfUnset(settings, ['tap', processor, 'enabled'], true)
               }
             }
             else log.warn(`Failed to seed stream processing file: ${targetFile}`)
@@ -588,10 +592,15 @@ export async function loadStreamProcessors(settings, log) {
   return settings
 }
 
-function ensureStreamProcessorSettings(seededSettings, morioSettings) {
+function ensureStreamProcessorSettings(seededSettings={}, morioSettings) {
   for (const [key, val] of Object.entries(seededSettings)) {
-    if (typeof val.dflt !== 'undefined') {
-      if (typeof morioSettings[key] === 'undefined') morioSettings[key] = val.dflt
+    if (['enabled', 'topics'].includes(key) && typeof val !== 'undefined') {
+      // These two fields take a simple value
+      setIfUnset(morioSettings, key, val)
+    }
+    else if (typeof val.dflt !== 'undefined') {
+      // These take a UI config object, with the default value stored in the `dflt` key
+      setIfUnset(morioSettings, key, val.dflt)
     }
   }
 
@@ -618,8 +627,80 @@ function findPreseedTarget (file, root) {
   else return file.slice(-1 * start)
 }
 
-function reverseString (str) {
-  return str.split('').reverse().join('')
+function applyOverlays (settings, overlays, log) {
+  const count = overlays.length
+  let i = 0
+  for (const overlay of overlays) {
+    i++
+    log.debug(`Applying overlay ${i}/${count}`)
+    settings = applyOverlay(settings, overlay)
+  }
+
+  return settings
 }
 
+/*
+ * This function applies an overlay to the settings and returns them
+ *
+ * Overlays can contain 6 different keys, which are used to mutate the config.
+ * They are:
+ * - merge: Soft-set a key in the settings object
+ * - ensure: Soft-add an element to an array in the settings object
+ * - push: Hard-add an element to an array in the settings object
+ * - drop: Hard-remove an element from an array in the settings object
+ * - set: Hard-set a key in the settings object
+ * - unset: Hard-unset a key in the settings object
+ *
+ * So we have 3 methods: soft-add, hard-add, and (hard-)remove
+ * and this both for objects and arrays.
+ *
+ * @param {object} settings - The settings object to mutate
+ * @param {object} overlay - The overlay to apply
+ * @return {object} settings - The mutated settings
+ */
+function applyOverlay (settings, overlay={}) {
+  // Merge goes first, this is the soft add for methods
+  if (overlay.merge) {
+    const todo = Array.isArray(overlay.merge) ? [...overlay.merge] : [overlay.merge]
+    for (const item of todo) {
+      settings = merge({}, item, settings)
+    }
+  }
+  // Then we have the soft array method
+  if (overlay.ensure) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, [])
+      if (!current.includes(val)) set(settings, path, [...current, val])
+    }
+  }
+  // Then the hard array method to add
+  if (overlay.push) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, [])
+      set(settings, path, [...current, val])
+    }
+  }
+  // Then the hard array method to remove
+  if (overlay.drop) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, false)
+      if (Array.isArray(current) && current.includes(val)) {
+        set(settings, path, current.filter(item => item !== val))
+      }
+    }
+  }
+  // Set goes second to last, hard method to add
+  if (overlay.set) {
+    for (const [path, value] of Object.entries(overlay.set)) {
+      set(settings, path, value)
+    }
+  }
+  // Unset goes last, hard method to remove
+  if (overlay.unset) {
+    for (const [path, value] of Object.entries(overlay.unset)) {
+      unset(settings, path, value)
+    }
+  }
 
+  return settings
+}

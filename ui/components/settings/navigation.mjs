@@ -18,11 +18,7 @@ export const SettingsNavigation = ({
       .filter((entry) => !entry.hide)
       .map((entry) => (
         <li key={entry.id}>
-          <NavButton {...{ lead, entry, loadView, view, level }}>
-            <span className={`${entry.children ? 'uppercase font-bold' : 'capitalize'}`}>
-              {entry.title ? entry.title : entry.label}
-            </span>
-          </NavButton>
+          <NavButton {...{ lead, entry, loadView, view, level }} />
           {entry.children && (
             <SettingsNavigation
               {...{ view, loadView, mSettings }}
@@ -72,7 +68,7 @@ export const NavButton = ({
    */
   return (
     <button onClick={() => loadView([...lead, entry.id].join('/'))} className={className}>
-      {entry.title ? entry.title : entry.label}
+      {entry.title ? entry.title : entry.label ? entry.label : entry.id}
     </button>
   )
 }

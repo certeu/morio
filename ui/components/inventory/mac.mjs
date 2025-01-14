@@ -13,7 +13,7 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/inventory/shared.mjs'
 
 /**
- * This compnent renders a table with all MAC address and allow removal
+ * This component renders a table with all MAC addresses and allows removal
  */
 export const MacsTable = () => {
   // State

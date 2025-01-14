@@ -24,7 +24,8 @@
     "ui"
   ],
   "devDependencies": {
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
+    "dotenv-cli": "^7.4.4",
     "esbuild": "^0.23.1",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
@@ -40,8 +41,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "create:testvm": "node ./scripts/create-test-vm.mjs",
-    "destroy:testvm": "node ./scripts/destroy-test-vm.mjs",
+    "isetup": "dotenv -e .env -- sh -c 'for dns in $(echo $MORIO_TEST_DNS_NAMES | tr \",\" \" \"); do echo \"[instances]\n$dns\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/install_moriod.yml; done'",
+    "ireset": "dotenv -e .env -- sh -c 'for dns in $(echo $MORIO_TEST_DNS_NAMES | tr \",\" \" \"); do echo \"[instances]\n$dns\" > /tmp/ansible_inventory && ansible-playbook -i /tmp/ansible_inventory --extra-vars \"ansible_ssh_private_key_file=~/.ssh/id_rsa ansible_user=admin ansible_ssh_common_args=\\\"-o StrictHostKeyChecking=no\\\"\" ./ansible/playbooks/reset_moriod.yml; done'",
+    "itest": "node ./tests/test-runner.mjs",
+    "iconfigure": "node ./scripts/configure-test-vm.mjs",
+    "ideploy": "ansible-playbook ./ansible/playbooks/deploy_moriod.yml --extra-vars @json-templates/deploy.json",
+    "idestroy": "ansible-playbook ./ansible/playbooks/destroy_moriod.yml",
     "build": "npm run build:dev",
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
@@ -66,7 +71,6 @@
     "ci:build.tap": "./scripts/ci-build-container.sh tap",
     "ci:build.ui": "./scripts/ci-build-container.sh ui",
     "ci:eslint": "npm run lint",
-    "ci:lint-api-spec": "scripts/lint-api-spec.sh",
     "ci:prettier": "npm run prettier",
     "ci:spellcheck": "./scripts/ci-spellcheck-docs.sh",
     "docker:build.moriod.deb": "./scripts/docker-build-moriod-deb.sh",
@@ -78,7 +82,6 @@
     "help": "cat docs/includes/cli-help-content.mdx",
     "kickstart": "npm install && npm install --global husky && husky install && npm run prebuild",
     "lint": "npm run lint --workspace=core && npm run lint --workspace=api && npm run lint --workspace=ui",
-    "lint:api-spec": "scripts/lint-api-spec.sh",
     "logs:api": "docker logs -n 20 -f morio-api | pino-pretty -i pid,time,name,hostname",
     "logs:core": "docker logs -n 20 -f morio-core | pino-pretty -i pid,time,name,hostname",
     "logs:tap": "docker logs -n 20 -f morio-tap | pino-pretty -i pid,time,name,hostname",
@@ -99,5 +102,8 @@
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
     "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
+  },
+  "dependencies": {
+    "mocha": "^11.0.1"
   }
 }

@@ -100,7 +100,7 @@ function resetCounters(processors=false, topics=false) {
 
   if (init) {
     /*
-     * Initial start, just initialise´counters object
+     * Initial start, just initialise the counters object
      */
     for (const type of Object.keys(list)) {
       const reset = {}

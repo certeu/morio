@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -239,69 +240,57 @@ func ModuleFileInfo(agent, folder, module string, printHeader bool) {
 }
 
 func PrintModuleInfoHeader(module, status string) {
-	fmt.Println()
+	fmt.Print()
 	fmt.Println("Module: " + module)
 	fmt.Println("Status: " + status)
-	fmt.Println()
+	fmt.Print()
 }
 
 func PrintModuleInfoData(agent, folder, file string) {
-	globalVars := LoadGlobalVars()
-	docs := TemplateDocsAsYaml(agent + "/" + folder + "/" + file)
-	for key, val := range docs {
-		if key == "about" {
-			fmt.Print("-- " + agent + " --\n")
+	moriodata := TemplateDocsAsYaml(agent + "/" + folder + "/" + file)
+
+	// We want this in alphabetical order
+	sorted := make([]string, 0, len(moriodata))
+	for k := range moriodata {
+		sorted = append(sorted, k)
+	}
+	sort.Strings(sorted)
+
+	if len(moriodata) > 0 {
+		fmt.Print("  [ " + agent + " ]")
+	}
+	for _, key := range sorted {
+		val := moriodata[key]
+		if key == "href" {
+			fmt.Print("\n    See: ")
+			fmt.Print(val)
+		}
+		if key == "info" {
+			fmt.Print("\n    Info: ")
+			fmt.Print(val)
+		}
+		if key == "version" {
+			fmt.Print("\n    Version: ")
 			fmt.Println(val)
 		}
 		if key == "vars" {
-			vars, ok := docs["vars"].(map[string]interface{})
+			fmt.Print("\n    Vars:")
+			vars, ok := moriodata["vars"].(map[string]interface{})
 			if ok {
-				fmt.Print("  -- vars --\n")
-				local, ok := vars["local"].(map[string]interface{})
-				if ok {
-					fmt.Print("    -- local --\n")
-					for key, val := range local {
-						fmt.Print("      ", key, "\n        ", val, "\n")
-					}
-				}
-				global, ok := vars["global"].([]interface{})
-				if ok {
-					fmt.Print("    -- globals --\n")
-					for _, key := range global {
-						if str, ok := key.(string); ok {
-							fmt.Print("      ", str, "\n        ")
-							nested, ok := globalVars[str].(map[string]interface{})
+				for varKey, _ := range vars {
+					fmt.Print("\n      " + varKey + ": ")
+					nested, ok := vars[varKey].(map[string]interface{})
+					if ok {
+						if docs, ok := nested["info"].(string); ok {
 							if ok {
-								if about, ok := nested["about"].(string); ok {
-									if ok {
-										fmt.Println(about)
-									}
-								}
+								fmt.Print(docs)
 							}
-						}
-					}
-				}
-				defaults, ok := vars["defaults"].(map[string]interface{})
-				if ok {
-					fmt.Print("    -- defaults --\n")
-					for key, val := range defaults {
-						fmt.Print("      ")
-						fmt.Print(key)
-						fmt.Print(": ")
-						fmt.Print(val)
-						fmt.Println()
-					}
-					for _, key := range global {
-						if str, ok := key.(string); ok {
-							fmt.Print("      ")
-							fmt.Print(str, ":", GetVar(str))
 						}
 					}
 				}
 			}
 		}
 	}
-	fmt.Println()
 }
 
 func joinUnique(slice1, slice2 []string) []string {

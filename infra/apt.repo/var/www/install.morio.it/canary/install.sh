@@ -21,7 +21,7 @@
 
 #
 # Which distribution channel to use?
-# Alternatives are production or testing
+# Alternatives are stable or testing
 CHANNEL="canary"
 
 #
@@ -155,4 +155,3 @@ install() {
 # Run the install function
 #
 install
-

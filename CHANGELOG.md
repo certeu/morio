@@ -37,13 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - We renamed the `production` release channel to `stable` 
+- [client] The Morio client is now statically linked to improve portability
 - [core] We no longer populate settings with all (disabled) feature flags
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 
 ### Fixed
 
-- [api] Return the cleaned version of the username when creating a local account
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin

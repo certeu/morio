@@ -70,7 +70,7 @@ authentication, but adds an extra authentication layer.`
 flags.ENFORCE_HTTP_MTLS = false
 
 /*
- * Alwas run the cache service, even if Morio does not need it
+ * Always run the cache service, even if Morio does not need it
  */
 fdocs.ENFORCE_SERVICE_CACHE = `Forces the cache service to always run, even when Morio does not require it.
 
