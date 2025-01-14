@@ -1,26 +1,52 @@
 name: PR Comment on Trigger
 
 on:
-  pull_request: # Trigger when a pull request event occurs
+  pull_request:
     types:
       - opened
       - reopened
-      - synchronize # Optional: Trigger when the PR code is updated
+      - synchronize
 
 jobs:
   add_comment:
     runs-on: ubuntu-latest
     steps:
+      # Debug: Log event payload for inspection
+      - name: Log Event Payload
+        run: |
+          echo "=== EVENT PAYLOAD ==="
+          echo "${{ toJSON(github.event) }}" | jq .
+        shell: bash
+
+      # Debug: Print repository details
+      - name: Print Repository Info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
+          echo "PR Head Ref: ${{ github.event.pull_request.head.ref }}"
+
+      # Checkout PR Code
       - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
+      # Debug: List checked-out files
+      - name: List Files in Workspace
+        run: |
+          echo "=== FILES IN WORKSPACE ==="
+          ls -la
+
+      # Add Comment to PR
       - name: Add Comment to PR
         run: |
           COMMENT_BODY="Thank you for opening this pull request! 🎉"
+          echo "Attempting to post comment to PR ${{ github.event.pull_request.number }}"
           curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             -d "{\"body\": \"$COMMENT_BODY\"}" \
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments
+        env:
+          DEBUG: true
