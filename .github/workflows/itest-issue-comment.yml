@@ -2,64 +2,31 @@ name: PR Comment on Trigger
 
 on:
   pull_request:
+    branches:
+      - develop
     types:
       - opened
       - reopened
       - synchronize
 
-permissions:
-  issues: write
-  pull-requests: write
-
 jobs:
   add_comment:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
+      id-token: write
+
     steps:
-      # Step 1: Install jq
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      # Step 3: Debug: Print repository details
-      - name: Print Repository Info
-        run: |
-          echo "Repository: ${{ github.repository }}"
-          echo "PR Number: ${{ github.event.pull_request.number }}"
-          echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
-          echo "PR Head Ref: ${{ github.event.pull_request.head.ref }}"
-
-      # Step 4: Checkout PR Code
-      - name: Checkout PR Code
+      - name: Checkout
         uses: actions/checkout@v4
+      - uses: actions/github-script@v6
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      # Step 5: Debug: List checked-out files
-      - name: List Files in Workspace
-        run: |
-          echo "=== FILES IN WORKSPACE ==="
-          ls -la
-
-      # Check if GITHUB_TOKEN is available
-      - name: Check if GITHUB_TOKEN is set
-        run: |
-          if [ -z "${{ secrets.GITHUB_TOKEN }}" ]; then
-            echo "GITHUB_TOKEN is not set. Exiting."
-            exit 1
-          else
-            echo "GITHUB_TOKEN is set."
-          fi
-
-      # Step 6: Add Comment to PR
-      - name: Add Comment to PR
-        run: |
-          COMMENT_BODY="Thank you for opening this pull request! 🎉"
-          REPO_OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
-          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2)
-          echo "Attempting to post comment to PR ${{ github.event.pull_request.number }}"
-          curl -s -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Accept: application/vnd.github+json" \
-            -d "{\"body\": \"$COMMENT_BODY\"}" \
-            https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${{ github.event.pull_request.number }}/comments
-        env:
-          DEBUG: true
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '👋 Thanks for reporting!'
+            })
