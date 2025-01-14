@@ -52,7 +52,7 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
    */
   for (const [name, conf] of Object.entries(dconf.tap)) {
     const title = conf.title ? conf.title : name
-    const docs = conf.docs ? conf.docs : (
+    const docs = conf.about ? conf.about : (
       <Popout note>
         <h4>This stream processor does not provide this info</h4>
         <p>The <code>{name}</code> stream processor does not provide any <b>about</b> info.</p>
