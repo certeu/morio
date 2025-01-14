@@ -1,0 +1,73 @@
+:root {
+  --txt: rgb(36, 37, 38);
+  --bg: rgb(235, 237, 240);
+  --link: #1b88a2;
+  --logo: url("/static/logo.svg");
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --txt: rgb(235, 237, 240);
+    --bg: rgb(36, 37, 38);
+    --link: #06B6D4;
+    --logo: url("/static/dmlogo.svg");
+  }
+}
+
+html {
+  color: var(--txt);
+  background-color: var(--bg);
+  font-family: system-ui, sans-serif;
+  font-weight: normal;
+}
+body {
+  padding: 1rem;
+  font-size: 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 4rem);
+  text-align: center;
+}
+h1:before {
+  content: ' ';
+  font-size: 1rem;
+  background-image: var(--logo);
+  background-repeat: no-repeat;
+  background-position-x: center;
+  display: block;
+  height: 2rem;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+a, a:visited, a:active {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  text-decoration-thickness: 3px;
+}
+#content {
+  max-width: 666px;
+  margin: auto;
+  width: 100%;
+}
+#logo {
+  max-width: 420px;
+  margin: auto;
+}
+pre {
+  background: #212121;
+  color: #FFF;
+  padding: 0.5rem 0;
+  border-radius: 0.5rem;
+  text-align: left;
+}
+pre > code {
+  padding: 0.5rem 1rem;
+  display: block;
+  overflow-x: auto;
+}
+footer {
+  margin-bottom: 0;
+  font-size: 75%;
+}

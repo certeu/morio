@@ -18,6 +18,14 @@ const testFiles = {
   setup: './tests/20_setup.test.mjs',
   create: './tests/25_create-test-account.test.mjs',
   anonymous: './tests/30_anonymous.test.mjs',
+  settings: './tests/35_settings.test.mjs', // FIXME included
+  docker: './tests/40_docker.test.mjs', // FIXME included
+  local: './tests/50_idp-local.test.mjs',
+  apikey: './tests/51_idp-apikey.test.mjs',
+  mrt: './tests/52_idp-mrt.test.mjs',
+  ldap: './tests/53_idp-ldap.test.mjs', // not even started
+  crypto: './tests/60_crypto.test.mjs',
+  kv: './tests/70_kv.test.mjs',
 }
 
 const testFile = testFiles[testName]

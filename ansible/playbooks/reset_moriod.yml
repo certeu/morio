@@ -17,7 +17,7 @@
 
     - name: Make backup directory
       ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/.moriod"
+        path: '{{ ansible_env.HOME }}/.moriod'
         state: directory
         mode: '0755'
       ignore_errors: true
@@ -30,10 +30,10 @@
 
     - name: Backup version files
       ansible.builtin.copy:
-        src: "{{ item.path }}"
-        dest: "{{ ansible_env.HOME }}/.moriod/"
+        src: '{{ item.path }}'
+        dest: '{{ ansible_env.HOME }}/.moriod/'
         remote_src: yes
-      with_items: "{{ version_files.files }}"
+      with_items: '{{ version_files.files }}'
       ignore_errors: true
 
     - name: Find all files in the directory
@@ -44,9 +44,9 @@
 
     - name: Remove all files in the directory
       ansible.builtin.file:
-        path: "{{ item.path }}"
+        path: '{{ item.path }}'
         state: absent
-      with_items: "{{ files_to_remove.files }}"
+      with_items: '{{ files_to_remove.files }}'
       ignore_errors: true
 
     - name: Find all log files in the directory
@@ -57,9 +57,9 @@
 
     - name: Remove all log files
       ansible.builtin.file:
-        path: "{{ item.path }}"
+        path: '{{ item.path }}'
         state: absent
-      with_items: "{{ log_files.files }}"
+      with_items: '{{ log_files.files }}'
       ignore_errors: true
 
     - name: Find all data files in the directory
@@ -70,30 +70,30 @@
 
     - name: Remove all data files
       ansible.builtin.file:
-        path: "{{ item.path }}"
+        path: '{{ item.path }}'
         state: absent
-      with_items: "{{ db_files.files }}"
+      with_items: '{{ db_files.files }}'
       ignore_errors: true
 
     - name: Find version files in backup
       ansible.builtin.find:
-        paths: "{{ ansible_env.HOME }}/.moriod"
+        paths: '{{ ansible_env.HOME }}/.moriod'
         patterns: version*
       register: backup_version_files
 
     - name: Copy back version files
       ansible.builtin.copy:
-        src: "{{ item.path }}"
+        src: '{{ item.path }}'
         dest: /etc/morio/moriod/
         remote_src: yes
-      with_items: "{{ backup_version_files.files }}"
+      with_items: '{{ backup_version_files.files }}'
       ignore_errors: true
 
     - name: Start Morio service
       ansible.builtin.systemd:
         name: moriod
         state: started
-        enabled: yes  # Ensure the service is enabled to start on boot
+        enabled: yes # Ensure the service is enabled to start on boot
       register: start_result
 
     - name: Log result of starting Morio service

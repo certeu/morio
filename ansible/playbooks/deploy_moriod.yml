@@ -7,67 +7,67 @@
     - community.general
   vars:
     pr_id: "{{ lookup('env', 'PR_ID') }}"
-    region: "eu-central-1"
+    region: 'eu-central-1'
     subnet_id: "{{ lookup('env', 'ITEST_AWS_SUBNET_ID') }}"
     security_group_id: "{{ lookup('env', 'ITEST_AWS_SECURITY_GROUP_ID') }}"
     zone_id: "{{ lookup('env', 'ITEST_AWS_ROUTE53_ZONE_ID') }}"
-    ami_id: "{{ lookup('env', 'ITEST_AWS_DEBIAN12_AMI_ID') }}"  # Replace dynamically during testing if needed
+    ami_id: "{{ lookup('env', 'ITEST_AWS_DEBIAN12_AMI_ID') }}" # Replace dynamically during testing if needed
     ssh_pubkey_1: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_1') }}"
     ssh_pubkey_2: "{{ lookup('env', 'ITEST_AWS_SSH_PUBKEY_2') }}"
-    ansible_python_interpreter: "/usr/bin/python3"  # Adjust to your Python path
+    ansible_python_interpreter: '/usr/bin/python3' # Adjust to your Python path
 
   tasks:
     - name: Debug Python interpreter
       debug:
-        msg: "Using Python interpreter: {{ ansible_python_interpreter }}"
+        msg: 'Using Python interpreter: {{ ansible_python_interpreter }}'
 
     - name: Generate random DNS names for instances
       set_fact:
         dns_names: []
-        
+
     - name: Generate random DNS names and append to list
       set_fact:
         dns_names: "{{ dns_names + [lookup('community.general.random_string', count=1, length=3, special=False, upper=False)] }}"
-      loop: "{{ range(node_count)|list }}"
+      loop: '{{ range(node_count)|list }}'
 
     - name: Create an SSH Key Pair
       amazon.aws.ec2_key:
-        name: "morio_itest_{{ pr_id }}-{{ item }}"
+        name: 'morio_itest_{{ pr_id }}-{{ item }}'
         key_material: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-      loop: "{{ dns_names }}"
+      loop: '{{ dns_names }}'
 
     - name: Create EC2 instances
       amazon.aws.ec2_instance:
-        name: "morio_itest-{{ pr_id }}-{{ item }}"
-        key_name: "morio_itest_{{ pr_id }}-{{ item }}"
-        instance_type: "t3.medium"
-        image_id: "{{ ami_id }}"
-        region: "{{ region }}"
-        vpc_subnet_id: "{{ subnet_id }}"
-        security_group: "{{ security_group_id }}"
+        name: 'morio_itest-{{ pr_id }}-{{ item }}'
+        key_name: 'morio_itest_{{ pr_id }}-{{ item }}'
+        instance_type: 't3.medium'
+        image_id: '{{ ami_id }}'
+        region: '{{ region }}'
+        vpc_subnet_id: '{{ subnet_id }}'
+        security_group: '{{ security_group_id }}'
         network:
           assign_public_ip: true
         wait: yes
         tags:
-          Name: "morio_itest-{{ pr_id }}-{{ item }}"
-          morio: "true"
-          pull_request: "{{ pr_id }}"
+          Name: 'morio_itest-{{ pr_id }}-{{ item }}'
+          morio: 'true'
+          pull_request: '{{ pr_id }}'
         user_data: |
           #!/bin/bash
           echo "{{ ssh_pubkey_1 }}" >> /home/admin/.ssh/authorized_keys
           echo "{{ ssh_pubkey_2 }}" >> /home/admin/.ssh/authorized_keys
-      loop: "{{ dns_names }}"
+      loop: '{{ dns_names }}'
       register: ec2_instances
 
     - name: Create Route 53 DNS records for EC2 instances
       amazon.aws.route53:
         state: present
-        hosted_zone_id: "{{ zone_id }}"
-        record: "{{ dns_names[item] }}.test.morio.it"
+        hosted_zone_id: '{{ zone_id }}'
+        record: '{{ dns_names[item] }}.test.morio.it'
         type: A
         ttl: 86400
-        value: "{{ ec2_instances.results[item].instances[0].public_ip_address }}"
-      loop: "{{ range(0, dns_names | length) | list }}"
+        value: '{{ ec2_instances.results[item].instances[0].public_ip_address }}'
+      loop: '{{ range(0, dns_names | length) | list }}'
       loop_control:
         index_var: item
 
@@ -79,38 +79,38 @@
     - name: Create EC2 instance for FQDN if more than 1 node
       when: node_count > 1
       amazon.aws.ec2_instance:
-        name: "fqdn-instance-{{ pr_id }}-{{ fqdn_name }}"
-        instance_type: "t3.medium"
-        image_id: "{{ ami_id }}"
-        region: "{{ region }}"
-        vpc_subnet_id: "{{ subnet_id }}"
-        security_group: "{{ security_group_id }}"
+        name: 'fqdn-instance-{{ pr_id }}-{{ fqdn_name }}'
+        instance_type: 't3.medium'
+        image_id: '{{ ami_id }}'
+        region: '{{ region }}'
+        vpc_subnet_id: '{{ subnet_id }}'
+        security_group: '{{ security_group_id }}'
         network:
           assign_public_ip: true
         wait: yes
         tags:
-          Name: "fqdn-instance-{{ pr_id }}-{{ fqdn_name }}"
-          morio: "true"
-          pull_request: "{{ pr_id }}"
+          Name: 'fqdn-instance-{{ pr_id }}-{{ fqdn_name }}'
+          morio: 'true'
+          pull_request: '{{ pr_id }}'
       register: fqdn_instance
 
     - name: Create Route 53 record for FQDN instance
       when: node_count > 1
       amazon.aws.route53:
         state: present
-        hosted_zone_id: "{{ zone_id }}"
-        record: "{{ fqdn_name }}-cluster.test.morio.it"
+        hosted_zone_id: '{{ zone_id }}'
+        record: '{{ fqdn_name }}-cluster.test.morio.it'
         type: A
         ttl: 86400
         value: "{{ ec2_instances.results | map(attribute='instances') | map('first') | map(attribute='public_ip_address') | list }}"
 
     - name: Debug SSH Public Key 1
       debug:
-        msg: "SSH Public Key 1: {{ ssh_pubkey_1 }}"
+        msg: 'SSH Public Key 1: {{ ssh_pubkey_1 }}'
 
     - name: Debug SSH Public Key 2
       debug:
-        msg: "SSH Public Key 2: {{ ssh_pubkey_2 }}"
+        msg: 'SSH Public Key 2: {{ ssh_pubkey_2 }}'
 
     - name: Check if the id_rsa.pub and id_rsa are correctly set up
       shell: |
@@ -130,20 +130,20 @@
 
     - name: Export DNS names and FQDN to .env file
       copy:
-        dest: "../../.env"
+        dest: '../../.env'
         content: |
           {% if dns_names | length == 1 %}
           MORIO_TEST_DNS_NAMES={{ dns_names[0] }}.test.morio.it
           MORIO_TEST_PUBLIC_IPS={{ ec2_instances.results[0].instances[0].public_ip_address }}
           MORIO_TEST_IDS={{ ec2_instances.results[0].instances[0].instance_id }}
           MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
-          MORIO_TEST_KEYS=morio_itest_{{ pr_id }}-{{ dns_names[0] }}
+          MORIO_TEST_KEYS=morio_itest_{{ pr_id }}-{{ dns_names[0] }} 
           {% else %}
           MORIO_TEST_DNS_NAMES={% for dns in dns_names %}{{ dns }}.test.morio.it{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_PUBLIC_IPS={% for instance in ec2_instances.results | map(attribute='instances') | map('first') | list %}{{ instance.public_ip_address }}{% if not loop.last %},{% endif %}{% endfor %} 
           MORIO_TEST_IDS={% for instance in ec2_instances.results | map(attribute='instances') | map('first') | list %}{{ instance.instance_id }}{% if not loop.last %},{% endif %}{% endfor %} 
-          MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it
-          MORIO_TEST_KEYS={% for dns in dns_names %}morio_itest_{{ pr_id }}-{{ dns }}{% if not loop.last %},{% endif %}{% endfor %}
+          MORIO_TEST_HOST={{ dns_names[0] }}.test.morio.it 
+          MORIO_TEST_KEYS={% for dns in dns_names %}morio_itest_{{ pr_id }}-{{ dns }}{% if not loop.last %},{% endif %}{% endfor %} 
           {% endif %}
           {% if fqdn_name is defined and fqdn_name %}
           MORIO_TEST_FQDN={{ fqdn_name }}-cluster.test.morio.it

@@ -27,6 +27,7 @@ const setup = {
   cluster: {
     name: 'Morio Unit Tests',
     broker_nodes: brokerNodes,
+    ...(brokerNodes.length > 1 && { fqdn: fqdn }),
   },
   iam: {
     providers: {
@@ -41,21 +42,70 @@ const setup = {
         id: 'local',
         label: 'Morio Account',
       },
+      // ldap: {
+      //   provider: 'ldap',
+      //   about: 'Test LDAP server',
+      //   server: {
+      //     url: 'ldap://ldap:10389',
+      //     bindDN: 'uid=admin,ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
+      //     bindCredentials: 'secret',
+      //     searchBase: 'ou=system,dc=ldap,dc=unit,dc=test,dc=morio,dc=it',
+      //     searchFilter: '(&(objectClass=user)(uid={{username}}))',
+      //   },
+      //   username_field: 'username',
+      //   label: 'LDAP Test Server',
+      //   rbac: {
+      //     user: {
+      //       attribute: 'uid',
+      //       regex: '.',
+      //     },
+      //     root: {
+      //       attribute: 'employeeType',
+      //       regex: 'admin',
+      //     },
+      //   },
+      // },
     },
     ui: {
       visibility: {
         local: 'full',
         mrt: 'icon',
         apikey: 'icon',
+        // ldap: 'icon',
       },
-      order: ['local', 'apikey', 'mrt'],
+      order: [
+        'local',
+        'apikey',
+        'mrt',
+        // , 'ldap'
+      ],
+    },
+  },
+  tokens: {
+    secrets: {
+      TEST_SECRET_1: 'super secret',
+      TEST_SECRET_2: 'super secret either',
+      AD_PASSWORD: 'super critical password',
     },
   },
 }
 
-async function __withoutBody(method, url, raw = false, log = false, ignoreCertificate = true) {
+async function __withoutBody(
+  method,
+  url,
+  raw = false,
+  log = false,
+  ignoreCertificate = true,
+  jwtToken = null,
+  cookie = null
+) {
   const requestConfig = {
     method: method.toUpperCase(), // Accepts "GET" or "DELETE"
+    headers: {
+      'Content-Type': 'application/json',
+      ...(jwtToken && { Authorization: `Bearer ${jwtToken.jwt}` }),
+      ...(cookie && { cookie: `morio=${cookie}` }),
+    },
     url: url,
     ...(ignoreCertificate ? { httpsAgent: globalHttpsAgent } : {}),
   }
@@ -105,16 +155,16 @@ async function __withBody(
 
 function restClient(api) {
   return {
-    get: (url, raw, log, ignoreCertificate) =>
-      __withoutBody('GET', api + url, raw, log, ignoreCertificate),
+    get: (url, raw, log, ignoreCertificate, jwtToken, cookie) =>
+      __withoutBody('GET', api + url, raw, log, ignoreCertificate, jwtToken, cookie),
     post: (url, data, raw, log, ignoreCertificate, jwtToken) =>
       __withBody('POST', api + url, data, raw, log, ignoreCertificate, jwtToken),
     put: (url, data, raw, log, ignoreCertificate) =>
       __withBody('PUT', api + url, data, raw, log, ignoreCertificate),
-    patch: (url, data, raw, log, ignoreCertificate) =>
-      __withBody('PATCH', api + url, data, raw, log, ignoreCertificate),
-    remove: (url, raw, log, ignoreCertificate) =>
-      __withoutBody('DELETE', api + url, raw, log, ignoreCertificate),
+    patch: (url, data, raw, log, ignoreCertificate, jwtToken) =>
+      __withBody('PATCH', api + url, data, raw, log, ignoreCertificate, jwtToken),
+    remove: (url, raw, log, ignoreCertificate, jwtToken) =>
+      __withoutBody('DELETE', api + url, raw, log, ignoreCertificate, jwtToken),
   }
 }
 
@@ -153,11 +203,15 @@ async function isApiReady() {
 
 const accounts = {
   user: {
-    username: `testAccount${Date.now()}`,
+    username: `testaccount${Date.now()}`,
     about: 'This account was created as part of a test',
     provider: 'local',
     role: 'engineer',
   },
+}
+
+function clean(username) {
+  return username === null ? null : String(username).toLowerCase().trim()
 }
 
 export {
@@ -177,4 +231,5 @@ export {
   brokerNodes,
   fqdn,
   hostName,
+  clean,
 }
