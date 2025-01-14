@@ -7,6 +7,10 @@ on:
       - reopened
       - synchronize
 
+permissions:
+  issues: write
+  pull-requests: write
+
 jobs:
   add_comment:
     runs-on: ubuntu-latest
