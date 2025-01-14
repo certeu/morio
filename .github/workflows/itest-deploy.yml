@@ -175,31 +175,31 @@ jobs:
           ITEST_AWS_SSH_PUBKEY_1: ${{ secrets.AWS_SSH_PUBKEY_1 }}
           ITEST_AWS_SSH_PUBKEY_2: ${{ secrets.AWS_SSH_PUBKEY_2 }}
 
-    - name: Run isetup (Deploy and setup with SSH retry)
-      run: |
-        # Update comment with Pending status for this step
-        update_comment "Deploy and Setup with SSH Retry" "Pending"
+      - name: Run isetup (Deploy and setup with SSH retry)
+        run: |
+          # Update comment with Pending status for this step
+          update_comment "Deploy and Setup with SSH Retry" "Pending"
 
-        # Start retry logic
-        for i in {1..10}; do
-          if npm run isetup; then
-            # If the setup is successful, update the comment with Success and exit loop
-            update_comment "Deploy and Setup with SSH Retry" "Success"
-            break
-          else
-            # If SSH fails, log retry and update comment status as Pending
-            echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
-            update_comment "Deploy and Setup with SSH Retry" "Pending"
-            sleep 10
+          # Start retry logic
+          for i in {1..10}; do
+            if npm run isetup; then
+              # If the setup is successful, update the comment with Success and exit loop
+              update_comment "Deploy and Setup with SSH Retry" "Success"
+              break
+            else
+              # If SSH fails, log retry and update comment status as Pending
+              echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
+              update_comment "Deploy and Setup with SSH Retry" "Pending"
+              sleep 10
+            fi
+          done
+
+          # If all retries fail, update the comment with Fail and exit the job
+          if [ $i -eq 10 ]; then
+            update_comment "Deploy and Setup with SSH Retry" "Fail"
+            echo "SSH authentication failed after 10 attempts. Exiting."
+            exit 1
           fi
-        done
-
-        # If all retries fail, update the comment with Fail and exit the job
-        if [ $i -eq 10 ]; then
-          update_comment "Deploy and Setup with SSH Retry" "Fail"
-          echo "SSH authentication failed after 10 attempts. Exiting."
-          exit 1
-        fi
 
       - name: Wait for 30 seconds
         run: sleep 30
@@ -208,7 +208,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Testing" "Pending"
-          
+
           # Run the test command
           if npm run itest ephemeral; then
             # If successful, update the comment with Success
@@ -218,12 +218,12 @@ jobs:
             update_comment "Testing" "Fail"
             exit 1
           fi
-          
+
       - name: Run setup configure (with test)
         run: |
           # Update comment with Pending status for this step
           update_comment "Setup Configure" "Pending"
-          
+
           # Run the setup command
           if npm run itest setup; then
             # If successful, update the comment with Success
@@ -241,7 +241,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Account Create Test" "Pending"
-          
+
           # Run the account create test command
           if npm run itest create; then
             # If successful, update the comment with Success
@@ -256,7 +256,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Anonymous Test" "Pending"
-          
+
           # Run the anonymous test command
           if npm run itest anonymous; then
             # If successful, update the comment with Success
@@ -271,7 +271,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Settings Test" "Pending"
-          
+
           # Run the settings test command
           if npm run itest settings; then
             # If successful, update the comment with Success
@@ -286,7 +286,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Docker Test" "Pending"
-          
+
           # Run the docker test command
           if npm run itest docker; then
             # If successful, update the comment with Success
@@ -301,7 +301,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "IDP Local Test" "Pending"
-          
+
           # Run the idp-local test command
           if npm run itest local; then
             # If successful, update the comment with Success
@@ -316,7 +316,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "IDP API Key Test" "Pending"
-          
+
           # Run the idp-apikey test command
           if npm run itest apikey; then
             # If successful, update the comment with Success
@@ -331,7 +331,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "IDP MRT Test" "Pending"
-          
+
           # Run the idp-mrt test command
           if npm run itest mrt; then
             # If successful, update the comment with Success
@@ -346,7 +346,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Crypto Test" "Pending"
-          
+
           # Run the crypto test command
           if npm run itest crypto; then
             # If successful, update the comment with Success
@@ -361,7 +361,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "KV Test" "Pending"
-          
+
           # Run the kv test command
           if npm run itest kv; then
             # If successful, update the comment with Success
@@ -376,7 +376,7 @@ jobs:
         run: |
           # Update comment with Pending status for this step
           update_comment "Destroy Resources" "Pending"
-          
+
           # Run the idestroy command
           if npm run idestroy; then
             # If successful, update the comment with Success
