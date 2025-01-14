@@ -1,0 +1,52 @@
+name: PR Test Comment Workflow
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  handle-test-comment:
+    # Only run on pull request comments
+    if: ${{ github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check comment criteria
+        id: check_comment
+        run: |
+          # Check if the comment is from an authorized user and contains the trigger phrase
+          AUTHOR="${{ github.event.comment.user.login }}"
+          COMMENT="${{ github.event.comment.body }}"
+          AUTHORIZED_USERS='["joostdecock", "serge-tellene", "levente232"]'
+
+          if echo "$AUTHORIZED_USERS" | jq -e --arg user "$AUTHOR" 'index($user) >= 0' > /dev/null; then
+            if echo "$COMMENT" | grep -i "please test this" > /dev/null; then
+              echo "authorized=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Get PR target branch
+        if: steps.check_comment.outputs.authorized == 'true'
+        id: get_pr
+        run: |
+          PR_DATA=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}")
+
+          BASE_BRANCH=$(echo "$PR_DATA" | jq -r .base.ref)
+          if [ "$BASE_BRANCH" = "develop" ]; then
+            echo "is_develop=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Add comment
+        if: steps.check_comment.outputs.authorized == 'true' && steps.get_pr.outputs.is_develop == 'true'
+        run: |
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"body": "tests started"}' \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments"
