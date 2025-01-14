@@ -5,8 +5,9 @@ import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, globDir } from './fs.mjs'
-import { cloneAsPojo, set, setIfUnset, reverseString } from './utils.mjs'
+import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
+import unset from 'lodash/unset.js'
 
 /*
  * A collection of utils to load various files
@@ -632,7 +633,7 @@ function applyOverlays (settings, overlays, log) {
   for (const overlay of overlays) {
     i++
     log.debug(`Applying overlay ${i}/${count}`)
-    settings = applyOverlay(settings, overlay, log)
+    settings = applyOverlay(settings, overlay)
   }
 
   return settings
@@ -655,10 +656,9 @@ function applyOverlays (settings, overlays, log) {
  *
  * @param {object} settings - The settings object to mutate
  * @param {object} overlay - The overlay to apply
- * @param {object} log - The logger object
  * @return {object} settings - The mutated settings
  */
-function applyOverlay (settings, overlay={}, log) {
+function applyOverlay (settings, overlay={}) {
   // Merge goes first, this is the soft add for methods
   if (overlay.merge) {
     const todo = Array.isArray(overlay.merge) ? [...overlay.merge] : [overlay.merge]
