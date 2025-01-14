@@ -382,11 +382,11 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
     }
   } else if (Array.isArray(preseed.overlays)) {
     /*
-     * If overlays holds and array, that array can still hold a glob pattern
+     * If overlays holds an array, that array can still hold a glob pattern.
      * Rather than duplicate the logic, we call this function recursively to
      * handle each array entry individually. To make that work, we just need
      * to adapt the preseed object a bit.
-     * Note that while this also happens to mean we support nested arrays
+     * Note that this also means we support nested arrays
      * although we don't tend to advocate for it. But it's possible.
      */
     for (const config of preseed.overlays) {
@@ -640,7 +640,7 @@ function applyOverlays (settings, overlays, log) {
 }
 
 /*
- * This function applies an overlay to the settings and returs them
+ * This function applies an overlay to the settings and returns them
  *
  * Overlays can contain 6 different keys, which are used to mutate the config.
  * They are:
