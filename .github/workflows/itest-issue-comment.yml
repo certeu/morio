@@ -11,14 +11,18 @@ jobs:
   add_comment:
     runs-on: ubuntu-latest
     steps:
-      # Debug: Log event payload for inspection
+      # Step 1: Install jq
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      # Step 2: Debug: Log event payload for inspection
       - name: Log Event Payload
         run: |
           echo "=== EVENT PAYLOAD ==="
           echo "${{ toJSON(github.event) }}" | jq .
         shell: bash
 
-      # Debug: Print repository details
+      # Step 3: Debug: Print repository details
       - name: Print Repository Info
         run: |
           echo "Repository: ${{ github.repository }}"
@@ -26,19 +30,19 @@ jobs:
           echo "PR Head SHA: ${{ github.event.pull_request.head.sha }}"
           echo "PR Head Ref: ${{ github.event.pull_request.head.ref }}"
 
-      # Checkout PR Code
+      # Step 4: Checkout PR Code
       - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      # Debug: List checked-out files
+      # Step 5: Debug: List checked-out files
       - name: List Files in Workspace
         run: |
           echo "=== FILES IN WORKSPACE ==="
           ls -la
 
-      # Add Comment to PR
+      # Step 6: Add Comment to PR
       - name: Add Comment to PR
         run: |
           COMMENT_BODY="Thank you for opening this pull request! 🎉"
