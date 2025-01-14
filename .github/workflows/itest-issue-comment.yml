@@ -17,6 +17,7 @@ jobs:
       pull-requests: write
       repository-projects: write
       id-token: write
+      issues: write
 
     steps:
       - name: Checkout
