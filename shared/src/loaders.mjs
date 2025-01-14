@@ -5,7 +5,9 @@ import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, globDir } from './fs.mjs'
-import { cloneAsPojo, set, setIfUnset, reverseString } from './utils.mjs'
+import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
+import merge from 'lodash/merge.js'
+import unset from 'lodash/unset.js'
 
 /*
  * A collection of utils to load various files
@@ -189,19 +191,9 @@ export async function loadPreseededSettings(preseed, currentSettings=false, log,
   const overlays = await loadPreseedOverlays(preseed, gitroot, log)
 
   /*
-   * Now merge overlays into base settings
+   * Now merge overlays into base settings and return
    */
-  const count = overlays.length
-  let i = 0
-  for (const overlayConfig of overlays) {
-    i++
-    log.debug(`Loaded preseed overlay ${i}/${count}`)
-    for (const [path, value] of Object.entries(overlayConfig)) {
-      set(settings, path, value)
-    }
-  }
-
-  return settings
+  return applyOverlays(settings, overlays, log)
 }
 
 /**
@@ -320,11 +312,12 @@ async function loadPreseedFileFromUrl(config, log) {
  * @param {object|string} overlay - The preseed settings for this overlay
  * @param {object} preseed - The preseed settings
  * @param {string} gitroot - Path to the root where git repos are stored
+ * @param {object} log - The logger object
  * @return {object} settings - The loaded settings
  */
-async function loadPreseedOverlay(overlay, preseed, gitroot) {
+async function loadPreseedOverlay(overlay, preseed, gitroot, log) {
   if (typeof overlay === 'string') {
-    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot)
+    if (fromRepo(overlay)) return await loadPreseedFileFromRepo(overlay, preseed, gitroot, log)
     const api = fromApi(overlay)
     if (api === 'github')
       return await loadPreseedFileFromGithub({
@@ -384,17 +377,21 @@ async function loadPreseedOverlays(preseed, gitroot, log) {
         if (overlay) overlays.push(overlay)
       }
     } else {
-      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot)
+      const overlay = await loadPreseedOverlay(preseed.overlays, preseed, gitroot, log)
       if (overlay) overlays.push(overlay)
     }
   } else if (Array.isArray(preseed.overlays)) {
-
-  /*
-   * Handle array
-   */
+    /*
+     * If overlays holds an array, that array can still hold a glob pattern.
+     * Rather than duplicate the logic, we call this function recursively to
+     * handle each array entry individually. To make that work, we just need
+     * to adapt the preseed object a bit.
+     * Note that this also means we support nested arrays
+     * although we don't tend to advocate for it. But it's possible.
+     */
     for (const config of preseed.overlays) {
-      const overlay = await loadPreseedOverlay(config, preseed, gitroot)
-      if (overlay) overlays.push(overlay)
+      const sublays = await loadPreseedOverlays({ ...preseed, overlays: config }, gitroot, log)
+      if (sublays) overlays.push(...sublays)
     }
   }
 
@@ -630,3 +627,80 @@ function findPreseedTarget (file, root) {
   else return file.slice(-1 * start)
 }
 
+function applyOverlays (settings, overlays, log) {
+  const count = overlays.length
+  let i = 0
+  for (const overlay of overlays) {
+    i++
+    log.debug(`Applying overlay ${i}/${count}`)
+    settings = applyOverlay(settings, overlay)
+  }
+
+  return settings
+}
+
+/*
+ * This function applies an overlay to the settings and returns them
+ *
+ * Overlays can contain 6 different keys, which are used to mutate the config.
+ * They are:
+ * - merge: Soft-set a key in the settings object
+ * - ensure: Soft-add an element to an array in the settings object
+ * - push: Hard-add an element to an array in the settings object
+ * - drop: Hard-remove an element from an array in the settings object
+ * - set: Hard-set a key in the settings object
+ * - unset: Hard-unset a key in the settings object
+ *
+ * So we have 3 methods: soft-add, hard-add, and (hard-)remove
+ * and this both for objects and arrays.
+ *
+ * @param {object} settings - The settings object to mutate
+ * @param {object} overlay - The overlay to apply
+ * @return {object} settings - The mutated settings
+ */
+function applyOverlay (settings, overlay={}) {
+  // Merge goes first, this is the soft add for methods
+  if (overlay.merge) {
+    const todo = Array.isArray(overlay.merge) ? [...overlay.merge] : [overlay.merge]
+    for (const item of todo) {
+      settings = merge({}, item, settings)
+    }
+  }
+  // Then we have the soft array method
+  if (overlay.ensure) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, [])
+      if (!current.includes(val)) set(settings, path, [...current, val])
+    }
+  }
+  // Then the hard array method to add
+  if (overlay.push) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, [])
+      set(settings, path, [...current, val])
+    }
+  }
+  // Then the hard array method to remove
+  if (overlay.drop) {
+    for (const [path, val] of Object.entries(overlay.ensure)) {
+      const current = get(settings, path, false)
+      if (Array.isArray(current) && current.includes(val)) {
+        set(settings, path, current.filter(item => item !== val))
+      }
+    }
+  }
+  // Set goes second to last, hard method to add
+  if (overlay.set) {
+    for (const [path, value] of Object.entries(overlay.set)) {
+      set(settings, path, value)
+    }
+  }
+  // Unset goes last, hard method to remove
+  if (overlay.unset) {
+    for (const [path, value] of Object.entries(overlay.unset)) {
+      unset(settings, path, value)
+    }
+  }
+
+  return settings
+}
