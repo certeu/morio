@@ -1,0 +1,11 @@
+{
+  "DISABLE_IDP_APIKEY": false,
+  "DISABLE_IDP_LDAP": false,
+  "DISABLE_IDP_LOCAL": false,
+  "DISABLE_IDP_MRT": false,
+  "DISABLE_IDP_OIDC": false,
+  "DISABLE_SERVICE_UI": false,
+  "ENFORCE_HTTP_MTLS": false,
+  "ENFORCE_SERVICE_CACHE": false,
+  "RESEED_ON_RELOAD": false
+}
