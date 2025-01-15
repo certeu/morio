@@ -114,30 +114,20 @@ jobs:
       - name: Run ideploy (Deploy to the environment)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Deploy to Environment"
-            STATUS: "Pending"
+          chmod +x ./scripts/update-comment.sh
+          ./scripts/update-comment.sh "Deploy to Environment" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the deployment command
           if npm run ideploy; then
             # If the deployment is successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy to Environment"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Deploy to Environment" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If the deployment fails, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy to Environment"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Deploy to Environment" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1  # Exit the job if it fails
           fi
         env:
+          COMMENT_ID: ${{ secrets.COMMENT_ID }}  # Ensure COMMENT_ID is passed as an environment variable or secret
           PR_ID: ${{ env.PR_ID }}
           ITEST_AWS_SUBNET_ID: ${{ secrets.ITEST_AWS_SUBNET_ID }}
           ITEST_AWS_SECURITY_GROUP_ID: ${{ secrets.ITEST_AWS_SECURITY_GROUP_ID }}
@@ -149,41 +139,26 @@ jobs:
       - name: Run isetup (Deploy and setup with SSH retry)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Deploy and Setup with SSH Retry"
-            STATUS: "Pending"
+          chmod +x ./scripts/update-comment.sh
+          ./scripts/update-comment.sh "Deploy and Setup with SSH Retry" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
-          # Start retry logic
+          # Start retry logic for SSH setup
           for i in {1..10}; do
             if npm run isetup; then
-              # If the setup is successful, update the comment with Success and exit loop
-              uses: ./.github/workflows/update-comment.yml
-              with:
-                COMMENT_ID: ${{ env.COMMENT_ID }}
-                STEP_NAME: "Deploy and Setup with SSH Retry"
-                STATUS: "Success"
+              # If setup is successful, update the comment with Success and exit loop
+              ./scripts/update-comment.sh "Deploy and Setup with SSH Retry" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
               break
             else
               # If SSH fails, log retry and update comment status as Pending
               echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
-              uses: ./.github/workflows/update-comment.yml
-              with:
-                COMMENT_ID: ${{ env.COMMENT_ID }}
-                STEP_NAME: "Deploy and Setup with SSH Retry"
-                STATUS: "Pending"
+              ./scripts/update-comment.sh "Deploy and Setup with SSH Retry" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
               sleep 10
             fi
           done
 
           # If all retries fail, update the comment with Fail and exit the job
           if [ $i -eq 10 ]; then
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy and Setup with SSH Retry"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Deploy and Setup with SSH Retry" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             echo "SSH authentication failed after 10 attempts. Exiting."
             exit 1
           fi
@@ -194,54 +169,32 @@ jobs:
       - name: Run ephemeral test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Testing ephemeral"
-            STATUS: "Pending"
+          chmod +x ./scripts/update-comment.sh
+          ./scripts/update-comment.sh "Testing ephemeral" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the test command
           if npm run itest ephemeral; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Testing ephemeral"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Testing ephemeral" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Testing ephemeral"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Testing ephemeral" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run setup configure (with test)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Setup Configure Test"
-            STATUS: "Pending"
+          chmod +x ./scripts/update-comment.sh
+          ./scripts/update-comment.sh "Setup Configure Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the setup command
           if npm run itest setup; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Setup Configure Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Setup Configure Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Setup Configure Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Setup Configure Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
@@ -251,270 +204,150 @@ jobs:
       - name: Run account create test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Account Create Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "Account Create Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the account create test command
           if npm run itest create; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Account Create Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Account Create Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Account Create Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Account Create Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run anonymous test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Anonymous Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "Anonymous Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the anonymous test command
           if npm run itest anonymous; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Anonymous Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Anonymous Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Anonymous Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Anonymous Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run settings test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Settings Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "Settings Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the settings test command
           if npm run itest settings; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Settings Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Settings Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Settings Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Settings Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run docker test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Docker Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "Docker Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the docker test command
           if npm run itest docker; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Docker Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Docker Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Docker Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Docker Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run idp-local test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "IDP Local Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "IDP Local Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the idp-local test command
           if npm run itest local; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP Local Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "IDP Local Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP Local Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "IDP Local Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run idp-apikey test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "IDP API Key Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "IDP API Key Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the idp-apikey test command
           if npm run itest apikey; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP API Key Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "IDP API Key Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP API Key Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "IDP API Key Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run idp-mrt test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "IDP MRT Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "IDP MRT Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the idp-mrt test command
           if npm run itest mrt; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP MRT Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "IDP MRT Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP MRT Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "IDP MRT Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run crypto test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Crypto Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "Crypto Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the crypto test command
           if npm run itest crypto; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Crypto Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Crypto Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Crypto Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Crypto Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run kv test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "KV Test"
-            STATUS: "Pending"
+          ./scripts/update-comment.sh "KV Test" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the kv test command
           if npm run itest kv; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "KV Test"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "KV Test" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "KV Test"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "KV Test" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
       - name: Run idestroy (Destroy resources)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Destroy Resources"
-            STATUS: "Pending" 
+          ./scripts/update-comment.sh "Destroy Resources" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
 
           # Run the idestroy command
           if npm run idestroy; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Destroy Resources"
-              STATUS: "Success"
+            ./scripts/update-comment.sh "Destroy Resources" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Destroy Resources"
-              STATUS: "Fail"
+            ./scripts/update-comment.sh "Destroy Resources" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
             exit 1
           fi
 
@@ -528,8 +361,4 @@ jobs:
           fi
 
           # Call the update_comment function to update the final status
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Final Status"
-            STATUS: "$FINAL_STATUS"
+          ./scripts/update-comment.sh "Final Status" "$FINAL_STATUS" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
