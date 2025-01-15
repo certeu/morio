@@ -75,6 +75,9 @@ jobs:
           COMMENT_ID=$(echo "$COMMENT_RESPONSE" | jq -r .id)
           echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
 
+      - name: Debug Environment Variables
+        run: echo "COMMENT_ID=${{ env.COMMENT_ID }}"
+
       - name: Set PR ID as Environment Variable
         run: |
           if [ "${{ github.event.pull_request.number }}" ]; then
