@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
+- [client] Do not show help after restarting agents. [#101](https://github.com/certeu/morio/issues/101)
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
 - [ui] Remove broken link from navigation. [#100](https://github.com/certeu/morio/issues/100)
 - [watcher] Update internal hostnames with new Docker container prefix
