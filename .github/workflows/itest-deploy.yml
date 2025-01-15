@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Checkout PR Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
 
@@ -29,6 +29,47 @@ jobs:
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments)
           COMMENT_ID=$(echo "$COMMENT_RESPONSE" | jq -r .id)
           echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
+
+      - name: Update Comment Function
+        id: update_comment
+        run: |
+          update_comment() {
+            STEP_NAME="$1"
+            STATUS="$2"
+
+            # Define the icons for each status
+            case "$STATUS" in
+              "Pending") ICON="⏳" ;;
+              "Success") ICON="✅" ;;
+              "Fail") ICON="❌" ;;
+              *) ICON="⏳" ;; # Default to Pending if status is unrecognized
+            esac
+
+            # Fetch the current comment body
+            COMMENT_BODY=$(curl -s -X GET \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              https://api.github.com/repos/${{ github.repository }}/issues/comments/${COMMENT_ID} | jq -r .body)
+
+            # Add or update the step's status with the icon
+            if echo "$COMMENT_BODY" | grep -q "| $STEP_NAME |"; then
+              # Update existing step
+              UPDATED_BODY=$(echo "$COMMENT_BODY" | sed "s/| $STEP_NAME |.*|/| $STEP_NAME | $ICON $STATUS |/")
+            else
+              # Append a new step
+              UPDATED_BODY=$(echo -e "$COMMENT_BODY\\n| $STEP_NAME | $ICON $STATUS |")
+            fi
+
+            # Update the comment on GitHub
+            curl -s -X PATCH \
+              -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github+json" \
+              -d "{\"body\": \"$UPDATED_BODY\"}" \
+              https://api.github.com/repos/${{ github.repository }}/issues/comments/${COMMENT_ID} > /dev/null
+          }
+
+          # Export the function to be used in subsequent steps
+          export -f update_comment
 
       - name: Check if Comment Matches Deploy Key and User is Allowed
         id: check_trigger
@@ -114,27 +155,15 @@ jobs:
       - name: Run ideploy (Deploy to the environment)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Deploy to Environment"
-            STATUS: "Pending"
+          update_comment "Deploy to Environment" "Pending"
 
           # Run the deployment command
           if npm run ideploy; then
             # If the deployment is successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy to Environment"
-              STATUS: "Success"
+            update_comment "Deploy to Environment" "Success"
           else
             # If the deployment fails, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy to Environment"
-              STATUS: "Fail"
+            update_comment "Deploy to Environment" "Fail"
             exit 1  # Exit the job if it fails
           fi
         env:
@@ -149,41 +178,25 @@ jobs:
       - name: Run isetup (Deploy and setup with SSH retry)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Deploy and Setup with SSH Retry"
-            STATUS: "Pending"
+          update_comment "Deploy and Setup with SSH Retry" "Pending"
 
           # Start retry logic
           for i in {1..10}; do
             if npm run isetup; then
               # If the setup is successful, update the comment with Success and exit loop
-              uses: ./.github/workflows/update-comment.yml
-              with:
-                COMMENT_ID: ${{ env.COMMENT_ID }}
-                STEP_NAME: "Deploy and Setup with SSH Retry"
-                STATUS: "Success"
+              update_comment "Deploy and Setup with SSH Retry" "Success"
               break
             else
               # If SSH fails, log retry and update comment status as Pending
               echo "SSH authentication failed. Retrying in 10 seconds... ($i/10)"
-              uses: ./.github/workflows/update-comment.yml
-              with:
-                COMMENT_ID: ${{ env.COMMENT_ID }}
-                STEP_NAME: "Deploy and Setup with SSH Retry"
-                STATUS: "Pending"
+              update_comment "Deploy and Setup with SSH Retry" "Pending"
               sleep 10
             fi
           done
 
           # If all retries fail, update the comment with Fail and exit the job
           if [ $i -eq 10 ]; then
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Deploy and Setup with SSH Retry"
-              STATUS: "Fail"
+            update_comment "Deploy and Setup with SSH Retry" "Fail"
             echo "SSH authentication failed after 10 attempts. Exiting."
             exit 1
           fi
@@ -194,54 +207,30 @@ jobs:
       - name: Run ephemeral test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Testing ephemeral"
-            STATUS: "Pending"
+          update_comment "Testing" "Pending"
 
           # Run the test command
           if npm run itest ephemeral; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Testing ephemeral"
-              STATUS: "Success"
+            update_comment "Testing" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Testing ephemeral"
-              STATUS: "Fail"
+            update_comment "Testing" "Fail"
             exit 1
           fi
 
       - name: Run setup configure (with test)
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Setup Configure Test"
-            STATUS: "Pending"
+          update_comment "Setup Configure" "Pending"
 
           # Run the setup command
           if npm run itest setup; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Setup Configure Test"
-              STATUS: "Success"
+            update_comment "Setup Configure" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Setup Configure Test"
-              STATUS: "Fail"
+            update_comment "Setup Configure" "Fail"
             exit 1
           fi
 
@@ -251,119 +240,67 @@ jobs:
       - name: Run account create test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Account Create Test"
-            STATUS: "Pending"
+          update_comment "Account Create Test" "Pending"
 
           # Run the account create test command
           if npm run itest create; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Account Create Test"
-              STATUS: "Success"
+            update_comment "Account Create Test" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Account Create Test"
-              STATUS: "Fail"
+            update_comment "Account Create Test" "Fail"
             exit 1
           fi
 
       - name: Run anonymous test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Anonymous Test"
-            STATUS: "Pending"
+          update_comment "Anonymous Test" "Pending"
 
           # Run the anonymous test command
           if npm run itest anonymous; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Anonymous Test"
-              STATUS: "Success"
+            update_comment "Anonymous Test" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Anonymous Test"
-              STATUS: "Fail"
+            update_comment "Anonymous Test" "Fail"
             exit 1
           fi
 
       - name: Run settings test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Settings Test"
-            STATUS: "Pending"
+          update_comment "Settings Test" "Pending"
 
           # Run the settings test command
           if npm run itest settings; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Settings Test"
-              STATUS: "Success"
+            update_comment "Settings Test" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Settings Test"
-              STATUS: "Fail"
+            update_comment "Settings Test" "Fail"
             exit 1
           fi
 
       - name: Run docker test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "Docker Test"
-            STATUS: "Pending"
+          update_comment "Docker Test" "Pending"
 
           # Run the docker test command
           if npm run itest docker; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Docker Test"
-              STATUS: "Success"
+            update_comment "Docker Test" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Docker Test"
-              STATUS: "Fail"
+            update_comment "Docker Test" "Fail"
             exit 1
           fi
 
       - name: Run idp-local test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "IDP Local Test"
-            STATUS: "Pending"
+          update_comment "IDP Local Test" "Pending"
 
           # Run the idp-local test command
           if npm run itest local; then
@@ -375,22 +312,14 @@ jobs:
               STATUS: "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "IDP Local Test"
-              STATUS: "Fail"
+            update_comment "IDP Local Test" "Fail"
             exit 1
           fi
 
       - name: Run idp-apikey test
         run: |
           # Update comment with Pending status for this step
-          uses: ./.github/workflows/update-comment.yml
-          with:
-            COMMENT_ID: ${{ env.COMMENT_ID }}
-            STEP_NAME: "IDP API Key Test"
-            STATUS: "Pending"
+          update_comment "IDP API Key Test" "Pending"
 
           # Run the idp-apikey test command
           if npm run itest apikey; then
@@ -503,18 +432,10 @@ jobs:
           # Run the idestroy command
           if npm run idestroy; then
             # If successful, update the comment with Success
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Destroy Resources"
-              STATUS: "Success"
+            update_comment "Destroy Resources" "Success"
           else
             # If failed, update the comment with Fail
-            uses: ./.github/workflows/update-comment.yml
-            with:
-              COMMENT_ID: ${{ env.COMMENT_ID }}
-              STEP_NAME: "Destroy Resources"
-              STATUS: "Fail"
+            update_comment "Destroy Resources" "Fail"
             exit 1
           fi
 
