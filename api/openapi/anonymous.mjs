@@ -165,7 +165,7 @@ export default function (api) {
     operationId: 'upHealthcheck',
     ...shared,
     summary: `API Healthcheck`,
-    description: `Returns status code 200 if the API is up. Useful for a quick healhcheck.`,
+    description: `Returns status code 200 if the API is up. Useful for a quick health check.`,
     responses: {
       200: response({
         desc: 'A minimal response to indicate the service is up',
