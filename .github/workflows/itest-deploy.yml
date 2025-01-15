@@ -32,10 +32,10 @@ jobs:
           LINK_TO_COMMENT=$(echo "$COMMENT_RESPONSE" | jq -r '.[0].html_url')
           
           # Construct the comment body
-          COMMENT_BODY="As requested by @$USERNAME in [this comment]($LINK_TO_COMMENT) we will test this pull request. 
-      To do so, we will provision ephemeral infrastructure and then run integration tests.
+          COMMENT_BODY="As requested by @$USERNAME in [this comment]($LINK_TO_COMMENT), we will test this pull request. 
+          To do so, we will provision ephemeral infrastructure and then run integration tests.
 
-      This will take a while, but we will report back here to keep you updated:"
+          This will take a while, but we will report back here to keep you updated:"
 
           # Post the comment to the PR
           POST_COMMENT_RESPONSE=$(curl -s -X POST \
