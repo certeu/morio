@@ -20,7 +20,7 @@ export function currentUser(req) {
    */
   return !provider || !user || typeof user !== 'string' || user.length < 3 || user.length > 255
     ? false
-    : `${provider}.${user}`
+    : user
 }
 
 /**

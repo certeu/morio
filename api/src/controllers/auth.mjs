@@ -29,6 +29,7 @@ const allowedUrisBase = [
   `/ca/certificates`,
   `/pubkey`,
   `/pubkey.pem`,
+  `/up`,
 ]
 
 /*

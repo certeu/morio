@@ -164,7 +164,9 @@ async function loadPreseedBaseFile(preseed, gitroot, log) {
  * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export async function loadPreseededSettings(preseed, currentSettings=false, log, gitroot = '/etc/morio/shared') {
+export async function loadPreseededSettings(preseed=false, currentSettings=false, log, gitroot = '/etc/morio/shared') {
+  if (!preseed) return currentSettings
+
   /*
    * If there's a git config, we need to handle that first
    */
@@ -208,7 +210,7 @@ export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio
   /*
    * If there's a git config, we need to fetch it
    */
-  if (preseed.git) {
+  if (preseed?.git) {
     for (const [id, config] of Object.entries(preseed.git)) {
       await loadGitRepo(gitroot, id, config, log)
     }

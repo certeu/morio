@@ -88,7 +88,6 @@ var restartCmd = &cobra.Command{
 			ChangeAgentState("logs", "restart")
 			ChangeAgentState("metrics", "restart")
 			ShowStatus()
-			_ = cmd.Help()
 		} else if args[0] == "audit" {
 			ChangeAgentState("audit", "restart")
 			ShowStatus()

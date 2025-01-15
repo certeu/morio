@@ -10,7 +10,7 @@ import { Box } from 'components/box.mjs'
  */
 export const SettingsReport = ({ report }) => (
   <div className="py-2">
-    <div className="lg:grid lg:grid-cols-2 lg:gap-2">
+    <div className="lg:grid grid-cols-1 lg:gap-2">
     <Box color={report.valid ? 'success' : 'error'}>
       <div className="flex flex-row gap-4 items-center w-full">
         {report.valid ? <OkIcon stroke={4} /> : <WarningIcon />}

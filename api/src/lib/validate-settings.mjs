@@ -10,7 +10,7 @@ import { utils, log } from './utils.mjs'
  * @param {object} newSettings - The settings to validate
  * @retrun {object} report - An object detailing the results of the validation
  */
-export async function validateSettings(newSettings) {
+export async function validateSettings(newSettings, headers=false) {
   /*
    * Set up the report skeleton that we will return
    */
@@ -146,6 +146,21 @@ export async function validateSettings(newSettings) {
     }
   }
   await Promise.all(httpPromises)
+
+  /*
+   * Check that the current URL is also one of the nodes
+   */
+  if (
+    headers &&
+    headers['x-forwarded-host'] &&
+    !newSettings.cluster.broker_nodes.includes(headers['x-forwarded-host'])
+  ) {
+    report.deployable = false
+    report.warnings.push(`You browser is connected to ${
+      headers['x-forwarded-host']
+      }, but that is not one of the broker nodes.
+      Please make sure to use the FQDN of the broker nodes to configure your system.`)
+  }
 
   /*
    * Looks good
