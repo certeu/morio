@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [api] Handle browser domain mismatch in validation. [#109](https://github.com/certeu/morio/issues/109)
+- [api] The `/up` endpoint is now anonymous and returns status 200 [#133](https://github.com/certeu/morio/issues/133)
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [client] Do not show help after restarting agents. [#101](https://github.com/certeu/morio/issues/101)
