@@ -30,11 +30,13 @@ update_comment() {
     UPDATED_BODY=$(echo -e "$COMMENT_BODY\\n| $STEP_NAME | $ICON $STATUS |")
   fi
 
+  ESCAPED_BODY=$(echo "$UPDATED_BODY" | jq -R .)
+
   # Update the comment body
   curl -s -X PATCH \
     -H "Authorization: Bearer $GITHUB_TOKEN" \
     -H "Accept: application/vnd.github+json" \
-    -d "{\"body\": \"$UPDATED_BODY\"}" \
+    -d "{\"body\": \"$ESCAPED_BODY\"}" \
     https://api.github.com/repos/$REPO/issues/comments/$COMMENT_ID > /dev/null
 }
 

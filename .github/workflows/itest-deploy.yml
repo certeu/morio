@@ -44,7 +44,9 @@ jobs:
 
       - name: Exit if Not Triggered by Allowed User or Matching Deploy Key
         if: ${{ env.match != 'true' }}
-        run: echo "Comment does not match deploy key or user is not allowed. Exiting..."
+        run: |
+          echo "Comment does not match deploy key or user is not allowed. Exiting..."
+          exit 1
         continue-on-error: false
 
       - name: Initialize Comment
@@ -74,9 +76,6 @@ jobs:
           # Extract the comment ID and save it for later use
           COMMENT_ID=$(echo "$COMMENT_RESPONSE" | jq -r .id)
           echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
-
-      - name: Debug Environment Variables
-        run: echo "COMMENT_ID=${{ env.COMMENT_ID }}"
 
       - name: Set PR ID as Environment Variable
         run: |
@@ -133,20 +132,59 @@ jobs:
       - name: Debug Environment Variables
         run: echo "COMMENT_ID=${{ env.COMMENT_ID }}"
 
+      - name: Debug Github Token
+        run: echo "GITHUB_Token=${{ github.GITHUB_TOKEN }}"
+
+      - name: Debug Repository Name
+        run: echo "GITHUB_REPO=${{ github.repository }}"
+
       - name: Run ideploy (Deploy to the environment)
         run: |
-          # Update comment with Pending status for this step
+          # Check if the script file exists
+          if [ ! -f ./scripts/update-comment.sh ]; then
+            echo "Error: Script file './scripts/update-comment.sh' not found!"
+            exit 1  # Exit the job with an error
+          fi
+          
+          # Ensure the script is executable and provide logs for debugging
           chmod +x ./scripts/update-comment.sh
+          echo "Running update-comment.sh with 'Pending' status..."
+          
+          # Update comment with Pending status for this step
           ./scripts/update-comment.sh "Deploy to Environment" "Pending" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
+          
+          if [ $? -eq 0 ]; then
+            echo "Successfully updated comment with 'Pending' status."
+          else
+            echo "Failed to update comment with 'Pending' status."
+            exit 1
+          fi
 
           # Run the deployment command
+          echo "Running npm run ideploy..."
           if npm run ideploy; then
             # If the deployment is successful, update the comment with Success
+            echo "Deployment successful, updating comment with 'Success'..."
             ./scripts/update-comment.sh "Deploy to Environment" "Success" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
+
+            if [ $? -eq 0 ]; then
+              echo "Successfully updated comment with 'Success' status."
+            else
+              echo "Failed to update comment with 'Success' status."
+              exit 1
+            fi
           else
             # If the deployment fails, update the comment with Fail
+            echo "Deployment failed, updating comment with 'Fail'..."
             ./scripts/update-comment.sh "Deploy to Environment" "Fail" "${{ env.COMMENT_ID }}" "${{ secrets.GITHUB_TOKEN }}" "${{ github.repository }}"
-            exit 1  # Exit the job if it fails
+
+            if [ $? -eq 0 ]; then
+              echo "Successfully updated comment with 'Fail' status."
+            else
+              echo "Failed to update comment with 'Fail' status."
+            fi
+
+            exit 1  # Exit the job if deployment fails
           fi
         env:
           COMMENT_ID: ${{ secrets.COMMENT_ID }}  # Ensure COMMENT_ID is passed as an environment variable or secret
