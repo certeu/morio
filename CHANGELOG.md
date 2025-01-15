@@ -44,11 +44,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [api] Handle browser domain mismatch in validation. [#109](https://github.com/certeu/morio/issues/109)
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [client] Do not show help after restarting agents. [#101](https://github.com/certeu/morio/issues/101)
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
 - [ui] Remove broken link from navigation. [#100](https://github.com/certeu/morio/issues/100)
+- [ui] Handle new validation check for browser domain. [#109](https://github.com/certeu/morio/issues/109)
 - [watcher] Update internal hostnames with new Docker container prefix
 
 ## [0.5.5] - 2024-11-18
