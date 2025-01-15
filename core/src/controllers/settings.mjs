@@ -61,7 +61,7 @@ Controller.prototype.deploy = async function (req, res) {
   /*
    * We might need to reseed on reload
    */
-  const settings = await reseedHandler(valid)
+  const settings = valid.preseed ? await reseedHandler(valid) : valid
 
   /*
    * Do the actual deploy
@@ -107,7 +107,7 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Ensure preseeded content
    */
-  await preseedHandler(body.preseed, true)
+  if (body.preseed) await preseedHandler(body?.preseed, true)
 
   /*
    * Handle initial setup
@@ -448,11 +448,13 @@ const preseedHandler = async function (preseedSettings = false, force = false) {
 }
 
 const reseedHandler = async function (newSettings = false) {
+  if (!newSettings) return newSettings
+
   /*
    * Load the preseeded settings
    */
   let settings = await loadPreseededSettings(
-    newSettings ? newSettings.preseed : utils.getSettings('preseed'),
+    newSettings.preseed ? newSettings.preseed : utils.getSettings('preseed'),
     newSettings ? newSettings : utils.getSettings(),
     log
   )
