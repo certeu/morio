@@ -21,12 +21,28 @@ jobs:
       - name: Initialize Comment
         id: create_comment
         run: |
-          COMMENT_BODY="{ \"body\": \"| Step | Status |\\n|------|--------|\\n| Initialize Workflow |\" }"
+          # Dynamic content: username and link to the comment
+          USERNAME="${{ github.event.comment.user.login }}"
+          COMMENT_URL="${{ github.event.comment.html_url }}"
+
+          # Prepare the comment body with detailed information
+          COMMENT_BODY=$(
+            jq -n --arg username "$USERNAME" \
+                    --arg comment_url "$COMMENT_URL" \
+                    --arg intro "| Step | Status |\\n|------|--------|\\n| Initialize Workflow |" \
+                    '{ 
+                      body: "As requested by \($username) in [this comment](\($comment_url)), we will test this pull request.\n\nTo do so, we will provision ephemeral infrastructure and then run integration tests.\n\nThis will take a while, but we will report back here to keep you updated:\n\n\($intro)" 
+                    }'
+          )
+
+          # Post the comment to the pull request
           COMMENT_RESPONSE=$(curl -s -X POST \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             -d "$COMMENT_BODY" \
             https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments)
+
+          # Extract the comment ID and save it for later use
           COMMENT_ID=$(echo "$COMMENT_RESPONSE" | jq -r .id)
           echo "COMMENT_ID=$COMMENT_ID" >> $GITHUB_ENV
 
