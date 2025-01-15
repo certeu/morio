@@ -13,9 +13,9 @@ update_comment() {
     *) ICON="⏳" ;;  # Default to Pending if status is unrecognized
   esac
 
-  COMMENT_ID=$3
-  GITHUB_TOKEN=$4
-  REPO=$5
+  COMMENT_ID="$3"
+  GITHUB_TOKEN="$4"
+  REPO="$5"
 
   # Get the existing comment body
   COMMENT_BODY=$(curl -s -X GET \
