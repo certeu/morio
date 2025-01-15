@@ -127,6 +127,9 @@ jobs:
           ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
           echo "SSH Key Pair generated and stored in ~/.ssh/id_rsa"
 
+      - name: Debug Environment Variables
+        run: echo "COMMENT_ID=${{ env.COMMENT_ID }}"
+
       - name: Run ideploy (Deploy to the environment)
         run: |
           # Update comment with Pending status for this step
