@@ -53,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
 - [ui] Remove broken link from navigation. [#100](https://github.com/certeu/morio/issues/100)
 - [ui] Handle new validation check for browser domain. [#109](https://github.com/certeu/morio/issues/109)
+- [ui] Do not assume container images have tags. [#137](https://github.com/certeu/morio/issues/137)
 - [watcher] Update internal hostnames with new Docker container prefix
 
 ## [0.5.5] - 2024-11-18

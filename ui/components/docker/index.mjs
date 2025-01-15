@@ -711,7 +711,7 @@ const DisplayDockerImages = ({ data }) => {
             <tr key={image.Id} className="hover:bg-secondary hover:bg-opacity-30">
               <td className="px-4">
                 <PageLink href={`/status/docker/images/${image.Id.slice(7)}`}>
-                  {image.RepoTags.length > 0
+                  {image.RepoTags && image.RepoTags.length > 0
                     ? formatContainerName(image.RepoTags[0])
                     : image.Id.slice(7, 13)}
                 </PageLink>
