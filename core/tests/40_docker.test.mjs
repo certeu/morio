@@ -85,7 +85,7 @@ describe('Core Docker GET Info Tests', () => {
     assert.equal(d.length > 4, true)
   })
 
-  // GET /docker/verion
+  // GET /docker/version
   it(`Should GET /docker/version`, async () => {
     const result = await core.get(`/docker/version`)
     const d = result[1]
