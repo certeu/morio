@@ -9,7 +9,7 @@
     "dev": "nodemon src/index.mjs -w src -w config -w shared -w openapi --quiet -- --no-warnings",
     "lint": "eslint --fix 'src/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it core node --no-warnings --test-concurrency=1 --test",
+    "test": "docker exec -it morio-core node --no-warnings --test-concurrency=1 --test",
     "retest": "cd .. && npm run redev && cd - && sleep 5 && npm run test"
   },
   "dependencies": {
@@ -32,6 +32,7 @@
     "simple-git": "^3.27.0"
   },
   "devDependencies": {
+    "c8": "^10.1.3",
     "esbuild": "^0.23.1"
   },
   "imports": {

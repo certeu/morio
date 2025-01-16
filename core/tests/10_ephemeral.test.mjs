@@ -5,35 +5,7 @@ import { pkg } from './json-loader.mjs'
 import { errors } from '../src/errors.mjs'
 
 describe('Ephemeral Core: Status Routes', () => {
-  /*
-   * GET /status - Retrieve status data of an ephemeral node
-   * Example response:
-   * {
-   *   info: {
-   *     about: 'Morio Core',
-   *     name: '@morio/core',
-   *     production: false,
-   *     version: '0.2.0'
-   *   },
-   *   status: {
-   *     cluster: {
-   *       code: 1,
-   *       color: 'amber',
-   *       time: 1722352609787,
-   *       msg: 'Morio is running in ephemeral mode'
-   *     }
-   *   },
-   *   nodes: {},
-   *   node: {
-   *     uptime: 6,
-   *     ephemeral: true,
-   *     ephemeral_uuid: '5008f15a-4366-46ca-b5df-230e106cd49a',
-   *     reload_count: 1,
-   *     config_resolved: true,
-   *     settings_serial: 0
-   *   }
-   * }
-   */
+  // GET /status - Retrieve status data of an ephemeral node
   it('Should load /status', async () => {
     const result = await core.get('/status')
     assert.equal(true, Array.isArray(result), true)
@@ -101,9 +73,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
     ],
   }
 
-  /*
-   * Loop all GET endpoints that should not be available in ephemeral mode
-   */
+  // Loop all GET endpoints that should not be available in ephemeral mode
   for (const url of test.get) {
     it(`Should not GET ${url} in ephemeral mode`, async () => {
       const result = await core.get(url)
@@ -111,9 +81,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all POST endpoints that should not be available in ephemeral mode
-   */
+  // Loop all POST endpoints that should not be available in ephemeral mode
   for (const url of test.post) {
     it(`Should not POST ${url} in ephemeral mode`, async () => {
       const result = await core.post(url, {})
@@ -121,9 +89,7 @@ describe('Ephemeral Core: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all PUT endpoints that should not be available in ephemeral mode
-   */
+  // Loop all PUT endpoints that should not be available in ephemeral mode
   for (const url of test.put) {
     it(`Should not PUT ${url} in ephemeral mode`, async () => {
       const result = await core.put(url, {})

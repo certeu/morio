@@ -4,58 +4,24 @@ import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
 
 describe('Core Setup Tests', () => {
-  /*
-   * POST /setup - no body
-   * Example response:
-   * {
-   *    status: 400,
-   *    title: 'This request violates the data schema',
-   *    detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
-   *    type: 'https://morio.it/reference/errors/morio.core.schema.violation'
-   *  }
-   */
+  // POST /setup - no body
   it('Should POST /setup (no body)', async () => {
     const result = await core.post('/setup')
     validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
-  /*
-   * POST /setup - empty object as body
-   * Example response:
-   * {
-   *    status: 400,
-   *    title: 'This request violates the data schema',
-   *    detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
-   *    type: 'https://morio.it/reference/errors/morio.core.schema.violation'
-   *  }
-   */
+  // POST /setup - empty object as body
   it('Should POST /setup (empty object)', async () => {
     const result = await core.post('/setup', {})
     validateErrorResponse(result, errors, 'morio.core.schema.violation')
   })
 
-  /*
-   * POST /setup - should work
-   * Example response:
-   * {
-   *   result: 'success',
-   *   uuids: {
-   *     node: '7fa824fb-b507-4150-b061-800ab5d91924',
-   *     cluster: 'f1107ae0-e572-41a5-a9bd-2963b3d1fb0f'
-   *   },
-   *   root_token: {
-   *     about: 'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-   *     value: 'mrt.71d3366f196c000d75b64cce75a1a1347029dfe16ed52fdfe2d5d919c52b499a'
-   *   }
-   * }
-   */
+  // POST /setup - should work
   it('Should POST /setup', async () => {
     const result = await core.post('/setup', {
       ...setup,
-      /*
-       * Normally, the proxy adds the headers to the body
-       * Since we're talking to core direcytly, we need to do this ourselves
-       */
+      // Normally, the proxy adds the headers to the body
+      // Since we're talking to core direcytly, we need to do this ourselves
       headers: { 'x-forwarded-host': getPreset('MORIO_UNIT_TEST_HOST') },
     })
     const d = result[1]
@@ -80,26 +46,11 @@ describe('Core Setup Tests', () => {
     assert.equal(d.root_token.about.includes('never be shown'), true)
     assert.equal(d.root_token.value.length, 68)
     assert.equal(d.root_token.value.slice(0, 4), 'mrt.')
-    /*
-     * Keep root token in store
-     */
+    // Keep root token in store
     store.mrt = d.root_token.value
   })
 
-  /*
-   * POST /setup
-   * Example response:
-   * {
-   *   status: 409,
-   *   data: {
-   *     status: 409,
-   *     title: 'Not available while reloading',
-   *     detail: 'This endpoint is not available when Morio is reloading its configuration. As Morio is reloading now, this endpoint is momentarily unavailable.',
-   *     type: 'https://morio.it/reference/errors/morio.core.reloading.prohibited',
-   *     instance: 'http://core:3007/setup'
-   *   }
-   * }
-   */
+  // POST /setup
   it('Should POST /setup (unavailable while reconfiguring)', async () => {
     const result = await core.post('/setup', {})
     validateErrorResponse(result, errors, 'morio.core.reloading.prohibited')

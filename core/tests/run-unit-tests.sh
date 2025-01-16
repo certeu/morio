@@ -28,6 +28,8 @@ node --test-concurrency=1 --test
 # Stop core container
 kill -1 %1
 
-# Generate report
+# Generate coverage report (text)
+../node_modules/.bin/c8 report
+# Generate coverage report (html)
 ../node_modules/.bin/c8 report --format=html
 

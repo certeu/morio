@@ -32,7 +32,7 @@ const store = new Store().set('log', logger('trace'))
 /*
  * Client for the core API (which we are testing)
  */
-const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+const core = restClient(`http://morio-core:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
  * Client for the management API
@@ -81,8 +81,7 @@ const setup = {
   },
   tokens: {
     flags: {
-      HEADLESS_MORIO: false,
-      DISABLE_ROOT_TOKEN: false,
+      RESEED_ON_RELOAD: true,
     },
     secrets: {
       TEST_SECRET_1: 'banana',
@@ -93,20 +92,17 @@ const setup = {
   iam: {
     providers: {
       apikey: {
-        provider: 'apikey',
-        id: 'apikey',
         label: 'API Key',
+        provider: 'apikey',
       },
       mrt: {},
       local: {
-        provider: 'local',
-        id: 'mrt',
         label: 'Morio Account',
+        provider: 'local',
       },
       ldap: {
         provider: 'ldap',
         verify_certificate: false,
-        id: 'ldap',
         label: 'LDAP',
         about: 'Test LDAP server',
         server: {
