@@ -5,8 +5,9 @@ import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
 import axios from 'axios'
-import { readJsonFile } from '#shared/fs'
+import { readJsonFile, writeJsonFile } from '#shared/fs'
 import path from 'path'
+import process from 'process'
 
 /*
  * We'll re-use these in the API unit tests
@@ -24,6 +25,7 @@ const headers = {
   'x-morio-user': 'test_user',
   'x-morio-provider': 'local',
 }
+
 /*
  * Setup the store
  */
@@ -45,7 +47,10 @@ const axiosHandler = async (route, data = null, customHeaders = {}, method = 'ge
   params.push({ headers: { ...headers, ...customHeaders } })
   let result
   try {
-    result = await axios[method](`http://api:${getPreset('MORIO_API_PORT')}${route}`, ...params)
+    result = await axios[method](
+      `http://morio-api:${getPreset('MORIO_API_PORT')}${route}`,
+      ...params
+    )
     //console.log({result})
   } catch (err) {
     //console.log({err})
@@ -77,7 +82,7 @@ const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'conn
 const setup = {
   cluster: {
     name: 'Morio Unit Tests',
-    broker_nodes: ['unit.test.morio.it'],
+    broker_nodes: [process.env['MORIO_FQDN']],
   },
   tokens: {
     flags: {
@@ -210,6 +215,11 @@ const loadKeys = async () => {
   return keys
 }
 
+const writePersistedData = async (data, name = 'api_tests') =>
+  await writeJsonFile(`../local/${name}.json`, data)
+
+const readPersistedData = async (name = 'api_tests') => await readJsonFile(`../local/${name}.json`)
+
 export {
   api,
   accounts,
@@ -226,4 +236,6 @@ export {
   sleep,
   validationShouldFail,
   validateErrorResponse,
+  readPersistedData,
+  writePersistedData,
 }

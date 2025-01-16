@@ -37,8 +37,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - We renamed the `production` release channel to `stable` 
+- We removed all configuration that was handled differently for unit tests
+- [api] Remove anything done differently for unit tests
+- [api] Persist test credentials to disk so tests can be re-run incrementally
 - [client] The Morio client is now statically linked to improve portability
 - [core] We no longer populate settings with all (disabled) feature flags
+- [core] Remove anything done differently for unit tests
+- [core] Persist test credentials to disk so tests can be re-run incrementally
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 
@@ -46,7 +51,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [api] Handle browser domain mismatch in validation. [#109](https://github.com/certeu/morio/issues/109)
 - [api] The `/up` endpoint is now anonymous and returns status 200 [#133](https://github.com/certeu/morio/issues/133)
-- [api] Remove double provider prefix in RBAC username [#138](https://github.com/certeu/morio/issues/138)
+- [api] RBAC would block access when a token in a cookie was expired, even if a valid Bearer token was provided
+- [api] Update test run-script with prefixed container name
+- [api] Required length for `api_key` and `api_key_secret` were inverted in the schema
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [core] Encrypt secrets when provided at initial setup. [#136](https://github.com/certeu/morio/issues/136)

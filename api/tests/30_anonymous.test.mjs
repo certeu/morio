@@ -2,70 +2,10 @@ import { api } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg, corePkg } from './json-loader.mjs'
+import process from 'process'
 
 describe('Anonymous Routes Tests', () => {
-  /*
-   * Quick test to make sure we are back on track after reconfiguring
-   * Example response:
-   * {
-   *   info: {
-   *     about: 'Morio Management API',
-   *     name: '@morio/api',
-   *     production: false,
-   *     version: '0.2.0'
-   *   },
-   *   state: {
-   *     ephemeral: false,
-   *     uptime: 27,
-   *     start_time: 1721920395586,
-   *     reload_count: 1,
-   *     config_resolved: true,
-   *     settings_serial: 1721920395631
-   *   },
-   *   core: {
-   *     info: {
-   *       about: 'Morio Core',
-   *       name: '@morio/core',
-   *       production: false,
-   *       version: '0.2.0'
-   *     },
-   *     status: {
-   *       cluster: {
-   *         code: 0,
-   *         color: 'green',
-   *         time: 1721971430413,
-   *         updated: 1721971430413,
-   *         msg: 'Everything is ok'
-   *       }
-   *       nodes: {
-   *         'unit.test.morio.it': { api: 0, broker: 0, db: 0, ca: 0, proxy: 0, ui: 0, console: 0 }
-   *       },
-   *       cluster_leader: {
-   *         serial: 1,
-   *         uuid: '34362aae-326f-4368-8b1a-c492a44044b7'
-   *     },
-   *     nodes: {
-   *       '34362aae-326f-4368-8b1a-c492a44044b7': {
-   *         fqdn: 'unit.test.morio.it',
-   *         hostname: 'unit',
-   *         serial: 1,
-   *         uuid: '448a7148-44c6-40b9-9605-5fa421619d79',
-   *         settings: 1721971254878
-   *       },
-   *     },
-   *     node: {
-   *       uptime: 33,
-   *       cluster: '56ff7cc4-c060-4ad1-b538-ed43e89ac238',
-   *       node: '34362aae-326f-4368-8b1a-c492a44044b7',
-   *       node_serial: 1,
-   *       ephemeral: false,
-   *       reconfigure_count: 2,
-   *       config_resolved: true,
-   *       settings_serial: 1721920395631
-   *     }
-   *   }
-   * }
-   */
+  // Quick test to make sure we are back on track after reconfiguring
   it(`Should GET /status`, async () => {
     const result = await api.get('/status')
     const d = result[1]
@@ -101,12 +41,12 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.core.status.cluster.updated, 'number')
     assert.equal(typeof d.core.status.cluster.msg, 'string')
     // core.status.nodes
-    assert.equal(typeof d.core.status.nodes['unit.test.morio.it'], 'object')
+    assert.equal(typeof d.core.status.nodes[process.env['MORIO_FQDN']], 'object')
     // core.nodes
     assert.equal(typeof d.core.nodes, 'object')
     const uuid = Object.keys(d.core.nodes).pop()
-    assert.equal(d.core.nodes[uuid].fqdn, 'unit.test.morio.it')
-    assert.equal(d.core.nodes[uuid].hostname, 'unit')
+    assert.equal(d.core.nodes[uuid].fqdn, process.env['MORIO_FQDN'])
+    assert.equal(d.core.nodes[uuid].hostname, process.env['MORIO_FQDN'].split('.')[0])
     assert.equal(typeof d.core.nodes[uuid].ip, 'string')
     assert.equal(d.core.nodes[uuid].serial, 1)
     assert.equal(d.core.nodes[uuid].uuid, uuid)
@@ -115,49 +55,19 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.core.node, 'object')
     assert.equal(typeof d.core.node.uptime, 'number')
     assert.equal(typeof d.core.node.node_serial, 'number')
-    assert.equal(typeof d.core.node.reconfigure_count, 'number')
+    assert.equal(typeof d.core.node.reload_count, 'number')
     assert.equal(typeof d.core.node.settings_serial, 'number')
     assert.equal(typeof d.core.node.cluster, 'string')
     assert.equal(d.core.node.node, uuid)
   })
 
-  /*
-   * GET /up
-   * No response body
-   */
+  // GET /up
   it('Should GET /up', async () => {
     const result = await api.get('/up')
-    assert.equal(result[0], 204)
+    assert.equal(result[0], 200)
   })
 
-  /*
-   * GET /idps
-   * Example response:
-   * {
-   *   idps: {
-   *     apikey: {
-   *       id: 'apikey',
-   *       provider: 'apikey',
-   *       label: 'API Key',
-   *       about: false
-   *     },
-   *     mrt: { id: 'mrt', provider: 'mrt', about: false },
-   *     local: {
-   *       id: 'local',
-   *       provider: 'local',
-   *       label: 'Morio Account',
-   *       about: false
-   *     },
-   *     ldap: {
-   *       id: 'ldap',
-   *       provider: 'ldap',
-   *       label: 'LDAP',
-   *       about: 'Test LDAP server'
-   *     }
-   *   },
-   *   ui: {}
-   * }
-   */
+  // GET /idps
   it('Should GET /idps', async () => {
     const result = await api.get('/idps')
     const d = result[1]
@@ -191,20 +101,7 @@ describe('Anonymous Routes Tests', () => {
     assert.deepEqual(d.ui, {})
   })
 
-  /*
-   * GET /jwks
-   * Example response:
-   *  {
-   *    "keys": [
-   *      {
-   *        "kty": "RSA",
-   *        "kid": "a5lLSxoMgVHu7m1I9If0E2LwXU9pF3aCTKi6vNIGm1A",
-   *        "n": "046jSZd3WnxNO8_GY...jfigzkpVofiMwLic5o7IbqIqbxGwVkfDcDQaeArs",
-   *        "e": "AQAB"
-   *      }
-   *    ]
-   *  }
-   */
+  // GET /jwks
   it('Should GET /jwks', async () => {
     const result = await api.get('/jwks')
     const d = result[1]
@@ -222,15 +119,7 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof key.e, 'string')
   })
 
-  /*
-   * GET /ca/certificates
-   * Example response:
-   * {
-   *   root_fingerprint: '7de1670354c43391eb7ad0c20687877dac034afff24a909da033f5ced11a1061',
-   *   root_certificate: '-----BEGIN CERTIFICATE-----...',
-   *   intermediate_certificate: '-----BEGIN CERTIFICATE-----...',
-   *  }
-   */
+  // GET /ca/certificates
   it('Should GET /ca/certificates', async () => {
     const result = await api.get('/ca/certificates')
     const d = result[1]

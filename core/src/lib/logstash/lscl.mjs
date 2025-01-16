@@ -20,7 +20,6 @@ export function lsclFilter(filter) {
   return lsclBlock('filter', filter)
 }
 
-
 /**
  * Generates a logstash output configuration based on LSCL
  *
@@ -40,9 +39,6 @@ export function lsclOutput(output) {
  */
 export function lsclBlock(type, config) {
   return config.wrap
-  ? `${nl}${nl}# LSCL ${type}${nl}${type} {${nl}${config.lscl}${nl}}${nl}`
-  : `${nl}# LSCL ${type}${nl}${config.lscl}${nl}`
+    ? `${nl}${nl}# LSCL ${type}${nl}${type} {${nl}${config.lscl}${nl}}${nl}`
+    : `${nl}# LSCL ${type}${nl}${config.lscl}${nl}`
 }
-
-
-

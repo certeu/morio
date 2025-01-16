@@ -69,5 +69,5 @@ const isApiUp = async (reload = false) => {
     }
   )
 
-  return status === 204
+  return reload ? status === 204 : status === 200
 }

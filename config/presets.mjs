@@ -170,12 +170,6 @@ presets.MORIO_API_LOG_LEVEL = 'trace'
 predocs.MORIO_API_PORT = 'TCP port for the API service to listen on'
 presets.MORIO_API_PORT = 3000
 
-// Hosts for which to forego the https validation check
-// Used in unit tests only
-predocs.MORIO_UNIT_TEST_HOST = `Host for which to forego the HTTPS validation
-check. Used in unit tests only`
-presets.MORIO_UNIT_TEST_HOST = 'unit.test.morio.it'
-
 /*
  * Broker presets
  */

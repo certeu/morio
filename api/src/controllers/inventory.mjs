@@ -19,7 +19,6 @@ import {
   saveHost,
 } from '../lib/inventory.mjs'
 
-
 /**
  * This inventory controller handles API access to the inventory.
  *
@@ -127,12 +126,12 @@ Controller.prototype.deleteHost = async function (req, res) {
  * @param {object} res - The response object from Express
  * @param {string} format - When this is 'object' we return an object, by default we return an array
  */
-Controller.prototype.listHosts = async function (req, res, format="array") {
+Controller.prototype.listHosts = async function (req, res, format = 'array') {
   const list = await listHosts()
 
   if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 
-  if (format !== 'object')  return res.send(list)
+  if (format !== 'object') return res.send(list)
 
   /*
    * Transform list into an obhject
@@ -378,9 +377,7 @@ Controller.prototype.listOss = async function (req, res) {
 Controller.prototype.getStats = async function (req, res) {
   const stats = await getStats()
 
-  return stats
-    ? res.send(stats)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return stats ? res.send(stats) : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -405,5 +402,3 @@ Controller.prototype.search = async function (req, res) {
     ? res.send(list)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
-
-

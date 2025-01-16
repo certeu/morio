@@ -100,7 +100,7 @@
     "spellcheck": "./scripts/spellcheck-docs.sh",
     "subscribe": "node --no-warnings scripts/kafka-client.mjs",
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
-    "test:api": "npm run redev && sleep 5 && ./api/run-test-container.sh && npm run redev",
+    "test:api": "npm run redev && ./scripts/sleep 7 && ./api/run-test-container.sh && npm run redev",
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {

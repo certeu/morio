@@ -250,4 +250,3 @@ export async function ensureServiceCertificate(service, internal = false, chain 
     key: certAndKey.key,
   }
 }
-

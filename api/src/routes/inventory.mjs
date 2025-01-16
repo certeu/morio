@@ -44,7 +44,6 @@ export function routes(app) {
    */
   app.get(`/inventory/hosts.obj`, rbac.user, (req, res) => inventory.listHosts(req, res, 'object'))
 
-
   /*
    * Read a host
    */

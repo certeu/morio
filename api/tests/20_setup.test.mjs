@@ -8,53 +8,30 @@ import {
   isCoreReady,
   isApiReady,
   validateErrorResponse,
+  writePersistedData,
 } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
 import axios from 'axios'
+import process from 'process'
+
 describe('API Setup Tests', () => {
-  /*
-   * POST /setup
-   * Example response:
-   * {
-   *   status: 400,
-   *   title: 'This request violates the data schema',
-   *   detail: 'The request data failed validation against the Morio data schema. This means the request is invalid.',
-   *   type: 'https://morio.it/reference/errors/morio.api.schema.violation',
-   *   instance: 'http://api:3000/setup'
-   * }
-   */
+  // POST /setup
   it('Should POST /setup (invalid data)', async () => {
     const result = await api.post('/setup', { settings: 'are not valid' })
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
-  /*
-   * POST /setup
-   * Example response:
-   * {
-   *   result: 'success',
-   *   uuids: {
-   *     node: '40361cd8-a149-4675-bd46-11a2b48acd04',
-   *     cluster: '26e66c95-c342-49fc-8e3a-f5ca69b392ba'
-   *   },
-   *   root_token: {
-   *     about: 'This is the Morio root token. You can use it to authenticate before any authentication providers have been set up. Store it in a safe space, as it will never be shown again.',
-   *     value: 'mrt.7297ef89ed8c855ffc6786e0377bb7bf5e0137dcbc367494aebd39782747ab43'
-   *   }
-   * }
-   */
+  // POST /setup
   it('Should POST /setup', async () => {
-    /*
-     * Need to handle this with axios as we need to inject the headers
-     * that are typically injected by the proxy.
-     * Note that we also need to fake them to make core accept
-     * this setup request as if we're talking to host unit.test.morio.it.
-     */
-    const headers = { 'x-forwarded-host': 'unit.test.morio.it' }
+    // Need to handle this with axios as we need to inject the headers
+    // that are typically injected by the proxy.
+    // Note that we also need to fake them to make core accept
+    // this setup request as if we're talking to host unit.test.morio.it.
+    const headers = { 'x-forwarded-host': process.env['MORIO_FQDN'] }
     const axiosResult = await axios.post(
-      `http://core:${getPreset('MORIO_CORE_PORT')}/setup`,
+      `http://morio-api:${getPreset('MORIO_API_PORT')}/setup`,
       { ...setup, headers },
       { headers }
     )
@@ -82,22 +59,19 @@ describe('API Setup Tests', () => {
     assert.equal(d.root_token.value.length, 68)
     assert.equal(d.root_token.value.slice(0, 4), 'mrt.')
 
-    /*
-     * Keep root token in store
-     */
+    // Keep root token in store and persist to disk to re-start tests
     store.mrt = d.root_token.value
     store.mrtAuth = {
       Authorization: Buffer.from(`mrt:${d.root_token.value}`).toString('base64'),
     }
+    await writePersistedData({ mrt: store.mrt, mrtAuth: store.mrtAuth })
   })
 })
 
 describe('Ensure we are out of configuration mode', async () => {
-  /*
-   * When running tests, the previous tests just setup core
-   * so we are probably still resolving the configuration.
-   * That's why we wait here and give feedback so it's clear what is going on.
-   */
+  // When running tests, the previous tests just setup core
+  // so we are probably still resolving the configuration.
+  // That's why we wait here and give feedback so it's clear what is going on.
   const coreReady = await attempt({
     every: 1,
     timeout: 90,

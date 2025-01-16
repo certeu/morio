@@ -1,23 +1,14 @@
-import { store, api, validateErrorResponse, loadKeys } from './utils.mjs'
+import { store, api, validateErrorResponse, readPersistedData } from './utils.mjs'
 import { errors } from '../src/errors.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('API MRT Tests', async () => {
-  const keys = await loadKeys()
-  store.set('mrt', keys.mrt)
-  const mrt = keys.mrt
-  /*
-   * POST /login
-   * Example response:
-   * {
-   *   jwt: 'eyJhbGciOiJSUzI1...',
-   *   data: {
-   *     user: 'root',
-   *     role: 'user'
-   *   }
-   * }
-   */
+  const data = await readPersistedData()
+  store.set('mrt', data.mrt)
+  store.set('mrtAuth', data.mrtAuth)
+  const mrt = data.mrt
+  // POST /login
   it(`Should POST /login`, async () => {
     const data = {
       provider: 'mrt',
@@ -35,19 +26,7 @@ describe('API MRT Tests', async () => {
     store.mrt_jwt = d.jwt
   })
 
-  /*
-   * POST /login (non-existing role)
-   * Example response:
-   * {
-   *   status: 403,
-   *   title: 'Role unavailable',
-   *   detail: 'The requested role is not available to this account.',
-   *   type: 'https://morio.it/reference/errors/morio.api.account.role.unavailable',
-   *   instance: 'http://api:3000/login',
-   *   requested_role: 'schmuser',
-   *   available_roles: [ 'user', 'manager', 'operator', 'engineer', 'root' ]
-   * }
-   */
+  // POST /login (non-existing role)
   it(`Should POST /login (non-existing role)`, async () => {
     const data = {
       provider: 'mrt',
@@ -57,26 +36,10 @@ describe('API MRT Tests', async () => {
       },
     }
     const result = await api.post(`/login`, data)
-    validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
-  /*
-   * GET /whoami (JWT in Bearer header)
-   * Example response:
-   * {
-   *   user: 'root',
-   *   role: 'user',
-   *   provider: 'mrt',
-   *   node: '3bf79fc1-9373-4589-bcd5-13e4ac1f77d9',
-   *   deployment: '5039e84d-805a-4c15-a0b2-1a08a5d8b653',
-   *   iat: 1715068923,
-   *   nbf: 1715068923,
-   *   exp: 1715083323,
-   *   aud: 'morio',
-   *   iss: 'morio',
-   *   sub: 'morio'
-   * }
-   */
+  // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.mrt_jwt}` })
     assert.equal(result[0], 200)
@@ -89,13 +52,11 @@ describe('API MRT Tests', async () => {
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
   })
 
-  /*
-   * GET /auth (JWT in Bearer header)
-   * No response body
-   */
+  // GET /auth (JWT in Bearer header)
   it(`Should GET /auth (JWT in Bearer header)`, async () => {
     const result = await api.get(`/auth`, {
-      'X-Forwarded-Uri': '/-/api/settings',
+      'X-Forwarded-Uri': '/-/api/whoami',
+      'X-Morio-Service': 'api',
       Authorization: `Bearer ${store.mrt_jwt}`,
     })
     assert.equal(result[0], 200)

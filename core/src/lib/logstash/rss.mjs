@@ -4,7 +4,4 @@
  */
 import { baseInput as rssInput, baseOutput as rssOutput } from './lib.mjs'
 
-export {
-  rssInput,
-  rssOutput,
-}
+export { rssInput, rssOutput }

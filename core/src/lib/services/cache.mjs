@@ -17,7 +17,7 @@ export const service = {
      *
      * @return {boolean} wanted - Wanted or not
      */
-    wanted: () => (utils.getFlag('ENFORCE_SERVICE_CACHE') || isTapWanted()),
+    wanted: () => utils.getFlag('ENFORCE_SERVICE_CACHE') || isTapWanted(),
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

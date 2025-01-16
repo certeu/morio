@@ -71,8 +71,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ...pullConfig,
       // Name to use for the running container
       container_name: 'proxy',
-      // Aliases to use on the docker network (used to add unit test alias)
-      aliases: !PROD ? ['unit.test.morio.it'] : [],
+      // Aliases to use on the docker network
+      aliases: [],
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

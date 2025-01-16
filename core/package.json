@@ -10,7 +10,7 @@
     "lint": "eslint --fix 'src/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
     "test": "docker exec -it morio-core node --no-warnings --test-concurrency=1 --test",
-    "retest": "cd .. && npm run redev && cd - && sleep 5 && npm run test"
+    "retest": "cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
   },
   "dependencies": {
     "axios": "^1.7.7",

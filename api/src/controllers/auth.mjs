@@ -109,7 +109,7 @@ Controller.prototype.authenticate = async function (req, res) {
    * If the JWT is not in the cookie, check the Authorization header
    */
   let header = false
-  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+  if (!payload && req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
     header = true
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
@@ -118,7 +118,7 @@ Controller.prototype.authenticate = async function (req, res) {
   /*
    * Is it perhaps a request without a token but with credentials?
    */
-  if (req.headers.authorization && req.headers.authorization.includes('Basic ')) {
+  if (!payload && req.headers.authorization && req.headers.authorization.includes('Basic ')) {
     header = true
     const credentials = Buffer.from(req.headers.authorization.split('Basic ')[1].trim(), 'base64')
       .toString('utf-8')
