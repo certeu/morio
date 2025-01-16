@@ -129,7 +129,7 @@ export async function validateSettings(newSettings, headers = false) {
           } else {
             if (status.info?.name === '@morio/api') {
               report.warnings.push(
-                `Node ${i} runs Morio, but is not in ephemeral mode, its settings would be overwritten`
+                `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
               )
             } else {
               report.errors.push(`Node ${i} does not seem to run Morio`)
