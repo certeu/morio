@@ -22,7 +22,7 @@ describe('Core Setup Tests', () => {
     const result = await core.post('/setup', {
       ...setup,
       // Normally, the proxy adds the headers to the body
-      // Since we're talking to core direcytly, we need to do this ourselves
+      // Since we're talking to core directly, we need to do this ourselves
       headers: { 'x-forwarded-host': process.env['MORIO_FQDN'] },
     })
     const d = result[1]
