@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('Core Docker GET Info Tests', () => {
-  // GET /docker/all-contaienrs
+  // GET /docker/all-containers
   it(`Should GET /docker/all-containers`, async () => {
     const result = await core.get(`/docker/all-containers`)
     const d = result[1]
