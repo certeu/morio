@@ -14,6 +14,7 @@ on:
 jobs:
   test:
     # This needs to run on a self-hosted runner
+    # I also need a PR to make this work so here we go with a pointless change
     runs-on: self-hosted
     steps:
       - name: Checkout PR Code
