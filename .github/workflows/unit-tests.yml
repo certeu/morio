@@ -33,6 +33,9 @@ jobs:
       - name: Configure repository
         run: npm run reconfigure
 
+      - name: Build docker images
+        run: npm run build:dev
+
       - name: Run Core unit tests
         env:
           MORIO_FQDN: runner.morio.it
