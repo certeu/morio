@@ -94,6 +94,7 @@
     "print:cli.sh": "./scripts/print-cli-config.sh",
     "prod": "./core/run-prod-container.sh",
     "pull-oci": "./scripts/pull-oci-images.sh",
+    "prereconfigure": "./scripts/preconfigure.sh",
     "reconfigure": "node scripts/reconfigure.mjs",
     "redev": "npm run destroy && npm run dev",
     "reprod": "npm run destroy && npm run prod",
