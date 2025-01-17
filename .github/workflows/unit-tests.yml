@@ -22,13 +22,14 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
 
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/iron
+
       - name: Run unit tests
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GH_TOKEN: ${{ github.token }}
-        shell: bash -l {0}  # Use login shell for nvm to work
-        run: |
-          export NVM_DIR="$HOME/.nvm"
-          $NVM_DIR/nvm.sh
-          nvm use lts/iron
-          ./.github/workflows/unit-tests.sh
+        run: ./.github/workflows/unit-tests.sh
