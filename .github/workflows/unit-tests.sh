@@ -28,9 +28,6 @@ export CI_STATUS_DEPS="Starting..."
 export CI_ICON_DEPS="🚀"
 createPrComment
 
-# Use NVM for node version
-nvm use lts/iron
-
 # Install dependencies, CI style
 # See: https://docs.npmjs.com/cli/v11/commands/npm-ci
 npm ci
