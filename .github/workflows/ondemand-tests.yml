@@ -13,6 +13,11 @@ jobs:
       contains(fromJSON('["joostdecock", "serge-tellene", "levente232"]'), github.event.comment.user.login) && contains(github.event.comment.body, 'do magic')
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
+
       - name: Run end-to-end tests
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
