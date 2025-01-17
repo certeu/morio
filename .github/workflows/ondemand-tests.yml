@@ -10,7 +10,7 @@ jobs:
     # we need to make sure this is a command on a pull request
     if: |
       github.event.issue.pull_request &&
-      contains(fromJSON('["joostdecock", "serge-tellene", "levente232"]'), github.event.comment.user.login) && contains(github.event.comment.body, 'do magic')
+      contains(fromJSON('["joostdecock", "serge-tellene", "levente232"]'), github.event.comment.user.login) && contains(github.event.comment.body, vars.ITEST_DEPLOY_TRIGGER)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout PR Code
