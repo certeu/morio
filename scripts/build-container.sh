@@ -9,7 +9,10 @@ then
   echo "No target environment specified, will default to development."
   echo "Building container for Morio development environment."
   echo ""
+  RELEASE_CHANNEL="dev"
+  RELEASE_CHANNEL_TAG="dev"
   NAMESPACE="devmorio"
+  TAG_SUFFIX=""
 else
   if [ "stable" == $2 ]
   then
@@ -43,6 +46,7 @@ else
     echo "Building container for Morio development environment."
     echo ""
     RELEASE_CHANNEL="dev"
+    RELEASE_CHANNEL_TAG="dev"
     NAMESPACE="devmorio"
     TAG_SUFFIX=""
   fi
@@ -63,8 +67,11 @@ else
     npm run build:clients
   fi
 
-  # Now build the container
+  # Keep coverage reports out of the build
   cd $MORIO_GIT_ROOT/$1
+  sudo rm -rf ./coverage
+
+  # Now build the container
   tar -ch . | docker build \
     --file Containerfile.$RELEASE_CHANNEL \
     --tag $NAMESPACE/$CONTAINER:$RELEASE_CHANNEL_TAG \

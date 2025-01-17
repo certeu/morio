@@ -34,7 +34,7 @@ jobs:
         run: npm run reconfigure
 
       - name: Build docker images
-        run: npm run build:dev
+        run: npm run buildall:testing
 
       - name: Run Core unit tests
         env:
