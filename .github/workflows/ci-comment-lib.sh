@@ -38,7 +38,7 @@ function updateComment {
   cat .github/workflows/ci-comment-template-tests.md | ./local/bin/mo | gh pr comment --edit-last $PR_NUMBER --body-file -
 }
 
-export CI_HEADER="As requested by @{{ COMMENT_AUTHOR }} in [this comment]({{ COMMENT_URL }}), we will now proceed to test this pull request.<br>To do so, we will provision ephemeral infrastructure to run the end-to-end tests. This will take a while, but we will keep you abreast by updating this comment as we make progress."
+export CI_HEADER="As requested by @$COMMENT_AUTHOR in [this comment]($COMMENT_URL), we will now proceed to test this pull request.<br>To do so, we will provision ephemeral infrastructure to run the end-to-end tests. This will take a while, but we will keep you abreast by updating this comment as we make progress."
 export CI_STATUS_REPO="Pending"
 export CI_STATUS_DEPS="Pending"
 export CI_STATUS_UCORE="Pending"
