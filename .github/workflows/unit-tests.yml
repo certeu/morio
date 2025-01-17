@@ -34,7 +34,11 @@ jobs:
         run: npm run reconfigure
 
       - name: Run Core unit tests
+        env:
+          MORIO_FQDN: runner.morio.it
         run: npm run test:core
 
       - name: Run API unit tests
+        env:
+          MORIO_FQDN: runner.morio.it
         run: npm run test:api
