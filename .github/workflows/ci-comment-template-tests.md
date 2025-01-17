@@ -1,0 +1,2 @@
+{{{ CI_HEADER }}}\n\n | Step                   | Result                 | Icon                 |\n| ---------------------- | ---------------------- | -------------------- |\n| Instantiate repository | {{ CI_STATUS_REPO }}   | {{ CI_ICON_REPO }}   |\n| Install dependencies   | {{ CI_STATUS_DEPS }}   | {{ CI_ICON_DEPS }}   |\n| Run CORE unit tests    | {{ CI_STATUS_UCORE }}  | {{ CI_ICON_UCORE }}  |\n| Run API unit tests     | {{ CI_STATUS_UAPI }}   | {{ CI_ICON_UAPI }}   |\n\n{{{ CI_FOOTER }}}{{{CI_ERROR_FOOTER}}}
+
