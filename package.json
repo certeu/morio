@@ -101,7 +101,6 @@
     "ship:testing": "RELEASE_CHANNEL=testing ./scripts/ship.sh",
     "ship:canary": "RELEASE_CHANNEL=canary ./scripts/ship.sh",
     "ship:stable": "RELEASE_CHANNEL=stable ./scripts/ship.sh",
-    "ship": "RELEASE_CHANNEL=testing ./scripts/ship.sh",
     "spellcheck": "./scripts/spellcheck-docs.sh",
     "subscribe": "node --no-warnings scripts/kafka-client.mjs",
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
