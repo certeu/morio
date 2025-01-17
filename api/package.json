@@ -1,6 +1,6 @@
 {
   "name": "@morio/api",
-  "version": "0.5.5",
+  "version": "0.6.0-rc.1",
   "description": "Morio Management API",
   "private": true,
   "scripts": {
@@ -33,6 +33,7 @@
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.18.0",
     "glob": "^11.0.0",
+    "ioredis": "^5.4.2",
     "is-in-subnet": "^4.0.1",
     "joi": "^17.13.3",
     "joi-to-swagger": "^6.2.0",

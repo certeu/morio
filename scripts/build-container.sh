@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Sounce config variables
+# Source config variables
 source config/cli.sh
 #
 # Check that an environment was specified
@@ -9,29 +9,42 @@ then
   echo "No target environment specified, will default to development."
   echo "Building container for Morio development environment."
   echo ""
-  TARGET="dev"
   NAMESPACE="devmorio"
 else
-  if [ "prod" == $2 ]
+  if [ "stable" == $2 ]
   then
     echo ""
-    echo "Building container for Morio production environment."
+    echo "Building container in channel: stable"
     echo ""
-    TARGET="prod"
+    RELEASE_CHANNEL="stable"
+    RELEASE_CHANNEL_TAG="latest"
     NAMESPACE="itsmorio"
-  elif [ "test" == $2 ]
+    TAG_SUFFIX=""
+  elif [ "canary" == $2 ]
   then
     echo ""
-    echo "Building container for Morio testing environment."
+    echo "Building container in channel: canary"
     echo ""
-    TARGET="test"
-    NAMESPACE="testmorio"
+    RELEASE_CHANNEL="canary"
+    RELEASE_CHANNEL_TAG="canary"
+    NAMESPACE="itsmorio"
+    TAG_SUFFIX="-canary"
+  elif [ "testing" == $2 ]
+  then
+    echo ""
+    echo "Building container in channel:  testing"
+    echo ""
+    RELEASE_CHANNEL="testing"
+    RELEASE_CHANNEL_TAG="testing"
+    NAMESPACE="itsmorio"
+    TAG_SUFFIX="-$(git rev-parse HEAD)"
   else
     echo ""
     echo "Building container for Morio development environment."
     echo ""
-    TARGET="dev"
+    RELEASE_CHANNEL="dev"
     NAMESPACE="devmorio"
+    TAG_SUFFIX=""
   fi
 fi
 
@@ -50,20 +63,12 @@ else
     npm run build:clients
   fi
 
-  # Release to tag this with
-  # Either `latest` for production or `next` for a pre-release
-  if [[ "$MORIO_VERSION_TAG" == *-* ]]; then
-    MORIO_RELEASE="testing"
-  else
-    MORIO_RELEASE="latest"
-  fi
-
   # Now build the container
   cd $MORIO_GIT_ROOT/$1
   tar -ch . | docker build \
-    --file Containerfile.$TARGET \
-    --tag $NAMESPACE/$CONTAINER:$MORIO_RELEASE \
-    --tag $NAMESPACE/$CONTAINER:$MORIO_VERSION_TAG \
+    --file Containerfile.$RELEASE_CHANNEL \
+    --tag $NAMESPACE/$CONTAINER:$RELEASE_CHANNEL_TAG \
+    --tag $NAMESPACE/$CONTAINER:$MORIO_VERSION_TAG$TAG_SUFFIX \
     -
 fi
 
