@@ -114,6 +114,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e MORIO_LOGS_ROOT=${presetGetters[env]('MORIO_LOGS_ROOT')} \\
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
   -e MORIO_DOCKER_LOG_DRIVER=${MORIO_DOCKER_LOG_DRIVER} \\
+  -e MORIO_FQDN=${process.env['MORIO_FQDN']} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
@@ -128,11 +129,15 @@ const preApiTest = `
 #   - The morionet network is available so we can attach to it
 #   - The reporter inside our test container has permissions to write coverage output
 #
-docker rm -f api
+docker rm -f morio-api
 docker network create morionet
 sudo rm -rf ./api/coverage/*
-mkdir ./api/coverage/tmp
-sudo chown 2112:2112 ./api/coverage/tmp
+mkdir -p ./api/coverage/tmp
+sudo chown -R 2112:2112 ./api/coverage
+sudo touch ./local/api_tests.json
+sudo chown 2112:2112 ./local/api_tests.json
+sudo echo "" > ./local/api_test_logs.ndjson
+sudo chown 2112:2112 ./local/api_test_logs.ndjson
 
 # Start an ephemeral LDAP instance so we can test IDP/LDAP
 echo "Starting ephemeral LDAP server"
@@ -154,6 +159,17 @@ sudo cp -R ${MORIO_GIT_ROOT}/moriod/var/lib/morio/moriod/webroot ${MORIO_GIT_ROO
 
 `
 
+const testFqdnCheck = `
+if [ -z "\${MORIO_FQDN}" ]; then
+  echo ""
+  echo "Error: MORIO_FQDN is not set"
+  echo "To be able to run the unit tests, we need to know the FQDN for the Morio collector."
+  echo "Please set the MORIO_FQDN variable in your local environment. Eg:"
+  echo "export MORIO_FQDN=10.0.0.1.nip.io"
+  exit 1
+fi
+`
+
 const script = (name, env) => `#!/bin/bash
 #
 # This file is auto-generated
@@ -161,6 +177,8 @@ const script = (name, env) => `#!/bin/bash
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
+${(name === 'core' && env === 'test') ? testFqdnCheck : ''}
+${(name === 'api' && env === 'test') ? testFqdnCheck : ''}
 ${(name === 'core' && env === 'dev') ? coreWebConfig : ''}
 ${name === 'api' ? preApiTest : ''}
 docker run ${cliOptions(name, env)}

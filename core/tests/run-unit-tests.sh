@@ -5,7 +5,7 @@ cd /morio/core
 
 # Start the core instance, as background job
 # Also wrap it in c8 to generate a coverage report
-../node_modules/.bin/c8 --reporter=html -- node src/index.mjs &> /dev/null &
+../node_modules/.bin/c8 --reporter=html -- node ./src/index.mjs &> ../local/core_test_logs.ndjson &
 
 # Wait for core to come up by checking the status endpoint
 TRIES=0
@@ -28,6 +28,8 @@ node --test-concurrency=1 --test
 # Stop core container
 kill -1 %1
 
-# Generate report
-../node_modules/.bin/c8 report --format=html
+# Generate coverage report (text)
+../node_modules/.bin/c8 report
+# Generate coverage report (html)
+../node_modules/.bin/c8 report --reporter=html
 

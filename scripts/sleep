@@ -1,0 +1,15 @@
+#!/bin/bash
+if [ -z "$1" ]; then
+  echo "Please specify how long we should sleep"
+  exit 1
+fi
+
+echo "Taking a $1 seconds powernap:"
+TICKS=1
+while [ $TICKS -le $1 ]
+do
+  echo "  zzz [$TICKS/$1]"
+  sleep 1
+  TICKS=$((TICKS+1))
+done
+

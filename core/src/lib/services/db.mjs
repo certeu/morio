@@ -128,14 +128,13 @@ async function ensureTablesExist() {
     log.debug(`[db] Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1]?.results?.[0]?.error) {
-      if (result[1].results[0].error.includes('already exists')) log.debug(`[db] Table ${table} already existed`)
+      if (result[1].results[0].error.includes('already exists'))
+        log.debug(`[db] Table ${table} already existed`)
       else log.warn(result[1].results[0].error, `Failed to create table ${table}`)
-
     } else if (result[0] === 200) {
       log.debug(`[db] Table ${table} created`)
       initial = true
-    }
-    else log.warn(`Failed to create table ${table} for an unknown reason`)
+    } else log.warn(`Failed to create table ${table} for an unknown reason`)
   }
   if (initial) {
     /*

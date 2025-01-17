@@ -5,46 +5,7 @@ import { pkg, corePkg } from './json-loader.mjs'
 import { errors } from '../src/errors.mjs'
 
 describe('Ephemeral API: Status Routes', () => {
-  /*
-   * GET /status
-   * Example response:
-   * {
-   *   info: {
-   *     about: 'Morio Management API',
-   *     name: '@morio/api',
-   *     production: false,
-   *     version: '0.2.0'
-   *   },
-   *   state: {
-   *     ephemeral: true,
-   *     uptime: 11,
-   *     start_time: 1721909714669,
-   *     reload_count: 1,
-   *     config_resolved: true,
-   *     settings_serial: 0
-   *   },
-   *   core: {
-   *     info: {
-   *       about: 'Morio Core',
-   *       name: '@morio/core',
-   *       production: false,
-   *       version: '0.2.0'
-   *     },
-   *     status: {
-   *       cluster: { code: 2, color: 'amber', time: 1721907766101 },
-   *     },
-   *     nodes: {},
-   *     node: {
-   *       uptime: 1960,
-   *       ephemeral: true,
-   *       ephemeral_uuid: '4a207d56-728b-472f-8d20-52326c118661',
-   *       reconfigure_count: 1,
-   *       config_resolved: true,
-   *       settings_serial: 0
-   *     }
-   *   }
-   * }
-   */
+  // GET /status
   it('Should load /status', async () => {
     const result = await api.get('/status')
     assert.equal(true, Array.isArray(result), true)
@@ -82,15 +43,13 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(typeof d.core.status.cluster.time, 'number')
   })
 
-  /*
-   * GET /up
-   * No response body
-   */
+  // GET /up
   it('Should load /up', async () => {
-    const result = await api.get('/status')
+    const result = await api.get('/up')
     assert.equal(true, Array.isArray(result), true)
     assert.equal(3, result.length, 3)
     assert.equal(200, result[0], 200)
+    assert.equal(result[1].up, true)
   })
 })
 
@@ -152,17 +111,7 @@ describe('Ephemeral API: Non-available Routes', () => {
     delete: ['/apikeys/key'],
   }
 
-  /*
-   * Loop all GET endpoints that should not be available in ephemeral mode
-   * Example return:
-   * {
-   *   status: 409,
-   *   title: 'Not available in ephemeral mode',
-   *   detail: 'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
-   *   type: 'https://morio.it/reference/errors/morio.api.ephemeral.prohibited',
-   *   instance: 'http://api:3000/idps'
-   * }
-   */
+  // Loop all GET endpoints that should not be available in ephemeral mode
   for (const url of test.get) {
     it(`Should not GET ${url} in ephemeral mode`, async () => {
       const result = await api.get(url)
@@ -170,9 +119,7 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all POST endpoints that should not be available in ephemeral mode
-   */
+  // Loop all POST endpoints that should not be available in ephemeral mode
   for (const url of test.post) {
     it(`Should not POST ${url} in ephemeral mode`, async () => {
       const result = await api.post(url, {})
@@ -180,9 +127,7 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all PATCH endpoints that should not be available in ephemeral mode
-   */
+  // Loop all PATCH endpoints that should not be available in ephemeral mode
   for (const url of test.patch) {
     it(`Should not PATCH ${url} in ephemeral mode`, async () => {
       const result = await api.patch(url, {})
@@ -190,9 +135,7 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all DELETE endpoints that should not be available in ephemeral mode
-   */
+  // Loop all DELETE endpoints that should not be available in ephemeral mode
   for (const url of test.delete) {
     it(`Should not DELETE ${url} in ephemeral mode`, async () => {
       const result = await api.delete(url)
@@ -200,9 +143,7 @@ describe('Ephemeral API: Non-available Routes', () => {
     })
   }
 
-  /*
-   * Loop all PUT endpoints that should not be available in ephemeral mode
-   */
+  // Loop all PUT endpoints that should not be available in ephemeral mode
   for (const url of test.put) {
     it(`Should not PUT ${url} in ephemeral mode`, async () => {
       const result = await api.put(url, {})

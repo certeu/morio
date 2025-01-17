@@ -10,7 +10,7 @@ import { utils, log } from './utils.mjs'
  * @param {object} newSettings - The settings to validate
  * @retrun {object} report - An object detailing the results of the validation
  */
-export async function validateSettings(newSettings, headers=false) {
+export async function validateSettings(newSettings, headers = false) {
   /*
    * Set up the report skeleton that we will return
    */
@@ -111,39 +111,34 @@ export async function validateSettings(newSettings, headers=false) {
     i++
     /*
      * Try contacting nodes over HTTPS, ignore certificate
-     * We bypass this when it's the unit test node
      */
     const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
-    if (node !== utils.getPreset('MORIO_UNIT_TEST_HOST')) {
-      httpPromises.push(
-        await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
-          (status) => {
-            if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
-            else {
-              report.info.push(`Validation failed for node ${i}`)
-              report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+    httpPromises.push(
+      await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
+        (status) => {
+          if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
+          else {
+            report.info.push(`Validation failed for node ${i}`)
+            report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
 
-              return abort()
-            }
+            return abort()
+          }
 
-            if (status.state?.ephemeral) {
-              report.info.push(`Node ${i} runs Morio and is ready for setup`)
+          if (status.state?.ephemeral) {
+            report.info.push(`Node ${i} runs Morio and is ready for setup`)
+          } else {
+            if (status.info?.name === '@morio/api') {
+              report.warnings.push(
+                `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
+              )
             } else {
-              if (status.info?.name === '@morio/api') {
-                report.warnings.push(
-                  `Node ${i} runs Morio, but is not in ephemeral mode, its settings would be overwritten`
-                )
-              } else {
-                report.errors.push(`Node ${i} does not seem to run Morio`)
-                abort()
-              }
+              report.errors.push(`Node ${i} does not seem to run Morio`)
+              abort()
             }
           }
-        )
+        }
       )
-    } else {
-      report.info.push(`This is the unit test host, not validating HTTPS connection.`)
-    }
+    )
   }
   await Promise.all(httpPromises)
 
@@ -158,7 +153,7 @@ export async function validateSettings(newSettings, headers=false) {
     report.deployable = false
     report.warnings.push(`You browser is connected to ${
       headers['x-forwarded-host']
-      }, but that is not one of the broker nodes.
+    }, but that is not one of the broker nodes.
       Please make sure to use the FQDN of the broker nodes to configure your system.`)
   }
 
