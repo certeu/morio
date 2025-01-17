@@ -30,8 +30,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Debug info
-        run: pwd && whoami && ls -l ./core
+      - name: Configure repository
+        run: npm run reconfigure
 
       - name: Run Core unit tests
         run: npm run test:core
