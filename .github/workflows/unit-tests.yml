@@ -22,7 +22,6 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
 
-
       - name: Run unit tests
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
