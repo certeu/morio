@@ -8,13 +8,12 @@
 # Make sure to do so in the repository root
 #
 name: Run unit tests
-# This needs to run on a self-hosted runner
-runs-on: self-hosted
 on:
   pull_request:
 
 jobs:
   test:
+    # This needs to run on a self-hosted runner
     runs-on: self-hosted
     steps:
       - name: Checkout PR Code
@@ -22,10 +21,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
 
-      - name: Run end-to-end tests
+      - name: Run unit tests
         env:
           PR_NUMBER: ${{ github.event.issue.number }}
           GH_TOKEN: ${{ github.token }}
           COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
           COMMENT_URL: ${{ github.event.comment.html_url }}
-        run: ./.github/workflows/run-e2e-tests.sh
+        run: ./.github/workflows/unit-tests.sh
