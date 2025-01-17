@@ -22,14 +22,16 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
 
-
       - name: Set up NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: lts/iron
 
-      - name: Run unit tests
-        env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          GH_TOKEN: ${{ github.token }}
-        run: ./.github/workflows/unit-tests.sh
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Core unit tests
+        run: npm run test:core
+
+      - name: Run API unit tests
+        run: npm run test:api
