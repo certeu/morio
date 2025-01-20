@@ -60,6 +60,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/apikeys',
       '/token',
       '/whoami',
+      '/limits',
       '/docker/containers/',
       '/docker/containers/id',
       '/docker/containers/id/logs',

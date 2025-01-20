@@ -61,6 +61,18 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.core.node.node, uuid)
   })
 
+  it('Should GET /limits', async () => {
+    const result = await api.get('/limits')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d.ip, 'string')
+    assert.equal(typeof d.hits, 'number')
+    assert.equal(typeof d.hits, 'number')
+    assert.equal(typeof d.reset_time, 'string')
+    assert.equal(typeof d.reset_seconds, 'number')
+  })
+
   // GET /up
   it('Should GET /up', async () => {
     const result = await api.get('/up')
