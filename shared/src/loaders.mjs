@@ -489,7 +489,7 @@ export async function loadClientModules(settings, log) {
           )) {
             const copy = await copyPreseedFile({
               sourceFile,
-              targetFile,
+              targetFile: (sourceFile.slice(-4) === ".yml" ? `${targetFile}.disabled` : targetFile),
               targetFolder,
             })
             if (copy) log.debug(`Seeding client module file: ${targetFile}`)
