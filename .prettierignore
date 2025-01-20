@@ -9,3 +9,9 @@ clients/linux/etc/morio/metrics/module-templates.d/*
 docs/docs/*
 docs/jargon/*
 docs/includes/*
+# Do not lint these
+api/Containerfile.*
+core/Containerfile.*
+tap/Containerfile.*
+ui/Containerfile.*
+builders/dbuilder/Containerfile.*

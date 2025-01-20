@@ -18,6 +18,7 @@ COPY . .
 
 ## Copy in entrypoint.sh
 COPY ./entrypoint.sh /entrypoint.sh
+COPY ./entrypoint-loader.mjs /entrypoint-loader.mjs
 
 ## Install dependencies
 RUN npm i

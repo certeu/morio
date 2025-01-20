@@ -1,0 +1,46 @@
+#
+# This runs unit tests for the core and api in CI
+# To run these tests locally, you can run the following:
+#
+# - npm run test:core
+# - npm run tsest:api
+#
+# Make sure to do so in the repository root
+#
+name: Run unit tests
+on:
+  pull_request:
+
+jobs:
+  test:
+    # This needs to run on a self-hosted runner
+    runs-on: self-hosted
+    steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/iron
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure repository
+        run: npm run reconfigure
+
+      - name: Build docker images for local development
+        run: npm run buildall:dev
+
+      - name: Run Core unit tests
+        env:
+          MORIO_FQDN: runner.morio.it
+        run: npm run test:core
+
+      - name: Run API unit tests
+        env:
+          MORIO_FQDN: runner.morio.it
+        run: npm run test:api

@@ -1,5 +1,5 @@
 name: On-demand end-to-end tests
-
+runs-on: self-hosted
 on:
   issue_comment:
     types: [created]

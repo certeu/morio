@@ -57,7 +57,10 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
 
   // Only keep what is in the cache, but use the inventory data
   const hosts = {}
-  for (const id of cache) hosts[id] = inventory[id]
+  for (const id of cache) {
+    if (inventory[id]) hosts[id] = inventory[id]
+    else hosts[id] = unknownHost(id)
+  }
   const sorted = orderBy(hosts, [order], [(desc ? 'desc' : 'asc')])
 
   return (
@@ -91,6 +94,16 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
     <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
   </>
   )
+}
+
+function unknownHost (id) {
+  return {
+    id,
+    name: 'Unknown in inventory',
+    cores: 0,
+    memory: 0,
+    last_update: new Date(),
+  }
 }
 
 async function runLogsTableApiCall (api, key) {

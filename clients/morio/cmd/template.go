@@ -117,7 +117,10 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 	}
 
 	// Filter out moriodata
-	var inputs = StripMoriodataFromInputs(result)
+	var inputs = AddDefaultProcessorsToInputs(StripMoriodataFromInputs(result), from)
+
+	// Add default processors
+	//fmt.Printf("Inputs: %v", inputs)
 
 	// Convert back to a YAML string
 	yamlData, err := yaml.Marshal(inputs)
@@ -330,6 +333,66 @@ func StripMoriodataFromInputs(inputs []map[string]interface{}) []map[string]inte
 	}
 
 	return filteredInputs
+}
+
+func AddDefaultProcessorsToInputs(inputs []map[string]interface{}, from string) []map[string]interface{} {
+	// These are processors that we add to every input
+	// This way, we keep the boilerplate to a minimum
+	defaultProcessors := []map[string]interface{}{
+		{
+			"add_fields": map[string]interface{}{
+				"target": "host",
+				"fields": map[string]interface{}{
+					"id": GetVar("MORIO_CLIENT_UUID"),
+				},
+			},
+		},
+		{
+			"add_labels": map[string]interface{}{
+				"labels": map[string]interface{}{
+					"morio.module": ModuleNameFromFile(from),
+				},
+			},
+		},
+		{
+			"add_id": nil,
+		},
+	}
+
+	// If there's no processors key, that makes it easy
+	for i := range inputs {
+		processors, exists := inputs[i]["processors"]
+		if !exists {
+			inputs[i]["processors"] = defaultProcessors
+			continue
+		}
+
+		// If there is a processors key, we need to add to it
+		// This takes some more work as this comes from parsed YAML
+		// So we cannot be certain about the structure
+		var existingProcessors []map[string]interface{}
+
+		switch p := processors.(type) {
+		case []map[string]interface{}:
+			existingProcessors = p
+		case []interface{}:
+			// Convert []interface{} to []map[string]interface{}
+			existingProcessors = make([]map[string]interface{}, len(p))
+			for j, item := range p {
+				if m, ok := item.(map[string]interface{}); ok {
+					existingProcessors[j] = m
+				}
+			}
+		default:
+			// If it's neither type, replace with default processors
+			inputs[i]["processors"] = defaultProcessors
+			continue
+		}
+
+		inputs[i]["processors"] = append(existingProcessors, defaultProcessors...)
+	}
+
+	return inputs
 }
 
 // FIXME: Make this platform agnostic

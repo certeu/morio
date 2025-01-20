@@ -1,13 +1,13 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { CheckInCircleIcon } from 'components/icons.mjs'
+import { CheckCircleIcon } from 'components/icons.mjs'
 import { Check } from 'components/boards/checks.mjs'
 
 export default function HealthcheckPage ({ id }) {
   const meta = {
     title: `Health check`,
     page: ['boards', 'checks', id],
-    Icon: CheckInCircleIcon
+    Icon: CheckCircleIcon
   }
 
   return (

@@ -16,6 +16,15 @@ export const errors = {
     detail: 'This identity provider is disabled by a feature flag.',
   },
   /*
+   * DB 404 error, API style
+   */
+  'morio.api.db.404': {
+    status: 404,
+    title: 'No result',
+    detail:
+      'This is the API equivalent of a 404 page for the database. The query did not find any results.',
+  },
+  /*
    * Cache 404 error, API style
    */
   'morio.api.cache.404': {
