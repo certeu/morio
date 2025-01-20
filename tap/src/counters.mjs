@@ -56,15 +56,12 @@ function countersAsEcs (throughput) {
     ecs: { version: "8.0.0" },
     event: {
       dataset: "morio-tap.throughput",
-      kind: "metric",
-      module: "morio-tap",
     },
     metricset: {
       name: "throughput",
       period: tick,
     },
     morio: {
-      module: 'morio-tap',
       tap: {
         throughput,
         version: 7
@@ -73,6 +70,9 @@ function countersAsEcs (throughput) {
     host: {
       id: node.uuid,
       name: node.fqdn,
+    },
+    labels: {
+      'morio.module': 'morio-tap'
     }
   }
 }

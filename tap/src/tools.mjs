@@ -52,7 +52,7 @@ export const tools = {
     host: (data) => (data?.host?.id || 'unknown-host'),
     id: (data) => (data?.['@metadata']._id || 'unknown-id'),
     metricset: (data) => (data?.metricset?.name || 'unknown-metricset'),
-    module: (data) => (data?.morio?.module || 'unknown-module'),
+    module: (data) => (data?.labels?.['morio.module'] || 'unknown-module'),
     timestamp: when,
   },
   format: {
