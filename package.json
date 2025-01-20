@@ -111,8 +111,6 @@
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
-    "@morio/config": "^0.5.5",
-    "@morio/shared": "^0.5.5",
     "mocha": "^11.0.1"
   }
 }
