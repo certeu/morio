@@ -58,20 +58,6 @@ export function currentRole(req) {
   return roles.includes(role) ? role : false
 }
 
-/**
- * Helper method to get the current username
- *
- * @param {object} req - The request object from express
- * @return {string} username - The current username
- */
-export function currentUsername(req) {
-  const username = req.headers['x-morio-user']
-
-  return !username || typeof username !== 'string' || username.length < 3 || username.length > 255
-    ? false
-    : username
-}
-
 /*
  * Helper method to get all roles available to a given role
  */
