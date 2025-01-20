@@ -3,7 +3,6 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg, corePkg } from './json-loader.mjs'
 import process from 'process'
-import { binary } from 'joi'
 
 describe('Anonymous Routes Tests', () => {
   // Quick test to make sure we are back on track after reconfiguring
