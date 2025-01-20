@@ -24,7 +24,6 @@ var startCmd = &cobra.Command{
 			ChangeAgentState("logs", "start")
 			ChangeAgentState("metrics", "start")
 			ShowStatus()
-			_ = cmd.Help()
 		} else if args[0] == "audit" {
 			ChangeAgentState("audit", "start")
 			ShowStatus()
@@ -56,7 +55,6 @@ var stopCmd = &cobra.Command{
 			ChangeAgentState("logs", "stop")
 			ChangeAgentState("metrics", "stop")
 			ShowStatus()
-			_ = cmd.Help()
 		} else if args[0] == "audit" {
 			ChangeAgentState("audit", "stop")
 			ShowStatus()
