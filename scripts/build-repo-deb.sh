@@ -3,16 +3,12 @@
 # This script will build the .deb package to add the morio APT
 # repository to a system.
 
-# Sounce config variables
+# Source config variables
 source config/cli.sh
 
 # Check channel/component/environment
 if [[ "$1" == "stable" || "$1" == "canary" || "$1" == "testing" ]]; then
-  if [[ "$1" == "stable" ]]; then
-    CHANNEL="main"
-  else
-    CHANNEL=$1
-  fi
+  CHANNEL=$1
   echo "Building moriod .deb repo package for $1 (channel = $CHANNEL)"
 else
   echo "Invalid distribution channel. Please specify one of: stable, canary, testing."
@@ -21,19 +17,34 @@ fi
 
 # Create package structure
 cd $MORIO_GIT_ROOT
-rm -rf build-context/*
-rm -rf build-context/.*
-mkdir -p build-context/usr/share/keyrings
-mkdir -p build-context/etc/apt/sources.list.d
-mkdir -p build-context/var
-cp morio.gpg build-context/usr/share/keyrings/moriod.gpg
-echo "# Moriod repository. See https://apt.repo.morio.it/" > build-context/etc/apt/sources.list.d/moriod.list
-echo "deb [signed-by=/usr/share/keyrings/moriod.gpg] https://apt.repo.morio.it/ $(lsb_release -cs) $CHANNEL" >> build-context/etc/apt/sources.list.d/moriod.list
-cat config/moriod-repos/deb/control | sed "s/MORIO_VERSION/${MORIO_VERSION}/g" > build-context/control
-cp config/moriod-repos/deb/postinst build-context/
+sudo rm -rf build-context
+mkdir -p build-context/DEBIAN
+cp -R moriod-repos/deb/* build-context/
+mv build-context/control build-context/DEBIAN
+mv build-context/postinst build-context/DEBIAN
 
-# Build package
+# Keep only the correct apt source file
+cd build-context/etc/apt/sources.list.d
+mv moriod.list.$CHANNEL moriod.list
+rm moriod.list.*
+cd -
+
+# Update control file
+cd build-context/DEBIAN
+sed -i "s/MORIO_VERSION/${MORIO_VERSION}/g" control
+cd -
+
+# Now build the package
 docker run -it \
   -v ${MORIO_GIT_ROOT}/build-context:/morio/src \
   -v ${MORIO_GIT_ROOT}/data/data:/morio/dist \
   itsmorio/dbuilder /entrypoint.sh moriodrepo
+
+# Move into a known location
+mkdir -p local/builds
+cp data/data/*.deb local/builds
+
+echo
+echo
+echo "local/builds now holds:"
+ls -1 local/builds

@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - We renamed the `production` release channel to `stable` 
 - We removed all configuration that was handled differently for unit tests
+- Our apt repositories are no longer tied to a specific (Debian) version
 - [api] Remove anything done differently for unit tests
 - [api] Persist test credentials to disk so tests can be re-run incrementally
 - [client] The Morio client is now statically linked to improve portability
