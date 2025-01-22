@@ -10,7 +10,6 @@ import process from 'node:process'
  *
  *  - MORIO_ASCII_BANNER
  *  - MORIO_ABOUT
- *  - MORIO_AWS_ACCOUNT_ID
  *  - MORIO_GIT_ROOT
  *  - MORIO_GITHUB_REPO
  *  - MORIO_GITHUB_REPO_URL
@@ -46,11 +45,6 @@ export const MORIO_ASCII_BANNER = `
   | ' ' |/ . \\| '_/| |/ . \\
   |_|_|_|\\___/|_|  |_|\\___/
 `
-
-/*
- * AWS account id (for AMI ownership)
- */
-export const MORIO_AWS_ACCOUNT_ID = '719603448334'
 
 /*
  * Location of the git repository on disk

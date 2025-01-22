@@ -7,7 +7,6 @@ import process from 'node:process'
 import {
   MORIO_ASCII_BANNER,
   MORIO_ABOUT,
-  MORIO_AWS_ACCOUNT_ID,
   MORIO_GIT_ROOT,
   MORIO_GITHUB_REPO,
   MORIO_GITHUB_REPO_URL,
