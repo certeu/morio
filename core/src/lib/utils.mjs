@@ -28,7 +28,7 @@ log['to' + 'do'] = (a, b) => {
 /*
  * This store instance will hold our state, but won't be exported.
  * Only through the utility methods below will we allow changing state.
- * We're also initializing it with some data at start time.
+ * We're also initialising it with some data at start time.
  */
 const store = new Store(log)
   .set('state.start_time', Date.now())
@@ -65,7 +65,7 @@ export const utils = {
  */
 
 /**
- * Helper method to get a list of all FQDNS used in the settings
+ * Helper method to get a list of all FQDNs used in the settings
  *
  * @return {array} list - The list of all FQDNs
  *
@@ -80,7 +80,7 @@ utils.getAllFqdns = () =>
       ]
 
 /**
- * Helper method to number of broker nodes
+ * Helper method to get the number of broker nodes
  *
  * @return {number} count - The number of broker nodes
  *
@@ -88,7 +88,7 @@ utils.getAllFqdns = () =>
 utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).length
 
 /**
- * Helper method to get a list of all FQDNS for broker nodes
+ * Helper method to get a list of all FQDNs for broker nodes
  *
  * @return {array} list - The list of all broker node FQDNs
  *
@@ -96,7 +96,7 @@ utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).lengt
 utils.getBrokerFqdns = () => utils.getSettings('cluster.broker_nodes', [])
 
 /**
- * Helper method to get a list of all FQDNS for central nodes
+ * Helper method to get a list of all FQDNs for central nodes
  *
  * This means broker nodes + cluster FQDN
  *
@@ -111,7 +111,7 @@ utils.getCentralFqdns = () => [
 /**
  * Helper method to get a cache entry (see utils.cacheHit)
  *
- * @param {string|array} path - Path to the key in the cache, as an array or dot.notation.triung
+ * @param {string|array} path - Path to the key in the cache, as an array or dot.notation string
  * @return {mixed} value - The value stored in the cache under this path
  *
  */
@@ -120,7 +120,7 @@ utils.getCache = (path) => store.get(unshift(['cache'], path), false)
 /*
  * Retrieve a cache entry but only if it's fresh
  *
- * @param {string|array} key - Path to the key in the cache, as an array or dot.notation.tring
+ * @param {string|array} key - Path to the key in the cache, as an array or dot.notation string
  */
 utils.getCacheHit = (key) => {
   const hit = utils.getCache(key)
@@ -150,7 +150,7 @@ utils.getClusterFqdn = () => {
 utils.getClusterNode = (uuid) => store.get(['state', 'cluster', 'nodes', uuid], false)
 
 /**
- * Helper method to get the data for a cluster rnode based on its serial
+ * Helper method to get the data for a cluster node based on its serial
  */
 utils.getClusterNodeFromSerial = (serial) =>
   Object.values(store.get(['state', 'cluster', 'nodes'], {}))
@@ -168,7 +168,7 @@ utils.getClusterNodes = () => store.get(['state', 'cluster', 'nodes'], {})
 utils.getClusterState = () => store.get('state.cluster')
 
 /**
- * Helper method to get the cluster status age (time it was last updated)
+ * Helper method to get the cluster status age (the time it was last updated)
  */
 utils.getClusterStatusAge = () => store.get('status.cluster.updated', 172e10)
 
@@ -178,12 +178,12 @@ utils.getClusterStatusAge = () => store.get('status.cluster.updated', 172e10)
 utils.getClusterStatus = () => store.get('status.cluster', { code: 499, time: 172e10 })
 
 /**
- * Helper method to get the cluster uuid
+ * Helper method to get the cluster UUID
  */
 utils.getClusterUuid = () => utils.getKeys()?.cluster
 
 /**
- * Helper method to get the cluster leader fqdn
+ * Helper method to get the cluster leader FQDN
  *
  * @return {string} fqdn - The FQDN of the cluster leader node
  */
@@ -191,21 +191,21 @@ utils.getLeaderFqdn = () =>
   utils.getSettings('cluster.broker_nodes', [])[Number(utils.getLeaderSerial()) - 1] || false
 
 /**
- * Helper method to get the node_serial of the node leading the cluster
+ * Helper method to get the serial of the node leading the cluster
  *
  * @return {string} serial - The node serial of the cluster leader
  */
 utils.getLeaderSerial = () => store.get('state.cluster.leader_serial', false)
 
 /**
- * Helper method to get the uuid of the node leading the cluster
+ * Helper method to get the UUID of the node leading the cluster
  *
  * @return {string} uuid - The UUID of the cluster leader
  */
 utils.getLeaderUuid = () => store.get('state.cluster.leader_uuid', false)
 
 /**
- * Helper method to get a Docer service configuration
+ * Helper method to get a Docker service configuration
  *
  * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
  * @return {object} config - The docker service configuration
@@ -214,10 +214,9 @@ utils.getDockerServiceConfig = (serviceName) =>
   store.get(['config', 'services', 'docker', serviceName])
 
 /**
- * Helper method to get a Docer service configuration
+ * Helper method to get the current ephemeral UUID of the state
  *
- * @param {string} serviceName - The name of the service for which to retrieve the docker service configuration
- * @return {object} config - The docker service configuration
+ * @return {string} uuid - The current ephemeral UUID
  */
 utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 
@@ -230,7 +229,7 @@ utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
- * Helper method to number of flanking nodes
+ * Helper method to get the number of flanking nodes
  *
  * @return {number} count - The number of flanking nodes
  *
@@ -245,16 +244,16 @@ utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).l
 utils.getHeartbeatInterval = () => store.get('state.cluster.heartbeat_interval', 1)
 
 /**
- * Helper method to get local heartbeat setTimeout id
+ * Helper method to get the local heartbeat setTimeout ID
  *
- * @return {number} id - The setTimeout id which allows clearing the timetout
+ * @return {number} id - The setTimeout ID, which allows clearing the timeout
  */
 utils.getHeartbeatLocal = () => store.get(['state', 'cluster', 'heartbeats', 'local'], false)
 
 /**
- * Helper method to get outgoing heartbeat setTimeout id
+ * Helper method to get the outgoing heartbeat setTimeout ID
  *
- * @return {number} id - The setTimeout id which allows clearing the timetout
+ * @return {number} id - The setTimeout ID, which allows clearing the timeout
  */
 utils.getHeartbeatOut = (fqdn) => store.get(['state', 'cluster', 'heartbeats', 'out', fqdn], false)
 
@@ -269,7 +268,7 @@ utils.getInfo = () => store.get('info')
  * Get internal service CN
  *
  * @param {string} service - The service name
- * @return {string} fqdn - The internal CN (and fqdn)
+ * @return {string} fqdn - The internal CN (and FQDN)
  */
 utils.getInternalServiceCn = (service) =>
   `${service}.infra.${utils.getClusterUuid()}.morio.internal`
@@ -346,12 +345,12 @@ utils.getNodeCount = () =>
 /**
  * Helper method to get the FQDN of this node
  *
- * @return {string} ip - This node's fully quqlified domain name (FQDN)
+ * @return {string} ip - This node's fully qualified domain name (FQDN)
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
 
 /**
- * Helper method to get a list of all node FQDNS used in the settings
+ * Helper method to get a list of all node FQDNs used in the settings
  *
  * @return {array} list - The list of all node FQDNs
  *
@@ -376,14 +375,14 @@ utils.getNodeHostname = () => store.get('state.node.hostname')
 utils.getNodeSerial = () => store.get('state.node.serial', 0)
 
 /**
- * Helper method to get the uuid of this node
+ * Helper method to get the UUID of this node
  *
  * @return {string} uuid - This node's UUID
  */
 utils.getNodeUuid = () => store.get('state.node.uuid')
 
 /**
- * Helper method to get the uuid fingerprint of this node
+ * Helper method to get the UUID fingerprint of this node
  *
  * @return {string} uuid - This node's UUID
  */
@@ -398,12 +397,12 @@ utils.getNodeFingerprint = () =>
 utils.getReloadCount = () => store.get('state.reload_count')
 
 /**
- * Helper method to get the sanitized settings
+ * Helper method to get the sanitised settings
  *
  * Node that unlike getSettings, this always returns the entire object
  * as it's only used in the route to provide this object to the API
  *
- * @return {object} settings - The sanitized settings object
+ * @return {object} settings - The sanitised settings object
  */
 utils.getSanitizedSettings = () => store.get('settings.sanitized')
 
@@ -411,9 +410,9 @@ utils.getSanitizedSettings = () => store.get('settings.sanitized')
  * Helper method to facilitate getting resolved settings
  *
  * Note that not providing a dflt fallback value will log a WARN message
- * So if you are not sure whetherr the value is there, provide a fallback, even if it's false
+ * So if you are not sure whether the value is there, provide a fallback, even if it's false
  *
- * @param {string|array} path - Path to the key in settings, as an array or dot.notation.triung
+ * @param {string|array} path - Path to the key in settings, as an array or dot.notation string
  * @param {mixed} dflt - A default value to return if none is found
  * @return {object} settings - The settings object
  */
@@ -500,7 +499,7 @@ utils.getPreset = (key, dflt, opts) => {
 utils.getPresets = () => store.get('presets')
 
 /**
- * Helper method for getting a lifecycle hookk for a service
+ * Helper method for getting a lifecycle hook for a service
  *
  * @param {string} serviceName - Name of the service
  * @param {string} hookName - Name of the lifecycle hook
@@ -522,7 +521,7 @@ utils.getHook = (serviceName, hookName) => {
 /**
  * Helper method to set a cache entry
  *
- * @param {string|array} path - Path to the key in settings, as an array or dot.notation.triung
+ * @param {string|array} path - Path to the key in settings, as an array or dot.notation string
  * @param {mixed} value - The value to store
  * @return {object} utils - The utils instance, making this method chainable
  */
@@ -534,7 +533,7 @@ utils.setCache = (path, value) => {
 /**
  * Helper method to set the CA configuration
  *
- * @param {oject} config - The CA configuration to store
+ * @param {object} config - The CA configuration to store
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setCaConfig = (config) => {
@@ -543,7 +542,7 @@ utils.setCaConfig = (config) => {
 }
 
 /**
- * Helper method to get the uuid fingerprint of the cluster
+ * Helper method to get the UUID fingerprint of the cluster
  *
  * @return {string} uuid - The cluster's UUID fingerprint
  */
@@ -575,7 +574,7 @@ utils.setCoreReady = (ready) => {
 }
 
 /**
- * Helper method to store a Docer service configuration
+ * Helper method to store a Docker service configuration
  *
  * @param {string} serviceName - The name of the service
  * @param {object} config - The docker configuration object to store
@@ -587,9 +586,9 @@ utils.setDockerServiceConfig = (serviceName, config) => {
 }
 
 /**
- * Helper method to store the epehemral state value
+ * Helper method to store the ephemeral state value
  *
- * @param {bool} val - Truthy or falsy value to detemine the ephemeral state
+ * @param {bool} val - Truthy or falsy value to determine the ephemeral state
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setEphemeral = (val) => {
@@ -598,7 +597,7 @@ utils.setEphemeral = (val) => {
 }
 
 /**
- * Helper method to store the epehemral uuid
+ * Helper method to store the ephemeral UUID
  *
  * @param {string} uuid - The ephemeral UUID
  * @return {object} utils - The utils instance, making this method chainable
@@ -626,7 +625,7 @@ utils.setPeerStatus = (fqdn, status) => {
  * @param {bool} up - Whether the node is up (reachable) or not
  * @param {bool} ok - Whether the heartbeat was a (complete) success, or not
  * @param {string} uuid - The remote node's UUID
- * @param {object} data - Heartbet data (from the remote node)
+ * @param {object} data - Heartbeat data (from the remote node)
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatIn = (fqdn, data) => {
@@ -635,7 +634,7 @@ utils.setHeartbeatIn = (fqdn, data) => {
 }
 
 /**
- * Helper method to set the hearbeat interval (in seconds)
+ * Helper method to set the heartbeat interval (in seconds)
  *
  * @param {number} seconds - Number of seconds between heartbeats
  * @return {object} utils - The utils instance, making this method chainable
@@ -648,7 +647,7 @@ utils.setHeartbeatInterval = (seconds) => {
 /**
  * Helper method to store the local heartbeat data
  *
- * @param {object} id - The heartbeat setTimeout id
+ * @param {object} id - The heartbeat setTimeout ID
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatLocal = (id) => {
@@ -660,7 +659,7 @@ utils.setHeartbeatLocal = (id) => {
  * Helper method to store the outgoing heartbeat data
  *
  * @param {string} fqdn - The FQDN of the heartbeat target
- * @param {object} id - The heartbeat setTimeout id
+ * @param {object} id - The heartbeat setTimeout ID
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setHeartbeatOut = (fqdn, id) => {
@@ -701,12 +700,12 @@ utils.setKeys = (keys) => {
  *
  * This matters because there are two main chunks for data that we need
  * to keep in sync between cluster nodes:
- *  - The settings, here we use the settings serial to indidate a change
- *  - They keys, here we use the hash of the JSON.stirngified data on disk
+ *  - The settings, here we use the settings serial to indicate a change
+ *  - The keys, here we use the hash of the JSON-stringified data on disk
  *
- *  Cluster hearbeat includes the settings serial and keys serial, allowing
+ *  Cluster heartbeat includes the settings serial and keys serial, allowing
  *  nodes to detect any updates. This means we do not need any custom logic
- *  when (for example) rotating the morio root token. It will change the
+ *  when (for example) rotating the Morio Root Token. It will change the
  *  keys serial and on the next cluster heartbeat, this change will cause the
  *  other nodes to re-sync.
  *
@@ -721,7 +720,7 @@ utils.setKeysSerial = (serial) => {
 /**
  * Helper method to store a new Morio Root Token
  *
- * @param {string} mrtHash - The password hash of the new Morio root token
+ * @param {string} mrtHash - The password hash of the new Morio Root Token
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setKeysMrt = (mrtHash) => {
@@ -846,7 +845,7 @@ utils.setMorioServiceConfigContainerLabel = (serviceName, key, value) => {
 /**
  * Helper method to store the status code and color
  *
- * @param {number} code - The status code, 0 means all ok, 1-99 issue (amber), 100+ = big problem (red)
+ * @param {number} code - The status code, 0 means all OK, 1-99 issue (amber), 100+ = big problem (red)
  * @param {object} color - The status color, one of green, amber, or red
  * @return {object} utils - The utils instance, making this method chainable
  */
@@ -879,7 +878,7 @@ utils.setNodeSerial = (serial) => {
 }
 
 /**
- * Helper method to store the save (unresolved) settings object
+ * Helper method to store the saved (unresolved) settings object
  *
  * @param {object} settings - The settings object, not resolved
  * @return {object} utils - The utils instance, making this method chainable
@@ -951,10 +950,10 @@ utils.isCoreReady = () => (store.get('state.core_ready') ? true : false)
 /**
  * Helper method to see if brokers are distributed
  *
- * Just because Morio is a cluster does not mean we have a 1+-node broken cluster.
- * This checks for that and will return true of there's a multi-node broker cluster.
+ * Just because Morio is a cluster does not mean we have a 1+-node broker cluster.
+ * Here we check for that and will return true of there's a multi-node broker cluster.
  *
- * @return {bool} distritbuted - True if brokers are distributed, false if not
+ * @return {bool} distributed - True if brokers are distributed, false if not
  */
 utils.isDistributed = () =>
   utils
@@ -962,30 +961,30 @@ utils.isDistributed = () =>
     .concat(utils.getSettings('cluster.flanking_nodes', [])).length > 1
 
 /**
- * Helper method for returning ephemeral state
+ * Determine whether we are in an ephemeral state
  *
  * @return {bool} ephemeral - True if ephemeral, false if not
  */
 utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
 
 /*
- * Determined whether this node is leading the cluster
+ * Determine whether this node is leading the cluster
  *
  * @return {bool} leading - True if this cluster node is leading, false if not
  */
 utils.isLeading = () => (store.get('state.cluster.leading', false) ? true : false)
 
 /*
- * Determined whether we are running in production or not
+ * Determine whether we are running in production or not
  *
  * @return {bool} leading - True if NODE_ENV is production
  */
 utils.isProduction = () => (inProduction() ? true : false)
 
 /**
- * Helper method to determine the status of a service is ok
+ * Helper method to determine if the status of a service is OK
  *
- * @return {bool} ok - True if the status is ok, false if not
+ * @return {bool} ok - True if the status is OK, false if not
  */
 utils.isServiceOk = (serviceName) =>
   store.get(['status', utils.getNodeFqdn(), serviceName], 1) === 0 ? true : false
@@ -1079,7 +1078,7 @@ utils.beginReload = () => {
 }
 
 /**
- * Helper method clear the list of services
+ * Helper method to clear the list of services
  *
  * @return {object} utils - The utils instance, making this method chainable
  */
@@ -1152,7 +1151,7 @@ utils.resetServicesStateAge = () => {
  */
 
 /**
- * Returns a pre-configured API client, itself on object
+ * Returns a pre-configured API client, itself an object
  */
 utils.apiClient = restClient(
   `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${getPreset('MORIO_API_PORT')}`
@@ -1167,7 +1166,7 @@ utils.resolveHostAsIp = resolveHostAsIp
  * Add helper method for sending RFC7807 error responses
  *
  * @param {object} res - The response object from Express
- * @param {string|object} tempalte - Either a string for a know tempate, or a customg object holding the response data
+ * @param {string|object} template - Either a string for a known template, or a custom object holding the response data
  * @param {bool|string} route - The API route to construct the instance string, or false if there is none
  */
 utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
@@ -1203,11 +1202,15 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
 /**
  * Unwrap a secret
  */
-utils.unwrapSecret = async (key, val) =>
-  val?.vault ? await vaultGetSecret(key, val.vault) : utils.decrypt(val)
+utils.unwrapSecret = async (key, val) => {
+  if (val?.vault) return await vaultGetSecret(key, val.vault)
+  if (utils.isEncrypted(val)) return utils.decrypt(val)
+
+  return val
+}
 
 /**
- * Add validate method for eacy access
+ * Add validate method for easy access
  */
 utils.validate = validateMethod
 
