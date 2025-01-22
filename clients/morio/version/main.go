@@ -1,3 +1,3 @@
 // This file is auto-generated
 package version
-var Version string = "0.6.0-rc.7"
+var Version string = "0.6.0-rc.8"
