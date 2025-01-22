@@ -8,6 +8,9 @@
 # Make sure to do so in the repository root
 #
 name: Run unit tests
+permissions:
+  contents: read
+  pull-requests: write
 on:
   pull_request:
 
