@@ -60,10 +60,10 @@ ExecStart=/usr/bin/docker run --rm \
   itsmorio/core:${MORIO_CONTAINER_TAG}
 
 # When stopping, we stop & remove all containers as they are
-# ephemeral (their data is mounted from the host disk)
+# ephemeral (their data is mounted from the host disk).
 # Core will recreate them when you start the service again.
-# We are listing all possible serviices. Some may not exist w
-# so we redirect stderr to /dev/null
+# We are listing all possible services. Some may not exist,
+# so we redirect stderr to /dev/null.
 ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web morio-cache morio-tap 2> /dev/null
 
 # Always restart
