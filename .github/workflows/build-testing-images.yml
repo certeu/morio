@@ -1,0 +1,40 @@
+#
+# This builds docker images for integration tests
+# To run this locally, you can use:
+#
+# - npm run buildall:testing
+#
+# Make sure to do so in the repository root
+#
+name: Build testing container images
+on:
+  on:
+  workflow_run:
+    workflows: ["Run unit tests"]
+    types:
+      - completed
+
+jobs:
+  test:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # This needs to run on a self-hosted runner
+    runs-on: self-hosted
+    steps:
+      - name: Checkout PR Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Set up NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/iron
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure repository
+        run: npm run reconfigure
+
+      - name: Build docker images for the testing channel
+        run: npm run buildall:testing

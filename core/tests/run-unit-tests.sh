@@ -33,9 +33,13 @@ node \
 # Stop core container
 kill -1 %1
 
+echo "commit: $GIT_COMMIT_SHA"
+echo "pr: $GITHUB_PR_NUMBER"
 # Copy the coverage report if an artificate location is set
 if [ -n "$MORIO_ARTIFACT_FOLDER" ]; then
   chmod +r ./coverage/*.json
   cp ./coverage/*.json $MORIO_ARTIFACT_FOLDER
+  # Remove these files to avoid permission trouble
+  rm -rf ./coverage/*
 fi
 
