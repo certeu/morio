@@ -399,19 +399,24 @@ Controller.prototype.whoami = async function (req, res) {
  *
  * @param {object} token - The token to verify
  */
-const verifyToken = (token) =>
-  new Promise((resolve) =>
-    jwt.verify(
-      token,
-      utils.getKeys().public,
-      {
-        audience: 'morio',
-        issuer: 'morio',
-        subject: 'morio',
-      },
-      (err, payload) => resolve(err ? false : payload)
+const verifyToken = (token) => {
+  const publicKey = utils.getKeys()?.public
+
+  return publicKey
+    ?  new Promise((resolve) =>
+      jwt.verify(
+        token,
+        utils.getKeys().public,
+        {
+          audience: 'morio',
+          issuer: 'morio',
+          subject: 'morio',
+        },
+        (err, payload) => resolve(err ? false : payload)
+      )
     )
-  )
+    : false
+}
 
 function redirectPath(req, to) {
   return `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host']}:${

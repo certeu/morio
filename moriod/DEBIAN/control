@@ -1,0 +1,19 @@
+
+Package: moriod
+Source: moriod
+Version: __MORIO_VERSION__
+Section: utils
+Priority: optional
+Architecture: amd64
+Essential: no
+Installed-Size: 500000
+Maintainer: CERT-EU <services@cert.europa.eu>
+Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
+Homepage: https://morio.it
+Description: Umbrella package for Morio
+  Morio is an end-to-end streaming data backbone
+  for your observability needs.
+Vcs-Git: https://github.com/certeu/morio -b main [moriod]
+Depends: docker.io, systemd
+Uploaders: Joost De Cock <joost.decock@cert.europa.eu>
+

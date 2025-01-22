@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] We no longer populate settings with all (disabled) feature flags
 - [core] Remove anything done differently for unit tests
 - [core] Persist test credentials to disk so tests can be re-run incrementally
+- [core] Extended the moriod.env file to allow changing presets
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 

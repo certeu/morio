@@ -9,7 +9,7 @@ source config/cli.sh
 # Check channel/component/environment
 if [[ "$1" == "stable" || "$1" == "canary" || "$1" == "testing" ]]; then
   CHANNEL=$1
-  echo "Building moriod .deb repo package for $1 (channel = $CHANNEL)"
+  echo "Building moriod-repo.deb package for $1 (channel = $CHANNEL)"
 else
   echo "Invalid distribution channel. Please specify one of: stable, canary, testing."
   exit 1

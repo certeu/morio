@@ -144,3 +144,19 @@ const getServicePort = (service, utils) => {
   if (service === 'watcher') return utils.getPreset('MORIO_WATCHER_HTTP_PORT')
   if (service === 'web') return utils.getPreset('MORIO_WEB_HTTP_PORT')
 }
+
+/**
+ * A helper method to determine the suffix for container image tags
+ *
+ * @parms {object} utils - The utils object with the getPreset helper
+ * @return {string} suffix - The tag suffix to use
+ */
+export function getContainerTagSuffix ({ getPreset }) {
+  const CHANNEL = getPreset('MORIO_RELEASE_CHANNEL', { dflt: 'stable' })
+
+  return CHANNEL === 'stable'
+    ? ''
+    : `-${CHANNEL}`
+}
+
+

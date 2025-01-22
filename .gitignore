@@ -27,10 +27,6 @@ builders/dbuilder/clients
 # Auto-generated moriod files
 moriod/control
 VERSION
-moriod/etc/morio/version
-moriod/etc/morio/moriod/version.env
-moriod/etc/morio/moriod/version
-moriod/etc/morio/moriod/version.env
 
 # Auto-generated scripts
 core/run-dev-container.sh
@@ -81,6 +77,8 @@ yarn-error.log*
 .env
 *.env
 *.env*
+!moriod/etc/morio/moriod/moriod.env
+!moriod/etc/morio/moriod/channel.env
 
 # Nx
 .nx/installation
