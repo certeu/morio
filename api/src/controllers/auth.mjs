@@ -32,6 +32,10 @@ const allowedUrisBase = [
   `/up`,
 ]
 
+const blockedUris = [
+  '/reload', // Used internally by core
+]
+
 /*
  * Add them all again but with a trailing slash this time
  * This will avoid head-scratching and support calls
@@ -72,6 +76,14 @@ Controller.prototype.authenticate = async function (req, res) {
    */
   const uri = req.headers['x-forwarded-uri']
   if (!uri) return utils.sendErrorResponse(res, 'morio.api.rbac.denied', req.url)
+
+  /*
+   * Is the URL blocked?
+   *
+   */
+  if (blockedUris.includes(uri)) {
+    return utils.sendErrorResponse(res, 'morio.api.404', req.url)
+  }
 
   /*
    * Is the URL allow-listed?
@@ -387,19 +399,24 @@ Controller.prototype.whoami = async function (req, res) {
  *
  * @param {object} token - The token to verify
  */
-const verifyToken = (token) =>
-  new Promise((resolve) =>
-    jwt.verify(
-      token,
-      utils.getKeys().public,
-      {
-        audience: 'morio',
-        issuer: 'morio',
-        subject: 'morio',
-      },
-      (err, payload) => resolve(err ? false : payload)
+const verifyToken = (token) => {
+  const publicKey = utils.getKeys()?.public
+
+  return publicKey
+    ?  new Promise((resolve) =>
+      jwt.verify(
+        token,
+        utils.getKeys().public,
+        {
+          audience: 'morio',
+          issuer: 'morio',
+          subject: 'morio',
+        },
+        (err, payload) => resolve(err ? false : payload)
+      )
     )
-  )
+    : false
+}
 
 function redirectPath(req, to) {
   return `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host']}:${

@@ -1,3 +1,5 @@
+import { getContainerTagSuffix } from './index.mjs'
+
 /*
  * Export a single method that resolves the service configuration
  */
@@ -24,7 +26,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Image to run (different in dev)
       image: 'itsmorio/dbuilder',
       // Image tag (version) to run
-      tag: utils.getPreset('MORIO_VERSION_TAG'),
+      tag: utils.getPreset('MORIO_VERSION_TAG') + getContainerTagSuffix(utils),
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network

@@ -61,10 +61,50 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.core.node.node, uuid)
   })
 
+  it('Should GET /limits', async () => {
+    const result = await api.get('/limits')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d.ip, 'string')
+    assert.equal(typeof d.hits, 'number')
+    assert.equal(typeof d.hits, 'number')
+    assert.equal(typeof d.reset_time, 'string')
+    assert.equal(typeof d.reset_seconds, 'number')
+  })
+
   // GET /up
   it('Should GET /up', async () => {
     const result = await api.get('/up')
     assert.equal(result[0], 200)
+  })
+
+  // GET /ip
+  it('Should GET /ip', async () => {
+    const result = await api.get('/ip')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d.ip, 'string')
+    assert.equal(typeof d.limits, 'object')
+  })
+
+  // GET /pubkey
+  it('Should GET /pubkey', async () => {
+    const result = await api.get('/pubkey')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d.pubkey, 'string')
+  })
+
+  // GET /pubkey.pem
+  it('Should GET /pubkey.pem', async () => {
+    const result = await api.get('/pubkey.pem')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d, 'string')
   })
 
   // GET /idps

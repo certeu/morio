@@ -8,7 +8,6 @@
 #   - MORIO_GIT_ROOT
 #   - MORIO_ABOUT
 #   - MORIO_ASCII_BANNER
-#   - MORIO_AWS_ACCOUNT_ID
 #   - MORIO_GITHUB_REPO
 #   - MORIO_GITHUB_REPO_URL
 #   - MORIO_VERSION
@@ -40,12 +39,6 @@ read -r -d '' MORIO_ASCII_BANNER << EOB
   |_|_|_|\\___/|_|  |_|\\___/
 
 EOB
-
-#
-# AWS account ID (for AMI image ownership)
-#
-MORIO_AWS_ACCOUNT_ID="719603448334"
-
 
 #
 # GitHub repository

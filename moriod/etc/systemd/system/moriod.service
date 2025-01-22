@@ -7,34 +7,11 @@ After=docker.service
 Requires=docker.service
 
 [Service]
-# We fist define the defaults for these variables
-# And then include the EnvironmentFile
-# This ensures sensible defaults, while
-# allowing users to override them in the EnvironmentFile
-#
-# DO NOT CHANGE ANYTHING BELOW THIS LINE
-# Instead, make your changes in /etc/morio/core.env instead
-#
-# Location of the Docker socket
-Environment=MORIO_DOCKER_SOCKET=/var/run/docker.sock
-# Location of the Morio configuration folder
-Environment=MORIO_CONFIG_ROOT=/etc/morio/moriod
-# Location of the Morio data folder
-Environment=MORIO_DATA_ROOT=/var/lib/morio/moriod
-# Location of the Morio logs folder
-Environment=MORIO_LOGS_ROOT=/var/log/morio/moriod
-# Log level for Morio core
-Environment=MORIO_CORE_LOG_LEVEL=debug
-# Node environment
-Environment=NODE_ENV=production
-
-# Load environment file to potentially override these vars
-# This is optional
+# Load environment file to allow changing presets
 EnvironmentFile=-/etc/morio/moriod/moriod.env
 
-# Load version from the version environment file
-# This is NOT optional
-EnvironmentFile=/etc/morio/moriod/version.env
+# Load info from the channel environment file
+EnvironmentFile=/etc/morio/moriod/channel.env
 
 # Make sure to stop & remove the core container if it's running
 ExecStartPre=/usr/bin/docker rm -f core
@@ -52,22 +29,49 @@ ExecStart=/usr/bin/docker run --rm \
   -v "${MORIO_CONFIG_ROOT}:/etc/morio" \
   -v "${MORIO_DATA_ROOT}:/morio/data" \
   -v "${MORIO_LOGS_ROOT}:/var/log/morio" \
+  -e "MORIO_VERSION=${MORIO_VERSION}" \
+  -e "MORIO_RELEASE_CHANNEL=${MORIO_RELEASE_CHANNEL}" \
+  -e "MORIO_CONTAINER_TAG=${MORIO_CONTAINER_TAG}" \
+  -e "MORIO_DOCKER_LOG_DRIVER=${MORIO_DOCKER_LOG_DRIVER}" \
+  -e "MORIO_API_LOG_LEVEL=${MORIO_API_LOG_LEVEL}" \
+  -e "MORIO_BROKER_LOG_LEVEL=${MORIO_BROKER_LOG_LEVEL}" \
   -e "MORIO_CORE_LOG_LEVEL=${MORIO_CORE_LOG_LEVEL}" \
+  -e "MORIO_PROXY_LOG_LEVEL=${MORIO_PROXY_LOG_LEVEL}" \
+  -e "MORIO_PROXY_LOG_FORMAT=${MORIO_PROXY_LOG_FORMAT}" \
+  -e "MORIO_TAP_LOG_LEVEL=${MORIO_TAP_LOG_LEVEL}" \
+  -e "MORIO_NETWORK=${MORIO_NETWORK}" \
+  -e "MORIO_NETWORK_SUBNET=${MORIO_NETWORK_SUBNET}" \
+  -e "MORIO_NETWORK_MTU=${MORIO_NETWORK_MTU}" \
+  -e "MORIO_API_JWT_EXPIRY=${MORIO_API_JWT_EXPIRY}" \
+  -e "MORIO_CA_CERTIFICATE_LIFETIME_MIN=${MORIO_CA_CERTIFICATE_LIFETIME_MIN}" \
+  -e "MORIO_CA_CERTIFICATE_LIFETIME_MAX=${MORIO_CA_CERTIFICATE_LIFETIME_MAX}" \
+  -e "MORIO_CA_CERTIFICATE_LIFETIME_DFLT=${MORIO_CA_CERTIFICATE_LIFETIME_DFLT}" \
+  -e "MORIO_UI_TIMEOUT_URL_CHECK=${MORIO_UI_TIMEOUT_URL_CHECK}" \
+  -e "MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL=${MORIO_CORE_CLUSTER_HEARTBEAT_INTERVAL}" \
+  -e "MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT=${MORIO_CORE_CLUSTER_HEARTBEAT_MAX_RTT}" \
+  -e "MORIO_X509_CN=${MORIO_X509_CN}" \
+  -e "MORIO_X509_C=${MORIO_X509_C}" \
+  -e "MORIO_X509_ST=${MORIO_X509_ST}" \
+  -e "MORIO_X509_L=${MORIO_X509_L}" \
+  -e "MORIO_X509_O=${MORIO_X509_O}" \
+  -e "MORIO_X509_OU=${MORIO_X509_OU}" \
+  -e "MORIO_ERRORS_WEB_PREFIX=${MORIO_ERRORS_WEB_PREFIX}" \
   -e "NODE_ENV=${NODE_ENV}" \
-  itsmorio/core:v${MORIO_VERSION}
+  itsmorio/core:${MORIO_CONTAINER_TAG}
 
 # When stopping, we stop & remove all containers as they are
-# ephemeral (their data is mounted from the host disk)
+# ephemeral (their data is mounted from the host disk).
 # Core will recreate them when you start the service again.
-# We are listing all possible serviices. Some may not exist w
-# so we redirect stderr to /dev/null
-ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2> /dev/null
+# We are listing all possible services. Some may not exist,
+# so we redirect stderr to /dev/null.
+ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web morio-cache morio-tap 2> /dev/null
 
 # Always restart
 Restart=always
 
-# Idenitifier for syslog
+# Identifier for syslog
 SyslogIdentifier=moriod
 
 [Install]
 WantedBy=default.target
+

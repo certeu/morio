@@ -82,15 +82,6 @@ app.use(`/coverage/api`, express.static('/morio/api/coverage'))
 app.use(`/coverage/core`, express.static('/morio/core/coverage'))
 
 /*
- * Add the reload route
- */
-app.get(`/reload`, async (req, res) => {
-  await reload()
-
-  return res.send({ result: 'ok', info: utils.getInfo() })
-})
-
-/*
  * Add downloads folder for serving static files
  */
 app.use(`/downloads`, express.static(`/morio/${getPreset('MORIO_DOWNLOADS_FOLDER')}`))
@@ -108,12 +99,7 @@ await reload()
 /*
  * Start listening for requests
  */
-wrapExpress(
-  log,
-  app.listen(getPreset('MORIO_API_PORT'), (err) => {
-    if (err) log.error(err, 'An error occured')
-  })
-)
+wrapExpress(log, app.listen(getPreset('MORIO_API_PORT')))
 
 /*
  * This method allows the API to dynamically reload its

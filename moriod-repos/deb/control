@@ -1,0 +1,17 @@
+Package: moriod-repo
+Source: moriod-repo
+Version: MORIO_VERSION
+Section: misc
+Priority: optional
+Architecture: all
+Essential: no
+Depends: apt-transport-https
+Installed-Size: 50000
+Maintainer: CERT-EU <services@cert.europa.eu>
+Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
+Homepage: https://morio.it
+Description: Adds Moriod repository and GPG key
+  This package adds the APT repository for moriod
+  allowing you to install a morio node from it.
+Vcs-Git: https://github.com/certeu/morio -b main
+Uploaders: Joost De Cock <joost.decock@cert.europa.eu>

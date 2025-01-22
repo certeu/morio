@@ -70,6 +70,9 @@ presets.MORIO_LOGS_ROOT = '/var/log/morio/moriod'
 predocs.MORIO_DOWNLOADS_FOLDER = 'Name of the Morio public downloads folder'
 presets.MORIO_DOWNLOADS_FOLDER = 'downloads'
 
+predocs.MORIO_RELEASE_CHANNEL = 'Name of the release channel to load containers from'
+presets.MORIO_RELEASE_CHANNEL = 'stable'
+
 predocs.MORIO_REPOS_FOLDER = 'Name of the Morio public repositories folder'
 presets.MORIO_REPOS_FOLDER = 'repos'
 

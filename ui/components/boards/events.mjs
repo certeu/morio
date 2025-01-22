@@ -10,7 +10,7 @@ import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { Popout } from 'components/popout.mjs'
 import { FlagIcon } from 'components/icons.mjs'
 
-export const Event = ({ event }) => (
+export const Event = ({ event }) => event ? (
   <details className="group">
     <summary className="flex flex-row gap-2 rounded my-1 hover:cursor-pointer hover:bg-secondary hover:bg-opacity-20 px-2 group-open:bg-secondary group-open:bg-opacity-30">
       <h6 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full">
@@ -23,7 +23,7 @@ export const Event = ({ event }) => (
       <pre>{JSON.stringify(event, null, 2)}</pre>
     </div>
   </details>
-)
+) : null
 
 export const Events = () => {
   const [tip, setTip] = useState(false)
@@ -60,7 +60,7 @@ export const Events = () => {
         )}
       </div>
       {data
-        ? Object.entries(cacheStreamAsObj(data.value)).reverse().map(([id, event]) => <Event key={id} id={id} event={event.data} />)
+        ? Object.entries(cacheStreamAsObj(data.value)).reverse().map(([id, event]) => <Event key={id} id={id} event={event} />)
         : <Spinner />
       }
     </>

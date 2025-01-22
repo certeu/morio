@@ -489,7 +489,7 @@ export async function loadClientModules(settings, log) {
           )) {
             const copy = await copyPreseedFile({
               sourceFile,
-              targetFile,
+              targetFile: (sourceFile.slice(-4) === ".yml" ? `${targetFile}.disabled` : targetFile),
               targetFolder,
             })
             if (copy) log.debug(`Seeding client module file: ${targetFile}`)
@@ -508,7 +508,7 @@ export async function loadStreamProcessors(settings, log) {
    * Don't bother unless we have processors to load
    */
   const globs = settings?.preseed?.processors
-  if (!Array.isArray(globs) || globs.length < 1) return
+  if (!Array.isArray(globs) || globs.length < 1) return settings
 
   /*
    * Folder inside the core container where to store the client files

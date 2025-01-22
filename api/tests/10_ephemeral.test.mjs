@@ -51,6 +51,16 @@ describe('Ephemeral API: Status Routes', () => {
     assert.equal(200, result[0], 200)
     assert.equal(result[1].up, true)
   })
+
+  /*
+   * GET /reload
+   * Example response: 204 (no content)
+   */
+  it(`Should GET /reload`, async () => {
+    const result = await api.get(`/reload`)
+    assert.equal(result[0], 204)
+    assert.equal(result[1], '')
+  })
 })
 
 describe('Ephemeral API: Non-available Routes', () => {
@@ -60,6 +70,7 @@ describe('Ephemeral API: Non-available Routes', () => {
       '/apikeys',
       '/token',
       '/whoami',
+      '/limits',
       '/docker/containers/',
       '/docker/containers/id',
       '/docker/containers/id/logs',

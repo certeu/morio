@@ -38,12 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - We renamed the `production` release channel to `stable` 
 - We removed all configuration that was handled differently for unit tests
+- Our apt repositories are no longer tied to a specific (Debian) version
 - [api] Remove anything done differently for unit tests
 - [api] Persist test credentials to disk so tests can be re-run incrementally
 - [client] The Morio client is now statically linked to improve portability
 - [core] We no longer populate settings with all (disabled) feature flags
 - [core] Remove anything done differently for unit tests
 - [core] Persist test credentials to disk so tests can be re-run incrementally
+- [core] Extended the moriod.env file to allow changing presets
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 
