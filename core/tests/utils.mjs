@@ -29,7 +29,7 @@ const headers = {
 /*
  * Setup the store
  */
-const store = new Store().set('log', logger('trace'))
+const store = new Store(logger('trace'))
 
 /*
  * Client for the core API (which we are testing)
