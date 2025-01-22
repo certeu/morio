@@ -1203,8 +1203,12 @@ utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
 /**
  * Unwrap a secret
  */
-utils.unwrapSecret = async (key, val) =>
-  val?.vault ? await vaultGetSecret(key, val.vault) : utils.decrypt(val)
+utils.unwrapSecret = async (key, val) => {
+  if (val?.vault) return await vaultGetSecret(key, val.vault)
+  if (utils.isEncrypted(val)) return utils.decrypt(val)
+
+  return val
+}
 
 /**
  * Add validate method for eacy access
