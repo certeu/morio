@@ -229,7 +229,7 @@ utils.getEphemeralUuid = () => store.get('state.ephemeral_uuid', false)
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
- * Helper method to number of flanking nodes
+ * Helper method to get the number of flanking nodes
  *
  * @return {number} count - The number of flanking nodes
  *
@@ -345,12 +345,12 @@ utils.getNodeCount = () =>
 /**
  * Helper method to get the FQDN of this node
  *
- * @return {string} ip - This node's fully quqlified domain name (FQDN)
+ * @return {string} ip - This node's fully qualified domain name (FQDN)
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
 
 /**
- * Helper method to get a list of all node FQDNS used in the settings
+ * Helper method to get a list of all node FQDNs used in the settings
  *
  * @return {array} list - The list of all node FQDNs
  *
@@ -397,12 +397,12 @@ utils.getNodeFingerprint = () =>
 utils.getReloadCount = () => store.get('state.reload_count')
 
 /**
- * Helper method to get the sanitized settings
+ * Helper method to get the sanitised settings
  *
  * Node that unlike getSettings, this always returns the entire object
  * as it's only used in the route to provide this object to the API
  *
- * @return {object} settings - The sanitized settings object
+ * @return {object} settings - The sanitised settings object
  */
 utils.getSanitizedSettings = () => store.get('settings.sanitized')
 
@@ -410,7 +410,7 @@ utils.getSanitizedSettings = () => store.get('settings.sanitized')
  * Helper method to facilitate getting resolved settings
  *
  * Note that not providing a dflt fallback value will log a WARN message
- * So if you are not sure whetherr the value is there, provide a fallback, even if it's false
+ * So if you are not sure whether the value is there, provide a fallback, even if it's false
  *
  * @param {string|array} path - Path to the key in settings, as an array or dot.notation string
  * @param {mixed} dflt - A default value to return if none is found
@@ -533,7 +533,7 @@ utils.setCache = (path, value) => {
 /**
  * Helper method to set the CA configuration
  *
- * @param {oject} config - The CA configuration to store
+ * @param {object} config - The CA configuration to store
  * @return {object} utils - The utils instance, making this method chainable
  */
 utils.setCaConfig = (config) => {
@@ -634,7 +634,7 @@ utils.setHeartbeatIn = (fqdn, data) => {
 }
 
 /**
- * Helper method to set the hearbeat interval (in seconds)
+ * Helper method to set the heartbeat interval (in seconds)
  *
  * @param {number} seconds - Number of seconds between heartbeats
  * @return {object} utils - The utils instance, making this method chainable
@@ -701,9 +701,9 @@ utils.setKeys = (keys) => {
  * This matters because there are two main chunks for data that we need
  * to keep in sync between cluster nodes:
  *  - The settings, here we use the settings serial to indicate a change
- *  - The keys, here we use the hash of the JSON.stringified data on disk
+ *  - The keys, here we use the hash of the JSON-stringified data on disk
  *
- *  Cluster hearbeat includes the settings serial and keys serial, allowing
+ *  Cluster heartbeat includes the settings serial and keys serial, allowing
  *  nodes to detect any updates. This means we do not need any custom logic
  *  when (for example) rotating the Morio Root Token. It will change the
  *  keys serial and on the next cluster heartbeat, this change will cause the
@@ -953,7 +953,7 @@ utils.isCoreReady = () => (store.get('state.core_ready') ? true : false)
  * Just because Morio is a cluster does not mean we have a 1+-node broker cluster.
  * Here we check for that and will return true of there's a multi-node broker cluster.
  *
- * @return {bool} distritbuted - True if brokers are distributed, false if not
+ * @return {bool} distributed - True if brokers are distributed, false if not
  */
 utils.isDistributed = () =>
   utils
@@ -1166,7 +1166,7 @@ utils.resolveHostAsIp = resolveHostAsIp
  * Add helper method for sending RFC7807 error responses
  *
  * @param {object} res - The response object from Express
- * @param {string|object} tempalte - Either a string for a known tempate, or a custom object holding the response data
+ * @param {string|object} template - Either a string for a known template, or a custom object holding the response data
  * @param {bool|string} route - The API route to construct the instance string, or false if there is none
  */
 utils.sendErrorResponse = (res, template, url = false, extraData = {}) => {
