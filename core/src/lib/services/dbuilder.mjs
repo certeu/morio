@@ -87,7 +87,7 @@ export async function buildPackage(customSettings = {}) {
   /*
    * Populate client with modules
    */
-  await loadClientModules(utils.getSettings(), 'clients/linux/etc/morio', log)
+  await loadClientModules(utils.getSettings(), log)
 
   /*
    * Generate a certificate and key for mTLS
