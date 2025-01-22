@@ -16,6 +16,7 @@
 # Morio
 
 ![image](https://github.com/certeu/morio/assets/1708494/91892e94-0cb5-4c94-8845-ffe52c19c417)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcerteu%2Fmorio.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcerteu%2Fmorio?ref=badge_shield)
 
 ## What is Morio?
 
@@ -242,3 +243,7 @@ Then pipe the logs into it, stripping some of the fields we don't care about:
 ```
 docker logs -f core | pino-pretty --ignore pid,time,hostname
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcerteu%2Fmorio.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcerteu%2Fmorio?ref=badge_large)
