@@ -15,7 +15,7 @@ tee /etc/morio/moriod/channel.env > /dev/null <<EOF
 # Under normal circumstances, you should not edit it.
 #
 # It is installed/provided by the moriod package
-# and will by updated when you update the package.
+# and will be updated when you update the package.
 #
 MORIO_CONTAINER_TAG=${MORIO_CONTAINER_TAG}
 MORIO_RELEASE_CHANNEL=${MORIO_RELEASE_CHANNEL}
