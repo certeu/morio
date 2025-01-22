@@ -69,7 +69,7 @@ ExecStop=/usr/bin/docker rm -f morio-api morio-ca morio-broker morio-db morio-co
 # Always restart
 Restart=always
 
-# Idenitifier for syslog
+# Identifier for syslog
 SyslogIdentifier=moriod
 
 [Install]
