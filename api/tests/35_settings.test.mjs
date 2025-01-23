@@ -53,8 +53,6 @@ describe('API Settings Tests', () => {
     const result = await api.post('/validate/settings', setup)
     const d = result[1]
 
-    console.log('result', result)
-
     assert.equal(result[0], 200)
     assert.equal(d.valid, true)
     assert.equal(d.deployable, true)
