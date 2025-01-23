@@ -8,12 +8,17 @@
 # Make sure to do so in the repository root
 #
 name: Run unit tests
+permissions:
+  contents: read
+  pull-requests: write
 on:
   pull_request:
+    branches: [develop]
 
 jobs:
   test:
     # This needs to run on a self-hosted runner
+    # we need a change
     runs-on: self-hosted
     steps:
       - name: Checkout PR Code
@@ -38,9 +43,13 @@ jobs:
       - name: Run Core unit tests
         env:
           MORIO_FQDN: runner.morio.it
+          GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.id }}
         run: npm run test:core
 
       - name: Run API unit tests
         env:
           MORIO_FQDN: runner.morio.it
+          GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+          GITHUB_PR_NUMBER: ${{ github.event.pull_request.id }}
         run: npm run test:api

@@ -7,7 +7,6 @@ import process from 'node:process'
 import {
   MORIO_ASCII_BANNER,
   MORIO_ABOUT,
-  MORIO_AWS_ACCOUNT_ID,
   MORIO_GIT_ROOT,
   MORIO_GITHUB_REPO,
   MORIO_GITHUB_REPO_URL,
@@ -15,7 +14,6 @@ import {
   MORIO_WEBSITE,
   MORIO_WEBSITE_URL,
 } from '../../config/cli.mjs'
-import { deb, rpm, versionEnv, moriodEnv } from '../../config/moriod.mjs'
 
 function showHelp() {
   console.log(`
@@ -37,14 +35,8 @@ Arguments:
 
   help                      Show this help
 
-  moriod-deb-control        Outputs the content of the .deb control file
-  moriod-rpm-spec           Outputs the content of the .rpm spec file
-  moriod-moriod-env         Outputs the content of the moriod.env file for the moriod package
-  moriod-version-env        Outputs the content of the version.env file for the moriod package
-
   MORIO_ASCII_BANNER        Output the MORIO_ASCII_BANNER CLI variable
   MORIO_ABOUT               Output the MORIO_ABOUT CLI variable
-  MORIO_AWS_ACCOUNT_ID      Output the MORIO_AWS_ACCOUNT_ID CLI variable
   MORIO_GIT_ROOT            Output the MORIO_GIT_ROOT CLI variable
   MORIO_GITHUB_REPO         Output the MORIO_GITHUB_REPO CLI variable
   MORIO_GITHUB_REPO_URL     Output the MORIO_GITHUB_REPO_URL CLI variable
@@ -62,13 +54,8 @@ source config/cli.sh
  * Map CLI flag to the variable to output
  */
 const cliParamToVar = {
-  'moriod-deb-control': deb.control,
-  'moriod-moriod-env': moriodEnv,
-  'moriod-rpm-spec': rpm.spec,
-  'moriod-version-env': versionEnv,
   MORIO_ASCII_BANNER,
   MORIO_ABOUT,
-  MORIO_AWS_ACCOUNT_ID,
   MORIO_GIT_ROOT,
   MORIO_GITHUB_REPO,
   MORIO_GITHUB_REPO_URL,

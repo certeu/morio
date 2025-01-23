@@ -150,7 +150,7 @@ Controller.prototype.setup = async function (req, res) {
     /*
      * Load the preseeded settings so we can validate them
      */
-    const settings = await loadPreseededSettings(body.preseed, log, '/tmp')
+    const settings = await loadPreseededSettings(body.preseed, false, log, '/tmp')
     if (!settings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.setup`, settings)
   } else {
