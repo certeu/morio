@@ -73,6 +73,15 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.reset_seconds, 'number')
   })
 
+  // GET /downloads
+  it('Should GET /downloads', async () => {
+    const result = await api.get('/downloads')
+    const d = result[1]
+
+    assert.equal(result[0], 200)
+    assert.equal(typeof d, 'object')
+  })
+
   // GET /up
   it('Should GET /up', async () => {
     const result = await api.get('/up')

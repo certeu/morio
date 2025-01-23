@@ -133,6 +133,31 @@ const setup = {
   },
 }
 
+const build = {
+  Package: 'morio-client',
+  Source: 'morio-client',
+  Section: 'utils',
+  Priority: 'optional',
+  Architecture: 'amd64',
+  Essential: 'no',
+  Depends: [
+    ['auditbeat', '>= 8.12'],
+    ['filebeat', '>= 8.12'],
+    ['metricbeat', '>= 8.12'],
+  ],
+  'Installed-Size': 5000,
+  Maintainer: 'CERT-EU <services@cert.europa.eu>',
+  'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
+  Uploaders: ['Joost De Cock <joost.decock@cert.europa.eu>'],
+  Homepage: 'https://github.com/certeu/morio',
+  Description: 'The Morio client collects and ships observability data to a Morio instance.',
+  DetailedDescription:
+    'Deploy this Morio client (based on Elastic Beats) on your endpoints,\nand collect their data on one or more centralized Morio instances\nfor analysis, further processing, downstream routing & filtering,\nor event-driven automation.',
+  'Vcs-Git': 'https://github.com/certeu/morio -b main [clients/linux]',
+  Version: '0.2.0',
+  Revision: 1,
+}
+
 /*
  * Helper method to assert strings are equal ignoring spaces
  */
@@ -229,6 +254,7 @@ export {
   loadKeys,
   services,
   setup,
+  build,
   store,
   attempt,
   isCoreReady,
