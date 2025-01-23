@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Post-Install script for moriod-repo
+
+set -e
+
+# Update package lists
+echo ""
+echo "Updating package lists"
+echo ""
+apt-get update
+

@@ -5,7 +5,8 @@ cd /morio/core
 
 # Start the core instance, as background job
 # Also wrap it in c8 to generate a coverage report
-../node_modules/.bin/c8 --reporter=html -- node ./src/index.mjs & #> ../local/core_test_logs.ndjson &
+#../node_modules/.bin/c8 --reporter=html -- node ./src/index.mjs &> ../local/core_test_logs.ndjson &
+node ./src/index.mjs &> ../local/core_test_logs.ndjson &
 
 # Wait for core to come up by checking the status endpoint
 TRIES=0
@@ -22,14 +23,23 @@ do
 done
 
 # Run unit tests
-node -v
-node --test-concurrency=1 --test
+export NODE_V8_COVERAGE=./coverage
+node \
+  --experimental-test-coverage \
+  --test-reporter=spec \
+  --test-concurrency=1 \
+  --test
 
 # Stop core container
 kill -1 %1
 
-# Generate coverage report (text)
-../node_modules/.bin/c8 report
-# Generate coverage report (html)
-../node_modules/.bin/c8 report --reporter=html
+echo "commit: $GIT_COMMIT_SHA"
+echo "pr: $GITHUB_PR_NUMBER"
+# Copy the coverage report if an artificate location is set
+if [ -n "$MORIO_ARTIFACT_FOLDER" ]; then
+  chmod +r ./coverage/*.json
+  cp ./coverage/*.json $MORIO_ARTIFACT_FOLDER
+  # Remove these files to avoid permission trouble
+  rm -rf ./coverage/*
+fi
 

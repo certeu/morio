@@ -291,21 +291,23 @@ export async function loadClusterDataFromDisk() {
   }
 }
 
-export async function templateSettings(settings) {
-  const tokens = {}
-  // Build the tokens object
-  for (const [key, val] of Object.entries(settings.tokens?.vars || {})) {
-    tokens[key] = val
-  }
-  for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
-    try {
-      const clear = await utils.unwrapSecret(key, val)
-      tokens[key] = clear
-    } catch (err) {
-      if (val.vault)
-        log.error(
-          `Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: ' + err.message : ''}`
-        )
+export async function templateSettings(settings, tokens = false) {
+  if (!tokens) {
+    tokens = {}
+    // Build the tokens object
+    for (const [key, val] of Object.entries(settings.tokens?.vars || {})) {
+      tokens[key] = val
+    }
+    for (const [key, val] of Object.entries(settings.tokens?.secrets || {})) {
+      try {
+        const clear = await utils.unwrapSecret(key, val)
+        tokens[key] = clear
+      } catch (err) {
+        if (val.vault)
+          log.error(
+            `Failed to unwrap secret: ${key}. ${err.message ? 'Request to Vault failed: ' + err.message : ''}`
+          )
+      }
     }
   }
 

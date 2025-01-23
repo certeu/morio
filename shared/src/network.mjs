@@ -204,7 +204,7 @@ async function __postput(method = 'POST', url, data, raw = false, log = false) {
   if (response?.status && [204].includes(response.status)) return [response.status, {}]
   /*
    * Handle all other status codes
-   */ else if (response?.status && response.status < 400) {
+   */ else if (response?.status) {
     let data
     try {
       data = raw ? await response.text() : await response.json()

@@ -13,7 +13,7 @@ import { reload } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
-import { unsealKeyData, loadKeysFromDisk } from '../lib/services/core.mjs'
+import { unsealKeyData, loadKeysFromDisk, templateSettings } from '../lib/services/core.mjs'
 import {
   loadPreseededSettings,
   ensurePreseededContent,
@@ -62,6 +62,21 @@ Controller.prototype.deploy = async function (req, res) {
    * We might need to reseed on reload
    */
   const settings = valid.preseed ? await reseedHandler(valid) : valid
+
+  /*
+   * If preseeding failed, back out
+   */
+  if (!settings) {
+    if (valid.preseed) {
+      log.warn(`Failed to preseed settings. Backing out of the deploy request.`)
+      return utils.sendErrorResponse(res, 'morio.core.settings.preseed.failed', req.url)
+    } else {
+      log.warn(
+        `Settings are not available after preseeding check. Backing out of the deploy request.`
+      )
+      return utils.sendErrorResponse(res, 'morio.core.deploy.stopped', req.url)
+    }
+  }
 
   /*
    * Do the actual deploy
@@ -451,11 +466,32 @@ const reseedHandler = async function (newSettings = false) {
   if (!newSettings) return newSettings
 
   /*
+   * If the preseed settings have tokens in them we need to resolve them.
+   * In addition, we have the extra difficulty that tokens can be part
+   * of the current settings, or the new settings. So, we load the current,
+   * then the new settings, so that the new settings take precedence.
+   */
+  const tokens = {
+    ...utils.getSettings('tokens.vars', {}),
+    ...(newSettings.tokens?.vars || {}),
+  }
+  for (const [key, val] of Object.entries({
+    ...utils.getSettings('tokens.secrets', {}),
+    ...(newSettings.tokens?.secrets || {}),
+  }))
+    tokens[key] = await utils.unwrapSecret(key, val)
+
+  /*
+   * New template the settings
+   */
+  const templatedSettings = await templateSettings(newSettings)
+
+  /*
    * Load the preseeded settings
    */
   let settings = await loadPreseededSettings(
-    newSettings.preseed ? newSettings.preseed : utils.getSettings('preseed'),
-    newSettings ? newSettings : utils.getSettings(),
+    templatedSettings.preseed ? templatedSettings.preseed : utils.getSettings('preseed'),
+    templatedSettings ? templatedSettings : utils.getSettings(),
     log
   )
 

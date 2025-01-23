@@ -38,12 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - We renamed the `production` release channel to `stable` 
 - We removed all configuration that was handled differently for unit tests
+- Our apt repositories are no longer tied to a specific (Debian) version
 - [api] Remove anything done differently for unit tests
 - [api] Persist test credentials to disk so tests can be re-run incrementally
 - [client] The Morio client is now statically linked to improve portability
 - [core] We no longer populate settings with all (disabled) feature flags
 - [core] Remove anything done differently for unit tests
 - [core] Persist test credentials to disk so tests can be re-run incrementally
+- [core] Extended the moriod.env file to allow changing presets
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 
@@ -57,6 +59,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
 - [core] Encrypt secrets when provided at initial setup. [#136](https://github.com/certeu/morio/issues/136)
+- [core] Improve resilience when preseeding fails
+- [core] Support tokens in preseed settings
 - [client] Do not show help after restarting agents. [#101](https://github.com/certeu/morio/issues/101)
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
 - [ui] Remove broken link from navigation. [#100](https://github.com/certeu/morio/issues/100)
