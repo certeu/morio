@@ -11,7 +11,8 @@ export const cacheStreamAsObj = (stream) => {
     const [id, d] = entry
     data[id] = {}
     for (let i=0; i < d.length; i += 2) {
-      if (d[i] === 'data')  {
+      if (typeof d[i+1] === 'string' && ['[', '{'].includes(d[i+1][0]))  {
+        // Attempt to parse as JSON
         let parsed
         try {
           parsed = JSON.parse(d[i+1])

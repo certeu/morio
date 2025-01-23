@@ -122,8 +122,8 @@ export const schema = {
         "ID of the Morio identity provider. Must always be 'apikey' for authentication with an API key"
       ),
     data: Joi.object({
-      api_key: Joi.string().length(96).required().description('This is the API key (a UUID)'),
-      api_key_secret: Joi.string().length(36).required().description('This is the API key secret'),
+      api_key: Joi.string().length(36).required().description('This is the API key (a UUID)'),
+      api_key_secret: Joi.string().length(96).required().description('This is the API key secret'),
     })
       .required()
       .description('Holds data that is specific to the identity provider'),
@@ -230,13 +230,13 @@ export const schema = {
     tags: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
-    id: Joi.string().required()
+    id: Joi.string().required(),
   }),
   'req.inventory.readIp': Joi.object({
-    id: Joi.string().required()
+    id: Joi.string().required(),
   }),
   'req.inventory.readMac': Joi.object({
-    id: Joi.string().required()
+    id: Joi.string().required(),
   }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),

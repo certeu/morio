@@ -205,10 +205,6 @@ export const links = {
     accounts: {
       r: 'manager',
     },
-    pkgs: {
-      t: 'Client Packages',
-      r: 'operator',
-    },
     decrypt: {
       t: 'Decrypt Data',
       r: 'engineer',

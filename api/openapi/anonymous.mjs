@@ -165,14 +165,13 @@ export default function (api) {
     operationId: 'upHealthcheck',
     ...shared,
     summary: `API Healthcheck`,
-    description: `Returns status code 204 if the API is up. No response body or data is returned. Useful for a quick healhcheck.`,
+    description: `Returns status code 200 if the API is up. Useful for a quick health check.`,
     responses: {
-      204: { description: 'No response body' },
-      ...errorResponses([
-        'morio.api.authentication.required',
-        `morio.api.internal.error`,
-        `morio.api.ratelimit.exceeded`,
-      ]),
+      200: response({
+        desc: 'A minimal response to indicate the service is up',
+        example: { up: true },
+      }),
+      ...errorResponses([`morio.api.internal.error`, `morio.api.ratelimit.exceeded`]),
     },
   })
 

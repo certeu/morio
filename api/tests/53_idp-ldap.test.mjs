@@ -4,17 +4,7 @@ import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 
 describe('API IDP/LDAP Tests', () => {
-  /*
-   * POST /login (valid LDAP user but no access)
-   * Example response:
-   * {
-   *   status: 401,
-   *   title: 'Authentication required',
-   *   detail: 'The request was not properly authenticated.',
-   *   type: 'https://morio.it/reference/errors/morio.api.authentication.required',
-   *   instance: 'http://api:3000/login'
-   * }
-   */
+  // POST /login (valid LDAP user but no access)
   it(`Should POST /login (user, LDAP user without Morio access)`, async () => {
     const data = {
       provider: 'ldap',
@@ -28,19 +18,7 @@ describe('API IDP/LDAP Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
   })
 
-  /*
-   * POST /login (user2 as manager)
-   * Example response:
-   * {
-   *   jwt: 'eyJhbGciOiJSUzI1NiI...',
-   *     data: {
-   *       user: 'user2',
-   *       role: 'manager',
-   *       highest_role: 'manager',
-   *       provider: 'ldap'
-   *     }
-   *   }
-   */
+  // POST /login (user2 as manager)
   it(`Should POST /login (user2 as manager)`, async () => {
     const data = {
       provider: 'ldap',
@@ -62,19 +40,7 @@ describe('API IDP/LDAP Tests', () => {
     store.ldap_user2_jwt = d.jwt
   })
 
-  /*
-   * POST /login (user2 as user)
-   * Example response:
-   * {
-   *   jwt: 'eyJhbGciOiJSUzI1NiI...',
-   *   data: {
-   *     user: 'user2',
-   *     role: 'user',
-   *     highest_role: 'manager',
-   *     provider: 'ldap'
-   *   }
-   * }
-   */
+  // POST /login (user2 as user)
   it(`Should POST /login (user2 as user)`, async () => {
     const data = {
       provider: 'ldap',
@@ -95,18 +61,7 @@ describe('API IDP/LDAP Tests', () => {
     assert.equal(d.data.provider, 'ldap')
   })
 
-  /*
-   * POST /login (user3 as operator)
-   * Example response:
-   * {
-   *   jwt: 'eyJhbGciOiJSUzI1NiI...',
-   *   data: {
-   *     user: 'user2',
-   *     role: 'user',
-   *     highest_role: 'manager',
-   *     provider: 'ldap'
-   *   }
-   */
+  // POST /login (user3 as operator)
   it(`Should POST /login (user3 as operator)`, async () => {
     const data = {
       provider: 'ldap',
@@ -128,17 +83,7 @@ describe('API IDP/LDAP Tests', () => {
     store.ldap_user3_jwt = d.jwt
   })
 
-  /*
-   * POST /login (invalid credentials)
-   * Example response:
-   * {
-   *   status: 403,
-   *   title: 'Account credentials mismatch',
-   *   detail: 'The provided account credentials are incorrect.',
-   *   type: 'https://morio.it/reference/errors/morio.api.account.credentials.mismatch',
-   *   instance: 'http://api:3000/login'
-   * }
-   */
+  // POST /login (invalid credentials)
   it(`Should POST /login (wrong password)`, async () => {
     const data = {
       provider: 'ldap',
@@ -152,17 +97,7 @@ describe('API IDP/LDAP Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.account.credentials.mismatch')
   })
 
-  /*
-   * POST /login (unavailable role)
-   * Example response:
-   * {
-   *   status: 403,
-   *   title: 'Role unavailable',
-   *   detail: 'The requested role is not available to this account.',
-   *   type: 'https://morio.it/reference/errors/morio.api.account.role.unavailable',
-   *   instance: 'http://api:3000/login'
-   * }
-   */
+  // POST /login (unavailable role)
   it(`Should POST /login (unavailable role)`, async () => {
     const data = {
       provider: 'ldap',
@@ -176,17 +111,7 @@ describe('API IDP/LDAP Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
   })
 
-  /*
-   * POST /login (non-existing role)
-   * Example response:
-   * {
-   *   status: 403,
-   *   title: 'Role unavailable',
-   *   detail: 'The requested role is not available to this account.',
-   *   type: 'https://morio.it/reference/errors/morio.api.account.role.unavailable',
-   *   instance: 'http://api:3000/login'
-   * }
-   */
+  // POST /login (non-existing role)
   it(`Should POST /login (non-existing role)`, async () => {
     const data = {
       provider: 'ldap',
@@ -197,27 +122,10 @@ describe('API IDP/LDAP Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    validateErrorResponse(result, errors, 'morio.api.account.role.unavailable')
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
-  /*
-   * GET /whoami (JWT in Bearer header)
-   * Example response:
-   * {
-   *   user: 'user2',
-   *   role: 'manager',
-   *   highest_role: 'manager',
-   *   provider: 'ldap',
-   *   node: '5242fbe1-b6b5-43c1-a05f-0491c8e9c3c2',
-   *   cluster: '50227e6e-1f82-419d-aef4-dc5f61402e77',
-   *   iat: 1715085390,
-   *   nbf: 1715085390,
-   *   exp: 1715099790,
-   *   aud: 'morio',
-   *   iss: 'morio',
-   *   sub: 'morio'
-   * }
-   */
+  // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.ldap_user2_jwt}` })
     assert.equal(result[0], 200)
@@ -231,13 +139,11 @@ describe('API IDP/LDAP Tests', () => {
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
   })
 
-  /*
-   * GET /auth (JWT in Bearer header)
-   * No response body
-   */
+  // GET /auth (JWT in Bearer header)
   it(`Should GET /auth (JWT in Bearer header)`, async () => {
     const result = await api.get(`/auth`, {
-      'X-Forwarded-Uri': '/-/api/settings',
+      'X-Forwarded-Uri': '/-/api/whoami',
+      'X-Morio-Service': 'api',
       Authorization: `Bearer ${store.ldap_user3_jwt}`,
     })
     assert.equal(result[0], 200)

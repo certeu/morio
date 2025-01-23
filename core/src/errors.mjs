@@ -61,6 +61,24 @@ export const errors = {
       'The provided settings failed validation against the Morio data schema, or are invalid for some other reason.',
   },
   /*
+   * Error for failed preseeding of settings
+   */
+  'morio.core.settings.preseed.failed': {
+    status: 400,
+    title: 'Failed to preseed the settings',
+    detail:
+      'We failed to preseed the settings, so we did not update the running settings. Verify your preseed settings.',
+  },
+  /*
+   * Error when we cannot deploy (typically bad settings)
+   */
+  'morio.core.deploy.stopped': {
+    status: 400,
+    title: 'Deploy stopped due to invalid settings',
+    detail:
+      'The settings generated an unexpected result, so we backed out of the deploy to prevent breaking your setup.',
+  },
+  /*
    * Error for when the settings are deployed on a host that's not listed as a node
    */
   'morio.core.settings.fqdn.mismatch': {

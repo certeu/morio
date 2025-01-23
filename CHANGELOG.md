@@ -37,16 +37,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - We renamed the `production` release channel to `stable` 
+- We removed all configuration that was handled differently for unit tests
+- Our apt repositories are no longer tied to a specific (Debian) version
+- [api] Remove anything done differently for unit tests
+- [api] Persist test credentials to disk so tests can be re-run incrementally
 - [client] The Morio client is now statically linked to improve portability
 - [core] We no longer populate settings with all (disabled) feature flags
+- [core] Remove anything done differently for unit tests
+- [core] Persist test credentials to disk so tests can be re-run incrementally
+- [core] Extended the moriod.env file to allow changing presets
 - [shared] `mkdir` is now recursive
 - [watcher] Added the cluster UUID to internal monitor IDs
 
 ### Fixed
 
+- [api] Handle browser domain mismatch in validation. [#109](https://github.com/certeu/morio/issues/109)
+- [api] The `/up` endpoint is now anonymous and returns status 200 [#133](https://github.com/certeu/morio/issues/133)
+- [api] RBAC would block access when a token in a cookie was expired, even if a valid Bearer token was provided
+- [api] Update test run-script with prefixed container name
+- [api] Required length for `api_key` and `api_key_secret` were inverted in the schema
 - [broker] Respect broker log level set in preset rather than always use debug
 - [ca] Prevent the CA service from restarting at every reload
+- [core] Encrypt secrets when provided at initial setup. [#136](https://github.com/certeu/morio/issues/136)
+- [core] Improve resilience when preseeding fails
+- [core] Support tokens in preseed settings
+- [client] Do not show help after restarting agents. [#101](https://github.com/certeu/morio/issues/101)
 - [connector] Fixed a regression where the recent move to mTLS for Kafka broke the connector plugin
+- [ui] Remove broken link from navigation. [#100](https://github.com/certeu/morio/issues/100)
+- [ui] Handle new validation check for browser domain. [#109](https://github.com/certeu/morio/issues/109)
+- [ui] Do not assume container images have tags. [#137](https://github.com/certeu/morio/issues/137)
 - [watcher] Update internal hostnames with new Docker container prefix
 
 ## [0.5.5] - 2024-11-18

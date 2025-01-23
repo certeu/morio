@@ -5,8 +5,9 @@ import { getPreset } from '#config'
 import { restClient } from './rest.mjs'
 import { strict as assert } from 'node:assert'
 import axios from 'axios'
-import { readJsonFile } from '#shared/fs'
+import { readJsonFile, writeJsonFile } from '#shared/fs'
 import path from 'path'
+import process from 'process'
 
 /*
  * We'll re-use these in the API unit tests
@@ -24,15 +25,16 @@ const headers = {
   'x-morio-user': 'test_user',
   'x-morio-provider': 'local',
 }
+
 /*
  * Setup the store
  */
-const store = new Store().set('log', logger('trace'))
+const store = new Store(logger('trace'))
 
 /*
  * Client for the core API (which we are testing)
  */
-const core = restClient(`http://core:${getPreset('MORIO_CORE_PORT')}`)
+const core = restClient(`http://morio-core:${getPreset('MORIO_CORE_PORT')}`)
 
 /*
  * Client for the management API
@@ -45,7 +47,10 @@ const axiosHandler = async (route, data = null, customHeaders = {}, method = 'ge
   params.push({ headers: { ...headers, ...customHeaders } })
   let result
   try {
-    result = await axios[method](`http://api:${getPreset('MORIO_API_PORT')}${route}`, ...params)
+    result = await axios[method](
+      `http://morio-api:${getPreset('MORIO_API_PORT')}${route}`,
+      ...params
+    )
     //console.log({result})
   } catch (err) {
     //console.log({err})
@@ -77,12 +82,11 @@ const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'conn
 const setup = {
   cluster: {
     name: 'Morio Unit Tests',
-    broker_nodes: ['unit.test.morio.it'],
+    broker_nodes: [process.env['MORIO_FQDN']],
   },
   tokens: {
     flags: {
-      HEADLESS_MORIO: false,
-      DISABLE_ROOT_TOKEN: false,
+      RESEED_ON_RELOAD: true,
     },
     secrets: {
       TEST_SECRET_1: 'banana',
@@ -93,20 +97,17 @@ const setup = {
   iam: {
     providers: {
       apikey: {
-        provider: 'apikey',
-        id: 'apikey',
         label: 'API Key',
+        provider: 'apikey',
       },
       mrt: {},
       local: {
-        provider: 'local',
-        id: 'mrt',
         label: 'Morio Account',
+        provider: 'local',
       },
       ldap: {
         provider: 'ldap',
         verify_certificate: false,
-        id: 'ldap',
         label: 'LDAP',
         about: 'Test LDAP server',
         server: {
@@ -130,6 +131,31 @@ const setup = {
       },
     },
   },
+}
+
+const build = {
+  Package: 'morio-client',
+  Source: 'morio-client',
+  Section: 'utils',
+  Priority: 'optional',
+  Architecture: 'amd64',
+  Essential: 'no',
+  Depends: [
+    ['auditbeat', '>= 8.12'],
+    ['filebeat', '>= 8.12'],
+    ['metricbeat', '>= 8.12'],
+  ],
+  'Installed-Size': 5000,
+  Maintainer: 'CERT-EU <services@cert.europa.eu>',
+  'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
+  Uploaders: ['Joost De Cock <joost.decock@cert.europa.eu>'],
+  Homepage: 'https://github.com/certeu/morio',
+  Description: 'The Morio client collects and ships observability data to a Morio instance.',
+  DetailedDescription:
+    'Deploy this Morio client (based on Elastic Beats) on your endpoints,\nand collect their data on one or more centralized Morio instances\nfor analysis, further processing, downstream routing & filtering,\nor event-driven automation.',
+  'Vcs-Git': 'https://github.com/certeu/morio -b main [clients/linux]',
+  Version: '0.2.0',
+  Revision: 1,
 }
 
 /*
@@ -214,6 +240,11 @@ const loadKeys = async () => {
   return keys
 }
 
+const writePersistedData = async (data, name = 'api_tests') =>
+  await writeJsonFile(`../local/${name}.json`, data)
+
+const readPersistedData = async (name = 'api_tests') => await readJsonFile(`../local/${name}.json`)
+
 export {
   api,
   accounts,
@@ -223,6 +254,7 @@ export {
   loadKeys,
   services,
   setup,
+  build,
   store,
   attempt,
   isCoreReady,
@@ -230,4 +262,6 @@ export {
   sleep,
   validationShouldFail,
   validateErrorResponse,
+  readPersistedData,
+  writePersistedData,
 }

@@ -70,6 +70,9 @@ presets.MORIO_LOGS_ROOT = '/var/log/morio/moriod'
 predocs.MORIO_DOWNLOADS_FOLDER = 'Name of the Morio public downloads folder'
 presets.MORIO_DOWNLOADS_FOLDER = 'downloads'
 
+predocs.MORIO_RELEASE_CHANNEL = 'Name of the release channel to load containers from'
+presets.MORIO_RELEASE_CHANNEL = 'stable'
+
 predocs.MORIO_REPOS_FOLDER = 'Name of the Morio public repositories folder'
 presets.MORIO_REPOS_FOLDER = 'repos'
 
@@ -169,12 +172,6 @@ presets.MORIO_API_LOG_LEVEL = 'trace'
 
 predocs.MORIO_API_PORT = 'TCP port for the API service to listen on'
 presets.MORIO_API_PORT = 3000
-
-// Hosts for which to forego the https validation check
-// Used in unit tests only
-predocs.MORIO_UNIT_TEST_HOST = `Host for which to forego the HTTPS validation
-check. Used in unit tests only`
-presets.MORIO_UNIT_TEST_HOST = 'unit.test.morio.it'
 
 /*
  * Broker presets

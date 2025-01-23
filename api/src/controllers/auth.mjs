@@ -29,6 +29,11 @@ const allowedUrisBase = [
   `/ca/certificates`,
   `/pubkey`,
   `/pubkey.pem`,
+  `/up`,
+]
+
+const blockedUris = [
+  '/reload', // Used internally by core
 ]
 
 /*
@@ -73,6 +78,14 @@ Controller.prototype.authenticate = async function (req, res) {
   if (!uri) return utils.sendErrorResponse(res, 'morio.api.rbac.denied', req.url)
 
   /*
+   * Is the URL blocked?
+   *
+   */
+  if (blockedUris.includes(uri)) {
+    return utils.sendErrorResponse(res, 'morio.api.404', req.url)
+  }
+
+  /*
    * Is the URL allow-listed?
    */
   if (allowedUris.includes(uri)) return res.status(200).send().end()
@@ -108,7 +121,7 @@ Controller.prototype.authenticate = async function (req, res) {
    * If the JWT is not in the cookie, check the Authorization header
    */
   let header = false
-  if (req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
+  if (!payload && req.headers.authorization && req.headers.authorization.includes('Bearer ')) {
     header = true
     const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
     if (valid) payload = valid
@@ -117,7 +130,7 @@ Controller.prototype.authenticate = async function (req, res) {
   /*
    * Is it perhaps a request without a token but with credentials?
    */
-  if (req.headers.authorization && req.headers.authorization.includes('Basic ')) {
+  if (!payload && req.headers.authorization && req.headers.authorization.includes('Basic ')) {
     header = true
     const credentials = Buffer.from(req.headers.authorization.split('Basic ')[1].trim(), 'base64')
       .toString('utf-8')
@@ -386,19 +399,24 @@ Controller.prototype.whoami = async function (req, res) {
  *
  * @param {object} token - The token to verify
  */
-const verifyToken = (token) =>
-  new Promise((resolve) =>
-    jwt.verify(
-      token,
-      utils.getKeys().public,
-      {
-        audience: 'morio',
-        issuer: 'morio',
-        subject: 'morio',
-      },
-      (err, payload) => resolve(err ? false : payload)
+const verifyToken = (token) => {
+  const publicKey = utils.getKeys()?.public
+
+  return publicKey
+    ?  new Promise((resolve) =>
+      jwt.verify(
+        token,
+        utils.getKeys().public,
+        {
+          audience: 'morio',
+          issuer: 'morio',
+          subject: 'morio',
+        },
+        (err, payload) => resolve(err ? false : payload)
+      )
     )
-  )
+    : false
+}
 
 function redirectPath(req, to) {
   return `${req.headers['x-forwarded-proto']}://${req.headers['x-forwarded-host']}:${

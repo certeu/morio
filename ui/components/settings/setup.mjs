@@ -38,7 +38,7 @@ const ShowConfigurationValidation = ({ deploy, validationReport, toggleValidate 
           </Popout>
         ) : null}
         <SettingsReport report={validationReport} />
-        {validationReport.valid ? (
+        {validationReport.valid && validationReport.deployable ? (
           <button className="btn btn-accent btn-lg w-full mt-4" onClick={deploy}>
             Deploy Configuration
           </button>

@@ -1,4 +1,5 @@
-import { generateTraefikConfig } from './index.mjs'
+import { generateTraefikConfig, getContainerTagSuffix } from './index.mjs'
+import process from 'process'
 
 /*
  * Export a single method that resolves the service configuration
@@ -53,16 +54,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
        */
       .set('http.routers.api.middlewares', ['api-prefix@file', 'api-service-header@file', 'api-auth@file'])
   }
-  /*
-   * To run unit tests, we need to modify the config slightly
-   */
-  if (!PROD && utils.isUnitTest()) {
-    traefik.set('http.routers.api.tls', true)
-    traefik.set('http.routers.api.tls.certresolver', 'ca')
-    traefik.set('tls.stores.default.defaultgeneratedcert.domain.main', 'unit.test.morio.it')
-    traefik.set('tls.stores.default.defaultgeneratedcert.domain.sans', 'unit.test.morio.it')
-    traefik.set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
-  }
 
   return {
     /**
@@ -74,7 +65,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Image to run (different in dev)
       image: PROD ? 'itsmorio/api' : 'devmorio/api',
       // Image tag (version) to run
-      tag: utils.getPreset('MORIO_VERSION_TAG'),
+      tag: utils.getPreset('MORIO_VERSION_TAG') + getContainerTagSuffix(utils),
       // Don't attach to the default network
       networks: { default: null },
       // Instead, attach to the morio network
@@ -93,10 +84,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Run an init inside the container to forward signals and avoid PID 1
       init: true,
       // Environment
-      environment: [
+      environment: {
         // Silence this message from the Kafka JS client
-        `KAFKAJS_NO_PARTITIONER_WARNING=1`,
-      ],
+        KAFKAJS_NO_PARTITIONER_WARNING: 1,
+        MORIO_FQDN: process.env['MORIO_FQDN'],
+      },
       // Add extra hosts
       hosts: [],
     },

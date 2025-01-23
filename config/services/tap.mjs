@@ -1,13 +1,4 @@
-/*
- * This is kept out of the full config to facilitate
- * pulling images with the pull-oci run script
- */
-export const pullConfig = {
-  // Image to run
-  image: 'itsmorio/tap',
-  // Image tag (version) to run
-  tag: 'v0.5.5',
-}
+import { getContainerTagSuffix } from './index.mjs'
 
 /*
  * Export a single method that resolves the service configuration
@@ -20,9 +11,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
   return {
     container: {
-      ...pullConfig,
-      // Different image in dev
+      // Image to run (different in dev)
       image: PROD ? 'itsmorio/tap' : 'devmorio/tap',
+      // Image tag (version) to run
+      tag: utils.getPreset('MORIO_VERSION_TAG') + getContainerTagSuffix(utils),
       // Name to use for the running container
       container_name: 'tap',
       // Don't attach to the default network

@@ -38,8 +38,6 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     },
     // Volumes
     volumes: [`${utils.getPreset('MORIO_CONFIG_ROOT')}/console:/etc/morio/console`],
-    // TODO: For unit tests, we need to know the IP, something like:
-    //hosts: ['unit.test.morio.it:10.10.10.10'],
   },
   traefik: {
     console: generateTraefikConfig(utils, {

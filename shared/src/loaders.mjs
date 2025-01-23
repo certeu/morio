@@ -164,7 +164,9 @@ async function loadPreseedBaseFile(preseed, gitroot, log) {
  * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export async function loadPreseededSettings(preseed, currentSettings=false, log, gitroot = '/etc/morio/shared') {
+export async function loadPreseededSettings(preseed=false, currentSettings=false, log, gitroot = '/etc/morio/shared') {
+  if (!preseed) return currentSettings
+
   /*
    * If there's a git config, we need to handle that first
    */
@@ -208,7 +210,7 @@ export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio
   /*
    * If there's a git config, we need to fetch it
    */
-  if (preseed.git) {
+  if (preseed?.git) {
     for (const [id, config] of Object.entries(preseed.git)) {
       await loadGitRepo(gitroot, id, config, log)
     }
@@ -487,7 +489,7 @@ export async function loadClientModules(settings, log) {
           )) {
             const copy = await copyPreseedFile({
               sourceFile,
-              targetFile,
+              targetFile: (sourceFile.slice(-4) === ".yml" ? `${targetFile}.disabled` : targetFile),
               targetFolder,
             })
             if (copy) log.debug(`Seeding client module file: ${targetFile}`)
@@ -506,7 +508,7 @@ export async function loadStreamProcessors(settings, log) {
    * Don't bother unless we have processors to load
    */
   const globs = settings?.preseed?.processors
-  if (!Array.isArray(globs) || globs.length < 1) return
+  if (!Array.isArray(globs) || globs.length < 1) return settings
 
   /*
    * Folder inside the core container where to store the client files

@@ -14,9 +14,9 @@ const fields = {
   fqdn: clean,
   memory: Number,
   name: clean,
-  notes: (val) => val.map(item => clean(item)),
+  notes: (val) => val.map((item) => clean(item)),
   os: clean,
-  tags: (val) => val.map(item => clean(item)),
+  tags: (val) => val.map((item) => clean(item)),
   last_update: asTime,
 }
 
@@ -83,10 +83,9 @@ export async function listOss() {
  * @return {object} data - The data saved for the host
  */
 export async function loadHost(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_hosts WHERE id=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -106,10 +105,9 @@ export async function loadHost(id) {
  * @return {object} data - The data saved for the IP address
  */
 export async function loadIp(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_ips WHERE id=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE id=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -129,10 +127,9 @@ export async function loadIp(id) {
  * @return {object} data - The data saved for the MAC address
  */
 export async function loadMac(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_macs WHERE id=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_macs WHERE id=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -152,10 +149,9 @@ export async function loadMac(id) {
  * @return {object} data - The data saved for the MAC address
  */
 export async function loadOs(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_oss WHERE id=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -175,10 +171,9 @@ export async function loadOs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostIps(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_ips WHERE host=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE host=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -195,10 +190,9 @@ export async function loadHostIps(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostMacs(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_macs WHERE host=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_macs WHERE host=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -215,10 +209,9 @@ export async function loadHostMacs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostOs(id) {
-  const [status, result] = await db.read(
-    `SELECT * FROM inventory_oss WHERE id=:id`,
-    { id: clean(id) }
-  )
+  const [status, result] = await db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
+    id: clean(id),
+  })
 
   if (status !== 200) return false
   const found = hostsAsList(result)
@@ -261,7 +254,7 @@ export async function getStats() {
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-async function deleteRecord (table=false, id=false) {
+async function deleteRecord(table = false, id = false) {
   if (!id || !table) return false
 
   await db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
@@ -275,7 +268,7 @@ async function deleteRecord (table=false, id=false) {
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-export async function deleteIp (id=false) {
+export async function deleteIp(id = false) {
   return await deleteRecord('inventory_ips', id)
 }
 
@@ -285,7 +278,7 @@ export async function deleteIp (id=false) {
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-export async function deleteMac (id=false) {
+export async function deleteMac(id = false) {
   return await deleteRecord('inventory_macs', id)
 }
 
@@ -295,7 +288,7 @@ export async function deleteMac (id=false) {
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-export async function deleteOs (id=false) {
+export async function deleteOs(id = false) {
   return await deleteRecord('inventory_oss', id)
 }
 
@@ -305,7 +298,7 @@ export async function deleteOs (id=false) {
  * @param {string} id - The ID of the record to delete
  * @return {bool} result - true if it went ok, false if not
  */
-export async function deleteHost (id=false) {
+export async function deleteHost(id = false) {
   const result = await deleteRecord('inventory_hosts', id)
 
   // Also remove IPs, MACs, and OS beloonging to this host
@@ -323,7 +316,7 @@ export async function deleteHost (id=false) {
  * @param {object} result - The result from Rqlite
  * @resturn {array} list - The list of field values
  */
-function getFields(result={}) {
+function getFields(result = {}) {
   const cols = result?.results?.[0]?.columns
   const list = (result?.results?.[0]?.values || []).map((entry) => {
     const data = {}
@@ -367,8 +360,7 @@ export async function saveHost(id, data) {
       if (typeof dbval === 'object') {
         try {
           dbval = JSON.stringify(dbval)
-        }
-        catch {
+        } catch {
           log.warn(`Failed to parse field ${key} to JSON in saveHost()`)
         }
       }

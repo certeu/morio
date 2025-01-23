@@ -7,7 +7,7 @@ import { Redis as Valkey } from 'ioredis'
  * So we do not create it at startup, instead just do so later when it's needed
  */
 export const valkey = {
-  client: false
+  client: false,
 }
 valkey.connect = () => {
   /*

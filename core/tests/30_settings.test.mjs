@@ -25,79 +25,7 @@ describe('Ensure we are out of configuration mode', async () => {
 })
 
 describe('Core Settings/Reload/Status Tests', () => {
-  /*
-   * GET /reload - Load data from core to bootstrap the API
-   * Example response:
-   * {
-   *   info: {
-   *     about: 'Morio Core',
-   *     name: '@morio/core',
-   *     production: false,
-   *     version: '0.2.0'
-   *   },
-   *   status: {
-   *     cluster: {
-   *       code: 15,
-   *       color: 'red',
-   *       time: 1721837466014,
-   *       updated: 1721837466014,
-   *       leader_serial: 1,
-   *       leading: true
-   *     },
-   *     nodes: { 'unit.test.morio.it': [Object] }
-   *   },
-   *   nodes: {
-   *     '38b96b17-3536-4247-82e5-8675ee3a1d3c': {
-   *       serial: 1,
-   *       fqdn: 'unit.test.morio.it',
-   *       hostname: 'unit',
-   *       ip: '192.168.144.36',
-   *       uuid: '38b96b17-3536-4247-82e5-8675ee3a1d3c',
-   *       settings: 1721837321743
-   *     }
-   *   },
-   *   node: {
-   *     uptime: 198,
-   *     cluster: '297305e5-7e72-4494-b764-a20dd0b0c161',
-   *     node: '38b96b17-3536-4247-82e5-8675ee3a1d3c',
-   *     node_serial: 1,
-   *     ephemeral: false,
-   *     ephemeral_uuid: '539fe81f-8c82-4b1f-836c-606db6e37386',
-   *     reload_count: 2,
-   *     config_resolved: true,
-   *     settings_serial: 1721837321743
-   *   },
-   *   settings: {
-   *     cluster: { name: 'Morio Unit Tests', broker_nodes: [Array] },
-   *     tokens: { flags: [Object], secrets: [Object] },
-   *     iam: { providers: [Object] }
-   *   },
-   *   keys: {
-   *     jwt: 'e5d...',
-   *     mrt: 'mrt.8be...',
-   *     public: '-----BEGIN PUBLIC KEY--...',
-   *     private: '-----BEGIN ENCRYPTED PRIVATE KEY--...',
-   *     cluster: '297305e5-7e72-4494-b764-a20dd0b0c161',
-   *     jwk: {
-   *       kty: 'RSA',
-   *       kid: 'HGxwVtXyTVpiYMVEuB19F9qEh9yI0rdX0A9YP1CWPgA',
-   *       n: 'w5Ed...',
-   *       e: 'AQAB'
-   *     },
-   *     rfpr: 'fae30c2a303d25366658ec1d6d2a076e6de056c4d3a2d7ce4c32bb9380fa9eec',
-   *     rcrt: '-----BEGIN CERTIFICATE---...',
-   *     rkey: '-----BEGIN ENCRYPTED PRIVATE KEY---...',
-   *     rpwd: '2f064...',
-   *     icrt: '-----BEGIN CERTIFICATE---...',
-   *     ikey: '-----BEGIN ENCRYPTED PRIVATE KEY---...',
-   *   },
-   *   presets: {
-   *     MORIO_API_JWT_EXPIRY: '12h',
-   *     ...
-   *     NODE_ENV: 'development'
-   *   }
-   * }
-   */
+  //GET /reload - Load data from core to bootstrap the API
   it('Should GET /reload', async () => {
     const result = await core.get('/reload')
     const d = result[1]
@@ -117,14 +45,13 @@ describe('Core Settings/Reload/Status Tests', () => {
     assert.equal(['green', 'amber', 'red'].includes(d.status.cluster.color), true)
     assert.equal(typeof d.status.cluster.time, 'number')
     assert.equal(typeof d.status.cluster.updated, 'number')
-    /*
-     * The leader serial won't be available until after the cluster
-     * rebalances. Even if we have a single node. So we'll test this
-     * in the final tests (80_extras)
-     *
-     * assert.equal([true, false].includes(d.status.cluster.leading), true)
-     * assert.equal(typeof d.status.cluster.leader_serial, 'number')
-     */
+
+    // The leader serial won't be available until after the cluster
+    // rebalances. Even if we have a single node. So we'll test this
+    // in the final tests (80_extras)
+    // assert.equal([true, false].includes(d.status.cluster.leading), true)
+    // assert.equal(typeof d.status.cluster.leader_serial, 'number')
+
     // status.nodes
     assert.equal(typeof d.status.nodes, 'object')
     let node = Object.keys(d.status.nodes).pop()
@@ -167,8 +94,7 @@ describe('Core Settings/Reload/Status Tests', () => {
     assert.equal(typeof d.settings.tokens, 'object')
     assert.equal(typeof d.settings.tokens.flags, 'object')
     assert.equal(typeof d.settings.tokens.secrets, 'object')
-    assert.equal(d.settings.tokens.flags.HEADLESS_MORIO, false)
-    assert.equal(d.settings.tokens.flags.DISABLE_ROOT_TOKEN, false)
+    assert.equal(d.settings.tokens.flags.RESEED_ON_RELOAD, true)
     assert.equal(typeof d.settings.tokens.secrets.TEST_SECRET_1, 'string')
     assert.equal(typeof d.settings.tokens.secrets.TEST_SECRET_2, 'string')
     const s1 = JSON.parse(d.settings.tokens.secrets.TEST_SECRET_1)
@@ -190,10 +116,17 @@ describe('Core Settings/Reload/Status Tests', () => {
     assert.equal(typeof d.keys, 'object')
     if (store.mrt) assert.equal(d.keys.mrt, store.mrt)
     for (const key of [
-      'jwt',
+      'cluster',
+      'seal',
       'mrt',
+      'mrt_serial',
+      'unseal',
       'public',
       'private',
+      'pgpub',
+      'pgpriv',
+      'jwt',
+      'jwk',
       'rfpr',
       'rcrt',
       'rkey',
@@ -201,57 +134,41 @@ describe('Core Settings/Reload/Status Tests', () => {
       'icrt',
       'ikey',
     ]) {
-      assert.equal(typeof d.keys[key], 'string')
+      if (key === 'seal' || key === 'mrt') {
+        assert.equal(typeof d.keys[key], 'object')
+        assert.equal(typeof d.keys[key].hash, 'string')
+        assert.equal(typeof d.keys[key].salt, 'string')
+      } else if (key === 'jwk') {
+        assert.equal(typeof d.keys[key], 'object')
+        assert.equal(typeof d.keys[key].kty, 'string')
+        assert.equal(typeof d.keys[key].kid, 'string')
+        assert.equal(typeof d.keys[key].n, 'string')
+        assert.equal(typeof d.keys[key].e, 'string')
+      } else if (key === 'mrt_serial') assert.equal(typeof d.keys[key], 'number')
+      else assert.equal(typeof d.keys[key], 'string')
     }
     for (const key of ['public', 'private', 'rcrt', 'rkey', 'icrt', 'ikey']) {
       assert.equal(d.keys[key].includes('--BEGIN '), true)
       assert.equal(d.keys[key].includes('--END '), true)
     }
-    // keys.jwk
-    assert.equal(typeof d.keys.jwk, 'object')
-    for (const key of ['kty', 'kid', 'n', 'e']) {
-      assert.equal(typeof d.keys.jwk[key], 'string')
-    }
     // presets
     assert.equal(typeof d.presets, 'object')
     for (const preset in d.presets) {
-      if (preset !== 'MORIO_BROKER_TOPICS') {
-        assert.equal(['string', 'number'].includes(typeof d.presets[preset]), true)
-      } else {
-        // This is the only array that holds a preset
+      if (preset === 'MORIO_BROKER_CLIENT_TOPICS') {
         assert.equal(Array.isArray(d.presets[preset]), true)
+      } else if (preset === 'MORIO_DOCKER_ADD_HOST') {
+        assert.equal(false, d.presets[preset])
+      } else {
+        assert.equal(['string', 'number'].includes(typeof d.presets[preset]), true)
       }
     }
-    /*
-     * Add to store for re-use in other tests
-     */
+    // Add to store for re-use in other tests
     store.settings = d.settings
     store.keys = d.keys
     store.presets = d.presets
   })
 
-  /*
-   * GET /settings - Get settings to show to user in frontend
-   * Example response:
-   * {
-   *   cluster: { name: 'Morio Unit Tests', broker_nodes: [ 'unit.test.morio.it' ] },
-   *   tokens: {
-   *     flags: {
-   *       HEADLESS_MORIO: false,
-   *       DISABLE_ROOT_TOKEN: false,
-   *       DISABLE_SWARM_OVERLAY_ENCRYPTION: false
-   *     },
-   *     secrets: {
-   *       TEST_SECRET_1: '{"iv":"0a06e4ddaaa06fb0dc28baffefe2da0c","ct":"2a96fbc96a76fd54d06068f2149e46ff"}',
-   *       TEST_SECRET_2: '{"iv":"00815aeac695bac49d89a855d8e4194d","ct":"61dd8e62c34d0249fa42c7e1a963b64d"}',
-   *       LDAP_BIND_SECRET: '{"iv":"b36434b8e953fe8ccc8c59a0185d107d","ct":"79167396e3896559345ddcf7b4280583"}'
-   *     }
-   *   },
-   *   iam: {
-   *     providers: { apikey: [Object], mrt: {}, local: [Object], ldap: [Object] }
-   *   }
-   * }
-   */
+  // GET /settings - Get settings to show to user in frontend
   it('Should GET /settings', async () => {
     const result = await core.get('/settings')
     const d = result[1]
@@ -266,8 +183,7 @@ describe('Core Settings/Reload/Status Tests', () => {
     assert.equal(typeof d.tokens, 'object')
     assert.equal(typeof d.tokens.flags, 'object')
     assert.equal(typeof d.tokens.secrets, 'object')
-    assert.equal(d.tokens.flags.HEADLESS_MORIO, false)
-    assert.equal(d.tokens.flags.DISABLE_ROOT_TOKEN, false)
+    assert.equal(d.tokens.flags.RESEED_ON_RELOAD, true)
     assert.equal(typeof d.tokens.secrets.TEST_SECRET_1, 'string')
     assert.equal(typeof d.tokens.secrets.TEST_SECRET_2, 'string')
     const s1 = JSON.parse(d.tokens.secrets.TEST_SECRET_1)

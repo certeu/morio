@@ -10,7 +10,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
-import { ReloadDataButton } from 'components/inventory/shared.mjs'
+import { ReloadDataButton } from 'components/button.mjs'
 
 /**
  * This component renders a table with all MAC addresses and allows removal

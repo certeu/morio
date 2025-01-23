@@ -13,8 +13,13 @@ import { reload } from '../index.mjs'
 import { cloneAsPojo } from '#shared/utils'
 import { log, utils } from '../lib/utils.mjs'
 import { generateCaConfig } from '../lib/services/ca.mjs'
-import { unsealKeyData, loadKeysFromDisk } from '../lib/services/core.mjs'
-import { loadPreseededSettings, ensurePreseededContent, loadClientModules, loadStreamProcessors } from '#shared/loaders'
+import { unsealKeyData, loadKeysFromDisk, templateSettings } from '../lib/services/core.mjs'
+import {
+  loadPreseededSettings,
+  ensurePreseededContent,
+  loadClientModules,
+  loadStreamProcessors,
+} from '#shared/loaders'
 import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
 
 /**
@@ -56,7 +61,22 @@ Controller.prototype.deploy = async function (req, res) {
   /*
    * We might need to reseed on reload
    */
-  const settings = await reseedHandler(valid)
+  const settings = valid.preseed ? await reseedHandler(valid) : valid
+
+  /*
+   * If preseeding failed, back out
+   */
+  if (!settings) {
+    if (valid.preseed) {
+      log.warn(`Failed to preseed settings. Backing out of the deploy request.`)
+      return utils.sendErrorResponse(res, 'morio.core.settings.preseed.failed', req.url)
+    } else {
+      log.warn(
+        `Settings are not available after preseeding check. Backing out of the deploy request.`
+      )
+      return utils.sendErrorResponse(res, 'morio.core.deploy.stopped', req.url)
+    }
+  }
 
   /*
    * Do the actual deploy
@@ -102,7 +122,7 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Ensure preseeded content
    */
-  await preseedHandler(body.preseed, true)
+  if (body.preseed) await preseedHandler(body?.preseed, true)
 
   /*
    * Handle initial setup
@@ -236,7 +256,7 @@ const initialSetup = async function (req, settings) {
     if (!preseededSettings) err = { message: 'Failed to construct settings from preseed data' }
     else [valid, err] = await utils.validate(`req.settings.setup`, preseededSettings)
   } else {
-    [valid, err] = await utils.validate(`req.settings.setup`, settings)
+    ;[valid, err] = await utils.validate(`req.settings.setup`, settings)
   }
 
   if (!valid?.cluster)
@@ -358,8 +378,9 @@ const initialSetup = async function (req, settings) {
   /*
    * Now ensure token secrecy before we write to disk
    */
-  if (valid.tokens?.secrets) {
-    valid.tokens.secrets = ensureTokenSecrecy(valid.tokens.secrets)
+  if (saveSettings.tokens?.secrets) {
+    saveSettings.tokens.secrets = ensureTokenSecrecy(saveSettings.tokens.secrets)
+    utils.setSettings(saveSettings)
   }
 
   /*
@@ -442,12 +463,35 @@ const preseedHandler = async function (preseedSettings = false, force = false) {
 }
 
 const reseedHandler = async function (newSettings = false) {
+  if (!newSettings) return newSettings
+
+  /*
+   * If the preseed settings have tokens in them we need to resolve them.
+   * In addition, we have the extra difficulty that tokens can be part
+   * of the current settings, or the new settings. So, we load the current,
+   * then the new settings, so that the new settings take precedence.
+   */
+  const tokens = {
+    ...utils.getSettings('tokens.vars', {}),
+    ...(newSettings.tokens?.vars || {}),
+  }
+  for (const [key, val] of Object.entries({
+    ...utils.getSettings('tokens.secrets', {}),
+    ...(newSettings.tokens?.secrets || {}),
+  }))
+    tokens[key] = await utils.unwrapSecret(key, val)
+
+  /*
+   * New template the settings
+   */
+  const templatedSettings = await templateSettings(newSettings)
+
   /*
    * Load the preseeded settings
    */
   let settings = await loadPreseededSettings(
-    (newSettings ? newSettings.preseed : utils.getSettings('preseed')),
-    (newSettings ? newSettings : utils.getSettings()),
+    templatedSettings.preseed ? templatedSettings.preseed : utils.getSettings('preseed'),
+    templatedSettings ? templatedSettings : utils.getSettings(),
     log
   )
 
@@ -470,7 +514,7 @@ const reseedHandler = async function (newSettings = false) {
  * @param {object} settings - The settings to use (could be different from the running settings)
  * @param {object} settings - The (potentially) updated settings
  */
-export async function ensureClientModules (settings) {
+export async function ensureClientModules(settings) {
   return await loadClientModules(settings, log)
 }
 
@@ -480,7 +524,7 @@ export async function ensureClientModules (settings) {
  * @param {object} settings - The current settings
  * @param {object} settings - The (potentially) updated settings
  */
-export async function ensureStreamProcessors (settings) {
+export async function ensureStreamProcessors(settings) {
   /*
    * This will not only load stream processors, but also
    * merge their (default) settings into  the settings object

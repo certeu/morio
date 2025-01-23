@@ -184,7 +184,7 @@ Controller.prototype.validateSettings = async function (req, res) {
   /*
    * Run the settings validation helper, which returns a report object
    */
-  const report = await validateSettings(req.body)
+  const report = await validateSettings(req.body, req.headers)
 
   return res.send(report).end()
 }

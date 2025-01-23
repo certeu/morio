@@ -1,6 +1,6 @@
 {
   "name": "@morio/api",
-  "version": "0.5.5",
+  "version": "0.6.0-rc.8",
   "description": "Morio Management API",
   "private": true,
   "scripts": {
@@ -10,8 +10,8 @@
     "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it api node --no-warnings --test-concurrency=1 --test",
-    "retest": "cd .. && npm run redev && cd - && sleep 8 && npm run test"
+    "test": "docker exec -it morio-api node --no-warnings --test-concurrency=1 --test",
+    "retest": "cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
   },
   "imports": {
     "#config": "./config/index.mjs",
@@ -33,6 +33,7 @@
     "express-rate-limit": "^7.4.0",
     "express-session": "^1.18.0",
     "glob": "^11.0.0",
+    "ioredis": "^5.4.2",
     "is-in-subnet": "^4.0.1",
     "joi": "^17.13.3",
     "joi-to-swagger": "^6.2.0",

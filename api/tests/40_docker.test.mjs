@@ -119,7 +119,7 @@ describe('API Docker Active Tests', async () => {
    * Just need to grab the proxy container info real quick
    */
   const container = (await api.get(`/docker/containers`))[1]
-    .filter((container) => container.Names.includes('/proxy'))
+    .filter((container) => container.Names.includes('/morio-proxy'))
     .pop()
   const cid = container.Id
   const iid = container.ImageID.split(':').pop()
@@ -197,7 +197,7 @@ describe('API Docker Container State Tests', async () => {
    * Just need to grab the proxy container ID real quick
    */
   const container = (await api.get(`/docker/containers`))[1]
-    .filter((container) => container.Names.includes('/proxy'))
+    .filter((container) => container.Names.includes('/morio-proxy'))
     .pop().Id
   /*
    * Note: We're not stopping/killing containers here

@@ -51,7 +51,7 @@ export function routes(app) {
   /*
    * Get a status code 200 if the API is up
    */
-  app.get(`/up`, (req, res) => res.status(204).send())
+  app.get(`/up`, (req, res) => res.send({ up: true }))
 
   /*
    * Validates Morio settings

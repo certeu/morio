@@ -74,21 +74,6 @@ Note that Morio will encrypt all secrets and remove them from the settings. So t
     },
   })
 
-  api.get('/reload', {
-    operationId: 'reload',
-    ...shared,
-    summary: `Reload the API`,
-    description: `This will cause the API to re-initialize itself, including reaching out the Morio Core to re-load the settings.
-
-This is an internal route that is exposed to allow for troubleshooting. You probably don't want to use this.`,
-    responses: {
-      204: { description: 'No response body' },
-      ...errorResponse(`morio.api.authentication.required`),
-      ...errorResponse(`morio.api.internal.error`),
-      ...errorResponse(`morio.api.ratelimit.exceeded`),
-    },
-  })
-
   api.get('/reseed', {
     operationId: 'reseed',
     ...shared,
