@@ -62,15 +62,18 @@ const Search = () => {
 }
 
 const SearchResults = ({ hits, q }) => (
-  <Grid>
-    {hits.map(hit => {
-      if (hit.item.category === 'modules') return <Module id={hit.item.name} q={q} key={hit.item.name}/>
-      if (hit.item.category === 'overlays') return <Overlay id={hit.item.name} q={q} key={hit.item.name}/>
-      if (hit.item.category === 'processors') return <Processor id={hit.item.name} q={q} key={hit.item.name}/>
+  <div className="mt-6">
+    <Grid>
 
-      return null
-    })}
-  </Grid>
+      {hits.map(hit => {
+        if (hit.item.category === 'modules') return <Module id={hit.item.name} q={q} key={hit.item.name}/>
+        if (hit.item.category === 'overlays') return <Overlay id={hit.item.name} q={q} key={hit.item.name}/>
+        if (hit.item.category === 'processors') return <Processor id={hit.item.name} q={q} key={hit.item.name}/>
+
+        return null
+      })}
+    </Grid>
+  </div>
 )
 
 

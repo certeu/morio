@@ -170,6 +170,7 @@ export async function prebuildMoriohubContent() {
       'modules'
       )
     )
+    await ensureFile(`./hubnotes/modules/${name}.mdx`)
   }
   for (const [name, overlay] of Object.entries(data.overlays)) {
     await writeFile(
@@ -179,6 +180,7 @@ export async function prebuildMoriohubContent() {
       'overlays'
       )
     )
+    await ensureFile(`./hubnotes/overlays/${name}.mdx`)
   }
   for (const [name, overlay] of Object.entries(data.processors)) {
     await writeFile(
@@ -188,6 +190,17 @@ export async function prebuildMoriohubContent() {
       'processors'
       )
     )
+    await ensureFile(`./hubnotes/processors/${name}.mdx`)
   }
 }
 
+async function ensureFile(file) {
+  let result = false
+  try {
+    result = await readFile(file)
+  }
+  catch (err) {
+    // This is fine
+  }
+  if (result === false) await writeFile(file, "---\n---")
+}
