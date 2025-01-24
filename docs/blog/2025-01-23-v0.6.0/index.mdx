@@ -1,0 +1,135 @@
+---
+title: 'Morio v0.6.0'
+authors: [joostdecock] # skip-spellcheck
+tags: [morio, release, alpha, v0.6.0]
+---
+
+We have released version 0.6.0 of Morio, a new minor release that bundles a
+bunch of exciting improvements as well as new features.
+Let's have a look at the most important changes.
+
+<!-- truncate -->
+
+## Announcing Moriohub
+
+We have started building out [Moriohub](https://github.com/certeu/moriohub), a
+centralized hub for Morio client modules, stream processors, and settings
+overlays. The need for such a place arose as we were implementing stream
+processing in Morio -- more on that later.
+
+The specific challenge is that stream processing -- much like client modules --
+is something that interacts directly with the data that is flowing through
+Morio. And while we can unilaterally build and features and make improvements,
+we cannot foresee how you will be using Morio, and what data you will collect
+with it.
+
+So, we needed a way to allow you to _extend_ Morio so that it could provide the
+most value to you. Internally, we have implemented this by extending the
+preseeding settings, which allows you to dynamicall load content from any git
+repository.
+
+[Moriohub](https://github.com/certeu/moriohub) is the git repository where we
+will bundle the communal efforts to provide ready-to-use building blocks for
+Morio -- preventing you from having to re-invent the wheel -- but you can also
+setup your own repository to load your own client modules or stream processors,
+or even Morio's settings.
+
+Moriohub is a work in progress. We foresee to integrate it in this website so
+that you can look up what kind of content is available.
+
+In the mean time, you can already use it. We sure do.
+
+## Stream processing & BYOBL
+
+Since Morio uses Kafka -- nay RedPanda -- as its streaming data backbone, you
+could already do stream processing on Morio's data. But you had to roll your
+own solution, which is non-trivial.
+
+In this release, we are proud to introduce Morio's new [Tap
+service](/docs/guides/services/tap) which allows you to _tap into the data
+stream_ (hence the name) without having to handle any of the complicated stream
+processing yourself.
+
+In practical terms, this is a low-code solution that allows you to _bring your
+own business logic_ (_BYOBL_).
+
+In addition to offering the capabilities to deploy your own stream processor
+with minimal knowledge required, we also published several stream processors
+on Moriohub that do a bunch of common tasks, such as caching log data, 
+or metrics, building out an inventory, and so on.
+
+This feature relies on [the cache service](/docs/guides/services/cache/) as
+well as the new inventory tables, but more on that later.
+
+For more info, please refer to [the Tap stream processing
+guide](/docs/guides/features/stream-processing/tap/).
+
+## The new cache service facilitates dashboarding (wip)
+
+In tandem with Morio's new stream processing capabilities, we have added the
+new cache service](/docs/guides/services/cache/).
+
+This allows us to provide dashboarding in the Morio UI, giving real-time
+insights into the data that is flowing through Morio.
+
+This is a work-in-progress, so expect more updates in subsequent Morio
+releases.
+
+## New inventory tables and API endpoints
+
+Another feature set that is tied to the new stream processing capabilities are
+the new database tables and API endpoints to build out a Morio inventory.
+
+We have created a stream processor for this that you can enable to have Morio
+build out an inventory over time.
+
+This too is something we'll build upon in future updates.
+
+## Improvements to the Morio client and its templates
+
+We've also made important changes to the Morio client, and sweeping (and
+breaking) changes to the way we handle client modules, or their templates if
+you will.
+
+Essentially, we have significantly reduced the amount of boilerplate, making it
+easy to implement your own client modules for Morio.
+
+We've also changed our client build to generate a statically linked executable,
+making the client more portable on different (versions of) operating systems.
+
+
+
+## Support for raw LSCL input in connector config
+
+## Support for editing settings by hand through the UI
+
+## Changes to preseed settings, and reseeding support
+
+## Moriohub
+
+## Add the `force_mrt` parameter to avoid lockout
+
+## 3 release channels
+
+## Generic apt repos
+
+## statically linked client
+
+## Morio.env use for systemd
+
+## New in Morio 0.6
+
+## Smaller improvements
+
+
+- guidance for fqdn mismatch
+- the `/up` endpoint is now anonymous
+- speed up reloading/restart of Morio core
+- encrypt secrets at initial deploy
+- improve resilients when preseeding fails
+- suppor tokens in preseed settings
+- DISABLE_SERVICE_UI
+
+
+ENFORCE_SERVICE_CACHE
+
