@@ -126,7 +126,10 @@ Controller.prototype.update = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.apikey.update`, req.params)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Fet the key with a filter method
@@ -198,7 +201,10 @@ Controller.prototype.delete = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.apikey.delete`, req.params)
-  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
 
   /*
    * Load the key with a filter method
