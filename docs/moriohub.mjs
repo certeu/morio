@@ -2,7 +2,7 @@
  * This is a work in progress
  */
 import path from 'node:path'
-import { globDir, readFile, writeJsonFile } from '../shared/src/fs.mjs'
+import { globDir, readFile, writeFile, writeJsonFile } from '../shared/src/fs.mjs'
 import yaml from 'yaml'
 
 const settings = {
@@ -59,9 +59,13 @@ const load = {
     for (const file of list) {
       const contents = await readFile(file)
       let moriodata = false
+      let raw = false
       try {
-        const yml = yaml.parse(contents)
-        if (yml?.moriodata) moriodata = yml.moriodata
+        raw = yaml.parse(contents)
+        if (raw?.moriodata) {
+          moriodata = raw.moriodata
+          delete raw.moriodata
+        }
       }
       catch (err) {
         console.log(err, `Failed to parse file as yaml: ${file}`)
@@ -71,6 +75,7 @@ const load = {
         const entry = {
           location: name,
           moriodata,
+          raw: yaml.stringify(raw),
         }
         if (typeof data[name] === 'undefined') data[name] = entry
         else {
@@ -107,7 +112,7 @@ const load = {
           )
           exit(1)
         }
-      } else {
+      } else if (d.name !== 'index'){
         if (typeof data[d.processor] === 'undefined') data[d.processor] = { }
         if (typeof data[d.processor].modules === 'undefined') data[d.processor].modules = {}
         data[d.processor].modules[d.name] = d
@@ -118,6 +123,34 @@ const load = {
   },
 }
 
+const pageData = (data, children, type) => `
+import Layout from '@theme/Layout'
+import { HubEntry } from '@site/src/components/moriohub/entry.js'
+
+const data = ${JSON.stringify(data, null ,2)}
+
+// Dynamically import notes
+let notes = false
+try {
+  notes = await import('@site/hubnotes/${type}/${data.title}.mdx')
+}
+catch (err) {
+  // No notes
+}
+
+export default function HubPage() {
+  return (
+    <Layout title={data.title} description={data.about}>
+      <div className="tailwind">
+        <div className="max-w-5xl mx-auto mb-12 px-4">
+          ${children}
+        </div>
+      </div>
+    </Layout>
+  )
+}
+`
+
 export async function prebuildMoriohubContent() {
   const root = path.resolve(settings.folder)
   const data = {
@@ -126,7 +159,35 @@ export async function prebuildMoriohubContent() {
     processors: await load.processors(),
     //watchers: await globDir(`${settings.folder}/watchers`),
   }
-  await writeJsonFile('./prebuild/moriohub.json', data)
+  await writeFile('./prebuild/moriohub.mjs', `export const moriohub = ${JSON.stringify(data, null, 2)}`)
+  await writeJsonFile('./static/moriohub.json', data)
+
+  for (const [name, module] of Object.entries(data.modules)) {
+    await writeFile(
+      `./src/pages/hub/modules/${name}.js`,
+      pageData({ title: name, ...module },
+      `<HubEntry data={data} type="module" notes={notes} />`,
+      'modules'
+      )
+    )
+  }
+  for (const [name, overlay] of Object.entries(data.overlays)) {
+    await writeFile(
+      `./src/pages/hub/overlays/${name}.js`,
+      pageData({ title: name, ...overlay },
+      `<HubEntry data={data} type="overlay" notes={notes} />`,
+      'overlays'
+      )
+    )
+  }
+  for (const [name, overlay] of Object.entries(data.processors)) {
+    await writeFile(
+      `./src/pages/hub/processors/${name}.js`,
+      pageData({ title: name, ...overlay },
+      `<HubEntry data={data} type="processor" notes={notes} />`,
+      'processors'
+      )
+    )
+  }
 }
 
-prebuildMoriohubContent()

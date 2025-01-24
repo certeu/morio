@@ -5,6 +5,8 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 import { themes as prismThemes } from 'prism-react-renderer'
 import smartyPants from 'remark-smartypants'
+import tailwindcss from 'tailwindcss'
+import autoprefixer from 'autoprefixer'
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -78,6 +80,20 @@ const config = {
         },
       },
     ],
+  ],
+
+  plugins: [
+    async function tailwindPlugin() {
+      return {
+        name: 'docusaurus-tailwindcss',
+        configurePostCss(postcssOptions) {
+          // Appends TailwindCSS and AutoPrefixer.
+          postcssOptions.plugins.push(tailwindcss)
+          postcssOptions.plugins.push(autoprefixer)
+          return postcssOptions
+        },
+      }
+    },
   ],
 
   markdown: {
