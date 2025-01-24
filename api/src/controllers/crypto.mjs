@@ -20,18 +20,15 @@ Controller.prototype.decrypt = async function (req, res) {
    * Validate request against schema
    */
   const [valid, err] = await utils.validate(`req.decrypt`, req.body)
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
 
   let data
-  try {
-    data = utils.decrypt(JSON.stringify(valid))
-  } catch (err) {
-    log.todo(err)
-    return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
-  }
+  // try {
+  data = utils.decrypt(JSON.stringify(valid))
+  // } catch (err) {
+  //   log.todo(err)
+  //   return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
+  // }
 
   return res.send({ data })
 }
@@ -55,11 +52,11 @@ Controller.prototype.encrypt = async function (req, res) {
     })
 
   let data
-  try {
-    data = utils.encrypt(req.body.data)
-  } catch (err) {
-    return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
-  }
+  // try {
+  data = utils.encrypt(req.body.data)
+  // } catch (err) {
+  //   return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
+  // }
 
   return res.send(data)
 }

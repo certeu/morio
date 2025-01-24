@@ -48,10 +48,7 @@ Controller.prototype.readKey = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.kv.get`, { key: req.params[0] })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
 
   /*
    * Read from KV
@@ -79,10 +76,7 @@ Controller.prototype.deleteKey = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.kv.get`, { key: req.params[0] })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
 
   /*
    * Delete from KV
@@ -124,10 +118,7 @@ Controller.prototype.globKeys = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.kv.get`, { key: req.params[0] })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
+  if (!valid) return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url)
 
   const list = await utils.kv.glob(valid.key)
 

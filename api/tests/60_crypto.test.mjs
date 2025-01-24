@@ -11,6 +11,7 @@ describe('Encryp/Decrypt data', async () => {
   const time = String(Date.now())
   const data = {
     text: time,
+    // malformed: ['malformed', 'data'],
     json: `{ "time": "${time}" }`,
   }
 
@@ -19,6 +20,12 @@ describe('Encryp/Decrypt data', async () => {
     const result = await api.post(`/encrypt`, { beta: data.text })
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
+
+  // POST /encrypt (schema violation)
+  // it(`Should POST /encrypt (malformed)`, async () => {
+  //   const result = await api.post(`/encrypt`, { data: data.malformed })
+  //   validateErrorResponse(result, errors, 'morio.api.input.malformed')
+  // })
 
   // POST /encrypt
   it(`Should POST /encrypt (text)`, async () => {
@@ -47,6 +54,12 @@ describe('Encryp/Decrypt data', async () => {
     const result = await api.post(`/encrypt`, { beta: data.text })
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
+
+  // POST /encrypt (schema violation)
+  // it(`Should POST /decrypt (malformed)`, async () => {
+  //   const result = await api.post(`/decrypt`, { data: data.malformed })
+  //   validateErrorResponse(result, errors, 'morio.api.input.malformed')
+  // })
 
   // POST /decrypt
   it(`Should POST /decrypt (text)`, async () => {
