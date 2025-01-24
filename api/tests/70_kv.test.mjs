@@ -110,4 +110,10 @@ describe('KV Store', async () => {
     const result = await api.delete(`/kv/keys/test`)
     assert.equal(result[0], 404)
   })
+
+  // GET /kv/dump
+  it(`Should GET /kv/dump`, async () => {
+    const result = await api.get(`/kv/dump`)
+    assert.equal(result[0], 200)
+  })
 })

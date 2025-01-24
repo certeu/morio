@@ -26,4 +26,10 @@ describe('Other Tests', async () => {
     assert.equal(d.result, 'ok')
     assert.equal(d.status, 'building')
   })
+
+  // core /restart
+  it(`Should GET /restart`, async () => {
+    const result = await api.get('/restart')
+    assert.equal(result[0], 204)
+  })
 })

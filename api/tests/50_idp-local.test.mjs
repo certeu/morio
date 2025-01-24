@@ -3,6 +3,7 @@ import { store, accounts, api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
+import base64 from 'base-64'
 
 const timeout = 80000
 
@@ -300,6 +301,14 @@ describe('API Create Account Tests', () => {
     for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
     for (const field of ['node', 'cluster']) assert.equal(typeof d[field], 'string')
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
+  })
+
+  // GET /whoami (User in Basic header)
+  it(`Should not GET /whoami (User in Basic header)`, async () => {
+    const credentials = base64.encode(`${store.accounts.user2.username}:password`)
+
+    const result = await api.get(`/whoami`, { Authorization: `Basic ${credentials}` })
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /token (No JWT)
