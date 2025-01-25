@@ -126,17 +126,9 @@ const load = {
 const pageData = (data, children, type) => `
 import Layout from '@theme/Layout'
 import { HubEntry } from '@site/src/components/moriohub/entry.js'
+import notes from '@site/hubnotes/${type}/${data.title}.mdx'
 
 const data = ${JSON.stringify(data, null ,2)}
-
-// Dynamically import notes
-let notes = false
-try {
-  notes = await import('@site/hubnotes/${type}/${data.title}.mdx')
-}
-catch (err) {
-  // No notes
-}
 
 export default function HubPage() {
   return (
