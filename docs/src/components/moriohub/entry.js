@@ -209,7 +209,7 @@ const Processor = ({ data, notes=false }) => {
   return (
     <div className="tailwind">
       <div className="max-w-5xl mx-auto mb-12">
-        <Breadcrumbs type="overlays" title={data.title} />
+        <Breadcrumbs type="processors" title={data.title} />
         <H1>
           <div className="flex flex-row flex-wrap gap-2 items-center w-full justify-between">
             <div>
