@@ -142,6 +142,7 @@ const config = {
             label: 'Training',
           },
           { to: '/blog', label: 'Blog', position: 'left' },
+          { to: '/hub', label: 'MorioHub', position: 'right' },
           {
             href: 'https://github.com/certeu/morio',
             label: 'GitHub',
