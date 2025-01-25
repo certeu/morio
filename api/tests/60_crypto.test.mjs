@@ -42,13 +42,6 @@ describe('Encryp/Decrypt data', async () => {
     store.set('encrypted.json', d)
   })
 
-  // POST /encrypt
-  it(`Should not POST /encrypt (empty string with only space)`, async () => {
-    const result = await api.post(`/encrypt`, { data: '!@#$%^&*----===+++~~~***(){}|"":?>' })
-
-    console.log('malform encrypt', result)
-  })
-
   // POST /decrypt (schema violation)
   it(`Should POST /decrypt (schema violation)`, async () => {
     const result = await api.post(`/encrypt`, { beta: data.text })
