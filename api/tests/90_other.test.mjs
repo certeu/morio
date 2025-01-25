@@ -27,6 +27,16 @@ describe('Other Tests', async () => {
     assert.equal(d.status, 'building')
   })
 
+  it(`Should GET /dconf/tap`, async () => {
+    const result = await api.get('/dconf/tap', { 'X-Morio-User': 'operator' })
+    assert.equal(result[0], 200)
+  })
+
+  it(`Should GET /dconf/flags`, async () => {
+    const result = await api.get('/dconf/flags', { 'X-Morio-User': 'operator' })
+    assert.equal(result[0], 200)
+  })
+
   // core /restart
   it(`Should GET /restart`, async () => {
     const result = await api.get('/restart')

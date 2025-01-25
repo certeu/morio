@@ -1,4 +1,4 @@
-import { store, api, validateErrorResponse } from './utils.mjs'
+import { store, api, validateErrorResponse, readPersistedData } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
@@ -146,5 +146,27 @@ describe('API Key Tests', () => {
   it(`Should not POST /apikeys/:key/enable (key was removed)`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/enable`)
     validateErrorResponse(result, errors, 'morio.api.404')
+  })
+
+  // PATCH /apikey
+  it(`Should not PATCH /apikeys/:key/rotate`, async () => {
+    const persistedData = await readPersistedData()
+    const key2 = persistedData.key2
+
+    const result = await api.patch(`/apikeys/${key2.key}/rotate`, null, {
+      'x-morio-role': 'user',
+    })
+    validateErrorResponse(result, errors, 'morio.api.account.role.insufficient')
+  })
+
+  // DELETE /apikey/:key
+  it(`Should not DELETE /apikeys/:key`, async () => {
+    const persistedData = await readPersistedData()
+    const key2 = persistedData.key2
+
+    const result = await api.delete(`/apikeys/${key2.key}`, {
+      'x-morio-role': 'user',
+    })
+    validateErrorResponse(result, errors, 'morio.api.account.role.insufficient')
   })
 })
