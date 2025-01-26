@@ -198,13 +198,28 @@ describe('API Create Account Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
+  // POST /login (invalid username)
+  it(`Should not POST /login (invalid username)`, async () => {
+    const data = {
+      provider: 'local',
+      data: {
+        username: 'wrong',
+        password: 'password',
+        role: 'user',
+        token: '666',
+      },
+    }
+    const result = await api.post(`/login`, data)
+    validateErrorResponse(result, errors, 'morio.api.account.unknown')
+  })
+
   // POST /login (invalid password)
   it(`Should not POST /login (invalid password)`, async () => {
     const data = {
       provider: 'local',
       data: {
         username: store.accounts.user2.username,
-        password: 'wrong',
+        password: 'password',
         role: 'user',
         token: '666',
       },

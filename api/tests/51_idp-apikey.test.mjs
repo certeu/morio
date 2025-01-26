@@ -113,6 +113,30 @@ describe('API Key Tests', () => {
     store.keys.key1.jwt = d.jwt
   })
 
+  it(`Should POST /settings with DISABLE_IDP_APIKEY flag`, async () => {
+    const storedData = await readPersistedData()
+    const settings = storedData.settings
+
+    settings.tokens.flags.DISABLE_IDP_APIKEY = true
+
+    const result = await api.post('/settings', settings)
+
+    assert.equal(result[0], 204)
+  })
+
+  // POST /login
+  it(`Should not POST /login`, async () => {
+    const data = {
+      provider: 'apikey',
+      data: {
+        api_key: store.keys.key1.key,
+        api_key_secret: store.keys.key1.secret,
+      },
+    }
+    const result = await api.post(`/login`, data)
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
+  })
+
   // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
@@ -134,6 +158,12 @@ describe('API Key Tests', () => {
       Authorization: `Bearer ${store.keys.key1.jwt}`,
     })
     assert.equal(result[0], 200)
+  })
+
+  // GET /apikeys
+  it(`Should GET /apikeys`, async () => {
+    const result = await api.get(`/apikeys`)
+    console.log('result', result)
   })
 
   // DELETE /apikey/:key

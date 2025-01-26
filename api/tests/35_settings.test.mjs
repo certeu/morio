@@ -37,7 +37,6 @@ describe('API Settings Tests', () => {
     assert.equal(typeof s2.iv, 'string')
     assert.equal(typeof s2.ct, 'string')
 
-    d.tokens.flags.DISABLE_IDP_MRT = true
     const perData = await readPersistedData()
     await writePersistedData({ ...perData, settings: d })
   })
