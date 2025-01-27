@@ -16,7 +16,7 @@ If you are not familiar with JavaScript, it is a beginner-friendly language
 and you do not need to master it to start creating valuable stream processing 
 logic. Instead, you can start from our examples and build up from there, or
 look at [the various stream processors on
-moriohub](https://github.com/certeu/moriohub/tree/develop/processors) for
+MorioHub](https://github.com/certeu/moriohub/tree/develop/processors) for
 inspiration.
 
 If you prefer another language, you can always handle these aspects yourself
@@ -60,17 +60,17 @@ user, Morio only needs to know what topic(s) to subscribe to.
 
 If you are writing a stream processor for your own use, the `topics` setting
 may be all you need.  But if you are planning to share your stream processor
-with the community through [moriohub](https://github.com/certeu/moriohub) -- or
+with the community through [MorioHub](https://github.com/certeu/moriohub) -- or
 just want to reach a higher level of polish -- you can extend the `info` object
 with more information. Specifically:
 
 - You can add information for the benefit of the user -- like a description of
 what the stream processor does
-- You can add additional settings that the user can levarage to control how
+- You can add additional settings that the user can leverage to control how
   your stream processor behaves.
 
 Here is an example from [our checks stream processor on
-moriohub](https://github.com/certeu/moriohub/blob/develop/processors/checks/index.mjs)
+MorioHub](https://github.com/certeu/moriohub/blob/develop/processors/checks/index.mjs)
 that adds both info and custom settings:
 
 ```js showLineNumbers
@@ -97,7 +97,7 @@ And here is a screenshot from this stream processor in the settings UI:
 
 ![](settings2.png)
 
-As you can see, this results is a more more polishes experience for the suer
+As you can see, this results is a more more polishes experience for the user
 who gets a little info about what this stream processor does.
 
 We can also see that Morio will add a setting to disable (or enable) this
@@ -138,7 +138,7 @@ export default function (data, tools, topic) {
 }
 ```
 
-We have strived to keep the boilerplate to a minimum. You merely need to define
+We have tried to keep the boilerplate to a minimum. You merely need to define
 a function, and make it the default export.  The function receives 3
 parameters: [data](#data), [tools](#tools), and [topic](#topic).
 Let's have a closer look at each of these.
@@ -247,47 +247,47 @@ your stream processor logic.
 
 :::tip
 Check out some of [the stream processors on
-Moriohub](https://github.com/certeu/moriohub/tree/develop/processors) for
+MorioHub](https://github.com/certeu/moriohub/tree/develop/processors) for
 examples of how to use these tools.  
 :::
 
 Here's a brief overview of what is provides by tools, for a full list, please
 refer to [the stream  processing reference documentation](#fixme).
 
-- `tools.axios`: Holds an instance of the Axios HTTP client for NodeJS
-- `tools.get`: Holds a copy of the lodash get
-- `tools.set`: Holds a copy of the lodash set
-- `tools.unset`: Holds a copy of the lodash unset
+- `tools.axios`: Holds an instance of [the `axios` HTTP client](https://www.npmjs.com/package/axios)
+- `tools.get`: Holds a copy of [the `lodash.get` method](https://lodash.com/docs/4.17.15#get)
+- `tools.set`: Holds a copy of [the `lodash.set` method](https://lodash.com/docs/4.17.15#set)
+- `tools.unset`: Holds a copy of [the `lodash.unset` method](https://lodash.com/docs/4.17.15#unset)
 - `tools.cache`: Holds various helpers to add data to the Morio cache
   - `tools.cache.audit`: Caches audit data
   - `tools.cache.event`: Caches event data
-  - `tools.cache.healthcheck`: Caches healthcheck data
+  - `tools.cache.healthcheck`: Caches health check data
   - `tools.cache.logline`: Caches log data
   - `tools.cache.metricset`: Caches metrics data
 - `tools.clean`: A helper method to lowercase and trim strings
-- `tools.inventory`: Helper methods to mamage the Morio inventory
-- `tools.ipaddr`: A copy of the ipaddr library to wrangle IP addresses
-- `tools.node`: A helper method for logging that side-steps teh potential logging snowball effect
-- `tools.valkey`: An instance of the ValKey/Redis client for NodeJS for low-level cache access
+- `tools.inventory`: Helper methods to manage the Morio inventory
+- `tools.ipaddr`: A copy of [the `ipaddr.js` library](https://www.npmjs.com/package/ipaddr.js) to wrangle IP addresses
+- `tools.node`: A helper method for logging that side-steps the potential logging snowball effect
+- `tools.valkey`: An instance of [the `ioredis` Redis client](https://www.npmjs.com/package/ioredis) for low-level cache access
 - `tools.create`: Helper methods to generate various types of data
   - `tools.create.context`: Creates a Morio context
   - `tools.create.hash`: Creates a hash
   - `tools.create.key`: Creates a Morio cache key
 - `tools.extract`: Helper methods to generate various types of info from data received from RedPanda/Kafka
   - `tools.extract.by`: Extracts the agent name from the data
-  - `tools.extract.check`: Extracts the full healthcheck URL from the data
+  - `tools.extract.check`: Extracts the full health check URL from the data
   - `tools.extract.host`: Extracts the host ID from the data
   - `tools.extract.id`: Extracts the message ID from the data
-  - `tools.extract.metricset`: Extracts the (name of the) metricset from the data
+  - `tools.extract.metricset`: Extracts the (name of the) metric set from the data
   - `tools.extract.module`: Extracts the (name of the) Morio module from the data
 - `tools.format`: Helper methods to format data
   - `tools.format.escape`: Escapes a string value for use in a URL query string
-- `tools.log`: A logger object, an instance of the Pinki logger. Beware of the snowball effect when logging.
+- `tools.log`: A logger object, an instance of the `pino` logger. Beware of the snowball effect when logging.
 - `tools.time`: Various methods to deal with time data
   - `tools.time.ms2s`: Converts milliseconds to seconds
   - `tools.time.now`: Returns the current timestamp
   - `tools.time.when`: Gets the timestamp from the data
-- `tools.produce`: Various methods to publish data to a RedPanda/Kafka topic
+- `tools.produce`: Various methods to publish data to a RedPanda topic
   - `tools.produce.alarm`: Publish a message to the `alarms` topic
   - `tools.produce.event`: Publish a message to the `event` topic
   - `tools.produce.notification`: Publish a message to the `notifications` topic
@@ -298,7 +298,7 @@ refer to [the stream  processing reference documentation](#fixme).
 
 ### topic
 
-The third and final paramter, `topic` holds the name of the topic the `data`
+The third and final parameter, `topic` holds the name of the topic the `data`
 was sourced from.  If your stream processor only subscribes to a single topic,
 this information is not very useful. But if you have a stream processors that
 subscribes to multiple topics -- like [our inventory stream
@@ -358,7 +358,7 @@ _preseeding_ them.
 
 The first thing you have to do is make your stream processor available from a git repository. It can be a self-hosted repository, or a SaaS service like GitHub or GitLab, but it needs to be in a git repository that Morio can access.
 
-Then update your preseed settings. Here is an example that loads all stream processesors from moriohub:
+Then update your preseed settings. Here is an example that loads all stream processors from MorioHub:
 
 ```yaml
 preseed:
@@ -393,7 +393,7 @@ This feature is especially powerful because you can load preseed these files in
 the `modules` folder from various locations.
 
 For example, [the metrics stream processor on
-moriohub](https://github.com/certeu/moriohub/tree/develop/processors/metrics/modules)
+MorioHub](https://github.com/certeu/moriohub/tree/develop/processors/metrics/modules)
 used this mechanism to allow logic for how to cache metrics for different Morio
 modules.
 
@@ -427,8 +427,8 @@ control:
 - From there they will be picked up by our stream processor, which will generate more logs, and round and round we go
 
 This creates a feedback loop, or snowball effect, where the logs generated by
-the stream processor get picked up agan by the same stream processor,
-ever-increasing the amound of log data flowing through the system.
+the stream processor get picked up again by the same stream processor,
+ever-increasing the amount of log data flowing through the system.
 
 For this reason, use the `tools.note` helper to log data inside the stream
 processor. These logs will be added to the Morio cache and made available
