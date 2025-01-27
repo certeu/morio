@@ -54,13 +54,13 @@ export const theme = {
   // secondary: The link color on default backgrounds (base-100)
   secondary: '#ffb703',
   // secondary-focus: The :hover link color for default backgrounds. Or:
-  // secondary-focus: An alternative link color for on dark backgrounds
+  // secondary-focus: An alternative link color when on dark backgrounds
   'secondary-focus': '#ffb703',
   // secondary-content: The text color on a secondary button
   'secondary-content': colors.neutral['50'],
 
   // accent: The accent color is used to highlight active things
-  // Should be something is positive/neutral. Avoid red or orange.
+  // Should be something that is positive/neutral. Avoid red or orange.
   accent: colors.fuchsia['600'],
   // accent-focus: The :hover color for the accent button
   'accent-focus': colors.fuchsia['500'],
@@ -75,13 +75,13 @@ export const theme = {
   // neutral-content: The text color on neutral backgrounds
   'neutral-content': colors.neutral['50'],
 
-  // info: Used rarely, can be another color best somewhat neutral looking
-  // and should work with the default text color
+  // info: Used rarely, can be another color; best somewhat neutral-looking
+  // and which would work well with the default text color
   info: colors.indigo['600'],
   // Text color on info
   'info-content': colors.neutral[50],
 
-  // success: Used rarely, but if it is it's in notifications indicating success
+  // success: Used rarely, but if it is, it's in notifications, indicating success
   // Typically some shade of green
   success: colors.green['600'],
   // Text color on success
@@ -93,8 +93,8 @@ export const theme = {
   // Text color on warning
   'warning-content': colors.neutral[50],
 
-  // error: Used rarely, but if it is it's in notifications indicating success
-  // or the danger button
+  // error: Used rarely, but if it is, it's in notifications, indicating failure,
+  // or in the 'Danger' button
   // Typically some shade of red
   error: colors.red['600'],
   // Text color on error
@@ -146,7 +146,7 @@ export const theme = {
   '--rounded-badge': '1.9rem',
   // bounce animation time for button
   '--animation-btn': '0.25s',
-  // bounce animation time for checkbox, toggle, etc
+  // bounce animation time for checkbox, toggle, etc.
   '--animation-input': '.4s',
   // default card-body padding
   '--padding-card': '2rem',
