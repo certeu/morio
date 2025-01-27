@@ -128,7 +128,7 @@ describe('API Key Tests', () => {
   it(`Should GET /status`, async () => {
     sleep(5)
 
-    const data = await attempt({
+    await attempt({
       every: 3,
       timeout: 90,
       run: async () => {
@@ -137,7 +137,7 @@ describe('API Key Tests', () => {
         return status === 200 && body.state.config_resolved === true
       },
       onFailedAttempt: (s) => {
-        log.debug(`Waited ${s} seconds for , will continue waiting.`)
+        console.log(`Waited ${s} seconds for , will continue waiting.`)
       },
     })
   })
