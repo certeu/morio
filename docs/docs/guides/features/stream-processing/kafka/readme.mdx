@@ -64,8 +64,8 @@ read data from the `metrics` topic and output it.
 
 :::tip
 
-This is a simple example, that only reads data from the Kafka API.
-It also does not handle things like graceful shutdown and so on.
+This is a simple example that only reads data from the Kafka API.
+It does not handle things like graceful shutdown and so on.
 
 If you are not certain how to build upon this example, you might
 want to look at [our low-code stream processing
@@ -134,7 +134,7 @@ await consumer.run({ eachMessage: streamProcessor })
 
 
 /*
- * This is a a function that returns the client settings
+ * This function returns the client settings.
  * It is created as a function only because this allows us to
  * place it at the end of the file so that the example starts
  * with the relevant code, rather than a wall of text from the
