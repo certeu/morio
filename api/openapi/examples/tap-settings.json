@@ -20,7 +20,7 @@
       },
       "ttl": {
         "dflt": 1,
-        "title": "Maxumum age of cached metrics",
+        "title": "Maximum age of cached metrics",
         "about": "Metrics in the cache will expire after this amount of time",
         "labelBL": "In hours",
         "type": "number"
@@ -102,7 +102,7 @@
       },
       "ttl": {
         "dflt": 4,
-        "title": "Maxumum age of cached logs",
+        "title": "Maximum age of cached logs",
         "about": "Logs in the cache will expire after this amount of time",
         "labelBL": "In hours",
         "type": "number"
@@ -193,7 +193,7 @@
   },
   "checks": {
     "title": "Health checks stream processor",
-    "about": "This stream processor will process health check data flowing through your Morio collection.\n\nIt can cache recent health check data, as well as enventify them for event-driven automation.\nIt also supports verifying the expiry of TLS certificates.\n",
+    "about": "This stream processor will process health check data flowing through your Morio collection.\n\nIt can cache recent health check data, as well as eventify them for event-driven automation.\nIt also supports verifying the expiry of TLS certificates.\n",
     "settings": {
       "topics": ["checks"],
       "cache": {
@@ -214,7 +214,7 @@
       },
       "ttl": {
         "dflt": 2,
-        "title": "Maxumum age of cached health checks",
+        "title": "Maximum age of cached health checks",
         "about": "Health check data in the cache will expire after this amount of time",
         "labelBL": "In hours",
         "type": "number"
@@ -260,7 +260,7 @@
       "certificate_days": {
         "dflt": 21,
         "title": "Days before certificate expiry to escalate",
-        "about": "How many days before certifcates expire would you like to raise an event?",
+        "about": "How many days before certificates expire would you like to raise an event?",
         "labelBL": "In days",
         "type": "number"
       }
@@ -268,7 +268,7 @@
   },
   "audit": {
     "title": "Audit data stream processor",
-    "about": "This stream processor will process audit data flowing through your Morio collection.\n\nIt can cache recent audit events, as well as enventify them for event-driven automation.\nIt also supports dynamic loading of module-specific logic.",
+    "about": "This stream processor will process audit data flowing through your Morio collection.\n\nIt can cache recent audit events, as well as eventify them for event-driven automation.\nIt also supports dynamic loading of module-specific logic.",
     "settings": {
       "topics": ["audit"],
       "cache": {
@@ -299,7 +299,7 @@
           {
             "val": true,
             "label": "Auto-create events based on audit data",
-            "about": "Eventifyingaudit data allows for event-driven automation and monitoring based on audit information"
+            "about": "Eventifying audit data allows for event-driven automation and monitoring based on audit information"
           }
         ]
       },
