@@ -2,7 +2,7 @@ import { response, errorResponses, security } from './index.mjs'
 
 export default function (api) {
   const shared = { tags: ['fixme'] }
-  api.tag('fixme', "Endpoints to mange Morio's inventory (FIXME: documemnt these)")
+  api.tag('fixme', "Endpoints to manage Morio's inventory (FIXME: document these)")
 
   api.get('/inventory/stats', {
     ...shared,
