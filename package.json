@@ -51,7 +51,7 @@
     "buildall:dev": "./scripts/run-build.sh dev",
     "buildall:testing": "./scripts/run-build.sh testing",
     "buildall:canary": "./scripts/run-build.sh canary",
-    "buildall:stable": "./scripts/run-build.sh testing",
+    "buildall:stable": "./scripts/run-build.sh stable",
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
     "build:clients": "./scripts/build-clients.sh",
