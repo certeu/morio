@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Started work on integration tests
-- Added the new `ENFORCE_SERVICE_CACH` feature flag
+- Added the new `ENFORCE_SERVICE_CACHE` feature flag
 - [api] Added endpoints to read cache data
 - [api] Added endpoints to manage the inventory
 - [api] Added endpoints to retrieve flags and dynamic config

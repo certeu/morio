@@ -57,9 +57,18 @@ Enable this flag to disable [the UI service](/docs/guides/services/ui) and run
 Morio in headless mode where you can only use [the API](/docs/guides/apis/api)
 to manage it.
 
-:::warning FIXME 
-This flag is not implemented yet, but  on our todo list. 
-:::
+## `ENFORCE_SERVICE_CACHE`
+
+Enable this flag to force the cache service to always run, even when Morio does
+not require it.
+
+By default, the _cache service_ will only be started when Morio requires it.
+Typically, it is started as a dependency of the _tap service_, so if you do
+not run any stream processors, it will not be started.
+
+However, the cache service is also exposed through the API, so you may have
+other reasons to run it. If you enable this feature flag, this service will
+always be started once Morio is set up.
 
 ## `ENFORCE_HTTP_MTLS`
 

@@ -1,0 +1,3 @@
+[submodule "docs/moriohub"]
+	path = docs/moriohub
+	url = https://github.com/certeu/moriohub

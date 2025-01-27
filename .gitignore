@@ -47,7 +47,17 @@ api/coverage
 build-context
 build-context/*
 build-context.*
+
+# Docs prebuild artifacts
 docs/prebuild/*
+docs/src/pages/hub/modules/*
+!docs/src/pages/hub/modules/index.js
+docs/src/pages/hub/overlays/*
+!docs/src/pages/hub/overlays/index.js
+docs/src/pages/hub/processors/*
+!docs/src/pages/hub/processors/index.js
+docs/static/*.yaml
+docs/static/*.json
 
 # dependencies
 node_modules

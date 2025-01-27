@@ -14,8 +14,10 @@ import loadAuthEndpoints from './auth.mjs'
 import loadCacheEndpoints from './cache.mjs'
 import loadClientPackagesEndpoints from './pkgs.mjs'
 import loadCryptoEndpoints from './crypto.mjs'
+import loadDconfEndpoints from './dconf.mjs'
 import loadDockerEndpoints from './docker.mjs'
 import loadExportEndpoints from './export.mjs'
+import loadInventoryEndpoints from './inventory.mjs'
 import loadKvEndpoints from './kv.mjs'
 import loadSettingsEndpoints from './settings.mjs'
 import { components } from './components.mjs'
@@ -111,8 +113,10 @@ loadAuthEndpoints(api, utils)
 loadCacheEndpoints(api, utils)
 loadClientPackagesEndpoints(api, utils)
 loadCryptoEndpoints(api, utils)
+loadDconfEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
 loadExportEndpoints(api, utils)
+loadInventoryEndpoints(api, utils)
 loadKvEndpoints(api, utils)
 loadSettingsEndpoints(api, utils)
 

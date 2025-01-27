@@ -1,4 +1,4 @@
-personal_ws-1.1 en 251 
+personal_ws-1.1 en 263 
 ABAC
 ACL
 ACLs
@@ -8,6 +8,7 @@ APIs
 Ansible
 Auditbeat
 AwsImages
+BYOBL
 CAs
 CISO
 CN
@@ -33,6 +34,7 @@ EditorConfig
 Entra
 FILEPATH
 FQDN
+FQDNs
 FTW
 Filebeat
 Fixme
@@ -63,6 +65,7 @@ Kubernetes
 LDAP
 LDAPS
 LOMO
+LSCL
 LSW
 Lex
 LiteFS
@@ -76,6 +79,7 @@ MirrorMaker
 Modularity
 Morio
 Morio's
+MorioHub
 Mustache
 NGINX
 NPM
@@ -109,6 +113,7 @@ Rqlite
 SASL
 SIEM
 SUBNET
+SaaS
 Scode
 SmallStep
 SmallStep's
@@ -128,6 +133,7 @@ UID
 URIs
 UUID
 VM
+ValKey
 VeriSign
 WBuilder
 WithCaption
@@ -138,6 +144,7 @@ api
 apikey
 apis
 aspell
+async
 auditd
 backend
 backends
@@ -152,10 +159,12 @@ cron
 cryptographic
 cryptographically
 cybersecurity
+dashboarding
 dbuilder
 de
 decrypt
 dev
+discoverability
 distros
 docusaurus
 dogfooding
@@ -183,6 +192,7 @@ js
 json
 kickstart
 ldap
+lifecycle
 lilianbaz
 linter
 linux
@@ -202,6 +212,7 @@ morio
 moriod
 mrt
 namespace
+natively
 nfiguration
 npm
 nvm
@@ -249,4 +260,5 @@ uppercased
 url
 valorise
 wbuilder
+wip
 workspaces

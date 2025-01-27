@@ -1,0 +1,28 @@
+---
+title: Cache Service Guide
+tags:
+  - cache
+---
+
+The **Morio Cache Service** (cache) provides data caching in Morio.<br /> 
+Under the hood, this service is backed by [ValKey](https://valkey.io/) -- the
+open source [Redis](https://redis.io/) fork.
+
+The cache is an in-memory data store, and is not persisted to disk.
+In other words, all cache data is ephemeral and will be lost when Morio restarts.
+
+The cache service was added to support the stream processing capabilities
+provided by the _tap service_.
+
+It allows caching of recent data flowing through Morio, which in turn powers
+the Morio dashboarding features that are available through the _UI service_.
+
+## Access to the cache service
+
+The cache service is not exposed as an external service. In other
+words, Morio does not provide a Redis-like service that you can utilise for
+non-Morio use-cases, like our (persistent) _KV store_.
+
+Instead, the cache service is available internally to the _tap service_.
+Externally, you can read cache keys through the _API service_, but writing to
+the cache is not supported outside the tap service.
