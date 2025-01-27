@@ -10,7 +10,7 @@ import {
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
-import base64 from 'base-64'
+import { Buffer } from 'node:buffer'
 
 const keys = {
   key1: {
@@ -374,7 +374,10 @@ describe('API Create Account Tests', () => {
 
   // GET /whoami (User in Basic header)
   it(`Should not GET /whoami (User in Basic header)`, async () => {
-    const credentials = base64.encode(`${store.accounts.user2.username}:password`)
+    const credentials = Buffer.from(`${store.accounts.user2.username}:password`, 'base64').toString(
+      'utf-8'
+    )
+
     const result = await api.get(`/whoami`, { Authorization: `Basic ${credentials}` })
 
     validateErrorResponse(result, errors, 'morio.api.authentication.required')

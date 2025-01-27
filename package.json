@@ -111,7 +111,6 @@
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
-    "base-64": "^1.0.0",
     "mocha": "^11.0.1"
   }
 }
