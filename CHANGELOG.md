@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-01-23
+
 ### Added
 
 - Started work on integration tests
@@ -32,7 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [ui] Added dashboarding (wip)
 - [ui] Added inventory views (wip)
 - [watcher] Added the `MORIO_IGNORE_CERTIFICATE_EXPIRY` escape hatch
-
 
 ### Changed
 
