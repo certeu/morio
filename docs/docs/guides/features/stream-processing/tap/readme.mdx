@@ -10,7 +10,7 @@ logic and have Morio run it for you.
 
 :::tip Some JavaScript required
 
-With morio, you can _BYOBL_ and write your own stream processor in JavaScript.
+With Morio, you can _BYOBL_ and write your own stream processor in JavaScript.
 
 If you are not familiar with JavaScript, it is a beginner-friendly language
 and you do not need to master it to start creating valuable stream processing 
@@ -77,7 +77,7 @@ that adds both info and custom settings:
 export const info = {
   title: 'Health checks stream processor',
   about: `This stream processor will process health check data flowing through your Morio collection.
-It can cache recent health check data, as well as enventify them for event-driven automation.
+It can cache recent health check data, as well as eventify them for event-driven automation.
 It also supports verifying the expiry of TLS certificates.
 `,
   settings: {
@@ -85,7 +85,7 @@ It also supports verifying the expiry of TLS certificates.
     certificate_days: {
       dflt: 21,
       title: 'Days before certificate expiry to escalate',
-      about: 'How many days before certifcates expire would you like to raise an event?',
+      about: 'How many days before certificates expire would you like to raise an event?',
       labelBL: 'In days',
       type: 'number'
     }
@@ -97,13 +97,13 @@ And here is a screenshot from this stream processor in the settings UI:
 
 ![](settings2.png)
 
-As you can see, this results is a more more polishes experience for the user
-who gets a little info about what this stream processor does.
+As you can see, this results in a more polished experience for the user
+who now gets information about what this stream processor does.
 
 We can also see that Morio will add a setting to disable (or enable) this
 stream processor.  This setting is automatically injected for all stream
 processors. While loaded stream processors are enabled by default, this allows
-one to disable them without having to unload them.
+disabling them without having to unload them.
 
 We can also see that our `topics` setting is made available. Since this setting
 is present for all stream processors, you do not need to give it a title and so
@@ -124,11 +124,11 @@ all the various ways you can extend your stream processor with custom settings.
 ## The stream processor function
 
 Now that we've learned how to inform Morio about how to integrate our stream
-processor, it is time we get to the good stuff: Actual stream processing.
+processor, it is time we get to the good stuff: actual stream processing.
 
-The way it works is that Morio's tap service will subscribe to all topics your
+The way it works is that Morio's tap service will subscribe to all topics you
 specified in [the `topics` settings](#topics).
-Each time a new message arrives on one of these topics, it will a function you
+Every time a new message arrives in one of these topics, it will call a function you
 provide with the data received from the stream and some helper tools too. Here
 is a minimal example:
 
@@ -138,26 +138,26 @@ export default function (data, tools, topic) {
 }
 ```
 
-We have tried to keep the boilerplate to a minimum. You merely need to define
-a function, and make it the default export.  The function receives 3
+We have tried to keep the boilerplate to a minimum: you merely need to define
+a function and to make it the default export.  The function receives 3
 parameters: [data](#data), [tools](#tools), and [topic](#topic).
-Let's have a closer look at each of these.
+Let's have a closer look at each one of these.
 
 ### data
 
-The first parameter, `data` holds the data received from the RedPanda/Kafka
+The first parameter, `data`, holds the data received from the RedPanda/Kafka
 topic.  As our stream processing function will be called for each message that
-is received on the topic(s) we have subscribed to, `data` will hols one such
+is received on the topic(s) we have subscribed to, `data` will hold one such
 message parsed as JSON, so it will be structured as an object.
 
 :::tip
 Note that Morio uses the [Elastic Common
 Schema](https://www.elastic.co/guide/en/ecs/current/index.html) so the data
-should always be well-structured.
+should always be well structured.
 :::
 
 Below is an example from the `audit` topic to give you an idea of what to
-expect, although the actual `data` will obviously different for you.
+expect, although the actual `data` will obviously be different for you.
 
 ```json
 {
@@ -242,7 +242,7 @@ expect, although the actual `data` will obviously different for you.
 ### tools
 
 The second parameter holds the `tools` object. As the name implies, this is a
-helper object that provides you with various tools to you can leverage inside
+helper object that provides you with various tools that you can leverage inside
 your stream processor logic.
 
 :::tip
@@ -251,7 +251,7 @@ MorioHub](https://github.com/certeu/moriohub/tree/develop/processors) for
 examples of how to use these tools.  
 :::
 
-Here's a brief overview of what is provides by tools, for a full list, please
+Here's a brief overview of what is provided by tools; for a full list, please
 refer to [the stream  processing reference documentation](#fixme).
 
 - `tools.axios`: Holds an instance of [the `axios` HTTP client](https://www.npmjs.com/package/axios)
@@ -267,7 +267,7 @@ refer to [the stream  processing reference documentation](#fixme).
 - `tools.clean`: A helper method to lowercase and trim strings
 - `tools.inventory`: Helper methods to manage the Morio inventory
 - `tools.ipaddr`: A copy of [the `ipaddr.js` library](https://www.npmjs.com/package/ipaddr.js) to wrangle IP addresses
-- `tools.node`: A helper method for logging that side-steps the potential logging snowball effect
+- `tools.node`: A helper method for logging that sidesteps the potential logging snowball effect
 - `tools.valkey`: An instance of [the `ioredis` Redis client](https://www.npmjs.com/package/ioredis) for low-level cache access
 - `tools.create`: Helper methods to generate various types of data
   - `tools.create.context`: Creates a Morio context
@@ -298,18 +298,18 @@ refer to [the stream  processing reference documentation](#fixme).
 
 ### topic
 
-The third and final parameter, `topic` holds the name of the topic the `data`
+The third and final parameter, `topic`, holds the name of the topic that the `data`
 was sourced from.  If your stream processor only subscribes to a single topic,
-this information is not very useful. But if you have a stream processors that
+this information is not very useful; but if you have a stream processor that
 subscribes to multiple topics -- like [our inventory stream
 processor](https://github.com/certeu/moriohub/blob/develop/processors/inventory/index.mjs)
-does -- this allows you to differentiate your logic based on the topic the
+does -- this allows you to differentiate your logic based on the topic that the
 message came from.
 
 ## Bundling your stream processor
 
 To bundle your stream processor, create a folder, and inside it add an `index.mjs` file.
-In this file, you define both your method and info object. Below is a full example, 
+In this file, you define both your method and info object. Below is a full example - 
 albeit that does nothing:
 
 
@@ -320,7 +320,7 @@ albeit that does nothing:
  *
  * @param {object} data - The data from RedPanda
  * @param {obectt} tools - The tools object
- * @param {string} topic - The topic the data came from
+ * @param {string} topic - The topic that the data came from
  */
 export default function exampleStreamProcessor (data, tools, topic) {
   /*
@@ -418,13 +418,13 @@ One thing to avoid inside a stream processor function is to log data.
 Especially when you are processing log data with that stream processor.
 
 We do provide a logger object in the tools object, because you may have a
-specific use-case where it is ok to log inside a stream processor. But you
+specific use-case where it is OK to log inside a stream processor. But you
 should be aware that this is often a bad idea that will quickly spiral out of
 control:
 
 - Imagine you have a stream processor that is processing log data.
 - When that stream processor logs themselves, those logs will be picked up by the local Morio client running on the Morio collected, and will end up in the `logs` topic
-- From there they will be picked up by our stream processor, which will generate more logs, and round and round we go
+- From there they will be picked up by our stream processor, which will generate more logs... and round and round we go!
 
 This creates a feedback loop, or snowball effect, where the logs generated by
 the stream processor get picked up again by the same stream processor,
