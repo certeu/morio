@@ -151,7 +151,6 @@ export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
     queryKey: [cacheKey],
     queryFn: () => {
       runCheckApiCall(api, cacheKey).then(result => {
-        console.log({result})
         if (result) setCache(result)
       })
     },
