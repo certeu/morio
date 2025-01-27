@@ -219,7 +219,7 @@ describe('API Create Account Tests', () => {
       provider: 'local',
       data: {
         username: store.accounts.user2.username,
-        password: 'password',
+        password: 'wrong',
         role: 'user',
         token: '666',
       },

@@ -137,7 +137,7 @@ describe('API Key Tests', () => {
         return status === 200 && body.state.config_resolved === true
       },
       onFailedAttempt: (s) => {
-        console.log(`Waited ${s} seconds for , will continue waiting.`)
+        console.log(`Waited ${s} seconds for setting reconfigured, will continue waiting.`)
       },
     })
   })

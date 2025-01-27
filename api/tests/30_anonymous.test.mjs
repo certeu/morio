@@ -180,10 +180,4 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.root_certificate.includes('--BEGIN CERTIFICATE--'), true)
     assert.equal(d.intermediate_certificate.includes('--BEGIN CERTIFICATE--'), true)
   })
-
-  // GET /unknown/template
-  it('Should GET /unknown/template', async () => {
-    const result = await api.get('/unknown/template')
-    assert.equal(result[0], 500)
-  })
 })

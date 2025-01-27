@@ -188,7 +188,3 @@ Controller.prototype.validateSettings = async function (req, res) {
 
   return res.send(report).end()
 }
-
-Controller.prototype.unknownTemplate = async function (req, res) {
-  return utils.sendErrorResponse(res, 'morio.api.unknown.template', req.url)
-}
