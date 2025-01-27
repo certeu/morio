@@ -8,6 +8,7 @@ describe('API MRT Tests', async () => {
   store.set('mrt', data.mrt)
   store.set('mrtAuth', data.mrtAuth)
   const mrt = data.mrt
+
   // POST /login
   it(`Should POST /login`, async () => {
     const data = {
@@ -24,6 +25,19 @@ describe('API MRT Tests', async () => {
     assert.equal(d.data.role, 'user')
     assert.equal(d.data.user, `root`)
     store.mrt_jwt = d.jwt
+  })
+
+  // POST /login
+  it(`Should not POST /login (invalid mrt)`, async () => {
+    const data = {
+      provider: 'mrt',
+      data: {
+        mrt: 'mrt.abcdefghijklmnopqrstuvwxyz0123456789abcdefghijklmnopqrstuvwxyz12',
+        role: 'user',
+      },
+    }
+    const result = await api.post(`/login`, data)
+    validateErrorResponse(result, errors, 'morio.api.account.credentials.mismatch')
   })
 
   // POST /login (non-existing role)

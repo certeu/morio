@@ -57,4 +57,9 @@ export function routes(app) {
    * Validates Morio settings
    */
   app.post(`/validate/settings`, Anonymous.validateSettings)
+
+  /*
+   * Invalid template testing
+   */
+  app.get(`/unknown/template`, Anonymous.unknownTemplate)
 }

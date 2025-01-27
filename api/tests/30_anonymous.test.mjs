@@ -1,8 +1,9 @@
-import { api } from './utils.mjs'
+import { api, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg, corePkg } from './json-loader.mjs'
 import process from 'process'
+import { errors } from '../src/errors.mjs'
 
 describe('Anonymous Routes Tests', () => {
   // Quick test to make sure we are back on track after reconfiguring
@@ -179,5 +180,11 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.root_fingerprint, 'string')
     assert.equal(d.root_certificate.includes('--BEGIN CERTIFICATE--'), true)
     assert.equal(d.intermediate_certificate.includes('--BEGIN CERTIFICATE--'), true)
+  })
+
+  // GET /unknown/template
+  it('Should GET /unknown/template', async () => {
+    const result = await api.get('/unknown/template')
+    validateErrorResponse(result, errors, 'morio.api.internal.error')
   })
 })

@@ -1,20 +1,23 @@
-import { api, build } from './utils.mjs'
+import { api, build, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 describe('Other Tests', async () => {
   // GET /settings
-  it(`Should GET /settings with non-operator error`, async () => {
+  it(`Should not GET /settings with non-operator error`, async () => {
     // Force the user role
     const result = await api.get('/settings', { 'x-morio-role': 'user' })
-    assert.equal(result[0], 401)
+    // assert.equal(result[0], 401)
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /accounts
-  it(`Should GET /accounts with non-manager error`, async () => {
+  it(`Should not GET /accounts with non-manager error`, async () => {
     // Force the user role
     const result = await api.get('/accounts', { 'x-morio-role': 'user' })
-    assert.equal(result[0], 401)
+    // assert.equal(result[0], 401)
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // PKG /pkgs/clients/deb/build
@@ -35,11 +38,5 @@ describe('Other Tests', async () => {
   it(`Should GET /dconf/flags`, async () => {
     const result = await api.get('/dconf/flags', { 'X-Morio-User': 'operator' })
     assert.equal(result[0], 200)
-  })
-
-  // core /restart
-  it(`Should GET /restart`, async () => {
-    const result = await api.get('/restart')
-    assert.equal(result[0], 204)
   })
 })

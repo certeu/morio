@@ -1,4 +1,4 @@
-import { store, api, validateErrorResponse, readPersistedData } from './utils.mjs'
+import { store, api, validateErrorResponse, readPersistedData, attempt, sleep } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
@@ -40,6 +40,7 @@ describe('API Key Tests', () => {
   // GET /apikeys
   it(`Should GET /apikeys`, async () => {
     const result = await api.get(`/apikeys`)
+
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -124,6 +125,23 @@ describe('API Key Tests', () => {
     assert.equal(result[0], 204)
   })
 
+  it(`Should GET /status`, async () => {
+    sleep(5)
+
+    const data = await attempt({
+      every: 3,
+      timeout: 90,
+      run: async () => {
+        const [status, body] = await api.get('/status')
+
+        return status === 200 && body.state.config_resolved === true
+      },
+      onFailedAttempt: (s) => {
+        log.debug(`Waited ${s} seconds for , will continue waiting.`)
+      },
+    })
+  })
+
   // POST /login
   it(`Should not POST /login`, async () => {
     const data = {
@@ -134,6 +152,7 @@ describe('API Key Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
+    // validateErrorResponse(result, errors, 'morio.api.idp.disabled')
     validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
@@ -158,12 +177,6 @@ describe('API Key Tests', () => {
       Authorization: `Bearer ${store.keys.key1.jwt}`,
     })
     assert.equal(result[0], 200)
-  })
-
-  // GET /apikeys
-  it(`Should GET /apikeys`, async () => {
-    const result = await api.get(`/apikeys`)
-    console.log('result', result)
   })
 
   // DELETE /apikey/:key
