@@ -18,11 +18,11 @@ addressed. Essentially, when it comes to the data plane, we cannot know
 for sure what things will look like, so what we want to offer is 
 flexibility to deal with a variety of scenarios.
 
-To some extend, we can foresee such flexibility and incorporate it in our
+To some extent, we can foresee such flexibility and incorporate it in our
 design. But at the end of the day, we need a way for people to be able to
 _plug in_ their own logic or configuration in an easy way.
 
-To that extend, we currently have 3 different ways you can add your own
+To that extent, we currently have 3 different ways you can add your own
 logic or configuration to Morio:
 
 - A **settings overlay** adds certain settings to your Morio setup
@@ -46,7 +46,7 @@ website](/hub), and we plan integration with the Morio UI in a future update.
 
 ## Stream processing & BYOBL
 
-Since Morio uses Kafka -- nay RedPanda -- as its streaming data backbone, you
+Since Morio uses Kafka -- nay, RedPanda -- as its streaming data backbone, you
 could already do stream processing on Morio's data. But you had to roll your
 own solution, which is non-trivial.
 
@@ -66,7 +66,7 @@ log data, or metrics, building out an inventory, and so on.
 This feature relies on [the cache service](/docs/guides/services/cache/) as
 well as the new inventory tables, but more on that later.
 
-For more info, please refer to [the Tap stream processing
+For more information, please refer to [the Tap stream processing
 guide](/docs/guides/features/stream-processing/tap/).
 
 ## The new cache service facilitates dashboarding (wip)
@@ -78,7 +78,7 @@ This allows us to provide dashboarding in the Morio UI, giving real-time
 insights into the data that is flowing through Morio.
 
 :::tip
-This is a work-in-progress, so expect more updates in subsequent Morio
+This is a work in progress, so expect more updates in subsequent Morio
 releases.
 :::
 
@@ -111,12 +111,12 @@ There's a lot more that went into this release. Here are some more highlights:
 ### Support for raw LSCL input in connector config
 
 The connector service now supports raw _LSCL_ for configuring your data
-pipelines, thus allowing you to re-use any existing Logstash pipelines you may
+pipelines, thus allowing you to reuse any existing Logstash pipelines you may
 have.
 
 ### Support for editing settings by hand through the UI
 
-The UI now also allows you to hand edit the entire settings file.  Thus giving
+The UI now also allows you to hand edit the entire settings file, thus giving
 you the full power of updating the settings through the API, through Morio's
 UI.
 
@@ -149,25 +149,24 @@ We have completed support for our 3 release channels:
 All docker images are now tagged as follows (using `0.6` as an example
 version):
 
-- `v0.6`: This `0.6` release in the `stable` channel.
-- `v0.6-canary`: This `0.6` release in the `canary` channel.
-- `v0.6-testing`: This `0.6` release in the `testing` channel.
-- `stable`: This most recent release in the `stable` channel.
-- `canary`: This most recent release in the `canary` channel.
-- `testing`: This most recent release in the `testing` channel.
-- `latest`: This most recent release in the `stable` channel (this is an alias
-  for `stable` and what Docker uses if no specific tag is provided).
+- `v0.6`: The `0.6` release in the `stable` channel.
+- `v0.6-canary`: The `0.6` release in the `canary` channel.
+- `v0.6-testing`: The `0.6` release in the `testing` channel.
+- `stable`: The most recent release in the `stable` channel.
+- `canary`: The most recent release in the `canary` channel.
+- `testing`: The most recent release in the `testing` channel.
+- `latest`: The most recent release in the `stable` channel (this is an alias
+  for `stable`, and what Docker uses if no specific tag is provided).
 
 For software packages, each release channel has its own repository.
 
-### Generic apt repositories
+### Generic APT repositories
 
 When we initially created our Debian software repositories, they were tied to
-Debian Bookworm. We have since recreated these APT repositories, and now they
-are not tied to a specific Debian version, or even Debian for that matter.
+Debian Bookworm. We have since recreated these repositories, and now they
+are not tied to a specific Debian version any more, or even to Debian itself for that matter.
 
-Which means you can use them on different Debian version, or even on Debian
-based distributions such as Ubuntu.
+It means that you can use them on a different Debian version, or even on Debian-based distributions such as Ubuntu.
 
 ### The Morio client is now statically linked
 
@@ -178,14 +177,14 @@ of) operating systems.
 ### Extended use of a systemd environment file for moriod
 
 We have a new `moriod.env` file to pre-configure the Moriod service.
-This allows you to change certain Moriod presets, much like you would do
+This allows you to change certain Moriod presets, much as you would do
 by passing custom environment parameters to a container.
 
 ### Provide guidance for FQDN mismatch during setup
 
 Morio will not validate a setup when the FQDN used to access Morio in the
 browser is not included in the list of broken FQDNs. We've now added a helpful
-message to help identity this issue.
+message to help identify this issue.
 
 ### The `/up` API endpoint is now anonymous
 
@@ -194,8 +193,6 @@ longer requires authentication.
 
 ### Speed up reloading and restarting of Morio
 
-We've made changes to the various life cycles methods of the services in Morio
+We've made changes to the various lifecycle methods of the services in Morio
 core, and in doing so have significantly reduced the time needed for Morio to
-reconfigure itself, or restart itself.
-
-
+reconfigure itself or restart.
