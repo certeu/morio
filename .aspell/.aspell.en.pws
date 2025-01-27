@@ -1,4 +1,4 @@
-personal_ws-1.1 en 262 
+personal_ws-1.1 en 263 
 ABAC
 ACL
 ACLs
@@ -192,6 +192,7 @@ js
 json
 kickstart
 ldap
+lifecycle
 lilianbaz
 linter
 linux
