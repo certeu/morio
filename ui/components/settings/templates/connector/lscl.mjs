@@ -50,7 +50,7 @@ const lsclForm = (type) => ({
         Metadata: xputMeta('filter'),
         Configuration: [
          {
-           schema: Joi.boolean().default(false).label('Wrap as input'),
+           schema: Joi.boolean().default(false).label(`Wrap as ${type}`),
            label: `Wrap LSCL in a ${type} block`,
            labelBL: data?.wrap
              ? <>Enable this to wrap your LSCL code in a {type} block: <code>{`${type} { ... }`}</code></>
