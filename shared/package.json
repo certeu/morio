@@ -1,5 +1,5 @@
 {
-  "name": "@morio/shared",
+  "name": "@itsmorio/shared",
   "version": "0.6.0",
   "description": "Morio Library Methods for NodeJS (shared)",
   "private": true,
