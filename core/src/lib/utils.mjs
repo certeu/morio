@@ -37,9 +37,10 @@ const store = new Store(log)
   .set('state.ephemeral', true)
   .set('info', {
     about: 'Morio Core',
-    name: '@morio/core',
+    channel: getPreset('MORIO_RELEASE_CHANNEL'),
+    name: '@itsmorio/core',
     production: inProduction(),
-    version: getPreset('MORIO_VERSION'),
+    version: getPreset('MORIO_CONTAINER_TAG'),
   })
 
 /*

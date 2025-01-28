@@ -34,9 +34,10 @@ const store = new Store(log)
   .set('prefix', getPreset('MORIO_API_PREFIX'))
   .set('info', {
     about: 'Morio Management API',
-    name: '@morio/api',
+    channel: getPreset('MORIO_RELEASE_CHANNEL'),
+    name: '@itsmorio/api',
     production: inProduction(),
-    version: getPreset('MORIO_VERSION'),
+    version: getPreset('MORIO_CONTAINER_TAG'),
   })
 
 /*
