@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [tap] The container will now report the correct name
 - [tap] Do not bundle stream processors inside the container image
 - [ui] Correctly display type in help messages in LSCL forms
-- [ui] Fixed broken links in breakcrumbs [#181](https://github.com/certeu/morio/issues/181)
+- [ui] Fixed broken links in breadcrumbs [#181](https://github.com/certeu/morio/issues/181)
 
 ## [0.6.0] - 2025-01-23
 
