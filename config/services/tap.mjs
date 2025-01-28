@@ -11,8 +11,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
   return {
     container: {
-      // Image to run (different in dev)
-      image: PROD ? 'itsmorio/tap' : 'devmorio/tap',
+      // Image to run
+      image: 'itsmorio/tap',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION_TAG') + getContainerTagSuffix(utils),
       // Name to use for the running container
