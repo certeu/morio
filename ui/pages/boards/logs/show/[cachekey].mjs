@@ -6,7 +6,7 @@ import { ShowLogs } from 'components/boards/logs.mjs'
 export default function DashboardsShowLogsPage ({ cachekey }) {
   const meta = {
     title: 'Show cached logs',
-    page: ['dashboards', 'logs', 'show', <span key='ck' className="font-mono">{cachekey}</span>],
+    page: ['boards', 'logs', 'show', <span key='ck' className="font-mono">{cachekey}</span>],
     Icon: LogsIcon
   }
 

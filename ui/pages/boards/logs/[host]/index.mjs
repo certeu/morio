@@ -7,7 +7,7 @@ import { Uuid } from 'components/uuid.mjs'
 export default function DashboardsHostLogsPage ({ host }) {
   const meta = {
     title: 'Cached host logs',
-    page: ['dashboards', 'logs', <Uuid key="uuid" uuid={host}/>],
+    page: ['boards', 'logs', <Uuid key="uuid" uuid={host}/>],
     Icon: LogsIcon
   }
 
