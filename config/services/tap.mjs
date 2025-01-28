@@ -27,6 +27,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       volumes: PROD
         ? [
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/morio/tap/config`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap/processors:/morio/tap/processors`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
