@@ -4,7 +4,7 @@ import readline from 'node:readline'
 import process from 'node:process'
 import mustache from 'mustache'
 // Load various package.json files
-import { root, api, config, core, shared, ui } from './json-loader.mjs'
+import { root, api, config, core, shared, tap, ui } from './json-loader.mjs'
 
 /*
  * Object holding all files we need to update and their folder
@@ -15,6 +15,7 @@ const files = {
   config,
   core,
   shared,
+  tap,
   ui,
 }
 

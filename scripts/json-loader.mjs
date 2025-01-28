@@ -13,6 +13,7 @@ import api from '../api/package.json' assert { type: 'json' }
 import config from '../config/package.json' assert { type: 'json' }
 import core from '../core/package.json' assert { type: 'json' }
 import shared from '../shared/package.json' assert { type: 'json' }
+import tap from '../tap/package.json' assert { type: 'json' }
 import ui from '../ui/package.json' assert { type: 'json' }
 
-export { root, api, config, core, shared, ui }
+export { root, api, config, core, shared, tap, ui }
