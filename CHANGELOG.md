@@ -7,10 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2025-01-28
+
+### Added
+
+- [api] We now return the container tag and release channel from the status endpoint
+- [core] We now return the container tag and release channel from the status endpoint
+- [ui] Display the release channel on the status page
+
+### Changed
+
+- We now use the same container namespace in dev to prevent namespace squatting
+
 ### Fixed
 
 - [tap] Reset npm environment in container to avoid npm issues
 - [tap] Missing comma in auto-generated stream processors module loader
+- [tap] Add missing dependencies to container image
+- [tap] Fix volume mount for processors folder
+- [tap] The container will now report the correct name
+- [tap] Do not bundle stream processors inside the container image
+- [ui] Correctly display type in help messages in LSCL forms
+- [ui] Fixed broken links in breakcrumbs [#181](https://github.com/certeu/morio/issues/181)
 
 ## [0.6.0] - 2025-01-23
 
