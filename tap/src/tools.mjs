@@ -44,6 +44,7 @@ export const tools = {
   create: {
     context: createContext,
     hash: createHash,
+    id: createElasticId,
     key: createKey,
   },
   extract: {
@@ -162,7 +163,6 @@ function alarm (data) {
  * Creates an event
  */
 function event (data) {
-  tools.note('event', data)
   return produceStructuredMessage('event', data)
 }
 
@@ -252,7 +252,6 @@ async function cacheLogline (logset, logData, data, overrides={}) {
 
   // Create cache key
   const key = createKey('log', host, module, logset)
-  tools.note(logset, key)
 
   // Cache the log line itself
   valkey
@@ -280,7 +279,7 @@ async function cacheLogline (logset, logData, data, overrides={}) {
     .zadd(hkey, when(data), host)
     .zremrangebyscore(hkey, '-inf', now()/1000 - ttl*3600)
     .zremrangebyrank(key, 0, 10000)
-    .expire(key, ttl * 1.5 * 3600)
+    .expire(hkey, ttl * 1.5 * 3600)
     .exec(logCacheErrors)
 }
 
@@ -304,7 +303,7 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
   // Extract overrides or use defaults
   const {
     cap=150,
-    ttl=1800,
+    ttl=1,
     host=tools.extract.host(data),
     module=tools.extract.module(data),
   } = overrides
@@ -316,21 +315,31 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
   valkey
     .multi()
     .zadd(key, when(data), JSON.stringify(metrics))
-    .zremrangebyscore(key, '-inf', now() - ttl)
-    .zremrangebyrank(key, 0, cap * -1)
-    .expire(key, ttl * 1.5)
+    .zremrangebyscore(key, '-inf', now() - (ttl * 3600 * 1000))
+    //.zremrangebyrank(key, 0, cap * -1)
+    .expire(key, ttl * 3600 * 1.5)
     .exec(logCacheErrors)
 
   // Keep track of metricsets collected for this host
   const lkey = createKey('metrics', host)
   const metricsets = JSON.parse(await valkey.hget(lkey, module))
   valkey.hset(lkey, module, JSON.stringify((metricsets === null)
-    // First log we see for this host, start new list
+    // First metricset we see for this host, start new list
     ? [metricset]
-    // Add to list of logs for this host, making sure to avoid duplicates
+    // Add to list of metricsets for this host, making sure to avoid duplicates
     : [...new Set([...metricsets, metricset])]
   ))
-  valkey.expire(lkey, ttl)
+  valkey.expire(lkey, ttl * 3600)
+
+  // Finally, keep track of the hosts for which we have metrics
+  const hkey = 'metrics'
+  valkey
+    .multi()
+    .zadd(hkey, when(data), host)
+    .zremrangebyscore(hkey, '-inf', now()/1000 - ttl*3600)
+    //.zremrangebyrank(hkey, 0, 10000)
+    .expire(hkey, ttl * 1.5 * 3600)
+    .exec(logCacheErrors)
 }
 
 /*
@@ -442,4 +451,16 @@ function produceStructuredMessage(msgType, msgData) {
   })
 }
 
-
+/**
+ * Generates a unique event ID
+ *
+ * This is a NodeJS implementation of the algorithm used by Beats add_id processor:
+ * - Generate 20 random bytes
+ * - Convert to base64
+ * - Replace + with - and / with _ (to make it URL-safe)
+ *
+ * @return {string} id - The unique id
+ */
+function createElasticId() {
+  return crypto.randomBytes(20).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
+}

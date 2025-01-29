@@ -53,9 +53,13 @@ function startCount () {
 function countersAsEcs (throughput) {
   return {
     "@timestamp": new Date().toISOString(),
+    "@metadata": {
+      type: "_doc",
+      _id: tools.create.id(),
+    },
     ecs: { version: "8.0.0" },
     event: {
-      dataset: "morio-tap.throughput",
+      dataset: "linux-morio-tap.throughput",
     },
     metricset: {
       name: "throughput",
@@ -72,7 +76,7 @@ function countersAsEcs (throughput) {
       name: node.fqdn,
     },
     labels: {
-      'morio.module': 'morio-tap'
+      'morio.module': 'linux-morio-tap'
     }
   }
 }
@@ -119,12 +123,11 @@ function resetCounters(processors=false, topics=false) {
       for (const name of list[type]) {
         reset[name] = 0
         /*
-         * We use Math.ceil() here because it is the better choice when there is
-         * not a lot of data. Essentially, we want to avoid that 0.5 msg/s does not
-         * register as anything at all.
-         * On the higher end of the spectrum, who cares whether it's 3000/s or 3001/s
+         * Note that we do not report messages per second,
+         * but rather total messages per tick. We convert to mps in the
+         * visualisation, and this is more informative.
          */
-        data[type][name] = counters[type]?.[name] ? Math.ceil(counters[type][name]/30) : 0
+        data[type][name] = counters[type]?.[name] ? counters[type][name] : 0
       }
       counters[type] = reset
     }
