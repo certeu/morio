@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [ui] Group operaring systems on inventory pages
+
 ### Fixed
 
 - [ui] Add missing inventory/oss icon to main navigation menu
