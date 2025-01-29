@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { HardwareIcon, LocationIcon, PowerIcon, ServersIcon } from 'components/icons.mjs'
+import { HardwareIcon, LocationIcon, ServersIcon, WindowIcon } from 'components/icons.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -48,7 +48,7 @@ export default function InventoryPage() {
           <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts"/>
           <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips"/>
           <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs"/>
-          <Stat title="Operating Systems" nr={data?.oss} Icon={({className}) => <PowerIcon className={className} stroke={2.5}/>} link="/inventory/oss"/>
+          <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss"/>
         </div>
         <ReloadDataButton onClick={() => setCount(count+1)} />
       </ContentWrapper>

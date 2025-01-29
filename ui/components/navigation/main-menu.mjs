@@ -27,6 +27,7 @@ import {
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
+  WindowIcon,
   QuestionIcon,
   RightIcon,
   SearchIcon,
@@ -90,6 +91,7 @@ const icons = {
   networks: WifiIcon,
   nodes: ServersIcon,
   notes: TipIcon,
+  oss: WindowIcon,
   pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
@@ -163,6 +165,10 @@ export const links = {
     },
     macs: {
       t: 'MAC Addresses',
+      r: 'user'
+    },
+    oss: {
+      t: 'Operating Systems',
       r: 'user'
     },
   },
