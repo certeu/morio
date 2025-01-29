@@ -159,6 +159,22 @@ export const Host = ({ data }) => {
           </div>
         </div>
       </div>
+      <Details summaryLeft="Audit Data">
+        <div className="p-2">
+          {data.id
+            ? <HostAudit uuid={data.id} />
+            : <p>One moment please...</p>
+          }
+        </div>
+      </Details>
+      <Details summaryLeft="Logs">
+        <div className="p-2">
+          {data.id
+            ? <HostLogsTable host={data.id} />
+            : <p>One moment please...</p>
+          }
+        </div>
+      </Details>
       <Details summaryLeft="IP Addresses" summaryRight={data.ips?.length}>
         <IpsDisplayTable ips={data.ips} />
       </Details>
@@ -170,16 +186,6 @@ export const Host = ({ data }) => {
           <div className="p-2">{data.nodes || 'no notes for this host'}</div>
         </Details>
       ) : null}
-      <Details summaryLeft="Audit Data">
-        <div className="p-2">
-          <HostAudit uuid={data.id} />
-        </div>
-      </Details>
-      <Details summaryLeft="Logs">
-        <div className="p-2">
-          <HostLogsTable host={data.id} />
-        </div>
-      </Details>
     </>
   )
 }
