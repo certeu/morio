@@ -14,9 +14,7 @@ export const asJson = (data, pretty = true) => {
     else json[key] = val
   }
 
-  return pretty
-    ? JSON.stringify(json, null ,2)
-    : JSON.stringify(json)
+  return pretty ? JSON.stringify(json, null, 2) : JSON.stringify(json)
 }
 
 export const decodeJwt = (token) => {
@@ -180,9 +178,8 @@ export const iconSize = 'h-8 w-8'
  * @param {string} uuid - The input UUID
  * @return {string} short - The shortened UUID
  */
-export const shortUuid = (uuid) => typeof uuid === 'string' && uuid.length > 5
-  ? uuid.slice(0,5)
-  : 'xxxxx'
+export const shortUuid = (uuid) =>
+  typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'
 
 /**
  * Wrapper around mustache's render method to render templated strings

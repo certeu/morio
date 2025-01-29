@@ -99,14 +99,18 @@ export const ButtonFrame = ({
     onClick={onClick}
   >
     {children}
-    {active
-      ? activeIcon
-        ? <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>{activeIcon}</div>
-        : <OkIcon
-            className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
-            stroke={4}
-          />
-     : null}
+    {active ? (
+      activeIcon ? (
+        <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>
+          {activeIcon}
+        </div>
+      ) : (
+        <OkIcon
+          className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
+          stroke={4}
+        />
+      )
+    ) : null}
   </button>
 )
 
@@ -636,7 +640,9 @@ export const LabelInput = (props) => {
         <div className="flex flex-row flex-wrap gap-1 items-center">
           <span className="text-sm font-bold">Current:</span>
           {labels}
-          {labels.length > 0 ? <span className="text-sm opacity-60 italic">(click to remove)</span> : null}
+          {labels.length > 0 ? (
+            <span className="text-sm opacity-60 italic">(click to remove)</span>
+          ) : null}
         </div>
       ) : null}
     </div>

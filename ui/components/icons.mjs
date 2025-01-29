@@ -576,7 +576,6 @@ export const SearchIcon = (props) => (
   </IconWrapper>
 )
 
-
 /*
  * ServersIcon - Looks like 2 rack servers stacked
  */

@@ -7,8 +7,7 @@ import { Popout } from 'components/popout.mjs'
  *
  * This holds the configuration wizard view settings for the tap service
  */
-export const tap = ({ mSettings={}, update, dconf=false }) => {
-
+export const tap = ({ mSettings = {}, update, dconf = false }) => {
   // We'll re-use this
   const title = 'Stream Processing'
 
@@ -23,7 +22,7 @@ export const tap = ({ mSettings={}, update, dconf=false }) => {
 
 Refer to [the stream processing guide](https://morio.it/docs/guides/stream-processing?FIXME-write-this-guide) to get started.`,
       type: 'info',
-      children: {}
+      children: {},
     }
   }
 
@@ -40,11 +39,13 @@ so you can bring your own logic and have the Tap service handle the stream for y
 Note that stream processors do not ship with Morio, but need to be loaded dynamically.
 Currently, the following stream processorts are loaded:
 
-${Object.keys(dconf.tap).map(name => `- ${dconf.tap[name].title || name}`).join("\n")}
+${Object.keys(dconf.tap)
+  .map((name) => `- ${dconf.tap[name].title || name}`)
+  .join('\n')}
 
 Refer to [the stream processing guide](https://morio.it/docs/guides/stream-processing?FIXME-write-this-guide) to get started.`,
     type: 'info',
-    children: {}
+    children: {},
   }
 
   /*
@@ -52,19 +53,24 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
    */
   for (const [name, conf] of Object.entries(dconf.tap)) {
     const title = conf.title ? conf.title : name
-    const docs = conf.about ? conf.about : (
+    const docs = conf.about ? (
+      conf.about
+    ) : (
       <Popout note>
         <h4>This stream processor does not provide this info</h4>
-        <p>The <code>{name}</code> stream processor does not provide any <b>about</b> info.</p>
+        <p>
+          The <code>{name}</code> stream processor does not provide any <b>about</b> info.
+        </p>
       </Popout>
     )
     const href = conf.href
       ? [
-        <Popout link key="popout">
-          <h5>Learn more about this stream processor</h5>
-          <a href={conf.href}>{conf.href}</a>
-        </Popout>
-      ] : []
+          <Popout link key="popout">
+            <h5>Learn more about this stream processor</h5>
+            <a href={conf.href}>{conf.href}</a>
+          </Popout>,
+        ]
+      : []
     const child = {
       type: 'form',
       title,
@@ -74,7 +80,7 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
         docs,
         ...href,
         ...dynamicForm({ conf, dkey: name, mSettings, update, name }),
-      ]
+      ],
     }
     template.children[name] = child
   }
@@ -82,11 +88,11 @@ Refer to [the stream processing guide](https://morio.it/docs/guides/stream-proce
   return template
 }
 
-function dynamicForm ({ conf, dkey, mSettings, update, name }) {
+function dynamicForm({ conf, dkey, mSettings, update, name }) {
   if (!conf.settings) return null
 
   // Start the form
-  const form = [ '### Settings' ]
+  const form = ['### Settings']
 
   // First, inject the enabled setting
   if (typeof conf.settings?.enabled === 'undefined') {
@@ -98,14 +104,14 @@ function dynamicForm ({ conf, dkey, mSettings, update, name }) {
         {
           val: false,
           label: 'Disabled',
-          about: `This completely disables the ${name} stream processor`
+          about: `This completely disables the ${name} stream processor`,
         },
         {
           val: true,
           label: 'Enabled',
-          about: `Enables the ${name} stream processor`
+          about: `Enables the ${name} stream processor`,
         },
-      ]
+      ],
     }
     form.push(...dynamicFormSetting('enabled', val, dkey, mSettings, update))
   }
@@ -130,20 +136,24 @@ function dynamicForm ({ conf, dkey, mSettings, update, name }) {
   return form
 }
 
-function dynamicFormSetting (key, val, dkey, mSettings, update) {
+function dynamicFormSetting(key, val, dkey, mSettings, update) {
   if (val.type === 'list') return dynamicFormListSetting(key, val, dkey, mSettings, update)
   if (val.type === 'labels') return dynamicFormLabelsSetting(key, val, dkey, mSettings, update)
   if (val.type === 'number') return dynamicFormNumberSetting(key, val, dkey, mSettings, update)
 
-  return key ? [`No dynamic form method for ${key}`, <pre key="pre">{JSON.stringify(val, null ,2)}</pre>] : []
+  return key
+    ? [`No dynamic form method for ${key}`, <pre key="pre">{JSON.stringify(val, null, 2)}</pre>]
+    : []
 }
 
-function dynamicFormListSetting (key, val, dkey, mSettings) {
+function dynamicFormListSetting(key, val, dkey, mSettings) {
   let current = mSettings.tap?.[dkey]?.[key]
   if (current === undefined) current = val.dflt
 
   return [
-    <h4 className="mt-8" key="title">{val.title}</h4>,
+    <h4 className="mt-8" key="title">
+      {val.title}
+    </h4>,
     val.about ? val.about : [],
     {
       schema: Joi.boolean().default(val.dflt),
@@ -158,7 +168,7 @@ function dynamicFormListSetting (key, val, dkey, mSettings) {
   ]
 }
 
-function dynamicFormLabelsSetting (key, val, dkey, mSettings) {
+function dynamicFormLabelsSetting(key, val, dkey, mSettings) {
   let current = mSettings.tap?.[dkey]?.[key]
   if (current === undefined) current = val.dflt
   if (Array.isArray(current)) {
@@ -168,25 +178,32 @@ function dynamicFormLabelsSetting (key, val, dkey, mSettings) {
   }
 
   return [
-    <h4 className="mt-8" key="title">{val.title}</h4>,
+    <h4 className="mt-8" key="title">
+      {val.title}
+    </h4>,
     val.about ? val.about : [],
     {
-      schema: Joi.array().items(Joi.string()).optional().label(val.label || val.title),
+      schema: Joi.array()
+        .items(Joi.string())
+        .optional()
+        .label(val.label || val.title),
       key: `tap.${dkey}.${key}`,
       dflt: val.dflt,
       inputType: 'labels',
       current,
       ...dynamicFormLabels(val),
-    }
+    },
   ]
 }
 
-function dynamicFormNumberSetting (key, val, dkey, mSettings) {
+function dynamicFormNumberSetting(key, val, dkey, mSettings) {
   let current = mSettings.tap?.[dkey]?.[key]
   if (current === undefined) current = val.dflt
 
   return [
-    <h4 className="mt-8" key="title">{val.title}</h4>,
+    <h4 className="mt-8" key="title">
+      {val.title}
+    </h4>,
     val.about ? val.about : [],
     {
       schema: Joi.number(),
@@ -198,7 +215,7 @@ function dynamicFormNumberSetting (key, val, dkey, mSettings) {
   ]
 }
 
-function dynamicFormLabels (val) {
+function dynamicFormLabels(val) {
   return {
     label: val.label ? val.label : false,
     labelBL: val.labelBL ? val.labelBL : false,

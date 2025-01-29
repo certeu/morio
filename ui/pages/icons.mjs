@@ -3,7 +3,7 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import * as allIcons from 'components/icons.mjs'
 
 const custom = {
-  HttpIcon: {stroke: 0, fill: true},
+  HttpIcon: { stroke: 0, fill: true },
 }
 
 const DashboardsPage = (props) => {
@@ -12,12 +12,14 @@ const DashboardsPage = (props) => {
       <ContentWrapper {...props}>
         <div className="max-w-4xl">
           <div className="flex flex-row flex-wrap gap-4 items-center justify-between items-stretch">
-            {Object.entries(allIcons).filter(([name]) => name !== 'IconWrapper').map(([name, Icon]) => (
-              <div key={name} className="border rounded-lg p-4 flex flex-col items-center gap-4">
-                {custom[name] ? <Icon {...custom[name]} /> : <Icon />}
-                <span className="text-xs opacity-70">{name}</span>
-              </div>
-            ))}
+            {Object.entries(allIcons)
+              .filter(([name]) => name !== 'IconWrapper')
+              .map(([name, Icon]) => (
+                <div key={name} className="border rounded-lg p-4 flex flex-col items-center gap-4">
+                  {custom[name] ? <Icon {...custom[name]} /> : <Icon />}
+                  <span className="text-xs opacity-70">{name}</span>
+                </div>
+              ))}
           </div>
         </div>
       </ContentWrapper>

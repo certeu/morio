@@ -32,28 +32,30 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
 
   // Effects
   useEffect(() => {
-    runLogsTableApiCall(api, cacheKey).then(result => {
+    runLogsTableApiCall(api, cacheKey).then((result) => {
       if (result.cache) setCache(result.cache)
       if (result.inventory) setInventory(result.inventory)
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  },[refresh])
+  }, [refresh])
 
   // Tell people  we are still lading
-  if (cache === false) return (
-    <>
-      <Loading />
-      <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
-    </>
-  )
+  if (cache === false)
+    return (
+      <>
+        <Loading />
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </>
+    )
 
   // Don't bother if there's nothing in the caceh
-  if (cache.length < 1) return (
-    <>
-      <Loading />
-      <p>Nothing in the cache to show you here.</p>
-    </>
-  )
+  if (cache.length < 1)
+    return (
+      <>
+        <Loading />
+        <p>Nothing in the cache to show you here.</p>
+      </>
+    )
 
   // Only keep what is in the cache, but use the inventory data
   const hosts = {}
@@ -61,42 +63,51 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
     if (inventory[id]) hosts[id] = inventory[id]
     else hosts[id] = unknownHost(id)
   }
-  const sorted = orderBy(hosts, [order], [(desc ? 'desc' : 'asc')])
+  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
 
   return (
     <>
-    <table className="table table-auto">
-      <thead>
-        <tr>
-          {['host', 'name', 'cores', 'memory', 'last_seen'].map(field => (
-            <th key={field}>
-              <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
-                onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-              >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
-              </button>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map(host => (
-          <tr key={host.id}>
-            <td className=""><Uuid uuid={host.id} href={`/boards/logs/${host.id}`}/></td>
-            <td className=""><PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink></td>
-            <td className="">{host.cores}</td>
-            <td className="">{formatBytes(host.memory)}</td>
-            <td className="">{timeAgo(host.last_update)}</td>
+      <table className="table table-auto">
+        <thead>
+          <tr>
+            {['host', 'name', 'cores', 'memory', 'last_seen'].map((field) => (
+              <th key={field}>
+                <button
+                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
+                >
+                  {field}{' '}
+                  <RightIcon
+                    stroke={3}
+                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
+                  />
+                </button>
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
-    <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
-  </>
+        </thead>
+        <tbody>
+          {sorted.map((host) => (
+            <tr key={host.id}>
+              <td className="">
+                <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
+              </td>
+              <td className="">
+                <PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink>
+              </td>
+              <td className="">{host.cores}</td>
+              <td className="">{formatBytes(host.memory)}</td>
+              <td className="">{timeAgo(host.last_update)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+    </>
   )
 }
 
-function unknownHost (id) {
+function unknownHost(id) {
   return {
     id,
     name: 'Unknown in inventory',
@@ -106,7 +117,7 @@ function unknownHost (id) {
   }
 }
 
-async function runLogsTableApiCall (api, key) {
+async function runLogsTableApiCall(api, key) {
   const data = {}
   let result = await api.getCacheKey(key)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
@@ -116,12 +127,10 @@ async function runLogsTableApiCall (api, key) {
   return data
 }
 
-
 /**
  * This compnent renders a table with all cached logs for a given host
  */
-export const HostLogsTable = ({ host, module=false }) => {
-
+export const HostLogsTable = ({ host, module = false }) => {
   // State
   const [cache, setCache] = useState(false)
   const [refresh, setRefresh] = useState(0)
@@ -133,27 +142,29 @@ export const HostLogsTable = ({ host, module=false }) => {
 
   // Effects
   useEffect(() => {
-    runHostLogsTableApiCall(api, host).then(result => {
+    runHostLogsTableApiCall(api, host).then((result) => {
       if (result.cache) setCache(result.cache)
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  },[refresh])
+  }, [refresh])
 
   // Tell people  we are still lading
-  if (cache === false) return (
-    <>
-      <Loading />
-      <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
-    </>
-  )
+  if (cache === false)
+    return (
+      <>
+        <Loading />
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </>
+    )
 
   // Don't bother if there's nothing in the caceh
-  if (Object.keys(cache).length < 1) return (
-    <>
-      <Loading />
-      <p>Nothing in the cache to show you here.</p>
-    </>
-  )
+  if (Object.keys(cache).length < 1)
+    return (
+      <>
+        <Loading />
+        <p>Nothing in the cache to show you here.</p>
+      </>
+    )
 
   // Only keep what is in the cache, but use the inventory data
   const data = []
@@ -164,41 +175,55 @@ export const HostLogsTable = ({ host, module=false }) => {
       }
     }
   }
-  const sorted = orderBy(data, [order], [(desc ? 'desc' : 'asc')])
+  const sorted = orderBy(data, [order], [desc ? 'desc' : 'asc'])
   const cols = module ? ['logset'] : ['module', 'logset']
 
   return (
     <>
-    <Host uuid={host} />
-    <table className="table table-auto">
-      <thead>
-        <tr>
-          {cols.map(field => (
-            <th key={field}>
-              <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
-                onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-              >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
-              </button>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map(entry => (
-          <tr key={entry.lolset+entry.host+entry.module}>
-            {module ? null : <td className=""><PageLink href={`/boards/logs/${host}/${entry.module}/`}>{entry.module}</PageLink></td>}
-            <td className=""><MorioLogset name={entry.logset} href={`/boards/logs/${host}/${entry.module}/${entry.logset}`}/></td>
+      <Host uuid={host} />
+      <table className="table table-auto">
+        <thead>
+          <tr>
+            {cols.map((field) => (
+              <th key={field}>
+                <button
+                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
+                >
+                  {field}{' '}
+                  <RightIcon
+                    stroke={3}
+                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
+                  />
+                </button>
+              </th>
+            ))}
           </tr>
-        ))}
-      </tbody>
-    </table>
-    <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
-  </>
+        </thead>
+        <tbody>
+          {sorted.map((entry) => (
+            <tr key={entry.lolset + entry.host + entry.module}>
+              {module ? null : (
+                <td className="">
+                  <PageLink href={`/boards/logs/${host}/${entry.module}/`}>{entry.module}</PageLink>
+                </td>
+              )}
+              <td className="">
+                <MorioLogset
+                  name={entry.logset}
+                  href={`/boards/logs/${host}/${entry.module}/${entry.logset}`}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+    </>
   )
 }
 
-async function runHostLogsTableApiCall (api, host) {
+async function runHostLogsTableApiCall(api, host) {
   const data = {}
   let result = await api.getCacheKey(`logs|${host}`)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
@@ -208,25 +233,27 @@ async function runHostLogsTableApiCall (api, host) {
   return data
 }
 
-const MorioLogset = ({ name, href }) => href
-  ? <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
-  : <span>{name.split('.').join(' / ')}</span>
+const MorioLogset = ({ name, href }) =>
+  href ? (
+    <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
+  ) : (
+    <span>{name.split('.').join(' / ')}</span>
+  )
 
 /**
  * This compnent renders a table with all cached logs for a given host
  */
 export const ShowLogs = ({ host, module, logset }) => {
-
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
 
   // Hooks
   const { api } = useApi()
-  useQuery ({
+  useQuery({
     queryKey: [`${host}|${module}|${logset}`],
     queryFn: () => {
-      runShowLogsApiCall(api, host, module, logset).then(result => {
+      runShowLogsApiCall(api, host, module, logset).then((result) => {
         if (result.cache) setCache(result.cache)
       })
     },
@@ -235,19 +262,19 @@ export const ShowLogs = ({ host, module, logset }) => {
   })
 
   // Don't bother if there's nothing in the caceh
-  if (!cache || cache.length < 1) return (
-    <>
-      <Loading />
-      <p>Nothing in the cache to show you here.</p>
-    </>
-  )
+  if (!cache || cache.length < 1)
+    return (
+      <>
+        <Loading />
+        <p>Nothing in the cache to show you here.</p>
+      </>
+    )
 
   // Can we figure out the field names?
   let fields = false
   try {
     fields = Object.keys(JSON.parse(cache[0]))
-  }
-  catch (err) {
+  } catch (err) {
     // ah well
   }
 
@@ -256,27 +283,28 @@ export const ShowLogs = ({ host, module, logset }) => {
       <Host uuid={host} />
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-between gap-2 mt-4">
-          <ToggleLiveButton { ...{paused, setPaused }} />
-          <KeyVal k='module' val={module} />
-          <KeyVal k='logset' val={logset} />
+          <ToggleLiveButton {...{ paused, setPaused }} />
+          <KeyVal k="module" val={module} />
+          <KeyVal k="logset" val={logset} />
         </div>
       </div>
-      {fields
-        ? <LogLines fields={fields} lines={cache} />
-        : (
-          <>
-            <Popout note>
-              We were unable to parse this log entry into fields, so we show the raw data
-            </Popout>
-            {cache.map(line => <LogLine key={line} data={line} />)}
-          </>
-        )
-      }
+      {fields ? (
+        <LogLines fields={fields} lines={cache} />
+      ) : (
+        <>
+          <Popout note>
+            We were unable to parse this log entry into fields, so we show the raw data
+          </Popout>
+          {cache.map((line) => (
+            <LogLine key={line} data={line} />
+          ))}
+        </>
+      )}
     </>
   )
 }
 
-async function runShowLogsApiCall (api, host, module, logset) {
+async function runShowLogsApiCall(api, host, module, logset) {
   const data = {}
   let result = await api.getCacheKey(`log|${host}|${module}|${logset}`)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
@@ -286,13 +314,11 @@ async function runShowLogsApiCall (api, host, module, logset) {
   return data
 }
 
-
 const LogLine = ({ data }) => {
   let parsed
   try {
     parsed = JSON.parse(`${data}`)
-  }
-  catch (err) {
+  } catch (err) {
     parsed = `${data}`
   }
 
@@ -304,18 +330,27 @@ const LogLines = ({ fields, lines }) => {
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  const sorted = orderBy(lines.map(line => JSON.parse(line)), [order], [(desc ? 'desc' : 'asc')])
+  const sorted = orderBy(
+    lines.map((line) => JSON.parse(line)),
+    [order],
+    [desc ? 'desc' : 'asc']
+  )
 
   return (
     <table className="table table-auto">
       <thead>
         <tr>
-          {fields.map(field => (
+          {fields.map((field) => (
             <th key={field}>
               <button
                 className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-              >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
+              >
+                {field}{' '}
+                <RightIcon
+                  stroke={3}
+                  className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
+                />
               </button>
             </th>
           ))}
@@ -324,7 +359,9 @@ const LogLines = ({ fields, lines }) => {
       <tbody>
         {sorted.map((entry, i) => (
           <tr key={i}>
-            {fields.map(field => <td key={field}>{field === 'time' ? timeAgo(entry[field]) : entry[field]}</td>)}
+            {fields.map((field) => (
+              <td key={field}>{field === 'time' ? timeAgo(entry[field]) : entry[field]}</td>
+            ))}
           </tr>
         ))}
       </tbody>

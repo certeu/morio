@@ -15,11 +15,13 @@ import { Card } from 'components/card.mjs'
 
 const types = {
   audit: {
-    about: 'This is low-level audit data collected by the Morio client, made available through the cache.',
+    about:
+      'This is low-level audit data collected by the Morio client, made available through the cache.',
     Icon: FingerprintIcon,
   },
   events: {
-    about: 'Keep track of events throughout your infrastructure, such as logins, software changes, and so on',
+    about:
+      'Keep track of events throughout your infrastructure, such as logins, software changes, and so on',
     Icon: FlagIcon,
   },
   checks: {
@@ -27,7 +29,12 @@ const types = {
     Icon: CheckCircleIcon,
   },
   logs: {
-    about: <>Like <code>tail -f</code> but without a need to have access to the machine where the logs are generated</>,
+    about: (
+      <>
+        Like <code>tail -f</code> but without a need to have access to the machine where the logs
+        are generated
+      </>
+    ),
     Icon: LogsIcon,
   },
   metrics: {
@@ -35,7 +42,8 @@ const types = {
     Icon: StatusIcon,
   },
   notes: {
-    about: 'Notes is how the Tap service communicates, as generating logs would cause a snowball effect',
+    about:
+      'Notes is how the Tap service communicates, as generating logs would cause a snowball effect',
     Icon: TipIcon,
   },
 }
@@ -43,10 +51,10 @@ const types = {
 const meta = {
   title: 'Morio Dashboards',
   page: ['boards'],
-  Icon: FlipoverIcon
+  Icon: FlipoverIcon,
 }
 
-export default function  DashboardsPage () {
+export default function DashboardsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
@@ -72,7 +80,7 @@ export default function  DashboardsPage () {
           </div>
           <h3 className="mt-8">Per data type</h3>
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
-            {Object.keys(types).map(type => {
+            {Object.keys(types).map((type) => {
               const { about, Icon } = types[type]
               return (
                 <Card

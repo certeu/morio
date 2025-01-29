@@ -9,7 +9,7 @@ const meta = {
   Icon: TipIcon,
 }
 
-export default function NotesDashboardPage () {
+export default function NotesDashboardPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>

@@ -4,11 +4,11 @@ import { LogsIcon } from 'components/icons.mjs'
 import { ShowLogs } from 'components/boards/logs.mjs'
 import { shortUuid } from 'lib/utils.mjs'
 
-export default function DashboardsHostLogsPage ({ host, module, logset }) {
+export default function DashboardsHostLogsPage({ host, module, logset }) {
   const meta = {
     title: 'Cached host logs',
     page: ['boards', 'logs', shortUuid(host), module, logset],
-    Icon: LogsIcon
+    Icon: LogsIcon,
   }
 
   return (
@@ -32,5 +32,3 @@ export const getStaticPaths = () => ({
   paths: [],
   fallback: 'blocking',
 })
-
-

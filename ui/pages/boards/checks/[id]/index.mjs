@@ -3,11 +3,11 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { CheckCircleIcon } from 'components/icons.mjs'
 import { Check } from 'components/boards/checks.mjs'
 
-export default function HealthcheckPage ({ id }) {
+export default function HealthcheckPage({ id }) {
   const meta = {
     title: `Health check`,
     page: ['boards', 'checks', id],
-    Icon: CheckCircleIcon
+    Icon: CheckCircleIcon,
   }
 
   return (
@@ -29,5 +29,3 @@ export const getStaticPaths = () => ({
   paths: [],
   fallback: 'blocking',
 })
-
-

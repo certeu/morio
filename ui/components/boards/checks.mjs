@@ -33,7 +33,7 @@ export const ChecksTable = () => {
 
   // Effects
   useEffect(() => {
-    runChecksTableApiCall(api, 'checks').then(result => {
+    runChecksTableApiCall(api, 'checks').then((result) => {
       if (result) {
         const all = []
         for (const check of result) {
@@ -44,23 +44,25 @@ export const ChecksTable = () => {
       }
     })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  },[refresh])
+  }, [refresh])
 
   // Tell people  we are still lading
-  if (cache === false) return (
-    <>
-      <Loading />
-      <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
-    </>
-  )
+  if (cache === false)
+    return (
+      <>
+        <Loading />
+        <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
+      </>
+    )
 
   // Don't bother if there's nothing in the cache
-  if (cache.length < 1) return (
-    <>
-      <Loading />
-      <p>Nothing in the cache to show you here.</p>
-    </>
-  )
+  if (cache.length < 1)
+    return (
+      <>
+        <Loading />
+        <p>Nothing in the cache to show you here.</p>
+      </>
+    )
 
   const btn = (
     <ListInput
@@ -81,28 +83,25 @@ export const ChecksTable = () => {
         },
       ]}
       dense={true}
-      dir='row'
+      dir="row"
       update={(val) => setShow(val)}
     />
   )
 
-  if (show !== 'list') return (
-    <>
-      {btn}
-      <div className="flex flex-row flex-wrap items-center gap-2">
-        {cache.map(check => (
-          <UpOrNot
-            key={check.key}
-            cacheKey={check.key}
-            hideOnUp={show === 'failing'}
-          />
-        ))}
-      </div>
-    </>
-  )
+  if (show !== 'list')
+    return (
+      <>
+        {btn}
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          {cache.map((check) => (
+            <UpOrNot key={check.key} cacheKey={check.key} hideOnUp={show === 'failing'} />
+          ))}
+        </div>
+      </>
+    )
 
   // Only keep what is in the cache, but use the inventory data
-  const sorted = orderBy(cache, [order], [(desc ? 'desc' : 'asc')])
+  const sorted = orderBy(cache, [order], [desc ? 'desc' : 'asc'])
 
   return (
     <>
@@ -110,31 +109,38 @@ export const ChecksTable = () => {
       <table className="table table-auto">
         <thead>
           <tr>
-            {['id'].map(field => (
+            {['id'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-                >{field} <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}/>
+                >
+                  {field}{' '}
+                  <RightIcon
+                    stroke={3}
+                    className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
+                  />
                 </button>
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {sorted.map(check => (
+          {sorted.map((check) => (
             <tr key={check.id}>
-              <td className=""><PageLink href={`/boards/checks/${check.id}`}>{check.id}</PageLink></td>
+              <td className="">
+                <PageLink href={`/boards/checks/${check.id}`}>{check.id}</PageLink>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <ReloadDataButton onClick={() => setRefresh(refresh+1)} />
+      <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
   )
 }
 
-async function runChecksTableApiCall (api, key) {
+async function runChecksTableApiCall(api, key) {
   const result = await api.getCacheKey(key)
   if (Array.isArray(result) && result[1] === 200) return result[0].value
 
@@ -147,10 +153,10 @@ export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
 
   // Hooks
   const { api } = useApi()
-  const { isLoading } = useQuery ({
+  const { isLoading } = useQuery({
     queryKey: [cacheKey],
     queryFn: () => {
-      runCheckApiCall(api, cacheKey).then(result => {
+      runCheckApiCall(api, cacheKey).then((result) => {
         if (result) setCache(result)
       })
     },
@@ -160,12 +166,12 @@ export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
 
   const check = Array.isArray(cache) && cache.length > 0 ? JSON.parse(cache.pop()) : false
 
-
-  if (isLoading) return (
-    <div className={`bg-neutral opacity-60 rounded-lg shadow p-1 w-10 h-10`}>
-     <Spinner />
-    </div>
-  )
+  if (isLoading)
+    return (
+      <div className={`bg-neutral opacity-60 rounded-lg shadow p-1 w-10 h-10`}>
+        <Spinner />
+      </div>
+    )
 
   // Hide up if requested
   if (hideOnUp && check.up) return null
@@ -176,22 +182,23 @@ export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
       title={`${check.name} (${check.id})`}
       href={`/boards/checks/${check.id}`}
     >
-      {check.up
-        ? <OkIcon className="w-8 h-9 text-success-content" stroke={4}/>
-        : <NoIcon className="w-8 h-8 text-error-content" stroke={4}/>
-      }
+      {check.up ? (
+        <OkIcon className="w-8 h-9 text-success-content" stroke={4} />
+      ) : (
+        <NoIcon className="w-8 h-8 text-error-content" stroke={4} />
+      )}
     </Link>
   )
 }
 
-async function runCheckApiCall (api, key) {
+async function runCheckApiCall(api, key) {
   const result = await api.getCacheKey(key)
   if (Array.isArray(result) && result[1] === 200) return result[0].value
 
   return false
 }
 
-export const Check = ({ id=false, cacheKey=false }) => {
+export const Check = ({ id = false, cacheKey = false }) => {
   if (!cacheKey && id) cacheKey = `check|${id}`
 
   // State
@@ -201,10 +208,10 @@ export const Check = ({ id=false, cacheKey=false }) => {
 
   // Hooks
   const { api } = useApi()
-  useQuery ({
+  useQuery({
     queryKey: [cacheKey],
     queryFn: () => {
-      runCheckApiCall(api, cacheKey).then(result => {
+      runCheckApiCall(api, cacheKey).then((result) => {
         if (result) setCache(result)
       })
     },
@@ -212,7 +219,7 @@ export const Check = ({ id=false, cacheKey=false }) => {
     refetchIntervalInBackground: false,
   })
 
-  if (!cacheKey) return  null
+  if (!cacheKey) return null
   if (!Array.isArray(cache)) return <Spinner />
 
   /*
@@ -223,14 +230,14 @@ export const Check = ({ id=false, cacheKey=false }) => {
   for (const entry of cache) {
     const check = JSON.parse(entry)
     from = check.from
-    if (typeof series[check.from] === 'undefined') series[from] = {
-      name: `Reponse time from ${from}`,
-      type: 'line',
-      smooth: true,
-      data: [],
-    }
-    series[from].data.push([ check.time, check.ms ])
-
+    if (typeof series[check.from] === 'undefined')
+      series[from] = {
+        name: `Reponse time from ${from}`,
+        type: 'line',
+        smooth: true,
+        data: [],
+      }
+    series[from].data.push([check.time, check.ms])
   }
   if (Object.keys(series).length === 1) {
     series[from].areaStyle = {}
@@ -259,10 +266,10 @@ export const Check = ({ id=false, cacheKey=false }) => {
           show: true,
         },
         dataZoom: {
-          show: true
+          show: true,
         },
         magicType: {
-          type: ['line', 'bar']
+          type: ['line', 'bar'],
         },
       },
     },
@@ -276,7 +283,7 @@ export const Check = ({ id=false, cacheKey=false }) => {
       name: 'Response\nTime',
       nameGap: 10,
     },
-    series: Object.values(series)
+    series: Object.values(series),
   }
   const check = JSON.parse(cache.pop())
 
@@ -285,20 +292,26 @@ export const Check = ({ id=false, cacheKey=false }) => {
       <h5 className="text-center">{check.name}</h5>
       <div className="flex flex-row items-center justify-center gap-2 mb-1">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        <KeyVal k='status' val={check.up ? 'up' : 'down'} color={check.up ? 'success' : 'error'} />
-        <KeyVal k='uptime' val={`${Math.round(check.uptime * 1000)/10}%`} />
-        <KeyVal k='since' val={timeAgo(check.uptime_since)} />
+        <KeyVal k="status" val={check.up ? 'up' : 'down'} color={check.up ? 'success' : 'error'} />
+        <KeyVal k="uptime" val={`${Math.round(check.uptime * 1000) / 10}%`} />
+        <KeyVal k="since" val={timeAgo(check.uptime_since)} />
         <ToggleGraphButton {...{ graph, setGraph }} />
       </div>
       <div className="flex flex-row items-center justify-center gap-2 mb-2">
-        <KeyVal k='url' val={check.url} small />
-        <KeyVal k='id' val={check.id} small />
+        <KeyVal k="url" val={check.url} small />
+        <KeyVal k="id" val={check.id} small />
       </div>
-      {graph
-        ? <Echart option={option} />
-        : <Highlight language="json">{JSON.stringify(cache.map(item => JSON.parse(item)), null, 2)}</Highlight>
-      }
+      {graph ? (
+        <Echart option={option} />
+      ) : (
+        <Highlight language="json">
+          {JSON.stringify(
+            cache.map((item) => JSON.parse(item)),
+            null,
+            2
+          )}
+        </Highlight>
+      )}
     </div>
   )
 }
-

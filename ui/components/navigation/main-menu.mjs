@@ -50,7 +50,6 @@ import { Link } from 'components/link'
  */
 export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
 
-
 /*
  * Object to map icons to page
  */
@@ -121,35 +120,35 @@ export const links = {
     r: 'user',
     audit: {
       t: 'Audit',
-      r: 'user'
+      r: 'user',
     },
     events: {
       t: 'Events',
-      r: 'user'
+      r: 'user',
     },
     checks: {
       t: 'Health Checks',
-      r: 'user'
+      r: 'user',
     },
     logs: {
       t: 'Logs',
-      r: 'user'
+      r: 'user',
     },
     metrics: {
       t: 'Metrics',
-      r: 'user'
+      r: 'user',
     },
     notes: {
       t: 'Notes',
-      r: 'user'
+      r: 'user',
     },
     search: {
       t: 'Search Dashboards',
-      r: 'user'
+      r: 'user',
     },
     custom: {
       t: 'Custom Dashboards',
-      r: 'user'
+      r: 'user',
     },
   },
   inventory: {
@@ -157,19 +156,19 @@ export const links = {
     r: 'operator',
     hosts: {
       t: 'Hosts',
-      r: 'user'
+      r: 'user',
     },
     ips: {
       t: 'IP Addresses',
-      r: 'user'
+      r: 'user',
     },
     macs: {
       t: 'MAC Addresses',
-      r: 'user'
+      r: 'user',
     },
     oss: {
       t: 'Operating Systems',
-      r: 'user'
+      r: 'user',
     },
   },
   settings: {

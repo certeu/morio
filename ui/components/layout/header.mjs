@@ -91,7 +91,11 @@ export const Header = ({
                 <NavButton href="/boards" label="Dashboards" active={isActive('/boards', asPath)}>
                   Dashboards
                 </NavButton>
-                <NavButton href="/inventory" label="Inventory" active={isActive('/inventory', asPath)}>
+                <NavButton
+                  href="/inventory"
+                  label="Inventory"
+                  active={isActive('/inventory', asPath)}
+                >
                   Inventory
                 </NavButton>
                 <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>

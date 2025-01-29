@@ -236,16 +236,16 @@ const ProviderOrder = ({ data, update }) => {
     if (!order.has(id)) order.add(id)
   }
 
-  if (order.size === 0) return (
-    <Popout note>
-      <h4>You cannot order what you do not (yet) have</h4>
-      <p>
-        Once you have configured identity providers,
-        you will be able to configure here how they are to be
-        presented on the sign in page.
-      </p>
-    </Popout>
-  )
+  if (order.size === 0)
+    return (
+      <Popout note>
+        <h4>You cannot order what you do not (yet) have</h4>
+        <p>
+          Once you have configured identity providers, you will be able to configure here how they
+          are to be presented on the sign in page.
+        </p>
+      </Popout>
+    )
 
   const moveUp = (i) => {
     const newOrder = [...order]

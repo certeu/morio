@@ -9,7 +9,7 @@ const meta = {
   Icon: FlagIcon,
 }
 
-export default function EventsDashboardPage () {
+export default function EventsDashboardPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>

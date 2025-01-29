@@ -1,7 +1,7 @@
 import { useState } from 'react'
 // Components
 import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
-import { NarrowIcon, WideIcon  } from 'components/icons.mjs'
+import { NarrowIcon, WideIcon } from 'components/icons.mjs'
 
 export const MainSideView = ({ children, page, title, side, sideTitle, Icon = null }) => {
   const [wide, setWide] = useState(false)
@@ -15,11 +15,14 @@ export const MainSideView = ({ children, page, title, side, sideTitle, Icon = nu
       <div className={`mx-auto p-8 w-full ${wide ? '' : 'max-w-4xl'}`}>
         <div className="">
           <Breadcrumbs page={page} />
-          <button onClick={() => setWide(!wide)} className="border-0 bg-transparent hover:cursor-pointer">
+          <button
+            onClick={() => setWide(!wide)}
+            className="border-0 bg-transparent hover:cursor-pointer"
+          >
             {wide ? <NarrowIcon /> : <WideIcon />}
           </button>
         </div>
-        <h1 className={`capitalize flex ${wide ? '' : 'max-w-4xl'} justify-between`}>
+        <h1 className={`flex ${wide ? '' : 'max-w-4xl'} justify-between`}>
           {title}
           {typeof Icon === 'function' ? <Icon className="w-16 h-16" /> : Icon}
         </h1>

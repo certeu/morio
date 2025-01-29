@@ -468,11 +468,15 @@ MorioClient.prototype.preseed = async function (preseed) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.deploy = async function (settings) {
-  return await this.call(`${morioConfig.api}/settings`, {
-    headers: this.jsonHeaders,
-    method: 'POST',
-    body: JSON.stringify(settings),
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/settings`,
+    {
+      headers: this.jsonHeaders,
+      method: 'POST',
+      body: JSON.stringify(settings),
+    },
+    true
+  )
 }
 
 /**
@@ -641,13 +645,23 @@ MorioClient.prototype.getInventoryHostsObject = async function () {
 }
 
 /**
- * Get a host from the inventory
+ * Get an IP address from the inventory
  *
- * @param {string} - The uuid of the host
+ * @param {string} - The id of the IP address
  * @return {object} - The result
  */
-MorioClient.prototype.getInventoryHost = async function (uuid) {
-  return await this.call(`${morioConfig.api}/inventory/hosts/${uuid}`)
+MorioClient.prototype.getInventoryIp = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${id}`)
+}
+
+/**
+ * Get a MAC address from the inventory
+ *
+ * @param {string} - The id of the MAC address
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMac = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/macs/${id}`)
 }
 
 /**
@@ -692,10 +706,14 @@ MorioClient.prototype.getInventoryStats = async function () {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryHost = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/hosts/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/hosts/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -704,10 +722,14 @@ MorioClient.prototype.removeInventoryHost = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryIp = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/ips/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/ips/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -716,10 +738,14 @@ MorioClient.prototype.removeInventoryIp = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryMac = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/macs/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/macs/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -728,10 +754,14 @@ MorioClient.prototype.removeInventoryMac = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryOs = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/oss/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**

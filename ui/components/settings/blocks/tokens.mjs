@@ -278,7 +278,7 @@ export const Flags = ({ update, data }) => {
     }
     loadFlags()
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  },[data])
+  }, [data])
 
   const mergedFlags = {
     ...flags,

@@ -12,11 +12,7 @@ import { NoteIcon, ExpandIcon, OkIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { Box } from 'components/box.mjs'
-import {
-  getRunningSettings,
-  getDynamicConfig,
-  ShowSettingsValidation,
-} from './wizard.mjs'
+import { getRunningSettings, getDynamicConfig, ShowSettingsValidation } from './wizard.mjs'
 import CodeMirror from '@uiw/react-codemirror'
 import { json as jsonLang } from '@codemirror/lang-json'
 import { Tab, Tabs } from 'components/tabs.mjs'
@@ -41,7 +37,8 @@ export const SettingsEditor = (props) => {
   }, [])
 
   if (notCool) return <p>Things are not cool...</p>
-  if (runningSettings?.cluster) return <PrimedSettingsEditor {...props} {...{ runningSettings, dconf }} />
+  if (runningSettings?.cluster)
+    return <PrimedSettingsEditor {...props} {...{ runningSettings, dconf }} />
   return <p>One moment please...</p>
 }
 
@@ -64,7 +61,7 @@ export const PrimedSettingsEditor = (props) => {
   const [deployOngoing, setDeployOngoing] = useState(false)
   const [doValidate, setDoValidate] = useState(false)
   const [kiosk, setKiosk] = useState(false)
-  const [localJson, setLocalJson] = useState(JSON.stringify(runningSettings, null ,2)) // Holds the settings as JSON
+  const [localJson, setLocalJson] = useState(JSON.stringify(runningSettings, null, 2)) // Holds the settings as JSON
   const [localYaml, setLocalYaml] = useState(yaml.stringify(runningSettings)) // Holds the settings as YAML
 
   /*
@@ -125,8 +122,7 @@ export const PrimedSettingsEditor = (props) => {
         setLocalYaml(input)
         setMSettings(newSettings)
       }
-    }
-    catch (err) {
+    } catch (err) {
       // This is fine
     }
   }
@@ -138,13 +134,11 @@ export const PrimedSettingsEditor = (props) => {
         setLocalJson(input)
         setMSettings(newSettings)
       }
-    }
-    catch (err) {
+    } catch (err) {
       console.log(err)
       // This is fine
     }
   }
-
 
   return (
     <>
@@ -163,61 +157,59 @@ export const PrimedSettingsEditor = (props) => {
           </p>
         </Popout>
       ) : null}
-      {doValidate
-        ? <>
-            <ShowSettingsValidation  {...{
+      {doValidate ? (
+        <>
+          <ShowSettingsValidation
+            {...{
               api,
               deploy,
               mSettings,
               setLoadingStatus,
               setValidationReport,
               validationReport,
-            }}/>
-            <p className="text-right w-full">
-              <button
-                className="btn btn-primary btn-outline btn-s btn-sm"
-                onClick={() => setDoValidate(false)}
-              >
-              <NoteIcon />  Back to editor
-              </button>
-            </p>
-          </>
-        : (
-          <div className={kiosk
-            ? "absolute top-12 left-0 w-screen h-screen z-50 bg-base-100"
-            : ""
-          }>
-            <Tabs tabs="YAML, JSON">
-              <Tab id="json" name="test" label="As YAML">
-                <CodeMirror
-                  value={localYaml}
-                  height={kiosk ? "90vh" : "70vh"}
-                  onChange={onChangeYaml}
-                />
-              </Tab>
-              <Tab id="yaml" label="As JSON">
-                <CodeMirror
-                  value={localJson}
-                  height={kiosk ? "90vh" : "70vh"}
-                  extensions={[jsonLang()]}
-                  onChange={onChangeJson}
-                />
-              </Tab>
-            </Tabs>
-            <div className="my-2 w-full flex flex-row flex-wrap items-center gap-2 justify-center">
-              <button
-                className="btn btn-primary btn-outline flex flex-row items-center gap-2"
-                onClick={() => setKiosk(!kiosk)}
-              >
-                <ExpandIcon /> {kiosk ? 'Collapse' : 'Expand'}
-              </button>
-              <button className="btn btn-primary" onClick={() => setDoValidate(true)}>
-                Validate Settings
-              </button>
-            </div>
+            }}
+          />
+          <p className="text-right w-full">
+            <button
+              className="btn btn-primary btn-outline btn-s btn-sm"
+              onClick={() => setDoValidate(false)}
+            >
+              <NoteIcon /> Back to editor
+            </button>
+          </p>
+        </>
+      ) : (
+        <div className={kiosk ? 'absolute top-12 left-0 w-screen h-screen z-50 bg-base-100' : ''}>
+          <Tabs tabs="YAML, JSON">
+            <Tab id="json" name="test" label="As YAML">
+              <CodeMirror
+                value={localYaml}
+                height={kiosk ? '90vh' : '70vh'}
+                onChange={onChangeYaml}
+              />
+            </Tab>
+            <Tab id="yaml" label="As JSON">
+              <CodeMirror
+                value={localJson}
+                height={kiosk ? '90vh' : '70vh'}
+                extensions={[jsonLang()]}
+                onChange={onChangeJson}
+              />
+            </Tab>
+          </Tabs>
+          <div className="my-2 w-full flex flex-row flex-wrap items-center gap-2 justify-center">
+            <button
+              className="btn btn-primary btn-outline flex flex-row items-center gap-2"
+              onClick={() => setKiosk(!kiosk)}
+            >
+              <ExpandIcon /> {kiosk ? 'Collapse' : 'Expand'}
+            </button>
+            <button className="btn btn-primary" onClick={() => setDoValidate(true)}>
+              Validate Settings
+            </button>
           </div>
-        )
-      }
+        </div>
+      )}
       {!doValidate && delta ? (
         <Popout note>
           <h4>You have made changes that are yet to be deployed</h4>
