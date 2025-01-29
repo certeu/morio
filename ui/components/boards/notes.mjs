@@ -39,7 +39,7 @@ export const Notes = () => {
   const { data } = useQuery({
     queryKey: ['notes'],
     queryFn: () => runNotesCall(api),
-    refetchInterval: paused ? false : 15000,
+    refetchInterval: paused ? false : 5000,
     refetchIntervalInBackground: false,
   })
 
@@ -54,9 +54,6 @@ export const Notes = () => {
         desc ? 'desc' : 'asc'
       )
     : false
-
-  //<Note key={id} id={id} note={note} />)
-  //  : false
 
   return (
     <>

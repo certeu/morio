@@ -161,7 +161,7 @@ cache.readZset = async function (key = false) {
   if (key) {
     ensureClient()
     // Using 1e6 as upper limit here, that should be enough
-    const value = await valkey.client.zrange(key, 0, 1e6)
+    const value = await valkey.client.zrange(key, 0, 1e6, 'WITHSCORES')
     // zset keys return an array
     if (Array.isArray(value)) return { key, value, type: 'zset' }
   }

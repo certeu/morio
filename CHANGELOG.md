@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [ui] Add missing inventory/oss icon to main navigation menu
+- [tap] Fix an issue with metrics caching expiry
 
 ## [0.6.1] - 2025-01-28
 
