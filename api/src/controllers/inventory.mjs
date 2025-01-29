@@ -163,14 +163,7 @@ Controller.prototype.readIp = async function (req, res) {
    */
   const result = await loadIp(valid.id)
 
-  /*
-   * Be expicit when a key cannot be found
-   */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
 
 /**
@@ -238,14 +231,7 @@ Controller.prototype.readMac = async function (req, res) {
    */
   const result = await loadMac(valid.id)
 
-  /*
-   * Be expicit when a key cannot be found
-   */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
 
 /**

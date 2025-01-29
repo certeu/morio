@@ -1,4 +1,5 @@
 import { log } from './utils.mjs'
+import { get } from '#shared/utils'
 // Load the database client
 import { db } from './db.mjs'
 // Shared code from accounts
@@ -37,7 +38,7 @@ export async function listHosts() {
   const query = `SELECT * FROM inventory_hosts`
   const [status, result] = await db.read(query)
 
-  return status === 200 ? hostsAsList(result) : false
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
@@ -49,7 +50,7 @@ export async function listIps() {
   const query = `SELECT * FROM inventory_ips`
   const [status, result] = await db.read(query)
 
-  return status === 200 ? hostsAsList(result) : false
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
 
 /**
@@ -61,7 +62,7 @@ export async function listMacs() {
   const query = `SELECT * FROM inventory_macs`
   const [status, result] = await db.read(query)
 
-  return status === 200 ? hostsAsList(result) : false
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
 
 /**
@@ -73,7 +74,7 @@ export async function listOss() {
   const query = `SELECT * FROM inventory_oss`
   const [status, result] = await db.read(query)
 
-  return status === 200 ? hostsAsList(result) : false
+  return status === 200 ? await addHostNamesToList(resultsAsList(result)) : false
 }
 
 /**
@@ -88,7 +89,7 @@ export async function loadHost(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -110,10 +111,10 @@ export async function loadIp(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
-  if (found.length === 1) return found[0]
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
   else {
     log.warn(`Found more than one host in loadIp. This is unexpected.`)
     return false
@@ -132,12 +133,12 @@ export async function loadMac(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
-  if (found.length === 1) return found[0]
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
   else {
-    log.warn(`Found more than one host in loadIp. This is unexpected.`)
+    log.warn(`Found more than one host in loadMac. This is unexpected.`)
     return false
   }
 }
@@ -154,7 +155,7 @@ export async function loadOs(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -176,7 +177,7 @@ export async function loadHostIps(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -195,7 +196,7 @@ export async function loadHostMacs(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -214,7 +215,7 @@ export async function loadHostOs(id) {
   })
 
   if (status !== 200) return false
-  const found = hostsAsList(result)
+  const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
@@ -382,7 +383,7 @@ export async function saveHost(id, data) {
 /**
  * Helper method to parse results into an array of objects
  */
-function hostsAsList(result) {
+function resultsAsList(result) {
   const cols = result?.results?.[0]?.columns
   const list = (result?.results?.[0]?.values || []).map((entry) => {
     const host = {}
@@ -396,4 +397,62 @@ function hostsAsList(result) {
   })
 
   return list
+}
+
+/**
+ * Helper method to enrich a list of results with host names
+ */
+async function addHostNamesToList(list, idField = 'id') {
+  const resolve = new Set()
+  /*
+   * First figure out all hosts to resolve
+   */
+  for (const entry of list) {
+    const id = get(entry, idField, false)
+    if (id) resolve.add(id)
+  }
+
+  /*
+   * Now get the names from the database
+   */
+  const names = await getHostnames([...resolve])
+  if (!names) return list
+
+  /*
+   * If we have results, enrich the list
+   */
+  const enriched = []
+  for (const entry of list) {
+    const id = get(entry, idField, false)
+    if (names[id])
+      enriched.push({
+        ...entry,
+        host_name: names[id].name,
+        host_fqdn: names[id].fqdn,
+      })
+  }
+
+  return enriched
+}
+
+/**
+ * Helper method to get host names or a list of host IDs
+ * @return {array} hostIds - An array of host IDs
+ * @return {object} hosts - An object with hostId as keys and name as values
+ */
+async function getHostnames(hostIds = []) {
+  /*
+   * Query using IN
+   */
+  const id = hostIds.map((id) => `'${clean(id)}'`).join()
+  const [status, result] = await db.read(
+    `SELECT name, fqdn, id FROM inventory_hosts WHERE id IN (${id})`
+  )
+
+  if (status !== 200) return false
+
+  const perId = {}
+  for (const host of resultsAsList(result)) perId[host.id] = host
+
+  return perId
 }
