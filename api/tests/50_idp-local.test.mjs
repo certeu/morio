@@ -1,8 +1,24 @@
 import { authenticator } from '@otplib/preset-default'
-import { store, accounts, api, validateErrorResponse } from './utils.mjs'
+import {
+  store,
+  accounts,
+  api,
+  validateErrorResponse,
+  readPersistedData,
+  writePersistedData,
+} from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
+import { Buffer } from 'node:buffer'
+
+const keys = {
+  key1: {
+    name: `testKey${new Date().toISOString()}`,
+    expires: 1,
+    role: 'user',
+  },
+}
 
 const timeout = 80000
 
@@ -54,6 +70,26 @@ describe('API Create Account Tests', () => {
   it(`Should POST /account (same account twice)`, { timeout }, async () => {
     const result = await api.post(`/account`, accounts.user)
     validateErrorResponse(result, errors, 'morio.api.account.exists')
+  })
+
+  // POST /account (same account with higher privilege)
+  it(`Should POST /account (same account twice with high privilege)`, { timeout }, async () => {
+    const result = await api.post(
+      `/account`,
+      { ...accounts.user, overwrite: true },
+      { 'X-Morio-Role': 'operator' }
+    )
+    const d = result[1]
+
+    assert.equal(typeof d, 'object')
+    assert.equal(Object.keys(d).length, 7)
+    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.about, accounts.user.about)
+    assert.equal(d.provider, accounts.user.provider)
+    assert.equal(d.role, accounts.user.role)
+    assert.equal(typeof d.invite, 'string')
+    assert.equal(d.inviteUrl.includes(d.invite), true)
+    store.set('accounts.user2', d)
   })
 
   // POST /activate-account (missing username)
@@ -162,6 +198,21 @@ describe('API Create Account Tests', () => {
     validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
+  // POST /login (invalid username)
+  it(`Should not POST /login (invalid username)`, async () => {
+    const data = {
+      provider: 'local',
+      data: {
+        username: 'wrong',
+        password: 'password',
+        role: 'user',
+        token: '666',
+      },
+    }
+    const result = await api.post(`/login`, data)
+    validateErrorResponse(result, errors, 'morio.api.account.unknown')
+  })
+
   // POST /login (invalid password)
   it(`Should not POST /login (invalid password)`, async () => {
     const data = {
@@ -262,6 +313,25 @@ describe('API Create Account Tests', () => {
     store.accounts.user2.jwt = d.jwt
   })
 
+  // POST /apikey
+  it(`Should POST /apikey`, async () => {
+    const result = await api.post(`/apikey`, keys.key1, {
+      'X-Morio-User': store.accounts.user2.username,
+    })
+    assert.equal(result[0], 200)
+    const d = result[1]
+    assert.equal(d.name, keys.key1.name)
+    assert.equal(d.status, 'active')
+    assert.equal(d.created_by, `local.${store.accounts.user2.username}`)
+    assert.equal(d.role, keys.key1.role)
+    assert.equal(typeof d.created_at, 'string')
+    assert.equal(typeof d.expires_at, 'string')
+    assert.equal(new Date(d.expires_at) - new Date(d.created_at) - 24 * 60 * 60 * 1000 < 1000, true)
+
+    const persistedData = await readPersistedData()
+    await writePersistedData({ ...persistedData, key2: d })
+  })
+
   // GET /whoami (no JWT)
   it(`Should not GET /whoami (no JWT)`, async () => {
     const result = await api.get(`/whoami`)
@@ -300,6 +370,17 @@ describe('API Create Account Tests', () => {
     for (const field of ['aud', 'iss', 'sub']) assert.equal(d[field], 'morio')
     for (const field of ['node', 'cluster']) assert.equal(typeof d[field], 'string')
     for (const field of ['iat', 'nbf', 'exp']) assert.equal(typeof d[field], 'number')
+  })
+
+  // GET /whoami (User in Basic header)
+  it(`Should not GET /whoami (User in Basic header)`, async () => {
+    const credentials = Buffer.from(`${store.accounts.user2.username}:password`, 'base64').toString(
+      'utf-8'
+    )
+
+    const result = await api.get(`/whoami`, { Authorization: `Basic ${credentials}` })
+
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /token (No JWT)

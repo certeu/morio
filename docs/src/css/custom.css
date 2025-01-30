@@ -204,3 +204,12 @@ iframe.yt-embed {
   width: 100%;
   aspect-ratio: 16 /9;
 }
+
+/*
+ * Add Tailwindcss
+ */
+.tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}

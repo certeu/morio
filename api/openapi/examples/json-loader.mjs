@@ -38,6 +38,10 @@ import keys from './keys.json' with { type: 'json' }
 import settingsSanitized from './settings.sanitized.json' with { type: 'json' }
 import setupRes from './setup.res.json' with { type: 'json' }
 import presets from './presets.json' with { type: 'json' }
+// dconf
+import flags from './flags.json' with { type: 'json' }
+import tap from './tap-settings.json' with { type: 'json' }
+//
 
 // Objects
 import settingsCluster1 from './settings.cluster.1.json' with { type: 'json' }
@@ -92,10 +96,10 @@ export const examples = {
     createAccount: createAccount.res,
     createApikey: createApikey.res,
     createCertificate: createCertificate.res,
-    setup: setupRes,
     downloads,
     decrypt: encrypt.req,
     encrypt: encrypt.res,
+    flags,
     idps,
     jwks,
     keys,
@@ -107,8 +111,10 @@ export const examples = {
     },
     presets,
     ratelimits,
+    setup: setupRes,
     status,
     settingsSanitized,
+    tap,
     updateApikey,
     validateSettings: {
       ...validateSettings,

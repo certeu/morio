@@ -57,10 +57,19 @@ describe('Encryp/Decrypt data', async () => {
   })
 
   // POST /decrypt
-  it(`Should POST /decrypt (text)`, async () => {
+  it(`Should POST /decrypt (json to text)`, async () => {
     const result = await api.post(`/decrypt`, store.get('encrypted.json'))
     assert.equal(result[0], 200)
     const d = result[1]
     assert.equal(JSON.parse(d.data).time, String(time))
+  })
+
+  // POST /decrypt
+  it(`Should POST /decrypt (malformed text)`, async () => {
+    const encData = store.get('encrypted.text')
+    encData.iv = 'abc' + encData.iv.slice(3)
+
+    const result = await api.post(`/decrypt`, encData)
+    validateErrorResponse(result, errors, 'morio.api.input.malformed')
   })
 })

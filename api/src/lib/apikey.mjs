@@ -139,18 +139,6 @@ export async function deleteApikey(id = false) {
 }
 
 /**
- * Helper method to list apikeys
- *
- * @return {object} keys - The API keys
- */
-export async function listApikeys() {
-  const query = `SELECT id, name, status, role, created_by, created_at, updated_by, updated_at, last_login FROM apikeys`
-  const [status, result] = await db.read(query)
-
-  return status === 200 ? apikeysAsList(result) : false
-}
-
-/**
  * Helper method to save the last login time in the apikey data
  *
  * @param {string} id - The id of the apikey (the key)

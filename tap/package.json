@@ -1,6 +1,6 @@
 {
-  "name": "@morio/tap",
-  "version": "0.5.5",
+  "name": "@itsmorio/tap",
+  "version": "0.6.1",
   "description": "Morio Tap",
   "private": true,
   "scripts": {
@@ -12,10 +12,12 @@
     "prettier": "npx prettier --ignore-unknown --write ."
   },
   "dependencies": {
+    "axios": "^1.7.9",
     "esbuild": "^0.24.0",
     "ioredis": "^5.4.1",
     "ipaddr.js": "^2.2.0",
     "kafkajs": "^2.2.4",
+    "lodash": "^4.17.21",
     "pino": "^9.5.0"
   },
   "imports": {

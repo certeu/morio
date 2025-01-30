@@ -1,0 +1,198 @@
+---
+title: 'Morio v0.6.0'
+authors: [joostdecock] # skip-spellcheck
+tags: [morio, release, alpha, v0.6.0]
+---
+
+We have released version 0.6.0 of Morio, a new minor release that bundles a
+bunch of exciting improvements as well as new features.
+Let's have a look at the most important changes.
+
+<!-- truncate -->
+
+## Announcing MorioHub
+
+One thing we cannot know about Morio is how people will end up using it.
+What data will be processed, or what business challenges are being
+addressed. Essentially, when it comes to the data plane, we cannot know
+for sure what things will look like, so what we want to offer is 
+flexibility to deal with a variety of scenarios.
+
+To some extent, we can foresee such flexibility and incorporate it in our
+design. But at the end of the day, we need a way for people to be able to
+_plug in_ their own logic or configuration in an easy way.
+
+To that extent, we currently have 3 different ways you can add your own
+logic or configuration to Morio:
+
+- A **settings overlay** adds certain settings to your Morio setup
+- A **client module** bundles configuration for the various client agents
+- A **stream processor** implements business logic for our tap service
+
+:::tip
+Some of these are new since this release, so keep reading to learn more.
+:::
+
+To make all of these available -- as well as facilitate contributions from
+the community -- we have started building out [MorioHub](/hub).
+
+MorioHub is a centralised repository for these various plugins for Morio.
+Specifically, it is [a dedicated git 
+repository](https://github.com/certeu/moriohub) from which you can load
+client modules, stream processors, or even some of Morio's settings.
+
+To facilitate discoverability, we have also [integrated MorioHub in this
+website](/hub), and we plan integration with the Morio UI in a future update.
+
+## Stream processing & BYOBL
+
+Since Morio uses Kafka -- nay, RedPanda -- as its streaming data backbone, you
+could already do stream processing on Morio's data. But you had to roll your
+own solution, which is non-trivial.
+
+In this release, we are proud to introduce Morio's new [Tap
+service](/docs/guides/services/tap) which allows you to _tap into the data
+stream_ (hence the name) without having to handle any of the complicated stream
+processing yourself.
+
+In practical terms, this is a low-code solution that allows you to _bring your
+own business logic_ (_BYOBL_).
+
+In addition to offering the capabilities to deploy your own stream processor
+with minimal knowledge required, we also [publish several stream processors
+on MorioHub](/hub/processors/) that do a bunch of common tasks, such as caching
+log data, or metrics, building out an inventory, and so on.
+
+This feature relies on [the cache service](/docs/guides/services/cache/) as
+well as the new inventory tables, but more on that later.
+
+For more information, please refer to [the Tap stream processing
+guide](/docs/guides/features/stream-processing/tap/).
+
+## The new cache service facilitates dashboarding (wip)
+
+In tandem with Morio's new stream processing capabilities, we have added [the
+new cache service](/docs/guides/services/cache/).
+
+This allows us to provide dashboarding in the Morio UI, giving real-time
+insights into the data that is flowing through Morio.
+
+:::tip
+This is a work in progress, so expect more updates in subsequent Morio
+releases.
+:::
+
+## New inventory tables and API endpoints
+
+Another feature set that is tied to the new stream processing capabilities are
+the new database tables and API endpoints to build out a Morio inventory.
+
+We have created a stream processor for this that you can enable to have Morio
+build out an inventory over time.
+
+This too is something we'll build upon in future updates.
+
+## Improvements to the Morio client and its templates
+
+We've also made important changes to the Morio client, and sweeping (and
+breaking) changes to the way we handle client modules, or their templates if
+you will.
+
+Essentially, we have significantly reduced the amount of boilerplate, making it
+easy to implement your own client modules for Morio.
+
+We've also changed our client build to generate a statically linked executable,
+making the client more portable on different (versions of) operating systems.
+
+## And much more
+
+There's a lot more that went into this release. Here are some more highlights:
+
+### Support for raw LSCL input in connector config
+
+The connector service now supports raw _LSCL_ for configuring your data
+pipelines, thus allowing you to reuse any existing Logstash pipelines you may
+have.
+
+### Support for editing settings by hand through the UI
+
+The UI now also allows you to hand edit the entire settings file, thus giving
+you the full power of updating the settings through the API, through Morio's
+UI.
+
+### Changes to preseed settings, and reseeding support
+
+We've made changes to how we handle preseeding, making it more powerful and versatile.
+Refer to [the preseeding guide](/docs/guides/settings/preseed/) for all details.
+
+We're also deprecating preseeding via GitHub or GitLab APIs and will only
+support preseeding via git going forward.
+
+### Add the `force_mrt` parameter to avoid lockout
+
+We've added a `force_mrt` URL parameter to Morio's sign-in page to force the
+inclusion of the Morio Root Token identity provider on the sign-in form.
+
+Note that this does not bypass [the `DISABLE_IDP_MRT` feature 
+flag](/docs/reference/flags/#disable_idp_mrt). Rather, it prevents you from 
+locking yourself out of the UI if you neglect to add the MRT provider to the
+sign in page.
+
+### Images are now published for our 3 release channels
+
+We have completed support for our 3 release channels:
+
+- `stable`: Our best work
+- `canary`: Preview releases of what we intend to release as `stable`
+- `testing`: Bleeding edge releases for testing and development. Not stable.
+
+All docker images are now tagged as follows (using `0.6` as an example
+version):
+
+- `v0.6`: The `0.6` release in the `stable` channel.
+- `v0.6-canary`: The `0.6` release in the `canary` channel.
+- `v0.6-testing`: The `0.6` release in the `testing` channel.
+- `stable`: The most recent release in the `stable` channel.
+- `canary`: The most recent release in the `canary` channel.
+- `testing`: The most recent release in the `testing` channel.
+- `latest`: The most recent release in the `stable` channel (this is an alias
+  for `stable`, and what Docker uses if no specific tag is provided).
+
+For software packages, each release channel has its own repository.
+
+### Generic APT repositories
+
+When we initially created our Debian software repositories, they were tied to
+Debian Bookworm. We have since recreated these repositories, and now they
+are not tied to a specific Debian version any more, or even to Debian itself for that matter.
+
+It means that you can use them on a different Debian version, or even on Debian-based distributions such as Ubuntu.
+
+### The Morio client is now statically linked
+
+We have changed the way we build the Morio client to produce a statically
+linked binary. This makes the client more portable across different (versions
+of) operating systems.
+
+### Extended use of a systemd environment file for moriod
+
+We have a new `moriod.env` file to pre-configure the Moriod service.
+This allows you to change certain Moriod presets, much as you would do
+by passing custom environment parameters to a container.
+
+### Provide guidance for FQDN mismatch during setup
+
+Morio will not validate a setup when the FQDN used to access Morio in the
+browser is not included in the list of broken FQDNs. We've now added a helpful
+message to help identify this issue.
+
+### The `/up` API endpoint is now anonymous
+
+This endpoint is provided for fast health checks on the API, and as such no
+longer requires authentication.
+
+### Speed up reloading and restarting of Morio
+
+We've made changes to the various life cycle methods of the services in Morio
+core, and in doing so have significantly reduced the time needed for Morio to
+reconfigure itself or restart.

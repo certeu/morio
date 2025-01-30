@@ -1,0 +1,38 @@
+---
+title: TODO
+draft: true
+---
+
+This page is here to keep track of things that (still) need to be documented.
+
+## Morio 0.6 release
+
+Below is the changelog, we need to ensure that everything is documented.
+When it's done, it can be removed from the list:
+
+### Added
+
+- [api] Added endpoints to read cache data
+- [api] Added endpoints to manage the inventory
+- [api] Added endpoints to retrieve flags and dynamic config
+- [core] Support preseeding of client modules
+- [core] Support preseeding of stream processors
+- [core] Handle reseeding of client modules and stream processors
+- [core] We now create ACL broker entries for tap service
+- [db] Added tables for storing inventory data
+- [tap] Added the new tap service for stream processing
+- [ui] Added the `force_mrt` query parameter to force the sign-in form to show the root token identity provider
+- [watcher] Added the `MORIO_IGNORE_CERTIFICATE_EXPIRY` escape hatch
+
+
+### Changed
+
+- We renamed the `production` release channel to `stable` 
+- Our APT repositories are no longer tied to a specific (Debian) version
+- [client] The Morio client is now statically linked to improve portability
+- [core] Extended the moriod.env file to allow changing presets
+
+### Fixed
+
+- [api] Handle browser domain mismatch in validation. [#109](https://github.com/certeu/morio/issues/109)
+- [api] The `/up` endpoint is now anonymous and returns status 200 [#133](https://github.com/certeu/morio/issues/133)

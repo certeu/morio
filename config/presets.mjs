@@ -109,6 +109,12 @@ presets.MORIO_ERRORS_WEB_PREFIX = 'https://morio.it/docs/reference/errors/'
 predocs.MORIO_CONTAINER_PREFIX = "Prefix used in container images for Morio"
 presets.MORIO_CONTAINER_PREFIX = "morio-"
 
+predocs.MORIO_CONTAINER_TAG = "The currently running container tag. Picked up from environment variables."
+presets.MORIO_CONTAINER_TAG = "dev-build"
+
+predocs.MORIO_RELEASE_CHANNEL = "The current release channel. Picked up from environment variables."
+presets.MORIO_RELEASE_CHANNEL = "dev"
+
 /*
  * Docker presets
  */

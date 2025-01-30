@@ -126,7 +126,7 @@ async function ensureModuleLoaders(settings) {
         const importName = module.replaceAll('-', '_')
         imports[processor][module] = {
           imp: `import ${importName} from './${filename}'`,
-          exp: `  "${module}": ${importName}`
+          exp: `  "${module}": ${importName},`
         }
       }
     }

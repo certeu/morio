@@ -151,19 +151,6 @@ export async function loadAccount(provider, id) {
 }
 
 /**
- * Helper method to load API keys for a given account
- *
- * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
- * @return {object} keys - The API keys saved for the account
- */
-export async function loadAccountApikeys(provider, id) {
-  return await db.read(`SELECT id FROM apikeys WHERE created_by=:username`, {
-    id: fields.id(fullId(provider, id)),
-  })
-}
-
-/**
  * Helper method to create an account
  *
  * @param {object} data - The data to save for the account

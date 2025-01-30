@@ -170,6 +170,4 @@ export function caseInsensitiveGet(key, obj = {}) {
   for (const k of Object.keys(obj)) {
     if (k.toLowerCase() === String(key).toLowerCase()) return obj[k]
   }
-
-  return
 }

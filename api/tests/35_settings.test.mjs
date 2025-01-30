@@ -1,6 +1,13 @@
-import { api, setup } from './utils.mjs'
+import {
+  api,
+  setup,
+  readPersistedData,
+  writePersistedData,
+  validateErrorResponse,
+} from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
+import { errors } from '../src/errors.mjs'
 
 describe('API Settings Tests', () => {
   // GET /settings
@@ -29,57 +36,29 @@ describe('API Settings Tests', () => {
     assert.equal(typeof s1.ct, 'string')
     assert.equal(typeof s2.iv, 'string')
     assert.equal(typeof s2.ct, 'string')
+
+    const perData = await readPersistedData()
+    await writePersistedData({ ...perData, settings: d })
   })
 
-  // GET /idps
-  it('Should GET /idps', async () => {
-    const result = await api.get('/idps')
-    const d = result[1]
-    assert.equal(Array.isArray(result), true)
-    assert.equal(result.length, 3)
-    assert.equal(result[0], 200)
-    assert.equal(typeof d, 'object')
-    // idps
-    assert.deepEqual(d.idps, {
-      apikey: {
-        id: 'apikey',
-        provider: 'apikey',
-        label: 'API Key',
-        about: false,
-      },
-      mrt: { id: 'mrt', provider: 'mrt', about: false },
-      local: {
-        id: 'local',
-        provider: 'local',
-        label: 'Morio Account',
-        about: false,
-      },
-      ldap: {
-        id: 'ldap',
-        provider: 'ldap',
-        label: 'LDAP',
-        about: 'Test LDAP server',
-      },
-    })
-    // ui
-    assert.deepEqual(d.ui, {})
+  // POST /validate/settings (invalid data)
+  it('Should POST /validate/settings (invalid data)', async () => {
+    const result = await api.post('/validate/settings', { data: 'invalid data' })
+    validateErrorResponse(result, errors, 'morio.api.schema.violation')
   })
 
-  // GET /jwks
-  it('Should GET /jwks', async () => {
-    const result = await api.get('/jwks')
+  // POST /validate/settings
+  it('Should POST /validate/settings', async () => {
+    const result = await api.post('/validate/settings', setup)
     const d = result[1]
-    assert.equal(true, Array.isArray(result), true)
-    assert.equal(result.length, 3)
+
     assert.equal(result[0], 200)
-    assert.equal(typeof d, 'object')
-    assert.equal(Array.isArray(d.keys), true)
-    assert.equal(Object.keys(d).length, 1)
-    assert.equal(d.keys.length, 1)
-    const key = d.keys[0]
-    assert.equal(key.kty, 'RSA')
-    assert.equal(typeof key.kid, 'string')
-    assert.equal(typeof key.n, 'string')
-    assert.equal(typeof key.e, 'string')
+    assert.equal(d.valid, true)
+    assert.equal(d.deployable, true)
+    assert.equal(typeof d.warnings, 'object')
+    assert.equal(typeof d.info, 'object')
+    assert.equal(typeof d.validated_settings.cluster, 'object')
+    assert.equal(typeof d.validated_settings.tokens, 'object')
+    assert.equal(typeof d.validated_settings.iam, 'object')
   })
 })

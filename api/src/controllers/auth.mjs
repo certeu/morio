@@ -403,18 +403,18 @@ const verifyToken = (token) => {
   const publicKey = utils.getKeys()?.public
 
   return publicKey
-    ?  new Promise((resolve) =>
-      jwt.verify(
-        token,
-        utils.getKeys().public,
-        {
-          audience: 'morio',
-          issuer: 'morio',
-          subject: 'morio',
-        },
-        (err, payload) => resolve(err ? false : payload)
+    ? new Promise((resolve) =>
+        jwt.verify(
+          token,
+          utils.getKeys().public,
+          {
+            audience: 'morio',
+            issuer: 'morio',
+            subject: 'morio',
+          },
+          (err, payload) => resolve(err ? false : payload)
+        )
       )
-    )
     : false
 }
 

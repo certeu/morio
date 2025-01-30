@@ -11,6 +11,7 @@ import { errors as apiErrors } from '../api/src/errors.mjs'
 import { errors as coreErrors } from '../core/src/errors.mjs'
 // Utils
 import { globDir, readDirectory, writeFile, readFile, mkdir } from '../shared/src/fs.mjs'
+import { prebuildMoriohubContent } from './moriohub.mjs'
 
 // Combine errors
 const errors = { ...apiErrors, ...coreErrors }
@@ -263,3 +264,4 @@ export const prebuildDocs = async () => {
 }
 
 prebuildDocs()
+prebuildMoriohubContent()

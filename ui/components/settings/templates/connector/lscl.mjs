@@ -19,7 +19,7 @@ const nl = "\n"
 const t = "  "
 
 const examples = {
-  input: (t1='') => `{${t1}exec {${nl + t1 + t}command => "echo 'hi!'"${nl + t1 + t}interval => 30${nl + t1}}`,
+  input: (t1='') => `${t1}exec {${nl + t1 + t}command => "echo 'hi!'"${nl + t1 + t}interval => 30${nl + t1}}`,
   filter: (t1='') => `${t1}mutate {${nl + t1 + t}add_field => {${nl + t1 + t + t}"sourcetype" => "_json"${nl + t1 + t}}${nl + t1}}`,
   output: (t1='') => `${t1}sink { }`,
 }
@@ -50,11 +50,11 @@ const lsclForm = (type) => ({
         Metadata: xputMeta('filter'),
         Configuration: [
          {
-           schema: Joi.boolean().default(false).label('Wrap as filter'),
-           label: 'Wrap LSCL in a filter block',
+           schema: Joi.boolean().default(false).label(`Wrap as ${type}`),
+           label: `Wrap LSCL in a ${type} block`,
            labelBL: data?.wrap
-             ? <>We will wrap your LSCL code in a filter block: <code>{`filter { [your LSCL here] }`}</code></>
-             : 'We will use your LSCL code as-is. You can use this to bundle multiple filter steps.',
+             ? <>Enable this to wrap your LSCL code in a {type} block: <code>{`${type} { ... }`}</code></>
+             : 'Disable this to use your LSCL code as-is in the pipeline.',
            list: [true, false],
            labels: ['Yes', 'No'],
            dflt: true,

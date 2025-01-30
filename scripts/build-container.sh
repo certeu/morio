@@ -47,8 +47,8 @@ else
     echo ""
     RELEASE_CHANNEL="dev"
     RELEASE_CHANNEL_TAG="dev"
-    NAMESPACE="devmorio"
-    TAG_SUFFIX=""
+    NAMESPACE="itsmorio"
+    TAG_SUFFIX="-dev"
   fi
 fi
 
@@ -64,7 +64,12 @@ else
 
   # If building core, build the clients first
   if [[ "$CONTAINER" == "core" ]]; then
-    npm run build:clients
+    # But not for dev
+    if [[ "$RELEASE_CHANNEL" == "dev" ]]; then
+      echo "Skipping client build for dev"
+    else
+      npm run build:clients
+    fi
   fi
 
   # Keep coverage reports out of the build

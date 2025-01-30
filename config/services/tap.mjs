@@ -11,8 +11,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
 
   return {
     container: {
-      // Image to run (different in dev)
-      image: PROD ? 'itsmorio/tap' : 'devmorio/tap',
+      // Image to run
+      image: 'itsmorio/tap',
       // Image tag (version) to run
       tag: utils.getPreset('MORIO_VERSION_TAG') + getContainerTagSuffix(utils),
       // Name to use for the running container
@@ -27,6 +27,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       volumes: PROD
         ? [
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap:/morio/tap/config`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/tap/processors:/morio/tap/processors`,
           ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,

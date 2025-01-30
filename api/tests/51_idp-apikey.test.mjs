@@ -1,4 +1,4 @@
-import { store, api, validateErrorResponse } from './utils.mjs'
+import { store, api, validateErrorResponse, readPersistedData, attempt, sleep } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
@@ -40,6 +40,7 @@ describe('API Key Tests', () => {
   // GET /apikeys
   it(`Should GET /apikeys`, async () => {
     const result = await api.get(`/apikeys`)
+
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -113,6 +114,48 @@ describe('API Key Tests', () => {
     store.keys.key1.jwt = d.jwt
   })
 
+  it(`Should POST /settings with DISABLE_IDP_APIKEY flag`, async () => {
+    const storedData = await readPersistedData()
+    const settings = storedData.settings
+
+    settings.tokens.flags.DISABLE_IDP_APIKEY = true
+
+    const result = await api.post('/settings', settings)
+
+    assert.equal(result[0], 204)
+  })
+
+  it(`Should GET /status`, async () => {
+    sleep(5)
+
+    await attempt({
+      every: 3,
+      timeout: 90,
+      run: async () => {
+        const [status, body] = await api.get('/status')
+
+        return status === 200 && body.state.config_resolved === true
+      },
+      onFailedAttempt: (s) => {
+        console.log(`Waited ${s} seconds for setting reconfigured, will continue waiting.`)
+      },
+    })
+  })
+
+  // POST /login
+  it(`Should not POST /login`, async () => {
+    const data = {
+      provider: 'apikey',
+      data: {
+        api_key: store.keys.key1.key,
+        api_key_secret: store.keys.key1.secret,
+      },
+    }
+    const result = await api.post(`/login`, data)
+    // validateErrorResponse(result, errors, 'morio.api.idp.disabled')
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
+  })
+
   // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
@@ -146,5 +189,27 @@ describe('API Key Tests', () => {
   it(`Should not POST /apikeys/:key/enable (key was removed)`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/enable`)
     validateErrorResponse(result, errors, 'morio.api.404')
+  })
+
+  // PATCH /apikey
+  it(`Should not PATCH /apikeys/:key/rotate`, async () => {
+    const persistedData = await readPersistedData()
+    const key2 = persistedData.key2
+
+    const result = await api.patch(`/apikeys/${key2.key}/rotate`, null, {
+      'x-morio-role': 'user',
+    })
+    validateErrorResponse(result, errors, 'morio.api.account.role.insufficient')
+  })
+
+  // DELETE /apikey/:key
+  it(`Should not DELETE /apikeys/:key`, async () => {
+    const persistedData = await readPersistedData()
+    const key2 = persistedData.key2
+
+    const result = await api.delete(`/apikeys/${key2.key}`, {
+      'x-morio-role': 'user',
+    })
+    validateErrorResponse(result, errors, 'morio.api.account.role.insufficient')
   })
 })

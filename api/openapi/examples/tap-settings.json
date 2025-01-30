@@ -1,0 +1,335 @@
+{
+  "metrics": {
+    "settings": {
+      "topics": ["metrics"],
+      "cache": {
+        "dflt": true,
+        "title": "Cache metrics data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not cache metrics (disable)"
+          },
+          {
+            "val": true,
+            "label": "Cache recent metrics",
+            "about": "Caching metrics allows consulting them through the dashboards provided by Morio&apos;s UI service"
+          }
+        ]
+      },
+      "ttl": {
+        "dflt": 1,
+        "title": "Maximum age of cached metrics",
+        "about": "Metrics in the cache will expire after this amount of time",
+        "labelBL": "In hours",
+        "type": "number"
+      },
+      "cap": {
+        "dflt": 300,
+        "title": "Maximum number of sets per metricset",
+        "about": "This is a hard safety limit regardless of cache age or polling interval.",
+        "type": "number"
+      },
+      "eventify": {
+        "dflt": true,
+        "title": "Eventify metrics",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not eventify metrics (disable)"
+          },
+          {
+            "val": true,
+            "label": "Auto-create events based on metrics",
+            "about": "Eventifying metrics allows for event-driven automation and monitoring based on audit information"
+          }
+        ]
+      },
+      "log_unhandled": {
+        "dflt": false,
+        "title": "Log unhandled metrics data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not log unhandled metrics data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Log unhandled metrics data",
+            "about": "This allows you to see the kind of metrics data that is not being treated by this stream processor. It is intended as a debug tool for stream processor developers and will generate a lot of notes."
+          }
+        ]
+      }
+    },
+    "modules": {
+      "morio-tap": {
+        "name": "Metrics stream plugin: morio-tap",
+        "about": "This stream processor plugin will process metrics data from the morio-tap module.",
+        "settings": {
+          "test": {
+            "dflt": 666,
+            "title": "Just some number",
+            "about": "This is a test for module-based settings in stream processors",
+            "type": "number"
+          }
+        }
+      }
+    }
+  },
+  "logs": {
+    "title": "Log stream processor",
+    "about": "This stream processor will process log data flowing through your Morio collection.\n\nIt can cache recent log data, as well as eventify them for event-driven automation.\nIt also supports dynamic loading of module-specific logic.",
+    "settings": {
+      "topics": ["logs"],
+      "cache": {
+        "dflt": true,
+        "title": "Cache log data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not cache log data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Cache recent log data",
+            "about": "Caching log data allows consulting it through the dashboards provided by Morio&apos;s UI service"
+          }
+        ]
+      },
+      "ttl": {
+        "dflt": 4,
+        "title": "Maximum age of cached logs",
+        "about": "Logs in the cache will expire after this amount of time",
+        "labelBL": "In hours",
+        "type": "number"
+      },
+      "cap": {
+        "dflt": 25,
+        "title": "Maximum number of log lines per logset",
+        "about": "This is a hard safety limit regardless of cache age.",
+        "labelBL": "In log lines",
+        "type": "number"
+      },
+      "eventify": {
+        "dflt": true,
+        "title": "Eventify log data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not eventify log data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Auto-create events based on log data",
+            "about": "Eventifying log data allows for event-driven automation and monitoring based on your logs"
+          }
+        ]
+      },
+      "log_unhandled": {
+        "dflt": false,
+        "title": "Log unhandled audit data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not log unhandled audit data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Log unhandled audit data",
+            "about": "This allows you to see the kind of audit data that is not being treated by this stream processor. It is intended as a debug tool for stream processor developers and will generate a lot of notes."
+          }
+        ]
+      }
+    },
+    "modules": {
+      "linux-system": {
+        "name": "Logs stream plugin: linux-system",
+        "about": "This stream processor plugin will process log data from the linux-system module."
+      }
+    }
+  },
+  "inventory": {
+    "title": "Inventory stream processor",
+    "about": "This stream processor will process data from various topics to build out an inventory of your infrastructure.\n\nIt can only be enabled or disabled, and requires no configuration.",
+    "settings": {
+      "topics": ["audit", "inventory", "metrics"]
+    }
+  },
+  "events": {
+    "title": "Event data stream processor",
+    "about": "This stream processor will process event data flowing through your Morio collection.\n\nIt can cache recent events, and supports dynamic loading of module-specific logic.",
+    "settings": {
+      "topics": ["events"],
+      "cache": {
+        "dflt": true,
+        "title": "Cache event data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not cache event data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Cache recent event data",
+            "about": "Caching event data allows consulting it through the dashboards provided by Morio&apos;s UI service"
+          }
+        ]
+      },
+      "cap": {
+        "dflt": 250,
+        "title": "Maximum number of events to cache",
+        "about": "This is a hard limit.",
+        "labelBL": "In cached events",
+        "type": "number"
+      }
+    }
+  },
+  "checks": {
+    "title": "Health checks stream processor",
+    "about": "This stream processor will process health check data flowing through your Morio collection.\n\nIt can cache recent health check data, as well as eventify them for event-driven automation.\nIt also supports verifying the expiry of TLS certificates.\n",
+    "settings": {
+      "topics": ["checks"],
+      "cache": {
+        "dflt": true,
+        "title": "Cache health check data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not cache health check data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Cache recent health check",
+            "about": "Caching health check data allows consulting it through the dashboards provided by Morio&apos;s UI service"
+          }
+        ]
+      },
+      "ttl": {
+        "dflt": 2,
+        "title": "Maximum age of cached health checks",
+        "about": "Health check data in the cache will expire after this amount of time",
+        "labelBL": "In hours",
+        "type": "number"
+      },
+      "eventify": {
+        "dflt": true,
+        "title": "Eventify health check data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not eventify health check data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Auto-create events based on health check data",
+            "about": "Eventifying health check data allows for event-driven automation and monitoring based on health check information"
+          }
+        ]
+      },
+      "up_values": {
+        "dflt": [1, "green", "up"],
+        "title": "Up values",
+        "about": "All of the different health check return values that should be considered 'up'",
+        "type": "labels"
+      },
+      "certificate_check": {
+        "dflt": true,
+        "title": "Verify certificate expiry",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not verify certificate expiry"
+          },
+          {
+            "val": true,
+            "label": "Verify certificate expiry",
+            "about": "Check certificate expiry, and create an event when expiry approaches"
+          }
+        ]
+      },
+      "certificate_days": {
+        "dflt": 21,
+        "title": "Days before certificate expiry to escalate",
+        "about": "How many days before certificates expire would you like to raise an event?",
+        "labelBL": "In days",
+        "type": "number"
+      }
+    }
+  },
+  "audit": {
+    "title": "Audit data stream processor",
+    "about": "This stream processor will process audit data flowing through your Morio collection.\n\nIt can cache recent audit events, as well as eventify them for event-driven automation.\nIt also supports dynamic loading of module-specific logic.",
+    "settings": {
+      "topics": ["audit"],
+      "cache": {
+        "dflt": true,
+        "title": "Cache audit data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not cache audit data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Cache recent audit data",
+            "about": "Caching audit data allows consulting it through the dashboards provided by Morio&apos;s UI service"
+          }
+        ]
+      },
+      "eventify": {
+        "dflt": true,
+        "title": "Eventify audit data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not eventify audit data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Auto-create events based on audit data",
+            "about": "Eventifying audit data allows for event-driven automation and monitoring based on audit information"
+          }
+        ]
+      },
+      "ttl": {
+        "dflt": 2,
+        "title": "fixme",
+        "type": "number"
+      },
+      "log_unhandled": {
+        "dflt": false,
+        "title": "Log unhandled audit data",
+        "type": "list",
+        "list": [
+          {
+            "val": false,
+            "label": "Do not log unhandled audit data (disable)"
+          },
+          {
+            "val": true,
+            "label": "Log unhandled audit data",
+            "about": "This allows you to see the kind of audit data that is not being treated by this stream processor. It is intended as a debug tool for stream processor developers and will generate a lot of notes."
+          }
+        ]
+      }
+    },
+    "modules": {
+      "linux-system": {
+        "name": "Audit module: linux-system",
+        "about": "This stream processor plugin will process audit data from the linux-system module."
+      }
+    }
+  }
+}
