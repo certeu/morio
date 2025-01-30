@@ -1,10 +1,7 @@
 /*
  * This is a work in progress
  */
-import path from 'node:path'
-import { globDir, readFile, writeFile, writeJsonFile } from '../shared/src/fs.mjs'
-import yaml from 'yaml'
-import fetch from 'node-fetch' // Import fetch for HTTP requests
+import { readFile, writeFile } from '../shared/src/fs.mjs'
 
 // Function to download the JSON file from the GitHub release URL
 async function downloadMoriohubData() {
