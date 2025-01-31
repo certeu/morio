@@ -116,7 +116,7 @@ Controller.prototype.readHostname = async function (req, res) {
 
   return res.send({
     fqdn: result.fqdn,
-    name: result.name
+    name: result.name,
   })
 }
 

@@ -672,7 +672,7 @@ export async function loadChartProcessors(settings, log) {
         // Write to disk
         if (Object.keys(js).length > 0) {
           await mkdir(targetFolder)
-          await writeFile(`${targetFolder}/metrics.mjs`, convertToChartFile(js, 'metrics'), log, '00775')
+          await writeFile(`${targetFolder}/metrics.mjs`, convertToChartFile(js), log, '00775')
         }
       }
     }
@@ -681,7 +681,7 @@ export async function loadChartProcessors(settings, log) {
   return
 }
 
-function convertToChartFile(code, type) {
+function convertToChartFile(code) {
   let output = `window.morio = window.morio || {}
 window.morio.charts = window.morio.charts || {}
 window.morio.charts.metrics = {`

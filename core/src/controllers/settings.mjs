@@ -511,7 +511,6 @@ const reseedHandler = async function (newSettings = false) {
    */
   settings = await ensureStreamProcessors(settings)
 
-
   return settings
 }
 
