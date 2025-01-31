@@ -627,6 +627,15 @@ MorioClient.prototype.getInventoryHost = async function (host) {
 }
 
 /**
+ * Get a hostname from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostname = async function (host) {
+  return await this.call(`${morioConfig.api}/inventory/hostnames/${host}`)
+}
+
+/**
  * Get all hosts from the inventory
  *
  * @return {object} - The result

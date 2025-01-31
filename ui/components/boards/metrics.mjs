@@ -1,8 +1,9 @@
 // Dependencies
 import { formatBytes, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { chartTemplates } from './chart-templates.mjs'
 // Hooks
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
@@ -15,8 +16,9 @@ import { Host } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
 import { ToggleLiveButton, cacheStreamAsObj } from 'components/boards/shared.mjs'
-import { TransformerProvider } from './transformer-provider.mjs'
+import { ChartsProvider } from './charts-provider.mjs'
 import { Echart } from 'components/echarts.mjs'
+import { Details } from 'components/details.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached metrics
@@ -243,25 +245,25 @@ const MorioMetricset = ({ name, href }) =>
   )
 
 /*
- * Wrapper to provide echarts transformers
+ * Wrapper to provide echarts dynamic chart handlers
  */
 export const ShowMetrics = (props) => (
-  <TransformerProvider type='metrics'>
+  <ChartsProvider type='metrics'>
     <ShowMetricsInner {...props} />
-  </TransformerProvider>
+  </ChartsProvider>
 )
 
 const transformMetrics = ({ host, module, metricset, data, templates }) => (
-  typeof window?.morio?.transformers?.metrics?.[module]?.[metricset] === 'function'
+  typeof window?.morio?.charts?.metrics?.[module]?.[metricset] === 'function'
 )
-  ? window.morio.transformers.metrics[module][metricset]({host, module, metricset, data, templates})
+  ? window.morio.charts.metrics[module][metricset]({host, module, metricset, data, templates})
   : data
 
 /**
  * This component renders visualisations for all cached
  * metrics for a given host/module/metricset
  */
-const ShowMetricsInner = ({ host, module, metricset }) => {
+const ShowMetricsInner = ({ host, module, metricset, hostname, show }) => {
   // State
   const [cache, setCache] = useState(false)
   const [paused, setPaused] = useState(false)
@@ -279,25 +281,22 @@ const ShowMetricsInner = ({ host, module, metricset }) => {
     refetchIntervalInBackground: false,
   })
 
-  // Don't bother if there's nothing in the caceh
-  if (!cache || cache.length < 1)
-    return (
+
+  // Defer to chart transformer
+  const data = parseCachedMetrics(cache)
+
+  // Don't bother if there's nothing in the cache
+  return (!cache || cache.length < 1)
+    ? (
       <>
         <Loading />
         <p>Nothing in the cache to show you here.</p>
       </>
     )
-
-  return <Echart option={transformMetrics({
-    host,
-    module,
-    metricset,
-    data: parseCachedMetrics(cache),
-    templates: JSON.parse(JSON.stringify(templates)),
-  })} />
+    : <EchartWrapper {...{ data, host, module, metricset, paused, setPaused, hostname, show }} />
 }
 
-async function runShowMetricsApiCall(api, host, module, metricset) {
+async function runShowMetricsApiCall(api, host, module, metricset, hostname) {
   const data = {}
   let result = await api.getCacheKey(`metric|${host}|${module}|${metricset}`)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
@@ -307,6 +306,79 @@ async function runShowMetricsApiCall(api, host, module, metricset) {
   return data
 }
 
+const EchartWrapper = ({ data, host, module, metricset, paused, setPaused, hostname, show=true }) => {
+  const [enabled, setEnabled] = useState(show)
+
+  // We are memoizing option to avoid re-renders
+  const option = useMemo(() => transformMetrics({
+    host,
+    module,
+    metricset,
+    data,
+    templates: chartTemplates(data)
+  }), [data])
+
+  const toggleChart = (id) => {
+    const newEnabled = enabled === true ? {} : {...enabled}
+    if (newEnabled[id]) delete newEnabled[id]
+    else newEnabled[id] = true
+
+    setEnabled(newEnabled)
+  }
+
+  const isEnabled = (option, i) => (enabled === true || (enabled && (enabled[i] || enabled[option?.id])))
+    ? true
+    : false
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-row flex-wrap items-center justify-center gap-1 mb-4">
+        <ToggleLiveButton {...{ paused, setPaused }} />
+        <KeyVal k="module" val={module} />
+        <KeyVal k="metricset" val={metricset} />
+        {hostname
+          ? <KeyVal k="hostname" val={hostname} />
+          : <KeyVal k="host" val={host} />
+        }
+        {Array.isArray(option) && typeof show !== 'object'
+          ? option.map((opt, i) => opt ? <KeyVal
+              key={i}
+              k={isEnabled(opt, i) ? "shown" : "hidden"}
+              val={opt.title.text}
+              color={isEnabled(opt, i) ? "success" : "error"}
+              onClick={() => toggleChart(option.id ? option.id : i)}
+            /> : null
+          )
+          : null
+        }
+      </div>
+      {Array.isArray(option)
+        ? option.map((opt, i) => (!opt || !isEnabled(opt, i))
+          ? null
+          : <SingleEchart key={i} option={opt} href={`/boards/metrics/${host}/${module}/${metricset}/${opt.id || i}`}/>
+        )
+        : <SingleEchart option={option} href={`/boards/metrics/${host}/${module}/${metricset}/${option.id || i}`}/>
+      }
+    </div>
+  )
+}
+
+const SingleEchart = ({ option, href=false }) => {
+  if (href && option.toolbox?.feature) {
+    option.toolbox.feature.myPermalink = {
+      show: true,
+      title: "Permalink to this chart",
+      icon: 'path://M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z',
+
+      onclick: () => window.location.href = href
+    }
+  }
+
+  return <Echart option={option} />
+}
+
+const MultiEchart = ({ options, href }) => options.map((option, i) => <SingleEchart option={option} href={href} key={i} />)
+
 /**
  * A helper method to parse a list of Redis/ValKey metrics
  *
@@ -314,6 +386,7 @@ async function runShowMetricsApiCall(api, host, module, metricset) {
  * @return {object} data - The same data parsed
  */
 function parseCachedMetrics (metrics) {
+  if (!metrics) return false
   const data = []
   for (const i in metrics) {
     if (i %2 === 1) data.push({
@@ -324,51 +397,4 @@ function parseCachedMetrics (metrics) {
 
   return data
 }
-
-const options = {
-  tooltip: {
-    trigger: 'axis',
-    show: true,
-  },
-  toolbox: {
-    feature: {
-      saveAsImage: {},
-      dataView: {
-        backgroundColor: 'var(--morio-bg)',
-        textareaColor: 'transparent',
-        textColor: 'currentColor',
-        buttonColor: 'var(--morio-primary)',
-        buttonTextColor: '#fff',
-      },
-      dataZoom: {},
-      magicType: {
-        type: ['line', 'bar', 'stack']
-      },
-    }
-  },
-  legend: {
-    show: true,
-    type: 'scroll',
-    bottom: 10,
-  },
-}
-const charts = {
-  line: {
-    ...options,
-    title: {
-      left: 'center',
-      text: 'Set title.text to replace this title',
-    },
-    xAxis: {
-      type: 'category',
-      name: 'Time',
-    },
-    yAxis: {
-      type: 'value',
-      name: 'set yAxis.name to replace this name',
-    },
-  }
-}
-
-const templates = { options, charts }
 

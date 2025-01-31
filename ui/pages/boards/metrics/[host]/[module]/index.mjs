@@ -2,12 +2,11 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { StatusIcon } from 'components/icons.mjs'
 import { HostMetricsTable } from 'components/boards/metrics.mjs'
-import { Uuid } from 'components/uuid.mjs'
 
 export default function DashboardsHostMetricsPage({ host, module }) {
   const meta = {
     title: 'Cached host metrics',
-    page: ['boards', 'metrics', <Uuid key="uuid" uuid={host} />, module],
+    page: ['boards', 'metrics', host, module],
     Icon: StatusIcon,
   }
 

@@ -35,6 +35,11 @@ export function routes(app) {
   app.get(`/inventory/hosts/:id`, rbac.user, inventory.readHost)
 
   /*
+   * Read a hostname (of a host)
+   */
+  app.get(`/inventory/hostnames/:id`, rbac.user, inventory.readHostname)
+
+  /*
    * Delete a host
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)

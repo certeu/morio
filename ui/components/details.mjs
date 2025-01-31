@@ -5,8 +5,9 @@ export const Details = ({
   summaryRight = null,
   children,
   summaryClassname = 'justify-between',
+  open=false
 }) => (
-  <details className="bg-primary/20 rounded mt-4 open:bg-transparent open:border-l-4 open:shadow hover:bg-primary/30 open:hover:bg-transparent open:cusor-default border-primary group">
+  <details className="bg-primary/20 rounded mt-4 open:bg-transparent open:border-l-4 open:shadow hover:bg-primary/30 open:hover:bg-transparent open:cusor-default border-primary group" open={open ? true : false}>
     <summary
       className={`flex flex-row gap-2 items-center hover:cursor-pointer pr-4 group-open:bg-primary/20 ${summaryClassname}`}
     >

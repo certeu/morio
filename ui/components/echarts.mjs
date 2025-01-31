@@ -1,6 +1,5 @@
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
-import { Popout } from './popout.mjs'
 
 /*
  * Helper object for styling an axis in Echarts
@@ -16,9 +15,9 @@ const axisStyle = {
  */
 echarts.registerTheme('gar', {
   color: [
-    'var(--fallback-su,oklch(var(--su)/var(--tw-bg-opacity)))',
-    'var(--fallback-wa,oklch(var(--wa)/var(--tw-bg-opacity)))',
-    'var(--fallback-er,oklch(var(--er)/var(--tw-bg-opacity)))',
+    'var(--fallback-su,oklch(var(--su)))',
+    'var(--fallback-wa,oklch(var(--wa)))',
+    'var(--fallback-er,oklch(var(--er)))',
   ],
   backgroundColor: 'transparent',
   title: {
@@ -37,16 +36,17 @@ echarts.registerTheme('gar', {
 /*
  * MORIO theme (branded graphs)
  * Probably can use some TLC from a designer
+ * Note: You cannot use CSS vars here, it will break the graph on hover
  */
 echarts.registerTheme('morio', {
   color: [
-    'var(--fallback-p,oklch(var(--p)/var(--tw-bg-opacity)))',
-    'var(--fallback-s,oklch(var(--s)/var(--tw-bg-opacity)))',
+    '#1b88a2',
+    '#14b8a6',
     '#EAB308',
     '#0EA5E9',
     '#EC4899',
     '#10B981',
-    'var(--morio-light)',
+    '#8ecae6',
     '#6366F1',
     '#666',
   ],
@@ -64,18 +64,17 @@ echarts.registerTheme('morio', {
   },
 })
 
-export const Echart = ({ option = false, theme = 'morio' }) => {
+export const Echart = (props) => {
+  const { option = false, theme = "morio" } = props
   if (option === false) return null
 
-  return option ? (
+  return (
     <ReactECharts
       option={option}
       theme={theme}
-      style={{ height: 400 }}
+      style={{ height: 450 }}
       notMerge={true}
       opts={{ renderer: 'svg' }}
     />
-  ) : (
-    <Popout loading>Loading chart...</Popout>
   )
 }

@@ -8,6 +8,7 @@ import { rm, mkdir, readFile, globDir } from './fs.mjs'
 import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
+import mustache from 'mustache'
 
 /*
  * A collection of utils to load various files
@@ -706,3 +707,14 @@ function applyOverlay (settings, overlay={}) {
 
   return settings
 }
+
+export function extractTemplateVariables (template) {
+  const vars = []
+  for (const chunk of mustache.parse(template)) {
+    if (chunk[0] === '&' && !chunk[1].includes(' ')) vars.push(chunk[1])
+    else if (chunk[0] === 'name') vars.push(chunk[1])
+  }
+
+  return vars
+}
+
