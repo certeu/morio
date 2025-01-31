@@ -49,6 +49,9 @@ COPY --from=builder --chown=nextjs:nodejs /morio/ui/public ./public
 COPY --from=builder --chown=nextjs:nodejs /morio/ui/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /morio/ui/.next/static ./.next/static
 
+## Map the charts folder to a shared location with core
+RUN mkdir -p /etc/morio/shared/charts && ln -s /etc/morio/shared/charts ./public/charts
+
 ENV HOSTNAME "0.0.0.0"
 
 ## Drop privleges and run NodeJS code via pm2

@@ -4,7 +4,7 @@ import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
-import { rm, mkdir, readFile, globDir } from './fs.mjs'
+import { rm, mkdir, readFile, writeFile, globDir } from './fs.mjs'
 import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
@@ -608,6 +608,93 @@ function ensureStreamProcessorSettings(seededSettings={}, morioSettings) {
   }
 
   return morioSettings
+}
+
+export async function loadChartProcessors(settings, log) {
+  /*
+   * Don't bother unless we have charts to load
+   */
+  const globs = settings?.preseed?.charts
+  if (!Array.isArray(globs) || globs.length < 1) return settings
+
+  /*
+   * Folder inside the core container where to store the chart files
+   */
+  const targetFolder = '/etc/morio/shared/charts'
+
+  /*
+   * Clear charts folder
+   */
+  const current = await globDir(targetFolder, `**`)
+  for (const file of current) {
+    try {
+      log.trace(`Removing chart processors: ${file}`)
+      await rm(file, { force: true, recursive: true })
+    }
+    catch (err) {
+      log.warn(err, `Failed to remove ${file}`)
+    }
+  }
+
+  /*
+   * Now load chart processors
+   */
+  for (const entry of globs) {
+    if (entry.slice(0,4) === 'git:') {
+      const [pattern, repo] = entry.slice(4).split('@')
+      if (settings.preseed?.git?.[repo]) {
+        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        // For now, we only support metrics
+        const metrics = {}
+        for (const sourceFile of files.sort()) {
+          const relFile = sourceFile.slice(`/etc/morio/shared/${sanitizeGitFolder(repo)}/`.length)
+          const [file=false, type=false] = relFile.split('/').reverse()
+          if (file.slice(-4) === ".mjs" && type === 'metrics') {
+            const module = file.slice(0, -4)
+            try {
+              // Import file dynamically
+              const esm = await import(sourceFile)
+              if (esm && typeof esm.default === 'object') metrics[module] = esm.default
+            }
+            catch (err) {
+              log.warn(`Failed to load chart transformer: ${sourceFile}. ${err}`)
+            }
+          }
+        }
+        // Make it serializable
+        const js = {}
+        for (const [module, metricsets] of Object.entries(metrics)) {
+          for (const [metricset, method] of Object.entries(metricsets)) {
+            if (typeof js[module] === 'undefined') js[module] = {}
+            if (typeof method === 'function') js[module][metricset] = method.toString()
+          }
+        }
+        // Write to disk
+        if (Object.keys(js).length > 0) {
+          await mkdir(targetFolder)
+          await writeFile(`${targetFolder}/metrics.mjs`, convertToChartFile(js, 'metrics'), log, '00775')
+        }
+      }
+    }
+  }
+
+  return
+}
+
+function convertToChartFile(code, type) {
+  let output = `window.morio = window.morio || {}
+window.morio.charts = window.morio.charts || {}
+window.morio.charts.metrics = {`
+  for (const [module, metricsets] of Object.entries(code)) {
+    output += `\n  "${module}": {`
+    for (const [metricset, method] of Object.entries(metricsets)) {
+      output += `\n    "${metricset}": ${method.split("\n").join("\n  ")},`
+    }
+    output += '\n  }'
+  }
+  output += '\n}'
+
+  return output
 }
 
 async function copyPreseedFile ({ sourceFile, targetFile, targetFolder }, chownId=false) {

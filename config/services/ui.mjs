@@ -29,7 +29,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD
-        ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`]
+        ? [
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
+          ]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,

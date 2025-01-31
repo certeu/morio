@@ -10,14 +10,27 @@ const tick = 30000
 /*
  * We keep track of throughput in-memory
  */
-const counters = {}
+const counters = {
+  topics: {},
+  procs: {},
+  peak: {
+    topics: {},
+    procs: {},
+  }
+}
 
 export const count = {
   message: function (topic) {
     counters.topics[topic]++
+    if (counters.topics[topic] > counters.peak.topics[topic]) {
+      counters.peak.topics[topic] = counters.topics[topic]
+    }
   },
   processor: function (name) {
-    counters.processors[name]++
+    counters.procs[name]++
+    if (counters.procs[name] > counters.peak.procs[name]) {
+      counters.peak.procs[name] = counters.procs[name]
+    }
   }
 }
 
@@ -84,52 +97,39 @@ function countersAsEcs (throughput) {
 /**
  * Reset counters on every tick
  *
- * @param {object} processors - The stream processors that are loaded
- * @param {array} topics - The topics we are subscribed to
+ * @param {bool} init - Whether or not this is in initial reset
  */
-function resetCounters(processors=false, topics=false) {
-  /*
-   * Only on initial startup will stream processors and topics be set
-   */
-  const init = (processors && topics) ? true : false
-
-  /*
-   * Stream processors and topics are only passed in at the initial startup
-   * So at that time, we use them, later on we re-use the keys in counters
-   */
-  const list = {
-    processors: init ? processors : Object.keys(counters.processors),
-    topics: init ? topics : Object.keys(counters.topics)
-  }
-
+function resetCounters(init=false) {
   if (init) {
     /*
      * Initial start, just initialise the counters object
      */
-    for (const type of Object.keys(list)) {
-      const reset = {}
-      for (const name of list[type]) reset[name] = 0
-      counters[type] = reset
+    for (const topic of topics) {
+      counters.topics[topic] = 0
+      counters.peak.topics[topic] = 0
+    }
+    for (const proc of processorList) {
+      counters.procs[proc] = 0
+      counters.peak.procs[proc] = 0
     }
 
     return
   } else {
     /*
-     * Counter snapshot. We will extract the currect counters data and convert to msg/s
+     * Counter snapshot. We will extract the currect counters data
      */
-    const data = { topics: {}, processors: {} }
-    for (const type of Object.keys(list)) {
-      const reset = {}
-      for (const name of list[type]) {
-        reset[name] = 0
-        /*
-         * Note that we do not report messages per second,
-         * but rather total messages per tick. We convert to mps in the
-         * visualisation, and this is more informative.
-         */
-        data[type][name] = counters[type]?.[name] ? counters[type][name] : 0
-      }
-      counters[type] = reset
+    const data = {
+      topics: {},
+      procs: {},
+      peak: counters.peak
+    }
+    for (const topic of topics) {
+      data.topics[topic] = counters.topics[topic]
+      counters.topics[topic] = 0
+    }
+    for (const proc of processorList) {
+      data.procs[proc] = counters.procs[proc]
+      counters.procs[proc] = 0
     }
 
     return data

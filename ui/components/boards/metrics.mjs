@@ -253,10 +253,13 @@ export const ShowMetrics = (props) => (
   </ChartsProvider>
 )
 
+// Avoid re-using objects
+const clone = (data) => JSON.parse(JSON.stringify(data))
+
 const transformMetrics = ({ host, module, metricset, data, templates }) => (
   typeof window?.morio?.charts?.metrics?.[module]?.[metricset] === 'function'
 )
-  ? window.morio.charts.metrics[module][metricset]({host, module, metricset, data, templates})
+  ? window.morio.charts.metrics[module][metricset]({host, module, metricset, data, templates, clone})
   : data
 
 /**

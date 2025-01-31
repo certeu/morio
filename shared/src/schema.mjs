@@ -199,19 +199,11 @@ const preseed = Joi.alternatives().try(
     url: Joi.string(),
     git: Joi.object().pattern(Joi.string(), gitRepo),
     base: preseedFile,
-    overlays: Joi.alternatives().try(
-      preseedFile,
-      Joi.array().items(preseedFile),
-    ),
+    overlays: Joi.array().items(preseedFile),
     keys: preseedKeys,
-    processors: Joi.alternatives().try(
-      preseedFile,
-      Joi.array().items(preseedFile),
-    ),
-    modules: Joi.alternatives().try(
-      preseedFile,
-      Joi.array().items(preseedFile),
-    ),
+    charts: Joi.array().items(preseedFile),
+    processors: Joi.array().items(preseedFile),
+    modules: Joi.array().items(preseedFile),
   }),
   Joi.string()
 )

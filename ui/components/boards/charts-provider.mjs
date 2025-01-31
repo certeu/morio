@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 
 export const ChartsProvider = ({ type='metrics', children }) => {
   const [ready, setReady] = useState(window.morio?.charts?.[type] ? true : false)
+  const [error, setError] = useState(false)
   const [injected, setInjected] = useState(0)
 
   useEffect(() => {
@@ -28,19 +29,21 @@ export const ChartsProvider = ({ type='metrics', children }) => {
         const script = document.createElement('script');
         script.src = `/charts/${type}.mjs`;
         script.onload = () => setReady(true)
-        script.onerror = () => console.log(`Failed to load charts: ${type}`)
+        script.onerror = (err) => setError(true)
 
         /*
          * Inject script tag into the DOM
          */
         document.body.appendChild(script)
       } catch (err) {
-        console.log(`Error while providing charts: ${err.message}`)
+        console.log(err)
+        setError(err)
       }
     }
     loadCharts()
   }, [type, injected, children])
 
+  if (error) return <p>We failed to load the charts: {error.toString()}</p>
 
   return ready
     ? children

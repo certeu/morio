@@ -104,7 +104,11 @@ import { log } from './src/tools.mjs'
    */
   const code = `${imp}${ah}${hpt}${nl}
 export const topics = ${JSON.stringify([...topics])}
-export const processorList = Object.keys(allProcessors)
+export const processorList = []
+for (const topic in processorsPerTopic) {
+  for (const proc of processorsPerTopic[topic])
+  processorList.push(proc.name)
+}
 `
   await fs.writeFile('./loader.mjs', code)
 }

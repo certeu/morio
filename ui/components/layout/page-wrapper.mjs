@@ -14,10 +14,10 @@ import { Footer } from './footer.mjs'
 import { AuthWrapper } from 'components/auth/wrapper.mjs'
 
 const titleText = (title) => {
-  if (typeof title === 'string' || typeof DOMParser === 'undefined') return title
+  if (typeof title === 'string') return title
   const html = ReactDOMServer.renderToString(title)
+  if (typeof DOMParser === 'undefined') return html.replace(/<[^>]*>/g, '')
   const doc = new DOMParser().parseFromString(html, 'text/html');
-
   return doc.body.textContent || doc.body.innerText || ''
 }
 
