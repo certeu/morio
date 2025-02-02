@@ -17,7 +17,7 @@ const pad2 = (str) => `${str}`.length === 2 ? str : '0'+str
 
 
 /*
- * Shared shared options
+ * Shared chart options
  */
 const options = {
   tooltip: {
