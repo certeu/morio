@@ -40,13 +40,13 @@ echarts.registerTheme('gar', {
  */
 echarts.registerTheme('morio', {
   color: [
-    '#1b88a2',
-    '#14b8a6',
+    '#1B88A2',
+    '#14B8A6',
     '#EAB308',
     '#0EA5E9',
     '#EC4899',
     '#10B981',
-    '#8ecae6',
+    '#8ECAE6',
     '#6366F1',
     '#666',
   ],
