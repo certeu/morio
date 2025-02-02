@@ -161,7 +161,7 @@ export const HostMetricsTable = ({ host, module = false }) => {
       </>
     )
 
-  // Don't bother if there's nothing in the caceh
+  // Don't bother if there's nothing in the cache
   if (Object.keys(cache).length < 1)
     return (
       <>
