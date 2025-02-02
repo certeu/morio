@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [api] Return host name/fqdn when loading inventory data
-- [ui] Group operaring systems on inventory pages
+- [ui] Group operating systems on inventory pages
 - [ui] Improvement to inventory pages
 
 ### Fixed
