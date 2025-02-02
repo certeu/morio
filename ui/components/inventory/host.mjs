@@ -20,7 +20,7 @@ import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
 
 /**
- * This compnent renders a table with all IP address and allow removal
+ * This component renders a table with all IP addresses, and allows removal
  */
 export const HostsTable = () => {
   // State
