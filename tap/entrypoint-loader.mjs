@@ -12,8 +12,8 @@ const banner = `/*
  */`
 
 // Whitespace to re-use
-const nl = "\n"
-const tab = "  "
+const nl = '\n'
+const tab = '  '
 
 /*
  * Helper function to glob a folder
@@ -36,7 +36,7 @@ async function loadProcessorFiles(directory, pattern) {
   return await globDir(folder.pathname, pattern)
 }
 
-function asTopicList (input) {
+function asTopicList(input) {
   if (typeof input === 'string') return [input]
   if (Array.isArray(input)) return input
   if (typeof input === 'object') return Object.values(input)
@@ -53,7 +53,7 @@ async function ensureProcessorLoader(settings) {
     if (settings.tap?.[processor]?.enabled) {
       const subs = asTopicList(settings.tap?.[processor]?.topics || [])
       for (const topic of subs) topics.add(topic)
-      imports[processor] = [ processor, subs ]
+      imports[processor] = [processor, subs]
     }
   }
 
@@ -92,8 +92,7 @@ import { log } from './src/tools.mjs'
     for (const h of [...processors]) {
       if (Array.isArray(h)) {
         for (const hh of h) hpt += `${nl}    allProcessors.${hh},`
-      }
-      else hpt += `${nl}    allProcessors.${h},`
+      } else hpt += `${nl}    allProcessors.${h},`
     }
     hpt += `${nl}  ],`
   }
@@ -125,12 +124,12 @@ async function ensureModuleLoaders(settings) {
     if (typeof imports[processor] === 'undefined') imports[processor] = {}
     const filename = path.basename(file)
     if (filename.slice(-4) === '.mjs') {
-      const module = filename.slice(0,-4)
+      const module = filename.slice(0, -4)
       if (module !== 'index') {
         const importName = module.replaceAll('-', '_')
         imports[processor][module] = {
           imp: `import ${importName} from './${filename}'`,
-          exp: `  "${module}": ${importName},`
+          exp: `  "${module}": ${importName},`,
         }
       }
     }
@@ -141,8 +140,12 @@ async function ensureModuleLoaders(settings) {
    */
   for (const processor in imports) {
     const code = `${banner}
-${Object.values(imports[processor]).map(h => h.imp).join(nl)}${nl}
-export default {${nl}${Object.values(imports[processor]).map(h => h.exp).join(nl)}${nl}}${nl}`
+${Object.values(imports[processor])
+  .map((h) => h.imp)
+  .join(nl)}${nl}
+export default {${nl}${Object.values(imports[processor])
+      .map((h) => h.exp)
+      .join(nl)}${nl}}${nl}`
     await fs.writeFile(`./processors/${processor}/modules/index.mjs`, code)
   }
 }
@@ -150,18 +153,15 @@ export default {${nl}${Object.values(imports[processor]).map(h => h.exp).join(nl
 /*
  * This loads the settings from core over the internal docker network
  */
-async function loadSettings (settings) {
+async function loadSettings(settings) {
   let result
   try {
     result = await axios.get(`http://morio-core:3007/settings`)
-  }
-  catch(err) {
+  } catch (err) {
     console.log(`Failed to load settings from core`, err)
   }
 
-  return result?.data
-    ? result.data
-    : false
+  return result?.data ? result.data : false
 }
 
 /*
@@ -169,11 +169,13 @@ async function loadSettings (settings) {
  */
 const settings = await loadSettings()
 if (settings) {
-  await fs.writeFile('./settings.mjs', `${banner}${nl}export const settings = ${JSON.stringify(settings)}`)
+  await fs.writeFile(
+    './settings.mjs',
+    `${banner}${nl}export const settings = ${JSON.stringify(settings)}`
+  )
 
   ensureProcessorLoader(settings)
   ensureModuleLoaders(settings)
 } else {
   console.log(`Core did not provide settings. Tap service cannot start.`)
 }
-

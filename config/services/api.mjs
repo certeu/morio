@@ -39,7 +39,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
       /*
        * Middleware to add Morio service header
        */
-      .set('http.middlewares.api-service-header.headers.customRequestHeaders.X-Morio-Service', 'api')
+      .set(
+        'http.middlewares.api-service-header.headers.customRequestHeaders.X-Morio-Service',
+        'api'
+      )
       /*
        * Middleware for central authentication/access control
        */
@@ -52,7 +55,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
        * Add middleware to router
        * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
        */
-      .set('http.routers.api.middlewares', ['api-prefix@file', 'api-service-header@file', 'api-auth@file'])
+      .set('http.routers.api.middlewares', [
+        'api-prefix@file',
+        'api-service-header@file',
+        'api-auth@file',
+      ]),
   }
 
   return {
@@ -72,10 +79,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD
-        ? [
-            `${DIRS.conf}/shared:/etc/morio/shared`,
-            `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
-          ]
+        ? [`${DIRS.conf}/shared:/etc/morio/shared`, `${DIRS.data}/${DIRS.dl}:/morio/downloads`]
         : [
             `${DIRS.conf}/shared:/etc/morio/shared`,
             `${DIRS.data}/${DIRS.dl}:/morio/downloads`,

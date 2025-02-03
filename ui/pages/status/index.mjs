@@ -39,7 +39,8 @@ const ClusterInfo = ({ status }) => {
 
   return (
     <div className={`p-2 px-4`}>
-      Morio <b>{status.core.info.version}</b> (<b>{status.core.info.channel}</b> channel) on <b>{node}</b>
+      Morio <b>{status.core.info.version}</b> (<b>{status.core.info.channel}</b> channel) on{' '}
+      <b>{node}</b>
       {node === leader ? (
         <small> (cluster leader)</small>
       ) : (

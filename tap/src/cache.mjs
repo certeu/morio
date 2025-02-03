@@ -7,5 +7,5 @@ export const cache = new valkey({
   family: 4,
   connectionName: 'morio-tap',
   db: 0,
-  tls: false
+  tls: false,
 })

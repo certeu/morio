@@ -37,10 +37,12 @@ rl.question(`Enter a new version number: `, async (version) => {
     )
   }
   // Also update version in Go code
-  promises.push(writeFile(
-    "clients/morio/version/main.go",
-    "// This file is auto-generated\npackage version\nvar Version string = \"" + version + "\""
-  ))
+  promises.push(
+    writeFile(
+      'clients/morio/version/main.go',
+      '// This file is auto-generated\npackage version\nvar Version string = "' + version + '"'
+    )
+  )
   await Promise.all(promises)
   rl.close()
 })

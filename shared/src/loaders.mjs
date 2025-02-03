@@ -165,7 +165,12 @@ async function loadPreseedBaseFile(preseed, gitroot, log) {
  * @param {string} gitroot - Folder in which to clone git repos
  * @return {object} config - The loaded config
  */
-export async function loadPreseededSettings(preseed=false, currentSettings=false, log, gitroot = '/etc/morio/shared') {
+export async function loadPreseededSettings(
+  preseed = false,
+  currentSettings = false,
+  log,
+  gitroot = '/etc/morio/shared'
+) {
   if (!preseed) return currentSettings
 
   /*
@@ -181,9 +186,8 @@ export async function loadPreseededSettings(preseed=false, currentSettings=false
     ? await loadPreseedBaseFile(preseed, gitroot, log)
     : cloneAsPojo(currentSettings)
   if (!settings) {
-    log.warn(preseed.base
-      ? `Failed to load preseed base file`
-      : `Failed to construct initial settings`
+    log.warn(
+      preseed.base ? `Failed to load preseed base file` : `Failed to construct initial settings`
     )
     return false
   } else if (preseed.base) log.debug(`Loaded preseed base file`)
@@ -226,8 +230,10 @@ export async function ensurePreseededContent(preseed, log, gitroot = '/etc/morio
  */
 async function loadPreseedFileFromGithub(config, log) {
   const url = `${config.github.url || 'https://api.github.com'}/repos/${
-    config.github.owner}/${config.github.repo}/contents/${
-      encodeURIComponent(config.github.file_path)}?ref=${config.github.ref}`
+    config.github.owner
+  }/${config.github.repo}/contents/${encodeURIComponent(
+    config.github.file_path
+  )}?ref=${config.github.ref}`
   const result = await testUrl(url, {
     returnError: true,
     ignoreCertificate: config.verify_certificate === false ? true : false,
@@ -253,8 +259,8 @@ async function loadPreseedFileFromGithub(config, log) {
  */
 async function loadPreseedFileFromGitlab(config, log) {
   const url = `${config.gitlab.url || 'https://gitlab.com'}/api/v4/projects/${
-    config.gitlab.project_id}/repository/files/${
-      encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`
+    config.gitlab.project_id
+  }/repository/files/${encodeURIComponent(config.gitlab.file_path)}?ref=${config.gitlab.ref}`
   const result = await testUrl(url, {
     ignoreCertificate: config.verify_certificate === false ? true : false,
     timeout: 4500,
@@ -283,7 +289,7 @@ async function loadPreseedFileFromRepo(config, preseed, gitroot, log) {
   if (content) log.debug(`Preseeded ${config}`)
   else log.warn(`Failed to preseed ${config}`)
 
-  return content ?  asJsonOrYaml(content) : false
+  return content ? asJsonOrYaml(content) : false
 }
 
 /**
@@ -478,19 +484,19 @@ export async function loadClientModules(settings, log) {
    * Now load client modules
    */
   for (const entry of globs) {
-    if (entry.slice(0,4) === 'git:') {
+    if (entry.slice(0, 4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
-        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        const { files } = await globFilesFromRepo(pattern, repo, '/etc/morio/shared')
         for (const sourceFile of files) {
           const targetFile = findPreseedTarget(sourceFile, 'modules')
-          if (targetFile && (
-            sourceFile.slice(-4) === ".yml" ||
-            sourceFile.slice(-6) === ".rules"
-          )) {
+          if (
+            targetFile &&
+            (sourceFile.slice(-4) === '.yml' || sourceFile.slice(-6) === '.rules')
+          ) {
             const copy = await copyPreseedFile({
               sourceFile,
-              targetFile: (sourceFile.slice(-4) === ".yml" ? `${targetFile}.disabled` : targetFile),
+              targetFile: sourceFile.slice(-4) === '.yml' ? `${targetFile}.disabled` : targetFile,
               targetFolder,
             })
             if (copy) log.debug(`Seeding client module file: ${targetFile}`)
@@ -524,8 +530,7 @@ export async function loadStreamProcessors(settings, log) {
     try {
       log.trace(`Removing seeded stream processors: ${file}`)
       await rm(file, { force: true, recursive: true })
-    }
-    catch (err) {
+    } catch (err) {
       log.warn(err, `Failed to remove ${file}`)
     }
   }
@@ -534,22 +539,25 @@ export async function loadStreamProcessors(settings, log) {
    * Now load stream processors
    */
   for (const entry of globs) {
-    if (entry.slice(0,4) === 'git:') {
+    if (entry.slice(0, 4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
-        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        const { files } = await globFilesFromRepo(pattern, repo, '/etc/morio/shared')
         /*
          * By sorting the list of files, we can ensure that the main
          * file is always loaded before any modules it uses.
          */
         for (const sourceFile of files.sort()) {
           const targetFile = findPreseedTarget(sourceFile, 'processors')
-          if (targetFile && sourceFile.slice(-4) === ".mjs") {
-            const copy = await copyPreseedFile({
-              sourceFile,
-              targetFile,
-              targetFolder,
-            }, 2112) // 2112 is the user id of the user inside the tap container
+          if (targetFile && sourceFile.slice(-4) === '.mjs') {
+            const copy = await copyPreseedFile(
+              {
+                sourceFile,
+                targetFile,
+                targetFolder,
+              },
+              2112
+            ) // 2112 is the user id of the user inside the tap container
             if (copy) {
               log.debug(`Seeding stream processing file: ${targetFile}`)
               /*
@@ -559,9 +567,10 @@ export async function loadStreamProcessors(settings, log) {
                */
               const chunks = targetFile.split('/')
               const processor = chunks[0]
-              const mod = (chunks.length === 3 && chunks[1] === 'modules' && chunks[2].slice(-4) === '.mjs')
-                ? chunks[2].slice(0, -4)
-                : false
+              const mod =
+                chunks.length === 3 && chunks[1] === 'modules' && chunks[2].slice(-4) === '.mjs'
+                  ? chunks[2].slice(0, -4)
+                  : false
               const load = await import(sourceFile)
               /*
                * Is it a stream processor module?
@@ -573,19 +582,20 @@ export async function loadStreamProcessors(settings, log) {
                   load.info?.settings,
                   settings.tap[processor].modules[mod]
                 )
-              }
+              } else {
               /*
                * Or is it a stream processor itself?
                * (these should always have settings)
                */
-              else {
                 setIfUnset(settings, ['tap', processor], {})
-                settings.tap[processor] = ensureStreamProcessorSettings(load.info?.settings, settings.tap[processor])
+                settings.tap[processor] = ensureStreamProcessorSettings(
+                  load.info?.settings,
+                  settings.tap[processor]
+                )
                 // Enabled is implied  unless explicitly disabled
                 setIfUnset(settings, ['tap', processor, 'enabled'], true)
               }
-            }
-            else log.warn(`Failed to seed stream processing file: ${targetFile}`)
+            } else log.warn(`Failed to seed stream processing file: ${targetFile}`)
           }
         }
       }
@@ -595,13 +605,12 @@ export async function loadStreamProcessors(settings, log) {
   return settings
 }
 
-function ensureStreamProcessorSettings(seededSettings={}, morioSettings) {
+function ensureStreamProcessorSettings(seededSettings = {}, morioSettings) {
   for (const [key, val] of Object.entries(seededSettings)) {
     if (['enabled', 'topics'].includes(key) && typeof val !== 'undefined') {
       // These two fields take a simple value
       setIfUnset(morioSettings, key, val)
-    }
-    else if (typeof val.dflt !== 'undefined') {
+    } else if (typeof val.dflt !== 'undefined') {
       // These take a UI config object, with the default value stored in the `dflt` key
       setIfUnset(morioSettings, key, val.dflt)
     }
@@ -630,8 +639,7 @@ export async function loadChartProcessors(settings, log) {
     try {
       log.trace(`Removing chart processors: ${file}`)
       await rm(file, { force: true, recursive: true })
-    }
-    catch (err) {
+    } catch (err) {
       log.warn(err, `Failed to remove ${file}`)
     }
   }
@@ -640,23 +648,22 @@ export async function loadChartProcessors(settings, log) {
    * Now load chart processors
    */
   for (const entry of globs) {
-    if (entry.slice(0,4) === 'git:') {
+    if (entry.slice(0, 4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
       if (settings.preseed?.git?.[repo]) {
-        const { files } = await globFilesFromRepo( pattern, repo, '/etc/morio/shared')
+        const { files } = await globFilesFromRepo(pattern, repo, '/etc/morio/shared')
         // For now, we only support metrics
         const metrics = {}
         for (const sourceFile of files.sort()) {
           const relFile = sourceFile.slice(`/etc/morio/shared/${sanitizeGitFolder(repo)}/`.length)
-          const [file=false, type=false] = relFile.split('/').reverse()
-          if (file.slice(-4) === ".mjs" && type === 'metrics') {
+          const [file = false, type = false] = relFile.split('/').reverse()
+          if (file.slice(-4) === '.mjs' && type === 'metrics') {
             const module = file.slice(0, -4)
             try {
               // Import file dynamically
               const esm = await import(sourceFile)
               if (esm && typeof esm.default === 'object') metrics[module] = esm.default
-            }
-            catch (err) {
+            } catch (err) {
               log.warn(`Failed to load chart transformer: ${sourceFile}. ${err}`)
             }
           }
@@ -688,7 +695,7 @@ window.morio.charts.metrics = {`
   for (const [module, metricsets] of Object.entries(code)) {
     output += `\n  "${module}": {`
     for (const [metricset, method] of Object.entries(metricsets)) {
-      output += `\n    "${metricset}": ${method.split("\n").join("\n  ")},`
+      output += `\n    "${metricset}": ${method.split('\n').join('\n  ')},`
     }
     output += '\n  }'
   }
@@ -697,7 +704,7 @@ window.morio.charts.metrics = {`
   return output
 }
 
-async function copyPreseedFile ({ sourceFile, targetFile, targetFolder }, chownId=false) {
+async function copyPreseedFile({ sourceFile, targetFile, targetFolder }, chownId = false) {
   try {
     await mkdir(targetFolder)
     if (chownId) await fs.promises.chown(targetFolder, chownId, chownId)
@@ -711,13 +718,13 @@ async function copyPreseedFile ({ sourceFile, targetFile, targetFolder }, chownI
   return true
 }
 
-function findPreseedTarget (file, root) {
-  const start  = reverseString(file).indexOf(`/${reverseString(root)}/`)
+function findPreseedTarget(file, root) {
+  const start = reverseString(file).indexOf(`/${reverseString(root)}/`)
   if (start === -1) return false
   else return file.slice(-1 * start)
 }
 
-function applyOverlays (settings, overlays, log) {
+function applyOverlays(settings, overlays, log) {
   const count = overlays.length
   let i = 0
   for (const overlay of overlays) {
@@ -748,7 +755,7 @@ function applyOverlays (settings, overlays, log) {
  * @param {object} overlay - The overlay to apply
  * @return {object} settings - The mutated settings
  */
-function applyOverlay (settings, overlay={}) {
+function applyOverlay(settings, overlay = {}) {
   // Merge goes first, this is the soft add for methods
   if (overlay.merge) {
     const todo = Array.isArray(overlay.merge) ? [...overlay.merge] : [overlay.merge]
@@ -775,7 +782,11 @@ function applyOverlay (settings, overlay={}) {
     for (const [path, val] of Object.entries(overlay.ensure)) {
       const current = get(settings, path, false)
       if (Array.isArray(current) && current.includes(val)) {
-        set(settings, path, current.filter(item => item !== val))
+        set(
+          settings,
+          path,
+          current.filter((item) => item !== val)
+        )
       }
     }
   }
@@ -795,7 +806,7 @@ function applyOverlay (settings, overlay={}) {
   return settings
 }
 
-export function extractTemplateVariables (template) {
+export function extractTemplateVariables(template) {
   const vars = []
   for (const chunk of mustache.parse(template)) {
     if (chunk[0] === '&' && !chunk[1].includes(' ')) vars.push(chunk[1])
@@ -804,4 +815,3 @@ export function extractTemplateVariables (template) {
 
   return vars
 }
-

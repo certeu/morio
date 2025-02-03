@@ -170,5 +170,3 @@ export const resolveServiceConfiguration = ({ utils }) => {
     },
   }
 }
-
-

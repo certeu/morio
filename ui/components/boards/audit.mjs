@@ -100,7 +100,7 @@ const AuditTable = ({ data, paused, setPaused }) => {
             ? sorted.map(({ audit, timestamp }, i) => (
                 <tr key={i}>
                   <td className="py-0">
-                    <TimeAgoBrief time={timestamp} suffix='' />
+                    <TimeAgoBrief time={timestamp} suffix="" />
                   </td>
                   <td className="py-0">
                     <button

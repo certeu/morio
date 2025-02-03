@@ -23,11 +23,13 @@ export const log = pino({ name: 'tap', level: 20, sync: false })
  */
 export const tools = {
   axios,
-  get, set, unset,
+  get,
+  set,
+  unset,
   cache: {
     audit: cacheAudit,
     event: cacheEvent,
-    healthcheck:cacheHealthcheck,
+    healthcheck: cacheHealthcheck,
     logErrors: logCacheErrors,
     // Use logline here (all lowercase) to avoid confusion with logErrors
     // because logErrors logs errors, whereas loglines caches loglines and does not log
@@ -48,12 +50,12 @@ export const tools = {
     key: createKey,
   },
   extract: {
-    by: (data) => (data?.msg?.agent?.name || 'unknown-agent'),
-    check: (data) => (data?.url?.full || 'unknown-check'),
-    host: (data) => (data?.host?.id || 'unknown-host'),
-    id: (data) => (data?.['@metadata']._id || 'unknown-id'),
-    metricset: (data) => (data?.metricset?.name || 'unknown-metricset'),
-    module: (data) => (data?.labels?.['morio.module'] || 'unknown-module'),
+    by: (data) => data?.msg?.agent?.name || 'unknown-agent',
+    check: (data) => data?.url?.full || 'unknown-check',
+    host: (data) => data?.host?.id || 'unknown-host',
+    id: (data) => data?.['@metadata']._id || 'unknown-id',
+    metricset: (data) => data?.metricset?.name || 'unknown-metricset',
+    module: (data) => data?.labels?.['morio.module'] || 'unknown-module',
     timestamp: when,
   },
   format: {
@@ -73,7 +75,7 @@ export const tools = {
   },
   settings,
   getSettings: (path, dflt) => get(settings, path, dflt),
-  shortUuid: (uuid) => typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0,5) : 'xxxxx',
+  shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
 }
 
 /*
@@ -95,7 +97,7 @@ function clean(input) {
  * Generates a context key
  * This is the same as a cache key, but uses '.' as spacer
  */
-function createContext (...data) {
+function createContext(...data) {
   return generateKey(data, '.')
 }
 
@@ -104,7 +106,7 @@ function createContext (...data) {
  *
  * @param {string} input - The input to hash. A scalar is expected but we will cast to string if you pass a non-scalar.
  */
-function createHash (input) {
+function createHash(input) {
   /*
    * Ensure this 'just works' even when passing an object or array
    */
@@ -116,14 +118,14 @@ function createHash (input) {
  * Generates a cache key
  * This is the same as a context key, but uses '|' as spacer
  */
-function createKey (...data) {
+function createKey(...data) {
   return generateKey(data, '|')
 }
 
 /*
  * Converts milliseconds to seconds
  */
-function ms2s (ms) {
+function ms2s(ms) {
   return Math.floor(ms / 1000)
 }
 
@@ -132,19 +134,16 @@ function ms2s (ms) {
  *
  * @return {number} ms - Current timestamp in milliseconds
  */
-function now () {
+function now() {
   return Date.now()
 }
 
 /*
  * Figure out when a message happened
  */
-function when (data) {
-  return (data?.['@timestamp'])
-    ? new Date(data['@timestamp']).getTime()
-    : now()
+function when(data) {
+  return data?.['@timestamp'] ? new Date(data['@timestamp']).getTime() : now()
 }
-
 
 /*
  *
@@ -155,21 +154,21 @@ function when (data) {
 /*
  * Creates an alarm
  */
-function alarm (data) {
+function alarm(data) {
   return produceStructuredMessage('alarm', data)
 }
 
 /*
  * Creates an event
  */
-function event (data) {
+function event(data) {
   return produceStructuredMessage('event', data)
 }
 
 /*
  * Creates a notification
  */
-function notification (data) {
+function notification(data) {
   return produceStructuredMessage('notification', data)
 }
 
@@ -178,16 +177,14 @@ function notification (data) {
  * CACHE RELATED TOOLS
  *
  */
-function logCacheErrors (err, result) {
-  return err
-    ? tools.note(`ValKey pipeline exec error`, err)
-    : null
+function logCacheErrors(err, result) {
+  return err ? tools.note(`ValKey pipeline exec error`, err) : null
 }
 
 /*
  * Cache an event
  */
-async function cacheEvent (data) {
+async function cacheEvent(data) {
   valkey.xadd('events', '*', ...asValKeyParams(data))
   trimStream('events', 150)
 }
@@ -195,7 +192,7 @@ async function cacheEvent (data) {
 /*
  * Cache an audit event
  */
-async function cacheAudit (data, overrides={}) {
+async function cacheAudit(data, overrides = {}) {
   valkey.xadd('audit', '*', ...asValKeyParams(data))
   trimStream('audit', 150)
 }
@@ -212,11 +209,9 @@ async function cacheAudit (data, overrides={}) {
  * @param {number } remrange - How long (in seconds) to keep healthcheck data for
  * @param {number} expire - How long a healthcheck can go without data before it's expired
  */
-async function cacheHealthcheck (checkData, data, overrides={}) {
+async function cacheHealthcheck(checkData, data, overrides = {}) {
   // Extract overrides or use defaults
-  const {
-    ttl=2,
-  } = overrides
+  const { ttl = 2 } = overrides
 
   // Create cache key
   const key = createKey('check', checkData.id)
@@ -225,7 +220,7 @@ async function cacheHealthcheck (checkData, data, overrides={}) {
   valkey
     .multi()
     .zadd(key, checkData.time, JSON.stringify(checkData))
-    .zremrangebyscore(key, '-inf', checkData.time - (ttl * 3600 * 1000))
+    .zremrangebyscore(key, '-inf', checkData.time - ttl * 3600 * 1000)
     .expire(key, ttl * 3600)
     .sadd('checks', key)
     .exec(logCacheErrors)
@@ -239,16 +234,15 @@ async function cacheHealthcheck (checkData, data, overrides={}) {
  * @param {obhject} data - The full data from kafka
  * @param {object} overrides - The processor configuration and any other overrides
  */
-async function cacheLogline (logset, logData, data, overrides={}) {
+async function cacheLogline(logset, logData, data, overrides = {}) {
   // Extract settings from config or use defaults
   const {
     cache = true,
     ttl = 1,
     host = tools.extract.host(data),
     module = tools.extract.module(data),
-    cap = 25
+    cap = 25,
   } = overrides
-
 
   // Create cache key
   const key = createKey('log', host, module, logset)
@@ -258,26 +252,31 @@ async function cacheLogline (logset, logData, data, overrides={}) {
     .multi()
     .lpush(key, logData)
     .ltrim(key, 0, cap)
-    .expire(key, ttl*3600)
+    .expire(key, ttl * 3600)
     .exec(logCacheErrors)
 
   // Keep track of log files collected for this host
   const lkey = createKey('logs', host)
   const logs = JSON.parse(await valkey.hget(lkey, module))
-  valkey.hset(lkey, module, JSON.stringify((logs === null)
-    // First log we see for this host, start new list
-    ? [logset]
-    // Add to list of logs for this host, making sure to avoid duplicates
-    : [...new Set([...logs, logset])]
-  ))
-  valkey.expire(lkey, ttl*3600)
+  valkey.hset(
+    lkey,
+    module,
+    JSON.stringify(
+      logs === null
+        ? // First log we see for this host, start new list
+          [logset]
+        : // Add to list of logs for this host, making sure to avoid duplicates
+          [...new Set([...logs, logset])]
+    )
+  )
+  valkey.expire(lkey, ttl * 3600)
 
   // Finally, keep track of the hosts for which we have logs
   const hkey = 'logs'
   valkey
     .multi()
     .zadd(hkey, when(data), host)
-    .zremrangebyscore(hkey, '-inf', now()/1000 - ttl*3600)
+    .zremrangebyscore(hkey, '-inf', now() / 1000 - ttl * 3600)
     .zremrangebyrank(key, 0, 10000)
     .expire(hkey, ttl * 1.5 * 3600)
     .exec(logCacheErrors)
@@ -292,7 +291,7 @@ async function cacheLogline (logset, logData, data, overrides={}) {
  * @param {object} data - The full data from RedPanda
  * @param {object} overrides - The stream processor configuration and any other overrides
  */
-async function cacheMetricset (metricset, metrics, data, overrides={}) {
+async function cacheMetricset(metricset, metrics, data, overrides = {}) {
   /*
    * Don't bother if we do not have the data
    */
@@ -302,20 +301,20 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
 
   // Extract overrides or use defaults
   const {
-    cap=150,
-    ttl=1,
-    host=tools.extract.host(data),
-    module=tools.extract.module(data),
+    cap = 150,
+    ttl = 1,
+    host = tools.extract.host(data),
+    module = tools.extract.module(data),
   } = overrides
 
   // Create cache key
-  const key = createKey( 'metric', host, module, metricset)
+  const key = createKey('metric', host, module, metricset)
 
   // Cache the metrics
   valkey
     .multi()
     .zadd(key, when(data), JSON.stringify(metrics))
-    .zremrangebyscore(key, '-inf', now() - (ttl * 3600 * 1000))
+    .zremrangebyscore(key, '-inf', now() - ttl * 3600 * 1000)
     //.zremrangebyrank(key, 0, cap * -1)
     .expire(key, ttl * 3600 * 1.5)
     .exec(logCacheErrors)
@@ -323,12 +322,17 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
   // Keep track of metricsets collected for this host
   const lkey = createKey('metrics', host)
   const metricsets = JSON.parse(await valkey.hget(lkey, module))
-  valkey.hset(lkey, module, JSON.stringify((metricsets === null)
-    // First metricset we see for this host, start new list
-    ? [metricset]
-    // Add to list of metricsets for this host, making sure to avoid duplicates
-    : [...new Set([...metricsets, metricset])]
-  ))
+  valkey.hset(
+    lkey,
+    module,
+    JSON.stringify(
+      metricsets === null
+        ? // First metricset we see for this host, start new list
+          [metricset]
+        : // Add to list of metricsets for this host, making sure to avoid duplicates
+          [...new Set([...metricsets, metricset])]
+    )
+  )
   valkey.expire(lkey, ttl * 3600)
 
   // Finally, keep track of the hosts for which we have metrics
@@ -336,7 +340,7 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
   valkey
     .multi()
     .zadd(hkey, when(data), host)
-    .zremrangebyscore(hkey, '-inf', now()/1000 - ttl*3600)
+    .zremrangebyscore(hkey, '-inf', now() / 1000 - ttl * 3600)
     //.zremrangebyrank(hkey, 0, 10000)
     .expire(hkey, ttl * 1.5 * 3600)
     .exec(logCacheErrors)
@@ -348,7 +352,7 @@ async function cacheMetricset (metricset, metrics, data, overrides={}) {
  * They also make it easier to debug, since logging on a system that is running
  * Morio can result in an exponential snowball when also processing logs
  */
-function cacheNote (title="No note title", data={}) {
+function cacheNote(title = 'No note title', data = {}) {
   if (typeof title !== 'string' || typeof data !== 'object') return false
   valkey.xadd('notes', '*', ...asValKeyParams({ title, data }))
   trimStream('notes', 50)
@@ -357,10 +361,8 @@ function cacheNote (title="No note title", data={}) {
 /*
  * Trims a ValKey stream to a given length
  */
-function trimStream (key=false, len=100) {
- return key
-  ? valkey.xtrim(key, 'MAXLEN', '~', len)
-  : false
+function trimStream(key = false, len = 100) {
+  return key ? valkey.xtrim(key, 'MAXLEN', '~', len) : false
 }
 
 /*
@@ -370,20 +372,17 @@ function trimStream (key=false, len=100) {
 /*
  * Flattens an object to [prop, val, prop, val, ... ] array for valkey commands
  */
-function asValKeyParams (obj) {
+function asValKeyParams(obj) {
   const params = []
   for (const [prop, val] of Object.entries(obj)) params.push(prop, valKeySafe(val))
 
   return params
 }
 
-function valKeySafe (value) {
-  if (value === null) return 'null';
-  if (typeof value === 'function') return 'function';
-  if (
-    Array.isArray(value) ||
-    typeof value === 'object'
-  ) return JSON.stringify(value)
+function valKeySafe(value) {
+  if (value === null) return 'null'
+  if (typeof value === 'function') return 'function'
+  if (Array.isArray(value) || typeof value === 'object') return JSON.stringify(value)
 
   return value
 }
@@ -395,7 +394,8 @@ function valKeySafe (value) {
  * This message is variadic, so you can pass as many params as you want.
  */
 function generateKey(data, spacer) {
-  return data.map(p => p ? String(p).replace(/\|/g, '_') : 'undefined')
+  return data
+    .map((p) => (p ? String(p).replace(/\|/g, '_') : 'undefined'))
     .join(spacer)
     .toLowerCase()
 }
@@ -411,7 +411,7 @@ function produceInventoryUpdate(data) {
 
   return tools.producer.send({
     topic: 'inventory',
-    messages: [{ value: JSON.stringify(data) }]
+    messages: [{ value: JSON.stringify(data) }],
   })
 }
 
@@ -423,31 +423,33 @@ function produceStructuredMessage(msgType, msgData) {
   if (typeof msgData !== 'object') log.warn(`Invalid ${topic} data`)
 
   const {
-    context=`${msgType}.context.missing`,
-    data=null,
-    host='unknown',
-    tags=[],
-    time=now(),
-    title=`Untitled ${msgType}`,
-    type=`${msgType}.type.missing`,
+    context = `${msgType}.context.missing`,
+    data = null,
+    host = 'unknown',
+    tags = [],
+    time = now(),
+    title = `Untitled ${msgType}`,
+    type = `${msgType}.type.missing`,
   } = msgData
 
   // Remember that we want ECS compliant data
   const msg = {
     host: { id: host },
     tags,
-    morio: { }
+    morio: {},
   }
-  msg.morio[msgType] = { context, data, time, title, type, hash: createHash(type+context) }
+  msg.morio[msgType] = { context, data, time, title, type, hash: createHash(type + context) }
 
   return tools.producer.send({
     topic: msgType + 's',
-    messages: [{
-      value: JSON.stringify(msg),
-      headers: {
-        morio_context: msg.morio[msgType].context
-      }
-    }]
+    messages: [
+      {
+        value: JSON.stringify(msg),
+        headers: {
+          morio_context: msg.morio[msgType].context,
+        },
+      },
+    ],
   })
 }
 

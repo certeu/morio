@@ -16,13 +16,12 @@ export default function DashboardsHostMetricsPage({ host, module, metricset, cha
       try {
         result = await api.getInventoryHostname(host)
         if (result.fqdn) setHostname(result.fqdn)
-      }
-      catch (err) {
+      } catch (err) {
         console.log(err)
       }
     }
     getHostName()
-  },[host])
+  }, [host, api])
 
   const meta = {
     title: (
@@ -47,7 +46,13 @@ export default function DashboardsHostMetricsPage({ host, module, metricset, cha
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <ShowMetrics host={host} module={module} metricset={metricset} hostname={hostname} show={show}/>
+        <ShowMetrics
+          host={host}
+          module={module}
+          metricset={metricset}
+          hostname={hostname}
+          show={show}
+        />
       </ContentWrapper>
     </PageWrapper>
   )

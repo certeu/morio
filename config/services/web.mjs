@@ -30,7 +30,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: [ ],
+      ports: [],
       // Volumes
       volumes: PROD
         ? [
@@ -56,8 +56,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         service: 'web',
         prefixes: ['/downloads', '/coverage', '/pubkey', '/repos', '/install', '/static'],
         priority: 666,
-      })
+      }),
     },
   }
 }
-

@@ -2,7 +2,6 @@ MORIO_TICK:
   about: The minimal time interval between data collection
   default: 30s
 
-MORIO_TRACK_INVENTORY: 
+MORIO_TRACK_INVENTORY:
   about: Enables data collection of inventory assets and installed software
   default: true
-

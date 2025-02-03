@@ -15,11 +15,9 @@ import { Loading } from 'components/animations.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { Host } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
-import { Popout } from 'components/popout.mjs'
-import { ToggleLiveButton, cacheStreamAsObj } from 'components/boards/shared.mjs'
+import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { ChartsProvider } from './charts-provider.mjs'
 import { Echart } from 'components/echarts.mjs'
-import { Details } from 'components/details.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached metrics
@@ -210,7 +208,9 @@ export const HostMetricsTable = ({ host, module = false }) => {
             <tr key={entry.lolset + entry.host + entry.module}>
               {module ? null : (
                 <td className="">
-                  <PageLink href={`/boards/metrics/${host}/${entry.module}/`}>{entry.module}</PageLink>
+                  <PageLink href={`/boards/metrics/${host}/${entry.module}/`}>
+                    {entry.module}
+                  </PageLink>
                 </td>
               )}
               <td className="">
@@ -249,7 +249,7 @@ const MorioMetricset = ({ name, href }) =>
  * Wrapper to provide echarts dynamic chart handlers
  */
 export const ShowMetrics = (props) => (
-  <ChartsProvider type='metrics'>
+  <ChartsProvider type="metrics">
     <ShowMetricsInner {...props} />
   </ChartsProvider>
 )
@@ -257,11 +257,17 @@ export const ShowMetrics = (props) => (
 // Avoid re-using objects
 const clone = (data) => JSON.parse(JSON.stringify(data))
 
-const transformMetrics = ({ host, module, metricset, data, templates }) => (
+const transformMetrics = ({ host, module, metricset, data, templates }) =>
   typeof window?.morio?.charts?.metrics?.[module]?.[metricset] === 'function'
-)
-  ? window.morio.charts.metrics[module][metricset]({host, module, metricset, data, templates, clone})
-  : data
+    ? window.morio.charts.metrics[module][metricset]({
+        host,
+        module,
+        metricset,
+        data,
+        templates,
+        clone,
+      })
+    : data
 
 /**
  * This component renders visualisations for all cached
@@ -285,22 +291,21 @@ const ShowMetricsInner = ({ host, module, metricset, hostname, show }) => {
     refetchIntervalInBackground: false,
   })
 
-
   // Defer to chart transformer
   const data = parseCachedMetrics(cache)
 
   // Don't bother if there's nothing in the cache
-  return (!cache || cache.length < 1)
-    ? (
-      <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
-      </>
-    )
-    : <EchartWrapper {...{ data, host, module, metricset, paused, setPaused, hostname, show }} />
+  return !cache || cache.length < 1 ? (
+    <>
+      <Loading />
+      <p>Nothing in the cache to show you here.</p>
+    </>
+  ) : (
+    <EchartWrapper {...{ data, host, module, metricset, paused, setPaused, hostname, show }} />
+  )
 }
 
-async function runShowMetricsApiCall(api, host, module, metricset, hostname) {
+async function runShowMetricsApiCall(api, host, module, metricset) {
   const data = {}
   let result = await api.getCacheKey(`metric|${host}|${module}|${metricset}`)
   if (Array.isArray(result) && result[1] === 200) data.cache = result[0].value
@@ -310,29 +315,41 @@ async function runShowMetricsApiCall(api, host, module, metricset, hostname) {
   return data
 }
 
-const EchartWrapper = ({ data, host, module, metricset, paused, setPaused, hostname, show=true }) => {
+const EchartWrapper = ({
+  data,
+  host,
+  module,
+  metricset,
+  paused,
+  setPaused,
+  hostname,
+  show = true,
+}) => {
   const [enabled, setEnabled] = useState(show)
 
   // We are memoizing option to avoid re-renders
-  const option = useMemo(() => transformMetrics({
-    host,
-    module,
-    metricset,
-    data,
-    templates: chartTemplates(data)
-  }), [data])
+  const option = useMemo(
+    () =>
+      transformMetrics({
+        host,
+        module,
+        metricset,
+        data,
+        templates: chartTemplates(data),
+      }),
+    [host, module, metricset, data]
+  )
 
   const toggleChart = (id) => {
-    const newEnabled = enabled === true ? {} : {...enabled}
+    const newEnabled = enabled === true ? {} : { ...enabled }
     if (newEnabled[id]) delete newEnabled[id]
     else newEnabled[id] = true
 
     setEnabled(newEnabled)
   }
 
-  const isEnabled = (option, i) => (enabled === true || (enabled && (enabled[i] || enabled[option?.id])))
-    ? true
-    : false
+  const isEnabled = (option, i) =>
+    enabled === true || (enabled && (enabled[i] || enabled[option?.id])) ? true : false
 
   return (
     <div className="flex flex-col gap-4">
@@ -340,48 +357,54 @@ const EchartWrapper = ({ data, host, module, metricset, paused, setPaused, hostn
         <ToggleLiveButton {...{ paused, setPaused }} />
         <KeyVal k="module" val={module} />
         <KeyVal k="metricset" val={metricset} />
-        {hostname
-          ? <KeyVal k="hostname" val={hostname} />
-          : <KeyVal k="host" val={host} />
-        }
+        {hostname ? <KeyVal k="hostname" val={hostname} /> : <KeyVal k="host" val={host} />}
         {Array.isArray(option) && typeof show !== 'object'
-          ? option.map((opt, i) => opt ? <KeyVal
-              key={i}
-              k={isEnabled(opt, i) ? "shown" : "hidden"}
-              val={opt.title.text}
-              color={isEnabled(opt, i) ? "success" : "error"}
-              onClick={() => toggleChart(option.id ? option.id : i)}
-            /> : null
-          )
-          : null
-        }
+          ? option.map((opt, i) =>
+              opt ? (
+                <KeyVal
+                  key={i}
+                  k={isEnabled(opt, i) ? 'shown' : 'hidden'}
+                  val={opt.title.text}
+                  color={isEnabled(opt, i) ? 'success' : 'error'}
+                  onClick={() => toggleChart(option.id ? option.id : i)}
+                />
+              ) : null
+            )
+          : null}
       </div>
-      {Array.isArray(option)
-        ? option.map((opt, i) => (!opt || !isEnabled(opt, i))
-          ? null
-          : <SingleEchart key={i} option={opt} href={`/boards/metrics/${host}/${module}/${metricset}/${opt.id || i}`}/>
+      {Array.isArray(option) ? (
+        option.map((opt, i) =>
+          !opt || !isEnabled(opt, i) ? null : (
+            <SingleEchart
+              key={i}
+              option={opt}
+              href={`/boards/metrics/${host}/${module}/${metricset}/${opt.id || i}`}
+            />
+          )
         )
-        : <SingleEchart option={option} href={`/boards/metrics/${host}/${module}/${metricset}/${option.id || i}`}/>
-      }
+      ) : (
+        <SingleEchart
+          option={option}
+          href={`/boards/metrics/${host}/${module}/${metricset}/${option.id || 0}`}
+        />
+      )}
     </div>
   )
 }
 
-const SingleEchart = ({ option, href=false }) => {
+const SingleEchart = ({ option, href = false }) => {
   if (href && option.toolbox?.feature) {
     option.toolbox.feature.myPermalink = {
       show: true,
-      title: "Permalink to this chart",
+      title: 'Permalink to this chart',
       icon: 'path://M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z',
 
-      onclick: () => window.location.href = href
+      onclick: () => (window.location.href = href),
     }
   }
 
   return <Echart option={option} />
 }
-
-const MultiEchart = ({ options, href }) => options.map((option, i) => <SingleEchart option={option} href={href} key={i} />)
 
 /**
  * A helper method to parse a list of Redis/ValKey metrics
@@ -389,16 +412,16 @@ const MultiEchart = ({ options, href }) => options.map((option, i) => <SingleEch
  * @param {array} cache - The data from the cache
  * @return {object} data - The same data parsed
  */
-function parseCachedMetrics (metrics) {
+function parseCachedMetrics(metrics) {
   if (!metrics) return false
   const data = []
   for (const i in metrics) {
-    if (i %2 === 1) data.push({
-      timestamp: Number(metrics[i]),
-      data: JSON.parse(metrics[i-1])
-    })
+    if (i % 2 === 1)
+      data.push({
+        timestamp: Number(metrics[i]),
+        data: JSON.parse(metrics[i - 1]),
+      })
   }
 
   return data
 }
-

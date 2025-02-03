@@ -1,11 +1,8 @@
-import { wordmarkPathString } from 'components/branding.mjs'
-
 /*
  * Helper method to format time on charts
  */
 const chartTime = (timestamp) => {
   const date = new Date(timestamp)
-  const hours = date.getHours()
   return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`
 }
 
@@ -13,8 +10,7 @@ const chartTime = (timestamp) => {
  * Helper method to pad a string to a length of 2
  * This is used for hours, minutes, seconds
  */
-const pad2 = (str) => `${str}`.length === 2 ? str : '0'+str
-
+const pad2 = (str) => (`${str}`.length === 2 ? str : '0' + str)
 
 /*
  * Shared chart options
@@ -24,17 +20,17 @@ const options = {
     trigger: 'axis',
     show: true,
     axisPointer: {
-      type: "line",
+      type: 'line',
       lineStyle: {
-        type: "dashed"
-      }
-    }
+        type: 'dashed',
+      },
+    },
   },
   grid: {
-    left: "3%",
-    right: "4%",
-    bottom: "80", // Space for legend
-    containLabel: true
+    left: '3%',
+    right: '4%',
+    bottom: '80', // Space for legend
+    containLabel: true,
   },
   toolbox: {
     feature: {
@@ -48,9 +44,9 @@ const options = {
       },
       dataZoom: {},
       magicType: {
-        type: ['line', 'bar', 'stack']
+        type: ['line', 'bar', 'stack'],
       },
-    }
+    },
   },
   legend: {
     show: true,
@@ -59,17 +55,17 @@ const options = {
   },
   dataZoom: [
     {
-      type: "slider",
+      type: 'slider',
       show: true,
       xAxisIndex: [0],
       bottom: 40,
       start: 0,
-      end: 100
+      end: 100,
     },
     {
-      type: "inside",
-      xAxisIndex: [0]
-    }
+      type: 'inside',
+      xAxisIndex: [0],
+    },
   ],
   graphic: [
     {
@@ -82,9 +78,9 @@ const options = {
         width: 75,
         height: 20,
         opacity: 0.25,
-      }
-    }
-  ]
+      },
+    },
+  ],
 }
 
 /*
@@ -100,38 +96,27 @@ const charts = (data) => ({
     xAxis: {
       type: 'category',
       name: 'Time',
-      nameLocation: "middle",
+      nameLocation: 'middle',
       nameGap: 45,
       axisLabel: {
-        rotate: 45  // Rotate labels for better readability
+        rotate: 45, // Rotate labels for better readability
       },
-      data: data.map(entry => chartTime(entry.timestamp)),
+      data: data.map((entry) => chartTime(entry.timestamp)),
     },
     yAxis: {
       type: 'value',
       name: 'set yAxis.name to replace this name',
-      nameLocation: "middle",
+      nameLocation: 'middle',
       nameGap: 30,
       splitLine: {
         show: true,
         lineStyle: {
-          type: "dashed"
+          type: 'dashed',
         },
-      }
+      },
     },
-  }
+  },
 })
-
-/*
- * Shared chart series templates
- */
-const series = {
-  line: {
-    type: 'line',
-    symbol: 'none',
-    smooth: true,
-  }
-}
 
 /*
  * Wrapper templates object with charts, option, and series
@@ -145,6 +130,5 @@ export const chartTemplates = (data) => ({
       symbol: 'none',
       smooth: true,
     },
-  }
+  },
 })
-

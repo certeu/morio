@@ -106,14 +106,15 @@ presets.MORIO_NETWORK_MTU = 1500
 predocs.MORIO_ERRORS_WEB_PREFIX = 'Web URL prefix for linking to errors'
 presets.MORIO_ERRORS_WEB_PREFIX = 'https://morio.it/docs/reference/errors/'
 
-predocs.MORIO_CONTAINER_PREFIX = "Prefix used in container images for Morio"
-presets.MORIO_CONTAINER_PREFIX = "morio-"
+predocs.MORIO_CONTAINER_PREFIX = 'Prefix used in container images for Morio'
+presets.MORIO_CONTAINER_PREFIX = 'morio-'
 
-predocs.MORIO_CONTAINER_TAG = "The currently running container tag. Picked up from environment variables."
-presets.MORIO_CONTAINER_TAG = "dev-build"
+predocs.MORIO_CONTAINER_TAG =
+  'The currently running container tag. Picked up from environment variables.'
+presets.MORIO_CONTAINER_TAG = 'dev-build'
 
-predocs.MORIO_RELEASE_CHANNEL = "The current release channel. Picked up from environment variables."
-presets.MORIO_RELEASE_CHANNEL = "dev"
+predocs.MORIO_RELEASE_CHANNEL = 'The current release channel. Picked up from environment variables.'
+presets.MORIO_RELEASE_CHANNEL = 'dev'
 
 /*
  * Docker presets
@@ -288,16 +289,19 @@ presets.MORIO_CACHE_PORT = 6379
  * Connnector presets
  */
 
-predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_FOLDER = 'The location of the pipeline configurations within the Logstash container.'
+predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_FOLDER =
+  'The location of the pipeline configurations within the Logstash container.'
 presets.MORIO_CONNECTOR_LOGSTAHS_PIPELINE_FOLDER = '/usr/share/logstash/config/pipeline'
 
-predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = 'The location of the central pipeline configuration file within the Logstash container.'
+predocs.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE =
+  'The location of the central pipeline configuration file within the Logstash container.'
 presets.MORIO_CONNECTOR_LOGSTASH_PIPELINE_CONFIG_FILE = '/etc/morio/connector/pipelines.yml'
 
 predocs.MORIO_CONNECTOR_UID = 'User ID (UID) of the user running the Connector service'
 presets.MORIO_CONNECTOR_UID = 1000
 
-predocs.MORIO_CONNECTOR_P12_PASSWORD = 'A password to protect PKCS12 keystores. Does not provide actual security.'
+predocs.MORIO_CONNECTOR_P12_PASSWORD =
+  'A password to protect PKCS12 keystores. Does not provide actual security.'
 presets.MORIO_CONNECTOR_P12_PASSWORD = 'Butterflies and zebras and moonbeams'
 
 /*
@@ -328,8 +332,9 @@ settings.`
 presets.MORIO_CORE_LOG_LEVEL = 'trace'
 
 // Location of the logstash pipelines.folder
-predocs.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER = "Location of the Logstash pipelines config folder within the core container."
-presets.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER = "/etc/morio/connector/pipelines"
+predocs.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER =
+  'Location of the Logstash pipelines config folder within the core container.'
+presets.MORIO_CORE_LOGSTASH_PIPELINES_FOLDER = '/etc/morio/connector/pipelines'
 
 // TCP port core should listen on
 predocs.MORIO_CORE_PORT = 'TCP port for the _core service_ to listen on'

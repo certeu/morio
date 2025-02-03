@@ -16,7 +16,7 @@ const counters = {
   peak: {
     topics: {},
     procs: {},
-  }
+  },
 }
 
 export const count = {
@@ -31,13 +31,13 @@ export const count = {
     if (counters.procs[name] > counters.peak.procs[name]) {
       counters.peak.procs[name] = counters.procs[name]
     }
-  }
+  },
 }
 
 /*
  * This function is called to start the count
  */
-function startCount () {
+function startCount() {
   /*
    * Start with a clean slate
    */
@@ -57,40 +57,40 @@ function startCount () {
     return tools.producer
       .send({
         topic: 'metrics',
-        messages: [{ value: JSON.stringify(countersAsEcs(data)) }]
+        messages: [{ value: JSON.stringify(countersAsEcs(data)) }],
       })
-      .catch(err => tools.cache.note('Error when producing counters', err))
+      .catch((err) => tools.cache.note('Error when producing counters', err))
   }, tick)
 }
 
-function countersAsEcs (throughput) {
+function countersAsEcs(throughput) {
   return {
-    "@timestamp": new Date().toISOString(),
-    "@metadata": {
-      type: "_doc",
+    '@timestamp': new Date().toISOString(),
+    '@metadata': {
+      type: '_doc',
       _id: tools.create.id(),
     },
-    ecs: { version: "8.0.0" },
+    ecs: { version: '8.0.0' },
     event: {
-      dataset: "linux-morio-tap.throughput",
+      dataset: 'linux-morio-tap.throughput',
     },
     metricset: {
-      name: "throughput",
+      name: 'throughput',
       period: tick,
     },
     morio: {
       tap: {
         throughput,
-        version: 7
-      }
+        version: 7,
+      },
     },
     host: {
       id: node.uuid,
       name: node.fqdn,
     },
     labels: {
-      'morio.module': 'linux-morio-tap'
-    }
+      'morio.module': 'linux-morio-tap',
+    },
   }
 }
 
@@ -99,7 +99,7 @@ function countersAsEcs (throughput) {
  *
  * @param {bool} init - Whether or not this is in initial reset
  */
-function resetCounters(init=false) {
+function resetCounters(init = false) {
   if (init) {
     /*
      * Initial start, just initialise the counters object
@@ -121,7 +121,7 @@ function resetCounters(init=false) {
     const data = {
       topics: {},
       procs: {},
-      peak: counters.peak
+      peak: counters.peak,
     }
     for (const topic of topics) {
       data.topics[topic] = counters.topics[topic]

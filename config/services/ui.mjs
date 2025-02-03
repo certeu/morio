@@ -29,9 +29,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD
-        ? [
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
-          ]
+        ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`]
         : [
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,
             `${utils.getPreset('MORIO_CONFIG_ROOT')}/shared:/etc/morio/shared`,
@@ -52,12 +50,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         prefixes: ['/'],
         priority: 6,
       })
-      .set('http.middlewares.pretty-errors.errors', {
-        status: ["400-599"],
-        service: 'ui',
-        query: "/http-errors/{status}/"
-      })
-      .set('http.routers.ui.middlewares', ['pretty-errors@file'])
+        .set('http.middlewares.pretty-errors.errors', {
+          status: ['400-599'],
+          service: 'ui',
+          query: '/http-errors/{status}/',
+        })
+        .set('http.routers.ui.middlewares', ['pretty-errors@file']),
     },
   }
 }

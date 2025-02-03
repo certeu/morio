@@ -70,9 +70,9 @@ function OpenAPI(utils, type = 'api', extra = {}) {
         altText: 'Morio Logo',
       },
       contact: {
-        name: "Morio Team",
-        url: "https://github.com/certeu/morio",
-        email: "morio@morio.it",
+        name: 'Morio Team',
+        url: 'https://github.com/certeu/morio',
+        email: 'morio@morio.it',
       },
     },
     externalDocs: {
@@ -122,11 +122,11 @@ for (const method of ['get', 'post', 'patch', 'put', 'delete']) {
  */
 export function response({
   desc,
-  example=false,
-  examples=false,
-  schema=false,
-  headers=false,
-  contentType='application/json'
+  example = false,
+  examples = false,
+  schema = false,
+  headers = false,
+  contentType = 'application/json',
 }) {
   const res = {
     description: desc,

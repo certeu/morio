@@ -83,7 +83,6 @@ other reasons to run it. If you enable this feature flag, this service will
 always be started once Morio is set up.`
 flags.ENFORCE_SERVICE_CACHE = false
 
-
 /*
  * Reseed the config when reloading/restarting
  */
@@ -102,4 +101,3 @@ When you enable this flag, Morio will reseed (thus update the local git
 content from the remote) whenever you restart it, or update its
 configuration.`
 flags.RESEED_ON_RELOAD = false
-

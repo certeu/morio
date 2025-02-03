@@ -3,11 +3,11 @@ import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import {
   CheckCircleIcon,
   FingerprintIcon,
-  FixmeIcon,
+  //  FixmeIcon,
   FlagIcon,
   FlipoverIcon,
   LogsIcon,
-  SearchIcon,
+  //  SearchIcon,
   StatusIcon,
   TipIcon,
 } from 'components/icons.mjs'
@@ -54,13 +54,8 @@ const meta = {
   Icon: FlipoverIcon,
 }
 
-export default function DashboardsPage() {
-  return (
-    <PageWrapper {...meta}>
-      <ContentWrapper {...meta}>
-        <div className="max-w-4xl">
-          {false ? (
-            <>
+// Removed because it's not ready yet
+/*
           <h3>Top Picks</h3>
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             <Card
@@ -80,7 +75,13 @@ export default function DashboardsPage() {
               Icon={FixmeIcon}
             />
           </div>
-            </> ) : null}
+          */
+
+export default function DashboardsPage() {
+  return (
+    <PageWrapper {...meta}>
+      <ContentWrapper {...meta}>
+        <div className="max-w-4xl">
           <h3 className="mt-8">Per data type</h3>
           <div className="grid grid-cols-2 gap-4 items-center justify-between items-stretch">
             {Object.keys(types).map((type) => {

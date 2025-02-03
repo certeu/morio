@@ -4,7 +4,6 @@ import { useApi } from 'hooks/use-api.mjs'
 import { useQuery } from '@tanstack/react-query'
 import { Markdown } from 'components/markdown.mjs'
 
-
 const defaultAboutMarkdown = `
 We are still trying to find the best way to sum up Morio in a consise way.
 This is what we have so far:

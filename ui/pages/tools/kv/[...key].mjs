@@ -6,17 +6,14 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { UlIcon, PlusIcon, KeyIcon, TrashIcon, WarningIcon } from 'components/icons.mjs'
+import { UlIcon, KeyIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput, TextInput } from 'components/inputs.mjs'
-import { Markdown } from 'components/markdown.mjs'
-import { Popout } from 'components/popout.mjs'
-import { Highlight } from 'components/highlight.mjs'
 import { linkClasses } from 'components/link.mjs'
 
 /**
  * The actual component, in case we want to extract it for re-use later
  */
-export const KvStore = ({ k='' }) => {
+export const KvStore = ({ k = '' }) => {
   /*
    * State
    */
@@ -24,7 +21,6 @@ export const KvStore = ({ k='' }) => {
   const [keys, setKeys] = useState([])
   const [val, setVal] = useState('')
   const [glob, setGlob] = useState('')
-  const [result, setResult] = useState({})
 
   /*
    * Loading context
@@ -41,10 +37,10 @@ export const KvStore = ({ k='' }) => {
    */
   const kvWrite = async () => {
     setLoadingStatus([true, 'Contacting Morio API'])
-    const [body, status] = await api.kvWrite(key, val)
-    if (status === 204) {
+    const result = await api.kvWrite(key, val)
+    if (result[1] === 204) {
       setLoadingStatus([true, 'Key written', true, true])
-    } else if (status === 403) {
+    } else if (result[1] === 403) {
       setLoadingStatus([true, `Access denied when contacting the API`, true, false])
     } else {
       setLoadingStatus([true, 'Failed to write key', true, false])
@@ -54,7 +50,6 @@ export const KvStore = ({ k='' }) => {
     setLoadingStatus([true, 'Contacting Morio API'])
     const [body, status] = await api.kvRead(key)
     if (status === 200) {
-      setResult(body)
       setVal(body.value)
       setLoadingStatus([true, `Read key ${key}`, true, true])
     } else if (status === 403) {
@@ -121,12 +116,11 @@ export const KvStore = ({ k='' }) => {
         <>
           <h5>Search results</h5>
           <ul>
-            {keys.map(k => (
+            {keys.map((k) => (
               <li key={k}>
-                <button key={k}
-                  onClick={() => setKey(k)}
-                  className={`text-primary ${linkClasses}`}
-                >{k}</button>
+                <button key={k} onClick={() => setKey(k)} className={`text-primary ${linkClasses}`}>
+                  {k}
+                </button>
               </li>
             ))}
           </ul>
@@ -167,7 +161,7 @@ const KvPage = (props) => (
   <PageWrapper {...props}>
     <ContentWrapper {...props} Icon={KeyIcon} title={props.title}>
       <div className="max-w-4xl">
-        <KvStore k={Array.isArray(props.k) ? props.k.join('/') : props.k}/>
+        <KvStore k={Array.isArray(props.k) ? props.k.join('/') : props.k} />
       </div>
     </ContentWrapper>
   </PageWrapper>
@@ -178,8 +172,8 @@ export default KvPage
 export const getStaticProps = ({ params }) => ({
   props: {
     title: 'KV Store',
-    page: ['tools', 'kv'],
-    k: params.key
+    page: ['tools', 'kv', ...(Array.isArray(params.key) ? params.key : [params.key])],
+    k: params.key,
   },
 })
 
@@ -187,4 +181,3 @@ export const getStaticPaths = () => ({
   paths: [],
   fallback: 'blocking',
 })
-

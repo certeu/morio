@@ -132,9 +132,7 @@ Controller.prototype.globKeys = async function (req, res) {
   const list = await utils.kv.glob(valid.key)
   log.todo(list)
 
-  return Array.isArray(list)
-    ? res.send(list)
-    : res.send([])
+  return Array.isArray(list) ? res.send(list) : res.send([])
 }
 
 /**

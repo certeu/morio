@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-export const ChartsProvider = ({ type='metrics', children }) => {
+export const ChartsProvider = ({ type = 'metrics', children }) => {
   const [ready, setReady] = useState(window.morio?.charts?.[type] ? true : false)
   const [error, setError] = useState(false)
   const [injected, setInjected] = useState(0)
@@ -19,17 +19,18 @@ export const ChartsProvider = ({ type='metrics', children }) => {
          * not loaded yet, give it a second. Then
          * trigger another check.
          */
-        if (injected > 0) return setTimeout(() => {
-          setInjected(injected+1)
-        }, 1000)
+        if (injected > 0)
+          return setTimeout(() => {
+            setInjected(injected + 1)
+          }, 1000)
 
         /*
          * Prepare script tag
          */
-        const script = document.createElement('script');
-        script.src = `/charts/${type}.mjs`;
+        const script = document.createElement('script')
+        script.src = `/charts/${type}.mjs`
         script.onload = () => setReady(true)
-        script.onerror = (err) => setError(true)
+        script.onerror = (err) => setError(err)
 
         /*
          * Inject script tag into the DOM
@@ -45,7 +46,5 @@ export const ChartsProvider = ({ type='metrics', children }) => {
 
   if (error) return <p>We failed to load the charts: {error.toString()}</p>
 
-  return ready
-    ? children
-    : <p>Loading {type} charts...</p>
+  return ready ? children : <p>Loading {type} charts...</p>
 }

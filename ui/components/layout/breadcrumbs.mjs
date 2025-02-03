@@ -22,7 +22,9 @@ export const Breadcrumbs = ({ page }) => {
             {i + 1 === page.length ? (
               <span className="">{label}</span>
             ) : (
-              <PageLink href={`/${path.map((p) => `${p}`.toLowerCase()).join('/')}`}>{label}</PageLink>
+              <PageLink href={`/${path.map((p) => `${p}`.toLowerCase()).join('/')}`}>
+                {label}
+              </PageLink>
             )}
           </li>,
         ]

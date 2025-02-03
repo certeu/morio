@@ -6,7 +6,7 @@ const db = `http://morio-db:4001`
  * @param {object} data - The data from Kafka
  * @param {object} tools - The tools object
  */
-async function updateHost (data, tools) {
+async function updateHost(data, tools) {
   /*
    * We need at least an ID
    */
@@ -22,17 +22,13 @@ async function updateHost (data, tools) {
   if (hq) {
     let result
     try {
-      result = await tools.axios.post(
-        `${db}/db/execute`,
-        [
-          hq,
-          ...osQuery(data, tools),
-          ...ipQueries(data, tools),
-          ...macQueries(data, tools),
-        ]
-      )
-    }
-    catch (err) {
+      result = await tools.axios.post(`${db}/db/execute`, [
+        hq,
+        ...osQuery(data, tools),
+        ...ipQueries(data, tools),
+        ...macQueries(data, tools),
+      ])
+    } catch (err) {
       tools.note(`Failed to update host ${data.host.id} in DB`, { err, result })
     }
 
@@ -47,7 +43,7 @@ async function updateHost (data, tools) {
  * @param {object} tools - The tools object
  * @return {array} query - The query and its parameters
  */
-function hostQuery (data, tools, update=true) {
+function hostQuery(data, tools, update = true) {
   /*
    * Construct the params
    */
@@ -72,31 +68,20 @@ function hostQuery (data, tools, update=true) {
  * @param {object} tools - The tools object
  * @return {array} query - The query and its parameters
  */
-function osQuery (data, tools) {
+function osQuery(data, tools) {
   const params = {
     id: tools.clean(data.host.id),
     last_update: new Date().toISOString(),
   }
   if (data.host?.os) {
-    for (const field of [
-      'codename',
-      'family',
-      'kernel',
-      'name',
-      'platform',
-      'type',
-      'version'
-    ]) {
+    for (const field of ['codename', 'family', 'kernel', 'name', 'platform', 'type', 'version']) {
       if (data.host?.os[field]) params[field] = data.host.os[field]
     }
   }
 
   // We will spread these results, so an empty array means nothing will be done
-  return  Object.keys(params).length > 3
-    ? [replaceQuery(`inventory_oss`, params)]
-    : []
+  return Object.keys(params).length > 3 ? [replaceQuery(`inventory_oss`, params)] : []
 }
-
 
 /*
  * Creates the query to add an IP address to the inventory
@@ -106,7 +91,7 @@ function osQuery (data, tools) {
  * @param {object} tools - The tools object
  * @return {array} query - The query and its parameters
  */
-function ipQuery (hostId, ip, tools) {
+function ipQuery(hostId, ip, tools) {
   return replaceQuery(`inventory_ips`, {
     id: `${tools.clean(hostId)}_${tools.clean(ip)}`,
     ip: tools.clean(ip),
@@ -123,8 +108,8 @@ function ipQuery (hostId, ip, tools) {
  * @param {object} tools - The tools object
  * @return {array} queries - The queries
  */
-function ipQueries (data, tools) {
-  const queries = data.host.ip.map(ip => ipQuery(data.host.id, ip, tools))
+function ipQueries(data, tools) {
+  const queries = data.host.ip.map((ip) => ipQuery(data.host.id, ip, tools))
 
   return queries
 }
@@ -137,7 +122,7 @@ function ipQueries (data, tools) {
  * @param {object} tools - The tools object
  * @return {array} query - The query and its parameters
  */
-function macQuery (hostId, mac, tools) {
+function macQuery(hostId, mac, tools) {
   const params = {
     id: `${tools.clean(hostId)}_${tools.clean(mac)}`,
     mac: tools.clean(mac),
@@ -155,8 +140,8 @@ function macQuery (hostId, mac, tools) {
  * @param {object} tools - The tools object
  * @return {array} queries - The queries
  */
-function macQueries (data, tools) {
-  const queries = data.host.mac.map(mac => macQuery(data.host.id, mac, tools))
+function macQueries(data, tools) {
+  const queries = data.host.mac.map((mac) => macQuery(data.host.id, mac, tools))
 
   return queries
 }
@@ -176,10 +161,7 @@ function replaceQuery(table, params) {
   const keys = Object.keys(params)
   const vals = keys.map((key) => ':' + key).join()
 
-  return [
-    `REPLACE INTO ${table}(${keys.join()}) VALUES(${vals})`,
-    params,
-  ]
+  return [`REPLACE INTO ${table}(${keys.join()}) VALUES(${vals})`, params]
 }
 
 /*
@@ -190,5 +172,3 @@ export const inventory = {
     update: updateHost,
   },
 }
-
-

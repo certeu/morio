@@ -52,12 +52,10 @@ function parseMessageData(message) {
   data.offset = message.offset ? Number(message.offset) : null
   try {
     data.data = JSON.parse(message.value)
-  }
-  catch (err) {
+  } catch (err) {
     tools.log.warn(`Failed to parse message value as JSON: ${message.value}`)
     data.data = message?.value ? message.value : null
   }
 
   return data
 }
-

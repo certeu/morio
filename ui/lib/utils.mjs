@@ -200,7 +200,7 @@ export const template = (input, replace = {}) =>
  * @param {string/number} timestamp - The time to parse
  * @return {string} timeago - How long ago it was
  */
-export function timeAgo(timestamp, terse = true, suffix=' ago') {
+export function timeAgo(timestamp, terse = true, suffix = ' ago') {
   const delta = new Date() - new Date(timestamp)
 
   const seconds = Math.floor(delta / 1000)

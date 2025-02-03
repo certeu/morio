@@ -29,9 +29,7 @@ export const AuthLayout = ({ children }) => {
         </h1>
         <div className="max-w-lg text-center mx-auto text-neutral-content opacity-80 italic">
           <div className="italic">
-            <div className="flex flex-row items-center opacity-50">
-              Observability Plumbing
-            </div>
+            <div className="flex flex-row items-center opacity-50">Observability Plumbing</div>
           </div>
           <div className="opacity-80 font-thin text-xs mt-4 opacity-50">
             By{' '}

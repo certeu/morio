@@ -46,7 +46,7 @@ export const NavButton = ({
 const BannerMessage = () => {
   const { api } = useApi()
   const key = 'morio/ui/markdown/banner'
-  const { data }  = useQuery({
+  const { data } = useQuery({
     queryKey: [key],
     queryFn: async () => {
       const result = await api.kvRead(key)
@@ -90,21 +90,16 @@ export const Header = ({
   )
 
   const key = 'morio/ui/urls/help'
-  const all = useQuery({
+  const { data } = useQuery({
     queryKey: [key],
     queryFn: async () => {
-      const result1 = await api.kvRead(key)
-      const result2 = await api.kvRead('morio/ui/svg/logo')
-      const it = { help: false, logo: false }
-      if (result1[1] === 200 && result1[0].value) it.help = result1[0].value
-      if (result2[1] === 200 && result2[0].value) it.logo = result2[0].value
-      return it
+      const result = await api.kvRead(key)
+      if (result[1] === 200 && result[0].value) return result[0].value
+      return false
     },
     refetchInterval: false,
     refetchIntervalInBackground: false,
   })
-  const { data } = all
-  console.log(all)
 
   return (
     <>
@@ -116,10 +111,7 @@ export const Header = ({
         <div className="m-auto p-2 py-0 md:px-8">
           <div className="p-0 flex flex-row gap-0 justify-between items-center">
             <Link href="/" label="Home" title="Home" className="text-current hover:text-primary">
-              {data?.logo
-                ? <div className="h-6" dangerouslySetInnerHTML={{ __html: data.logo }} />
-                : <MorioBanner className="h-6" shadow />
-              }
+              <MorioBanner className="h-6" shadow />
             </Link>
             <div className="flex lg:px-2 flex-row items-start justify-between w-full max-w-6xl mx-auto">
               <div className="grow pl-4 justify-start flex flex-row">
@@ -172,7 +164,7 @@ export const Header = ({
             <NavButton onClick={toggleTheme} label="Change theme" toggle>
               {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
             </NavButton>
-            <NavButton href={data?.help ? data.help : "https://morio.it/"} label="Get help">
+            <NavButton href={data ? data : 'https://morio.it/'} label="Get help">
               <QuestionIcon />
             </NavButton>
             <NavButton href="https://github.com/certeu/morio" label="Source code on Github">

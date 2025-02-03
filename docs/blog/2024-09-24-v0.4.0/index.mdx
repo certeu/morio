@@ -22,16 +22,15 @@ However, even though Morio is currently in alpha, we felt it important
 to put out an update to address the [CVE in Traefik][cve], which has a rating
 of 9.8.
 
-While we could have back ported our fix -- which was a simple as upgrading 
+While we could have back ported our fix -- which was a simple as upgrading
 Traefik to 3.1.4 -- we felt we might as well push 0.4 out the door, even if
 it is a bit rough around the edges. We are in alpha after all.
 
 Up until this point we've limited ourselves to minor releases, cutting a new
 release whenever we have significant new features. Going forward, you can
 accept our release cadence to accelerate, as we'll be publishing patch releases
-with smaller updates. This will also allow us to streamline our release 
+with smaller updates. This will also allow us to streamline our release
 workflows and artefact build pipelines.
-
 
 ## New in Morio 0.4
 
@@ -54,14 +53,14 @@ the `root` user
 This is a bit of a intermediate solution as we prefer to avoid using SASL as it
 complicates client configuration. Alas, we hit an issue with using mTLS
 authorisation where we were unable to extract the user principal from the
-certificate. An issue for which a fix has so far eluded us. 
+certificate. An issue for which a fix has so far eluded us.
 
 Once we resolve this, we will switch authorisation back to mTLS and drop SASL.
 
 ### Added support for OIDC identity providers
 
 We've added support for a new type of identity provider that allows to
-integrate Morio with any provider that support OpenID Connect (OIDC).  
+integrate Morio with any provider that support OpenID Connect (OIDC).
 
 In addition, we've written guides for how to integrate with common providers
 that support OIDC, such as
@@ -89,15 +88,15 @@ centralised identity provider.
 
 ### Initial Key/Value store implementation
 
-Morio now ships with a key/value store on board. 
-This is already exposed through the API, although there is no UI component for it. 
+Morio now ships with a key/value store on board.
+This is already exposed through the API, although there is no UI component for it.
 That is something we might add later.
 
 We needed a persistent KV store for our own purposes inside Morio, so we created
-one that you can access through Morio's _management API_ and is backed by 
+one that you can access through Morio's _management API_ and is backed by
 our _DB service_.
 
-This is a very simply KV store -- think a poor man's `etcd` -- but if it fully 
+This is a very simply KV store -- think a poor man's `etcd` -- but if it fully
 distributed on clustered deployments.
 
 Refer to [the KV endpoints in the API reference
@@ -113,7 +112,7 @@ Morio more resilient against abuse.
 The _management API_ has an authentication endpoint where you can trade in your
 credentials for a JSON Web Token that you can then use in subsequent requests.
 This is the recommended way to interact with the API when you require multiple
-request (like from our UI) since authentication of a request with a JWT is 
+request (like from our UI) since authentication of a request with a JWT is
 much more efficient then checking credentials.
 
 However, you might need to only make a single API call, for example to get a value
@@ -121,14 +120,14 @@ from the KV store in a CI pipeline. In such a use case, the extra
 sign in step adds friction and ends up being slower than making the initial
 request with credentials.
 
-For such use cases, we've made changes to allow basic authentication 
-for the `apikey` and `mrt` identity providers, as those are the ones 
+For such use cases, we've made changes to allow basic authentication
+for the `apikey` and `mrt` identity providers, as those are the ones
 typically used in an automated way.
 
 ### Prevent generating certificates that would grant elevated privileges
 
 Once we start using mTLS for authorisation on the Kafka API, the certificate's
-Common Name will determine what a user can do.  Given that Morio allows users
+Common Name will determine what a user can do. Given that Morio allows users
 to generate X.509 certificates, we've hardened this endpoint so that users
 cannot generate certificates that would grant them elevated permissions on the
 broker.
@@ -171,6 +170,5 @@ All packages will be signed with [Morio's key](https://apt.repo.morio.it/morio.a
 Apart from what's new, there's a bunch of changes and fixes in this release.
 For the full list, refer to [the
 change log](https://github.com/certeu/morio/blob/develop/CHANGELOG.md).
-
 
 [cve]: https://nvd.nist.gov/vuln/detail/CVE-2024-45410

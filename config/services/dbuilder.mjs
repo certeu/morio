@@ -47,13 +47,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/aptrepo:/repo`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/dbuilder:/etc/dbuilder`,
           ],
-      command: [
-        '/entrypoint.sh',
-        'client',
-      ],
+      command: ['/entrypoint.sh', 'client'],
       // Don't keep container after it exits
       ephemeral: true,
-    }
+    },
   }
 }
 
@@ -83,7 +80,7 @@ and collect their data on one or more centralized Morio instances
 for analysis, further processing, downstream routing & filtering,
 or event-driven automation.`,
   'Vcs-Git': 'https://github.com/certeu/morio -b main [clients/linux]',
-  Architecture: '__MORIO_CLIENT_ARCHITECTURE__' // This will be replaced by the builder
+  Architecture: '__MORIO_CLIENT_ARCHITECTURE__', // This will be replaced by the builder
 }
 
 export const packageDefaultsYouCanEdit = [
@@ -120,8 +117,7 @@ export const resolveControlFile = (settings = {}, utils) => {
   if (settings.Revision) {
     s.Version += `-${s.Revision}`
     delete s.Revision
-  }
-  else s.Version += `-0`
+  } else s.Version += `-0`
 
   /*
    * Construct more complex fields
@@ -138,5 +134,3 @@ export const resolveControlFile = (settings = {}, utils) => {
    */
   return [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n')
 }
-
-

@@ -65,7 +65,7 @@ echarts.registerTheme('morio', {
 })
 
 export const Echart = (props) => {
-  const { option = false, theme = "morio" } = props
+  const { option = false, theme = 'morio' } = props
   if (option === false) return null
 
   return (

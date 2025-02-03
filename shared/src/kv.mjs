@@ -33,7 +33,8 @@ export function kv(db, log) {
     /*
      * Handle keys that do not exist first
      */
-    if (result[0] === 200 && typeof result[1].results?.[0].values === 'undefined') return [false, 404]
+    if (result[0] === 200 && typeof result[1].results?.[0].values === 'undefined')
+      return [false, 404]
 
     let val = false
     if (result[0] === 200 && typeof result[1].results?.[0]?.values?.[0]?.[0] !== 'undefined') {

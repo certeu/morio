@@ -23,7 +23,9 @@ body {
   min-height: calc(100vh - 4rem);
   text-align: center;
 }
-a, a:visited, a:active {
+a,
+a:visited,
+a:active {
   color: #1b88a2;
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -37,7 +39,7 @@ a:hover {
 }
 pre {
   background: #212121;
-  color: #FFF;
+  color: #fff;
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: left;
@@ -54,6 +56,12 @@ span.note {
   display: block;
   border-radius: 0.5rem;
 }
-span.note.production { background-color: #15803D; }
-span.note.canary { background-color: #F97316; }
-span.note.testing { background-color: #DC2626; }
+span.note.production {
+  background-color: #15803d;
+}
+span.note.canary {
+  background-color: #f97316;
+}
+span.note.testing {
+  background-color: #dc2626;
+}

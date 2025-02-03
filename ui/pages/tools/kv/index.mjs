@@ -16,10 +16,9 @@ const KvPage = (props) => (
 
 export default KvPage
 
-export const getStaticProps = ({ params }) => ({
+export const getStaticProps = () => ({
   props: {
     title: 'KV Store',
     page: ['tools', 'kv'],
   },
 })
-

@@ -48,8 +48,8 @@ const brokerNodes = Joi.array().items(fqdn).min(1).max(9).required()
 const client = Joi.object({
   modules: Joi.object().pattern(
     Joi.string(), // keys should be string
-    Joi.string(), // values should be string
-  )
+    Joi.string() // values should be string
+  ),
 })
 
 /*
@@ -109,7 +109,6 @@ const keysFile = Joi.object({
   seal: passwordHash.required(),
 })
 
-
 /*
  * A vault secret
  */
@@ -140,11 +139,13 @@ const vaultInstance = Joi.object({
  */
 export const preseedKeys = Joi.object({
   data: Joi.string().required(),
-  key: Joi.string().pattern(/.*ENCRYPTED PRIVATE KEY.*/).required(),
+  key: Joi.string()
+    .pattern(/.*ENCRYPTED PRIVATE KEY.*/)
+    .required(),
   seal: Joi.object({
     hash: Joi.string().hex().required(),
     salt: Joi.string().hex().required(),
-  })
+  }),
 })
 
 /*
@@ -291,4 +292,19 @@ async function validate(key, input, schema) {
 /*
  * Named exports
  */
-export { Joi, validate, id, fqdn, jsTime, uuid, keys, keysFile,  mrt, passwordHash, version, nodeSerial, settings, preseed }
+export {
+  Joi,
+  validate,
+  id,
+  fqdn,
+  jsTime,
+  uuid,
+  keys,
+  keysFile,
+  mrt,
+  passwordHash,
+  version,
+  nodeSerial,
+  settings,
+  preseed,
+}

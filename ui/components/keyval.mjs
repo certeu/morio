@@ -20,9 +20,13 @@ export const KeyVal = ({ k, val, color = 'primary', small = false, onClick = fal
     </>
   )
 
-  return onClick
-    ? <button onClick={onClick}>{inner}</button>
-    : <Copy text={val} onCopy={() => handleCopied(setLoadingStatus, k)}><button>{inner}</button></Copy>
+  return onClick ? (
+    <button onClick={onClick}>{inner}</button>
+  ) : (
+    <Copy text={val} onCopy={() => handleCopied(setLoadingStatus, k)}>
+      <button>{inner}</button>
+    </Copy>
+  )
 }
 
 const sharedClasses = `px-1 text-sm font-medium whitespace-nowrap border-2`

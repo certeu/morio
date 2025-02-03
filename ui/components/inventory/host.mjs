@@ -162,18 +162,12 @@ export const Host = ({ data }) => {
       </div>
       <Details summaryLeft="Audit Data">
         <div className="p-2">
-          {data.id
-            ? <HostAudit uuid={data.id} />
-            : <p>One moment please...</p>
-          }
+          {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
         </div>
       </Details>
       <Details summaryLeft="Logs">
         <div className="p-2">
-          {data.id
-            ? <HostLogsTable host={data.id} />
-            : <p>One moment please...</p>
-          }
+          {data.id ? <HostLogsTable host={data.id} /> : <p>One moment please...</p>}
         </div>
       </Details>
       <Details summaryLeft="IP Addresses" summaryRight={data.ips?.length}>
@@ -211,17 +205,17 @@ export const InventoryHostname = ({ uuid }) => {
     queryKey: [`ostname_${uuid}`],
     queryFn: () => runInventoryHostnameCall(uuid, api),
     refetchInterval: 1000, //false,
-    refetchIntervalInBackground: true //false,
+    refetchIntervalInBackground: true, //false,
   })
 
-  return data
-    ? <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
-    : uuid
-
+  return data ? (
+    <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
+  ) : (
+    uuid
+  )
 }
 
 const runInventoryHostnameCall = async (uuid, api) => {
   const result = await api.getInventoryHostname(uuid)
   return result[1] === 200 ? result[0] : false
 }
-

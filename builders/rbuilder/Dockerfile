@@ -1,1 +1,1 @@
-Containerfile.prod
+Containerfile.stable

@@ -90,7 +90,7 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
         </thead>
         <tbody>
           {sorted.map((host) => (
-            <tr key={host.id} className='font-mono text-sm'>
+            <tr key={host.id} className="font-mono text-sm">
               <td className="pr-6 py-0.5">
                 <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
               </td>
@@ -204,7 +204,7 @@ export const HostLogsTable = ({ host, module = false }) => {
         </thead>
         <tbody>
           {sorted.map((entry) => (
-            <tr key={entry.lolset + entry.host + entry.module} className='font-mono text-sm'>
+            <tr key={entry.lolset + entry.host + entry.module} className="font-mono text-sm">
               {module ? null : (
                 <td className="pr-6">
                   <PageLink href={`/boards/logs/${host}/${entry.module}/`}>{entry.module}</PageLink>
@@ -339,20 +339,25 @@ const LogLines = ({ fields, lines }) => {
     [desc ? 'desc' : 'asc']
   )
 
-  const toggleShowField = (field) => showFields.includes(field)
-    ? setShowFields(showFields.filter(fld => fld !== field))
-    : setShowFields([...showFields, field])
+  const toggleShowField = (field) =>
+    showFields.includes(field)
+      ? setShowFields(showFields.filter((fld) => fld !== field))
+      : setShowFields([...showFields, field])
 
-  const forder = fields.filter(field => showFields.includes(field))
+  const forder = fields.filter((field) => showFields.includes(field))
 
   return (
     <>
       <div className="flex flex-row flex-wrap items-center gap-1 mt-1">
-        {fields.map(field => <KeyVal val={field} key={field}
-          k={showFields.includes(field) ? 'show' : 'hide'}
-          color={showFields.includes(field) ? 'success' : 'warning'}
-          onClick={() => toggleShowField(field)}
-        />)}
+        {fields.map((field) => (
+          <KeyVal
+            val={field}
+            key={field}
+            k={showFields.includes(field) ? 'show' : 'hide'}
+            color={showFields.includes(field) ? 'success' : 'warning'}
+            onClick={() => toggleShowField(field)}
+          />
+        ))}
       </div>
       <div className="max-w-full overflow-x-auto mt-4">
         <Table className="w-full">
@@ -376,10 +381,14 @@ const LogLines = ({ fields, lines }) => {
           </thead>
           <tbody>
             {sorted.map((entry, i) => (
-              <tr key={i} className='font-mono text-sm'>
-                {forder.filter(field => showFields.includes(field)).map((field) => (
-                  <td key={field} className="pr-6 whitespace-nowrap">{field === 'time' ? timeAgo(entry[field], true, '') : entry[field]}</td>
-                ))}
+              <tr key={i} className="font-mono text-sm">
+                {forder
+                  .filter((field) => showFields.includes(field))
+                  .map((field) => (
+                    <td key={field} className="pr-6 whitespace-nowrap">
+                      {field === 'time' ? timeAgo(entry[field], true, '') : entry[field]}
+                    </td>
+                  ))}
               </tr>
             ))}
           </tbody>

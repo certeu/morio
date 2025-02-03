@@ -9,7 +9,7 @@ const Agent = ({ children }) => (
   <div className="badge badge-accent font-medium uppercase text-xs">{children}</div>
 )
 
-export const H1 = ({ children, className="" }) => (
+export const H1 = ({ children, className = '' }) => (
   <h1 className="text-4xl lg:text-6xl font-bold my-8 text-center">{children}</h1>
 )
 
@@ -22,11 +22,13 @@ const Search = () => {
    * Initialize our Fuse instance
    */
   useEffect(() => {
-    setFuse(new Fuse(transformData(), {
-      keys: ['name', 'info'],
-      threshold: 0.4,
-      includeMatches: true
-    }))
+    setFuse(
+      new Fuse(transformData(), {
+        keys: ['name', 'info'],
+        threshold: 0.4,
+        includeMatches: true,
+      })
+    )
   }, [hub])
 
   /*
@@ -53,10 +55,7 @@ const Search = () => {
           className="input w-full input-bordered input-primary"
         />
       </div>
-      {hits.length > 0
-        ? <SearchResults hits={hits} q={q} /> :
-        <ShowAll />
-      }
+      {hits.length > 0 ? <SearchResults hits={hits} q={q} /> : <ShowAll />}
     </div>
   )
 }
@@ -64,11 +63,13 @@ const Search = () => {
 const SearchResults = ({ hits, q }) => (
   <div className="mt-6">
     <Grid>
-
-      {hits.map(hit => {
-        if (hit.item.category === 'modules') return <Module id={hit.item.name} q={q} key={hit.item.name}/>
-        if (hit.item.category === 'overlays') return <Overlay id={hit.item.name} q={q} key={hit.item.name}/>
-        if (hit.item.category === 'processors') return <Processor id={hit.item.name} q={q} key={hit.item.name}/>
+      {hits.map((hit) => {
+        if (hit.item.category === 'modules')
+          return <Module id={hit.item.name} q={q} key={hit.item.name} />
+        if (hit.item.category === 'overlays')
+          return <Overlay id={hit.item.name} q={q} key={hit.item.name} />
+        if (hit.item.category === 'processors')
+          return <Processor id={hit.item.name} q={q} key={hit.item.name} />
 
         return null
       })}
@@ -76,42 +77,57 @@ const SearchResults = ({ hits, q }) => (
   </div>
 )
 
-
 const Grid = ({ children }) => (
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-2">
-    {children}
-  </div>
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 lg:gap-2">{children}</div>
 )
 
 export const Modules = () => (
   <Grid>
-    {Object.keys(hub.modules).sort().map(id => <Module id={id} key={id} />)}
+    {Object.keys(hub.modules)
+      .sort()
+      .map((id) => (
+        <Module id={id} key={id} />
+      ))}
   </Grid>
 )
 export const Overlays = () => (
   <Grid>
-    {Object.keys(hub.overlays).sort().map(id => <Overlay id={id} key={id} />)}
+    {Object.keys(hub.overlays)
+      .sort()
+      .map((id) => (
+        <Overlay id={id} key={id} />
+      ))}
   </Grid>
 )
 export const Processors = () => (
   <Grid>
-    {Object.keys(hub.processors).sort().map(id => <Processor id={id} key={id} />)}
+    {Object.keys(hub.processors)
+      .sort()
+      .map((id) => (
+        <Processor id={id} key={id} />
+      ))}
   </Grid>
 )
 
-const boxClasses = "px-4 py-2 rounded-lg border md:border-2 shadow border"
+const boxClasses = 'px-4 py-2 rounded-lg border md:border-2 shadow border'
 
-const Module = ({ id }) => hub.modules[id] ? (
-  <Link
-    className={`${boxClasses} border-accent hover:bg-accent/20`}
-    href={`/hub/modules/${id}/`}
-  >
-    <h4 className="font-bold text-lg">{id}</h4>
-    <ul className="flex flex-row flex-wrap gap-1 items-center">
-      {Object.keys(hub.modules[id]).sort().map(agent => <li key={agent}><Agent>{agent}</Agent></li>)}
-    </ul>
-  </Link>
-) : <p>No such module: {id}</p>
+const Module = ({ id }) =>
+  hub.modules[id] ? (
+    <Link className={`${boxClasses} border-accent hover:bg-accent/20`} href={`/hub/modules/${id}/`}>
+      <h4 className="font-bold text-lg">{id}</h4>
+      <ul className="flex flex-row flex-wrap gap-1 items-center">
+        {Object.keys(hub.modules[id])
+          .sort()
+          .map((agent) => (
+            <li key={agent}>
+              <Agent>{agent}</Agent>
+            </li>
+          ))}
+      </ul>
+    </Link>
+  ) : (
+    <p>No such module: {id}</p>
+  )
 
 const Overlay = ({ id }) => (
   <Link
@@ -130,21 +146,29 @@ const Processor = ({ id }) => (
   >
     <h4 className="font-bold text-lg">{id}</h4>
     <p className="text-sm leading-5">{hub.processors[id].moriodata.info}</p>
-    {hub.processors[id].modules
-      ? <div className="badge bg-yellow-500 text-yellow-900 font-medium uppercase text-xs">modular</div>
-      : null
-    }
+    {hub.processors[id].modules ? (
+      <div className="badge bg-yellow-500 text-yellow-900 font-medium uppercase text-xs">
+        modular
+      </div>
+    ) : null}
   </Link>
 )
 
-
 const ShowAll = () => (
   <>
-    <H2>Morio Client Modules <small className="opacity-70">({Object.keys(hub.modules).length})</small></H2>
+    <H2>
+      Morio Client Modules <small className="opacity-70">({Object.keys(hub.modules).length})</small>
+    </H2>
     <Modules />
-    <H2>Morio Settings Overlays <small className="opacity-70">({Object.keys(hub.overlays).length})</small></H2>
+    <H2>
+      Morio Settings Overlays{' '}
+      <small className="opacity-70">({Object.keys(hub.overlays).length})</small>
+    </H2>
     <Overlays />
-    <H2>Morio Stream Processors <small className="opacity-70">({Object.keys(hub.processors).length})</small></H2>
+    <H2>
+      Morio Stream Processors{' '}
+      <small className="opacity-70">({Object.keys(hub.processors).length})</small>
+    </H2>
     <Processors />
   </>
 )
@@ -184,7 +208,7 @@ function transformData() {
         type: value.type,
         name: value.name || key,
         info: value.moriodata?.info || '',
-        path: `${category}/${key}`
+        path: `${category}/${key}`,
       })
 
       /*
@@ -197,7 +221,7 @@ function transformData() {
             type: moduleValue.type,
             name: moduleValue.name || moduleKey,
             info: moduleValue.moriodata?.info || '',
-            path: `${category}/${key}/modules/${moduleKey}`
+            path: `${category}/${key}/modules/${moduleKey}`,
           })
         })
       }
@@ -206,4 +230,3 @@ function transformData() {
 
   return items
 }
-

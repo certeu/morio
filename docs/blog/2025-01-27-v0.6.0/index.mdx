@@ -15,7 +15,7 @@ Let's have a look at the most important changes.
 One thing we cannot know about Morio is how people will end up using it.
 What data will be processed, or what business challenges are being
 addressed. Essentially, when it comes to the data plane, we cannot know
-for sure what things will look like, so what we want to offer is 
+for sure what things will look like, so what we want to offer is
 flexibility to deal with a variety of scenarios.
 
 To some extent, we can foresee such flexibility and incorporate it in our
@@ -37,7 +37,7 @@ To make all of these available -- as well as facilitate contributions from
 the community -- we have started building out [MorioHub](/hub).
 
 MorioHub is a centralised repository for these various plugins for Morio.
-Specifically, it is [a dedicated git 
+Specifically, it is [a dedicated git
 repository](https://github.com/certeu/moriohub) from which you can load
 client modules, stream processors, or even some of Morio's settings.
 
@@ -133,8 +133,8 @@ support preseeding via git going forward.
 We've added a `force_mrt` URL parameter to Morio's sign-in page to force the
 inclusion of the Morio Root Token identity provider on the sign-in form.
 
-Note that this does not bypass [the `DISABLE_IDP_MRT` feature 
-flag](/docs/reference/flags/#disable_idp_mrt). Rather, it prevents you from 
+Note that this does not bypass [the `DISABLE_IDP_MRT` feature
+flag](/docs/reference/flags/#disable_idp_mrt). Rather, it prevents you from
 locking yourself out of the UI if you neglect to add the MRT provider to the
 sign in page.
 

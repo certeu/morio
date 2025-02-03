@@ -790,14 +790,11 @@ MorioClient.prototype.kvRead = async function (key) {
  * @param {mixed} value - The value to write
  */
 MorioClient.prototype.kvWrite = async function (key, value) {
-  return await this.call(
-    `${morioConfig.api}/kv/keys/${key}`,
-    {
-      headers: this.jsonHeaders,
-      method: "POST",
-      body: JSON.stringify({ value }),
-    }
-  )
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ value }),
+  })
 }
 
 /**
@@ -812,7 +809,7 @@ MorioClient.prototype.kvGlob = async function (glob) {
 /**
  * Lists all keys in the KV store
  */
-MorioClient.prototype.kvList = async function (glob) {
+MorioClient.prototype.kvList = async function () {
   return await this.call(`${morioConfig.api}/kv/keys`)
 }
 
