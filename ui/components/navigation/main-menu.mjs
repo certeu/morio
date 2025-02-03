@@ -19,6 +19,7 @@ import {
   FlagIcon,
   FlipoverIcon,
   HardwareIcon,
+  KeyIcon,
   LayersIcon,
   LocationIcon,
   LogsIcon,
@@ -83,6 +84,7 @@ const icons = {
   images: ContainerImageIcon,
   inventory: ServersIcon,
   ips: LocationIcon,
+  kv: KeyIcon,
   logs: LogsIcon,
   macs: HardwareIcon,
   metrics: StatusIcon,
@@ -142,14 +144,14 @@ export const links = {
       t: 'Notes',
       r: 'user',
     },
-    search: {
-      t: 'Search Dashboards',
-      r: 'user',
-    },
-    custom: {
-      t: 'Custom Dashboards',
-      r: 'user',
-    },
+    //search: {
+    //  t: 'Search Dashboards',
+    //  r: 'user',
+    //},
+    //custom: {
+    //  t: 'Custom Dashboards',
+    //  r: 'user',
+    //},
   },
   inventory: {
     t: 'Inventory',
@@ -220,6 +222,9 @@ export const links = {
     },
     export: {
       t: 'Export Data',
+    },
+    kv: {
+      t: 'Key/Value Store',
     },
     certificates: {
       t: 'X.509 Certificates',

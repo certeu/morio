@@ -6,6 +6,7 @@ import {
   CertificateIcon,
   CogIcon,
   OpenLockIcon,
+  KeyIcon,
   ClosedLockIcon,
   UserIcon,
 } from 'components/icons.mjs'
@@ -53,6 +54,14 @@ const ToolsPage = (props) => (
             width="w-full"
             Icon={BriefcaseIcon}
             role="user"
+          />
+          <Card
+            title="Key/Value Store"
+            href="/tools/kv"
+            desc="Store data in Morio's KV store, or read data from it via this web interface."
+            width="w-full"
+            role="operator"
+            Icon={KeyIcon}
           />
           <Card
             title="X.509 Certificates"

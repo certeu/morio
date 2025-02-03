@@ -8,11 +8,11 @@ import colors from 'tailwindcss/colors'
 const c = {
   light: '#8ecae6',
   mid: '#219ebc',
-  dark: '#023047',
+  dark: '#0A0A0A',
   accent1: '#ffb703',
   accent2: '#fb8500',
-  bg: '#001d2d',
-  white: '#ffffff',
+  bg: '#004252',
+  white: '#F5F5F5',
 }
 
 export const theme = {

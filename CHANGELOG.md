@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for preseeding chart plugins
 - [api] Return host name/fqdn when loading inventory data
-- [ui] Group operating systems on inventory pages
+- [api] Added a new endpoint to read (only) the hostname/fqdn from the inventory
+- [ui] Allow overriding certain UI aspects by setting KV keys
+- [ui] Add KV management to tools pages
+- [ui] Group operaring systems on inventory pages
 - [ui] Improvement to inventory pages
 
 ### Fixed

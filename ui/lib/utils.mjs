@@ -200,7 +200,7 @@ export const template = (input, replace = {}) =>
  * @param {string/number} timestamp - The time to parse
  * @return {string} timeago - How long ago it was
  */
-export function timeAgo(timestamp, terse = true) {
+export function timeAgo(timestamp, terse = true, suffix=' ago') {
   const delta = new Date() - new Date(timestamp)
 
   const seconds = Math.floor(delta / 1000)
@@ -209,7 +209,6 @@ export function timeAgo(timestamp, terse = true) {
   const days = Math.floor(hours / 24)
   const months = Math.floor(days / 30)
   const years = Math.floor(days / 365)
-  const suffix = ' ago'
 
   if (seconds < 1) return 'Now'
   if (seconds === 1) return `${terse ? '1s' : '1 second'}${suffix}`

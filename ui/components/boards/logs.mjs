@@ -1,6 +1,7 @@
 // Dependencies
 import { formatBytes, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { linkClasses } from 'components/link.mjs'
 // Hooks
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -15,6 +16,7 @@ import { Host } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
+import { Table } from 'components/table.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
@@ -67,13 +69,13 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
 
   return (
     <>
-      <table className="table table-auto">
+      <Table>
         <thead>
           <tr>
             {['host', 'name', 'cores', 'memory', 'last_seen'].map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className={`btn btn-link capitalize text-left px-0 ${linkClasses}`}
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -88,20 +90,20 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
         </thead>
         <tbody>
           {sorted.map((host) => (
-            <tr key={host.id}>
-              <td className="">
+            <tr key={host.id} className='font-mono text-sm'>
+              <td className="pr-6 py-0.5">
                 <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
               </td>
-              <td className="">
+              <td className="pr-6 text-sm">
                 <PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink>
               </td>
-              <td className="">{host.cores}</td>
-              <td className="">{formatBytes(host.memory)}</td>
-              <td className="">{timeAgo(host.last_update)}</td>
+              <td className="pr-6 text-sm">{host.cores}</td>
+              <td className="pr-6 text-sm">{formatBytes(host.memory)}</td>
+              <td className="text-sm">{timeAgo(host.last_update, true, '')}</td>
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
   )
@@ -181,13 +183,13 @@ export const HostLogsTable = ({ host, module = false }) => {
   return (
     <>
       <Host uuid={host} />
-      <table className="table table-auto">
+      <Table>
         <thead>
           <tr>
             {cols.map((field) => (
-              <th key={field}>
+              <th key={field} className="text-left pr-6">
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className={`btn btn-link capitalize px-0 ${linkClasses}`}
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -202,9 +204,9 @@ export const HostLogsTable = ({ host, module = false }) => {
         </thead>
         <tbody>
           {sorted.map((entry) => (
-            <tr key={entry.lolset + entry.host + entry.module}>
+            <tr key={entry.lolset + entry.host + entry.module} className='font-mono text-sm'>
               {module ? null : (
-                <td className="">
+                <td className="pr-6">
                   <PageLink href={`/boards/logs/${host}/${entry.module}/`}>{entry.module}</PageLink>
                 </td>
               )}
@@ -217,7 +219,7 @@ export const HostLogsTable = ({ host, module = false }) => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
   )
@@ -235,7 +237,7 @@ async function runHostLogsTableApiCall(api, host) {
 
 const MorioLogset = ({ name, href }) =>
   href ? (
-    <PageLink href={href}>{name.split('.').join(' / ')}</PageLink>
+    <PageLink href={href}>{name.split('.').join(' » ')}</PageLink>
   ) : (
     <span>{name.split('.').join(' / ')}</span>
   )
@@ -329,6 +331,7 @@ const LogLines = ({ fields, lines }) => {
   // State
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
+  const [showFields, setShowFields] = useState(fields)
 
   const sorted = orderBy(
     lines.map((line) => JSON.parse(line)),
@@ -336,35 +339,52 @@ const LogLines = ({ fields, lines }) => {
     [desc ? 'desc' : 'asc']
   )
 
+  const toggleShowField = (field) => showFields.includes(field)
+    ? setShowFields(showFields.filter(fld => fld !== field))
+    : setShowFields([...showFields, field])
+
+  const forder = fields.filter(field => showFields.includes(field))
+
   return (
-    <table className="table table-auto">
-      <thead>
-        <tr>
-          {fields.map((field) => (
-            <th key={field}>
-              <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
-                onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
-              >
-                {field}{' '}
-                <RightIcon
-                  stroke={3}
-                  className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
-                />
-              </button>
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {sorted.map((entry, i) => (
-          <tr key={i}>
-            {fields.map((field) => (
-              <td key={field}>{field === 'time' ? timeAgo(entry[field]) : entry[field]}</td>
+    <>
+      <div className="flex flex-row flex-wrap items-center gap-1 mt-1">
+        {fields.map(field => <KeyVal val={field} key={field}
+          k={showFields.includes(field) ? 'show' : 'hide'}
+          color={showFields.includes(field) ? 'success' : 'warning'}
+          onClick={() => toggleShowField(field)}
+        />)}
+      </div>
+      <div className="max-w-full overflow-x-auto mt-4">
+        <Table className="w-full">
+          <thead>
+            <tr>
+              {forder.map((field) => (
+                <th key={field} className="">
+                  <button
+                    className={`text-primary capitalize px-0 text-left ${linkClasses} flex flex-row items-center gap-0.5 pr-2`}
+                    onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
+                  >
+                    {field}
+                    <RightIcon
+                      stroke={3}
+                      className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
+                    />
+                  </button>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {sorted.map((entry, i) => (
+              <tr key={i} className='font-mono text-sm'>
+                {forder.filter(field => showFields.includes(field)).map((field) => (
+                  <td key={field} className="pr-6 whitespace-nowrap">{field === 'time' ? timeAgo(entry[field], true, '') : entry[field]}</td>
+                ))}
+              </tr>
             ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+          </tbody>
+        </Table>
+      </div>
+    </>
   )
 }

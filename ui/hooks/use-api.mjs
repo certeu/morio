@@ -774,6 +774,59 @@ MorioClient.prototype.removeInventoryOs = async function (id) {
 }
 
 /**
+ * Reads a key from the KV store
+ *
+ * @param {string} key - The key to read
+ * @return {string} val - The value under the key (stringified as JSON)
+ */
+MorioClient.prototype.kvRead = async function (key) {
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`)
+}
+
+/**
+ * Writes a key to the KV store
+ *
+ * @param {string} key - The key to write to
+ * @param {mixed} value - The value to write
+ */
+MorioClient.prototype.kvWrite = async function (key, value) {
+  return await this.call(
+    `${morioConfig.api}/kv/keys/${key}`,
+    {
+      headers: this.jsonHeaders,
+      method: "POST",
+      body: JSON.stringify({ value }),
+    }
+  )
+}
+
+/**
+ * Glob-searches the KV store
+ *
+ * @param {string} glob - The glob pattern to search
+ */
+MorioClient.prototype.kvGlob = async function (glob) {
+  return await this.call(`${morioConfig.api}/kv/glob/${glob}`)
+}
+
+/**
+ * Lists all keys in the KV store
+ */
+MorioClient.prototype.kvList = async function (glob) {
+  return await this.call(`${morioConfig.api}/kv/keys`)
+}
+
+/**
+ * Remove a key from the KV store
+ *
+ * @param {string} key - The key to remove
+ * @param {mixed} value - The value to write
+ */
+MorioClient.prototype.kvDel = async function (key) {
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`, { method: 'DELETE' })
+}
+
+/**
  * Gets the tap config from the UI endpoint
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble

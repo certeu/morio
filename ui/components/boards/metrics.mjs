@@ -2,6 +2,7 @@
 import { formatBytes, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { chartTemplates } from './chart-templates.mjs'
+import { linkClasses } from 'components/link.mjs'
 // Hooks
 import { useEffect, useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -77,7 +78,7 @@ export const MetricsTable = ({ cacheKey = 'metrics' }) => {
             {['host', 'name', 'cores', 'memory', 'last_seen'].map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className={`btn btn-link capitalize px-0 ${linkClasses}`}
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -191,7 +192,7 @@ export const HostMetricsTable = ({ host, module = false }) => {
             {cols.map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className={`btn btn-link capitalize px-0 ${linkClasses}`}
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}

@@ -1,6 +1,7 @@
 import { cacheStreamAsObj } from 'components/boards/shared.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { asJson } from 'lib/utils.mjs'
+import { linkClasses } from 'components/link.mjs'
 // Context
 import { useContext } from 'react'
 import { ModalContext } from 'context/modal.mjs'
@@ -71,7 +72,7 @@ export const Notes = () => {
           <tr>
             <th className="w-24">
               <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                className={`btn btn-link capitalize px-0 ${linkClasses}`}
                 onClick={() => setDesc(!desc)}
               >
                 Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
@@ -90,7 +91,7 @@ export const Notes = () => {
                   </td>
                   <td className="py-0">
                     <button
-                      className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                      className={`btn btn-link capitalize px-0 ${linkClasses}`}
                       onClick={() =>
                         pushModal(
                           <ModalWrapper keepOpenOnClick>

@@ -14,7 +14,7 @@ EnvironmentFile=-/etc/morio/moriod/moriod.env
 EnvironmentFile=/etc/morio/moriod/channel.env
 
 # Make sure to stop & remove the core container if it's running
-ExecStartPre=/usr/bin/docker rm -f core
+ExecStartPre=/usr/bin/docker rm -f morio-core
 
 # Start the core container
 ExecStart=/usr/bin/docker run --rm \

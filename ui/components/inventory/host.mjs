@@ -7,6 +7,7 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
+import { useQuery } from '@tanstack/react-query'
 // Components
 import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
@@ -203,3 +204,24 @@ export const Hostname = ({ data }) => {
 
   return JSON.stringify(data)
 }
+
+export const InventoryHostname = ({ uuid }) => {
+  const { api } = useApi()
+  const { data } = useQuery({
+    queryKey: [`ostname_${uuid}`],
+    queryFn: () => runInventoryHostnameCall(uuid, api),
+    refetchInterval: 1000, //false,
+    refetchIntervalInBackground: true //false,
+  })
+
+  return data
+    ? <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
+    : uuid
+
+}
+
+const runInventoryHostnameCall = async (uuid, api) => {
+  const result = await api.getInventoryHostname(uuid)
+  return result[1] === 200 ? result[0] : false
+}
+

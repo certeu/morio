@@ -1,6 +1,7 @@
 import { cacheStreamAsObj } from 'components/boards/shared.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { asJson } from 'lib/utils.mjs'
+import { linkClasses } from 'components/link.mjs'
 // Context
 import { useContext } from 'react'
 import { ModalContext } from 'context/modal.mjs'
@@ -16,6 +17,8 @@ import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
+import { Table } from 'components/table.mjs'
+import { InventoryHostname } from 'components/inventory/host.mjs'
 
 export const Audit = () => {
   const [paused, setPaused] = useState(false)
@@ -27,6 +30,8 @@ export const Audit = () => {
     refetchInterval: paused ? false : 15000,
     refetchIntervalInBackground: false,
   })
+
+  if (!data?.value) return <p>No audit data...</p>
 
   return <AuditTable data={cacheStreamAsObj(data.value)} {...{ paused, setPaused }} />
 }
@@ -75,31 +80,31 @@ const AuditTable = ({ data, paused, setPaused }) => {
           What is audit?
         </button>
       </div>
-      <table className="table table-fixed">
+      <Table>
         <thead>
           <tr>
-            <th className="w-24">
+            <th className="w-24 pr-4">
               <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
                 onClick={() => setDesc(!desc)}
               >
                 Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
               </button>
             </th>
-            <th>Note</th>
-            <th className="w-28">Host</th>
+            <th className="pr-4 text-left px-0">Note</th>
+            <th className="w-28 pr-4 text-left px-0">Host</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text-sm font-mono">
           {sorted
             ? sorted.map(({ audit, timestamp }, i) => (
-                <tr key={i} className={` ${i % 2 === 0 ? 'bg-neutral bg-opacity-10' : ''} p-0 m-0`}>
+                <tr key={i}>
                   <td className="py-0">
-                    <TimeAgoBrief time={timestamp} />
+                    <TimeAgoBrief time={timestamp} suffix='' />
                   </td>
                   <td className="py-0">
                     <button
-                      className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2 normal-case"
+                      className={`text-primary px-0 pr-4 ${linkClasses}`}
                       onClick={() =>
                         pushModal(
                           <ModalWrapper keepOpenOnClick>
@@ -113,14 +118,14 @@ const AuditTable = ({ data, paused, setPaused }) => {
                       {audit.title}
                     </button>
                   </td>
-                  <td className="py-0">
-                    {audit.host ? <Uuid uuid={audit.host} /> : <Uuid uuid={false} />}
+                  <td className="py-0.5">
+                    {audit.host ? <InventoryHostname uuid={audit.host} /> : <Uuid uuid={false} />}
                   </td>
                 </tr>
               ))
             : null}
         </tbody>
-      </table>
+      </Table>
       {sorted ? null : <Spinner />}
     </>
   )
