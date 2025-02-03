@@ -111,6 +111,9 @@
     "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
+    "@itsmorio/api": "^0.6.1",
+    "@itsmorio/config": "^0.6.1",
+    "@itsmorio/shared": "^0.6.1",
     "mocha": "^11.0.1"
   }
 }

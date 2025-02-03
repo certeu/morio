@@ -1,7 +1,7 @@
-import { writeFile } from '@morio/shared/fs'
-import { resolveServiceConfiguration, getPreset } from '@morio/config'
-import { pullConfig } from '@morio/config'
-import { Store } from '@morio/shared/store'
+import { writeFile } from '@itsmorio/shared/fs'
+import { resolveServiceConfiguration, getPreset } from '@itsmorio/config'
+import { pullConfig } from '@itsmorio/config'
+import { Store } from '@itsmorio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
 
@@ -60,7 +60,7 @@ const getHelpers = (env) => {
   const utils = new Store(logger)
   utils.getPreset = presetGetters[env]
   utils.isEphemeral = () => true
-  utils.isProduction = () => env === "prod" ? true : false
+  utils.isProduction = () => (env === 'prod' ? true : false)
   utils.isUnitTest = () => false
   utils.isSwarm = () => false
   utils.getAllFqdns = () => []
@@ -96,6 +96,7 @@ const config = {
  */
 const cliOptions = (name, env) => `\\
   ${env === 'test' ? '--interactive --rm' : '-d'} \\
+  --user root \\
   --name=morio-${config[name][env].container.container_name} \\
   --hostname=morio-${config[name][env].container.container_name} \\
   --label morio.service=${name} \\
@@ -103,7 +104,7 @@ const cliOptions = (name, env) => `\\
   ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
 ${MORIO_DOCKER_ADD_HOST ? '--add-host ' + MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${['morio-'+name].concat(config[name][env].container?.aliases || []).join(',')} \\
+  --network-alias ${['morio-' + name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(' \\\n')} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(' \\\n')} \\
@@ -119,7 +120,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
-  }${config[name][env].container.image}:v${pkg.version} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}
+  }${config[name][env].container.image}:v${pkg.version} ${env === 'test' ? `bash -c "apt-get update && apt-get install -y curl && bash /morio/${name}/tests/run-unit-tests.sh"` : ''}
 `
 
 const preApiTest = `
@@ -132,12 +133,15 @@ const preApiTest = `
 docker rm -f morio-api
 docker network create morionet
 sudo rm -rf ./api/coverage/*
-mkdir -p ./api/coverage/tmp
+sudo mkdir -p ./api/coverage/tmp
 sudo chown -R 2112:2112 ./api/coverage
+sudo chmod -R 755 ./api/coverage  # Allow read/write/execute for the user
 sudo touch ./local/api_tests.json
 sudo chown 2112:2112 ./local/api_tests.json
-sudo echo "" > ./local/api_test_logs.ndjson
+sudo chmod 644 ./local/api_tests.json
+sudo touch ./local/api_test_logs.ndjson
 sudo chown 2112:2112 ./local/api_test_logs.ndjson
+sudo chmod 644 ./local/api_test_logs.ndjson
 
 # Start an ephemeral LDAP instance so we can test IDP/LDAP
 echo "Starting ephemeral LDAP server"
@@ -177,10 +181,12 @@ const script = (name, env) => `#!/bin/bash
 # Any changes you make here will be lost next time 'npm run reconfigure' runs.
 # To make changes, see: scripts/reconfigure.mjs
 #
-${(name === 'core' && env === 'test') ? testFqdnCheck : ''}
-${(name === 'api' && env === 'test') ? testFqdnCheck : ''}
-${(name === 'core' && env === 'dev') ? coreWebConfig : ''}
+
+${name === 'core' && env === 'test' ? testFqdnCheck : ''}
+${name === 'api' && env === 'test' ? testFqdnCheck : ''}
+${name === 'core' && env === 'dev' ? coreWebConfig : ''}
 ${name === 'api' ? preApiTest : ''}
+
 docker run ${cliOptions(name, env)}
 ${name === 'api' ? postApiTest : ''}
 `
@@ -204,4 +210,3 @@ await writeFile(
   false,
   0o755
 )
-
