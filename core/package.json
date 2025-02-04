@@ -1,6 +1,6 @@
 {
   "name": "@itsmorio/core",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "Morio Core",
   "private": true,
   "scripts": {

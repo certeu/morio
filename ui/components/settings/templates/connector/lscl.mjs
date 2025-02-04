@@ -36,7 +36,7 @@ const lsclForm = (type) => ({
   title: 'LSCL',
   about: `Write a custom ${type} in LSCL`,
   desc: `Use this if Morio does not provide a preconfigured ${type} for your use case.`,
-  local: (data) => `connector.filters.${data.id}`,
+  local: (data) => `connector.${type}s.${data.id}`,
   form: ({ data }) => [
     <Popout tip key="tip">
       <b>LSCL</b> is the <b>L</b>og<b>S</b>tash <b>C</b>onfiguration <b>L</b>anguage. It is
