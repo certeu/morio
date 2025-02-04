@@ -5,19 +5,19 @@ import { useQuery } from '@tanstack/react-query'
 import { Markdown } from 'components/markdown.mjs'
 
 const defaultAboutMarkdown = `
-We are still trying to find the best way to sum up Morio in a consise way.
+We are still trying to find the best way to sum up Morio in a concise way.
 This is what we have so far:
 
 ## One-liner
 Morio is a ready-to-use observability platform that makes real-time monitoring
 simple, whether you're watching logs, metrics, or system health across cloud
-and on-premises infrastructure.
+and on-premise infrastructure.
 
 ## Elevator pitch
 Morio is an observability platform that gives you real-time insight into your
 infrastructure without the complexity typically associated with monitoring
 solutions. It handles logs, metrics, and system health data from both cloud and
-on-premises systems, presenting everything in a single dashboard. Built by
+on-premise systems, presenting everything in a single dashboard. Built by
 CERT-EU's engineering team, it's designed to be simple to deploy and maintain,
 while still providing enterprise-grade monitoring capabilities.
 
