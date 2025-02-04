@@ -104,7 +104,6 @@ const cliOptions = (name, env) => `\\
   ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
 ${MORIO_DOCKER_ADD_HOST ? '--add-host ' + MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${['morio-' + name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(' \\\n')} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(' \\\n')} \\
@@ -120,8 +119,7 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
     env !== 'prod' ? '-e MORIO_GIT_ROOT=' + MORIO_GIT_ROOT + ' \\\n  ' : ''
-  }${config[name][env].container.image}:v${pkg.version} ${env === 'test' ? `bash -c "apt-get update && apt-get install -y curl && bash /morio/${name}/tests/run-unit-tests.sh"` : ''}
-`
+  }${config[name][env].container.image}:${env === 'prod' ? 'v' + pkg.version : 'dev'} ${env === 'test' ? 'bash /morio/' + name + '/tests/run-unit-tests.sh' : ''}`
 
 const preApiTest = `
 #

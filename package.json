@@ -113,6 +113,7 @@
   "dependencies": {
     "@itsmorio/api": "^0.6.1",
     "@itsmorio/config": "^0.6.1",
+    "@itsmorio/core": "^0.6.1",
     "@itsmorio/shared": "^0.6.1",
     "mocha": "^11.0.1"
   }
