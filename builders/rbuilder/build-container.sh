@@ -35,7 +35,7 @@ then
   TAG_SUFFIX="-$(git rev-parse HEAD)"
 else
   echo ""
-  echo "Building container for Morio development environment."
+  echo "Building container for Morio development environment"
   echo ""
   RELEASE_CHANNEL="dev"
   RELEASE_CHANNEL_TAG="dev"
