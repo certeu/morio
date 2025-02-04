@@ -66,7 +66,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
           ],
-      // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
+      // Aliases to use on the docker network (used for proxying the RedPanda admin API)
       aliases: [
         `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin`,
         `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy`,
