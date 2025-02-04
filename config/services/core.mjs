@@ -10,7 +10,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
   const PROD = utils.isProduction()
 
   /*
-   * The allowerd paths differ between ephemeral and regular mode
+   * The allowed paths differ between ephemeral and regular mode
    */
   const paths = [
     '/status',
