@@ -7,6 +7,7 @@ import {
   isApiReady,
   api,
   readPersistedData,
+  clean,
 } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
@@ -80,7 +81,7 @@ describe('Create Test Account', async () => {
     const result = await api.post(`/account`, accounts.user)
     const d = result[1]
     assert.equal(typeof d, 'object')
-    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.username, clean(accounts.user.username))
     assert.equal(d.about, accounts.user.about)
     assert.equal(d.provider, accounts.user.provider)
     assert.equal(d.role, accounts.user.role)
