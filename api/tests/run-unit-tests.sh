@@ -31,7 +31,7 @@ do
 done
 
 # Run unit tests
-node --test-concurrency=1 --test
+node --no-warnings --test-concurrency=1 --test
 
 # Stop api container
 kill -1 %1

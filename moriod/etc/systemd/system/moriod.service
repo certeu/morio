@@ -23,7 +23,6 @@ ExecStart=/usr/bin/docker run --rm \
   --label morio.service=core \
   --log-driver=journald \
   --log-opt labels=morio.service \
-  --network-alias=core \
   --init \
   -v "${MORIO_DOCKER_SOCKET}:/var/run/docker.sock" \
   -v "${MORIO_CONFIG_ROOT}:/etc/morio" \

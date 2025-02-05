@@ -76,6 +76,10 @@ const api = {
  */
 const services = ['core', 'ca', 'proxy', 'api', 'ui', 'broker', 'console', 'connector', 'dbuilder']
 
+function clean(username) {
+  return username === null ? null : String(username).toLowerCase().trim()
+}
+
 /*
  * Settings for the test setup
  */
@@ -256,6 +260,7 @@ export {
   setup,
   build,
   store,
+  clean,
   attempt,
   isCoreReady,
   isApiReady,

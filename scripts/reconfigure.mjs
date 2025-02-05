@@ -1,7 +1,7 @@
-import { writeFile } from '@morio/shared/fs'
-import { resolveServiceConfiguration, getPreset } from '@morio/config'
-import { pullConfig } from '@morio/config'
-import { Store } from '@morio/shared/store'
+import { writeFile } from '@itsmorio/shared/fs'
+import { resolveServiceConfiguration, getPreset } from '@itsmorio/config'
+import { pullConfig } from '@itsmorio/config'
+import { Store } from '@itsmorio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
 
@@ -96,6 +96,7 @@ const config = {
  */
 const cliOptions = (name, env) => `\\
   ${env === 'test' ? '--interactive --rm' : '-d'} \\
+  --user root \\
   --name=morio-${config[name][env].container.container_name} \\
   --hostname=morio-${config[name][env].container.container_name} \\
   --label morio.service=${name} \\
@@ -132,12 +133,15 @@ const preApiTest = `
 docker rm -f morio-api
 docker network create morionet
 sudo rm -rf ./api/coverage/*
-mkdir -p ./api/coverage/tmp
+sudo mkdir -p ./api/coverage/tmp
 sudo chown -R 2112:2112 ./api/coverage
+sudo chmod -R 755 ./api/coverage  # Allow read/write/execute for the user
 sudo touch ./local/api_tests.json
 sudo chown 2112:2112 ./local/api_tests.json
-sudo echo "" > ./local/api_test_logs.ndjson
+sudo chmod 644 ./local/api_tests.json
+sudo touch ./local/api_test_logs.ndjson
 sudo chown 2112:2112 ./local/api_test_logs.ndjson
+sudo chmod 644 ./local/api_test_logs.ndjson
 
 # Start an ephemeral LDAP instance so we can test IDP/LDAP
 echo "Starting ephemeral LDAP server"
@@ -181,6 +185,7 @@ ${name === 'core' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'core' && env === 'dev' ? coreWebConfig : ''}
 ${name === 'api' ? preApiTest : ''}
+
 docker run ${cliOptions(name, env)}
 ${name === 'api' ? postApiTest : ''}
 `
