@@ -10,7 +10,7 @@
     "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it morio-api node --no-warnings --test-concurrency=1 --test",
+    "test": "docker exec -it -e \"MORIO_FQDN=${MORIO_FQDN}\" morio-api node --no-warnings --test-concurrency=1 --test",
     "retest": "cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
   },
   "imports": {

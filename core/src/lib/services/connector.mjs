@@ -1,12 +1,9 @@
-import { writeFile, writeYamlFile, chown, mkdir } from '#shared/fs'
-import { convertPkcs1ToPkcs8 } from '#shared/crypto'
+import { writeJsonFile, chown, mkdir } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
-// Logstash
-import { ensurePipelines } from '../logstash/index.mjs'
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -22,13 +19,10 @@ export const service = {
      * @return {boolean} wanted - Wanted or not
      */
     wanted: async () => {
-      const pipelines = utils.getSettings('connector.pipelines', false)
+      const sinks = utils.getSettings('connector.sinks', false)
 
-      // Without pipelines, this service should not be started
-      if (
-        pipelines === false ||
-        Object.values(pipelines).filter((pipe) => !pipe.disabled).length < 1
-      )
+      // Without sinks, this service should not be started
+      if (sinks === false || Object.values(sinks).filter((sink) => !sink.disabled).length < 1)
         return false
       // Always update pipeline config until we have a way to diff them
       else await ensurePipelines()
@@ -71,14 +65,24 @@ export const service = {
 
 async function ensureLocalPrerequisites() {
   /*
-   * Write out logstash.yml based on the settings
+   * Generate key and certificate for mTLS
    */
+  await ensureServiceCertificate('connector', false)
+
+  /*
+   * Write out vector.yaml based on the settings
   const config = utils.getMorioServiceConfig('connector', false)
   if (config) {
-    const file = '/etc/morio/connector/logstash.yml'
+    const file = '/etc/morio/connector/vector.yaml'
     log.debug('Connector: Creating config file')
-    await writeYamlFile(file, config.logstash, log, 0o644)
+    await writeJsonFile(file, {
+      ...config.vector,
+      sources: utils.getSettings('connector.sources', {}),
+      transforms: utils.getSettings('connector.transforms', {}),
+      sinks: utils.getSettings('connector.sinks', {}),
+    }, log, 0o644)
   }
+   */
 
   /*
    * Make sure the data directory exists, and is writable
@@ -87,41 +91,67 @@ async function ensureLocalPrerequisites() {
   await mkdir('/morio/data/connector')
   await chown('/morio/data/connector', uid, uid)
 
-  /*
-   * Make sure the pipelines directory exists, and is writable
-   */
-  await mkdir('/etc/morio/connector/pipelines')
-  await chown('/etc/morio/connector/pipelines', uid, uid)
-
-  /*
-   * Make sure the pipeline_assets directory exists, and is writable
-   */
-  await mkdir('/etc/morio/connector/pipeline_assets')
-  await chown('/etc/morio/connector/pipeline_assets', uid, uid)
-
-  /*
-   * Make sure pipelines.yml file exists, so it can be mounted
-   */
-  await writeYamlFile('/etc/morio/connector/pipelines.yml', {}, log, 0o644)
-
-  /*
-   * Make sure we have a keystore on disk to connect to Kafka
-   */
-  const x509 = await ensureServiceCertificate('connector', true)
-  const keystore = '/etc/morio/connector/pipeline_assets/local-keystore.pem'
-  await writeFile(
-    keystore,
-    convertPkcs1ToPkcs8(x509.key) + x509.cert + utils.getCaConfig().intermediate,
-    log,
-    0o600
-  )
-  await chown(keystore, uid, uid)
-
-  /*
-   * Also add a truststore, which is just the CA root PEM
-   */
-  const truststore = '/etc/morio/connector/pipeline_assets/local-truststore.pem'
-  await writeFile(truststore, utils.getCaConfig().certificate, log, 0o644)
-
   return true
+}
+
+async function ensurePipelines() {
+  /*
+   * Load vector.yaml base settings
+   */
+  const config = utils.getMorioServiceConfig('connector', false)
+
+  /*
+   * Populate sources, sinks, and transforms
+   */
+  const sst = {
+    sources: utils.getSettings('connector.sources', {}),
+    sinks: utils.getSettings('connector.sinks', {}),
+    transforms: utils.getSettings('connector.transforms', {}),
+  }
+  const local = {
+    type: 'kafka',
+    bootstrap_servers: utils
+      .getBrokerFqdns()
+      .map((fqdn) => `${fqdn}:9092`)
+      .join(),
+    tls: {
+      ca_file: '/etc/vector/tls-ca.pem',
+      crt_file: '/etc/vector/tls-cert.pem',
+      key_file: '/etc/vector/tls-key.pem',
+      enabled: true,
+    },
+  }
+
+  /*
+   * Process sources
+   */
+  for (const source in sst.sources) {
+    if (sst.sources[source].type === 'local_morio') {
+      const add = {
+        ...local,
+        group_id: `morio_connector_source__${source}`,
+      }
+      sst.sources[source] = { ...sst.sources[source], ...add }
+    }
+  }
+
+  /*
+   * Process sinks
+   */
+  for (const sink in sst.sinks) {
+    if (sst.sinks[sink].type === 'local_morio') {
+      const add = {
+        ...local,
+        consgroup_id: `morio_connector_sink__${sink}`,
+      }
+      sst.sinks[sink] = { ...sst.sinks[sink], ...add }
+    }
+  }
+
+  /*
+   * Write out file
+   */
+  const file = '/etc/morio/connector/vector.json'
+  log.debug('Connector: Creating config file')
+  await writeJsonFile(file, { ...config.vector, ...sst }, log, 0o644)
 }

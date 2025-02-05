@@ -4,9 +4,9 @@
  */
 export const pullConfig = {
   // Image to run
-  image: 'docker.elastic.co/logstash/logstash',
+  image: 'timberio/vector',
   // Image tag (version) to run
-  tag: '8.15.3',
+  tag: '0.44.0-debian',
 }
 
 /*
@@ -17,11 +17,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
    * Make it easy to test production containers in a dev environment
    */
   const PROD = utils.isProduction()
-
-  /*
-   * We'll re-use this a bunch of times, so let's keep things DRY
-   */
-  const NODE = utils.getNodeSerial()
 
   return {
     /**
@@ -39,114 +34,37 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports to export
-      ports: ['9600:9600'],
+      ports: [],
       // Environment
       environment: {
-        // Node ID
-        LOGSTASH_HOME: '/usr/share/logstash',
+        SSL_CERT_FILE: "/etc/vector/root_ca.crt",
+        VECTOR_CONFIG: "/etc/vector/vector.json",
+        VECTOR_WATCH_CONFIG: true,
+        //VECTOR_LOG: 'debug',
+        VECTOR_LOG_FORMAT: 'json',
       },
       // Volumes
       volumes: PROD
         ? [
-            `${utils.getPreset('MORIO_DATA_ROOT')}/connector:/usr/share/logstash/data`,
-            `${utils.getPreset('MORIO_LOGS_ROOT')}/connector:/usr/share/logstash/logs`,
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipelines/:/usr/share/logstash/config/pipeline/`,
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/pipeline_assets/:/usr/share/logstash/config/pipeline_assets/`,
-            //`${utils.getPreset('MORIO_CONFIG_ROOT')}/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+            `${utils.getPreset('MORIO_DATA_ROOT')}/connector:/var/lib/vector`,
+            `${utils.getPreset('MORIO_CONFIG_ROOT')}/connector:/etc/vector:ro`,
           ]
         : [
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/connector:/usr/share/logstash/data`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/logs/connector:/usr/share/logstash/logs`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/logstash.yml:/usr/share/logstash/config/logstash.yml:ro`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines.yml:/usr/share/logstash/config/pipelines.yml:ro`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipelines:/usr/share/logstash/config/pipeline/`,
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/pipeline_assets:/usr/share/logstash/config/pipeline_assets/`,
-            //`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector/docker-entrypoint:/usr/local/bin/docker-entrypoint`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/connector:/var/lib/vector`,
+            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/connector:/etc/vector:ro`,
           ],
     },
 
-    /*
-     * Logstash configuration file
-     */
-    logstash: {
-      /*
-       * NOTE: Do not configure paths as doing so will make Logstash ignore pipelines.yml
-       */
-
-      /*
-       * Set node name based on the node serial and nodes list
-       */
-      node: {
-        name: utils.getSettings('cluster.broker_nodes')[NODE - 1],
-      },
-      /*
-       * Set the log level and format
-       */
-      log: {
-        level: 'info',
-        format: 'json',
-      },
-      /*
-       * Do not debug config
-       */
-      config: {
-        reload: {
-          automatic: true,
-        },
-      },
-      /*
-       * Configure queue
-       */
-      queue: {
-        type: 'persisted',
-        drain: true,
-      },
-      /*
-       * Enable dead letter queue
-       */
-      'dead_letter_queue.enable': true,
-      'dead_letter_queue.retain.age': '10d',
-      /*
-       * Disable monitoring, use metricbeat instead.
-       * See: https://www.elastic.co/guide/en/logstash/current/monitoring-with-metricbeat.html
-       */
-      monitoring: {
-        enabled: false,
-      },
-      xpack: {
-        management: {
-          enabled: false,
-        },
-      },
+    vector: {
+      data_dir: "/var/lib/vector",
       api: {
         enabled: true,
-        environment: utils.getSettings('cluster.broker_nodes')[NODE - 1],
-        http: {
-          host: '0.0.0.0',
-        },
-        ssl: {
-          enabled: false,
-        },
+        address: "127.0.0.1:8686",
       },
-      allow_superuser: false,
+      log_schema: {
+        level: 'debug'
+      }
     },
   }
 }
 
-/*
- * These exports are used by the connector settings UI
- */
-export const httpMethods = ['delete', 'get', 'head', 'patch', 'post', 'put']
-export const outputCodecs = [
-  'avro',
-  'cef',
-  'es_bulk',
-  'json',
-  'json_lines',
-  'line',
-  'multiline',
-  'plain',
-  'rubydebug',
-]

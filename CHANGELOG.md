@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [connector] The Morio connector is now backend by Vector (instead of Logstash)
+
+### Changed
+
+- [core] We now use `{|` and `|}` as Mustache delimiters to prevent mixups with VRL delimiters
+
 ## [0.6.2] - 2025-02-04
 
 ### Added

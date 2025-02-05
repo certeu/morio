@@ -87,7 +87,7 @@ export const theme = {
 
   // info: Used rarely, can be another color best somewhat neutral looking
   // and should work with the default text color
-  info: colors.sky['600'],
+  info: colors.slate['500'],
   // Text color on the info button
   'info-content': colors.neutral[50],
   // success: Used rarely, but if it is it's in notifications indicating success

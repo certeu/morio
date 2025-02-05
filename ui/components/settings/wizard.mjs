@@ -6,6 +6,7 @@ import yaml from 'yaml'
 import { templates } from './templates/index.mjs'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
+import { ModalContext } from 'context/modal.mjs'
 // Hooks
 import { useState, useContext, useEffect, useCallback } from 'react'
 import { useStateObject } from 'hooks/use-state-object.mjs'
@@ -231,6 +232,7 @@ export const SettingsWizard = (props) => {
   const [runningSettings, setRunningSettings] = useState(false) // Holds the current running settings
   const [dconf, setDconf] = useState(false) // Holds the dynamic configuration
   const [notCool, setNotCool] = useState(false)
+  const { clearModal, pushModal } = useContext(ModalContext)
   const { api } = useApi()
 
   /*
@@ -244,7 +246,7 @@ export const SettingsWizard = (props) => {
   }, [])
 
   return runningSettings?.cluster ? (
-    <PrimedSettingsWizard {...props} {...{ runningSettings, dconf }} />
+    <PrimedSettingsWizard {...props} {...{ runningSettings, dconf, clearModal, pushModal }} />
   ) : notCool ? (
     <NotCool />
   ) : (
@@ -337,7 +339,7 @@ export const PrimedSettingsWizard = (props) => {
   /*
    * Destructure props
    */
-  const { prefix = '/settings', runningSettings, dconf } = props
+  const { prefix = '/settings', runningSettings, dconf, clearModal, pushModal } = props
 
   /*
    * React state
@@ -411,7 +413,9 @@ export const PrimedSettingsWizard = (props) => {
    * Load the template and section
    */
   const [group, section] = sectionPath.split('.')
-  const template = templates[group] ? templates[group]({ mSettings, update, dconf }) : false
+  const template = templates[group]
+    ? templates[group]({ mSettings, update, dconf, clearModal, pushModal })
+    : false
   const doValidate = group === 'validate'
 
   /*
@@ -443,6 +447,8 @@ export const PrimedSettingsWizard = (props) => {
         section,
         loadView,
         setView,
+        clearModal,
+        pushModal,
       }
   const wrapProps = {
     title,

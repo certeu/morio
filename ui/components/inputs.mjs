@@ -1,10 +1,16 @@
+// Dependencies
 import { roles } from 'config/roles.mjs'
+import { cloneAsPojo } from 'lib/utils.mjs'
+import yaml from 'yaml'
 // Hooks
 import { useCallback, useState } from 'react'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
-import { OkIcon, QuestionIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
+import { ExpandIcon, OkIcon, QuestionIcon, ResetIcon, WarningIcon } from 'components/icons.mjs'
+import CodeMirror from '@uiw/react-codemirror'
+import { json as jsonLang } from '@codemirror/lang-json'
+import { Tab, Tabs } from 'components/tabs.mjs'
 
 /*
  * Helper component to wrap a form control with a label
@@ -649,6 +655,104 @@ export const LabelInput = (props) => {
           ) : null}
         </div>
       ) : null}
+    </div>
+  )
+}
+
+/**
+ * Input for YAML (or JSON)
+ */
+export const YamlInput = ({ data, update }) => {
+  /*
+   * React state
+   */
+  const [localData, setLocalData] = useState(data)
+  const [localJson, setLocalJson] = useState(JSON.stringify(data, null, 2))
+  const [localYaml, setLocalYaml] = useState(
+    yaml.stringify(data, undefined, {
+      lineWidth: 0,
+    })
+  )
+  const [kiosk, setKiosk] = useState(false)
+
+  /*
+   * Method to revert to the initial state
+   */
+  const revert = () => {
+    const orig = cloneAsPojo(data)
+    setLocalData(orig)
+    setLocalJson(JSON.stringify(orig, null, 2))
+    setLocalYaml(yaml.stringify(orig))
+  }
+
+  /*
+   * Method to apply a new initial state
+   */
+  const apply = () => {
+    update(localData)
+    setLocalJson(JSON.stringify(localData, null, 2))
+    setLocalYaml(yaml.stringify(localData))
+  }
+
+  /*
+   * Change handler for YAML
+   */
+  const onChangeYaml = (input) => {
+    let newData
+    try {
+      newData = yaml.parse(input)
+      if (newData) {
+        setLocalYaml(input)
+        setLocalData(newData)
+      }
+    } catch (err) {
+      console.log(err)
+      // This is fine
+    }
+  }
+  const onChangeJson = (input) => {
+    let newData
+    try {
+      newData = JSON.parse(input)
+      if (newData) {
+        setLocalJson(input)
+        setLocalData(newData)
+      }
+    } catch (err) {
+      console.log(err)
+      // This is fine
+    }
+  }
+
+  return (
+    <div className={kiosk ? 'absolute top-12 left-0 w-screen h-screen z-50 bg-base-100' : ''}>
+      <Tabs tabs="YAML, JSON">
+        <Tab id="json" name="test" label="As YAML">
+          <CodeMirror value={localYaml} height={kiosk ? '90vh' : '50vh'} onChange={onChangeYaml} />
+        </Tab>
+        <Tab id="yaml" label="As JSON">
+          <CodeMirror
+            value={localJson}
+            height={kiosk ? '90vh' : '50vh'}
+            extensions={[jsonLang()]}
+            onChange={onChangeJson}
+          />
+        </Tab>
+      </Tabs>
+      <div className="my-2 w-full flex flex-row flex-wrap items-center gap-2 justify-center">
+        <button
+          className="btn btn-primary btn-outline flex flex-row items-center gap-2"
+          onClick={() => setKiosk(!kiosk)}
+        >
+          <ExpandIcon /> {kiosk ? 'Collapse' : 'Expand'}
+        </button>
+        <button className="btn btn-primary" onClick={apply}>
+          Apply Changes
+        </button>
+        <button className="btn btn-primary btn-outline" onClick={revert}>
+          Revert Changes
+        </button>
+      </div>
     </div>
   )
 }

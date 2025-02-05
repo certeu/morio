@@ -311,18 +311,19 @@ export async function templateSettings(settings, tokens = false) {
     }
   }
 
-  /*
-   * Replace any use of {{ username }} or {{ dn }} with  literal '{{username}}' or '{{dn}}' (no spaces).
-   * This is needed because it's not a mustache template, but instead hardcoded in:
-   * https://github.com/vesse/node-ldapauth-fork/blob/8a461ea72e5d7b6af0b5bb4f272ebf881659a832/lib/ldapauth.js#L160
-   */
-  tokens.username = '{{username}}'
-  tokens.dn = '{{dn}}'
-
   // Now template the settings
   let newSettings
   try {
-    newSettings = JSON.parse(mustache.render(JSON.stringify(settings), tokens))
+    newSettings = JSON.parse(
+      mustache.render(
+        JSON.stringify(settings),
+        tokens,
+        {},
+        {
+          tags: utils.getPreset('MORIO_TEMPLATE_TAGS'),
+        }
+      )
+    )
   } catch (err) {
     log.warn(err, 'Failed to template out settings')
   }

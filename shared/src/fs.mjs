@@ -239,7 +239,7 @@ export async function writeFile(
  * @return {bool} true of success, false in case of trouble
  */
 export async function writeYamlFile(filePath, data, log = false, mode = 0o666) {
-  return await writeFile(filePath, yaml.dump(data), log, mode)
+  return await writeFile(filePath, yaml.dump(data, { lineWidth: -1 }), log, mode)
 }
 
 /**
