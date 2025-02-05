@@ -14,9 +14,7 @@ export const asJson = (data, pretty = true) => {
     else json[key] = val
   }
 
-  return pretty
-    ? JSON.stringify(json, null ,2)
-    : JSON.stringify(json)
+  return pretty ? JSON.stringify(json, null, 2) : JSON.stringify(json)
 }
 
 export const decodeJwt = (token) => {
@@ -180,9 +178,8 @@ export const iconSize = 'h-8 w-8'
  * @param {string} uuid - The input UUID
  * @return {string} short - The shortened UUID
  */
-export const shortUuid = (uuid) => typeof uuid === 'string' && uuid.length > 5
-  ? uuid.slice(0,5)
-  : 'xxxxx'
+export const shortUuid = (uuid) =>
+  typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'
 
 /**
  * Wrapper around mustache's render method to render templated strings
@@ -203,7 +200,7 @@ export const template = (input, replace = {}) =>
  * @param {string/number} timestamp - The time to parse
  * @return {string} timeago - How long ago it was
  */
-export function timeAgo(timestamp, terse = true) {
+export function timeAgo(timestamp, terse = true, suffix = ' ago') {
   const delta = new Date() - new Date(timestamp)
 
   const seconds = Math.floor(delta / 1000)
@@ -212,7 +209,6 @@ export function timeAgo(timestamp, terse = true) {
   const days = Math.floor(hours / 24)
   const months = Math.floor(days / 30)
   const years = Math.floor(days / 365)
-  const suffix = ' ago'
 
   if (seconds < 1) return 'Now'
   if (seconds === 1) return `${terse ? '1s' : '1 second'}${suffix}`

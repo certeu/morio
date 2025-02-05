@@ -39,7 +39,7 @@ export const Term = ({ children }) => {
 
   return term ? (
     <button
-      className="italic underline decoration-warning decoration-dotted decoration-2 hover:decoration-solid hover:cursor-pointer"
+      className="italic underline decoration-warning decoration-dotted decoration-1 hover:decoration-solid hover:cursor-pointer"
       title="Learn more"
       onClick={() =>
         pushModal(

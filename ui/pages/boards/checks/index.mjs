@@ -9,7 +9,7 @@ const meta = {
   Icon: CheckCircleIcon,
 }
 
-export default function ChecksDashboardsPage () {
+export default function ChecksDashboardsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
@@ -18,4 +18,3 @@ export default function ChecksDashboardsPage () {
     </PageWrapper>
   )
 }
-

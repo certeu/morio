@@ -48,7 +48,7 @@ export function setIfUnset(obj, path, val) {
  * @param {string} str - The input string
  * @return {string} rts - The reversed string
  */
-export function reverseString (str) {
+export function reverseString(str) {
   return str.split('').reverse().join('')
 }
 

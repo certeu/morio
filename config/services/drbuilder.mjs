@@ -13,7 +13,6 @@ export const resolveServiceConfiguration = ({ utils }) => {
     dl: utils.getPreset('MORIO_DOWNLOADS_FOLDER'),
   }
 
-
   return {
     /**
      * Container configuration
@@ -46,13 +45,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/aptrepo:/repo`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/drbuilder:/etc/drbuilder`,
           ],
-      command: [
-        '/entrypoint.sh',
-        'repo',
-      ],
+      command: ['/entrypoint.sh', 'repo'],
       // Don't keep container after it exits
       ephemeral: true,
-    }
+    },
   }
 }
 
@@ -67,7 +63,7 @@ export const packageDefaults = {
   Priority: 'optional',
   Architecture: 'all',
   Essential: 'no',
-  Depends: [ ['apt-transport-https', '>=2'] ],
+  Depends: [['apt-transport-https', '>=2']],
   'Installed-Size': 50000,
   Maintainer: 'CERT-EU <services@cert.europa.eu>',
   'Changed-By': 'Joost De Cock <joost.decock@cert.europa.eu>',
@@ -77,7 +73,7 @@ export const packageDefaults = {
   Uploaders: ['Joost De Cock <joost.decock@cert.europa.eu>'],
   DetailedDescription: `Install this package to set up the apt
 repository on your Morio collector. This allows you to install the
-Morio client and its updates via the OS package manager.`
+Morio client and its updates via the OS package manager.`,
 }
 
 /**
@@ -102,8 +98,7 @@ export const resolveControlFile = (settings = {}, utils) => {
   if (settings.Revision) {
     s.Version += `-${s.Revision}`
     delete s.Revision
-  }
-  else s.Version += `-0`
+  } else s.Version += `-0`
 
   /*
    * Construct more complex fields
@@ -120,4 +115,3 @@ export const resolveControlFile = (settings = {}, utils) => {
    */
   return [...Object.keys(s).map((key) => `${key}: ${s[key]}`), ...extra, ''].join('\n')
 }
-

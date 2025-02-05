@@ -64,7 +64,16 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = ['db', 'cache', 'ui', 'connector', 'dbuilder', 'drbuilder', 'tap', 'watcher']
+export const optionalServices = [
+  'db',
+  'cache',
+  'ui',
+  'connector',
+  'dbuilder',
+  'drbuilder',
+  'tap',
+  'watcher',
+]
 
 /**
  * Helper method to generate the Traefik configuration
@@ -97,7 +106,11 @@ export const generateTraefikConfig = (
     })
     .set(SERVICE, {
       loadBalancer: {
-        servers: [{ url: `${backendTls ? 'https' : 'http'}://${utils.getPreset('MORIO_CONTAINER_PREFIX')}${service}:${port}` }],
+        servers: [
+          {
+            url: `${backendTls ? 'https' : 'http'}://${utils.getPreset('MORIO_CONTAINER_PREFIX')}${service}:${port}`,
+          },
+        ],
       },
     })
   if (utils.isEphemeral()) {
@@ -110,7 +123,9 @@ export const generateTraefikConfig = (
     // Configure TLS
     tc.set([...ROUTER, 'tls'], true)
     if (utils.getFlag('ENFORCE_HTTP_MTLS')) {
-      tc.set('tls.options.default.clientAuth.caFiles', ['/usr/local/share/ca-certificates/morio_root_ca.crt'])
+      tc.set('tls.options.default.clientAuth.caFiles', [
+        '/usr/local/share/ca-certificates/morio_root_ca.crt',
+      ])
       tc.set('tls.options.default.clientAuth.clientAuthType', 'RequireAndVerifyClientCert')
     }
     // Include rules and config using the cluster's FQDNs/nodes
@@ -151,12 +166,8 @@ const getServicePort = (service, utils) => {
  * @parms {object} utils - The utils object with the getPreset helper
  * @return {string} suffix - The tag suffix to use
  */
-export function getContainerTagSuffix ({ getPreset }) {
+export function getContainerTagSuffix({ getPreset }) {
   const CHANNEL = getPreset('MORIO_RELEASE_CHANNEL', { dflt: 'stable' })
 
-  return CHANNEL === 'stable'
-    ? ''
-    : `-${CHANNEL}`
+  return CHANNEL === 'stable' ? '' : `-${CHANNEL}`
 }
-
-

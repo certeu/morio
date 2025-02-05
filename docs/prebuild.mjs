@@ -54,7 +54,8 @@ const ensurePresetPage = async () => {
   /*
    * Iterate over presets
    */
-  for (const key of presetsSafeToEdit) content.push(`
+  for (const key of presetsSafeToEdit)
+    content.push(`
 ## ${key}
 
 ${presetDocs[key]}
@@ -67,7 +68,7 @@ ${renderPresetValue(presets[key])}
   /*
    * Write out page
    */
-  await createPresetPage(content.join("\n"))
+  await createPresetPage(content.join('\n'))
 }
 
 /*
@@ -89,11 +90,12 @@ or only during the initial setup depends on the specific preset.
 Refer to the documentation of the various presets below for more details.
 
 ${presets}
-`)
+`
+  )
 
 const renderPresetValue = (val) => {
   if (['number', 'string'].includes(typeof val)) return val
-  if (Array.isArray(val)) return val.join("\n")
+  if (Array.isArray(val)) return val.join('\n')
   else return JSON.stringify(val, null, 2)
 }
 

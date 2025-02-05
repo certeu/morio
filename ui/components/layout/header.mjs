@@ -2,11 +2,14 @@
 import { useState } from 'react'
 import { useScrollPosition } from '@n8tb1t/use-scroll-position'
 import { useRouter } from 'next/router'
+import { useApi } from 'hooks/use-api.mjs'
+import { useQuery } from '@tanstack/react-query'
 // Components
 import Link from 'next/link'
-import { QuestionIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
+import { TipIcon, QuestionIcon, LightThemeIcon, DarkThemeIcon } from 'components/icons.mjs'
 import { GitHub } from 'components/brands.mjs'
 import { MorioBanner } from 'components/branding.mjs'
+import { Markdown } from 'components/markdown.mjs'
 
 export const NavButton = ({
   href,
@@ -40,16 +43,30 @@ export const NavButton = ({
   )
 }
 
-const BannerMessage = () => null
-//(
-//  <div className="mt-14 -mb-12 text-center p-0.5">
-//    <div className="flex flex-row gap-2 items-center justify-center w-full">
-//      <WarningIcon className="w-5 h-5 text-warning" />
-//      <span>Morio v{pkg.version} | this is alpha code</span>
-//      <WarningIcon className="w-5 h-5 text-warning" />
-//    </div>
-//  </div>
-//)
+const BannerMessage = () => {
+  const { api } = useApi()
+  const key = 'morio/ui/markdown/banner'
+  const { data } = useQuery({
+    queryKey: [key],
+    queryFn: async () => {
+      const result = await api.kvRead(key)
+      if (result[1] === 200 && result[0].value) return result[0].value
+      return false
+    },
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+  })
+
+  return data ? (
+    <div className="mt-14 -mb-12 text-center py-1">
+      <div className="flex flex-row gap-2 items-center justify-center w-full bg-gradient-to-r from-success/20 via-warning/30 to-success/20 py-1">
+        <TipIcon className="w-5 h-5 text-accent" />
+        <Markdown className="mdx dense">{data}</Markdown>
+        <TipIcon className="w-5 h-5 text-accent" />
+      </div>
+    </div>
+  ) : null
+}
 
 const isActive = (page, path) => path.slice(0, page.length) === page
 
@@ -59,6 +76,7 @@ export const Header = ({
 }) => {
   const [scrolled, setScrolled] = useState(false)
   const { asPath } = useRouter()
+  const { api } = useApi()
 
   /*
    * Style header differently upon scroll (add shadow)
@@ -70,6 +88,18 @@ export const Header = ({
     },
     [scrolled]
   )
+
+  const key = 'morio/ui/urls/help'
+  const { data } = useQuery({
+    queryKey: [key],
+    queryFn: async () => {
+      const result = await api.kvRead(key)
+      if (result[1] === 200 && result[0].value) return result[0].value
+      return false
+    },
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+  })
 
   return (
     <>
@@ -91,7 +121,11 @@ export const Header = ({
                 <NavButton href="/boards" label="Dashboards" active={isActive('/boards', asPath)}>
                   Dashboards
                 </NavButton>
-                <NavButton href="/inventory" label="Inventory" active={isActive('/inventory', asPath)}>
+                <NavButton
+                  href="/inventory"
+                  label="Inventory"
+                  active={isActive('/inventory', asPath)}
+                >
                   Inventory
                 </NavButton>
                 <NavButton href="/settings" label="Settings" active={isActive('/settings', asPath)}>
@@ -130,7 +164,7 @@ export const Header = ({
             <NavButton onClick={toggleTheme} label="Change theme" toggle>
               {theme === 'dark' ? <LightThemeIcon /> : <DarkThemeIcon />}
             </NavButton>
-            <NavButton href="https://morio.it/" label="Documentation on morio.it">
+            <NavButton href={data ? data : 'https://morio.it/'} label="Get help">
               <QuestionIcon />
             </NavButton>
             <NavButton href="https://github.com/certeu/morio" label="Source code on Github">

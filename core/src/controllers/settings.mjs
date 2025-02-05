@@ -18,6 +18,7 @@ import {
   loadPreseededSettings,
   ensurePreseededContent,
   loadClientModules,
+  loadChartProcessors,
   loadStreamProcessors,
 } from '#shared/loaders'
 import { generateKeySeal, generateRootToken, formatRootTokenResponseData } from '../lib/crypto.mjs'
@@ -496,6 +497,11 @@ const reseedHandler = async function (newSettings = false) {
   )
 
   /*
+   * Ensure preseeded chart processors are in place
+   */
+  await ensureChartProcessors(settings)
+
+  /*
    * Ensure preseeded client module are in place
    */
   await ensureClientModules(settings)
@@ -512,17 +518,26 @@ const reseedHandler = async function (newSettings = false) {
  * This distributes the client modules that are preseeded
  *
  * @param {object} settings - The settings to use (could be different from the running settings)
- * @param {object} settings - The (potentially) updated settings
+ * @return {object} settings - The (potentially) updated settings
  */
 export async function ensureClientModules(settings) {
   return await loadClientModules(settings, log)
 }
 
 /**
+ * This distributes the chart processors that are preseeded
+ *
+ * @param {object} settings - The settings to use (could be different from the running settings)
+ */
+export function ensureChartProcessors(settings) {
+  loadChartProcessors(settings, log)
+}
+
+/**
  * This distributes the stream processors that are preseeded
  *
  * @param {object} settings - The current settings
- * @param {object} settings - The (potentially) updated settings
+ * @return {object} settings - The (potentially) updated settings
  */
 export async function ensureStreamProcessors(settings) {
   /*

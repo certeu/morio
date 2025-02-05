@@ -38,13 +38,13 @@ export const TimeForHumans = ({ iso, future = false }) => {
 export const TimeAgo = (props) => <TimeForHumans {...props} />
 export const TimeToGo = (props) => <TimeForHumans {...props} future />
 
-export const TimeAgoBrief = ({ time }) => {
+export const TimeAgoBrief = ({ time, suffix = ' ago' }) => {
   const d = Math.floor(Date.now() - time)
-  if (d > day) return `${Math.floor(d / day)}d ago`
-  if (d > hour) return `${Math.floor(d / hour)}h ago`
-  if (d > minute * 2) return `${Math.floor(d / minute)}m ago`
-  if (d > second) return `${Math.floor(d / second)}s  ago`
-  return `${d}ms ago`
+  if (d > day) return `${Math.floor(d / day)}d${suffix}`
+  if (d > hour) return `${Math.floor(d / hour)}h${suffix}`
+  if (d > minute * 2) return `${Math.floor(d / minute)}m${suffix}`
+  if (d > second) return `${Math.floor(d / second)}s${suffix}`
+  return `${d}ms${suffix}`
 }
 
 export const TimeToGoBrief = ({ time }) => {

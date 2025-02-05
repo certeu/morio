@@ -156,15 +156,17 @@ export async function generateGpgKeyPair(uuid) {
   const result = await openpgp.generateKey({
     type: 'ecc',
     curve: 'curve25519',
-    userIDs: [{
-      name: `Morio collector ${uuid}`,
-      email: `gpg@${uuid}.collectors.morio.it`
-    }],
+    userIDs: [
+      {
+        name: `Morio collector ${uuid}`,
+        email: `gpg@${uuid}.collectors.morio.it`,
+      },
+    ],
     passphrase: '', // helps signing in an automated way
-    format: 'armored'
+    format: 'armored',
   })
 
-  return (result.privateKey && result.publicKey)
+  return result.privateKey && result.publicKey
     ? { public: result.publicKey, private: result.privateKey }
     : false
 }
@@ -531,7 +533,6 @@ export function verifyPassword(userInput, storedPassword) {
   return false
 }
 
-
 /**
  * Convert a key in PKCS#1 format to PKCS#8 which is what Java wants
  *
@@ -546,11 +547,6 @@ export function convertPkcs1ToPkcs8(key) {
    *  - Convert back to PEM
    */
   return forge.pki.privateKeyInfoToPem(
-    forge.pki.wrapRsaPrivateKey(
-      forge.pki.privateKeyToAsn1(
-        forge.pki.privateKeyFromPem(key)
-      )
-    )
+    forge.pki.wrapRsaPrivateKey(forge.pki.privateKeyToAsn1(forge.pki.privateKeyFromPem(key)))
   )
 }
-

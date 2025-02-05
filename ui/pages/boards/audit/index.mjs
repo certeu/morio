@@ -9,7 +9,7 @@ const meta = {
   Icon: FingerprintIcon,
 }
 
-export default function AuditDashboardsPage () {
+export default function AuditDashboardsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>

@@ -468,11 +468,15 @@ MorioClient.prototype.preseed = async function (preseed) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.deploy = async function (settings) {
-  return await this.call(`${morioConfig.api}/settings`, {
-    headers: this.jsonHeaders,
-    method: 'POST',
-    body: JSON.stringify(settings),
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/settings`,
+    {
+      headers: this.jsonHeaders,
+      method: 'POST',
+      body: JSON.stringify(settings),
+    },
+    true
+  )
 }
 
 /**
@@ -623,6 +627,15 @@ MorioClient.prototype.getInventoryHost = async function (host) {
 }
 
 /**
+ * Get a hostname from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostname = async function (host) {
+  return await this.call(`${morioConfig.api}/inventory/hostnames/${host}`)
+}
+
+/**
  * Get all hosts from the inventory
  *
  * @return {object} - The result
@@ -641,13 +654,23 @@ MorioClient.prototype.getInventoryHostsObject = async function () {
 }
 
 /**
- * Get a host from the inventory
+ * Get an IP address from the inventory
  *
- * @param {string} - The uuid of the host
+ * @param {string} - The id of the IP address
  * @return {object} - The result
  */
-MorioClient.prototype.getInventoryHost = async function (uuid) {
-  return await this.call(`${morioConfig.api}/inventory/hosts/${uuid}`)
+MorioClient.prototype.getInventoryIp = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${id}`)
+}
+
+/**
+ * Get a MAC address from the inventory
+ *
+ * @param {string} - The id of the MAC address
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMac = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/macs/${id}`)
 }
 
 /**
@@ -692,10 +715,14 @@ MorioClient.prototype.getInventoryStats = async function () {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryHost = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/hosts/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/hosts/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -704,10 +731,14 @@ MorioClient.prototype.removeInventoryHost = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryIp = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/ips/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/ips/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -716,10 +747,14 @@ MorioClient.prototype.removeInventoryIp = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryMac = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/macs/${id}`, {
-    headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+  return await this.call(
+    `${morioConfig.api}/inventory/macs/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
 }
 
 /**
@@ -728,10 +763,64 @@ MorioClient.prototype.removeInventoryMac = async function (id) {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryOs = async function (id) {
-  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
+  return await this.call(
+    `${morioConfig.api}/inventory/oss/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Reads a key from the KV store
+ *
+ * @param {string} key - The key to read
+ * @return {string} val - The value under the key (stringified as JSON)
+ */
+MorioClient.prototype.kvRead = async function (key) {
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`)
+}
+
+/**
+ * Writes a key to the KV store
+ *
+ * @param {string} key - The key to write to
+ * @param {mixed} value - The value to write
+ */
+MorioClient.prototype.kvWrite = async function (key, value) {
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`, {
     headers: this.jsonHeaders,
-    method: 'DELETE',
-  }, true)
+    method: 'POST',
+    body: JSON.stringify({ value }),
+  })
+}
+
+/**
+ * Glob-searches the KV store
+ *
+ * @param {string} glob - The glob pattern to search
+ */
+MorioClient.prototype.kvGlob = async function (glob) {
+  return await this.call(`${morioConfig.api}/kv/glob/${glob}`)
+}
+
+/**
+ * Lists all keys in the KV store
+ */
+MorioClient.prototype.kvList = async function () {
+  return await this.call(`${morioConfig.api}/kv/keys`)
+}
+
+/**
+ * Remove a key from the KV store
+ *
+ * @param {string} key - The key to remove
+ * @param {mixed} value - The value to write
+ */
+MorioClient.prototype.kvDel = async function (key) {
+  return await this.call(`${morioConfig.api}/kv/keys/${key}`, { method: 'DELETE' })
 }
 
 /**

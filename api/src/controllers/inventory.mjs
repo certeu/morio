@@ -89,6 +89,38 @@ Controller.prototype.readHost = async function (req, res) {
 }
 
 /**
+ * Read hostname
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readHostname = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHost`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadHost(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return res.send({
+    fqdn: result.fqdn,
+    name: result.name,
+  })
+}
+
+/**
  * Delete host
  *
  * @param {object} req - The request object from Express
@@ -163,14 +195,7 @@ Controller.prototype.readIp = async function (req, res) {
    */
   const result = await loadIp(valid.id)
 
-  /*
-   * Be expicit when a key cannot be found
-   */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
 
 /**
@@ -238,14 +263,7 @@ Controller.prototype.readMac = async function (req, res) {
    */
   const result = await loadMac(valid.id)
 
-  /*
-   * Be expicit when a key cannot be found
-   */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
 
 /**

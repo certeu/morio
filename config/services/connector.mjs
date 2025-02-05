@@ -138,6 +138,15 @@ export const resolveServiceConfiguration = ({ utils }) => {
 /*
  * These exports are used by the connector settings UI
  */
-export const httpMethods = [ 'delete', 'get', 'head', 'patch', 'post', 'put' ]
-export const outputCodecs = [ 'avro', 'cef', 'es_bulk', 'json', 'json_lines', 'line', 'multiline', 'plain', 'rubydebug' ]
-
+export const httpMethods = ['delete', 'get', 'head', 'patch', 'post', 'put']
+export const outputCodecs = [
+  'avro',
+  'cef',
+  'es_bulk',
+  'json',
+  'json_lines',
+  'line',
+  'multiline',
+  'plain',
+  'rubydebug',
+]

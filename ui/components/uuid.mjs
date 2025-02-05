@@ -5,12 +5,13 @@ import { CopyToClipboard } from 'components/copy-to-clipboard.mjs'
 export const Uuid = ({ uuid, href }) => {
   if (!uuid) return <MissingUuid />
 
-  if (href === false) return (
-    <span className="flex flex-row items-center">
-      <span className="badge badge-primary font-mono">{shortUuid(uuid)}</span>
-      <CopyToClipboard content={uuid}label="UUID"  sup />
-    </span>
-  )
+  if (href === false)
+    return (
+      <span className="flex flex-row items-center">
+        <span className="badge badge-primary font-mono">{shortUuid(uuid)}</span>
+        <CopyToClipboard content={uuid} label="UUID" sup />
+      </span>
+    )
 
   if (typeof href === 'undefined') href = `/inventory/hosts/${uuid}`
 

@@ -14,7 +14,8 @@ export async function subscribe() {
   /*
    * Ensure config is valid
    */
-  if (!config.brokers || !Array.isArray(config.brokers)) throw(new Error("Invalid broker configuration"))
+  if (!config.brokers || !Array.isArray(config.brokers))
+    throw new Error('Invalid broker configuration')
 
   const clientId = `${config.clientId}.${node.uuid}`
   const client = createClient(clientId)
@@ -75,15 +76,20 @@ async function createConsumer(client, topics) {
    */
   consumer.on(consumer.events.CONNECT, () => log.info('Kafka consumer connected'))
   consumer.on(consumer.events.DISCONNECT, () => log.info('Kafka consumer disconnected'))
-  consumer.on(consumer.events.CRASH, err => log.warn(err, 'Kafka consumer crash'))
-  consumer.on(consumer.events.REQUEST_TIMEOUT, err => log.warn(err, 'Kafka consumer request timeout'))
+  consumer.on(consumer.events.CRASH, (err) => log.warn(err, 'Kafka consumer crash'))
+  consumer.on(consumer.events.REQUEST_TIMEOUT, (err) =>
+    log.warn(err, 'Kafka consumer request timeout')
+  )
   /*
    * This would be hard to debug if we do not log it
    * It happens when a consumer group has multiple consumers subscribing
    * to different topics. It should not happen, but when it does we should
    * learn about it, which is why we are logging this here as a warning
    */
-  consumer.on(consumer.events.RECEIVED_UNSUBSCRIBED_TOPICS, err => () => log.warn(err, 'Kafka consumer received unsubscribed topics'))
+  consumer.on(
+    consumer.events.RECEIVED_UNSUBSCRIBED_TOPICS,
+    (err) => () => log.warn(err, 'Kafka consumer received unsubscribed topics')
+  )
 
   /*
    * Finally, return the consumer
@@ -126,11 +132,9 @@ async function exitGracefully() {
   try {
     await tools.consumer.disconnect()
     await tools.producer.disconnect()
-  }
-  catch (err) {
+  } catch (err) {
     log.warn(err, 'Error when closing connection')
-  }
-  finally {
+  } finally {
     log.debug('Bye')
     process.exit()
   }
@@ -143,4 +147,3 @@ process.on('exit', exitGracefully.bind())
 process.on('SIGINT', exitGracefully.bind())
 process.on('SIGUSR1', exitGracefully.bind())
 process.on('SIGUSR2', exitGracefully.bind())
-

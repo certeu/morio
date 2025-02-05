@@ -48,7 +48,10 @@ export const resolveServiceConfiguration = ({ utils }) => ({
       /*
        * Middleware to add Morio service header
        */
-      .set('http.middlewares.console-service-header.headers.customRequestHeaders.X-Morio-Service', 'console')
+      .set(
+        'http.middlewares.console-service-header.headers.customRequestHeaders.X-Morio-Service',
+        'console'
+      )
       /*
        * Middleware for central authentication/access control
        */
@@ -61,7 +64,11 @@ export const resolveServiceConfiguration = ({ utils }) => ({
        * Add middleware to router
        * The order in which middleware is loaded matters. Auth should go last.
        */
-      .set('http.routers.console.middlewares', ['console-service-header@file', 'console-auth@file', 'pretty-errors@file'])
+      .set('http.routers.console.middlewares', [
+        'console-service-header@file',
+        'console-auth@file',
+        'pretty-errors@file',
+      ]),
   },
   /*
    * Console configuration

@@ -287,19 +287,25 @@ const PipelineConnectors = ({ pipelineSettings, data, localUpdate }) => {
           <RightIcon className="h-5 w-5 -ml-4" />
         </div>
         <div className="flex flex-col items-center my-4 w-1/3">
-          {filterOrder.map(({ id=false }, i) => id ? [
-              i > 10 ? <RightIcon key="icon" className="rotate-90 w-4 h-4" stroke="3"/> : null,
-              <button key="btn"
-                className={`w-full btn btn-sm btn-ghost btn-primary italic flex flex-row items-center justify-between ${
-                  pipelineSettings.filters?.[id] ? 'text-success hover:text-error' : 'opacity-70'
-                }`}
-                onClick={() => localUpdate(['filters', id], undefined)}
-              >
-                <FilterIcon className="w-5 h-5" />
-                {id}
-                <FilterIcon className="w-5 h-5" />
-              </button>
-            ] : null
+          {filterOrder.map(({ id = false }, i) =>
+            id
+              ? [
+                  i > 10 ? <RightIcon key="icon" className="rotate-90 w-4 h-4" stroke="3" /> : null,
+                  <button
+                    key="btn"
+                    className={`w-full btn btn-sm btn-ghost btn-primary italic flex flex-row items-center justify-between ${
+                      pipelineSettings.filters?.[id]
+                        ? 'text-success hover:text-error'
+                        : 'opacity-70'
+                    }`}
+                    onClick={() => localUpdate(['filters', id], undefined)}
+                  >
+                    <FilterIcon className="w-5 h-5" />
+                    {id}
+                    <FilterIcon className="w-5 h-5" />
+                  </button>,
+                ]
+              : null
           )}
         </div>
         <div className="col-span-1 flex flex-row gap-1 items-end justify-center">

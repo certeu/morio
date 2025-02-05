@@ -10,21 +10,34 @@ const tick = 30000
 /*
  * We keep track of throughput in-memory
  */
-const counters = {}
+const counters = {
+  topics: {},
+  procs: {},
+  peak: {
+    topics: {},
+    procs: {},
+  },
+}
 
 export const count = {
   message: function (topic) {
     counters.topics[topic]++
+    if (counters.topics[topic] > counters.peak.topics[topic]) {
+      counters.peak.topics[topic] = counters.topics[topic]
+    }
   },
   processor: function (name) {
-    counters.processors[name]++
-  }
+    counters.procs[name]++
+    if (counters.procs[name] > counters.peak.procs[name]) {
+      counters.peak.procs[name] = counters.procs[name]
+    }
+  },
 }
 
 /*
  * This function is called to start the count
  */
-function startCount () {
+function startCount() {
   /*
    * Start with a clean slate
    */
@@ -44,89 +57,79 @@ function startCount () {
     return tools.producer
       .send({
         topic: 'metrics',
-        messages: [{ value: JSON.stringify(countersAsEcs(data)) }]
+        messages: [{ value: JSON.stringify(countersAsEcs(data)) }],
       })
-      .catch(err => tools.cache.note('Error when producing counters', err))
+      .catch((err) => tools.cache.note('Error when producing counters', err))
   }, tick)
 }
 
-function countersAsEcs (throughput) {
+function countersAsEcs(throughput) {
   return {
-    "@timestamp": new Date().toISOString(),
-    ecs: { version: "8.0.0" },
+    '@timestamp': new Date().toISOString(),
+    '@metadata': {
+      type: '_doc',
+      _id: tools.create.id(),
+    },
+    ecs: { version: '8.0.0' },
     event: {
-      dataset: "morio-tap.throughput",
+      dataset: 'linux-morio-tap.throughput',
     },
     metricset: {
-      name: "throughput",
+      name: 'throughput',
       period: tick,
     },
     morio: {
       tap: {
         throughput,
-        version: 7
-      }
+        version: 7,
+      },
     },
     host: {
       id: node.uuid,
       name: node.fqdn,
     },
     labels: {
-      'morio.module': 'morio-tap'
-    }
+      'morio.module': 'linux-morio-tap',
+    },
   }
 }
 
 /**
  * Reset counters on every tick
  *
- * @param {object} processors - The stream processors that are loaded
- * @param {array} topics - The topics we are subscribed to
+ * @param {bool} init - Whether or not this is in initial reset
  */
-function resetCounters(processors=false, topics=false) {
-  /*
-   * Only on initial startup will stream processors and topics be set
-   */
-  const init = (processors && topics) ? true : false
-
-  /*
-   * Stream processors and topics are only passed in at the initial startup
-   * So at that time, we use them, later on we re-use the keys in counters
-   */
-  const list = {
-    processors: init ? processors : Object.keys(counters.processors),
-    topics: init ? topics : Object.keys(counters.topics)
-  }
-
+function resetCounters(init = false) {
   if (init) {
     /*
      * Initial start, just initialise the counters object
      */
-    for (const type of Object.keys(list)) {
-      const reset = {}
-      for (const name of list[type]) reset[name] = 0
-      counters[type] = reset
+    for (const topic of topics) {
+      counters.topics[topic] = 0
+      counters.peak.topics[topic] = 0
+    }
+    for (const proc of processorList) {
+      counters.procs[proc] = 0
+      counters.peak.procs[proc] = 0
     }
 
     return
   } else {
     /*
-     * Counter snapshot. We will extract the currect counters data and convert to msg/s
+     * Counter snapshot. We will extract the currect counters data
      */
-    const data = { topics: {}, processors: {} }
-    for (const type of Object.keys(list)) {
-      const reset = {}
-      for (const name of list[type]) {
-        reset[name] = 0
-        /*
-         * We use Math.ceil() here because it is the better choice when there is
-         * not a lot of data. Essentially, we want to avoid that 0.5 msg/s does not
-         * register as anything at all.
-         * On the higher end of the spectrum, who cares whether it's 3000/s or 3001/s
-         */
-        data[type][name] = counters[type]?.[name] ? Math.ceil(counters[type][name]/30) : 0
-      }
-      counters[type] = reset
+    const data = {
+      topics: {},
+      procs: {},
+      peak: counters.peak,
+    }
+    for (const topic of topics) {
+      data.topics[topic] = counters.topics[topic]
+      counters.topics[topic] = 0
+    }
+    for (const proc of processorList) {
+      data.procs[proc] = counters.procs[proc]
+      counters.procs[proc] = 0
     }
 
     return data

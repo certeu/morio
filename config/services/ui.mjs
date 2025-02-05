@@ -50,12 +50,12 @@ export const resolveServiceConfiguration = ({ utils }) => {
         prefixes: ['/'],
         priority: 6,
       })
-      .set('http.middlewares.pretty-errors.errors', {
-        status: ["400-599"],
-        service: 'ui',
-        query: "/http-errors/{status}/"
-      })
-      .set('http.routers.ui.middlewares', ['pretty-errors@file'])
+        .set('http.middlewares.pretty-errors.errors', {
+          status: ['400-599'],
+          service: 'ui',
+          query: '/http-errors/{status}/',
+        })
+        .set('http.routers.ui.middlewares', ['pretty-errors@file']),
     },
   }
 }

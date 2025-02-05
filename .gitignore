@@ -68,6 +68,7 @@ ui/out/
 
 # production
 ui/build
+ui/public/charts
 dist
 
 # Tim Apple litter

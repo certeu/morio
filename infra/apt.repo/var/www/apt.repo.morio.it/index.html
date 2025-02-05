@@ -1,66 +1,82 @@
 <html>
   <head>
     <title>Morio APT Repository</title>
-<style>
-  :root {
-    --txt: rgb(36, 37, 38);
-    --bg: rgb(235, 237, 240);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --txt: rgb(235, 237, 240);
-      --bg: rgb(36, 37, 38);
-    }
-  }
+    <style>
+      :root {
+        --txt: rgb(36, 37, 38);
+        --bg: rgb(235, 237, 240);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --txt: rgb(235, 237, 240);
+          --bg: rgb(36, 37, 38);
+        }
+      }
 
-  html {
-    color: var(--txt);
-    background-color: var(--bg);
-    font-family: system-ui, sans-serif;
-    font-weight: normal;
-  }
-  body {
-    padding: 1rem;
-    font-size: 18px;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    text-align: center;
-  }
-  a, a:visited, a:active {
-    color: #1b88a2;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-  }
-  a:hover {
-    text-decoration-thickness: 3px;
-  }
-  #content {
-    max-width: 500px;
-    margin: auto;
-  }
-  span.spacer {
-    padding: 0 1rem;
-    opacity: 0.5;
-  }
-</style>
+      html {
+        color: var(--txt);
+        background-color: var(--bg);
+        font-family: system-ui, sans-serif;
+        font-weight: normal;
+      }
+      body {
+        padding: 1rem;
+        font-size: 18px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        text-align: center;
+      }
+      a,
+      a:visited,
+      a:active {
+        color: #1b88a2;
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+      }
+      a:hover {
+        text-decoration-thickness: 3px;
+      }
+      #content {
+        max-width: 500px;
+        margin: auto;
+      }
+      span.spacer {
+        padding: 0 1rem;
+        opacity: 0.5;
+      }
+    </style>
   </head>
   <body>
     <div id="content">
       <h1>Morio APT Repositories</h1>
       <p>
-      We provide different APT repositories:<br><br>
-      <a href="/stable/"><b><code>stable</code></b></a>
-      	<span class='spacer'>|</span>
-      	<a href="/canary/"><b><code>canary</code></b></a>
-      	<span class='spacer'>|</span>
-      	<a href="/testing/"><b><code>testing</code></b></a>
-	<br>
-	<br>
-	<small>You probably want <a href="/stable/"><b><code>stable</code></b></a></small>
+        We provide different APT repositories:<br /><br />
+        <a href="/stable/"
+          ><b><code>stable</code></b></a
+        >
+        <span class="spacer">|</span>
+        <a href="/canary/"
+          ><b><code>canary</code></b></a
+        >
+        <span class="spacer">|</span>
+        <a href="/testing/"
+          ><b><code>testing</code></b></a
+        >
+        <br />
+        <br />
+        <small
+          >You probably want
+          <a href="/stable/"
+            ><b><code>stable</code></b></a
+          ></small
+        >
       </p>
       <p>
-      For more details, refer to the install guide at:<br><a href="https://morio.it/docs/guides/">morio.it/docs/guides/install</a>
+        For more details, refer to the install guide at:<br /><a
+          href="https://morio.it/docs/guides/"
+          >morio.it/docs/guides/install</a
+        >
       </p>
     </div>
   </body>

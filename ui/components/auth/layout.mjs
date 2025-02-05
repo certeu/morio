@@ -29,17 +29,9 @@ export const AuthLayout = ({ children }) => {
         </h1>
         <div className="max-w-lg text-center mx-auto text-neutral-content opacity-80 italic">
           <div className="italic">
-            <div className="flex flex-row items-center">
-              <span className="px-2">Connect</span>
-              <Arrows />
-              <span className="px-2">Stream</span>
-              <Arrows />
-              <span className="px-2">Observe</span>
-              <Arrows />
-              <span className="px-2">Respond</span>
-            </div>
+            <div className="flex flex-row items-center opacity-50">Observability Plumbing</div>
           </div>
-          <div className="opacity-80 font-thin text-xs mt-4">
+          <div className="opacity-80 font-thin text-xs mt-4 opacity-50">
             By{' '}
             <a href="https://www.cert.europa.eu/" className="underline text-secondary px-1">
               CERT-EU

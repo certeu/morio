@@ -7,8 +7,10 @@ import { Popout } from 'components/popout.mjs'
 import { SplashLayout } from 'components/layout/splash.mjs'
 import { DarkThemeIcon, LightThemeIcon, WarningIcon } from 'components/icons.mjs'
 import { MorioIcon, MorioWordmark } from 'components/branding.mjs'
+import { useQuery } from '@tanstack/react-query'
 import { useTheme } from 'hooks/use-theme.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
+import { Markdown } from 'components/markdown.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 
@@ -153,13 +155,35 @@ export const NotUnlessSetup = ({ children, pageProps }) => {
   return children
 }
 
+const defaultHomepageMarkdown = `
+This is the Morio home page, or welcome page if you will.
+
+You can change this content by [setting the \`morio/ui/markdown/home\` key
+  in the KV store](/tools/kv/morio/ui/markdown/home).`
+
+const HomepageMarkdown = () => {
+  const { api } = useApi()
+
+  const key = 'morio/ui/markdown/home'
+  const { data } = useQuery({
+    queryKey: [key],
+    queryFn: async () => {
+      const result = await api.kvRead(key)
+      if (result[1] === 200 && result[0].value) return result[0].value
+      return false
+    },
+    refetchInterval: false,
+    refetchIntervalInBackground: false,
+  })
+
+  return <Markdown>{data ? data : defaultHomepageMarkdown}</Markdown>
+}
+
 const HomePage = (props) => (
   <NotUnlessSetup pageProps={props}>
     <PageWrapper {...props}>
       <ContentWrapper {...props} Icon={MorioIcon} title={props.title}>
-        <Popout fixme compact>
-          This is a work in progress
-        </Popout>
+        <HomepageMarkdown />
       </ContentWrapper>
     </PageWrapper>
   </NotUnlessSetup>

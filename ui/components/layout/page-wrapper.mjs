@@ -1,3 +1,4 @@
+import ReactDOMServer from 'react-dom/server'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { ModalContext } from 'context/modal.mjs'
@@ -11,6 +12,14 @@ import { DefaultLayout } from './base.mjs'
 import { Header } from './header.mjs'
 import { Footer } from './footer.mjs'
 import { AuthWrapper } from 'components/auth/wrapper.mjs'
+
+const titleText = (title) => {
+  if (typeof title === 'string') return title
+  const html = ReactDOMServer.renderToString(title)
+  if (typeof DOMParser === 'undefined') return html.replace(/<[^>]*>/g, '')
+  const doc = new DOMParser().parseFromString(html, 'text/html')
+  return doc.body.textContent || doc.body.innerText || ''
+}
 
 /*
  * This React component should wrap all pages
@@ -61,7 +70,7 @@ export const PageWrapper = ({
       key={currentTheme} // This forces the data-theme update
     >
       <Head>
-        <title>{title ? `Morio: ${title}` : 'Morio'}</title>
+        <title>{title ? `Morio: ${titleText(title)}` : 'Morio'}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.svg" />
       </Head>

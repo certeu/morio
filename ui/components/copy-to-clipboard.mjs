@@ -11,11 +11,16 @@ const strip = (html) =>
 
 const handleCopied = (setCopied, setLoadingStatus, label) => {
   setCopied(true)
-  setLoadingStatus([true, label ? `${label} copied to clipboard` : 'Copied to clipboard', true, true])
+  setLoadingStatus([
+    true,
+    label ? `${label} copied to clipboard` : 'Copied to clipboard',
+    true,
+    true,
+  ])
   setTimeout(() => setCopied(false), 1000)
 }
 
-export const CopyToClipboard = ({ content, label=false, sup=false }) => {
+export const CopyToClipboard = ({ content, label = false, sup = false }) => {
   const [copied, setCopied] = useState(false)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
@@ -28,7 +33,10 @@ export const CopyToClipboard = ({ content, label=false, sup=false }) => {
     <Copy text={text} onCopy={() => handleCopied(setCopied, setLoadingStatus, label)}>
       <button className={copied ? 'text-success' : ''}>
         {copied ? (
-          <OkIcon className={`${style} text-success-content bg-success rounded-full p-1`} stroke={4} />
+          <OkIcon
+            className={`${style} text-success-content bg-success rounded-full p-1`}
+            stroke={4}
+          />
         ) : (
           <CopyIcon className={`${style} text-inherit hover:text-primary`} />
         )}

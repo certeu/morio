@@ -19,6 +19,7 @@ import {
   FlagIcon,
   FlipoverIcon,
   HardwareIcon,
+  KeyIcon,
   LayersIcon,
   LocationIcon,
   LogsIcon,
@@ -27,6 +28,7 @@ import {
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
+  WindowIcon,
   QuestionIcon,
   RightIcon,
   SearchIcon,
@@ -48,7 +50,6 @@ import { Link } from 'components/link'
  * Shared props for icons in the sidebar/navigation
  */
 export const iconProps = { className: 'w-6 h-6 shrink-0 grow-0', stroke: 1.25 }
-
 
 /*
  * Object to map icons to page
@@ -83,6 +84,7 @@ const icons = {
   images: ContainerImageIcon,
   inventory: ServersIcon,
   ips: LocationIcon,
+  kv: KeyIcon,
   logs: LogsIcon,
   macs: HardwareIcon,
   metrics: StatusIcon,
@@ -90,6 +92,7 @@ const icons = {
   networks: WifiIcon,
   nodes: ServersIcon,
   notes: TipIcon,
+  oss: WindowIcon,
   pkgs: PackageIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
@@ -119,51 +122,55 @@ export const links = {
     r: 'user',
     audit: {
       t: 'Audit',
-      r: 'user'
+      r: 'user',
     },
     events: {
       t: 'Events',
-      r: 'user'
+      r: 'user',
     },
     checks: {
       t: 'Health Checks',
-      r: 'user'
+      r: 'user',
     },
     logs: {
       t: 'Logs',
-      r: 'user'
+      r: 'user',
     },
     metrics: {
       t: 'Metrics',
-      r: 'user'
+      r: 'user',
     },
     notes: {
       t: 'Notes',
-      r: 'user'
+      r: 'user',
     },
-    search: {
-      t: 'Search Dashboards',
-      r: 'user'
-    },
-    custom: {
-      t: 'Custom Dashboards',
-      r: 'user'
-    },
+    //search: {
+    //  t: 'Search Dashboards',
+    //  r: 'user',
+    //},
+    //custom: {
+    //  t: 'Custom Dashboards',
+    //  r: 'user',
+    //},
   },
   inventory: {
     t: 'Inventory',
     r: 'operator',
     hosts: {
       t: 'Hosts',
-      r: 'user'
+      r: 'user',
     },
     ips: {
       t: 'IP Addresses',
-      r: 'user'
+      r: 'user',
     },
     macs: {
       t: 'MAC Addresses',
-      r: 'user'
+      r: 'user',
+    },
+    oss: {
+      t: 'Operating Systems',
+      r: 'user',
     },
   },
   settings: {
@@ -215,6 +222,9 @@ export const links = {
     },
     export: {
       t: 'Export Data',
+    },
+    kv: {
+      t: 'Key/Value Store',
     },
     certificates: {
       t: 'X.509 Certificates',

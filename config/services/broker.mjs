@@ -66,8 +66,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/broker/rpk.yaml:/var/lib/redpanda/.config/rpk/rpk.yaml`,
             `${utils.getPreset('MORIO_GIT_ROOT')}/data/data/broker:/var/lib/redpanda/data`,
           ],
-      // Aliases to use on the docker network (used to for proxying the RedPanda admin API)
-      aliases: [`${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin`, `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy`],
+      // Aliases to use on the docker network (used for proxying the RedPanda admin API)
+      aliases: [
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpadmin`,
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}rpproxy`,
+      ],
       // Command
       command: [
         'redpanda',
@@ -85,7 +88,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Middleware to add Morio service header
          */
-        .set('http.middlewares.rpadmin-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpadmin')
+        .set(
+          'http.middlewares.rpadmin-service-header.headers.customRequestHeaders.X-Morio-Service',
+          'rpadmin'
+        )
         /*
          * Middleware for central authentication/access control
          */
@@ -98,7 +104,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Add middleware to router
          * The order in which middleware is loaded matters. Auth should go last.
          */
-        .set('http.routers.rpadmin.middlewares', ['rpadmin-service-header@file', 'rpadmin-auth@file']),
+        .set('http.routers.rpadmin.middlewares', [
+          'rpadmin-service-header@file',
+          'rpadmin-auth@file',
+        ]),
       rpproxy: generateTraefikConfig(utils, {
         service: 'rpproxy',
         prefixes: [`/-/rpproxy/`],
@@ -112,7 +121,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Middleware to add Morio service header
          */
-        .set('http.middlewares.rpproxy-service-header.headers.customRequestHeaders.X-Morio-Service', 'rpproxy')
+        .set(
+          'http.middlewares.rpproxy-service-header.headers.customRequestHeaders.X-Morio-Service',
+          'rpproxy'
+        )
         /*
          * Middleware for central authentication/access control
          */
@@ -125,7 +137,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
          * Add middleware to router
          * The order in which middleware is loaded matters. Auth should go last.
          */
-        .set('http.routers.rpadmin.middlewares', ['rprpoxy-prefix@file', 'rpproxy-service-header@file', 'rpproxy-auth@file']),
+        .set('http.routers.rpadmin.middlewares', [
+          'rprpoxy-prefix@file',
+          'rpproxy-service-header@file',
+          'rpproxy-auth@file',
+        ]),
     },
     /*
      * RedPanda configuration file
@@ -290,7 +306,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         /*
          * Extract CN as principal in mTLS
          */
-        kafka_mtls_principal_mapping_rules: [ "RULE:.*CN *= *([^,]+).*/$1/" ],
+        kafka_mtls_principal_mapping_rules: ['RULE:.*CN *= *([^,]+).*/$1/'],
 
         /*
          * Default topic partition count
@@ -388,7 +404,9 @@ export const resolveServiceConfiguration = ({ utils }) => {
           },
           admin_api: {
             // Only connect locally
-            addresses: [ `${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}` ],
+            addresses: [
+              `${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}`,
+            ],
           },
           schema_registry: {},
           cloud_auth: [],

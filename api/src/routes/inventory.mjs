@@ -15,21 +15,6 @@ export function routes(app) {
   app.post(`/inventory/hosts/:id`, rbac.operator, inventory.writeHost)
 
   /*
-   * List all hosts in the inventory
-   */
-  //app.get(`/inventory/hosts/`, rbac.operator, inventory.listHosts)
-
-  /*
-   * List all host IPs in the inventory
-   */
-  //app.get(`/inventory/host-ips/`, rbac.operator, inventory.listHostIps)
-
-  /*
-   * List all host MACs in the inventory
-   */
-  //app.get(`/inventory/host-ips/`, rbac.operator, inventory.listHostMacs)
-
-  /*
    * Get inventory stats
    */
   app.get(`/inventory/stats`, rbac.user, inventory.getStats)
@@ -50,6 +35,11 @@ export function routes(app) {
   app.get(`/inventory/hosts/:id`, rbac.user, inventory.readHost)
 
   /*
+   * Read a hostname (of a host)
+   */
+  app.get(`/inventory/hostnames/:id`, rbac.user, inventory.readHostname)
+
+  /*
    * Delete a host
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
@@ -62,7 +52,7 @@ export function routes(app) {
   /*
    * Read an IP address
    */
-  //app.get(`/inventory/ips/:id`, rbac.user, inventory.readIp)
+  app.get(`/inventory/ips/:id`, rbac.user, inventory.readIp)
 
   /*
    * Delete an IP address
@@ -77,7 +67,7 @@ export function routes(app) {
   /*
    * Read a MAC address
    */
-  //app.get(`/inventory/macs/:id`, rbac.user, inventory.readMac)
+  app.get(`/inventory/macs/:id`, rbac.user, inventory.readMac)
 
   /*
    * Delete a MAC address
@@ -92,7 +82,7 @@ export function routes(app) {
   /*
    * Read an Operating System
    */
-  //app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
+  app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
 
   /*
    * Delete an Operating System

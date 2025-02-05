@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2025-02-04
+
+### Added
+
+- Added support for preseeding chart plugins
+- [api] Return host name/fqdn when loading inventory data
+- [api] Added a new endpoint to read (only) the hostname/fqdn from the inventory
+- [ui] Allow overriding certain UI aspects by setting KV keys
+- [ui] Add KV management to tools pages
+- [ui] Group operating systems on inventory pages
+- [ui] Improvement to inventory pages
+
+### Changed
+
+- [ui] Style tweaks
+- [ui] Use brand color for dark mode background
+
+### Fixed
+
+- [ui] Add missing inventory/oss icon to main navigation menu
+- [tap] Fix an issue with metrics caching expiry
+- [dbuilder] Fix incorrect tagging of container image
+- [rbuilder] Fix incorrect tagging of container image
+
 ## [0.6.1] - 2025-01-28
 
 ### Added
@@ -60,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- We renamed the `production` release channel to `stable` 
+- We renamed the `production` release channel to `stable`
 - We removed all configuration that was handled differently for unit tests
 - Our apt repositories are no longer tied to a specific (Debian) version
 - [api] Remove anything done differently for unit tests
@@ -247,7 +271,6 @@ Since this is a minor release, here's what's new since 0.4.0:
 - [core] Store the salted&hashed the root token. Earlier, it was stored in clear on disk to facilitate development, no longer.
 - [core] Support optional mTLS for HTTP behind the `ENFORCE_HTTP_MTLS` feature flag
 
-
 ## [0.4.2] - 2024-10-02
 
 ### Fixed
@@ -269,7 +292,7 @@ Since this is a minor release, here's what's new since 0.4.0:
 
 ### Changed
 
-- Set default core log level for moriod installs to debug  (in systemd unit file)
+- Set default core log level for moriod installs to debug (in systemd unit file)
 
 ### Fixed
 

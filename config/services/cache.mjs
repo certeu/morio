@@ -28,15 +28,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: [ ],
+      ports: [],
       // Volumes
       volumes: PROD
-        ? [
-            `${utils.getPreset('MORIO_CONFIG_ROOT')}/valkey:/usr/local/etc/valkey`,
-          ]
-        : [
-            `${utils.getPreset('MORIO_GIT_ROOT')}/data/config/valkey:/usr/local/etc/valkey`,
-          ],
+        ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/valkey:/usr/local/etc/valkey`]
+        : [`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/valkey:/usr/local/etc/valkey`],
     },
     /*
      * Valkey configuration file
@@ -118,4 +114,3 @@ maxmemory-policy volatile-lfu
 `,
   }
 }
-

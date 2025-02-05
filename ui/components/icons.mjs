@@ -576,7 +576,6 @@ export const SearchIcon = (props) => (
   </IconWrapper>
 )
 
-
 /*
  * ServersIcon - Looks like 2 rack servers stacked
  */
@@ -719,6 +718,15 @@ export const NarrowIcon = (props) => (
 export const VariableIcon = (props) => (
   <IconWrapper {...props}>
     <path d="M4.745 3A23.933 23.933 0 0 0 3 12c0 3.183.62 6.22 1.745 9M19.5 3c.967 2.78 1.5 5.817 1.5 9s-.533 6.22-1.5 9M8.25 8.885l1.444-.89a.75.75 0 0 1 1.105.402l2.402 7.206a.75.75 0 0 0 1.104.401l1.445-.889m-8.25.75.213.09a1.687 1.687 0 0 0 2.062-.617l4.45-6.676a1.688 1.688 0 0 1 2.062-.618l.213.09" />
+  </IconWrapper>
+)
+
+/*
+ * Windown - Looks like an (application) window
+ */
+export const WindowIcon = (props) => (
+  <IconWrapper {...props}>
+    <path d="M3 8.25V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V8.25m-18 0V6a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 6v2.25m-18 0h18M5.25 6h.008v.008H5.25V6ZM7.5 6h.008v.008H7.5V6Zm2.25 0h.008v.008H9.75V6Z" />
   </IconWrapper>
 )
 

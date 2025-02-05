@@ -22,7 +22,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
       // Ports
-      ports: [ ],
+      ports: [],
       // Volumes
       volumes: PROD
         ? [
@@ -47,8 +47,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         ca: '/tap/config/tls-ca.pem',
         key: '/tap/config/tls-key.pem',
         cert: '/tap/config/tls-cert.pem',
-      }
+      },
     },
   }
 }
-

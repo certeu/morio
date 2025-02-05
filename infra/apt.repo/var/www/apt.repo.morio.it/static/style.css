@@ -2,14 +2,14 @@
   --txt: rgb(36, 37, 38);
   --bg: rgb(235, 237, 240);
   --link: #1b88a2;
-  --logo: url("/static/logo.svg");
+  --logo: url('/static/logo.svg');
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --txt: rgb(235, 237, 240);
     --bg: rgb(36, 37, 38);
-    --link: #06B6D4;
-    --logo: url("/static/dmlogo.svg");
+    --link: #06b6d4;
+    --logo: url('/static/dmlogo.svg');
   }
 }
 
@@ -38,7 +38,9 @@ h1:before {
   padding: 2rem 0;
   margin-bottom: 2rem;
 }
-a, a:visited, a:active {
+a,
+a:visited,
+a:active {
   color: var(--link);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -57,7 +59,7 @@ a:hover {
 }
 pre {
   background: #212121;
-  color: #FFF;
+  color: #fff;
   padding: 0.5rem 0;
   border-radius: 0.5rem;
   text-align: left;

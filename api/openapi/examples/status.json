@@ -1,7 +1,7 @@
 {
   "info": {
     "about": "Morio Management API",
-    "name": "@morio/api",
+    "name": "@itsmorio/api",
     "production": false,
     "version": "0.2.0"
   },
@@ -16,7 +16,7 @@
   "core": {
     "info": {
       "about": "Morio Core",
-      "name": "@morio/core",
+      "name": "@itsmorio/core",
       "production": false,
       "version": "0.2.0"
     },

@@ -116,7 +116,7 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   let forceMrt = false
   if (window) {
     const queryParams = new URLSearchParams(window.location.search)
-    forceMrt = queryParams.get("force_mrt")
+    forceMrt = queryParams.get('force_mrt')
   }
 
   /*
@@ -125,7 +125,13 @@ export const Login = ({ setAccount, account = false, role = false }) => {
   useEffect(() => {
     const getIdps = async () => {
       if (forceMrt) {
-        setIdps({ mrt: { id: 'mrt', provider: 'mrt', label: 'Morio Root Token (forced via query parameter)' } })
+        setIdps({
+          mrt: {
+            id: 'mrt',
+            provider: 'mrt',
+            label: 'Morio Root Token (forced via query parameter)',
+          },
+        })
         setUi({ mrt: 'full' })
       } else {
         const [result, status] = await api.getIdps()

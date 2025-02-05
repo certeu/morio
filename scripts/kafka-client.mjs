@@ -26,17 +26,19 @@ if (onCli) {
   /*
    * Set up logging method
    */
-  const log = process.argv[3] === 'pretty'
-    ? (data, br=false) => {
-      if (br) {
-        console.log()
-        console.log(`-------------------------------- ${data.partition} / ${data.offset} --------------------------------`)
-        console.log()
-        console.log(prettyjson.render(data.value))
-      }
-      else console.log(prettyjson.render(typeof data === 'string' ? { msg: data } : data ))
-    }
-    : (data) => console.log(JSON.stringify(typeof data === 'string' ? { msg: data } : data ))
+  const log =
+    process.argv[3] === 'pretty'
+      ? (data, br = false) => {
+          if (br) {
+            console.log()
+            console.log(
+              `-------------------------------- ${data.partition} / ${data.offset} --------------------------------`
+            )
+            console.log()
+            console.log(prettyjson.render(data.value))
+          } else console.log(prettyjson.render(typeof data === 'string' ? { msg: data } : data))
+        }
+      : (data) => console.log(JSON.stringify(typeof data === 'string' ? { msg: data } : data))
 
   /*
    * Load settings from disk
@@ -75,7 +77,7 @@ if (onCli) {
   }
   const client = new Kafka({
     clientId,
-    brokers: settings.cluster.broker_nodes.map(broker => `${broker}:9092`),
+    brokers: settings.cluster.broker_nodes.map((broker) => `${broker}:9092`),
     ssl,
     logLevel: logLevel.ERROR,
   })
@@ -89,11 +91,14 @@ if (onCli) {
   await consumer.subscribe({ topic: process.argv[2], fromBeginning: true })
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
-      log({
-        partition,
-        offset: message.offset,
-        value: JSON.parse(message.value.toString()),
-      }, true)
+      log(
+        {
+          partition,
+          offset: message.offset,
+          value: JSON.parse(message.value.toString()),
+        },
+        true
+      )
     },
   })
 
@@ -114,37 +119,33 @@ if (onCli) {
   /*
    * Handle exit gracefully
    */
-  process.on('SIGINT', async function() {
+  process.on('SIGINT', async function () {
     console.log()
     console.log()
     log('Exiting, closing connnection...')
     try {
       await consumer.disconnect()
-    }
-    catch (err) {
+    } catch (err) {
       // Do we care?
-    }
-    finally {
+    } finally {
       log('All done. Bye!')
       process.exit(0)
     }
   })
 }
 
-
-
 /*
  * To make sure this 'just works' we load the MRT straight from disk.
  * We use it to load the settings, and a certificate for mTLS.
  */
-async function loadMrt () {
+async function loadMrt() {
   return (await readFile(`${MORIO_GIT_ROOT}/local/mrt`)).trim()
 }
 
 /*
  * To make sure this 'just works' we load the settings from disk.
  */
-async function loadSettings () {
+async function loadSettings() {
   const files = await globDir(`${MORIO_GIT_ROOT}/data/config`, 'settings.*.json')
 
   if (Array.isArray(files) && files.length > 0) return await readJsonFile(files.sort().pop())
@@ -152,20 +153,19 @@ async function loadSettings () {
   return false
 }
 
-async function login (node, mrt) {
+async function login(node, mrt) {
   const httpsAgent = new https.Agent({ rejectUnauthorized: false })
   let result
   try {
     result = await axios.post(
       `https://${node}/-/api/login`,
       {
-        provider: "mrt",
-        data: { mrt, role: "user" }
+        provider: 'mrt',
+        data: { mrt, role: 'user' },
       },
       { httpsAgent }
     )
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err)
     return false
   }
@@ -175,7 +175,7 @@ async function login (node, mrt) {
   return result.data.jwt
 }
 
-async function loadCertificate ({ node, mrt }) {
+async function loadCertificate({ node, mrt }) {
   const token = await login(node, mrt)
   const httpsAgent = new https.Agent({ rejectUnauthorized: false })
   let result
@@ -184,22 +184,21 @@ async function loadCertificate ({ node, mrt }) {
       `https://${node}/-/api/ca/certificate`,
       {
         certificate: {
-          cn: "Morio dev kafka client",
-          c: "BE",
-          st: "Antwerp",
-          l: "Antwerp",
-          o: "SoJoMo",
-          ou: "Jo",
-          san: [ 'dev.clients.morio.sojomo.co' ],
-        }
+          cn: 'Morio dev kafka client',
+          c: 'BE',
+          st: 'Antwerp',
+          l: 'Antwerp',
+          o: 'SoJoMo',
+          ou: 'Jo',
+          san: ['dev.clients.morio.sojomo.co'],
+        },
       },
       {
         headers: { Authorization: `Bearer ${token}` },
         httpsAgent,
       }
     )
-  }
-  catch (err) {
+  } catch (err) {
     console.log(err.response)
     return false
   }
@@ -208,7 +207,7 @@ async function loadCertificate ({ node, mrt }) {
 }
 
 function showHelp() {
-    console.log(`
+  console.log(`
 Usage:
 
   node ./scripts/kafka-client.mjs topic
@@ -216,4 +215,3 @@ Usage:
 Where 'topic' is the name of a Kafka topic to follow.
 `)
 }
-

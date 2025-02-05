@@ -15,22 +15,22 @@
 @layer components {
   /* Applied styles for common HTML tags */
   h1 {
-    @apply text-base-content text-4xl py-5 font-bold lg:text-6xl;
+    @apply text-base-content text-5xl pt-5 pb-4 font-thin tracking-tighter lg:text-6xl;
   }
   h2 {
-    @apply text-base-content text-3xl pt-4 pb-3 m-0 font-medium lg:text-4xl;
+    @apply text-base-content text-3xl pt-4 pb-3 font-black tracking-tighter m-0 lg:text-4xl;
   }
   h3 {
-    @apply text-base-content text-2xl pt-3 pb-2 m-0 font-medium lg:text-3xl;
+    @apply text-base-content text-2xl pt-3 pb-2 font-extrabold tracking-tighter m-0 lg:text-3xl;
   }
   h4 {
-    @apply text-base-content text-xl pt-2 pb-1 m-0 font-medium lg:text-2xl;
+    @apply text-base-content text-xl pt-2 pb-1 font-bold tracking-tighter m-0 lg:text-2xl;
   }
   h5 {
-    @apply text-base-content text-lg py-1 m-0 font-medium lg:text-xl;
+    @apply text-base-content text-lg py-1 font-semibold tracking-tight m-0 lg:text-xl;
   }
   h6 {
-    @apply text-base-content text-base py-0 m-0 font-medium lg:text-lg;
+    @apply text-base-content text-base py-1 font-medium tracking-tight m-0 lg:text-lg;
   }
   p {
     @apply text-base-content my-1 py-2 text-base leading-6;
@@ -57,10 +57,9 @@
 
   /* mdx styles */
   .mdx a:not(.btn) {
-    @apply underline decoration-2;
   }
   .mdx a:hover {
-    @apply decoration-4;
+    @apply underline;
   }
   .mdx ul {
     @apply pl-0 lg:pl-4  list-disc list-inside text-base-content;

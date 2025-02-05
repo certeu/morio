@@ -16,7 +16,14 @@ const MissingRole = ({ role }) => (
   </div>
 )
 
-export const Card = ({ desc, Icon = null, width = 'w-72', role = false, extraClasses = '', ...aProps }) => {
+export const Card = ({
+  desc,
+  Icon = null,
+  width = 'w-72',
+  role = false,
+  extraClasses = '',
+  ...aProps
+}) => {
   const { account } = useAccount()
   const hasRole = role ? rbac(account.role, role) : true
 

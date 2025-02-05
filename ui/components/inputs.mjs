@@ -65,7 +65,7 @@ export const FormControl = ({
           <div className="label">{bottomLabelChildren}</div>
         )
       ) : null}
-      <ValidationErrors valid={isValid} bLabel={labelBL || labelBR} />
+      {isValid === true ? null : <ValidationErrors valid={isValid} bLabel={labelBL || labelBR} />}
     </div>
   )
 }
@@ -99,14 +99,18 @@ export const ButtonFrame = ({
     onClick={onClick}
   >
     {children}
-    {active
-      ? activeIcon
-        ? <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>{activeIcon}</div>
-        : <OkIcon
-            className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
-            stroke={4}
-          />
-     : null}
+    {active ? (
+      activeIcon ? (
+        <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>
+          {activeIcon}
+        </div>
+      ) : (
+        <OkIcon
+          className={`text-success w-8 h-8 absolute ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}
+          stroke={4}
+        />
+      )
+    ) : null}
   </button>
 )
 
@@ -195,7 +199,7 @@ export const NumberInput = ({
   inputType = 'input',
   help = false, // Optional link to help / docs
 }) => {
-  const isValid = valid(current)
+  const isValid = typeof valid === 'function' ? valid(current) : valid
   if (inputType === 'range') label += ` (${current})`
 
   return (
@@ -239,7 +243,7 @@ export const StringInput = ({
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
 }) => {
-  const isValid = valid(current)
+  const isValid = typeof valid === 'function' ? valid(current) : valid
 
   return (
     <FormControl {...{ label, labelTR, labelBL, labelBR, isValid, help }} forId={id}>
@@ -278,7 +282,7 @@ export const SecretInput = ({
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
 }) => {
-  const isValid = valid(current)
+  const isValid = typeof valid === 'function' ? valid(current) : valid
   const [reveal, setReveal] = useState(false)
   const labelTR = (
     <button
@@ -338,21 +342,25 @@ export const TextInput = ({
   disabled = false, // Allows rendering a disabled view
   help = false, // Optional link to help / docs
   code = false, // Allows using fixed-width font for input
-}) => (
-  <FormControl {...{ label, labelTR, labelBL, labelBR, help }} forId={id} isValid={valid(current)}>
-    <textarea
-      id={id}
-      disabled={disabled}
-      type="text"
-      placeholder={placeholder}
-      value={current}
-      onChange={(evt) => update(evt.target.value)}
-      className={`input w-full bg-base-100 input-bordered py-2 ${
-        current === original ? 'input-secondary' : valid(current) ? 'input-success' : 'input-error'
-      } ${code ? 'font-mono h-96' : 'h-36'}`}
-    />
-  </FormControl>
-)
+}) => {
+  const isValid = typeof valid === 'function' ? valid(current) : valid
+
+  return (
+    <FormControl {...{ label, labelTR, labelBL, labelBR, help, isValid }} forId={id}>
+      <textarea
+        id={id}
+        disabled={disabled}
+        type="text"
+        placeholder={placeholder}
+        value={current}
+        onChange={(evt) => update(evt.target.value)}
+        className={`input w-full bg-base-100 input-bordered py-2 ${
+          current === original ? 'input-secondary' : isValid ? 'input-success' : 'input-error'
+        } ${code ? 'font-mono h-96' : 'h-36'}`}
+      />
+    </FormControl>
+  )
+}
 
 /*
  * Input for a list of things to pick from
@@ -636,7 +644,9 @@ export const LabelInput = (props) => {
         <div className="flex flex-row flex-wrap gap-1 items-center">
           <span className="text-sm font-bold">Current:</span>
           {labels}
-          {labels.length > 0 ? <span className="text-sm opacity-60 italic">(click to remove)</span> : null}
+          {labels.length > 0 ? (
+            <span className="text-sm opacity-60 italic">(click to remove)</span>
+          ) : null}
         </div>
       ) : null}
     </div>

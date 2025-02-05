@@ -38,14 +38,13 @@ const ClusterInfo = ({ status }) => {
   const leader = status.core.nodes?.[status.core.status.cluster_leader.uuid]?.fqdn
 
   return (
-    <div className={`p-2 px-4 flex flex-row items-center gap-2`}>
-      Morio <b>{status.core.info.version}</b> (<b>{status.core.info.channel}</b> channel)
-      on
+    <div className={`p-2 px-4`}>
+      Morio <b>{status.core.info.version}</b> (<b>{status.core.info.channel}</b> channel) on{' '}
       <b>{node}</b>
       {node === leader ? (
-        <small>(cluster leader)</small>
+        <small> (cluster leader)</small>
       ) : (
-        <small>(cluster leader is {leader})</small>
+        <small> (cluster leader is {leader})</small>
       )}
     </div>
   )
