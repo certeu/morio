@@ -116,7 +116,7 @@ presets.MORIO_CONTAINER_TAG = 'dev-build'
 predocs.MORIO_RELEASE_CHANNEL = 'The current release channel. Picked up from environment variables.'
 presets.MORIO_RELEASE_CHANNEL = 'dev'
 
-predocs.MORIO_TEMPLATE_TAGS = 'Custom Mustache delmiters to use'
+predocs.MORIO_TEMPLATE_TAGS = 'Custom Mustache delimiters to use'
 presets.MORIO_TEMPLATE_TAGS = ['{|', '|}']
 
 
