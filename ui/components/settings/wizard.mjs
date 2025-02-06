@@ -17,7 +17,7 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport } from './report.mjs'
-import { SettingsIcon, OkIcon, CheckCircleIcon, RightIcon } from 'components/icons.mjs'
+import { ResetIcon, SearchIcon, CompareIcon, SettingsIcon, OkIcon, CheckCircleIcon, RightIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
@@ -56,7 +56,7 @@ const Welcome = ({ setView }) => (
     <h5>Shortcuts</h5>
     <ul className="list list-disc list-inside ml-4">
       <li>
-        The <b>Validate Settings</b> button on the right will always take you to{' '}
+        The <b>Validate Settings</b> button at the top will always take you to{' '}
         <a role="button" onClick={() => setView('validate')}>
           the validation page
         </a>
@@ -281,53 +281,14 @@ const WizardWrapper = ({
       </div>
     </div>
     <div className="grow-0 shrink-0 pt-20 min-h-screen lg:w-64 2xl:w-96">
-      <details className="[&_svg]:open:rotate-90" open>
-        <summary className="flex flex-row">
-          <h5
-            className={`w-full flex flex-row items-center px-4 py-2 rounded-l-lg gap-2
-            lg:hover:bg-accent lg:hover:text-accent-content text-secondary uppercase hover:cursor-pointer text-base`}
-          >
-            <RightIcon stroke={3} className="w-6 h-6 transition-transform" />
-            Settings
-          </h5>
-        </summary>
-        <SettingsNavigation
-          view={sectionPath}
-          loadView={loadView}
-          nav={templates}
-          mSettings={mSettings}
-          dconf={dconf}
-          edit
-        />
-      </details>
-      <details className="[&_svg]:open:rotate-90" open>
-        <summary className="flex flex-row">
-          <h6
-            className={`w-full flex flex-row items-center px-4 py-2 rounded-l-lg gap-2
-            lg:hover:bg-accent lg:hover:text-accent-content text-secondary uppercase hover:cursor-pointer text-base`}
-          >
-            <RightIcon stroke={3} className="w-6 h-6 transition-transform" />
-            Actions
-          </h6>
-        </summary>
-        <ul className="list list-inside pl-2">
-          <li>
-            <button className={btnClasses} onClick={() => loadView('start')}>
-              Getting Started
-            </button>
-          </li>
-          <li>
-            <button className={btnClasses} onClick={() => setPreview(!preview)}>
-              {preview ? 'Hide ' : 'Show '} settings preview
-            </button>
-          </li>
-          <li>
-            <button className={btnClasses} onClick={() => loadView('validate')}>
-              Validate Settings
-            </button>
-          </li>
-        </ul>
-      </details>
+      <SettingsNavigation
+        view={sectionPath}
+        loadView={loadView}
+        nav={templates}
+        mSettings={mSettings}
+        dconf={dconf}
+        edit
+      />
     </div>
   </div>
 )
@@ -479,8 +440,42 @@ export const PrimedSettingsWizard = (props) => {
       </WizardWrapper>
     )
 
+  const topBtnClasses = `btn btn-outline flex flex-row items-center justify-between flex-nowrap`
+
   return (
     <WizardWrapper {...wrapProps}>
+      <div className="grid grid-cols-4 gap-2">
+        <button
+          className={`${topBtnClasses} btn-primary`}
+          onClick={() => setShowDelta(true)}
+          disabled={!delta}
+        >
+          <CompareIcon />
+          {showDelta
+            ? <span>Hide diff</span>
+            : <span>Diff<span className="hidden 2xl:inline"> Settings</span></span>
+          }
+        </button>
+        <button className={`${topBtnClasses} btn-primary`}>
+          <SearchIcon />
+          <span>Preview<span className="hidden 2xl:inline"> Settings</span></span>
+        </button>
+        <button
+          className={`${topBtnClasses} btn-success`}
+          onClick={() => setView('validate')}
+        >
+          <CheckCircleIcon />
+          <span>Validate<span className="hidden 2xl:inline"> Settings</span></span>
+        </button>
+        <button
+          className={`${topBtnClasses} btn-warning`}
+          onClick={revert}
+          disabled={!delta}
+        >
+          <ResetIcon />
+          <span>Restore<span className="hidden 2xl:inline"> Settings</span></span>
+        </button>
+      </div>
       {mSettings.preseed?.base ? (
         <Popout warning>
           <h5>These settings are preseeded</h5>
