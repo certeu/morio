@@ -17,7 +17,14 @@ import { Breadcrumbs } from 'components/layout/breadcrumbs.mjs'
 import { Block } from './blocks/index.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { SettingsReport } from './report.mjs'
-import { ResetIcon, SearchIcon, CompareIcon, SettingsIcon, OkIcon, CheckCircleIcon, RightIcon } from 'components/icons.mjs'
+import {
+  ResetIcon,
+  SearchIcon,
+  CompareIcon,
+  SettingsIcon,
+  OkIcon,
+  CheckCircleIcon,
+} from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { DiffViewer, diffCheck } from 'components/settings/diff.mjs'
 import { SettingsNavigation } from './navigation.mjs'
@@ -254,18 +261,12 @@ export const SettingsWizard = (props) => {
   )
 }
 
-const btnClasses =
-  'w-full flex flex-row items-center px-4 py-2 rounded-l-lg ' +
-  'lg:hover:bg-primary lg:hover:text-primary-content text-base-content font-medium'
-
 const WizardWrapper = ({
   title,
   Icon = SettingsIcon,
   sectionPath,
   loadView,
   mSettings,
-  preview,
-  setPreview,
   children,
   dconf,
 }) => (
@@ -451,29 +452,31 @@ export const PrimedSettingsWizard = (props) => {
           disabled={!delta}
         >
           <CompareIcon />
-          {showDelta
-            ? <span>Hide diff</span>
-            : <span>Diff<span className="hidden 2xl:inline"> Settings</span></span>
-          }
+          {showDelta ? (
+            <span>Hide diff</span>
+          ) : (
+            <span>
+              Diff<span className="hidden 2xl:inline"> Settings</span>
+            </span>
+          )}
         </button>
         <button className={`${topBtnClasses} btn-primary`}>
           <SearchIcon />
-          <span>Preview<span className="hidden 2xl:inline"> Settings</span></span>
+          <span>
+            Preview<span className="hidden 2xl:inline"> Settings</span>
+          </span>
         </button>
-        <button
-          className={`${topBtnClasses} btn-success`}
-          onClick={() => setView('validate')}
-        >
+        <button className={`${topBtnClasses} btn-success`} onClick={() => setView('validate')}>
           <CheckCircleIcon />
-          <span>Validate<span className="hidden 2xl:inline"> Settings</span></span>
+          <span>
+            Validate<span className="hidden 2xl:inline"> Settings</span>
+          </span>
         </button>
-        <button
-          className={`${topBtnClasses} btn-warning`}
-          onClick={revert}
-          disabled={!delta}
-        >
+        <button className={`${topBtnClasses} btn-warning`} onClick={revert} disabled={!delta}>
           <ResetIcon />
-          <span>Restore<span className="hidden 2xl:inline"> Settings</span></span>
+          <span>
+            Restore<span className="hidden 2xl:inline"> Settings</span>
+          </span>
         </button>
       </div>
       {mSettings.preseed?.base ? (

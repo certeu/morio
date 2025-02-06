@@ -119,7 +119,6 @@ presets.MORIO_RELEASE_CHANNEL = 'dev'
 predocs.MORIO_TEMPLATE_TAGS = 'Custom Mustache delimiters to use'
 presets.MORIO_TEMPLATE_TAGS = ['{|', '|}']
 
-
 /*
  * Docker presets
  */

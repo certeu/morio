@@ -37,8 +37,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ports: [],
       // Environment
       environment: {
-        SSL_CERT_FILE: "/etc/vector/root_ca.crt",
-        VECTOR_CONFIG: "/etc/vector/vector.json",
+        SSL_CERT_FILE: '/etc/vector/root_ca.crt',
+        VECTOR_CONFIG: '/etc/vector/vector.json',
         VECTOR_WATCH_CONFIG: true,
         //VECTOR_LOG: 'debug',
         VECTOR_LOG_FORMAT: 'json',
@@ -56,15 +56,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
     },
 
     vector: {
-      data_dir: "/var/lib/vector",
+      data_dir: '/var/lib/vector',
       api: {
         enabled: true,
-        address: "127.0.0.1:8686",
+        address: '127.0.0.1:8686',
       },
       log_schema: {
-        level: 'debug'
-      }
+        level: 'debug',
+      },
     },
   }
 }
-

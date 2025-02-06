@@ -582,10 +582,10 @@ export async function loadStreamProcessors(settings, log) {
                   settings.tap[processor].modules[mod]
                 )
               } else {
-              /*
-               * Or is it a stream processor itself?
-               * (these should always have settings)
-               */
+                /*
+                 * Or is it a stream processor itself?
+                 * (these should always have settings)
+                 */
                 setIfUnset(settings, ['tap', processor], {})
                 settings.tap[processor] = ensureStreamProcessorSettings(
                   load.info?.settings,
@@ -804,4 +804,3 @@ function applyOverlay(settings, overlay = {}) {
 
   return settings
 }
-
