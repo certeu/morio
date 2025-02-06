@@ -85,12 +85,12 @@ export const theme = {
   // neutral-content: The text color on neutral backgrounds
   'neutral-content': colors.teal['50'],
 
-  // info: Used rarely, can be another color best somewhat neutral looking
-  // and should work with the default text color
+  // info: Used rarely, can be another color; best somewhat neutral-looking
+  // and which should work well with the default text color
   info: colors.slate['500'],
   // Text color on the info button
   'info-content': colors.neutral[50],
-  // success: Used rarely, but if it is it's in notifications indicating success
+  // success: Used rarely, but if it is, it's in notifications indicating success
   // Typically some shade of green
   success: colors.green['600'],
   // Text color on the success button
@@ -100,7 +100,7 @@ export const theme = {
   warning: colors.orange['500'],
   // Text color on the warning button
   'warning-content': colors.neutral[50],
-  // error: Used rarely, but if it is it's in notifications indicating success
+  // error: Used rarely, but if it is, it's in notifications, indicating failure
   // or the danger button
   // Typically some shade of red
   error: colors.red['600'],
