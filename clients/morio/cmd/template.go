@@ -66,21 +66,25 @@ func EnsureTemplateFileVars(file string) {
 }
 
 func TemplateOutConfigFile(from string, to string, context map[string]string) {
+	// Read the template from disk
+	template, err := os.ReadFile(GetConfigPath(from))
+	if err != nil {
+		fmt.Printf("Failed to read config file: %v\n", err)
+		panic(err)
+	}
+
+	// Inject run-time vars
+	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
+
+	// Render with mustache
+	output, err := mustache.Render("{{={| |}=}}"+string(template), context)
+
 	// Open file
 	file, err := os.Create(GetConfigPath(to))
 	check(err)
 	defer file.Close()
 
-	// Inject run-time vars
-	context["MORIO_TEMPLATE_SOURCE_FILE"] = GetConfigPath(from)
-
 	// Write value
-	output, err := mustache.RenderFileInLayout(GetConfigPath(from), GetConfigPath("template-layout.mustache"), context)
-	if err != nil {
-		fmt.Println("Failed to render " + GetConfigPath(from))
-		panic(err)
-	}
-
 	_, err = file.WriteString(output)
 	if err != nil {
 		fmt.Println("Failed to write to " + GetConfigPath(to))
@@ -97,7 +101,7 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 	// Read the template from disk
 	template, err := os.ReadFile(GetConfigPath(from))
 	if err != nil {
-		fmt.Printf("Failed to read template: %v\n", err)
+		fmt.Printf("Failed to read template file: %v\n", err)
 		panic(err)
 	}
 
@@ -106,7 +110,7 @@ func TemplateOutInputFile(from string, to string, context map[string]string) {
 	context["MORIO_MODULE_NAME"] = ModuleNameFromFile(from)
 
 	// Render with mustache
-	templated, err := mustache.Render(string(template), context)
+	templated, err := mustache.Render("{{={| |}=}}"+string(template), context)
 
 	// Convert back to Yaml
 	var result []map[string]interface{}
