@@ -65,7 +65,7 @@ export const ChecksTable = () => {
         <h5>No health check data found</h5>
         <p>No health check data was returned from the cache.</p>
         <p>
-          If this is unexpected, you should verify you are you running a stream processor that
+          If this is unexpected, you should verify that you are running a stream processor that
           caches health check data.
         </p>
       </Popout>
