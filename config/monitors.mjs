@@ -136,8 +136,8 @@ export function monitors(utils) {
         response: {
           status: [200],
         },
-        id: `morio.${cluster}.internal.core`,
       },
+      id: `morio.${cluster}.internal.core`,
     },
 
     /*
@@ -167,7 +167,7 @@ export function monitors(utils) {
       ...ssl,
       type: 'http',
       name: `Morio Proxy Service: HTTPS on ${utils.getNodeFqdn()}`,
-      urls: [`https://${utils.getNodeFqdn()}/`],
+      urls: [`https://${utils.getNodeFqdn()}/chartmark.svg`],
       check: {
         response: {
           status: [200],
