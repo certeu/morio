@@ -59,3 +59,4 @@ function parseMessageData(message) {
 
   return data
 }
+

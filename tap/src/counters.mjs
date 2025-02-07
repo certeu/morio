@@ -1,5 +1,5 @@
-import { processorList, topics } from '../loader.mjs'
-import { tools } from './tools.mjs'
+import { processorList, processorsPerTopic, topics } from '../loader.mjs'
+import { tools, log } from './tools.mjs'
 import { node } from '../config/tap.mjs' // Needs to be mounted in the container
 
 /*
@@ -61,6 +61,15 @@ function startCount() {
       })
       .catch((err) => tools.cache.note('Error when producing counters', err))
   }, tick)
+
+  /*
+   * Also log what stream processors are loaded
+   */
+  for (const topic in processorsPerTopic) {
+    for (const processor of processorsPerTopic[topic]) {
+      log.debug(`Stream processor ${processor.id || 'no_id_set'} is subscribed to topic ${topic}`)
+    }
+  }
 }
 
 function countersAsEcs(throughput) {

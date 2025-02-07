@@ -9,6 +9,7 @@ import ipaddr from 'ipaddr.js'
 import get from 'lodash/get.js'
 import set from 'lodash/set.js'
 import unset from 'lodash/unset.js'
+import { node } from '../config/tap.mjs'
 
 /*
  * Export log object on its own
@@ -36,7 +37,6 @@ export const tools = {
     logline: cacheLogline,
     metricset: cacheMetricset,
     note: cacheNote,
-    trimStream,
   },
   clean,
   inventory,
@@ -76,6 +76,7 @@ export const tools = {
   settings,
   getSettings: (path, dflt) => get(settings, path, dflt),
   shortUuid: (uuid) => (typeof uuid === 'string' && uuid.length > 5 ? uuid.slice(0, 5) : 'xxxxx'),
+  node,
 }
 
 /*
@@ -110,8 +111,7 @@ function createHash(input) {
   /*
    * Ensure this 'just works' even when passing an object or array
    */
-  if (typeof input === 'object') input = JSON.stringify(input)
-  return crypto.createHash('sha256').update(input, 'utf-8').digest('hex')
+  return crypto.createHash('sha256').update(asString(input), 'utf-8').digest('hex')
 }
 
 /*
@@ -130,7 +130,7 @@ function ms2s(ms) {
 }
 
 /*
- * Returns current timestamp in milliseconds
+ * Returns current date
  *
  * @return {number} ms - Current timestamp in milliseconds
  */
@@ -142,7 +142,11 @@ function now() {
  * Figure out when a message happened
  */
 function when(data) {
-  return data?.['@timestamp'] ? new Date(data['@timestamp']).getTime() : now()
+  if (data?.['@timestamp']) new Date(data['@timestamp']).getTime()
+  if (data?.time) new Date(data.time).getTime()
+  if (data?.timestamp) new Date(data.timestamp).getTime()
+
+  return now()
 }
 
 /*
@@ -181,117 +185,224 @@ function logCacheErrors(err, result) {
   return err ? tools.note(`ValKey pipeline exec error`, err) : null
 }
 
-/*
- * Cache an event
- */
-async function cacheEvent(data) {
-  valkey.xadd('events', '*', ...asValKeyParams(data))
-  trimStream('events', 150)
-}
-
-/*
+/**
  * Cache an audit event
+ *
+ * @param {object} data - The data to cache
+ * @param {object} overrides - Override default settings
  */
 async function cacheAudit(data, overrides = {}) {
-  valkey.xadd('audit', '*', ...asValKeyParams(data))
-  trimStream('audit', 150)
+  tools.note(`[audit] about to cache`, data)
+  /*
+   * These limits can be set in the settings
+   * which should be passed in as overrides
+   */
+  const {
+    cap = 150, // Set to zero to disable
+    hostCap = 25, // Set to zero to disable
+    userCap = 25, // Set to zero to disable
+  } = overrides
+
+  /*
+   * Cache only stores strings, so stringify the data
+   */
+  const d = asString({ ...data, timestamp: when(data) })
+
+  /*
+   * Prepare ValKey commands
+   */
+  const ops = valkey.multi()
+  /*
+   * Cache audit event
+   */
+  if (cap) ops.lpush('audit', d).ltrim('audit', 0, cap)
+  /*
+   * Cache per host
+   */
+  if (hostCap && typeof data.host === 'string') {
+    const key = createKey('audit', 'host', data.host)
+    ops.lpush(key, d).ltrim(key, 0, hostCap)
+  }
+  if (userCap && typeof data.user?.name === 'string') {
+    const key = createKey('audit', 'user', data.user.name)
+    ops.lpush(key, d).ltrim(key, 0, userCap)
+  }
+  /*
+   * Execure ValKey commands
+   */
+  ops.exec(logCacheErrors)
 }
 
-/*
- * Cache a healtcheck
+/**
+ * Cache an event
  *
- * @param {object} msg - The original message data as received from RedPanda
- * @param {obhject} summary - An object holding the summary data of the healthcheck
- * @param {number} summary.time - The original time of the event (optional)
- * @param {number} summary.up - Whether the healthcheck succeeded (1) or failed (0)
- * @param {number} summary.ms - Amount of milliseconds the healtcheck took
- * @param {number} summary.dbce - Amount of days before certificate expiry (for TLS only)
- * @param {number } remrange - How long (in seconds) to keep healthcheck data for
- * @param {number} expire - How long a healthcheck can go without data before it's expired
+ * @param {object} data - The data to cache
+ * @param {object} overrides - Override default settings
  */
-async function cacheHealthcheck(checkData, data, overrides = {}) {
-  // Extract overrides or use defaults
-  const { ttl = 2 } = overrides
+async function cacheEvent(data, overrides={}) {
+  /*
+   * These limits can be set in the settings
+   * which should be passed in as overrides
+   */
+  const {
+    cap = 150, // Set to zero to disable
+  } = overrides
 
-  // Create cache key
-  const key = createKey('check', checkData.id)
-
-  // Cache the health check itself, as well as its ID
-  valkey
-    .multi()
-    .zadd(key, checkData.time, JSON.stringify(checkData))
-    .zremrangebyscore(key, '-inf', checkData.time - ttl * 3600 * 1000)
-    .expire(key, ttl * 3600)
-    .sadd('checks', key)
+  /*
+   * Run the valkey commands
+   */
+  valkey.multi()
+    .lpush('events', asString({ ...data, timestamp: when(data) }))
+    .ltrim('events', 0, cap)
     .exec(logCacheErrors)
 }
 
-/*
+/**
+ * Cache a healthcheck event
+ *
+ * @param {object} data - The data to cache
+ * @param {object} overrides - Override default settings
+ */
+async function cacheHealthcheck(data, overrides = {}) {
+  /*
+   * These limits can be set in the settings
+   * which should be passed in as overrides
+   */
+  const {
+    cap = 150, // Set to zero to disable
+    hostCap = 25 // Set to zero to disable
+  } = overrides
+
+  /*
+   * Create cache key
+   */
+  const key = createKey('check', data.id)
+
+  /*
+   * Cache only stores strings, so stringify the data
+   */
+  const d = asString({ ...data, timestamp: when(data) })
+
+  /*
+   * Prepare ValKey commands
+   */
+  const ops = valkey.multi()
+
+  /*
+   * Cache healthcheck event
+   */
+  if (cap) ops.lpush(key, d).ltrim(key, 0, cap).sadd('checks', key)
+  /*
+   * Cache per host
+   */
+  if (hostCap && typeof data.host === 'string') {
+    const key = createKey('check', 'host', data.host)
+    ops.lpush(key, d).ltrim(key, 0, hostCap)
+  }
+
+  /*
+   * Execure ValKey commands
+   */
+  ops.exec(logCacheErrors)
+}
+
+/**
  * Cache a log line
  *
  * @param {object} logset - An identifier that tells us what type of log it is
- * @param {object} msg - The original message data as received from RedPanda
+ * @param {object} logData - The log message
  * @param {obhject} data - The full data from kafka
  * @param {object} overrides - The processor configuration and any other overrides
  */
 async function cacheLogline(logset, logData, data, overrides = {}) {
-  // Extract settings from config or use defaults
+  /*
+   * These can be set in the settings
+   * which should be passed in as overrides
+   */
   const {
     cache = true,
-    ttl = 1,
     host = tools.extract.host(data),
     module = tools.extract.module(data),
-    cap = 25,
+    cap = 50,
+    ttl = 1,
   } = overrides
 
-  // Create cache key
+  if (!cache) return
+
+  /*
+   * Cache only stores strings, so stringify the data
+   */
+  const d = asString(logData)
+
+  /*
+   * Create cache key
+   */
   const key = createKey('log', host, module, logset)
 
-  // Cache the log line itself
-  valkey
-    .multi()
-    .lpush(key, logData)
-    .ltrim(key, 0, cap)
-    .expire(key, ttl * 3600)
-    .exec(logCacheErrors)
+  /*
+   * Prepare ValKey commands
+   */
+  const ops = valkey.multi()
 
-  // Keep track of log files collected for this host
+  /*
+   * Cache the log line itself
+   */
+  ops.lpush(key, d).ltrim(key, 0, cap)
+  /*
+   * Keep track of hosts for which we have logs
+   * We also have to handle more complex expiry here
+   */
+  ops.zadd('logs', when(data), host)
+    .zremrangebyscore('logs', '-inf', now() / 1000 - ttl * 3600)
+    .expire('logs', ttl * 1.5 * 3600)
+
+  /*
+   * Keep track of log files collected for this host
+   * We also have to handle more complex expiry here
+   */
   const lkey = createKey('logs', host)
-  const logs = JSON.parse(await valkey.hget(lkey, module))
-  valkey.hset(
+  const logs = JSON.parse((await valkey.hget(lkey, module)))
+  ops.hset(
     lkey,
     module,
-    JSON.stringify(
+    asString(
       logs === null
         ? // First log we see for this host, start new list
           [logset]
         : // Add to list of logs for this host, making sure to avoid duplicates
           [...new Set([...logs, logset])]
     )
-  )
-  valkey.expire(lkey, ttl * 3600)
+  ).expire(lkey, ttl * 3600)
 
-  // Finally, keep track of the hosts for which we have logs
-  const hkey = 'logs'
-  valkey
-    .multi()
-    .zadd(hkey, when(data), host)
-    .zremrangebyscore(hkey, '-inf', now() / 1000 - ttl * 3600)
-    .zremrangebyrank(key, 0, 10000)
-    .expire(hkey, ttl * 1.5 * 3600)
-    .exec(logCacheErrors)
+  /*
+   * Execute ValKey commands
+   */
+  ops.exec(logCacheErrors)
 }
 
-/*
+/**
  * Cache a metricset
  *
- * @param {object} msg - The original message data as received from RedPanda
- * @param {string} metricset - The metricset name to cache under
- * @param {object} metrics - The metrics to cache
- * @param {object} data - The full data from RedPanda
- * @param {object} overrides - The stream processor configuration and any other overrides
+ * @param {object} metricset - An identifier that tells us what type of metrics these are
+ * @param {object} metrics - The metrics data
+ * @param {obhject} data - The full data from kafka
+ * @param {object} overrides - The processor configuration and any other overrides
  */
 async function cacheMetricset(metricset, metrics, data, overrides = {}) {
+  /*
+   * These can be set in the settings
+   * which should be passed in as overrides
+   */
+  const {
+    cache = true,
+    host = tools.extract.host(data),
+    module = tools.extract.module(data),
+    cap = 150,
+    ttl = 1,
+  } = overrides
+
+  if (!cache) return
+
   /*
    * Don't bother if we do not have the data
    */
@@ -299,93 +410,85 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
     return tools.cache.note('Cannot cache metrics, lacking data', { metricset, metrics })
   }
 
-  // Extract overrides or use defaults
-  const {
-    cap = 150,
-    ttl = 1,
-    host = tools.extract.host(data),
-    module = tools.extract.module(data),
-  } = overrides
-
-  // Create cache key
+  /*
+   * Create cache key
+   */
   const key = createKey('metric', host, module, metricset)
 
-  // Cache the metrics
-  valkey
-    .multi()
-    .zadd(key, when(data), JSON.stringify(metrics))
-    .zremrangebyscore(key, '-inf', now() - ttl * 3600 * 1000)
-    //.zremrangebyrank(key, 0, cap * -1)
-    .expire(key, ttl * 3600 * 1.5)
-    .exec(logCacheErrors)
+  /*
+   * Prepare ValKey commands
+   */
+  const ops = valkey.multi()
 
-  // Keep track of metricsets collected for this host
+  /*
+   * Cache the metricset itself
+   */
+  ops.lpush(key, asString({ ...metrics, timestamp: when(data) })).ltrim(key, 0, cap)
+  /*
+   * Keep track of hosts for which we have metrics
+   * We also have to handle more complex expiry here
+   */
+  ops.zadd('metrics', when(data), host)
+    .zremrangebyscore('metrics', '-inf', now() / 1000 - ttl * 3600)
+
+  /*
+   * Keep track of metricsets collected for this host
+   * We also have to handle more complex expiry here
+   */
   const lkey = createKey('metrics', host)
-  const metricsets = JSON.parse(await valkey.hget(lkey, module))
-  valkey.hset(
+  const metricsets = JSON.parse((await valkey.hget(lkey, module)))
+  ops.hset(
     lkey,
     module,
-    JSON.stringify(
+    asString(
       metricsets === null
         ? // First metricset we see for this host, start new list
           [metricset]
         : // Add to list of metricsets for this host, making sure to avoid duplicates
           [...new Set([...metricsets, metricset])]
     )
-  )
-  valkey.expire(lkey, ttl * 3600)
+  ).expire(lkey, ttl * 3600)
 
-  // Finally, keep track of the hosts for which we have metrics
-  const hkey = 'metrics'
-  valkey
-    .multi()
-    .zadd(hkey, when(data), host)
-    .zremrangebyscore(hkey, '-inf', now() / 1000 - ttl * 3600)
-    //.zremrangebyrank(hkey, 0, 10000)
-    .expire(hkey, ttl * 1.5 * 3600)
-    .exec(logCacheErrors)
+  /*
+   * Execure ValKey commands
+   */
+  ops.exec(logCacheErrors)
 }
 
-/*
+/**
+ * Cache a note
+ *
  * Notes are only kept in cache (not ingested)
  * They are meant for internal Morio things
  * They also make it easier to debug, since logging on a system that is running
  * Morio can result in an exponential snowball when also processing logs
+ *
+ * @param {string} title - The note title
+ * @param {obbject} datat - Any note data
+ * @param {object} overrides - The processor configuration and any other overrides
  */
-function cacheNote(title = 'No note title', data = {}) {
-  if (typeof title !== 'string' || typeof data !== 'object') return false
-  valkey.xadd('notes', '*', ...asValKeyParams({ title, data }))
-  trimStream('notes', 50)
-}
+function cacheNote(title = 'No note title', data = {}, overrides = {}) {
+  /*
+   * Don't bother is data is malformed
+   */
+  if (typeof title !== 'string') return false
 
-/*
- * Trims a ValKey stream to a given length
- */
-function trimStream(key = false, len = 100) {
-  return key ? valkey.xtrim(key, 'MAXLEN', '~', len) : false
+  /*
+   * These can be set in the settings
+   * which should be passed in as overrides
+   */
+  const { cap = 150 } = overrides
+
+  /*
+   * Run the valkey commands
+   */
+  valkey.lpush('notes', asString({ title, data: data ? data : {}, timestamp: when(data) }))
+  valkey.ltrim('notes', 0, cap)
 }
 
 /*
  * Non-exported helper methods
  */
-
-/*
- * Flattens an object to [prop, val, prop, val, ... ] array for valkey commands
- */
-function asValKeyParams(obj) {
-  const params = []
-  for (const [prop, val] of Object.entries(obj)) params.push(prop, valKeySafe(val))
-
-  return params
-}
-
-function valKeySafe(value) {
-  if (value === null) return 'null'
-  if (typeof value === 'function') return 'function'
-  if (Array.isArray(value) || typeof value === 'object') return JSON.stringify(value)
-
-  return value
-}
 
 /**
  * This generates a key, which is a string value
@@ -411,7 +514,7 @@ function produceInventoryUpdate(data) {
 
   return tools.producer.send({
     topic: 'inventory',
-    messages: [{ value: JSON.stringify(data) }],
+    messages: [{ value: asString(data) }],
   })
 }
 
@@ -444,7 +547,7 @@ function produceStructuredMessage(msgType, msgData) {
     topic: msgType + 's',
     messages: [
       {
-        value: JSON.stringify(msg),
+        value: asString(msg),
         headers: {
           morio_context: msg.morio[msgType].context,
         },
@@ -465,4 +568,10 @@ function produceStructuredMessage(msgType, msgData) {
  */
 function createElasticId() {
   return crypto.randomBytes(20).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
+}
+
+function asString (input) {
+  if (typeof input === 'string') return input
+  if (typeof input === 'object') return JSON.stringify(input)
+  return `${input}`
 }
