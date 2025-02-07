@@ -57,7 +57,7 @@ export const Notes = () => {
         <h5>No notes found</h5>
         <p>No notes data was returned from the cache.</p>
         <p>
-          If this is unexpected, you should verify you are you running a stream processor that
+          If this is unexpected, you should verify that you are running a stream processor that
           generates notes.
         </p>
       </Popout>
