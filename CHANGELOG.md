@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- [tap] Simplify caching logic, auto-add timestamps
+- [ui] Improvements to cache visualisations
+- [watcher] Fix ID of the core monitor
+- [watcher] Fetch a static file in proxy health check
+
 ## [0.7.0] - 2025-02-06
 
 ### Changed
