@@ -192,7 +192,6 @@ function logCacheErrors(err, result) {
  * @param {object} overrides - Override default settings
  */
 async function cacheAudit(data, overrides = {}) {
-  tools.note(`[audit] about to cache`, data)
   /*
    * These limits can be set in the settings
    * which should be passed in as overrides
