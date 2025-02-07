@@ -244,7 +244,7 @@ export const Check = ({ id = false, cacheKey = false }) => {
       option.series[check.from] = {
         ...templates.series.line,
         data: [],
-        name: `Reponse time from ${check.from}`,
+        name: `Response time from ${check.from}`,
       }
     }
     option.series[check.from].data.push(check.ms)
