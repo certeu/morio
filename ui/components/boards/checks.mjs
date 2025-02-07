@@ -289,6 +289,6 @@ function parseCachedHealthchecks(data) {
       'ASC'
     )
 
-  console.log('Healthcheck data was a not an array. This is unexpected')
+  console.log('Health check data was a not an array. This is unexpected')
   return []
 }
