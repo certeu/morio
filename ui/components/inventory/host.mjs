@@ -19,6 +19,7 @@ import { MacsDisplayTable } from './mac.mjs'
 import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
+import { HostMetricsTable } from 'components/boards/metrics.mjs'
 
 /**
  * This component renders a table with all IP addresses and allows removal
@@ -161,24 +162,23 @@ export const Host = ({ data }) => {
         </div>
       </div>
       <Details summaryLeft="Audit Data">
-        <div className="p-2">
-          {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
-        </div>
+        {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
       </Details>
       <Details summaryLeft="Logs">
-        <div className="p-2">
-          {data.id ? <HostLogsTable host={data.id} /> : <p>One moment please...</p>}
-        </div>
+        {data.id ? <HostLogsTable host={data.id} /> : <p>One moment please...</p>}
       </Details>
-      <Details summaryLeft="IP Addresses" summaryRight={data.ips?.length}>
+      <Details summaryLeft="Metrics">
+        {data.id ? <HostMetricsTable host={data.id} /> : <p>One moment please...</p>}
+      </Details>
+      <Details summaryLeft="IP Addresses" summaryRight={<span className="badge badge-primary">{data.ips?.length}</span>}>
         <IpsDisplayTable ips={data.ips} />
       </Details>
-      <Details summaryLeft="MAC Addresses" summaryRight={data.macs?.length}>
+      <Details summaryLeft="MAC Addresses" summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}>
         <MacsDisplayTable macs={data.macs} />
       </Details>
       {data.notes ? (
         <Details summaryLeft="Notes">
-          <div className="p-2">{data.nodes || 'no notes for this host'}</div>
+          {data.nodes || 'no notes for this host'}
         </Details>
       ) : null}
     </>
@@ -202,7 +202,7 @@ export const Hostname = ({ data }) => {
 export const InventoryHostname = ({ uuid }) => {
   const { api } = useApi()
   const { data } = useQuery({
-    queryKey: [`ostname_${uuid}`],
+    queryKey: [`hostname_${uuid}`],
     queryFn: () => runInventoryHostnameCall(uuid, api),
     refetchInterval: 1000, //false,
     refetchIntervalInBackground: true, //false,

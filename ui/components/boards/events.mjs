@@ -1,33 +1,24 @@
 import { cacheStreamAsObj } from 'components/boards/shared.mjs'
-import { timeAgo } from 'lib/utils.mjs'
+import { asJson } from 'lib/utils.mjs'
+import orderBy from 'lodash/orderBy.js'
+import { linkClasses } from 'components/link.mjs'
+// Context
+import { useContext } from 'react'
+import { ModalContext } from 'context/modal.mjs'
 // Hooks
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Spinner } from 'components/animations.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
-import { Popout } from 'components/popout.mjs'
-import { FlagIcon } from 'components/icons.mjs'
-
-export const Event = ({ event }) =>
-  event ? (
-    <details className="group">
-      <summary className="flex flex-row gap-2 rounded my-1 hover:cursor-pointer hover:bg-secondary hover:bg-opacity-20 px-2 group-open:bg-secondary group-open:bg-opacity-30">
-        <h6 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full">
-          <FlagIcon className="w-6 h-6 text-warning group-open:text-secondary" />
-          <span className="grow">{event?.morio?.event?.title || 'No title in event'}</span>
-          <span className="text-sm font-medium">{timeAgo(event.morio.event.time)}</span>
-        </h6>
-      </summary>
-      <div className="ml-8 border border-4 border-y-0 border-r-0 border-secondary pl-4 mb-4">
-        <pre>{JSON.stringify(event, null, 2)}</pre>
-      </div>
-    </details>
-  ) : null
+import { RightIcon } from 'components/icons.mjs'
+import { Table } from 'components/table.mjs'
+import { TimeAgoBrief } from 'components/time.mjs'
+import { Highlight } from 'components/highlight.mjs'
 
 export const Events = () => {
-  const [tip, setTip] = useState(false)
   const [paused, setPaused] = useState(false)
   const { api } = useApi()
 
@@ -38,45 +29,77 @@ export const Events = () => {
     refetchIntervalInBackground: false,
   })
 
+  return data?.value
+    ? <EventsTable data={cacheStreamAsObj(data.value)} {...{ paused, setPaused }} />
+    : <p>No events data...</p>
+}
+
+const EventsTable = ({ data, paused, setPaused }) => {
+  const [desc, setDesc] = useState(true)
+  const { pushModal } = useContext(ModalContext)
+
+  const sorted = data
+    ? orderBy(
+        Object.entries(data).map(([id, evt]) => ({ evt, id, timestamp: id.split('-')[0] })),
+        'timestamp',
+        desc ? 'desc' : 'asc'
+      )
+    : false
+
   return (
     <>
       <div className="flex flex-row gap-2 items-center">
         <ToggleLiveButton {...{ paused, setPaused }} />
-        {tip ? (
-          <Popout tip>
-            <h4>What are events?</h4>
-            <p>
-              Events are things that happen throughout your infrastructure: things like logins,
-              reboots, but also health checks that fail and so on.
-            </p>
-            <p>
-              Events are typically an intermediate step between the raw data streams, and highly
-              filtered streams such as notifications or alarms. For example, a failing health check
-              will trigger an event for every consecutive failure but it should not trigger an alarm
-              each time, as that would lead to alarm fatigue.
-            </p>
-            <p className="text-right">
-              <button className="btn btn-primary btn-outline" onClick={() => setTip(false)}>
-                Dismiss Tip
-              </button>
-            </p>
-          </Popout>
-        ) : (
-          <button
-            className="btn btn-xs btn-primary btn-outline border-2"
-            onClick={() => setTip(!tip)}
-          >
-            What are events?
-          </button>
-        )}
+        <button
+          className="btn btn-xs btn-primary btn-outline border-2"
+          onClick={() => pushModal(<About />)}
+        >
+          What are events?
+        </button>
       </div>
-      {data ? (
-        Object.entries(cacheStreamAsObj(data.value))
-          .reverse()
-          .map(([id, event]) => <Event key={id} id={id} event={event} />)
-      ) : (
-        <Spinner />
-      )}
+      <Table>
+        <thead>
+          <tr>
+            <th className="w-24 pr-4">
+              <button
+                className={`text-primary capitalize px-0 ${linkClasses} flex flex-row gap-0.5 items-center pr-2 text-left`}
+                onClick={() => setDesc(!desc)}
+              >
+                Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
+              </button>
+            </th>
+            <th className="pr-4 text-left px-0">Title</th>
+          </tr>
+        </thead>
+        <tbody className="text-sm font-mono">
+          {sorted
+            ? sorted.map(({ evt, timestamp }, i) => (
+                <tr key={i}>
+                  <td className="py-0">
+                    <TimeAgoBrief time={timestamp} suffix="" />
+                  </td>
+                  <td className="py-0">
+                    <button
+                      className={`text-primary px-0 pr-4 ${linkClasses}`}
+                      onClick={() =>
+                        pushModal(
+                          <ModalWrapper keepOpenOnClick>
+                            <Highlight title={evt.title} language="json">
+                              {asJson(evt)}
+                            </Highlight>
+                          </ModalWrapper>
+                        )
+                      }
+                    >
+                      {evt.morio?.event?.title}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            : null}
+        </tbody>
+      </Table>
+      {sorted ? null : <Spinner />}
     </>
   )
 }
@@ -85,3 +108,31 @@ const runEventsCall = async (api) => {
   const result = await api.getCacheKey('events')
   return result[1] === 200 ? result[0] : false
 }
+
+const About = () => (
+  <ModalWrapper>
+    <h4>
+      What is an event? <small>Or what is event data?</small>
+    </h4>
+    <p>
+      In event-driven automation (EDA), events are the <b>triggers </b>
+      that we can use to react to changes, remediate problems, or
+      escalate incidents in an automated way.
+      As such, an event can represent any status change inside your infrastructure.
+    </p>
+    <p>
+      In Morio, we strive to turn anything potentially noteworthy into an event.
+      As such, events cast the widest net, and serve as input for more refined filters.
+    </p>
+    <p>
+      As an example, alerts are typically not generated from raw data flowing through
+      Morio. Instead, raw data is turned into events (also known as <em>eventifying</em>).
+      From those events, we can now generate alerts, but also handle grouping, suppression,
+      and other higher level abstractions.
+    </p>
+    <p>
+      In a nutshell, you can think of events as the firehose of everything happening inside Morio.
+    </p>
+  </ModalWrapper>
+)
+

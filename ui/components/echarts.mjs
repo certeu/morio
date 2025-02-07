@@ -1,6 +1,19 @@
 import * as echarts from 'echarts'
 import ReactECharts from 'echarts-for-react'
 
+export const chartGradient = (color='1b88a2') => {
+  return new echarts.graphic.LinearGradient(
+    0,
+    0,
+    0,
+    1,
+    [
+      { offset: 0, color: `${color}dd` },
+      { offset: 1, color: `${color}76` },
+    ]
+  )
+}
+
 /*
  * Helper object for styling an axis in Echarts
  */

@@ -1,6 +1,7 @@
 // Dependencies
 import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { chartTemplates } from './chart-templates.mjs'
 // Hooks
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -13,9 +14,10 @@ import { ReloadDataButton } from 'components/button.mjs'
 import { Loading, Spinner } from 'components/animations.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ListInput } from 'components/inputs.mjs'
-import { Echart } from 'components/echarts.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { ToggleGraphButton, ToggleLiveButton } from 'components/boards/shared.mjs'
+import { SingleEchart, parseCachedMetrics } from './metrics.mjs'
+import { chartGradient } from 'components/echarts.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
@@ -222,70 +224,35 @@ export const Check = ({ id = false, cacheKey = false }) => {
   if (!cacheKey) return null
   if (!Array.isArray(cache)) return <Spinner />
 
+  const data = parseCachedMetrics(cache)
+  const templates = chartTemplates(data)
+
+  const option = templates.charts.line
+  option.title.text = "Health check response time"
+  option.yAxis.name = 'Response time in ms'
   /*
    * Split series by agent
    */
-  const series = {}
-  let from
-  for (const entry of cache) {
-    const check = JSON.parse(entry)
-    from = check.from
-    if (typeof series[check.from] === 'undefined')
-      series[from] = {
-        name: `Reponse time from ${from}`,
-        type: 'line',
-        smooth: true,
+  option.series = {}
+  for (const entry of data) {
+    const check = entry.data
+    if (typeof option.series[check.from] === 'undefined') {
+      option.series[check.from] = {
+        ...templates.series.line,
         data: [],
+        name: `Reponse time from ${check.from}`,
       }
-    series[from].data.push([check.time, check.ms])
+    }
+    option.series[check.from].data.push(check.ms)
   }
-  if (Object.keys(series).length === 1) {
-    series[from].areaStyle = {}
+  option.series = Object.values(option.series)
+  if (option.series.length === 1) {
+    option.series[0].areaStyle = {
+      opacity: 0.2,
+      color: chartGradient('#1b88a2')
+    }
   }
-
-  const option = {
-    title: {
-      text: 'Health check response time in milliseconds',
-      left: 'center',
-      top: 6,
-    },
-    legend: {
-      show: true,
-      bottom: 0,
-    },
-    grid: {
-      left: 35,
-      right: 50,
-      top: 50,
-      bottom: 50,
-    },
-    toolbox: {
-      show: true,
-      feature: {
-        saveAsImage: {
-          show: true,
-        },
-        dataZoom: {
-          show: true,
-        },
-        magicType: {
-          type: ['line', 'bar'],
-        },
-      },
-    },
-    xAxis: {
-      type: 'time',
-      name: 'Time',
-      nameGap: 10,
-    },
-    yAxis: {
-      type: 'value',
-      name: 'Response\nTime',
-      nameGap: 10,
-    },
-    series: Object.values(series),
-  }
-  const check = JSON.parse(cache.pop())
+  const check = data.pop().data
 
   return (
     <div className="">
@@ -302,14 +269,10 @@ export const Check = ({ id = false, cacheKey = false }) => {
         <KeyVal k="id" val={check.id} small />
       </div>
       {graph ? (
-        <Echart option={option} />
+        <SingleEchart option={option} />
       ) : (
         <Highlight language="json">
-          {JSON.stringify(
-            cache.map((item) => JSON.parse(item)),
-            null,
-            2
-          )}
+          {JSON.stringify(data, null, 2)}
         </Highlight>
       )}
     </div>

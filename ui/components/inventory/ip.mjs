@@ -11,7 +11,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { LocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { Hostname } from './host.mjs'
+import { InventoryHostname } from './host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 
 /**
@@ -61,7 +61,7 @@ export const IpsTable = () => {
           <TrashIcon /> {count} IP Addresses
         </button>
       ) : null}
-      <table className="table table-auto">
+      <table>
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -104,7 +104,7 @@ export const IpsTable = () => {
               </td>
               <td className="">
                 <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <Hostname data={ip} />
+                  <InventoryHostname uuid={ip.host} />
                 </PageLink>
               </td>
               <td className="">{ip.version}</td>
@@ -125,13 +125,13 @@ export const IpsDisplayTable = ({ ips }) => {
   const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
 
   return (
-    <table className="table table-auto">
+    <table>
       <thead>
         <tr>
           {['ip', 'host', 'version', 'last_update'].map((field) => (
-            <th key={field}>
+            <th key={field} className="text-left">
               <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
               >
                 {field}{' '}
@@ -147,16 +147,16 @@ export const IpsDisplayTable = ({ ips }) => {
       <tbody>
         {sorted.map((ip) => (
           <tr key={ip.id}>
-            <td className="">
+            <td className="pr-6 py-0.5 font-mono text-sm">
               <PageLink href={`/inventory/ips/${ip.id}`}>{ip.ip}</PageLink>
             </td>
-            <td className="">
+            <td className="pr-6 py-0.5 text-sm">
               <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <Hostname data={ip} />
+                <InventoryHostname uuid={ip.host} />
               </PageLink>
             </td>
-            <td className="">{ip.version}</td>
-            <td className="">{timeAgo(ip.last_update)}</td>
+            <td className="pr-6 py-0.5">{ip.version}</td>
+            <td className="py-0.5 text-sm">{timeAgo(ip.last_update)}</td>
           </tr>
         ))}
       </tbody>
@@ -185,7 +185,7 @@ export const IpAddress = ({ data }) => {
           </h4>
           <div className="flex flex-row flex-wrap gap-2">
             <KeyVal k="ip" val={ip} />
-            <KeyVal k="host" val={<Hostname data={data} />} />
+            <KeyVal k="host" val={<InventoryHostname uuid={ip.host} />} />
             <KeyVal k="last update" val={timeAgo(data.last_update)} />
           </div>
         </div>

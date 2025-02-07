@@ -11,7 +11,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { RightIcon, TrashIcon, HardwareIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { Hostname } from './host.mjs'
+import { InventoryHostname } from './host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 
 /**
@@ -61,7 +61,7 @@ export const MacsTable = () => {
           <TrashIcon /> {count} MAC Addresses
         </button>
       ) : null}
-      <table className="table table-auto">
+      <table>
         <thead>
           <tr>
             <th className="text-base-300 text-base text-left w-8">
@@ -75,7 +75,7 @@ export const MacsTable = () => {
             {['mac', 'host', 'last_update'].map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -104,7 +104,7 @@ export const MacsTable = () => {
               </td>
               <td className="">
                 <PageLink href={`/inventory/hosts/${mac.host}`}>
-                  <Hostname data={mac} />
+                  <InventoryHostname uuid={mac.host} />
                 </PageLink>
               </td>
               <td className="">{timeAgo(mac.last_update)}</td>
@@ -135,16 +135,16 @@ export const MacsDisplayTable = ({ macs }) => {
   const sorted = orderBy(macs, [order], [desc ? 'desc' : 'asc'])
 
   return (
-    <table className="table table-auto">
+    <table>
       <thead>
         <tr>
           {['mac', 'host', 'last_update'].map((field) => (
-            <th key={field}>
+            <th key={field} className="text-left">
               <button
-                className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
               >
-                {field}{' '}
+                {field.replace('_', ' ')}{' '}
                 <RightIcon
                   stroke={3}
                   className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
@@ -157,15 +157,15 @@ export const MacsDisplayTable = ({ macs }) => {
       <tbody>
         {sorted.map((mac) => (
           <tr key={mac.id}>
-            <td className="">
+            <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/macs/${mac.id}`}>{mac.mac}</PageLink>
             </td>
-            <td className="">
+            <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/hosts/${mac.host}`}>
-                <Hostname data={mac} />
+                <InventoryHostname uuid={mac.host} />
               </PageLink>
             </td>
-            <td className="">{timeAgo(mac.last_update)}</td>
+            <td className="py-0.5 text-sm">{timeAgo(mac.last_update)}</td>
           </tr>
         ))}
       </tbody>
@@ -188,7 +188,7 @@ export const MacAddress = ({ data }) => {
           </h4>
           <div className="flex flex-row flex-wrap gap-2">
             <KeyVal k="mac" val={mac} />
-            <KeyVal k="host" val={<Hostname data={data} />} />
+            <KeyVal k="host" val={<InventoryHostname uuid={data.host} />} />
             <KeyVal k="last update" val={timeAgo(data.last_update)} />
           </div>
         </div>
