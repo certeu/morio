@@ -36,7 +36,7 @@ export const Events = () => {
       <h5>No event data found</h5>
       <p>No event data was returned from the cache.</p>
       <p>
-        If this is unexpected, you should verify you are you running a stream processor that caches
+        If this is unexpected, you should verify that you are running a stream processor that caches
         event data.
       </p>
     </Popout>
