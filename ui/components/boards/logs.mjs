@@ -341,8 +341,6 @@ const LogLines = ({ fields, lines }) => {
   const [desc, setDesc] = useState(false)
   const [showFields, setShowFields] = useState(fields)
 
-  console.log({ lines })
-
   const sorted = orderBy(
     lines.map((line) => parseJson(line)),
     [order],

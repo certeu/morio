@@ -130,7 +130,7 @@ function ms2s(ms) {
 }
 
 /*
- * Returns current date
+ * Returns current timestamp in milliseconds
  *
  * @return {number} ms - Current timestamp in milliseconds
  */
@@ -238,7 +238,7 @@ async function cacheAudit(data, overrides = {}) {
  * @param {object} data - The data to cache
  * @param {object} overrides - Override default settings
  */
-async function cacheEvent(data, overrides={}) {
+async function cacheEvent(data, overrides = {}) {
   /*
    * These limits can be set in the settings
    * which should be passed in as overrides
@@ -250,7 +250,8 @@ async function cacheEvent(data, overrides={}) {
   /*
    * Run the valkey commands
    */
-  valkey.multi()
+  valkey
+    .multi()
     .lpush('events', asString({ ...data, timestamp: when(data) }))
     .ltrim('events', 0, cap)
     .exec(logCacheErrors)
@@ -269,7 +270,7 @@ async function cacheHealthcheck(data, overrides = {}) {
    */
   const {
     cap = 150, // Set to zero to disable
-    hostCap = 25 // Set to zero to disable
+    hostCap = 25, // Set to zero to disable
   } = overrides
 
   /*
@@ -351,7 +352,8 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
    * Keep track of hosts for which we have logs
    * We also have to handle more complex expiry here
    */
-  ops.zadd('logs', when(data), host)
+  ops
+    .zadd('logs', when(data), host)
     .zremrangebyscore('logs', '-inf', now() / 1000 - ttl * 3600)
     .expire('logs', ttl * 1.5 * 3600)
 
@@ -360,18 +362,20 @@ async function cacheLogline(logset, logData, data, overrides = {}) {
    * We also have to handle more complex expiry here
    */
   const lkey = createKey('logs', host)
-  const logs = JSON.parse((await valkey.hget(lkey, module)))
-  ops.hset(
-    lkey,
-    module,
-    asString(
-      logs === null
-        ? // First log we see for this host, start new list
-          [logset]
-        : // Add to list of logs for this host, making sure to avoid duplicates
-          [...new Set([...logs, logset])]
+  const logs = JSON.parse(await valkey.hget(lkey, module))
+  ops
+    .hset(
+      lkey,
+      module,
+      asString(
+        logs === null
+          ? // First log we see for this host, start new list
+            [logset]
+          : // Add to list of logs for this host, making sure to avoid duplicates
+            [...new Set([...logs, logset])]
+      )
     )
-  ).expire(lkey, ttl * 3600)
+    .expire(lkey, ttl * 3600)
 
   /*
    * Execute ValKey commands
@@ -427,7 +431,8 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
    * Keep track of hosts for which we have metrics
    * We also have to handle more complex expiry here
    */
-  ops.zadd('metrics', when(data), host)
+  ops
+    .zadd('metrics', when(data), host)
     .zremrangebyscore('metrics', '-inf', now() / 1000 - ttl * 3600)
 
   /*
@@ -435,18 +440,20 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
    * We also have to handle more complex expiry here
    */
   const lkey = createKey('metrics', host)
-  const metricsets = JSON.parse((await valkey.hget(lkey, module)))
-  ops.hset(
-    lkey,
-    module,
-    asString(
-      metricsets === null
-        ? // First metricset we see for this host, start new list
-          [metricset]
-        : // Add to list of metricsets for this host, making sure to avoid duplicates
-          [...new Set([...metricsets, metricset])]
+  const metricsets = JSON.parse(await valkey.hget(lkey, module))
+  ops
+    .hset(
+      lkey,
+      module,
+      asString(
+        metricsets === null
+          ? // First metricset we see for this host, start new list
+            [metricset]
+          : // Add to list of metricsets for this host, making sure to avoid duplicates
+            [...new Set([...metricsets, metricset])]
+      )
     )
-  ).expire(lkey, ttl * 3600)
+    .expire(lkey, ttl * 3600)
 
   /*
    * Execure ValKey commands
@@ -468,7 +475,7 @@ async function cacheMetricset(metricset, metrics, data, overrides = {}) {
  */
 function cacheNote(title = 'No note title', data = {}, overrides = {}) {
   /*
-   * Don't bother is data is malformed
+   * Don't bother when data is malformed
    */
   if (typeof title !== 'string') return false
 
@@ -569,7 +576,7 @@ function createElasticId() {
   return crypto.randomBytes(20).toString('base64').replace(/\+/g, '-').replace(/\//g, '_')
 }
 
-function asString (input) {
+function asString(input) {
   if (typeof input === 'string') return input
   if (typeof input === 'object') return JSON.stringify(input)
   return `${input}`
