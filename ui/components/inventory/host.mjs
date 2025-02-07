@@ -170,16 +170,20 @@ export const Host = ({ data }) => {
       <Details summaryLeft="Metrics">
         {data.id ? <HostMetricsTable host={data.id} /> : <p>One moment please...</p>}
       </Details>
-      <Details summaryLeft="IP Addresses" summaryRight={<span className="badge badge-primary">{data.ips?.length}</span>}>
+      <Details
+        summaryLeft="IP Addresses"
+        summaryRight={<span className="badge badge-primary">{data.ips?.length}</span>}
+      >
         <IpsDisplayTable ips={data.ips} />
       </Details>
-      <Details summaryLeft="MAC Addresses" summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}>
+      <Details
+        summaryLeft="MAC Addresses"
+        summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}
+      >
         <MacsDisplayTable macs={data.macs} />
       </Details>
       {data.notes ? (
-        <Details summaryLeft="Notes">
-          {data.nodes || 'no notes for this host'}
-        </Details>
+        <Details summaryLeft="Notes">{data.nodes || 'no notes for this host'}</Details>
       ) : null}
     </>
   )

@@ -1,7 +1,5 @@
-import { cacheStreamAsObj } from 'components/boards/shared.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { asJson } from 'lib/utils.mjs'
-import { linkClasses } from 'components/link.mjs'
+import { asJson, parseJson, timeAgo } from 'lib/utils.mjs'
 // Context
 import { useContext } from 'react'
 import { ModalContext } from 'context/modal.mjs'
@@ -10,13 +8,14 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
+import { Link, linkClasses } from 'components/link.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { RightIcon } from 'components/icons.mjs'
 import { Spinner } from 'components/animations.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
-import { Uuid } from 'components/uuid.mjs'
-import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
+import { InventoryHostname } from 'components/inventory/host.mjs'
+import { Popout } from 'components/popout.mjs'
 
 export const Note = ({ note }) => {
   const { title, data } = note
@@ -44,17 +43,25 @@ export const Notes = () => {
     refetchIntervalInBackground: false,
   })
 
-  const sorted = data
+  const sorted = data?.value
     ? orderBy(
-        Object.entries(cacheStreamAsObj(data.value)).map(([id, note]) => ({
-          note,
-          id,
-          timestamp: id.split('-')[0],
-        })),
+        data.value.map((entry) => parseJson(entry)),
         'timestamp',
         desc ? 'desc' : 'asc'
       )
     : false
+
+  if (!sorted)
+    return (
+      <Popout note>
+        <h5>No notes found</h5>
+        <p>No notes data was returned from the cache.</p>
+        <p>
+          If this is unexpected, you should verify you are you running a stream processor that
+          generates notes.
+        </p>
+      </Popout>
+    )
 
   return (
     <>
@@ -67,10 +74,10 @@ export const Notes = () => {
           What are notes?
         </button>
       </div>
-      <table className="table table-fixed">
+      <table>
         <thead>
           <tr>
-            <th className="w-24">
+            <th className="text-left">
               <button
                 className={`btn btn-link capitalize px-0 ${linkClasses}`}
                 onClick={() => setDesc(!desc)}
@@ -84,19 +91,17 @@ export const Notes = () => {
         </thead>
         <tbody>
           {sorted
-            ? sorted.map(({ note, timestamp }, i) => (
-                <tr key={i} className={` ${i % 2 === 0 ? 'bg-neutral bg-opacity-10' : ''} p-0 m-0`}>
-                  <td className="py-0">
-                    <TimeAgoBrief time={timestamp} />
-                  </td>
-                  <td className="py-0">
+            ? sorted.map((note, i) => (
+                <tr key={i}>
+                  <td className="py-0.5 pr-4 text-mono font-sm">{timeAgo(note.timestamp)}</td>
+                  <td className="py-0.5 pr-4 text-mono font-sm">
                     <button
-                      className={`btn btn-link capitalize px-0 ${linkClasses}`}
+                      className={`${linkClasses} text-sm text-primary font-medium`}
                       onClick={() =>
                         pushModal(
                           <ModalWrapper keepOpenOnClick>
                             <Highlight title={note.title} language="json">
-                              {asJson(note.data)}
+                              {asJson(note)}
                             </Highlight>
                           </ModalWrapper>
                         )
@@ -105,11 +110,13 @@ export const Notes = () => {
                       {note.title}
                     </button>
                   </td>
-                  <td className="py-0">
+                  <td className="py-0.5 pr-4 text-mono font-sm">
                     {note.data?.host?.id ? (
-                      <Uuid uuid={note.data.host.id} />
+                      <Link href={`/inventory/hosts/${note.data.host.id}`}>
+                        <InventoryHostname uuid={note.data.host.id} />
+                      </Link>
                     ) : (
-                      <Uuid uuid={false} />
+                      '-'
                     )}
                   </td>
                 </tr>

@@ -1,5 +1,5 @@
 // Dependencies
-import { formatBytes, timeAgo } from 'lib/utils.mjs'
+import { formatBytes, timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { linkClasses } from 'components/link.mjs'
 // Hooks
@@ -61,9 +61,16 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
 
   // Only keep what is in the cache, but use the inventory data
   const hosts = {}
-  for (const id of cache) {
-    if (inventory[id]) hosts[id] = inventory[id]
-    else hosts[id] = unknownHost(id)
+  for (const i in cache) {
+    /*
+     * This is a zset with scores
+     * So we ignore all odd indexes
+     */
+    if (i % 2 == 0) {
+      const id = cache[i]
+      if (inventory[id]) hosts[id] = inventory[id]
+      else hosts[id] = unknownHost(id)
+    }
   }
   const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
 
@@ -317,24 +324,27 @@ async function runShowLogsApiCall(api, host, module, logset) {
 }
 
 const LogLine = ({ data }) => {
-  let parsed
+  let parsed = data
   try {
-    parsed = JSON.parse(`${data}`)
+    const asJson = JSON.parse(`${data}`)
+    if (typeof asJson !== 'string') parsed = JSON.stringify(asJson, null, 2)
   } catch (err) {
     parsed = `${data}`
   }
 
-  return <pre>{JSON.stringify(parsed, null, 2)}</pre>
+  return <pre className="text-sm font-mono">{parsed}</pre>
 }
 
 const LogLines = ({ fields, lines }) => {
   // State
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('time')
   const [desc, setDesc] = useState(false)
   const [showFields, setShowFields] = useState(fields)
 
+  console.log({ lines })
+
   const sorted = orderBy(
-    lines.map((line) => JSON.parse(line)),
+    lines.map((line) => parseJson(line)),
     [order],
     [desc ? 'desc' : 'asc']
   )
@@ -386,7 +396,7 @@ const LogLines = ({ fields, lines }) => {
                   .filter((field) => showFields.includes(field))
                   .map((field) => (
                     <td key={field} className="pr-6 whitespace-nowrap">
-                      {field === 'time' ? timeAgo(entry[field], true, '') : entry[field]}
+                      <LogMessage entry={entry} field={field} />
                     </td>
                   ))}
               </tr>
@@ -396,4 +406,12 @@ const LogLines = ({ fields, lines }) => {
       </div>
     </>
   )
+}
+
+const LogMessage = ({ entry, field }) => {
+  if (field === 'msg' && typeof entry === 'string') return entry
+  if (typeof entry[field] === 'undefined') return '-'
+  if (field === 'time') return timeAgo(entry[field], true, '')
+
+  return entry[field]
 }

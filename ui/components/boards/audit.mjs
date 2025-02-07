@@ -1,6 +1,5 @@
-import { cacheStreamAsObj } from 'components/boards/shared.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { asJson } from 'lib/utils.mjs'
+import { asJson, parseJson } from 'lib/utils.mjs'
 import { linkClasses } from 'components/link.mjs'
 // Context
 import { useContext } from 'react'
@@ -17,6 +16,7 @@ import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
+import { Popout } from 'components/popout.mjs'
 import { Table } from 'components/table.mjs'
 import { InventoryHostname } from 'components/inventory/host.mjs'
 
@@ -31,9 +31,19 @@ export const Audit = () => {
     refetchIntervalInBackground: false,
   })
 
-  if (!data?.value) return <p>No audit data...</p>
+  if (!data?.value)
+    return (
+      <Popout note>
+        <h5>No audit data found</h5>
+        <p>No audit data was returned from the cache.</p>
+        <p>
+          If this is unexpected, you should verify you are you running a stream processor that
+          caches audit data.
+        </p>
+      </Popout>
+    )
 
-  return <AuditTable data={cacheStreamAsObj(data.value)} {...{ paused, setPaused }} />
+  return <AuditTable data={parseCachedAuditData(data.value)} {...{ paused, setPaused }} />
 }
 
 export const HostAudit = ({ uuid }) => {
@@ -48,7 +58,7 @@ export const HostAudit = ({ uuid }) => {
   })
 
   if (!data) return null
-  const all = cacheStreamAsObj(data.value)
+  const all = parseCachedAuditData(data.value)
   const filtered = {}
   for (const id in all) {
     if (all[id].host === uuid) filtered[id] = all[id]
@@ -61,13 +71,7 @@ const AuditTable = ({ data, paused, setPaused }) => {
   const [desc, setDesc] = useState(true)
   const { pushModal } = useContext(ModalContext)
 
-  const sorted = data
-    ? orderBy(
-        Object.entries(data).map(([id, audit]) => ({ audit, id, timestamp: id.split('-')[0] })),
-        'timestamp',
-        desc ? 'desc' : 'asc'
-      )
-    : false
+  const sorted = data ? orderBy(data, 'time', desc ? 'desc' : 'asc') : false
 
   return (
     <>
@@ -97,10 +101,10 @@ const AuditTable = ({ data, paused, setPaused }) => {
         </thead>
         <tbody className="text-sm font-mono">
           {sorted
-            ? sorted.map(({ audit, timestamp }, i) => (
+            ? sorted.map((evt, i) => (
                 <tr key={i}>
                   <td className="py-0">
-                    <TimeAgoBrief time={timestamp} suffix="" />
+                    <TimeAgoBrief time={evt.time} suffix="" />
                   </td>
                   <td className="py-0">
                     <button
@@ -108,18 +112,18 @@ const AuditTable = ({ data, paused, setPaused }) => {
                       onClick={() =>
                         pushModal(
                           <ModalWrapper keepOpenOnClick>
-                            <Highlight title={audit.title} language="json">
-                              {asJson(audit)}
+                            <Highlight title={evt.title} language="json">
+                              {asJson(evt)}
                             </Highlight>
                           </ModalWrapper>
                         )
                       }
                     >
-                      {audit.title}
+                      {evt.title}
                     </button>
                   </td>
                   <td className="py-0.5">
-                    {audit.host ? <InventoryHostname uuid={audit.host} /> : <Uuid uuid={false} />}
+                    {evt.host ? <InventoryHostname uuid={evt.host} /> : <Uuid uuid={false} />}
                   </td>
                 </tr>
               ))
@@ -153,3 +157,10 @@ const About = () => (
     <p>All audit events are cached, and a subset of them may be further escalated.</p>
   </ModalWrapper>
 )
+
+function parseCachedAuditData(data) {
+  if (Array.isArray(data)) return data.map((entry) => parseJson(entry))
+
+  console.log('Audit data was a not an array. This is unexpected')
+  return []
+}

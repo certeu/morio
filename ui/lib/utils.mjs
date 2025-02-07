@@ -172,6 +172,25 @@ export const formatNumber = (num, suffix = '') => {
  */
 export const iconSize = 'h-8 w-8'
 
+/**
+ * A helper object to parse as JSON
+ *
+ * Handles errors and returns a best effort
+ */
+export const parseJson = (input) => {
+  let result = input
+  if (typeof input === 'string') {
+    try {
+      const parsed = JSON.parse(input)
+      if (typeof parsed !== 'string') result = parsed
+    } catch (err) {
+      // This is fine
+    }
+  }
+
+  return result
+}
+
 /*
  * Shorten a UUID
  *

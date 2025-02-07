@@ -1,5 +1,5 @@
 // Dependencies
-import { formatBytes, timeAgo } from 'lib/utils.mjs'
+import { formatBytes, timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { chartTemplates } from './chart-templates.mjs'
 import { linkClasses } from 'components/link.mjs'
@@ -62,9 +62,16 @@ export const MetricsTable = ({ cacheKey = 'metrics' }) => {
 
   // Only keep what is in the cache, but use the inventory data
   const hosts = {}
-  for (const id of cache) {
-    if (inventory[id]) hosts[id] = inventory[id]
-    else hosts[id] = unknownHost(id)
+  for (const i in cache) {
+    /*
+     * This is a zset with scores
+     * So we ignore all odd indexes
+     */
+    if (i % 2 == 0) {
+      const id = cache[i]
+      if (inventory[id]) hosts[id] = inventory[id]
+      else hosts[id] = unknownHost(id)
+    }
   }
   const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
 
@@ -412,16 +419,14 @@ export const SingleEchart = ({ option, href = false }) => {
  * @param {array} cache - The data from the cache
  * @return {object} data - The same data parsed
  */
-export function parseCachedMetrics(metrics) {
-  if (!metrics) return false
-  const data = []
-  for (const i in metrics) {
-    if (i % 2 === 1)
-      data.push({
-        timestamp: Number(metrics[i]),
-        data: JSON.parse(metrics[i - 1]),
-      })
-  }
+export function parseCachedMetrics(data) {
+  if (Array.isArray(data))
+    return orderBy(
+      data.map((entry) => parseJson(entry)),
+      'timestamp',
+      'ASC'
+    )
 
-  return data
+  console.log('Metrics data was a not an array. This is unexpected')
+  return []
 }

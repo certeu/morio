@@ -1,5 +1,4 @@
-import { cacheStreamAsObj } from 'components/boards/shared.mjs'
-import { asJson } from 'lib/utils.mjs'
+import { asJson, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { linkClasses } from 'components/link.mjs'
 // Context
@@ -17,6 +16,7 @@ import { RightIcon } from 'components/icons.mjs'
 import { Table } from 'components/table.mjs'
 import { TimeAgoBrief } from 'components/time.mjs'
 import { Highlight } from 'components/highlight.mjs'
+import { Popout } from 'components/popout.mjs'
 
 export const Events = () => {
   const [paused, setPaused] = useState(false)
@@ -29,22 +29,25 @@ export const Events = () => {
     refetchIntervalInBackground: false,
   })
 
-  return data?.value
-    ? <EventsTable data={cacheStreamAsObj(data.value)} {...{ paused, setPaused }} />
-    : <p>No events data...</p>
+  return data?.value ? (
+    <EventsTable data={parseCachedEventData(data.value)} {...{ paused, setPaused }} />
+  ) : (
+    <Popout note>
+      <h5>No event data found</h5>
+      <p>No event data was returned from the cache.</p>
+      <p>
+        If this is unexpected, you should verify you are you running a stream processor that caches
+        event data.
+      </p>
+    </Popout>
+  )
 }
 
 const EventsTable = ({ data, paused, setPaused }) => {
   const [desc, setDesc] = useState(true)
   const { pushModal } = useContext(ModalContext)
 
-  const sorted = data
-    ? orderBy(
-        Object.entries(data).map(([id, evt]) => ({ evt, id, timestamp: id.split('-')[0] })),
-        'timestamp',
-        desc ? 'desc' : 'asc'
-      )
-    : false
+  const sorted = data ? orderBy(data, 'timestamp', desc ? 'desc' : 'asc') : false
 
   return (
     <>
@@ -73,10 +76,10 @@ const EventsTable = ({ data, paused, setPaused }) => {
         </thead>
         <tbody className="text-sm font-mono">
           {sorted
-            ? sorted.map(({ evt, timestamp }, i) => (
+            ? sorted.map((evt, i) => (
                 <tr key={i}>
                   <td className="py-0">
-                    <TimeAgoBrief time={timestamp} suffix="" />
+                    <TimeAgoBrief time={evt.timestamp} suffix="" />
                   </td>
                   <td className="py-0">
                     <button
@@ -116,19 +119,18 @@ const About = () => (
     </h4>
     <p>
       In event-driven automation (EDA), events are the <b>triggers </b>
-      that we can use to react to changes, remediate problems, or
-      escalate incidents in an automated way.
-      As such, an event can represent any status change inside your infrastructure.
+      that we can use to react to changes, remediate problems, or escalate incidents in an automated
+      way. As such, an event can represent any status change inside your infrastructure.
     </p>
     <p>
-      In Morio, we strive to turn anything potentially noteworthy into an event.
-      As such, events cast the widest net, and serve as input for more refined filters.
+      In Morio, we strive to turn anything potentially noteworthy into an event. As such, events
+      cast the widest net, and serve as input for more refined filters.
     </p>
     <p>
-      As an example, alerts are typically not generated from raw data flowing through
-      Morio. Instead, raw data is turned into events (also known as <em>eventifying</em>).
-      From those events, we can now generate alerts, but also handle grouping, suppression,
-      and other higher level abstractions.
+      As an example, alerts are typically not generated from raw data flowing through Morio.
+      Instead, raw data is turned into events (also known as <em>eventifying</em>). From those
+      events, we can now generate alerts, but also handle grouping, suppression, and other higher
+      level abstractions.
     </p>
     <p>
       In a nutshell, you can think of events as the firehose of everything happening inside Morio.
@@ -136,3 +138,12 @@ const About = () => (
   </ModalWrapper>
 )
 
+function parseCachedEventData(data) {
+  if (Array.isArray(data))
+    return data
+      .map((entry) => parseJson(entry))
+      .map((entry) => ({ ...entry, timestamp: entry.morio?.event?.time }))
+
+  console.log('Event data was a not an array. This is unexpected')
+  return []
+}

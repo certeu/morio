@@ -6,7 +6,7 @@ export const Details = ({
   children,
   summaryClassname = 'justify-between',
   open = false,
-  noPadding  = false,
+  noPadding = false,
 }) => (
   <details
     className="bg-primary/20 rounded mt-4 open:bg-transparent open:border-l-4 open:shadow hover:bg-primary/30 open:hover:bg-transparent open:cusor-default border-primary group"
@@ -21,9 +21,6 @@ export const Details = ({
       </div>
       {summaryRight}
     </summary>
-      {noPadding
-        ? children
-        : <div className="p-2 px-4">{children}</div>
-      }
+    {noPadding ? children : <div className="p-2 px-4">{children}</div>}
   </details>
 )

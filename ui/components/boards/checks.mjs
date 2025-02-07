@@ -1,5 +1,5 @@
 // Dependencies
-import { timeAgo } from 'lib/utils.mjs'
+import { timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { chartTemplates } from './chart-templates.mjs'
 // Hooks
@@ -16,8 +16,9 @@ import { KeyVal } from 'components/keyval.mjs'
 import { ListInput } from 'components/inputs.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { ToggleGraphButton, ToggleLiveButton } from 'components/boards/shared.mjs'
-import { SingleEchart, parseCachedMetrics } from './metrics.mjs'
+import { SingleEchart } from './metrics.mjs'
 import { chartGradient } from 'components/echarts.mjs'
+import { Popout } from 'components/popout.mjs'
 
 /**
  * This compnent renders a table with the host for which we have cached logs
@@ -60,10 +61,14 @@ export const ChecksTable = () => {
   // Don't bother if there's nothing in the cache
   if (cache.length < 1)
     return (
-      <>
-        <Loading />
-        <p>Nothing in the cache to show you here.</p>
-      </>
+      <Popout note>
+        <h5>No health check data found</h5>
+        <p>No health check data was returned from the cache.</p>
+        <p>
+          If this is unexpected, you should verify you are you running a stream processor that
+          caches health check data.
+        </p>
+      </Popout>
     )
 
   const btn = (
@@ -224,18 +229,17 @@ export const Check = ({ id = false, cacheKey = false }) => {
   if (!cacheKey) return null
   if (!Array.isArray(cache)) return <Spinner />
 
-  const data = parseCachedMetrics(cache)
+  const data = parseCachedHealthchecks(cache)
   const templates = chartTemplates(data)
 
   const option = templates.charts.line
-  option.title.text = "Health check response time"
+  option.title.text = 'Health check response time'
   option.yAxis.name = 'Response time in ms'
   /*
    * Split series by agent
    */
   option.series = {}
-  for (const entry of data) {
-    const check = entry.data
+  for (const check of data) {
     if (typeof option.series[check.from] === 'undefined') {
       option.series[check.from] = {
         ...templates.series.line,
@@ -249,10 +253,10 @@ export const Check = ({ id = false, cacheKey = false }) => {
   if (option.series.length === 1) {
     option.series[0].areaStyle = {
       opacity: 0.2,
-      color: chartGradient('#1b88a2')
+      color: chartGradient('#1b88a2'),
     }
   }
-  const check = data.pop().data
+  const check = data.pop()
 
   return (
     <div className="">
@@ -271,10 +275,20 @@ export const Check = ({ id = false, cacheKey = false }) => {
       {graph ? (
         <SingleEchart option={option} />
       ) : (
-        <Highlight language="json">
-          {JSON.stringify(data, null, 2)}
-        </Highlight>
+        <Highlight language="json">{JSON.stringify(data, null, 2)}</Highlight>
       )}
     </div>
   )
+}
+
+function parseCachedHealthchecks(data) {
+  if (Array.isArray(data))
+    return orderBy(
+      data.map((entry) => parseJson(entry)).map((entry) => ({ ...entry, timestamp: entry.time })),
+      'timestamp',
+      'ASC'
+    )
+
+  console.log('Healthcheck data was a not an array. This is unexpected')
+  return []
 }
