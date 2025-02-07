@@ -37,7 +37,7 @@ export const Audit = () => {
         <h5>No audit data found</h5>
         <p>No audit data was returned from the cache.</p>
         <p>
-          If this is unexpected, you should verify you are you running a stream processor that
+          If this is unexpected, you should verify that you are running a stream processor that
           caches audit data.
         </p>
       </Popout>
