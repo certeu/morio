@@ -21,7 +21,7 @@ import { chartGradient } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
 
 /**
- * This compnent renders a table with the host for which we have cached logs
+ * This component renders a table with the host for which we have cached logs
  */
 export const ChecksTable = () => {
   // State
