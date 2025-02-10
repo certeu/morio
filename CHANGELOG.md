@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - [client] Fixed issue with extracting vars from template files
+- [ui] Fixed the inventory host summary view in dashboard lists
 
 ## [0.7.1] - 2025-02-07
 

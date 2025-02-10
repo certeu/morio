@@ -12,7 +12,7 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
 import { Uuid } from 'components/uuid.mjs'
-import { Host } from 'components/inventory/host.mjs'
+import { HostSummary } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { Popout } from 'components/popout.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
@@ -189,7 +189,7 @@ export const HostLogsTable = ({ host, module = false }) => {
 
   return (
     <>
-      <Host uuid={host} />
+      <HostSummary uuid={host} />
       <Table>
         <thead>
           <tr>
@@ -289,7 +289,7 @@ export const ShowLogs = ({ host, module, logset }) => {
 
   return (
     <>
-      <Host uuid={host} />
+      <HostSymmary uuid={host} />
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-between gap-2 mt-4">
           <ToggleLiveButton {...{ paused, setPaused }} />

@@ -130,37 +130,73 @@ async function runHostsTableApiCall(api) {
   else return false
 }
 
+export const HostSummary = ({ uuid }) => {
+  const { api } = useApi()
+  const [data, setData] = useState(false)
+
+  useEffect(() => {
+    const loadHost = async () => {
+      const result = await runHostApiCall(uuid, api)
+      if (result) setData(result)
+    }
+    if (!data) loadHost()
+  }, [uuid])
+
+  return data
+    ? <HostDataSummary data={data} />
+    : <p>Loading...</p>
+}
+
+async function runHostApiCall(uuid, api) {
+  const result = await api.getInventoryHost(uuid)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+/**
+ * A React component for a summary of a host from the inventory
+ *
+ * @param {object] data - The inventory data for this host
+ */
+export const HostDataSummary = ({ data }) => {
+  if (!data) return null
+
+  return (
+    <div className="p-2 px-4 rounded-lg shadow border border-base-300">
+      <div className="flex flex-row items-center gap-2 justify-start w-full">
+        <OsIcon data={data.os} className="w-16 h-16" />
+        <div className="w-full">
+          <h4 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full mt-0 pt-0 w-full">
+            <span className="flex flex-row gap-2 items-center">
+              <Hostname data={data} /> test
+            </span>
+          </h4>
+          <div className="flex flex-row flex-wrap gap-2">
+            <KeyVal k="os" val={getOsId(data.os)} />
+            <KeyVal k="arch" val={data.arch} />
+            <KeyVal k="cores" val={data.cores} />
+            <KeyVal k="memory" val={formatBytes(data.memory)} />
+            <KeyVal k="last update" val={timeAgo(data.last_update)} />
+            <KeyVal k="ips" val={(data.ips || []).length} />
+            <KeyVal k="macs" val={(data.macs || []).length} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /**
  * A React component for a host from the inventory
  *
  * @param {object] data - The inventory data for this host
  */
-export const Host = ({ data }) => {
+export const HostDetail = ({ data }) => {
   if (!data) return null
 
   return (
     <>
-      <div className="p-2 px-4 rounded-lg shadow border border-base-300">
-        <div className="flex flex-row items-center gap-2 justify-start w-full">
-          <OsIcon data={data.os} className="w-16 h-16" />
-          <div className="w-full">
-            <h4 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full mt-0 pt-0 w-full">
-              <span className="flex flex-row gap-2 items-center">
-                <Hostname data={data} /> test
-              </span>
-            </h4>
-            <div className="flex flex-row flex-wrap gap-2">
-              <KeyVal k="os" val={getOsId(data.os)} />
-              <KeyVal k="arch" val={data.arch} />
-              <KeyVal k="cores" val={data.cores} />
-              <KeyVal k="memory" val={formatBytes(data.memory)} />
-              <KeyVal k="last update" val={timeAgo(data.last_update)} />
-              <KeyVal k="ips" val={(data.ips || []).length} />
-              <KeyVal k="macs" val={(data.macs || []).length} />
-            </div>
-          </div>
-        </div>
-      </div>
+      <HostDataSummary data={data} />
       <Details summaryLeft="Audit Data">
         {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
       </Details>

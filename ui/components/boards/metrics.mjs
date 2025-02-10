@@ -13,7 +13,7 @@ import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { Loading } from 'components/animations.mjs'
 import { Uuid } from 'components/uuid.mjs'
-import { Host } from 'components/inventory/host.mjs'
+import { HostSummary } from 'components/inventory/host.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
 import { ChartsProvider } from './charts-provider.mjs'
@@ -190,12 +190,12 @@ export const HostMetricsTable = ({ host, module = false }) => {
 
   return (
     <>
-      <Host uuid={host} />
+      <HostSummary uuid={host} />
       <table>
         <thead>
           <tr>
             {cols.map((field) => (
-              <th key={field} className="text-left">
+              <th key={field} className="text-left" key={field}>
                 <button
                   className={`btn btn-link capitalize px-0 ${linkClasses}`}
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
@@ -212,7 +212,7 @@ export const HostMetricsTable = ({ host, module = false }) => {
         </thead>
         <tbody>
           {sorted.map((entry) => (
-            <tr key={entry.lolset + entry.host + entry.module}>
+            <tr key={entry.metricset + entry.host + entry.module}>
               {module ? null : (
                 <td className="py-0.5 pr-4 font-mono text-sm">
                   <PageLink href={`/boards/metrics/${host}/${entry.module}/`}>
