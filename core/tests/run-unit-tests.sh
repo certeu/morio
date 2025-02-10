@@ -43,3 +43,16 @@ if [ -n "$MORIO_ARTIFACT_FOLDER" ]; then
   rm -rf ./coverage/*
 fi
 
+# Upload the coverage report to Codecov
+LATEST_COVERAGE_FILE=$(ls -t ./coverage/*.json | head -n 1)
+
+if [ -f "$LATEST_COVERAGE_FILE" ]; then
+  echo "Uploading coverage report: $LATEST_COVERAGE_FILE"
+  ../node_modules/.bin/codecov --file="$LATEST_COVERAGE_FILE" --token=$CODECOV_TOKEN
+else
+  echo "Error: No coverage report found"
+  exit 1
+fi
+
+# Clean up the coverage directory
+rm -rf ./coverage

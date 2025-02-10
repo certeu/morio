@@ -6,6 +6,7 @@ import {
   validateErrorResponse,
   readPersistedData,
   writePersistedData,
+  clean,
 } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
@@ -57,7 +58,7 @@ describe('API Create Account Tests', () => {
     const d = result[1]
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 6)
-    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.username, clean(accounts.user.username))
     assert.equal(d.about, accounts.user.about)
     assert.equal(d.provider, accounts.user.provider)
     assert.equal(d.role, accounts.user.role)
@@ -83,7 +84,7 @@ describe('API Create Account Tests', () => {
 
     assert.equal(typeof d, 'object')
     assert.equal(Object.keys(d).length, 7)
-    assert.equal(d.username, accounts.user.username)
+    assert.equal(d.username, clean(accounts.user.username))
     assert.equal(d.about, accounts.user.about)
     assert.equal(d.provider, accounts.user.provider)
     assert.equal(d.role, accounts.user.role)

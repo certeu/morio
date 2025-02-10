@@ -36,11 +36,21 @@ node --no-warnings --test-concurrency=1 --test
 # Stop api container
 kill -1 %1
 
-# Stop the test LDAP server
-./tests/stop-ldap-server.sh
-
 # Generate coverage report (text)
 ../node_modules/.bin/c8 report
 # Generate coverage report (html)
 ../node_modules/.bin/c8 report --reporter=html
 
+# Upload the coverage report to Codecov
+LATEST_COVERAGE_FILE=$(ls -t coverage/tmp/*.json | head -n 1)
+
+if [ -f "$LATEST_COVERAGE_FILE" ]; then
+  echo "Uploading coverage report: $LATEST_COVERAGE_FILE"
+  ../node_modules/.bin/codecov --file="$LATEST_COVERAGE_FILE" --token=$CODECOV_TOKEN
+else
+  echo "Error: No coverage report found"
+  exit 1
+fi
+
+# Clean up the coverage directory
+rm -rf ./coverage

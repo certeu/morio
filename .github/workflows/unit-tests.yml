@@ -40,11 +40,19 @@ jobs:
       - name: Build docker images for local development
         run: npm run buildall:dev
 
+      # Install Codecov CLI
+      - name: Install Codecov CLI
+        run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          sudo mv codecov /usr/local/bin/
+
       - name: Run Core unit tests
         env:
           MORIO_FQDN: runner.morio.it
           GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.id }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: npm run test:core
 
       - name: Run API unit tests
@@ -52,4 +60,5 @@ jobs:
           MORIO_FQDN: runner.morio.it
           GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.id }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: npm run test:api

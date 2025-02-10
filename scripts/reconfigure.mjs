@@ -1,7 +1,7 @@
-import { writeFile } from '@morio/shared/fs'
-import { resolveServiceConfiguration, getPreset } from '@morio/config'
-import { pullConfig } from '@morio/config'
-import { Store } from '@morio/shared/store'
+import { writeFile } from '@itsmorio/shared/fs'
+import { resolveServiceConfiguration, getPreset } from '@itsmorio/config'
+import { pullConfig } from '@itsmorio/config'
+import { Store } from '@itsmorio/shared/store'
 import pkg from '../package.json' assert { type: 'json' }
 import { MORIO_GIT_ROOT, MORIO_DOCKER_LOG_DRIVER, MORIO_DOCKER_ADD_HOST } from '../config/cli.mjs'
 
@@ -104,7 +104,6 @@ const cliOptions = (name, env) => `\\
   ${MORIO_DOCKER_LOG_DRIVER === 'journald' ? '--log-opt labels=morio.service' : ''}  \\
 ${MORIO_DOCKER_ADD_HOST ? '--add-host ' + MORIO_DOCKER_ADD_HOST : ''} \\
 ${name === 'api' ? '  --network morionet' : ''} \\
-  --network-alias ${['morio-' + name].concat(config[name][env].container?.aliases || []).join(',')} \\
   ${config[name][env].container.init ? '--init' : ''} \\
 ${(config[name][env].container?.ports || []).map((port) => `  -p ${port} `).join(' \\\n')} \\
 ${(config[name][env].container?.volumes || []).map((vol) => `  -v ${vol} `).join(' \\\n')} \\
