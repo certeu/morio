@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed the morionet subnet from /28 to /27
 
+### Fixed
+
+- [client] Fixed issue with extracting vars from template files
+
 ## [0.7.1] - 2025-02-07
 
 ### Changed

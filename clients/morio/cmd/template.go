@@ -306,9 +306,14 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 		panic(err)
 	}
 
-	// Now parse the result as YAML
+  // Render with mustache because the tags make for invalid YAML
+  // and we are only interested in extracting the moriodata
+	context := GetVars()
+	cleanTemplate, err := mustache.Render("{{={| |}=}}"+string(template), context)
+
+	// Now parse the cleaned template as YAML
 	var result []map[string]interface{}
-	yaml.Unmarshal(template, &result)
+	yaml.Unmarshal([]byte(cleanTemplate), &result)
 	if err != nil {
 		fmt.Println("Failed to parse YAML data in template. Bailing out.")
 		panic(err)
