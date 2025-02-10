@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2025-02-10
+
 ### Changed
 
 - Changed the morionet subnet from /28 to /27
@@ -15,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [client] Fixed issue with extracting vars from template files
 - [ui] Fixed the inventory host summary view in dashboard lists
+- [ui] Improvements to metrics visualisations
 
 ## [0.7.1] - 2025-02-07
 

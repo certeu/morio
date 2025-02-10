@@ -16,7 +16,6 @@ export default function DashboardsHostMetricsPage({ host, module, metricset }) {
       try {
         result = await api.getInventoryHostname(host)
         if (result.fqdn) setHostname(result.fqdn)
-        console.log(result)
       } catch (err) {
         console.log(err)
       }

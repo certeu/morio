@@ -1,16 +1,3 @@
-/*
- * Helper method to format time on charts
- */
-const chartTime = (timestamp) => {
-  const date = new Date(timestamp)
-  return `${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}`
-}
-
-/*
- * Helper method to pad a string to a length of 2
- * This is used for hours, minutes, seconds
- */
-const pad2 = (str) => (`${str}`.length === 2 ? str : '0' + str)
 
 /*
  * Shared chart options
@@ -27,8 +14,8 @@ const options = {
     },
   },
   grid: {
-    left: '3%',
-    right: '4%',
+    left: '40',
+    right: '50',
     bottom: '80', // Space for legend
     containLabel: true,
   },
@@ -86,7 +73,7 @@ const options = {
 /*
  * Shared chart templates
  */
-const charts = (data) => ({
+const charts = {
   line: {
     ...options,
     title: {
@@ -94,14 +81,13 @@ const charts = (data) => ({
       text: 'Set title.text to replace this title',
     },
     xAxis: {
-      type: 'category',
+      type: 'time',
       name: 'Time',
       nameLocation: 'middle',
       nameGap: 45,
       axisLabel: {
         rotate: 45, // Rotate labels for better readability
       },
-      data: data.map((entry) => chartTime(entry.timestamp)),
     },
     yAxis: {
       type: 'value',
@@ -116,14 +102,14 @@ const charts = (data) => ({
       },
     },
   },
-})
+}
 
 /*
  * Wrapper templates object with charts, option, and series
  */
-export const chartTemplates = (data) => ({
-  charts: JSON.parse(JSON.stringify(charts(data))),
-  options: JSON.parse(JSON.stringify(options)),
+export const chartTemplates = {
+  charts,
+  options,
   series: {
     line: {
       type: 'line',
@@ -131,4 +117,4 @@ export const chartTemplates = (data) => ({
       smooth: true,
     },
   },
-})
+}

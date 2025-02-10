@@ -289,7 +289,7 @@ export const ShowLogs = ({ host, module, logset }) => {
 
   return (
     <>
-      <HostSymmary uuid={host} />
+      <HostSummary uuid={host} />
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-between gap-2 mt-4">
           <ToggleLiveButton {...{ paused, setPaused }} />

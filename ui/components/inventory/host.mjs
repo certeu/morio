@@ -140,7 +140,7 @@ export const HostSummary = ({ uuid }) => {
       if (result) setData(result)
     }
     if (!data) loadHost()
-  }, [uuid])
+  }, [uuid, api, data])
 
   return data
     ? <HostDataSummary data={data} />
