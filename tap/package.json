@@ -1,6 +1,6 @@
 {
   "name": "@itsmorio/tap",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Morio Tap",
   "private": true,
   "scripts": {
