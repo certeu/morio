@@ -21,7 +21,7 @@ import { Echart } from 'components/echarts.mjs'
 import { Popout } from 'components/popout.mjs'
 
 /**
- * This compnent renders a table with the host for which we have cached metrics
+ * This component renders a table with the host for which we have cached metrics
  */
 export const MetricsTable = ({ cacheKey = 'metrics' }) => {
   // State
