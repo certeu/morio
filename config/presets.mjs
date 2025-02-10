@@ -91,7 +91,7 @@ any other private network.
 
 To change this, set \`tokens.presets.MORIO_NETWORK_SUBNET\` in your Morio
 settings.`
-presets.MORIO_NETWORK_SUBNET = '192.168.144.32/28'
+presets.MORIO_NETWORK_SUBNET = '192.168.144.32/27'
 
 predocs.MORIO_NETWORK_MTU = `MTU to configure on the internal Morio Docker
 network.

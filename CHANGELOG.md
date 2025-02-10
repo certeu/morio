@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Changed the morionet subnet from /28 to /27
+
 ## [0.7.1] - 2025-02-07
 
 ### Changed
