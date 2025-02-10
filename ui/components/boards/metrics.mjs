@@ -364,7 +364,7 @@ const EchartWrapper = ({
     <Popout note>
       <h5>No visualisations available</h5>
       <p>No charts are loaded for the <code>{metricset}</code> metricset of the <code>{module}</code> module.</p>
-      <p>If this modules provides chart templates, you may need to preseed them.</p>
+      <p>If this module provides chart templates, you may need to preseed them.</p>
     </Popout>
   )
 
