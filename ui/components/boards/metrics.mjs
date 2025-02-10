@@ -439,6 +439,6 @@ export function parseCachedMetrics(data) {
       'ASC'
     )
 
-  console.log('Metrics data was a not an array. This is unexpected', data)
+  console.log('Metrics data was not an array. This is unexpected', data)
   return []
 }
