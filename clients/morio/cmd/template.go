@@ -306,8 +306,8 @@ func TemplateDocsAsYaml(path string) map[string]interface{} {
 		panic(err)
 	}
 
-  // Render with mustache because the tags make for invalid YAML
-  // and we are only interested in extracting the moriodata
+	// Render with mustache because the tags make for invalid YAML
+	// and we are only interested in extracting the moriodata
 	context := GetVars()
 	cleanTemplate, err := mustache.Render("{{={| |}=}}"+string(template), context)
 
