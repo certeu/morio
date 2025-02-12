@@ -55,7 +55,7 @@
     "simple-git": "^3.27.0"
   },
   "devDependencies": {
-    "esbuild": "^0.23.1"
+    "esbuild": "^0.25.0"
   },
   "main": "index.js",
   "directories": {
