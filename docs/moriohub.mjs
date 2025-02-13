@@ -2,7 +2,7 @@
  * This is a work in progress
  */
 import { readFile, writeFile } from '../shared/src/fs.mjs'
-import fetch from 'node:fetch' // Import fetch for HTTP requests
+//import fetch from 'node:fetch' // Import fetch for HTTP requests
 
 // Function to download the JSON file from the GitHub release URL
 async function downloadMoriohubData() {
