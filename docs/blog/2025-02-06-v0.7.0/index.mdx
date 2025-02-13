@@ -21,7 +21,7 @@ increases, the memory footprint of Logstash -- which underpinned the connector
 service -- would balloon to the point where the system would start swapping
 which would lead to a negative feedback loop where performance would plummet.
 
-Now it's worth pointing out that we run this on a 4 core / 8Gb memory box. We
+Now it's worth pointing out that we run this on a 4-core / 8GB memory box. We
 are deliberately keeping it on a conservative amount of memory precisely
 because we don't want to paper over any performance issues.
 
@@ -31,22 +31,22 @@ root cause, which is Logstash and its thirst for memory.
 ## In with Vector
 
 In our original plans, we reached for Logstash to underpin the connector
-service mostly because we had experience with it, it allows for plenty
-different output and inputs, and since we're using the Beats agents, 
+service mostly because we had experience with it, because it allows for many
+different outputs and inputs, and, since we're using the Beats agents, 
 it seemed like a good fit.
 
 But it was not a passionate choice for Logstash. It runs on the JVM -- which
-we don't love -- its _LSCL_ configuration langauge is undocumented, and it's
+we don't love -- its _LSCL_ configuration language is undocumented, and it's
 hard to troubleshoot.
 
-We had been keeping our eye on [Vector](https://vector.dev/) for a while now,
+We had been keeping an eye on [Vector](https://vector.dev/) for a while,
 but without a good reason to make the change, it felt like we always had
-more urgent matters to attent to than replace something that already worked.
+more urgent matters to attend to than replace something that already worked.
 
-But when Logstash started giving us grief, we decided the time had come
+But when Logstash started giving us grief, we decided that the time had come
 to replace it with Vector to power Morio's connector service.
 
-So that's what this release is about. It replaces Logstash with Vector. We had
+So that's what this release is about: it replaces Logstash with Vector. We had
 to rewrite our pipelines, change our UI code and schema to handle the
 differences in configuration, but all in all it was easy to swap in Vector.
 
@@ -57,7 +57,7 @@ instance to its knees.
 We measure throughput every 30 seconds, and we saw up to 45k events over
 such a 30 seconds time period.
 
-We average this out out to 1.5k/s because that's easier to reason about,
-but the effect is rather clear: It's much better now.
+We average this out to 1.5k/s because that's easier to reason about,
+but the effect is rather clear: it's much better now.
 
 
