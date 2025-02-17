@@ -133,7 +133,7 @@ const preApiTest = `
 #   - The reporter inside our test container has permissions to write coverage output
 #
 docker rm -f morio-api
-docker network create morionet
+docker network create morionet || true
 sudo rm -rf ./api/coverage/*
 sudo mkdir -p ./api/coverage/tmp
 sudo chown -R 2112:2112 ./api/coverage

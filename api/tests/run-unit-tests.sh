@@ -33,8 +33,16 @@ done
 # Run unit tests
 node --no-warnings --test-concurrency=1 --test
 
+TEST_EXIT_CODE=$? 
+
 # Stop api container
 kill -1 %1
+
+# If tests failed, propagate failure
+if [ $TEST_EXIT_CODE -ne 0 ]; then
+  echo "Tests failed. Exiting with error."
+  exit $TEST_EXIT_CODE
+fi
 
 curl -Os https://uploader.codecov.io/latest/linux/codecov
 chmod +x codecov
@@ -57,4 +65,5 @@ else
 fi
 
 # Clean up the coverage directory
+rm -rf ./coverage/tmp/*
 rm -rf ./coverage/*
