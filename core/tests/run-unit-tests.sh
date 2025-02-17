@@ -61,4 +61,4 @@ else
 fi
 
 # Clean up the coverage directory
-rm -rf ./coverage
+rm -rf ./coverage/*
