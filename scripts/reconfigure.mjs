@@ -150,9 +150,21 @@ echo "Starting ephemeral LDAP server"
 ./api/tests/start-ldap-server.sh
 `
 const postApiTest = `
+# Store the test outcome for later
+TEST_EXIT_CODE=$?
+
 # Stop an ephemeral LDAP instance
 echo "Stopping ephemeral LDAP server"
 ./api/tests/stop-ldap-server.sh
+
+# If tests failed, propagate failure
+if [ $TEST_EXIT_CODE -eq 0 ]; then
+  echo "Congratulations, all tests passed."
+else
+  echo "Tests failed. Exiting with error."
+  echo "Exit code is: $TEST_EXIT_CODE"
+  exit $TEST_EXIT_CODE
+fi
 `
 
 const coreWebConfig = `

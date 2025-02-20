@@ -31,18 +31,20 @@ do
 done
 
 # Run unit tests
-node --no-warnings --test-concurrency=1 --test
+node --no-warnings --test-concurrency=1 --test --test-reporter=spec
 
-TEST_EXIT_CODE=$? 
-
-# Stop api container
-kill -1 %1
+TEST_EXIT_CODE=$?
 
 # If tests failed, propagate failure
 if [ $TEST_EXIT_CODE -ne 0 ]; then
   echo "Tests failed. Exiting with error."
   exit $TEST_EXIT_CODE
+else
+  echo "Congratulations, all tests passed."
 fi
+
+# Stop api container
+#kill -1 %1
 
 curl -Os https://uploader.codecov.io/latest/linux/codecov
 chmod +x codecov
