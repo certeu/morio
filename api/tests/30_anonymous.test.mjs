@@ -15,6 +15,7 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(d.info.name, pkg.name)
     assert.equal(d.info.about, pkg.description)
     assert.equal(d.info.version, pkg.version)
+    assert.equal([pkg.version, 'dev-build'].includes(d.info.version), true)
     assert.equal(d.info.production, false)
     // state
     assert.equal(typeof d.info, 'object')
