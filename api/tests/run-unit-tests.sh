@@ -37,7 +37,7 @@ TEST_EXIT_CODE=$?
 
 # If tests failed, propagate failure
 if [ $TEST_EXIT_CODE -ne 0 ]; then
-  echo "Tests failed. Exiting with error."
+  echo "Tests failed. Exiting with error. (run-unit-tests)"
   exit $TEST_EXIT_CODE
 else
   echo "Congratulations, all tests passed."
@@ -69,3 +69,6 @@ fi
 # Clean up the coverage directory
 rm -rf ./coverage/tmp/*
 rm -rf ./coverage/*
+
+exit $TEST_EXIT_CODE
+
