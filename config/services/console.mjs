@@ -90,7 +90,7 @@ export const resolveServiceConfiguration = ({ utils }) => ({
     },
     redpanda: {
       adminApi: {
-        enabled: true,
+        enabled: false,
         urls: utils.getBrokerFqdns().map((fqdn) => `https://${fqdn}:443`),
         tls: {
           enabled: true,
