@@ -15,7 +15,7 @@ COPY ./entrypoint.sh /entrypoint.sh
 
 # Add client binaries
 RUN mkdir /morio-clients
-COPY ./clients/* /morio-clients/
+COPY ./clients/morio-* /morio-clients/
 
 ## Run the builder script
 CMD ["/entrypoint.sh"]
