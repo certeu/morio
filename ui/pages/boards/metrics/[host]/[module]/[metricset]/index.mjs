@@ -31,7 +31,7 @@ export default function DashboardsHostMetricsPage({ host, module, metricset }) {
         <span className="font-bold">{metricset}</span>
         <br />
         <span className="text-xl font-light pr-1 pacity-50">on</span>
-        <span className="text-2xl font-medium">{hostname}</span>
+        <span className="text-2xl font-medium tracking-tight">{hostname}</span>
       </span>
     ),
     page: ['boards', 'metrics', host, module, metricset],
