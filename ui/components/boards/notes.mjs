@@ -4,7 +4,7 @@ import { asJson, parseJson, timeAgo } from 'lib/utils.mjs'
 import { useContext } from 'react'
 import { ModalContext } from 'context/modal.mjs'
 // Hooks
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
@@ -33,6 +33,8 @@ export const Note = ({ note }) => {
 export const Notes = () => {
   const [paused, setPaused] = useState(false)
   const [desc, setDesc] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filtered, setFiltered] = useState([])
   const { api } = useApi()
   const { pushModal } = useContext(ModalContext)
 
@@ -50,6 +52,19 @@ export const Notes = () => {
         desc ? 'desc' : 'asc'
       )
     : false
+
+  useEffect(() => {
+    if (sorted) {
+      if (search == '') setFiltered([...sorted])
+      else {
+        const filteredArray = sorted.filter((item) =>
+          item.title.toLowerCase().includes(search.toLowerCase())
+        )
+
+        setFiltered(filteredArray)
+      }
+    }
+  }, [search, data])
 
   if (!sorted)
     return (
@@ -85,13 +100,22 @@ export const Notes = () => {
                 Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
               </button>
             </th>
-            <th>Note</th>
+            <th className="flex flex-col">
+              Note{' '}
+              <input
+                type="text"
+                placeholder="Search..."
+                className="grow border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none text-[#555555]"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </th>
             <th className="w-28">Host</th>
           </tr>
         </thead>
         <tbody>
-          {sorted
-            ? sorted.map((note, i) => (
+          {filtered
+            ? filtered.map((note, i) => (
                 <tr key={i}>
                   <td className="py-0.5 pr-4 text-mono font-sm">{timeAgo(note.timestamp)}</td>
                   <td className="py-0.5 pr-4 text-mono font-sm">
