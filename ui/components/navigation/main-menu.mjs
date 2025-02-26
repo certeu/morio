@@ -1,5 +1,7 @@
 // Dependencies
 import { capitalize, pageChildren, rbac } from 'lib/utils.mjs'
+// Hooks
+import { useEffect, useState } from 'react'
 // Components
 import {
   BriefcaseIcon,
@@ -352,10 +354,15 @@ const getHref = (page, parents = [], slug = false) =>
  * @param {array} parent - An array holding the parents of the current page, allowing to construct the href
  */
 export const MainMenu = ({ role, current, navs = false, level = 0, parents = [] }) => {
+  const [list, setList] = useState([])
   if (!navs) navs = links
-  const list = []
-  for (const [key, page] of Object.entries(navs))
-    list.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+
+  useEffect(() => {
+    const newList = []
+    for (const [key, page] of Object.entries(navs))
+      newList.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+    setList(newList)
+  },[navs, role])
 
   return list
 }

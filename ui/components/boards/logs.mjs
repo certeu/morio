@@ -72,7 +72,7 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
       else hosts[id] = unknownHost(id)
     }
   }
-  const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
+  let sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
 
   const handleReorder = (field) => {
     if (order === field) {
