@@ -74,6 +74,18 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
   }
   const sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
 
+  const handleReorder = (field) => {
+    if (order === field) {
+      setDesc(!desc) // Toggle sorting direction if same field is clicked
+    } else {
+      setOrder(field) // Change sorting field
+      setDesc(false) // Default to ascending when switching fields
+    }
+
+    // Reapply sorting
+    sorted = orderBy(hosts, [order], [desc ? 'desc' : 'asc'])
+  }
+
   return (
     <>
       <Table>
@@ -83,7 +95,7 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
               <th key={field}>
                 <button
                   className={`btn btn-link capitalize text-left px-0 ${linkClasses}`}
-                  onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
+                  onClick={() => handleReorder(field)}
                 >
                   {field}{' '}
                   <RightIcon
@@ -96,19 +108,20 @@ export const LogsTable = ({ cacheKey = 'logs' }) => {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((host) => (
-            <tr key={host.id} className="font-mono text-sm">
-              <td className="pr-6 py-0.5">
-                <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
-              </td>
-              <td className="pr-6 text-sm">
-                <PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink>
-              </td>
-              <td className="pr-6 text-sm">{host.cores}</td>
-              <td className="pr-6 text-sm">{formatBytes(host.memory)}</td>
-              <td className="text-sm">{timeAgo(host.last_update, true, '')}</td>
-            </tr>
-          ))}
+          {sorted &&
+            sorted.map((host) => (
+              <tr key={host.id} className="font-mono text-sm">
+                <td className="pr-6 py-0.5">
+                  <Uuid uuid={host.id} href={`/boards/logs/${host.id}`} />
+                </td>
+                <td className="pr-6 text-sm">
+                  <PageLink href={`/boards/logs/${host.id}`}>{host.name || host.fqdn}</PageLink>
+                </td>
+                <td className="pr-6 text-sm">{host.cores}</td>
+                <td className="pr-6 text-sm">{formatBytes(host.memory)}</td>
+                <td className="text-sm">{timeAgo(host.last_update, true, '')}</td>
+              </tr>
+            ))}
         </tbody>
       </Table>
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
