@@ -116,6 +116,45 @@ export async function saveApikey(id = false, data) {
   return result
 }
 
+export async function updateApikey(id = false, data) {
+  /*
+   * We need at least an ID
+   */
+  if (!id) {
+    log.warn('updateApikey was called without an id')
+    return false
+  }
+
+  /*
+   * Ensure we have valid fields to update
+   */
+  const updates = []
+  const params = { id: fields.id(id) }
+
+  for (const [key, val] of Object.entries(data)) {
+    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
+      updates.push(`${key} = :${key}`)
+      params[key] = fields[key](val)
+    }
+  }
+
+  /*
+   * If there's nothing to update, return false
+   */
+  if (updates.length === 0) {
+    log.warn('updateApikey was called with no valid fields to update')
+    return false
+  }
+
+  /*
+   * Construct and execute the query
+   */
+  const query = `UPDATE apikeys SET ${updates.join(', ')} WHERE id = :id`
+  const [status] = await db.write(query, params)
+
+  return status === 200 ? true : false
+}
+
 /**
  * Helper method to delete an API key
  *
@@ -144,7 +183,7 @@ export async function deleteApikey(id = false) {
  * @param {string} id - The id of the apikey (the key)
  */
 export async function updateLastLoginTime(id) {
-  return await saveApikey(id, { last_login: asTime() })
+  return await updateApikey(id, { last_login: asTime() })
 }
 
 /**
