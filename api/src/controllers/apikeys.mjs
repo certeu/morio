@@ -1,6 +1,6 @@
 import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
 import { uuid, randomString, hashPassword } from '#shared/crypto'
-import { loadApikey, saveApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
+import { loadApikey, createApikey, updateApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { utils } from '../lib/utils.mjs'
 
@@ -69,7 +69,7 @@ Controller.prototype.create = async function (req, res) {
     key,
   }
 
-  const [dbStatus] = await saveApikey(key, { ...data, secret: hashPassword(secret) })
+  const [dbStatus] = await createApikey(key, { ...data, secret: hashPassword(secret) })
 
   return dbStatus === 200
     ? res.send({ ...data, secret })
@@ -172,7 +172,7 @@ Controller.prototype.update = async function (req, res) {
   /*
    * Store update key
    */
-  await saveApikey(valid.key, { ...key, ...updated })
+  await updateApikey(valid.key, { ...key, ...updated })
 
   /*
    * Keep the secret out of the returned data unless we just created it
