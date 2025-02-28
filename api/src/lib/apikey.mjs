@@ -110,7 +110,6 @@ export async function deleteApikey(id = false) {
  */
 export async function createApikey(data) {
   if (!data.id) {
-    log.todo({data})
     log.debug('createApikey was called without an id')
     return false
   }
