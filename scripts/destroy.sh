@@ -2,10 +2,13 @@
 # Sounce config variables
 source config/cli.sh
 
+# Remove files owned by root by calling the core container
 docker exec -it morio-core bash -c "rm -rf /etc/morio"
 docker exec -it morio-core bash -c "rm -rf /var/log/morio"
 docker exec -it morio-core bash -c "rm -rf /morio/data"
-docker exec -it morio-api bash -c "rm -rf /api"
+
+
+docker exec -it morio-api bash -c "rm -rf /morio/api"
 
 docker rm -fv \
   morio-core \
