@@ -17,6 +17,7 @@ docker rm -fv \
   morio-web \
   morio-tap \
   morio-cache \
+  ldap \
   2> /dev/null
 docker network rm morionet
 sudo rm -rf ${MORIO_GIT_ROOT}/data/* &> /dev/null

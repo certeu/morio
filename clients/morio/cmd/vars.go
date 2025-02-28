@@ -140,9 +140,18 @@ var listCmd = &cobra.Command{
 	Example: "  morio vars list",
 	Run: func(cmd *cobra.Command, args []string) {
 		allVars := GetVars()
-		for key, val := range allVars {
-			fmt.Printf("%s: %v\n", key, val)
-		}
+    // Get sorted keys
+    sortedKeys := SortedVarsOrder(allVars)
+    // Iterate over sorted keys
+    for _, key := range sortedKeys {
+      val := allVars[key]
+      // Do not print secrets on the console when listing vars
+      if strings.HasSuffix(key, "SECRET") {
+        fmt.Printf("%s: ~~~ MASKED ~~~\n", key)
+      } else {
+        fmt.Printf("%s: %v\n", key, val)
+      }
+    }
 	},
 }
 
@@ -217,7 +226,7 @@ func GetVar(key string) string {
 	return string(value)
 }
 
-// Read the value of a variable
+// Read the value of all variables
 func GetVars() map[string]string {
 	// Create the map
 	found := make(map[string]string)
@@ -247,20 +256,20 @@ func GetVars() map[string]string {
 		}
 	}
 
-	// Let's return with the keys in alphabetic order
-	keys := make([]string, 0, len(found))
-	orderedVars := make(map[string]string)
-	for key := range found {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
+  return found
+}
 
-	for _, key := range keys {
-		val := found[key]
-		orderedVars[key] = val
-	}
 
-	return orderedVars
+func SortedVarsOrder(keys map[string]string) []string {
+    // Create a slice to hold all the keys
+    sorted := make([]string, 0, len(keys))
+    for key := range keys {
+        sorted = append(sorted, key)
+    }
+    // Sort the slice of keys alphabetically
+    sort.Strings(sorted)
+
+    return sorted
 }
 
 // Takes a string and parses it as YAML

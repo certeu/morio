@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { HardwareIcon, LocationIcon, ServersIcon, WindowIcon } from 'components/icons.mjs'
+import { PuzzleIcon, HardwareIcon, LocationIcon, PackageIcon, ServersIcon, WindowIcon } from 'components/icons.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -15,11 +15,11 @@ const meta = {
 
 const Stat = ({ title, nr, Icon, link }) => (
   <div className="stat">
-    <div className="stat-figure text-primary">
+    <div className="stat-figure">
       <Icon className="w-10 h-10" />
     </div>
     <div className="stat-title">{title}</div>
-    <div className="stat-value text-primary">{nr}</div>
+    <div className="stat-value">{nr}</div>
     <div className="stat-desc">
       <PageLink href={link}>{link}</PageLink>
     </div>
@@ -49,9 +49,13 @@ export default function InventoryPage() {
       <ContentWrapper {...meta}>
         <div className="stats shadow w-full">
           <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts" />
+          <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss" />
+          <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
+        </div>
+        <div className="stats shadow w-full">
           <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips" />
           <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs" />
-          <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss" />
+          <Stat title="Software Packages" nr={data?.pkgs} Icon={PackageIcon} link="/inventory/pkgs" />
         </div>
         <ReloadDataButton onClick={() => setCount(count + 1)} />
       </ContentWrapper>

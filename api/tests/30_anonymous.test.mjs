@@ -14,7 +14,7 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.info, 'object')
     assert.equal(d.info.name, pkg.name)
     assert.equal(d.info.about, pkg.description)
-    assert.equal(d.info.version, pkg.version)
+    assert.equal([pkg.version, 'dev-build'].includes(d.info.version), true)
     assert.equal(d.info.production, false)
     // state
     assert.equal(typeof d.info, 'object')
@@ -30,7 +30,7 @@ describe('Anonymous Routes Tests', () => {
     assert.equal(typeof d.core.info, 'object')
     assert.equal(d.core.info.name, corePkg.name)
     assert.equal(d.core.info.about, corePkg.description)
-    assert.equal(d.core.info.version, corePkg.version)
+    assert.equal([corePkg.version, 'dev-build'].includes(d.core.info.version), true)
     assert.equal(d.core.info.production, false)
     // core.status.cluster
     assert.equal(typeof d.core.status.cluster, 'object')

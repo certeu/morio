@@ -109,6 +109,14 @@ utils.getCoreStatus = () => store.get('status.core')
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
+ * Helper method to get a list of all FQDNS for flaning nodes
+ *
+ * @return {array} list - The list of all flankin node FQDNs
+ *
+ */
+utils.getFlankingFqdns = () => utils.getSettings('cluster.flanking_nodes', [])
+
+/**
  * Helper method to get the info from the store
  *
  * @return {string} prefix - The API prefix
@@ -128,6 +136,17 @@ utils.getKeys = () => store.get('keys')
  * @return {string} fqdn - The local node's FQDN
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
+
+/**
+ * Helper method to get a list of all FQDNS for flaning nodes
+ *
+ * @return {array} list - The list of all flankin node FQDNs
+ *
+ */
+utils.getAllNodesFqdns = () => [
+  ...utils.getBrokerFqdns(),
+  ...utils.getFlankingFqdns(),
+]
 
 /**
  * Helper method to get the node_serial of the local node

@@ -11,25 +11,27 @@ import { Buffer } from 'node:buffer'
  * List of allowListed URLs that do not require authentication
  */
 const allowedUrisBase = [
-  `/setup`,
-  `/preseed`,
-  `/status`,
-  `/info`,
+  `/activate-account`,
+  `/activate-mfa`,
+  `/ca/certificates`,
+  `/clients/join`,
+  `/clients/rejoin`,
+  `/cluster/join`,
+  `/idps`,
   `/info/`,
+  `/info`,
+  `/jwks`,
   '/limits',
   '/limits/',
   `/login`,
   `/login-form`,
-  `/idps`,
-  `/activate-account`,
-  `/activate-mfa`,
-  `/jwks`,
-  `/cluster/join`,
-  `/validate/settings`,
-  `/ca/certificates`,
+  `/preseed`,
   `/pubkey`,
   `/pubkey.pem`,
+  `/setup`,
+  `/status`,
   `/up`,
+  `/validate/settings`,
 ]
 
 const blockedUris = [

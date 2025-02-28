@@ -123,8 +123,9 @@ async function isDbUp() {
  * Helper method to create database tables
  */
 async function ensureTablesExist() {
+  const config = utils.getMorioServiceConfig('db')
   let initial = false
-  for (const [table, q] of Object.entries(utils.getMorioServiceConfig('db').schema || {})) {
+  for (const [table, q] of Object.entries(config.schema || {})) {
     log.debug(`[db] Ensuring database schema: ${table}`)
     const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
     if (result[1]?.results?.[0]?.error) {
@@ -136,6 +137,11 @@ async function ensureTablesExist() {
       initial = true
     } else log.warn(`Failed to create table ${table} for an unknown reason`)
   }
+  if (config.data) {
+    log.debug(`[db] Ensuring database default content`)
+    await dbClient.post(`/db/execute`, config.data)
+  }
+
   if (initial) {
     /*
      * This means we have just bootstrapped the database

@@ -160,6 +160,15 @@ MorioClient.prototype.getClientRepoPackageDefaults = async function (type) {
 }
 
 /**
+ * Gets the cluster FQDN
+ *
+ * @return {string} - The cluster fqdn
+ */
+MorioClient.prototype.getClusterFqdn = async function () {
+  return await this.call(`${morioConfig.api}/info/cluster/fqdn`)
+}
+
+/**
  * List files in the dowbloads folder
  *
  * @return {array} - The list of files
@@ -839,6 +848,35 @@ MorioClient.prototype.getDynamicTapConfig = async function () {
  */
 MorioClient.prototype.getDynamicFlagsConfig = async function () {
   return await this.call(`${morioConfig.api}/dconf/flags`)
+}
+
+/**
+ * Sends a client command to a specific client
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.sendClientCommand = async function (cmd, uuids) {
+  return await this.call(
+    `${morioConfig.api}/clients/${cmd}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PUT',
+      body: JSON.stringify({ clients: uuids }),
+    }
+  )
+}
+
+/**
+ * Create a client invite
+ *
+ * @param {string} type - The type of invite, either `once` or `many`
+ * @return {object} - The result
+ */
+MorioClient.prototype.createClientInvite = async function (type) {
+  return await this.call(`${morioConfig.api}/clients/invite/${type}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
 }
 
 /*

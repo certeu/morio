@@ -9,7 +9,7 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Card, CardButton } from 'components/card.mjs'
-import { PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
+import { PuzzleIcon, MegaphoneIcon, PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
 import { SecretInput } from 'components/inputs.mjs'
 import { mrtValid } from 'components/auth/mrt-provider.mjs'
 import { Popout } from 'components/popout.mjs'
@@ -131,12 +131,20 @@ const ActionsPage = (props) => {
           className={`grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl`}
         >
           <Card
-            title="Build Packages"
-            href="/actions/pkgs"
-            desc="Trigger builds of packages pre-configured to integrate with this Morio collector."
-            width="w-full"
-            Icon={PackageIcon}
             role="operator"
+            title="Enroll clients"
+            href="/actions/enroll"
+            desc="Guidance and examples that show how to join one or more clients to this Morio cluster."
+            width="w-full"
+            Icon={PuzzleIcon}
+          />
+          <Card
+            role="operator"
+            title="Send client commands"
+            href="/actions/clients"
+            desc="Send a command to one or more Morio clients. This requires clients to run in listener mode."
+            width="w-full"
+            Icon={MegaphoneIcon}
           />
           <CardButton
             role="operator"

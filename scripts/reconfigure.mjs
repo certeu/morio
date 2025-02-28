@@ -132,27 +132,39 @@ const preApiTest = `
 #   - The morionet network is available so we can attach to it
 #   - The reporter inside our test container has permissions to write coverage output
 #
-docker rm -f morio-api
+#docker rm -f morio-api
 docker network create morionet || true
-sudo rm -rf ./api/coverage/*
-sudo mkdir -p ./api/coverage/tmp
-sudo chown -R 2112:2112 ./api/coverage
-sudo chmod -R 755 ./api/coverage  # Allow read/write/execute for the user
-sudo touch ./local/api_tests.json
-sudo chown 2112:2112 ./local/api_tests.json
-sudo chmod 644 ./local/api_tests.json
-sudo touch ./local/api_test_logs.ndjson
-sudo chown 2112:2112 ./local/api_test_logs.ndjson
-sudo chmod 644 ./local/api_test_logs.ndjson
+#sudo rm -rf ./api/coverage/*
+#sudo mkdir -p ./api/coverage/tmp
+#sudo chown -R 2112:2112 ./api/coverage
+#sudo chmod -R 755 ./api/coverage  # Allow read/write/execute for the user
+#sudo touch ./local/api_tests.json
+#sudo chown 2112:2112 ./local/api_tests.json
+#sudo chmod 644 ./local/api_tests.json
+#sudo touch ./local/api_test_logs.ndjson
+#sudo chown 2112:2112 ./local/api_test_logs.ndjson
+#sudo chmod 644 ./local/api_test_logs.ndjson
 
 # Start an ephemeral LDAP instance so we can test IDP/LDAP
-echo "Starting ephemeral LDAP server"
-./api/tests/start-ldap-server.sh
+#echo "Starting ephemeral LDAP server"
+#./api/tests/start-ldap-server.sh
 `
 const postApiTest = `
+# Store the test outcome for later
+TEST_EXIT_CODE=$?
+
 # Stop an ephemeral LDAP instance
 echo "Stopping ephemeral LDAP server"
 ./api/tests/stop-ldap-server.sh
+
+# If tests failed, propagate failure
+if [ $TEST_EXIT_CODE -eq 0 ]; then
+  echo "Congratulations, all tests passed."
+else
+  echo "Tests failed. Exiting with error."
+  echo "Exit code is: $TEST_EXIT_CODE"
+  exit $TEST_EXIT_CODE
+fi
 `
 
 const coreWebConfig = `

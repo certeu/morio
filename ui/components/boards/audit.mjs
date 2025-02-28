@@ -5,7 +5,7 @@ import { linkClasses } from 'components/link.mjs'
 import { useContext } from 'react'
 import { ModalContext } from 'context/modal.mjs'
 // Hooks
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
@@ -69,9 +69,22 @@ export const HostAudit = ({ uuid }) => {
 
 const AuditTable = ({ data, paused, setPaused }) => {
   const [desc, setDesc] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filtered, setFiltered] = useState([])
   const { pushModal } = useContext(ModalContext)
 
   const sorted = data ? orderBy(data, 'time', desc ? 'desc' : 'asc') : false
+
+  useEffect(() => {
+    if (search == '') setFiltered([...sorted])
+    else {
+      const filteredArray = sorted.filter((item) =>
+        item.title.toLowerCase().includes(search.toLowerCase())
+      )
+
+      setFiltered(filteredArray)
+    }
+  }, [search])
 
   return (
     <>
@@ -95,13 +108,22 @@ const AuditTable = ({ data, paused, setPaused }) => {
                 Time <RightIcon stroke={3} className={`w-4 h-4 ${desc ? '-' : ''}rotate-90`} />
               </button>
             </th>
-            <th className="pr-4 text-left px-0">Note</th>
+            <th className="pr-4 text-left px-0 flex flex-row gap-4">
+              Note{' '}
+              <input
+                type="text"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="grow border-0 border-b-2 border-gray-200 bg-transparent focus:outline-none text-[#555555]"
+              />
+            </th>
             <th className="w-28 pr-4 text-left px-0">Host</th>
           </tr>
         </thead>
         <tbody className="text-sm font-mono">
-          {sorted
-            ? sorted.map((evt, i) => (
+          {filtered
+            ? filtered.map((evt, i) => (
                 <tr key={i}>
                   <td className="py-0">
                     <TimeAgoBrief time={evt.time} suffix="" />

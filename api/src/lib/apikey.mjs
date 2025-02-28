@@ -81,42 +81,7 @@ export async function loadAccountApikeys(id) {
   return status === 200 ? apikeysAsList(result) : false
 }
 
-/**
- * Helper method to create an API key
- *
- * @param {object} data - The data to save for the API key
- */
-export async function saveApikey(id = false, data) {
-  /*
-   * We need at least an ID
-   */
-  if (!id) {
-    log.debug('saveApikey was called witout an id')
-    return false
-  }
-
-  /*
-   * Now construct the query
-   */
-  data.id = id
-  const updates = []
-  const params = {}
-  for (const [key, val] of Object.entries(data)) {
-    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
-      updates.push(key)
-      params[key] = fields[key](val)
-    }
-  }
-
-  const result = await db.write(
-    `REPLACE INTO apikeys(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
-    params
-  )
-
-  return result
-}
-
-/**
+/*
  * Helper method to delete an API key
  *
  * @param {string} id - The apikey ID (key)
@@ -139,12 +104,78 @@ export async function deleteApikey(id = false) {
 }
 
 /**
+ * Create a new API key
+ * @param {object} data - The data to save for the API key
+ * @return {boolean} - True if successful, false otherwise
+ */
+export async function createApikey(data) {
+  if (!data.id) {
+    log.todo({data})
+    log.debug('createApikey was called without an id')
+    return false
+  }
+
+  const columns = []
+  const params = {}
+
+  for (const [key, val] of Object.entries(data)) {
+    if (fields[key] && typeof fields[key] === 'function') {
+      columns.push(key)
+      params[key] = fields[key](val)
+    }
+  }
+
+  if (columns.length === 0) {
+    log.warn('createApikey was called with no valid fields')
+    return false
+  }
+
+  const query = `INSERT INTO apikeys (${columns.join(', ')}) VALUES (${columns.map((key) => ':' + key).join(', ')})`
+  const [status] = await db.write(query, params)
+
+  return status === 200
+}
+
+/**
+ * Update an existing API key
+ * @param {string} id - The API key ID
+ * @param {object} data - The fields to update
+ * @return {boolean} - True if successful, false otherwise
+ */
+export async function updateApikey(id, data) {
+  if (!id) {
+    log.warn('updateApikey was called without an id')
+    return false
+  }
+
+  const updates = []
+  const params = { id: fields.id(id) }
+
+  for (const [key, val] of Object.entries(data)) {
+    if (fields[key] && typeof fields[key] === 'function') {
+      updates.push(`${key} = :${key}`)
+      params[key] = fields[key](val)
+    }
+  }
+
+  if (updates.length === 0) {
+    log.warn('updateApikey was called with no valid fields to update')
+    return false
+  }
+
+  const query = `UPDATE apikeys SET ${updates.join(', ')} WHERE id = :id`
+  const [status] = await db.write(query, params)
+
+  return status === 200
+}
+
+/**
  * Helper method to save the last login time in the apikey data
  *
  * @param {string} id - The id of the apikey (the key)
  */
 export async function updateLastLoginTime(id) {
-  return await saveApikey(id, { last_login: asTime() })
+  return await updateApikey(id, { last_login: asTime() })
 }
 
 /**

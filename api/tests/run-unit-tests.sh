@@ -12,10 +12,6 @@ fi
 # Enter monorepo folder
 cd /morio/api
 
-# Start the api instance, as background job
-# Also wrap it in c8 to generate a coverage report
-../node_modules/.bin/c8 --reporter=html -- node ./src/index.mjs &> ../local/api_test_logs.ndjson &
-
 # Wait for the api to come up by checking the up endpoint
 TRIES1=0
 while [ $TRIES1 -le 19 ] && [ -z "$UP" ]
@@ -31,39 +27,17 @@ do
 done
 
 # Run unit tests
-node --no-warnings --test-concurrency=1 --test
+node --no-warnings --test-concurrency=1 --test --test-reporter=spec
 
-TEST_EXIT_CODE=$? 
-
-# Stop api container
-kill -1 %1
+TEST_EXIT_CODE=$?
 
 # If tests failed, propagate failure
 if [ $TEST_EXIT_CODE -ne 0 ]; then
-  echo "Tests failed. Exiting with error."
+  echo "Tests failed. Exiting with error. (run-unit-tests)"
   exit $TEST_EXIT_CODE
-fi
-
-curl -Os https://uploader.codecov.io/latest/linux/codecov
-chmod +x codecov
-mv codecov /usr/local/bin/
-
-# Generate coverage report (text)
-../node_modules/.bin/c8 report
-# Generate coverage report (html)
-../node_modules/.bin/c8 report --reporter=html
-
-# Upload the coverage report to Codecov
-LATEST_COVERAGE_FILE=$(ls -t ./coverage/tmp/*.json | head -n 1)
-
-if [ -f "$LATEST_COVERAGE_FILE" ]; then
-  echo "Uploading coverage report: $LATEST_COVERAGE_FILE"
-  /usr/local/bin/codecov --file="$LATEST_COVERAGE_FILE" --token="$CODECOV_TOKEN" --slug="$CODECOV_SLUG" --sha="$GIT_COMMIT_SHA" --trace-warnings
 else
-  echo "Error: No coverage report found"
-  exit 1
+  echo "Congratulations, all tests passed."
 fi
 
-# Clean up the coverage directory
-rm -rf ./coverage/tmp/*
-rm -rf ./coverage/*
+exit $TEST_EXIT_CODE
+

@@ -19,7 +19,11 @@ export const BaseProvider = ({
 
   const submit = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.login(id, { username: username.trim(), password, role })
+
+    let data = { username: username.trim(), password, role }
+    if(usernameLabel == 'API Key') data = { api_key: username, api_key_secret: password }
+
+    const result = await api.login(id, data)
     if (result?.[1] === 200 && result?.[0]?.jwt) {
       setLoadingStatus([true, 'Authentication Succeeded', true, true])
       setError(false)

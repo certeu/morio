@@ -1,4 +1,4 @@
-import { roles } from '#config/roles'
+import { roles, hiddenRoles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 import { utils, log } from './utils.mjs'
 // Load the database client
@@ -57,7 +57,7 @@ export function fromJson(data) {
  */
 export function asRole(data) {
   const r = String(data).toLowerCase()
-  if (roles.includes(r)) return r
+  if ([...roles, ...hiddenRoles].includes(r)) return r
   else {
     log.warn(`The role '${r}' is not know. Forcing to 'user' instead.`)
     return 'user'

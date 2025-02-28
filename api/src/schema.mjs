@@ -63,6 +63,22 @@ const kv = {
   ),
 }
 
+const client = {
+  name: Joi.string().hostname(),
+  fqdn: Joi.string().hostname(),
+  os: Joi.string(),
+  os_version: Joi.string(),
+  arch: Joi.string(),
+  cores: Joi.number(),
+  memory: Joi.number(),
+  ips: Joi.array().items(Joi.string()),
+  macs: Joi.array().items(Joi.string()),
+  packages: Joi.array().items(Joi.object({
+    name: Joi.string(),
+    version: Joi.string()
+  }))
+}
+
 /*
  * This describes the schema of requests and responses in the Core API
  */
@@ -179,6 +195,12 @@ export const schema = {
   'req.cache.readKey': Joi.object({ key: Joi.string().required() }),
   'req.cache.listKeys': Joi.object({ glob: Joi.string().required() }),
   'req.cache.readKeys': Joi.object({ keys: Joi.array().required().items(Joi.string()) }),
+  'req.client.join': Joi.object({
+    cluster: Joi.string().hostname(),
+    invite: Joi.string().optional(),
+    uuid: uuid.optional(),
+    info: client
+  }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({
     Package: Joi.string().required(),

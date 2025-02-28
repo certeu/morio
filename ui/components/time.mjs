@@ -40,6 +40,8 @@ export const TimeToGo = (props) => <TimeForHumans {...props} future />
 
 export const TimeAgoBrief = ({ time, suffix = ' ago' }) => {
   const d = Math.floor(Date.now() - time)
+
+  if (d < 0) return 'now'
   if (d > day) return `${Math.floor(d / day)}d${suffix}`
   if (d > hour) return `${Math.floor(d / hour)}h${suffix}`
   if (d > minute * 2) return `${Math.floor(d / minute)}m${suffix}`

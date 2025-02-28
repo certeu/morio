@@ -1,5 +1,5 @@
 // Dependencies
-import { timeAgo, parseJson } from 'lib/utils.mjs'
+import { cloneAsPojo, timeAgo, parseJson } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { chartTemplates } from './chart-templates.mjs'
 // Hooks
@@ -230,7 +230,7 @@ export const Check = ({ id = false, cacheKey = false }) => {
   if (!Array.isArray(cache)) return <Spinner />
 
   const data = parseCachedHealthchecks(cache)
-  const templates = chartTemplates(data)
+  const templates = cloneAsPojo(chartTemplates)
 
   const option = templates.charts.line
   option.title.text = 'Health check response time'

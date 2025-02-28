@@ -432,3 +432,23 @@ func EnsureGlobalVars() map[string]string {
 func GetConfigPath(parts ...string) string {
 	return filepath.Join(append([]string{"/etc", "morio"}, parts...)...)
 }
+
+// FIXME: Make this platform agnostic
+func WriteConfigFile(filename string, content string) error {
+	// Open file
+	file, err := os.Create(GetConfigPath(filename))
+	check(err)
+	defer file.Close()
+
+	// Write value
+	_, err = file.WriteString(content)
+	if err != nil {
+		fmt.Println("Failed to write to " + GetConfigPath(filename))
+		panic(err)
+	}
+
+	// Sync
+	file.Sync()
+
+  return err
+}

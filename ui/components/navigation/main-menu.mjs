@@ -1,5 +1,7 @@
 // Dependencies
 import { capitalize, pageChildren, rbac } from 'lib/utils.mjs'
+// Hooks
+import { useEffect, useState } from 'react'
 // Components
 import {
   BriefcaseIcon,
@@ -23,11 +25,13 @@ import {
   LayersIcon,
   LocationIcon,
   LogsIcon,
+  MegaphoneIcon,
   MorioIcon,
   NoteIcon,
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
+  PuzzleIcon,
   WindowIcon,
   QuestionIcon,
   RightIcon,
@@ -64,6 +68,7 @@ const icons = {
   ca: CertificateIcon,
   certificates: CertificateIcon,
   checks: CheckCircleIcon,
+  clients: MegaphoneIcon,
   create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
@@ -77,6 +82,7 @@ const icons = {
   downloads: DownloadIcon,
   edit: NoteIcon,
   encrypt: ClosedLockIcon,
+  enroll: PuzzleIcon,
   events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
@@ -116,6 +122,14 @@ export const links = {
   actions: {
     t: 'Actions',
     r: 'operator',
+    enroll: {
+      t: 'Enroll Clients',
+      r: 'operator'
+    },
+    clients: {
+      t: 'Send Client Commands',
+      r: 'operator'
+    },
   },
   boards: {
     t: 'Dashboards',
@@ -170,6 +184,10 @@ export const links = {
     },
     oss: {
       t: 'Operating Systems',
+      r: 'user',
+    },
+    pkgs: {
+      t: 'Software Packages',
       r: 'user',
     },
   },
@@ -352,10 +370,15 @@ const getHref = (page, parents = [], slug = false) =>
  * @param {array} parent - An array holding the parents of the current page, allowing to construct the href
  */
 export const MainMenu = ({ role, current, navs = false, level = 0, parents = [] }) => {
+  const [list, setList] = useState([])
   if (!navs) navs = links
-  const list = []
-  for (const [key, page] of Object.entries(navs))
-    list.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+
+  useEffect(() => {
+    const newList = []
+    for (const [key, page] of Object.entries(navs))
+      newList.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+    setList(newList)
+  },[navs, role])
 
   return list
 }

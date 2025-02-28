@@ -304,7 +304,19 @@ export function generateContainerConfig(serviceName) {
   if (config.container.hosts) {
     opts.HostConfig.ExtraHosts = config.container.hosts
     if (extraHost) opts.HostConfig.ExtraHosts.push(extraHost)
-  } else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
+  } 
+  else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
+  else opts.HostConfig.ExtraHosts = []
+
+
+  /*
+   * Make this work on NAT loopback hosts (aka hairpinning)
+   * In such a case, the public IP that the FQDN resolves to
+   * is not an IP address that is available on the box so we
+   * need to force routing of such an IP to the internal address.
+   */
+  opts.HostConfig.ExtraHosts.push(`${utils.getClusterFqdn()}:host-gateway`)
+  opts.HostConfig.ExtraHosts.push(`${utils.getNodeFqdn()}:host-gateway`)
 
   /*
    * Command

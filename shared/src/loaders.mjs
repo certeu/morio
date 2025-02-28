@@ -1,5 +1,7 @@
 import fs from 'node:fs'
-import { testUrl } from './network.mjs'
+import path from 'node:path'
+import mustache from 'mustache'
+import { testUrl, restClient } from './network.mjs'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
@@ -13,6 +15,11 @@ import unset from 'lodash/unset.js'
  * A collection of utils to load various files
  * Typically used to load the preseeded config
  */
+
+/*
+ * We need access to the database to store client modules
+ */
+const dbClient = restClient(`http://morio-db:4001`)
 
 /**
  * Helper method to parse a result as YAML or JSON
@@ -482,6 +489,8 @@ export async function loadClientModules(settings, log) {
   /*
    * Now load client modules
    */
+  const modules = {}
+  //logs/module-templates.d/linux-tomcat.yml
   for (const entry of globs) {
     if (entry.slice(0, 4) === 'git:') {
       const [pattern, repo] = entry.slice(4).split('@')
@@ -498,15 +507,94 @@ export async function loadClientModules(settings, log) {
               targetFile: sourceFile.slice(-4) === '.yml' ? `${targetFile}.disabled` : targetFile,
               targetFolder,
             })
-            if (copy) log.debug(`Seeding client module file: ${targetFile}`)
-            else log.warn(`Failed to seed client module file: ${targetFile}`)
+            if (!copy) log.warn(`Failed to seed client module file: ${targetFile}`)
+            else {
+              log.debug(`Seeding client module file: ${targetFile}`)
+              if (sourceFile.slice(-4) === '.yml') {
+                const module  = path.basename(sourceFile).slice(0, -4)
+                if (typeof modules[module] === 'undefined') {
+                  const repos = {}
+                  repos[repo] = pattern
+                  modules[module] = { module, repos, info: [], vars: {} }
+                }
+                else if (typeof modules[module].repos[repo] === 'undefined') {
+                  modules[module].repos[repo] = pattern
+                }
+                const data = await loadMorioDataFromModule(sourceFile, log)
+                if (data) {
+                  modules[module].info = [...modules[module].info, data.info ]
+                  modules[module].vars = {...modules[module].vars, ...data.vars }
+                }
+              }
+            }
           }
         }
       }
     }
   }
+  // No need to await this
+  storeClientModules(modules, log)
 
   return true
+}
+
+async function storeClientModules (modules, log) {
+  const queries = []
+  for (const module in modules) {
+    const d = JSON.stringify(modules[module])
+    queries.push([
+      `INSERT INTO inventory_mods (mod, data) VALUES(:module, :data)`,
+      { module, data: JSON.stringify(modules[module]) }
+    ])
+    for (const [key, val] of Object.entries(modules[module].vars || {})) {
+      queries.push([
+        `INSERT INTO inventory_module_vars (id, val, info, mod) VALUES(:key, :val, :info, :module)`,
+        { key, val: asScalar(val.dflt), info: val.info, module }
+      ])
+    }
+  }
+  if (queries.length > 0) {
+    /*
+     * We completely remove all modules and recreate them
+     * because only through preseeding can modules be loaded
+     */
+    await dbClient.post(
+      `/db/execute`,
+      [
+        `DELETE FROM inventory_mods where 1`,
+        ...queries
+      ]
+    )
+  }
+}
+
+function asScalar (val) {
+  if (typeof val === 'string') return val
+  if (typeof val === 'number') return val
+  return JSON.stringify(val)
+}
+
+
+async function loadMorioDataFromModule (sourceFile, log) {
+  const raw = await readFile(sourceFile)
+  const rendered = mustache.render(raw, {}, {}, { tags: ['{|', '|}'] })
+  let yml = false
+  try {
+    yml = yaml.load(rendered)
+    if (!yml) {
+      log.debug(`Failed to parse as YAML: ${sourceFile}`)
+      return false
+    }
+  } catch (err) {
+    // This is probably a noop placeholder file
+    return false
+  }
+
+  for (const entry of yml) {
+    if (entry.moriodata) return entry.moriodata
+  }
+
+  return false
 }
 
 export async function loadStreamProcessors(settings, log) {

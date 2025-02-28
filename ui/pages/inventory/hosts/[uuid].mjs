@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ServersIcon } from 'components/icons.mjs'
-import { Host } from 'components/inventory/host.mjs'
+import { HostDetail } from 'components/inventory/host.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 
 export default function InventoryHostPage({ uuid = false }) {
@@ -29,7 +29,7 @@ export default function InventoryHostPage({ uuid = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <Host data={data} />
+          <HostDetail data={data} />
         </div>
       </ContentWrapper>
     </PageWrapper>

@@ -8,6 +8,54 @@ export const errors = {
     detail: 'This is the API equivalent of a 404 page. The endpoint you requested does not exist.',
   },
   /*
+   * Mismatch between the client join request cluster value and the actual cluster FQDN
+   */
+  'morio.api.client.cluster.mismatch': {
+    status: 400,
+    title: 'Cluster mismatch',
+    detail: 'The cluster name provided in the join request does not match the cluster FQDN',
+  },
+  /*
+   * Client tries to join with a UUID that alread joined
+   */
+  'morio.api.client.joined': {
+    status: 400,
+    title: 'Client already joined',
+    detail: 'A client with this UUID already joined this cluster. To re-join this client, use the "morio rejoin" cli command instead.'
+  },
+  /*
+   * Client tries to join with a UUID that alread joined
+   */
+  'morio.api.clients.invalid_invite_type': {
+    status: 400,
+    title: 'Invalid client invite type',
+    detail: 'The client invite type you requested is invalid. It should be one of either "once" or "many".'
+  },
+  /*
+   * Client tries to join without an invite that is required
+   */
+  'morio.api.clients.invite_required': {
+    status: 400,
+    title: 'An invite code is required to join this cluster',
+    detail: 'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.'
+  },
+  /*
+   * Client tries to join with an invalid invite
+   */
+  'morio.api.clients.invite_invalid': {
+    status: 400,
+    title: 'The provided invite code is invalid',
+    detail: 'The invite provided was not valid. Typically this happens when you try to use a one-time invite more than once.'
+  },
+  /*
+   * Failed to generate an X.509 certificate
+   */
+  'morio.ca.certificate.failure': {
+    status: 500,
+    title: 'CA failure',
+    detail: 'We were unable to provision a X.509 certificate from the certificate authority.',
+  },
+  /*
    * Identity provider is disabled by a feature flag
    */
   'morio.api.idp.disabled': {

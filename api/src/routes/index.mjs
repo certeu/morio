@@ -3,6 +3,7 @@ import { routes as anonymous } from '#routes/anonymous'
 import { routes as apikeys } from '#routes/apikeys'
 import { routes as auth } from '#routes/auth'
 import { routes as cache } from '#routes/cache'
+import { routes as clients } from '#routes/clients'
 import { routes as crypto } from '#routes/crypto'
 import { routes as core } from '#routes/core'
 import { routes as docs } from '#routes/docs'
@@ -16,6 +17,7 @@ export const routes = {
   accounts,
   apikeys,
   cache,
+  clients,
   core,
   crypto,
   dconf,

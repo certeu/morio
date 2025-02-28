@@ -1,4 +1,5 @@
 import { Controller } from '#controllers/anonymous'
+import { utils } from '../lib/utils.mjs'
 
 const Anonymous = new Controller()
 
@@ -17,6 +18,11 @@ export function routes(app) {
    * Get the the available downloads
    */
   app.get(`/downloads`, Anonymous.listDownloads)
+
+  /*
+   * Get the cluster FQDN
+   */
+  app.get(`/info/cluster/fqdn`, (req, res) => res.send({ fqdn: utils.getClusterFqdn() }))
 
   /*
    * Get a list of the available idenity/authentication providers (idps)
@@ -57,4 +63,5 @@ export function routes(app) {
    * Validates Morio settings
    */
   app.post(`/validate/settings`, Anonymous.validateSettings)
+
 }
