@@ -3,7 +3,6 @@
 source config/cli.sh
 
 docker rm -fv \
-  morio-core \
   morio-api \
   morio-ui \
   morio-proxy \
@@ -17,7 +16,6 @@ docker rm -fv \
   morio-web \
   morio-tap \
   morio-cache \
-  ldap \
   2> /dev/null
 
 # Remove files owned by root by calling the core container
