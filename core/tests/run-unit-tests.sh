@@ -23,9 +23,9 @@ do
 done
 
 # Run unit tests
-export NODE_V8_COVERAGE=./coverage
+#export NODE_V8_COVERAGE=./coverage
 node \
-  --experimental-test-coverage \
+#  --experimental-test-coverage \
   --test-reporter=spec \
   --test-concurrency=1 \
   --test
