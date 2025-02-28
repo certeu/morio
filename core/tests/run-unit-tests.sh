@@ -26,7 +26,7 @@ done
 #export NODE_V8_COVERAGE=./coverage
 node \
 #  --experimental-test-coverage \
-  --test-reporter=spec \
+#  --test-reporter=spec \
   --test-concurrency=1 \
   --test
 
