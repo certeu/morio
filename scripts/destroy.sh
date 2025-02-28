@@ -2,6 +2,10 @@
 # Sounce config variables
 source config/cli.sh
 
+docker exec -it morio-core bash -c "rm -rf /etc/morio"
+docker exec -it morio-core bash -c "rm -rf /var/log/morio"
+docker exec -it morio-core bash -c "rm -rf /morio/data"
+
 docker rm -fv \
   morio-core \
   morio-api \
