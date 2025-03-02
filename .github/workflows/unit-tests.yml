@@ -19,6 +19,10 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
+      - name: Force Cleanup of Workspace (If Needed)
+        run: |
+          sudo rm -rf ${{ github.workspace }}/* || true
+
       - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
