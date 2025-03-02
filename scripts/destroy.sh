@@ -24,6 +24,7 @@ docker exec -it morio-core  bash -c "rm -rf /var/log/morio"
 docker exec -it morio-core  bash -c "rm -rf /morio/data"
 
 docker rm -fv morio-core 2> /dev/null
+
 docker network rm morionet
 
 sudo rm -rf ${MORIO_GIT_ROOT}/data/* &> /dev/null
