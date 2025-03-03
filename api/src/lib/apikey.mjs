@@ -132,7 +132,7 @@ export async function saveApikey(id = false, data) {
   }
 
   const result = await db.write(
-    `REPLACE INTO apikeys(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
+    `REPLACE INTO apikeys(${columns.join()}) VALUES(${columns.map((key) => ':' + key).join()})`,
     params
   )
 
