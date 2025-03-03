@@ -23,7 +23,9 @@ var modulesListCmd = &cobra.Command{
 	Short: "List modules",
 	Long:  `List client modules.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		ShowModulesList()
+		// Get the verbose flag value from the command
+		verbose, _ := cmd.Flags().GetBool("verbose")
+		ShowModulesList(verbose)
 	},
 }
 
@@ -35,7 +37,7 @@ var modulesEnableCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		enableModule(args[0])
-		ShowModulesList()
+		ShowModulesList(false)
 	},
 }
 
@@ -47,7 +49,7 @@ var modulesDisableCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		disableModule(args[0])
-		ShowModulesList()
+		ShowModulesList(false)
 	},
 }
 
@@ -64,6 +66,10 @@ var modulesInfoCmd = &cobra.Command{
 }
 
 func init() {
+	// Verbose flag for the list command
+	var verbose bool
+	// Add details flag to list
+	modulesListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output: Lists modules per agent")
 	// Add the commands
 	RootCmd.AddCommand(modulesCmd)
 	modulesCmd.AddCommand(modulesListCmd)
@@ -98,10 +104,38 @@ func ShowModuleList(agent string) {
 	fmt.Println()
 }
 
-func ShowModulesList() {
-	ShowModuleList("audit")
-	ShowModuleList("logs")
-	ShowModuleList("metrics")
+func ShowModuleListSummary() {
+	// Gather all enabled modules
+	enabled, _ := ModuleList("audit/module-templates.d")
+	enabledLogs, _ := ModuleList("logs/module-templates.d")
+	enabledLogsInputs, _ := ModuleList("logs/input-templates.d")
+	enabledMetrics, _ := ModuleList("metrics/module-templates.d")
+
+	// Make them unique
+	enabled = joinUnique(enabled, enabledLogs)
+	enabled = joinUnique(enabled, enabledLogsInputs)
+	enabled = joinUnique(enabled, enabledMetrics)
+
+	if len(enabled) == 0 {
+		fmt.Println("No modules are currently enabled")
+	} else {
+		fmt.Println("Enabled modules:")
+		for _, name := range enabled {
+			fmt.Println(" - " + ModuleNameFromFile(name))
+		}
+	}
+	fmt.Println()
+}
+
+func ShowModulesList(verbose bool) {
+	if verbose {
+		ShowModuleListSummary()
+		ShowModuleList("audit")
+		ShowModuleList("logs")
+		ShowModuleList("metrics")
+	} else {
+		ShowModuleListSummary()
+	}
 }
 
 func ModuleList(folder string) ([]string, []string) {

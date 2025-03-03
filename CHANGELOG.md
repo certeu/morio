@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [core] Add support for NAT loopback/hairpinning
 - [ui] Fixed incorrect loading of healtcheck chart templates
 
+### Changed
+
+- [client] The modules list command output is now terse by default, use the `-v` or `--verbose` flag for detailed output
+
 ## [0.7.2] - 2025-02-10
 
 ### Changed
