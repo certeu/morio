@@ -109,13 +109,6 @@ export async function deleteApikey(id = false) {
  * @return {number} status - 200 or 500
  */
 export async function createApikey(data) {
-  if (!id) {
-    log.debug('createApikey was called without an id')
-    return false
-  }
-
-  data.id = id
-
   const columns = []
   const params = {}
 
