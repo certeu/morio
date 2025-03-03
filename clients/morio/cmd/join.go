@@ -26,10 +26,14 @@ var (
 
 // Define structures for API responses
 type ErrorResponse struct {
-	Type   string `json:"type"`
-	Status int    `json:"status"`
-	Title  string `json:"title"`
-	Detail string `json:"detail"`
+	Type            string `json:"type"`
+	Status          int    `json:"status"`
+	Title           string `json:"title"`
+	Detail          string `json:"detail"`
+	SchemaViolation string `json:"schema_violation,omitempty"`
+	UnknownModules string `json:"unknown_modules,omitempty"`
+	FailedModules string `json:"failed_modules,omitempty"`
+	FailedVars string `json:"failed_vars,omitempty"`
 }
 
 type SuccessResponse struct {
@@ -37,7 +41,9 @@ type SuccessResponse struct {
 	Key     string   `json:"key"`
 	Ca      string   `json:"ca"`
 	Uuid    string   `json:"uuid"`
-	Secret  string `json:"secret"`
+	Secret  string   `json:"secret"`
+	Cluster string   `json:"cluster"`
+	Brokers []string `json:"brokers"`
 }
 
 func init() {
@@ -149,15 +155,15 @@ func joinCluster(args []string, rejoin bool) error {
 		}
 
 		// Log the error and exit
-		fmt.Printf("Error: %s\n", errResp.Title)
-		fmt.Printf("Details: %s\n", errResp.Detail)
-		fmt.Printf("For more information, visit: %s\n", errResp.Type)
-		return fmt.Errorf("failed with status code: %d", resp.StatusCode)
+		PrintErrorResponse(errResp)
+		//fmt.Printf("\n\nError: %s\n", errResp.Title)
+		//fmt.Printf("Details: %s\n", errResp.Detail)
+		//fmt.Printf("For more information, visit: %s\n", errResp.Type)
+		return fmt.Errorf("\nRequest failed with status code: %d", resp.StatusCode)
 	}
 
 	// Parse success response
 	var successResp SuccessResponse
-  fmt.Printf("body: %s", respBody)
 	if err := json.Unmarshal(respBody, &successResp); err != nil {
 		return fmt.Errorf("failed to parse success response: %w", err)
 	}
@@ -169,27 +175,25 @@ func joinCluster(args []string, rejoin bool) error {
 	}
 
 	// Write certificates and key to disk
-  WriteConfigFile("cert.pem", successResp.Crt)
-  WriteConfigFile("key.pem", successResp.Key)
-  WriteConfigFile("ca.pem", successResp.Ca)
+	WriteConfigFile("cert.pem", successResp.Crt)
+	WriteConfigFile("key.pem", successResp.Key)
+	WriteConfigFile("ca.pem", successResp.Ca)
 
-	// Store UUID in var
-  SetVar("MORIO_CLIENT_UUID", successResp.Uuid)
+	// Store UUID, secret, and cluster in vars
+	SetVar("MORIO_CLIENT_UUID", successResp.Uuid)
+	SetVar("MORIO_CLUSTER", successResp.Cluster)
+	SetVar("MORIO_APIKEY_SECRET", successResp.Secret)
 
-  // Store brokers as JSON string
-  //brokersJson, err := json.Marshal(successResp.Brokers)
-  //if err != nil {
-  //  return fmt.Errorf("failed to marshal brokers list: %w", err)
-  //}
-  //brokersStr := string(brokersJson)
-  //SetVar("MORIO_BROKERS", brokersStr)
-
-  // Store apikey secret
-  SetVar("MORIO_APIKEY_SECRET", successResp.Secret)
+	// Store brokers as JSON string
+	brokersJson, err := json.Marshal(successResp.Brokers)
+	if err != nil {
+		return fmt.Errorf("failed to marshal brokers list: %w", err)
+	}
+	brokersStr := string(brokersJson)
+	SetVar("MORIO_BROKERS", brokersStr)
 
 	fmt.Printf("\nSuccessfully joined cluster %s as client %s\n\n", cluster, successResp.Uuid)
-	//fmt.Printf("\n- Cluster: %s\n", cluster)
-	//fmt.Printf("- Client: %s\n\n", successResp.Uuid)
+
 	return nil
 }
 

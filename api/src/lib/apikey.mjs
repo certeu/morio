@@ -106,9 +106,10 @@ export async function deleteApikey(id = false) {
 /**
  * Create a new API key
  * @param {object} data - The data to save for the API key
+ * @param {boolean} recreate - Whether to first delete before creating this key
  * @return {boolean} - True if successful, false otherwise
  */
-export async function createApikey(data) {
+export async function createApikey(data, recreate=false) {
   if (!data.id) {
     log.debug('createApikey was called without an id')
     return false
@@ -129,10 +130,18 @@ export async function createApikey(data) {
     return false
   }
 
+  // Prepare the insert query
   const query = `INSERT INTO apikeys (${columns.join(', ')}) VALUES (${columns.map((key) => ':' + key).join(', ')})`
-  const [status] = await db.write(query, params)
 
-  return status === 200
+  // Now either delete + insert, or just insert
+  const result = recreate
+    ? await db.writeMany([
+      [`DELETE FROM apikeys WHERE id=:id`, { id: data.id }],
+      [query, params]
+    ])
+    : await db.write(query, params)
+
+  return result[0] === 200
 }
 
 /**

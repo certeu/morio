@@ -1,4 +1,4 @@
-import { utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
@@ -140,7 +140,7 @@ Controller.prototype.authenticate = async function (req, res) {
     const idpResult =
       credentials[0] === 'root'
         ? await idps.mrt('mrt', { role: 'root', mrt: credentials[1] })
-        : await idps.mrt('mrt', { api_key: credentials[0], api_key_secret: credentials[1] })
+        : await idps.apikey('apikey', { api_key: credentials[0], api_key_secret: credentials[1] })
     if (Array.isArray(idpResult) && idpResult[0] === true) payload = idpResult[1]
   }
 

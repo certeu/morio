@@ -1,5 +1,5 @@
 import { log } from './utils.mjs'
-import { get } from '#shared/utils'
+import { get, asScalarOrJson } from '#shared/utils'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
 // Load the database client
@@ -398,11 +398,7 @@ export async function useInvite(id) {
    * Does the invite exist?
    */
   const invite = await getInvite(id)
-  log.todo({invite, id})
-  if (invite?.id !== id) {
-    return false
-    log.todo('matched the checl')
-  }
+  if (invite?.id !== id) return false
 
   /*
    * Is it a multi-use invite?
@@ -628,6 +624,128 @@ export async function enrollHost (uuid, data, replace=false) {
   }
 
   return result
+}
+
+/**
+ * Verifies that a list of modules exists
+ *
+ * @param {array} modules - The list of modules to check
+ * @return {array} result - An [bool result, array missing] array
+ */
+export async function verifyModulesExist (modules) {
+  const missing = []
+  const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const allModules = (result[0] === 200 && result[1].results?.[0]?.values)
+    ? result[1].results[0].values.map(row => row[0])
+    : []
+  for (const mod of modules) {
+    if (!allModules.includes(mod)) missing.push(mod)
+  }
+
+  return [missing.length === 0, missing]
+}
+
+/**
+ * Sets the available modules on a client
+ *
+ * @param {string} uuid - The client UUID
+ * @param {array} modules - The list of modules
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function setClientModules (uuid, modules) {
+  const queries = [
+    [
+      `DELETE from inventory_host_mod WHERE host=:uuid`,
+      { uuid }
+    ]
+  ]
+  for (const module of modules) queries.push([
+    `INSERT INTO inventory_host_mod VALUES(:uuid, :module)`,
+    { uuid, module }
+  ])
+
+  const result = await db.writeMany(queries)
+  const failed = []
+  if (result[0] === 200 && result[1].results) {
+
+    for (const i in modules) {
+      const j = Number(i)+1
+      if (result[1].results[Number(i)+1].last_insert_id) log.debug(`[client] Enabled module ${modules[i]} for client ${uuid}`)
+      else {
+        log.warn(`[client] Failed to enable module ${modules[i]} to client ${uuid}`)
+        failed.push(modules[i])
+      }
+    }
+  }
+
+  return [failed.length === 0, failed]
+}
+
+/**
+ * Retrieves a host variable
+ *
+ * @param {string} host - The host UUID
+ * @param {string} key - The key (name of the variable)
+ * @return {object} result - The found result
+ */
+export async function getHostVar(host, key) {
+  const result = await db.read(
+    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
+    { host, key }
+  )
+
+  if (result[0] === 200 && result[1].results[0].values) {
+    const found = {}
+    const cols = result[1].results[0].columns
+    const vals = result[1].results[0].values[0]
+    for (const i in cols) found[cols[i]] = vals[i]
+
+    return found
+  }
+
+  return false
+}
+
+/**
+ * Sets the available variables for a client
+ *
+ * @param {string} uuid - The client UUID
+ * @param {array} vars - The list of variables
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function setClientVariables (uuid, vars) {
+  const queries = []
+  for (const [key, val] of Object.entries(vars)) {
+    const exists = await getHostVar(uuid, key)
+    if (exists) {
+      // Update var
+      queries.push([
+        `UPDATE inventory_hostvars SET val=:val, info=:info WHERE id=:id`,
+        { val: asScalarOrJson(val), info: exists.info, id: exists.id }
+      ])
+    } else {
+      // Create var
+      queries.push([
+        `INSERT INTO inventory_hostvars (key, val, info, host) VALUES(:key, :val, :info, :host)`,
+        { key, val: asScalarOrJson(val), info: 'Pushed from host', host: uuid }
+      ])
+    }
+  }
+
+  const result = await db.writeMany(queries)
+  const failed = []
+  if (result[0] === 200 && result[1].results) {
+    const varNames = Object.keys(vars)
+    for (const i in varNames) {
+      if (result[1].results[i].last_insert_id) log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
+      else {
+        log.warn(`[client] Failed to set var ${varNames[i]} to client ${uuid}`)
+        failed.push(varNames[i])
+      }
+    }
+  }
+
+  return [failed.length === 0, failed]
 }
 
 /**

@@ -79,6 +79,7 @@ const client = {
   }))
 }
 
+
 /*
  * This describes the schema of requests and responses in the Core API
  */
@@ -200,6 +201,12 @@ export const schema = {
     invite: Joi.string().optional(),
     uuid: uuid.optional(),
     info: client
+  }),
+  'req.client.push': Joi.object({
+    uuid: uuid.required().description('The UUID of the client'),
+    cluster: Joi.string().hostname().description('The FQDN of the Morio cluster'),
+    modules: Joi.array().items(Joi.string()),
+    vars: Joi.object(),
   }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({

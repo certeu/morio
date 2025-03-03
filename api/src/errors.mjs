@@ -10,10 +10,26 @@ export const errors = {
   /*
    * Mismatch between the client join request cluster value and the actual cluster FQDN
    */
-  'morio.api.client.cluster.mismatch': {
+  'morio.api.client.cluster_mismatch': {
     status: 400,
     title: 'Cluster mismatch',
     detail: 'The cluster name provided in the join request does not match the cluster FQDN',
+  },
+  /*
+   * Mismatch between the client join request cluster value and the actual cluster FQDN
+   */
+  'morio.api.client.authentication_mismatch': {
+    status: 403,
+    title: 'Authentication mismatch',
+    detail: 'This endpoint can only be used by the API key that was assigned to the client when joining the cluster.',
+  },
+  /*
+   * Mismatch between the client join request cluster value and the actual cluster FQDN
+   */
+  'morio.api.client.unknown_module': {
+    status: 400,
+    title: 'Unknown client module',
+    detail: 'The modules list includes a module that is not known to Morio. Modules should be centrally seeded.'
   },
   /*
    * Client tries to join with a UUID that alread joined

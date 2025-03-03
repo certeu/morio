@@ -9,6 +9,20 @@ export const get = _get
 export const set = _set
 
 /**
+ * Returns a scale value, typically used to store things in the database
+ *
+ * This will return a JSON representation of the value, unless it's a simple string or number
+ *
+ * @param {mixed} val - The value to scalarize
+ * @return {mixed} result - The result
+ */
+export function asScalarOrJson (val) {
+  if (typeof val === 'string') return val
+  if (typeof val === 'number') return val
+  return JSON.stringify(val)
+}
+
+/**
  * Capitalize the first character of a string
  *
  * @param {string} string - The string to capitalize

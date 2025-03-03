@@ -1,5 +1,5 @@
 import { log, utils } from '../lib/utils.mjs'
-import { createInvite, useInvite, enrollHost } from '../lib/inventory.mjs'
+import { createInvite, useInvite, enrollHost, verifyModulesExist, setClientModules, setClientVariables } from '../lib/inventory.mjs'
 import { createApikey } from '../lib/apikey.mjs'
 import { testUrl } from '#shared/network'
 import { asTime } from '../lib/account.mjs'
@@ -52,7 +52,7 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
    * Verify that it's the correct cluster
    */
   if (valid.cluster !== utils.getClusterFqdn())
-    return utils.sendErrorResponse(res, 'morio.api.client.cluster.mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.client.cluster_mismatch', req.url)
 
   /*
    * Does the cluster require an invite?
@@ -153,8 +153,7 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
     created_at: asTime(),
     expires_at: asTime(Date.now() + Number(valid.expires) * 86400000 * 356 * 2), // ms in a day
     secret: hashPassword(secret)
-  })
-  log.todo(apikey)
+  }, rejoin)
 
   return res.send({
     crt: certs.certificate.crt,
@@ -162,7 +161,68 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
     ca: certs.certificate.ca,
     uuid,
     secret,
+    cluster: utils.getClusterFqdn(),
+    brokers: utils.getBrokerFqdns(),
   })
+}
+
+/**
+ * Endpoint for clients to push their config to the cluster
+ *
+ * Config means a list of enabled modules, and all vars
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.push = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.push`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * No funny business, this is only available with the API key
+   * that was generated via the client (re)join flow.
+   * The API key and client UUID must match, provider should be apikey and role client.
+   * Anything else and we reject this.
+   */
+  if (
+    req.headers['x-morio-provider'] !== 'apikey' ||
+    req.headers['x-morio-role'] !== 'client' ||
+    req.headers['x-morio-user'] !== `apikey.${valid.uuid}`
+  ) return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * If any of the submitted module does not exist, reject the request entirely.
+   */
+  const result = await verifyModulesExist(valid.modules)
+  if (!result[0]) return utils.sendErrorResponse(res, 'morio.api.client.unknown_module', req.url, {
+    unknown_modules: result[1].join()
+  })
+
+  /*
+   * Update the database with the client modules
+   */
+  const mods = await setClientModules(valid.uuid, valid.modules)
+  if (!mods[0]) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
+    failed_modules: result[1].join()
+  })
+
+  /*
+   * Update the database with the client vars
+   */
+  const vars = await setClientVariables(valid.uuid, valid.vars)
+  if (!vars[0]) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
+    failed_vars: result[1].join()
+  })
+
+  return res.status(204).send()
 }
 
 /**

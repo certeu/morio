@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- [client] Added support markdown output for vars and modules list
 - [console] Remove dependency on admin API
 - [core] Add support for NAT loopback/hairpinning
 - [ui] Fixed incorrect loading of healtcheck chart templates
@@ -16,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [client] The modules list command output is now terse by default, use the `-v` or `--verbose` flag for detailed output
+- [client] Mask secrets vars output when listing vars
 
 ## [0.7.2] - 2025-02-10
 

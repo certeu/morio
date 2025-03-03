@@ -206,18 +206,18 @@ export const resolveServiceConfiguration = ({ utils }) => {
         type TEXT,
         used INTEGER
       )`,
-      inventory_module_vars: `CREATE table inventory_module_vars (
+      inventory_modvars: `CREATE table inventory_modvars (
         id TEXT NOT NULL PRIMARY KEY,
         val TEXT,
         info TEXT,
         mod TEXT,
         FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
       )`,
-      inventory_host_vars: `CREATE table inventory_host_vars (
+      inventory_hostvars: `CREATE table inventory_hostvars (
         id INTEGER PRIMARY KEY,
         key TEXT,
         val TEXT,
-        info TEXT,
+        info TEXT NULL,
         host TEXT,
         FOREIGN KEY (host) REFERENCES inventory_hosts(id)
       )`,

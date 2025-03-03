@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -75,16 +76,7 @@ var exportCmd = &cobra.Command{
 This will always write a custom template variable.`,
 	Example: "  morio vars export",
 	Run: func(cmd *cobra.Command, args []string) {
-		stringVars := GetVars()
-		typedVars := make(map[string]interface{})
-		for key, val := range stringVars {
-			typedVars[key], _ = parseYAMLValue(val)
-		}
-		typedVarsAsJson, err := json.MarshalIndent(typedVars, "", "  ")
-		if err != nil {
-			fmt.Println("export failed JSON")
-		}
-		fmt.Print(string(typedVarsAsJson))
+		fmt.Print(GetVarsAsJson())
 	},
 }
 
@@ -140,18 +132,43 @@ var listCmd = &cobra.Command{
 	Example: "  morio vars list",
 	Run: func(cmd *cobra.Command, args []string) {
 		allVars := GetVars()
-    // Get sorted keys
-    sortedKeys := SortedVarsOrder(allVars)
-    // Iterate over sorted keys
-    for _, key := range sortedKeys {
-      val := allVars[key]
-      // Do not print secrets on the console when listing vars
-      if strings.HasSuffix(key, "SECRET") {
-        fmt.Printf("%s: ~~~ MASKED ~~~\n", key)
-      } else {
-        fmt.Printf("%s: %v\n", key, val)
-      }
-    }
+		// Get sorted keys
+		sortedKeys := SortedVarsOrder(allVars)
+
+		// Get the table flag value from the command
+		tableOutput, _ := cmd.Flags().GetBool("table")
+		if tableOutput {
+			// Table output
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Variable", "Value"})
+			table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+			table.SetCenterSeparator("|")
+			table.SetAutoWrapText(false)
+
+			for _, key := range sortedKeys {
+				val := allVars[key]
+				var valueStr string
+				if strings.HasSuffix(key, "SECRET") {
+					valueStr = "~~~ MASKED ~~~"
+				} else {
+					valueStr = fmt.Sprintf("%v", val)
+				}
+				table.Append([]string{key, valueStr})
+			}
+
+			table.Render()
+		} else {
+			// Original text output
+			for _, key := range sortedKeys {
+				val := allVars[key]
+				// Do not print secrets on the console when listing vars
+				if strings.HasSuffix(key, "SECRET") {
+					fmt.Printf("%s: ~~~ MASKED ~~~\n", key)
+				} else {
+					fmt.Printf("%s: %v\n", key, val)
+				}
+			}
+		}
 	},
 }
 
@@ -188,6 +205,10 @@ This will always write a custom template variable.`,
 }
 
 func init() {
+	// Add boolean flag to list command
+	var table bool
+	listCmd.Flags().BoolVarP(&table, "table", "t", false, "Display output as a markdown table")
+
 	RootCmd.AddCommand(varsCmd)
 	varsCmd.AddCommand(clearCmd)
 	varsCmd.AddCommand(disableCmd)
@@ -256,20 +277,40 @@ func GetVars() map[string]string {
 		}
 	}
 
-  return found
+	return found
 }
 
+// Get all variables as properly typed data
+func GetTypedVars() map[string]interface{} {
+	stringVars := GetVars()
+	typedVars := make(map[string]interface{})
+	for key, val := range stringVars {
+		typedVars[key], _ = parseYAMLValue(val)
+	}
+
+	return typedVars
+}
+
+// Get all variables as properly typed data
+func GetVarsAsJson() string {
+	typedVarsAsJson, err := json.MarshalIndent(GetTypedVars(), "", "  ")
+	if err != nil {
+		fmt.Println("export failed JSON")
+	}
+
+	return string(typedVarsAsJson)
+}
 
 func SortedVarsOrder(keys map[string]string) []string {
-    // Create a slice to hold all the keys
-    sorted := make([]string, 0, len(keys))
-    for key := range keys {
-        sorted = append(sorted, key)
-    }
-    // Sort the slice of keys alphabetically
-    sort.Strings(sorted)
+	// Create a slice to hold all the keys
+	sorted := make([]string, 0, len(keys))
+	for key := range keys {
+		sorted = append(sorted, key)
+	}
+	// Sort the slice of keys alphabetically
+	sort.Strings(sorted)
 
-    return sorted
+	return sorted
 }
 
 // Takes a string and parses it as YAML

@@ -20,6 +20,11 @@ export function routes(app) {
   app.post(`/clients/rejoin`, (req, res) => Clients.join(req, res, true))
 
   /*
+   * Endpoint for a client to push its config to the cluster
+   */
+  app.post(`/clients/push`, rbac.client, Clients.push)
+
+  /*
    * Endpoint to generate a client invite
    */
   app.post(`/clients/invite/:type`, rbac.operator, Clients.createInvite)

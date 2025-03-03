@@ -7,7 +7,7 @@ import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
 import { hash } from './crypto.mjs'
 import { rm, mkdir, readFile, writeFile, globDir } from './fs.mjs'
-import { cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
+import { asScalarOrJson, cloneAsPojo, get, set, setIfUnset, reverseString } from './utils.mjs'
 import merge from 'lodash/merge.js'
 import unset from 'lodash/unset.js'
 
@@ -548,8 +548,8 @@ async function storeClientModules (modules, log) {
     ])
     for (const [key, val] of Object.entries(modules[module].vars || {})) {
       queries.push([
-        `INSERT INTO inventory_module_vars (id, val, info, mod) VALUES(:key, :val, :info, :module)`,
-        { key, val: asScalar(val.dflt), info: val.info, module }
+        `INSERT INTO inventory_modvars (id, val, info, mod) VALUES(:key, :val, :info, :module)`,
+        { key, val: asScalarOrJson(val.dflt), info: val.info, module }
       ])
     }
   }
@@ -567,13 +567,6 @@ async function storeClientModules (modules, log) {
     )
   }
 }
-
-function asScalar (val) {
-  if (typeof val === 'string') return val
-  if (typeof val === 'number') return val
-  return JSON.stringify(val)
-}
-
 
 async function loadMorioDataFromModule (sourceFile, log) {
   const raw = await readFile(sourceFile)

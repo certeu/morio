@@ -450,5 +450,5 @@ func WriteConfigFile(filename string, content string) error {
 	// Sync
 	file.Sync()
 
-  return err
+	return err
 }

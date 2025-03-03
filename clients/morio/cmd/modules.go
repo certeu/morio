@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
@@ -25,7 +26,8 @@ var modulesListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the verbose flag value from the command
 		verbose, _ := cmd.Flags().GetBool("verbose")
-		ShowModulesList(verbose)
+		table, _ := cmd.Flags().GetBool("table")
+		ShowModulesList(verbose, table)
 	},
 }
 
@@ -37,7 +39,7 @@ var modulesEnableCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		enableModule(args[0])
-		ShowModulesList(false)
+		ShowModulesList(false, false)
 	},
 }
 
@@ -49,7 +51,7 @@ var modulesDisableCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		disableModule(args[0])
-		ShowModulesList(false)
+		ShowModulesList(false, false)
 	},
 }
 
@@ -66,10 +68,12 @@ var modulesInfoCmd = &cobra.Command{
 }
 
 func init() {
-	// Verbose flag for the list command
+	// Boolean flags for the list command
 	var verbose bool
-	// Add details flag to list
-	modulesListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output: Lists modules per agent")
+	var table bool
+	// Add flags to list command
+	modulesListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output, lists modules per agent")
+	modulesListCmd.Flags().BoolVarP(&table, "table", "t", false, "Display output as a markdown table")
 	// Add the commands
 	RootCmd.AddCommand(modulesCmd)
 	modulesCmd.AddCommand(modulesListCmd)
@@ -104,7 +108,7 @@ func ShowModuleList(agent string) {
 	fmt.Println()
 }
 
-func ShowModuleListSummary() {
+func GetEnabledModules() []string {
 	// Gather all enabled modules
 	enabled, _ := ModuleList("audit/module-templates.d")
 	enabledLogs, _ := ModuleList("logs/module-templates.d")
@@ -116,25 +120,54 @@ func ShowModuleListSummary() {
 	enabled = joinUnique(enabled, enabledLogsInputs)
 	enabled = joinUnique(enabled, enabledMetrics)
 
+	// Turn filenames into module names
+	list := make([]string, len(enabled))
+
+	for i, val := range enabled {
+		list[i] = ModuleNameFromFile(val)
+	}
+
+	return list
+}
+
+func ShowModuleListSummary(table bool) {
+	// Gather all enabled modules
+	enabled := GetEnabledModules()
+
 	if len(enabled) == 0 {
 		fmt.Println("No modules are currently enabled")
 	} else {
-		fmt.Println("Enabled modules:")
-		for _, name := range enabled {
-			fmt.Println(" - " + ModuleNameFromFile(name))
+		if table {
+			// Table output
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Module", "Enabled"})
+			table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+			table.SetCenterSeparator("|")
+			table.SetAutoWrapText(false)
+
+			for _, name := range enabled {
+				table.Append([]string{name, "yes"})
+			}
+
+			table.Render()
+		} else {
+			fmt.Println("Enabled modules:")
+			for _, name := range enabled {
+				fmt.Println(" - " + ModuleNameFromFile(name))
+			}
 		}
 	}
 	fmt.Println()
 }
 
-func ShowModulesList(verbose bool) {
+func ShowModulesList(verbose bool, table bool) {
 	if verbose {
-		ShowModuleListSummary()
+		ShowModuleListSummary(table)
 		ShowModuleList("audit")
 		ShowModuleList("logs")
 		ShowModuleList("metrics")
 	} else {
-		ShowModuleListSummary()
+		ShowModuleListSummary(table)
 	}
 }
 
