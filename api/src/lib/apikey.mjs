@@ -108,11 +108,13 @@ export async function deleteApikey(id = false) {
  * @param {object} data - The data to save for the API key
  * @return {boolean} - True if successful, false otherwise
  */
-export async function createApikey(data) {
-  if (!data.id) {
-    log.debug('createApikey was called without an id')
+export async function createApikey(key, data) {
+  if (!id) {
+    log.debug('createApikey was called witout an id')
     return false
   }
+
+  data.id = id
 
   const columns = []
   const params = {}
@@ -129,7 +131,7 @@ export async function createApikey(data) {
     return false
   }
 
-  const query = `INSERT INTO apikeys (${columns.join(', ')}) VALUES (${columns.map((key) => ':' + key).join(', ')})`
+  const query = `INSERT INTO apikeys (${columns.join()}) VALUES (${columns.map((key) => ':' + key).join()})`
   const [status] = await db.write(query, params)
 
   return status === 200
