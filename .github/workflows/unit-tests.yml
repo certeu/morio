@@ -66,3 +66,4 @@ jobs:
           GIT_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_PR_NUMBER: ${{ github.event.pull_request.id }}
         run: npm run test:api
+
