@@ -95,7 +95,6 @@ const config = {
  * Generate run files for development
  */
 const cliOptions = (name, env) => `\\
-  ${env === 'test' ? '--interactive --rm' : '-d'} \\
   --user root \\
   --name=morio-${config[name][env].container.container_name} \\
   --hostname=morio-${config[name][env].container.container_name} \\
