@@ -95,7 +95,6 @@ const config = {
  * Generate run files for development
  */
 const cliOptions = (name, env) => `\\
-#  ${env === 'test' ? '--interactive --rm' : '-d'} \\
   --user root \\
   --name=morio-${config[name][env].container.container_name} \\
   --hostname=morio-${config[name][env].container.container_name} \\
@@ -115,9 +114,6 @@ ${(config[name][env].container?.labels || []).map((lab) => `  -l "${lab.split('`
   -e MORIO_CORE_LOG_LEVEL=${presetGetters[env]('MORIO_CORE_LOG_LEVEL')} \\
   -e MORIO_DOCKER_LOG_DRIVER=${MORIO_DOCKER_LOG_DRIVER} \\
   -e MORIO_FQDN=${process.env['MORIO_FQDN']} \\
-#  -e GIT_COMMIT_SHA=${process.env['GIT_COMMIT_SHA']} \\
-#  -e GITHUB_PR_NUMBER=${process.env['GITHUB_PR_NUMBER']} \\
-#  -e CODECOV_TOKEN=${process.env['CODECOV_TOKEN']} \\
   -e NODE_ENV=${presetGetters[env]('NODE_ENV')} \\
 ${MORIO_DOCKER_ADD_HOST ? '-e MORIO_DOCKER_ADD_HOST="' + MORIO_DOCKER_ADD_HOST + '"' : ''} \\
   ${
