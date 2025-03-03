@@ -8,4 +8,5 @@ if [ -t 1 ]; then
 else
   docker exec -i morio-api bash /morio/api/tests/run-unit-tests.sh
 fi
+./api/tests/stop-ldap-server.sh
 npm run redev

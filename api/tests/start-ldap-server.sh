@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "ldap server started"
 
 # Figure out the location of the repository root
 REPO_ROOT=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )"/../.. &> /dev/null && pwd )
