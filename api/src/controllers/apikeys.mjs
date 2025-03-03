@@ -69,7 +69,7 @@ Controller.prototype.create = async function (req, res) {
     key,
   }
 
-  const [dbStatus] = await createApikey(key, { ...data, secret: hashPassword(secret) })
+  const [dbStatus] = await createApikey({ ...data, secret: hashPassword(secret) })
 
   return dbStatus === 200
     ? res.send({ ...data, secret })

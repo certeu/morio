@@ -118,7 +118,7 @@ export async function createApikey(data) {
   const params = {}
 
   for (const [key, val] of Object.entries(data)) {
-    if (fields[key] && typeof fields[key] === 'function') {
+    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
       columns.push(key)
       params[key] = fields[key](val)
     }
