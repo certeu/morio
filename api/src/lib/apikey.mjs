@@ -106,9 +106,9 @@ export async function deleteApikey(id = false) {
 /**
  * Create a new API key
  * @param {object} data - The data to save for the API key
- * @return {boolean} - True if successful, false otherwise
+ * @return {number} status - 200 or 500
  */
-export async function createApikey(id = false, data) {
+export async function createApikey(data) {
   if (!id) {
     log.debug('createApikey was called without an id')
     return false
