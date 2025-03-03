@@ -19,10 +19,20 @@ jobs:
   test:
     runs-on: self-hosted
     steps:
+      - name: Force Cleanup of Workspace (If Needed)
+        run: |
+          sudo rm -rf ${{ github.workspace }}/* || true
+
+      - name: Fix Folder Permissions (For Self-Hosted Runner)
+        run: |
+          sudo chown -R $(whoami) ${{ github.workspace }}
+          sudo chmod -R u+w ${{ github.workspace }}
+
       - name: Checkout PR Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.event.issue.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.event.issue.pul>
+          clean: false
 
       - name: Set up NodeJS
         uses: actions/setup-node@v4
