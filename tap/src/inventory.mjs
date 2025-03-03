@@ -11,7 +11,7 @@ async function updateHost(data, tools) {
    * We need at least an ID
    */
   if (!data.host?.id) {
-    tools.note('updateHost was called witout an id')
+    tools.note('updateHost was called without an id')
     return false
   }
 

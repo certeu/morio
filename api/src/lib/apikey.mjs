@@ -91,7 +91,7 @@ export async function deleteApikey(id = false) {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('deleteApikey was called witout an id')
+    log.warn('deleteApikey was called without an id')
     return false
   }
 
@@ -110,7 +110,7 @@ export async function deleteApikey(id = false) {
  */
 export async function createApikey(id = false, data) {
   if (!id) {
-    log.debug('createApikey was called witout an id')
+    log.debug('createApikey was called without an id')
     return false
   }
 
