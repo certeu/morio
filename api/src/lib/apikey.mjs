@@ -91,7 +91,7 @@ export async function deleteApikey(id = false) {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('deleteApikey was called witout an id')
+    log.warn('deleteApikey was called without an id')
     return false
   }
 
@@ -106,19 +106,19 @@ export async function deleteApikey(id = false) {
 /**
  * Create a new API key
  * @param {object} data - The data to save for the API key
- * @return {boolean} - True if successful, false otherwise
+ * @return {number} status - 200 or 500
  */
 export async function createApikey(data) {
   if (!data.id) {
     log.debug('createApikey was called without an id')
     return false
   }
-
+  
   const columns = []
   const params = {}
 
   for (const [key, val] of Object.entries(data)) {
-    if (fields[key] && typeof fields[key] === 'function') {
+    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
       columns.push(key)
       params[key] = fields[key](val)
     }
@@ -130,9 +130,14 @@ export async function createApikey(data) {
   }
 
   const query = `INSERT INTO apikeys (${columns.join(', ')}) VALUES (${columns.map((key) => ':' + key).join(', ')})`
-  const [status] = await db.write(query, params)
 
-  return status === 200
+  try {
+    const status = await db.write(query, params)
+    return status // Return the new API key if successful
+  } catch (error) {
+    log.error('Failed to insert new API key:', error)
+    return false
+  }
 }
 
 /**

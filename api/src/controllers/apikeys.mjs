@@ -1,6 +1,12 @@
 import { isRoleAvailable, currentUser, currentProvider } from '../rbac.mjs'
 import { uuid, randomString, hashPassword } from '#shared/crypto'
-import { loadApikey, createApikey, updateApikey, deleteApikey, loadAccountApikeys } from '../lib/apikey.mjs'
+import {
+  loadApikey,
+  createApikey,
+  updateApikey,
+  deleteApikey,
+  loadAccountApikeys,
+} from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { utils } from '../lib/utils.mjs'
 
@@ -66,10 +72,10 @@ Controller.prototype.create = async function (req, res) {
     role: valid.role,
     created_at: asTime(),
     expires_at: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
-    key,
+    id: key,
   }
 
-  const [dbStatus] = await createApikey(key, { ...data, secret: hashPassword(secret) })
+  const [dbStatus] = await createApikey({ ...data, secret: hashPassword(secret) })
 
   return dbStatus === 200
     ? res.send({ ...data, secret })
