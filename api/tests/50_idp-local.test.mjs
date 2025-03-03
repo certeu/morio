@@ -319,6 +319,9 @@ describe('API Create Account Tests', () => {
     const result = await api.post(`/apikey`, keys.key1, {
       'X-Morio-User': store.accounts.user2.username,
     })
+
+    console.log("result", result);
+
     assert.equal(result[0], 200)
     const d = result[1]
     assert.equal(d.name, keys.key1.name)
