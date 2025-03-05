@@ -52,6 +52,7 @@ describe('API Key Tests', () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`)
 
     console.log('result', result)
+    console.log('key', store.keys.key1.key)
 
     const d = result[1]
     assert.equal(result[0], 200)
