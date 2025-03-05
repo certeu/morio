@@ -45,6 +45,8 @@ describe('API Key Tests', () => {
   it(`Should GET /apikeys`, async () => {
     const result = await api.get(`/apikeys`)
 
+    console.log('getKeys', result)
+
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -53,10 +55,10 @@ describe('API Key Tests', () => {
 
   // PATCH /apikey
   it(`Should PATCH /apikeys/:key/rotate`, async () => {
-    const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`)
+    const result = await api.patch(`/apikeys/${store.keys.key1.id}/rotate`)
 
     console.log('result', result)
-    console.log('key', store.keys.key1.key)
+    console.log('key', store.keys.key1.id)
 
     const d = result[1]
     assert.equal(result[0], 200)
