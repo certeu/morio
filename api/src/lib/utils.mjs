@@ -498,6 +498,18 @@ utils.endReload = () => {
  */
 
 /**
+ * Turn input into a string
+ *
+ * @param {mixes} input - The input
+ * @return {string} str - The input as a string
+ */
+utils.asString = (input) => {
+  if (typeof input === 'string') return input
+  if (typeof input === 'object') return JSON.stringify(input)
+  return `${input}`
+}
+
+/**
  * Clear OIDC PKCE data after an OIDC flow
  */
 utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])

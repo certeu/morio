@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -31,12 +32,12 @@ type ErrorResponse struct {
 	Title           string `json:"title"`
 	Detail          string `json:"detail"`
 	SchemaViolation string `json:"schema_violation,omitempty"`
-	UnknownModules string `json:"unknown_modules,omitempty"`
-	FailedModules string `json:"failed_modules,omitempty"`
-	FailedVars string `json:"failed_vars,omitempty"`
+	UnknownModules  string `json:"unknown_modules,omitempty"`
+	FailedModules   string `json:"failed_modules,omitempty"`
+	FailedVars      string `json:"failed_vars,omitempty"`
 }
 
-type SuccessResponse struct {
+type SuccessResponseJoin struct {
 	Crt     string   `json:"crt"`
 	Key     string   `json:"key"`
 	Ca      string   `json:"ca"`
@@ -51,6 +52,7 @@ func init() {
 	rejoinCmd.Flags().StringVar(&invite, "invite", "", "Invitation code (optional)")
 	RootCmd.AddCommand(joinCmd)
 	RootCmd.AddCommand(rejoinCmd)
+	RootCmd.AddCommand(unjoinCmd)
 }
 
 var joinCmd = &cobra.Command{
@@ -72,6 +74,16 @@ Optionally provide an invitation code using the --invite flag.`,
 	Args: cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return joinCluster(args, true)
+	},
+}
+
+var unjoinCmd = &cobra.Command{
+	Use:   "unjoin",
+	Short: "Removes this client from the currently joined cluster",
+	Long:  `This will remove both local configuration, and remove this client from the currently joined cluster.`,
+	Args:  cobra.ExactArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return unjoinCluster()
 	},
 }
 
@@ -163,7 +175,7 @@ func joinCluster(args []string, rejoin bool) error {
 	}
 
 	// Parse success response
-	var successResp SuccessResponse
+	var successResp SuccessResponseJoin
 	if err := json.Unmarshal(respBody, &successResp); err != nil {
 		return fmt.Errorf("failed to parse success response: %w", err)
 	}
@@ -422,4 +434,88 @@ func getBrewPackages() ([]PackageInfo, error) {
 	}
 
 	return packages, scanner.Err()
+}
+
+func ClearJoin() error {
+	if err := os.Remove(GetConfigPath("ca.pem")); err != nil {
+		return err
+	}
+	if err := os.Remove(GetConfigPath("cert.pem")); err != nil {
+		return err
+	}
+	if err := os.Remove(GetConfigPath("key.pem")); err != nil {
+		return err
+	}
+	RmVar("MORIO_BROKERS")
+	RmVar("MORIO_APIKEY_SECRET")
+
+	return nil
+}
+
+func unjoinCluster() error {
+	// Grab the client UUID, cluster FQDN, and apikey secret
+	uuid := GetVar("MORIO_CLIENT_UUID")
+	cluster := GetVar("MORIO_CLUSTER")
+	secret := GetVar("MORIO_APIKEY_SECRET")
+
+	if uuid == "" {
+		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+	}
+	if secret == "" {
+		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+	}
+	if cluster == "" {
+		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+	}
+
+	// Create HTTP client
+	client, err := CreateHttpClient()
+	if err != nil {
+		log.Fatalf("Error creating HTTP client: %v", err)
+	}
+
+	// API endpoint
+	apiURL := fmt.Sprintf("https://%s/-/api/clients/%s", cluster, uuid)
+
+	// Create request
+	req, err := http.NewRequest("DELETE", apiURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set content type and authentication headers
+	req.SetBasicAuth(uuid, secret)
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Handle different response types based on status code
+	if resp.StatusCode != http.StatusNoContent {
+		// Read response body
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		// Parse error response (RFC7807)
+		var errResp ErrorResponse
+		if err := json.Unmarshal(respBody, &errResp); err != nil {
+			return fmt.Errorf("failed to parse error response: %w", err)
+		}
+
+		// Log the error and exit
+		PrintErrorResponse(errResp)
+		return fmt.Errorf("failed with status code: %d", resp.StatusCode)
+	}
+
+	// Now also clean up the local config
+	ClearVars()
+	ClearModules()
+	ClearJoin()
+
+	return nil
 }

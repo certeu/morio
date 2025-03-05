@@ -1,6 +1,23 @@
 import { log, utils } from '../lib/utils.mjs'
-import { createInvite, useInvite, enrollHost, verifyModulesExist, setClientModules, setClientVariables } from '../lib/inventory.mjs'
-import { createApikey } from '../lib/apikey.mjs'
+import {
+  addClientCommandStatusUpdate,
+  createInvite,
+  disableClientModule,
+  enableClientModule,
+  enrollHost,
+  getAllClientModules,
+  getClientCommandId,
+  getClientModuleFiles,
+  getClientModules,
+  getClientVars,
+  getModuleVars,
+  removeHost,
+  setClientModules,
+  setClientVariables,
+  useInvite,
+  verifyModulesExist,
+} from '../lib/inventory.mjs'
+import { createApikey, deleteApikey } from '../lib/apikey.mjs'
 import { testUrl } from '#shared/network'
 import { asTime } from '../lib/account.mjs'
 import { currentUser } from '../rbac.mjs'
@@ -162,8 +179,49 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
     uuid,
     secret,
     cluster: utils.getClusterFqdn(),
-    brokers: utils.getBrokerFqdns(),
+    brokers: utils.getBrokerFqdns().map(host => `${host}:9092`),
   })
+}
+
+/**
+ * Client report sends system info to the cluster
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.report = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.report`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * No funny business
+   */
+  if (!matchClientApikey(req, valid.uuid)) return utils.sendErrorResponse(
+    res,
+    'morio.api.client.authentication_mismatch',
+    req.url,
+  )
+
+  /*
+   * Verify that it's the correct cluster
+   */
+  if (valid.cluster !== utils.getClusterFqdn())
+    return utils.sendErrorResponse(res, 'morio.api.client.cluster_mismatch', req.url)
+
+  /*
+   * Update the client data in the inventory tables
+   */
+  const result = await enrollHost(valid.uuid, valid.info, true)
+
+  return result
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -185,18 +243,13 @@ Controller.prototype.push = async function (req, res) {
     })
 
   /*
-   * No funny business, this is only available with the API key
-   * that was generated via the client (re)join flow.
-   * The API key and client UUID must match, provider should be apikey and role client.
-   * Anything else and we reject this.
+   * No funny business
    */
-  if (
-    req.headers['x-morio-provider'] !== 'apikey' ||
-    req.headers['x-morio-role'] !== 'client' ||
-    req.headers['x-morio-user'] !== `apikey.${valid.uuid}`
-  ) return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url, {
-      schema_violation: err?.message,
-    })
+  if (!matchClientApikey(req, valid.uuid)) return utils.sendErrorResponse(
+    res,
+    'morio.api.client.authentication_mismatch',
+    req.url,
+  )
 
   /*
    * If any of the submitted module does not exist, reject the request entirely.
@@ -226,13 +279,173 @@ Controller.prototype.push = async function (req, res) {
 }
 
 /**
+ * Endpoint for clients to pull their config from the cluster
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.pull = async function (req, res) {
+  /*
+   * No funny business
+   */
+  if (!matchClientApikey(req, req.params.uuid)) return utils.sendErrorResponse(
+    res,
+    'morio.api.client.authentication_mismatch',
+    req.url,
+  )
+
+  /*
+   * Load client modules
+   */
+  const modules = await getClientModules(req.params.uuid)
+  const mvars = await getModuleVars(modules, true)
+  const cvars = await getClientVars(req.params.uuid, true)
+  const files = await getClientModuleFiles(modules)
+
+  /*
+   * Client vars have precedent over module vars
+   */
+  const vars = {}
+  for (const {key, val} of mvars) vars[key] = { key, val }
+  for (const {key, val} of cvars) vars[key] = { key, val }
+
+  return res.send({ modules, files, vars: Object.values(vars) })
+}
+
+/**
+ * Endpoint for clients to unjoin/delete themselves
+ *
+ * Unjoining means:
+ * - Remove host from inventory
+ * - Remove host API key
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unjoin = async function (req, res) {
+  /*
+   * No funny business
+   */
+  if (!matchClientApikey(req, req.params.uuid)) return utils.sendErrorResponse(
+    res,
+    'morio.api.client.authentication_mismatch',
+    req.url,
+  )
+
+  await removeHost(req.params.uuid)
+  await deleteApikey(req.params.uuid)
+
+  return res.status(204).send()
+}
+
+/**
+ * Lists modules available to clients
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listModules = async function (req, res) {
+  const available = await getAllClientModules()
+  const enabled = await getClientModules(apikeyFromHeaders(req))
+
+  return res.send({ available, enabled })
+}
+
+/**
+ * Enables a client module
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.enableModule = async function (req, res) {
+  const result = await enableClientModule(apikeyFromHeaders(req), req.params.module)
+
+  return result
+    ? res.status(204).send()
+    : res.status(400).send()
+}
+
+/**
+ * Disables a client module
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.disableModule = async function (req, res) {
+  const result = await disableClientModule(apikeyFromHeaders(req), req.params.module)
+
+  return result
+    ? res.status(204).send()
+    : res.status(400).send()
+}
+
+/**
  * Send command to one or more clients
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.sendCommand = async function (req, res) {
-  return utils.sendErrorResponse(res, 'morio.api.cache.failure', req.url)
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.command`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * Is it a valid command
+   */
+  if (!['pull', 'push', 'reload', 'restart', 'report', 'stop'].includes(req.params.cmd)) {
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: `Not a valid command: ${req.params.cmd}`
+    })
+  }
+
+  /*
+   * Grab a client command ID
+   */
+  const id = await getClientCommandId()
+
+  /*
+   * Then produce the Kafka message, don't await it
+   */
+  utils.produce('clients', {
+    command: req.params.cmd,
+    clients: valid.clients ? valid.clients : undefined,
+    id
+  })
+
+  /*
+   * Finally return the command ID
+   */
+  return res.send({ id })
+}
+
+/**
+ * Endpoint for clients to report the command status
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.commandStatus = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.client.commandStatus`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err?.message,
+    })
+
+  /*
+   * Store status update
+   */
+  log.todo({valid})
+  //await addClientCommandStatusUpdate(valid)
+  return res.status(204).send()
 }
 
 /**
@@ -269,4 +482,28 @@ const produceMessage = async (data) => {
   )
 
   return result
+}
+
+/**
+ * No funny business, this is only available with the API key
+ * that was generated via the client (re)join flow.
+ * The API key and client UUID must match, provider should be apikey and role client.
+ * Anything else and we reject this.
+ *
+ * @param {object} req - The request object
+ * @param {string} uuid - The client UUID
+ * @return {bool} result - True if it's ok, false if not
+ */
+function matchClientApikey (req, uuid) {
+  if (
+    req.headers['x-morio-provider'] === 'apikey' ||
+    req.headers['x-morio-role'] === 'client' ||
+    req.headers['x-morio-user'] === `apikey.${uuid}`
+  ) return true
+
+  return false
+}
+
+function apikeyFromHeaders (req) {
+  return req.headers['x-morio-user'].split('.').pop()
 }

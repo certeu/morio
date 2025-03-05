@@ -40,6 +40,14 @@ export const getStaticProps = () => ({
   },
 })
 
+const commands = {
+  pull: 'Pull client config from Morio cluster',
+  push: 'Push client config to Morio cluster',
+  reload: 'Reload agents',
+  restart: 'Restart agents',
+  report: 'Submit client report to Morio cluster',
+  stop: 'Stop agents',
+}
 
 
 const ClientCommandBox = () => {
@@ -125,10 +133,10 @@ const ClientCommandBox = () => {
         </div>
       )}
       <h2>Command to run</h2>
-      <div className="grid grid-cols-4 gap-2">
-        {['init', 'configure', 'seed', 'template'].map(cmd => (
+      <div className="grid grid-cols-2 gap-2">
+        {Object.keys(commands).map(cmd => (
           <button key={cmd}
-            className="btn btn-primary capitalize"
+            className="btn btn-primary btn-outline capitalize flex flex-row items-center justify-between"
             onClick={() =>
               pushModal(
                 <ModalWrapper keepOpenOnClick>
@@ -136,7 +144,10 @@ const ClientCommandBox = () => {
                 </ModalWrapper>
               )
             }
-          >{cmd}</button>
+          >
+            {cmd}
+            <span className="font-medium italic">{commands[cmd]}</span>
+          </button>
         ))}
       </div>
       <div className="flex flex-row gap-2 items-center border-warning border rounded p-1 px-2 my-2 text-sm bg-warning bg-opacity-20">

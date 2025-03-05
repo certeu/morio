@@ -1,14 +1,23 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 )
+
+type SuccessResponseModules struct {
+	Available []string `json:"available"`
+	Enabled   []string `json:"enabled"`
+}
 
 // morio modules
 var modulesCmd = &cobra.Command{
@@ -20,9 +29,10 @@ This allows you to manage Morio client modules which will be applied to all agen
 
 // morio modules list
 var modulesListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List modules",
-	Long:  `List client modules.`,
+	Use:     "list",
+	Short:   "List local modules",
+	Long:    `List client modules.`,
+	Example: `  morio module list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the verbose flag value from the command
 		verbose, _ := cmd.Flags().GetBool("verbose")
@@ -33,10 +43,11 @@ var modulesListCmd = &cobra.Command{
 
 // morio modules enable
 var modulesEnableCmd = &cobra.Command{
-	Use:   "enable [module-name]",
-	Short: "Enable a module",
-	Long:  `Enables a client module.`,
-	Args:  cobra.ExactArgs(1),
+	Use:     "enable [module-name]",
+	Short:   "Enable a local module",
+	Long:    `Enables a client module.`,
+	Args:    cobra.ExactArgs(1),
+	Example: `  morio module enable linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		enableModule(args[0])
 		ShowModulesList(false, false)
@@ -45,10 +56,11 @@ var modulesEnableCmd = &cobra.Command{
 
 // morio modules disable
 var modulesDisableCmd = &cobra.Command{
-	Use:   "disable [module-name]",
-	Short: "Disable a module",
-	Long:  `Disables a client module.`,
-	Args:  cobra.ExactArgs(1),
+	Use:     "disable [module-name]",
+	Short:   "Disable a local module",
+	Long:    `Disables a client module.`,
+	Args:    cobra.ExactArgs(1),
+	Example: `  morio module disable linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		disableModule(args[0])
 		ShowModulesList(false, false)
@@ -58,12 +70,61 @@ var modulesDisableCmd = &cobra.Command{
 // morio modules info
 var modulesInfoCmd = &cobra.Command{
 	Use:     "info [module-name]",
-	Short:   "Show module info",
+	Short:   "Show local module info",
 	Long:    `Shows info about a client module.`,
 	Args:    cobra.ExactArgs(1),
 	Example: `  morio module info linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ModuleInfo(args[0])
+	},
+}
+
+// morio modules info
+var modulesInfoRemoteCmd = &cobra.Command{
+	Use:     "info-remote [module-name]",
+	Short:   "Show remote module info",
+	Long:    `Shows info about a client module on the Morio cluster.`,
+	Args:    cobra.ExactArgs(1),
+	Example: `  morio module info-remote linux-system`,
+	Run: func(cmd *cobra.Command, args []string) {
+		ModuleInfo(args[0])
+	},
+}
+
+// morio modules list-remote
+var modulesListRemoteCmd = &cobra.Command{
+	Use:     "list-remote",
+	Short:   "List remote modules",
+	Long:    `List client modules available on the Morio cluster.`,
+	Example: `  morio module list-remote`,
+	Run: func(cmd *cobra.Command, args []string) {
+		// Get the table flag value from the command
+		table, _ := cmd.Flags().GetBool("table")
+		ShowRemoteModulesList(table)
+	},
+}
+
+// morio modules enable-remote
+var modulesEnableRemoteCmd = &cobra.Command{
+	Use:     "enable-remote [module-name]",
+	Short:   "Enable a remote module",
+	Long:    `Enables a module for this client on the Morio cluster.`,
+	Args:    cobra.ExactArgs(1),
+	Example: `  morio module enable-remote linux-apache2`,
+	Run: func(cmd *cobra.Command, args []string) {
+		EnableRemoteModule(args[0])
+	},
+}
+
+// morio modules disable-remote
+var modulesDisableRemoteCmd = &cobra.Command{
+	Use:     "disable-remote [module-name]",
+	Short:   "Disable a remote module",
+	Long:    `Disables a module for this client on the Morio cluster.`,
+	Args:    cobra.ExactArgs(1),
+	Example: `  morio module disable-remote linux-apache2`,
+	Run: func(cmd *cobra.Command, args []string) {
+		DisableRemoteModule(args[0])
 	},
 }
 
@@ -74,12 +135,17 @@ func init() {
 	// Add flags to list command
 	modulesListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output, lists modules per agent")
 	modulesListCmd.Flags().BoolVarP(&table, "table", "t", false, "Display output as a markdown table")
+	// Add flag to list-remote command
+	modulesListRemoteCmd.Flags().BoolVarP(&table, "table", "t", false, "Display output as a markdown table")
 	// Add the commands
 	RootCmd.AddCommand(modulesCmd)
 	modulesCmd.AddCommand(modulesListCmd)
 	modulesCmd.AddCommand(modulesEnableCmd)
 	modulesCmd.AddCommand(modulesDisableCmd)
 	modulesCmd.AddCommand(modulesInfoCmd)
+	modulesCmd.AddCommand(modulesListRemoteCmd)
+	modulesCmd.AddCommand(modulesEnableRemoteCmd)
+	modulesCmd.AddCommand(modulesDisableRemoteCmd)
 }
 
 func ShowModuleList(agent string) {
@@ -374,4 +440,217 @@ func joinUnique(slice1, slice2 []string) []string {
 	}
 
 	return result
+}
+
+func ClearModules() {
+	ClearModuleFiles("audit/module-templates.d")
+	ClearModuleFiles("audit/rule-templates.d")
+	ClearModuleFiles("logs/module-templates.d")
+	ClearModuleFiles("logs/input-templates.d")
+	ClearModuleFiles("metrics/module-templates.d")
+}
+
+// FIXME: Make this platform agnostic
+func ClearModuleFiles(folder string) error {
+	matches, err := filepath.Glob(GetConfigPath(folder) + "/*")
+	if err != nil {
+		return err
+	}
+
+	for _, match := range matches {
+		if err := os.Remove(match); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func ShowRemoteModulesList(table bool) {
+	available, enabled, _ := FetchModules()
+
+	ShowRemoteModuleListSummary(available, enabled, table)
+}
+
+func FetchModules() ([]string, []string, error) {
+	// Grab the cluste,r client UUID, and API key secret (if they exist)
+	uuid := GetVar("MORIO_CLIENT_UUID")
+	secret := GetVar("MORIO_APIKEY_SECRET")
+	cluster := GetVar("MORIO_CLUSTER")
+
+	if uuid == "" {
+		return nil, nil, fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+	}
+	if secret == "" {
+		return nil, nil, fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+	}
+	if cluster == "" {
+		return nil, nil, fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+	}
+
+	// Create HTTP client
+	client, err := CreateHttpClient()
+	if err != nil {
+		return nil, nil, fmt.Errorf("Error creating HTTP client: %v", err)
+	}
+
+	// API endpoint
+	apiURL := fmt.Sprintf("https://%s/-/api/clients/modules", cluster)
+
+	// Create request
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set authentication header
+	req.SetBasicAuth(uuid, secret)
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Handle different response types based on status code
+	if resp.StatusCode != http.StatusOK {
+		// Parse error response (RFC7807)
+		var errResp ErrorResponse
+		if err := json.Unmarshal(respBody, &errResp); err != nil {
+			return nil, nil, fmt.Errorf("failed to parse error response: %w", err)
+		}
+
+		// Log the error and exit
+		PrintErrorResponse(errResp)
+		return nil, nil, fmt.Errorf("\nRequest failed with status code: %d", resp.StatusCode)
+	}
+
+	// Parse success response
+	var successResp SuccessResponseModules
+	if err := json.Unmarshal(respBody, &successResp); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse success response: %w", err)
+	}
+
+	return successResp.Available, successResp.Enabled, nil
+}
+
+func ShowRemoteModuleListSummary(available []string, enabled []string, table bool) {
+	if len(available) == 0 {
+		fmt.Println("No modules are currently available on the cluster")
+	} else {
+		if table {
+			// Table output
+			table := tablewriter.NewWriter(os.Stdout)
+			table.SetHeader([]string{"Module", "Enabled"})
+			table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+			table.SetCenterSeparator("|")
+			table.SetAutoWrapText(false)
+
+			for _, name := range available {
+				on := "No"
+				if slices.Contains(enabled, name) {
+					on = "Yes"
+				}
+				table.Append([]string{name, on})
+			}
+
+			table.Render()
+		} else {
+			fmt.Println("Remote modules:")
+			for _, name := range available {
+				on := " - "
+				if slices.Contains(enabled, name) {
+					on = " + "
+				}
+				fmt.Println(on + name)
+			}
+		}
+	}
+	fmt.Println()
+}
+
+func EnableRemoteModule(module string) error {
+	return ChangeRemoteModuleStatus(module, "enable")
+}
+
+func DisableRemoteModule(module string) error {
+	return ChangeRemoteModuleStatus(module, "disable")
+}
+
+func ChangeRemoteModuleStatus(module string, state string) error {
+	// Grab the cluste,r client UUID, and API key secret (if they exist)
+	uuid := GetVar("MORIO_CLIENT_UUID")
+	secret := GetVar("MORIO_APIKEY_SECRET")
+	cluster := GetVar("MORIO_CLUSTER")
+
+	if uuid == "" {
+		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+	}
+	if secret == "" {
+		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+	}
+	if cluster == "" {
+		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+	}
+
+	// Create HTTP client
+	client, err := CreateHttpClient()
+	if err != nil {
+		return fmt.Errorf("Error creating HTTP client: %v", err)
+	}
+
+	// API endpoint
+	apiURL := fmt.Sprintf("https://%s/-/api/clients/modules/%s/%s", cluster, state, module)
+
+	// Create request
+	req, err := http.NewRequest("PUT", apiURL, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set authentication header
+	req.SetBasicAuth(uuid, secret)
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Handle different response types based on status code
+	if resp.StatusCode != http.StatusNoContent {
+		// Parse error response (RFC7807)
+		var errResp ErrorResponse
+		if err := json.Unmarshal(respBody, &errResp); err != nil {
+			return fmt.Errorf("failed to parse error response: %w", err)
+		}
+
+		// Log the error and exit
+		PrintErrorResponse(errResp)
+		return fmt.Errorf("\nRequest failed with status code: %d", resp.StatusCode)
+	}
+
+	// All good, let the people know
+	fmt.Printf("Module %s is now %sd for this client in the inventory.\n", module, state)
+	if state == "enable" {
+		fmt.Println("Use 'morio pull' to update the local configuration.")
+	} else {
+		fmt.Println("Use 'morio reset modules' followed by 'morio pull' to update the local configuration.")
+	}
+
+	return nil
 }

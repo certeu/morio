@@ -19,21 +19,7 @@ var templateCmd = &cobra.Command{
 	Example: "  morio template",
 	Long:    `Templates out the configuration for the different agents.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// First ensure all vars are present
-		EnsureTemplateVars()
-		// Then load the vars
-		context := GetVars()
-		// Audit
-		TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
-		TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
-		TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
-		// metrics
-		TemplateOutConfigFile("metrics/config-template.yml", "metrics/config.yml", context)
-		TemplateOutInputFolder("metrics/module-templates.d", "metrics/modules.d", context)
-		// logs
-		TemplateOutConfigFile("logs/config-template.yml", "logs/config.yml", context)
-		TemplateOutInputFolder("logs/module-templates.d", "logs/modules.d", context)
-		TemplateOutInputFolder("logs/input-templates.d", "logs/inputs.d", context)
+		TemplateConfig()
 	},
 }
 
@@ -47,6 +33,24 @@ func EnsureTemplateVars() {
 	EnsureTemplateFolderVars("metrics/module-templates.d")
 	EnsureTemplateFolderVars("logs/module-templates.d")
 	EnsureTemplateFolderVars("logs/input-templates.d")
+}
+
+func TemplateConfig() {
+	// First ensure all vars are present
+	EnsureTemplateVars()
+	// Then load the vars
+	context := GetVars()
+	// Audit
+	TemplateOutConfigFile("audit/config-template.yml", "audit/config.yml", context)
+	TemplateOutInputFolder("audit/module-templates.d", "audit/modules.d", context)
+	TemplateOutConfigFolder("audit/rule-templates.d", "audit/rules.d", context)
+	// metrics
+	TemplateOutConfigFile("metrics/config-template.yml", "metrics/config.yml", context)
+	TemplateOutInputFolder("metrics/module-templates.d", "metrics/modules.d", context)
+	// logs
+	TemplateOutConfigFile("logs/config-template.yml", "logs/config.yml", context)
+	TemplateOutInputFolder("logs/module-templates.d", "logs/modules.d", context)
+	TemplateOutInputFolder("logs/input-templates.d", "logs/inputs.d", context)
 }
 
 // FIXME: make this platform agnostic
@@ -87,10 +91,10 @@ func TemplateOutConfigFile(from string, to string, context map[string]string) {
 	// Write value
 	_, err = file.WriteString(output)
 	if err != nil {
-		fmt.Println("Failed to write to " + GetConfigPath(to))
+		fmt.Println("Failed to write to " + to)
 		panic(err)
 	} else {
-		fmt.Println(GetConfigPath(to))
+		fmt.Println("Templating config file: " + to)
 	}
 
 	// Sync

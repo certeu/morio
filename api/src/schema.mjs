@@ -63,7 +63,7 @@ const kv = {
   ),
 }
 
-const client = {
+const client = Joi.object({
   name: Joi.string().hostname(),
   fqdn: Joi.string().hostname(),
   os: Joi.string(),
@@ -77,7 +77,7 @@ const client = {
     name: Joi.string(),
     version: Joi.string()
   }))
-}
+}).required()
 
 
 /*
@@ -204,9 +204,25 @@ export const schema = {
   }),
   'req.client.push': Joi.object({
     uuid: uuid.required().description('The UUID of the client'),
-    cluster: Joi.string().hostname().description('The FQDN of the Morio cluster'),
+    cluster: Joi.string().hostname().required().description('The FQDN of the Morio cluster'),
     modules: Joi.array().items(Joi.string()),
     vars: Joi.object(),
+  }),
+  'req.client.report': Joi.object({
+    cluster: Joi.string().hostname().required(),
+    uuid: uuid.optional(),
+    info: client
+  }),
+  'req.client.command': Joi.object({
+    clients: Joi.alternatives().try(
+      Joi.boolean().valid(false),
+      Joi.array().items(uuid),
+    ).required(),
+  }),
+  'req.client.commandStatus': Joi.object({
+    uuid: uuid.required(),
+    id: Joi.number(),
+    status: Joi.string().allow("start", "done", "error").required()
   }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({

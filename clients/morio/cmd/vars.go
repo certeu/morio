@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -361,4 +362,25 @@ func RmVar(key string) {
 	if err != nil && !strings.Contains(err.Error(), "no such file or directory") {
 		check(err)
 	}
+}
+
+// Remove all (custom) variables
+func ClearVars() error {
+	/*
+	 * These vars wil break the join/rejoin flow which is
+	 * almost certainly not what people want, so we skip them
+	 */
+	matches, err := filepath.Glob(CustomVarFolder + "/*")
+	if err != nil {
+		return err
+	}
+
+	for _, match := range matches {
+		fmt.Println(match)
+		if err := os.Remove(match); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

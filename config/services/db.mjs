@@ -221,6 +221,28 @@ export const resolveServiceConfiguration = ({ utils }) => {
         host TEXT,
         FOREIGN KEY (host) REFERENCES inventory_hosts(id)
       )`,
+      inventory_modfiles: `CREATE table inventory_modfiles (
+        id INTEGER PRIMARY KEY,
+        mod TEXT,
+        folder TEXT,
+        file TEXT,
+        content TEXT,
+        source TEXT,
+        FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
+      )`,
+      client_commands: `CREATE table client_commands (
+        id INTEGER PRIMARY KEY,
+        created_at DATETIME
+      )`,
+      client_command_status: `CREATE table client_command_status (
+        id INTEGER PRIMARY KEY,
+        host TEXT NOT NULL,
+        cid INTEGER,
+        created_at DATETIME
+        status TEXT,
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id)
+        FOREIGN KEY (cid) REFERENCES client_commands(id)
+      )`,
     },
     data: [
       `INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,

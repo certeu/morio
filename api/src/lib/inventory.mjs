@@ -623,7 +623,28 @@ export async function enrollHost (uuid, data, replace=false) {
     log.debug(err, `Failed to bulk-write updates for host enrollment`)
   }
 
-  return result
+  return result[0] === 200 ? true : false
+}
+
+/**
+ * Removes a host from the inventory
+ *
+ * @param {string} uuid - The host's UUID
+ * @return {boolean} result - True if it went ok, false if not
+ */
+export async function removeHost (uuid) {
+  const params = { host: uuid }
+  const queries = [
+    'inventory_host_ip',
+    'inventory_host_mac',
+    'inventory_host_pkg',
+    'inventory_host_os',
+    'inventory_host_mod',
+    'inventory_hostvars',
+  ].map(table => ([ `DELETE from ${table} WHERE host=:host`, params ]))
+  queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
+
+  const result = await db.writeMany(queries)
 }
 
 /**
@@ -682,6 +703,154 @@ export async function setClientModules (uuid, modules) {
 }
 
 /**
+ * Gets the available modules for a client
+ *
+ * @param {string} uuid - The client UUID
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function getClientModules (uuid) {
+  const result = await db.read(
+    `SELECT mod from inventory_host_mod WHERE host=:host`,
+    { host: uuid }
+  )
+  const modules = []
+  if (result[0] === 200 && result[1].results?.[0]?.values) {
+    for (const read of result[1].results[0]?.values) modules.push(read[0])
+  }
+
+  return modules
+}
+
+/**
+ * Gets the available client modules
+ *
+ * @param {string} uuid - The client UUID
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function getAllClientModules () {
+  const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const modules = []
+  if (result[0] === 200 && result[1].results) {
+    for (const read of result[1].results[0]?.values) modules.push(read[0])
+  }
+
+  return modules
+}
+
+/**
+ * Enable a client module
+ *
+ * @param {string} uuid - The client UUID
+ * @param {string} module - The module name
+ * @return {bool} result - True if it worked, false if not
+ */
+export async function enableClientModule (uuid, module) {
+  const result = await db.write(
+    `INSERT INTO inventory_host_mod (host, mod) VALUES(:uuid, :module) ON CONFLICT DO NOTHING`,
+    { uuid, module }
+  )
+
+  return (result[0] === 200 && result[1].results?.[0].last_insert_id)
+    ? true
+    : false
+}
+
+/**
+ * Disable a client module
+ *
+ * @param {string} uuid - The client UUID
+ * @param {string} module - The module name
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function disableClientModule (uuid, module) {
+  const result = await db.write(
+    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
+    { uuid, module }
+  )
+  log.todo({result})
+
+  return (result[0] === 200 && result[1].results?.[0].last_insert_id)
+    ? true
+    : false
+}
+
+/**
+ * Gets the available module files for a client
+ *
+ * @param {arrau} modules - The modules for which to load files
+ * @return {array} result - An [bool result, array failed] array
+ */
+export async function getClientModuleFiles (modules) {
+  const result = await db.read(
+    `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map(mod => `"${mod}"`).join()})`
+  )
+  const files = []
+  if (result[0] === 200 && result[1].results) {
+    for (const read of result[1].results[0]?.values) {
+      const [file, folder, content] = read
+      files.push({ file, folder, content })
+    }
+  }
+
+  return files
+}
+
+/**
+ * Gets the client variables
+ *
+ * @param {string} uuid - The client UUID
+ * @param {bool} noInfo - Set to true to not include the variable info
+ * @return {array} result - An array holding the vars
+ */
+export async function getClientVars (uuid, noInfo=false) {
+  const result = await db.read(
+    `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
+    { host: uuid }
+  )
+  const vars = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    for (const read of result[1].results[0]?.values) {
+      /*
+       * If noInfo is set, info will be undefined
+       * but that's ok, JS doesn't mind and will drop it
+       */
+      const [key, val, info] = read
+      vars.push({ key, val, info })
+    }
+  }
+
+  return vars
+}
+
+/**
+ * Gets the module variables
+ *
+ * @param {array} modules - An (optional) array of modules to fetch the vars for
+ * @param {bool} noInfo - Set to true to not include the variable info
+ * @return {object} result - An array holding the vars
+ */
+export async function getModuleVars (modules=[], noInfo=false) {
+  const where = modules.length > 0
+    ? `WHERE mod IN (${modules.map(mod => `"${mod}"`).join()})`
+    : `WHERE 1`
+  const q = `SELECT id AS key, val ${noInfo ? '' : ', info'} from inventory_modvars ${where}`
+  const result = await db.read(q)
+  const vars = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    for (const read of result[1].results[0]?.values) {
+      /*
+       * If noInfo is set, info will be undefined
+       * but that's ok, JS doesn't mind and will drop it
+       */
+      const [key, val, info] = read
+      vars.push({ key, val, info })
+    }
+  }
+
+  return vars
+}
+
+/**
  * Retrieves a host variable
  *
  * @param {string} host - The host UUID
@@ -715,7 +884,9 @@ export async function getHostVar(host, key) {
  */
 export async function setClientVariables (uuid, vars) {
   const queries = []
-  for (const [key, val] of Object.entries(vars)) {
+  // Note that we do not store vars that start with MORIO_
+  const toStore = Object.entries(vars).filter(([key, val]) => key.slice(0,6) !== 'MORIO_')
+  for (const [key, val] of toStore) {
     const exists = await getHostVar(uuid, key)
     if (exists) {
       // Update var
@@ -735,7 +906,7 @@ export async function setClientVariables (uuid, vars) {
   const result = await db.writeMany(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
-    const varNames = Object.keys(vars)
+    const varNames = toStore.map(kv => kv[0])
     for (const i in varNames) {
       if (result[1].results[i].last_insert_id) log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
       else {
@@ -746,6 +917,43 @@ export async function setClientVariables (uuid, vars) {
   }
 
   return [failed.length === 0, failed]
+}
+
+/**
+ * Creates a client command entry and returns the ID
+ *
+ * @return {number} id - The client command ID
+ */
+export async function getClientCommandId () {
+  const result = await db.write(
+    `INSERT INTO client_commands (created_at) VALUES (:createdAt)`,
+    { createdAt: new Date() }
+  )
+
+  // Clean up old records while we're at it
+  cleanupClientCommands()
+
+  return result[0] === 200 && result[1].results?.[0]?.last_insert_id
+    ? result[1].results[0].last_insert_id
+    : false
+}
+
+async function cleanupClientCommands () {
+  await db.writeMany([
+    [
+      `DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`
+    ],
+    [
+      `DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`
+    ],
+  ])
+}
+
+export async function addClientCommandStatusUpdate({ uuid=false, id=false, status=false }) {
+  if (uuid && id && status) await db.write([
+    `INSERT INTO client_command_status (host, cid, status, created_at) VALUES(:uuid, :id, :status, :createdAt)`,
+    { uuid, id, status, createdAt: new Date() }
+  ])
 }
 
 /**

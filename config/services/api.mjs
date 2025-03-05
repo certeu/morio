@@ -79,8 +79,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
       network: utils.getPreset('MORIO_NETWORK'),
       // Volumes
       volumes: PROD
-        ? [`${DIRS.conf}/shared:/etc/morio/shared`, `${DIRS.data}/${DIRS.dl}:/morio/downloads`]
+        ? [
+            `${DIRS.conf}/api:/etc/morio/api`,
+            `${DIRS.conf}/shared:/etc/morio/shared`,
+            `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
+        ]
         : [
+            `${DIRS.conf}/api:/etc/morio/api`,
             `${DIRS.conf}/shared:/etc/morio/shared`,
             `${DIRS.data}/${DIRS.dl}:/morio/downloads`,
             `${utils.getPreset('MORIO_GIT_ROOT')}:/morio`,

@@ -8,8 +8,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"slices"
 	"sync"
 	"syscall"
+  "log"
+  "bytes"
+	"net/http"
+	"io"
 
 	"github.com/IBM/sarama"
 	"github.com/spf13/cobra"
@@ -22,12 +27,18 @@ type kafkaConsumer struct {
 	ready    chan bool
 }
 
+type kafkaCommandMessage struct {
+	Command string    `json:"command"`
+	Clients *[]string `json:"clients,omitempty"`
+	ID      int       `json:"id"`
+}
+
 // The listen command
 var listenCmd = &cobra.Command{
 	Use:   "listen",
-	Short: "Listen for client configuration updates via Kafka",
+	Short: "Listen for client command requests via Kafka",
 	Long: `This command starts a Kafka consumer that subscribes to the clients topic
-and listens for configuration updates. It is not for interactive use, but intended
+and listens for command requests. It is not for interactive use, but intended
 to run as a service.`,
 	RunE: runListen,
 }
@@ -41,7 +52,6 @@ func runListen(cmd *cobra.Command, args []string) error {
 	brokers := getBrokers()
 	kafkaTopic := "clients"
 
-	// Create Kafka config
 	// Create Kafka config
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
@@ -128,16 +138,6 @@ func runListen(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// handleMessage processes a single Kafka message
-func handleMessage(msg *sarama.ConsumerMessage) error {
-	// Add your message processing logic here
-	fmt.Printf("Message topic:%q partition:%d offset:%d\n",
-		msg.Topic, msg.Partition, msg.Offset)
-	fmt.Printf("Message value: %s\n", string(msg.Value))
-
-	return nil
-}
-
 // createTLSConfig creates a TLS configuration for the Kafka client
 func createTLSConfig(clientCertFile, clientKeyFile, caCertFile string) (*tls.Config, error) {
 	// Load client cert
@@ -175,4 +175,192 @@ func getBrokers() []string {
 		return nil
 	}
 	return brokers
+}
+
+// handleMessage processes a single Kafka message
+func handleMessage(msg *sarama.ConsumerMessage) error {
+	// Topic is should always be clients, but let's make sure
+	if msg.Topic != "clients" {
+		return nil
+	}
+
+	// Parse JSON message
+	var cmd kafkaCommandMessage
+	err := json.Unmarshal(msg.Value, &cmd)
+	if err != nil {
+		return err
+	}
+
+	// Is this for specific clients?
+	if cmd.Clients != nil {
+		// It is, but is it for us?
+		uuid := GetVar("MORIO_CLIENT_UUID")
+		if slices.Contains(*cmd.Clients, uuid) {
+			runCommand(cmd.Command, cmd.ID)
+		}
+	} else {
+		// Command is for all clients
+		runCommand(cmd.Command, cmd.ID)
+	}
+
+	return nil
+}
+
+func runCommand(cmd string, id int) error {
+	if cmd == "pull" {
+		fmt.Println("Running pull command")
+		return runPullCommand(id)
+	}
+	if cmd == "push" {
+		fmt.Println("Running push command")
+		return runPushCommand(id)
+	}
+	if cmd == "reload" {
+		fmt.Println("Running reload command")
+		return runReloadCommand(id)
+	}
+	if cmd == "restart" {
+		fmt.Println("Running restart command")
+		return runRestartCommand(id)
+	}
+	if cmd == "report" {
+		fmt.Println("Running restart command")
+		return runRestartCommand(id)
+	}
+	if cmd == "stop" {
+		fmt.Println("Running stop command")
+		return runRestartCommand(id)
+	}
+
+	// This should not happen
+	fmt.Println("Ignoring unsupported command.")
+
+	return nil
+}
+
+func runPullCommand(id int) error {
+	// Report start status
+  fmt.Println("Report start status")
+	err := reportCommandStatus(id, "start")
+	if err != nil {
+		return fmt.Errorf("failed to report start status: %w", err)
+	}
+	// Run actual command
+  fmt.Println("Running command")
+	result := PullConfig()
+	if result != nil {
+		reportCommandStatus(id, "error")
+		return fmt.Errorf("failed to pull config: %w", err)
+	}
+
+	// Report done status
+  fmt.Println("Report done status")
+	err = reportCommandStatus(id, "done")
+	if err != nil {
+		return fmt.Errorf("failed to report done status: %w", err)
+	}
+
+	return nil
+}
+
+func runPushCommand(id int) error {
+	return nil
+}
+
+func runReloadCommand(id int) error {
+	return nil
+}
+
+func runRestartCommand(id int) error {
+	return nil
+}
+
+func runReportCommand(id int) error {
+	return nil
+}
+
+func runStopCommand(id int) error {
+	return nil
+}
+
+func reportCommandStatus(id int, status string) error {
+	// Grab the cluster client UUID, and API key secret (if they exist)
+	uuid := GetVar("MORIO_CLIENT_UUID")
+	secret := GetVar("MORIO_APIKEY_SECRET")
+	cluster := GetVar("MORIO_CLUSTER")
+
+	if uuid == "" {
+		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+	}
+	if secret == "" {
+		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+	}
+	if cluster == "" {
+		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+	}
+
+	// Create request payload
+	payload := struct {
+		Uuid   string                 `json:"uuid"`
+		ID     int                    `json:"id"`
+		Status string `json:"status"`
+	}{
+		Uuid:   uuid,
+		ID:     id,
+		Status: status,
+	}
+
+	// Marshal payload to JSON
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal request payload: %w", err)
+	}
+
+	// Create HTTP client
+	client, err := CreateHttpClient()
+	if err != nil {
+		log.Fatalf("Error creating HTTP client: %v", err)
+	}
+
+	// API endpoint
+	apiURL := fmt.Sprintf("https://%s/-/api/clients/cmdstatus", cluster)
+
+	// Create request
+	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	// Set content type and authentication headers
+	req.Header.Set("Content-Type", "application/json")
+	req.SetBasicAuth(uuid, secret)
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to send request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Handle different response types based on status code
+	if resp.StatusCode != http.StatusNoContent {
+		// Read response body
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w", err)
+		}
+
+		// Parse error response (RFC7807)
+		var errResp ErrorResponse
+		if err := json.Unmarshal(respBody, &errResp); err != nil {
+			return fmt.Errorf("failed to parse error response: %w", err)
+		}
+
+		// Log the error and exit
+		PrintErrorResponse(errResp)
+		return fmt.Errorf("failed with status code: %d", resp.StatusCode)
+	}
+  fmt.Println("Reported status %v for command ID %v", status, id)
+
+	return nil
 }

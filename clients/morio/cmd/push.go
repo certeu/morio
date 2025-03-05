@@ -80,7 +80,7 @@ func pushConfig() error {
 		Vars    map[string]interface{} `json:"vars"`
 	}{
 		Uuid:    uuid,
-		Cluster:  cluster,
+		Cluster: cluster,
 		Modules: modules,
 		Vars:    vars,
 	}
@@ -117,14 +117,13 @@ func pushConfig() error {
 	}
 	defer resp.Body.Close()
 
-
 	// Handle different response types based on status code
 	if resp.StatusCode != http.StatusNoContent {
-	  // Read response body
-	  respBody, err := io.ReadAll(resp.Body)
-	  if err != nil {
-	  	return fmt.Errorf("failed to read response body: %w", err)
-	  }
+		// Read response body
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w", err)
+		}
 
 		// Parse error response (RFC7807)
 		var errResp ErrorResponse
@@ -137,7 +136,7 @@ func pushConfig() error {
 		return fmt.Errorf("failed with status code: %d", resp.StatusCode)
 	}
 
-  fmt.Println("Local modules and vars pushed to Morio cluster")
+	fmt.Println("Local modules and vars pushed to Morio cluster")
 
 	return nil
 }
