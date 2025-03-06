@@ -28,9 +28,6 @@ describe('API Key Tests', () => {
     assert.equal(result[0], 200)
     const d = result[1]
 
-    console.log('result', result)
-    console.log('key', keys.key1)
-
     assert.equal(d.name, keys.key1.name)
     assert.equal(d.status, 'active')
     assert.equal(d.created_by, 'local.test_user')
@@ -45,8 +42,6 @@ describe('API Key Tests', () => {
   it(`Should GET /apikeys`, async () => {
     const result = await api.get(`/apikeys`)
 
-    console.log('getKeys', result)
-
     assert.equal(Array.isArray(result), true)
     assert.equal(result.length, 3)
     assert.equal(result[0], 200)
@@ -55,10 +50,7 @@ describe('API Key Tests', () => {
 
   // PATCH /apikey
   it(`Should PATCH /apikeys/:key/rotate`, async () => {
-    const result = await api.patch(`/apikeys/${store.keys.key1.id}/rotate`)
-
-    console.log('result', result)
-    console.log('key', store.keys.key1.id)
+    const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`)
 
     const d = result[1]
     assert.equal(result[0], 200)

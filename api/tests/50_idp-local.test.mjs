@@ -322,9 +322,6 @@ describe('API Create Account Tests', () => {
     assert.equal(result[0], 200)
     const d = result[1]
 
-    console.log('result')
-    console.log('keys.key1', keys.key1)
-
     assert.equal(d.name, keys.key1.name)
     assert.equal(d.status, 'active')
     assert.equal(d.created_by, `local.${store.accounts.user2.username}`)
