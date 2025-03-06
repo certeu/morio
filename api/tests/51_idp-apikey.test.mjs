@@ -146,6 +146,7 @@ describe('API Key Tests', () => {
 
   // POST /login
   it(`Should not POST /login`, async () => {
+    sleep(10)
     const data = {
       provider: 'apikey',
       data: {
@@ -163,7 +164,6 @@ describe('API Key Tests', () => {
 
   // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
-    sleep(5)
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
     assert.equal(result[0], 200)
     const d = result[1]
