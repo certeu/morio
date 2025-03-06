@@ -232,15 +232,16 @@ export const resolveServiceConfiguration = ({ utils }) => {
       )`,
       client_commands: `CREATE table client_commands (
         id INTEGER PRIMARY KEY,
+        clients TEXT,
         created_at DATETIME
       )`,
       client_command_status: `CREATE table client_command_status (
         id INTEGER PRIMARY KEY,
         host TEXT NOT NULL,
         cid INTEGER,
-        created_at DATETIME
+        created_at DATETIME,
         status TEXT,
-        FOREIGN KEY (host) REFERENCES inventory_hosts(id)
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
         FOREIGN KEY (cid) REFERENCES client_commands(id)
       )`,
     },

@@ -57,7 +57,17 @@ export function routes(app) {
   /*
    * Endpoint for clients to report the command status
    */
-  app.post(`/clients/cmdstatus`, rbac.client, Clients.commandStatus)
+  app.post(`/clients/cmdstatus`, rbac.client, Clients.addCommandStatus)
+
+  /*
+   * Endpoint to retrieve the command info
+   */
+  app.get(`/clients/cmd/:id`, rbac.operator, Clients.getCommandInfo)
+
+  /*
+   * Endpoint to retrieve the command status
+   */
+  app.get(`/clients/cmdstatus/:id`, rbac.operator, Clients.getCommandStatus)
 
   /*
    * Endpoint to generate a client invite

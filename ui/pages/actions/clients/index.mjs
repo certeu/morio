@@ -1,5 +1,5 @@
 // Hooks
-import { useState, useEffect, useContext } from 'react'
+import { useState, useContext } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
@@ -8,171 +8,155 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { MegaphoneIcon, TipIcon, WarningIcon } from 'components/icons.mjs'
-import { Link } from 'components/link.mjs'
+import { Card, CardButton } from 'components/card.mjs'
+import { PuzzleIcon, MegaphoneIcon, PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
+import { SecretInput } from 'components/inputs.mjs'
+import { mrtValid } from 'components/auth/mrt-provider.mjs'
 import { Popout } from 'components/popout.mjs'
-import { StringInput } from 'components/inputs.mjs'
+import { Highlight } from 'components/highlight.mjs'
 
-const ClientsPage = (props) => (
-  <PageWrapper {...props} role="operator">
-    <ContentWrapper {...props} Icon={MegaphoneIcon} title={props.title}>
-      <div className="max-w-4xl">
-        <ClientCommandBox />
-        <Popout note>
-          <h5>Clients running in listener mode will pick up these commands</h5>
-          <p>
-            This relies on the Morio client running in listener mode.
-            <br />
-            FIXME: Link to docs
-          </p>
-        </Popout>
-      </div>
-    </ContentWrapper>
-  </PageWrapper>
+const RestartConfirmation = ({ restart }) => (
+  <>
+    <h2>Restart Morio?</h2>
+    <p>Click the button below to trigger a soft restart of Morio</p>
+    <b>What will happen?</b>
+    <p>
+      Morio Core will reload the settings on disk and re-bootstrap itself.
+      <br />
+      One or more services will potentially be restarted.
+    </p>
+    <button className="btn btn-primary w-full" onClick={restart}>
+      Restart Morio Now
+    </button>
+  </>
 )
 
-export default ClientsPage
+const ReseedConfirmation = ({ reseed }) => (
+  <>
+    <h2>Reseed Morio?</h2>
+    <p>Click the button below to trigger a reseed of Morio</p>
+    <b>What will happen?</b>
+    <p>
+      Morio Core will use the current preseed settings to construct a new settings file.
+      <br />
+      It will then write that file to disk, and trigger a soft restart.
+      <br />
+      One or more services will likely be restarted.
+    </p>
+    <button className="btn btn-primary w-full" onClick={reseed}>
+      Reseed Morio Now
+    </button>
+  </>
+)
 
-export const getStaticProps = () => ({
-  props: {
-    title: 'Send Client Commands',
-    page: ['actions', ['clients', 'Send Client Commands']],
-  },
-})
+const RotateRootTokenConfirmation = ({ rotateRootToken }) => {
+  const [mrt, setMrt] = useState('')
 
-const commands = {
-  pull: 'Pull client config from Morio cluster',
-  push: 'Push client config to Morio cluster',
-  reload: 'Reload agents',
-  restart: 'Restart agents',
-  report: 'Submit client report to Morio cluster',
-  stop: 'Stop agents',
+  return (
+    <div className="max-w-xl">
+      <h2>Rotate the Morio Root Token?</h2>
+      <p>Enter the current Root Token, then click the button to generate a new one.</p>
+      <b>What will happen?</b>
+      <p>
+        Morio Core will generate a new Root Token and store its cryptographic hash.
+        <br />
+        There will be no downtime or service interruptions.
+      </p>
+      <SecretInput
+        label="Morio Root Token"
+        labelBL="The Morio Root Token was generated when you initially setup Morio"
+        current={mrt}
+        update={setMrt}
+        valid={mrtValid}
+      />
+      <button
+        className="btn btn-primary w-full"
+        onClick={() => rotateRootToken(mrt)}
+        disabled={mrtValid(mrt) ? false : true}
+      >
+        Rotate Morio Root Token
+      </button>
+    </div>
+  )
 }
 
-
-const ClientCommandBox = () => {
+const ActionsPage = (props) => {
   const { api } = useApi()
-  const [step, setStep] = useState(1)
-  const [clients, setClients] = useState([])
-  const [filter, setFilter] = useState("")
-  const [selected, setSelected] = useState({})
   const { pushModal, clearModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
-  useEffect(() => {
-    const getClients = async () => {
-      const result = await api.getInventoryHosts()
-      if (result[1] === 200 && Array.isArray(result[0])) setClients(result[0])
-      console.log(result)
+  const restart = async () => {
+    setLoadingStatus([true, 'Restarting Morio, this will take a while'])
+    const result = await api.restart()
+    if (result[1] !== 204) return setLoadingStatus([true, `Unable to restart Morio`, true, false])
+    else setLoadingStatus([true, 'Restart initialized', true, true])
+  }
+
+  const reseed = async () => {
+    setLoadingStatus([true, 'Reseeding Morio, this will take a while'])
+    const result = await api.reseed()
+    if (result[1] !== 204) return setLoadingStatus([true, `Unable to reseed Morio`, true, false])
+    else setLoadingStatus([true, 'Reseed initialized', true, true])
+  }
+
+  const rotateRootToken = async (mrt) => {
+    setLoadingStatus([true, 'Rotating the Morio Root Token, this should not take long'])
+    const result = await api.rotateMrt(mrt)
+    if (result[1] !== 200)
+      return setLoadingStatus([true, `Unable to rotate the Morio Root Token`, true, false])
+    else {
+      setLoadingStatus([true, 'Successfully rotated the Morio Root Token', true, true])
+      pushModal(
+        <ModalWrapper keepOpenOnClick>
+          <h3>Morio Root Token Rotated</h3>
+          <Popout important>
+            <h5>Store the Morio Root Token in a safe place</h5>
+            <p>Below is the new Morio Root Token.</p>
+            <Highlight>{result[0].root_token.value}</Highlight>
+          </Popout>
+          <p className="text-center">
+            <button className="btn btn-primary nt-4 btn-lg" onClick={clearModal}>
+              Close
+            </button>
+          </p>
+        </ModalWrapper>
+      )
     }
-    getClients()
-  },[])
-
-  const toggleSelection = (client) => {
-    const newSelected = {...selected}
-    if (newSelected[client.id]) delete newSelected[client.id]
-    else newSelected[client.id] = client
-
-    setSelected(newSelected)
   }
-
-  const runCommand = async (cmd) => {
-    clearModal()
-    setLoadingStatus([true, 'Sending client command'])
-    const result = await api.sendClientCommand(
-      cmd,
-      impacted > 0 ? Object.keys(selected) : false,
-    )
-    console.log(result)
-  }
-
-  const impacted = Object.keys(selected).length
 
   return (
-    <div>
-      <h2>Client list</h2>
-      <StringInput
-        label="Type here to filter the client list"
-        update={setFilter}
-        current={filter}
-      />
-      <ul className="list list-inside mt-4 ml-4 list-disc mb-4">
-      {clients
-        .filter(client => {
-          if (!filter) return true
-          if (JSON.stringify(client).toLowerCase().includes(filter.toLowerCase())) return true
-          return false
-        })
-        .map(client => (
-          <li key={client.id}>
-            <button
-              className={`font-mono btn ${selected[client.id]
-                ? 'btn-success'
-                : 'btn-neutral btn-outline'
-              } btn-xs text-sm font-medium`}
-              onClick={() => toggleSelection(client)}
-            >
-              {client.fqdn || client.name}<span className="px-1 opacity-50">|</span>{client.id}
-            </button>
-          </li>
-        ))
-      }
-      </ul>
-      <h2>Selected clients</h2>
-      {impacted > 0 ? (
-        <ol className="list list-inside mt-4 ml-4 list-decimal mb-4">
-          {Object.values(selected).map(client => (
-            <li key={client.id}>
-              {client.fqdn || client.name}<span className="px-2 opacity-50">|</span>{client.id}
-            </li>
-          ))}
-        </ol>
-      ) : (
-        <div className="flex flex-row gap-2 items-center">
-          <WarningIcon className="w-5 h-5 text-warning"/> None so far
+    <PageWrapper {...props}>
+      <ContentWrapper {...props} Icon={WrenchIcon} title={props.title}>
+        <div
+          className={`grid grid-cols-2 gap-4 items-center justify-between items-stretch max-w-4xl`}
+        >
+          <Card
+            role="operator"
+            title="Enroll clients"
+            href="/actions/clients/enroll"
+            desc="Guidance and examples that show how to join one or more clients to this Morio cluster."
+            width="w-full"
+            Icon={PuzzleIcon}
+          />
+          <Card
+            role="operator"
+            title="Send client commands"
+            href="/actions/clients/cmd"
+            desc="Send a command to one or more Morio clients. This requires clients to run in listener mode."
+            width="w-full"
+            Icon={MegaphoneIcon}
+          />
         </div>
-      )}
-      <h2>Command to run</h2>
-      <div className="grid grid-cols-2 gap-2">
-        {Object.keys(commands).map(cmd => (
-          <button key={cmd}
-            className="btn btn-primary btn-outline capitalize flex flex-row items-center justify-between"
-            onClick={() =>
-              pushModal(
-                <ModalWrapper keepOpenOnClick>
-                  <CommandWarning {...{ cmd, selected, impacted, runCommand, clearModal }} />
-                </ModalWrapper>
-              )
-            }
-          >
-            {cmd}
-            <span className="font-medium italic">{commands[cmd]}</span>
-          </button>
-        ))}
-      </div>
-      <div className="flex flex-row gap-2 items-center border-warning border rounded p-1 px-2 my-2 text-sm bg-warning bg-opacity-20">
-        <TipIcon className="h-5 w-5 text-warning"/> This command will target <b>{impacted ? impacted : 'all'}</b> clients
-      </div>
-    </div>
+      </ContentWrapper>
+    </PageWrapper>
   )
-
 }
 
-const CommandWarning = ({ cmd, selected, impacted, runCommand, clearModal }) => (
-  <div>
-    <h2>Client command confirmation</h2>
-    <p>Do you want to send the <b>{cmd}</b> command to <b>{impacted > 0 ? impacted : 'all'}</b> clients?</p>
-    <div className="flex flex-rwo items-center gap-2">
-      <button onClick={() => runCommand(cmd)} className="btn btn-primary">Send Command</button>
-      <button onClick={clearModal} className="btn btn-outline">Cancel</button>
-    </div>
-    {impacted > 0 ? (
-      <ul className="list list-inside flex flex-row flex-wrap gap-1 items-center">
-        <li>Impacted clients:</li>
-        {Object.values(selected).map(client => (
-          <li key={client.id} className="font-mono text-xs">{client.fqdn || client.name || client.id}</li>
-        ))}
-      </ul>
-    ) : null}
-  </div>
-)
+export default ActionsPage
+
+export const getStaticProps = () => ({
+  props: {
+    title: 'Client Actions',
+    page: ['actions', 'clients'],
+  },
+})

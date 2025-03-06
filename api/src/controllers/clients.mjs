@@ -6,7 +6,9 @@ import {
   enableClientModule,
   enrollHost,
   getAllClientModules,
+  getClientCommand,
   getClientCommandId,
+  getClientCommandStatusUpdates,
   getClientModuleFiles,
   getClientModules,
   getClientVars,
@@ -407,7 +409,7 @@ Controller.prototype.sendCommand = async function (req, res) {
   /*
    * Grab a client command ID
    */
-  const id = await getClientCommandId()
+  const id = await getClientCommandId(valid.clients)
 
   /*
    * Then produce the Kafka message, don't await it
@@ -430,7 +432,7 @@ Controller.prototype.sendCommand = async function (req, res) {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.commandStatus = async function (req, res) {
+Controller.prototype.addCommandStatus = async function (req, res) {
   /*
    * Validate input
    */
@@ -441,11 +443,37 @@ Controller.prototype.commandStatus = async function (req, res) {
     })
 
   /*
-   * Store status update
+   * Store status update, but don't await it
    */
-  log.todo({valid})
-  //await addClientCommandStatusUpdate(valid)
+  addClientCommandStatusUpdate(valid)
+
   return res.status(204).send()
+}
+
+/**
+ * Endpoint for users to retrieve info about a client command id
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCommandInfo = async function (req, res) {
+  const command = await getClientCommand(req.params.id)
+
+  return command
+    ? res.send(command)
+    : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
+ * Endpoint for users to retrieve the command status for client command id
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.getCommandStatus = async function (req, res) {
+  const updates = await getClientCommandStatusUpdates(req.params.id)
+
+  return res.send(updates)
 }
 
 /**

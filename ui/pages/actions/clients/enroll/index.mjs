@@ -144,7 +144,7 @@ export default EnrollClientsPage
 export const getStaticProps = () => ({
   props: {
     title: 'Enroll Clients',
-    page: ['actions', ['enroll', 'Enroll Clients']],
+    page: ['actions', 'clients', ['enroll', 'Enroll Clients']],
   },
 })
 

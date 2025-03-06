@@ -238,15 +238,21 @@ export async function getStats() {
     [`SELECT COUNT(id) as oss FROM inventory_oss`],
     [`SELECT COUNT(id) as pkgs FROM inventory_pkgs`],
     [`SELECT COUNT(mod) as mods FROM inventory_mods`],
+    [`SELECT COUNT(id) as modvars FROM inventory_modvars`],
+    [`SELECT COUNT(id) as hostvars FROM inventory_hostvars`],
+    [`SELECT COUNT(id) as modfiles FROM inventory_modfiles`],
   ])
   if (Array.isArray(count) && count[0] === 200) {
     return {
-      hosts: count[1].results[0].values[0][0],
-      ips:   count[1].results[1].values[0][0],
-      macs:  count[1].results[2].values[0][0],
-      oss:   count[1].results[3].values[0][0],
-      pkgs:  count[1].results[4].values[0][0],
-      mods:  count[1].results[5].values[0][0],
+      hosts:     count[1].results[0].values[0][0],
+      ips:       count[1].results[1].values[0][0],
+      macs:      count[1].results[2].values[0][0],
+      oss:       count[1].results[3].values[0][0],
+      pkgs:      count[1].results[4].values[0][0],
+      mods:      count[1].results[5].values[0][0],
+      modvars:   count[1].results[6].values[0][0],
+      hostvars:  count[1].results[7].values[0][0],
+      modfiles:  count[1].results[8].values[0][0],
     }
   }
   else return {
@@ -256,6 +262,9 @@ export async function getStats() {
     oss: 0,
     pkgs: 0,
     mods: 0,
+    modvars: 0,
+    hostvars: 0,
+    modfiles: 0,
   }
 }
 
@@ -924,10 +933,10 @@ export async function setClientVariables (uuid, vars) {
  *
  * @return {number} id - The client command ID
  */
-export async function getClientCommandId () {
+export async function getClientCommandId (clients=false) {
   const result = await db.write(
-    `INSERT INTO client_commands (created_at) VALUES (:createdAt)`,
-    { createdAt: new Date() }
+    `INSERT INTO client_commands (created_at, clients) VALUES (:createdAt, :clients)`,
+    { createdAt: new Date(), clients: Array.isArray(clients) ? JSON.stringify(clients) : null }
   )
 
   // Clean up old records while we're at it
@@ -949,11 +958,45 @@ async function cleanupClientCommands () {
   ])
 }
 
-export async function addClientCommandStatusUpdate({ uuid=false, id=false, status=false }) {
-  if (uuid && id && status) await db.write([
+export async function addClientCommandStatusUpdate({ uuid, id, status }) {
+  const result = await db.write(
     `INSERT INTO client_command_status (host, cid, status, created_at) VALUES(:uuid, :id, :status, :createdAt)`,
     { uuid, id, status, createdAt: new Date() }
-  ])
+  )
+
+  return (result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    ? true
+    : log.warn({ uuid, id, status }, `Failed to write client command status update`)
+}
+
+export async function getClientCommand(id) {
+  const result = await db.read(`SELECT * FROM client_commands WHERE id=:id`, { id })
+
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    const fields = result[1].results[0].columns
+    for (const row of result[1].results[0].values) {
+      const info = {}
+      for (const i in fields)  info[fields[i]] = row[i]
+      return info
+    }
+  }
+
+  return false
+}
+
+export async function getClientCommandStatusUpdates(cid) {
+  const result = await db.read(`SELECT * FROM client_command_status WHERE cid=:cid`, { cid })
+  const updates = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    const fields = result[1].results[0].columns
+    for (const row of result[1].results[0].values) {
+      const update = {}
+      for (const i in fields)  update[fields[i]] = row[i]
+      updates.push(update)
+    }
+  }
+
+  return updates
 }
 
 /**

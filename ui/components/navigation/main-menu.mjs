@@ -68,7 +68,8 @@ const icons = {
   ca: CertificateIcon,
   certificates: CertificateIcon,
   checks: CheckCircleIcon,
-  clients: MegaphoneIcon,
+  cmd: MegaphoneIcon,
+  clients: DesktopIcon,
   create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
@@ -122,13 +123,17 @@ export const links = {
   actions: {
     t: 'Actions',
     r: 'operator',
-    enroll: {
-      t: 'Enroll Clients',
-      r: 'operator'
-    },
     clients: {
-      t: 'Send Client Commands',
-      r: 'operator'
+      t: 'Client Actions',
+      r: 'operator',
+      enroll: {
+        t: 'Enroll Clients',
+        r: 'operator'
+      },
+      cmd: {
+        t: 'Send Client Commands',
+        r: 'operator'
+      },
     },
   },
   boards: {

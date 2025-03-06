@@ -133,7 +133,7 @@ const ActionsPage = (props) => {
           <Card
             role="operator"
             title="Enroll clients"
-            href="/actions/enroll"
+            href="/actions/clients/enroll"
             desc="Guidance and examples that show how to join one or more clients to this Morio cluster."
             width="w-full"
             Icon={PuzzleIcon}
@@ -141,7 +141,7 @@ const ActionsPage = (props) => {
           <Card
             role="operator"
             title="Send client commands"
-            href="/actions/clients"
+            href="/actions/clients/cmd"
             desc="Send a command to one or more Morio clients. This requires clients to run in listener mode."
             width="w-full"
             Icon={MegaphoneIcon}

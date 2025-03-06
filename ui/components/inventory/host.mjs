@@ -239,16 +239,16 @@ export const Hostname = ({ data }) => {
   return JSON.stringify(data)
 }
 
-export const InventoryHostname = ({ uuid }) => {
+export const InventoryHostname = ({ uuid, raw=false }) => {
   const { api } = useApi()
   const { data } = useQuery({
     queryKey: [`hostname_${uuid}`],
     queryFn: () => runInventoryHostnameCall(uuid, api),
-    refetchInterval: 1000, //false,
+    refetchInterval: false,
     refetchIntervalInBackground: true, //false,
   })
 
-  return data ? (
+  return data ? raw ? (data.fqdn || data.name) : (
     <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
   ) : (
     uuid

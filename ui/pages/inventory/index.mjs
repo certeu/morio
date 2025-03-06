@@ -47,15 +47,20 @@ export default function InventoryPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <div className="stats shadow w-full">
+        <div className="stats shadow w-full grid grid-cols-3 mb-2">
           <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts" />
           <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss" />
-          <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
+          <Stat title="Software Packages" nr={data?.pkgs} Icon={PackageIcon} link="/inventory/pkgs" />
         </div>
-        <div className="stats shadow w-full">
+        <div className="stats shadow w-full grid grid-cols-3 mb-2">
           <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips" />
           <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs" />
-          <Stat title="Software Packages" nr={data?.pkgs} Icon={PackageIcon} link="/inventory/pkgs" />
+          <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
+        </div>
+        <div className="stats shadow w-full grid grid-cols-3 mb-2">
+          <Stat title="Module Vars" nr={data?.modvars} Icon={LocationIcon} link="/inventory/modvars" />
+          <Stat title="Host Vars" nr={data?.hostvars} Icon={HardwareIcon} link="/inventory/hostvars" />
+          <Stat title="Module Files" nr={data?.modfiles} Icon={PackageIcon} link="/inventory/modfiles" />
         </div>
         <ReloadDataButton onClick={() => setCount(count + 1)} />
       </ContentWrapper>

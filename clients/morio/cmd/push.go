@@ -47,11 +47,11 @@ var pushCmd = &cobra.Command{
 	Long:  `Push the local client configuration to the Morio cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return pushConfig()
+		return PushConfig()
 	},
 }
 
-func pushConfig() error {
+func PushConfig() error {
 
 	// Grab the cluste,r client UUID, and API key secret (if they exist)
 	uuid := GetVar("MORIO_CLIENT_UUID")

@@ -207,64 +207,42 @@ func handleMessage(msg *sarama.ConsumerMessage) error {
 }
 
 func runCommand(cmd string, id int) error {
-	if cmd == "pull" {
-		fmt.Println("Running pull command")
-		return runPullCommand(id)
-	}
-	if cmd == "push" {
-		fmt.Println("Running push command")
-		return runPushCommand(id)
-	}
-	if cmd == "reload" {
-		fmt.Println("Running reload command")
-		return runReloadCommand(id)
-	}
-	if cmd == "restart" {
-		fmt.Println("Running restart command")
-		return runRestartCommand(id)
-	}
-	if cmd == "report" {
-		fmt.Println("Running restart command")
-		return runRestartCommand(id)
-	}
-	if cmd == "stop" {
-		fmt.Println("Running stop command")
-		return runRestartCommand(id)
-	}
-
-	// This should not happen
-	fmt.Println("Ignoring unsupported command.")
-
-	return nil
-}
-
-func runPullCommand(id int) error {
 	// Report start status
-  fmt.Println("Report start status")
 	err := reportCommandStatus(id, "start")
 	if err != nil {
 		return fmt.Errorf("failed to report start status: %w", err)
 	}
-	// Run actual command
-  fmt.Println("Running command")
-	result := PullConfig()
-	if result != nil {
-		reportCommandStatus(id, "error")
-		return fmt.Errorf("failed to pull config: %w", err)
+  // Run command
+  if cmd == "pull" {
+		err = runPullCommand(id)
+	} else if cmd == "push" {
+		err = runPushCommand(id)
+	} else if cmd == "reload" {
+		err = runReloadCommand(id)
+	} else if cmd == "restart" {
+		err = runRestartCommand(id)
+	} else if cmd == "report" {
+		err = runReportCommand(id)
+	} else if cmd == "stop" {
+		err = runStopCommand(id)
 	}
 
-	// Report done status
-  fmt.Println("Report done status")
-	err = reportCommandStatus(id, "done")
+	// Report done/error status
 	if err != nil {
-		return fmt.Errorf("failed to report done status: %w", err)
-	}
+	  reportCommandStatus(id, "error")
+		return fmt.Errorf("Command failed: %w", err)
+	} else {
+	  reportCommandStatus(id, "done")
+    return nil
+  }
+}
 
-	return nil
+func runPullCommand(id int) error {
+	return PullConfig()
 }
 
 func runPushCommand(id int) error {
-	return nil
+  return PushConfig()
 }
 
 func runReloadCommand(id int) error {
@@ -276,7 +254,7 @@ func runRestartCommand(id int) error {
 }
 
 func runReportCommand(id int) error {
-	return nil
+  return ReportClient()
 }
 
 func runStopCommand(id int) error {
@@ -360,7 +338,6 @@ func reportCommandStatus(id int, status string) error {
 		PrintErrorResponse(errResp)
 		return fmt.Errorf("failed with status code: %d", resp.StatusCode)
 	}
-  fmt.Println("Reported status %v for command ID %v", status, id)
 
 	return nil
 }
