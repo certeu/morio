@@ -114,7 +114,7 @@ export async function createApikey(data) {
     return false
   }
 
-  data.id = key
+  data.id = data.key
 
   const columns = []
   const params = {}
