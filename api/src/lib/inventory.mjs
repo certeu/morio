@@ -1,4 +1,4 @@
-import { log } from './utils.mjs'
+import { log, utils } from './utils.mjs'
 import { get, asScalarOrJson } from '#shared/utils'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
@@ -175,9 +175,12 @@ export async function loadOs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostIps(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE host=:id`, {
-    id: clean(id),
-  })
+  const [status, result] = await db.read(
+    `SELECT hi.host, hi.ip, i.version FROM inventory_host_ip hi
+     JOIN inventory_ips i ON hi.ip = i.ip
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
 
   if (status !== 200) return false
   const found = resultsAsList(result)
@@ -194,9 +197,12 @@ export async function loadHostIps(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostMacs(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_macs WHERE host=:id`, {
-    id: clean(id),
-  })
+  const [status, result] = await db.read(
+    `SELECT hm.host, hm.mac FROM inventory_host_mac hm
+     JOIN inventory_macs m ON hm.mac = m.mac
+     WHERE hm.host=:id`,
+    { id: clean(id) }
+  )
 
   if (status !== 200) return false
   const found = resultsAsList(result)
@@ -213,9 +219,12 @@ export async function loadHostMacs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostOs(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
-    id: clean(id),
-  })
+  const [status, result] = await db.read(
+    `SELECT ho.host, o.id, o.name, o.version FROM inventory_host_os ho
+     JOIN inventory_oss o ON ho.os = o.id
+     WHERE ho.host=:id`,
+    { id: clean(id) }
+  )
 
   if (status !== 200) return false
   const found = resultsAsList(result)
@@ -809,9 +818,10 @@ export async function getClientModuleFiles (modules) {
  *
  * @param {string} uuid - The client UUID
  * @param {bool} noInfo - Set to true to not include the variable info
+ * @param {bool} decrypt - Set to true to decrypt vars encrypted at rest
  * @return {array} result - An array holding the vars
  */
-export async function getClientVars (uuid, noInfo=false) {
+export async function getClientVars (uuid, noInfo=false, decrypt=false) {
   const result = await db.read(
     `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
     { host: uuid }
@@ -824,7 +834,11 @@ export async function getClientVars (uuid, noInfo=false) {
        * but that's ok, JS doesn't mind and will drop it
        */
       const [key, val, info] = read
-      vars.push({ key, val, info })
+      vars.push({
+        key,
+        val: decrypt ? undoVarSecrecy(key, val)[1] : val,
+        info
+      })
     }
   }
 
@@ -894,7 +908,10 @@ export async function getHostVar(host, key) {
 export async function setClientVariables (uuid, vars) {
   const queries = []
   // Note that we do not store vars that start with MORIO_
-  const toStore = Object.entries(vars).filter(([key, val]) => key.slice(0,6) !== 'MORIO_')
+  const toStore = Object.entries(vars)
+    .filter(([key, val]) => key.slice(0,6) !== 'MORIO_')
+    .map(entry => ensureVarSecrecy(...entry))
+  log.todo({ toStore })
   for (const [key, val] of toStore) {
     const exists = await getHostVar(uuid, key)
     if (exists) {
@@ -926,6 +943,34 @@ export async function setClientVariables (uuid, vars) {
   }
 
   return [failed.length === 0, failed]
+}
+
+export function ensureVarSecrecy(key, val) {
+  // If a key ends with 'SECRET' we encrypt it at rest
+  if (key.slice(-6) === 'SECRET') {
+    try {
+      val = utils.encrypt(val)
+    }
+    catch (err) {
+      log.warn(err, `Failed to encrypt hostvar ${key}`)
+    }
+  }
+
+  return [ key, val ]
+}
+
+export function undoVarSecrecy(key, val) {
+  // If a key ends with 'SECRET' and is encrypted, we decrypt it
+  if (key.slice(-6) === 'SECRET' && typeof val === 'string') {
+    try {
+      val = utils.decrypt(val)
+    }
+    catch (err) {
+      log.warn(err, `Failed to decrypt hostvar ${key}`)
+    }
+  }
+
+  return [ key, val ]
 }
 
 /**

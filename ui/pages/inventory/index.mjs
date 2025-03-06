@@ -2,7 +2,7 @@ import { useState, useEffect, useContext } from 'react'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { PuzzleIcon, HardwareIcon, LocationIcon, PackageIcon, ServersIcon, WindowIcon } from 'components/icons.mjs'
+import { VariableIcon, CodeIcon, PuzzleIcon, HardwareIcon, LocationIcon, PackageIcon, ServersIcon, WindowIcon } from 'components/icons.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -58,9 +58,9 @@ export default function InventoryPage() {
           <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
         </div>
         <div className="stats shadow w-full grid grid-cols-3 mb-2">
-          <Stat title="Module Vars" nr={data?.modvars} Icon={LocationIcon} link="/inventory/modvars" />
-          <Stat title="Host Vars" nr={data?.hostvars} Icon={HardwareIcon} link="/inventory/hostvars" />
-          <Stat title="Module Files" nr={data?.modfiles} Icon={PackageIcon} link="/inventory/modfiles" />
+          <Stat title="Module Vars" nr={data?.modvars} Icon={VariableIcon} link="/inventory/modvars" />
+          <Stat title="Host Vars" nr={data?.hostvars} Icon={VariableIcon} link="/inventory/hostvars" />
+          <Stat title="Module Files" nr={data?.modfiles} Icon={CodeIcon} link="/inventory/modfiles" />
         </div>
         <ReloadDataButton onClick={() => setCount(count + 1)} />
       </ContentWrapper>

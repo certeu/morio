@@ -13,7 +13,7 @@ import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { getOsId, OsIcon } from './oss.mjs'
+import { OsIcon } from './oss.mjs'
 import { IpsDisplayTable } from './ip.mjs'
 import { MacsDisplayTable } from './mac.mjs'
 import { Details } from '../details.mjs'
@@ -172,7 +172,7 @@ export const HostDataSummary = ({ data }) => {
             </span>
           </h4>
           <div className="flex flex-row flex-wrap gap-2">
-            <KeyVal k="os" val={getOsId(data.os)} />
+            <KeyVal k="os" val={data.os} />
             <KeyVal k="arch" val={data.arch} />
             <KeyVal k="cores" val={data.cores} />
             <KeyVal k="memory" val={formatBytes(data.memory)} />

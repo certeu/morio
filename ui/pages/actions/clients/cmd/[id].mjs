@@ -23,10 +23,10 @@ export default function ClientCommandStatusPage({ id  }) {
 
   useEffect(() => {
     async function getUpdates() {
-      setLoadingStatus([true, 'Loading command info'])
       if (cmd === false) {
         let result
         try {
+          setLoadingStatus([true, 'Loading command info'])
           result = await api.getClientCommandInfo(id)
           if (result[1] === 200 && result[0]?.id) {
             const command = {...result[0]}
@@ -35,6 +35,7 @@ export default function ClientCommandStatusPage({ id  }) {
             setLoadingStatus([true, 'Command info loaded', true, true])
           } else {
             setLoadingStatus([true, 'Failed to load command info', true, false])
+            setPaused(true)
           }
         } catch (err) {
           console.log(err)
@@ -45,9 +46,8 @@ export default function ClientCommandStatusPage({ id  }) {
         result = await api.getClientCommandStatusUpdates(id)
         if (result[1] === 200 && Array.isArray(result[0])) {
           setUpdates(result[0])
-          setLoadingStatus([true, 'Command updates loaded', true, true])
         } else {
-          setLoadingStatus([true, 'Failed to load command updates', true, false])
+          setPaused(true)
         }
       } catch (err) {
         console.log(err)

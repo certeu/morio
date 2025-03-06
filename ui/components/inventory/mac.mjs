@@ -72,7 +72,7 @@ export const MacsTable = () => {
                 checked={macs.length === count}
               />
             </th>
-            {['mac', 'host', 'last_update'].map((field) => (
+            {['mac', 'host'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -90,24 +90,23 @@ export const MacsTable = () => {
         </thead>
         <tbody>
           {sorted.map((mac) => (
-            <tr key={mac.id}>
+            <tr key={mac.mac}>
               <td className="text-base font-medium">
                 <input
                   type="checkbox"
-                  checked={selection[mac.id] ? true : false}
+                  checked={selection[mac.mac] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(mac.id)}
+                  onClick={() => toggle(mac.mac)}
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/macs/${mac.id}`}>{mac.mac}</PageLink>
+                <PageLink href={`/inventory/macs/${mac.mac}`}>{mac.mac}</PageLink>
               </td>
               <td className="">
                 <PageLink href={`/inventory/hosts/${mac.host}`}>
                   <InventoryHostname uuid={mac.host} />
                 </PageLink>
               </td>
-              <td className="">{timeAgo(mac.last_update)}</td>
             </tr>
           ))}
         </tbody>
@@ -138,7 +137,7 @@ export const MacsDisplayTable = ({ macs }) => {
     <table>
       <thead>
         <tr>
-          {['mac', 'host', 'last_update'].map((field) => (
+          {['mac', 'host'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -156,16 +155,15 @@ export const MacsDisplayTable = ({ macs }) => {
       </thead>
       <tbody>
         {sorted.map((mac) => (
-          <tr key={mac.id}>
+          <tr key={mac.mac}>
             <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/macs/${mac.id}`}>{mac.mac}</PageLink>
+              <PageLink href={`/inventory/macs/${mac.mac}`}>{mac.mac}</PageLink>
             </td>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/hosts/${mac.host}`}>
                 <InventoryHostname uuid={mac.host} />
               </PageLink>
             </td>
-            <td className="py-0.5 text-sm">{timeAgo(mac.last_update)}</td>
           </tr>
         ))}
       </tbody>
@@ -189,7 +187,6 @@ export const MacAddress = ({ data }) => {
           <div className="flex flex-row flex-wrap gap-2">
             <KeyVal k="mac" val={mac} />
             <KeyVal k="host" val={<InventoryHostname uuid={data.host} />} />
-            <KeyVal k="last update" val={timeAgo(data.last_update)} />
           </div>
         </div>
       </div>

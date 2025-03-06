@@ -326,17 +326,17 @@ func parseYAMLValue(input string) (interface{}, error) {
 
 // Write a value to a variable
 func SetVar(key string, value string) {
-	// Open file
-	file, err := os.Create(CustomVarFolder + "/" + key)
-	check(err)
-	defer file.Close()
+  // Open file with 0600 permissions (read/write for owner only)
+  file, err := os.OpenFile(CustomVarFolder+"/"+key, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+  check(err)
+  defer file.Close()
 
-	// Write value
-	_, err = file.WriteString(value)
-	check(err)
+  // Write value
+  _, err = file.WriteString(value)
+  check(err)
 
-	// Sync
-	file.Sync()
+  // Sync
+  file.Sync()
 }
 
 // Write a value to a default variable
@@ -376,10 +376,13 @@ func ClearVars() error {
 	}
 
 	for _, match := range matches {
-		fmt.Println(match)
-		if err := os.Remove(match); err != nil {
-			return err
-		}
+    basename := filepath.Base(match)
+    if !strings.HasPrefix(basename, "MORIO_") {
+		  fmt.Println(basename)
+		  if err := os.Remove(match); err != nil {
+		  	return err
+		  }
+    }
 	}
 
 	return nil

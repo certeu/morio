@@ -301,7 +301,7 @@ Controller.prototype.pull = async function (req, res) {
    */
   const modules = await getClientModules(req.params.uuid)
   const mvars = await getModuleVars(modules, true)
-  const cvars = await getClientVars(req.params.uuid, true)
+  const cvars = await getClientVars(req.params.uuid, true, true)
   const files = await getClientModuleFiles(modules)
 
   /*

@@ -30,6 +30,7 @@ export default function InventoryHostPage({ uuid = false }) {
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
           <HostDetail data={data} />
+          <pre>{JSON.stringify(data, null ,2)}</pre>
         </div>
       </ContentWrapper>
     </PageWrapper>
