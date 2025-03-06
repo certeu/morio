@@ -154,12 +154,16 @@ describe('API Key Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    // validateErrorResponse(result, errors, 'morio.api.idp.disabled')
-    validateErrorResponse(result, errors, 'morio.api.authentication.required')
+
+    console.log('result', result)
+
+    validateErrorResponse(result, errors, 'morio.api.idp.disabled')
+    // validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
+    sleep(5)
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
     assert.equal(result[0], 200)
     const d = result[1]
