@@ -128,7 +128,7 @@ describe('API Key Tests', () => {
   })
 
   it(`Should GET /status`, async () => {
-    sleep(5)
+    sleep(30)
 
     await attempt({
       every: 3,
@@ -146,7 +146,6 @@ describe('API Key Tests', () => {
 
   // POST /login
   it(`Should not POST /login`, async () => {
-    sleep(10)
     const data = {
       provider: 'apikey',
       data: {
