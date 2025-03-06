@@ -124,17 +124,22 @@ describe('API Key Tests', () => {
 
     const result = await api.post('/settings', settings)
 
+    console.log('setting result', result)
+
     assert.equal(result[0], 204)
   })
 
   it(`Should GET /status`, async () => {
-    sleep(30)
+    sleep(5)
 
     await attempt({
       every: 3,
       timeout: 90,
       run: async () => {
         const [status, body] = await api.get('/status')
+
+        console.log('status', status)
+        console.log('body', body)
 
         return status === 200 && body.state.config_resolved === true
       },
