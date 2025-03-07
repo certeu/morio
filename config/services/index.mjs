@@ -7,8 +7,6 @@ import { resolveServiceConfiguration as console } from './console.mjs'
 import { resolveServiceConfiguration as connector } from './connector.mjs'
 import { resolveServiceConfiguration as core } from './core.mjs'
 import { resolveServiceConfiguration as db } from './db.mjs'
-import { resolveServiceConfiguration as dbuilder } from './dbuilder.mjs'
-import { resolveServiceConfiguration as drbuilder } from './drbuilder.mjs'
 import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as tap } from './tap.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
@@ -24,8 +22,6 @@ const resolvers = {
   connector,
   core,
   db,
-  dbuilder,
-  drbuilder,
   proxy,
   tap,
   ui,
@@ -52,8 +48,6 @@ export const serviceOrder = [
   'watcher',
   'tap',
   'web',
-  'dbuilder',
-  'drbuilder',
 ]
 
 /*
@@ -69,8 +63,6 @@ export const optionalServices = [
   'cache',
   'ui',
   'connector',
-  'dbuilder',
-  'drbuilder',
   'tap',
   'watcher',
 ]

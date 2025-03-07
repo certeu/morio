@@ -18,9 +18,6 @@ import { uuid } from '#shared/crypto'
 import { ensureTraefikDynamicConfiguration } from './proxy.mjs'
 // Load core config
 import { resolveServiceConfiguration } from '#config'
-// Client builders
-import { buildPackage as buildDebianClientPackage } from '#lib/services/dbuilder'
-import { buildPackage as buildDebianRepoPackage } from '#lib/services/drbuilder'
 
 /*
  * This service object holds the service name,
@@ -169,24 +166,6 @@ export const service = {
        * Also, don't wait
        */
       await ensureMorioCluster(hookParams)
-
-      /*
-       * Build packages at initial startup
-       */
-      if (hookParams?.initialSetup) {
-        // Build repo package
-        log.debug('Building initial repo package')
-        buildDebianRepoPackage()
-        /*
-         * Defer building client package a bit
-         * Since they both update the same repository
-         * so best to spread them a bit to avoid race conditions
-         */
-        setTimeout(() => {
-          log.debug('Building initial client package')
-          buildDebianClientPackage()
-        }, 20000)
-      }
 
       return utils.isCoreReady()
     },

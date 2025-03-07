@@ -223,26 +223,6 @@ export const schema = {
     status: Joi.string().allow('start', 'done', 'error').required(),
   }),
   // TODO: Lock this down further
-  'req.pkg.build.deb': Joi.object({
-    Package: Joi.string().required(),
-    Source: Joi.string().required(),
-    Section: Joi.string().valid('utils').required(),
-    Priority: Joi.string().valid('required,important,standard,optional,extra').required(),
-    Architecture: Joi.string().required(),
-    Essential: Joi.string().valid('no').required(),
-    Depends: Joi.array().required(),
-    'Installed-Size': Joi.number().required(),
-    Maintainer: Joi.string().required(),
-    'Changed-By': Joi.string().required(),
-    Uploaders: Joi.array().required(),
-    Homepage: Joi.string().required(),
-    Description: Joi.string().required(),
-    DetailedDescription: Joi.string().required(),
-    'Vcs-Git': Joi.string().required(),
-    Version: Joi.string().required(),
-    Revision: Joi.number().required(),
-  }),
-  // TODO: Lock this down further
   'req.certificate.create': Joi.object({
     certificate: Joi.object({
       cn: Joi.string().required(),

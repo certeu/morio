@@ -8,8 +8,6 @@ import { service as cacheService } from './cache.mjs'
 import { service as brokerService } from './broker.mjs'
 import { service as connectorService } from './connector.mjs'
 import { service as consoleService } from './console.mjs'
-import { service as dbuilderService } from './dbuilder.mjs'
-import { service as drbuilderService } from './drbuilder.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 import { service as tapService } from './tap.mjs'
 import { service as watcherService } from './watcher.mjs'
@@ -53,8 +51,6 @@ const services = {
   broker: brokerService,
   console: consoleService,
   connector: connectorService,
-  dbuilder: dbuilderService,
-  drbuilder: drbuilderService,
   tap: tapService,
   watcher: watcherService,
   web: webService,

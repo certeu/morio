@@ -4,55 +4,23 @@ import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { CertificateIcon, DownloadIcon, PackageIcon } from 'components/icons.mjs'
-//import { Apple, Debian, Microsoft, RedHat } from 'components/brands.mjs'
-import { Debian } from 'components/brands.mjs'
+import { CertificateIcon, DownloadIcon } from 'components/icons.mjs'
 import { Popout } from 'components/popout.mjs'
 import { WebLink } from 'components/link.mjs'
 
-const clients = {
-  deb: ['Debian Linux', Debian],
-  //  rpm: ['RedHat Linux', RedHat],
-  //  msi: ['Microsoft Windows', Microsoft],
-  //  pkg: ['Apple MacOS', Apple],
-}
-
 const DownloadsPage = (props) => {
   const { api } = useApi()
-  const [clientPkgs, setClientPkgs] = useState({})
-  const [repoPkgs, setRepoPkgs] = useState({})
   const [certs, setCerts] = useState([])
 
   useEffect(() => {
     const loadFiles = async () => {
-      const types = ['deb', 'rpm', 'msi', 'pkg']
-      const match1 = '/downloads/clients/'
-      const match2 = '/downloads/installers/'
-      const match3 = '/downloads/certs/'
+      const match = '/downloads/certs/'
       const files = await api.listDownloads()
-      const cp = {}
-      const rp = {}
       const arr = []
       if (files[1] === 200) {
         for (const file of files[0]) {
-          if (file.slice(0, match1.length) === match1) {
-            const type = file.slice(-4)
-            const ext = file.slice(-3)
-            if (types.map((t) => `.${t}`).includes(type)) {
-              if (typeof cp[ext] === 'undefined') cp[ext] = []
-              cp[ext].push(file)
-            }
-          } else if (file.slice(0, match2.length) === match2) {
-            const type = file.slice(-4)
-            const ext = file.slice(-3)
-            if (types.map((t) => `.${t}`).includes(type)) {
-              if (typeof rp[ext] === 'undefined') rp[ext] = []
-              rp[ext].push(file)
-            }
-          } else if (file.slice(0, match3.length) === match3) arr.push(file)
+          if (file.slice(0, match.length) === match) arr.push(file)
         }
-        setClientPkgs(cp)
-        setRepoPkgs(rp)
         setCerts(arr)
       }
     }
@@ -80,66 +48,6 @@ const DownloadsPage = (props) => {
               </li>
             ))}
           </ul>
-          <h2 className="flex flex-row gap-2 items-center pl-2" id="packages">
-            <PackageIcon className="w-10 h-10" />
-            <span>Client Packages</span>
-          </h2>
-          {Object.keys(clients).map((ext) => {
-            const Icon = clients[ext][1]
-            return (
-              <div key={ext}>
-                <h3 className="flex flex-row gap-2 items-center pl-6">
-                  <Icon />
-                  <span>For {clients[ext][0]}</span>
-                </h3>
-                <ul className="list list-inside ml-10">
-                  {clientPkgs[ext] && clientPkgs[ext].length > 0 ? (
-                    clientPkgs[ext]
-                      .sort()
-                      .filter((pkg) => pkg.includes('morio-client'))
-                      .map((pkg) => (
-                        <li key={pkg} className="flex flex-row gap-2 items-center py-0.5">
-                          <Icon className="w-4 h-4" />
-                          <WebLink href={pkg}>{pkg}</WebLink>
-                        </li>
-                      ))
-                  ) : (
-                    <li className="opacity-50 italic">No downloads available</li>
-                  )}
-                </ul>
-              </div>
-            )
-          })}
-          <h2 className="flex flex-row gap-2 items-center pl-2" id="packages">
-            <PackageIcon className="w-10 h-10" />
-            <span>Repository Installer Packages</span>
-          </h2>
-          {Object.keys(clients).map((ext) => {
-            const Icon = clients[ext][1]
-            return (
-              <div key={ext}>
-                <h3 className="flex flex-row gap-2 items-center pl-6">
-                  <Icon />
-                  <span>For {clients[ext][0]}</span>
-                </h3>
-                <ul className="list list-inside ml-10">
-                  {repoPkgs[ext] && repoPkgs[ext].length > 0 ? (
-                    repoPkgs[ext]
-                      .sort()
-                      .filter((pkg) => pkg.includes('morio-repo'))
-                      .map((pkg) => (
-                        <li key={pkg} className="flex flex-row gap-2 items-center py-0.5">
-                          <Icon className="w-4 h-4" />
-                          <WebLink href={pkg}>{pkg}</WebLink>
-                        </li>
-                      ))
-                  ) : (
-                    <li className="opacity-50 italic">No downloads available</li>
-                  )}
-                </ul>
-              </div>
-            )
-          })}
         </div>
       </ContentWrapper>
     </PageWrapper>
