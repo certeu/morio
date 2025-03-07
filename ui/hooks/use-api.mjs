@@ -858,14 +858,11 @@ MorioClient.prototype.getDynamicFlagsConfig = async function () {
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.sendClientCommand = async function (cmd, uuids) {
-  return await this.call(
-    `${morioConfig.api}/clients/cmd/${cmd}`,
-    {
-      headers: this.jsonHeaders,
-      method: 'PUT',
-      body: JSON.stringify({ clients: uuids }),
-    }
-  )
+  return await this.call(`${morioConfig.api}/clients/cmd/${cmd}`, {
+    headers: this.jsonHeaders,
+    method: 'PUT',
+    body: JSON.stringify({ clients: uuids }),
+  })
 }
 
 /**

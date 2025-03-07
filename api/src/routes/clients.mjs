@@ -78,5 +78,4 @@ export function routes(app) {
    * Send a command to one or more (or all) multiple clients
    */
   app.put(`/clients/cmd/:cmd`, rbac.operator, Clients.sendCommand)
-
 }

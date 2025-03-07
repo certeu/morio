@@ -12,7 +12,7 @@ import { KeyVal } from 'components/keyval.mjs'
 import { InventoryHostname } from 'components/inventory/host.mjs'
 import { ToggleLiveButton } from 'components/boards/shared.mjs'
 
-export default function ClientCommandStatusPage({ id  }) {
+export default function ClientCommandStatusPage({ id }) {
   const { api } = useApi()
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
@@ -29,7 +29,7 @@ export default function ClientCommandStatusPage({ id  }) {
           setLoadingStatus([true, 'Loading command info'])
           result = await api.getClientCommandInfo(id)
           if (result[1] === 200 && result[0]?.id) {
-            const command = {...result[0]}
+            const command = { ...result[0] }
             if (typeof command.clients === 'string') command.clients = JSON.parse(command.clients)
             setCmd(command)
             setLoadingStatus([true, 'Command info loaded', true, true])
@@ -59,7 +59,7 @@ export default function ClientCommandStatusPage({ id  }) {
       }
     }
     if (id) getUpdates()
-  }, [id, polls, api])
+  }, [id, polls, api, cmd, paused, setLoadingStatus])
 
   const meta = {
     title: `Client command status`,
@@ -70,7 +70,7 @@ export default function ClientCommandStatusPage({ id  }) {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <ClientCommand { ...cmd } paused={paused} setPaused={setPaused} />
+        <ClientCommand {...cmd} paused={paused} setPaused={setPaused} />
         <ClientCommandUpdates updates={updates} />
       </ContentWrapper>
     </PageWrapper>
@@ -91,20 +91,22 @@ export const getStaticPaths = () => ({
 const ClientCommand = ({ id, clients, created_at, paused, setPaused }) => (
   <div className="px-0 pt-2 border-primary border-2 border-x-0 border-t-0 flex flex-row items-center flex-wrap gap-2 justify-between">
     <div className="flex flex-row flex-wrap items-center gap-2">
-      <MegaphoneIcon className="w-10 h-10 text-primary"/>
+      <MegaphoneIcon className="w-10 h-10 text-primary" />
       <h4>Morio Client Command #{id}</h4>
     </div>
     <div className="flex flex-row flex-wrap items-center gap-2">
       <KeyVal k="issued" val={<TimeAgo iso={created_at} />} />
       <KeyVal k="clients" val={Array.isArray(clients) ? clients.length : 'all'} />
-      <ToggleLiveButton {...{paused, setPaused }}/>
+      <ToggleLiveButton {...{ paused, setPaused }} />
     </div>
   </div>
 )
 
 const ClientCommandUpdates = ({ updates }) => (
   <div className="flex flex-col gap-1 mt-4">
-    {updates.map(update => <ClientCommandUpdate update={update} />)}
+    {updates.map((update, i) => (
+      <ClientCommandUpdate update={update} key={i} />
+    ))}
   </div>
 )
 
@@ -121,7 +123,7 @@ const ClientCommandUpdate = ({ update }) => (
 
 const ClientCommandStart = ({ update }) => (
   <>
-    <PlayIcon className="w-6 h-6 text-primary"/>
+    <PlayIcon className="w-6 h-6 text-primary" />
     <h5 className="flex flex-row items-center flex-wrap gap-2">
       Start <small>on</small> <InventoryHostname uuid={update.host} raw />
     </h5>
@@ -139,10 +141,9 @@ const ClientCommandDone = ({ update }) => (
 
 const ClientCommandError = ({ update }) => (
   <>
-    <WarningIcon className="w-6 h-6 text-error"/>
+    <WarningIcon className="w-6 h-6 text-error" />
     <h5 className="flex flex-row items-center flex-wrap gap-2">
       Error <small>on</small> <InventoryHostname uuid={update.host} raw />
     </h5>
   </>
 )
-

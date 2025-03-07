@@ -63,5 +63,4 @@ export function routes(app) {
    * Validates Morio settings
    */
   app.post(`/validate/settings`, Anonymous.validateSettings)
-
 }

@@ -143,10 +143,7 @@ utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
  * @return {array} list - The list of all flankin node FQDNs
  *
  */
-utils.getAllNodesFqdns = () => [
-  ...utils.getBrokerFqdns(),
-  ...utils.getFlankingFqdns(),
-]
+utils.getAllNodesFqdns = () => [...utils.getBrokerFqdns(), ...utils.getFlankingFqdns()]
 
 /**
  * Helper method to get the node_serial of the local node

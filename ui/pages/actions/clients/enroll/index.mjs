@@ -5,20 +5,15 @@ import { useApi } from 'hooks/use-api.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PackageIcon } from 'components/icons.mjs'
-import { Apple, Debian, Microsoft, RedHat } from 'components/brands.mjs'
-import { Link } from 'components/link.mjs'
 import { Popout } from 'components/popout.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { Tabs, Tab } from 'components/tabs.mjs'
-import { Ext } from 'components/ext.mjs'
 import { StringInput } from 'components/inputs.mjs'
-
 
 const EnrollClientsPage = (props) => {
   const [fqdn, setFqdn] = useState('cluster-fqdn-here')
   const [flags, setFlags] = useState({})
   const [invite, setInvite] = useState('invite-here')
-  const [inviteType, setInviteType] = useState()
   const { api } = useApi()
 
   useEffect(
@@ -29,58 +24,75 @@ const EnrollClientsPage = (props) => {
     []
   )
 
-
   let step2 = null
 
-  if (flags.ENFORCE_HTTP_MTLS) step2 = (
-    <Popout warning>
-      <h5>Joining a client to an mTLS-protected cluster is not supported</h5>
-      <p>
-        This Morio cluster has the <code>ENFORCE_HTTP_MTLS</code> feature flag enabled.
-        <br />
-        Automatic enrollment of a client to an mTLS-protected cluster is currently not supported.
-      </p>
-      <p>
-        As a workaround, we recommend to (temporarily) disable this feature flag.
-      </p>
-      <p className="text-sm italic">
-        You can mitigate your risk by blocking access to TCP port 443 from untrusted hosts.
-      </p>
-    </Popout>
-  )
-  else if (1 || flags.REQUIRE_CLIENT_INVITES) step2 = (
-    <>
-      <Popout note>
-        <h5>This cluster requires client invites</h5>
+  if (flags.ENFORCE_HTTP_MTLS)
+    step2 = (
+      <Popout warning>
+        <h5>Joining a client to an mTLS-protected cluster is not supported</h5>
         <p>
-          The <code>REQUIRE_CLIENT_INVITES</code> feature flags is enabled on this cluster,
-          meaning that clients cannot join without providing an invite code.
-        </p>
-        <p>
-          If you have an invite code, you can enter it below to auto-update the command examples.
+          This Morio cluster has the <code>ENFORCE_HTTP_MTLS</code> feature flag enabled.
           <br />
-          If you do not have an invite code, you can generate one with the buttons below.
+          Automatic enrollment of a client to an mTLS-protected cluster is currently not supported.
         </p>
-        <div className="flex flex-col gap-2">
-          <StringInput label="Invite code" current={invite} update={setInvite}/>
-          <div className="flex flex-row flex-wrap gap-2 justify-center">
-            <button
-              className="btn btn-primary"
-              onClick={() => getInvite({ setInvite, setInviteType, api, type: 'once' })}
-            >Generate one-time invite code</button>
-            <button
-              className="btn btn-primary"
-              onClick={() => getInvite({ setInvite, setInviteType, api, type: 'many' })}
-            >Generate multi-use invite code</button>
-          </div>
-        </div>
+        <p>As a workaround, we recommend to (temporarily) disable this feature flag.</p>
+        <p className="text-sm italic">
+          You can mitigate your risk by blocking access to TCP port 443 from untrusted hosts.
+        </p>
       </Popout>
+    )
+  else if (flags.REQUIRE_CLIENT_INVITES)
+    step2 = (
+      <>
+        <Popout note>
+          <h5>This cluster requires client invites</h5>
+          <p>
+            The <code>REQUIRE_CLIENT_INVITES</code> feature flags is enabled on this cluster,
+            meaning that clients cannot join without providing an invite code.
+          </p>
+          <p>
+            If you have an invite code, you can enter it below to auto-update the command examples.
+            <br />
+            If you do not have an invite code, you can generate one with the buttons below.
+          </p>
+          <div className="flex flex-col gap-2">
+            <StringInput label="Invite code" current={invite} update={setInvite} />
+            <div className="flex flex-row flex-wrap gap-2 justify-center">
+              <button
+                className="btn btn-primary"
+                onClick={() => getInvite({ setInvite, api, type: 'once' })}
+              >
+                Generate one-time invite code
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={() => getInvite({ setInvite, api, type: 'many' })}
+              >
+                Generate multi-use invite code
+              </button>
+            </div>
+          </div>
+        </Popout>
+        <Tabs tabs="Linux, MacOS, Windows">
+          <Tab name="Linux" key="lin">
+            <p>Hook up the Morio client to this cluster by running the following command:</p>
+            <Highlight language="shell">{`sudo morio join ${fqdn} --invite ${invite}`}</Highlight>
+          </Tab>
+          <Tab name="MacOS" key="mac">
+            <Popout fixme>Provide instructions for MacOS</Popout>
+          </Tab>
+          <Tab name="Windows" key="win">
+            <Popout fixme>Provide instructions for Windows</Popout>
+          </Tab>
+        </Tabs>
+      </>
+    )
+  else
+    step2 = (
       <Tabs tabs="Linux, MacOS, Windows">
         <Tab name="Linux" key="lin">
-          <p>
-            Hook up the Morio client to this cluster by running the following command:
-          </p>
-          <Highlight language="shell">{`sudo morio join ${fqdn} --invite ${invite}`}</Highlight>
+          <p>Hook up the Morio client to this cluster by running the following command:</p>
+          <Highlight language="shell">{`sudo morio join ${fqdn}`}</Highlight>
         </Tab>
         <Tab name="MacOS" key="mac">
           <Popout fixme>Provide instructions for MacOS</Popout>
@@ -89,25 +101,7 @@ const EnrollClientsPage = (props) => {
           <Popout fixme>Provide instructions for Windows</Popout>
         </Tab>
       </Tabs>
-    </>
-  )
-  else step2 = (
-    <Tabs tabs="Linux, MacOS, Windows">
-      <Tab name="Linux" key="lin">
-        <p>
-          Hook up the Morio client to this cluster by running the following command:
-        </p>
-        <Highlight language="shell">{`sudo morio join ${fqdn}`}</Highlight>
-        <pre>{JSON.stringify({ fqdn, flags }, null ,2)}</pre>
-      </Tab>
-      <Tab name="MacOS" key="mac">
-        <Popout fixme>Provide instructions for MacOS</Popout>
-      </Tab>
-      <Tab name="Windows" key="win">
-        <Popout fixme>Provide instructions for Windows</Popout>
-      </Tab>
-    </Tabs>
-  )
+    )
 
   return (
     <PageWrapper {...props} role="operator">
@@ -118,8 +112,8 @@ const EnrollClientsPage = (props) => {
           <Tabs tabs="Linux, MacOS, Windows">
             <Tab name="Linux" key="lin">
               <p>
-                To install the Morio client for Linux,
-                run the following command from an account with <code>sudo</code> rights:
+                To install the Morio client for Linux, run the following command from an account
+                with <code>sudo</code> rights:
               </p>
               <Highlight language="shell">{`curl -fsSL https://install.morio.it/client/ | bash`}</Highlight>
             </Tab>
@@ -148,7 +142,7 @@ export const getStaticProps = () => ({
   },
 })
 
-async function getFqdn ({ api, setFqdn, setFlags }) {
+async function getFqdn({ api, setFqdn, setFlags }) {
   const result1 = await api.getClusterFqdn()
   if (result1[1] === 200) {
     setFqdn(result1[0].fqdn)
@@ -159,10 +153,9 @@ async function getFqdn ({ api, setFqdn, setFlags }) {
   } else setFlags(false)
 }
 
-async function getInvite ({ api, setInvite, setInviteType, type }) {
+async function getInvite({ api, setInvite, type }) {
   const result = await api.createClientInvite(type)
   if (result[1] === 200) {
-    setInviteType(type)
     setInvite(result[0].invite)
   } else setInvite(false)
 }

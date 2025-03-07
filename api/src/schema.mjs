@@ -73,12 +73,13 @@ const client = Joi.object({
   memory: Joi.number(),
   ips: Joi.array().items(Joi.string()),
   macs: Joi.array().items(Joi.string()),
-  packages: Joi.array().items(Joi.object({
-    name: Joi.string(),
-    version: Joi.string()
-  }))
+  packages: Joi.array().items(
+    Joi.object({
+      name: Joi.string(),
+      version: Joi.string(),
+    })
+  ),
 }).required()
-
 
 /*
  * This describes the schema of requests and responses in the Core API
@@ -200,7 +201,7 @@ export const schema = {
     cluster: Joi.string().hostname(),
     invite: Joi.string().optional(),
     uuid: uuid.optional(),
-    info: client
+    info: client,
   }),
   'req.client.push': Joi.object({
     uuid: uuid.required().description('The UUID of the client'),
@@ -211,18 +212,15 @@ export const schema = {
   'req.client.report': Joi.object({
     cluster: Joi.string().hostname().required(),
     uuid: uuid.optional(),
-    info: client
+    info: client,
   }),
   'req.client.command': Joi.object({
-    clients: Joi.alternatives().try(
-      Joi.boolean().valid(false),
-      Joi.array().items(uuid),
-    ).required(),
+    clients: Joi.alternatives().try(Joi.boolean().valid(false), Joi.array().items(uuid)).required(),
   }),
   'req.client.commandStatus': Joi.object({
     uuid: uuid.required(),
     id: Joi.number(),
-    status: Joi.string().allow("start", "done", "error").required()
+    status: Joi.string().allow('start', 'done', 'error').required(),
   }),
   // TODO: Lock this down further
   'req.pkg.build.deb': Joi.object({

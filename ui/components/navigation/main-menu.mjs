@@ -128,11 +128,11 @@ export const links = {
       r: 'operator',
       enroll: {
         t: 'Enroll Clients',
-        r: 'operator'
+        r: 'operator',
       },
       cmd: {
         t: 'Send Client Commands',
-        r: 'operator'
+        r: 'operator',
       },
     },
   },
@@ -381,9 +381,12 @@ export const MainMenu = ({ role, current, navs = false, level = 0, parents = [] 
   useEffect(() => {
     const newList = []
     for (const [key, page] of Object.entries(navs))
-      newList.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+      newList.push(
+        <NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />
+      )
     setList(newList)
-  },[navs, role])
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [navs, role])
 
   return list
 }

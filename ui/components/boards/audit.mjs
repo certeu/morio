@@ -84,6 +84,7 @@ const AuditTable = ({ data, paused, setPaused }) => {
 
       setFiltered(filteredArray)
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [search])
 
   return (

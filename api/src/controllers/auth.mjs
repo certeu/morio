@@ -1,4 +1,4 @@
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'

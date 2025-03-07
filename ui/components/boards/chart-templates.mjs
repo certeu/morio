@@ -1,4 +1,3 @@
-
 /*
  * Shared chart options
  */

@@ -21,7 +21,8 @@ export const errors = {
   'morio.api.client.authentication_mismatch': {
     status: 403,
     title: 'Authentication mismatch',
-    detail: 'This endpoint can only be used by the API key that was assigned to the client when joining the cluster.',
+    detail:
+      'This endpoint can only be used by the API key that was assigned to the client when joining the cluster.',
   },
   /*
    * Mismatch between the client join request cluster value and the actual cluster FQDN
@@ -29,7 +30,8 @@ export const errors = {
   'morio.api.client.unknown_module': {
     status: 400,
     title: 'Unknown client module',
-    detail: 'The modules list includes a module that is not known to Morio. Modules should be centrally seeded.'
+    detail:
+      'The modules list includes a module that is not known to Morio. Modules should be centrally seeded.',
   },
   /*
    * Client tries to join with a UUID that alread joined
@@ -37,7 +39,8 @@ export const errors = {
   'morio.api.client.joined': {
     status: 400,
     title: 'Client already joined',
-    detail: 'A client with this UUID already joined this cluster. To re-join this client, use the "morio rejoin" cli command instead.'
+    detail:
+      'A client with this UUID already joined this cluster. To re-join this client, use the "morio rejoin" cli command instead.',
   },
   /*
    * Client tries to join with a UUID that alread joined
@@ -45,7 +48,8 @@ export const errors = {
   'morio.api.clients.invalid_invite_type': {
     status: 400,
     title: 'Invalid client invite type',
-    detail: 'The client invite type you requested is invalid. It should be one of either "once" or "many".'
+    detail:
+      'The client invite type you requested is invalid. It should be one of either "once" or "many".',
   },
   /*
    * Client tries to join without an invite that is required
@@ -53,7 +57,8 @@ export const errors = {
   'morio.api.clients.invite_required': {
     status: 400,
     title: 'An invite code is required to join this cluster',
-    detail: 'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.'
+    detail:
+      'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.',
   },
   /*
    * Client tries to join with an invalid invite
@@ -61,7 +66,8 @@ export const errors = {
   'morio.api.clients.invite_invalid': {
     status: 400,
     title: 'The provided invite code is invalid',
-    detail: 'The invite provided was not valid. Typically this happens when you try to use a one-time invite more than once.'
+    detail:
+      'The invite provided was not valid. Typically this happens when you try to use a one-time invite more than once.',
   },
   /*
    * Failed to generate an X.509 certificate

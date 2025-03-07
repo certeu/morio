@@ -398,7 +398,6 @@ export const MegaphoneIcon = (props) => (
   </IconWrapper>
 )
 
-
 /*
  * MenuIcon - Looks like a hamburger menu (3 horizontal lines)
  */

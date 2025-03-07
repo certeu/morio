@@ -152,19 +152,11 @@ function groupOss(oss) {
   return all
 }
 
-export const OsIcon = ({ data, ...rest }) => {
-  let Icon = ServersIcon
-  if (!data) return <Icon {...rest} />
+export const OsIcon = ({ data = {}, ...rest }) => {
   if (data.name === 'linux') {
-    if (data.version.toLowerCase().includes('debian')) return <span>debian</span>
-    return <span>linux</span>
+    if (data.version.toLowerCase().includes('debian')) return <Debian {...rest} />
+    return <Linux {...rest} />
   }
 
-    return null
-  if (id[0] === 'linux') {
-    Icon = Linux
-    if (id[1] === 'debian') Icon = Debian
-  }
-
-  return <Icon {...rest} />
+  return <ServersIcon {...rest} />
 }

@@ -79,8 +79,8 @@ const isApiUp = async (reload = false) => {
 }
 
 async function ensureLocalPrerequisites() {
-  await mkdir("/etc/morio/api")
-  await chown("/etc/morio/api", 2112, 2112)
+  await mkdir('/etc/morio/api')
+  await chown('/etc/morio/api', 2112, 2112)
   /*
    * Generate key and certificate for mTLS
    * (this will only renew the cert if it's missing or old
@@ -89,5 +89,3 @@ async function ensureLocalPrerequisites() {
 
   return
 }
-
-

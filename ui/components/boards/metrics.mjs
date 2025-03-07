@@ -301,12 +301,13 @@ const ShowMetricsInner = ({ host, module, metricset, hostname, show }) => {
   })
 
   // Don't bother if there's nothing in the cache
-  if (!cache || cache.length < 1) return (
-    <>
-      <Loading />
-      <p>Nothing in the cache to show you here.</p>
-    </>
-  )
+  if (!cache || cache.length < 1)
+    return (
+      <>
+        <Loading />
+        <p>Nothing in the cache to show you here.</p>
+      </>
+    )
 
   // Defer to chart transformer
   const data = parseCachedMetrics(cache)
@@ -360,14 +361,17 @@ const EchartWrapper = ({
   const isEnabled = (option, i) =>
     enabled === true || (enabled && (enabled[i] || enabled[option?.id])) ? true : false
 
-  if (option.err === 'noTransformAvailable') return (
-    <Popout note>
-      <h5>No visualisations available</h5>
-      <p>No charts are loaded for the <code>{metricset}</code> metricset of the <code>{module}</code> module.</p>
-      <p>If this module provides chart templates, you may need to preseed them.</p>
-    </Popout>
-  )
-
+  if (option.err === 'noTransformAvailable')
+    return (
+      <Popout note>
+        <h5>No visualisations available</h5>
+        <p>
+          No charts are loaded for the <code>{metricset}</code> metricset of the{' '}
+          <code>{module}</code> module.
+        </p>
+        <p>If this module provides chart templates, you may need to preseed them.</p>
+      </Popout>
+    )
 
   return (
     <div className="flex flex-col gap-4">

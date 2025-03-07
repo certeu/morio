@@ -14,12 +14,12 @@ import { readFile } from '#shared/fs'
 async function createClient() {
   return new Kafka({
     clientId: `api_${utils.getNodeUuid()}`,
-    brokers: utils.getBrokerFqdns().map(host => `${host}:9092`),
+    brokers: utils.getBrokerFqdns().map((host) => `${host}:9092`),
     ssl: {
       rejectUnauthorized: false,
-      ca: [(await readFile('/etc/morio/api/tls-ca.pem'))],
-      key: (await readFile('/etc/morio/api/tls-key.pem')),
-      cert: (await readFile('/etc/morio/api/tls-cert.pem')),
+      ca: [await readFile('/etc/morio/api/tls-ca.pem')],
+      key: await readFile('/etc/morio/api/tls-key.pem'),
+      cert: await readFile('/etc/morio/api/tls-cert.pem'),
     },
     logLevel: logLevel.WARN,
   })
@@ -46,7 +46,9 @@ export async function createProducer() {
    */
   utils.producer.on(utils.producer.events.CONNECT, () => log.info('Kafka producer connected'))
   utils.producer.on(utils.producer.events.DISCONNECT, () => log.info('Kafka producer disconnected'))
-  utils.producer.on(utils.producer.events.REQUEST_TIMEOUT, () => log.warn('Kafka producer request timeout'))
+  utils.producer.on(utils.producer.events.REQUEST_TIMEOUT, () =>
+    log.warn('Kafka producer request timeout')
+  )
 
   /*
    * Attach produce function & exitHandler to utils
@@ -57,7 +59,7 @@ export async function createProducer() {
   return utils.producer
 }
 
-function produce (topic, data)  {
+function produce(topic, data) {
   return utils.producer.send({
     topic,
     messages: [{ value: utils.asString(data) }],
@@ -86,4 +88,3 @@ async function exitGracefully() {
 //process.on('SIGINT', exitGracefully.bind())
 //process.on('SIGUSR1', exitGracefully.bind())
 //process.on('SIGUSR2', exitGracefully.bind())
-

@@ -1,5 +1,4 @@
 // Dependencies
-import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'

@@ -21,7 +21,7 @@ const fields = {
     notes: (val) => val.map((item) => clean(item)),
     tags: (val) => val.map((item) => clean(item)),
     last_update: asTime,
-  }
+  },
 }
 
 /*
@@ -253,28 +253,28 @@ export async function getStats() {
   ])
   if (Array.isArray(count) && count[0] === 200) {
     return {
-      hosts:     count[1].results[0].values[0][0],
-      ips:       count[1].results[1].values[0][0],
-      macs:      count[1].results[2].values[0][0],
-      oss:       count[1].results[3].values[0][0],
-      pkgs:      count[1].results[4].values[0][0],
-      mods:      count[1].results[5].values[0][0],
-      modvars:   count[1].results[6].values[0][0],
-      hostvars:  count[1].results[7].values[0][0],
-      modfiles:  count[1].results[8].values[0][0],
+      hosts: count[1].results[0].values[0][0],
+      ips: count[1].results[1].values[0][0],
+      macs: count[1].results[2].values[0][0],
+      oss: count[1].results[3].values[0][0],
+      pkgs: count[1].results[4].values[0][0],
+      mods: count[1].results[5].values[0][0],
+      modvars: count[1].results[6].values[0][0],
+      hostvars: count[1].results[7].values[0][0],
+      modfiles: count[1].results[8].values[0][0],
     }
-  }
-  else return {
-    hosts: 0,
-    ips: 0,
-    macs: 0,
-    oss: 0,
-    pkgs: 0,
-    mods: 0,
-    modvars: 0,
-    hostvars: 0,
-    modfiles: 0,
-  }
+  } else
+    return {
+      hosts: 0,
+      ips: 0,
+      macs: 0,
+      oss: 0,
+      pkgs: 0,
+      mods: 0,
+      modvars: 0,
+      hostvars: 0,
+      modfiles: 0,
+    }
 }
 
 /**
@@ -340,7 +340,7 @@ export async function deleteHost(id = false) {
   return result
 }
 
-export async function createInvite(user, type='once') {
+export async function createInvite(user, type = 'once') {
   /*
    * There is a (small) chance that the random string we get
    * is already in use. So we loop until the record is created.
@@ -370,10 +370,11 @@ export async function createInvite(user, type='once') {
         createdBy: user,
         createdAt: new Date(),
         type: type === 'many' ? 'many' : 'once',
-        used: 0
+        used: 0,
       }
     )
-    if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id) created = true
+    if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+      created = true
   }
 
   return invite
@@ -391,9 +392,7 @@ export async function getInvite(id) {
     return false
   }
   const result = await db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
-  const data = (result[0] === 200 && result[1].results)
-    ? getFields(result[1]).pop()
-    : false
+  const data = result[0] === 200 && result[1].results ? getFields(result[1]).pop() : false
 
   return data
 }
@@ -421,10 +420,11 @@ export async function useInvite(id) {
   /*
    * Is it a multi-use invite?
    */
-  if (invite.type === 'many') await db.write(
-    `UPDATE inventory_invites SET used=:used WHERE id=:id`,
-    { id, used: Number(invite.used) +1 }
-  )
+  if (invite.type === 'many')
+    await db.write(`UPDATE inventory_invites SET used=:used WHERE id=:id`, {
+      id,
+      used: Number(invite.used) + 1,
+    })
   else await db.write(`DELETE FROM inventory_invites WHERE id=:id`, { id })
 
   return true
@@ -576,7 +576,6 @@ async function getHostnames(hostIds = []) {
   return perId
 }
 
-
 /**
  * Enrolls a (new) host into the inventory
  *
@@ -585,7 +584,7 @@ async function getHostnames(hostIds = []) {
  * @param {bool} replace - Whether to overwrite an existing client or not
  * @return {boolean} result - True if it went ok, false if not
  */
-export async function enrollHost (uuid, data, replace=false) {
+export async function enrollHost(uuid, data, replace = false) {
   const exists = await loadHost(uuid)
   /*
    * By default, we do not allow replacing/updating a host
@@ -608,7 +607,7 @@ export async function enrollHost (uuid, data, replace=false) {
       [`DELETE from inventory_host_os WHERE host=:host`, { host }],
       [`DELETE from inventory_host_ip WHERE host=:host`, { host }],
       [`DELETE from inventory_host_mac WHERE host=:host`, { host }],
-      [`DELETE from inventory_host_pkg WHERE host=:host`, { host }],
+      [`DELETE from inventory_host_pkg WHERE host=:host`, { host }]
     )
   }
 
@@ -618,17 +617,17 @@ export async function enrollHost (uuid, data, replace=false) {
   const osQueries = osInsertQuery(uuid, { name: data.os, version: data.os_version })
   if (osQueries) queries.push(...osQueries)
   // IP queries
-  for (const ip of (data.ips || [])) {
+  for (const ip of data.ips || []) {
     const ipQueries = ipInsertQuery(uuid, ip)
     if (ipQueries) queries.push(...ipQueries)
   }
   // Mac queries
-  for (const mac of (data.macs || [])) {
+  for (const mac of data.macs || []) {
     const macQueries = macInsertQuery(uuid, mac)
     if (macQueries) queries.push(...macQueries)
   }
   // Package queries
-  for (const pkg of (data.packages || [])) {
+  for (const pkg of data.packages || []) {
     const pkgQueries = pkgInsertQuery(uuid, pkg)
     if (pkgQueries) queries.push(...pkgQueries)
   }
@@ -636,8 +635,7 @@ export async function enrollHost (uuid, data, replace=false) {
   let result
   try {
     result = await db.writeMany(queries)
-  }
-  catch (err) {
+  } catch (err) {
     log.debug(err, `Failed to bulk-write updates for host enrollment`)
   }
 
@@ -650,7 +648,7 @@ export async function enrollHost (uuid, data, replace=false) {
  * @param {string} uuid - The host's UUID
  * @return {boolean} result - True if it went ok, false if not
  */
-export async function removeHost (uuid) {
+export async function removeHost(uuid) {
   const params = { host: uuid }
   const queries = [
     'inventory_host_ip',
@@ -659,10 +657,10 @@ export async function removeHost (uuid) {
     'inventory_host_os',
     'inventory_host_mod',
     'inventory_hostvars',
-  ].map(table => ([ `DELETE from ${table} WHERE host=:host`, params ]))
+  ].map((table) => [`DELETE from ${table} WHERE host=:host`, params])
   queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
 
-  const result = await db.writeMany(queries)
+  await db.writeMany(queries)
 }
 
 /**
@@ -671,12 +669,13 @@ export async function removeHost (uuid) {
  * @param {array} modules - The list of modules to check
  * @return {array} result - An [bool result, array missing] array
  */
-export async function verifyModulesExist (modules) {
+export async function verifyModulesExist(modules) {
   const missing = []
   const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
-  const allModules = (result[0] === 200 && result[1].results?.[0]?.values)
-    ? result[1].results[0].values.map(row => row[0])
-    : []
+  const allModules =
+    result[0] === 200 && result[1].results?.[0]?.values
+      ? result[1].results[0].values.map((row) => row[0])
+      : []
   for (const mod of modules) {
     if (!allModules.includes(mod)) missing.push(mod)
   }
@@ -691,25 +690,17 @@ export async function verifyModulesExist (modules) {
  * @param {array} modules - The list of modules
  * @return {array} result - An [bool result, array failed] array
  */
-export async function setClientModules (uuid, modules) {
-  const queries = [
-    [
-      `DELETE from inventory_host_mod WHERE host=:uuid`,
-      { uuid }
-    ]
-  ]
-  for (const module of modules) queries.push([
-    `INSERT INTO inventory_host_mod VALUES(:uuid, :module)`,
-    { uuid, module }
-  ])
+export async function setClientModules(uuid, modules) {
+  const queries = [[`DELETE from inventory_host_mod WHERE host=:uuid`, { uuid }]]
+  for (const module of modules)
+    queries.push([`INSERT INTO inventory_host_mod VALUES(:uuid, :module)`, { uuid, module }])
 
   const result = await db.writeMany(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
-
     for (const i in modules) {
-      const j = Number(i)+1
-      if (result[1].results[Number(i)+1].last_insert_id) log.debug(`[client] Enabled module ${modules[i]} for client ${uuid}`)
+      if (result[1].results[Number(i) + 1].last_insert_id)
+        log.debug(`[client] Enabled module ${modules[i]} for client ${uuid}`)
       else {
         log.warn(`[client] Failed to enable module ${modules[i]} to client ${uuid}`)
         failed.push(modules[i])
@@ -726,14 +717,13 @@ export async function setClientModules (uuid, modules) {
  * @param {string} uuid - The client UUID
  * @return {array} result - An [bool result, array failed] array
  */
-export async function getClientModules (uuid) {
-  const result = await db.read(
-    `SELECT mod from inventory_host_mod WHERE host=:host`,
-    { host: uuid }
-  )
+export async function getClientModules(uuid) {
+  const result = await db.read(`SELECT mod from inventory_host_mod WHERE host=:host`, {
+    host: uuid,
+  })
   const modules = []
   if (result[0] === 200 && result[1].results?.[0]?.values) {
-    for (const read of result[1].results[0]?.values) modules.push(read[0])
+    for (const read of result[1].results[0].values) modules.push(read[0])
   }
 
   return modules
@@ -745,11 +735,11 @@ export async function getClientModules (uuid) {
  * @param {string} uuid - The client UUID
  * @return {array} result - An [bool result, array failed] array
  */
-export async function getAllClientModules () {
+export async function getAllClientModules() {
   const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
   const modules = []
   if (result[0] === 200 && result[1].results) {
-    for (const read of result[1].results[0]?.values) modules.push(read[0])
+    for (const read of result[1].results[0].values) modules.push(read[0])
   }
 
   return modules
@@ -762,15 +752,13 @@ export async function getAllClientModules () {
  * @param {string} module - The module name
  * @return {bool} result - True if it worked, false if not
  */
-export async function enableClientModule (uuid, module) {
+export async function enableClientModule(uuid, module) {
   const result = await db.write(
     `INSERT INTO inventory_host_mod (host, mod) VALUES(:uuid, :module) ON CONFLICT DO NOTHING`,
     { uuid, module }
   )
 
-  return (result[0] === 200 && result[1].results?.[0].last_insert_id)
-    ? true
-    : false
+  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
 }
 
 /**
@@ -780,16 +768,14 @@ export async function enableClientModule (uuid, module) {
  * @param {string} module - The module name
  * @return {array} result - An [bool result, array failed] array
  */
-export async function disableClientModule (uuid, module) {
-  const result = await db.write(
-    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
-    { uuid, module }
-  )
-  log.todo({result})
+export async function disableClientModule(uuid, module) {
+  const result = await db.write(`DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`, {
+    uuid,
+    module,
+  })
+  log.todo({ result })
 
-  return (result[0] === 200 && result[1].results?.[0].last_insert_id)
-    ? true
-    : false
+  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
 }
 
 /**
@@ -798,13 +784,13 @@ export async function disableClientModule (uuid, module) {
  * @param {arrau} modules - The modules for which to load files
  * @return {array} result - An [bool result, array failed] array
  */
-export async function getClientModuleFiles (modules) {
+export async function getClientModuleFiles(modules) {
   const result = await db.read(
-    `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map(mod => `"${mod}"`).join()})`
+    `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})`
   )
   const files = []
   if (result[0] === 200 && result[1].results) {
-    for (const read of result[1].results[0]?.values) {
+    for (const read of result[1].results[0].values) {
       const [file, folder, content] = read
       files.push({ file, folder, content })
     }
@@ -821,14 +807,14 @@ export async function getClientModuleFiles (modules) {
  * @param {bool} decrypt - Set to true to decrypt vars encrypted at rest
  * @return {array} result - An array holding the vars
  */
-export async function getClientVars (uuid, noInfo=false, decrypt=false) {
+export async function getClientVars(uuid, noInfo = false, decrypt = false) {
   const result = await db.read(
     `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
     { host: uuid }
   )
   const vars = []
   if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    for (const read of result[1].results[0]?.values) {
+    for (const read of result[1].results[0].values) {
       /*
        * If noInfo is set, info will be undefined
        * but that's ok, JS doesn't mind and will drop it
@@ -837,7 +823,7 @@ export async function getClientVars (uuid, noInfo=false, decrypt=false) {
       vars.push({
         key,
         val: decrypt ? undoVarSecrecy(key, val)[1] : val,
-        info
+        info,
       })
     }
   }
@@ -852,15 +838,14 @@ export async function getClientVars (uuid, noInfo=false, decrypt=false) {
  * @param {bool} noInfo - Set to true to not include the variable info
  * @return {object} result - An array holding the vars
  */
-export async function getModuleVars (modules=[], noInfo=false) {
-  const where = modules.length > 0
-    ? `WHERE mod IN (${modules.map(mod => `"${mod}"`).join()})`
-    : `WHERE 1`
+export async function getModuleVars(modules = [], noInfo = false) {
+  const where =
+    modules.length > 0 ? `WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})` : `WHERE 1`
   const q = `SELECT id AS key, val ${noInfo ? '' : ', info'} from inventory_modvars ${where}`
   const result = await db.read(q)
   const vars = []
   if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    for (const read of result[1].results[0]?.values) {
+    for (const read of result[1].results[0].values) {
       /*
        * If noInfo is set, info will be undefined
        * but that's ok, JS doesn't mind and will drop it
@@ -881,10 +866,10 @@ export async function getModuleVars (modules=[], noInfo=false) {
  * @return {object} result - The found result
  */
 export async function getHostVar(host, key) {
-  const result = await db.read(
-    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
-    { host, key }
-  )
+  const result = await db.read(`SELECT * from inventory_hostvars WHERE host=:host AND key=:key`, {
+    host,
+    key,
+  })
 
   if (result[0] === 200 && result[1].results[0].values) {
     const found = {}
@@ -905,26 +890,25 @@ export async function getHostVar(host, key) {
  * @param {array} vars - The list of variables
  * @return {array} result - An [bool result, array failed] array
  */
-export async function setClientVariables (uuid, vars) {
+export async function setClientVariables(uuid, vars) {
   const queries = []
   // Note that we do not store vars that start with MORIO_
   const toStore = Object.entries(vars)
-    .filter(([key, val]) => key.slice(0,6) !== 'MORIO_')
-    .map(entry => ensureVarSecrecy(...entry))
-  log.todo({ toStore })
+    .filter((entry) => entry.key.slice(0, 6) !== 'MORIO_')
+    .map((entry) => ensureVarSecrecy(...entry))
   for (const [key, val] of toStore) {
     const exists = await getHostVar(uuid, key)
     if (exists) {
       // Update var
       queries.push([
         `UPDATE inventory_hostvars SET val=:val, info=:info WHERE id=:id`,
-        { val: asScalarOrJson(val), info: exists.info, id: exists.id }
+        { val: asScalarOrJson(val), info: exists.info, id: exists.id },
       ])
     } else {
       // Create var
       queries.push([
         `INSERT INTO inventory_hostvars (key, val, info, host) VALUES(:key, :val, :info, :host)`,
-        { key, val: asScalarOrJson(val), info: 'Pushed from host', host: uuid }
+        { key, val: asScalarOrJson(val), info: 'Pushed from host', host: uuid },
       ])
     }
   }
@@ -932,9 +916,10 @@ export async function setClientVariables (uuid, vars) {
   const result = await db.writeMany(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
-    const varNames = toStore.map(kv => kv[0])
+    const varNames = toStore.map((kv) => kv[0])
     for (const i in varNames) {
-      if (result[1].results[i].last_insert_id) log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
+      if (result[1].results[i].last_insert_id)
+        log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
       else {
         log.warn(`[client] Failed to set var ${varNames[i]} to client ${uuid}`)
         failed.push(varNames[i])
@@ -950,13 +935,12 @@ export function ensureVarSecrecy(key, val) {
   if (key.slice(-6) === 'SECRET') {
     try {
       val = utils.encrypt(val)
-    }
-    catch (err) {
+    } catch (err) {
       log.warn(err, `Failed to encrypt hostvar ${key}`)
     }
   }
 
-  return [ key, val ]
+  return [key, val]
 }
 
 export function undoVarSecrecy(key, val) {
@@ -964,13 +948,12 @@ export function undoVarSecrecy(key, val) {
   if (key.slice(-6) === 'SECRET' && typeof val === 'string') {
     try {
       val = utils.decrypt(val)
-    }
-    catch (err) {
+    } catch (err) {
       log.warn(err, `Failed to decrypt hostvar ${key}`)
     }
   }
 
-  return [ key, val ]
+  return [key, val]
 }
 
 /**
@@ -978,7 +961,7 @@ export function undoVarSecrecy(key, val) {
  *
  * @return {number} id - The client command ID
  */
-export async function getClientCommandId (clients=false) {
+export async function getClientCommandId(clients = false) {
   const result = await db.write(
     `INSERT INTO client_commands (created_at, clients) VALUES (:createdAt, :clients)`,
     { createdAt: new Date(), clients: Array.isArray(clients) ? JSON.stringify(clients) : null }
@@ -992,14 +975,10 @@ export async function getClientCommandId (clients=false) {
     : false
 }
 
-async function cleanupClientCommands () {
+async function cleanupClientCommands() {
   await db.writeMany([
-    [
-      `DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`
-    ],
-    [
-      `DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`
-    ],
+    [`DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`],
+    [`DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`],
   ])
 }
 
@@ -1009,7 +988,7 @@ export async function addClientCommandStatusUpdate({ uuid, id, status }) {
     { uuid, id, status, createdAt: new Date() }
   )
 
-  return (result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+  return result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
     ? true
     : log.warn({ uuid, id, status }, `Failed to write client command status update`)
 }
@@ -1021,7 +1000,7 @@ export async function getClientCommand(id) {
     const fields = result[1].results[0].columns
     for (const row of result[1].results[0].values) {
       const info = {}
-      for (const i in fields)  info[fields[i]] = row[i]
+      for (const i in fields) info[fields[i]] = row[i]
       return info
     }
   }
@@ -1036,7 +1015,7 @@ export async function getClientCommandStatusUpdates(cid) {
     const fields = result[1].results[0].columns
     for (const row of result[1].results[0].values) {
       const update = {}
-      for (const i in fields)  update[fields[i]] = row[i]
+      for (const i in fields) update[fields[i]] = row[i]
       updates.push(update)
     }
   }
@@ -1050,7 +1029,7 @@ export async function getClientCommandStatusUpdates(cid) {
  * @param {string} ip - the (normalized) IP address
  * @return {number} version - Either 4 for IPv4 or 6 for IPv6
  */
-function ipVersion (ip) {
+function ipVersion(ip) {
   return ip.includes(':') ? 6 : 4
 }
 
@@ -1061,7 +1040,7 @@ function ipVersion (ip) {
  * @param {object} data - The host data
  * @return {array} query - A [query, params] array
  */
-function hostUpsertQuery (uuid, data) {
+function hostUpsertQuery(uuid, data) {
   data.id = uuid
   const keys = []
   const params = {}
@@ -1114,13 +1093,13 @@ function osInsertQuery(uuid, os) {
         {
           id,
           name: clean(os.name),
-          version: clean(os.version)
-        }
+          version: clean(os.version),
+        },
       ],
       [
         `INSERT INTO inventory_host_os(host, os) VALUES(:host, :os) ON CONFLICT DO NOTHING`,
-        { host: clean(uuid), os: id }
-      ]
+        { host: clean(uuid), os: id },
+      ],
     ]
   }
 
@@ -1136,16 +1115,17 @@ function osInsertQuery(uuid, os) {
  */
 function ipInsertQuery(uuid, ip) {
   ip = normalizeIp(ip)
-  if (ip) return [
-    [
-      `INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version) ON CONFLICT DO NOTHING`,
-      { ip, version: ipVersion(ip) }
-    ],
-    [
-      `INSERT INTO inventory_host_ip(host, ip) VALUES(:host, :ip) ON CONFLICT DO NOTHING`,
-      { host: uuid, ip }
+  if (ip)
+    return [
+      [
+        `INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version) ON CONFLICT DO NOTHING`,
+        { ip, version: ipVersion(ip) },
+      ],
+      [
+        `INSERT INTO inventory_host_ip(host, ip) VALUES(:host, :ip) ON CONFLICT DO NOTHING`,
+        { host: uuid, ip },
+      ],
     ]
-  ]
 
   return []
 }
@@ -1159,16 +1139,14 @@ function ipInsertQuery(uuid, ip) {
  */
 function macInsertQuery(uuid, mac) {
   mac = normalizeMac(mac)
-  if (mac) return [
-    [
-      `INSERT INTO inventory_macs(mac) VALUES(:mac) ON CONFLICT DO NOTHING`,
-      { mac }
-    ],
-    [
-      `INSERT INTO inventory_host_mac(host, mac) VALUES(:host, :mac) ON CONFLICT DO NOTHING`,
-      { host: uuid, mac }
+  if (mac)
+    return [
+      [`INSERT INTO inventory_macs(mac) VALUES(:mac) ON CONFLICT DO NOTHING`, { mac }],
+      [
+        `INSERT INTO inventory_host_mac(host, mac) VALUES(:host, :mac) ON CONFLICT DO NOTHING`,
+        { host: uuid, mac },
+      ],
     ]
-  ]
 
   return false
 }
@@ -1186,20 +1164,20 @@ function pkgInsertQuery(uuid, pkg) {
      * We are constructing the ID from name + version so it is deterministic
      * and we do not need the returned ID to create the link between host and package
      */
-    const id =  clean(`${pkg.name}|${pkg.version}`)
+    const id = clean(`${pkg.name}|${pkg.version}`)
     return [
       [
         `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version) ON CONFLICT DO NOTHING`,
         {
           id,
           name: clean(pkg.name),
-          version: clean(pkg.version)
-        }
+          version: clean(pkg.version),
+        },
       ],
       [
         `INSERT INTO inventory_host_pkg(host, pkg) VALUES(:host, :pkg) ON CONFLICT DO NOTHING`,
-        { host: clean(uuid), pkg: id }
-      ]
+        { host: clean(uuid), pkg: id },
+      ],
     ]
   }
 
@@ -1214,10 +1192,9 @@ function pkgInsertQuery(uuid, pkg) {
  * However, localising method names, that's where madness lies.
  *
  * @param {string} ip - The IP address to normalise
- * @param {string} tools - The tools object (used in case of trouble)
  * @returns {string} - The normalized IP address
  */
-function normalizeIp(ip, tools) {
+function normalizeIp(ip) {
   // Do not continue if the IP is not valid
   if (typeof ip !== 'string' || !ipaddr.isValid(ip)) {
     log.debug(`Cannot parse IP address: ${JSON.stringify(ip)}`)
@@ -1227,9 +1204,7 @@ function normalizeIp(ip, tools) {
   // Parse the IP
   const address = ipaddr.parse(ip)
 
-  return address.kind() === "ipv4"
-    ? address.toString()
-    : address.toNormalizedString()
+  return address.kind() === 'ipv4' ? address.toString() : address.toNormalizedString()
 }
 
 /**
@@ -1242,7 +1217,7 @@ function normalizeIp(ip, tools) {
  * @param {string} mac - The MAC address to normalize
  * @returns {string} - The normalized MAC address
  */
-function normalizeMac (mac) {
+function normalizeMac(mac) {
   if (typeof mac !== 'string') {
     log.debug(`Invalid MAC address: ${JSON.stringify(mac)}`)
     return false
@@ -1264,6 +1239,5 @@ function normalizeMac (mac) {
   return hexOnly
     .toLowerCase() // No yelling
     .match(/.{1,2}/g) // Split per 2 characters
-    .join(':'); // Glue back together with ':' characters
+    .join(':') // Glue back together with ':' characters
 }
-

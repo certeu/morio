@@ -142,9 +142,7 @@ export const HostSummary = ({ uuid }) => {
     if (!data) loadHost()
   }, [uuid, api, data])
 
-  return data
-    ? <HostDataSummary data={data} />
-    : <p>Loading...</p>
+  return data ? <HostDataSummary data={data} /> : <p>Loading...</p>
 }
 
 async function runHostApiCall(uuid, api) {
@@ -172,13 +170,15 @@ export const HostDataSummary = ({ data }) => {
             </span>
           </h4>
           <div className="flex flex-row flex-wrap gap-2">
-            <KeyVal k="os" val={data.os} />
-            <KeyVal k="arch" val={data.arch} />
-            <KeyVal k="cores" val={data.cores} />
-            <KeyVal k="memory" val={formatBytes(data.memory)} />
-            <KeyVal k="last update" val={timeAgo(data.last_update)} />
-            <KeyVal k="ips" val={(data.ips || []).length} />
-            <KeyVal k="macs" val={(data.macs || []).length} />
+            {data.os?.name && data.os?.version ? (
+              <KeyVal k={data.os.name} val={data.os?.version} />
+            ) : null}
+            <KeyVal k="Arch" val={data.arch} />
+            <KeyVal k="Cores" val={data.cores} />
+            <KeyVal k="Memory" val={formatBytes(data.memory)} />
+            <KeyVal k="Last Report" val={timeAgo(data.last_update)} />
+            <KeyVal k="IPs" val={(data.ips || []).length} />
+            <KeyVal k="MACs" val={(data.macs || []).length} />
           </div>
         </div>
       </div>
@@ -239,7 +239,7 @@ export const Hostname = ({ data }) => {
   return JSON.stringify(data)
 }
 
-export const InventoryHostname = ({ uuid, raw=false }) => {
+export const InventoryHostname = ({ uuid, raw = false }) => {
   const { api } = useApi()
   const { data } = useQuery({
     queryKey: [`hostname_${uuid}`],
@@ -248,8 +248,12 @@ export const InventoryHostname = ({ uuid, raw=false }) => {
     refetchIntervalInBackground: true, //false,
   })
 
-  return data ? raw ? (data.fqdn || data.name) : (
-    <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
+  return data ? (
+    raw ? (
+      data.fqdn || data.name
+    ) : (
+      <span className="whitespace-nowrap text-sm font-mono">{data.fqdn || data.name}</span>
+    )
   ) : (
     uuid
   )

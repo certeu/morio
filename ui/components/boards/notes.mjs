@@ -64,6 +64,7 @@ export const Notes = () => {
         setFiltered(filteredArray)
       }
     }
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [search, data])
 
   if (!sorted)

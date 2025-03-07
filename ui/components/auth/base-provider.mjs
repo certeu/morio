@@ -21,7 +21,7 @@ export const BaseProvider = ({
     setLoadingStatus([true, 'Contacting API'])
 
     let data = { username: username.trim(), password, role }
-    if(usernameLabel == 'API Key') data = { api_key: username, api_key_secret: password }
+    if (usernameLabel == 'API Key') data = { api_key: username, api_key_secret: password }
 
     const result = await api.login(id, data)
     if (result?.[1] === 200 && result?.[0]?.jwt) {

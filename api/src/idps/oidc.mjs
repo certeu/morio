@@ -214,8 +214,6 @@ async function getClient(id) {
 }
 
 function getOidcRedirectUrl(id) {
-  // FIXME: Obvious hack for now
-  return `https://poc-morio-node1.certeu.teleport.sh/-/api/callback/oidc/${id}`
   return `https://${utils.getNodeFqdn()}/-/api/callback/oidc/${id}`
 }
 

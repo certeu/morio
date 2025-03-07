@@ -559,7 +559,6 @@ async function storeClientModules (modules, log) {
   const queries = []
   for (const module in modules) {
     log.debug(`[client] Preparing to add client module ${module} to the database`)
-    const d = JSON.stringify(modules[module])
     queries.push([
       `INSERT INTO inventory_mods (mod, data) VALUES(:module, :data)`,
       { module, data: JSON.stringify(modules[module]) }
@@ -638,7 +637,7 @@ async function loadMorioDataFromModule (raw, log) {
   try {
     yml = yaml.load(rendered)
     if (!yml) {
-      log.debug(`Failed to parse as YAML: ${sourceFile}`)
+      log.debug(`Failed to parse Moriodata as YAML`)
       return false
     }
   } catch (err) {

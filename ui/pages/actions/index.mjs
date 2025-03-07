@@ -9,7 +9,14 @@ import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { Card, CardButton } from 'components/card.mjs'
-import { PuzzleIcon, MegaphoneIcon, PackageIcon, RestartIcon, ReseedIcon, KeyIcon, WrenchIcon } from 'components/icons.mjs'
+import {
+  PuzzleIcon,
+  MegaphoneIcon,
+  RestartIcon,
+  ReseedIcon,
+  KeyIcon,
+  WrenchIcon,
+} from 'components/icons.mjs'
 import { SecretInput } from 'components/inputs.mjs'
 import { mrtValid } from 'components/auth/mrt-provider.mjs'
 import { Popout } from 'components/popout.mjs'

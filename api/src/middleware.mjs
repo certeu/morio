@@ -104,7 +104,7 @@ export function guardRoutes(req, res, next) {
 function requireRole(req, res, next, role) {
   const realRole = currentRole(req)
   if (realRole) {
-    const isOk = (role === realRole) || isRoleAvailable(realRole, role)
+    const isOk = role === realRole || isRoleAvailable(realRole, role)
     if (isOk) return next()
   }
   return utils.sendErrorResponse(res, 'morio.api.authentication.required', req.url)
@@ -114,7 +114,8 @@ function requireRole(req, res, next, role) {
  * Helper RBAC middleware
  */
 export const rbac = {}
-for (const role of [...roles, ...hiddenRoles]) rbac[role] = (req, res, next) => requireRole(req, res, next, role)
+for (const role of [...roles, ...hiddenRoles])
+  rbac[role] = (req, res, next) => requireRole(req, res, next, role)
 
 /*
  * Add custom middleware to load roles from header

@@ -1,4 +1,4 @@
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import {
   addClientCommandStatusUpdate,
   createInvite,
@@ -20,7 +20,6 @@ import {
   verifyModulesExist,
 } from '../lib/inventory.mjs'
 import { createApikey, deleteApikey } from '../lib/apikey.mjs'
-import { testUrl } from '#shared/network'
 import { asTime } from '../lib/account.mjs'
 import { currentUser } from '../rbac.mjs'
 import { uuid as generateUuid, randomString, hashPassword } from '#shared/crypto'
@@ -43,7 +42,8 @@ export function Controller() {}
  */
 Controller.prototype.createInvite = async function (req, res) {
   const types = ['once', 'many']
-  if (!types.includes(req.params.type)) return utils.sendErrorResponse(res, 'morio.api.clients.invalid_invite_type', req.url)
+  if (!types.includes(req.params.type))
+    return utils.sendErrorResponse(res, 'morio.api.clients.invalid_invite_type', req.url)
 
   const invite = await createInvite(currentUser(req), req.params.type)
 
@@ -57,7 +57,7 @@ Controller.prototype.createInvite = async function (req, res) {
  * @param {object} res - The response object from Express
  * @param {bool} rejoin - Set to true to allow overwriting an existing client
  */
-Controller.prototype.join = async function (req, res, rejoin=false) {
+Controller.prototype.join = async function (req, res, rejoin = false) {
   /*
    * Validate input
    */
@@ -80,7 +80,8 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
     /*
      * Bail out if no invite is provided
      */
-    if (!valid.invite) return utils.sendErrorResponse(res, 'morio.api.clients.invite_required', req.url)
+    if (!valid.invite)
+      return utils.sendErrorResponse(res, 'morio.api.clients.invite_required', req.url)
     /*
      * Use the invite
      */
@@ -92,7 +93,7 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
   /*
    * Is the client running on a Morio node
    */
-  const nodes = utils.getAllNodesFqdns().map(fqdn => fqdn.toLowerCase())
+  const nodes = utils.getAllNodesFqdns().map((fqdn) => fqdn.toLowerCase())
   const runsOnMorioNode = nodes.includes(valid.info.fqdn.toLowerCase())
 
   /*
@@ -126,9 +127,9 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
    */
   let { uuid = false } = req.body
   if (uuid) {
-    if (nodeUuid && uuid !== nodeUuid) return utils.sendErrorResponse(res, `morio.api.client.uuid.mismatch`, req.url)
-  }
-  else if (nodeUuid) uuid = nodeUuid
+    if (nodeUuid && uuid !== nodeUuid)
+      return utils.sendErrorResponse(res, `morio.api.client.uuid.mismatch`, req.url)
+  } else if (nodeUuid) uuid = nodeUuid
   else uuid = generateUuid()
 
   /*
@@ -163,16 +164,20 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
    * Generate API key for the client
    */
   const secret = randomString(48)
-  const apikey = await createApikey({
-    id: uuid,
-    name: `Control plane key for client ${uuid}`,
-    status: 'active',
-    created_by: currentUser(req),
-    role: "client",
-    created_at: asTime(),
-    expires_at: asTime(Date.now() + Number(valid.expires) * 86400000 * 356 * 2), // ms in a day
-    secret: hashPassword(secret)
-  }, rejoin)
+  // We do not await this
+  createApikey(
+    {
+      id: uuid,
+      name: `Control plane key for client ${uuid}`,
+      status: 'active',
+      created_by: currentUser(req),
+      role: 'client',
+      created_at: asTime(),
+      expires_at: asTime(Date.now() + Number(valid.expires) * 86400000 * 356 * 2), // ms in a day
+      secret: hashPassword(secret),
+    },
+    rejoin
+  )
 
   return res.send({
     crt: certs.certificate.crt,
@@ -181,7 +186,7 @@ Controller.prototype.join = async function (req, res, rejoin=false) {
     uuid,
     secret,
     cluster: utils.getClusterFqdn(),
-    brokers: utils.getBrokerFqdns().map(host => `${host}:9092`),
+    brokers: utils.getBrokerFqdns().map((host) => `${host}:9092`),
   })
 }
 
@@ -204,11 +209,8 @@ Controller.prototype.report = async function (req, res) {
   /*
    * No funny business
    */
-  if (!matchClientApikey(req, valid.uuid)) return utils.sendErrorResponse(
-    res,
-    'morio.api.client.authentication_mismatch',
-    req.url,
-  )
+  if (!matchClientApikey(req, valid.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
 
   /*
    * Verify that it's the correct cluster
@@ -247,35 +249,35 @@ Controller.prototype.push = async function (req, res) {
   /*
    * No funny business
    */
-  if (!matchClientApikey(req, valid.uuid)) return utils.sendErrorResponse(
-    res,
-    'morio.api.client.authentication_mismatch',
-    req.url,
-  )
+  if (!matchClientApikey(req, valid.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
 
   /*
    * If any of the submitted module does not exist, reject the request entirely.
    */
   const result = await verifyModulesExist(valid.modules)
-  if (!result[0]) return utils.sendErrorResponse(res, 'morio.api.client.unknown_module', req.url, {
-    unknown_modules: result[1].join()
-  })
+  if (!result[0])
+    return utils.sendErrorResponse(res, 'morio.api.client.unknown_module', req.url, {
+      unknown_modules: result[1].join(),
+    })
 
   /*
    * Update the database with the client modules
    */
   const mods = await setClientModules(valid.uuid, valid.modules)
-  if (!mods[0]) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
-    failed_modules: result[1].join()
-  })
+  if (!mods[0])
+    return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
+      failed_modules: result[1].join(),
+    })
 
   /*
    * Update the database with the client vars
    */
   const vars = await setClientVariables(valid.uuid, valid.vars)
-  if (!vars[0]) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
-    failed_vars: result[1].join()
-  })
+  if (!vars[0])
+    return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
+      failed_vars: result[1].join(),
+    })
 
   return res.status(204).send()
 }
@@ -290,11 +292,8 @@ Controller.prototype.pull = async function (req, res) {
   /*
    * No funny business
    */
-  if (!matchClientApikey(req, req.params.uuid)) return utils.sendErrorResponse(
-    res,
-    'morio.api.client.authentication_mismatch',
-    req.url,
-  )
+  if (!matchClientApikey(req, req.params.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
 
   /*
    * Load client modules
@@ -308,8 +307,8 @@ Controller.prototype.pull = async function (req, res) {
    * Client vars have precedent over module vars
    */
   const vars = {}
-  for (const {key, val} of mvars) vars[key] = { key, val }
-  for (const {key, val} of cvars) vars[key] = { key, val }
+  for (const { key, val } of mvars) vars[key] = { key, val }
+  for (const { key, val } of cvars) vars[key] = { key, val }
 
   return res.send({ modules, files, vars: Object.values(vars) })
 }
@@ -328,11 +327,8 @@ Controller.prototype.unjoin = async function (req, res) {
   /*
    * No funny business
    */
-  if (!matchClientApikey(req, req.params.uuid)) return utils.sendErrorResponse(
-    res,
-    'morio.api.client.authentication_mismatch',
-    req.url,
-  )
+  if (!matchClientApikey(req, req.params.uuid))
+    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
 
   await removeHost(req.params.uuid)
   await deleteApikey(req.params.uuid)
@@ -362,9 +358,7 @@ Controller.prototype.listModules = async function (req, res) {
 Controller.prototype.enableModule = async function (req, res) {
   const result = await enableClientModule(apikeyFromHeaders(req), req.params.module)
 
-  return result
-    ? res.status(204).send()
-    : res.status(400).send()
+  return result ? res.status(204).send() : res.status(400).send()
 }
 
 /**
@@ -376,9 +370,7 @@ Controller.prototype.enableModule = async function (req, res) {
 Controller.prototype.disableModule = async function (req, res) {
   const result = await disableClientModule(apikeyFromHeaders(req), req.params.module)
 
-  return result
-    ? res.status(204).send()
-    : res.status(400).send()
+  return result ? res.status(204).send() : res.status(400).send()
 }
 
 /**
@@ -402,7 +394,7 @@ Controller.prototype.sendCommand = async function (req, res) {
    */
   if (!['pull', 'push', 'reload', 'restart', 'report', 'stop'].includes(req.params.cmd)) {
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: `Not a valid command: ${req.params.cmd}`
+      schema_violation: `Not a valid command: ${req.params.cmd}`,
     })
   }
 
@@ -417,7 +409,7 @@ Controller.prototype.sendCommand = async function (req, res) {
   utils.produce('clients', {
     command: req.params.cmd,
     clients: valid.clients ? valid.clients : undefined,
-    id
+    id,
   })
 
   /*
@@ -459,9 +451,7 @@ Controller.prototype.addCommandStatus = async function (req, res) {
 Controller.prototype.getCommandInfo = async function (req, res) {
   const command = await getClientCommand(req.params.id)
 
-  return command
-    ? res.send(command)
-    : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+  return command ? res.send(command) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
 
 /**
@@ -477,42 +467,6 @@ Controller.prototype.getCommandStatus = async function (req, res) {
 }
 
 /**
- * Helper method to publish a message to the clients topic
- *
- * This is a bit of a hack because we are using the Console API here
- * which is undocumented.
- *
- * @param {object} data - The data to publish
- * @return {object} result - The return body, parsed as JSON
- */
-const produceMessage = async (data) => {
-  const result = await testUrl(
-    `http://morio-console:${utils.getPreset('MORIO_CONSOLE_PORT')
-    }/console/redpanda.api.console.v1alpha1.ConsoleService/PublishMessage`,
-    {
-      returnAs: 'json',
-      method: 'POST',
-      headers: {
-        "Content-Type": "application/json"
-      },
-      data: {
-        topic: "clients",
-        partitionId: -1,
-        compression: "COMPRESSION_TYPE_UNCOMPRESSED",
-        key: { encoding: "PAYLOAD_ENCODING_TEXT" },
-        value:{
-          encoding: "PAYLOAD_ENCODING_JSON",
-          data: Buffer.from(JSON.stringify(data), 'base64')
-        }
-      }
-    },
-    log.debug
-  )
-
-  return result
-}
-
-/**
  * No funny business, this is only available with the API key
  * that was generated via the client (re)join flow.
  * The API key and client UUID must match, provider should be apikey and role client.
@@ -522,16 +476,17 @@ const produceMessage = async (data) => {
  * @param {string} uuid - The client UUID
  * @return {bool} result - True if it's ok, false if not
  */
-function matchClientApikey (req, uuid) {
+function matchClientApikey(req, uuid) {
   if (
     req.headers['x-morio-provider'] === 'apikey' ||
     req.headers['x-morio-role'] === 'client' ||
     req.headers['x-morio-user'] === `apikey.${uuid}`
-  ) return true
+  )
+    return true
 
   return false
 }
 
-function apikeyFromHeaders (req) {
+function apikeyFromHeaders(req) {
   return req.headers['x-morio-user'].split('.').pop()
 }

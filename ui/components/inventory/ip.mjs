@@ -1,5 +1,4 @@
 // Dependencies
-import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -43,7 +42,7 @@ export const IpsTable = () => {
     let i = 0
     for (const id in selection) {
       i++
-      await api.removeInventoryIp(ip)
+      await api.removeInventoryIp(id)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Removing IP Addresses" key="linter" />,

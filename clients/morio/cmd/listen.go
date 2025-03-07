@@ -1,20 +1,20 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"slices"
 	"sync"
 	"syscall"
-  "log"
-  "bytes"
-	"net/http"
-	"io"
 
 	"github.com/IBM/sarama"
 	"github.com/spf13/cobra"
@@ -212,8 +212,8 @@ func runCommand(cmd string, id int) error {
 	if err != nil {
 		return fmt.Errorf("failed to report start status: %w", err)
 	}
-  // Run command
-  if cmd == "pull" {
+	// Run command
+	if cmd == "pull" {
 		err = runPullCommand(id)
 	} else if cmd == "push" {
 		err = runPushCommand(id)
@@ -229,12 +229,12 @@ func runCommand(cmd string, id int) error {
 
 	// Report done/error status
 	if err != nil {
-	  reportCommandStatus(id, "error")
+		reportCommandStatus(id, "error")
 		return fmt.Errorf("Command failed: %w", err)
 	} else {
-	  reportCommandStatus(id, "done")
-    return nil
-  }
+		reportCommandStatus(id, "done")
+		return nil
+	}
 }
 
 func runPullCommand(id int) error {
@@ -242,7 +242,7 @@ func runPullCommand(id int) error {
 }
 
 func runPushCommand(id int) error {
-  return PushConfig()
+	return PushConfig()
 }
 
 func runReloadCommand(id int) error {
@@ -254,7 +254,7 @@ func runRestartCommand(id int) error {
 }
 
 func runReportCommand(id int) error {
-  return ReportClient()
+	return ReportClient()
 }
 
 func runStopCommand(id int) error {
@@ -279,8 +279,8 @@ func reportCommandStatus(id int, status string) error {
 
 	// Create request payload
 	payload := struct {
-		Uuid   string                 `json:"uuid"`
-		ID     int                    `json:"id"`
+		Uuid   string `json:"uuid"`
+		ID     int    `json:"id"`
 		Status string `json:"status"`
 	}{
 		Uuid:   uuid,

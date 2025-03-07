@@ -10,6 +10,7 @@
     "prebuild": "node ./prebuild.mjs",
     "start": "next start",
     "lint": "next lint",
+    "clint": "docker exec -it morio-ui npm run lint",
     "prettier": "prettier -w .",
     "test": "npx playwright test",
     "testui": "npx playwright test --ui",
