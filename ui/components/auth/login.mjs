@@ -8,7 +8,6 @@ import { ModalContext } from 'context/modal.mjs'
 // Components
 import { Tabs, Tab } from 'components/tabs.mjs'
 import { Popout } from 'components/popout.mjs'
-import { Term } from 'components/term.mjs'
 import { CloseIcon, QuestionIcon, ClosedLockIcon, OpenLockIcon } from 'components/icons.mjs'
 // Providers
 import { BaseProvider } from './base-provider.mjs'
@@ -50,12 +49,10 @@ const help = (
     <p>
       Morio supports a variety of identity providers. Each tab lists one of them.
       <br />
-      With the exception of the <b>Root Token</b> provider, they are set up by the local Morio
-      operator (<Term>LoMO</Term>).
+      With the exception of the <b>Root Token</b> provider, they are set up by your admin.
     </p>
     <p>
-      Contact your <Term>LoMO</Term> for questions about how to authenticate to this Morio
-      deployment.
+      Contact them for questions about how to authenticate to this Morio deployment.
     </p>
   </Tab>
 )
