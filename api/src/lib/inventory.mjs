@@ -463,7 +463,7 @@ export async function saveHost(id, data) {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('saveHost was called witout an id')
+    log.warn('saveHost was called without an id')
     return false
   }
 

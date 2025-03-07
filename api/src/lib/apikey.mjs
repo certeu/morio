@@ -91,7 +91,7 @@ export async function deleteApikey(id = false) {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('deleteApikey was called witout an id')
+    log.warn('deleteApikey was called without an id')
     return false
   }
 
@@ -115,11 +115,13 @@ export async function createApikey(data, recreate = false) {
     return false
   }
 
+  data.id = data.key
+
   const columns = []
   const params = {}
 
   for (const [key, val] of Object.entries(data)) {
-    if (fields[key] && typeof fields[key] === 'function') {
+    if (Object.keys(fields).includes(key) && typeof fields[key] === 'function') {
       columns.push(key)
       params[key] = fields[key](val)
     }

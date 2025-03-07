@@ -26,10 +26,17 @@ do
   fi
 done
 
-# Run unit tests
-node --no-warnings --test-concurrency=1 --test --test-reporter=spec
+export NODE_V8_COVERAGE=./coverage
+node \
+  --experimental-test-coverage \
+  --test-reporter=spec \
+  --test-concurrency=1 \
+  --test
 
 TEST_EXIT_CODE=$?
+
+# Stop api container
+kill -1 %1
 
 # If tests failed, propagate failure
 if [ $TEST_EXIT_CODE -ne 0 ]; then

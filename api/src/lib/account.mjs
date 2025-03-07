@@ -160,7 +160,7 @@ export async function saveAccount(provider = false, id = false, data) {
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('saveAccount was called witout an id or provider')
+    log.warn('saveAccount was called without an id or provider')
     return false
   }
 
@@ -209,7 +209,7 @@ export async function updateLastLoginTime(provider, id, extraData = {}) {
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('[api] updateLastLoginTime was called witout an id or provider')
+    log.warn('[api] updateLastLoginTime was called without an id or provider')
     return false
   }
 
