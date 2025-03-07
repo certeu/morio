@@ -72,7 +72,7 @@ Controller.prototype.create = async function (req, res) {
     role: valid.role,
     created_at: asTime(),
     expires_at: asTime(Date.now() + Number(valid.expires) * 86400000), // ms in a day
-    id: key,
+    key,
   }
 
   const [dbStatus] = await createApikey({ ...data, secret: hashPassword(secret) })

@@ -27,6 +27,7 @@ describe('API Key Tests', () => {
     const result = await api.post(`/apikey`, keys.key1)
     assert.equal(result[0], 200)
     const d = result[1]
+
     assert.equal(d.name, keys.key1.name)
     assert.equal(d.status, 'active')
     assert.equal(d.created_by, 'local.test_user')
@@ -50,6 +51,7 @@ describe('API Key Tests', () => {
   // PATCH /apikey
   it(`Should PATCH /apikeys/:key/rotate`, async () => {
     const result = await api.patch(`/apikeys/${store.keys.key1.key}/rotate`)
+
     const d = result[1]
     assert.equal(result[0], 200)
     assert.equal(d.name, store.get('keys.key1.name'))
@@ -125,6 +127,21 @@ describe('API Key Tests', () => {
     assert.equal(result[0], 204)
   })
 
+  it(`Waiting for setting reconfigured`, async () => {
+    await attempt({
+      every: 3,
+      timeout: 90,
+      run: async () => {
+        const [status, body] = await api.get('/dconf/flags', { 'X-Morio-User': 'operator' })
+
+        return status === 200 && body['DISABLE_IDP_APIKEY']
+      },
+      onFailedAttempt: (s) => {
+        console.log(`Waited ${s} seconds for setting reconfigured, will continue waiting.`)
+      },
+    })
+  })
+
   it(`Should GET /status`, async () => {
     sleep(5)
 
@@ -152,12 +169,14 @@ describe('API Key Tests', () => {
       },
     }
     const result = await api.post(`/login`, data)
-    // validateErrorResponse(result, errors, 'morio.api.idp.disabled')
+
     validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /whoami (JWT in Bearer header)
   it(`Should GET /whoami (JWT in Bearer header)`, async () => {
+    sleep(5)
+
     const result = await api.get(`/whoami`, { Authorization: `Bearer ${store.keys.key1.jwt}` })
     assert.equal(result[0], 200)
     const d = result[1]
