@@ -1,0 +1,14 @@
+# /etc/systemd/system/morio-audit.service
+[Unit]
+Description=Morio audit info collection service
+Documentation=https://morio.it/
+
+[Service]
+ExecStart=/usr/sbin/morio audit
+Restart=always
+SyslogIdentifier=morio-audit
+TimeoutSec=15
+TimeoutStopFailureMode=kill
+
+[Install]
+WantedBy=default.target

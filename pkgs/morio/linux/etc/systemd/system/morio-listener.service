@@ -1,0 +1,14 @@
+# /etc/systemd/system/morio-listener.service
+[Unit]
+Description=Morio client listener
+Documentation=https://morio.it/
+
+[Service]
+ExecStart=/usr/sbin/morio listen
+Restart=always
+SyslogIdentifier=morio-listener
+TimeoutSec=15
+TimeoutStopFailureMode=kill
+
+[Install]
+WantedBy=default.target

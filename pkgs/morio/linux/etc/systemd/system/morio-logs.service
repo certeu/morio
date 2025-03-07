@@ -1,0 +1,14 @@
+# /etc/systemd/system/morio-logs.service
+[Unit]
+Description=Morio logs collection service
+Documentation=https://morio.it/
+
+[Service]
+ExecStart=/usr/sbin/morio logs
+Restart=always
+SyslogIdentifier=morio-logs
+TimeoutSec=15
+TimeoutStopFailureMode=kill
+
+[Install]
+WantedBy=default.target
