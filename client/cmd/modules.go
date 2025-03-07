@@ -79,18 +79,6 @@ var modulesInfoCmd = &cobra.Command{
 	},
 }
 
-// morio modules info
-var modulesInfoRemoteCmd = &cobra.Command{
-	Use:     "info-remote [module-name]",
-	Short:   "Show remote module info",
-	Long:    `Shows info about a client module on the Morio cluster.`,
-	Args:    cobra.ExactArgs(1),
-	Example: `  morio module info-remote linux-system`,
-	Run: func(cmd *cobra.Command, args []string) {
-		ModuleInfo(args[0])
-	},
-}
-
 // morio modules list-remote
 var modulesListRemoteCmd = &cobra.Command{
 	Use:     "list-remote",

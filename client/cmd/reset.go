@@ -1,16 +1,7 @@
 package cmd
 
 import (
-	//"encoding/json"
-	//"fmt"
-	//"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
-	//"gopkg.in/yaml.v3"
-	//"io/ioutil"
-	//"log"
-	//"os"
-	//"sort"
-	//"strings"
 )
 
 func init() {

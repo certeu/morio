@@ -109,7 +109,7 @@ utils.getCoreStatus = () => store.get('status.core')
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
- * Helper method to get a list of all FQDNS for flaning nodes
+ * Helper method to get a list of all FQDNS for flanking nodes
  *
  * @return {array} list - The list of all flankin node FQDNs
  *
@@ -138,7 +138,7 @@ utils.getKeys = () => store.get('keys')
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
 
 /**
- * Helper method to get a list of all FQDNS for flaning nodes
+ * Helper method to get a list of all FQDNS for flanking nodes
  *
  * @return {array} list - The list of all flankin node FQDNs
  *

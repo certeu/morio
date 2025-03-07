@@ -81,10 +81,3 @@ async function exitGracefully() {
   }
 }
 
-/*
- * Gracefully handle a tap exit
- */
-//process.on('exit', exitGracefully.bind())
-//process.on('SIGINT', exitGracefully.bind())
-//process.on('SIGUSR1', exitGracefully.bind())
-//process.on('SIGUSR2', exitGracefully.bind())

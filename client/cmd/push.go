@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	//"bufio"
 	"bytes"
 	"crypto/tls"
 	"crypto/x509"
@@ -9,33 +8,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	//"net"
 	"net/http"
-	//"os"
-	//"os/exec"
-	//"path/filepath"
-	//"runtime"
-	//"strings"
 	"log"
 
 	"github.com/spf13/cobra"
 )
-
-// Define structures for API responses
-//type ErrorResponse struct {
-//	Type   string `json:"type"`
-//	Status int    `json:"status"`
-//	Title  string `json:"title"`
-//	Detail string `json:"detail"`
-//}
-
-//type SuccessResponse struct {
-//	Crt     string   `json:"crt"`
-//	Key     string   `json:"key"`
-//	Ca      string   `json:"ca"`
-//	Uuid    string   `json:"uuid"`
-//	Secret  string `json:"secret"`
-//}
 
 func init() {
 	RootCmd.AddCommand(pushCmd)

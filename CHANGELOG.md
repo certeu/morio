@@ -7,17 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
+### Added
 
-- [client] Added support markdown output for vars and modules list
-- [console] Remove dependency on admin API
-- [core] Add support for NAT loopback/hairpinning
-- [ui] Fixed incorrect loading of healtcheck chart templates
+- Added the `REQUIRE_CLIENT_INVITES` feature flag
+- [api] Added the `POST /clients/join` endpoint
+- [api] Added the `POST /clients/rejoin` endpoint
+- [api] Added the `POST /clients/push` endpoint
+- [api] Added the `GET /clients/modules` endpoint
+- [api] Added a new client RBAC role
+- [client] Added the `fetch` command to the Morio client
+- [client] Added the `join` command to the Morio client
+- [client] Added the `listen` command to the Morio client
+- [client] Added the `pull` command to the Morio client
+- [client] Added the `rejoin` command to the Morio client
+- [client] Added the `reset` command to the Morio client
+- [client] Added the `push` command to the Morio client
+- [client] Added the `module list-remote` subcommand to the Morio client
+- [client] Added the `module enable-remote` subcommand to the Morio client
+- [client] Added the `module disable-remote` subcommand to the Morio client
 
 ### Changed
 
 - [client] The modules list command output is now terse by default, use the `-v` or `--verbose` flag for detailed output
 - [client] Mask secrets vars output when listing vars
+- [client] Output vars in alphabetic order
+
+### Fixed
+
+- [api] Fixed an issue with the `dconf/flags` endpoint where it was not loading flags correctly
+- [client] Added support markdown output for vars and modules list
+- [client] Set correct ownership on vars files
+- [console] Remove dependency on admin API
+- [core] Add support for NAT loopback/hairpinning
+- [ui] Fixed incorrect loading of healtcheck chart templates
+
+
+### Removed
+
+- [api] Removed all API routes related to building packages
+- [core] Removed all API routes related to building packages
+- [dbuilder] Removed the dbuilder service
+- [drbuilder] Removed teh drbuilder service
 
 ## [0.7.2] - 2025-02-10
 
