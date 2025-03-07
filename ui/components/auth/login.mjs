@@ -51,9 +51,7 @@ const help = (
       <br />
       With the exception of the <b>Root Token</b> provider, they are set up by your admin.
     </p>
-    <p>
-      Contact them for questions about how to authenticate to this Morio deployment.
-    </p>
+    <p>Contact them for questions about how to authenticate to this Morio deployment.</p>
   </Tab>
 )
 
