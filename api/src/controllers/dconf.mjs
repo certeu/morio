@@ -85,7 +85,7 @@ async function loadTapUiConfig() {
 Controller.prototype.flags = async function (req, res) {
   const allFlags = {
     ...flags,
-    ...utils.getSettings('flags', {}),
+    ...utils.getSettings('tokens.flags', {}),
   }
 
   return res.send(allFlags)

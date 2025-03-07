@@ -127,6 +127,21 @@ describe('API Key Tests', () => {
     assert.equal(result[0], 204)
   })
 
+  it(`Waiting for setting reconfigured`, async () => {
+    await attempt({
+      every: 3,
+      timeout: 90,
+      run: async () => {
+        const [status, body] = await api.get('/dconf/flags', { 'X-Morio-User': 'operator' })
+
+        return status === 200 && body['DISABLE_IDP_APIKEY']
+      },
+      onFailedAttempt: (s) => {
+        console.log(`Waited ${s} seconds for setting reconfigured, will continue waiting.`)
+      },
+    })
+  })
+
   it(`Should GET /status`, async () => {
     sleep(5)
 
@@ -155,8 +170,7 @@ describe('API Key Tests', () => {
     }
     const result = await api.post(`/login`, data)
 
-    validateErrorResponse(result, errors, 'morio.api.idp.disabled')
-    // validateErrorResponse(result, errors, 'morio.api.authentication.required')
+    validateErrorResponse(result, errors, 'morio.api.authentication.required')
   })
 
   // GET /whoami (JWT in Bearer header)
