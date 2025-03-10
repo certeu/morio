@@ -70,7 +70,7 @@ function produce(topic, data) {
  * Properly close kafka connections when exiting
  */
 async function exitGracefully() {
-  log.info('Exiting; Closing Kafka connection...')
+  log.info('Exiting. Closing Kafka connection...')
   try {
     if (utils.producer) await utils.producer.disconnect()
   } catch (err) {
