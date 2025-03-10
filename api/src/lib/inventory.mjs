@@ -344,8 +344,8 @@ export async function createInvite(user, type = 'once') {
   /*
    * There is a (small) chance that the random string we get
    * is already in use. So we loop until the record is created.
-   * However, we also guard against more than 3 loops because that
-   * probable means there's a problem with the database, and we
+   * However, we also guard against more than 3 loops because it
+   * probably means there's a problem with the database, and we
    * do not want to create an endless loop.
    */
   let created = false
