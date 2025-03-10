@@ -12,7 +12,7 @@
     "prettier": "npx prettier --ignore-unknown --write ./src"
   },
   "dependencies": {
-    "axios": "^1.7.9",
+    "axios": "^1.8.2",
     "esbuild": "^0.24.0",
     "ioredis": "^5.4.1",
     "ipaddr.js": "^2.2.0",
