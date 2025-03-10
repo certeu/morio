@@ -84,7 +84,7 @@ export function asTime(data) {
 }
 
 /**
- * Helper method to return the full id (provider + '.' + id)
+ * Helper method to return the full ID (provider + '.' + id)
  * @return null
  */
 export function fullId(provider, id) {
@@ -92,7 +92,7 @@ export function fullId(provider, id) {
 }
 
 /**
- * Helper method to return the username based on the full id (provider + '.' + id)
+ * Helper method to return the username based on the full ID (provider + '.' + id)
  * @return null
  */
 function username(fullId = '') {
@@ -131,7 +131,7 @@ const values = {
  * Helper method to load an account (or rather its data)
  *
  * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
+ * @param {string} id - The unique ID (the username)
  * @return {object} data - The data saved for the account
  */
 export async function loadAccount(provider, id) {
@@ -160,7 +160,7 @@ export async function saveAccount(provider = false, id = false, data) {
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('saveAccount was called without an id or provider')
+    log.warn('saveAccount was called without an ID or provider')
     return false
   }
 
@@ -202,14 +202,14 @@ export async function listAccounts() {
  * Helper method to save the last login time in the account data
  *
  * @param {string} provider - The ID of the identity provider
- * @param {string} id - The id of the account (the username)
+ * @param {string} id - The ID of the account (the username)
  */
 export async function updateLastLoginTime(provider, id, extraData = {}) {
   /*
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('[api] updateLastLoginTime was called without an id or provider')
+    log.warn('[api] updateLastLoginTime was called without an ID or provider')
     return false
   }
 
