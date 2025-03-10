@@ -40,12 +40,12 @@ export function routes(app) {
   app.put(`/clients/modules/enable/:module`, rbac.client, Clients.enableModule)
 
   /*
-   * Endpoint for a client to enable a module
+   * Endpoint for a client to disable a module
    */
   app.put(`/clients/modules/disable/:module`, rbac.client, Clients.disableModule)
 
   /*
-   * Endpoint for a client to push its config to the cluster
+   * Endpoint for a client to pull its config from the cluster
    */
   app.get(`/clients/pull/:uuid`, rbac.client, Clients.pull)
 
@@ -75,7 +75,7 @@ export function routes(app) {
   app.post(`/clients/invite/:type`, rbac.operator, Clients.createInvite)
 
   /*
-   * Send a command to one or more (or all) multiple clients
+   * Send a command to one (or more, or all) clients
    */
   app.put(`/clients/cmd/:cmd`, rbac.operator, Clients.sendCommand)
 }
