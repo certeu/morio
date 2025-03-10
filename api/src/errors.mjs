@@ -16,7 +16,7 @@ export const errors = {
     detail: 'The cluster name provided in the join request does not match the cluster FQDN',
   },
   /*
-   * Mismatch between the client join request cluster value and the actual cluster FQDN
+   * Mismatch between the client API key value and the expected one
    */
   'morio.api.client.authentication_mismatch': {
     status: 403,
@@ -25,7 +25,7 @@ export const errors = {
       'This endpoint can only be used by the API key that was assigned to the client when joining the cluster.',
   },
   /*
-   * Mismatch between the client join request cluster value and the actual cluster FQDN
+   * The client mentions a module unknown of the server
    */
   'morio.api.client.unknown_module': {
     status: 400,
@@ -34,7 +34,7 @@ export const errors = {
       'The modules list includes a module that is not known to Morio. Modules should be centrally seeded.',
   },
   /*
-   * Client tries to join with a UUID that alread joined
+   * Client tries to join with a UUID that already joined
    */
   'morio.api.client.joined': {
     status: 400,
@@ -43,7 +43,7 @@ export const errors = {
       'A client with this UUID already joined this cluster. To re-join this client, use the "morio rejoin" cli command instead.',
   },
   /*
-   * Client tries to join with a UUID that alread joined
+   * Client requests an invite type that does not exist
    */
   'morio.api.clients.invalid_invite_type': {
     status: 400,
@@ -61,7 +61,7 @@ export const errors = {
       'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.',
   },
   /*
-   * Client tries to join with an invalid invite
+   * Client tries to join with an invalid invite 
    */
   'morio.api.clients.invite_invalid': {
     status: 400,
@@ -111,7 +111,7 @@ export const errors = {
     detail: 'This is the API equivalent of a 404 page for the KV store. This key does not exist.',
   },
   /*
-   * Error for only in ephemeral mode' errors
+   * An endpoint only available in ephemeral mode has been used on a system that has been fully setup
    */
   'morio.api.ephemeral.required': {
     status: 409,
@@ -120,7 +120,7 @@ export const errors = {
       'This endpoint is only available when Morio is running in ephemeral mode. Since this system has been set up, this endpoint is no longer available.',
   },
   /*
-   * Error for not in ephemeral mode' errors
+   * An endpoint not available in ephemeral mode has been used on a system that is in ephemeral mode
    */
   'morio.api.ephemeral.prohibited': {
     status: 409,
@@ -129,7 +129,7 @@ export const errors = {
       'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
   },
   /*
-   * Error for not in ephemeral mode' errors
+   * Transient API error for when the configuration is being reloaded 
    */
   'morio.api.reloading.prohibited': {
     status: 409,
@@ -162,7 +162,7 @@ export const errors = {
     detail: 'When reaching out to Morio Core, we received a status code 503.',
   },
   /*
-   * Status issues coming from core when it does not response
+   * Status issues coming from core when it does not respond
    */
   'morio.api.core.status.undefined': {
     status: 503,
