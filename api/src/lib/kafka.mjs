@@ -67,7 +67,7 @@ function produce(topic, data) {
 }
 
 /*
- * Properly close kafka connections when exiting
+ * Properly close Kafka connections when exiting
  */
 async function exitGracefully() {
   log.info('Exiting. Closing Kafka connection...')
