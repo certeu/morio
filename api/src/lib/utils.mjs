@@ -111,7 +111,7 @@ utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', 
 /**
  * Helper method to get a list of all FQDNS for flanking nodes
  *
- * @return {array} list - The list of all flankin node FQDNs
+ * @return {array} list - The list of all flanking node FQDNs
  *
  */
 utils.getFlankingFqdns = () => utils.getSettings('cluster.flanking_nodes', [])
@@ -140,7 +140,7 @@ utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
 /**
  * Helper method to get a list of all FQDNS for flanking nodes
  *
- * @return {array} list - The list of all flankin node FQDNs
+ * @return {array} list - The list of all flanking node FQDNs
  *
  */
 utils.getAllNodesFqdns = () => [...utils.getBrokerFqdns(), ...utils.getFlankingFqdns()]
