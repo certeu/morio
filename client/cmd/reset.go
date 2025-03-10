@@ -45,7 +45,7 @@ var resetModulesCmd = &cobra.Command{
 var resetJoinCmd = &cobra.Command{
 	Use:     "join",
 	Short:   "Removes the cluster-specific configuration",
-	Long:    `This removes teh configuration created by joining the client to a Morio cluster.`,
+	Long:    `This removes the configuration created by joining the client to a Morio cluster.`,
 	Example: "  morio reset join",
 	Run: func(cmd *cobra.Command, args []string) {
 		ClearJoin()
