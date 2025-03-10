@@ -25,7 +25,7 @@ export function routes(app) {
   app.get(`/info/cluster/fqdn`, (req, res) => res.send({ fqdn: utils.getClusterFqdn() }))
 
   /*
-   * Get a list of the available idenity/authentication providers (idps)
+   * Get a list of the available identity/authentication providers (idps)
    */
   app.get(`/idps`, Anonymous.getIdps)
 
