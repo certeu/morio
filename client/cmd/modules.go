@@ -32,7 +32,7 @@ var modulesListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List local modules",
 	Long:    `List client modules.`,
-	Example: `  morio module list`,
+	Example: `  morio modules list`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the verbose flag value from the command
 		verbose, _ := cmd.Flags().GetBool("verbose")
@@ -47,7 +47,7 @@ var modulesEnableCmd = &cobra.Command{
 	Short:   "Enable a local module",
 	Long:    `Enables a client module.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio module enable linux-apache2`,
+	Example: `  morio modules enable linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		enableModule(args[0])
 		ShowModulesList(false, false)
@@ -60,7 +60,7 @@ var modulesDisableCmd = &cobra.Command{
 	Short:   "Disable a local module",
 	Long:    `Disables a client module.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio module disable linux-apache2`,
+	Example: `  morio modules disable linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		disableModule(args[0])
 		ShowModulesList(false, false)
@@ -73,7 +73,7 @@ var modulesInfoCmd = &cobra.Command{
 	Short:   "Show local module info",
 	Long:    `Shows info about a client module.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio module info linux-system`,
+	Example: `  morio modules info linux-system`,
 	Run: func(cmd *cobra.Command, args []string) {
 		ModuleInfo(args[0])
 	},
@@ -84,7 +84,7 @@ var modulesListRemoteCmd = &cobra.Command{
 	Use:     "list-remote",
 	Short:   "List remote modules",
 	Long:    `List client modules available on the Morio cluster.`,
-	Example: `  morio module list-remote`,
+	Example: `  morio modules list-remote`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the table flag value from the command
 		table, _ := cmd.Flags().GetBool("table")
@@ -98,7 +98,7 @@ var modulesEnableRemoteCmd = &cobra.Command{
 	Short:   "Enable a remote module",
 	Long:    `Enables a module for this client on the Morio cluster.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio module enable-remote linux-apache2`,
+	Example: `  morio modules enable-remote linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		EnableRemoteModule(args[0])
 	},
@@ -110,7 +110,7 @@ var modulesDisableRemoteCmd = &cobra.Command{
 	Short:   "Disable a remote module",
 	Long:    `Disables a module for this client on the Morio cluster.`,
 	Args:    cobra.ExactArgs(1),
-	Example: `  morio module disable-remote linux-apache2`,
+	Example: `  morio modules disable-remote linux-apache2`,
 	Run: func(cmd *cobra.Command, args []string) {
 		DisableRemoteModule(args[0])
 	},
@@ -467,13 +467,13 @@ func FetchModules() ([]string, []string, error) {
 	cluster := GetVar("MORIO_CLUSTER")
 
 	if uuid == "" {
-		return nil, nil, fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return nil, nil, fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return nil, nil, fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return nil, nil, fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return nil, nil, fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return nil, nil, fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Create HTTP client
@@ -579,13 +579,13 @@ func ChangeRemoteModuleStatus(module string, state string) error {
 	cluster := GetVar("MORIO_CLUSTER")
 
 	if uuid == "" {
-		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Create HTTP client
