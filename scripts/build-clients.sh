@@ -11,8 +11,7 @@ echo "Building Morio client:"
 echo " 1/5 Linux on amd64..."
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-extldflags "-static"' -o ../local/builds/morio-linux-amd64
 echo " 2/5 Linux on arm64..."
-echo "(skipped - not implemented yet)"
-#CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -ldflags '-extldflags "-static"' -o ../local/builds/morio-linux-arm64
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -a -ldflags '-extldflags "-static"' -o ../local/builds/morio-linux-arm64
 
 # Build for macos
 echo " 3/5 MacOS on amd64..."

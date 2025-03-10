@@ -8,7 +8,6 @@ set -e
 systemctl daemon-reload || true
 
 # Configure services
-/usr/sbin/morio init
 systemctl enable morio-audit
 systemctl enable morio-logs
 systemctl enable morio-metrics

@@ -27,25 +27,45 @@ cd $MORIO_GIT_ROOT
 sudo rm -rf build-context
 mkdir build-context
 cp -R pkgs/morio-client/linux/* build-context
-cd -
+rm build-context/usr/sbin/.gitkeep
 
-# Update version in various files
-cd build-context
-sed -i "s/__MORIO_VERSION__/${MORIO_VERSION}/g" ./DEBIAN/control
-cd -
+# Update version control file
+sed -i "s/__MORIO_VERSION__/${MORIO_VERSION}/g" ./build-context/DEBIAN/control
 
-# Build the package
-cd $MORIO_GIT_ROOT/build-context
-dpkg-deb --build . ../local/builds
-cd -
+# Build package for different architectures
+for arch in amd64 arm64
+do
 
-if [ $? -eq 0 ]
-then
-  echo "Successfully built the morio-client.deb package"
-else
-  echo "Failed to build the morio-client.deb package"
-  exit 1
-fi
+  # Update architecture control file
+  sed -i "s/__MORIO_ARCHITECTURE__/${arch}/g" ./build-context/DEBIAN/control
+
+  # Copy the client binary in place
+  if [ -f "./local/builds/morio-linux-${arch}" ]; then
+    echo "Copying client binary for ${arch}"
+    cp ./local/builds/morio-linux-${arch} ./build-context/usr/sbin/morio
+    chmod +x ./build-context/usr/sbin/morio
+  else
+    echo "Cannot locate client binary for ${arch}. Please build clients first."
+    exit 1
+  fi
+
+  # Build the package
+  cd $MORIO_GIT_ROOT/build-context
+  dpkg-deb --build . ../local/builds
+  cd -
+
+  if [ $? -eq 0 ]
+  then
+    echo "Successfully built the morio-client.deb package for $arch"
+  else
+    echo "Failed to build the morio-client.deb package for $arch"
+    exit 1
+  fi
+
+  # Restore architecture placeholder
+  sed -i "s/${arch}/__MORIO_ARCHITECTURE__/g" ./build-context/DEBIAN/control
+
+done
 
 cd $MORIO_GIT_ROOT
 echo
