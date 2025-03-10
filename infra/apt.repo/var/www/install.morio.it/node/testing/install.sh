@@ -21,8 +21,8 @@
 
 #
 # Which distribution channel to use?
-# Alternatives are stable or testing
-CHANNEL="canary"
+# Alternatives are canary or stable
+CHANNEL="testing"
 
 #
 # Store the package format
@@ -113,6 +113,7 @@ install_repo_pkg() {
   echo ""
   echo "📦 Installing moriod repo, which will add the ${PACKAGE_FORMAT} repository..."
   if [ $PACKAGE_FORMAT == "apt" ]; then
+    sudo DEBIAN_FRONTEND=noninteractive apt update -y
     sudo DEBIAN_FRONTEND=noninteractive apt install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
   else
     sudo yum install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
@@ -155,3 +156,4 @@ install() {
 # Run the install function
 #
 install
+

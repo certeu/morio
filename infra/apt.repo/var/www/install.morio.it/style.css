@@ -1,11 +1,17 @@
 :root {
   --txt: rgb(36, 37, 38);
   --bg: rgb(235, 237, 240);
+  --brand: hsl(191.6, 71.4%, 37.1%);
+  --brand-dark: hsl(191.6, 71.4%, 30%);
+  --brand-light: hsl(191.6, 71.4%, 40%);
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --txt: rgb(235, 237, 240);
     --bg: rgb(36, 37, 38);
+    --brand: hsl(191.6, 71.4%, 37.1%);
+    --brand-dark: hsl(191.6, 71.4%, 40%);
+    --brand-light: hsl(191.6, 71.4%, 30%);
   }
 }
 
@@ -23,10 +29,8 @@ body {
   min-height: calc(100vh - 4rem);
   text-align: center;
 }
-a,
-a:visited,
-a:active {
-  color: #1b88a2;
+a, a:visited, a:active {
+  color: var(--brand);
   text-decoration: underline;
   text-decoration-thickness: 1px;
 }
@@ -34,15 +38,19 @@ a:hover {
   text-decoration-thickness: 3px;
 }
 #content {
-  max-width: 560px;
+  max-width: 666px;
   margin: auto;
 }
 pre {
   background: #212121;
-  color: #fff;
+  color: #FFF;
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: left;
+}
+header {
+  margin-top: 0;
+  font-size: 75%;
 }
 footer {
   margin-bottom: 0;
@@ -56,12 +64,42 @@ span.note {
   display: block;
   border-radius: 0.5rem;
 }
-span.note.production {
-  background-color: #15803d;
+span.note.stable { background-color: #15803D; }
+span.note.canary { background-color: #F97316; }
+span.note.testing { background-color: #DC2626; }
+
+div.buttons {
+	margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 450px;
+  gap: 1rem;
+  
 }
-span.note.canary {
-  background-color: #f97316;
+a.big-btn {
+	border: solid 2px var(--brand-light);
+	border-radius: 0.5rem;
+	padding: 1.5rem;
+	text-decoration: none;
+	font-weigth: bold;
+    	background-color: var(--brand);
+	color: #fff;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	width: 100%;
+	font-size: 1.5rem;
 }
-span.note.testing {
-  background-color: #dc2626;
+a.big-btn:hover {
+    	background-color: var(--brand-light);
+  box-shadow: 0 1px 3px 0 #0006, 0 1px 2px -1px #0006;
+}
+a.big-btn.outline {
+	background-color: transparent;
+	color: var(--brand);
+	padding: 0.75rem 1.5rem;
+	font-size: 1.25rem;
 }

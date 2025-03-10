@@ -17,7 +17,11 @@ server {
   access_log /var/log/nginx/install.morio.it_access.log;
   error_log /var/log/nginx/install.morio.it_error.log;
 
-  location ~ ^/(stable|canary|testing|)$ {
+  location ~ ^/client/(stable|canary|testing|)$ {
+    try_files $uri/$index_file =404;  # Serve index.html for browsers
+  }
+
+  location ~ ^/node/(stable|canary|testing|)$ {
     try_files $uri/$index_file =404;  # Serve index.html for browsers
   }
 
