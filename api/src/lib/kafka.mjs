@@ -80,4 +80,3 @@ async function exitGracefully() {
     process.exit()
   }
 }
-

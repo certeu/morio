@@ -61,7 +61,7 @@ export const errors = {
       'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.',
   },
   /*
-   * Client tries to join with an invalid invite 
+   * Client tries to join with an invalid invite
    */
   'morio.api.clients.invite_invalid': {
     status: 400,
@@ -129,7 +129,7 @@ export const errors = {
       'This endpoint is not available when Morio is running in ephemeral mode. Since this system has not yet been set up, this endpoint is not yet available.',
   },
   /*
-   * Transient API error for when the configuration is being reloaded 
+   * Transient API error for when the configuration is being reloaded
    */
   'morio.api.reloading.prohibited': {
     status: 409,
