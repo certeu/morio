@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Post-Install script for moriod-repo
+# Post-Install script for morio-repo
 
 set -e
 

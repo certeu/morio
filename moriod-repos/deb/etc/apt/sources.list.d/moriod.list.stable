@@ -1,3 +1,0 @@
-# Moriod repository - stable channel
-# See https://apt.repo.morio.it/
-deb [signed-by=/usr/share/keyrings/moriod.gpg] https://apt.repo.morio.it/stable stable main

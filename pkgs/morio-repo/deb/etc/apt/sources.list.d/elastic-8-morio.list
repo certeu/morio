@@ -1,0 +1,6 @@
+# Elastic 8 repository - Added to provide the Morio client dependencies.
+# This repository is configured with half (250) of the default priority (500).
+# This ensures the Morio client's dependencies are available without breaking
+# any other Elastic packages or expectations on where apt will find them.
+# See: https://morio.it/docs/guides/install-client/#elastic-apt-repo-priority
+deb https://artifacts.elastic.co/packages/8.x/apt stable main

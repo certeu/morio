@@ -1,3 +1,0 @@
-# Moriod repository - testing channel
-# See https://apt.repo.morio.it/
-deb [signed-by=/usr/share/keyrings/moriod.gpg] https://apt.repo.morio.it/testing testing main
