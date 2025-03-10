@@ -56,20 +56,6 @@ npm run build:tap $RELEASE_CHANNEL
 echo "👷 Building itsmorio/ui:${MORIO_VERSION_TAG} container"
 npm run build:ui $RELEASE_CHANNEL
 
-# Build dbuilder container image
-echo "👷 Building itsmorio/dbuilder:${MORIO_VERSION_TAG} container"
-npm run build:dbuilder $RELEASE_CHANNEL
-
-# Build dbuilder deb package
-echo "👷 Building moriod package for Debian"
-npm run docker:build.moriod.deb
-cp build-context/dist/*.deb .
-
-# Build dbuilder deb package
-echo "👷 Building moriod-repo package for Debian"
-npm run build:moriod-repo-deb
-cp build-context/dist/*.deb .
-
 echo "✅ Publishing images..."
 docker push itsmorio/core:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/core:${RELEASE_CHANNEL_TAG}
@@ -77,6 +63,4 @@ docker push itsmorio/api:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/api:${RELEASE_CHANNEL_TAG}
 docker push itsmorio/ui:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 docker push itsmorio/ui:${RELEASE_CHANNEL_TAG}
-docker push itsmorio/dbuilder:${MORIO_VERSION_TAG}${TAG_SUFFIX}
-docker push itsmorio/dbuilder:${MORIO_VERSION_TAG}${TAG_SUFFIX}
 

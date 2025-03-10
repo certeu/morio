@@ -45,7 +45,7 @@ else
 fi
 
 # Run all build commands
-to_build=("api" "core" "ui" "dbuilder" "rbuilder" "tap")
+to_build=("api" "core" "ui" "tap")
 for item in "${to_build[@]}"; do
   npm run build:$item $RELEASE_CHANNEL
 done
