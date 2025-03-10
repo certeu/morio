@@ -169,7 +169,7 @@ MorioClient.prototype.getClusterFqdn = async function () {
 }
 
 /**
- * List files in the dowbloads folder
+ * List files in the downloads folder
  *
  * @return {array} - The list of files
  */
