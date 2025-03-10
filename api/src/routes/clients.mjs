@@ -6,7 +6,7 @@ const Clients = new Controller()
 /**
  * This method adds the client endpoints to Express
  *
- * @param {abject} app - The ExpressJS app
+ * @param {object} app - The ExpressJS app
  */
 export function routes(app) {
   /*
