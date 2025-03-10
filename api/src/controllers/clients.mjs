@@ -27,8 +27,8 @@ import { uuid as generateUuid, randomString, hashPassword } from '#shared/crypto
 /**
  * This client controller handles sending commands to clients
  *
- * That sounds more complicated than it is, all it does it
- * publish messages to the clients kafka topic.
+ * That sounds more complicated than it is, all it does is
+ * publish messages to the clients Kafka topic.
  *
  * @returns {object} Controller - The cache controller object
  */
@@ -253,7 +253,7 @@ Controller.prototype.push = async function (req, res) {
     return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
 
   /*
-   * If any of the submitted module does not exist, reject the request entirely.
+   * If any of the submitted module does not exist, reject the request entirely
    */
   const result = await verifyModulesExist(valid.modules)
   if (!result[0])
@@ -304,7 +304,7 @@ Controller.prototype.pull = async function (req, res) {
   const files = await getClientModuleFiles(modules)
 
   /*
-   * Client vars have precedent over module vars
+   * Client vars have precedence over module vars
    */
   const vars = {}
   for (const { key, val } of mvars) vars[key] = { key, val }
@@ -443,7 +443,7 @@ Controller.prototype.addCommandStatus = async function (req, res) {
 }
 
 /**
- * Endpoint for users to retrieve info about a client command id
+ * Endpoint for users to retrieve info about a client command ID
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -455,7 +455,7 @@ Controller.prototype.getCommandInfo = async function (req, res) {
 }
 
 /**
- * Endpoint for users to retrieve the command status for client command id
+ * Endpoint for users to retrieve the command status for client command ID
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
@@ -474,7 +474,7 @@ Controller.prototype.getCommandStatus = async function (req, res) {
  *
  * @param {object} req - The request object
  * @param {string} uuid - The client UUID
- * @return {bool} result - True if it's ok, false if not
+ * @return {bool} result - True if it's OK, false if not
  */
 function matchClientApikey(req, uuid) {
   if (
