@@ -383,12 +383,12 @@ export async function createInvite(user, type = 'once') {
 /*
  * Helper method to read a client invite from the database
  *
- * @param {string} id - The id of the invite
+ * @param {string} id - The ID of the invite
  * @return {object} invite - The invite data from the database
  */
 export async function getInvite(id) {
   if (!id) {
-    log.debug(`getInvite called without id`)
+    log.debug(`getInvite called without ID`)
     return false
   }
   const result = await db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
@@ -403,7 +403,7 @@ export async function getInvite(id) {
  * For one-time invites, this will remove the invite
  * For multi invites, this will increase teh use counter
  *
- * @param {string} id - The id of the invite
+ * @param {string} id - The ID of the invite
  * @return {bool} result - True if it worked
  */
 export async function useInvite(id) {
@@ -455,7 +455,7 @@ function getFields(result = {}) {
 /**
  * Helper method to create an inventory host
  *
- * @param {object} id - The id of the host
+ * @param {object} id - The ID of the host
  * @param {object} data - The data to save for the account
  */
 export async function saveHost(id, data) {
@@ -463,7 +463,7 @@ export async function saveHost(id, data) {
    * We need at least an ID
    */
   if (!id) {
-    log.warn('saveHost was called without an id')
+    log.warn('saveHost was called without an ID')
     return false
   }
 
