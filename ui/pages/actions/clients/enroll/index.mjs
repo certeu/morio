@@ -47,7 +47,7 @@ const EnrollClientsPage = (props) => {
         <Popout note>
           <h5>This cluster requires client invites</h5>
           <p>
-            The <code>REQUIRE_CLIENT_INVITES</code> feature flags is enabled on this cluster,
+            The <code>REQUIRE_CLIENT_INVITES</code> feature flag is enabled on this cluster,
             meaning that clients cannot join without providing an invite code.
           </p>
           <p>
@@ -73,13 +73,13 @@ const EnrollClientsPage = (props) => {
             </div>
           </div>
         </Popout>
-        <Tabs tabs="Linux, MacOS, Windows">
+        <Tabs tabs="Linux, macOS, Windows">
           <Tab name="Linux" key="lin">
             <p>Hook up the Morio client to this cluster by running the following command:</p>
             <Highlight language="shell">{`sudo morio join ${fqdn} --invite ${invite}`}</Highlight>
           </Tab>
-          <Tab name="MacOS" key="mac">
-            <Popout fixme>Provide instructions for MacOS</Popout>
+          <Tab name="macOS" key="mac">
+            <Popout fixme>Provide instructions for macOS</Popout>
           </Tab>
           <Tab name="Windows" key="win">
             <Popout fixme>Provide instructions for Windows</Popout>
@@ -89,13 +89,13 @@ const EnrollClientsPage = (props) => {
     )
   else
     step2 = (
-      <Tabs tabs="Linux, MacOS, Windows">
+      <Tabs tabs="Linux, macOS, Windows">
         <Tab name="Linux" key="lin">
           <p>Hook up the Morio client to this cluster by running the following command:</p>
           <Highlight language="shell">{`sudo morio join ${fqdn}`}</Highlight>
         </Tab>
-        <Tab name="MacOS" key="mac">
-          <Popout fixme>Provide instructions for MacOS</Popout>
+        <Tab name="macOS" key="mac">
+          <Popout fixme>Provide instructions for macOS</Popout>
         </Tab>
         <Tab name="Windows" key="win">
           <Popout fixme>Provide instructions for Windows</Popout>
@@ -109,7 +109,7 @@ const EnrollClientsPage = (props) => {
         <div className="max-w-4xl">
           <p>Enrolling a new Morio client is a 3-step process:</p>
           <h2>Step 1: Install the Morio client</h2>
-          <Tabs tabs="Linux, MacOS, Windows">
+          <Tabs tabs="Linux, macOS, Windows">
             <Tab name="Linux" key="lin">
               <p>
                 To install the Morio client for Linux, run the following command from an account
@@ -117,8 +117,8 @@ const EnrollClientsPage = (props) => {
               </p>
               <Highlight language="shell">{`curl -fsSL https://install.morio.it/client/ | bash`}</Highlight>
             </Tab>
-            <Tab name="MacOS" key="mac">
-              <Popout fixme>Provide instructions for MacOS</Popout>
+            <Tab name="macOS" key="mac">
+              <Popout fixme>Provide instructions for macOS</Popout>
             </Tab>
             <Tab name="Windows" key="win">
               <Popout fixme>Provide instructions for Windows</Popout>
