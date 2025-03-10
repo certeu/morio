@@ -80,7 +80,7 @@ Optionally provide an invitation code using the --invite flag.`,
 var unjoinCmd = &cobra.Command{
 	Use:   "unjoin",
 	Short: "Removes this client from the currently joined cluster",
-	Long:  `This will remove both local configuration, and remove this client from the currently joined cluster.`,
+	Long:  `This will delete the local configuration and remove this client from the currently joined cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return unjoinCluster()
@@ -459,13 +459,13 @@ func unjoinCluster() error {
 	secret := GetVar("MORIO_APIKEY_SECRET")
 
 	if uuid == "" {
-		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Create HTTP client
