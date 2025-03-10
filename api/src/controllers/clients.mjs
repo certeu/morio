@@ -109,7 +109,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
     const [status, result] = await utils.coreClient.get(`/status`, false, true)
 
     /*
-     * Bail out of core is not OK
+     * Bail out of core if not OK
      */
     if (status !== 200)
       return utils.sendErrorResponse(res, `morio.api.core.status.${status}`, req.url)
