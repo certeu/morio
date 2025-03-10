@@ -162,7 +162,7 @@ MorioClient.prototype.getClientRepoPackageDefaults = async function (type) {
 /**
  * Gets the cluster FQDN
  *
- * @return {string} - The cluster fqdn
+ * @return {string} - The cluster FQDN
  */
 MorioClient.prototype.getClusterFqdn = async function () {
   return await this.call(`${morioConfig.api}/info/cluster/fqdn`)
