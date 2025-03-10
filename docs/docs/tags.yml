@@ -10,15 +10,14 @@ oidc:
 api:
 broker:
 ca:
+cache:
 connector:
 console:
 core:
 db:
-dbuilder:
-drbuilder:
-mbuilder:
 proxy:
 rbuilder:
+tap:
 ui:
 watcher:
 wbuilder:

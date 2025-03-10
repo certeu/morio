@@ -123,3 +123,14 @@ In other words, the flag value of the **running configuration** is used, not
 the flag value of the **new settings**.
 :::
 
+## `REQUIRE_CLIENT_INVITES`
+
+Enable this flag to require clients to provide an invite code when joining the
+cluster.
+
+By default, clients can join the cluster without restrictions. You merely
+install the Morio client and join it to the cluster.
+
+If you need to guard against rogue client registration, you can enable this
+feature flag. Doing so will require clients to present an invite code. You can
+generate these invite codes through the API or UI.
