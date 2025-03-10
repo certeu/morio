@@ -11,7 +11,7 @@ Maintainer: CERT-EU <services@cert.europa.eu>
 Changed-By: Joost De Cock <joost.decock@cert.europa.eu>
 Homepage: https://morio.it
 Description: Adds the Morio APT repository and GPG key
-  Install this package to set up the Morio apt repository.
+  Install this package to set up the Morio APT repository.
   This allows you to install a Morio node or client and
   get its updates via the OS package manager.
 Vcs-Git: https://github.com/certeu/morio -b main
