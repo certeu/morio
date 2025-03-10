@@ -81,7 +81,7 @@ async function ensureLocalPrerequisites() {
   await chown('/etc/morio/api', 2112, 2112)
   /*
    * Generate key and certificate for mTLS
-   * (this will only renew the cert if it's missing or old
+   * (this will only renew the cert if it's missing or old)
    */
   await ensureServiceCertificate('api', false)
 
