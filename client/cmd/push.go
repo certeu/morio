@@ -36,13 +36,13 @@ func PushConfig() error {
 	cluster := GetVar("MORIO_CLUSTER")
 
 	if uuid == "" {
-		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Gather config
