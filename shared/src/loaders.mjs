@@ -515,7 +515,7 @@ export async function loadClientModules(settings, log) {
             if (!copy) log.warn(`Failed to seed client module file: ${targetFile}`)
             else {
               /*
-               * File is copies, update modules and moduleFiles objects
+               * File is copied, now update modules and moduleFiles objects
                */
               log.debug(`Seeding client module file: ${targetFile}`)
               if (sourceFile.slice(-4) === '.yml') {
