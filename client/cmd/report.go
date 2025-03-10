@@ -17,7 +17,7 @@ func init() {
 var reportCmd = &cobra.Command{
 	Use:   "report",
 	Short: "Send local system info to the Morio cluster",
-	Long:  `This sends local system info to the Morio cluster, which ensures the inventory stays up to date.`,
+	Long:  `This sends local system info to the Morio cluster, which ensures that the inventory stays up-to-date.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return ReportClient()
 	},
@@ -30,13 +30,13 @@ func ReportClient() error {
 	cluster := GetVar("MORIO_CLUSTER")
 
 	if uuid == "" {
-		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Gather system information
