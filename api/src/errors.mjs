@@ -25,7 +25,7 @@ export const errors = {
       'This endpoint can only be used by the API key that was assigned to the client when joining the cluster.',
   },
   /*
-   * The client mentions a module unknown of the server
+   * The client mentions a module unknown to the server
    */
   'morio.api.client.unknown_module': {
     status: 400,
