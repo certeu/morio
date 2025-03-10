@@ -101,3 +101,17 @@ When you enable this flag, Morio will reseed (thus update the local git
 content from the remote) whenever you restart it, or update its
 configuration.`
 flags.RESEED_ON_RELOAD = false
+
+/*
+ * Require clients to provide an invite code to join the cluster
+ */
+fdocs.REQUIRE_CLIENT_INVITES = `Enable this flag to require clients to have an invite code to join the cluster.
+
+By default, clients can join the cluster without restrictions. You merely
+install the Morio client and join it to the cluster.
+
+  If you need to guard against rogue client registration, you can enable this
+feature flag. Doing so will require clients to present an invite code. You can
+generate these invite codes through the API or UI.`
+flags.REQUIRE_CLIENT_INVITES = false
+

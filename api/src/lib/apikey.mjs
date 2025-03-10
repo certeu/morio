@@ -47,7 +47,7 @@ const values = {
 /**
  * Helper method to load an apikey (or rather its data)
  *
- * @param {string} id - The unique id (the key)
+ * @param {string} id - The unique ID (the key)
  * @return {object} data - The data saved for the API key
  */
 export async function loadApikey(id) {
@@ -69,7 +69,7 @@ export async function loadApikey(id) {
 /**
  * Helper method to load API keys for a given account
  *
- * @param {string} id - The unique id (in provider.username format)
+ * @param {string} id - The unique ID (in provider.username format)
  * @return {object} keys - The API keys saved for the account
  */
 export async function loadAccountApikeys(id) {
@@ -84,14 +84,14 @@ export async function loadAccountApikeys(id) {
 /*
  * Helper method to delete an API key
  *
- * @param {string} id - The apikey ID (key)
+ * @param {string} id - The API key ID (key)
  */
 export async function deleteApikey(id = false) {
   /*
    * We need at least an ID
    */
   if (!id) {
-    log.warn('deleteApikey was called without an id')
+    log.warn('deleteApikey was called without an ID')
     return false
   }
 
@@ -106,11 +106,12 @@ export async function deleteApikey(id = false) {
 /**
  * Create a new API key
  * @param {object} data - The data to save for the API key
- * @return {number} status - 200 or 500
+ * @param {boolean} recreate - Whether to first delete before creating this key
+ * @return {boolean} - True if successful, false otherwise
  */
-export async function createApikey(data) {
-  if (!data.key) {
-    log.debug('createApikey was called without an id')
+export async function createApikey(data, recreate = false) {
+  if (!data.id) {
+    log.debug('createApikey was called without an ID')
     return false
   }
 
@@ -131,15 +132,18 @@ export async function createApikey(data) {
     return false
   }
 
+  // Prepare the insert query
   const query = `INSERT INTO apikeys (${columns.join(', ')}) VALUES (${columns.map((key) => ':' + key).join(', ')})`
 
-  try {
-    const status = await db.write(query, params)
-    return status // Return the new API key if successful
-  } catch (error) {
-    log.error('Failed to insert new API key:', error)
-    return false
-  }
+  // Now either delete + insert, or just insert
+  const result = recreate
+    ? await db.writeMany([
+        [`DELETE FROM apikeys WHERE id=:id`, { id: data.id }],
+        [query, params],
+      ])
+    : await db.write(query, params)
+
+  return result[0] === 200
 }
 
 /**
@@ -150,7 +154,7 @@ export async function createApikey(data) {
  */
 export async function updateApikey(id, data) {
   if (!id) {
-    log.warn('updateApikey was called without an id')
+    log.warn('updateApikey was called without an ID')
     return false
   }
 
@@ -178,7 +182,7 @@ export async function updateApikey(id, data) {
 /**
  * Helper method to save the last login time in the apikey data
  *
- * @param {string} id - The id of the apikey (the key)
+ * @param {string} id - The ID of the API key (the key)
  */
 export async function updateLastLoginTime(id) {
   return await updateApikey(id, { last_login: asTime() })

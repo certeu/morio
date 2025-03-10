@@ -243,6 +243,7 @@ const settings = Joi.object({
       DISABLE_SERVICE_UI: Joi.boolean(),
       ENFORCE_HTTP_MTLS: Joi.boolean(),
       ENFORCE_SERVICE_CACHE: Joi.boolean(),
+      REQUIRE_CLIENT_INVITES: Joi.boolean(),
       RESEED_ON_RELOAD: Joi.boolean(),
     }),
     secrets: Joi.object(),

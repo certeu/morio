@@ -167,16 +167,6 @@ else
 fi
 `
 
-const coreWebConfig = `
-
-# Copy the webroot and config into the correct location for dev
-sudo mkdir -p ${MORIO_GIT_ROOT}/data/config/web
-sudo cp -R ${MORIO_GIT_ROOT}/moriod/etc/morio/moriod/web  ${MORIO_GIT_ROOT}/data/config
-sudo mkdir -p ${MORIO_GIT_ROOT}/data/data
-sudo cp -R ${MORIO_GIT_ROOT}/moriod/var/lib/morio/moriod/webroot ${MORIO_GIT_ROOT}/data/data/webroot
-
-`
-
 const testFqdnCheck = `
 if [ -z "\${MORIO_FQDN}" ]; then
   echo ""
@@ -197,7 +187,6 @@ const script = (name, env) => `#!/bin/bash
 #
 ${name === 'core' && env === 'test' ? testFqdnCheck : ''}
 ${name === 'api' && env === 'test' ? testFqdnCheck : ''}
-${name === 'core' && env === 'dev' ? coreWebConfig : ''}
 ${name === 'api' ? preApiTest : ''}
 
 docker run ${cliOptions(name, env)}

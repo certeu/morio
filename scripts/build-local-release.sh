@@ -19,10 +19,6 @@ npm run build:api prod
 echo "👷 Building itsmorio/ui:${MORIO_VERSION_TAG} container"
 npm run build:ui prod
 
-# Build dbuilder container image
-echo "👷 Building itsmorio/dbuilder:${MORIO_VERSION_TAG} container"
-npm run build:dbuilder prod
-
 # Build dbuilder deb package
 echo "👷 Building moriod package for Debian"
 npm run docker:build.moriod.deb
@@ -43,7 +39,6 @@ if [[ "$answer" == "y" ]]; then
   docker push itsmorio/core:${MORIO_VERSION_TAG}
   docker push itsmorio/api:${MORIO_VERSION_TAG}
   docker push itsmorio/ui:${MORIO_VERSION_TAG}
-  docker push itsmorio/dbuilder:${MORIO_VERSION_TAG}
 else
   echo "⛔ Not publishing images as ${MORIO_VERSION_TAG}"
 fi
@@ -58,7 +53,6 @@ if [[ "$answer" == "y" ]]; then
   docker push itsmorio/core:testing
   docker push itsmorio/api:testing
   docker push itsmorio/ui:testing
-  docker push itsmorio/dbuilder:testing
 else
   echo "⛔ Not publishing images as testing"
 fi

@@ -1,6 +1,6 @@
 {
   "name": "@itsmorio/api",
-  "version": "0.7.2",
+  "version": "0.8.0-rc.1",
   "description": "Morio Management API",
   "private": true,
   "scripts": {
@@ -10,8 +10,8 @@
     "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it -e \"MORIO_FQDN=${MORIO_FQDN}\" morio-api node --no-warnings --test-concurrency=1 --test",
-    "retest": "cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
+    "test": "../scripts/testcheck.sh && docker exec -it -e \"MORIO_FQDN=${MORIO_FQDN}\" morio-api node --no-warnings --test-concurrency=1 --test",
+    "retest": "../scripts/testcheck.sh && cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
   },
   "imports": {
     "#config": "./config/index.mjs",

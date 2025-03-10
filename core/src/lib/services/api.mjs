@@ -1,9 +1,10 @@
 import { utils, log } from '../utils.mjs'
+import { chown, mkdir } from '#shared/fs'
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
-
+import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
-import { alwaysTrue, defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -22,9 +23,12 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We reuse the alwaysTrue method here, since the api should always be running
      */
-    wanted: alwaysTrue,
+    wanted: ensureLocalPrerequisites,
+    /**
+     * Lifecycle hook for anything to be done prior to creating the container
+     */
+    precreate: ensureLocalPrerequisites,
     /*
      * Lifecycle hook to determine whether to recreate the service
      * We just reuse the default hook here, telling it we need TLS configured.
@@ -70,4 +74,16 @@ const isApiUp = async (reload = false) => {
   )
 
   return reload ? status === 204 : status === 200
+}
+
+async function ensureLocalPrerequisites() {
+  await mkdir('/etc/morio/api')
+  await chown('/etc/morio/api', 2112, 2112)
+  /*
+   * Generate key and certificate for mTLS
+   * (this will only renew the cert if it's missing or old)
+   */
+  await ensureServiceCertificate('api', false)
+
+  return
 }

@@ -1,6 +1,6 @@
 {
   "name": "morio",
-  "version": "0.7.2",
+  "version": "0.8.0-rc.1",
   "description": "Morio provides the plumbing for your observability needs",
   "license": "EUPL",
   "private": true,
@@ -55,20 +55,18 @@
     "build:api": "./scripts/build-container.sh api",
     "build:core": "./scripts/build-container.sh core",
     "build:clients": "./scripts/build-clients.sh",
-    "build:dbuilder": "./builders/dbuilder/build-container.sh",
-    "build:rbuilder": "./builders/rbuilder/build-container.sh",
     "build:tap": "./scripts/build-container.sh tap",
     "build:ui": "./scripts/build-container.sh ui",
     "build:local-release": "./scripts/build-local-release.sh",
-    "build:moriod-repo.deb": "./scripts/build-moriod-repo-deb.sh",
+    "build:morio-repo.deb": "./scripts/build-morio-repo-deb.sh",
     "build:moriod.deb": "./scripts/build-moriod-deb.sh",
+    "build:morio-client.deb": "./scripts/build-morio-client-deb.sh",
+    "build:pkgs.deb": "./scripts/build-pkgs-deb.sh",
     "cdp": "npm run check-docs-page",
     "check-docs-page": "./scripts/check-docs-page.sh",
     "check": "./scripts/check-doc.sh",
     "ci:build.api": "./scripts/ci-build-container.sh api",
     "ci:build.core": "./scripts/ci-build-container.sh core",
-    "ci:build.dbuilder": "./scripts/ci-build-container.sh dbuilder",
-    "ci:build.rbuilder": "./scripts/ci-build-container.sh rbuilder",
     "ci:build.moriod.rpm": "./scripts/ci-build-moriod-rpm.sh",
     "ci:build.tap": "./scripts/ci-build-container.sh tap",
     "ci:build.ui": "./scripts/ci-build-container.sh ui",
@@ -107,8 +105,8 @@
     "spellcheck": "./scripts/spellcheck-docs.sh",
     "subscribe": "node --no-warnings scripts/kafka-client.mjs",
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
-    "test:api": "./scripts/test-api.sh",
-    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
+    "test:api": "./scripts/testcheck.sh && ./scripts/test-api.sh",
+    "test:core": "./scripts/testcheck.sh && npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
     "mocha": "^11.0.1"

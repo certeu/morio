@@ -1,10 +1,11 @@
-import { roles as allRoles } from '#config/roles'
+import { roles as allRoles, hiddenRoles as allHiddenRoles } from '#config/roles'
 import { utils } from './lib/utils.mjs'
 
 /*
  * Re-export this here as it's more intuitive to import roles from rbac.mjs
  */
 export const roles = allRoles
+export const hiddenRoles = allHiddenRoles
 
 /**
  * Helper method to get the current user ID from headers
@@ -55,13 +56,14 @@ export function currentRole(req) {
   /*
    * Only allow roles that exist
    */
-  return roles.includes(role) ? role : false
+  return [...roles, ...hiddenRoles].includes(role) ? role : false
 }
 
 /*
  * Helper method to get all roles available to a given role
  */
 export function availableRoles(role) {
+  if (role === 'client') return ['client']
   const i = roles.indexOf(role)
   if (i < 0) return []
   return roles.slice(0, i + 1)

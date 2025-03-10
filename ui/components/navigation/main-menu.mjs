@@ -25,11 +25,13 @@ import {
   LayersIcon,
   LocationIcon,
   LogsIcon,
+  MegaphoneIcon,
   MorioIcon,
   NoteIcon,
   OpenLockIcon,
   PackageIcon,
   PlusCircleIcon,
+  PuzzleIcon,
   WindowIcon,
   QuestionIcon,
   RightIcon,
@@ -66,6 +68,8 @@ const icons = {
   ca: CertificateIcon,
   certificates: CertificateIcon,
   checks: CheckCircleIcon,
+  cmd: MegaphoneIcon,
+  clients: DesktopIcon,
   create: PlusCircleIcon,
   core: MorioIcon,
   components: ComponentIcon,
@@ -79,6 +83,7 @@ const icons = {
   downloads: DownloadIcon,
   edit: NoteIcon,
   encrypt: ClosedLockIcon,
+  enroll: PuzzleIcon,
   events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
@@ -118,6 +123,18 @@ export const links = {
   actions: {
     t: 'Actions',
     r: 'operator',
+    clients: {
+      t: 'Client Actions',
+      r: 'operator',
+      enroll: {
+        t: 'Enroll Clients',
+        r: 'operator',
+      },
+      cmd: {
+        t: 'Send Client Commands',
+        r: 'operator',
+      },
+    },
   },
   boards: {
     t: 'Dashboards',
@@ -172,6 +189,10 @@ export const links = {
     },
     oss: {
       t: 'Operating Systems',
+      r: 'user',
+    },
+    pkgs: {
+      t: 'Software Packages',
       r: 'user',
     },
   },
@@ -360,9 +381,12 @@ export const MainMenu = ({ role, current, navs = false, level = 0, parents = [] 
   useEffect(() => {
     const newList = []
     for (const [key, page] of Object.entries(navs))
-      newList.push(<NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />)
+      newList.push(
+        <NavButton page={page} k={key} key={key} {...{ role, current, parents, level }} />
+      )
     setList(newList)
-  },[navs, role])
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [navs, role])
 
   return list
 }

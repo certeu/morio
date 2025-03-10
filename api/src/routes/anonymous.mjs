@@ -1,4 +1,5 @@
 import { Controller } from '#controllers/anonymous'
+import { utils } from '../lib/utils.mjs'
 
 const Anonymous = new Controller()
 
@@ -19,7 +20,12 @@ export function routes(app) {
   app.get(`/downloads`, Anonymous.listDownloads)
 
   /*
-   * Get a list of the available idenity/authentication providers (idps)
+   * Get the cluster FQDN
+   */
+  app.get(`/info/cluster/fqdn`, (req, res) => res.send({ fqdn: utils.getClusterFqdn() }))
+
+  /*
+   * Get a list of the available identity/authentication providers (idps)
    */
   app.get(`/idps`, Anonymous.getIdps)
 

@@ -26,11 +26,8 @@ fi
 cd $MORIO_GIT_ROOT
 sudo rm -rf build-context
 mkdir build-context
-cp -R moriod/* build-context
+cp -R pkgs/moriod/* build-context
 cd -
-
-#SRC=$MORIO_GIT_ROOT/build-context/src
-#DIST=$MORIO_GIT_ROOT/build-context/dist
 
 # Update version in various files
 cd build-context

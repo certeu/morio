@@ -1,4 +1,4 @@
-import { roles } from '#config/roles'
+import { roles, hiddenRoles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 import { utils, log } from './utils.mjs'
 // Load the database client
@@ -33,7 +33,7 @@ export function asStatus(data) {
   const s = String(data).toLowerCase()
   if (statuses.includes(s)) return s
   else {
-    log.warn(`The status '${s}' is not know. Forcing to 'disabled' instead.`)
+    log.warn(`The status '${s}' is unknown. Forcing to 'disabled' instead.`)
     return 'disabled'
   }
 }
@@ -57,9 +57,9 @@ export function fromJson(data) {
  */
 export function asRole(data) {
   const r = String(data).toLowerCase()
-  if (roles.includes(r)) return r
+  if ([...roles, ...hiddenRoles].includes(r)) return r
   else {
-    log.warn(`The role '${r}' is not know. Forcing to 'user' instead.`)
+    log.warn(`The role '${r}' is unknown. Forcing to 'user' instead.`)
     return 'user'
   }
 }
@@ -71,7 +71,7 @@ function asProvider(data) {
   const p = String(data).toLowerCase()
   if (['mrt', ...Object.keys(utils.getSettings('iam.providers', {}))].includes(p)) return p
   else {
-    log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
+    log.warn(`The provider '${p}' is unknown. Forcing to '' instead.`)
     return ''
   }
 }
@@ -84,7 +84,7 @@ export function asTime(data) {
 }
 
 /**
- * Helper method to return the full id (provider + '.' + id)
+ * Helper method to return the full ID (provider + '.' + id)
  * @return null
  */
 export function fullId(provider, id) {
@@ -92,7 +92,7 @@ export function fullId(provider, id) {
 }
 
 /**
- * Helper method to return the username based on the full id (provider + '.' + id)
+ * Helper method to return the username based on the full ID (provider + '.' + id)
  * @return null
  */
 function username(fullId = '') {
@@ -131,7 +131,7 @@ const values = {
  * Helper method to load an account (or rather its data)
  *
  * @param {string} provider - The ID of the identity provider
- * @param {string} id - The unique id (the username)
+ * @param {string} id - The unique ID (the username)
  * @return {object} data - The data saved for the account
  */
 export async function loadAccount(provider, id) {
@@ -160,7 +160,7 @@ export async function saveAccount(provider = false, id = false, data) {
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('saveAccount was called without an id or provider')
+    log.warn('saveAccount was called without an ID or provider')
     return false
   }
 
@@ -202,14 +202,14 @@ export async function listAccounts() {
  * Helper method to save the last login time in the account data
  *
  * @param {string} provider - The ID of the identity provider
- * @param {string} id - The id of the account (the username)
+ * @param {string} id - The ID of the account (the username)
  */
 export async function updateLastLoginTime(provider, id, extraData = {}) {
   /*
    * We need at least an ID and provider
    */
   if (!id || !provider) {
-    log.warn('[api] updateLastLoginTime was called without an id or provider')
+    log.warn('[api] updateLastLoginTime was called without an ID or provider')
     return false
   }
 

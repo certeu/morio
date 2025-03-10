@@ -144,7 +144,7 @@ async function runOssTableApiCall(api) {
 function groupOss(oss) {
   const all = {}
   for (const os of oss) {
-    const id = getOsId(os)
+    const id = 'fixme' //getOsId(os)
     if (typeof all[id] === 'undefined') all[id] = []
     all[id].push({ ...os, os_id: id, host_id: os.id })
   }
@@ -152,24 +152,11 @@ function groupOss(oss) {
   return all
 }
 
-export function getOsId(os) {
-  if (!os) return null
-  if (os.type === 'linux') return `linux-${os.family}-${Number(os.version.split(' ')[0])}`
-  if (os.type === 'macos') return `macos-unrecogized`
-  if (os.type === 'windows') return `windows-unrecognized`
-
-  return 'unrecognized-os'
-}
-
-export const OsIcon = ({ data, ...rest }) => {
-  let Icon = ServersIcon
-  if (!data) return <Icon {...rest} />
-
-  const id = getOsId(data).split('-')
-  if (id[0] === 'linux') {
-    Icon = Linux
-    if (id[1] === 'debian') Icon = Debian
+export const OsIcon = ({ data = {}, ...rest }) => {
+  if (data.name === 'linux') {
+    if (data.version.toLowerCase().includes('debian')) return <Debian {...rest} />
+    return <Linux {...rest} />
   }
 
-  return <Icon {...rest} />
+  return <ServersIcon {...rest} />
 }

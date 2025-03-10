@@ -28,8 +28,6 @@ import updateApikey from './update-apikey.json' with { type: 'json' }
 // Authentication
 import login from './login.json' with { type: 'json' }
 import whoami from './whoami.json' with { type: 'json' }
-// Client packages
-import pkgBuildDeb from './pkg-build.deb.json' with { type: 'json' }
 // Cryptopgraphy
 import createCertificate from './create-certificate.json' with { type: 'json' }
 import encrypt from './encrypt.json' with { type: 'json' }
@@ -50,7 +48,6 @@ import settingsIam from './settings.iam.json' with { type: 'json' }
 import settingsTokens from './settings.tokens.json' with { type: 'json' }
 import settingsUi from './settings.ui.json' with { type: 'json' }
 import jwt from './jwt.json' with { type: 'json' }
-import pkgDefaults from './pkg-defaults.json' with { type: 'json' }
 import preseed from './preseed.json' with { type: 'json' }
 import pubkey from './pubkey.json' with { type: 'json' }
 
@@ -73,7 +70,6 @@ export const examples = {
   obj: {
     jwt: jwt.jwt,
     settings,
-    pkgDefaults,
     preseed,
     pubkey,
   },
@@ -85,9 +81,6 @@ export const examples = {
     decrypt: encrypt.res,
     encrypt: encrypt.req,
     login: login.req,
-    pkgBuild: {
-      deb: pkgBuildDeb.req,
-    },
   },
   res: {
     activateAccount: activateAccount.res,
@@ -106,9 +99,6 @@ export const examples = {
     listAccounts,
     listApikeys,
     login: login.res,
-    pkgBuild: {
-      deb: pkgBuildDeb.res,
-    },
     presets,
     ratelimits,
     setup: setupRes,

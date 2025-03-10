@@ -63,6 +63,24 @@ const kv = {
   ),
 }
 
+const client = Joi.object({
+  name: Joi.string().hostname(),
+  fqdn: Joi.string().hostname(),
+  os: Joi.string(),
+  os_version: Joi.string(),
+  arch: Joi.string(),
+  cores: Joi.number(),
+  memory: Joi.number(),
+  ips: Joi.array().items(Joi.string()),
+  macs: Joi.array().items(Joi.string()),
+  packages: Joi.array().items(
+    Joi.object({
+      name: Joi.string(),
+      version: Joi.string(),
+    })
+  ),
+}).required()
+
 /*
  * This describes the schema of requests and responses in the Core API
  */
@@ -179,25 +197,30 @@ export const schema = {
   'req.cache.readKey': Joi.object({ key: Joi.string().required() }),
   'req.cache.listKeys': Joi.object({ glob: Joi.string().required() }),
   'req.cache.readKeys': Joi.object({ keys: Joi.array().required().items(Joi.string()) }),
-  // TODO: Lock this down further
-  'req.pkg.build.deb': Joi.object({
-    Package: Joi.string().required(),
-    Source: Joi.string().required(),
-    Section: Joi.string().valid('utils').required(),
-    Priority: Joi.string().valid('required,important,standard,optional,extra').required(),
-    Architecture: Joi.string().required(),
-    Essential: Joi.string().valid('no').required(),
-    Depends: Joi.array().required(),
-    'Installed-Size': Joi.number().required(),
-    Maintainer: Joi.string().required(),
-    'Changed-By': Joi.string().required(),
-    Uploaders: Joi.array().required(),
-    Homepage: Joi.string().required(),
-    Description: Joi.string().required(),
-    DetailedDescription: Joi.string().required(),
-    'Vcs-Git': Joi.string().required(),
-    Version: Joi.string().required(),
-    Revision: Joi.number().required(),
+  'req.client.join': Joi.object({
+    cluster: Joi.string().hostname(),
+    invite: Joi.string().optional(),
+    uuid: uuid.optional(),
+    info: client,
+  }),
+  'req.client.push': Joi.object({
+    uuid: uuid.required().description('The UUID of the client'),
+    cluster: Joi.string().hostname().required().description('The FQDN of the Morio cluster'),
+    modules: Joi.array().items(Joi.string()),
+    vars: Joi.object(),
+  }),
+  'req.client.report': Joi.object({
+    cluster: Joi.string().hostname().required(),
+    uuid: uuid.optional(),
+    info: client,
+  }),
+  'req.client.command': Joi.object({
+    clients: Joi.alternatives().try(Joi.boolean().valid(false), Joi.array().items(uuid)).required(),
+  }),
+  'req.client.commandStatus': Joi.object({
+    uuid: uuid.required(),
+    id: Joi.number(),
+    status: Joi.string().allow('start', 'done', 'error').required(),
   }),
   // TODO: Lock this down further
   'req.certificate.create': Joi.object({

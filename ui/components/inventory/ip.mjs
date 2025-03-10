@@ -1,5 +1,4 @@
 // Dependencies
-import { timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -72,7 +71,7 @@ export const IpsTable = () => {
                 checked={ips.length === count}
               />
             </th>
-            {['ip', 'host', 'version', 'last_update'].map((field) => (
+            {['ip', 'host', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -90,17 +89,17 @@ export const IpsTable = () => {
         </thead>
         <tbody>
           {sorted.map((ip) => (
-            <tr key={ip.id}>
+            <tr key={ip.ip}>
               <td className="text-base font-medium">
                 <input
                   type="checkbox"
-                  checked={selection[ip.id] ? true : false}
+                  checked={selection[ip.ip] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(ip.id)}
+                  onClick={() => toggle(ip.ip)}
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/ips/${ip.id}`}>{ip.ip}</PageLink>
+                <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
               </td>
               <td className="">
                 <PageLink href={`/inventory/hosts/${ip.host}`}>
@@ -108,7 +107,6 @@ export const IpsTable = () => {
                 </PageLink>
               </td>
               <td className="">{ip.version}</td>
-              <td className="">{timeAgo(ip.last_update)}</td>
             </tr>
           ))}
         </tbody>
@@ -128,7 +126,7 @@ export const IpsDisplayTable = ({ ips }) => {
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version', 'last_update'].map((field) => (
+          {['ip', 'host', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -146,9 +144,9 @@ export const IpsDisplayTable = ({ ips }) => {
       </thead>
       <tbody>
         {sorted.map((ip) => (
-          <tr key={ip.id}>
+          <tr key={ip.ip}>
             <td className="pr-6 py-0.5 font-mono text-sm">
-              <PageLink href={`/inventory/ips/${ip.id}`}>{ip.ip}</PageLink>
+              <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
             </td>
             <td className="pr-6 py-0.5 text-sm">
               <PageLink href={`/inventory/hosts/${ip.host}`}>
@@ -156,7 +154,6 @@ export const IpsDisplayTable = ({ ips }) => {
               </PageLink>
             </td>
             <td className="pr-6 py-0.5">{ip.version}</td>
-            <td className="py-0.5 text-sm">{timeAgo(ip.last_update)}</td>
           </tr>
         ))}
       </tbody>
@@ -186,7 +183,6 @@ export const IpAddress = ({ data }) => {
           <div className="flex flex-row flex-wrap gap-2">
             <KeyVal k="ip" val={ip} />
             <KeyVal k="host" val={<InventoryHostname uuid={ip.host} />} />
-            <KeyVal k="last update" val={timeAgo(data.last_update)} />
           </div>
         </div>
       </div>

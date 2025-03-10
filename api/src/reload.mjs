@@ -2,6 +2,7 @@ import { attempt } from '#shared/utils'
 import { encryptionMethods, hash } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
 import process from 'node:process'
+import { createProducer } from './lib/kafka.mjs'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -81,6 +82,11 @@ export async function reloadConfiguration() {
     utils.decrypt = decrypt
     utils.isEncrypted = isEncrypted
   }
+
+  /*
+   * Make sure we have a kafka producer
+   */
+  if (!utils.produce) createProducer()
 
   /*
    * That's it, reload done

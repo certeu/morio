@@ -143,30 +143,111 @@ export const resolveServiceConfiguration = ({ utils }) => {
         tags TEXT,
         last_update DATETIME
       )`,
-      inventory_oss: `CREATE table inventory_oss (
-        id TEXT NOT NULL PRIMARY KEY,
-        codename TEXT,
-        family TEXT,
-        kernel TEXT,
-        name TEXT,
-        platform TEXT,
-        type TEXT,
-        version TEXT,
-        last_update DATETIME
-      )`,
       inventory_ips: `CREATE table inventory_ips (
-        id TEXT NOT NULL PRIMARY KEY,
-        ip TEXT,
-        host TEXT,
-        version INTEGER,
-        last_update DATETIME
+        ip TEXT NOT NULL PRIMARY KEY,
+        version TEXT
       )`,
       inventory_macs: `CREATE table inventory_macs (
-        id TEXT NOT NULL PRIMARY KEY,
-        mac TEXT,
+        mac TEXT NOT NULL PRIMARY KEY
+      )`,
+      inventory_oss: `CREATE table inventory_oss (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        version TEXT
+      )`,
+      inventory_pkgs: `CREATE table inventory_pkgs (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        version TEXT
+      )`,
+      inventory_mods: `CREATE table inventory_mods (
+        mod TEXT NOT NULL PRIMARY KEY,
+        data TEXT
+      )`,
+      inventory_host_ip: `CREATE table inventory_host_ip (
         host TEXT,
-        last_update DATETIME
+        ip TEXT,
+        PRIMARY KEY (host, ip),
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (ip) REFERENCES inventory_ips(ip)
+      )`,
+      inventory_host_mac: `CREATE table inventory_host_mac (
+        host TEXT,
+        mac TEXT,
+        PRIMARY KEY (host, mac),
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (mac) REFERENCES inventory_macs(mac)
+      )`,
+      inventory_host_os: `CREATE table inventory_host_os (
+        host TEXT,
+        os TEXT,
+        PRIMARY KEY (host, os),
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (os) REFERENCES inventory_oss(id)
+      )`,
+      inventory_host_pkg: `CREATE table inventory_host_pkg (
+        host TEXT,
+        pkg TEXT,
+        PRIMARY KEY (host, pkg),
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (pkg) REFERENCES inventory_pkgs(id)
+      )`,
+      inventory_host_mod: `CREATE table inventory_host_mod (
+        host TEXT,
+        mod TEXT,
+        PRIMARY KEY (host, mod),
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
+      )`,
+      inventory_invites: `CREATE table inventory_invites (
+        id TEXT NOT NULL PRIMARY KEY,
+        created_by TEXT,
+        created_at DATETIME,
+        type TEXT,
+        used INTEGER
+      )`,
+      inventory_modvars: `CREATE table inventory_modvars (
+        id TEXT NOT NULL PRIMARY KEY,
+        val TEXT,
+        info TEXT,
+        mod TEXT,
+        FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
+      )`,
+      inventory_hostvars: `CREATE table inventory_hostvars (
+        id INTEGER PRIMARY KEY,
+        key TEXT,
+        val TEXT,
+        info TEXT NULL,
+        host TEXT,
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id)
+      )`,
+      inventory_modfiles: `CREATE table inventory_modfiles (
+        id INTEGER PRIMARY KEY,
+        mod TEXT,
+        folder TEXT,
+        file TEXT,
+        content TEXT,
+        source TEXT,
+        FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
+      )`,
+      client_commands: `CREATE table client_commands (
+        id INTEGER PRIMARY KEY,
+        clients TEXT,
+        created_at DATETIME
+      )`,
+      client_command_status: `CREATE table client_command_status (
+        id INTEGER PRIMARY KEY,
+        host TEXT NOT NULL,
+        cid INTEGER,
+        created_at DATETIME,
+        status TEXT,
+        FOREIGN KEY (host) REFERENCES inventory_hosts(id),
+        FOREIGN KEY (cid) REFERENCES client_commands(id)
       )`,
     },
+    data: [
+      `INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
+      `INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
+    ],
   }
 }

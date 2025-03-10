@@ -157,6 +157,11 @@ export async function createX509Certificate(data) {
  */
 export async function ensureServiceCertificate(service, internal = false, chain = true) {
   /*
+   * Don't bother in ephemeral mode as there's no CA yet
+   */
+  if (utils.isEphemeral()) return true
+
+  /*
    * We'll check for the required files on disk.
    * If at least one is missing, we need to generate the certificates.
    * If all are there, we need to verify the cerificate expiry and renew if needed.

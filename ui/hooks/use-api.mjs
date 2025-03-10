@@ -160,7 +160,16 @@ MorioClient.prototype.getClientRepoPackageDefaults = async function (type) {
 }
 
 /**
- * List files in the dowbloads folder
+ * Gets the cluster FQDN
+ *
+ * @return {string} - The cluster FQDN
+ */
+MorioClient.prototype.getClusterFqdn = async function () {
+  return await this.call(`${morioConfig.api}/info/cluster/fqdn`)
+}
+
+/**
+ * List files in the downloads folder
  *
  * @return {array} - The list of files
  */
@@ -839,6 +848,54 @@ MorioClient.prototype.getDynamicTapConfig = async function () {
  */
 MorioClient.prototype.getDynamicFlagsConfig = async function () {
   return await this.call(`${morioConfig.api}/dconf/flags`)
+}
+
+/**
+ * Sends a client command to a specific client
+ *
+ * @param {string} cmd - The command (pull, push, reload, restart, report, stop)
+ * @param {array} uuids - The list of clients to send this to
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.sendClientCommand = async function (cmd, uuids) {
+  return await this.call(`${morioConfig.api}/clients/cmd/${cmd}`, {
+    headers: this.jsonHeaders,
+    method: 'PUT',
+    body: JSON.stringify({ clients: uuids }),
+  })
+}
+
+/**
+ * Retrieves info about a given client command ID
+ *
+ * @param {number} id - The client command ID
+ * @return {array} - A list of updates for this command
+ */
+MorioClient.prototype.getClientCommandInfo = async function (id) {
+  return await this.call(`${morioConfig.api}/clients/cmd/${id}`)
+}
+
+/**
+ * Retrieves updates for a given client command ID
+ *
+ * @param {number} id - The client command ID
+ * @return {array} - A list of updates for this command
+ */
+MorioClient.prototype.getClientCommandStatusUpdates = async function (id) {
+  return await this.call(`${morioConfig.api}/clients/cmdstatus/${id}`)
+}
+
+/**
+ * Create a client invite
+ *
+ * @param {string} type - The type of invite, either `once` or `many`
+ * @return {object} - The result
+ */
+MorioClient.prototype.createClientInvite = async function (type) {
+  return await this.call(`${morioConfig.api}/clients/invite/${type}`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+  })
 }
 
 /*

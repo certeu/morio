@@ -99,7 +99,7 @@ await reload()
 /*
  * Start listening for requests
  */
-wrapExpress(log, app.listen(getPreset('MORIO_API_PORT')))
+wrapExpress(log, app.listen(getPreset('MORIO_API_PORT')), utils.get('exitHandlers', []))
 
 /*
  * This method allows the API to dynamically reload its

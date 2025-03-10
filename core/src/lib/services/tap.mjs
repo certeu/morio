@@ -44,7 +44,7 @@ export const service = {
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
-     * Write out the heartbeat.yml file as it will be volume-mapped,
+     * Write out the config file for tap as it will be volume-mapped,
      * so we need to write it to disk first so it's available
      */
     precreate: ensureLocalPrerequisites,

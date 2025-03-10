@@ -109,6 +109,14 @@ utils.getCoreStatus = () => store.get('status.core')
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
+ * Helper method to get a list of all FQDNS for flanking nodes
+ *
+ * @return {array} list - The list of all flanking node FQDNs
+ *
+ */
+utils.getFlankingFqdns = () => utils.getSettings('cluster.flanking_nodes', [])
+
+/**
  * Helper method to get the info from the store
  *
  * @return {string} prefix - The API prefix
@@ -128,6 +136,14 @@ utils.getKeys = () => store.get('keys')
  * @return {string} fqdn - The local node's FQDN
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
+
+/**
+ * Helper method to get a list of all FQDNS for flanking nodes
+ *
+ * @return {array} list - The list of all flanking node FQDNs
+ *
+ */
+utils.getAllNodesFqdns = () => [...utils.getBrokerFqdns(), ...utils.getFlankingFqdns()]
 
 /**
  * Helper method to get the node_serial of the local node
@@ -477,6 +493,18 @@ utils.endReload = () => {
  * \___/\__|_||_\___|_|
  * Utility methods that do not use store data or presets
  */
+
+/**
+ * Turn input into a string
+ *
+ * @param {mixes} input - The input
+ * @return {string} str - The input as a string
+ */
+utils.asString = (input) => {
+  if (typeof input === 'string') return input
+  if (typeof input === 'object') return JSON.stringify(input)
+  return `${input}`
+}
 
 /**
  * Clear OIDC PKCE data after an OIDC flow

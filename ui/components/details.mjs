@@ -15,7 +15,7 @@ export const Details = ({
     <summary
       className={`flex flex-row gap-2 items-center hover:cursor-pointer pr-4 group-open:bg-primary/20 ${summaryClassname}`}
     >
-      <div className="flex flex-row gap-2 items-center p-2 group-open:p-2 hover:group-open:bg-primary/30 font-bold">
+      <div className="flex flex-row gap-2 items-center p-2 group-open:p-2 font-bold">
         <RightIcon className="w-4 h-4 transition-transform group-open:rotate-90" stroke={3} />
         {summaryLeft}
       </div>

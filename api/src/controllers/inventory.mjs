@@ -79,7 +79,7 @@ Controller.prototype.readHost = async function (req, res) {
   if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
   /*
-   * Add IP and MAC addresses
+   * Add related data
    */
   const ips = await loadHostIps(valid.id)
   const macs = await loadHostMacs(valid.id)

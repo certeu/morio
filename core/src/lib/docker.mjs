@@ -304,10 +304,8 @@ export function generateContainerConfig(serviceName) {
   if (config.container.hosts) {
     opts.HostConfig.ExtraHosts = config.container.hosts
     if (extraHost) opts.HostConfig.ExtraHosts.push(extraHost)
-  } 
-  else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
+  } else if (extraHost) opts.HostConfig.ExtraHosts = [extraHost]
   else opts.HostConfig.ExtraHosts = []
-
 
   /*
    * Make this work on NAT loopback hosts (aka hairpinning)
@@ -608,7 +606,7 @@ export async function updateRunningServicesState() {
 /**
  * This helper method saves a list of running services
  */
-async function forceUpdateRunningServicesState() {
+export async function forceUpdateRunningServicesState() {
   /*
    * Clear state first, or services that went away would never be cleared
    */

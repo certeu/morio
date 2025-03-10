@@ -57,7 +57,7 @@ Homepage: https://morio.it
 Description: Umbrella package for Morio
   Morio is an end-to-end streaming data backbone
   for your observability needs.
-Vcs-Git: https://github.com/certeu/morio -b main [clients/linux]
+Vcs-Git: https://github.com/certeu/morio -b main
 Depends: docker.io, systemd
 Uploaders: Joost De Cock <joost.decock@cert.europa.eu>
 `,

@@ -11,25 +11,27 @@ import { Buffer } from 'node:buffer'
  * List of allowListed URLs that do not require authentication
  */
 const allowedUrisBase = [
-  `/setup`,
-  `/preseed`,
-  `/status`,
-  `/info`,
+  `/activate-account`,
+  `/activate-mfa`,
+  `/ca/certificates`,
+  `/clients/join`,
+  `/clients/rejoin`,
+  `/cluster/join`,
+  `/idps`,
   `/info/`,
+  `/info`,
+  `/jwks`,
   '/limits',
   '/limits/',
   `/login`,
   `/login-form`,
-  `/idps`,
-  `/activate-account`,
-  `/activate-mfa`,
-  `/jwks`,
-  `/cluster/join`,
-  `/validate/settings`,
-  `/ca/certificates`,
+  `/preseed`,
   `/pubkey`,
   `/pubkey.pem`,
+  `/setup`,
+  `/status`,
   `/up`,
+  `/validate/settings`,
 ]
 
 const blockedUris = [
@@ -138,7 +140,7 @@ Controller.prototype.authenticate = async function (req, res) {
     const idpResult =
       credentials[0] === 'root'
         ? await idps.mrt('mrt', { role: 'root', mrt: credentials[1] })
-        : await idps.mrt('mrt', { api_key: credentials[0], api_key_secret: credentials[1] })
+        : await idps.apikey('apikey', { api_key: credentials[0], api_key_secret: credentials[1] })
     if (Array.isArray(idpResult) && idpResult[0] === true) payload = idpResult[1]
   }
 

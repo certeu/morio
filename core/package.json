@@ -1,6 +1,6 @@
 {
   "name": "@itsmorio/core",
-  "version": "0.7.2",
+  "version": "0.8.0-rc.1",
   "description": "Morio Core",
   "private": true,
   "scripts": {
@@ -9,8 +9,8 @@
     "dev": "nodemon src/index.mjs -w src -w config -w shared -w openapi --quiet -- --no-warnings",
     "lint": "eslint --fix 'src/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
-    "test": "docker exec -it morio-core node --no-warnings --test-concurrency=1 --test",
-    "retest": "cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
+    "test": "../scripts/testcheck.sh && docker exec -it morio-core node --no-warnings --test-concurrency=1 --test",
+    "retest": "../scripts/testcheck.sh && cd .. && npm run redev && ./scripts/sleep 5 && cd - && npm run test"
   },
   "dependencies": {
     "axios": "^1.7.7",
@@ -37,7 +37,6 @@
   },
   "imports": {
     "#config": "./config/index.mjs",
-    "#config/clients/linux": "./config/clients/linux.mjs",
     "#config/services/*": "./config/services/*.mjs",
     "#controllers/*": "./src/controllers/*.mjs",
     "#lib/services/*": "./src/lib/services/*.mjs",

@@ -7,7 +7,7 @@ import { encryptionMethods, hash } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysTrue } from './index.mjs'
+import { alwaysTrue, ensureMorioService } from './index.mjs'
 // Cluster code
 import { ensureMorioCluster } from '#lib/cluster'
 // log & utils
@@ -18,9 +18,8 @@ import { uuid } from '#shared/crypto'
 import { ensureTraefikDynamicConfiguration } from './proxy.mjs'
 // Load core config
 import { resolveServiceConfiguration } from '#config'
-// Client builders
-import { buildPackage as buildDebianClientPackage } from '#lib/services/dbuilder'
-import { buildPackage as buildDebianRepoPackage } from '#lib/services/drbuilder'
+// Docker
+import { forceUpdateRunningServicesState } from '../docker.mjs'
 
 /*
  * This service object holds the service name,
@@ -159,7 +158,8 @@ export const service = {
        * not yet have the state of running services at this point.
        * Commented out instead of removed in case of a regression
        */
-      //await ensureMorioService('ca')
+      await forceUpdateRunningServicesState()
+      await ensureMorioService('ca')
 
       /*
        * Morio always runs as a cluster, because even a stand-alone
@@ -169,24 +169,6 @@ export const service = {
        * Also, don't wait
        */
       await ensureMorioCluster(hookParams)
-
-      /*
-       * Build packages at initial startup
-       */
-      if (hookParams?.initialSetup) {
-        // Build repo package
-        log.debug('Building initial repo package')
-        buildDebianRepoPackage()
-        /*
-         * Defer building client package a bit
-         * Since they both update the same repository
-         * so best to spread them a bit to avoid race conditions
-         */
-        setTimeout(() => {
-          log.debug('Building initial client package')
-          buildDebianClientPackage()
-        }, 20000)
-      }
 
       return utils.isCoreReady()
     },

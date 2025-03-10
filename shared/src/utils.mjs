@@ -9,6 +9,20 @@ export const get = _get
 export const set = _set
 
 /**
+ * Returns a scale value, typically used to store things in the database
+ *
+ * This will return a JSON representation of the value, unless it's a simple string or number
+ *
+ * @param {mixed} val - The value to scalarize
+ * @return {mixed} result - The result
+ */
+export function asScalarOrJson (val) {
+  if (typeof val === 'string') return val
+  if (typeof val === 'number') return val
+  return JSON.stringify(val)
+}
+
+/**
  * Capitalize the first character of a string
  *
  * @param {string} string - The string to capitalize
@@ -145,9 +159,10 @@ async function tryWhilePromiseResolver(
  *
  * @param {object} log - A logger instance
  * @param {object} server - The Express server instance
+ * @param {array} preExit - An array of methods to run pre-exit
  * @return {object} server - The Express server instance
  */
-export function wrapExpress(log, server) {
+export function wrapExpress(log, server, preExit=[]) {
   /*
    * These are the signals we want to handle
    */
@@ -162,6 +177,7 @@ export function wrapExpress(log, server) {
    */
   const shutdown = (signal, value) => {
     log.info(`Received a ${signal} signal. Initiating shutdown.`)
+    for (const method of preExit) method()
     server.close(() => {
       /*
        * Wave goodbye
