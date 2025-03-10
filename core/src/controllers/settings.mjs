@@ -276,7 +276,7 @@ const initialSetup = async function (req, settings) {
   log.debug(`Started auto-discover of node info`)
   const node = await localNodeInfo({ ...valid, headers: req.body.headers })
   if (!node) {
-    log.info(`Ingoring request to setup with unmatched FQDN`)
+    log.info(`Ignoring request to setup with unmatched FQDN`)
     return [
       false,
       ['morio.core.schema.violation', err?.message ? { schema_violation: err.message } : undefined],
@@ -295,14 +295,14 @@ const initialSetup = async function (req, settings) {
   log.debug(`Initial settings will be tracked as: ${serial}`)
 
   /*
-   * This is the initial deploy, generate keys, UUIDS and so on
+   * This is the initial deploy, generate keys, UUIDs and so on
    */
   const keys = valid.preseed?.keys ? unsealKeyData(valid.preseed.keys) : {}
 
   /*
    * Generate UUIDs for node and cluster
    */
-  log.debug(`Generating UUIIDs`)
+  log.debug(`Generating UUIDs`)
   node.uuid = uuid()
   keys.cluster = uuid()
   log.debug(`Node UUID: ${node.uuid}`)
@@ -344,12 +344,12 @@ const initialSetup = async function (req, settings) {
   }
 
   /*
-   * Generate JWT, unles sit was providede in the preseeded key data
+   * Generate JWT, unless it was provided in the preseeded key data
    */
   if (!keys.jwt) keys.jwt = generateJwtKey()
 
   /*
-   * Make sure keys & settings exists in memory store so later steps can get them
+   * Make sure keys & settings exist in memory store so later steps can get them
    */
   utils.setKeys(keys)
 
@@ -429,7 +429,7 @@ const initialSetup = async function (req, settings) {
       root_token: morioRootToken.includes('preseeded')
         ? {
             about:
-              'This Morio instance was preseeded with Key Data. No new Morio root token was generated. Use the preceeded root token instead.',
+              'This Morio instance was preseeded with key data: no new Morio root token was generated. Use the preseeded root token instead.',
             value: morioRootToken,
           }
         : formatRootTokenResponseData(morioRootToken),
@@ -474,7 +474,7 @@ const reseedHandler = async function (newSettings = false) {
   /*
    * If the preseed settings have tokens in them we need to resolve them.
    * In addition, we have the extra difficulty that tokens can be part
-   * of the current settings, or the new settings. So, we load the current,
+   * of the current settings, or of the new settings. So, we load the current,
    * then the new settings, so that the new settings take precedence.
    */
   const tokens = {
@@ -488,7 +488,7 @@ const reseedHandler = async function (newSettings = false) {
     tokens[key] = await utils.unwrapSecret(key, val)
 
   /*
-   * New template the settings
+   * Now template the settings
    */
   const templatedSettings = await templateSettings(newSettings)
 
@@ -507,7 +507,7 @@ const reseedHandler = async function (newSettings = false) {
   await ensureChartProcessors(settings)
 
   /*
-   * Ensure preseeded client module are in place
+   * Ensure preseeded client modules are in place
    */
   await ensureClientModules(settings)
 
@@ -547,7 +547,7 @@ export function ensureChartProcessors(settings) {
 export async function ensureStreamProcessors(settings) {
   /*
    * This will not only load stream processors, but also
-   * merge their (default) settings into  the settings object
+   * merge their (default) settings into the settings object
    */
   settings = await loadStreamProcessors(settings, log)
 
