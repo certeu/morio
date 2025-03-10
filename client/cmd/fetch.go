@@ -33,7 +33,7 @@ func init() {
 
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
-	Short: "Fetch client configuation",
+	Short: "Fetch client configuration",
 	Long:  `Loads the client configuration from the Morio cluster.`,
 	Args:  cobra.ExactArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
