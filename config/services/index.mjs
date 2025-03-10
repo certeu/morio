@@ -11,7 +11,6 @@ import { resolveServiceConfiguration as proxy } from './proxy.mjs'
 import { resolveServiceConfiguration as tap } from './tap.mjs'
 import { resolveServiceConfiguration as ui } from './ui.mjs'
 import { resolveServiceConfiguration as watcher } from './watcher.mjs'
-import { resolveServiceConfiguration as web } from './web.mjs'
 
 const resolvers = {
   api,
@@ -26,7 +25,6 @@ const resolvers = {
   tap,
   ui,
   watcher,
-  web,
 }
 
 export const resolveServiceConfiguration = (name, helpers) =>
@@ -36,8 +34,8 @@ export const resolveServiceConfiguration = (name, helpers) =>
  * This is the order in which services are started
  */
 export const serviceOrder = [
-  'api',
   'ca',
+  'api',
   'broker',
   'db',
   'cache',
@@ -47,7 +45,6 @@ export const serviceOrder = [
   'connector',
   'watcher',
   'tap',
-  'web',
 ]
 
 /*
@@ -149,7 +146,6 @@ const getServicePort = (service, utils) => {
   if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
   if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')
   if (service === 'watcher') return utils.getPreset('MORIO_WATCHER_HTTP_PORT')
-  if (service === 'web') return utils.getPreset('MORIO_WEB_HTTP_PORT')
 }
 
 /**

@@ -11,7 +11,6 @@ import { service as consoleService } from './console.mjs'
 import { service as proxyService, ensureTraefikDynamicConfiguration } from './proxy.mjs'
 import { service as tapService } from './tap.mjs'
 import { service as watcherService } from './watcher.mjs'
-import { service as webService } from './web.mjs'
 // Dependencies
 import {
   resolveServiceConfiguration,
@@ -53,7 +52,6 @@ const services = {
   connector: connectorService,
   tap: tapService,
   watcher: watcherService,
-  web: webService,
 }
 
 /*
@@ -160,11 +158,15 @@ export async function startMorio(hookParams = {}) {
       /*
        * Wait for service to come up before we continue
        */
+      log.debug(`[${service}] Will wait for this service to start`)
       await ensureMorioService(service, hookParams)
-    } else promises.push(ensureMorioService(service, hookParams))
-    /*
-     * Or handle it in parallel
-     */
+    } else {
+      /*
+       * Or handle it in parallel
+       */
+      log.debug(`[${service}] Will start this service, but not wait for it`)
+      promises.push(ensureMorioService(service, hookParams))
+    }
   }
 
   return await Promise.all(promises)
@@ -286,7 +288,7 @@ async function shouldServiceBeRecreated(serviceName, hookParams) {
    */
   const running = isContainerRunning(serviceName)
   if (!running) {
-    log.debug(`[${serviceName}] Recreating service`)
+    log.debug({ running }, `[${serviceName}] Service is not running. Recreating service`)
     return true
   }
 
@@ -438,7 +440,9 @@ export function defaultRecreateServiceHook(service) {
   const config = utils.getMorioServiceConfig(service).container
   const container = utils.getServiceState(service, false)
   if (container.image !== `${config.image}:${config.tag}`) {
-    log.debug(`[${service}] The container image has changed, recreating service`)
+    log.debug(
+      `[${service}] The container image has changed from ${container.image} to ${config.image}:${config.tag}, recreating service`
+    )
     return true
   }
 

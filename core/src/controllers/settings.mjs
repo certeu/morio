@@ -123,7 +123,10 @@ Controller.prototype.setup = async function (req, res) {
   /*
    * Ensure preseeded content
    */
-  if (body.preseed) await preseedHandler(body?.preseed, true)
+  if (body.preseed) {
+    log.debug(`Running preseed handler`)
+    await preseedHandler(body?.preseed, true)
+  }
 
   /*
    * Handle initial setup
@@ -270,6 +273,7 @@ const initialSetup = async function (req, settings) {
    * Check whether we can figure out who we are
    * Need to merge the loaded settings with the request headers
    */
+  log.debug(`Started auto-discover of node info`)
   const node = await localNodeInfo({ ...valid, headers: req.body.headers })
   if (!node) {
     log.info(`Ingoring request to setup with unmatched FQDN`)
@@ -305,7 +309,7 @@ const initialSetup = async function (req, settings) {
   log.debug(`Cluster UUID: ${keys.cluster}`)
 
   /*
-   * Fenerate the seal secret unless it was provided in the preseeded key data
+   * Generate the seal secret unless it was provided in the preseeded key data
    */
   if (!keys.seal) keys.seal = await generateKeySeal()
 
@@ -360,6 +364,7 @@ const initialSetup = async function (req, settings) {
    * We need to generate the CA config & certificates early so that
    * we can pass them along the join invite to cluster nodes
    */
+  log.debug(`Generating CA config`)
   await generateCaConfig(keys)
 
   /*

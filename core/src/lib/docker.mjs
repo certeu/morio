@@ -606,7 +606,7 @@ export async function updateRunningServicesState() {
 /**
  * This helper method saves a list of running services
  */
-async function forceUpdateRunningServicesState() {
+export async function forceUpdateRunningServicesState() {
   /*
    * Clear state first, or services that went away would never be cleared
    */

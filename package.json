@@ -107,8 +107,8 @@
     "spellcheck": "./scripts/spellcheck-docs.sh",
     "subscribe": "node --no-warnings scripts/kafka-client.mjs",
     "test": "echo \"No test target specified.\nTry 'npm run test:api' or 'npm run test:core' instead.\" && exit 1",
-    "test:api": "./scripts/test-api.sh",
-    "test:core": "npm run destroy && ./core/run-test-container.sh && npm run redev"
+    "test:api": "./scripts/testcheck.sh && ./scripts/test-api.sh",
+    "test:core": "./scripts/testcheck.sh && npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
     "mocha": "^11.0.1"
