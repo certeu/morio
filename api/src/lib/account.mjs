@@ -33,7 +33,7 @@ export function asStatus(data) {
   const s = String(data).toLowerCase()
   if (statuses.includes(s)) return s
   else {
-    log.warn(`The status '${s}' is not know. Forcing to 'disabled' instead.`)
+    log.warn(`The status '${s}' is unknown. Forcing to 'disabled' instead.`)
     return 'disabled'
   }
 }
@@ -59,7 +59,7 @@ export function asRole(data) {
   const r = String(data).toLowerCase()
   if ([...roles, ...hiddenRoles].includes(r)) return r
   else {
-    log.warn(`The role '${r}' is not know. Forcing to 'user' instead.`)
+    log.warn(`The role '${r}' is unknown. Forcing to 'user' instead.`)
     return 'user'
   }
 }
@@ -71,7 +71,7 @@ function asProvider(data) {
   const p = String(data).toLowerCase()
   if (['mrt', ...Object.keys(utils.getSettings('iam.providers', {}))].includes(p)) return p
   else {
-    log.warn(`The provider '${p}' is not know. Forcing to '' instead.`)
+    log.warn(`The provider '${p}' is unknown. Forcing to '' instead.`)
     return ''
   }
 }
