@@ -1,4 +1,4 @@
-import { writeFile, readFile } from '@morio/shared/fs'
+import { writeFile, readFile } from '@itsmorio/shared/fs'
 import chalk from 'chalk'
 import readline from 'node:readline'
 import process from 'node:process'
@@ -39,7 +39,7 @@ rl.question(`Enter a new version number: `, async (version) => {
   // Also update version in Go code
   promises.push(
     writeFile(
-      'clients/morio/version/main.go',
+      'client/version/main.go',
       '// This file is auto-generated\npackage version\nvar Version string = "' + version + '"'
     )
   )

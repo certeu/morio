@@ -11,14 +11,7 @@ data/
 local/
 
 # Auto-generated client files
-clients/linux/control
-clients/morio/morio
-clients/morio-*
-builders/dbuilder/clients
-
-# Auto-generated moriod files
-moriod/control
-VERSION
+pkgs/morio-client/linux/usr/sbin/morio
 
 # Auto-generated scripts
 core/run-dev-container.sh
