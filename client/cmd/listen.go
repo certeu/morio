@@ -179,7 +179,7 @@ func getBrokers() []string {
 
 // handleMessage processes a single Kafka message
 func handleMessage(msg *sarama.ConsumerMessage) error {
-	// Topic is should always be clients, but let's make sure
+	// Topic should always be clients, but let's make sure
 	if msg.Topic != "clients" {
 		return nil
 	}
@@ -262,19 +262,19 @@ func runStopCommand(id int) error {
 }
 
 func reportCommandStatus(id int, status string) error {
-	// Grab the cluster client UUID, and API key secret (if they exist)
+	// Grab the cluster client UUID and the API key secret (if they exist)
 	uuid := GetVar("MORIO_CLIENT_UUID")
 	secret := GetVar("MORIO_APIKEY_SECRET")
 	cluster := GetVar("MORIO_CLUSTER")
 
 	if uuid == "" {
-		return fmt.Errorf("No client UUID found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No client UUID found. Is this client joined to a Morio cluster?")
 	}
 	if secret == "" {
-		return fmt.Errorf("No API key found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No API key found. Is this client joined to a Morio cluster?")
 	}
 	if cluster == "" {
-		return fmt.Errorf("No cluster name found. Did you join this client to a Morio cluster?")
+		return fmt.Errorf("No cluster name found. Is this client joined to a Morio cluster?")
 	}
 
 	// Create request payload
