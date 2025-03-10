@@ -367,8 +367,8 @@ func RmVar(key string) {
 // Remove all (custom) variables
 func ClearVars() error {
 	/*
-	 * These vars will break the join/rejoin flow which is
-	 * almost certainly not what people want, so we skip them
+	 * The vars named MORIO_ are needed for the join/rejoin flow
+	 * so we do not remove them
 	 */
 	matches, err := filepath.Glob(CustomVarFolder + "/*")
 	if err != nil {
