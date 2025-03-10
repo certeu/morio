@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Removed all API routes related to building packages
 - [core] Removed all API routes related to building packages
 - [dbuilder] Removed the dbuilder service
-- [drbuilder] Removed teh drbuilder service
+- [drbuilder] Removed the drbuilder service
 
 ## [0.7.2] - 2025-02-10
 
