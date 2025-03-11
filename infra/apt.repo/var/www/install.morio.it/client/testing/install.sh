@@ -77,15 +77,15 @@ download_repo_pkg() {
 
   # Use curl if it's available
   if command -v curl &> /dev/null; then
-    echo -n "⬇️  Downloading moriod-repo package with curl"
+    echo -n "⬇️  Downloading morio-repo package with curl"
     curl -fsSL "$url" -o "$output"
   # Use wget if curl is not available
   elif command -v wget &> /dev/null; then
-    echo -n "⬇️  Downloading moriod-repo package with wget"
+    echo -n "⬇️  Downloading morio-repo package with wget"
     wget -q "$url" -O "$output"
   # Without curl or wget, bail
   else
-    echo "⚠️  No curl found, and no wget found. We need a way to download the moriod-repo package."
+    echo "⚠️  No curl found, and no wget found. We need a way to download the morio-repo package."
     echo ""
     echo "💡 Consider installing curl with:"
     if [ $PACKAGE_FORMAT == "apt" ]; then

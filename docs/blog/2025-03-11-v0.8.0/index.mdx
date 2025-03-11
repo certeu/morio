@@ -4,7 +4,7 @@ authors: [joostdecock] # skip-spellcheck
 tags: [morio, release, alpha, v0.8.0]
 ---
 
-We have released version 0.8.0 of Morio, a new minor release that 
+We have released version 0.8.0 of Morio, a new minor release that
 overhauls the way we manage Morio client configurations.
 
 <!-- truncate -->
@@ -15,10 +15,10 @@ In our previous post [announcing Morio v0.7.0](/blog/2025/02/06/v0.7.0) we
 wrote:
 
 > _We've been running Morio in production for a while now, and as we continue to
-integrate more and more systems with it, the amount of data flowing through our
-Morio instance increases._
+> integrate more and more systems with it, the amount of data flowing through our
+> Morio instance increases._
 
-That post focused on optimizing performance of the Morio nodes by replacing
+That post focused on optimising performance of the Morio nodes by replacing
 Logstash with Vector, and in that context, the focus was on the amount of data
 flowing through Morio.
 
@@ -27,7 +27,7 @@ time around, the focus is on the client side, and the overhead of integrating
 systems with Morio.
 
 We always wanted to make this as easy as possible, but while we have done some
-work on this in the past, we felt that it was still too cumbersome to enroll
+work on this in the past, we felt that it was still too cumbersome to enrol
 clients.
 
 We wanted to do better, so we set out to do that. And this release brings that
@@ -39,7 +39,7 @@ Below is a schematic overview of the Morio client prior to this release:
 
 ```mermaid
 flowchart TD
-  subgraph Client 
+  subgraph Client
     subgraph Agents
       auditbeat([AuditBeat<br /><small>audit info</small>])
       filebeat([FileBeat<br /><small>logs</small>])
@@ -90,7 +90,7 @@ flowchart LR
     mvars ~~~ hvars
     hvars ~~~ mtemplates
   end
-  subgraph Client 
+  subgraph Client
     subgraph Agents
       auditbeat([AuditBeat<br /><small>audit info</small>])
       filebeat([FileBeat<br /><small>logs</small>])
@@ -119,7 +119,7 @@ store module files and (default) module vars in its database.
 
 The client can then `pull` its configuration from the cluster. When it does,
 it will receive the template files for all modules it has enabled, as well as
-all module and custom vars.  
+all module and custom vars.
 
 The client can also `push` its local configuration to the cluster. In that case,
 the list of enabled modules and any custom vars will be updated centrally.
@@ -128,7 +128,7 @@ They need to be preseeded on the cluster.
 
 In a future release, we will extend this with the ability to centrally manage
 clients by assigning modules, settings vars, and so on.
-This centralized management is not yet included in this release.
+This centralised management is not yet included in this release.
 We wanted to start using this ourselves as soon as possible, so we decided
 to release this without all of the UI work on central management implemented.
 
@@ -163,21 +163,20 @@ But wait, there's more. The new Morio client comes with a listen mode:
 sudo morio listen
 ```
 
-We install a `systemd` service file for this named `morio-listener`, 
+We install a `systemd` service file for this named `morio-listener`,
 but it is optional to run this service.
 
-When you do however, the client will deamonize and connect to the Kafka
+When you do however, the client will daemonise and connect to the Kafka
 broker and listen for events in the `clients` channel.
 Through the API or the UI, you can then trigger commands on one or more
 clients, who will pick them up and report their status back to the API.
 
-To be clear: While the client does listen for commands, it does so by 
-connecting to the Kafka broker. The Morio client does not listen on 
+To be clear: While the client does listen for commands, it does so by
+connecting to the Kafka broker. The Morio client does not listen on
 any ports, and this has not changed.  
 The commands are also limited to specific client-related things, such as
 pulling or pushing its config. We do not allow running arbitrary commands on
 the host through the Morio client.
-
 
 ## Installing a client is now just like installing a node
 
@@ -223,7 +222,6 @@ can generate these invite codes through the API or UI. They come in two types:
 - A one-time invite that can only be used once
 - A reusable invite that can be used many times
 
-
 ## Updates to our software repositories
 
 We already had an APT repository at
@@ -252,4 +250,3 @@ to a cluster. We currently have no plans to address this.
 
 Documentation is lacking on the new client functionality and central management.
 We hope to be able to resolve that soon.
-

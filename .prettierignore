@@ -1,9 +1,9 @@
 docs/build/*
 docs/.docusaurus/*
 # Until we figure out how to handle the yaml+mustache files, let's ignore them
-clients/linux/etc/morio/audit/module-templates.d/*
-clients/linux/etc/morio/logs/module-templates.d/*
-clients/linux/etc/morio/metrics/module-templates.d/*
+pkgs/morio-client/linux/etc/morio/audit/config-template.yml
+pkgs/morio-client/linux/etc/morio/logs/config-template.yml
+pkgs/morio-client/linux/etc/morio/metrics/config-template.yml
 # Need to setup proper remark linting one day.
 # Something like: "remark . --frail --output --quiet && remark . --ext mdx --frail --output --quiet --use remark-mdx && prettier . --log-level warn --write && xo --fix"
 docs/docs/*

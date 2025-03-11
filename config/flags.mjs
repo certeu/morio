@@ -114,4 +114,3 @@ install the Morio client and join it to the cluster.
 feature flag. Doing so will require clients to present an invite code. You can
 generate these invite codes through the API or UI.`
 flags.REQUIRE_CLIENT_INVITES = false
-

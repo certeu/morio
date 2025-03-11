@@ -1,4 +1,4 @@
-personal_ws-1.1 en 263 
+personal_ws-1.1 en 265 
 ABAC
 ACL
 ACLs
@@ -159,6 +159,7 @@ cron
 cryptographic
 cryptographically
 cybersecurity
+daemonise
 dashboarding
 dbuilder
 de
@@ -244,6 +245,7 @@ redpanda
 rollout
 routable
 runtime
+scratcher
 sha
 stellene
 subcommands

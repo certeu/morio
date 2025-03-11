@@ -293,6 +293,13 @@ export async function templateSettings(settings, tokens = false) {
     }
   }
 
+  /*
+   * The following tokens are auto-added and cannot be changed:
+   */
+  for (const preset of ['MORIO_VERSION', 'MORIO_VERSION_TAG']) {
+    tokens[preset] = utils.getPreset(preset)
+  }
+
   // Now template the settings
   let newSettings
   try {

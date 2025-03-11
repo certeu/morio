@@ -16,7 +16,7 @@ export const set = _set
  * @param {mixed} val - The value to scalarize
  * @return {mixed} result - The result
  */
-export function asScalarOrJson (val) {
+export function asScalarOrJson(val) {
   if (typeof val === 'string') return val
   if (typeof val === 'number') return val
   return JSON.stringify(val)
@@ -162,7 +162,7 @@ async function tryWhilePromiseResolver(
  * @param {array} preExit - An array of methods to run pre-exit
  * @return {object} server - The Express server instance
  */
-export function wrapExpress(log, server, preExit=[]) {
+export function wrapExpress(log, server, preExit = []) {
   /*
    * These are the signals we want to handle
    */

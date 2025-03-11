@@ -16,7 +16,7 @@ integrate more and more systems with it, the amount of data flowing through our
 Morio instance increases.
 
 We also forward logs collected by Morio to our SIEM solution, leveraging
-Morio's connector service to do so.  What we noticed is that as the load
+Morio's connector service to do so. What we noticed is that as the load
 increases, the memory footprint of Logstash -- which underpinned the connector
 service -- would balloon to the point where the system would start swapping
 which would lead to a negative feedback loop where performance would plummet.
@@ -32,7 +32,7 @@ root cause, which is Logstash and its thirst for memory.
 
 In our original plans, we reached for Logstash to underpin the connector
 service mostly because we had experience with it, because it allows for many
-different outputs and inputs, and, since we're using the Beats agents, 
+different outputs and inputs, and, since we're using the Beats agents,
 it seemed like a good fit.
 
 But it was not a passionate choice for Logstash. It runs on the JVM -- which
@@ -53,11 +53,9 @@ differences in configuration, but all in all it was easy to swap in Vector.
 ## So is it better?
 
 Ever since switching to Vector, we've been unable to bring our production
-instance to its knees. 
+instance to its knees.
 We measure throughput every 30 seconds, and we saw up to 45k events over
 such a 30 seconds time period.
 
 We average this out to 1.5k/s because that's easier to reason about,
 but the effect is rather clear: it's much better now.
-
-
