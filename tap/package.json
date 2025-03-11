@@ -12,13 +12,13 @@
     "prettier": "npx prettier --ignore-unknown --write ./src"
   },
   "dependencies": {
-    "axios": "^1.7.9",
-    "esbuild": "^0.24.0",
-    "ioredis": "^5.4.1",
+    "axios": "^1.8.2",
+    "esbuild": "^0.25.1",
+    "ioredis": "^5.6.0",
     "ipaddr.js": "^2.2.0",
     "kafkajs": "^2.2.4",
     "lodash": "^4.17.21",
-    "pino": "^9.5.0"
+    "pino": "^9.6.0"
   },
   "imports": {
     "#shared/*": "./shared/*.mjs"
@@ -35,6 +35,6 @@
   },
   "homepage": "https://github.com/certeu/morio#readme",
   "devDependencies": {
-    "glob": "^11.0.0"
+    "glob": "^11.0.1"
   }
 }

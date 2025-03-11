@@ -6,7 +6,7 @@ export const pullConfig = {
   // Image to run
   image: 'valkey/valkey',
   // Image tag (version) to run
-  tag: '8.0.1',
+  tag: '8.1',
 }
 
 /*

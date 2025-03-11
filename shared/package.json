@@ -37,8 +37,8 @@
     "./utils": "./src/utils.mjs"
   },
   "dependencies": {
-    "bson": "^6.8.0",
-    "glob": "^11.0.0",
+    "bson": "^6.10.3",
+    "glob": "^11.0.1",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "minimatch": "^10.0.1",
