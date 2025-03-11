@@ -10,7 +10,7 @@
 #   It will:
 #     - Make sure systemd is available
 #     - Detect whether it is a APT or RPM bacsed system
-#     - Setup the moriod repository:
+#     - Setup the morio repository:
 #       - For API: apt.repo.morio.it
 #       - for ROM: rpm.repo.morio.it
 #     - Update dependencies
@@ -68,7 +68,7 @@ detect_systemd() {
 }
 
 #
-# This function will download the moriod-repo installer package
+# This function will download the morio-repo installer package
 #
 download_repo_pkg() {
   local url="$1"
@@ -77,15 +77,15 @@ download_repo_pkg() {
 
   # Use curl if it's available
   if command -v curl &> /dev/null; then
-    echo -n "⬇️  Downloading moriod repo package with curl"
+    echo -n "⬇️  Downloading morio-repo package with curl"
     curl -fsSL "$url" -o "$output"
   # Use wget if curl is not available
   elif command -v wget &> /dev/null; then
-    echo -n "⬇️  Downloading moriod repo package with wget"
+    echo -n "⬇️  Downloading morio-repo package with wget"
     wget -q "$url" -O "$output"
   # Without curl or wget, bail
   else
-    echo "⚠️  No curl found, and no wget found. We need a way to download the moriod repo package."
+    echo "⚠️  No curl found, and no wget found. We need a way to download the morio-repo package."
     echo ""
     echo "💡 Consider installing curl with:"
     if [ $PACKAGE_FORMAT == "apt" ]; then
@@ -111,12 +111,12 @@ download_repo_pkg() {
 #
 install_repo_pkg() {
   echo ""
-  echo "📦 Installing moriod repo, which will add the ${PACKAGE_FORMAT} repository..."
+  echo "📦 Installing morio-repo, which will add the ${PACKAGE_FORMAT} repository..."
   if [ $PACKAGE_FORMAT == "apt" ]; then
     sudo DEBIAN_FRONTEND=noninteractive apt update -y
-    sudo DEBIAN_FRONTEND=noninteractive apt install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
+    sudo DEBIAN_FRONTEND=noninteractive apt install -y /tmp/setup-morio-repo.${PACKAGE_EXT}
   else
-    sudo yum install -y /tmp/setup-moriod-repo.${PACKAGE_EXT}
+    sudo yum install -y /tmp/setup-morio-repo.${PACKAGE_EXT}
     echo ""
     echo "🛢️ Updating list of available packages..."
     sudo yum clean expire-cache && sudo yum check-update
@@ -145,8 +145,8 @@ install() {
   detect_systemd
   detect_package_manager
   download_repo_pkg \
-    https://${PACKAGE_FORMAT}.repo.morio.it/setup-moriod-repo_${CHANNEL}.${PACKAGE_EXT} \
-    /tmp/setup-moriod-repo.${PACKAGE_EXT}
+    https://${PACKAGE_FORMAT}.repo.morio.it/setup-morio-repo_${CHANNEL}.${PACKAGE_EXT} \
+    /tmp/setup-morio-repo.${PACKAGE_EXT}
   install_repo_pkg
   install_moriod_pkg
   sudo systemctl start moriod.service
