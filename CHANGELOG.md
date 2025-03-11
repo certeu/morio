@@ -24,9 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [client] Added the `rejoin` command to the Morio client
 - [client] Added the `reset` command to the Morio client
 - [client] Added the `push` command to the Morio client
-- [client] Added the `module list-remote` subcommand to the Morio client
-- [client] Added the `module enable-remote` subcommand to the Morio client
-- [client] Added the `module disable-remote` subcommand to the Morio client
+- [client] Added the `modules list-remote` subcommand to the Morio client
+- [client] Added the `modules enable-remote` subcommand to the Morio client
+- [client] Added the `modules disable-remote` subcommand to the Morio client
 - [core] Always populate tokens with `MORIO_VERSION` and `MORIO_VERSION_TAG`
 
 ### Changed
