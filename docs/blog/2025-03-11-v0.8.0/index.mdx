@@ -18,7 +18,7 @@ wrote:
 > integrate more and more systems with it, the amount of data flowing through our
 > Morio instance increases._
 
-That post focused on optimizing performance of the Morio nodes by replacing
+That post focused on optimising performance of the Morio nodes by replacing
 Logstash with Vector, and in that context, the focus was on the amount of data
 flowing through Morio.
 
@@ -27,7 +27,7 @@ time around, the focus is on the client side, and the overhead of integrating
 systems with Morio.
 
 We always wanted to make this as easy as possible, but while we have done some
-work on this in the past, we felt that it was still too cumbersome to enroll
+work on this in the past, we felt that it was still too cumbersome to enrol
 clients.
 
 We wanted to do better, so we set out to do that. And this release brings that
@@ -128,7 +128,7 @@ They need to be preseeded on the cluster.
 
 In a future release, we will extend this with the ability to centrally manage
 clients by assigning modules, settings vars, and so on.
-This centralized management is not yet included in this release.
+This centralised management is not yet included in this release.
 We wanted to start using this ourselves as soon as possible, so we decided
 to release this without all of the UI work on central management implemented.
 
@@ -166,7 +166,7 @@ sudo morio listen
 We install a `systemd` service file for this named `morio-listener`,
 but it is optional to run this service.
 
-When you do however, the client will deamonize and connect to the Kafka
+When you do however, the client will daemonise and connect to the Kafka
 broker and listen for events in the `clients` channel.
 Through the API or the UI, you can then trigger commands on one or more
 clients, who will pick them up and report their status back to the API.

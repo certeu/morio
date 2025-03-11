@@ -58,7 +58,7 @@ export const errors = {
     status: 400,
     title: 'An invite code is required to join this cluster',
     detail:
-      'This cluster does not permit open enrollment of new clients. Only clients that present a valid invite can enroll.',
+      'This cluster does not permit open enrolment of new clients. Only clients that present a valid invite can enrol.',
   },
   /*
    * Client tries to join with an invalid invite
