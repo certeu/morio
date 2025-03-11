@@ -9,10 +9,10 @@
 #   This install script will setup a Morio node.
 #   It will:
 #     - Make sure systemd is available
-#     - Detect whether it is a APT or RPM bacsed system
+#     - Detect whether it is an APT or RPM based system
 #     - Setup the morio repository:
 #       - For API: apt.repo.morio.it
-#       - for ROM: rpm.repo.morio.it
+#       - for RPM: rpm.repo.morio.it
 #     - Update dependencies
 #     - Install the moriod package
 #
