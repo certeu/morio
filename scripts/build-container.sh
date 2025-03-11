@@ -62,16 +62,6 @@ else
   # Container to build
   CONTAINER="$1"
 
-  # If building core, build the clients first
-  if [[ "$CONTAINER" == "core" ]]; then
-    # But not for dev
-    if [[ "$RELEASE_CHANNEL" == "dev" ]]; then
-      echo "Skipping client build for dev"
-    else
-      npm run build:clients
-    fi
-  fi
-
   # Keep coverage reports out of the build
   cd $MORIO_GIT_ROOT/$1
   sudo rm -rf ./coverage
