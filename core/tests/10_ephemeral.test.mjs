@@ -1,10 +1,8 @@
-import { core, validateErrorResponse, ensureFqdn } from './utils.mjs'
+import { core, validateErrorResponse } from './utils.mjs'
 import { describe, it } from 'node:test'
 import { strict as assert } from 'node:assert'
 import { pkg } from './json-loader.mjs'
 import { errors } from '../src/errors.mjs'
-
-ensureFqdn()
 
 describe('Ephemeral Core: Status Routes', () => {
   // GET /status - Retrieve status data of an ephemeral node
