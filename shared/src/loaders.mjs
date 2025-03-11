@@ -519,13 +519,12 @@ export async function loadClientModules(settings, log) {
                */
               log.debug(`Seeding client module file: ${targetFile}`)
               if (sourceFile.slice(-4) === '.yml') {
-                const module  = path.basename(sourceFile).slice(0, -4)
+                const module = path.basename(sourceFile).slice(0, -4)
                 if (typeof modules[module] === 'undefined') {
                   const repos = {}
                   repos[repo] = pattern
                   modules[module] = { module, repos, info: [], vars: {} }
-                }
-                else if (typeof modules[module].repos[repo] === 'undefined') {
+                } else if (typeof modules[module].repos[repo] === 'undefined') {
                   modules[module].repos[repo] = pattern
                 }
                 const raw = await readFile(sourceFile)
@@ -534,12 +533,12 @@ export async function loadClientModules(settings, log) {
                   folder: path.dirname(targetFile),
                   file: path.basename(targetFile),
                   content: raw,
-                  source: repo
+                  source: repo,
                 }
                 const data = await loadMorioDataFromModule(raw, log)
                 if (data) {
-                  modules[module].info = [...modules[module].info, data.info ]
-                  modules[module].vars = {...modules[module].vars, ...data.vars }
+                  modules[module].info = [...modules[module].info, data.info]
+                  modules[module].vars = { ...modules[module].vars, ...data.vars }
                 }
               }
             }
@@ -555,13 +554,13 @@ export async function loadClientModules(settings, log) {
   return true
 }
 
-async function storeClientModules (modules, log) {
+async function storeClientModules(modules, log) {
   const queries = []
   for (const module in modules) {
     log.debug(`[client] Preparing to add client module ${module} to the database`)
     queries.push([
       `INSERT INTO inventory_mods (mod, data) VALUES(:module, :data)`,
-      { module, data: JSON.stringify(modules[module]) }
+      { module, data: JSON.stringify(modules[module]) },
     ])
     for (const [key, val] of Object.entries(modules[module].vars || {})) {
       log.debug(`[client] Preparing to add client var ${key} to the database`)
@@ -569,7 +568,7 @@ async function storeClientModules (modules, log) {
         `INSERT INTO inventory_modvars (id, val, info, mod)
         VALUES(:id, :val, :info, :mod)
         ON CONFLICT(id) DO UPDATE SET val=:val, info=:info, mod=:mod`,
-        { id: key, val: asScalarOrJson(val.dflt), info: val.info, mod: module }
+        { id: key, val: asScalarOrJson(val.dflt), info: val.info, mod: module },
       ])
     }
   }
@@ -578,33 +577,31 @@ async function storeClientModules (modules, log) {
      * We completely remove all modules and recreate them
      * because only through preseeding can modules be loaded
      */
-    const result = await dbClient.post(
-      `/db/execute`,
-      [
-        `DELETE FROM inventory_mods where 1`,
-        ...queries
-      ]
-    )
+    const result = await dbClient.post(`/db/execute`, [
+      `DELETE FROM inventory_mods where 1`,
+      ...queries,
+    ])
     if (result[0] === 200 && result[1].results) {
       let failed = 0
       for (const insert of result[1].results) {
-        if (!insert.last_insert_id) failed ++
+        if (!insert.last_insert_id) failed++
       }
       if (failed === 0) log.debug(`[client] All client modules & vars added to the database`)
       else log.warn(`[client] Failed ${failed} queries when adding modules & vars to the database`)
-    }
-    else log.warn(`[client] Database failure while adding modules & vars to the database`)
+    } else log.warn(`[client] Database failure while adding modules & vars to the database`)
   }
 }
 
-async function storeClientModuleFiles (files, log) {
+async function storeClientModuleFiles(files, log) {
   const queries = []
   for (const file of Object.values(files)) {
-    log.debug(`[client] Preparing to add client module file ${file.folder}/${file.file} to the database`)
+    log.debug(
+      `[client] Preparing to add client module file ${file.folder}/${file.file} to the database`
+    )
     queries.push([
       `INSERT INTO inventory_modfiles (mod, folder, file, content, source)
       VALUES(:mod, :folder, :file, :content, :source)`,
-      file
+      file,
     ])
   }
   if (queries.length > 0) {
@@ -612,26 +609,25 @@ async function storeClientModuleFiles (files, log) {
      * We completely remove all module files and recreate them
      * because only through preseeding can module files be loaded
      */
-    const result = await dbClient.post(
-      `/db/execute`,
-      [
-        `DELETE FROM inventory_modfiles where 1`,
-        ...queries
-      ]
-    )
+    const result = await dbClient.post(`/db/execute`, [
+      `DELETE FROM inventory_modfiles where 1`,
+      ...queries,
+    ])
     if (result[0] === 200 && result[1].results?.[0]) {
       let failed = 0
       for (const insert of result[1].results) {
-        if (!insert.last_insert_id) failed ++
+        if (!insert.last_insert_id) failed++
       }
       if (failed === 0) log.debug(`[client] All client module files added to the database`)
-      else log.warn(`[client] Failed ${failed} queries when adding client module files to the database`)
-    }
-    else log.warn(`[client] Database failure while adding client module files to the database`)
+      else
+        log.warn(
+          `[client] Failed ${failed} queries when adding client module files to the database`
+        )
+    } else log.warn(`[client] Database failure while adding client module files to the database`)
   }
 }
 
-async function loadMorioDataFromModule (raw, log) {
+async function loadMorioDataFromModule(raw, log) {
   const rendered = mustache.render(raw, {}, {}, { tags: ['{|', '|}'] })
   let yml = false
   try {

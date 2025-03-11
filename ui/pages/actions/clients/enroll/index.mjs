@@ -47,8 +47,8 @@ const EnrollClientsPage = (props) => {
         <Popout note>
           <h5>This cluster requires client invites</h5>
           <p>
-            The <code>REQUIRE_CLIENT_INVITES</code> feature flag is enabled on this cluster,
-            meaning that clients cannot join without providing an invite code.
+            The <code>REQUIRE_CLIENT_INVITES</code> feature flag is enabled on this cluster, meaning
+            that clients cannot join without providing an invite code.
           </p>
           <p>
             If you have an invite code, you can enter it below to auto-update the command examples.

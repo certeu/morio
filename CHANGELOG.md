@@ -31,15 +31,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- [broker] Upgraded RedPanda to v24.2.20 (from v24.2.7) 
-- [ca] Upgraded Step-CA to 0.28.2 (from 0.27.5) 
+- [broker] Upgraded RedPanda to v24.2.20 (from v24.2.7)
+- [ca] Upgraded Step-CA to 0.28.2 (from 0.27.5)
 - [cache] Upgraded ValKey to 8.1 (from 8.0.1)
 - [client] The modules list command output is now terse by default, use the `-v` or `--verbose` flag for detailed output
 - [client] Mask secrets vars output when listing vars
 - [client] Output vars in alphabetic order
 - [connector] Upgraded Vector to 0.45.0-debian (from 0.44.0-debian)
 - [console] Upgraded RedPanda Console to v2.8.3 (from v2.7.2)
-- [proxy] Upgraded Traefik to v3.3.4 (from v3.1.6) 
+- [proxy] Upgraded Traefik to v3.3.4 (from v3.1.6)
 
 ### Fixed
 
@@ -49,7 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [console] Remove dependency on admin API
 - [core] Add support for NAT loopback/hairpinning
 - [ui] Fixed incorrect loading of healtcheck chart templates
-
 
 ### Removed
 

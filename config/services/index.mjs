@@ -55,14 +55,7 @@ export const ephemeralServiceOrder = ['proxy', 'api', 'ui']
 /*
  * List of services that we should not take for granted
  */
-export const optionalServices = [
-  'db',
-  'cache',
-  'ui',
-  'connector',
-  'tap',
-  'watcher',
-]
+export const optionalServices = ['db', 'cache', 'ui', 'connector', 'tap', 'watcher']
 
 /**
  * Helper method to generate the Traefik configuration

@@ -29,7 +29,9 @@ body {
   min-height: calc(100vh - 4rem);
   text-align: center;
 }
-a, a:visited, a:active {
+a,
+a:visited,
+a:active {
   color: var(--brand);
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -43,7 +45,7 @@ a:hover {
 }
 pre {
   background: #212121;
-  color: #FFF;
+  color: #fff;
   padding: 1rem;
   border-radius: 0.5rem;
   text-align: left;
@@ -64,42 +66,49 @@ span.note {
   display: block;
   border-radius: 0.5rem;
 }
-span.note.stable { background-color: #15803D; }
-span.note.canary { background-color: #F97316; }
-span.note.testing { background-color: #DC2626; }
+span.note.stable {
+  background-color: #15803d;
+}
+span.note.canary {
+  background-color: #f97316;
+}
+span.note.testing {
+  background-color: #dc2626;
+}
 
 div.buttons {
-	margin-top: 2rem;
+  margin-top: 2rem;
   display: flex;
   flex-direction: column;
   width: 100%;
   min-width: 450px;
   gap: 1rem;
-  
 }
 a.big-btn {
-	border: solid 2px var(--brand-light);
-	border-radius: 0.5rem;
-	padding: 1.5rem;
-	text-decoration: none;
-	font-weigth: bold;
-    	background-color: var(--brand);
-	color: #fff;
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	justify-content: space-between;
-	gap: 1rem;
-	width: 100%;
-	font-size: 1.5rem;
+  border: solid 2px var(--brand-light);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-decoration: none;
+  font-weigth: bold;
+  background-color: var(--brand);
+  color: #fff;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  font-size: 1.5rem;
 }
 a.big-btn:hover {
-    	background-color: var(--brand-light);
-  box-shadow: 0 1px 3px 0 #0006, 0 1px 2px -1px #0006;
+  background-color: var(--brand-light);
+  box-shadow:
+    0 1px 3px 0 #0006,
+    0 1px 2px -1px #0006;
 }
 a.big-btn.outline {
-	background-color: transparent;
-	color: var(--brand);
-	padding: 0.75rem 1.5rem;
-	font-size: 1.25rem;
+  background-color: transparent;
+  color: var(--brand);
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
 }
