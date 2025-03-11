@@ -115,7 +115,7 @@ const EnrollClientsPage = (props) => {
                 To install the Morio client for Linux, run the following command from an account
                 with <code>sudo</code> rights:
               </p>
-              <Highlight language="shell">{`curl -fsSL https://install.morio.it/client/ | bash`}</Highlight>
+              <Highlight language="shell">{`curl -fsSL https://install.morio.it/client | bash`}</Highlight>
             </Tab>
             <Tab name="macOS" key="mac">
               <Popout fixme>Provide instructions for macOS</Popout>
