@@ -125,7 +125,7 @@ export const cluster = (context, toggleValidate, update) => {
               ],
               Moriohub: [
                 '### Moriohub Integration',
-                '##### Do you want to make Moriohub  content available?',
+                '##### Do you want to make Moriohub content available?',
                 <small key="note">
                   This adds{' '}
                   <a href="https://morio.it/hub/" target="_BLANK">
