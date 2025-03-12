@@ -44,7 +44,8 @@ const core = restClient(`http://morio-core:${getPreset('MORIO_CORE_PORT')}`)
 const axiosHandler = async (route, data = null, customHeaders = {}, method = 'get') => {
   const params = []
   if (['post', 'put', 'patch'].includes(method)) params.push(data)
-  params.push({ headers: { ...headers, ...customHeaders } })
+  if (customHeaders.Authorization) params.push({ headers: customHeaders })
+  else params.push({ headers: { ...headers, ...customHeaders } })
   let result
   try {
     result = await axios[method](
