@@ -20,8 +20,22 @@ import { Link } from 'components/link.mjs'
 
 /*
  * Little helper method to strip out the TMP key from an object
+ * and add some presets that are triggered by values in TMP
  */
-const withoutTMP = (obj) => ({ ...obj, TMP: undefined })
+const processAndStripTMP = (obj) => {
+  if (obj.TMP?.moriohub) {
+    if (typeof obj.preseed === 'undefined') obj.preseed = {}
+    if (typeof obj.preseed.git === 'undefined') obj.preseed.git = {}
+    obj.preseed.git.moriohub = { url: 'https://github.com/certeu/moriohub.git' }
+    if (obj.TMP.moriohub_modules) obj.preseed.modules = ['git:/modules/**@moriohub']
+    if (obj.TMP.moriohub_dashboarding) {
+      obj.preseed.processors = ['git:/processors/**@moriohub']
+      obj.preseed.charts = ['git:/charts/**@moriohub']
+    }
+  }
+
+  return { ...obj, TMP: undefined }
+}
 
 /*
  * Displays configuration validation
@@ -89,7 +103,7 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
   const deploy = async () => {
     setDeploymentOngoing(true)
     setLoadingStatus([true, 'Deploying your configuration, this will take a while'])
-    const [data, status] = await api.setup(withoutTMP(mSettings))
+    const [data, status] = await api.setup(processAndStripTMP(mSettings))
     if (data.result !== 'success' || status !== 200)
       return setLoadingStatus([true, `Unable to deploy the configuration`, true, false])
     else {
@@ -144,7 +158,9 @@ export const SetupWizard = ({ preload = {}, validate = false }) => {
 
   const toggleValidate = async () => {
     if (!validateView) {
-      setValidationReport(await validateSettings(api, withoutTMP(mSettings), setLoadingStatus))
+      setValidationReport(
+        await validateSettings(api, processAndStripTMP(mSettings), setLoadingStatus)
+      )
     }
     setValidateView(!validateView)
   }

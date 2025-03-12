@@ -128,7 +128,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
   let { uuid = false } = req.body
   if (uuid) {
     if (nodeUuid && uuid !== nodeUuid)
-      return utils.sendErrorResponse(res, `morio.api.client.uuid.mismatch`, req.url)
+      return utils.sendErrorResponse(res, `morio.api.client.uuid_mismatch`, req.url)
   } else if (nodeUuid) uuid = nodeUuid
   else uuid = generateUuid()
 

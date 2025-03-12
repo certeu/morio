@@ -35,6 +35,11 @@ RUN npm install pm2 -g
 RUN mkdir -p /morio/tap/processors
 RUN rm -rf /morio/tap/processors/*
 
+## Copy empty loader in place
+## This prevents issues when people build a container image in
+## their dev environment that contains a populated loader.mjs file
+RUN cp /morio/tap/loader.empty.mjs /morio/tap/loader.mjs
+
 ## Add a morio user to run the NodeJS code
 RUN addgroup --system --gid ${GID:-2112} ${USER:-morio} \
   && adduser --system --uid ${UID:-2112} --gid ${GIS:-2112} --gecos "Morio User" --home=/home/morio ${USER:-morio} \

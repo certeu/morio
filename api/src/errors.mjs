@@ -16,6 +16,14 @@ export const errors = {
     detail: 'The cluster name provided in the join request does not match the cluster FQDN',
   },
   /*
+   * Mismatch between the client join request UUID and a cluster node UUID with the same FQDN
+   */
+  'morio.api.client.uuid_mismatch': {
+    status: 400,
+    title: 'Client UUID mismatch',
+    detail: 'The client UUID is not matched with a cluster node UUID which has the same FQDN',
+  },
+  /*
    * Mismatch between the client API key value and the expected one
    */
   'morio.api.client.authentication_mismatch': {

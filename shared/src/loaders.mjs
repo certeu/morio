@@ -835,7 +835,7 @@ window.morio.charts.metrics = {`
     for (const [metricset, method] of Object.entries(metricsets)) {
       output += `\n    "${metricset}": ${method.split('\n').join('\n  ')},`
     }
-    output += '\n  }'
+    output += '\n  },'
   }
   output += '\n}'
 
