@@ -100,8 +100,9 @@ export async function validateSettings(newSettings, headers = false) {
    * If some of the nodes resolve to the same IP, that is probably going to be a problem
    */
   if (ips.length !== [...new Set([...ips])].length) {
-    report.errors.push('Different nodes share a common IP address')
-
+    // Warn only for now
+    //log.warn({ips}, `Non-unique IP addresses found`)
+    //report.errors.push('Different nodes share a common IP address')
     return abort()
   }
 
