@@ -115,8 +115,6 @@ export async function createApikey(data, recreate = false) {
     return false
   }
 
-  data.id = data.key
-
   const columns = []
   const params = {}
 
