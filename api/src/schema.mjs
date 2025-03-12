@@ -64,21 +64,23 @@ const kv = {
 }
 
 const client = Joi.object({
-  name: Joi.string().hostname(),
-  fqdn: Joi.string().hostname(),
-  os: Joi.string(),
-  os_version: Joi.string(),
-  arch: Joi.string(),
-  cores: Joi.number(),
-  memory: Joi.number(),
-  ips: Joi.array().items(Joi.string()),
-  macs: Joi.array().items(Joi.string()),
-  packages: Joi.array().items(
-    Joi.object({
-      name: Joi.string(),
-      version: Joi.string(),
-    })
-  ),
+  name: Joi.string().hostname().required(),
+  fqdn: Joi.string().hostname().required(),
+  os: Joi.string().required(),
+  os_version: Joi.string().required(),
+  arch: Joi.string().required(),
+  cores: Joi.number().required(),
+  memory: Joi.number().required(),
+  ips: Joi.array().items(Joi.string()).required(),
+  macs: Joi.array().items(Joi.string()).required(),
+  packages: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string(),
+        version: Joi.string(),
+      })
+    )
+    .required(),
 }).required()
 
 /*
