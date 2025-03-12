@@ -773,7 +773,6 @@ export async function disableClientModule(uuid, module) {
     uuid,
     module,
   })
-  log.todo({ result })
 
   return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
 }
@@ -890,11 +889,11 @@ export async function getHostVar(host, key) {
  * @param {array} vars - The list of variables
  * @return {array} result - An [bool result, array failed] array
  */
-export async function setClientVariables(uuid, vars) {
+export async function setClientVariables(uuid, vars = {}) {
   const queries = []
   // Note that we do not store vars that start with MORIO_
   const toStore = Object.entries(vars)
-    .filter((entry) => entry.key.slice(0, 6) !== 'MORIO_')
+    .filter(([key]) => key.slice(0, 6) !== 'MORIO_')
     .map((entry) => ensureVarSecrecy(...entry))
   for (const [key, val] of toStore) {
     const exists = await getHostVar(uuid, key)
