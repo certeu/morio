@@ -1,5 +1,6 @@
 import Joi from 'joi'
 import { Popout } from 'components/popout.mjs'
+import { BoolNoIcon, BoolYesIcon } from 'components/icons.mjs'
 
 /*
  * Cluster
@@ -122,6 +123,128 @@ export const cluster = (context, toggleValidate, update) => {
                   schema: Joi.string().hostname().required().label('Cluster Name'),
                 },
               ],
+              Moriohub: [
+                '### Moriohub Integration',
+                '##### Do you want to make Moriohub  content available?',
+                <small key="note">
+                  This adds{' '}
+                  <a href="https://morio.it/hub/" target="_BLANK">
+                    Moriohub
+                  </a>{' '}
+                  as a preseeding source.
+                </small>,
+                {
+                  key: 'TMP.moriohub',
+                  schema: Joi.bool().label('Moriohub Integration'),
+                  inputType: 'buttonList',
+                  title: 'Node vs Cluster',
+                  lockOnEdit: true,
+                  dir: 'row',
+                  activeIcon: context.TMP?.moriohub ? (
+                    <BoolYesIcon size={8} />
+                  ) : (
+                    <BoolNoIcon size={8} />
+                  ),
+                  list: [
+                    {
+                      val: true,
+                      label: 'Yes',
+                    },
+                    {
+                      val: false,
+                      label: 'No',
+                    },
+                  ],
+                },
+              ].concat(
+                context.TMP?.moriohub
+                  ? [
+                      [
+                        '###### Load Client Modules?',
+                        '###### Provide live dashboarding?',
+                        {
+                          key: 'TMP.moriohub_modules',
+                          schema: Joi.bool().label('Moriohub Client Modules'),
+                          inputType: 'buttonList',
+                          title: 'Node vs Cluster',
+                          dense: true,
+                          dir: 'row',
+                          current: true,
+                          activeIcon:
+                            context.TMP?.moriohub_modules === false ? (
+                              <BoolNoIcon size={6} />
+                            ) : (
+                              <BoolYesIcon size={6} />
+                            ),
+                          list: [
+                            {
+                              val: true,
+                              label: 'Yes',
+                            },
+                            {
+                              val: false,
+                              label: 'No',
+                            },
+                          ],
+                        },
+                        {
+                          key: 'TMP.moriohub_dashboarding',
+                          schema: Joi.bool().label('Moriohub Live Dashboarding'),
+                          inputType: 'buttonList',
+                          dir: 'row',
+                          dense: true,
+                          activeIcon:
+                            context.TMP?.moriohub_dashboarding === false ? (
+                              <BoolNoIcon size={6} />
+                            ) : (
+                              <BoolYesIcon size={6} />
+                            ),
+                          current: true,
+                          list: [
+                            {
+                              val: true,
+                              label: 'Yes',
+                            },
+                            {
+                              val: false,
+                              label: 'No',
+                            },
+                          ],
+                        },
+                      ],
+                    ]
+                  : [
+                      <Popout tip key="tip">
+                        <h5>No need to re-invent the observability wheel</h5>
+                        <p>
+                          <a href="https://morio.it/hub/" target="_BLANK">
+                            Moriohub
+                          </a>{' '}
+                          is a curated collection of Morio configuration and plugins for various use
+                          cases.
+                        </p>
+                        <small>
+                          We recommend to <b>enable Moriohub integration</b> and load its{' '}
+                          <b>client modules</b>. If you would like <b>live dashboarding</b> inside
+                          Morio, you should enable that too.
+                        </small>
+                        <p className="text-center">
+                          <button
+                            onClick={() => {
+                              update([
+                                ['TMP.moriohub', true],
+                                ['TMP.moriohub_modules', true],
+                                ['TMP.moriohub_dashboarding', true],
+                              ])
+                            }}
+                            className="btn btn-primary"
+                          >
+                            Enable Moriohub Integration
+                          </button>
+                        </p>
+                      </Popout>,
+                    ]
+              ),
               Validate: [
                 '### Pre-flight check: All systems go?',
                 'Before we deploy Morio using these settings, we will run a series of validation tests.',

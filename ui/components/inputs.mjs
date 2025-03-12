@@ -107,7 +107,7 @@ export const ButtonFrame = ({
     {children}
     {active ? (
       activeIcon ? (
-        <div className={`absolute w-8 h-8 ${dense ? '-top-3 -right-3' : 'top-2 right-2'}`}>
+        <div className={`absolute w-8 h-8 ${dense ? 'top-2 right-0' : 'top-2 right-2'}`}>
           {activeIcon}
         </div>
       ) : (
