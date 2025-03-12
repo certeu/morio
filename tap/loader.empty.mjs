@@ -1,6 +1,6 @@
 /*
  * This file is here to prevent accidentally building a morio-tap
- * container image with a populated loader as that will break the serivce.
+ * container image with a populated loader as that will break the service.
  * This will be copied to loader.mjs when building the container.
  */
 
