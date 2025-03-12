@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Fix incorrect handling of clients vars on push
 - [api] Do not use key as table field when storing apikeys
 - [client] Continue reset command even if files are missing
+- [tap] Prevent populated loader files from being included on build images
+- [tap] Fix issue with concatenation of charts logic
 
 ## [0.8.0] - 2025-03-11
 
