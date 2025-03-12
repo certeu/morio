@@ -160,7 +160,7 @@ export const cluster = (context, toggleValidate, update) => {
                 context.TMP?.moriohub
                   ? [
                       [
-                        '###### Load Client Modules?',
+                        '###### Load client modules?',
                         '###### Provide live dashboarding?',
                         {
                           key: 'TMP.moriohub_modules',
