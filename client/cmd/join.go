@@ -437,17 +437,14 @@ func getBrewPackages() ([]PackageInfo, error) {
 }
 
 func ClearJoin() error {
-	if err := os.Remove(GetConfigPath("ca.pem")); err != nil {
-		return err
-	}
-	if err := os.Remove(GetConfigPath("cert.pem")); err != nil {
-		return err
-	}
-	if err := os.Remove(GetConfigPath("key.pem")); err != nil {
-		return err
-	}
+	os.Remove(GetConfigPath("ca.pem"))
+	os.Remove(GetConfigPath("cert.pem"))
+	os.Remove(GetConfigPath("key.pem"))
+
 	RmVar("MORIO_BROKERS")
 	RmVar("MORIO_APIKEY_SECRET")
+	RmVar("MORIO_CLIENT_UUID")
+	RmVar("MORIO_CLUSTER")
 
 	return nil
 }

@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Don't block preseeding due to IP validation
+- [api] Don't block preseeding due to IP validation
+- [client] Continue reset command even if files are missing
 
 ## [0.8.0] - 2025-03-11
 
