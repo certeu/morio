@@ -21,7 +21,7 @@ server {
     try_files $uri/$index_file =404;  # Serve index.html for browsers
   }
 
-  location ~ ^/node/(stable|canary|testing|)$ {
+  location ~ ^/cluster/(stable|canary|testing|)$ {
     try_files $uri/$index_file =404;  # Serve index.html for browsers
   }
 

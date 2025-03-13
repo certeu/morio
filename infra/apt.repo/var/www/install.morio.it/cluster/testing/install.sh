@@ -6,7 +6,7 @@
 #
 #   https://morio.it
 #
-#   This install script will setup a Morio node.
+#   This install script will setup a Morio Cluster Node.
 #   It will:
 #     - Make sure systemd is available
 #     - Detect whether it is an APT or RPM based system
@@ -21,8 +21,8 @@
 
 #
 # Which distribution channel to use?
-# Alternatives are stable or testing
-CHANNEL="canary"
+# Alternatives are canary or stable
+CHANNEL="testing"
 
 #
 # Store the package format
