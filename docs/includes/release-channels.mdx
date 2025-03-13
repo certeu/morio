@@ -1,22 +1,24 @@
 Morio releases are provided through different channels that each serve their
-specific purpose. You should use the `production` channel unless you have
+specific purpose. You should use the `stable` channel unless you have
 specific reasons not to.
 
-**<big>📦 Production</big>**
+**<big>📦 Stable</big>**
 
-The `production` channel provides stable releases that have been tested and
+The `stable` channel provides stable releases that have been tested and
 gone through an incubation period in the `canary` channel.  
 
-This is the default channel. 
-Use this channel unless you have specific reasons not to.
+:::tip
+The `stable` channel is the default release channel. 
+We recommend to use `stable` unless you have specific reasons not to.
+:::
 
 **<big>🐣 Canary</big>**
 
 The `canary` channel provides early access to releases.
 When no issues come up during a `canary` release's incubation period,
-it is promoted to `production`.
+it is promoted to `stable`.
 
-The `canary` releases allows you to test an upcoming `production` release in
+The `canary` releases allows you to test an upcoming `stable` release in
 your specific environment, and limits the blast radius in case a problem is not
 caught in `testing`. 
 For this reason, we recommend to run the `canary` release on a _staging

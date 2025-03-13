@@ -1,0 +1,341 @@
+---
+title: Morio Cluster Node Installation Guide
+sidebar_label: Cluster Install Guide
+toc_max_heading_level: 5 # skip-spellcheck
+---
+
+import ReleaseChannels from '@site/includes/release-channels.mdx';  /* skip-spellcheck */
+
+This guide covers the various ways you can install a Morio cluster node, 
+from fully automated, to completely manual.
+
+:::tip Morio is always a cluster
+
+If you are looking to deploy a single-node Morio instance, do not let the word _cluster_
+scare you away, you came to the right place.
+Morio always runs as a cluster, even if it happens to be a 1-node cluster
+(which it often is).  
+:::
+
+## Before you start
+
+### Morio Cluster Node vs Morio Client
+
+This guide covers the installation of a Morio cluster node, also known as
+installing `moriod`.
+
+For installation of the Morio client, please refer to [the Morio Client 
+Installation guide](/docs/guides/install/client/).
+
+### Morio Release Channels
+
+<ReleaseChannels />
+
+### Filesystem Layout
+
+Morio utilises one folder for configuration, one for data, and another one for
+its logs. By default, they are laid out as such:
+
+- Configuration resides in `/etc/morio/moriod`.  See [the `MORIO_CONFIG_ROOT`
+  preset](/docs/reference/presets/#morio_config_root) for details.
+- Data resides in `/var/lib/morio/moriod`.  See [the `MORIO_DATA_ROOT`
+  preset](/docs/reference/presets/#morio_data_root) for details.
+- Logs are written to `/var/log/morio/moriod`. See [the `MORIO_LOGS_ROOT`
+  preset](/docs/reference/presets/#morio_logs_root) for details.
+
+In addition, Morio needs access to the Docker socket. See [the
+`MORIO_DOCKER_SOCKET`](/docs/reference/presets/#morio_docker_socket) for
+details.
+
+## Install Morio
+
+There are 3 ways to install Morio, and a bonus fourth way allows you to run it
+without any install step:
+
+- [Install Morio via the installer script](#auto)
+- [Install Morio from packages](#pkg)
+- [Install Morio by hand](#manual)
+- [Run Morio without installing it](#ephemeral)
+
+### Install Morio via the installer script {#auto}
+
+:::tip This is the recommended way to install a Morio Cluster Node. 
+
+:::
+
+To install Morio, run this command as a user with `sudo` permissions:
+
+<Tabs>
+<TabItem value="stable" label="Stable Channel">
+
+```sh
+curl -fsSL https://install.morio.it/cluster | bash
+```
+
+</TabItem>
+<TabItem value="canary" label="Canary Channel">
+
+```sh
+curl -fsSL https://install.morio.it/cluster/canary | bash
+```
+
+</TabItem>
+<TabItem value="testing" label="Testing Channel">
+
+```sh
+curl -fsSL https://install.morio.it/cluster/testing | bash
+```
+
+</TabItem>
+</Tabs>
+
+This will run through the following steps:
+
+- [Ensure `systemd` is available](#ensure-systemd-is-available)
+- [Detect the package type](#determine-the-package-type)
+- [Download and install the `morio-repo` package](#download-and-install-the-morio-repo-package)
+- [Update the list of available software](##update-the-list-of-available-sofware)
+- [Install the `moriod` package](#install-the-moriod-package)
+
+Alternatively, you can run all of these steps manually, as outlined below.
+
+### Install Morio from packages {#pkg}
+
+To install Morio from packages, we will go through the same steps as the
+install script, but instead run them by hand:
+
+- [Ensure `systemd` is available](#ensure-systemd-is-available)
+- [Detect the package type](#determine-the-package-type)
+- [Download the `morio-repo` package](#download-the-morio-repo-package)
+- [Update the list of available software](##update-the-list-of-available-sofware)
+- [Install the `moriod` package](#install-the-moriod-package)
+
+#### Ensure `systemd` is available
+
+To install Morio using our packages, `systemd` is a dependency.
+
+Make sure your system has `systemd` by running:
+
+```sh
+systemctl -h
+```
+
+If you get a bunch of output on how to use `systemctl`, you have `systemd`.
+
+:::tip
+If you do not have `systemd` on your system, you can still do [a fully manual
+install of Morio](#fully-manual).
+:::
+
+#### Determine the package type
+
+We provide `.deb` packages for APT-based systems, like Debian or Ubuntu.
+
+:::warning
+We will will also provide `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora, in the future, but currently we do not yet provide those.
+:::
+
+```sh
+apt -h
+```
+
+If you get a bunch of output about the `apt` packages manager, you are on an APT-based system.
+If not, you are probably on an RPM-based system.
+
+#### Download and install the `morio-repo` package
+
+Download the `morio-repo` package, and then install it:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+curl https://apt.repo.morio.it/setup-morio-repo.deb -o ./setup-morio-repo.deb
+sudo apt install -y ./setup-morio-repo.deb
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+curl https://rpm.repo.morio.it/setup-morio-repo.rpm -o ./setup-morio-repo.rpm
+sudo yum install -y ./setup-morio-repo.rpm
+```
+
+</TabItem>
+</Tabs>
+
+The first line downloads the package, from these URLs:
+
+- For APT-based systems: https://apt.repo.morio.it/setup-morio-repo.deb
+- For RPM-based systems: https://rpm.repo.morio.it/setup-morio-repo.rpm (planned)
+
+The second line installs it.
+
+#### Update the list of available software
+
+The `morio-repo` package we just installed adds a new software repository.
+Before we can install software from it, we need to update the list of available packages:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt update
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum clean expire-cache
+sudo yum check-update
+```
+
+</TabItem>
+</Tabs>
+
+#### Install the `moriod` package
+
+Now we can install the `moriod` package:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt install -y moriod
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum install -y moriod
+```
+
+</TabItem>
+</Tabs>
+
+This will create a new systemd service that will start Morio.
+
+### Install Morio by hand {#manual}
+
+Installing Morio by hand gives you even more control, and allows installing
+Morio on systems that do not support APT or RPM packages, or do not use
+`systemd`.
+
+Let's see how we can accomplish that.
+
+#### Create folder structure
+
+You'll need to create Morio's [Filesystem Layout](#filesystem-layout).
+To do so, you can run these commands:
+
+```
+sudo mkdir -p /etc/morio/moriod
+sudo mkdir -p /var/lib/morio/moriod
+sudo mkdir -p /var/log/morio/moriod
+```
+
+For each of these folders, holding configuration, data, and logs respectively,
+you can change their location.  However, if you do so, you should also update
+them in the commands below.
+
+#### Create the moriod service
+
+You can re-use the files that are inside the packages we provide to get a similar experience.
+They are hosted on GitHub, so you can download them from there.
+
+Note that apart from the systemd service file, we also
+utilize two environment files so you need to copy those too:
+
+| File | Target Folder | Description | Download Link |
+| ------ | ----------- | ----------- | -- | 
+| `moriod.service` | `/etc/systemd/system` | Moriod service file | [on GitHub](https://raw.githubusercontent.com/certeu/morio/refs/heads/develop/pkgs/moriod/etc/systemd/system/moriod.service) |
+| `modiod.env` | `/etc/morio/moriod` | Moriod presets | [on GitHub](https://raw.githubusercontent.com/certeu/morio/refs/heads/develop/pkgs/moriod/etc/morio/moriod/moriod.env) |
+| `channel.env` | `/etc/morio/moriod` | Moriod release channel | [on GitHub](https://raw.githubusercontent.com/certeu/morio/refs/heads/develop/pkgs/moriod/etc/morio/moriod/channel.env) |
+
+Note that you will need to update the `channel.env` file, and replace these placeholders:
+
+
+| Placeholder | Description | Example value |
+| ------ | ----------- | ----------- | 
+| `__MORIO_CONTAINER_TAG__` | The container tag to load | `v0.8.1` |
+| `__MORIO_RELEASE_CHANNEL__` | The release channel to use | `stable` |
+
+Alternatively, you can modify the `moriod.service` file to hard-code these values.
+
+:::tip
+Morio is now installed, you can start the moriod service:
+```
+sudo systemctl start moriod
+```
+:::
+
+### Run Morio without installing it {#ephemeral}
+
+Last but not least, you can run Morio without installing anything.
+
+<Tabs>
+<TabItem value="eph" label="Without data persistence">
+
+To kick the tires, all you need to start Morio is this command:
+```
+docker run --rm --init \
+  --name=morio-core \
+  --hostname=core \
+  --network-alias=core \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  itsmorio/core:latest
+```
+</TabItem>
+<TabItem value="map" label="With data persistence">
+Map in folders for config and data to persist your data after the container exists:
+```
+docker run --rm --init \
+  --name=morio-core \
+  --hostname=core \
+  --network-alias=core \
+  -v "/var/run/docker.sock:/var/run/docker.sock" \
+  -v "/etc/morio/moriod:/etc/morio" \
+  -v "/var/lib/morio/moriod:/morio/data" \
+  itsmorio/core:latest
+```
+</TabItem>
+</Tabs>
+
+If you want to clean up after stopping Morio, make sure to remove all its containers:
+
+```
+docker rm -f morio-core morio-api morio-ca morio-broker morio-db morio-console morio-ui morio-proxy morio-connector morio-dbuilder morio-watcher morio-web 2>/dev/null
+```
+
+## Uninstall Morio
+
+To uninstall morio and remove from your system, follow these steps:
+
+- Stop moriod: 
+```
+sudo systemctl stop moriod
+````
+- Remove all `morio-*` containers:
+```
+docker stop $(docker ps -q --filter "name=morio-")
+```
+
+- Remove the `morio-repo` and `moriod` packages (if you installed using our packages):
+```
+sudo apt purge -y morio-repo moriod
+```
+- Remove the 3 folders holding configuration, data, and logs. If you do not
+  have the Morio client installed, you can remove everything under `morio`: 
+```
+sudo rm -rf /etc/morio /var/log/morio /var/lib/morio
+```
+- If you do have the Morio client installed (and want to keep it), remove
+  everything under `morio/moriod`:
+```
+sudo rm -rf /etc/morio/moriod /var/log/morio/moriod /var/lib/morio/moriod
+```
+
+

@@ -73,8 +73,8 @@ yarn-error.log*
 .env
 *.env
 *.env*
-!moriod/etc/morio/moriod/moriod.env
-!moriod/etc/morio/moriod/channel.env
+!pkgs/moriod/etc/morio/moriod/moriod.env
+!pkgs/moriod/etc/morio/moriod/channel.env
 
 # Nx
 .nx/installation

@@ -3,60 +3,233 @@ title: Morio Client Installation Guide
 sidebar_label: Client Install Guide
 ---
 
+import ReleaseChannels from '@site/includes/release-channels.mdx';  /* skip-spellcheck */
+
 This guide covers the installation of the Morio client.
-The process is a little different on each platform:
 
-- [Installing the Morio client on Linux](#linux)
-- [Installing the Morio client on MacOS](#macos)
-- [Installing the Morio client on Windows](#windows)
+:::tip Quick Start
 
-However, for all of these the same principle applies:
+To install the Morio client, run the following command from an account with
+__sudo__ permissions:
 
-- A preconfigured version of the client can be downloaded from your Morio
-  instance
-- A so-called _bare_ version of the client can be downloaded from the
-  repositories provided by the Morio team
-
-Unless there is a specific reason why you need the _bare_ client, you should use
-the client packages made available by your Morio instance.
-
-:::warning The bare client is not available yet
-We do currently not (yet) publish a bare client, but it's on our todo list
+```
+curl -fsSL https://install.morio.it/client | bash
+```
 :::
 
-Once installed, refer to [the client configuration
-guide](/docs/guides/settings/client/) for info on how to configure the client.
+:::note
+We currently provide a `morio-client` package for Debian-based Linux systems,
+both `amd64` and `arm64` packages are available from [apt.repo.morio.it
+](https://apt.repo.morio.it/).
 
-## Installing the Morio client on Linux {#linux}
+Support for RPM-based linux distributions (like RedHat), as well as MacOS and
+Windows are on our roadmap.
+:::
 
-### Pre-configured client from a Morio instance
+## Before you start
 
-To install the Morio client, run the command below from an account with `sudo`
-rights, making sure to replace `example.morio.it` with the _FQDN_ of your Morio
-collector:
+### Morio Client vs Morio Cluster Node
+
+This guide covers the installation of the Morio client, also known as
+installing `morio-client`.
+
+For installation of a Morio cluster node, please refer to [the Morio Cluster
+Node Installation Guide](/docs/guides/install/).
+
+### Morio Release Channels
+
+<ReleaseChannels />
+
+### Filesystem Layout
+
+The Morio client utilises one folder for configuration, one for data, and another one for
+its logs. By default, they are laid out as such:
+
+- Configuration resides in `/etc/morio`.
+- Data resides in `/var/lib/morio`.
+- Logs are written to `/var/log/morio`.
+
+:::warning
+If you are installing the Morio client on a Morio Cluster Node, note that each
+of these locations will have a `moriod` subfolder holding config/data/logs for
+the Cluster Node (note the client). 
+:::
+
+
+## Install the Morio Client
+
+There are two ways to install the Morio Client:
+
+- [Install the Morio Client via the installer script](#auto)
+- [Install the Morio Client from packages](#pkg)
+
+We recommend usind the installer script.
+
+### Install the Morio Client via the installer script {#auto}
+
+:::tip This is the recommended way to install the Morio Client
+:::
+
+To install Morio, run this command as a user with `sudo` permissions:
+
+<Tabs>
+<TabItem value="stable" label="Stable Channel">
 
 ```sh
-curl -k https://example.morio.it/install/ | bash
+curl -fsSL https://install.morio.it/client | bash
 ```
 
-### Bare Morio client
+</TabItem>
+<TabItem value="canary" label="Canary Channel">
 
-Download the bare client package suitable for your distribution:
+```sh
+curl -fsSL https://install.morio.it/client/canary | bash
+```
 
-- APT package: FIXME
-- DEB package: FIXME 
+</TabItem>
+<TabItem value="testing" label="Testing Channel">
 
-Install the package.
+```sh
+curl -fsSL https://install.morio.it/client/testing | bash
+```
 
+</TabItem>
+</Tabs>
 
-## Installing the Morio client on MacOS  <!-- skip-spellcheck --> {#macos}
+This will run through the following steps:
 
-:::warning FIXME
-Write these docs
+- [Detect the package type](#determine-the-package-type)
+- [Download and install the `morio-repo` package](#download-and-install-the-morio-repo-package)
+- [Update the list of available software](#update-the-list-of-available-sofware)
+- [Install the `morio-client` package](#install-the-morio-client-package)
+
+Alternatively, you can run all of these steps manually, as outlined below.
+
+### Install the Morio Client from packages {#pkg}
+
+To install the Morio Client from packages, we will go through the same steps as
+the install script, but instead run them by hand:
+
+- [Detect the package type](#determine-the-package-type)
+- [Download the `morio-repo` package](#download-the-morio-repo-package)
+- [Update the list of available software](#update-the-list-of-available-sofware)
+- [Install the `morio-client` package](#install-the-morio-client-package)
+
+#### Determine the package type
+
+We provide `.deb` packages for APT-based systems, like Debian or Ubuntu.
+
+:::warning
+We will will also provide `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora, in the future, but currently we do not yet provide those.
 :::
 
-## Installing the Morio client on Windows {#windows}
+To see if you are on an APT-based system, you can run this command:
 
-:::warning FIXME
-Write these docs
+```sh
+apt -h
+```
+
+If you get a bunch of output about the `apt` packages manage, you are on an APT-based system.
+If not, you are probably on an RPM-based system.
+
+#### Download and install the `morio-repo` package
+
+Download the `morio-repo` package, and then install it:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+curl https://apt.repo.morio.it/setup-morio-repo.deb -o ./setup-morio-repo.deb
+sudo apt install -y ./setup-morio-repo.deb
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+curl https://rpm.repo.morio.it/setup-morio-repo.rpm -o ./setup-morio-repo.rpm
+sudo yum install -y ./setup-morio-repo.rpm
+```
+
+</TabItem>
+</Tabs>
+
+The first line downloads the package, from these URLS:
+
+- For APT-based systems: https://apt.repo.morio.it/setup-morio-repo.deb
+- For RPM-based systems: https://rpm.repo.morio.it/setup-morio-repo.rpm
+
+The second line installs it.
+
+#### Update the list of available software
+
+The `morio-repo` package we just installed adds a new software repository.
+Before we can install software from it, we need to update the list of available packages:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt update
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum clean expire-cache
+sudo yum check-update
+```
+
+</TabItem>
+</Tabs>
+
+#### Install the `morio-client` package
+
+Now we can install the `morio-client` package:
+
+<Tabs>
+<TabItem value="deb" label="On APT-based systems">
+
+```sh
+sudo apt install -y morio-client
+```
+
+</TabItem>
+<TabItem value="rpm" label="On RPM-based systems">
+
+```sh
+sudo yum install -y morio-client
+```
+
+</TabItem>
+</Tabs>
+
+That't is, you have now installed the Morio Client.
+
+## Uninstall the Morio Client
+
+To uninstall the Morio Client and remove from your system, follow these steps:
+
+- Stop all agents:
+```
+sudo morio stop all
+````
+
+:::warning
+The next steps are not save to run on a Morio Cluster Node if you want to
+remove the client, but keep the Cluster Node
 :::
+
+- Remove the `morio-repo` and `morio-client` packages:
+```
+sudo apt purge -y morio-repo moriod
+```
+- Remove the 3 folders holding configuration, data, and logs:
+
+```
+sudo rm -rf /etc/morio /var/log/morio /var/lib/morio
+```
+
+
