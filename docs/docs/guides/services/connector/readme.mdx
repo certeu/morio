@@ -4,10 +4,19 @@ tags:
   - connector
 ---
 
-The **Morio Connector Service** (connector) is responsible for routing data
-between external systems, including remote Morio deployments.
+The **Morio Connector Service** (connector) is responsible for routing 
+data between Morio and external systems, including remote Morio 
+deployments.
 
-## Console service responsibilities
+Under the hood, Morio's connector service is powered by [Vector
+](https://vector.dev/), _a lightweight, ultra-fast tool for 
+building observability pipelines_.
+This also means you can use the full power of [the Vector Remap
+Language](https://vector.dev/docs/reference/vrl/) to create your own pipelines
+in Morio.
+
+
+## Connector service responsibilities
 
 The connector service is a [flanking
 service](/docs/reference/terminology/flanking-service), and optional. It will
@@ -15,10 +24,11 @@ only be started when pipelines have been configured in the Morio settings.
 
 ### Running ETL pipelines
 
-The console service is responsible for running the pipelines that are configured
+The connnector service is responsible for running the pipelines that are configured
 in the Morio settings.
 
 These pipelines are sometimes referred to as [ETL
 pipelines](https://en.wikipedia.org/wiki/Extract,_transform,_load), but it's
 important to understand that these pipelines operate on streaming data, and are
 not batch pipelines which are the more common way of doing ETL.
+

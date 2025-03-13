@@ -41,6 +41,13 @@ password secrets, and so on. For external providers, like `ldap`, it is the api
 service that will reach out to the external LDAP service to verify your
 credentials.
 
+### Client management
+
+Clients who enroll will do so through the API service, and they also can push
+their config to, or pull their config from the API. 
+
+This is how Morio will build up an inventory of your infrastructure over time.
+
 ### Core access
 
 As the main user-facing API, some of the API's endpoint under the hood rely on

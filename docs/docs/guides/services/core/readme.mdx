@@ -53,6 +53,12 @@ to go when it starts up.
 For this to be possible, core relies on access to mounted folders on the Host
 OS that are also mounted on the various services.
 
+### Preseeding
+
+If you are preseeding (part of) your settings, or loading things like stream
+processors for the Tap service, or chart plugins for the UI through preseeding,
+it is the core service that will handle this.
+
 ### Clustering
 
 Last but not least, core is also responsible for enabling clustering support in
