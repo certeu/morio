@@ -26,16 +26,16 @@ Note that <code>invite</code> in the request body is required when
 the <code>REQUIRE_CLIENT_INVITES</code> feature flag is enabled.
 
 The <code>uuid</code> in the request body can be passed to suggest a UUID for the client.
-However, the API will run checks to validate not only that the UUID is not already in use
-but also to determine whether the client is running on a Morio cluster node. And if it is
-will use the UUID of the cluster node. So this preference is not guaranteed to be respected.
+However, the API will run checks to validate not only that the UUID is not already in use,
+but also to determine whether the client is running on a Morio cluster node. And if it is,
+it will use the UUID of the cluster node. So this preference is not guaranteed to be respected.
 
 This endpoint will return everything the client needs to communicate with the cluster:
 
-- X509 certificate and key for mTLS
-- API key and secret for API access
-- List of kafka brokers and ports
-- The Morio cluster fqdn
+- The X509 certificate and key for mTLS
+- The API key and secret for API access
+- The list of Kafka brokers and ports
+- The Morio cluster FQDN
 `
 
 export default function (api) {
@@ -102,7 +102,7 @@ export default function (api) {
     ],
     responses: {
       200: {
-        desc: 'The status udpates for a client command',
+        desc: 'The status updates for a client command',
         content: {
           'application/json': {
             schema: j2s(
@@ -292,7 +292,7 @@ export default function (api) {
     operationId: 'rejoin',
     summary: `Re-Join Cluster`,
     description: `Joins an existing client to a Morio cluster.
-Unlike the <code>/join</code> endpoint, this will allow to join a client with a UUID already known.
+Unlike the <code>/join</code> endpoint, this will allow to join a client with an already known UUID.
 ${clientMsg}${joinMsg}
 
     `,
@@ -367,7 +367,7 @@ ${clientMsg}${joinMsg}
     ...shared,
     operationId: 'report',
     summary: `Report client data`,
-    description: `Reports data about the system the client is runningon.${clientMsg}`,
+    description: `Reports data about the system the client is running on.${clientMsg}`,
     requestBody: {
       description: 'Info about the system running the Morio client',
       required: true,
