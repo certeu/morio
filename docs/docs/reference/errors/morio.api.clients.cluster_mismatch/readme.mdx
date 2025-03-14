@@ -1,11 +1,11 @@
 ---
-title: "morio.api.client.uuid_mismatch" # skip-spellcheck
+title: "morio.api.clients.cluster_mismatch" # skip-spellcheck
 tags:
  - error
 
 ---
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten skip-spellcheck -->
-__Client UUID mismatch__ - The client UUID is not matched with a cluster node UUID which has the same FQDN
+__Cluster mismatch__ - The cluster name provided in the join request does not match the cluster FQDN
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten skip-spellcheck -->
 
 
@@ -14,10 +14,10 @@ __Client UUID mismatch__ - The client UUID is not matched with a cluster node UU
 
 ```json
 {
-  "type": "https://morio.it/docs/reference/errors/morio.api.client.uuid_mismatch",
+  "type": "https://morio.it/docs/reference/errors/morio.api.clients.cluster_mismatch",
   "status": 400,
-  "title": "Client UUID mismatch",
-  "detail": "The client UUID is not matched with a cluster node UUID which has the same FQDN"
+  "title": "Cluster mismatch",
+  "detail": "The cluster name provided in the join request does not match the cluster FQDN"
 }
 ```
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten skip-spellcheck -->

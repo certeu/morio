@@ -1,11 +1,11 @@
 ---
-title: "morio.api.client.unknown_module" # skip-spellcheck
+title: "morio.api.clients.joined" # skip-spellcheck
 tags:
  - error
 
 ---
 <!-- MORIO_AUTO_GENERATED_CONTENT_STARTS - Manual changes made below will be overwritten skip-spellcheck -->
-__Unknown client module__ - The modules list includes a module that is not known to Morio. Modules should be centrally seeded.
+__Client already joined__ - A client with this UUID already joined this cluster. To re-join this client, use the "morio rejoin" cli command instead.
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten skip-spellcheck -->
 
 
@@ -14,10 +14,10 @@ __Unknown client module__ - The modules list includes a module that is not known
 
 ```json
 {
-  "type": "https://morio.it/docs/reference/errors/morio.api.client.unknown_module",
+  "type": "https://morio.it/docs/reference/errors/morio.api.clients.joined",
   "status": 400,
-  "title": "Unknown client module",
-  "detail": "The modules list includes a module that is not known to Morio. Modules should be centrally seeded."
+  "title": "Client already joined",
+  "detail": "A client with this UUID already joined this cluster. To re-join this client, use the \"morio rejoin\" cli command instead."
 }
 ```
 <!-- MORIO_AUTO_GENERATED_CONTENT_ENDS - Manual changes made above will be overwritten skip-spellcheck -->
