@@ -72,7 +72,7 @@ framework](https://www.elastic.co/beats) by Elastic.
 When you install the Morio client, the various Beats agents will be installed on
 your system as well, and you will be able to interact with them directly if you so wish.
 
-Stricty speaking, you don't even need the Morio client. You can install the
+Strictly speaking, you don't even need the Morio client. You can install the
 Beats you want, and manually configure them to send data to Morio.
 
 :::tip Already using Beats?
@@ -135,12 +135,12 @@ automation tool you like because these vars are just files.  The filename is
 the name of the variable, and its contents its value. Because
 you know, [we like to keep it simple](/docs/guides/goals/#design-goals).
 
-### High level abstraction: Centralized client management {#fleet}
+### High level abstraction: Centralised client management {#fleet}
 
 Having module templates and vars already makes it a lot easier to maintain a
 library of agent configuration that you can re-use across your systems.
 But it does not help with distributing these module templates, 
-or managing these vars in a centralized way.
+or managing these vars in a centralised way.
 
 It is certainly possible to leverage some automation tool, be it Ansible or
 whatnot, to take on this task, but it's a chore.
@@ -153,7 +153,7 @@ available module templates, as well as their default vars. In addition, it can
 also keep track of host-specific vars that override these defaults.
 
 The end result is that a client can _pull_ the configuration from the cluster
-providing centralized management.
+providing centralised management.
 
 Clients can do more than _pull_ their configuration, we'll cover that in the
 next section.
@@ -233,16 +233,16 @@ The data plane is relatively simple:
 - Agents on the system running the Morio Client send data to the Kafka broker on the Morio Cluster.
   In the world of Kafka and streaming data, this is referred to as _producing data_.
   Each agent produces to a topic that is tied to the agent type:
-  - auditbeat produces to the __audit__ topic
-  - filebeat produces to the __logs__ topic
-  - metricbeat produces to the __metrics__ topic
+  - Auditbeat produces to the __audit__ topic
+  - Filebeat produces to the __logs__ topic
+  - Metricbeat produces to the __metrics__ topic
 - The Morio client binary sends data about the system it is running on to the Morio Cluster.
   <br /><small><b>Note:</b> This is initiated via the `morio join` or `morio report` client commands.</small>
 
 ### Control plane
 
-The control plane only comes into play when using [centralized client management](#fleet).
-In that scenarion, these are the additional data flows:
+The control plane only comes into play when using [centralised client management](#fleet).
+In that scenario, these are the additional data flows:
 
 - The _core service_ will preseed client templates from the configure git providers, and store them in the _db service_.
 - The client can use the `morio pull` command to load its configuration from the Morio cluster, via the _API service_.
@@ -255,7 +255,7 @@ In that scenarion, these are the additional data flows:
 
 :::info The Morio client does not listen on any ports
 The Morio client's _listener_ does not listen on any TCP ports. Instead, it
-daemonizes and connects to the _broker service_ where it listens for (consumes)
+daemonises and connects to the _broker service_ where it listens for (consumes)
 events in the `clients` topic.
 
 This, in combination with the Morio client's access to the _api service_
@@ -302,7 +302,7 @@ To get the client version, run:
 morio version
 ```
 
-### Agent passthrough
+### Agent pass-through
 
 You can invoke any of the agents through the client:
 
@@ -332,7 +332,7 @@ morio metrics
 
 Doing so invokes the relevant beat with the correct configuration and data paths.
 
-As an example, to test the filebeat output, you can run:
+As an example, to test the Filebeat output, you can run:
 
 ```
 morio logs test output
@@ -392,7 +392,7 @@ morio template
 
 ### Client enrolment
 
-To enrol a clint, you _join_ it to a cluster passing it the cluster FQDN:
+To enrol a client, you _join_ it to a cluster passing it the cluster FQDN:
 
 ```
 morio join my.cluster.morio.it
@@ -410,7 +410,7 @@ And then perhaps enable one or more modules:
 morio modules enable-remote linux-system
 ```
 
-Once the cluster knows what modules to assign to this client, you can _pull_ the configation:
+Once the cluster knows what modules to assign to this client, you can _pull_ the configuration:
 
 ```
 morio pull
