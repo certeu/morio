@@ -33,7 +33,7 @@ Installation guide](/docs/guides/install/client/).
 
 ### Filesystem Layout
 
-Morio utilises one folder for configuration, one for data, and another one for
+Morio uses one folder for configuration, one for data, and another one for
 its logs. By default, they are laid out as such:
 
 - Configuration resides in `/etc/morio/moriod`.  See [the `MORIO_CONFIG_ROOT`
@@ -139,7 +139,7 @@ We will will also provide `.rpm` packages for RPM-based systems like RedHat, Roc
 apt -h
 ```
 
-If you get a bunch of output about the `apt` packages manager, you are on an APT-based system.
+If you get a bunch of output about `apt` packages, you are on an APT-based system.
 If not, you are probably on an RPM-based system.
 
 #### Download and install the `morio-repo` package
@@ -165,7 +165,7 @@ sudo yum install -y ./setup-morio-repo.rpm
 </TabItem>
 </Tabs>
 
-The first line downloads the package, from these URLs:
+The first line downloads the package from these URLs:
 
 - For APT-based systems: https://apt.repo.morio.it/setup-morio-repo.deb
 - For RPM-based systems: https://rpm.repo.morio.it/setup-morio-repo.rpm (planned)
@@ -220,7 +220,7 @@ This will create a new systemd service that will start Morio.
 
 ### Install Morio by hand {#manual}
 
-Installing Morio by hand gives you even more control, and allows installing
+Installing Morio by hand gives you even more control and allows installing
 Morio on systems that do not support APT or RPM packages, or do not use
 `systemd`.
 
@@ -243,11 +243,11 @@ them in the commands below.
 
 #### Create the moriod service
 
-You can re-use the files that are inside the packages we provide to get a similar experience.
+You can reuse the files that are inside the packages we provide to get a similar experience.
 They are hosted on GitHub, so you can download them from there.
 
 Note that apart from the systemd service file, we also
-utilise two environment files so you need to copy those too:
+use two environment files so you need to copy those too:
 
 | File | Target Folder | Description | Download Link |
 | ------ | ----------- | ----------- | -- | 
@@ -256,7 +256,6 @@ utilise two environment files so you need to copy those too:
 | `channel.env` | `/etc/morio/moriod` | Moriod release channel | [on GitHub](https://raw.githubusercontent.com/certeu/morio/refs/heads/develop/pkgs/moriod/etc/morio/moriod/channel.env) |
 
 Note that you will need to update the `channel.env` file, and replace these placeholders:
-
 
 | Placeholder | Description | Example value |
 | ------ | ----------- | ----------- | 
@@ -290,7 +289,7 @@ docker run --rm --init \
 ```
 </TabItem>
 <TabItem value="map" label="With data persistence">
-Map in folders for config and data to persist your data after the container exists:
+Map in folders for config and data to persist your data after the container exits:
 ```
 docker run --rm --init \
   --name=morio-core \
@@ -312,7 +311,7 @@ docker rm -f morio-core morio-api morio-ca morio-broker morio-db morio-console m
 
 ## Uninstall Morio
 
-To uninstall morio and remove from your system, follow these steps:
+To uninstall Morio and remove it from your system, follow these steps:
 
 - Stop moriod: 
 ```
@@ -333,7 +332,7 @@ sudo apt purge -y morio-repo moriod
 sudo rm -rf /etc/morio /var/log/morio /var/lib/morio
 ```
 - If you do have the Morio client installed (and want to keep it), remove
-  everything under `morio/moriod`:
+  everything under `morio/moriod` instead:
 ```
 sudo rm -rf /etc/morio/moriod /var/log/morio/moriod /var/lib/morio/moriod
 ```
