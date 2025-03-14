@@ -10,7 +10,7 @@ export const errors = {
   /*
    * Mismatch between the client join request cluster value and the actual cluster FQDN
    */
-  'morio.api.client.cluster_mismatch': {
+  'morio.api.clients.cluster_mismatch': {
     status: 400,
     title: 'Cluster mismatch',
     detail: 'The cluster name provided in the join request does not match the cluster FQDN',
@@ -18,7 +18,7 @@ export const errors = {
   /*
    * Mismatch between the client join request UUID and a cluster node UUID with the same FQDN
    */
-  'morio.api.client.uuid_mismatch': {
+  'morio.api.clients.uuid_mismatch': {
     status: 400,
     title: 'Client UUID mismatch',
     detail: 'The client UUID is not matched with a cluster node UUID which has the same FQDN',
@@ -26,7 +26,7 @@ export const errors = {
   /*
    * Mismatch between the client API key value and the expected one
    */
-  'morio.api.client.authentication_mismatch': {
+  'morio.api.clients.authentication_mismatch': {
     status: 403,
     title: 'Authentication mismatch',
     detail:
@@ -35,7 +35,7 @@ export const errors = {
   /*
    * The client mentions a module unknown to the server
    */
-  'morio.api.client.unknown_module': {
+  'morio.api.clients.unknown_module': {
     status: 400,
     title: 'Unknown client module',
     detail:
@@ -44,7 +44,7 @@ export const errors = {
   /*
    * Client tries to join with a UUID that already joined
    */
-  'morio.api.client.joined': {
+  'morio.api.clients.client_joined': {
     status: 400,
     title: 'Client already joined',
     detail:
