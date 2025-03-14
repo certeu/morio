@@ -10,12 +10,12 @@ To do so, it leverages various agents from the [Beats
 family](https://www.elastic.co/beats), which you may already be familiar with.
 
 However, it does more than that, and this guide will give you a good
-understanding of the Morio client and the abstractions it provides, 
+understanding of the Morio client and of the abstractions it provides, 
 so that you can get the most value from it.
 
 ## High level overview
 
-As we mentioned, the Morio clients uses various Beats agents to collect and ship data.
+As we mentioned, the Morio client uses various Beats agents to collect and ship data.
 However, assuming _it's just Beats_ -- and potentially using it like this -- will not
 be the best experience, as the client provides higher-level abstractions to
 help you manage clients at scale.
@@ -67,7 +67,7 @@ guide as we make progress.
 
 ### Low level: Just Beats {#beats}
 
-The Morio client bundles various observability agents, based on the [Beats
+The Morio client bundles various observability agents based on the [Beats
 framework](https://www.elastic.co/beats) by Elastic.
 When you install the Morio client, the various Beats agents will be installed on
 your system as well, and you will be able to interact with them directly if you so wish.
@@ -78,7 +78,7 @@ Beats you want, and manually configure them to send data to Morio.
 :::tip Already using Beats?
 If you are already using Beats on a system, you can still install the Morio
 client.  We make sure to not use any of the various Beats default configuration
-or data locations. So the Morio client can run side by side with your existing
+or data locations, so the Morio client can run side by side with your existing
 use of Beats agents.
 
 Furthermore, while we do setup the Elastic software repository in the
@@ -91,9 +91,9 @@ Beats from a different software repository, Morio will use that repository.
 
 The various Beats agents have -- apart from their base configuration -- a bunch
 of modules and/or inputs (the terminology depends a bit on the type of agent),
-which determine what data on a system will be collected.
+which determine what data will be collected on the system.
 
-Managing this at scale gets tired quick, so this is where Morio adds the first
+Managing this at scale gets quickly tiresome, so this is where Morio adds the first
 abstraction by using __module templates and vars__.
 
 #### Morio client templates
@@ -138,22 +138,22 @@ you know, [we like to keep it simple](/docs/guides/goals/#design-goals).
 ### High level abstraction: Centralised client management {#fleet}
 
 Having module templates and vars already makes it a lot easier to maintain a
-library of agent configuration that you can re-use across your systems.
+library of agent configurations that you can reuse across your systems.
 But it does not help with distributing these module templates, 
 or managing these vars in a centralised way.
 
 It is certainly possible to leverage some automation tool, be it Ansible or
 whatnot, to take on this task, but it's a chore.
 
-This is why the Morio client offers another high level abstraction that allows
-you to centrally manage both the client's module templates and vars.
+This is why the Morio client offers another level of abstraction that allows
+you to centrally manage both the client's module templates and the vars.
 
 In this scenario, the Morio Cluster stores information about the various
-available module templates, as well as their default vars. In addition, it can
+module templates available, as well as their default vars. In addition, it can
 also keep track of host-specific vars that override these defaults.
 
 The end result is that a client can _pull_ the configuration from the cluster
-providing centralised management.
+that provides centralised management.
 
 Clients can do more than _pull_ their configuration, we'll cover that in the
 next section.
@@ -164,7 +164,7 @@ We already knew that the client bundles agents that ship their data to the
 Morio Cluster.  Now we've also learned that there's a possibility to _pull_ the
 configuration, which begs the question, how does this all work?
 
-The diagram below outlines the different data flows, specific to the client:
+The diagram below outlines the different data flows specific to the client:
 
 ```mermaid
 flowchart TD
@@ -237,21 +237,21 @@ The data plane is relatively simple:
   - Filebeat produces to the __logs__ topic
   - Metricbeat produces to the __metrics__ topic
 - The Morio client binary sends data about the system it is running on to the Morio Cluster.
-  <br /><small><b>Note:</b> This is initiated via the `morio join` or `morio report` client commands.</small>
+  <br /><small><b>Note:</b> This is initiated via the `morio join` and `morio report` client commands.</small>
 
 ### Control plane
 
 The control plane only comes into play when using [centralised client management](#fleet).
 In that scenario, these are the additional data flows:
 
-- The _core service_ will preseed client templates from the configure git providers, and store them in the _db service_.
-- The client can use the `morio pull` command to load its configuration from the Morio cluster, via the _API service_.
-- The client can use the `morio push` command to send its local configuration to the Morio cluster, via the _API service_.
+- The _core service_ will preseed client templates from the configured Git providers and store them in the _db service_.
+- The client can use the `morio pull` command to load its configuration from the Morio cluster via the _API service_.
+- The client can use the `morio push` command to send its local configuration to the Morio cluster via the _API service_.
 - When running the client listener:
   - A Morio operator can leverage the _api service_ to issue commands to one, several, or all clients.
   - The _api service_ will generate a unique command ID and store it in the _db service_.
-  - The _api service_ will then produce a message in the `clients` topic of the _broker service_ that holds all info about the command and the unique command ID.
-  - The client listener will consume the message from the `clients` topic, it will run the requested command, and report back to the _api service_ about its progress and results for the given command ID.
+  - The _api service_ will then produce a message in the `clients` topic of the _broker service_ that holds all the information about the command and the unique command ID.
+  - The client listener will consume the message from the `clients` topic, it will run the requested command and report back to the _api service_ about its progress and results for the given command ID.
 
 :::info The Morio client does not listen on any ports
 The Morio client's _listener_ does not listen on any TCP ports. Instead, it
@@ -276,9 +276,9 @@ sudo morio
 :::info sudo required
 Since the Morio configuration is only accessible to the root user --
 and the client needs to be able to manipulate these files -- 
-you should preseed all commands with `sudo`. 
+you should precede all commands with `sudo`. 
 
-We won't include `sudo` in every example, but keep it in mind.
+We won't include `sudo` in every example, but please keep it in mind.
 :::
 
 :::tip See the client reference documentation
@@ -288,7 +288,7 @@ client reference documentation](/docs/reference/bin/client/).
 
 ### Help and version info
 
-To get help help on how to use the client, run:
+To get help on how to use the client, run:
 
 ```
 morio help
@@ -296,7 +296,7 @@ morio help
 
 To get help on a specific command, use the `--help` or `-h` flag.
 
-To get the client version, run:
+To get the version of the client, run:
 
 ```
 morio version
@@ -330,7 +330,7 @@ morio metrics
 </TabItem>
 </Tabs>
 
-Doing so invokes the relevant beat with the correct configuration and data paths.
+Doing so invokes the relevant Beat with the correct configuration and data paths.
 
 As an example, to test the Filebeat output, you can run:
 
@@ -338,7 +338,7 @@ As an example, to test the Filebeat output, you can run:
 morio logs test output
 ```
 
-Refer to the relevant beats documentation or the inline help for more info.
+Please refer to the relevant Beats documentation or to the inline help for more info.
 
 
 
@@ -392,7 +392,7 @@ morio template
 
 ### Client enrolment
 
-To enrol a client, you _join_ it to a cluster passing it the cluster FQDN:
+To enrol a client, you _join_ it to a cluster, passing it the cluster FQDN:
 
 ```
 morio join my.cluster.morio.it
@@ -404,7 +404,7 @@ To enable a central module, you may want to first list all the modules available
 morio modules list-remote
 ```
 
-And then perhaps enable one or more modules:
+Then perhaps enable a given module:
 
 ```
 morio modules enable-remote linux-system
