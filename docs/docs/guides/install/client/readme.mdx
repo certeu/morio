@@ -24,8 +24,8 @@ We currently provide a `morio-client` package for Debian-based Linux systems,
 both `amd64` and `arm64` packages are available from [apt.repo.morio.it
 ](https://apt.repo.morio.it/).
 
-Support for RPM-based linux distributions (like RedHat), as well as MacOS and
-Windows are on our road map.
+Support for RPM-based linux distributions (like RedHat), as well as macOS and
+Windows are on our roadmap.
 :::
 
 ## Before you start
@@ -44,7 +44,7 @@ Node Installation Guide](/docs/guides/install/).
 
 ### Filesystem Layout
 
-The Morio client utilises one folder for configuration, one for data, and another one for
+The Morio client uses one folder for configuration, one for data, and another one for
 its logs. By default, they are laid out as such:
 
 - Configuration resides in `/etc/morio`.
@@ -54,7 +54,7 @@ its logs. By default, they are laid out as such:
 :::warning
 If you are installing the Morio client on a Morio Cluster Node, note that each
 of these locations will have a `moriod` subfolder holding config/data/logs for
-the Cluster Node (note the client). 
+the Cluster Node (not the client). 
 :::
 
 
@@ -127,7 +127,7 @@ the install script, but instead run them by hand:
 We provide `.deb` packages for APT-based systems, like Debian or Ubuntu.
 
 :::warning
-We will will also provide `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora, in the future, but currently we do not yet provide those.
+We will will also provide `.rpm` packages for RPM-based systems like RedHat, RockyLinux, or Fedora in the future, but currently we do not yet provide those.
 :::
 
 To see if you are on an APT-based system, you can run this command:
@@ -136,7 +136,7 @@ To see if you are on an APT-based system, you can run this command:
 apt -h
 ```
 
-If you get a bunch of output about the `apt` packages manage, you are on an APT-based system.
+If you get a bunch of output about `apt` packages management, you are on an APT-based system.
 If not, you are probably on an RPM-based system.
 
 #### Download and install the `morio-repo` package
@@ -162,7 +162,7 @@ sudo yum install -y ./setup-morio-repo.rpm
 </TabItem>
 </Tabs>
 
-The first line downloads the package, from these URLS:
+The first line downloads the package from these URLS:
 
 - For APT-based systems: https://apt.repo.morio.it/setup-morio-repo.deb
 - For RPM-based systems: https://rpm.repo.morio.it/setup-morio-repo.rpm
@@ -220,16 +220,16 @@ Guide](/docs/guides/settings/client/) for what to do next.
 
 ## Uninstall the Morio Client
 
-To uninstall the Morio Client and remove from your system, follow these steps:
+To uninstall the Morio Client and remove it from your system, follow these steps:
 
 - Stop all agents:
 ```
-sudo morio stop all
+sudo morio stop
 ````
 
 :::warning
-The next steps are not save to run on a Morio Cluster Node if you want to
-remove the client, but keep the Cluster Node
+The next steps are not safe to run on a Morio Cluster Node if you want to
+remove only the client and keep the Cluster Node
 :::
 
 - Remove the `morio-repo` and `morio-client` packages:
