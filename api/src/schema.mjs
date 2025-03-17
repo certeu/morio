@@ -245,6 +245,10 @@ export const schema = {
     ct: Joi.string().required(),
   }),
   // Inventory
+  'req.inventory.createGroup': Joi.object({
+    id: Joi.string().required(),
+    description: Joi.string().allow(''),
+  }),
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
     cores: Joi.number(),
@@ -254,6 +258,9 @@ export const schema = {
     notes: Joi.array().items(Joi.string()),
     os: Joi.string(),
     tags: Joi.array().items(Joi.string()),
+  }),
+  'req.inventory.readGroup': Joi.object({
+    id: Joi.string().required(),
   }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),

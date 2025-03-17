@@ -90,7 +90,40 @@ export function routes(app) {
   app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
 
   /*
+   * Create a group
+   */
+  app.post(`/inventory/group`, rbac.operator, inventory.createGroup)
+
+  /*
+   * Read all groups (returns an array)
+   */
+  app.get(`/inventory/groups`, rbac.user, inventory.listGroups)
+
+  /*
+   * Checks whether a group name is available
+   */
+  app.get(`/inventory/is-group-available/:group`, rbac.user, inventory.isGroupAvailable)
+
+  /*
+   * Delete a group
+   */
+  app.delete(`/inventory/groups/:id`, rbac.operator, inventory.deleteGroup)
+
+  /*
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
+
+  /*
+   * Get inventory for Ansible as JSON
+   */
+  app.get(`/inventory/ansible.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', false))
+  app.get(`/inventory/ansible-with-secrets.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', true))
+
+  /*
+   * Get inventory for Ansible as YAML
+   */
+  app.get(`/inventory/ansible.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', false))
+  app.get(`/inventory/ansible-with-secrets.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', true))
+
 }

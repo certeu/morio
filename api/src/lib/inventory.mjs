@@ -33,6 +33,74 @@ const values = {
 }
 
 /**
+ * Helper method to list groups in the inventory
+ *
+ * @return {object} keys - The groups in the inventory
+ */
+export async function listGroups() {
+  const query = `SELECT * FROM inventory_groups`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to see if a group ID is available
+ *
+ * @param {string} group - The group ID/name
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isGroupAvailable(id) {
+  const [status, result] = await db.read(
+    `SELECT id FROM inventory_groups where id=:id`,
+    { id }
+  )
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to create an inventory (host) group
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createGroup(id, description = '') {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_groups(id, description) VALUES(:id, :description)`,
+    { id, description }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to delete a group
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteGroup(id = false) {
+  const result = await deleteRecord('inventory_groups', id)
+
+  // Also remove this group as a member of other groups
+  await db.write(`DELETE FROM inventory_group_group WHERE member_id = :id`, { id })
+
+  return result
+}
+
+
+/**
  * Helper method to list hosts in the inventory
  *
  * @return {object} keys - The hosts in the inventory
@@ -233,6 +301,93 @@ export async function loadHostOs(id) {
   if (found.length === 1) return found[0]
   else return found
 }
+
+/**
+ * Helper method to get all inventory data for use as an Ansible inventory
+ *
+ * @return {object} keys - The hosts in the inventory
+ */
+export async function getAnsibleInventory(withSecrets=false) {
+  // This will hold the entire inventory
+  const inventory = { }
+
+  // Load hosts
+  const [hostStatus, hostResult] = await db.read(`SELECT * FROM inventory_hosts`)
+  const hosts = hostStatus === 200 ? resultsAsList(hostResult) : []
+
+  // Load modules vars
+  const [modvarStatus, modvarResult] = await db.read(`SELECT * FROM inventory_modvars`)
+  const modvars = modvarStatus === 200 ? resultsAsList(modvarResult) : false
+
+  // Load host modules
+  const [hostmodStatus, hostmodResult] = await db.read(`SELECT * FROM inventory_host_mod`)
+  const hostmods = hostmodStatus === 200 ? resultsAsList(hostmodResult) : false
+
+  // Load host vars
+  const [hostvarStatus, hostvarResult] = await db.read(`SELECT * FROM inventory_hostvars`)
+  const hostvars = hostvarStatus === 200 ? resultsAsList(hostvarResult) : false
+
+  const modules = {}
+  for (const mvar of modvars) {
+    if (typeof modules[mvar.mod] === 'undefined') modules[mvar.mod] = {}
+    modules[mvar.mod][mvar.id] = unwrapVar(mvar.id, mvar.val)
+  }
+
+  // Now add them to the inventory
+  for (const host of hosts) {
+    inventory[host.id] = {
+      morio_host_fqdn: host.fqdn,
+      morio_host_name: host.name,
+      morio_host_id: host.id,
+      morio_host_arch: host.arch,
+      morio_host_memory: host.memory,
+      morio_host_cores: host.cores,
+      morio_modules: [],
+    }
+  }
+
+  // Add module vars
+  for (const mod of hostmods) {
+    inventory[mod.host].morio_modules.push(mod.mod)
+    inventory[mod.host] = {
+      ...inventory[mod.host],
+      ...modules[mod.mod],
+    }
+  }
+
+  // Add host vars
+  for (const hvar of hostvars) {
+    if (withSecrets || hvar.key.slice(-6) !== 'SECRET') inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
+  }
+
+  // Structure as ansible inventory
+  const ansinv = { all: { hosts: {} } }
+  for (const [uuid, host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
+
+  // Add groups based on morio modules
+  for (const mod of hostmods) {
+    const group = `morio_module_${mod.mod}`
+    if (typeof ansinv[group] === 'undefined') ansinv[group] = {}
+    ansinv[group][inventory[mod.host].morio_host_fqdn] = inventory[mod.host]
+  }
+
+  return ansinv
+}
+
+function unwrapVar(key, val) {
+  let nval = false
+  if (key.slice(-6) === 'SECRET') val = utils.decrypt(val)
+  try {
+    nval = JSON.parse(val)
+  } catch (err) {
+    // This is fine
+  }
+
+  return (nval === false || typeof nval === 'string')
+    ? val
+    : nval
+}
+
 
 /**
  * Helper method to get info about the inventory

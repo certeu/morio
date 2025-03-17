@@ -1,10 +1,16 @@
-import { utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
+import yaml from 'js-yaml'
 import {
+  createGroup,
+  deleteGroup,
   deleteIp,
   deleteMac,
   deleteHost,
   deleteOs,
+  getAnsibleInventory,
   getStats,
+  isGroupAvailable,
+  listGroups,
   listHosts,
   listIps,
   listMacs,
@@ -150,6 +156,94 @@ Controller.prototype.deleteHost = async function (req, res) {
     ? res.status(204).send()
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+
+/**
+ * List groups
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listGroups = async function (req, res, format = 'array') {
+  const list = await listGroups()
+
+  if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+
+  if (format !== 'object') return res.send(list)
+
+  /*
+   * Transform list into an obhject
+   */
+  const groups = {}
+  for (const group of list) groups[group.id] = group
+
+  return res.send(groups)
+}
+
+/**
+ * Is a group (id) available?
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.isGroupAvailable = async function (req, res) {
+  if (!req.params.group) return res.status(400).send()
+  const available = await isGroupAvailable(req.params.group)
+
+  return available
+    ? res.status(404).send()
+    : res.status(409).send()
+}
+
+/**
+ * Creates a new group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createGroup`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  const created = await createGroup(valid.id, valid.description)
+
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroup`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await deleteGroup(valid.id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
 
 /**
  * List hosts
@@ -420,3 +514,22 @@ Controller.prototype.search = async function (req, res) {
     ? res.send(list)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+
+/**
+ * Provide inventory as an Ansible-compatible inventory
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - One of 'json' or 'yaml'
+ * @param {bool} withSecrets - Whether to include vars ending with SECRET
+ */
+Controller.prototype.ansibleInventory = async function (req, res, format="yaml", withSecrets=false) {
+  const inventory = await getAnsibleInventory(withSecrets)
+
+  if (!inventory) return utils.sendErrorReponse(res, 'morio.api.db.failure', req.url)
+
+  return format === 'json'
+    ? res.send(inventory)
+    : res.setHeader('Content-Type', 'application/yaml').send(yaml.dump(inventory))
+}
+

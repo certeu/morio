@@ -230,6 +230,24 @@ export const resolveServiceConfiguration = ({ utils }) => {
         source TEXT,
         FOREIGN KEY (mod) REFERENCES inventory_mods(mod)
       )`,
+      inventory_groups: `CREATE table inventory_groups (
+        id TEXT NOT NULL PRIMARY KEY,
+        description TEXT
+      )`,
+      inventory_group_host: `CREATE table inventory_group_host (
+        id INTEGER PRIMARY KEY,
+        group_id TEXT,
+        member_id TEXT,
+        FOREIGN KEY (group_id) REFERENCES inventory_groups(id),
+        FOREIGN KEY (member_id) REFERENCES inventory_hosts(id)
+      )`,
+      inventory_group_group: `CREATE table inventory_group_group (
+        id INTEGER PRIMARY KEY,
+        group_id TEXT,
+        member_id TEXT,
+        FOREIGN KEY (group_id) REFERENCES inventory_groups(id),
+        FOREIGN KEY (member_id) REFERENCES inventory_groups(id)
+      )`,
       client_commands: `CREATE table client_commands (
         id INTEGER PRIMARY KEY,
         clients TEXT,

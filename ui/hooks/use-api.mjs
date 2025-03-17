@@ -645,6 +645,55 @@ MorioClient.prototype.getInventoryHostname = async function (host) {
 }
 
 /**
+ * Get all groups from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroups = async function () {
+  return await this.call(`${morioConfig.api}/inventory/groups`)
+}
+
+/**
+ * Get if a group name is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isGroupAvailable = async function (group) {
+  return await this.call(`${morioConfig.api}/inventory/is-group-available/${group}`)
+}
+
+/**
+ * Create an inventory group
+ *
+ * @param {string} id - The group name or ID
+ * @param {string} description - An optional description
+ * @return {object} - The result
+ */
+MorioClient.prototype.createGroup = async function (id, description) {
+  return await this.call(`${morioConfig.api}/inventory/group`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, description }),
+  })
+}
+
+/**
+ * Removes a group from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroup = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
  * Get all hosts from the inventory
  *
  * @return {object} - The result

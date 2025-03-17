@@ -20,6 +20,7 @@ import {
   FixmeIcon,
   FlagIcon,
   FlipoverIcon,
+  GroupIcon,
   HardwareIcon,
   KeyIcon,
   LayersIcon,
@@ -87,6 +88,7 @@ const icons = {
   events: FlagIcon,
   export: BriefcaseIcon,
   faq: QuestionIcon,
+  groups: GroupIcon,
   hosts: ServersIcon,
   images: ContainerImageIcon,
   inventory: ServersIcon,
@@ -175,6 +177,10 @@ export const links = {
   inventory: {
     t: 'Inventory',
     r: 'operator',
+    groups: {
+      t: 'Groups',
+      r: 'user',
+    },
     hosts: {
       t: 'Hosts',
       r: 'user',
