@@ -479,16 +479,10 @@ export async function deleteIp(id = false) {
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deletePkg(id = false) {
-  return await deleteRecord('inventory_pkgs', id)
-}
+  if (!id) return false
 
-/**
- * Helper method to delete an Software package
- *
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-export async function deletePkg(id = false) {
+  // First, remove associated records from inventory_host_pkg
+  await deleteRecord('inventory_host_pkg', id, 'pkg')
   return await deleteRecord('inventory_pkgs', id)
 }
 
@@ -499,6 +493,8 @@ export async function deletePkg(id = false) {
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deleteMod(id = false) {
+  // First, remove associated records from inventory_host_pkg
+  await deleteRecord('inventory_host_mod', id, 'mod')
   return await deleteRecord('inventory_mods', id)
 }
 
