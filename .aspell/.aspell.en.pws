@@ -1,4 +1,4 @@
-personal_ws-1.1 en 270 
+personal_ws-1.1 en 272 
 ABAC
 ACL
 ACLs
@@ -206,6 +206,7 @@ lowercased
 lts
 mDx
 mTLS
+macOS
 mbuilder
 md
 mdx
@@ -246,6 +247,7 @@ redev
 redoc
 redocusaurus
 redpanda
+roadmap
 rollout
 routable
 runtime
