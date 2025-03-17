@@ -71,7 +71,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
    * Verify that it's the correct cluster
    */
   if (valid.cluster !== utils.getClusterFqdn())
-    return utils.sendErrorResponse(res, 'morio.api.client.cluster_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.cluster_mismatch', req.url)
 
   /*
    * Does the cluster require an invite?
@@ -128,7 +128,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
   let { uuid = false } = req.body
   if (uuid) {
     if (nodeUuid && uuid !== nodeUuid)
-      return utils.sendErrorResponse(res, `morio.api.client.uuid_mismatch`, req.url)
+      return utils.sendErrorResponse(res, `morio.api.clients.uuid_mismatch`, req.url)
   } else if (nodeUuid) uuid = nodeUuid
   else uuid = generateUuid()
 
@@ -141,7 +141,8 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
    * If it is false and it's not a re-join,
    * bail out because we already have this host
    */
-  if (result === false) return utils.sendErrorResponse(res, `morio.api.client.joined`, req.url)
+  if (result === false)
+    return utils.sendErrorResponse(res, `morio.api.clients.client_joined`, req.url)
 
   /*
    * Generate certificate and key for the client
@@ -210,13 +211,13 @@ Controller.prototype.report = async function (req, res) {
    * No funny business
    */
   if (!matchClientApikey(req, valid.uuid))
-    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
 
   /*
    * Verify that it's the correct cluster
    */
   if (valid.cluster !== utils.getClusterFqdn())
-    return utils.sendErrorResponse(res, 'morio.api.client.cluster_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.cluster_mismatch', req.url)
 
   /*
    * Update the client data in the inventory tables
@@ -250,14 +251,14 @@ Controller.prototype.push = async function (req, res) {
    * No funny business
    */
   if (!matchClientApikey(req, valid.uuid))
-    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
 
   /*
    * If any of the submitted module does not exist, reject the request entirely
    */
   const result = await verifyModulesExist(valid.modules)
   if (!result[0])
-    return utils.sendErrorResponse(res, 'morio.api.client.unknown_module', req.url, {
+    return utils.sendErrorResponse(res, 'morio.api.clients.unknown_module', req.url, {
       unknown_modules: result[1].join(),
     })
 
@@ -293,7 +294,7 @@ Controller.prototype.pull = async function (req, res) {
    * No funny business
    */
   if (!matchClientApikey(req, req.params.uuid))
-    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
 
   /*
    * Load client modules
@@ -328,7 +329,7 @@ Controller.prototype.unjoin = async function (req, res) {
    * No funny business
    */
   if (!matchClientApikey(req, req.params.uuid))
-    return utils.sendErrorResponse(res, 'morio.api.client.authentication_mismatch', req.url)
+    return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
 
   await removeHost(req.params.uuid)
   await deleteApikey(req.params.uuid)

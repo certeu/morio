@@ -10,8 +10,12 @@ health checks on your infrastructure.
 ## Watcher service responsibilities
 
 The watcher service is a [flanking
-service](/docs/reference/terminology/flanking-service), and optional.
+service](/docs/reference/terminology/flanking-service) and is optional.
 
-:::warning FIXME
-Complete this guide.
-:::
+### Run health checks
+
+The purpose of the watcher service is to run health checks and generate
+observability data from them.
+
+You can add your own health checks by _preseeding_ them from a Git repository.
+

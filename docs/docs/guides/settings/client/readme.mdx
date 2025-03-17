@@ -10,7 +10,47 @@ FIXME
 Before we dive into the configuration of the Morio client, let us take a moment to
 ensure we have a good mental model of what the client is and does.
 
+The schematic overview below will help us:
+
 ### One client, multiple observability agents
+
+```mermaid
+flowchart LR
+  subgraph Git
+    moriohub[(Moriohub)]
+    yourhub[(Any git<br />repository)]
+    moriohub ~~~ yourhub
+  end
+  subgraph Cluster
+    mvars[(Module Vars<br /><small>defaults</small>)]
+    hvars[(Host Vars<br /><small>custom</small>)]
+    mtemplates[(Module<br />Templates)]
+    mvars ~~~ hvars
+    hvars ~~~ mtemplates
+  end
+  subgraph Client
+    subgraph Agents
+      auditbeat([AuditBeat<br /><small>audit info</small>])
+      filebeat([FileBeat<br /><small>logs</small>])
+      metricbeat([MetricBeat<br /><small>metrics</small>])
+      auditbeat ~~~ filebeat
+      filebeat ~~~ metricbeat
+    end
+    subgraph Abstraction
+      vars([Module Vars<br /><small>morio</small>])
+      templates([Module Templates<br /><small>morio</small>])
+      vars --> templates
+    end
+  end
+
+
+  Abstraction --> Agents
+  Cluster <--> Abstraction
+  Git ---> Cluster
+
+  style Git fill:#0284C7, fill-opacity: 0.1, stroke: #0284C7
+  style Cluster fill:#9333EA, fill-opacity: 0.1, stroke: #9333EA
+```
 
 ```mermaid
 flowchart TD

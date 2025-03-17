@@ -1,4 +1,4 @@
-personal_ws-1.1 en 265 
+personal_ws-1.1 en 272 
 ABAC
 ACL
 ACLs
@@ -80,6 +80,7 @@ Modularity
 Morio
 Morio's
 MorioHub
+Moriohub
 Mustache
 NGINX
 NPM
@@ -160,6 +161,7 @@ cryptographic
 cryptographically
 cybersecurity
 daemonise
+daemonises
 dashboarding
 dbuilder
 de
@@ -183,6 +185,7 @@ github
 gitops
 hostname
 http
+https
 idp
 init
 io
@@ -191,6 +194,7 @@ jdecock
 joostdecock
 js
 json
+kafka
 kickstart
 ldap
 lifecycle
@@ -202,6 +206,7 @@ lowercased
 lts
 mDx
 mTLS
+macOS
 mbuilder
 md
 mdx
@@ -242,6 +247,7 @@ redev
 redoc
 redocusaurus
 redpanda
+roadmap
 rollout
 routable
 runtime
@@ -252,6 +258,7 @@ subcommands
 subfolder
 subgraph
 subnet
+sudo
 systemd
 tellene
 templating

@@ -12,6 +12,7 @@ import loadAccountsEndpoints from './accounts.mjs'
 import loadApikeysEndpoints from './apikeys.mjs'
 import loadAuthEndpoints from './auth.mjs'
 import loadCacheEndpoints from './cache.mjs'
+import loadClientEndpoints from './clients.mjs'
 import loadCryptoEndpoints from './crypto.mjs'
 import loadDconfEndpoints from './dconf.mjs'
 import loadDockerEndpoints from './docker.mjs'
@@ -110,6 +111,7 @@ loadAccountsEndpoints(api, utils)
 loadApikeysEndpoints(api, utils)
 loadAuthEndpoints(api, utils)
 loadCacheEndpoints(api, utils)
+loadClientEndpoints(api, utils)
 loadCryptoEndpoints(api, utils)
 loadDconfEndpoints(api, utils)
 loadDockerEndpoints(api, utils)
