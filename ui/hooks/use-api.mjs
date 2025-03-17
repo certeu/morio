@@ -683,6 +683,56 @@ MorioClient.prototype.getInventoryMac = async function (id) {
 }
 
 /**
+ * Get a Software Package from the inventory
+ *
+ * @param {string} - The id of the Software Package
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryPkg = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/pkgs/${id}`)
+}
+
+/**
+ * Get a Morio Module from the inventory
+ *
+ * @param {string} - The id of the Morio Module
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMod = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/mods/${id}`)
+}
+
+/**
+ * Get a Module Var from the inventory
+ *
+ * @param {string} - The id of the Module Var
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryModvar = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/modvars/${id}`)
+}
+
+/**
+ * Get a Host Var from the inventory
+ *
+ * @param {string} - The id of the Host Var
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostvar = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/hostvars/${id}`)
+}
+
+/**
+ * Get a Module File from the inventory
+ *
+ * @param {string} - The id of the Module File
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryModfile = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/modfiles/${id}`)
+}
+
+/**
  * Get all IP addresses from the inventory
  *
  * @return {object} - The result
@@ -698,6 +748,51 @@ MorioClient.prototype.getInventoryIps = async function () {
  */
 MorioClient.prototype.getInventoryMacs = async function () {
   return await this.call(`${morioConfig.api}/inventory/macs`)
+}
+
+/**
+ * Get all Software packages from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryPkgs = async function () {
+  return await this.call(`${morioConfig.api}/inventory/pkgs`)
+}
+
+/**
+ * Get all Morio Modules from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryMods = async function () {
+  return await this.call(`${morioConfig.api}/inventory/mods`)
+}
+
+/**
+ * Get all Module Vars from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryModvars = async function () {
+  return await this.call(`${morioConfig.api}/inventory/modvars`)
+}
+
+/**
+ * Get all Host Vars from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryHostvars = async function () {
+  return await this.call(`${morioConfig.api}/inventory/hostvars`)
+}
+
+/**
+ * Get all Module Files from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryModfiles = async function () {
+  return await this.call(`${morioConfig.api}/inventory/modfiles`)
 }
 
 /**
@@ -758,6 +853,86 @@ MorioClient.prototype.removeInventoryIp = async function (id) {
 MorioClient.prototype.removeInventoryMac = async function (id) {
   return await this.call(
     `${morioConfig.api}/inventory/macs/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes an Software Package
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryPkg = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/pkgs/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes an Morio Module
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryMod = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/mods/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes an Module Var
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryModvar = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/modvars/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes an Host Var
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryHostvar = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/hostvars/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes an Module File
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryModfile = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/modfiles/${id}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',

@@ -1,12 +1,22 @@
 import { utils } from '../lib/utils.mjs'
 import {
   deleteIp,
+  deletePkg,
+  deleteMod,
+  deleteModvar,
+  deleteHostvar,
+  deleteModfile,
   deleteMac,
   deleteHost,
   deleteOs,
   getStats,
   listHosts,
   listIps,
+  listPkgs,
+  listMods,
+  listModvars,
+  listHostvars,
+  listModfiles,
   listMacs,
   listOss,
   loadHost,
@@ -14,6 +24,11 @@ import {
   loadHostMacs,
   loadHostOs,
   loadIp,
+  loadPkg,
+  loadMod,
+  loadModvar,
+  loadHostvar,
+  loadModfile,
   loadMac,
   loadOs,
   saveHost,
@@ -199,6 +214,126 @@ Controller.prototype.readIp = async function (req, res) {
 }
 
 /**
+ * Read Software package
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readPkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadPkg(valid.id)
+
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
+ * Read Morio module
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readMod = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMod`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadMod(valid.id)
+
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
+ * Read Module var
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readModvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readModvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadModvar(valid.id)
+
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
+ * Read Host var
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readHostvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadHostvar(valid.id)
+
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
+ * Read Module file
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readModfile = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readModfile`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadModfile(valid.id)
+
+  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+}
+
+/**
  * Delete IP
  *
  * @param {object} req - The request object from Express
@@ -229,6 +364,156 @@ Controller.prototype.deleteIp = async function (req, res) {
 }
 
 /**
+ * Delete Software package
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deletePkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deletePkg(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete Morio Module
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteMod = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMod`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteMod(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete Module var
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteModvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readModvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteModvar(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete Host var
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteHostvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteHostvar(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete Module file
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteModfile = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readModfile`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const result = await deleteModfile(valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
  * List IP addresses
  *
  * @param {object} req - The request object from Express
@@ -236,6 +521,76 @@ Controller.prototype.deleteIp = async function (req, res) {
  */
 Controller.prototype.listIps = async function (req, res) {
   const list = await listIps()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Software packages
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listPkgs = async function (req, res) {
+  const list = await listPkgs()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Morio modules
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listMods = async function (req, res) {
+  const list = await listMods()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Module vars
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listModvars = async function (req, res) {
+  const list = await listModvars()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Host vars
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listHostvars = async function (req, res) {
+  const list = await listHostvars()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Module files
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listModfiles = async function (req, res) {
+  const list = await listModfiles()
 
   return Array.isArray(list)
     ? res.send(list)

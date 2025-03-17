@@ -57,6 +57,66 @@ export async function listIps() {
 }
 
 /**
+ * Helper method to list Software packages in the inventory
+ *
+ * @return {object} keys - The Software packages in the inventory
+ */
+export async function listPkgs() {
+  const query = `SELECT * FROM inventory_pkgs`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
+}
+
+/**
+ * Helper method to list Morio modules in the inventory
+ *
+ * @return {object} keys - The Morio modules in the inventory
+ */
+export async function listMods() {
+  const query = `SELECT * FROM inventory_mods`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
+}
+
+/**
+ * Helper method to list Module vars in the inventory
+ *
+ * @return {object} keys - The Module vars in the inventory
+ */
+export async function listModvars() {
+  const query = `SELECT * FROM inventory_modvars`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list Host vars in the inventory
+ *
+ * @return {object} keys - The Host vars in the inventory
+ */
+export async function listHostvars() {
+  const query = `SELECT * FROM inventory_hostvars`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list Module files in the inventory
+ *
+ * @return {object} keys - The Modules files in the inventory
+ */
+export async function listModfiles() {
+  const query = `SELECT * FROM inventory_modfiles`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
  * Helper method to list MAC addresses in the inventory
  *
  * @return {object} keys - The MAC addresses in the inventory
@@ -120,6 +180,116 @@ export async function loadIp(id) {
   if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
   else {
     log.warn(`Found more than one host in loadIp. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Software package
+ *
+ * @param {string} id - The ID of the Software package
+ * @return {object} data - The data saved for the Software package
+ */
+export async function loadPkg(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
+  else {
+    log.warn(`Found more than one host in loadPkg. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Morio module
+ *
+ * @param {string} id - The ID of the Morio module
+ * @return {object} data - The data saved for the Morio module
+ */
+export async function loadMod(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_mods WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
+  else {
+    log.warn(`Found more than one host in loadMod. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Module var
+ *
+ * @param {string} id - The ID of the Module var
+ * @return {object} data - The data saved for the Module var
+ */
+export async function loadModvar(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modvars WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadModvar. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Host var
+ *
+ * @param {string} id - The ID of the Host var
+ * @return {object} data - The data saved for the Host var
+ */
+export async function loadHostvar(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadHostvar. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Module file
+ *
+ * @param {string} id - The ID of the Module file
+ * @return {object} data - The data saved for the Module file
+ */
+export async function loadModfile(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadModfile. This is unexpected.`)
     return false
   }
 }
@@ -300,6 +470,66 @@ async function deleteRecord(table = false, id = false) {
  */
 export async function deleteIp(id = false) {
   return await deleteRecord('inventory_ips', id)
+}
+
+/**
+ * Helper method to delete an Software package
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deletePkg(id = false) {
+  return await deleteRecord('inventory_pkgs', id)
+}
+
+/**
+ * Helper method to delete an Software package
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deletePkg(id = false) {
+  return await deleteRecord('inventory_pkgs', id)
+}
+
+/**
+ * Helper method to delete an Morio module
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteMod(id = false) {
+  return await deleteRecord('inventory_mods', id)
+}
+
+/**
+ * Helper method to delete an Module var
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteModvar(id = false) {
+  return await deleteRecord('inventory_modvars', id)
+}
+
+/**
+ * Helper method to delete an Host var
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteHostvar(id = false) {
+  return await deleteRecord('inventory_hostvars', id)
+}
+
+/**
+ * Helper method to delete an Module file
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteModfile(id = false) {
+  return await deleteRecord('inventory_modfiles', id)
 }
 
 /**

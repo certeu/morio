@@ -1,19 +1,19 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { LocationIcon } from 'components/icons.mjs'
-import { IpsTable } from 'components/inventory/ip.mjs'
+import { PuzzleIcon } from 'components/icons.mjs'
+import { ModsTable } from 'components/inventory/mods.mjs'
 
 const meta = {
-  title: 'IP Addresses',
-  page: ['inventory', 'ips'],
-  Icon: LocationIcon,
+  title: 'Morio Modules',
+  page: ['inventory', 'mod'],
+  Icon: PuzzleIcon,
 }
 
-export default function InventoryIpsPage() {
+export default function InventoryModsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <IpsTable />
+        <ModsTable />
       </ContentWrapper>
     </PageWrapper>
   )
