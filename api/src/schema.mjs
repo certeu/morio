@@ -262,6 +262,12 @@ export const schema = {
   'req.inventory.readGroup': Joi.object({
     id: Joi.string().required(),
   }),
+  'req.inventory.updateGroup': Joi.object({
+    id: Joi.string().required(),
+    action: Joi.string().required().valid('description', 'join'),
+    description: Joi.string().allow('', null),
+    groups: Joi.array().items(Joi.string()),
+  }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),
   }),
