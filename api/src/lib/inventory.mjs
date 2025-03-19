@@ -1014,7 +1014,7 @@ export async function getClientModuleFiles(modules) {
     `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})`
   )
   const files = []
-  if (result[0] === 200 && result[1].results) {
+  if (result[0] === 200 && result[1].results?.[0]?.values) {
     for (const read of result[1].results[0].values) {
       const [file, folder, content] = read
       files.push({ file, folder, content })

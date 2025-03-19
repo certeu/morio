@@ -109,6 +109,7 @@
     "test:core": "./scripts/testcheck.sh && npm run destroy && ./core/run-test-container.sh && npm run redev"
   },
   "dependencies": {
+    "mermaid": "^11.5.0",
     "mocha": "^11.1.0"
   }
 }

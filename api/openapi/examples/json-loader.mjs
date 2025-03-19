@@ -28,6 +28,10 @@ import updateApikey from './update-apikey.json' with { type: 'json' }
 // Authentication
 import login from './login.json' with { type: 'json' }
 import whoami from './whoami.json' with { type: 'json' }
+// Clients
+import clientsJoin from './clients.join.json' with { type: 'json' }
+import clientsPush from './clients.push.json' with { type: 'json' }
+import clientsPull from './clients.pull.json' with { type: 'json' }
 // Cryptopgraphy
 import createCertificate from './create-certificate.json' with { type: 'json' }
 import encrypt from './encrypt.json' with { type: 'json' }
@@ -76,6 +80,8 @@ export const examples = {
   req: {
     activateAccount: activateAccount.req,
     activateMfa: activateMfa.req,
+    clientsJoin: clientsJoin.req,
+    clientsPush: clientsPush.req,
     createAccount: createAccount.req,
     createCertificate: createCertificate.req,
     decrypt: encrypt.res,
@@ -86,6 +92,8 @@ export const examples = {
     activateAccount: activateAccount.res,
     activateMfa: activateMfa.res,
     caCertificates,
+    clientsJoin: clientsJoin.res,
+    clientsPull,
     createAccount: createAccount.res,
     createApikey: createApikey.res,
     createCertificate: createCertificate.res,

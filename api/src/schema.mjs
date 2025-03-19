@@ -4,6 +4,7 @@ import {
   settings,
   preseed,
   uuid,
+  fqdn,
   mrt,
   preseedKeys,
 } from '#shared/schema'
@@ -247,7 +248,7 @@ export const schema = {
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
     cores: Joi.number(),
-    fqdn: Joi.string().hostname(),
+    fqdn,
     memory: Joi.number(),
     name: Joi.string(),
     notes: Joi.array().items(Joi.string()),
@@ -332,6 +333,20 @@ export const schema = {
       highest_role: role,
       provider: Joi.string(),
     }),
+  }),
+  'res.client.join': Joi.object({
+    crt: Joi.string(),
+    key: Joi.string(),
+    ca: Joi.string(),
+    uuid: uuid,
+    secret: Joi.string(),
+    cluster: Joi.string().hostname(),
+    brokers: Joi.array().items(Joi.string()),
+  }),
+  'res.client.command': Joi.object({
+    command: Joi.string().valid('pull', 'push'),
+    clients: Joi.alternatives().try(Joi.boolean().valid(false), Joi.array().items(uuid)).required(),
+    id: Joi.number(),
   }),
   'res.ratelimits': Joi.object({
     ip: Joi.string().ip({ version: ['ipv4'], cidr: 'forbidden' }),
