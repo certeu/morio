@@ -23,8 +23,8 @@ import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
 import { HostMetricsTable } from 'components/boards/metrics.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
-import { InventoryHostname } from './host.mjs'
+import { StringInput, TextInput, InventoryGroupInput, InventoryHostInput } from 'components/inputs.mjs'
+import { InventoryHostname, runHostsTableApiCall } from './host.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { Tab, Tabs } from 'components/tabs.mjs'
 
@@ -138,7 +138,7 @@ export const GroupsTable = () => {
   )
 }
 
-async function runGroupsTableApiCall(api) {
+export async function runGroupsTableApiCall(api) {
   const result = await api.getInventoryGroups()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -404,64 +404,190 @@ export const GroupsHierarchy = () => {
 
   return (
     <>
-      {(groups.children || []).map(entry => <GroupHierarchyEntry key={entry.id} data={entry} topLevel={1}/>)}
+      {(Object.values(groups.children || {})).map((entry, i) => (
+        <GroupHierarchyEntry key={entry.id} data={entry} parentId={entry.id} topLevel={1} {...{i, refresh, setRefresh}}/>
+      ))}
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
   )
 }
 
-const GroupHierarchyEntry = ({ data, topLevel=false, parentId=false }) => data.type === 'group' ? (
-  <div className="ml-4 border border-primary/40 pb-4 mr-2 rounded-lg">
-    <div className="flex flex-row items-center gap-2 bg-primary/40 px-2 p-1 mb-4 justify-between rounded-t-lg">
-      <div className="flex flex-row items-center gap-4">
-        <GroupIcon />
-        {data.id}
-      </div>
-      <div className="flex flex-row items-center gap-2">
-        {topLevel ? null : (
-          <button className="btn btn-sm btn-primary font-medium hover:btn-error">
-            <NoIcon className="w-5 h-5 text-error-content" stroke={3}/>
-            Unlink
-          </button>
-        )}
-        <Link className="btn btn-sm btn-primary font-medium" href={`/inventory/groups/${data.id}/`}>
-          <SearchIcon className="w-5 h-5 text-error-content" stroke={2.5}/>
-          Browse
-        </Link>
-      </div>
-    </div>
-    <div className="px-4 py-2">
-      {data.children.filter(entry => entry.type === 'host').length > 0 ? (
-        <>
-          <h6>Member Hosts:</h6>
-          <ul className="list list-inside ml-4">
-          {data.children.filter(entry => entry.type === 'host').map(host => (
-            <li className="flex flex-row items-center gap-4">
-              <ServersIcon />
-              <InventoryHostname uuid={host.id} />
-              <Uuid uuid={host.id} />
-            </li>
-          ))}
-          </ul>
-        </>
-      ) : null}
-    </div>
-    {data.children.filter(entry => entry.type !== 'host').map(entry => <GroupHierarchyEntry key={entry.id} data={entry} parentId={data.id} />)}
-  </div>
-) : (
-  <ul className="list list-inside ml-4">
-    <li className="flex flex-row items-center gap-4">
-      <ServersIcon />
-      <InventoryHostname uuid={data.id} />
-      <Uuid uuid={data.id} />
-    </li>
-  </ul>
-)
+const GroupHierarchyEntry = ({ data, i=0, topLevel=false, parentId=false, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  // Context
+  const { pushModal } = useContext(ModalContext)
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
+  if (data.type !== 'group') return (
+    <ul className="list list-inside ml-4">
+      <GroupHierarchyHostEntry uuid={data.id} group={parentId} {...{ removeHostFromGroup }}/>
+    </ul>
+  )
+
+  // Do some housekeeping
+  const members = Object.values(data.children || {})
+  const hosts = members.filter(entry => entry.type !== 'group')
+  const groups = members.filter(entry => entry.type === 'group')
+
+  const addMembers = (id) => {
+    pushModal(
+      <ModalWrapper keepOpenOnClick>
+        <BulkGroupUpdate groups={Object.keys(selection)} {...{refresh, setRefresh}}/>
+      </ModalWrapper>
+    )
+  }
+
+  const removeGroupFromGroup = async (group, member) => {
+    setLoadingStatus([ true, `Removing group ${member} from group ${group}`])
+    const result = await api.removeInventoryGroupMembers(group, { groups: [member] })
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+    setRefresh(refresh+1)
+  }
+
+  const removeHostFromGroup = async (group, host) => {
+    setLoadingStatus([ true, `Removing host ${host} from group ${group}`])
+    const result = await api.removeInventoryGroupMembers(group, { hosts: [host] })
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+    setRefresh(refresh+1)
+  }
+
+  return (
+    <details className={`${i%2 === 0 ? 'bg-neutral/10 open:bg-transparent' : ''} ${topLevel ? '' : 'mr-4'} open:border open:border-primary/30 open:rounded-lg group open:my-2 `}>
+      <summary className="flex flex-row items-center gap-4 pl-2 p-1 pr-0 hover:bg-primary/20 hover:cursor-pointer group-open:rounded-t-lg">
+          <RightIcon className="w-5 h-5 transition-transform group-open:rotate-90"/><b>{data.id}</b>
+      </summary>
+      <div className="pl-4 py-0">
+        <div className="text-sm px-4 ml-4 pb-1">
+          Inventory group <PageLink href={`/inventory/groups/${data.id}/`}>{data.id}
+          </PageLink> has {members.length} members: {groups.length} groups and {hosts.length} hosts.
+        </div>
+        <div className="flex flex-row items-center flex-wrap gap-2 ml-4 px-4 mb-2">
+          {topLevel ? null : (
+            <button
+              className="btn btn-xs btn-error btn-outline"
+              title={`Remove from parent group (${parentId})`}
+              onClick={() => removeGroupFromGroup(parentId, data.id)}
+            >
+              <NoIcon className="w-4 h-4" stroke={3}/>
+              Remove from parent group ({parentId})
+            </button>
+          )}
+          <button
+            className="btn btn-xs btn-success btn-outline"
+            title="Add members"
+            onClick={() => pushModal(
+              <ModalWrapper keepOpenOnClick>
+                <AddMembersToGroup to={data.id} {...{refresh, setRefresh}}/>
+              </ModalWrapper>
+            )}
+          >
+            <NoIcon className="w-4 h-4" stroke={3}/>
+            Add members
+          </button>
+        </div>
+        {hosts.length > 0 ? (
+          <div className="py-2">
+            <b><small>Member Hosts:</small></b>
+            <ul className="list list-inside ml-4">
+              {hosts.map(host => <GroupHierarchyHostEntry uuid={host.id} group={parentId} {...{ removeHostFromGroup }}/>)}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+      {groups.length > 0 ? (
+        <div className="py-2 ml-12">
+          <b><small>Member Groups:</small></b>
+          {groups.map((entry, i) => <GroupHierarchyEntry key={entry.id} data={entry} parentId={data.id} {...{i, refresh, setRefresh}}/>)}
+        </div>
+      ) : null}
+    </details>
+  )
+}
+
+const GroupHierarchyHostEntry = ({ uuid, group, removeHostFromGroup }) => (
+  <li className="flex flex-row items-center gap-4">
+    <ServersIcon />
+    <InventoryHostname uuid={uuid} />
+    <Uuid uuid={uuid} />
+    <button
+      className="btn btn-xs btn-error btn-ghost hover:btn-outline"
+      title="Remove from group"
+      onClick={() => removeHostFromGroup(group, uuid)}
+    >
+      <NoIcon className="w-4 h-4" stroke={3}/>
+      Remove from group
+    </button>
+  </li>
+)
 
 async function runGroupsHierarchyApiCall(api) {
   const result = await api.getInventoryGroupsHierarchy()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
+}
+
+export const AddMembersToGroup = ({ to, refresh, setRefresh }) => {
+  // State
+  const [hosts, setHosts] = useState({})
+  const [groups, setGroups] = useState({})
+  const [allHosts, setAllHosts] = useState([])
+  const [allGroups, setAllGroups] = useState([])
+  // Hooks
+  const { api } = useApi()
+  // Context
+  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+  const { clearModal } = useContext(ModalContext)
+  // Effects
+  useEffect(() => {
+    runHostsTableApiCall(api).then((result) => setAllHosts(result))
+    runGroupsTableApiCall(api).then((result) => setAllGroups(result
+      .filter(entry => entry.id !== to)
+      .map(entry => entry.id)
+    ))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [refresh, to])
+
+  // Helper method to add hosts/groups to group
+  const updateMembers = async () => {
+    setLoadingStatus([ true, 'Updating group membership' ])
+    const result = await api.addInventoryGroupMembers(to, { hosts: Object.values(hosts), groups: Object.values(groups) })
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+    clearModal()
+  }
+
+  const addCount = Object.keys({...hosts, ...groups}).length
+  let btn = <>Add {groups.length} subgroup{groups.length > 1 ? 's' : ''} and {hosts.length} host{hosts.length > 1 ? 's' : ''} to group <em>{to}</em></>
+  if (!groups.length && !hosts.length) btn = <>Select any groups or hosts to add them to group <em>{to}</em></>
+  else if (!groups.length) btn = <>Add {hosts.length} hosts to group <em>{to}</em></>
+  else if (!hosts.length) btn = <>Add {groups.length} subgroups to group <em>{to}</em></>
+
+  return (
+    <div className="">
+      <h2>Add members to group <em>{to}</em></h2>
+      <Tabs
+        tabs="Add hosts, Add groups"
+      >
+        <Tab tabId="Add hosts">
+          <InventoryHostInput update={setHosts} preselect={Object.values(hosts)}/>
+        </Tab>
+        <Tab tabId="Add groups">
+          <InventoryGroupInput update={setGroups} exclude={[to]} preselect={Object.values(groups)}/>
+        </Tab>
+      </Tabs>
+      {addCount > 0
+        ? <p>Click below to add hosts and groups to the {to} groups</p>
+        : <p>Select any host or group to add them.</p>
+      }
+      <button
+        className="btn btn-primary mt-4 mx-auto block"
+        onClick={updateMembers}
+        disabled={addCount < 1}
+      >{btn}</button>
+    </div>
+  )
 }
 

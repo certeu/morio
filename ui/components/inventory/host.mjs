@@ -124,7 +124,7 @@ export const HostsTable = () => {
   )
 }
 
-async function runHostsTableApiCall(api) {
+export async function runHostsTableApiCall(api) {
   const result = await api.getInventoryHosts()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false

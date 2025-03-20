@@ -2,6 +2,7 @@ import { log, utils } from '../lib/utils.mjs'
 import yaml from 'js-yaml'
 import {
   addGroupToGroups,
+  addMembersToGroup,
   createGroup,
   deleteGroup,
   deleteIp,
@@ -29,6 +30,7 @@ import {
   loadIp,
   loadMac,
   loadOs,
+  removeMembersFromGroup,
   saveHost,
   updateGroup,
 } from '../lib/inventory.mjs'
@@ -372,12 +374,20 @@ Controller.prototype.updateGroup = async function (req, res) {
     const group = updateGroup(valid.id, valid.description)
     return res.status(200).send(group)
   }
-  if (valid.action === 'join') {
+  else if (valid.action === 'join') {
     const result = await addGroupToGroups(valid.id, valid.groups)
-    log.todo({result})
+    return res.status(201).send()
+  }
+  else if (valid.action === 'add-members') {
+    const result = await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    return res.status(201).send()
+  }
+  else if (valid.action === 'remove-members') {
+    const result = await removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    return res.status(201).send()
   }
 
-  return res.status(201).send()
+  return res.status(400).send()
 }
 
 /**

@@ -1,9 +1,14 @@
 // Dependencies
 import { roles } from 'config/roles.mjs'
-import { cloneAsPojo } from 'lib/utils.mjs'
+import { cloneAsPojo, arrayToObject } from 'lib/utils.mjs'
 import yaml from 'yaml'
+import { runGroupsTableApiCall } from './inventory/group.mjs'
+import { runHostsTableApiCall, InventoryHostname } from './inventory/host.mjs'
+// Context
+import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useCallback, useState } from 'react'
+import { useCallback, useContext, useState, useEffect } from 'react'
+import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
@@ -756,3 +761,160 @@ export const YamlInput = ({ data, update }) => {
     </div>
   )
 }
+
+export const InventoryGroupInput = ({
+  update, // onChange handler
+  current = '', // The current value
+  preselect = [], // Groups to preselect
+  placeholder="group-name", // The placeholder text
+  id = '', // An id to tie the input to the label
+  exclude = [], // List of groups to keep out of the select
+}) => {
+  // State
+  const [groups, setGroups] = useState(arrayToObject(preselect))
+  const [filter, setFilter] = useState('')
+  const [allGroups, setAllGroups] = useState([])
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effects
+  useEffect(() => {
+    runGroupsTableApiCall(api).then((result) => setAllGroups(result
+      .filter(entry => !exclude.includes(entry.id))
+      .map(entry => entry.id)
+      .sort()
+    ))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [])
+
+  // Helper to toggle group status
+  const toggleGroup = (id) => {
+    const newGroups = {...groups}
+    if (newGroups[id]) delete newGroups[id]
+    else newGroups[id] = id
+    setGroups(newGroups)
+    update(Object.keys(newGroups))
+  }
+
+  return (
+    <>
+      <StringInput
+        label="Filter groups"
+        labelBL="Enter (part of) a groupname to filter the list of available groups"
+        current={filter}
+        placeholder={placeholder}
+        update={setFilter}
+      />
+      <div className="flex flex-row items-center gap-1">
+        <span className="pl-1 text-sm">Selected:</span>
+        {Object.keys(groups).map(group => (
+          <button
+            key={group}
+            className="badge badge-success hover:badge-error"
+            onClick={() => toggleGroup(group)}
+          >{group}</button>
+        ))}
+      </div>
+      <div className="flex flex-row items-center gap-1 mt-2">
+        <span className="pl-1 text-sm">Groups:</span>
+        {allGroups
+          .filter(group => (
+              Object.keys(groups).includes(group) ||
+              filter && !group.toLowerCase().includes(filter.toLowerCase())
+            ) ? false : true
+          )
+          .map(group => (
+          <button
+            key={group}
+            className="badge badge-neutral hover:badge-primary"
+            onClick={() => toggleGroup(group)}
+          >{group}</button>
+        ))}
+      </div>
+    </>
+  )
+}
+
+export const InventoryHostInput = ({
+  update, // onChange handler
+  current = '', // The current value
+  preselect = [], // Groups to preselect
+  placeholder="hostname-or-uuid", // The placeholder text
+  id = '', // An id to tie the input to the label
+  exclude = [], // List of groups to keep out of the select
+}) => {
+  // State
+  const [hosts, setHosts] = useState(arrayToObject(preselect))
+  const [filter, setFilter] = useState('')
+  const [allHosts, setAllHosts] = useState([])
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effects
+  useEffect(() => {
+    runHostsTableApiCall(api).then((result) => setAllHosts(result
+      .filter(entry => !exclude.includes(entry.id))
+      .map(entry => entry.id)
+      .sort()
+    ))
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [])
+
+  // Helper to toggle host status
+  const toggleHost = (id) => {
+    const newHosts = {...hosts}
+    if (newHosts[id]) delete newHosts[id]
+    else newHosts[id] = id
+    setHosts(newHosts)
+    update(Object.keys(newHosts))
+  }
+
+  return (
+    <>
+      <StringInput
+        label="Filter hosts"
+        labelBL="Enter (part of) a hostname or UUID to filter the list of available hosts"
+        current={filter}
+        placeholder={placeholder}
+        update={setFilter}
+      />
+      <div className="pl-1 text-sm">Selected:</div>
+      <div className="flex flex-col items-start gap-1 pl-4">
+        {Object.keys(hosts).map(host => (
+          <button
+            key={host}
+            className="badge badge-success hover:badge-error"
+            onClick={() => toggleHost(host)}
+          >
+            <InventoryHostname uuid={host} raw />
+            <span className="px-2">|</span>
+            {host}
+          </button>
+        ))}
+      </div>
+      <div className="pl-1 text-sm mt-2">Hosts:</div>
+      <div className="flex flex-col items-start gap-1 pl-3">
+        {allHosts
+          .filter(host => (
+              Object.keys(hosts).includes(host) ||
+              filter && !host.toLowerCase().includes(filter.toLowerCase())
+            ) ? false : true
+          )
+          .map(host => (
+          <button
+            key={host}
+            className="badge adge-sm badge-neutral hover:badge-primary"
+            onClick={() => toggleHost(host)}
+          >
+            <InventoryHostname uuid={host} raw />
+            <span className="px-2">|</span>
+            {host}
+          </button>
+        ))}
+      </div>
+    </>
+  )
+}
+

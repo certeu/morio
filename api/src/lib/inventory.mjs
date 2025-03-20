@@ -108,7 +108,8 @@ export async function updateGroup(id, description = '') {
  */
 export async function addGroupToGroups(id, groups = []) {
   if (!Array.isArray(groups)) return false
-  for (const group of groups) await addGroupToGroup(id, group)
+  const results = []
+  for (const group of groups) results.push(await addGroupToGroup(id, group))
 
   return true
 }
@@ -136,6 +137,62 @@ export async function addGroupToGroup(id, group) {
   }
 
   return
+}
+
+export async function addHostToGroup(host, group) {
+  log.debug(`Adding host ${host} as member to group ${group}`)
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_group_host(group_id, member_id) VALUES(:group, :host)`,
+    { host, group }
+  )
+
+  return
+}
+
+export async function removeHostFromGroup(host, group) {
+  log.debug(`Removing host ${host} from group ${group}`)
+  /*
+   * Remove from the database
+   */
+  const result = await db.write(
+    `DELETE FROM inventory_group_host WHERE member_id=:host AND group_id=:group`,
+    { host, group }
+  )
+
+  return
+}
+
+export async function removeGroupFromGroup(member, group) {
+  log.debug(`Removing group ${member} from group ${group}`)
+  /*
+   * Remove from the database
+   */
+  const result = await db.write(
+    `DELETE FROM inventory_group_group WHERE member_id=:member AND group_id=:group`,
+    { member, group }
+  )
+  log.todo(result)
+
+  return
+}
+
+export async function addMembersToGroup(group, { hosts=[], groups=[] }) {
+  for (const member of groups) await addGroupToGroup(member, group)
+  for (const member of hosts) await addHostToGroup(member, group)
+
+  return
+}
+
+export async function removeMembersFromGroup(group, { hosts=[], groups=[] }) {
+  log.todo({hosts, groups})
+  for (const member of groups) await removeGroupFromGroup(member, group)
+  for (const member of hosts) await removeHostFromGroup(member, group)
+
+  return
+
 }
 
 /*
@@ -228,7 +285,7 @@ function buildGroupsTree(items) {
     itemMap[item.id] = {
       id: item.id,
       type: item.type,
-      children: []
+      children: item.type === 'group' ? {} : undefined
     }
   })
 
@@ -237,7 +294,7 @@ function buildGroupsTree(items) {
     id: 'morio',
     name: 'Inventory',
     type: 'root',
-    children: []
+    children: {}
   }
 
   // Now bbuild the tree structure
@@ -245,15 +302,15 @@ function buildGroupsTree(items) {
     const node = itemMap[item.id]
     if (item.parent_id === null) {
       // Top-level item with no parent
-      root.children.push(node)
+      root.children[node.id] = node
     } else {
       // Add to parent's children
       const parent = itemMap[item.parent_id]
-      if (parent) parent.children.push(node)
+      if (parent) parent.children[node.id] = node
       else {
         log.debug(`Parent node ${item.parent_id} not found for ${item.id}`)
         // Fallback: add to root, mark as orphan
-        root.children.push({...node, orphan: true })
+        root.children[node.id] = {...node, orphan: true }
       }
     }
   })

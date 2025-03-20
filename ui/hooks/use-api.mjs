@@ -730,6 +730,38 @@ MorioClient.prototype.updateInventoryGroupDescription = async function (group, d
 }
 
 /**
+ * Add members to an inventory group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.addInventoryGroupMembers = async function (group, add) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/add-members`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify(add),
+    },
+  )
+}
+
+/**
+ * Remove members to an inventory group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.removeInventoryGroupMembers = async function (group, remove) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/remove-members`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify(remove),
+    },
+  )
+}
+
+/**
  * Add an inventory group to another group
  *
  * @return {object} - The result
