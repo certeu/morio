@@ -1081,7 +1081,7 @@ MorioClient.prototype.createClientInvite = async function (type) {
  * @param {string} version - An ip version
  * @return {object} - The result
  */
-MorioClient.prototype.createGroup = async function (ip, version) {
+MorioClient.prototype.createIP = async function (ip, version) {
   return await this.call(`${morioConfig.api}/inventory/ip`, {
     headers: this.jsonHeaders,
     method: 'POST',
@@ -1097,7 +1097,7 @@ MorioClient.prototype.createGroup = async function (ip, version) {
  * @param {string} version - A package version
  * @return {object} - The result
  */
-MorioClient.prototype.createIp = async function (id, name, version) {
+MorioClient.prototype.createPkg = async function (id, name, version) {
   return await this.call(`${morioConfig.api}/inventory/pkg`, {
     headers: this.jsonHeaders,
     method: 'POST',
@@ -1216,7 +1216,7 @@ MorioClient.prototype.createHost = async function (id, name, version) {
  * @param {string} version - The os version
  * @return {object} - The result
  */
-MorioClient.prototype.createMac = async function (id, name, version) {
+MorioClient.prototype.createOs = async function (id, name, version) {
   return await this.call(`${morioConfig.api}/inventory/os`, {
     headers: this.jsonHeaders,
     method: 'POST',

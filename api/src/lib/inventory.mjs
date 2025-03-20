@@ -566,6 +566,228 @@ export async function deleteHost(id = false) {
   return result
 }
 
+/**
+ * Helper method to create an inventory (host) ip
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createIp(ip, version) {
+  if (!ip) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
+    ip,
+    version,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) pkg
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createPkg(id, name, version) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
+    {
+      id,
+      name,
+      version,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) mod
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createMod(mod, data) {
+  if (!mod) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
+    mod,
+    data,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) modvar
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModvar(id, val, info) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_modvars(id, val, info) VALUES(:id, :val, :info)`,
+    {
+      id,
+      val,
+      info,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) hostvar
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createHostvar(id, key, val, info) {
+  if (id <= 0) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hostvars(id, key, val, info) VALUES(:id, :key, :val, :info)`,
+    {
+      id,
+      key,
+      val,
+      info,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) modfile
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModfile(id, mod, folder, file, content, source) {
+  if (id <= 0) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_modfiles(id, mod, folder, file, content, source) VALUES(:id, :mod, :folder, :file, :content, :source)`,
+    {
+      id,
+      mod,
+      folder,
+      file,
+      content,
+      source,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) mac
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModfile(mac) {
+  if (!mac) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
+    mac,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host)
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createHost(id, arch, cores, fqdn, memory, name, notes, tags, last_update) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hosts(id, arch, cores, fqdn, memory, name, notes, tags, last_update) VALUES(:id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update)`,
+    {
+      id,
+      arch,
+      cores,
+      fqdn,
+      memory,
+      name,
+      notes,
+      tags,
+      last_update,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) os
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createOs(id, name, version) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hosts(id, name, version) VALUES(:id, :name, :version)`,
+    {
+      id,
+      name,
+      version,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
 export async function createInvite(user, type = 'once') {
   /*
    * There is a (small) chance that the random string we get
