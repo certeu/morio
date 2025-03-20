@@ -1,4 +1,5 @@
 import { getPreset } from 'config/index.mjs'
+import { DateTime } from 'luxon'
 
 /*
  * This is hardcoded for now
@@ -1070,6 +1071,156 @@ MorioClient.prototype.createClientInvite = async function (type) {
   return await this.call(`${morioConfig.api}/clients/invite/${type}`, {
     headers: this.jsonHeaders,
     method: 'POST',
+  })
+}
+
+/**
+ * Create an inventory ip
+ *
+ * @param {string} ip - The ip address
+ * @param {string} version - An ip version
+ * @return {object} - The result
+ */
+MorioClient.prototype.createGroup = async function (ip, version) {
+  return await this.call(`${morioConfig.api}/inventory/ip`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ ip, version }),
+  })
+}
+
+/**
+ * Create an inventory pkg
+ *
+ * @param {string} id - The package id
+ * @param {string} name - The package name
+ * @param {string} version - A package version
+ * @return {object} - The result
+ */
+MorioClient.prototype.createIp = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/pkg`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, name, version }),
+  })
+}
+
+/**
+ * Create an inventory mod
+ *
+ * @param {string} mod - The module id or name
+ * @param {string} data - The module detail
+ * @return {object} - The result
+ */
+MorioClient.prototype.createMod = async function (mod, data) {
+  return await this.call(`${morioConfig.api}/inventory/mod`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ mod, data }),
+  })
+}
+
+/**
+ * Create an inventory modvar
+ *
+ * @param {string} id - The module variable id
+ * @param {string} val - The module variable
+ * @param {string} info - The module variable description
+ * @return {object} - The result
+ */
+MorioClient.prototype.createModvar = async function (id, val, info) {
+  return await this.call(`${morioConfig.api}/inventory/modvar`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, val, info }),
+  })
+}
+
+/**
+ * Create an inventory hostvar
+ *
+ * @param {number} id - The host variable id
+ * @param {string} key - The host variable key
+ * @param {string} val - The host variable value
+ * @param {string} info - The host variable description
+ * @return {object} - The result
+ */
+MorioClient.prototype.createHostvar = async function (id, key, val, info) {
+  return await this.call(`${morioConfig.api}/inventory/hostvar`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, key, val, info }),
+  })
+}
+
+/**
+ * Create an inventory module file
+ *
+ * @param {number} id - The module file id
+ * @param {string} mod - The module name or id
+ * @param {string} folder - The module folder
+ * @param {string} file - The module file name
+ * @param {string} content - The module file content
+ * @param {string} source - The module file source
+ * @return {object} - The result
+ */
+MorioClient.prototype.createModfile = async function (id, mod, folder, file, content, source) {
+  return await this.call(`${morioConfig.api}/inventory/modfile`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, mod, folder, file, content, source }),
+  })
+}
+
+/**
+ * Create an inventory mac address
+ *
+ * @param {string} mac - The mac address
+ * @return {object} - The result
+ */
+MorioClient.prototype.createMac = async function (mac) {
+  return await this.call(`${morioConfig.api}/inventory/mac`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ mac }),
+  })
+}
+
+/**
+ * Create an inventory host
+ *
+ * @param {string} id - The host id
+ * @param {string} arch - The host arch
+ * @param {string} cores - The cores detail
+ * @param {string} fqdn - The fqdn name
+ * @param {string} memory - The memory size
+ * @param {string} name - The host name
+ * @param {string} notes - The notes
+ * @param {string} tags - The tags
+ * @param {string} last_update - The last update datetime
+ * @return {object} - The result
+ */
+MorioClient.prototype.createHost = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/host`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, arch, cores, fqdn, memory, name, notes, tags, last_update }),
+  })
+}
+
+/**
+ * Create an inventory os
+ *
+ * @param {string} id - The os id
+ * @param {string} name - The os name
+ * @param {string} version - The os version
+ * @return {object} - The result
+ */
+MorioClient.prototype.createMac = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/os`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, name, version }),
   })
 }
 

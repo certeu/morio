@@ -168,4 +168,49 @@ export function routes(app) {
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
+
+  /*
+   * Create a ip
+   */
+  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
+
+  /*
+   * Create a pkg
+   */
+  app.post(`/inventory/pkg`, rbac.operator, inventory.createPkg)
+
+  /*
+   * Create a mod
+   */
+  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
+
+  /*
+   * Create a modvar
+   */
+  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
+
+  /*
+   * Create a hostvar
+   */
+  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
+
+  /*
+   * Create a modfile
+   */
+  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
+
+  /*
+   * Create a mac
+   */
+  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
+
+  /*
+   * Create a host
+   */
+  app.post(`/inventory/host`, rbac.operator, inventory.createHost)
+
+  /*
+   * Create a os
+   */
+  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
 }
