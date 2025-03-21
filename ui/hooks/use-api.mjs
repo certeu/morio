@@ -646,6 +646,221 @@ MorioClient.prototype.getInventoryHostname = async function (host) {
 }
 
 /**
+ * Get all groupvas from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroupvars = async function () {
+  return await this.call(`${morioConfig.api}/inventory/groupvars`)
+}
+
+/**
+ * Get all groups from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroups = async function () {
+  return await this.call(`${morioConfig.api}/inventory/groups`)
+}
+
+/**
+ * Get if a group name is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isGroupAvailable = async function (group) {
+  return await this.call(`${morioConfig.api}/inventory/is-group-available/${group}`)
+}
+
+/**
+ * Create an inventory groupvar
+ *
+ * @param {string} key - The groupvar key (name or ID)
+ * @param {string} val - The groupvar value
+ * @param {string} group - The group to add the groupvar to
+ * @return {object} - The result
+ */
+MorioClient.prototype.createGroupvar = async function ({key, val='', group, info=''}) {
+  return await this.call(`${morioConfig.api}/inventory/groupvar`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ key, val, group, info }),
+  })
+}
+
+/**
+ * Create an inventory group
+ *
+ * @param {string} id - The group name or ID
+ * @param {string} description - An optional description
+ * @return {object} - The result
+ */
+MorioClient.prototype.createGroup = async function (id, description) {
+  return await this.call(`${morioConfig.api}/inventory/group`, {
+    headers: this.jsonHeaders,
+    method: 'POST',
+    body: JSON.stringify({ id, description }),
+  })
+}
+
+/**
+ * Get a group from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroup = async function (group) {
+  return await this.call(`${morioConfig.api}/inventory/groups/${group}`)
+}
+
+/**
+ * Get a groupvar from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroupvar = async function (name) {
+  return await this.call(`${morioConfig.api}/inventory/groupvars/${name}`)
+}
+
+/**
+ * Get the hierarchy of inventory groups
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroupsHierarchy = async function () {
+  return await this.call(`${morioConfig.api}/inventory/groups-hierarchy`)
+}
+
+/**
+ * Get the group members from the inventory
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroupMembers = async function (group) {
+  return await this.call(`${morioConfig.api}/inventory/group-members/${group}`)
+}
+
+/**
+ * Get the groups a given group is member of
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryGroupMemberOf = async function (group) {
+  return await this.call(`${morioConfig.api}/inventory/group-member-of/${group}`)
+}
+
+/**
+ * Update the description of an inventory group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryGroupDescription = async function (group, description) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/description`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify({ description }),
+    },
+  )
+}
+
+/**
+ * Add members to an inventory group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.addInventoryGroupMembers = async function (group, add) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/add-members`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify(add),
+    },
+  )
+}
+
+/**
+ * Remove members to an inventory group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.removeInventoryGroupMembers = async function (group, remove) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/remove-members`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify(remove),
+    },
+  )
+}
+
+/**
+ * Add an inventory group to another group
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.addInventoryGroupToGroups = async function (group, groups) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${group}/join`,
+    {
+      headers: this.jsonHeaders,
+      method: 'PATCH',
+      body: JSON.stringify({ groups }),
+    },
+  )
+}
+
+/**
+ * Removes a group from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroup = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes a groupvar from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroupvar = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groupvars/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Removes a group from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroup = async function (id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/${id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
  * Get all hosts from the inventory
  *
  * @return {object} - The result

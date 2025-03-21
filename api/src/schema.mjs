@@ -297,6 +297,15 @@ export const schema = {
     id: Joi.string().required(),
     name: Joi.string().required(),
     version: Joi.string().required(),
+  'req.inventory.createGroup': Joi.object({
+    id: Joi.string().required(),
+    description: Joi.string().allow(''),
+  }),
+  'req.inventory.createGroupvar': Joi.object({
+    key: Joi.string().required(),
+    val: Joi.string().allow(''),
+    group: Joi.string().required(),
+    info: Joi.string().allow(''),
   }),
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
@@ -307,6 +316,19 @@ export const schema = {
     notes: Joi.array().items(Joi.string()),
     os: Joi.string(),
     tags: Joi.array().items(Joi.string()),
+  }),
+  'req.inventory.readGroup': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readGroupvar': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.updateGroup': Joi.object({
+    id: Joi.string().required(),
+    action: Joi.string().required().valid('description', 'join', 'add-members', 'remove-members'),
+    description: Joi.string().allow('', null),
+    groups: Joi.array().items(Joi.string()),
+    hosts: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),

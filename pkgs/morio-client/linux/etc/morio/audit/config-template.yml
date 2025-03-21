@@ -25,7 +25,7 @@ output:
   kafka:
     client_id: {| MORIO_CLIENT_UUID |}
     enabled: true
-    hosts: {| MORIO_BROKERS |}
+    hosts: {|{ MORIO_BROKERS }|}
     max_retries: -1
     required_acks: 1
     ssl:
