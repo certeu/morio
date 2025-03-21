@@ -3,7 +3,10 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import {
-  VariableIcon,
+  HostvarIcon,
+  ModulevarIcon,
+  GroupvarIcon,
+  GroupIcon,
   CodeIcon,
   PuzzleIcon,
   HardwareIcon,
@@ -58,6 +61,7 @@ export default function InventoryPage() {
       <ContentWrapper {...meta}>
         <div className="stats shadow w-full grid grid-cols-3 mb-2">
           <Stat title="Hosts" nr={data?.hosts} Icon={ServersIcon} link="/inventory/hosts" />
+          <Stat title="Groups" nr={data?.groups} Icon={GroupIcon} link="/inventory/groups" />
           <Stat title="Operating Systems" nr={data?.oss} Icon={WindowIcon} link="/inventory/oss" />
           <Stat
             title="Software Packages"
@@ -66,29 +70,35 @@ export default function InventoryPage() {
             link="/inventory/pkgs"
           />
         </div>
-        <div className="stats shadow w-full grid grid-cols-3 mb-2">
+        <div className="stats shadow w-full grid grid-cols-4 mb-2">
           <Stat title="IP Addresses" nr={data?.ips} Icon={LocationIcon} link="/inventory/ips" />
           <Stat title="MAC Addresses" nr={data?.macs} Icon={HardwareIcon} link="/inventory/macs" />
           <Stat title="Morio Modules" nr={data?.mods} Icon={PuzzleIcon} link="/inventory/mods" />
-        </div>
-        <div className="stats shadow w-full grid grid-cols-3 mb-2">
-          <Stat
-            title="Module Vars"
-            nr={data?.modvars}
-            Icon={VariableIcon}
-            link="/inventory/modvars"
-          />
-          <Stat
-            title="Host Vars"
-            nr={data?.hostvars}
-            Icon={VariableIcon}
-            link="/inventory/hostvars"
-          />
           <Stat
             title="Module Files"
             nr={data?.modfiles}
             Icon={CodeIcon}
             link="/inventory/modfiles"
+          />
+        </div>
+        <div className="stats shadow w-full grid grid-cols-3 mb-2">
+          <Stat
+            title="Group Vars"
+            nr={data?.groupvars}
+            Icon={GroupvarIcon}
+            link="/inventory/groupvars"
+          />
+          <Stat
+            title="Host Vars"
+            nr={data?.hostvars}
+            Icon={HostvarIcon}
+            link="/inventory/hostvars"
+          />
+          <Stat
+            title="Module Vars"
+            nr={data?.modvars}
+            Icon={ModulevarIcon}
+            link="/inventory/modvars"
           />
         </div>
         <ReloadDataButton onClick={() => setCount(count + 1)} />

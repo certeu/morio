@@ -461,6 +461,36 @@ export const ListInput = ({
 )
 
 /*
+ * Input for a list of things to pick from with a select type of element
+ */
+export const SelectInput = ({
+  update, // the onChange handler
+  valid = () => true, // Method that should return whether the value is valid or not
+  label, // The label
+  labelTR = false, // Top-right label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+  labelDflt = 'Make a choice', // The label for the default option in the select
+  help = false, // Optional link to help / docs
+  list, // The list of items to present { val, label, about }
+  current, // The (value of the) current item
+  disabled = false, // Allows rendering a disabled view
+}) => (
+  <FormControl {...{ label, labelTR, labelBL, labelBR, help }}>
+    <fieldset className="fieldset w-full">
+      <select
+        defaultValue={labelDflt}
+        className="select select-bordered w-full"
+        onChange={(evt) => update(evt.target.value)}
+      >
+        <option disabled={true}>{labelDflt}</option>
+        {list.map(entry => <option key={entry.val} value={entry.val}>{entry.label}</option>)}
+      </select>
+    </fieldset>
+  </FormControl>
+)
+
+/*
  * Input for a (configuration) file
  */
 export const FileInput = ({
@@ -918,3 +948,50 @@ export const InventoryHostInput = ({
   )
 }
 
+/*
+ * Input for markdown content
+ */
+export const MarkdownInput = ({
+  label, // The label
+  current, // The current value (markdown)
+  update, // The onChange handler
+  placeholder, // The placeholder content
+  id = '', // An id to tie the input to the label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+}) => {
+  const [preview, setPreview] = useState(false)
+
+  return (
+    <FormControl
+      {...{ label, labelBR }}
+      forId={id}
+      labelBL={labelBL ? labelBL : 'This field supports markdown'}
+      labelTR={(
+        <button
+          className="text-primary hover:underline"
+          onClick={() => setPreview(!preview)}
+        >
+          {preview ? 'Edit' : 'Preview as'} Markdown
+        </button>
+      )}
+    >
+      {preview ? (
+      <div className="mdx markdown border rounded-lg p-4">
+        <Markdown>{current}</Markdown>
+      </div>
+      ) : (
+      <div className="flex flex-row items-center">
+        <textarea
+          id={id}
+          rows="5"
+          className="textarea textarea-bordered textarea-lg w-full"
+          value={current}
+          placeholder={placeholder}
+          onChange={(evt) => update(evt.target.value)}
+        />
+      </div>
+      )}
+    </FormControl>
+  )
+}

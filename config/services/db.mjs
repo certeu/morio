@@ -248,6 +248,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
         FOREIGN KEY (group_id) REFERENCES inventory_groups(id),
         FOREIGN KEY (member_id) REFERENCES inventory_groups(id)
       )`,
+      inventory_groupvars: `CREATE table inventory_groupvars (
+        id INTEGER PRIMARY KEY,
+        group_id TEXT NOT NULL,
+        key TEXT,
+        val TEXT,
+        info TEXT,
+        FOREIGN KEY (group_id) REFERENCES inventory_groups(id)
+      )`,
       client_commands: `CREATE table client_commands (
         id INTEGER PRIMARY KEY,
         clients TEXT,

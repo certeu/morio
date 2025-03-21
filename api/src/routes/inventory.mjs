@@ -108,6 +108,7 @@ export function routes(app) {
    * Read all groups as a hierarchy
    */
   app.get(`/inventory/groups-hierarchy`, rbac.user, inventory.loadGroupsHierarchy)
+
   /*
    * Checks whether a group name is available
    */
@@ -133,6 +134,25 @@ export function routes(app) {
    */
   app.delete(`/inventory/groups/:id`, rbac.operator, inventory.deleteGroup)
 
+  /*
+   * Create a groupvar
+   */
+  app.post(`/inventory/groupvar`, rbac.operator, inventory.createGroupvar)
+
+  /*
+   * Read a groupvar
+   */
+  app.get(`/inventory/groupvars/:id`, rbac.user, inventory.readGroupvar)
+
+  /*
+   * Read all groupvars
+   */
+  app.get(`/inventory/groupvars`, rbac.user, inventory.listGroupvars)
+
+  /*
+   * Delete a groupvar
+   */
+  app.delete(`/inventory/groupvars/:id`, rbac.operator, inventory.deleteGroupvar)
   /*
    * Search the inventory
    */

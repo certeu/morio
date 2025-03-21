@@ -4,7 +4,9 @@ import {
   addGroupToGroups,
   addMembersToGroup,
   createGroup,
+  createGroupvar,
   deleteGroup,
+  deleteGroupvar,
   deleteIp,
   deleteMac,
   deleteHost,
@@ -13,6 +15,7 @@ import {
   getStats,
   isGroupAvailable,
   listGroups,
+  listGroupvars,
   listHosts,
   listIps,
   listMacs,
@@ -23,6 +26,7 @@ import {
   loadGroupMembers,
   loadGroupMemberOf,
   loadGroupsHierarchy,
+  loadGroupvar,
   loadHost,
   loadHostIps,
   loadHostMacs,
@@ -168,6 +172,19 @@ Controller.prototype.deleteHost = async function (req, res) {
 }
 
 /**
+ * List groupvars
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listGroupvars = async function (req, res) {
+  const list = await listGroupvars()
+
+  if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+
+  return res.send(list)
+}
+/**
  * List groups
  *
  * @param {object} req - The request object from Express
@@ -203,6 +220,28 @@ Controller.prototype.isGroupAvailable = async function (req, res) {
   return available
     ? res.status(404).send()
     : res.status(409).send()
+}
+
+/**
+ * Creates a new groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createGroupvar`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await createGroupvar(valid.key, valid.val, valid.group, valid.info)
+
+  return id
+    ? res.status(201).send({...valid, id})
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -263,6 +302,35 @@ Controller.prototype.readGroup = async function (req, res) {
   }
 
   return res.send({ ...result, members })
+}
+
+/**
+ * Read groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroupvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadGroupvar(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return res.send(result)
 }
 
 /**
@@ -345,6 +413,32 @@ Controller.prototype.deleteGroup = async function (req, res) {
    * Delete from inventory
    */
   const result = await deleteGroup(valid.id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroupvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await deleteGroupvar(valid.id)
 
   return result === true
     ? res.status(204).send()

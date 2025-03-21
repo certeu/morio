@@ -33,6 +33,18 @@ const values = {
 }
 
 /**
+ * Helper method to list groupvars in the inventory
+ *
+ * @return {object} keys - The groupvars in the inventory
+ */
+export async function listGroupvars() {
+  const query = `SELECT * FROM inventory_groupvars`
+  const [status, result] = await db.read(query)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
  * Helper method to list groups in the inventory
  *
  * @return {object} keys - The groups in the inventory
@@ -61,6 +73,34 @@ export async function isGroupAvailable(id) {
   }
 
   return false
+}
+
+/**
+ * Helper method to create an inventory groupvar
+ *
+ * @param {string} key - The key of the groupvar (the name)
+ * @param {string} val - The value of the groupvar
+ * @param {string} group_id - The name/id of the group to assign the groupvar to
+ * @param {string} info - Optional info to describe the groupvar
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createGroupvar(key, val='', group_id, info='') {
+  if (!key || !group_id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_groupvars(key, val, group_id, info) VALUES(:key, :val, :group_id, :info)`,
+    { key, val, group_id, info }
+  )
+  let created = false
+  log.todo(result)
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+    ? result[1]?.results?.[0]?.last_insert_id
+    : false
 }
 
 /**
@@ -341,6 +381,28 @@ export async function loadGroup(id) {
 }
 
 /**
+ * Helper method to load a inventory groupvar
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the group
+ */
+export async function loadGroupvar(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_groupvars WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one groupvar in loadGroupvar. This is unexpected.`)
+    return false
+  }
+}
+
+/**
  * Helper method to host members for a given group
  *
  * @param {string} id - The ID of the group
@@ -475,6 +537,18 @@ export async function deleteGroup(id = false) {
 
   // Also remove this group as a member of other groups
   await db.write(`DELETE FROM inventory_group_group WHERE member_id = :id`, { id })
+
+  return result
+}
+
+/**
+ * Helper method to delete a groupvar
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteGroupvar(id = false) {
+  const result = await deleteRecord('inventory_groupvars', id)
 
   return result
 }
@@ -707,6 +781,7 @@ export async function getAnsibleInventory(withSecrets=false) {
   const [hostvarStatus, hostvarResult] = await db.read(`SELECT * FROM inventory_hostvars`)
   const hostvars = hostvarStatus === 200 ? resultsAsList(hostvarResult) : false
 
+  // Load modules
   const modules = {}
   for (const mvar of modvars) {
     if (typeof modules[mvar.mod] === 'undefined') modules[mvar.mod] = {}
@@ -784,6 +859,8 @@ export async function getStats() {
     [`SELECT COUNT(mod) as mods FROM inventory_mods`],
     [`SELECT COUNT(id) as modvars FROM inventory_modvars`],
     [`SELECT COUNT(id) as hostvars FROM inventory_hostvars`],
+    [`SELECT COUNT(id) as groupvars FROM inventory_groupvars`],
+    [`SELECT COUNT(id) as groups FROM inventory_groups`],
     [`SELECT COUNT(id) as modfiles FROM inventory_modfiles`],
   ])
   if (Array.isArray(count) && count[0] === 200) {
@@ -796,7 +873,9 @@ export async function getStats() {
       mods: count[1].results[5].values[0][0],
       modvars: count[1].results[6].values[0][0],
       hostvars: count[1].results[7].values[0][0],
-      modfiles: count[1].results[8].values[0][0],
+      groupvars: count[1].results[8].values[0][0],
+      groups: count[1].results[9].values[0][0],
+      modfiles: count[1].results[10].values[0][0],
     }
   } else
     return {
@@ -808,6 +887,8 @@ export async function getStats() {
       mods: 0,
       modvars: 0,
       hostvars: 0,
+      groupvars: 0,
+      groups: 0,
       modfiles: 0,
     }
 }

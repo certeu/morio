@@ -249,6 +249,12 @@ export const schema = {
     id: Joi.string().required(),
     description: Joi.string().allow(''),
   }),
+  'req.inventory.createGroupvar': Joi.object({
+    key: Joi.string().required(),
+    val: Joi.string().allow(''),
+    group: Joi.string().required(),
+    info: Joi.string().allow(''),
+  }),
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
     cores: Joi.number(),
@@ -260,6 +266,9 @@ export const schema = {
     tags: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readGroup': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readGroupvar': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.updateGroup': Joi.object({
