@@ -314,6 +314,24 @@ export const schema = {
   'req.inventory.readIp': Joi.object({
     id: Joi.string().required(),
   }),
+  'req.inventory.readOs': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readPkg': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readMod': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readModvar': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostvar': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readModfile': Joi.object({
+    id: Joi.string().required(),
+  }),
   'req.inventory.readMac': Joi.object({
     id: Joi.string().required(),
   }),

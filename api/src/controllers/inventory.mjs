@@ -108,8 +108,10 @@ Controller.prototype.readHost = async function (req, res) {
   const ips = await loadHostIps(valid.id)
   const macs = await loadHostMacs(valid.id)
   const os = await loadHostOs(valid.id)
+  const pkg = await loadPkg(valid.id)
+  const mod = await loadMod(valid.id)
 
-  return res.send({ ...result, ips, macs, os })
+  return res.send({ ...result, ips, macs, os, pkg, mod })
 }
 
 /**
@@ -716,7 +718,7 @@ Controller.prototype.deleteOs = async function (req, res) {
   /*
    * Validate input
    */
-  const [valid, err] = await utils.validate(`req.inventory.readIp`, { id: req.params.id })
+  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,

@@ -169,7 +169,7 @@ export async function loadHost(id) {
  * @return {object} data - The data saved for the IP address
  */
 export async function loadIp(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE id=:id`, {
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE ip=:id`, {
     id: clean(id),
   })
 
@@ -213,7 +213,7 @@ export async function loadPkg(id) {
  * @return {object} data - The data saved for the Morio module
  */
 export async function loadMod(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_mods WHERE id=:id`, {
+  const [status, result] = await db.read(`SELECT * FROM inventory_mods WHERE mod=:id`, {
     id: clean(id),
   })
 
@@ -479,11 +479,11 @@ export async function deleteIp(id = false) {
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deletePkg(id = false) {
-  if (!id) return false
+  const result = await deleteRecord('inventory_pkgs', id)
 
-  // First, remove associated records from inventory_host_pkg
-  await deleteRecord('inventory_host_pkg', id, 'pkg')
-  return await deleteRecord('inventory_pkgs', id)
+  await db.write(`DELETE FROM inventory_host_pkg WHERE pkg = :id`, { id })
+
+  return result
 }
 
 /**
@@ -493,9 +493,11 @@ export async function deletePkg(id = false) {
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deleteMod(id = false) {
-  // First, remove associated records from inventory_host_pkg
-  await deleteRecord('inventory_host_mod', id, 'mod')
-  return await deleteRecord('inventory_mods', id)
+  const result = await deleteRecord('inventory_mods', id)
+
+  await db.write(`DELETE FROM inventory_host_mod WHERE mod = :id`, { id })
+
+  return result
 }
 
 /**
