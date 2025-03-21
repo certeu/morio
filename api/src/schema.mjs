@@ -245,6 +245,58 @@ export const schema = {
     ct: Joi.string().required(),
   }),
   // Inventory
+  'req.inventory.createIp': Joi.object({
+    id: Joi.string().required(),
+    version: Joi.string().required(),
+  }),
+  'req.inventory.createPkg': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    version: Joi.string().required(),
+  }),
+  'req.inventory.createMod': Joi.object({
+    mod: Joi.string().required(),
+    data: Joi.string(),
+  }),
+  'req.inventory.createModvar': Joi.object({
+    id: Joi.string().required(),
+    val: Joi.string(),
+    info: Joi.string(),
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.createHostvar': Joi.object({
+    id: Joi.number().required(),
+    key: Joi.string(),
+    val: Joi.string(),
+    info: Joi.string(),
+    host: Joi.string().required(),
+  }),
+  'req.inventory.createModfile': Joi.object({
+    id: Joi.number().required(),
+    mod: Joi.string().required(),
+    folder: Joi.string(),
+    file: Joi.string(),
+    content: Joi.string(),
+    source: Joi.string(),
+  }),
+  'req.inventory.createMac': Joi.object({
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.createHost': Joi.object({
+    id: Joi.string().required(),
+    arch: Joi.string(),
+    cores: Joi.string(),
+    fqdn: Joi.string(),
+    memory: Joi.number(),
+    name: Joi.string(),
+    notes: Joi.string(),
+    tags: Joi.string(),
+    last_update: Joi.string().isoDate(),
+  }),
+  'req.inventory.createOs': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    version: Joi.string().required(),
   'req.inventory.createGroup': Joi.object({
     id: Joi.string().required(),
     description: Joi.string().allow(''),
@@ -282,6 +334,24 @@ export const schema = {
     id: Joi.string().required(),
   }),
   'req.inventory.readIp': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readOs': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readPkg': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readMod': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readModvar': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostvar': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readModfile': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readMac': Joi.object({

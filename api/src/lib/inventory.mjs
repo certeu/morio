@@ -560,8 +560,7 @@ export async function deleteGroupvar(id = false) {
  * @return {object} keys - The hosts in the inventory
  */
 export async function listHosts() {
-  const query = `SELECT * FROM inventory_hosts`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_hosts`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -572,10 +571,64 @@ export async function listHosts() {
  * @return {object} keys - The IP addresses in the inventory
  */
 export async function listIps() {
-  const query = `SELECT * FROM inventory_ips`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
+}
+
+/**
+ * Helper method to list Software packages in the inventory
+ *
+ * @return {object} keys - The Software packages in the inventory
+ */
+export async function listPkgs() {
+  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs`)
+
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
+}
+
+/**
+ * Helper method to list Morio modules in the inventory
+ *
+ * @return {object} keys - The Morio modules in the inventory
+ */
+export async function listMods() {
+  const [status, result] = await db.read(`SELECT * FROM inventory_mods`)
+
+  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
+}
+
+/**
+ * Helper method to list Module vars in the inventory
+ *
+ * @return {object} keys - The Module vars in the inventory
+ */
+export async function listModvars() {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modvars`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list Host vars in the inventory
+ *
+ * @return {object} keys - The Host vars in the inventory
+ */
+export async function listHostvars() {
+  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list Module files in the inventory
+ *
+ * @return {object} keys - The Modules files in the inventory
+ */
+export async function listModfiles() {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles`)
+
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**
@@ -584,8 +637,7 @@ export async function listIps() {
  * @return {object} keys - The MAC addresses in the inventory
  */
 export async function listMacs() {
-  const query = `SELECT * FROM inventory_macs`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_macs`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -596,8 +648,7 @@ export async function listMacs() {
  * @return {object} keys - The OSes in the inventory
  */
 export async function listOss() {
-  const query = `SELECT * FROM inventory_oss`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_oss`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result)) : false
 }
@@ -631,7 +682,7 @@ export async function loadHost(id) {
  * @return {object} data - The data saved for the IP address
  */
 export async function loadIp(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE id=:id`, {
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE ip=:id`, {
     id: clean(id),
   })
 
@@ -642,6 +693,116 @@ export async function loadIp(id) {
   if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
   else {
     log.warn(`Found more than one host in loadIp. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Software package
+ *
+ * @param {string} id - The ID of the Software package
+ * @return {object} data - The data saved for the Software package
+ */
+export async function loadPkg(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
+  else {
+    log.warn(`Found more than one host in loadPkg. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Morio module
+ *
+ * @param {string} id - The ID of the Morio module
+ * @return {object} data - The data saved for the Morio module
+ */
+export async function loadMod(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_mods WHERE mod=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
+  else {
+    log.warn(`Found more than one host in loadMod. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Module var
+ *
+ * @param {string} id - The ID of the Module var
+ * @return {object} data - The data saved for the Module var
+ */
+export async function loadModvar(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modvars WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadModvar. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Host var
+ *
+ * @param {string} id - The ID of the Host var
+ * @return {object} data - The data saved for the Host var
+ */
+export async function loadHostvar(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadHostvar. This is unexpected.`)
+    return false
+  }
+}
+
+/**
+ * Helper method to load a inventory Module file
+ *
+ * @param {string} id - The ID of the Module file
+ * @return {object} data - The data saved for the Module file
+ */
+export async function loadModfile(id) {
+  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles WHERE id=:id`, {
+    id: clean(id),
+  })
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one host in loadModfile. This is unexpected.`)
     return false
   }
 }
@@ -700,6 +861,50 @@ export async function loadHostIps(id) {
   const [status, result] = await db.read(
     `SELECT hi.host, hi.ip, i.version FROM inventory_host_ip hi
      JOIN inventory_ips i ON hi.ip = i.ip
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load Packages for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostPkgs(id) {
+  const [status, result] = await db.read(
+    `SELECT hi.host, hi.pkg, i.version FROM inventory_host_pkg hi
+     JOIN inventory_pkgs i ON hi.pkg = i.name
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load Modules for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostMods(id) {
+  const [status, result] = await db.read(
+    `SELECT hi.host, hi.mod, i.data FROM inventory_host_mod hi
+     JOIN inventory_mods i ON hi.mod = i.mod
      WHERE hi.host=:id`,
     { id: clean(id) }
   )
@@ -919,6 +1124,74 @@ export async function deleteIp(id = false) {
 }
 
 /**
+ * Helper method to delete an Software package
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deletePkg(id = false) {
+  const result = await deleteRecord('inventory_pkgs', id)
+
+  await db.write(`DELETE FROM inventory_host_pkg WHERE pkg = :id`, { id })
+
+  return result
+}
+
+/**
+ * Helper method to delete an Software package
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteHostPkg(id = false) {
+  return await db.write(`DELETE FROM inventory_host_pkg WHERE host = :id`, { id })
+}
+
+/**
+ * Helper method to delete an Morio module
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteMod(id = false) {
+  const result = await deleteRecord('inventory_mods', id)
+
+  await db.write(`DELETE FROM inventory_host_mod WHERE mod = :id`, { id })
+
+  return result
+}
+
+/**
+ * Helper method to delete an Module var
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteModvar(id = false) {
+  return await deleteRecord('inventory_modvars', id)
+}
+
+/**
+ * Helper method to delete an Host var
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteHostvar(id = false) {
+  return await deleteRecord('inventory_hostvars', id)
+}
+
+/**
+ * Helper method to delete an Module file
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteModfile(id = false) {
+  return await deleteRecord('inventory_modfiles', id)
+}
+
+/**
  * Helper method to delete a MAC address
  *
  * @param {string} id - The ID of the record to delete
@@ -954,6 +1227,228 @@ export async function deleteHost(id = false) {
   await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
 
   return result
+}
+
+/**
+ * Helper method to create an inventory (host) ip
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createIp(ip, version) {
+  if (!ip) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
+    ip,
+    version,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) pkg
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createPkg(id, name, version) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
+    {
+      id,
+      name,
+      version,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) mod
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createMod(mod, data) {
+  if (!mod) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
+    mod,
+    data,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) modvar
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModvar(id, val, info) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_modvars(id, val, info) VALUES(:id, :val, :info)`,
+    {
+      id,
+      val,
+      info,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) hostvar
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createHostvar(id, key, val, info) {
+  if (id <= 0) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hostvars(id, key, val, info) VALUES(:id, :key, :val, :info)`,
+    {
+      id,
+      key,
+      val,
+      info,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) modfile
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModfile(id, mod, folder, file, content, source) {
+  if (id <= 0) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_modfiles(id, mod, folder, file, content, source) VALUES(:id, :mod, :folder, :file, :content, :source)`,
+    {
+      id,
+      mod,
+      folder,
+      file,
+      content,
+      source,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) mac
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createModfile(mac) {
+  if (!mac) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
+    mac,
+  })
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host)
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createHost(id, arch, cores, fqdn, memory, name, notes, tags, last_update) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hosts(id, arch, cores, fqdn, memory, name, notes, tags, last_update) VALUES(:id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update)`,
+    {
+      id,
+      arch,
+      cores,
+      fqdn,
+      memory,
+      name,
+      notes,
+      tags,
+      last_update,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+/**
+ * Helper method to create an inventory (host) os
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+export async function createOs(id, name, version) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await db.write(
+    `INSERT INTO inventory_hosts(id, name, version) VALUES(:id, :name, :version)`,
+    {
+      id,
+      name,
+      version,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
 }
 
 export async function createInvite(user, type = 'once') {

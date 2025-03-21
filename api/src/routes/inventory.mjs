@@ -60,6 +60,81 @@ export function routes(app) {
   app.delete(`/inventory/ips/:id`, rbac.operator, inventory.deleteIp)
 
   /*
+   * Read all Software Packages
+   */
+  app.get(`/inventory/pkgs`, rbac.user, inventory.listPkgs)
+
+  /*
+   * Read an Software Package
+   */
+  app.get(`/inventory/pkgs/:id`, rbac.user, inventory.readPkg)
+
+  /*
+   * Delete an Software Package
+   */
+  app.delete(`/inventory/pkgs/:id`, rbac.operator, inventory.deletePkg)
+
+  /*
+   * Read all Morio Modules
+   */
+  app.get(`/inventory/mods`, rbac.user, inventory.listMods)
+
+  /*
+   * Read an Morio Module
+   */
+  app.get(`/inventory/mods/:id`, rbac.user, inventory.readMod)
+
+  /*
+   * Delete an Morio Module
+   */
+  app.delete(`/inventory/mods/:id`, rbac.operator, inventory.deleteMod)
+
+  /*
+   * Read all Module Vars
+   */
+  app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
+
+  /*
+   * Read an Module Var
+   */
+  app.get(`/inventory/modvars/:id`, rbac.user, inventory.readModvar)
+
+  /*
+   * Delete an Module Var
+   */
+  app.delete(`/inventory/modvars/:id`, rbac.operator, inventory.deleteModvar)
+
+  /*
+   * Read all Host Vars
+   */
+  app.get(`/inventory/hostvars`, rbac.user, inventory.listHostvars)
+
+  /*
+   * Read an Host Var
+   */
+  app.get(`/inventory/hostvars/:id`, rbac.user, inventory.readHostvar)
+
+  /*
+   * Delete an Host Var
+   */
+  app.delete(`/inventory/hostvars/:id`, rbac.operator, inventory.deleteHostvar)
+
+  /*
+   * Read all Module Files
+   */
+  app.get(`/inventory/modfiles`, rbac.user, inventory.listModfiles)
+
+  /*
+   * Read an Module File
+   */
+  app.get(`/inventory/modfiles/:id`, rbac.user, inventory.readModfile)
+
+  /*
+   * Delete an Module File
+   */
+  app.delete(`/inventory/modfiles/:id`, rbac.operator, inventory.deleteModfile)
+
+  /*
    * Read all MAC addresses
    */
   app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
@@ -159,6 +234,49 @@ export function routes(app) {
   app.post(`/inventory/search`, rbac.operator, inventory.search)
 
   /*
+   * Create a ip
+   */
+  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
+
+  /*
+   * Create a pkg
+   */
+  app.post(`/inventory/pkg`, rbac.operator, inventory.createPkg)
+
+  /*
+   * Create a mod
+   */
+  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
+
+  /*
+   * Create a modvar
+   */
+  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
+
+  /*
+   * Create a hostvar
+   */
+  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
+
+  /*
+   * Create a modfile
+   */
+  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
+
+  /*
+   * Create a mac
+   */
+  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
+
+  /*
+   * Create a host
+   */
+  app.post(`/inventory/host`, rbac.operator, inventory.createHost)
+
+  /*
+   * Create a os
+   */
+  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
    * Get inventory for Ansible as JSON
    */
   app.get(`/inventory/ansible.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', false))

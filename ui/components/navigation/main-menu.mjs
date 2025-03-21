@@ -53,6 +53,7 @@ import {
 } from 'components/icons.mjs'
 import { Docker, RedPanda, RedPandaConsole, Traefik } from 'components/brands.mjs'
 import { Link } from 'components/link'
+import { VariableIcon } from '../icons.mjs'
 
 /*
  * Shared props for icons in the sidebar/navigation
@@ -111,6 +112,10 @@ const icons = {
   notes: TipIcon,
   oss: WindowIcon,
   pkgs: PackageIcon,
+  mods: PuzzleIcon,
+  modvars: VariableIcon,
+  hostvars: VariableIcon,
+  modfiles: CodeIcon,
   presets: CheckCircleIcon,
   proxy: Traefik,
   reference: UlIcon,
@@ -227,6 +232,22 @@ export const links = {
     },
     pkgs: {
       t: 'Software Packages',
+      r: 'user',
+    },
+    mods: {
+      t: 'Morio Modules',
+      r: 'user',
+    },
+    modvars: {
+      t: 'Module Vars',
+      r: 'user',
+    },
+    hostvars: {
+      t: 'Host Vars',
+      r: 'user',
+    },
+    modfiles: {
+      t: 'Modules Files',
       r: 'user',
     },
   },

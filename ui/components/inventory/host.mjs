@@ -16,6 +16,8 @@ import { ReloadDataButton } from 'components/button.mjs'
 import { OsIcon } from './oss.mjs'
 import { IpsDisplayTable } from './ip.mjs'
 import { MacsDisplayTable } from './mac.mjs'
+import { PkgsDisplayTable } from './pkgs.mjs'
+import { ModsDisplayTable } from './mods.mjs'
 import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
@@ -217,6 +219,18 @@ export const HostDetail = ({ data }) => {
         summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}
       >
         <MacsDisplayTable macs={data.macs} />
+      </Details>
+      <Details
+        summaryLeft="Software Packages"
+        summaryRight={<span className="badge badge-primary">{data.pkgs?.length}</span>}
+      >
+        <PkgsDisplayTable macs={data.pkgs} />
+      </Details>
+      <Details
+        summaryLeft="Morio Modules"
+        summaryRight={<span className="badge badge-primary">{data.mods?.length}</span>}
+      >
+        <ModsDisplayTable macs={data.mods} />
       </Details>
       {data.notes ? (
         <Details summaryLeft="Notes">{data.nodes || 'no notes for this host'}</Details>

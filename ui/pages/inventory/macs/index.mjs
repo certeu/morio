@@ -4,7 +4,7 @@ import { HardwareIcon } from 'components/icons.mjs'
 import { MacsTable } from 'components/inventory/mac.mjs'
 
 const meta = {
-  title: 'MAC Adresses',
+  title: 'MAC Addresses',
   page: ['inventory', 'macs'],
   Icon: HardwareIcon,
 }

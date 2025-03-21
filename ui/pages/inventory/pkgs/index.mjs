@@ -1,19 +1,19 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
-import { LocationIcon } from 'components/icons.mjs'
-import { IpsTable } from 'components/inventory/ip.mjs'
+import { PackageIcon } from 'components/icons.mjs'
+import { PkgsTable } from 'components/inventory/pkgs.mjs'
 
 const meta = {
-  title: 'IP Addresses',
-  page: ['inventory', 'ips'],
-  Icon: LocationIcon,
+  title: 'Software Packages',
+  page: ['inventory', 'pkgs'],
+  Icon: PackageIcon,
 }
 
-export default function InventoryIpsPage() {
+export default function InventoryPkgsPage() {
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
-        <IpsTable />
+        <PkgsTable />
       </ContentWrapper>
     </PageWrapper>
   )
