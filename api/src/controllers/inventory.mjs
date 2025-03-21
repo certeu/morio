@@ -1,4 +1,5 @@
-import { utils } from '../lib/utils.mjs'
+import { log, utils } from '../lib/utils.mjs'
+import yaml from 'js-yaml'
 import {
   createIp,
   createPkg,
@@ -9,6 +10,12 @@ import {
   createMac,
   createHost,
   createOs,
+  addGroupToGroups,
+  addMembersToGroup,
+  createGroup,
+  createGroupvar,
+  deleteGroup,
+  deleteGroupvar,
   deleteIp,
   deletePkg,
   deleteMod,
@@ -18,7 +25,11 @@ import {
   deleteMac,
   deleteHost,
   deleteOs,
+  getAnsibleInventory,
   getStats,
+  isGroupAvailable,
+  listGroups,
+  listGroupvars,
   listHosts,
   listIps,
   listPkgs,
@@ -28,6 +39,13 @@ import {
   listModfiles,
   listMacs,
   listOss,
+  loadGroup,
+  loadGroupHostMembers,
+  loadGroupGroupMembers,
+  loadGroupMembers,
+  loadGroupMemberOf,
+  loadGroupsHierarchy,
+  loadGroupvar,
   loadHost,
   loadHostIps,
   loadHostMacs,
@@ -42,7 +60,9 @@ import {
   loadModfile,
   loadMac,
   loadOs,
+  removeMembersFromGroup,
   saveHost,
+  updateGroup,
 } from '../lib/inventory.mjs'
 
 /**
@@ -176,6 +196,333 @@ Controller.prototype.deleteHost = async function (req, res) {
 
   return result === true
     ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List groupvars
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listGroupvars = async function (req, res) {
+  const list = await listGroupvars()
+
+  if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+
+  return res.send(list)
+}
+/**
+ * List groups
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listGroups = async function (req, res, format = 'array') {
+  const list = await listGroups()
+
+  if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+
+  if (format !== 'object') return res.send(list)
+
+  /*
+   * Transform list into an obhject
+   */
+  const groups = {}
+  for (const group of list) groups[group.id] = group
+
+  return res.send(groups)
+}
+
+/**
+ * Is a group (id) available?
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.isGroupAvailable = async function (req, res) {
+  if (!req.params.group) return res.status(400).send()
+  const available = await isGroupAvailable(req.params.group)
+
+  return available
+    ? res.status(404).send()
+    : res.status(409).send()
+}
+
+/**
+ * Creates a new groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createGroupvar`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await createGroupvar(valid.key, valid.val, valid.group, valid.info)
+
+  return id
+    ? res.status(201).send({...valid, id})
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createGroup`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  const created = await createGroup(valid.id, valid.description)
+
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Read group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroup`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadGroup(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  /*
+   * Add direct members
+   */
+  const members = {
+    hosts: await loadGroupHostMembers(valid.id),
+    groups: await loadGroupGroupMembers(valid.id)
+  }
+
+  return res.send({ ...result, members })
+}
+
+/**
+ * Read groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroupvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadGroupvar(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+  return res.send(result)
+}
+
+/**
+ * Read group members (flattened/resolved)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readGroupMembers = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroup`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadGroupMembers(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+
+  return res.send(result)
+}
+
+/**
+ * Read groups a given group is member of (parent groups)
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readGroupMemberOf = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroup`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const result = await loadGroupMemberOf(valid.id)
+
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+
+
+  return res.send(result)
+}
+
+/**
+ * Delete group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroup`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await deleteGroup(valid.id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroupvar`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await deleteGroupvar(valid.id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Update a group
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updateGroup = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updateGroup`, { ...req.params, ...req.body })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Take appropriate action
+   */
+  if (valid.action === 'description') {
+    const group = updateGroup(valid.id, valid.description)
+    return res.status(200).send(group)
+  }
+  else if (valid.action === 'join') {
+    const result = await addGroupToGroups(valid.id, valid.groups)
+    return res.status(201).send()
+  }
+  else if (valid.action === 'add-members') {
+    const result = await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    return res.status(201).send()
+  }
+  else if (valid.action === 'remove-members') {
+    const result = await removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    return res.status(201).send()
+  }
+
+  return res.status(400).send()
+}
+
+/**
+ * Loads groups as a hierarchy
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.loadGroupsHierarchy = async function (req, res) {
+  const hierarchy = await loadGroupsHierarchy()
+
+  return hierarchy
+    ? res.send(hierarchy)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
@@ -1034,3 +1381,20 @@ Controller.prototype.createOs = async function (req, res) {
     ? res.status(201).send(valid)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+ * Provide inventory as an Ansible-compatible inventory
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - One of 'json' or 'yaml'
+ * @param {bool} withSecrets - Whether to include vars ending with SECRET
+ */
+Controller.prototype.ansibleInventory = async function (req, res, format="yaml", withSecrets=false) {
+  const inventory = await getAnsibleInventory(withSecrets)
+
+  if (!inventory) return utils.sendErrorReponse(res, 'morio.api.db.failure', req.url)
+
+  return format === 'json'
+    ? res.send(inventory)
+    : res.setHeader('Content-Type', 'application/yaml').send(yaml.dump(inventory))
+}
+

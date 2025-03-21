@@ -165,6 +165,70 @@ export function routes(app) {
   app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
 
   /*
+   * Create a group
+   */
+  app.post(`/inventory/group`, rbac.operator, inventory.createGroup)
+
+  /*
+   * Update a group
+   */
+  app.patch(`/inventory/groups/:id/:action`, rbac.operator, inventory.updateGroup)
+
+  /*
+   * Read all groups (returns an array)
+   */
+  app.get(`/inventory/groups`, rbac.user, inventory.listGroups)
+
+  /*
+   * Read all groups as a hierarchy
+   */
+  app.get(`/inventory/groups-hierarchy`, rbac.user, inventory.loadGroupsHierarchy)
+
+  /*
+   * Checks whether a group name is available
+   */
+  app.get(`/inventory/is-group-available/:group`, rbac.user, inventory.isGroupAvailable)
+
+  /*
+   * Read a group
+   */
+  app.get(`/inventory/groups/:id`, rbac.user, inventory.readGroup)
+
+  /*
+   * Read the flattened/resolved group members
+   */
+  app.get(`/inventory/group-members/:id`, rbac.user, inventory.readGroupMembers)
+
+  /*
+   * Read the flattened/resolved group members
+   */
+  app.get(`/inventory/group-member-of/:id`, rbac.user, inventory.readGroupMemberOf)
+
+  /*
+   * Delete a group
+   */
+  app.delete(`/inventory/groups/:id`, rbac.operator, inventory.deleteGroup)
+
+  /*
+   * Create a groupvar
+   */
+  app.post(`/inventory/groupvar`, rbac.operator, inventory.createGroupvar)
+
+  /*
+   * Read a groupvar
+   */
+  app.get(`/inventory/groupvars/:id`, rbac.user, inventory.readGroupvar)
+
+  /*
+   * Read all groupvars
+   */
+  app.get(`/inventory/groupvars`, rbac.user, inventory.listGroupvars)
+
+  /*
+   * Delete a groupvar
+   */
+  app.delete(`/inventory/groupvars/:id`, rbac.operator, inventory.deleteGroupvar)
+  /*
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
@@ -213,4 +277,15 @@ export function routes(app) {
    * Create a os
    */
   app.post(`/inventory/os`, rbac.operator, inventory.createOs)
+   * Get inventory for Ansible as JSON
+   */
+  app.get(`/inventory/ansible.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', false))
+  app.get(`/inventory/ansible-with-secrets.json`, rbac.operator, (req, res) => inventory.ansibleInventory(req, res, 'json', true))
+
+  /*
+   * Get inventory for Ansible as YAML
+   */
+  app.get(`/inventory/ansible.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', false))
+  app.get(`/inventory/ansible-with-secrets.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', true))
+
 }
