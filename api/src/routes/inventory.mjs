@@ -277,6 +277,8 @@ export function routes(app) {
    * Create a os
    */
   app.post(`/inventory/os`, rbac.operator, inventory.createOs)
+
+  /*
    * Get inventory for Ansible as JSON
    */
   app.get(`/inventory/ansible.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', false))

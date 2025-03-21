@@ -1380,7 +1380,7 @@ export async function createModfile(id, mod, folder, file, content, source) {
  *
  * @return {object} created - true if it is created, false if not
  */
-export async function createModfile(mac) {
+export async function createMac(mac) {
   if (!mac) return false
   /*
    * Insert into the database

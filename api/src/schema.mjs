@@ -297,6 +297,7 @@ export const schema = {
     id: Joi.string().required(),
     name: Joi.string().required(),
     version: Joi.string().required(),
+  }),
   'req.inventory.createGroup': Joi.object({
     id: Joi.string().required(),
     description: Joi.string().allow(''),

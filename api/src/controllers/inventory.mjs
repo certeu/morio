@@ -1142,7 +1142,7 @@ Controller.prototype.search = async function (req, res) {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.createIP = async function (req, res) {
+Controller.prototype.createIp = async function (req, res) {
   /*
    * Validate input
    */
@@ -1381,6 +1381,8 @@ Controller.prototype.createOs = async function (req, res) {
     ? res.status(201).send(valid)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+
+/*
  * Provide inventory as an Ansible-compatible inventory
  *
  * @param {object} req - The request object from Express
