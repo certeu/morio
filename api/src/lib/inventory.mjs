@@ -38,8 +38,7 @@ const values = {
  * @return {object} keys - The hosts in the inventory
  */
 export async function listHosts() {
-  const query = `SELECT * FROM inventory_hosts`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_hosts`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -50,8 +49,7 @@ export async function listHosts() {
  * @return {object} keys - The IP addresses in the inventory
  */
 export async function listIps() {
-  const query = `SELECT * FROM inventory_ips`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_ips`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -62,8 +60,7 @@ export async function listIps() {
  * @return {object} keys - The Software packages in the inventory
  */
 export async function listPkgs() {
-  const query = `SELECT * FROM inventory_pkgs`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -74,8 +71,7 @@ export async function listPkgs() {
  * @return {object} keys - The Morio modules in the inventory
  */
 export async function listMods() {
-  const query = `SELECT * FROM inventory_mods`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_mods`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -86,8 +82,7 @@ export async function listMods() {
  * @return {object} keys - The Module vars in the inventory
  */
 export async function listModvars() {
-  const query = `SELECT * FROM inventory_modvars`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_modvars`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -98,8 +93,7 @@ export async function listModvars() {
  * @return {object} keys - The Host vars in the inventory
  */
 export async function listHostvars() {
-  const query = `SELECT * FROM inventory_hostvars`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -110,8 +104,7 @@ export async function listHostvars() {
  * @return {object} keys - The Modules files in the inventory
  */
 export async function listModfiles() {
-  const query = `SELECT * FROM inventory_modfiles`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -122,8 +115,7 @@ export async function listModfiles() {
  * @return {object} keys - The MAC addresses in the inventory
  */
 export async function listMacs() {
-  const query = `SELECT * FROM inventory_macs`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_macs`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -134,8 +126,7 @@ export async function listMacs() {
  * @return {object} keys - The OSes in the inventory
  */
 export async function listOss() {
-  const query = `SELECT * FROM inventory_oss`
-  const [status, result] = await db.read(query)
+  const [status, result] = await db.read(`SELECT * FROM inventory_oss`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result)) : false
 }
@@ -361,6 +352,50 @@ export async function loadHostIps(id) {
 }
 
 /**
+ * Helper method to load Packages for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostPkgs(id) {
+  const [status, result] = await db.read(
+    `SELECT hi.host, hi.pkg, i.version FROM inventory_host_pkg hi
+     JOIN inventory_pkgs i ON hi.pkg = i.name
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load Modules for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+export async function loadHostMods(id) {
+  const [status, result] = await db.read(
+    `SELECT hi.host, hi.mod, i.data FROM inventory_host_mod hi
+     JOIN inventory_mods i ON hi.mod = i.mod
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
  * Helper method to load MAC addresses for a given host
  *
  * @param {string} id - The ID of the host
@@ -484,6 +519,16 @@ export async function deletePkg(id = false) {
   await db.write(`DELETE FROM inventory_host_pkg WHERE pkg = :id`, { id })
 
   return result
+}
+
+/**
+ * Helper method to delete an Software package
+ *
+ * @param {string} id - The ID of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+export async function deleteHostPkg(id = false) {
+  return await db.write(`DELETE FROM inventory_host_pkg WHERE host = :id`, { id })
 }
 
 /**

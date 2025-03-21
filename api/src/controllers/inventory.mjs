@@ -32,6 +32,8 @@ import {
   loadHostIps,
   loadHostMacs,
   loadHostOs,
+  loadHostPkgs,
+  loadHostMods,
   loadIp,
   loadPkg,
   loadMod,
@@ -108,10 +110,10 @@ Controller.prototype.readHost = async function (req, res) {
   const ips = await loadHostIps(valid.id)
   const macs = await loadHostMacs(valid.id)
   const os = await loadHostOs(valid.id)
-  const pkg = await loadPkg(valid.id)
-  const mod = await loadMod(valid.id)
+  const pkgs = await loadHostPkgs(valid.id)
+  const mods = await loadHostMods(valid.id)
 
-  return res.send({ ...result, ips, macs, os, pkg, mod })
+  return res.send({ ...result, ips, macs, os, pkgs, mods })
 }
 
 /**
