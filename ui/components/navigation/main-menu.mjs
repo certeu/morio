@@ -21,12 +21,15 @@ import {
   FlagIcon,
   FlipoverIcon,
   GroupIcon,
+  GroupvarIcon,
   HardwareIcon,
+  HostvarIcon,
   KeyIcon,
   LayersIcon,
   LocationIcon,
   LogsIcon,
   MegaphoneIcon,
+  ModulevarIcon,
   MorioIcon,
   NoteIcon,
   OpenLockIcon,
@@ -89,7 +92,9 @@ const icons = {
   export: BriefcaseIcon,
   faq: QuestionIcon,
   groups: GroupIcon,
+  groupvars: GroupvarIcon,
   hosts: ServersIcon,
+  hostvars: HostvarIcon,
   images: ContainerImageIcon,
   inventory: ServersIcon,
   ips: LocationIcon,
@@ -97,6 +102,9 @@ const icons = {
   logs: LogsIcon,
   macs: HardwareIcon,
   metrics: StatusIcon,
+  mods: PuzzleIcon,
+  modvars: ModulevarIcon,
+  modfiles: CodeIcon,
   morio: MorioIcon,
   networks: WifiIcon,
   nodes: ServersIcon,
@@ -181,8 +189,16 @@ export const links = {
       t: 'Groups',
       r: 'user',
     },
+    groupvars: {
+      t: 'Group Variables',
+      r: 'user',
+    },
     hosts: {
       t: 'Hosts',
+      r: 'user',
+    },
+    hostvars: {
+      t: 'Host Variables',
       r: 'user',
     },
     ips: {
@@ -191,6 +207,18 @@ export const links = {
     },
     macs: {
       t: 'MAC Addresses',
+      r: 'user',
+    },
+    mods: {
+      t: 'Modules',
+      r: 'user',
+    },
+    modfiles: {
+      t: 'Module Files',
+      r: 'user',
+    },
+    modvars: {
+      t: 'Module Variables',
       r: 'user',
     },
     oss: {

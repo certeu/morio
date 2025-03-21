@@ -71,20 +71,19 @@ export const GroupsTable = () => {
 
   return (
     <>
-      {groups.length > 0 ? (
-        <div className="flex flex-row item-center gap-2">
-          <button className="btn btn-primary" onClick={() => pushModal(
-            <ModalWrapper keepOpenOnClick>
-              <BulkGroupUpdate groups={Object.keys(selection)} {...{refresh, setRefresh}}/>
-            </ModalWrapper>
-          )} disabled={count < 1}>
-            <CogIcon /> Update {count} Groups
-          </button>
-          <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-            <TrashIcon /> Remove {count} Groups
-          </button>
-        </div>
-      ) : null}
+      <div className="flex flex-row item-center gap-2">
+        <button className="btn btn-primary" onClick={() => pushModal(
+          <ModalWrapper keepOpenOnClick>
+            <BulkGroupUpdate groups={Object.keys(selection)} {...{refresh, setRefresh}}/>
+          </ModalWrapper>
+        )} disabled={count < 1}>
+          <CogIcon /> Update {count} Groups
+        </button>
+        <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
+          <TrashIcon /> Remove {count} Groups
+        </button>
+        <NewGroupButton {...{ refresh, setRefresh}}/>
+      </div>
       <table className="table table-auto">
         <thead>
           <tr>
@@ -144,7 +143,7 @@ export async function runGroupsTableApiCall(api) {
   else return false
 }
 
-export const NewGroupButton = () => {
+export const NewGroupButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
@@ -153,7 +152,7 @@ export const NewGroupButton = () => {
       onClick={() =>
         pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <NewGroup />
+            <NewGroup {...{refresh, setRefresh}} />
           </ModalWrapper>
         )
       }
@@ -164,7 +163,7 @@ export const NewGroupButton = () => {
   )
 }
 
-export const NewGroup = () => {
+export const NewGroup = ({ refresh, setRefresh }) => {
   // Hooks
   const { api } = useApi()
   const { clearModal } = useContext(ModalContext)
@@ -194,6 +193,7 @@ export const NewGroup = () => {
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Group created', true, true])
+      if (setRefresh) setRefresh(refresh+1)
     } else setLoadingStatus([true, 'Failed to create group', true, false])
   }
 
@@ -419,6 +419,23 @@ const GroupHierarchyEntry = ({ data, i=0, topLevel=false, parentId=false, refres
   const { pushModal } = useContext(ModalContext)
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
+  // Methods
+  const removeGroupFromGroup = async (group, member) => {
+    setLoadingStatus([ true, `Removing group ${member} from group ${group}`])
+    const result = await api.removeInventoryGroupMembers(group, { groups: [member] })
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+    setRefresh(refresh+1)
+  }
+
+  const removeHostFromGroup = async (group, host) => {
+    setLoadingStatus([ true, `Removing host ${host} from group ${group}`])
+    const result = await api.removeInventoryGroupMembers(group, { hosts: [host] })
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+    setRefresh(refresh+1)
+  }
+
   if (data.type !== 'group') return (
     <ul className="list list-inside ml-4">
       <GroupHierarchyHostEntry uuid={data.id} group={parentId} {...{ removeHostFromGroup }}/>
@@ -436,22 +453,6 @@ const GroupHierarchyEntry = ({ data, i=0, topLevel=false, parentId=false, refres
         <BulkGroupUpdate groups={Object.keys(selection)} {...{refresh, setRefresh}}/>
       </ModalWrapper>
     )
-  }
-
-  const removeGroupFromGroup = async (group, member) => {
-    setLoadingStatus([ true, `Removing group ${member} from group ${group}`])
-    const result = await api.removeInventoryGroupMembers(group, { groups: [member] })
-    if (setRefresh) setRefresh(refresh + 1)
-    setLoadingStatus([true, 'Nailed it', true, true])
-    setRefresh(refresh+1)
-  }
-
-  const removeHostFromGroup = async (group, host) => {
-    setLoadingStatus([ true, `Removing host ${host} from group ${group}`])
-    const result = await api.removeInventoryGroupMembers(group, { hosts: [host] })
-    if (setRefresh) setRefresh(refresh + 1)
-    setLoadingStatus([true, 'Nailed it', true, true])
-    setRefresh(refresh+1)
   }
 
   return (
@@ -512,6 +513,7 @@ const GroupHierarchyHostEntry = ({ uuid, group, removeHostFromGroup }) => (
     <ServersIcon />
     <InventoryHostname uuid={uuid} />
     <Uuid uuid={uuid} />
+    {group === uuid ? null : (
     <button
       className="btn btn-xs btn-error btn-ghost hover:btn-outline"
       title="Remove from group"
@@ -520,6 +522,7 @@ const GroupHierarchyHostEntry = ({ uuid, group, removeHostFromGroup }) => (
       <NoIcon className="w-4 h-4" stroke={3}/>
       Remove from group
     </button>
+    )}
   </li>
 )
 
