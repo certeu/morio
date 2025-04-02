@@ -28,7 +28,7 @@ export const HostvarsTable = () => {
 
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(macs, [order], [desc ? 'desc' : 'asc'])
+  const sorted = orderBy(hostvars, [order], [desc ? 'desc' : 'asc'])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
 
   // Effects
@@ -68,7 +68,7 @@ export const HostvarsTable = () => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 onClick={toggleAll}
-                checked={macs.length === count}
+                checked={hostvars.length === count}
               />
             </th>
             {['host', 'key', 'val', 'info'].map((field) => (

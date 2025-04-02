@@ -55,7 +55,7 @@ export const ModsTable = () => {
 
   return (
     <>
-      {macs.length > 0 ? (
+      {mods.length > 0 ? (
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
           <TrashIcon /> {count} Morio Modules
         </button>
@@ -68,7 +68,7 @@ export const ModsTable = () => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 onClick={toggleAll}
-                checked={macs.length === count}
+                checked={mods.length === count}
               />
             </th>
             {['mod', 'host', 'data'].map((field) => (
