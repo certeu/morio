@@ -1,5 +1,5 @@
 // Dependencies
-import { formatBytes, shortUuid, timeAgo, slugify, varify, inlineHelp } from 'lib/utils.mjs'
+import { varify, inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 import { runGroupsTableApiCall } from './group.mjs'
 // Context
@@ -9,26 +9,14 @@ import { LoadingStatusContext } from 'context/loading-status.mjs'
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
-import { useQuery } from '@tanstack/react-query'
 // Components
 import { Highlight } from 'components/highlight.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { SearchIcon, TipIcon, NoIcon, CogIcon, AddVarIcon, ServersIcon, AddGroupIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { PageLink, Link } from 'components/link.mjs'
-import { KeyVal } from 'components/keyval.mjs'
+import { TipIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { OsIcon } from './oss.mjs'
-import { IpsDisplayTable } from './ip.mjs'
-import { MacsDisplayTable } from './mac.mjs'
-import { Details } from '../details.mjs'
-import { HostAudit } from '../boards/audit.mjs'
-import { HostLogsTable } from 'components/boards/logs.mjs'
-import { HostMetricsTable } from 'components/boards/metrics.mjs'
-import { StringInput, TextInput, InventoryGroupInput, InventoryHostInput, SelectInput, MarkdownInput } from 'components/inputs.mjs'
-import { InventoryHostname, runHostsTableApiCall } from './host.mjs'
-import { Uuid } from 'components/uuid.mjs'
-import { Tab, Tabs } from 'components/tabs.mjs'
+import { StringInput, TextInput, SelectInput, MarkdownInput } from 'components/inputs.mjs'
 
 /**
  * This component renders a table with all groups
@@ -42,7 +30,6 @@ export const GroupvarsTable = () => {
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()
@@ -73,12 +60,12 @@ export const GroupvarsTable = () => {
 
   return (
     <>
-        <div className="flex flex-row item-center gap-2 justify-between">
-          <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-            <TrashIcon /> Remove {count} Groupvars
-          </button>
-          <NewGroupvarButton {...{refresh, setRefresh }}/>
-        </div>
+      <div className="flex flex-row item-center gap-2 justify-between">
+        <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
+          <TrashIcon /> Remove {count} Groupvars
+        </button>
+        <NewGroupvarButton {...{ refresh, setRefresh }} />
+      </div>
       <table className="table table-auto">
         <thead>
           <tr>
@@ -122,7 +109,9 @@ export const GroupvarsTable = () => {
               </td>
               <td className="">{groupvar.val}</td>
               <td className="">
-                <PageLink href={`/inventory/groups/${groupvar.group_id}`}>{groupvar.group_id}</PageLink>
+                <PageLink href={`/inventory/groups/${groupvar.group_id}`}>
+                  {groupvar.group_id}
+                </PageLink>
               </td>
             </tr>
           ))}
@@ -139,7 +128,7 @@ export async function runGroupvarsTableApiCall(api) {
   else return false
 }
 
-export const NewGroupvarButton = ({ refresh, setRefresh  }) => {
+export const NewGroupvarButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
@@ -148,7 +137,7 @@ export const NewGroupvarButton = ({ refresh, setRefresh  }) => {
       onClick={() =>
         pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <NewGroupvar {...{refresh, setRefresh}}/>
+            <NewGroupvar {...{ refresh, setRefresh }} />
           </ModalWrapper>
         )
       }
@@ -159,7 +148,7 @@ export const NewGroupvarButton = ({ refresh, setRefresh  }) => {
   )
 }
 
-export const NewGroupvar = ({ refresh, setRefresh}) => {
+export const NewGroupvar = ({ refresh, setRefresh }) => {
   // Hooks
   const { api } = useApi()
   const { clearModal } = useContext(ModalContext)
@@ -172,30 +161,29 @@ export const NewGroupvar = ({ refresh, setRefresh}) => {
   const [groups, setGroups] = useState([])
 
   // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
 
   // Effects
   useEffect(() => {
-    if (groups.length < 1) runGroupsTableApiCall(api).then((result) => setGroups(result.map(entry => entry.id)))
-  },[api, name])
+    if (groups.length < 1)
+      runGroupsTableApiCall(api).then((result) => setGroups(result.map((entry) => entry.id)))
+  }, [api, name])
 
   // Handler method to create a new group
   const createGroupvar = async () => {
-    setLoadingStatus([ true, 'Contacting API' ])
+    setLoadingStatus([true, 'Contacting API'])
     const result = await api.createGroupvar({ key: name, val, group, info })
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Groupvar created', true, true])
-      if (setRefresh) setRefresh((refresh || 0) +1)
+      if (setRefresh) setRefresh((refresh || 0) + 1)
     } else setLoadingStatus([true, 'Failed to create groupvar', true, false])
   }
 
   return (
     <div>
       <h3>Create a new group var</h3>
-      <p>
-        Group vars are key/value pairs that are tied to an inventory group.
-      </p>
+      <p>Group vars are key/value pairs that are tied to an inventory group.</p>
       <SelectInput
         label="Inventory Group"
         labelDflt="Choose a group to assign this var to"
@@ -203,23 +191,24 @@ export const NewGroupvar = ({ refresh, setRefresh}) => {
         update={setGroup}
         current={val}
         placeholder={`["gold", "blue"]`}
-        list={groups.map(group => ({ val: group, label: group }))}
+        list={groups.map((group) => ({ val: group, label: group }))}
       />
       <StringInput
         label="Var name (key)"
-        labelTR={(
+        labelTR={
           <div className="flex gap-1 flex-row items-center flex-wrap">
-            <TipIcon className="w-5 h-5 text-success"/>
-            <span>Var names that contain <code>SECRET</code> will be encrypted at rest</span>
+            <TipIcon className="w-5 h-5 text-success" />
+            <span>
+              Var names that contain <code>SECRET</code> will be encrypted at rest
+            </span>
           </div>
-        )}
+        }
         help={inlineHelp('inventory/groupvars#key')}
         update={(val) => setName(varify(val))}
         current={name}
         placeholder="EU_COLOURS"
-        valid={(val) => val
-          ? true
-          : { error: { details: [{ message: 'Group name cannot be empty' }] } }
+        valid={(val) =>
+          val ? true : { error: { details: [{ message: 'Group name cannot be empty' }] } }
         }
       />
       <TextInput
@@ -242,12 +231,16 @@ export const NewGroupvar = ({ refresh, setRefresh}) => {
         />
       </details>
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-      <button
-        className="btn btn-primary grow"
-        disabled={!(name && val && group)}
-        onClick={createGroupvar}
-      >Create Group Var</button>
-      <button className="btn btn-primary btn-outline" onClick={clearModal}>Cancel</button>
+        <button
+          className="btn btn-primary grow"
+          disabled={!(name && val && group)}
+          onClick={createGroupvar}
+        >
+          Create Group Var
+        </button>
+        <button className="btn btn-primary btn-outline" onClick={clearModal}>
+          Cancel
+        </button>
       </div>
     </div>
   )
@@ -267,20 +260,23 @@ export const GroupvarDetail = ({ data }) => {
     Group: <PageLink href={`/inventory/groups/${data.group_id}/`}>{data.group_id}</PageLink>,
     Value: <Highlight title={`Groupvar #${data.id}`}>{data.val}</Highlight>,
   }
-  if (data.info) output.Info = <div className="border rounded-lg p-4"><Markdown>{data.info}</Markdown></div>
+  if (data.info)
+    output.Info = (
+      <div className="border rounded-lg p-4">
+        <Markdown>{data.info}</Markdown>
+      </div>
+    )
 
   return (
     <>
       <ul className="list list-inside ml-4 list-disc">
         {Object.entries(output).map(([label, content]) => (
-        <li className="flex flex-row flex-wrap items-start gap-4 my-1">
-          <div className="text-right w-24 font-bold">{label}:</div>
-          <div className="grow">{content}</div>
-        </li>
+          <li className="flex flex-row flex-wrap items-start gap-4 my-1">
+            <div className="text-right w-24 font-bold">{label}:</div>
+            <div className="grow">{content}</div>
+          </li>
         ))}
       </ul>
     </>
   )
 }
-
-
