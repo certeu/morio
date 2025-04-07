@@ -23,13 +23,11 @@ import {
   GroupIcon,
   GroupvarIcon,
   HardwareIcon,
-  HostvarIcon,
   KeyIcon,
   LayersIcon,
   LocationIcon,
   LogsIcon,
   MegaphoneIcon,
-  ModulevarIcon,
   MorioIcon,
   NoteIcon,
   OpenLockIcon,
@@ -198,28 +196,12 @@ export const links = {
       t: 'Hosts',
       r: 'user',
     },
-    hostvars: {
-      t: 'Host Variables',
-      r: 'user',
-    },
     ips: {
       t: 'IP Addresses',
       r: 'user',
     },
     macs: {
       t: 'MAC Addresses',
-      r: 'user',
-    },
-    mods: {
-      t: 'Modules',
-      r: 'user',
-    },
-    modfiles: {
-      t: 'Module Files',
-      r: 'user',
-    },
-    modvars: {
-      t: 'Module Variables',
       r: 'user',
     },
     oss: {

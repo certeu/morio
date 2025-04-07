@@ -1,6 +1,7 @@
 // Dependencies
 import orderBy from 'lodash/orderBy.js'
 // Context
+import { slugify } from 'lib/utils.mjs'
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
@@ -457,7 +458,7 @@ const GroupHierarchyEntry = ({
   // Methods
   const removeGroupFromGroup = async (group, member) => {
     setLoadingStatus([true, `Removing group ${member} from group ${group}`])
-    const result = await api.removeInventoryGroupMembers(group, { groups: [member] })
+    await api.removeInventoryGroupMembers(group, { groups: [member] })
     if (setRefresh) setRefresh(refresh + 1)
     setLoadingStatus([true, 'Nailed it', true, true])
     setRefresh(refresh + 1)
@@ -465,7 +466,7 @@ const GroupHierarchyEntry = ({
 
   const removeHostFromGroup = async (group, host) => {
     setLoadingStatus([true, `Removing host ${host} from group ${group}`])
-    const result = await api.removeInventoryGroupMembers(group, { hosts: [host] })
+    await api.removeInventoryGroupMembers(group, { hosts: [host] })
     if (setRefresh) setRefresh(refresh + 1)
     setLoadingStatus([true, 'Nailed it', true, true])
     setRefresh(refresh + 1)
@@ -530,6 +531,7 @@ const GroupHierarchyEntry = ({
             <ul className="list list-inside ml-4">
               {hosts.map((host) => (
                 <GroupHierarchyHostEntry
+                  key={host.id}
                   uuid={host.id}
                   group={parentId}
                   {...{ removeHostFromGroup }}
@@ -605,7 +607,7 @@ export const AddMembersToGroup = ({ to, refresh, setRefresh }) => {
   // Helper method to add hosts/groups to group
   const updateMembers = async () => {
     setLoadingStatus([true, 'Updating group membership'])
-    const result = await api.addInventoryGroupMembers(to, {
+    await api.addInventoryGroupMembers(to, {
       hosts: Object.values(hosts),
       groups: Object.values(groups),
     })
