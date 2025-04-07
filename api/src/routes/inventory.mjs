@@ -59,20 +59,32 @@ export function routes(app) {
    */
   app.delete(`/inventory/ips/:id`, rbac.operator, inventory.deleteIp)
 
-  /*
-   * Read all Software Packages
-   */
-  app.get(`/inventory/pkgs`, rbac.user, inventory.listPkgs)
+  // Pkgs ///////////////////////
 
   /*
-   * Read an Software Package
+   * Create a pkg
+   */
+  app.post(`/inventory/pkg`, rbac.operator, inventory.createPkg)
+
+  /*
+   * Read a Software Package
    */
   app.get(`/inventory/pkgs/:id`, rbac.user, inventory.readPkg)
+
+  /*
+   * Update a Software Package
+   */
+  app.put(`/inventory/pkgs/:id`, rbac.user, inventory.updatePkg)
 
   /*
    * Delete an Software Package
    */
   app.delete(`/inventory/pkgs/:id`, rbac.operator, inventory.deletePkg)
+
+  /*
+   * Read all Software Packages
+   */
+  app.get(`/inventory/pkgs`, rbac.user, inventory.listPkgs)
 
   /*
    * Read all Morio Modules
@@ -239,11 +251,6 @@ export function routes(app) {
   app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
 
   /*
-   * Create a pkg
-   */
-  app.post(`/inventory/pkg`, rbac.operator, inventory.createPkg)
-
-  /*
    * Create a mod
    */
   app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
@@ -281,13 +288,20 @@ export function routes(app) {
   /*
    * Get inventory for Ansible as JSON
    */
-  app.get(`/inventory/ansible.json`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'json', false))
-  app.get(`/inventory/ansible-with-secrets.json`, rbac.operator, (req, res) => inventory.ansibleInventory(req, res, 'json', true))
+  app.get(`/inventory/ansible.json`, rbac.user, (req, res) =>
+    inventory.ansibleInventory(req, res, 'json', false)
+  )
+  app.get(`/inventory/ansible-with-secrets.json`, rbac.operator, (req, res) =>
+    inventory.ansibleInventory(req, res, 'json', true)
+  )
 
   /*
    * Get inventory for Ansible as YAML
    */
-  app.get(`/inventory/ansible.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', false))
-  app.get(`/inventory/ansible-with-secrets.yaml`, rbac.user, (req, res) => inventory.ansibleInventory(req, res, 'yaml', true))
-
+  app.get(`/inventory/ansible.yaml`, rbac.user, (req, res) =>
+    inventory.ansibleInventory(req, res, 'yaml', false)
+  )
+  app.get(`/inventory/ansible-with-secrets.yaml`, rbac.user, (req, res) =>
+    inventory.ansibleInventory(req, res, 'yaml', true)
+  )
 }

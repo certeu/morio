@@ -1,8 +1,7 @@
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import yaml from 'js-yaml'
 import {
   createIp,
-  createPkg,
   createMod,
   createModvar,
   createHostvar,
@@ -17,7 +16,6 @@ import {
   deleteGroup,
   deleteGroupvar,
   deleteIp,
-  deletePkg,
   deleteMod,
   deleteModvar,
   deleteHostvar,
@@ -53,7 +51,6 @@ import {
   loadHostPkgs,
   loadHostMods,
   loadIp,
-  loadPkg,
   loadMod,
   loadModvar,
   loadHostvar,
@@ -64,6 +61,7 @@ import {
   saveHost,
   updateGroup,
 } from '../lib/inventory.mjs'
+import { Pkg } from '../lib/inventory/index.mjs'
 
 /**
  * This inventory controller handles API access to the inventory.
@@ -245,9 +243,7 @@ Controller.prototype.isGroupAvailable = async function (req, res) {
   if (!req.params.group) return res.status(400).send()
   const available = await isGroupAvailable(req.params.group)
 
-  return available
-    ? res.status(404).send()
-    : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -268,7 +264,7 @@ Controller.prototype.createGroupvar = async function (req, res) {
   const id = await createGroupvar(valid.key, valid.val, valid.group, valid.info)
 
   return id
-    ? res.status(201).send({...valid, id})
+    ? res.status(201).send({ ...valid, id })
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
@@ -326,7 +322,7 @@ Controller.prototype.readGroup = async function (req, res) {
    */
   const members = {
     hosts: await loadGroupHostMembers(valid.id),
-    groups: await loadGroupGroupMembers(valid.id)
+    groups: await loadGroupGroupMembers(valid.id),
   }
 
   return res.send({ ...result, members })
@@ -387,7 +383,6 @@ Controller.prototype.readGroupMembers = async function (req, res) {
    */
   if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-
   return res.send(result)
 }
 
@@ -416,7 +411,6 @@ Controller.prototype.readGroupMemberOf = async function (req, res) {
    * Do not continue if it didn't work
    */
   if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
 
   return res.send(result)
 }
@@ -483,7 +477,10 @@ Controller.prototype.updateGroup = async function (req, res) {
   /*
    * Validate input
    */
-  const [valid, err] = await utils.validate(`req.inventory.updateGroup`, { ...req.params, ...req.body })
+  const [valid, err] = await utils.validate(`req.inventory.updateGroup`, {
+    ...req.params,
+    ...req.body,
+  })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
@@ -495,17 +492,14 @@ Controller.prototype.updateGroup = async function (req, res) {
   if (valid.action === 'description') {
     const group = updateGroup(valid.id, valid.description)
     return res.status(200).send(group)
-  }
-  else if (valid.action === 'join') {
-    const result = await addGroupToGroups(valid.id, valid.groups)
+  } else if (valid.action === 'join') {
+    await addGroupToGroups(valid.id, valid.groups)
     return res.status(201).send()
-  }
-  else if (valid.action === 'add-members') {
-    const result = await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+  } else if (valid.action === 'add-members') {
+    await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
     return res.status(201).send()
-  }
-  else if (valid.action === 'remove-members') {
-    const result = await removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+  } else if (valid.action === 'remove-members') {
+    await removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
     return res.status(201).send()
   }
 
@@ -569,30 +563,6 @@ Controller.prototype.readIp = async function (req, res) {
    * Read from inventory
    */
   const result = await loadIp(valid.id)
-
-  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-}
-
-/**
- * Read Software package
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.readPkg = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Read from inventory
-   */
-  const result = await loadPkg(valid.id)
 
   return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
@@ -713,36 +683,6 @@ Controller.prototype.deleteIp = async function (req, res) {
    * Delete from database
    */
   const result = await deleteIp(valid.id)
-
-  /*
-   * Be expicit when a key cannot be found
-   */
-
-  return result === true
-    ? res.status(204).send()
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * Delete Software package
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.deletePkg = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Delete from database
-   */
-  const result = await deletePkg(valid.id)
 
   /*
    * Be expicit when a key cannot be found
@@ -1160,29 +1100,6 @@ Controller.prototype.createIp = async function (req, res) {
 }
 
 /**
- * Creates a new Pkg
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.createPkg = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.createPkg`, req.body)
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  const created = await createPkg(valid.id, valid.name, valid.version)
-
-  return created
-    ? res.status(201).send(valid)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
  * Creates a new Mod
  *
  * @param {object} req - The request object from Express
@@ -1390,7 +1307,12 @@ Controller.prototype.createOs = async function (req, res) {
  * @param {string} format - One of 'json' or 'yaml'
  * @param {bool} withSecrets - Whether to include vars ending with SECRET
  */
-Controller.prototype.ansibleInventory = async function (req, res, format="yaml", withSecrets=false) {
+Controller.prototype.ansibleInventory = async function (
+  req,
+  res,
+  format = 'yaml',
+  withSecrets = false
+) {
   const inventory = await getAnsibleInventory(withSecrets)
 
   if (!inventory) return utils.sendErrorReponse(res, 'morio.api.db.failure', req.url)
@@ -1400,3 +1322,109 @@ Controller.prototype.ansibleInventory = async function (req, res, format="yaml",
     : res.setHeader('Content-Type', 'application/yaml').send(yaml.dump(inventory))
 }
 
+/**
+ * Creates a new Pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createPkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createPkg`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  const pkg = await new Pkg().setId(valid.id).setName(valid.name).setVersion(valid.version).save()
+
+  return pkg.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(201).send(valid)
+}
+
+/**
+ * Reads a Pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readPkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const pkg = await new Pkg(valid.id).read()
+
+  return pkg.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await pkg.asData())
+}
+
+/**
+ * Updates a Pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updatePkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updatePkg`, {
+    ...req.body,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Update the package
+   */
+  const pkg = await new Pkg(valid.id).setName(valid.name).setVersion(valid.version).save()
+
+  return pkg.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await pkg.asData())
+}
+
+/**
+ * Deletes a Pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deletePkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readPkg`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const pkg = await new Pkg(valid.id).delete()
+
+  /*
+   * Return
+   */
+  return pkg.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(204).send()
+}

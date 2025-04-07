@@ -249,10 +249,19 @@ export const schema = {
     id: Joi.string().required(),
     version: Joi.string().required(),
   }),
+  // Inventory - Pkgs
   'req.inventory.createPkg': Joi.object({
     id: Joi.string().required(),
     name: Joi.string().required(),
     version: Joi.string().required(),
+  }),
+  'req.inventory.readPkg': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.updatePkg': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string(),
+    version: Joi.string(),
   }),
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
@@ -338,9 +347,6 @@ export const schema = {
     id: Joi.string().required(),
   }),
   'req.inventory.readOs': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readPkg': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readMod': Joi.object({
