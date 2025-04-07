@@ -121,6 +121,8 @@ export async function addGroupToGroups(id, groups = []) {
 }
 
 export async function addGroupToGroup(id, group) {
+  let result = false
+
   const isUnknown = await isGroupAvailable(group)
   if (isUnknown) {
     log.warn(`Not adding group ${id} to ${group} because the target group does not exist`)
@@ -135,9 +137,12 @@ export async function addGroupToGroup(id, group) {
     /*
      * Insert into the database
      */
-    const result = await db.write(
+    result = await db.write(
       `INSERT INTO inventory_group_group(group_id, member_id) VALUES(:group, :id)`,
-      { id, group }
+      {
+        id,
+        group,
+      }
     )
   }
 
