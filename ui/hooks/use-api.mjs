@@ -33,6 +33,8 @@ export function MorioClient(headers = {}) {
 MorioClient.prototype.call = async function (url, data, raw = false) {
   let response
   try {
+    console.log('url', url)
+    console.log('data', data)
     response = await fetch(url, data)
   } catch (err) {
     return [err, false]

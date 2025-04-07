@@ -1,6 +1,6 @@
 import { log } from '../utils.mjs'
 import { clean } from '../account.mjs'
-import { db } from './db.mjs'
+import { db } from '../db.mjs'
 import { deleteRecord, resultsAsList } from './util.mjs'
 
 /**

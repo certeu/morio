@@ -2,7 +2,7 @@ import { log, utils } from '../utils.mjs'
 import { asTime, clean } from '../account.mjs'
 import { get, asScalarOrJson } from '#shared/utils'
 import ipaddr from 'ipaddr.js'
-import { db } from './db.mjs'
+import { db } from '../db.mjs'
 import { deleteRecord, resultsAsList } from './util.mjs'
 
 /*

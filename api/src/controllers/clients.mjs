@@ -18,7 +18,7 @@ import {
   setClientVariables,
   useInvite,
   verifyModulesExist,
-} from '../lib/inventory.mjs'
+} from '../lib/inventory/index.mjs'
 import { createApikey, deleteApikey } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { currentUser } from '../rbac.mjs'
