@@ -5,6 +5,23 @@ import ipaddr from 'ipaddr.js'
 import { db } from './db.mjs'
 import { deleteRecord, resultsAsList } from './util.mjs'
 
+/*
+ * This maps the fields to a method to format the field
+ */
+const fields = {
+  host: {
+    id: clean,
+    arch: clean,
+    cores: Number,
+    fqdn: clean,
+    memory: Number,
+    name: clean,
+    notes: (val) => val.map((item) => clean(item)),
+    tags: (val) => val.map((item) => clean(item)),
+    last_update: asTime,
+  },
+}
+
 /**
  * Helper method to list hosts in the inventory
  *

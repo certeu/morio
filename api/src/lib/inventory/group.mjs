@@ -141,7 +141,7 @@ export async function addGroupToGroup(id, group) {
     )
   }
 
-  return
+  return result
 }
 
 export async function addHostToGroup(host, group) {
@@ -154,7 +154,7 @@ export async function addHostToGroup(host, group) {
     { host, group }
   )
 
-  return
+  return result
 }
 
 export async function removeHostFromGroup(host, group) {
@@ -167,7 +167,7 @@ export async function removeHostFromGroup(host, group) {
     { host, group }
   )
 
-  return
+  return result
 }
 
 export async function removeGroupFromGroup(member, group) {
@@ -181,7 +181,7 @@ export async function removeGroupFromGroup(member, group) {
   )
   log.todo(result)
 
-  return
+  return result
 }
 
 export async function addMembersToGroup(group, { hosts = [], groups = [] }) {

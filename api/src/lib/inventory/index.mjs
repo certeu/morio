@@ -3,24 +3,8 @@ import { randomString } from '#shared/crypto'
 // Load the database client
 import { db } from '../db.mjs'
 // Shared code from accounts
-import { asTime, clean, fromJson } from '../account.mjs'
-
-/*
- * This maps the fields to a method to format the field
- */
-const fields = {
-  host: {
-    id: clean,
-    arch: clean,
-    cores: Number,
-    fqdn: clean,
-    memory: Number,
-    name: clean,
-    notes: (val) => val.map((item) => clean(item)),
-    tags: (val) => val.map((item) => clean(item)),
-    last_update: asTime,
-  },
-}
+import { fromJson } from '../account.mjs'
+import { resultsAsList } from './util.mjs'
 
 /*
  * This maps the fields to a method to unserialize the value
@@ -92,8 +76,7 @@ export async function getAnsibleInventory(withSecrets = false) {
 
   // Structure as ansible inventory
   const ansinv = { all: { hosts: {} } }
-  for (const [uuid, host] of Object.entries(inventory))
-    ansinv.all.hosts[host.morio_host_fqdn] = host
+  for (const [host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
 
   // Add groups based on morio modules
   for (const mod of hostmods) {

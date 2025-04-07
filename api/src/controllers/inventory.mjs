@@ -1,4 +1,4 @@
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import yaml from 'js-yaml'
 import {
   createIp,
@@ -495,13 +495,13 @@ Controller.prototype.updateGroup = async function (req, res) {
     const group = updateGroup(valid.id, valid.description)
     return res.status(200).send(group)
   } else if (valid.action === 'join') {
-    const result = await addGroupToGroups(valid.id, valid.groups)
+    await addGroupToGroups(valid.id, valid.groups)
     return res.status(201).send()
   } else if (valid.action === 'add-members') {
-    const result = await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
     return res.status(201).send()
   } else if (valid.action === 'remove-members') {
-    const result = await removeMembersFromGroup(valid.id, {
+    await removeMembersFromGroup(valid.id, {
       groups: valid.groups,
       hosts: valid.hosts,
     })

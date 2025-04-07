@@ -1,5 +1,13 @@
 import { db } from './db.mjs'
 
+/*
+ * This maps the fields to a method to unserialize the value
+ */
+const values = {
+  password: fromJson,
+  scratch_codes: fromJson,
+}
+
 /**
  * Helper function to delete a record from a table
  *
