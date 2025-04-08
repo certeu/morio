@@ -29,6 +29,7 @@ import {
   listHosts,
   listIps,
   listPkgs,
+  listOss,
   listMods,
   listModvars,
   listHostvars,
@@ -831,6 +832,20 @@ Controller.prototype.listIps = async function (req, res) {
  */
 Controller.prototype.listPkgs = async function (req, res) {
   const list = await listPkgs()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List Operating systems
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listOss = async function (req, res) {
+  const list = await listOss()
 
   return Array.isArray(list)
     ? res.send(list)

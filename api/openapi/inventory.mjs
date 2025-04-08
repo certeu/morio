@@ -184,7 +184,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.get('/inventory/oss/{id}', {
     ...shared,
-    parameters,
+    parameters_oss,
     security,
     operationId: 'os.read',
     summary: `Read a Operating System`,
@@ -208,7 +208,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.put('/inventory/oss/{id}', {
     ...shared,
-    parameters,
+    parameters_oss,
     security,
     operationId: 'os.update',
     summary: `Update Operating System`,
@@ -245,7 +245,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.delete('/inventory/oss/{id}', {
     ...shared,
-    parameters,
+    parameters_oss,
     security,
     operationId: 'os.delete',
     summary: `Delete Operating System`,
