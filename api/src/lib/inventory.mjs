@@ -164,13 +164,13 @@ export async function addGroupToGroup(id, group) {
     /*
      * Insert into the database
      */
-    const result = await db.write(
-      `INSERT INTO inventory_group_group(group_id, member_id) VALUES(:group, :id)`,
-      { id, group }
-    )
+    await db.write(`INSERT INTO inventory_group_group(group_id, member_id) VALUES(:group, :id)`, {
+      id,
+      group,
+    })
   }
 
-  return result
+  return
 }
 
 export async function addHostToGroup(host, group) {
