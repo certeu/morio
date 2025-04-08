@@ -37,6 +37,9 @@ ENV NODE_ENV production
 ## Copy the various PM2 scripts into the PATH
 COPY --from=builder /morio/core/bin/* /usr/local/bin/
 
+## Copy the PM2 config file
+COPY --from=builder /morio/core/pm2.stable.config.js /morio/core/pm2.config.js
+
 # Copy dependencies that were kept out of the bundle
 COPY --from=builder /morio/core/node_modules/ssh2 ./node_modules/ssh2
 COPY --from=builder /morio/core/node_modules/asn1 ./node_modules/asn1
@@ -52,9 +55,4 @@ RUN npm install pm2 -g
 COPY --from=builder /morio/core/dist/index.mjs ./dist/index.mjs
 
 ## Now run NodeJS code inside PM2
-CMD [ "pm2-runtime", \
-  "--name", "core", \
-  "--namespace", "morio", \
-  "--log-type", "json", \
-  "--max-memory-bytes", "250000000", \
-  "./dist/index.mjs" ]
+CMD [ "pm2-runtime", "start", "/morio/core/pm2.config.js" ]

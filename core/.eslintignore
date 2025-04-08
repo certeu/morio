@@ -8,3 +8,5 @@ run-unit-tests.sh
 *.md
 control
 postinst
+pm2.*.config.js
+

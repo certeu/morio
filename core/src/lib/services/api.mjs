@@ -1,5 +1,5 @@
 import { utils, log } from '../utils.mjs'
-import { chown, mkdir } from '#shared/fs'
+import { chown, mkdir, writeFile } from '#shared/fs'
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { ensureServiceCertificate } from '#lib/tls'
@@ -84,6 +84,16 @@ async function ensureLocalPrerequisites() {
    * (this will only renew the cert if it's missing or old)
    */
   await ensureServiceCertificate('api', false)
+
+  /*
+   * Write PM2 config file
+   */
+  const pm2 = utils.getMorioServiceConfig('api')
+  if (pm2)
+    await writeFile(
+      `/etc/morio/api/pm2.config.js`,
+      `module.exports=${JSON.stringify(utils.getMorioServiceConfig('api').pm2, null, 2)}`
+    )
 
   return
 }

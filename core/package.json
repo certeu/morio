@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node build.mjs",
     "clean": "rimraf dist",
-    "dev": "nodemon src/index.mjs -w src -w config -w shared -w openapi --quiet -- --no-warnings",
+    "dev": "NODE_ENV=development pm2-runtime start /morio/core/pm2.dev.config.js",
     "lint": "eslint --fix 'src/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
     "test": "../scripts/testcheck.sh && docker exec -it morio-core node --no-warnings --test-concurrency=1 --test",

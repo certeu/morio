@@ -41,9 +41,4 @@ COPY --from=builder /morio/api/dist/index.mjs ./dist/index.mjs
 
 ## Drop privleges and run NodeJS code via pm2
 USER ${USER:-morio}
-CMD [ "pm2-runtime", \
-  "--name", "api", \
-  "--namespace", "morio", \
-  "--log-type", "json", \
-  "--max-memory-bytes", "250000000", \
-  "./dist/index.mjs" ]
+CMD [ "pm2-runtime", "start", "/etc/morio/api/pm2.config.js" ]
