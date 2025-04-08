@@ -55,7 +55,7 @@ export const NavButton = ({
   /*
    * Pre-calculate some things we need
    */
-  const className = `w-full flex flex-row items-center px-4 py-2 rounded-l-lg ${extraClasses} ${
+  const className = `w-full flex flex-row items-center px-4 py-2 rounded-l-lg text-left ${extraClasses} ${
     active
       ? here
         ? 'bg-secondary bg-opacity-20 font-bold text-inherit border-secondary border border-r-0'
