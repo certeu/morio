@@ -43,7 +43,7 @@ describe('Inventory Oss Tests', async () => {
     assert.equal(status, 200)
     assert.equal(body.id, os.id)
     assert.equal(body.name, os.name)
-    assert.equal(body.version, '2.0')
+    assert.equal(body.version, '2')
   })
 
   // DELETE /inventory/os/{id}
