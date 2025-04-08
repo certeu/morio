@@ -263,6 +263,20 @@ export const schema = {
     name: Joi.string(),
     version: Joi.string(),
   }),
+  // Inventory - Oss
+  'req.inventory.createOs': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string().required(),
+    version: Joi.string().required(),
+  }),
+  'req.inventory.readOs': Joi.object({
+    id: Joi.string().required(),
+  }),
+  'req.inventory.updateOs': Joi.object({
+    id: Joi.string().required(),
+    name: Joi.string(),
+    version: Joi.string(),
+  }),
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
     data: Joi.string(),
@@ -302,11 +316,6 @@ export const schema = {
     tags: Joi.string(),
     last_update: Joi.string().isoDate(),
   }),
-  'req.inventory.createOs': Joi.object({
-    id: Joi.string().required(),
-    name: Joi.string().required(),
-    version: Joi.string().required(),
-  }),
   'req.inventory.createGroup': Joi.object({
     id: Joi.string().required(),
     description: Joi.string().allow(''),
@@ -344,9 +353,6 @@ export const schema = {
     id: Joi.string().required(),
   }),
   'req.inventory.readIp': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readOs': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readMod': Joi.object({

@@ -8,7 +8,6 @@ import {
   createModfile,
   createMac,
   createHost,
-  createOs,
   addGroupToGroups,
   addMembersToGroup,
   createGroup,
@@ -22,7 +21,6 @@ import {
   deleteModfile,
   deleteMac,
   deleteHost,
-  deleteOs,
   getAnsibleInventory,
   getStats,
   isGroupAvailable,
@@ -36,7 +34,6 @@ import {
   listHostvars,
   listModfiles,
   listMacs,
-  listOss,
   loadGroup,
   loadGroupHostMembers,
   loadGroupGroupMembers,
@@ -56,12 +53,11 @@ import {
   loadHostvar,
   loadModfile,
   loadMac,
-  loadOs,
   removeMembersFromGroup,
   saveHost,
   updateGroup,
 } from '../lib/inventory.mjs'
-import { Pkg } from '../lib/inventory/index.mjs'
+import { Pkg, Os } from '../lib/inventory/index.mjs'
 
 /**
  * This inventory controller handles API access to the inventory.
@@ -967,81 +963,6 @@ Controller.prototype.listMacs = async function (req, res) {
 }
 
 /**
- * Read OS
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.readOs = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Read from inventory
-   */
-  const result = await loadOs(valid.id)
-
-  /*
-   * Be expicit when a key cannot be found
-   */
-  if (result[1] === 404) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-
-  return result[1] === null
-    ? res.send({ key: valid.key, value: result[0] })
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * Delete OS
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.deleteOs = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Delete from database
-   */
-  const result = await deleteOs(valid.id)
-
-  /*
-   * Be expicit when a key cannot be found
-   */
-
-  return result === true
-    ? res.status(204).send()
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * List Operating Systems
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listOss = async function (req, res) {
-  const list = await listOss()
-
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
  * Read stats, gather statistics about the inventory
  *
  * @param {object} req - The request object from Express
@@ -1276,29 +1197,6 @@ Controller.prototype.createHost = async function (req, res) {
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
-/**
- * Creates a new Os
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.createOs = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.createOs`, req.body)
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  const created = await createOs(valid.id, valid.name, valid.version)
-
-  return created
-    ? res.status(201).send(valid)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
 /*
  * Provide inventory as an Ansible-compatible inventory
  *
@@ -1425,6 +1323,113 @@ Controller.prototype.deletePkg = async function (req, res) {
    * Return
    */
   return pkg.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(204).send()
+}
+
+/**
+ * Creates a new Os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createOs`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  const os = await new Os().setId(valid.id).setName(valid.name).setVersion(valid.version).save()
+
+  return os.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(201).send(valid)
+}
+
+/**
+ * Reads a Os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const os = await new Os(valid.id).read()
+
+  return os.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await os.asData())
+}
+
+/**
+ * Updates a Os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updateOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updateOs`, {
+    ...req.body,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Update the os
+   */
+  const os = await new Os(valid.id).setName(valid.name).setVersion(valid.version).save()
+
+  return os.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await os.asData())
+}
+
+/**
+ * Deletes a Os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readOs`, { id: req.params.id })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const os = await new Os(valid.id).delete()
+
+  /*
+   * Return
+   */
+  return os.getError()
     ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
     : res.status(204).send()
 }

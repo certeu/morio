@@ -86,6 +86,33 @@ export function routes(app) {
    */
   app.get(`/inventory/pkgs`, rbac.user, inventory.listPkgs)
 
+  // Oss ///////////////////////
+
+  /*
+   * Create a os
+   */
+  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
+
+  /*
+   * Read an Operating System
+   */
+  app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
+
+  /*
+   * Update a Operating System
+   */
+  app.put(`/inventory/oss/:id`, rbac.user, inventory.updateOs)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
+
+  /*
+   * Read all Operating Systems
+   */
+  app.get(`/inventory/oss`, rbac.user, inventory.listOss)
+
   /*
    * Read all Morio Modules
    */
@@ -160,21 +187,6 @@ export function routes(app) {
    * Delete a MAC address
    */
   app.delete(`/inventory/macs/:id`, rbac.operator, inventory.deleteMac)
-
-  /*
-   * Read all Operating Systems
-   */
-  app.get(`/inventory/oss`, rbac.user, inventory.listOss)
-
-  /*
-   * Read an Operating System
-   */
-  app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
-
-  /*
-   * Delete an Operating System
-   */
-  app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
 
   /*
    * Create a group
@@ -279,11 +291,6 @@ export function routes(app) {
    * Create a host
    */
   app.post(`/inventory/host`, rbac.operator, inventory.createHost)
-
-  /*
-   * Create a os
-   */
-  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
 
   /*
    * Get inventory for Ansible as JSON

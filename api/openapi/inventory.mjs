@@ -13,6 +13,16 @@ const parameters = [
   },
 ]
 
+const parameters_oss = [
+  {
+    in: 'path',
+    name: `id`,
+    schema: j2s(Joi.string().required().description('The id of the operating system')).swagger,
+    required: true,
+    description: 'The id of the operation system in the inventory',
+  },
+]
+
 export default function (api) {
   const shared = { tags: ['inventory'] }
   api.tag('inventory', "Endpoints to manage Morio's inventory (FIXME: document these)")
@@ -132,6 +142,114 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'pkg.delete',
     summary: `Delete Software Package`,
     description: `Removes the software package with id \`id\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Oss
+  api.post('/inventory/oss', {
+    ...shared,
+    security,
+    operationId: 'oss.create',
+    summary: `Create Operation System`,
+    description: `Creates a operating system in the inventory.`,
+    requestBody: {
+      description: 'The os data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createOs']).swagger,
+          example: { id: 'debian|15.1.4', name: 'debian', version: '15.1.4' },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/oss/{id}', {
+    ...shared,
+    parameters,
+    security,
+    operationId: 'os.read',
+    summary: `Read a Operating System`,
+    description: `Reads a Operating System from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The os data',
+        example: {
+          id: 'debian|15.1.4',
+          name: 'debian',
+          version: '15.1.4',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/oss/{id}', {
+    ...shared,
+    parameters,
+    security,
+    operationId: 'os.update',
+    summary: `Update Operating System`,
+    description: `Updates a operating system in the inventory.
+
+    Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The os data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(Joi.object({ name: Joi.string(), version: Joi.string() })).swagger,
+          example: { name: 'debian', version: '15.1.4' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The os data',
+        example: {
+          id: 'debian|15.1.4',
+          name: 'debian',
+          version: '15.1.4',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/oss/{id}', {
+    ...shared,
+    parameters,
+    security,
+    operationId: 'os.delete',
+    summary: `Delete Operating System`,
+    description: `Removes the operating system with id \`id\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([
