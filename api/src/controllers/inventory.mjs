@@ -28,8 +28,6 @@ import {
   listGroupvars,
   listHosts,
   listIps,
-  listPkgs,
-  listOss,
   listMods,
   listModvars,
   listHostvars,
@@ -825,34 +823,6 @@ Controller.prototype.listIps = async function (req, res) {
 }
 
 /**
- * List Software packages
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listPkgs = async function (req, res) {
-  const list = await listPkgs()
-
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * List Operating systems
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listOss = async function (req, res) {
-  const list = await listOss()
-
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
  * List Morio modules
  *
  * @param {object} req - The request object from Express
@@ -1343,6 +1313,20 @@ Controller.prototype.deletePkg = async function (req, res) {
 }
 
 /**
+ * List Software packages
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listPkgs = async function (req, res) {
+  const list = await new Pkg().list()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
  * Creates a new Os
  *
  * @param {object} req - The request object from Express
@@ -1447,4 +1431,18 @@ Controller.prototype.deleteOs = async function (req, res) {
   return os.getError()
     ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
     : res.status(204).send()
+}
+
+/**
+ * List Operating systems
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listOss = async function (req, res) {
+  const list = await new Os().list()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }

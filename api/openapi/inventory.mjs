@@ -3,7 +3,7 @@ import { Joi } from '#shared/schema'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponses, security } from './index.mjs'
 
-const parameters = [
+const parameters_pkg = [
   {
     in: 'path',
     name: `id`,
@@ -76,7 +76,7 @@ export default function (api) {
 
   api.get('/inventory/pkgs/{id}', {
     ...shared,
-    parameters,
+    parameters: parameters_pkg,
     security,
     operationId: 'pkg.read',
     summary: `Read a Software Package`,
@@ -100,7 +100,7 @@ export default function (api) {
 
   api.put('/inventory/pkgs/{id}', {
     ...shared,
-    parameters,
+    parameters: parameters_pkg,
     security,
     operationId: 'pkg.update',
     summary: `Update Software Package`,
@@ -137,7 +137,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.delete('/inventory/pkgs/{id}', {
     ...shared,
-    parameters,
+    parameters: parameters_pkg,
     security,
     operationId: 'pkg.delete',
     summary: `Delete Software Package`,
@@ -184,7 +184,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.get('/inventory/oss/{id}', {
     ...shared,
-    parameters_oss,
+    parameters: parameters_oss,
     security,
     operationId: 'os.read',
     summary: `Read a Operating System`,
@@ -208,7 +208,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.put('/inventory/oss/{id}', {
     ...shared,
-    parameters_oss,
+    parameters: parameters_oss,
     security,
     operationId: 'os.update',
     summary: `Update Operating System`,
@@ -245,7 +245,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.delete('/inventory/oss/{id}', {
     ...shared,
-    parameters_oss,
+    parameters: parameters_oss,
     security,
     operationId: 'os.delete',
     summary: `Delete Operating System`,

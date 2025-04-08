@@ -57,8 +57,6 @@ Os.prototype.create = async function ({ id, name, version }) {
     result[1]?.results?.[0]?.last_insert_id
     ? this.setId(id).setSaved(true).setError(false)
     : this.setError('Failed to create record')
-
-  //await addHostNamesToList(found, 'host'))[0]
 }
 
 /*
@@ -155,16 +153,10 @@ Os.prototype.delete = async function () {
   try {
     result = await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id: this.getId() })
   } catch (err) {
-    console.log(err)
     return this.setError(err)
   }
 
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.clear()
-    : this.setError('Failed to create record')
+  return result?.[0] === 200 ? this.clear() : this.setError('Failed to delete record')
 }
 
 /**
@@ -198,6 +190,22 @@ Os.prototype.read = async function (id = false) {
   return result && Array.isArray(result) && result[0] === 200
     ? this
     : this.setError('Failed to create record')
+}
+
+/**
+ * List all OS records
+ */
+Os.prototype.list = async function () {
+  let result = false
+  try {
+    result = await db.read(`SELECT * FROM inventory_oss ORDER BY name`)
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result && Array.isArray(result) && result[0] === 200
+    ? result[1].results
+    : this.setError('Failed to fetch OS list')
 }
 
 /*
