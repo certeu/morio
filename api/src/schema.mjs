@@ -284,6 +284,16 @@ export const schema = {
     ip: Joi.string().required(),
     version: Joi.string(),
   }),
+  // Inventory - Macs
+  'req.inventory.createMac': Joi.object({
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.readMac': Joi.object({
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.updateMac': Joi.object({
+    mac: Joi.string().required(),
+  }),
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
     data: Joi.string(),
@@ -308,9 +318,6 @@ export const schema = {
     file: Joi.string(),
     content: Joi.string(),
     source: Joi.string(),
-  }),
-  'req.inventory.createMac': Joi.object({
-    mac: Joi.string().required(),
   }),
   'req.inventory.createHost': Joi.object({
     id: Joi.string().required(),
@@ -369,9 +376,6 @@ export const schema = {
     id: Joi.string().required(),
   }),
   'req.inventory.readModfile': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readMac': Joi.object({
     id: Joi.string().required(),
   }),
   // This is for the request body

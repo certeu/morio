@@ -33,6 +33,16 @@ const parameters_ips = [
   },
 ]
 
+const parameters_macs = [
+  {
+    in: 'path',
+    name: `name`,
+    schema: j2s(Joi.string().required().description('The mac address of the host')).swagger,
+    required: true,
+    description: 'The mac address of the host in the inventory',
+  },
+]
+
 export default function (api) {
   const shared = { tags: ['inventory'] }
   api.tag('inventory', "Endpoints to manage Morio's inventory (FIXME: document these)")
@@ -366,6 +376,110 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'ip.delete',
     summary: `Delete IP`,
     description: `Removes the ip with ip \`ip\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Mac
+  api.post('/inventory/mac', {
+    ...shared,
+    security,
+    operationId: 'mac.create',
+    summary: `Create Mac`,
+    description: `Creates a mac address in the inventory.`,
+    requestBody: {
+      description: 'The mac address',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createMac']).swagger,
+          example: { mac: '12:34:56:78:90:ab' },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/macs/{mac}', {
+    ...shared,
+    parameters: parameters_macs,
+    security,
+    operationId: 'mac.read',
+    summary: `Read a Mac`,
+    description: `Reads a Mac from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The mac address',
+        example: {
+          mac: '12:34:56:78:90:ab',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/macs/{mac}', {
+    ...shared,
+    parameters: parameters_macs,
+    security,
+    operationId: 'mac.update',
+    summary: `Update mac address`,
+    description: `Updates a mac address in the inventory.
+    
+    Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The mac address',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(Joi.object({ mac: Joi.string() })).swagger,
+          example: { ip: '12:34:56:78:90:ab' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The mac address',
+        example: {
+          mac: '12:34:56:78:90:ab',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/macs/{mac}', {
+    ...shared,
+    parameters: parameters_macs,
+    security,
+    operationId: 'mac.delete',
+    summary: `Delete mac address`,
+    description: `Removes the mac with mac address \`mac\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([

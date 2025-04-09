@@ -125,6 +125,33 @@ export function routes(app) {
    */
   app.get(`/inventory/ips`, rbac.user, inventory.listIps)
 
+  // Macs ///////////////////////
+
+  /*
+   * Create a mac
+   */
+  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
+
+  /*
+   * Read an Mac
+   */
+  app.get(`/inventory/macs/:mac`, rbac.user, inventory.readMac)
+
+  /*
+   * Update a Mac
+   */
+  app.put(`/inventory/macs/:mac`, rbac.user, inventory.updateMac)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/macs/:mac`, rbac.operator, inventory.deleteMac)
+
+  /*
+   * Read all Mac
+   */
+  app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
+
   /*
    * Read all Morio Modules
    */

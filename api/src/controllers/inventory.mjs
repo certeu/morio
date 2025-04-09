@@ -5,7 +5,6 @@ import {
   createModvar,
   createHostvar,
   createModfile,
-  createMac,
   createHost,
   addGroupToGroups,
   addMembersToGroup,
@@ -17,7 +16,6 @@ import {
   deleteModvar,
   deleteHostvar,
   deleteModfile,
-  deleteMac,
   deleteHost,
   getAnsibleInventory,
   getStats,
@@ -29,7 +27,6 @@ import {
   listModvars,
   listHostvars,
   listModfiles,
-  listMacs,
   loadGroup,
   loadGroupHostMembers,
   loadGroupGroupMembers,
@@ -47,12 +44,11 @@ import {
   loadModvar,
   loadHostvar,
   loadModfile,
-  loadMac,
   removeMembersFromGroup,
   saveHost,
   updateGroup,
 } from '../lib/inventory.mjs'
-import { Pkg, Os, Ip } from '../lib/inventory/index.mjs'
+import { Pkg, Os, Ip, Mac } from '../lib/inventory/index.mjs'
 
 /**
  * This inventory controller handles API access to the inventory.
@@ -807,75 +803,6 @@ Controller.prototype.listModfiles = async function (req, res) {
 }
 
 /**
- * Read MAC address
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.readMac = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readMac`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Read from inventory
-   */
-  const result = await loadMac(valid.id)
-
-  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-}
-
-/**
- * Delete MAC
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.deleteMac = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readMac`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Delete from database
-   */
-  const result = await deleteMac(valid.id)
-
-  /*
-   * Be expicit when a key cannot be found
-   */
-  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
-
-  return result === true
-    ? res.status(204).send()
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * List MAC addresses
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listMacs = async function (req, res) {
-  const list = await listMacs()
-
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
  * Read stats, gather statistics about the inventory
  *
  * @param {object} req - The request object from Express
@@ -1026,29 +953,6 @@ Controller.prototype.createModfile = async function (req, res) {
     valid.content,
     valid.source
   )
-
-  return created
-    ? res.status(201).send(valid)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * Creates a new Mac
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.createMac = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.createMac`, req.body)
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  const created = await createMac(valid.mac)
 
   return created
     ? res.status(201).send(valid)
@@ -1368,7 +1272,7 @@ Controller.prototype.createIp = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const ip = await new Ip().setId(valid.ip).setVersion(valid.version).save()
+  const ip = await new Ip().setId(valid.ip).setIp(valid.ip).setVersion(valid.version).save()
 
   return ip.getError()
     ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
@@ -1467,6 +1371,127 @@ Controller.prototype.deleteIp = async function (req, res) {
  */
 Controller.prototype.listIps = async function (req, res) {
   const list = await new Ip().list()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new Mac address
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.createMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createMac`, req.body)
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  const mac = await new Mac().setId(valid.mac).setMac(valid.mac).save()
+
+  return mac.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(201).send(valid)
+}
+
+/**
+ * Reads a Mac
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.readMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMac`, { mac: req.params.mac })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Read from inventory
+   */
+  const mac = await new Mac(valid.mac).read()
+
+  return mac.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await mac.asData())
+}
+
+/**
+ * Updates a Mac
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updateMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updateMac`, {
+    ...req.body,
+    mac: req.params.mac,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Update the mac
+   */
+  const mac = await new Mac(valid.mac).setMac(valid.mac).save()
+
+  return mac.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
+    : res.send(await mac.asData())
+}
+
+/**
+ * Deletes a Mac
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMac`, { mac: req.params.mac })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from database
+   */
+  const mac = await new Mac(valid.mac).delete()
+
+  /*
+   * Return
+   */
+  return mac.getError()
+    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+    : res.status(204).send()
+}
+
+/**
+ * List Macs
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.listMacs = async function (req, res) {
+  const list = await new Mac().list()
 
   return Array.isArray(list)
     ? res.send(list)
