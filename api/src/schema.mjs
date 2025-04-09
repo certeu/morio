@@ -244,11 +244,6 @@ export const schema = {
     iv: Joi.string().required(),
     ct: Joi.string().required(),
   }),
-  // Inventory
-  'req.inventory.createIp': Joi.object({
-    id: Joi.string().required(),
-    version: Joi.string().required(),
-  }),
   // Inventory - Pkgs
   'req.inventory.createPkg': Joi.object({
     id: Joi.string().required(),
@@ -275,6 +270,18 @@ export const schema = {
   'req.inventory.updateOs': Joi.object({
     id: Joi.string().required(),
     name: Joi.string(),
+    version: Joi.string(),
+  }),
+  // Inventory - Ips
+  'req.inventory.createIp': Joi.object({
+    ip: Joi.string().required(),
+    version: Joi.string().required(),
+  }),
+  'req.inventory.readIp': Joi.object({
+    ip: Joi.string().required(),
+  }),
+  'req.inventory.updateIp': Joi.object({
+    ip: Joi.string().required(),
     version: Joi.string(),
   }),
   'req.inventory.createMod': Joi.object({
@@ -350,9 +357,6 @@ export const schema = {
     hosts: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readIp': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readMod': Joi.object({

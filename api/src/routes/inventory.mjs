@@ -44,21 +44,6 @@ export function routes(app) {
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
 
-  /*
-   * Read all IP addresses
-   */
-  app.get(`/inventory/ips`, rbac.user, inventory.listIps)
-
-  /*
-   * Read an IP address
-   */
-  app.get(`/inventory/ips/:id`, rbac.user, inventory.readIp)
-
-  /*
-   * Delete an IP address
-   */
-  app.delete(`/inventory/ips/:id`, rbac.operator, inventory.deleteIp)
-
   // Pkgs ///////////////////////
 
   /*
@@ -112,6 +97,33 @@ export function routes(app) {
    * Read all Operating Systems
    */
   app.get(`/inventory/oss`, rbac.user, inventory.listOss)
+
+  // Ips ///////////////////////
+
+  /*
+   * Create a ip
+   */
+  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
+
+  /*
+   * Read an IP
+   */
+  app.get(`/inventory/ips/:ip`, rbac.user, inventory.readIp)
+
+  /*
+   * Update a IP
+   */
+  app.put(`/inventory/ips/:ip`, rbac.user, inventory.updateIp)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/ips/:ip`, rbac.operator, inventory.deleteIp)
+
+  /*
+   * Read all IP
+   */
+  app.get(`/inventory/ips`, rbac.user, inventory.listIps)
 
   /*
    * Read all Morio Modules
@@ -256,11 +268,6 @@ export function routes(app) {
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
-
-  /*
-   * Create a ip
-   */
-  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
 
   /*
    * Create a mod

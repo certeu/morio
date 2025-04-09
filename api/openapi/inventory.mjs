@@ -3,7 +3,7 @@ import { Joi } from '#shared/schema'
 import { schema } from '../src/schema.mjs'
 import { response, errorResponses, security } from './index.mjs'
 
-const parameters_pkg = [
+const parameters_pkgs = [
   {
     in: 'path',
     name: `id`,
@@ -20,6 +20,16 @@ const parameters_oss = [
     schema: j2s(Joi.string().required().description('The id of the operating system')).swagger,
     required: true,
     description: 'The id of the operation system in the inventory',
+  },
+]
+
+const parameters_ips = [
+  {
+    in: 'path',
+    name: `ip`,
+    schema: j2s(Joi.string().required().description('The ip of the host')).swagger,
+    required: true,
+    description: 'The ip of the host in the inventory',
   },
 ]
 
@@ -76,7 +86,7 @@ export default function (api) {
 
   api.get('/inventory/pkgs/{id}', {
     ...shared,
-    parameters: parameters_pkg,
+    parameters: parameters_pkgs,
     security,
     operationId: 'pkg.read',
     summary: `Read a Software Package`,
@@ -100,7 +110,7 @@ export default function (api) {
 
   api.put('/inventory/pkgs/{id}', {
     ...shared,
-    parameters: parameters_pkg,
+    parameters: parameters_pkgs,
     security,
     operationId: 'pkg.update',
     summary: `Update Software Package`,
@@ -137,7 +147,7 @@ Note that you probably should not use this, and instead create a new entry.`,
 
   api.delete('/inventory/pkgs/{id}', {
     ...shared,
-    parameters: parameters_pkg,
+    parameters: parameters_pkgs,
     security,
     operationId: 'pkg.delete',
     summary: `Delete Software Package`,
@@ -153,7 +163,7 @@ Note that you probably should not use this, and instead create a new entry.`,
     },
   })
 
-  // Oss
+  // Os
   api.post('/inventory/oss', {
     ...shared,
     security,
@@ -250,6 +260,112 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'os.delete',
     summary: `Delete Operating System`,
     description: `Removes the operating system with id \`id\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Ip
+  api.post('/inventory/ip', {
+    ...shared,
+    security,
+    operationId: 'ip.create',
+    summary: `Create IP`,
+    description: `Creates a IP in the inventory.`,
+    requestBody: {
+      description: 'The IP data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createIp']).swagger,
+          example: { ip: '192.168.1.1', version: 'ipv4' },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/ips/{id}', {
+    ...shared,
+    parameters: parameters_ips,
+    security,
+    operationId: 'ip.read',
+    summary: `Read a IP`,
+    description: `Reads a IP from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The package data',
+        example: {
+          ip: '192.168.1.1',
+          version: 'ipv4',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/ips/{id}', {
+    ...shared,
+    parameters: parameters_ips,
+    security,
+    operationId: 'ip.update',
+    summary: `Update IP`,
+    description: `Updates a ip in the inventory.
+  
+  Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The ip data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(Joi.object({ ip: Joi.string(), version: Joi.string() })).swagger,
+          example: { ip: '192.168.1.1', version: 'ipv4' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The ip data',
+        example: {
+          ip: '192.168.1.1',
+          version: 'ipv4',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/ips/{id}', {
+    ...shared,
+    parameters: parameters_ips,
+    security,
+    operationId: 'ip.delete',
+    summary: `Delete IP`,
+    description: `Removes the ip with ip \`ip\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([
