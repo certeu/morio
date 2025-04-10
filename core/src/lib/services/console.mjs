@@ -1,11 +1,7 @@
 import { ensureServiceCertificate } from '#lib/tls'
 import { writeYamlFile } from '#shared/fs'
 // Default hooks
-import {
-  defaultServiceWantedHook,
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 import { testUrl } from '#shared/network'
 // log & utils
 import { utils } from '../utils.mjs'
@@ -31,9 +27,13 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We just reuse the default hook here, checking for ephemeral state
+     * The console service is wanted on broker nodes in non-ephemeral state
      */
-    wanted: defaultServiceWantedHook,
+    wanted: () => {
+      if (utils.isEphemeral()) return false
+      if (utils.isFlankingNode()) return false
+      return true
+    },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

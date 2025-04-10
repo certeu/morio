@@ -930,9 +930,9 @@ utils.setVersion = (version) => {
  */
 
 /**
- * Helper method to see whether the config is resolved
+ * Helper method to see whether a node is a broker node
  *
- * @return {bool} resolved - True if the config is resolved, false if not
+ * @return {bool} brokerNode - True if the local node is a broker node, false if not
  */
 utils.isBrokerNode = () => (utils.getNodeSerial() < 100 ? true : false)
 
@@ -967,6 +967,13 @@ utils.isDistributed = () =>
  * @return {bool} ephemeral - True if ephemeral, false if not
  */
 utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
+
+/**
+ * Helper method to see whether a node is a flanking node
+ *
+ * @return {bool} brokerNode - True if the local node is a flanking node, false if not
+ */
+utils.isFlankingNode = () => (utils.getNodeSerial() > 100 ? true : false)
 
 /*
  * Determine whether this node is leading the cluster
@@ -1119,7 +1126,11 @@ utils.endReload = () => {
   store.set('state.reload_count', Number(store.get('state.reload_count')) + 1)
   const serial = store.get('state.settings_serial')
   log.info(
-    `Configuration Resolved - ${serial ? 'Running settings serial ' + serial : 'Running in ephemeral mode'}`
+    `Configuration Resolved - ${
+      serial
+        ? 'Running settings serial ' + serial + ', node serial ' + utils.getNodeSerial()
+        : 'Running in ephemeral mode'
+    }`
   )
   return utils
 }

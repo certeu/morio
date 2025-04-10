@@ -33,12 +33,12 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * TODO:
-     * For a true highly-available CA, we need to hook it up to our
-     * distributed database. See: https://github.com/smallstep/nosql/issues/64
-     * Until then, we can get by with a single CA.
+     * CA runs on all broker nodes.
      */
-    wanted: () => true,
+    wanted: () => {
+      if (utils.isEphemeral()) return false
+      return utils.isBrokerNode() ? true : false
+    },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

@@ -17,7 +17,28 @@ export const service = {
      *
      * @return {boolean} wanted - Wanted or not
      */
-    wanted: () => utils.getFlag('ENFORCE_SERVICE_CACHE') || isTapWanted(),
+    wanted: () => {
+      if (utils.isEphemeral()) return false
+      if (utils.getFlag('ENFORCE_SERVICE_CACHE') || isTapWanted()) {
+        /*
+         * We need a cache service, but where do we run it?
+         * Do we have a specific cache node in the settings?
+         */
+        const cacheNode = utils.getSettings('flanking_services.cache.nodes', []).pop()
+        if (cacheNode) return cacheNode === utils.getNodeFqdn() ? true : false
+        /*
+         * No explicit cache node configured.
+         * We will run it on the node with the lowest serial.
+         * First we check flanking nodes, finally we try broker nodes.
+         */
+        if (utils.getFlankingCount() > 0)
+          return utils.getNodeSerial() === utils.getLowestFlankingNodeSerial() ? true : false
+        else return utils.getNodeSerial() === utils.getLowestBrokerNodeSerial() ? true : false
+      }
+
+      // By default, we do not run the cache service
+      return false
+    },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

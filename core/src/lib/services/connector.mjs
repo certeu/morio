@@ -13,21 +13,46 @@ export const service = {
   hooks: {
     /**
      * Lifecycle hook to determine whether the container is wanted
-     *
-     * For the connector, the answer is only true when there are pipelines configured
-     *
-     * @return {boolean} wanted - Wanted or not
      */
     wanted: async () => {
       const sinks = utils.getSettings('connector.sinks', false)
-
       // Without sinks, this service should not be started
       if (sinks === false || Object.values(sinks).filter((sink) => !sink.disabled).length < 1)
         return false
-      // Always update pipeline config until we have a way to diff them
-      else await ensurePipelines()
 
-      return true
+      /*
+       * We need a connector service, but where do we run it?
+       * Do we have a specific connector node in the settings?
+       */
+      const cNodes = utils.getSettings('flanking_services.connector.nodes', [])
+      if (cNodes.includes(utils.getNodeFqdn())) {
+        // Always update pipeline config until we have a way to diff them
+        await ensurePipelines()
+        return true
+      }
+      /*
+       * If there are explicit nodes, we are not part of them.
+       * So do not run this service.
+       */
+      if (cNodes.length > 0) return false
+      /*
+       * No explicit connector node configured.
+       * We will run it on all flanking nodes, or all broker nodes.
+       */
+      if (utils.getFlankingCount() > 0) {
+        if (utils.isFlankingNode()) {
+          // Always update pipeline config until we have a way to diff them
+          await ensurePipelines()
+          return true
+        }
+      } else {
+        // Always update pipeline config until we have a way to diff them
+        await ensurePipelines()
+
+        return true
+      }
+
+      return false
     },
     /*
      * Lifecycle hook to determine whether to recreate the container

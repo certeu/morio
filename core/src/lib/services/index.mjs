@@ -385,34 +385,6 @@ export async function restartMorioService(serviceName, id) {
 }
 
 /**
- * The default wanted lifecycle hook
- *
- * Containers need to specify this hook, but for several containers
- * we just check whether we are running in ephemeral state of not.
- * So rather than create that hook for each service, we reuse this method.
- *
- * @retrun {boolean} result - True to indicate the container is wanted
- */
-export function defaultServiceWantedHook() {
-  return utils.isEphemeral() ? false : true
-}
-
-/**
- * The 'always true' method
- *
- * Containers need to specify various lifecycle hooks.
- * But some containers should always be running, or always be
- * restarted and so on.
- * So rather than create that hook for each service, we reuse this
- * method.
- *
- * @retrun {boolean} result - always true
- */
-export function alwaysTrue() {
-  return true
-}
-
-/**
  * The default recreateService lifecycle hook
  *
  * Containers need to specify this hook, but for most containers
