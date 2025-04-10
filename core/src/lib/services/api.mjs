@@ -89,11 +89,11 @@ async function ensureLocalPrerequisites() {
   /*
    * Write PM2 config file
    */
-  const pm2 = utils.getMorioServiceConfig('api')
-  if (pm2)
+  const config = utils.getMorioServiceConfig('api')
+  if (config?.pm2)
     await writeFile(
       `/etc/morio/api/pm2.config.js`,
-      `module.exports=${JSON.stringify(utils.getMorioServiceConfig('api').pm2, null, 2)}`
+      `module.exports=${JSON.stringify(config.pm2, null, 2)}`
     )
 
   return

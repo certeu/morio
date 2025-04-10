@@ -48,7 +48,6 @@ export const service = {
       } else {
         // Always update pipeline config until we have a way to diff them
         await ensurePipelines()
-
         return true
       }
 

@@ -69,7 +69,7 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * The broker service is wantes on broker nodes in non-ephemeral state
+     * The broker service is wanted on broker nodes in non-ephemeral state
      */
     wanted: () => {
       if (utils.isEphemeral()) return false

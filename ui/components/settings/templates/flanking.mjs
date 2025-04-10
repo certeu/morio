@@ -80,19 +80,6 @@ const flankingServices = {
     ]
   }
 }
-/*
-cluster:
-  broker_nodes:
-    - bnode1
-    - bnode2
-    - bnode3
-  flanking_nodes:
-    - fnode1
-    - fnode2
-flanking_services:
-  cache:
-    nodes: []
-*/
 
 const updateServiceLocation = ({ service, val, node, context }) => {
   // Cache service is special because it can only run in 1 place
@@ -160,7 +147,7 @@ const FlankingNodeForm = ({ node, context }) => {
  * This holds the configuration wizard view settings
  * for any flanking nodes in the Morio deployment.
  */
-export const flanking = (context, toggleValidate) => {
+export const flanking = (context) => {
   const flankingNodes = []
   for (const node of context.mSettings?.cluster?.flanking_nodes || []) {
     flankingNodes.push(<FlankingNodeForm node={node} context={context} />)
@@ -182,7 +169,7 @@ export const flanking = (context, toggleValidate) => {
         form: [
           '### Flanking nodes',
           ...flankingNodes,
-          <p className="text-center">
+          <p className="text-center" key='p'>
             <button
               onClick={() => context.pushModal((
                 <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">

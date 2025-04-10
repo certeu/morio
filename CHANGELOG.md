@@ -13,12 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - [ui] Add support for enabling Moriohub integration in the setup wizard
 
+### Changed
+
+- [api] Run in PM2 and restart when memory exceeds 250MB
+- [core] Run in PM2 and restart when memory exceeds 250MB
+
 ### Fixed
 
 - [api] Don't block preseeding due to IP validation
 - [api] Fix incorrect handling of clients vars on push
 - [api] Do not use key as table field when storing apikeys
 - [api] Fix an issue in IP resolver validation
+- [api] Fix an issue in flanking node validation
 - [client] Continue reset command even if files are missing
 - [tap] Prevent populated loader files from being included on build images
 - [tap] Fix issue with concatenation of charts logic
