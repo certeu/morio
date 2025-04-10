@@ -288,7 +288,7 @@ async function shouldServiceBeRecreated(serviceName, hookParams) {
    */
   const running = isContainerRunning(serviceName)
   if (!running) {
-    log.debug({ running }, `[${serviceName}] Service is not running. Recreating service`)
+    log.debug(`[${serviceName}] Service is not running. Recreating service`)
     return true
   }
 

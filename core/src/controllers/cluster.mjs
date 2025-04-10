@@ -195,7 +195,7 @@ Controller.prototype.join = async function (req, res) {
   if (valid.settings.data.cluster.broker_nodes.includes(valid.you)) {
     nodeSerial = valid.settings.data.cluster.broker_nodes.indexOf(valid.you) + 1
   } else if ((valid.settings.data.cluster.flanking_nodes || []).includes(valid.you)) {
-    nodeSerial = valid.settings.data.cluster.flanking_nodes.indexOf(valid.you) + 100
+    nodeSerial = valid.settings.data.cluster.flanking_nodes.indexOf(valid.you) + 101
   }
   if (!nodeSerial) log.warn(`Unable to determine node serial. This will not end well.`)
   else
