@@ -294,7 +294,15 @@ export const schema = {
   'req.inventory.updateMac': Joi.object({
     mac: Joi.string().required(),
   }),
+  // Inventory - Mods
   'req.inventory.createMod': Joi.object({
+    mod: Joi.string().required(),
+    data: Joi.string().required(),
+  }),
+  'req.inventory.readMod': Joi.object({
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.updateMod': Joi.object({
     mod: Joi.string().required(),
     data: Joi.string(),
   }),
@@ -364,9 +372,6 @@ export const schema = {
     hosts: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readMod': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readModvar': Joi.object({

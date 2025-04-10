@@ -36,10 +36,20 @@ const parameters_ips = [
 const parameters_macs = [
   {
     in: 'path',
-    name: `name`,
+    name: `mac`,
     schema: j2s(Joi.string().required().description('The mac address of the host')).swagger,
     required: true,
     description: 'The mac address of the host in the inventory',
+  },
+]
+
+const parameters_mods = [
+  {
+    in: 'path',
+    name: `mod`,
+    schema: j2s(Joi.string().required().description('The mod name of the host')).swagger,
+    required: true,
+    description: 'The mod name of the host in the inventory',
   },
 ]
 
@@ -453,7 +463,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       content: {
         'application/json': {
           schema: j2s(Joi.object({ mac: Joi.string() })).swagger,
-          example: { ip: '12:34:56:78:90:ab' },
+          example: { mac: '12:34:56:78:90:ab' },
         },
       },
     },
@@ -480,6 +490,110 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'mac.delete',
     summary: `Delete mac address`,
     description: `Removes the mac with mac address \`mac\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Mod
+  api.post('/inventory/mod', {
+    ...shared,
+    security,
+    operationId: 'mod.create',
+    summary: `Create Mod`,
+    description: `Creates a mod address in the inventory.`,
+    requestBody: {
+      description: 'The mod address',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createMod']).swagger,
+          example: { mod: 'module' },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/mods/{mod}', {
+    ...shared,
+    parameters: parameters_mods,
+    security,
+    operationId: 'mod.read',
+    summary: `Read a Mod`,
+    description: `Reads a Mod from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The mod address',
+        example: {
+          mod: 'module',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/mods/{mod}', {
+    ...shared,
+    parameters: parameters_mods,
+    security,
+    operationId: 'mod.update',
+    summary: `Update mod address`,
+    description: `Updates a mod address in the inventory.
+      
+      Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The mod name',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(Joi.object({ mod: Joi.string() })).swagger,
+          example: { mod: 'module' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The mod name',
+        example: {
+          mod: 'module',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/mods/{mod}', {
+    ...shared,
+    parameters: parameters_mods,
+    security,
+    operationId: 'mod.delete',
+    summary: `Delete mod name`,
+    description: `Removes the mod with mod name \`mod\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([

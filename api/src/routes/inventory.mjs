@@ -152,20 +152,32 @@ export function routes(app) {
    */
   app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
 
+  // Mods ///////////////////////
+
   /*
-   * Read all Morio Modules
+   * Create a Mod
+   */
+  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
+
+  /*
+   * Read an Mod
+   */
+  app.get(`/inventory/mods/:mod`, rbac.user, inventory.readMod)
+
+  /*
+   * Update a Mod
+   */
+  app.put(`/inventory/mods/:mod`, rbac.user, inventory.updateMod)
+
+  /*
+   * Delete a Mod
+   */
+  app.delete(`/inventory/mods/:mod`, rbac.operator, inventory.deleteMod)
+
+  /*
+   * Read all Mod
    */
   app.get(`/inventory/mods`, rbac.user, inventory.listMods)
-
-  /*
-   * Read an Morio Module
-   */
-  app.get(`/inventory/mods/:id`, rbac.user, inventory.readMod)
-
-  /*
-   * Delete an Morio Module
-   */
-  app.delete(`/inventory/mods/:id`, rbac.operator, inventory.deleteMod)
 
   /*
    * Read all Module Vars
@@ -297,11 +309,6 @@ export function routes(app) {
   app.post(`/inventory/search`, rbac.operator, inventory.search)
 
   /*
-   * Create a mod
-   */
-  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
-
-  /*
    * Create a modvar
    */
   app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
@@ -315,11 +322,6 @@ export function routes(app) {
    * Create a modfile
    */
   app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
-
-  /*
-   * Create a mac
-   */
-  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
 
   /*
    * Create a host

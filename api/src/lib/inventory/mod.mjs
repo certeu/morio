@@ -4,13 +4,13 @@ import { db } from '../db.mjs'
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
 /**
- * Constructor for a Mac instance
+ * Constructor for a Mod instance
  *
- * @param {string} mac - The Mac to preset this for reading
+ * @param {string} mod - The Mod to preset this for reading
  */
-export function Mac(mac = false) {
+export function Mod(mod = false) {
   // Non-enumerable properties
-  addNonEnumProp(this, '_id', mac)
+  addNonEnumProp(this, '_id', mod)
   addNonEnumProp(this, '_record', false)
   addNonEnumProp(this, '_saved', true)
 
@@ -21,25 +21,27 @@ export function Mac(mac = false) {
 }
 
 /**
- * Create a mac
+ * Create a mod
  *
  * @param {object} params  - All params as an object
- * @param {string} mac - The mac address
- * @return {Mac} this - The Mac instance
+ * @param {string} mod - The mod name
+ * @param {string} data - The mod data
+ * @return {Mod} this - The Mod instance
  */
-Mac.prototype.create = async function ({ mac }) {
+Mod.prototype.create = async function ({ mod, data }) {
   /*
-   * Do not bother without an mac
+   * Do not bother without a mod
    */
-  if (!mac && !this.getId()) return this.setError('You must provide an mac')
+  if (!mod && !this.getId()) return this.setError('You must provide a mod')
 
   /*
    * Insert into the database
    */
   let result = false
   try {
-    result = await db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
-      mac,
+    result = await db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
+      mod,
+      data,
     })
   } catch (err) {
     return this.setError(err)
@@ -52,61 +54,69 @@ Mac.prototype.create = async function ({ mac }) {
     Array.isArray(result) &&
     result[0] === 200 &&
     result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(mac).setSaved(true).setError(false)
+    ? this.setId(mod).setSaved(true).setError(false)
     : this.setError('Failed to create record')
 }
 
 /*
- * Set the mac
+ * Set the mod
  */
-Mac.prototype.setMac = function (mac) {
-  return mac === undefined ? this : this.setRecordField('mac', mac).setSaved(false)
+Mod.prototype.setMod = function (mod) {
+  return mod === undefined ? this : this.setRecordField('mod', mod).setSaved(false)
 }
 
 /*
- * Export the mac data
+ * Set the mod data
  */
-Mac.prototype.asData = async function () {
+Mod.prototype.setData = function (data) {
+  return data === undefined ? this : this.setRecordField('data', data).setSaved(false)
+}
+
+/*
+ * Export the mod data
+ */
+Mod.prototype.asData = async function () {
   /*
-   * Do not bother without an mac
+   * Do not bother without a mod
    */
-  if (!this.getId()) return this.setError('You must provide an mac')
+  if (!this.getId()) return this.setError('You must provide a mod')
 
   /*
    * Read from database or return local if there's unsaved changes
    */
   if (this.getSaved()) await this.read()
 
-  return { mac: this.getId(), ...this.getRecord() }
+  return { mod: this.getId(), ...this.getRecord() }
 }
 /*
- * Set the mac data
+ * Set the mod data
  */
-Mac.prototype.fromData = function ({ mac }) {
-  if (mac) this.setRecordField('mac', mac)
+Mod.prototype.fromData = function ({ mod, data }) {
+  if (mod) this.setRecordField('mod', mod)
+  if (data) this.setRecordField('data', data)
 
   return this
 }
 
 /**
- * Save a mac
+ * Save a mod
  *
- * @param {string} mac - The Mac address
+ * @param {string} mod - The Mod data
  */
-Mac.prototype.save = async function () {
+Mod.prototype.save = async function () {
   /*
-   * Do not bother without an mac
+   * Do not bother without a mod
    */
-  if (!this.getId()) return this.setError('You must provide an mac')
+  if (!this.getId()) return this.setError('You must provide an mod')
 
   /*
    * Update database
    */
   let result = false
   try {
-    const data = { mac: this.getId(), ...this.getRecord() }
+    const data = { mod: this.getId(), ...this.getRecord() }
     result = await db.write(
-      `INSERT INTO inventory_macs(${Object.keys(data).join(', ')}) ` +
+      `INSERT INTO inventory_mods(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
           .join(', ')}) ` +
@@ -126,20 +136,20 @@ Mac.prototype.save = async function () {
 }
 
 /**
- * Delete a mac
+ * Delete a mod
  */
-Mac.prototype.delete = async function () {
+Mod.prototype.delete = async function () {
   /*
-   * Do not bother without an mac
+   * Do not bother without a mod
    */
-  if (!this.getId()) return this.setError('You must provide an mac')
+  if (!this.getId()) return this.setError('You must provide an mod')
 
   /*
    * Remove from database
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_macs WHERE mac = :mac`, { mac: this.getId() })
+    result = await db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, { mod: this.getMod() })
   } catch (err) {
     return this.setError(err)
   }
@@ -148,26 +158,27 @@ Mac.prototype.delete = async function () {
 }
 
 /**
- * Read a mac
+ * Read a mod
  *
- * @param {string} mac - The Mac address
+ * @param {string} mod - The Mod data
  */
-Mac.prototype.read = async function (mac = false) {
+Mod.prototype.read = async function (mod = false) {
   /*
-   * Do not bother without an mac
+   * Do not bother without a mod
    */
-  if (!mac && !this.getId()) return this.setError('You must provide an mac')
+  if (!mod && !this.getId()) return this.setError('You must provide a mod')
 
   /*
    * Read from database
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_macs WHERE mac = :mac`, {
-      mac: mac || this.getId(),
+    result = await db.read(`SELECT * FROM inventory_mods WHERE mod = :mod`, {
+      mod: mod || this.getId(),
     })
     const data = resultAsRecord(result[1])
-    if (data.mac) this.setId(data.mac)
+    if (data.mod) this.setId(data.mod)
+    if (data.data) this.setRecordField('data', data.data)
     this.setSaved(true)
   } catch (err) {
     return this.setError(err)
@@ -179,19 +190,19 @@ Mac.prototype.read = async function (mac = false) {
 }
 
 /**
- * List all MAC records
+ * List all Mod records
  */
-Mac.prototype.list = async function () {
+Mod.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_macs ORDER BY mac`)
+    result = await db.read(`SELECT * FROM inventory_mods ORDER BY mod`)
   } catch (err) {
     return this.setError(err)
   }
 
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
-    : this.setError('Failed to fetch MAC list')
+    : this.setError('Failed to fetch Mod list')
 }
 
 /*
@@ -199,7 +210,7 @@ Mac.prototype.list = async function () {
  */
 
 // Clears internal fields
-Mac.prototype.clear = function () {
+Mod.prototype.clear = function () {
   this._id = false
   this._record = false
   this._saved = false
@@ -209,43 +220,43 @@ Mac.prototype.clear = function () {
 }
 
 // Sets the internal error field
-Mac.prototype.setError = function (error) {
+Mod.prototype.setError = function (error) {
   this.error = error
 
   return this
 }
 
 // Gets the internal error field
-Mac.prototype.getError = function () {
+Mod.prototype.getError = function () {
   return this.error
 }
 
-// Sets the internal mac field
-Mac.prototype.setId = function (mac) {
-  this._id = mac
+// Sets the internal id field
+Mod.prototype.setId = function (id) {
+  this._id = id
 
   return this
 }
 
 // Gets the internal id field
-Mac.prototype.getId = function () {
+Mod.prototype.getId = function () {
   return this._id
 }
 
 // Sets the internal record
-Mac.prototype.setRecord = function (record) {
+Mod.prototype.setRecord = function (record) {
   this._record = record
 
   return this
 }
 
 // Gets the internal record
-Mac.prototype.getRecord = function () {
+Mod.prototype.getRecord = function () {
   return this._record
 }
 
 // Sets an internal record field
-Mac.prototype.setRecordField = function (field, value) {
+Mod.prototype.setRecordField = function (field, value) {
   if (typeof this.getRecord() !== 'object') this.setRecord({})
   this._record[field] = value
 
@@ -253,13 +264,13 @@ Mac.prototype.setRecordField = function (field, value) {
 }
 
 // Sets the internal saved field
-Mac.prototype.setSaved = function (saved) {
+Mod.prototype.setSaved = function (saved) {
   this._saved = saved
 
   return this
 }
 
 // Gets the internal saved field
-Mac.prototype.getSaved = function () {
+Mod.prototype.getSaved = function () {
   return this._saved
 }
