@@ -185,7 +185,7 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
   )
 
   /*
-   * If the service optional, not wanted, yet running, stop it
+   * If the service is not wanted, yet running, stop it
    */
   const wanted = await runHook('wanted', serviceName, hookParams)
   if (!wanted) {

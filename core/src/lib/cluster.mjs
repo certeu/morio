@@ -269,10 +269,13 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
         },
         to: fqdn,
         cluster: utils.getClusterUuid(),
-        cluster_leader: {
-          serial: utils.getLeaderSerial() || undefined,
-          uuid: utils.getLeaderUuid() || undefined,
-        },
+        // Flanking nodes do not send/know the cluster leader
+        cluster_leader: utils.isFlankingNode()
+          ? undefined
+          : {
+              serial: utils.getLeaderSerial() || undefined,
+              uuid: utils.getLeaderUuid() || undefined,
+            },
         version: utils.getVersion(),
         settings_serial: Number(utils.getSettingsSerial()),
         keys_serial: Number(utils.getKeysSerial()),
@@ -508,8 +511,11 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
   /*
    * Verify leader (only for heatbeats)
    * If there's a mismatch, ask to re-elect the cluster leader.
+   * However, flanking nodes do not know/care who the cluster leader is.
+   * So this only matters for broker nodes.
+   * Note that a healthcheck from a flanking node will not include data.cluster_leader.
    */
-  if (!data.cluster_leader?.serial || data.cluster_leader.serial !== utils.getLeaderSerial()) {
+  if (data.cluster_leader && data.cluster_leader.serial !== utils.getLeaderSerial()) {
     /*
      * Do they look to us as their leader?
      */
