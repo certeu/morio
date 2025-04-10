@@ -2,7 +2,7 @@
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { serviceCodes } from '#shared/errors'
-import { serviceOrder, ephemeralServiceOrder, optionalServices } from '#config'
+import { serviceOrder, ephemeralServiceOrder } from '#config'
 // Core imports
 import { ensureMorioNetwork, runHook } from './services/index.mjs'
 import { isBrokerLeading } from './services/broker.mjs'
@@ -55,8 +55,7 @@ async function updateNodeState() {
    */
   const promises = []
   for (const service of utils.isEphemeral() ? ephemeralServiceOrder : serviceOrder) {
-    if (optionalServices.includes(service) || (await runHook('wanted', service)))
-      promises.push(runHook('heartbeat', service))
+    if (await runHook('wanted', service)) promises.push(runHook('heartbeat', service))
   }
   /*
    * Do the same for core as the final service
