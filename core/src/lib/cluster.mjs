@@ -136,7 +136,7 @@ async function ensureClusterHeartbeat() {
   }
 
   /*
-   * Let people know w're staring the heartbeat
+   * Let people know we're starting the heartbeat
    */
   log.debug(`Starting cluster heartbeat`)
   runHeartbeat(true, false)
@@ -155,7 +155,7 @@ export async function runHeartbeat(broadcast = false, justOnce = false) {
    *
    * Ensure we are comparing to up to date cluster state
    * Unless this is the initial setup in which case we just updated the state
-   * and should perhaps let the world knoww we just work up
+   * and should perhaps let the world know we just work up
    */
   if (!broadcast) await updateClusterState()
 
@@ -210,14 +210,14 @@ export async function runHeartbeat(broadcast = false, justOnce = false) {
 /**
  * Start a local heartbeat
  *
- * When Morio has only 1 node. Or when Morio has only 1 broker node,
+ * When Morio has only 1 node, or when Morio has only 1 broker node,
  * we will run a local heartbeat. This will not reach out over the network
  * but merely trigger the heartbeat lifecycle event locally, as that is what
  * used to keep things up to date.
  *
  * The reason we also run it when there is only 1 broker node is that
  * in a scenario where we have 1 broker node + 1 flanking node, the flanking
- * node going down would mean there is no long a heartbeat, and thus the cluster
+ * node going down would mean there is no longer a heartbeat, and thus the cluster
  * will start to decay.
  *
  */
@@ -313,7 +313,7 @@ async function sendHeartbeat(fqdn, broadcast = false, justOnce = false) {
   verifyHeartbeatResponse({ fqdn, data, rtt })
 
   /*
-   * Trigger a new heatbeat
+   * Trigger a new heartbeat
    */
   if (!justOnce) runHeartbeat(false, false)
 }
@@ -349,7 +349,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
    */
   if (error || data?.code) {
     /*
-     * Storing the result of a failed hearbteat will influence the cluster state
+     * Storing the result of a failed heartbeat will influence the cluster state
      */
     utils.setHeartbeatIn(fqdn, { up: false, ok: false, error: error.code })
     /*
@@ -414,7 +414,7 @@ function verifyHeartbeatResponse({ fqdn, data, rtt = 0, error = false }) {
   } else if (Array.isArray(data?.nodes)) {
     for (const uuid in data.nodes) {
       /*
-       * It it's a valid hearbeat, add the node info to the state
+       * If it's a valid hearbeat, add the node info to the state
        */
       if (uuid !== utils.getNodeUuid()) utils.setClusterNode(uuid, data.nodes[uuid])
     }
@@ -469,7 +469,7 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
   }
 
   /*
-   * Verify the 'to' is really us as a mismatch here can indicate fault DNS configuration
+   * Verify the 'to' is really us as a mismatch here can indicate faulty DNS configuration
    */
   if (utils.getNodeFqdn() !== data.to) {
     const err = 'HEARTBEAT_TARGET_FQDN_MISMATCH'
@@ -585,7 +585,7 @@ export async function verifyHeartbeatRequest(data, type = 'heartbeat') {
  *
  * This is called from the beforeall lifecycle hook
  * Note that Morio always runs in cluster mode
- * to ensure we can reach flanking nodes whne they are added.
+ * to ensure we can reach flanking nodes when they are added.
  */
 export async function ensureMorioCluster() {
   utils.setCoreReady(false)
@@ -627,7 +627,7 @@ export async function ensureMorioCluster() {
 }
 
 /*
- * Helpoer method to invite a single node to join the cluster
+ * Helper method to invite a single node to join the cluster
  *
  * @param {string} fqdn - The fqdn of the remote node
  */
@@ -667,7 +667,7 @@ async function inviteClusterNodeAttempt(remote) {
   const flanking = utils.isThisAFlankingNode({ fqdn: remote })
 
   /*
-   * Load data from disk becauise what we sync between cluster nodes
+   * Load data from disk because what we sync between cluster nodes
    * is what is written to disk.
    */
   const timestamp = utils.getSettingsSerial()
