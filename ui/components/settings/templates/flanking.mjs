@@ -75,7 +75,7 @@ const flankingServices = {
   watcher: {
     desc: `A heartbeat instance to run healthchecks`,
     tips: [
-      'Run this on a flanking nodes if possible.',
+      'Run this on a flanking node if possible.',
       'Multiple instances only add value if you want to run healthchecks from different origins (eg: different data centres).',
     ]
   }
