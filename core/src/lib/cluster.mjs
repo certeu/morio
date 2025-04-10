@@ -125,9 +125,16 @@ export async function ensureMorioClusterConsensus() {
  */
 async function ensureClusterHeartbeat() {
   /*
-   * If we are leading the cluster, don't bother
+   * If we are leading the cluster, run a single heartbeat broadcast.
+   * As leader, we do not have to send heartbeats, but it is possible
+   * that the config was updated on this node, so we need to broadcast
+   * the reload event.
    */
-  if (utils.isLeading()) return false
+  if (utils.isLeading()) {
+    log.debug(`Sending broadcast cluster heartbeat`)
+    runHeartbeat(true, true)
+    return false
+  }
 
   /*
    * Let people know w're staring the heartbeat
@@ -690,6 +697,7 @@ async function inviteClusterNodeAttempt(remote) {
   /*
    * Validate response
    */
+  if (result.status && result.status !== 200) return false
   const [valid, err] = await validate(`res.cluster.join`, result)
   if (valid) log.info(`Node ${valid.node} will join the cluster`)
   else log.todo(err, `Handle cluster join failure.`)
