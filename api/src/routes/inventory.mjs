@@ -206,50 +206,57 @@ export function routes(app) {
    */
   app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
 
-  /*
-   * Read all Host Vars
-   */
-  app.get(`/inventory/hostvars`, rbac.user, inventory.listHostvars)
+  // Hostvars ///////////////////////
 
   /*
-   * Read an Host Var
+   * Create a hostvar
+   */
+  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
+
+  /*
+   * Read a Host variable
    */
   app.get(`/inventory/hostvars/:id`, rbac.user, inventory.readHostvar)
 
   /*
-   * Delete an Host Var
+   * Update a Host variable
+   */
+  app.put(`/inventory/hostvars/:id`, rbac.user, inventory.updateHostvar)
+
+  /*
+   * Delete an Host variable
    */
   app.delete(`/inventory/hostvars/:id`, rbac.operator, inventory.deleteHostvar)
 
   /*
-   * Read all Module Files
+   * Read all Host Variables
    */
-  app.get(`/inventory/modfiles`, rbac.user, inventory.listModfiles)
+  app.get(`/inventory/hostvars`, rbac.user, inventory.listHostvars)
 
   /*
-   * Read an Module File
+   * Create a modfile
+   */
+  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
+
+  /*
+   * Read a Module File
    */
   app.get(`/inventory/modfiles/:id`, rbac.user, inventory.readModfile)
 
   /*
-   * Delete an Module File
+   * Update a Module file
+   */
+  app.put(`/inventory/modfiles/:id`, rbac.user, inventory.updateModfile)
+
+  /*
+   * Delete an Module file
    */
   app.delete(`/inventory/modfiles/:id`, rbac.operator, inventory.deleteModfile)
 
   /*
-   * Read all MAC addresses
+   * Read all Module files
    */
-  app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
-
-  /*
-   * Read a MAC address
-   */
-  app.get(`/inventory/macs/:id`, rbac.user, inventory.readMac)
-
-  /*
-   * Delete a MAC address
-   */
-  app.delete(`/inventory/macs/:id`, rbac.operator, inventory.deleteMac)
+  app.get(`/inventory/modfiles`, rbac.user, inventory.listModfiles)
 
   /*
    * Create a group
@@ -319,16 +326,6 @@ export function routes(app) {
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
-
-  /*
-   * Create a hostvar
-   */
-  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
-
-  /*
-   * Create a modfile
-   */
-  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
 
   /*
    * Create a host

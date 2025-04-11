@@ -247,8 +247,8 @@ export const schema = {
   // Inventory - Pkgs
   'req.inventory.createPkg': Joi.object({
     id: Joi.string().required(),
-    name: Joi.string().required(),
-    version: Joi.string().required(),
+    name: Joi.string(),
+    version: Joi.string(),
   }),
   'req.inventory.readPkg': Joi.object({
     id: Joi.string().required(),
@@ -261,8 +261,8 @@ export const schema = {
   // Inventory - Oss
   'req.inventory.createOs': Joi.object({
     id: Joi.string().required(),
-    name: Joi.string().required(),
-    version: Joi.string().required(),
+    name: Joi.string(),
+    version: Joi.string(),
   }),
   'req.inventory.readOs': Joi.object({
     id: Joi.string().required(),
@@ -275,7 +275,7 @@ export const schema = {
   // Inventory - Ips
   'req.inventory.createIp': Joi.object({
     ip: Joi.string().required(),
-    version: Joi.string().required(),
+    version: Joi.string(),
   }),
   'req.inventory.readIp': Joi.object({
     ip: Joi.string().required(),
@@ -297,7 +297,7 @@ export const schema = {
   // Inventory - Mods
   'req.inventory.createMod': Joi.object({
     mod: Joi.string().required(),
-    data: Joi.string().required(),
+    data: Joi.string(),
   }),
   'req.inventory.readMod': Joi.object({
     mod: Joi.string().required(),
@@ -309,32 +309,52 @@ export const schema = {
   // Inventory - Modvars
   'req.inventory.createModvar': Joi.object({
     id: Joi.string().required(),
-    val: Joi.string().required(),
-    info: Joi.string().required(),
-    mod: Joi.string().required(),
+    val: Joi.string(),
+    info: Joi.string(),
+    mod: Joi.string(),
   }),
   'req.inventory.readModvar': Joi.object({
     id: Joi.string().required(),
-    val: Joi.string().required(),
-    info: Joi.string().required(),
-    mod: Joi.string().required(),
   }),
   'req.inventory.updateModvar': Joi.object({
     id: Joi.string().required(),
     val: Joi.string(),
     info: Joi.string(),
-    mod: Joi.string().required(),
+    mod: Joi.string(),
   }),
+  // Inventory - Hostvars
   'req.inventory.createHostvar': Joi.object({
     id: Joi.number().required(),
     key: Joi.string(),
     val: Joi.string(),
     info: Joi.string(),
-    host: Joi.string().required(),
+    host: Joi.string(),
   }),
+  'req.inventory.readHostvar': Joi.object({
+    id: Joi.number().required(),
+  }),
+  'req.inventory.updateHostvar': Joi.object({
+    id: Joi.number().required(),
+    key: Joi.string(),
+    val: Joi.string(),
+    info: Joi.string(),
+    host: Joi.string(),
+  }),
+  // Inventory - Modfiles
   'req.inventory.createModfile': Joi.object({
     id: Joi.number().required(),
-    mod: Joi.string().required(),
+    mod: Joi.string(),
+    folder: Joi.string(),
+    file: Joi.string(),
+    content: Joi.string(),
+    source: Joi.string(),
+  }),
+  'req.inventory.readModfile': Joi.object({
+    id: Joi.number().required(),
+  }),
+  'req.inventory.updateModfile': Joi.object({
+    id: Joi.number().required(),
+    mod: Joi.string(),
     folder: Joi.string(),
     file: Joi.string(),
     content: Joi.string(),
@@ -385,12 +405,6 @@ export const schema = {
     hosts: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readHostvar': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readModfile': Joi.object({
     id: Joi.string().required(),
   }),
   // This is for the request body

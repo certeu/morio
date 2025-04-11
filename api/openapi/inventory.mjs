@@ -63,6 +63,26 @@ const parameters_modvars = [
   },
 ]
 
+const parameters_hostvars = [
+  {
+    in: 'path',
+    name: `id`,
+    schema: j2s(Joi.number().required().description('The id of the host variable')).swagger,
+    required: true,
+    description: 'The id of the host variable in the inventory',
+  },
+]
+
+const parameters_modfiles = [
+  {
+    in: 'path',
+    name: `id`,
+    schema: j2s(Joi.number().required().description('The id of the module file')).swagger,
+    required: true,
+    description: 'The id of the module file in the inventory',
+  },
+]
+
 export default function (api) {
   const shared = { tags: ['inventory'] }
   api.tag('inventory', "Endpoints to manage Morio's inventory (FIXME: document these)")
@@ -715,6 +735,266 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'modvar.delete',
     summary: `Delete Module Variable`,
     description: `Removes the module variable with id \`id\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Hostvar
+  api.post('/inventory/hostvar', {
+    ...shared,
+    security,
+    operationId: 'hostvar.create',
+    summary: `Create Host Variable`,
+    description: `Creates a host variable in the inventory.`,
+    requestBody: {
+      description: 'The host variable data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createHostvar']).swagger,
+          example: {
+            id: '1',
+            key: 'key1',
+            val: 'hostval',
+            info: 'hostinfo',
+            host: '192.168.52.132',
+          },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/hostvars/{id}', {
+    ...shared,
+    parameters: parameters_hostvars,
+    security,
+    operationId: 'hostvar.read',
+    summary: `Read a Host Variable`,
+    description: `Reads a Host Variable from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The host variable data',
+        example: {
+          id: '1',
+          key: 'key1',
+          val: 'hostval',
+          info: 'hostinfo',
+          host: '192.168.52.132',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/hostvars/{id}', {
+    ...shared,
+    parameters: parameters_hostvars,
+    security,
+    operationId: 'hostvar.update',
+    summary: `Update Host Variable`,
+    description: `Updates a host variable in the inventory.
+  
+  Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The host variable data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(
+            Joi.object({
+              key: Joi.string(),
+              val: Joi.string(),
+              info: Joi.string(),
+              host: Joi.string(),
+            })
+          ).swagger,
+          example: { key: 'key1', val: 'hostval', info: 'hostinfo', host: '192.168.52.132' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The host variable data',
+        example: {
+          id: '1',
+          key: 'key1',
+          val: 'hostval',
+          info: 'hostinfo',
+          host: '192.168.52.132',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/hostvars/{id}', {
+    ...shared,
+    parameters: parameters_hostvars,
+    security,
+    operationId: 'hostvar.delete',
+    summary: `Delete Host Variable`,
+    description: `Removes the host variable with id \`id\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Modfile
+  api.post('/inventory/modfile', {
+    ...shared,
+    security,
+    operationId: 'modfile.create',
+    summary: `Create Module File`,
+    description: `Creates a module file in the inventory.`,
+    requestBody: {
+      description: 'The module file data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createModfile']).swagger,
+          example: {
+            id: '1',
+            mod: 'module',
+            folder: 'folder',
+            file: 'file.txt',
+            content: 'content',
+            source: 'source',
+          },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/modfiles/{id}', {
+    ...shared,
+    parameters: parameters_modfiles,
+    security,
+    operationId: 'modfile.read',
+    summary: `Read a Module File`,
+    description: `Reads a Module File from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The module file',
+        example: {
+          id: '1',
+          mod: 'module',
+          folder: 'folder',
+          file: 'file.txt',
+          content: 'content',
+          source: 'source',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/modfiles/{id}', {
+    ...shared,
+    parameters: parameters_modfiles,
+    security,
+    operationId: 'modfile.update',
+    summary: `Update Module File`,
+    description: `Updates a module file in the inventory.
+  
+  Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The module file data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(
+            Joi.object({
+              mod: Joi.string(),
+              folder: Joi.string(),
+              file: Joi.string(),
+              content: Joi.string(),
+              source: Joi.string(),
+            })
+          ).swagger,
+          example: {
+            mod: 'module',
+            folder: 'folder',
+            file: 'file.txt',
+            content: 'content',
+            source: 'source',
+          },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The module file data',
+        example: {
+          id: '1',
+          mod: 'module',
+          folder: 'folder',
+          file: 'file.txt',
+          content: 'content',
+          source: 'source',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/modfiles/{id}', {
+    ...shared,
+    parameters: parameters_modfiles,
+    security,
+    operationId: 'modfile.delete',
+    summary: `Delete Module File`,
+    description: `Removes the module file with id \`id\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([
