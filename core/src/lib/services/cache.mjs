@@ -15,7 +15,7 @@ export const service = {
      *
      * @return {boolean} wanted - Wanted or not
      */
-    wanted: () => (utils.getCacheNode() === utils.getNodeFqdn() ? true : false),
+    wanted: () => utils.getCacheNode() === utils.getNodeFqdn() ? true : false,
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

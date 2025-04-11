@@ -3,6 +3,9 @@ import { encryptionMethods, hash } from '#shared/crypto'
 import { log, utils } from './lib/utils.mjs'
 import process from 'node:process'
 import { createProducer } from './lib/kafka.mjs'
+// DB & KV clients
+import { createDbClient } from '#shared/db'
+import { createKvClient } from '#shared/kv'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -66,6 +69,13 @@ export async function reloadConfiguration() {
    * If we are in ephemeral mode, we're done so return here
    */
   if (utils.isEphemeral()) return
+
+  /*
+   * If set up, add the db & kv clients to utils.
+   * On a hot-reload we'll already have done this so only do it if needed.
+   */
+  if (!utils.db) utils.db = await createDbClient(utils, log)
+  if (!utils.kv) utils.kv = createKvClient(utils, log)
 
   /*
    * If set up, add the encryption methods to utils now that we have the keys.

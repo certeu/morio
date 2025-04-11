@@ -69,11 +69,11 @@ export const optionalServices = ['db', 'cache', 'ui', 'connector', 'tap', 'watch
  */
 export const generateTraefikConfig = (
   utils,
-  { service, prefixes = [], paths = [], priority = 666, backendTls = false }
+  { service, prefixes = [], paths = [], priority = 666, backendTls = false, entrypoint='https', tls=true, router=false }
 ) => {
   const port = getServicePort(service, utils)
   // Paths to save us from typing them too often
-  const ROUTER = ['http', 'routers', service]
+  const ROUTER = ['http', 'routers', (router ? router : service)]
   const RULE = [...ROUTER, 'rule']
   const SERVICE = ['http', 'services', service]
   /*
@@ -83,8 +83,8 @@ export const generateTraefikConfig = (
     .set(ROUTER, {
       priority,
       service,
-      entrypoints: 'https',
-      tls: true,
+      entrypoints: entrypoint,
+      tls,
     })
     .set(SERVICE, {
       loadBalancer: {
@@ -103,7 +103,7 @@ export const generateTraefikConfig = (
     // Set certificate resolver
     tc.set([...ROUTER, 'tls', 'certresolver'], 'ca')
     // Configure TLS
-    tc.set([...ROUTER, 'tls'], true)
+    tc.set([...ROUTER, 'tls'], tls)
     if (utils.getFlag('ENFORCE_HTTP_MTLS')) {
       tc.set('tls.options.default.clientAuth.caFiles', [
         '/usr/local/share/ca-certificates/morio_root_ca.crt',
@@ -134,7 +134,7 @@ const getServicePort = (service, utils) => {
   if (service === 'core' || service === 'coredocs') return utils.getPreset('MORIO_CORE_PORT')
   if (service === 'ui') return utils.getPreset('MORIO_UI_PORT')
   if (service === 'ca') return utils.getPreset('MORIO_CA_PORT')
-  if (service === 'db') return utils.getPreset('MORIO_DB_HTTP_PORT')
+  if (service === 'db' || service === 'ccdb') return utils.getPreset('MORIO_DB_HTTP_PORT')
   if (service === 'console') return utils.getPreset('MORIO_CONSOLE_PORT')
   if (service === 'rpadmin') return utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')
   if (service === 'rpproxy') return utils.getPreset('MORIO_BROKER_REST_API_PORT')

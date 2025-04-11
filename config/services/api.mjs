@@ -51,6 +51,11 @@ export const resolveServiceConfiguration = ({ utils }) => {
         `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/auth`
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+      .set(
+        'http.middlewares.ccdb-auth.forwardAuth.address',
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/ccdbauth`
+      )
+      .set('http.middlewares.ccdb-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       /*
        * Add middleware to router
        * The order in which middleware is loaded matters. Prefix shoud go first, auth last.
@@ -59,7 +64,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         'api-prefix@file',
         'api-service-header@file',
         'api-auth@file',
-      ]),
+      ])
   }
 
   return {

@@ -6,8 +6,6 @@ import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
 import { vaultGetSecret } from './vault.mjs'
-import { db } from './db.mjs'
-import { kv as kvClient } from '#shared/kv'
 // Wanted helper from Tap
 import { isTapWanted } from './services/tap.mjs'
 
@@ -54,8 +52,6 @@ store.presets = loadAllPresets()
  * Export an utils object to hold utility methods
  */
 export const utils = {
-  db,
-  kv: kvClient(db, log),
   hooks: { services: {} },
 }
 
@@ -140,7 +136,7 @@ utils.getCacheNode = () => {
      * We need a cache service, but where do we run it?
      * Do we have a specific cache node in the settings?
      */
-    const cacheNode = utils.getSettings('flanking_services.cache.nodes', []).pop()
+    const cacheNode = utils.getSettings('flanking_services.cache.nodes', [])?.[0]
     if (cacheNode) return cacheNode
     /*
      * No explicit cache node configured.
@@ -1299,3 +1295,8 @@ utils.dumpStore = () => {
   delete dump.cache
   log.debug(JSON.stringify(dump, null, 2))
 }
+
+/**
+ * Simple method to check whether two things are not the same
+ */
+utils.isEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b)

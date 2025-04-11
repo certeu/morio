@@ -1,5 +1,6 @@
 import { readFile, writeFile, writeYamlFile, mkdir } from '#shared/fs'
 import { testUrl } from '#shared/network'
+import { hash } from '#shared/crypto'
 // Default hooks
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
@@ -34,9 +35,31 @@ export const service = {
     wanted: () => true,
     /*
      * Lifecycle hook to determine whether to recreate the container.
-     * FIXME: Do we need to always recreate this?
      */
-    recreate: () => defaultRecreateServiceHook('proxy'),
+    recreate: async () => {
+      /*
+       * The proxy service only needs to be recreated when we change the
+       * container startup command. Which, unfortunately, can happen at
+       * any time because depending on whether the cache service is used
+       * and whether or not there are flanking nodes, we will need to add
+       * extra entrypoints for cross-cluster mTLS connections to DB/Cache
+       * service.
+       *
+       * To detect changes across settings revisions, we store the command
+       * in the KV store, and check whether it has changed. If it has, we
+       * recreate the container by returning true here.
+       * Note that we hash the command to prevent leaking sensitive information.
+       */
+      const key = `.internal/morio/proxy/cmd`
+      const [runningCmdHash, err] = await utils.kv.get(key)
+      const newCmdHash = hash(JSON.stringify(utils.getMorioServiceConfig('proxy').container.command))
+      if (runningCmdHash !== newCmdHash) {
+        const result = await utils.kv.set(key, newCmdHash)
+        return true
+      }
+
+      return false
+    },
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container

@@ -4,8 +4,6 @@ import { getPreset, inProduction } from '#config'
 import { errors } from '../errors.mjs'
 import { validate as validateMethod } from '../schema.mjs'
 import { restClient } from '#shared/network'
-import { db } from './db.mjs'
-import { kv as kvClient } from '#shared/kv'
 
 /*
  * Export a log object for logging via the logger
@@ -44,11 +42,6 @@ const store = new Store(log)
  * Export an utils instance to hold utility methods
  */
 export const utils = new Store(log)
-
-/*
- * Attach kv helper
- */
-utils.kv = kvClient(db, log)
 
 /*           _   _
  *  __ _ ___| |_| |_ ___ _ _ ___
@@ -431,6 +424,13 @@ utils.setSettings = (settings) => {
  * \__|_||_\___\__|_\_\/__/
  * Checks for things, returns true or false only
  */
+
+/**
+ * Helper method to see whether a node is a broker node
+ *
+ * @return {bool} brokerNode - True if the local node is a broker node, false if not
+ */
+utils.isBrokerNode = () => (utils.getNodeSerial() < 100 ? true : false)
 
 /**
  * Helper method to see whether the config is resolved

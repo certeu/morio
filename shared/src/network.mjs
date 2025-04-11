@@ -103,15 +103,16 @@ export async function testUrl(url, customOptions = {}) {
  * @param {object} data - The data to send
  * @param {bool} raw - Set this to something truthy to not parse the result as JSON
  * @param {function} log - Optional logging method to log errors
+ * @param {object} options - Optional fetch options
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export async function get(url, raw = false, log = false) {
+export async function get(url, raw = false, log = false, options={}) {
   /*
    * Send the request to core
    */
   let response
   try {
-    response = await fetch(url)
+    response = await fetch(url, options)
   } catch (err) {
     // Log error if requested
     if (log) console.log({ url, err })
@@ -140,9 +141,10 @@ export async function get(url, raw = false, log = false) {
  * General purpose method to call the core API with a streaming GET request
  *
  * @param {url} string - The URL to call
+ * @param {object} options - Optional fetch options
  * @return {object} res - The Express response object
  */
-export async function streamGet(url, res) {
+export async function streamGet(url, res, options={}) {
   /*
    * Send headers
    */
@@ -154,7 +156,7 @@ export async function streamGet(url, res) {
    */
   let response
   try {
-    response = await fetch(url)
+    response = await fetch(url, options)
   } catch (err) {
     // Swallow error
     //console.log(err)
@@ -173,9 +175,10 @@ export async function streamGet(url, res) {
  * @param {data} string - The data to send
  * @param {raw} string - Set this to something truthy to not parse the result as JSON
  * @param {function} log - Optional logging method to log errors
+ * @param {object} options - Optional fetch options
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-async function __postput(method = 'POST', url, data, raw = false, log = false) {
+async function __postput(method = 'POST', url, data, raw = false, log = false, options={}) {
   /*
    * Construct the request object with or without a request body
    */
@@ -193,7 +196,7 @@ async function __postput(method = 'POST', url, data, raw = false, log = false) {
    */
   let response
   try {
-    response = await fetch(url, request)
+    response = await fetch(url, request, options)
   } catch (err) {
     if (log) log(err)
   }
@@ -221,24 +224,18 @@ async function __postput(method = 'POST', url, data, raw = false, log = false) {
   return [response?.status || 500, false]
 }
 
-export async function post(url, data) {
-  return __postput('POST', url, data)
-}
-export async function put(url, data) {
-  return __postput('PUT', url, data)
-}
-
 /**
  * General purpose client for a REST API
  *
  * @param {string} api - The API root URL
+ * @param {object} options - Any optional fetch options
  * @return {object] client - The API client
  */
-export function restClient(api) {
+export function restClient(api, options={}) {
   return {
-    get: async (url, raw, log) => get(api + url, raw, log),
-    post: async (url, data, raw, log) => __postput('POST', api + url, data, raw, log),
-    put: async (url, data, raw, log) => __postput('PUT', api + url, data, raw, log),
-    streamGet: async (url, res) => streamGet(api + url, res),
+    get: async (url, raw, log, options) => get(api + url, raw, log, options),
+    post: async (url, data, raw, log, options) => __postput('POST', api + url, data, raw, log, options),
+    put: async (url, data, raw, log, options) => __postput('PUT', api + url, data, raw, log, options),
+    streamGet: async (url, res, options) => streamGet(api + url, res, options),
   }
 }

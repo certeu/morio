@@ -45,6 +45,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Node ID
         NODE_ID: utils.getNodeSerial(),
       },
+      // Aliases to use on the docker network (used for cross-cluster db access)
+      aliases: [
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}ccdb`,
+      ],
       // Volumes
       volumes: PROD
         ? [
@@ -81,7 +85,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         : false,
     },
     /*
-     * Traefik (proxy) configuration for the API service
+     * Traefik (proxy) configuration for the DB service
      */
     traefik: {
       db: generateTraefikConfig(utils, {
@@ -92,6 +96,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
         .set('http.middlewares.db-prefix.replacepathregex.regex', '^/-/db/(.*)')
         .set('http.middlewares.db-prefix.replacepathregex.replacement', '/$1')
         .set('http.routers.db.middlewares', ['db-prefix@file']),
+      ccdb: generateTraefikConfig(utils, {
+        service: 'db',
+        prefixes: ['/'],
+        priority: 666,
+        entrypoint: 'ccdb',
+        router: 'ccdb',
+      })
+        .set('http.routers.ccdb.middlewares', ['ccdb-auth@file'])
     },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
