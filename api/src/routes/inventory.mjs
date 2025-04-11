@@ -179,20 +179,32 @@ export function routes(app) {
    */
   app.get(`/inventory/mods`, rbac.user, inventory.listMods)
 
-  /*
-   * Read all Module Vars
-   */
-  app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
+  // Modvars ///////////////////////
 
   /*
-   * Read an Module Var
+   * Create a modvar
+   */
+  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
+
+  /*
+   * Read a Module variable
    */
   app.get(`/inventory/modvars/:id`, rbac.user, inventory.readModvar)
 
   /*
-   * Delete an Module Var
+   * Update a Module variable
+   */
+  app.put(`/inventory/modvars/:id`, rbac.user, inventory.updateModvar)
+
+  /*
+   * Delete an Module Variable
    */
   app.delete(`/inventory/modvars/:id`, rbac.operator, inventory.deleteModvar)
+
+  /*
+   * Read all Module Variables
+   */
+  app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
 
   /*
    * Read all Host Vars
@@ -307,11 +319,6 @@ export function routes(app) {
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)
-
-  /*
-   * Create a modvar
-   */
-  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
 
   /*
    * Create a hostvar

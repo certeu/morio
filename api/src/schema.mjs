@@ -306,7 +306,20 @@ export const schema = {
     mod: Joi.string().required(),
     data: Joi.string(),
   }),
+  // Inventory - Modvars
   'req.inventory.createModvar': Joi.object({
+    id: Joi.string().required(),
+    val: Joi.string().required(),
+    info: Joi.string().required(),
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.readModvar': Joi.object({
+    id: Joi.string().required(),
+    val: Joi.string().required(),
+    info: Joi.string().required(),
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.updateModvar': Joi.object({
     id: Joi.string().required(),
     val: Joi.string(),
     info: Joi.string(),
@@ -372,9 +385,6 @@ export const schema = {
     hosts: Joi.array().items(Joi.string()),
   }),
   'req.inventory.readHost': Joi.object({
-    id: Joi.string().required(),
-  }),
-  'req.inventory.readModvar': Joi.object({
     id: Joi.string().required(),
   }),
   'req.inventory.readHostvar': Joi.object({

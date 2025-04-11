@@ -53,6 +53,16 @@ const parameters_mods = [
   },
 ]
 
+const parameters_modvars = [
+  {
+    in: 'path',
+    name: `id`,
+    schema: j2s(Joi.string().required().description('The id of the module variable')).swagger,
+    required: true,
+    description: 'The id of the module variable in the inventory',
+  },
+]
+
 export default function (api) {
   const shared = { tags: ['inventory'] }
   api.tag('inventory', "Endpoints to manage Morio's inventory (FIXME: document these)")
@@ -594,6 +604,117 @@ Note that you probably should not use this, and instead create a new entry.`,
     operationId: 'mod.delete',
     summary: `Delete mod name`,
     description: `Removes the mod with mod name \`mod\` from the inventory.`,
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  // Modvar
+  api.post('/inventory/modvar', {
+    ...shared,
+    security,
+    operationId: 'modvar.create',
+    summary: `Create Module Variable`,
+    description: `Creates a module variable in the inventory.`,
+    requestBody: {
+      description: 'The module variable data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(schema['req.inventory.createModvar']).swagger,
+          example: { id: 'module|4.13', val: 'moduleval', info: 'moduleinfo', mod: 'module' },
+        },
+      },
+    },
+    responses: {
+      204: { description: 'No response body' },
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.get('/inventory/modvars/{id}', {
+    ...shared,
+    parameters: parameters_modvars,
+    security,
+    operationId: 'modvar.read',
+    summary: `Read a Module Variable`,
+    description: `Reads a Module Variable from the inventory.`,
+    responses: {
+      200: response({
+        desc: 'The module variable data',
+        example: {
+          id: 'module|4.13',
+          val: 'moduleval',
+          info: 'moduleinfo',
+          mod: 'module',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.authentication.required`,
+        `morio.api.ratelimit.exceeded`,
+        `morio.api.internal.error`,
+      ]),
+    },
+  })
+
+  api.put('/inventory/modvars/{id}', {
+    ...shared,
+    parameters: parameters_modvars,
+    security,
+    operationId: 'modvar.update',
+    summary: `Update Module Variable`,
+    description: `Updates a module variable in the inventory.
+  
+  Note that you probably should not use this, and instead create a new entry.`,
+    requestBody: {
+      description: 'The module variable data',
+      required: true,
+      content: {
+        'application/json': {
+          schema: j2s(Joi.object({ val: Joi.string(), info: Joi.string(), mod: Joi.string() }))
+            .swagger,
+          example: { val: 'moduleval', info: 'moduleinfo', mod: 'module' },
+        },
+      },
+    },
+    responses: {
+      200: response({
+        desc: 'The module variable data',
+        example: {
+          id: 'module|4.13',
+          val: 'moduleval',
+          info: 'moduleinfo',
+          mod: 'module',
+        },
+      }),
+      ...errorResponses([
+        `morio.api.schema.violation`,
+        `morio.api.authentication.required`,
+        'morio.api.db.failure',
+        `morio.api.ratelimit.exceeded`,
+      ]),
+    },
+  })
+
+  api.delete('/inventory/modvars/{id}', {
+    ...shared,
+    parameters: parameters_modvars,
+    security,
+    operationId: 'modvar.delete',
+    summary: `Delete Module Variable`,
+    description: `Removes the module variable with id \`id\` from the inventory.`,
     responses: {
       204: { description: 'No response body' },
       ...errorResponses([
