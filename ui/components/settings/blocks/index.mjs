@@ -24,7 +24,7 @@ const blocks = {
 const LockedOnEdit = () => (
   <Popout note>
     <h5>These settings are locked</h5>
-    <p>Once deployed, these settings cannot be changed.</p>
+    <p>Once deployed, these settings cannot be changed through the UI.</p>
   </Popout>
 )
 
@@ -50,8 +50,10 @@ export const Block = (props) => {
       </Popout>
     ) : (
       <>
-        {props.edit && props.template.lockOnEdit ? <LockedOnEdit /> : null}
-        <Component {...props} {...viewConfig} viewConfig={viewConfig} disabled={disabled} />
+        {props.edit && props.template.lockOnEdit
+          ? <LockedOnEdit />
+          : <Component {...props} {...viewConfig} viewConfig={viewConfig} disabled={disabled} />
+        }
       </>
     )
   } else {

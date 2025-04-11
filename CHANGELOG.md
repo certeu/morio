@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- [ui] Add UI to manage flanking nodes and services
+- [core] Add selective deployment of flanking services
+
+### Changed
+
+- Allow users to define where to run flanking services
+- [api] Run in PM2 and restart when memory exceeds 250MB
+- [core] Run in PM2 and restart when memory exceeds 250MB
+- [core] Cluster join/heartbeat changes for flanking nodes
+
+### Fixed
+
+- [api] Fix an issue in IP resolver validation
+- [api] Fix an issue in flanking node validation
+
 ## [0.8.1] - 2025-03-12
 
 ### Added

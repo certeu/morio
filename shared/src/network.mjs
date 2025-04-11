@@ -25,7 +25,7 @@ export async function resolveHost(host) {
     return [false, `Failed to resolve host: ${host}`]
   }
 
-  return [true, result.map((record) => record.address)]
+  return [true, [...new Set(result.map((record) => record.address))]]
 }
 
 /**

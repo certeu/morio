@@ -3,6 +3,7 @@ import {
   serviceOrder,
   ephemeralServiceOrder,
   optionalServices,
+  hookMsg,
 } from './services/index.mjs'
 import { presets, getPreset, inProduction, loadAllPresets } from './presets.mjs'
 import { pullConfig } from './pull-oci.mjs'
@@ -16,5 +17,6 @@ export {
   serviceOrder,
   ephemeralServiceOrder,
   optionalServices,
+  hookMsg,
   pullConfig,
 }

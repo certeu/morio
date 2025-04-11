@@ -12,12 +12,7 @@ import { service as proxyService, ensureTraefikDynamicConfiguration } from './pr
 import { service as tapService } from './tap.mjs'
 import { service as watcherService } from './watcher.mjs'
 // Dependencies
-import {
-  resolveServiceConfiguration,
-  serviceOrder,
-  ephemeralServiceOrder,
-  optionalServices,
-} from '#config'
+import { resolveServiceConfiguration, serviceOrder, ephemeralServiceOrder, hookMsg } from '#config'
 // Docker
 import {
   docker,
@@ -181,7 +176,7 @@ export async function startMorio(hookParams = {}) {
  */
 export async function ensureMorioService(serviceName, hookParams = {}) {
   /*
-   * Start by generating the  morio service config so it's available in all hooks
+   * Start by generating the morio service config so it's available in all hooks
    * Docker config will be generated after the preCreate lifecycle hook
    */
   utils.setMorioServiceConfig(
@@ -189,30 +184,27 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
     resolveServiceConfiguration(serviceName, { utils, hookParams })
   )
 
-  if (optionalServices.includes(serviceName)) {
+  /*
+   * If the service is not wanted, yet running, stop it
+   */
+  const wanted = await runHook('wanted', serviceName, hookParams)
+  if (!wanted) {
+    const running = isContainerRunning(serviceName)
     /*
-     * If the service optional, not wanted, yet running, stop it
+     * Stopping services can take a long time.
+     * No need to wait for that, we can continue with other services.
+     * So we're letting this run its course async, rather than waiting for it.
      */
-    const wanted = await runHook('wanted', serviceName, hookParams)
-    if (!wanted) {
-      log.debug(`[${serviceName}] Optional service is not wanted`)
-      const running = isContainerRunning(serviceName)
-      /*
-       * Stopping services can take a long time.
-       * No need to wait for that, we can continue with other services.
-       * So we're letting this run its course async, rather than waiting for it.
-       */
-      log.debug(`[${serviceName}] Optional service is running, but not wanted. Shutting down...`)
-      if (running)
-        stopMorioService(serviceName).then((result) => {
-          if (result[0] === true)
-            log.debug(`[${serviceName}] Stopped service as it is no longer wanted`)
-          else log.warn(`[${serviceName}] Unexpected result when attempting to stop the service`)
-        })
+    log.debug(`[${serviceName}] Service is running, but not wanted. Shutting down...`)
+    if (running)
+      stopMorioService(serviceName).then((result) => {
+        if (result[0] === true)
+          log.debug(`[${serviceName}] Stopped service as it is no longer wanted`)
+        else log.warn(`[${serviceName}] Unexpected result when attempting to stop the service`)
+      })
 
-      // Not wanted, return early
-      return true
-    } else log.debug(`[${serviceName}] Optional service is wanted`)
+    // Not wanted, return early
+    return true
   }
 
   /*
@@ -226,8 +218,6 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
      * Run precreate lifecycle hook
      */
     await runHook('precreate', serviceName, hookParams)
-  } else {
-    log.debug(`[${serviceName}] Not updating container`)
   }
 
   /*
@@ -260,8 +250,6 @@ export async function ensureMorioService(serviceName, hookParams = {}) {
      * Run postStart lifecycle hook
      */
     await runHook('poststart', serviceName, { ...hookParams, recreate })
-  } else {
-    log.debug(`[${serviceName}] Not restarting service`)
   }
 
   /*
@@ -288,7 +276,7 @@ async function shouldServiceBeRecreated(serviceName, hookParams) {
    */
   const running = isContainerRunning(serviceName)
   if (!running) {
-    log.debug({ running }, `[${serviceName}] Service is not running. Recreating service`)
+    log.debug(`[${serviceName}] Service is not running. Recreating service`)
     return true
   }
 
@@ -345,8 +333,10 @@ export async function runHook(hookName, serviceName, hookParams) {
     log.warn(err, `[${serviceName}] Error in the ${hookName} hook`)
   }
 
-  if (!result && !['wanted', 'recreate', 'restart', 'heartbeat'].includes(hookName)) {
-    log.warn(`[${serviceName}] The ${hookName} hook failed`)
+  if (!result) {
+    if (['wanted', 'recreate', 'restart'].includes(hookName))
+      log.debug(`[${serviceName}] ${hookMsg.ko[hookName]}`)
+    else log.warn(`[${serviceName}] The ${hookName} hook failed`)
   }
 
   return result
@@ -382,34 +372,6 @@ export async function restartMorioService(serviceName, id) {
   else log.warn(err, `Failed to start service: ${serviceName}`)
 
   return ok
-}
-
-/**
- * The default wanted lifecycle hook
- *
- * Containers need to specify this hook, but for several containers
- * we just check whether we are running in ephemeral state of not.
- * So rather than create that hook for each service, we reuse this method.
- *
- * @retrun {boolean} result - True to indicate the container is wanted
- */
-export function defaultServiceWantedHook() {
-  return utils.isEphemeral() ? false : true
-}
-
-/**
- * The 'always true' method
- *
- * Containers need to specify various lifecycle hooks.
- * But some containers should always be running, or always be
- * restarted and so on.
- * So rather than create that hook for each service, we reuse this
- * method.
- *
- * @retrun {boolean} result - always true
- */
-export function alwaysTrue() {
-  return true
 }
 
 /**

@@ -60,7 +60,7 @@ export async function validateSettings(newSettings, headers = false) {
     newSettings.cluster.flanking_nodes &&
     (!Array.isArray(newSettings.cluster.flanking_nodes) ||
       newSettings.cluster.flanking_nodes.length < 0 ||
-      newSettings.cluster.flanking_nodes.length < 36)
+      newSettings.cluster.flanking_nodes.length > 35)
   ) {
     report.info.push(`Settings are not valid`)
     report.errors.push(`Flanking node count is not supported`)

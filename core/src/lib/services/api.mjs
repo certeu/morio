@@ -1,10 +1,10 @@
 import { utils, log } from '../utils.mjs'
-import { chown, mkdir } from '#shared/fs'
+import { chown, mkdir, writeFile } from '#shared/fs'
 import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
-import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
+import { defaultRestartServiceHook, defaultRecreateServiceHook } from './index.mjs'
 
 /**
  * Service object holds the various lifecycle methods
@@ -23,8 +23,9 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
+     * The API service is _always_ wanted.
      */
-    wanted: ensureLocalPrerequisites,
+    wanted: () => true,
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      */
@@ -84,6 +85,16 @@ async function ensureLocalPrerequisites() {
    * (this will only renew the cert if it's missing or old)
    */
   await ensureServiceCertificate('api', false)
+
+  /*
+   * Write PM2 config file
+   */
+  const config = utils.getMorioServiceConfig('api')
+  if (config?.pm2)
+    await writeFile(
+      `/etc/morio/api/pm2.config.js`,
+      `module.exports=${JSON.stringify(config.pm2, null, 2)}`
+    )
 
   return
 }

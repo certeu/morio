@@ -2,11 +2,7 @@ import { mkdir } from '#shared/fs'
 import { restClient, testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { ensureServiceCertificate } from '#lib/tls'
-import {
-  defaultServiceWantedHook,
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 import { log, utils } from '../utils.mjs'
 
 const dbClient = restClient(`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:4001`)
@@ -35,9 +31,13 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We just reuse the default hook here, checking for ephemeral state
+     * The DB service runs on all broker nodes
      */
-    wanted: defaultServiceWantedHook,
+    wanted: () => {
+      if (utils.isEphemeral()) return false
+      if (utils.isFlankingNode()) return false
+      return true
+    },
     /**
      * Lifecycle hook for anything to be done prior to creating the container
      *
