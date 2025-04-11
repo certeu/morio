@@ -114,32 +114,34 @@ export async function validateSettings(newSettings, headers = false) {
      * Try contacting nodes over HTTPS, ignore certificate
      */
     const url = `https://${node}/${utils.getPreset('MORIO_API_PREFIX')}/status`
-    httpPromises.push(
-      await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
-        (status) => {
-          if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
-          else {
-            report.info.push(`Validation failed for node ${i}`)
-            report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
+    // Do not test ourselves
+    if (node !== utils.getNodeFqdn())
+      httpPromises.push(
+        await testUrl(url, { ignoreCertificate: true, returnAs: 'json' }, log.debug).then(
+          (status) => {
+            if (status?.info) report.info.push(`Node ${i} is reachable over HTTPS`)
+            else {
+              report.info.push(`Validation failed for node ${i}`)
+              report.errors.push(`Unable to reach node ${i} at: https://${node}/`)
 
-            return abort()
-          }
+              return abort()
+            }
 
-          if (status.state?.ephemeral) {
-            report.info.push(`Node ${i} runs Morio and is ready for setup`)
-          } else {
-            if (status.info?.name === '@itsmorio/api') {
-              report.warnings.push(
-                `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
-              )
+            if (status.state?.ephemeral) {
+              report.info.push(`Node ${i} runs Morio and is ready for setup`)
             } else {
-              report.errors.push(`Node ${i} does not seem to run Morio`)
-              abort()
+              if (status.info?.name === '@itsmorio/api') {
+                report.warnings.push(
+                  `Node ${i} runs Morio but is not in ephemeral mode, its settings would be overwritten`
+                )
+              } else {
+                report.errors.push(`Node ${i} does not seem to run Morio`)
+                abort()
+              }
             }
           }
-        }
+        )
       )
-    )
   }
   await Promise.all(httpPromises)
 
