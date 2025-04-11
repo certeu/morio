@@ -1,3 +1,4 @@
+import https from 'node:https'
 import { readFile } from './fs.mjs'
 import { restClient } from './network.mjs'
 
