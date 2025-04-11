@@ -22,7 +22,7 @@ export async function createDbClient (utils, log) {
   const dbClient = local
     ? restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`)
     : restClient(
-      `https://${getSettings('cluster.broker_nodes')[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+      `https://${utils.getSettings('cluster.broker_nodes')[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
       {
         agent: new https.Agent({ ca: getKeys().ca })
       }
