@@ -760,7 +760,7 @@ Note that you probably should not use this, and instead create a new entry.`,
         'application/json': {
           schema: j2s(schema['req.inventory.createHostvar']).swagger,
           example: {
-            id: '1',
+            id: 1,
             key: 'key1',
             val: 'hostval',
             info: 'hostinfo',
@@ -792,7 +792,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The host variable data',
         example: {
-          id: '1',
+          id: 1,
           key: 'key1',
           val: 'hostval',
           info: 'hostinfo',
@@ -837,7 +837,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The host variable data',
         example: {
-          id: '1',
+          id: 1,
           key: 'key1',
           val: 'hostval',
           info: 'hostinfo',
@@ -885,7 +885,7 @@ Note that you probably should not use this, and instead create a new entry.`,
         'application/json': {
           schema: j2s(schema['req.inventory.createModfile']).swagger,
           example: {
-            id: '1',
+            id: 1,
             mod: 'module',
             folder: 'folder',
             file: 'file.txt',
@@ -918,7 +918,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The module file',
         example: {
-          id: '1',
+          id: 1,
           mod: 'module',
           folder: 'folder',
           file: 'file.txt',
@@ -971,7 +971,7 @@ Note that you probably should not use this, and instead create a new entry.`,
       200: response({
         desc: 'The module file data',
         example: {
-          id: '1',
+          id: 1,
           mod: 'module',
           folder: 'folder',
           file: 'file.txt',

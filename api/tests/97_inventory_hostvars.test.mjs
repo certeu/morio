@@ -4,7 +4,7 @@ import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
 
 const hostvar = {
-  id: '1',
+  id: 1,
   key: 'key1',
   val: 'hostval',
   info: 'hostinfo',

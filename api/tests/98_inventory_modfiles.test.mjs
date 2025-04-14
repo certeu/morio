@@ -4,7 +4,7 @@ import { strict as assert } from 'node:assert'
 import { errors } from '../src/errors.mjs'
 
 const modfile = {
-  id: '1',
+  id: 1,
   mod: 'module',
   folder: 'folder',
   file: 'file.txt',
