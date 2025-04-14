@@ -44,21 +44,6 @@ export function routes(app) {
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
 
-  /*
-   * Read all IP addresses
-   */
-  app.get(`/inventory/ips`, rbac.user, inventory.listIps)
-
-  /*
-   * Read an IP address
-   */
-  app.get(`/inventory/ips/:id`, rbac.user, inventory.readIp)
-
-  /*
-   * Delete an IP address
-   */
-  app.delete(`/inventory/ips/:id`, rbac.operator, inventory.deleteIp)
-
   // Pkgs ///////////////////////
 
   /*
@@ -86,85 +71,12 @@ export function routes(app) {
    */
   app.get(`/inventory/pkgs`, rbac.user, inventory.listPkgs)
 
-  /*
-   * Read all Morio Modules
-   */
-  app.get(`/inventory/mods`, rbac.user, inventory.listMods)
+  // Oss ///////////////////////
 
   /*
-   * Read an Morio Module
+   * Create a os
    */
-  app.get(`/inventory/mods/:id`, rbac.user, inventory.readMod)
-
-  /*
-   * Delete an Morio Module
-   */
-  app.delete(`/inventory/mods/:id`, rbac.operator, inventory.deleteMod)
-
-  /*
-   * Read all Module Vars
-   */
-  app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
-
-  /*
-   * Read an Module Var
-   */
-  app.get(`/inventory/modvars/:id`, rbac.user, inventory.readModvar)
-
-  /*
-   * Delete an Module Var
-   */
-  app.delete(`/inventory/modvars/:id`, rbac.operator, inventory.deleteModvar)
-
-  /*
-   * Read all Host Vars
-   */
-  app.get(`/inventory/hostvars`, rbac.user, inventory.listHostvars)
-
-  /*
-   * Read an Host Var
-   */
-  app.get(`/inventory/hostvars/:id`, rbac.user, inventory.readHostvar)
-
-  /*
-   * Delete an Host Var
-   */
-  app.delete(`/inventory/hostvars/:id`, rbac.operator, inventory.deleteHostvar)
-
-  /*
-   * Read all Module Files
-   */
-  app.get(`/inventory/modfiles`, rbac.user, inventory.listModfiles)
-
-  /*
-   * Read an Module File
-   */
-  app.get(`/inventory/modfiles/:id`, rbac.user, inventory.readModfile)
-
-  /*
-   * Delete an Module File
-   */
-  app.delete(`/inventory/modfiles/:id`, rbac.operator, inventory.deleteModfile)
-
-  /*
-   * Read all MAC addresses
-   */
-  app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
-
-  /*
-   * Read a MAC address
-   */
-  app.get(`/inventory/macs/:id`, rbac.user, inventory.readMac)
-
-  /*
-   * Delete a MAC address
-   */
-  app.delete(`/inventory/macs/:id`, rbac.operator, inventory.deleteMac)
-
-  /*
-   * Read all Operating Systems
-   */
-  app.get(`/inventory/oss`, rbac.user, inventory.listOss)
+  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
 
   /*
    * Read an Operating System
@@ -172,9 +84,179 @@ export function routes(app) {
   app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
 
   /*
+   * Update a Operating System
+   */
+  app.put(`/inventory/oss/:id`, rbac.user, inventory.updateOs)
+
+  /*
    * Delete an Operating System
    */
   app.delete(`/inventory/oss/:id`, rbac.operator, inventory.deleteOs)
+
+  /*
+   * Read all Operating Systems
+   */
+  app.get(`/inventory/oss`, rbac.user, inventory.listOss)
+
+  // Ips ///////////////////////
+
+  /*
+   * Create a ip
+   */
+  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
+
+  /*
+   * Read an IP
+   */
+  app.get(`/inventory/ips/:ip`, rbac.user, inventory.readIp)
+
+  /*
+   * Update a IP
+   */
+  app.put(`/inventory/ips/:ip`, rbac.user, inventory.updateIp)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/ips/:ip`, rbac.operator, inventory.deleteIp)
+
+  /*
+   * Read all IP
+   */
+  app.get(`/inventory/ips`, rbac.user, inventory.listIps)
+
+  // Macs ///////////////////////
+
+  /*
+   * Create a mac
+   */
+  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
+
+  /*
+   * Read an Mac
+   */
+  app.get(`/inventory/macs/:mac`, rbac.user, inventory.readMac)
+
+  /*
+   * Update a Mac
+   */
+  app.put(`/inventory/macs/:mac`, rbac.user, inventory.updateMac)
+
+  /*
+   * Delete an Operating System
+   */
+  app.delete(`/inventory/macs/:mac`, rbac.operator, inventory.deleteMac)
+
+  /*
+   * Read all Mac
+   */
+  app.get(`/inventory/macs`, rbac.user, inventory.listMacs)
+
+  // Mods ///////////////////////
+
+  /*
+   * Create a Mod
+   */
+  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
+
+  /*
+   * Read an Mod
+   */
+  app.get(`/inventory/mods/:mod`, rbac.user, inventory.readMod)
+
+  /*
+   * Update a Mod
+   */
+  app.put(`/inventory/mods/:mod`, rbac.user, inventory.updateMod)
+
+  /*
+   * Delete a Mod
+   */
+  app.delete(`/inventory/mods/:mod`, rbac.operator, inventory.deleteMod)
+
+  /*
+   * Read all Mod
+   */
+  app.get(`/inventory/mods`, rbac.user, inventory.listMods)
+
+  // Modvars ///////////////////////
+
+  /*
+   * Create a modvar
+   */
+  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
+
+  /*
+   * Read a Module variable
+   */
+  app.get(`/inventory/modvars/:id`, rbac.user, inventory.readModvar)
+
+  /*
+   * Update a Module variable
+   */
+  app.put(`/inventory/modvars/:id`, rbac.user, inventory.updateModvar)
+
+  /*
+   * Delete an Module Variable
+   */
+  app.delete(`/inventory/modvars/:id`, rbac.operator, inventory.deleteModvar)
+
+  /*
+   * Read all Module Variables
+   */
+  app.get(`/inventory/modvars`, rbac.user, inventory.listModvars)
+
+  // Hostvars ///////////////////////
+
+  /*
+   * Create a hostvar
+   */
+  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
+
+  /*
+   * Read a Host variable
+   */
+  app.get(`/inventory/hostvars/:id`, rbac.user, inventory.readHostvar)
+
+  /*
+   * Update a Host variable
+   */
+  app.put(`/inventory/hostvars/:id`, rbac.user, inventory.updateHostvar)
+
+  /*
+   * Delete an Host variable
+   */
+  app.delete(`/inventory/hostvars/:id`, rbac.operator, inventory.deleteHostvar)
+
+  /*
+   * Read all Host Variables
+   */
+  app.get(`/inventory/hostvars`, rbac.user, inventory.listHostvars)
+
+  /*
+   * Create a modfile
+   */
+  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
+
+  /*
+   * Read a Module File
+   */
+  app.get(`/inventory/modfiles/:id`, rbac.user, inventory.readModfile)
+
+  /*
+   * Update a Module file
+   */
+  app.put(`/inventory/modfiles/:id`, rbac.user, inventory.updateModfile)
+
+  /*
+   * Delete an Module file
+   */
+  app.delete(`/inventory/modfiles/:id`, rbac.operator, inventory.deleteModfile)
+
+  /*
+   * Read all Module files
+   */
+  app.get(`/inventory/modfiles`, rbac.user, inventory.listModfiles)
 
   /*
    * Create a group
@@ -246,44 +328,9 @@ export function routes(app) {
   app.post(`/inventory/search`, rbac.operator, inventory.search)
 
   /*
-   * Create a ip
-   */
-  app.post(`/inventory/ip`, rbac.operator, inventory.createIp)
-
-  /*
-   * Create a mod
-   */
-  app.post(`/inventory/mod`, rbac.operator, inventory.createMod)
-
-  /*
-   * Create a modvar
-   */
-  app.post(`/inventory/modvar`, rbac.operator, inventory.createModvar)
-
-  /*
-   * Create a hostvar
-   */
-  app.post(`/inventory/hostvar`, rbac.operator, inventory.createHostvar)
-
-  /*
-   * Create a modfile
-   */
-  app.post(`/inventory/modfile`, rbac.operator, inventory.createModfile)
-
-  /*
-   * Create a mac
-   */
-  app.post(`/inventory/mac`, rbac.operator, inventory.createMac)
-
-  /*
    * Create a host
    */
   app.post(`/inventory/host`, rbac.operator, inventory.createHost)
-
-  /*
-   * Create a os
-   */
-  app.post(`/inventory/os`, rbac.operator, inventory.createOs)
 
   /*
    * Get inventory for Ansible as JSON

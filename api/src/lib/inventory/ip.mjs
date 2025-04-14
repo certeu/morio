@@ -4,13 +4,13 @@ import { db } from '../db.mjs'
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
 /**
- * Constructor for a Pkg instance
+ * Constructor for a Ip instance
  *
- * @param {string} id - The Pkg id to preset this for reading
+ * @param {string} ip - The Ip to preset this for reading
  */
-export function Pkg(id = false) {
+export function Ip(ip = false) {
   // Non-enumerable properties
-  addNonEnumProp(this, '_id', id)
+  addNonEnumProp(this, '_id', ip)
   addNonEnumProp(this, '_record', false)
   addNonEnumProp(this, '_saved', true)
 
@@ -21,29 +21,28 @@ export function Pkg(id = false) {
 }
 
 /**
- * Create a package
+ * Create a ip
  *
  * @param {object} params  - All params as an object
- * @param {string} id - The Pkg id
- * @param {string} name - The Pkg name
- * @param {string} id - The Pkg version
- * @return {Pkg} this - The Pkg instance
+ * @param {string} ip - The ip ip
+ * @param {string} version - The ip version
+ * @return {Ip} this - The Ip instance
  */
-Pkg.prototype.create = async function ({ id, name, version }) {
+Ip.prototype.create = async function ({ ip, version }) {
   /*
-   * Do not bother without an id
+   * Do not bother without an ip
    */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+  if (!ip && !this.getId()) return this.setError('You must provide an ip')
 
   /*
    * Insert into the database
    */
   let result = false
   try {
-    result = await db.write(
-      `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
-      { id, name, version }
-    )
+    result = await db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
+      ip,
+      version,
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -55,70 +54,69 @@ Pkg.prototype.create = async function ({ id, name, version }) {
     Array.isArray(result) &&
     result[0] === 200 &&
     result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(id).setSaved(true).setError(false)
+    ? this.setId(ip).setSaved(true).setError(false)
     : this.setError('Failed to create record')
 }
 
 /*
- * Set the package name
+ * Set the ip
  */
-Pkg.prototype.setName = function (name) {
-  return name === undefined ? this : this.setRecordField('name', name).setSaved(false)
+Ip.prototype.setIp = function (ip) {
+  return ip === undefined ? this : this.setRecordField('ip', ip).setSaved(false)
 }
 
 /*
- * Set the package version
+ * Set the ip version
  */
-Pkg.prototype.setVersion = function (version) {
+Ip.prototype.setVersion = function (version) {
   return version === undefined ? this : this.setRecordField('version', version).setSaved(false)
 }
 
 /*
- * Export the package data
+ * Export the ip data
  */
-Pkg.prototype.asData = async function () {
+Ip.prototype.asData = async function () {
   /*
-   * Do not bother without an id
+   * Do not bother without an ip
    */
-  if (!this.getId()) return this.setError('You must provide an id')
+  if (!this.getId()) return this.setError('You must provide an ip')
 
   /*
    * Read from database or return local if there's unsaved changes
    */
   if (this.getSaved()) await this.read()
 
-  return { id: this.getId(), ...this.getRecord() }
+  return { ip: this.getId(), ...this.getRecord() }
 }
 /*
- * Set the package data
+ * Set the ip data
  */
-Pkg.prototype.fromData = function ({ id, name, version }) {
-  if (id) this.setRecordField('id', id)
-  if (name) this.setRecordField('name', name)
+Ip.prototype.fromData = function ({ ip, version }) {
+  if (ip) this.setRecordField('ip', ip)
   if (version) this.setRecordField('version', version)
 
   return this
 }
 
 /**
- * Save a package
+ * Save a ip
  *
- * @param {string} id - The Pkg id
+ * @param {string} ip - The Ip ip
  */
-Pkg.prototype.save = async function () {
+Ip.prototype.save = async function () {
   /*
-   * Do not bother without an id
+   * Do not bother without an ip
    */
-  if (!this.getId()) return this.setError('You must provide an id')
+  if (!this.getId()) return this.setError('You must provide an ip')
 
   /*
    * Update database
    */
   let result = false
   try {
-    const data = { id: this.getId(), ...this.getRecord() }
+    const data = { ip: this.getId(), ...this.getRecord() }
     result = await db.write(
-      `INSERT INTO inventory_pkgs(${Object.keys(data).join(', ')}) ` +
+      `INSERT INTO inventory_ips(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
           .join(', ')}) ` +
@@ -138,20 +136,20 @@ Pkg.prototype.save = async function () {
 }
 
 /**
- * Delete a package
+ * Delete a ip
  */
-Pkg.prototype.delete = async function () {
+Ip.prototype.delete = async function () {
   /*
-   * Do not bother without an id
+   * Do not bother without an ip
    */
-  if (!this.getId()) return this.setError('You must provide an id')
+  if (!this.getId()) return this.setError('You must provide an ip')
 
   /*
    * Remove from database
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
+    result = await db.write(`DELETE FROM inventory_ips WHERE ip = :ip`, { ip: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -160,27 +158,26 @@ Pkg.prototype.delete = async function () {
 }
 
 /**
- * Read a package
+ * Read a ip
  *
- * @param {string} id - The Pkg id
+ * @param {string} ip - The Ip ip
  */
-Pkg.prototype.read = async function (id = false) {
+Ip.prototype.read = async function (ip = false) {
   /*
-   * Do not bother without an id
+   * Do not bother without an ip
    */
-  if (!id && !this.getId()) return this.setError('You must provide an id')
+  if (!ip && !this.getId()) return this.setError('You must provide an ip')
 
   /*
    * Read from database
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
-      id: id || this.getId(),
+    result = await db.read(`SELECT * FROM inventory_ips WHERE ip = :ip`, {
+      ip: ip || this.getId(),
     })
     const data = resultAsRecord(result[1])
-    if (data.id) this.setId(data.id)
-    if (data.name) this.setRecordField('name', data.name)
+    if (data.ip) this.setId(data.ip)
     if (data.version) this.setRecordField('version', data.version)
     this.setSaved(true)
   } catch (err) {
@@ -193,19 +190,19 @@ Pkg.prototype.read = async function (id = false) {
 }
 
 /**
- * List all Package records
+ * List all IP records
  */
-Pkg.prototype.list = async function () {
+Ip.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
+    result = await db.read(`SELECT * FROM inventory_ips ORDER BY ip`)
   } catch (err) {
     return this.setError(err)
   }
 
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
-    : this.setError('Failed to fetch OS list')
+    : this.setError('Failed to fetch IP list')
 }
 
 /*
@@ -213,7 +210,7 @@ Pkg.prototype.list = async function () {
  */
 
 // Clears internal fields
-Pkg.prototype.clear = function () {
+Ip.prototype.clear = function () {
   this._id = false
   this._record = false
   this._saved = false
@@ -223,43 +220,43 @@ Pkg.prototype.clear = function () {
 }
 
 // Sets the internal error field
-Pkg.prototype.setError = function (error) {
+Ip.prototype.setError = function (error) {
   this.error = error
 
   return this
 }
 
 // Gets the internal error field
-Pkg.prototype.getError = function () {
+Ip.prototype.getError = function () {
   return this.error
 }
 
 // Sets the internal id field
-Pkg.prototype.setId = function (id) {
+Ip.prototype.setId = function (id) {
   this._id = id
 
   return this
 }
 
 // Gets the internal id field
-Pkg.prototype.getId = function () {
+Ip.prototype.getId = function () {
   return this._id
 }
 
 // Sets the internal record
-Pkg.prototype.setRecord = function (record) {
+Ip.prototype.setRecord = function (record) {
   this._record = record
 
   return this
 }
 
 // Gets the internal record
-Pkg.prototype.getRecord = function () {
+Ip.prototype.getRecord = function () {
   return this._record
 }
 
 // Sets an internal record field
-Pkg.prototype.setRecordField = function (field, value) {
+Ip.prototype.setRecordField = function (field, value) {
   if (typeof this.getRecord() !== 'object') this.setRecord({})
   this._record[field] = value
 
@@ -267,13 +264,13 @@ Pkg.prototype.setRecordField = function (field, value) {
 }
 
 // Sets the internal saved field
-Pkg.prototype.setSaved = function (saved) {
+Ip.prototype.setSaved = function (saved) {
   this._saved = saved
 
   return this
 }
 
 // Gets the internal saved field
-Pkg.prototype.getSaved = function () {
+Ip.prototype.getSaved = function () {
   return this._saved
 }

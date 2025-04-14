@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
-import { RightIcon, TrashIcon, CodeIcon } from 'components/icons.mjs'
+import { RightIcon, TrashIcon, HardwareIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { KeyVal } from 'components/keyval.mjs'

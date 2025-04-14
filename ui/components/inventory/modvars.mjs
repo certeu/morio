@@ -94,7 +94,7 @@ export const ModvarsTable = () => {
                   type="checkbox"
                   checked={selection[modvar.id] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(mod.id)}
+                  onClick={() => toggle(modvar.id)}
                 />
               </td>
               <td className="">

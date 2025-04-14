@@ -1,5 +1,4 @@
 import { getPreset } from 'config/index.mjs'
-import { DateTime } from 'luxon'
 
 /*
  * This is hardcoded for now
@@ -680,7 +679,7 @@ MorioClient.prototype.isGroupAvailable = async function (group) {
  * @param {string} group - The group to add the groupvar to
  * @return {object} - The result
  */
-MorioClient.prototype.createGroupvar = async function ({key, val='', group, info=''}) {
+MorioClient.prototype.createGroupvar = async function ({ key, val = '', group, info = '' }) {
   return await this.call(`${morioConfig.api}/inventory/groupvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
@@ -754,14 +753,11 @@ MorioClient.prototype.getInventoryGroupMemberOf = async function (group) {
  * @return {object} - The result
  */
 MorioClient.prototype.updateInventoryGroupDescription = async function (group, description) {
-  return await this.call(
-    `${morioConfig.api}/inventory/groups/${group}/description`,
-    {
-      headers: this.jsonHeaders,
-      method: 'PATCH',
-      body: JSON.stringify({ description }),
-    },
-  )
+  return await this.call(`${morioConfig.api}/inventory/groups/${group}/description`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ description }),
+  })
 }
 
 /**
@@ -770,14 +766,11 @@ MorioClient.prototype.updateInventoryGroupDescription = async function (group, d
  * @return {object} - The result
  */
 MorioClient.prototype.addInventoryGroupMembers = async function (group, add) {
-  return await this.call(
-    `${morioConfig.api}/inventory/groups/${group}/add-members`,
-    {
-      headers: this.jsonHeaders,
-      method: 'PATCH',
-      body: JSON.stringify(add),
-    },
-  )
+  return await this.call(`${morioConfig.api}/inventory/groups/${group}/add-members`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify(add),
+  })
 }
 
 /**
@@ -786,14 +779,11 @@ MorioClient.prototype.addInventoryGroupMembers = async function (group, add) {
  * @return {object} - The result
  */
 MorioClient.prototype.removeInventoryGroupMembers = async function (group, remove) {
-  return await this.call(
-    `${morioConfig.api}/inventory/groups/${group}/remove-members`,
-    {
-      headers: this.jsonHeaders,
-      method: 'PATCH',
-      body: JSON.stringify(remove),
-    },
-  )
+  return await this.call(`${morioConfig.api}/inventory/groups/${group}/remove-members`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify(remove),
+  })
 }
 
 /**
@@ -802,14 +792,11 @@ MorioClient.prototype.removeInventoryGroupMembers = async function (group, remov
  * @return {object} - The result
  */
 MorioClient.prototype.addInventoryGroupToGroups = async function (group, groups) {
-  return await this.call(
-    `${morioConfig.api}/inventory/groups/${group}/join`,
-    {
-      headers: this.jsonHeaders,
-      method: 'PATCH',
-      body: JSON.stringify({ groups }),
-    },
-  )
+  return await this.call(`${morioConfig.api}/inventory/groups/${group}/join`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ groups }),
+  })
 }
 
 /**
@@ -1415,7 +1402,17 @@ MorioClient.prototype.createMac = async function (mac) {
  * @param {string} last_update - The last update datetime
  * @return {object} - The result
  */
-MorioClient.prototype.createHost = async function (id, name, version) {
+MorioClient.prototype.createHost = async function (
+  id,
+  arch,
+  cores,
+  fqdn,
+  memory,
+  name,
+  notes,
+  tags,
+  last_update
+) {
   return await this.call(`${morioConfig.api}/inventory/host`, {
     headers: this.jsonHeaders,
     method: 'POST',

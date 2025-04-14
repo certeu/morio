@@ -11,7 +11,7 @@ export default function InventoryGroupvarPage({ id = false }) {
   const [title, setTitle] = useState('Loading groupvar data...')
 
   const meta = {
-    title: id ? data.key : 'Loading groupvar data',
+    title: title ? data.key : 'Loading groupvar data',
     page: ['inventory', 'groupvars', id ? id : 'unknown'],
     Icon: GroupIcon,
   }

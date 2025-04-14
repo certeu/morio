@@ -4,11 +4,11 @@ import { db } from '../db.mjs'
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
 /**
- * Constructor for a Pkg instance
+ * Constructor for a Hostvar instance
  *
- * @param {string} id - The Pkg id to preset this for reading
+ * @param {string} id - The Hostvar id to preset this for reading
  */
-export function Pkg(id = false) {
+export function Hostvar(id = false) {
   // Non-enumerable properties
   addNonEnumProp(this, '_id', id)
   addNonEnumProp(this, '_record', false)
@@ -21,15 +21,17 @@ export function Pkg(id = false) {
 }
 
 /**
- * Create a package
+ * Create a hostvar
  *
  * @param {object} params  - All params as an object
- * @param {string} id - The Pkg id
- * @param {string} name - The Pkg name
- * @param {string} id - The Pkg version
- * @return {Pkg} this - The Pkg instance
+ * @param {string} id - The Hostvar id
+ * @param {string} key - The Hostvar key
+ * @param {string} val - The Hostvar val
+ * @param {string} info - The Hostvar info
+ * @param {string} host - The Host name
+ * @return {Hostvar} this - The Hostvar instance
  */
-Pkg.prototype.create = async function ({ id, name, version }) {
+Hostvar.prototype.create = async function ({ id, key, val, info, host }) {
   /*
    * Do not bother without an id
    */
@@ -41,8 +43,8 @@ Pkg.prototype.create = async function ({ id, name, version }) {
   let result = false
   try {
     result = await db.write(
-      `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
-      { id, name, version }
+      `INSERT INTO inventory_hostvars(id, key, val, info, host) VALUES(:id, :key, :val, :info, :host)`,
+      { id, key, val, info, host }
     )
   } catch (err) {
     return this.setError(err)
@@ -60,23 +62,37 @@ Pkg.prototype.create = async function ({ id, name, version }) {
 }
 
 /*
- * Set the package name
+ * Set the hostvar key
  */
-Pkg.prototype.setName = function (name) {
-  return name === undefined ? this : this.setRecordField('name', name).setSaved(false)
+Hostvar.prototype.setKey = function (key) {
+  return key === undefined ? this : this.setRecordField('key', key).setSaved(false)
 }
 
 /*
- * Set the package version
+ * Set the hostvar val
  */
-Pkg.prototype.setVersion = function (version) {
-  return version === undefined ? this : this.setRecordField('version', version).setSaved(false)
+Hostvar.prototype.setVal = function (val) {
+  return val === undefined ? this : this.setRecordField('val', val).setSaved(false)
 }
 
 /*
- * Export the package data
+ * Set the hostvar info
  */
-Pkg.prototype.asData = async function () {
+Hostvar.prototype.setInfo = function (info) {
+  return info === undefined ? this : this.setRecordField('info', info).setSaved(false)
+}
+
+/*
+ * Set the hostvar host
+ */
+Hostvar.prototype.setHost = function (host) {
+  return host === undefined ? this : this.setRecordField('host', host).setSaved(false)
+}
+
+/*
+ * Export the hostvar
+ */
+Hostvar.prototype.asData = async function () {
   /*
    * Do not bother without an id
    */
@@ -90,22 +106,24 @@ Pkg.prototype.asData = async function () {
   return { id: this.getId(), ...this.getRecord() }
 }
 /*
- * Set the package data
+ * Set the hostvar
  */
-Pkg.prototype.fromData = function ({ id, name, version }) {
+Hostvar.prototype.fromData = function ({ id, key, val, info, host }) {
   if (id) this.setRecordField('id', id)
-  if (name) this.setRecordField('name', name)
-  if (version) this.setRecordField('version', version)
+  if (key) this.setRecordField('key', key)
+  if (val) this.setRecordField('val', val)
+  if (info) this.setRecordField('info', info)
+  if (host) this.setRecordField('host', host)
 
   return this
 }
 
 /**
- * Save a package
+ * Save a hostvar
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Hostvar id
  */
-Pkg.prototype.save = async function () {
+Hostvar.prototype.save = async function () {
   /*
    * Do not bother without an id
    */
@@ -118,7 +136,7 @@ Pkg.prototype.save = async function () {
   try {
     const data = { id: this.getId(), ...this.getRecord() }
     result = await db.write(
-      `INSERT INTO inventory_pkgs(${Object.keys(data).join(', ')}) ` +
+      `INSERT INTO inventory_hostvars(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
           .join(', ')}) ` +
@@ -138,9 +156,9 @@ Pkg.prototype.save = async function () {
 }
 
 /**
- * Delete a package
+ * Delete a hostvar
  */
-Pkg.prototype.delete = async function () {
+Hostvar.prototype.delete = async function () {
   /*
    * Do not bother without an id
    */
@@ -151,7 +169,7 @@ Pkg.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
+    result = await db.write(`DELETE FROM inventory_hostvars WHERE id = :id`, { id: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -160,11 +178,11 @@ Pkg.prototype.delete = async function () {
 }
 
 /**
- * Read a package
+ * Read a hostvar
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Hostvar id
  */
-Pkg.prototype.read = async function (id = false) {
+Hostvar.prototype.read = async function (id = false) {
   /*
    * Do not bother without an id
    */
@@ -175,13 +193,15 @@ Pkg.prototype.read = async function (id = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
+    result = await db.read(`SELECT * FROM inventory_hostvars WHERE id = :id`, {
       id: id || this.getId(),
     })
     const data = resultAsRecord(result[1])
     if (data.id) this.setId(data.id)
-    if (data.name) this.setRecordField('name', data.name)
-    if (data.version) this.setRecordField('version', data.version)
+    if (data.key) this.setRecordField('key', data.key)
+    if (data.val) this.setRecordField('val', data.val)
+    if (data.info) this.setRecordField('info', data.info)
+    if (data.host) this.setRecordField('host', data.host)
     this.setSaved(true)
   } catch (err) {
     return this.setError(err)
@@ -193,12 +213,12 @@ Pkg.prototype.read = async function (id = false) {
 }
 
 /**
- * List all Package records
+ * List all Hostvar records
  */
-Pkg.prototype.list = async function () {
+Hostvar.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
+    result = await db.read(`SELECT * FROM inventory_hostvars ORDER BY host`)
   } catch (err) {
     return this.setError(err)
   }
@@ -213,7 +233,7 @@ Pkg.prototype.list = async function () {
  */
 
 // Clears internal fields
-Pkg.prototype.clear = function () {
+Hostvar.prototype.clear = function () {
   this._id = false
   this._record = false
   this._saved = false
@@ -223,43 +243,43 @@ Pkg.prototype.clear = function () {
 }
 
 // Sets the internal error field
-Pkg.prototype.setError = function (error) {
+Hostvar.prototype.setError = function (error) {
   this.error = error
 
   return this
 }
 
 // Gets the internal error field
-Pkg.prototype.getError = function () {
+Hostvar.prototype.getError = function () {
   return this.error
 }
 
 // Sets the internal id field
-Pkg.prototype.setId = function (id) {
+Hostvar.prototype.setId = function (id) {
   this._id = id
 
   return this
 }
 
 // Gets the internal id field
-Pkg.prototype.getId = function () {
+Hostvar.prototype.getId = function () {
   return this._id
 }
 
 // Sets the internal record
-Pkg.prototype.setRecord = function (record) {
+Hostvar.prototype.setRecord = function (record) {
   this._record = record
 
   return this
 }
 
 // Gets the internal record
-Pkg.prototype.getRecord = function () {
+Hostvar.prototype.getRecord = function () {
   return this._record
 }
 
 // Sets an internal record field
-Pkg.prototype.setRecordField = function (field, value) {
+Hostvar.prototype.setRecordField = function (field, value) {
   if (typeof this.getRecord() !== 'object') this.setRecord({})
   this._record[field] = value
 
@@ -267,13 +287,13 @@ Pkg.prototype.setRecordField = function (field, value) {
 }
 
 // Sets the internal saved field
-Pkg.prototype.setSaved = function (saved) {
+Hostvar.prototype.setSaved = function (saved) {
   this._saved = saved
 
   return this
 }
 
 // Gets the internal saved field
-Pkg.prototype.getSaved = function () {
+Hostvar.prototype.getSaved = function () {
   return this._saved
 }

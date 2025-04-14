@@ -4,11 +4,11 @@ import { db } from '../db.mjs'
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
 /**
- * Constructor for a Pkg instance
+ * Constructor for a Os instance
  *
- * @param {string} id - The Pkg id to preset this for reading
+ * @param {string} id - The Os id to preset this for reading
  */
-export function Pkg(id = false) {
+export function Os(id = false) {
   // Non-enumerable properties
   addNonEnumProp(this, '_id', id)
   addNonEnumProp(this, '_record', false)
@@ -21,15 +21,15 @@ export function Pkg(id = false) {
 }
 
 /**
- * Create a package
+ * Create a os
  *
  * @param {object} params  - All params as an object
- * @param {string} id - The Pkg id
- * @param {string} name - The Pkg name
- * @param {string} id - The Pkg version
- * @return {Pkg} this - The Pkg instance
+ * @param {string} id - The Os id
+ * @param {string} name - The Os name
+ * @param {string} version - The Os version
+ * @return {Os} this - The Os instance
  */
-Pkg.prototype.create = async function ({ id, name, version }) {
+Os.prototype.create = async function ({ id, name, version }) {
   /*
    * Do not bother without an id
    */
@@ -41,7 +41,7 @@ Pkg.prototype.create = async function ({ id, name, version }) {
   let result = false
   try {
     result = await db.write(
-      `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
+      `INSERT INTO inventory_oss(id, name, version) VALUES(:id, :name, :version)`,
       { id, name, version }
     )
   } catch (err) {
@@ -60,23 +60,23 @@ Pkg.prototype.create = async function ({ id, name, version }) {
 }
 
 /*
- * Set the package name
+ * Set the os name
  */
-Pkg.prototype.setName = function (name) {
+Os.prototype.setName = function (name) {
   return name === undefined ? this : this.setRecordField('name', name).setSaved(false)
 }
 
 /*
- * Set the package version
+ * Set the os version
  */
-Pkg.prototype.setVersion = function (version) {
+Os.prototype.setVersion = function (version) {
   return version === undefined ? this : this.setRecordField('version', version).setSaved(false)
 }
 
 /*
- * Export the package data
+ * Export the os data
  */
-Pkg.prototype.asData = async function () {
+Os.prototype.asData = async function () {
   /*
    * Do not bother without an id
    */
@@ -90,9 +90,9 @@ Pkg.prototype.asData = async function () {
   return { id: this.getId(), ...this.getRecord() }
 }
 /*
- * Set the package data
+ * Set the os data
  */
-Pkg.prototype.fromData = function ({ id, name, version }) {
+Os.prototype.fromData = function ({ id, name, version }) {
   if (id) this.setRecordField('id', id)
   if (name) this.setRecordField('name', name)
   if (version) this.setRecordField('version', version)
@@ -101,11 +101,11 @@ Pkg.prototype.fromData = function ({ id, name, version }) {
 }
 
 /**
- * Save a package
+ * Save a os
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Os id
  */
-Pkg.prototype.save = async function () {
+Os.prototype.save = async function () {
   /*
    * Do not bother without an id
    */
@@ -118,7 +118,7 @@ Pkg.prototype.save = async function () {
   try {
     const data = { id: this.getId(), ...this.getRecord() }
     result = await db.write(
-      `INSERT INTO inventory_pkgs(${Object.keys(data).join(', ')}) ` +
+      `INSERT INTO inventory_oss(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
           .join(', ')}) ` +
@@ -138,9 +138,9 @@ Pkg.prototype.save = async function () {
 }
 
 /**
- * Delete a package
+ * Delete a os
  */
-Pkg.prototype.delete = async function () {
+Os.prototype.delete = async function () {
   /*
    * Do not bother without an id
    */
@@ -151,7 +151,7 @@ Pkg.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
+    result = await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -160,11 +160,11 @@ Pkg.prototype.delete = async function () {
 }
 
 /**
- * Read a package
+ * Read a os
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Os id
  */
-Pkg.prototype.read = async function (id = false) {
+Os.prototype.read = async function (id = false) {
   /*
    * Do not bother without an id
    */
@@ -175,7 +175,7 @@ Pkg.prototype.read = async function (id = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
+    result = await db.read(`SELECT * FROM inventory_oss WHERE id = :id`, {
       id: id || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -193,12 +193,12 @@ Pkg.prototype.read = async function (id = false) {
 }
 
 /**
- * List all Package records
+ * List all OS records
  */
-Pkg.prototype.list = async function () {
+Os.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
+    result = await db.read(`SELECT * FROM inventory_oss ORDER BY name`)
   } catch (err) {
     return this.setError(err)
   }
@@ -213,7 +213,7 @@ Pkg.prototype.list = async function () {
  */
 
 // Clears internal fields
-Pkg.prototype.clear = function () {
+Os.prototype.clear = function () {
   this._id = false
   this._record = false
   this._saved = false
@@ -223,43 +223,43 @@ Pkg.prototype.clear = function () {
 }
 
 // Sets the internal error field
-Pkg.prototype.setError = function (error) {
+Os.prototype.setError = function (error) {
   this.error = error
 
   return this
 }
 
 // Gets the internal error field
-Pkg.prototype.getError = function () {
+Os.prototype.getError = function () {
   return this.error
 }
 
 // Sets the internal id field
-Pkg.prototype.setId = function (id) {
+Os.prototype.setId = function (id) {
   this._id = id
 
   return this
 }
 
 // Gets the internal id field
-Pkg.prototype.getId = function () {
+Os.prototype.getId = function () {
   return this._id
 }
 
 // Sets the internal record
-Pkg.prototype.setRecord = function (record) {
+Os.prototype.setRecord = function (record) {
   this._record = record
 
   return this
 }
 
 // Gets the internal record
-Pkg.prototype.getRecord = function () {
+Os.prototype.getRecord = function () {
   return this._record
 }
 
 // Sets an internal record field
-Pkg.prototype.setRecordField = function (field, value) {
+Os.prototype.setRecordField = function (field, value) {
   if (typeof this.getRecord() !== 'object') this.setRecord({})
   this._record[field] = value
 
@@ -267,13 +267,13 @@ Pkg.prototype.setRecordField = function (field, value) {
 }
 
 // Sets the internal saved field
-Pkg.prototype.setSaved = function (saved) {
+Os.prototype.setSaved = function (saved) {
   this._saved = saved
 
   return this
 }
 
 // Gets the internal saved field
-Pkg.prototype.getSaved = function () {
+Os.prototype.getSaved = function () {
   return this._saved
 }

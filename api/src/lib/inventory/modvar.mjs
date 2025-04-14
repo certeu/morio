@@ -4,11 +4,11 @@ import { db } from '../db.mjs'
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
 /**
- * Constructor for a Pkg instance
+ * Constructor for a Modvar instance
  *
- * @param {string} id - The Pkg id to preset this for reading
+ * @param {string} id - The Modvar id to preset this for reading
  */
-export function Pkg(id = false) {
+export function Modvar(id = false) {
   // Non-enumerable properties
   addNonEnumProp(this, '_id', id)
   addNonEnumProp(this, '_record', false)
@@ -21,15 +21,16 @@ export function Pkg(id = false) {
 }
 
 /**
- * Create a package
+ * Create a modvar
  *
  * @param {object} params  - All params as an object
- * @param {string} id - The Pkg id
- * @param {string} name - The Pkg name
- * @param {string} id - The Pkg version
- * @return {Pkg} this - The Pkg instance
+ * @param {string} id - The Modvar id
+ * @param {string} val - The Modvar val
+ * @param {string} info - The Modvar info
+ * @param {string} mod - The Modvar module
+ * @return {Modvar} this - The Modvar instance
  */
-Pkg.prototype.create = async function ({ id, name, version }) {
+Modvar.prototype.create = async function ({ id, val, info, mod }) {
   /*
    * Do not bother without an id
    */
@@ -41,8 +42,8 @@ Pkg.prototype.create = async function ({ id, name, version }) {
   let result = false
   try {
     result = await db.write(
-      `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
-      { id, name, version }
+      `INSERT INTO inventory_modvars(id, val, info, mod) VALUES(:id, :val, :info, :mod)`,
+      { id, val, info, mod }
     )
   } catch (err) {
     return this.setError(err)
@@ -60,23 +61,30 @@ Pkg.prototype.create = async function ({ id, name, version }) {
 }
 
 /*
- * Set the package name
+ * Set the modvar val
  */
-Pkg.prototype.setName = function (name) {
-  return name === undefined ? this : this.setRecordField('name', name).setSaved(false)
+Modvar.prototype.setVal = function (val) {
+  return val === undefined ? this : this.setRecordField('val', val).setSaved(false)
 }
 
 /*
- * Set the package version
+ * Set the modvar info
  */
-Pkg.prototype.setVersion = function (version) {
-  return version === undefined ? this : this.setRecordField('version', version).setSaved(false)
+Modvar.prototype.setInfo = function (info) {
+  return info === undefined ? this : this.setRecordField('info', info).setSaved(false)
 }
 
 /*
- * Export the package data
+ * Set the modvar mod
  */
-Pkg.prototype.asData = async function () {
+Modvar.prototype.setMod = function (mod) {
+  return mod === undefined ? this : this.setRecordField('mod', mod).setSaved(false)
+}
+
+/*
+ * Export the modvar
+ */
+Modvar.prototype.asData = async function () {
   /*
    * Do not bother without an id
    */
@@ -90,22 +98,23 @@ Pkg.prototype.asData = async function () {
   return { id: this.getId(), ...this.getRecord() }
 }
 /*
- * Set the package data
+ * Set the modvar
  */
-Pkg.prototype.fromData = function ({ id, name, version }) {
+Modvar.prototype.fromData = function ({ id, val, info, mod }) {
   if (id) this.setRecordField('id', id)
-  if (name) this.setRecordField('name', name)
-  if (version) this.setRecordField('version', version)
+  if (val) this.setRecordField('val', val)
+  if (info) this.setRecordField('info', info)
+  if (mod) this.setRecordField('mod', mod)
 
   return this
 }
 
 /**
- * Save a package
+ * Save a modvar
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Modvar id
  */
-Pkg.prototype.save = async function () {
+Modvar.prototype.save = async function () {
   /*
    * Do not bother without an id
    */
@@ -118,7 +127,7 @@ Pkg.prototype.save = async function () {
   try {
     const data = { id: this.getId(), ...this.getRecord() }
     result = await db.write(
-      `INSERT INTO inventory_pkgs(${Object.keys(data).join(', ')}) ` +
+      `INSERT INTO inventory_modvars(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
           .join(', ')}) ` +
@@ -138,9 +147,9 @@ Pkg.prototype.save = async function () {
 }
 
 /**
- * Delete a package
+ * Delete a modvar
  */
-Pkg.prototype.delete = async function () {
+Modvar.prototype.delete = async function () {
   /*
    * Do not bother without an id
    */
@@ -151,7 +160,7 @@ Pkg.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
+    result = await db.write(`DELETE FROM inventory_modvars WHERE id = :id`, { id: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -160,11 +169,11 @@ Pkg.prototype.delete = async function () {
 }
 
 /**
- * Read a package
+ * Read a modvar
  *
- * @param {string} id - The Pkg id
+ * @param {string} id - The Modvar id
  */
-Pkg.prototype.read = async function (id = false) {
+Modvar.prototype.read = async function (id = false) {
   /*
    * Do not bother without an id
    */
@@ -175,13 +184,14 @@ Pkg.prototype.read = async function (id = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
+    result = await db.read(`SELECT * FROM inventory_modvars WHERE id = :id`, {
       id: id || this.getId(),
     })
     const data = resultAsRecord(result[1])
     if (data.id) this.setId(data.id)
-    if (data.name) this.setRecordField('name', data.name)
-    if (data.version) this.setRecordField('version', data.version)
+    if (data.val) this.setRecordField('val', data.val)
+    if (data.info) this.setRecordField('info', data.info)
+    if (data.mod) this.setRecordField('mod', data.mod)
     this.setSaved(true)
   } catch (err) {
     return this.setError(err)
@@ -193,12 +203,12 @@ Pkg.prototype.read = async function (id = false) {
 }
 
 /**
- * List all Package records
+ * List all Modvar records
  */
-Pkg.prototype.list = async function () {
+Modvar.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
+    result = await db.read(`SELECT * FROM inventory_modvars ORDER BY mod`)
   } catch (err) {
     return this.setError(err)
   }
@@ -213,7 +223,7 @@ Pkg.prototype.list = async function () {
  */
 
 // Clears internal fields
-Pkg.prototype.clear = function () {
+Modvar.prototype.clear = function () {
   this._id = false
   this._record = false
   this._saved = false
@@ -223,43 +233,43 @@ Pkg.prototype.clear = function () {
 }
 
 // Sets the internal error field
-Pkg.prototype.setError = function (error) {
+Modvar.prototype.setError = function (error) {
   this.error = error
 
   return this
 }
 
 // Gets the internal error field
-Pkg.prototype.getError = function () {
+Modvar.prototype.getError = function () {
   return this.error
 }
 
 // Sets the internal id field
-Pkg.prototype.setId = function (id) {
+Modvar.prototype.setId = function (id) {
   this._id = id
 
   return this
 }
 
 // Gets the internal id field
-Pkg.prototype.getId = function () {
+Modvar.prototype.getId = function () {
   return this._id
 }
 
 // Sets the internal record
-Pkg.prototype.setRecord = function (record) {
+Modvar.prototype.setRecord = function (record) {
   this._record = record
 
   return this
 }
 
 // Gets the internal record
-Pkg.prototype.getRecord = function () {
+Modvar.prototype.getRecord = function () {
   return this._record
 }
 
 // Sets an internal record field
-Pkg.prototype.setRecordField = function (field, value) {
+Modvar.prototype.setRecordField = function (field, value) {
   if (typeof this.getRecord() !== 'object') this.setRecord({})
   this._record[field] = value
 
@@ -267,13 +277,13 @@ Pkg.prototype.setRecordField = function (field, value) {
 }
 
 // Sets the internal saved field
-Pkg.prototype.setSaved = function (saved) {
+Modvar.prototype.setSaved = function (saved) {
   this._saved = saved
 
   return this
 }
 
 // Gets the internal saved field
-Pkg.prototype.getSaved = function () {
+Modvar.prototype.getSaved = function () {
   return this._saved
 }
