@@ -270,8 +270,8 @@ export const GroupvarDetail = ({ data }) => {
   return (
     <>
       <ul className="list list-inside ml-4 list-disc">
-        {Object.entries(output).map(([label, content]) => (
-          <li className="flex flex-row flex-wrap items-start gap-4 my-1">
+        {Object.entries(output).map(([label, content], index) => (
+          <li className="flex flex-row flex-wrap items-start gap-4 my-1" key={index}>
             <div className="text-right w-24 font-bold">{label}:</div>
             <div className="grow">{content}</div>
           </li>

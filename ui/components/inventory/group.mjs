@@ -531,6 +531,7 @@ const GroupHierarchyEntry = ({
             <ul className="list list-inside ml-4">
               {hosts.map((host) => (
                 <GroupHierarchyHostEntry
+                  key={host.id}
                   uuid={host.id}
                   group={parentId}
                   {...{ removeHostFromGroup }}
