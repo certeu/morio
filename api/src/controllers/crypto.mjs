@@ -29,7 +29,6 @@ Controller.prototype.decrypt = async function (req, res) {
   try {
     data = utils.decrypt(JSON.stringify(valid))
   } catch (err) {
-    log.todo(err)
     return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
   }
 

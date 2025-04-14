@@ -73,7 +73,6 @@ export function createKvClient(utils, log) {
     } catch (err) {
       log.warn(err, `Failed to list keys from KV table`)
     }
-    log.todo(result)
 
     if (result[0] === 200 && Array.isArray(result[1]?.results?.[0]?.values)) {
       return result[1].results[0].values.map((val) => val.pop())

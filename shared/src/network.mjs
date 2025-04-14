@@ -97,145 +97,66 @@ export async function testUrl(url, customOptions = {}) {
 }
 
 /*
- * General purpose method to call the core API with a GET request
+ * General purpose method to call an HTTP endpoint
  *
- * @param {string} url - The URL to call
- * @param {object} data - The data to send
- * @param {bool} raw - Set this to something truthy to not parse the result as JSON
- * @param {function} log - Optional logging method to log errors
- * @param {object} options - Optional fetch options
+ * @param {object} options - The Axios options object (includes, url, method, and optional data)
+ * @param {object} log - The logger object
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export async function get(url, raw = false, log = false, options={}) {
+async function http(options, log) {
   /*
-   * Send the request to core
+   * Send the request
    */
   let response
   try {
-    response = await fetch(url, options)
+    response = await axios(options)
   } catch (err) {
     // Log error if requested
-    if (log) console.log({ url, err })
+    if (log) log.warn({
+      baseURL: options.baseURL,
+      url: options.url,
+      method: options.method,
+      err: err.code,
+      body: response?.data,
+    }, 'HTTP request error')
   }
 
-  if (!response) return [false, false]
-
-  /*
-   * Try parsing the body as JSON, fallback to text
-   */
-  let body
-  try {
-    body = raw ? await response.text() : await response.json()
-  } catch (err) {
-    try {
-      body = await response.text()
-    } catch (err) {
-      body = false
-    }
-  }
-
-  return [response.status || false, body]
-}
-
-/*
- * General purpose method to call the core API with a streaming GET request
- *
- * @param {url} string - The URL to call
- * @param {object} options - Optional fetch options
- * @return {object} res - The Express response object
- */
-export async function streamGet(url, res, options={}) {
-  /*
-   * Send headers
-   */
-  res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.setHeader('Transfer-Encoding', 'chunked')
-
-  /*
-   * Send the request to core
-   */
-  let response
-  try {
-    response = await fetch(url, options)
-  } catch (err) {
-    // Swallow error
-    //console.log(err)
-  }
-
-  /*
-   * Try parsing the body as JSON, fallback to text
-   */
-  await pipeline(response.body, res)
-}
-
-/*
- * General purpose method to call the core API with a POST or PUT request
- *
- * @param {url} string - The URL to call
- * @param {data} string - The data to send
- * @param {raw} string - Set this to something truthy to not parse the result as JSON
- * @param {function} log - Optional logging method to log errors
- * @param {object} options - Optional fetch options
- * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
- */
-async function __postput(method = 'POST', url, data, raw = false, log = false, options={}) {
-  /*
-   * Construct the request object with or without a request body
-   */
-  const request = { method }
-  if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-    /*
-     * We have data, add request body and set content type
-     */
-    request.body = JSON.stringify(data)
-    request.headers = { 'Content-Type': 'application/json' }
-  }
-
-  /*
-   * Now send request to core
-   */
-  let response
-  try {
-    response = await fetch(url, request, options)
-  } catch (err) {
-    if (log) log(err)
-  }
-
-  /*
-   * Handle status codes that have no response body
-   */
-  if (response?.status && [204].includes(response.status)) return [response.status, {}]
-  /*
-   * Handle all other status codes
-   */ else if (response?.status) {
-    let data
-    try {
-      data = raw ? await response.text() : await response.json()
-    } catch (err) {
-      if (log) log(err)
-      return raw ? [response.status, { err }] : [response.status, data]
-    }
-    return [response.status, data]
-  }
-
-  /*
-   * If we end up here, status code is 400 or higher so it's an error
-   */
-  return [response?.status || 500, false]
+  return [response?.status || false, response?.data || false]
 }
 
 /**
- * General purpose client for a REST API
+ * General purpose client for a REST API, uses Axios
  *
  * @param {string} api - The API root URL
- * @param {object} options - Any optional fetch options
- * @return {object] client - The API client
+ * @param {object} log - A logger object
+ * @param {object} options - Any optional Axios options to apply to all requests
+ * @return {object] client - The REST client
  */
-export function restClient(api, options={}) {
+export function restClient(api, log, options={}) {
+  /*
+   * Merge default and custom options
+   */
+  const defaultOptions = {
+    baseURL: api,
+    method: 'GET',
+    headers: {},
+    data: undefined,
+    timeout: 1500,
+    httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Needed for initial Traefik self-signed cert
+    ...options,
+  }
+  const mergeOptions = (custom) => ({
+    ...defaultOptions,
+    ...custom,
+    headers: {
+      ...defaultOptions.headers,
+      ...(custom.headers || {})
+    }
+  })
+
   return {
-    get: async (url, raw, log, options) => get(api + url, raw, log, options),
-    post: async (url, data, raw, log, options) => __postput('POST', api + url, data, raw, log, options),
-    put: async (url, data, raw, log, options) => __postput('PUT', api + url, data, raw, log, options),
-    streamGet: async (url, res, options) => streamGet(api + url, res, options),
+    get: async (url, options={}) => http(mergeOptions({ ...options, url }), log),
+    post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), log),
+    put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), log),
   }
 }

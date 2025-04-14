@@ -5,7 +5,8 @@ import { ensureServiceCertificate } from '#lib/tls'
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 import { log, utils } from '../utils.mjs'
 
-const dbClient = restClient(`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:4001`)
+// FIXME: Use client from utils here
+const dbClient = restClient(`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:4001`, log)
 
 /**
  * Service object holds the various lifecycle hook methods

@@ -19,6 +19,7 @@ import unset from 'lodash/unset.js'
 /*
  * We need access to the database to store client modules
  */
+//FIXME: Swith to utils restclient
 const dbClient = restClient(`http://morio-db:4001`)
 
 /**

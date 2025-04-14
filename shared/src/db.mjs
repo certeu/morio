@@ -1,4 +1,5 @@
 import https from 'node:https'
+import { generateJwt } from './crypto.mjs'
 import { readFile } from './fs.mjs'
 import { restClient } from './network.mjs'
 
@@ -11,27 +12,68 @@ import { restClient } from './network.mjs'
  */
 export async function createDbClient (utils, log) {
   const local = utils.isBrokerNode()
-  const ca = local
-    ? false
-    : await readFile('/etc/morio/shared/root_ca.crt')
 
-  log.debug(local
-    ? `Creating local database client`
-    : `Creating cross-cluster database client`
-  )
+  if (local) {
+    /*
+     * If the service is available on the local node
+     * we connect directly over the docker network to Rqlite
+     */
+    log.debug(`Creating local database client`)
 
-  const dbClient = local
-    ? restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`)
-    : restClient(
-      `https://${utils.getSettings('cluster.broker_nodes')[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
-      {
-        agent: new https.Agent({ ca })
-      }
+    return dbHandlers(
+      restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, log)
     )
-
-  return {
-    read: (query, params = {}) => dbClient.post('/db/query', [[query, params]]),
-    write: (query, params = {}) => dbClient.post('/db/execute', [[query, params]]),
   }
+
+  /*
+   * If the service is not available on the local node,
+   * we need to do a cross-cluster connection over TLS
+   * that is proxied by the proxy service on the remote node.
+   * This requires setting up TLS as well as authentication.
+   */
+  log.debug(`Creating cross-cluster database client`)
+
+  /*
+   * Create the JWT for authentication
+   */
+  const jwt = await generateJwt({
+    data: {
+      user: 'ccdb',
+      role: 'ccdb',
+      node: utils.getNodeUuid(),
+      cluster: utils.getClusterUuid(),
+    },
+    key: utils.getKeys().private,
+    passphrase: utils.getKeys().unseal,
+    // This needs to be valid as long as the API uptime
+    options: {
+      expiresIn: '1y',
+    }
+  })
+
+  /*
+   * We need to make sure the Morio CA is trusted
+   */
+  const ca = await readFile('/etc/morio/shared/root_ca.crt')
+
+  return dbHandlers(
+    restClient(
+      `https://${utils.getSettings('cluster.broker_nodes')[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+      log,
+      {
+        agent: new https.Agent({
+          ca,
+          rejectUnauthorized: false,
+        }),
+        headers: {
+          authorization: `Bearer ${jwt}`
+        }
+      },
+    )
+  )
 }
 
+const dbHandlers = (dbClient) => ({
+  read: (query, params = {}) => dbClient.post('/db/query', [[query, params]]),
+  write: (query, params = {}) => dbClient.post('/db/execute', [[query, params]]),
+})

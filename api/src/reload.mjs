@@ -20,6 +20,7 @@ export async function reloadConfiguration() {
     every: 5,
     timeout: 3600,
     run: async () => {
+      const result = await utils.coreClient.get('/reload')
       const [status, body] = await utils.coreClient.get('/reload')
 
       return status === 200 ? body : false
