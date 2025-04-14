@@ -515,74 +515,6 @@ Controller.prototype.listHosts = async function (req, res, format = 'array') {
 }
 
 /**
- * Read Module file
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.readModfile = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readModfile`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Read from inventory
-   */
-  const result = await loadModfile(valid.id)
-
-  return result ? res.send(result) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-}
-
-/**
- * Delete Module file
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.deleteModfile = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.readModfile`, { id: req.params.id })
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  /*
-   * Delete from database
-   */
-  const result = await deleteModfile(valid.id)
-
-  /*
-   * Be expicit when a key cannot be found
-   */
-
-  return result === true
-    ? res.status(204).send()
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * List Module files
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.listModfiles = async function (req, res) {
-  const list = await listModfiles()
-
-  return Array.isArray(list)
-    ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
  * Read stats, gather statistics about the inventory
  *
  * @param {object} req - The request object from Express
@@ -614,36 +546,6 @@ Controller.prototype.search = async function (req, res) {
 
   return Array.isArray(list)
     ? res.send(list)
-    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-}
-
-/**
- * Creates a new Modfile
- *
- * @param {object} req - The request object from Express
- * @param {object} res - The response object from Express
- */
-Controller.prototype.createModfile = async function (req, res) {
-  /*
-   * Validate input
-   */
-  const [valid, err] = await utils.validate(`req.inventory.createModfile`, req.body)
-  if (!valid)
-    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
-      schema_violation: err.message,
-    })
-
-  const created = await createModfile(
-    valid.id,
-    valid.mod,
-    valid.folder,
-    valid.file,
-    valid.content,
-    valid.source
-  )
-
-  return created
-    ? res.status(201).send(valid)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
