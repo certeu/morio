@@ -4,10 +4,8 @@ import { cloneAsPojo, arrayToObject } from 'lib/utils.mjs'
 import yaml from 'yaml'
 import { runGroupsTableApiCall } from './inventory/group.mjs'
 import { runHostsTableApiCall, InventoryHostname } from './inventory/host.mjs'
-// Context
-import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
-import { useCallback, useContext, useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
@@ -465,7 +463,6 @@ export const ListInput = ({
  */
 export const SelectInput = ({
   update, // the onChange handler
-  valid = () => true, // Method that should return whether the value is valid or not
   label, // The label
   labelTR = false, // Top-right label
   labelBL = false, // Bottom-Left label
@@ -473,8 +470,6 @@ export const SelectInput = ({
   labelDflt = 'Make a choice', // The label for the default option in the select
   help = false, // Optional link to help / docs
   list, // The list of items to present { val, label, about }
-  current, // The (value of the) current item
-  disabled = false, // Allows rendering a disabled view
 }) => (
   <FormControl {...{ label, labelTR, labelBL, labelBR, help }}>
     <fieldset className="fieldset w-full">
@@ -484,7 +479,11 @@ export const SelectInput = ({
         onChange={(evt) => update(evt.target.value)}
       >
         <option disabled={true}>{labelDflt}</option>
-        {list.map(entry => <option key={entry.val} value={entry.val}>{entry.label}</option>)}
+        {list.map((entry) => (
+          <option key={entry.val} value={entry.val}>
+            {entry.label}
+          </option>
+        ))}
       </select>
     </fieldset>
   </FormControl>
@@ -794,10 +793,8 @@ export const YamlInput = ({ data, update }) => {
 
 export const InventoryGroupInput = ({
   update, // onChange handler
-  current = '', // The current value
   preselect = [], // Groups to preselect
-  placeholder="group-name", // The placeholder text
-  id = '', // An id to tie the input to the label
+  placeholder = 'group-name', // The placeholder text
   exclude = [], // List of groups to keep out of the select
 }) => {
   // State
@@ -810,17 +807,20 @@ export const InventoryGroupInput = ({
 
   // Effects
   useEffect(() => {
-    runGroupsTableApiCall(api).then((result) => setAllGroups(result
-      .filter(entry => !exclude.includes(entry.id))
-      .map(entry => entry.id)
-      .sort()
-    ))
+    runGroupsTableApiCall(api).then((result) =>
+      setAllGroups(
+        result
+          .filter((entry) => !exclude.includes(entry.id))
+          .map((entry) => entry.id)
+          .sort()
+      )
+    )
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   // Helper to toggle group status
   const toggleGroup = (id) => {
-    const newGroups = {...groups}
+    const newGroups = { ...groups }
     if (newGroups[id]) delete newGroups[id]
     else newGroups[id] = id
     setGroups(newGroups)
@@ -838,29 +838,34 @@ export const InventoryGroupInput = ({
       />
       <div className="flex flex-row items-center gap-1">
         <span className="pl-1 text-sm">Selected:</span>
-        {Object.keys(groups).map(group => (
+        {Object.keys(groups).map((group) => (
           <button
             key={group}
             className="badge badge-success hover:badge-error"
             onClick={() => toggleGroup(group)}
-          >{group}</button>
+          >
+            {group}
+          </button>
         ))}
       </div>
       <div className="flex flex-row items-center gap-1 mt-2">
         <span className="pl-1 text-sm">Groups:</span>
         {allGroups
-          .filter(group => (
-              Object.keys(groups).includes(group) ||
-              filter && !group.toLowerCase().includes(filter.toLowerCase())
-            ) ? false : true
+          .filter((group) =>
+            Object.keys(groups).includes(group) ||
+            (filter && !group.toLowerCase().includes(filter.toLowerCase()))
+              ? false
+              : true
           )
-          .map(group => (
-          <button
-            key={group}
-            className="badge badge-neutral hover:badge-primary"
-            onClick={() => toggleGroup(group)}
-          >{group}</button>
-        ))}
+          .map((group) => (
+            <button
+              key={group}
+              className="badge badge-neutral hover:badge-primary"
+              onClick={() => toggleGroup(group)}
+            >
+              {group}
+            </button>
+          ))}
       </div>
     </>
   )
@@ -868,10 +873,8 @@ export const InventoryGroupInput = ({
 
 export const InventoryHostInput = ({
   update, // onChange handler
-  current = '', // The current value
   preselect = [], // Groups to preselect
-  placeholder="hostname-or-uuid", // The placeholder text
-  id = '', // An id to tie the input to the label
+  placeholder = 'hostname-or-uuid', // The placeholder text
   exclude = [], // List of groups to keep out of the select
 }) => {
   // State
@@ -884,17 +887,20 @@ export const InventoryHostInput = ({
 
   // Effects
   useEffect(() => {
-    runHostsTableApiCall(api).then((result) => setAllHosts(result
-      .filter(entry => !exclude.includes(entry.id))
-      .map(entry => entry.id)
-      .sort()
-    ))
+    runHostsTableApiCall(api).then((result) =>
+      setAllHosts(
+        result
+          .filter((entry) => !exclude.includes(entry.id))
+          .map((entry) => entry.id)
+          .sort()
+      )
+    )
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [])
 
   // Helper to toggle host status
   const toggleHost = (id) => {
-    const newHosts = {...hosts}
+    const newHosts = { ...hosts }
     if (newHosts[id]) delete newHosts[id]
     else newHosts[id] = id
     setHosts(newHosts)
@@ -912,7 +918,7 @@ export const InventoryHostInput = ({
       />
       <div className="pl-1 text-sm">Selected:</div>
       <div className="flex flex-col items-start gap-1 pl-4">
-        {Object.keys(hosts).map(host => (
+        {Object.keys(hosts).map((host) => (
           <button
             key={host}
             className="badge badge-success hover:badge-error"
@@ -927,22 +933,23 @@ export const InventoryHostInput = ({
       <div className="pl-1 text-sm mt-2">Hosts:</div>
       <div className="flex flex-col items-start gap-1 pl-3">
         {allHosts
-          .filter(host => (
-              Object.keys(hosts).includes(host) ||
-              filter && !host.toLowerCase().includes(filter.toLowerCase())
-            ) ? false : true
+          .filter((host) =>
+            Object.keys(hosts).includes(host) ||
+            (filter && !host.toLowerCase().includes(filter.toLowerCase()))
+              ? false
+              : true
           )
-          .map(host => (
-          <button
-            key={host}
-            className="badge adge-sm badge-neutral hover:badge-primary"
-            onClick={() => toggleHost(host)}
-          >
-            <InventoryHostname uuid={host} raw />
-            <span className="px-2">|</span>
-            {host}
-          </button>
-        ))}
+          .map((host) => (
+            <button
+              key={host}
+              className="badge adge-sm badge-neutral hover:badge-primary"
+              onClick={() => toggleHost(host)}
+            >
+              <InventoryHostname uuid={host} raw />
+              <span className="px-2">|</span>
+              {host}
+            </button>
+          ))}
       </div>
     </>
   )
@@ -967,30 +974,27 @@ export const MarkdownInput = ({
       {...{ label, labelBR }}
       forId={id}
       labelBL={labelBL ? labelBL : 'This field supports markdown'}
-      labelTR={(
-        <button
-          className="text-primary hover:underline"
-          onClick={() => setPreview(!preview)}
-        >
+      labelTR={
+        <button className="text-primary hover:underline" onClick={() => setPreview(!preview)}>
           {preview ? 'Edit' : 'Preview as'} Markdown
         </button>
-      )}
+      }
     >
       {preview ? (
-      <div className="mdx markdown border rounded-lg p-4">
-        <Markdown>{current}</Markdown>
-      </div>
+        <div className="mdx markdown border rounded-lg p-4">
+          <Markdown>{current}</Markdown>
+        </div>
       ) : (
-      <div className="flex flex-row items-center">
-        <textarea
-          id={id}
-          rows="5"
-          className="textarea textarea-bordered textarea-lg w-full"
-          value={current}
-          placeholder={placeholder}
-          onChange={(evt) => update(evt.target.value)}
-        />
-      </div>
+        <div className="flex flex-row items-center">
+          <textarea
+            id={id}
+            rows="5"
+            className="textarea textarea-bordered textarea-lg w-full"
+            value={current}
+            placeholder={placeholder}
+            onChange={(evt) => update(evt.target.value)}
+          />
+        </div>
       )}
     </FormControl>
   )

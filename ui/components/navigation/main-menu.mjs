@@ -53,7 +53,6 @@ import {
 } from 'components/icons.mjs'
 import { Docker, RedPanda, RedPandaConsole, Traefik } from 'components/brands.mjs'
 import { Link } from 'components/link'
-import { VariableIcon } from '../icons.mjs'
 
 /*
  * Shared props for icons in the sidebar/navigation
