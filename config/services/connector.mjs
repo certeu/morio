@@ -6,7 +6,7 @@ export const pullConfig = {
   // Image to run
   image: 'timberio/vector',
   // Image tag (version) to run
-  tag: '0.45.0-debian',
+  tag: '0.46.1-debian',
 }
 
 /*
