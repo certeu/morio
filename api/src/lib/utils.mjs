@@ -22,6 +22,23 @@ log.todo = (a, b) => {
 }
 
 /*
+ * An error handler for the core API
+ */
+const coreErrorHandler = ({ options, err }) => {
+  if (err?.code === 'ECONNREFUSED')
+    return log.debug(`Connection refused when connecting to core. Perhaps it's reloading?`)
+
+  return log.warn(
+    {
+      url: (options.baseURL || '') + options.url,
+      method: options.method,
+      error: err,
+    },
+    `Core API error`
+  )
+}
+
+/*
  * This store instance will hold our state, but won't be exported.
  * Only through the utility methods below will we allow changing state.
  * We're also initializing it with some data at start time.
@@ -598,16 +615,7 @@ utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
  */
 utils.coreClient = restClient(
   `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${getPreset('MORIO_CORE_PORT')}`,
-  ({ options, err }) => {
-    log.warn(
-      {
-        url: (options.baseURL || '') + options.url,
-        method: options.method,
-        error: err,
-      },
-      `Core API error`
-    )
-  }
+  coreErrorHandler
 )
 
 /**

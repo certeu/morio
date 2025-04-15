@@ -257,10 +257,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         FOREIGN KEY (cid) REFERENCES client_commands(id)
       )`,
     },
-    data: [
+    //data: [
       // FIXME: This is in the ansibleinv branch
       //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
       //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
-    ],
+    //],
   }
 }

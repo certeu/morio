@@ -197,7 +197,7 @@ export async function ensureServiceCertificate(service, internal = false, chain 
   log.debug(`[${service}] Requesting certificates for inter-node TLS`)
   const certAndKey = await attempt({
     every: 5,
-    timeout: 60,
+    timeout: 300,
     run: async () =>
       await createX509Certificate({
         certificate: {

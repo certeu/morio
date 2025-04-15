@@ -2,9 +2,13 @@ import process from 'process'
 import { Kafka, logLevel } from 'kafkajs'
 import { log, utils } from './utils.mjs'
 import { readFile } from '#shared/fs'
+import { attempt } from '#shared/utils'
 
 /*
  * Creates a KafkaJS client instance
+ *
+ * Does figure out what broker to connect to and waits
+ * for it to become available (which takes a while on cold start)
  *
  * @see https://kafka.js.org/
  *
@@ -12,6 +16,10 @@ import { readFile } from '#shared/fs'
  * @return {object} client - The KafkaJS client instance
  */
 async function createClient() {
+  const broker = utils.isBrokerNode() ? utils.getNodeFqdn() : utils.getNodeFqdnFromSerial(1)
+  // Make sure it's up
+  await ensureBrokerIsUp(broker)
+
   return new Kafka({
     clientId: `api_${utils.getNodeUuid()}`,
     brokers: utils.getBrokerFqdns().map((host) => `${host}:9092`),
@@ -79,4 +87,27 @@ async function exitGracefully() {
     log.debug('Bye')
     process.exit()
   }
+}
+
+async function ensureBrokerIsUp(broker) {
+  log.debug(`Making sure broker is up before creating Kafka client`)
+  await attempt({
+    every: 5,
+    timeout: 3600,
+    run: async () => {
+      const [status, body] = await utils.coreClient.get('/status')
+
+      return status === 200 ? body : false
+    },
+    onFailedAttempt: (s) => {
+      log.debug(`Waited ${s} seconds for the broker, will continue waiting.`)
+    },
+    validate: (data) => {
+      if (data?.status?.nodes?.[broker]?.broker === 0) {
+        log.debug(`Broker is up`)
+        return true
+      }
+      return false
+    },
+  })
 }

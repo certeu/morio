@@ -22,12 +22,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [api] Run in PM2 and restart when memory exceeds 250MB
 - [core] Run in PM2 and restart when memory exceeds 250MB
 - [core] Cluster join/heartbeat changes for flanking nodes
+- [shared] Improved error handling for REST client
 
 ### Fixed
 
 - [api] Fix an issue in IP resolver validation
 - [api] Fix an issue in flanking node validation
 - [api] Skip connection test to local node in validation
+- [api] Ensure broker is up prior to instantiating Kafka client
 
 ## [0.8.1] - 2025-03-12
 

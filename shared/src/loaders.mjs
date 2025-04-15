@@ -543,13 +543,13 @@ export async function loadClientModules(settings, log, utils) {
     }
   }
   // No need to await this
-  storeClientModules(modules, log)
-  storeClientModuleFiles(moduleFiles, log)
+  storeClientModules(modules, log, utils)
+  storeClientModuleFiles(moduleFiles, log, utils)
 
   return true
 }
 
-async function storeClientModules(modules, log) {
+async function storeClientModules(modules, log, utils) {
   const queries = []
   for (const module in modules) {
     log.debug(`[client] Preparing to add client module ${module} to the database`)
@@ -587,7 +587,7 @@ async function storeClientModules(modules, log) {
   }
 }
 
-async function storeClientModuleFiles(files, log) {
+async function storeClientModuleFiles(files, log, utils) {
   const queries = []
   for (const file of Object.values(files)) {
     log.debug(
