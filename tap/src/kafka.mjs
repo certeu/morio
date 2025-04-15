@@ -14,10 +14,10 @@ export async function subscribe() {
   /*
    * Ensure config is valid
    */
-  if (!config.brokers || !Array.isArray(config.brokers))
+  if (!config.kafka?.brokers || !Array.isArray(config.kafka.brokers))
     throw new Error('Invalid broker configuration')
 
-  const clientId = `${config.clientId}.${node.uuid}`
+  const clientId = `${config.kafka.clientId}.${node.uuid}`
   const client = createClient(clientId)
   const consumer = await createConsumer(client, topics)
   const producer = await createProducer(client)
@@ -52,7 +52,7 @@ export async function subscribe() {
 function createClient(clientId) {
   log.debug(`Creating kafka client with clientId ${clientId}`)
 
-  return new Kafka({ ...config, clientId })
+  return new Kafka({ ...config.kafka, clientId })
 }
 
 /*
@@ -66,7 +66,7 @@ function createClient(clientId) {
  * @return {object} client - The KafkaJS client instance
  */
 async function createConsumer(client, topics) {
-  const consumer = client.consumer({ groupId: config.clientId })
+  const consumer = client.consumer({ groupId: config.kafka.clientId })
   await consumer.connect()
   for (const topic of topics) log.debug(`Subscribing to Kafka topic: ${topic}`)
   await consumer.subscribe({ topics })

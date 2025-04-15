@@ -572,10 +572,10 @@ async function storeClientModules(modules, log, utils) {
      * We completely remove all modules and recreate them
      * because only through preseeding can modules be loaded
      */
-    const result = await utils.db.write([
-      `DELETE FROM inventory_mods where 1`,
+    const result = await utils.db.write(
+      [`DELETE FROM inventory_mods where 1`],
       ...queries,
-    ])
+    )
     if (result[0] === 200 && result[1].results) {
       let failed = 0
       for (const insert of result[1].results) {
@@ -604,10 +604,10 @@ async function storeClientModuleFiles(files, log, utils) {
      * We completely remove all module files and recreate them
      * because only through preseeding can module files be loaded
      */
-    const result = await utils.db.write([
-      `DELETE FROM inventory_modfiles where 1`,
+    const result = await utils.db.write(
+      [ `DELETE FROM inventory_modfiles where 1`],
       ...queries,
-    ])
+    )
     if (result[0] === 200 && result[1].results?.[0]) {
       let failed = 0
       for (const insert of result[1].results) {

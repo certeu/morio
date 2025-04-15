@@ -22,7 +22,10 @@ export const service = {
      * We just reuse the default hook here, checking for changes in
      * name/version of the container.
      */
-    recreate: () => defaultRecreateServiceHook('cache'),
+    recreate: () => {
+      ensureLocalPrerequisites()
+      return defaultRecreateServiceHook('cache')
+    },
     /**
      * Lifecycle hook to determine whether to restart the container
      * We just reuse the default hook here, checking whether the container
@@ -56,7 +59,7 @@ async function ensureLocalPrerequisites() {
    */
   const secrets = [keys.mrt.hash, keys.private]
   // FIXME: Allow users to (re)generate the password for the default user (for CLI access)
-  const acl = `user tap on #${hash(secrets.map((s) => hash(s + 'tap')).join(''))} +@read +@write +@string +@list +@set +@hash +@sortedset ~* &*
+  const acl = `user tap on #${hash(secrets.map((s) => hash(s + 'tap')).join(''))} +@read +@write +@string +@list +@set +@hash +@sortedset +info ~* &*
 user api on #${hash(secrets.map((s) => hash(s + 'api')).join(''))} +@read ~* &*
 user default on #${hash(keys.seal.salt)} ~* &* +@all`
   await writeFile(`/etc/morio/valkey/users.acl`, acl, log)

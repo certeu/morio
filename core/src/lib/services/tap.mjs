@@ -1,5 +1,6 @@
 import { readFile, writeFile } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
+import { hash } from '#shared/crypto'
 // Default hooks
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // utils
@@ -83,15 +84,38 @@ async function ensureLocalPrerequisites() {
   /*
    * Generate the tap config file
    */
+  const keys = utils.getKeys()
+  const localCache = utils.getCacheNode() === utils.getNodeFqdn()
   const config = {
-    clientId: 'morio-tap',
-    brokers: [`${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`],
-    ssl: {
-      rejectUnauthorized: false,
-      ca: [await readFile('/etc/morio/tap/tls-ca.pem')],
-      key: await readFile('/etc/morio/tap/tls-key.pem'),
-      cert: await readFile('/etc/morio/tap/tls-cert.pem'),
+    kafka: {
+      clientId: 'morio-tap',
+      brokers: [
+        `${utils.getNodeFqdn()}:${utils.getPreset('MORIO_BROKER_KAFKA_API_EXTERNAL_PORT')}`,
+      ],
+      ssl: {
+        rejectUnauthorized: false,
+        ca: await readFile('/etc/morio/tap/tls-ca.pem'),
+        key: await readFile('/etc/morio/tap/tls-key.pem'),
+        cert: await readFile('/etc/morio/tap/tls-cert.pem'),
+      },
     },
+    redis: {
+      db: 0,
+      family: 4,
+      lazyConnect: true,
+      connectionName: `morio.tap.${utils.getNodeUuid()}`,
+      username: 'tap',
+      password: [keys.mrt.hash, keys.private].map((s) => hash(s + 'tap')).join(''),
+      host: localCache ? 'morio-cache' : utils.getCacheNode(),
+      port: localCache ? 6379 : 6661,
+      tls: localCache
+        ? false
+        : {
+            rejectUnauthorized: false,
+            ca: [keys.icrt, keys.rcert],
+          },
+    },
+    tap: utils.getSettings('tap'),
   }
 
   /*

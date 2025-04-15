@@ -4,7 +4,6 @@ import querystring from 'querystring'
 import pino from 'pino'
 import axios from 'axios'
 import { cache as valkey } from './cache.mjs'
-import { inventory } from './inventory.mjs'
 import ipaddr from 'ipaddr.js'
 import get from 'lodash/get.js'
 import set from 'lodash/set.js'
@@ -39,7 +38,6 @@ export const tools = {
     note: cacheNote,
   },
   clean,
-  inventory,
   ipaddr,
   note: cacheNote,
   valkey,
@@ -71,7 +69,6 @@ export const tools = {
     alarm,
     event,
     notification,
-    inventoryUpdate: produceInventoryUpdate,
   },
   settings,
   getSettings: (path, dflt) => get(settings, path, dflt),
@@ -507,21 +504,6 @@ function generateKey(data, spacer) {
     .map((p) => (p ? String(p).replace(/\|/g, '_') : 'undefined'))
     .join(spacer)
     .toLowerCase()
-}
-
-/*
- * Helper message to produce an inventory update to Kafka
- */
-function produceInventoryUpdate(data) {
-  /*
-   * Don't bother without a host ID*
-   */
-  if (!data?.host?.id) return tools.cache.note('Inventory update lacks host ID', data)
-
-  return tools.producer.send({
-    topic: 'inventory',
-    messages: [{ value: asString(data) }],
-  })
 }
 
 /*
