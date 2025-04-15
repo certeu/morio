@@ -9,8 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [ui] Add UI to manage flanking nodes and services
+- [api] Endpoint for cross-cluster database authentication
+- [cache] Enable ACL and authentication for cross-cluster access
 - [core] Add selective deployment of flanking services
+- [proxy] Endpoint for cross-cluster cache access
+- [proxy] Endpoint for cross-cluster database access
+- [ui] Add UI to manage flanking nodes and services
 
 ### Changed
 

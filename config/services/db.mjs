@@ -35,7 +35,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       networks: { default: null },
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
-      // Ports to export (none)
+      // Ports to export
       ports: [
         `${utils.getPreset('MORIO_DB_HTTP_PORT')}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,

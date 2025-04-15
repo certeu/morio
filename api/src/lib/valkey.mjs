@@ -10,7 +10,7 @@ import { Redis as Valkey } from 'ioredis'
  */
 export async function createCacheClient(utils, log) {
   /*
-   * Valkey.Redis requires authentication because it's available cross-cluster
+   * Valkey/Redis requires authentication because it's available cross-cluster
    */
   const keys = utils.getKeys()
   const password = [keys.mrt.hash, keys.private].map((s) => hash(s + 'api')).join('')
@@ -30,7 +30,7 @@ export async function createCacheClient(utils, log) {
   if (local) {
     /*
      * If the service is available on the local node
-     * we connect directly over the docker network to Rqlite
+     * we connect directly over the docker network to Valkey/Redis
      */
     log.debug(`Creating local cache client`)
     return new Cache(new Valkey({ ...valkeyOptions, host: 'morio-cache' }))
@@ -46,6 +46,7 @@ export async function createCacheClient(utils, log) {
         port: utils.getPreset('MORIO_CACHE_PROXY_PORT'),
         tls: {
           ca: [keys.icrt, keys.rcrt],
+          // Required for the intial self-signed Traefik certificate
           rejectUnauthorized: false,
         },
       })
