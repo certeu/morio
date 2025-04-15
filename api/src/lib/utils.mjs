@@ -598,7 +598,16 @@ utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
  */
 utils.coreClient = restClient(
   `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${getPreset('MORIO_CORE_PORT')}`,
-  log
+  ({ options, err }) => {
+    log.warn(
+      {
+        url: (options.baseURL || '') + options.url,
+        method: options.method,
+        error: err,
+      },
+      `Core API error`
+    )
+  }
 )
 
 /**

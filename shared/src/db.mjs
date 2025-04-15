@@ -13,6 +13,19 @@ import { restClient } from './network.mjs'
 export async function createDbClient (utils, log) {
   const local = utils.isBrokerNode()
 
+  /**
+   * The default error handler for the DB rest client
+   *
+   * @param {}
+   */
+  const dbErrorHandler = ({ options, err }) => {
+    log.warn({
+      url: (options.baseURL || '') + options.url,
+      method: options.method,
+      error: err,
+    }, `Database error`)
+
+  }
   if (local) {
     /*
      * If the service is available on the local node
@@ -21,7 +34,7 @@ export async function createDbClient (utils, log) {
     log.debug(`Creating local database client`)
 
     return dbHandlers(
-      restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, log)
+      restClient(`http://morio-db:${utils.getPreset('MORIO_DB_HTTP_PORT')}`, dbErrorHandler)
     )
   }
 
@@ -59,7 +72,7 @@ export async function createDbClient (utils, log) {
   return dbHandlers(
     restClient(
       `https://${utils.getSettings('cluster.broker_nodes')[0]}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
-      log,
+      dbErrorHandler,
       {
         agent: new https.Agent({
           ca,
@@ -93,3 +106,4 @@ function rqliteBody (query, params=false) {
 
   return [query]
 }
+

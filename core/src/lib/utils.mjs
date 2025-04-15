@@ -1228,7 +1228,16 @@ utils.resetServicesStateAge = () => {
  */
 utils.apiClient = restClient(
   `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${getPreset('MORIO_API_PORT')}`,
-  log
+  ({ options, err }) => {
+    log.warn(
+      {
+        url: (options.baseURL || '') + options.url,
+        method: options.method,
+        error: err,
+      },
+      `Core API error`
+    )
+  }
 )
 
 /**

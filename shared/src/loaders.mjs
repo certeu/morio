@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import mustache from 'mustache'
-import { testUrl, restClient } from './network.mjs'
+import { testUrl } from './network.mjs'
 import yaml from 'js-yaml'
 import { Buffer } from 'node:buffer'
 import { simpleGit } from 'simple-git'
@@ -15,12 +15,6 @@ import unset from 'lodash/unset.js'
  * A collection of utils to load various files
  * Typically used to load the preseeded config
  */
-
-/*
- * We need access to the database to store client modules
- */
-//FIXME: Swith to utils restclient
-const dbClient = restClient(`http://morio-db:4001`)
 
 /**
  * Helper method to parse a result as YAML or JSON
@@ -454,7 +448,7 @@ function sanitizeGitFolder(id) {
   return hash(id)
 }
 
-export async function loadClientModules(settings, log) {
+export async function loadClientModules(settings, log, utils) {
   /*
    * Don't bother unless we have modules to load
    */
@@ -578,7 +572,7 @@ async function storeClientModules(modules, log) {
      * We completely remove all modules and recreate them
      * because only through preseeding can modules be loaded
      */
-    const result = await dbClient.post(`/db/execute`, [
+    const result = await utils.db.write([
       `DELETE FROM inventory_mods where 1`,
       ...queries,
     ])
@@ -610,7 +604,7 @@ async function storeClientModuleFiles(files, log) {
      * We completely remove all module files and recreate them
      * because only through preseeding can module files be loaded
      */
-    const result = await dbClient.post(`/db/execute`, [
+    const result = await utils.db.write([
       `DELETE FROM inventory_modfiles where 1`,
       ...queries,
     ])

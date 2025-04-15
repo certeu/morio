@@ -50,8 +50,9 @@ export async function resolveHostAsIp(host) {
  *
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
+ * @param {function} onError - The onError handler
  */
-export async function testUrl(url, customOptions = {}) {
+export async function testUrl(url, customOptions = {}, onError) {
   /*
    * Merge default and custom options
    */
@@ -81,8 +82,9 @@ export async function testUrl(url, customOptions = {}) {
   try {
     result = await axios(url, options)
   } catch (err) {
-    // Swallow error?
-    //console.log(err, `${url}`)
+    // Invoke error handler if it is provided
+    if (typeof onError === 'function') onError({ url, options, err, result })
+
     return options.returnError ? err : false
   }
 
@@ -99,10 +101,10 @@ export async function testUrl(url, customOptions = {}) {
  * General purpose method to call an HTTP endpoint
  *
  * @param {object} options - The Axios options object (includes, url, method, and optional data)
- * @param {object} log - The logger object
+ * @param {function} onError - The onError handler
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-async function http(options, log) {
+async function http(options, onError) {
   /*
    * Send the request
    */
@@ -110,14 +112,8 @@ async function http(options, log) {
   try {
     response = await axios(options)
   } catch (err) {
-    // Log error if requested
-    if (log) log.warn({
-      url: (options.baseURL || "") + options.url,
-      method: options.method,
-      err: err.code,
-      body: response?.data,
-      options,
-    }, 'HTTP request error')
+    // Invoke error handler if it is provided
+    if (typeof onError === 'function') onError({ options, err, response })
 
     return [false, false, err]
   }
@@ -129,11 +125,11 @@ async function http(options, log) {
  * General purpose client for a REST API, uses Axios
  *
  * @param {string} api - The API root URL
- * @param {object} log - A logger object
+ * @param {object} onError - A default error handler
  * @param {object} options - Any optional Axios options to apply to all requests
  * @return {object] client - The REST client
  */
-export function restClient(api, log, options={}) {
+export function restClient(api, onError, options={}) {
   /*
    * Merge default and custom options
    */
@@ -143,8 +139,11 @@ export function restClient(api, log, options={}) {
     headers: {},
     data: undefined,
     timeout: 1500,
-    httpsAgent: new https.Agent({ rejectUnauthorized: false }), // Needed for initial Traefik self-signed cert
     ...options,
+  }
+  if (api.toLowerCase().slice(0,6) === 'https:') {
+    // Needed for initial Traefik self-signed cert
+    defaultOptions.httpsAgent = new https.Agent({ rejectUnauthorized: false })
   }
   const mergeOptions = (custom) => ({
     ...defaultOptions,
@@ -156,8 +155,8 @@ export function restClient(api, log, options={}) {
   })
 
   return {
-    get: async (url, options={}) => http(mergeOptions({ ...options, url }), log),
-    post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), log),
-    put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), log),
+    get: async (url, options={}) => http(mergeOptions({ ...options, url }), onError),
+    post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), onError),
+    put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), onError),
   }
 }
