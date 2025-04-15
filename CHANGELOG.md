@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [api] Endpoint for cross-cluster database authentication
+- [cache] Cache service is now available at the cluster level
 - [cache] Enable ACL and authentication for cross-cluster access
 - [core] Add selective deployment of flanking services
 - [proxy] Endpoint for cross-cluster cache access
