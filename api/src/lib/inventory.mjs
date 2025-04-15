@@ -767,10 +767,13 @@ export async function enableClientModule(uuid, module) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function disableClientModule(uuid, module) {
-  const result = await utils.db.write(`DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`, {
-    uuid,
-    module,
-  })
+  const result = await utils.db.write(
+    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
+    {
+      uuid,
+      module,
+    }
+  )
 
   return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
 }
@@ -863,10 +866,13 @@ export async function getModuleVars(modules = [], noInfo = false) {
  * @return {object} result - The found result
  */
 export async function getHostVar(host, key) {
-  const result = await utils.db.read(`SELECT * from inventory_hostvars WHERE host=:host AND key=:key`, {
-    host,
-    key,
-  })
+  const result = await utils.db.read(
+    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
+    {
+      host,
+      key,
+    }
+  )
 
   if (result[0] === 200 && result[1].results[0].values) {
     const found = {}

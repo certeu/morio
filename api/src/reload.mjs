@@ -6,6 +6,7 @@ import { createProducer } from './lib/kafka.mjs'
 // DB & KV clients
 import { createDbClient } from '#shared/db'
 import { createKvClient } from '#shared/kv'
+import { createCacheClient } from './lib/valkey.mjs'
 
 /**
  * Generates/Loads the configuration required to start the API
@@ -20,7 +21,6 @@ export async function reloadConfiguration() {
     every: 5,
     timeout: 3600,
     run: async () => {
-      const result = await utils.coreClient.get('/reload')
       const [status, body] = await utils.coreClient.get('/reload')
 
       return status === 200 ? body : false
@@ -77,6 +77,7 @@ export async function reloadConfiguration() {
    */
   if (!utils.db) utils.db = await createDbClient(utils, log)
   if (!utils.kv) utils.kv = createKvClient(utils, log)
+  if (!utils.cache) utils.cache = await createCacheClient(utils, log)
 
   /*
    * If set up, add the encryption methods to utils now that we have the keys.

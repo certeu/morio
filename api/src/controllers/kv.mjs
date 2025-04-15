@@ -1,5 +1,4 @@
-//import { currentUser } from '../rbac.mjs'
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This KV controller handles API access to the KV store.

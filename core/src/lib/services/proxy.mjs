@@ -2,7 +2,7 @@ import { readFile, writeFile, writeYamlFile, mkdir } from '#shared/fs'
 import { testUrl } from '#shared/network'
 import { hash } from '#shared/crypto'
 // Default hooks
-import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
+import { defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -51,10 +51,12 @@ export const service = {
        * Note that we hash the command to prevent leaking sensitive information.
        */
       const key = `.internal/morio/proxy/cmd`
-      const [runningCmdHash, err] = await utils.kv.get(key)
-      const newCmdHash = hash(JSON.stringify(utils.getMorioServiceConfig('proxy').container.command))
+      const [runningCmdHash] = await utils.kv.get(key)
+      const newCmdHash = hash(
+        JSON.stringify(utils.getMorioServiceConfig('proxy').container.command)
+      )
       if (runningCmdHash !== newCmdHash) {
-        const result = await utils.kv.set(key, newCmdHash)
+        await utils.kv.set(key, newCmdHash)
         return true
       }
 

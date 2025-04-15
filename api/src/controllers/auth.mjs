@@ -1,4 +1,4 @@
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 import { generateJwt } from '#shared/crypto'
 import jwt from 'jsonwebtoken'
 import { idps } from '../idps/index.mjs'
@@ -407,17 +407,13 @@ Controller.prototype.whoami = async function (req, res) {
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
-Controller.prototype.authenticateCcdb= async function (req, res) {
+Controller.prototype.authenticateCcdb = async function (req, res) {
   /*
    * These requests come with a JWT that we check
    */
   const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
 
-  if (
-    valid.user === "ccdb" &&
-    valid.role === "ccdb" &&
-    valid.cluster === utils.getClusterUuid()
-  ) {
+  if (valid.user === 'ccdb' && valid.role === 'ccdb' && valid.cluster === utils.getClusterUuid()) {
     /*
      * This is a legit cross-cluster Database connection
      */

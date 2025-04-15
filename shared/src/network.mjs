@@ -1,7 +1,6 @@
 import dns from 'dns'
 import https from 'https'
 import axios from 'axios'
-import { pipeline } from 'node:stream/promises'
 
 const dnsOptions = {
   family: 4, // Don't use IPv6
@@ -113,8 +112,7 @@ async function http(options, log) {
   } catch (err) {
     // Log error if requested
     if (log) log.warn({
-      baseURL: options.baseURL,
-      url: options.url,
+      url: options.baseURL || "" + options.url,
       method: options.method,
       err: err.code,
       body: response?.data,

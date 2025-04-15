@@ -18,7 +18,40 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  /*
+   * Figure out whether we need to add a proxy config
+   */
+  const traefik = utils.getCacheNode() === utils.getNodeFqdn()
+    ? {
+      cache: {
+        tcp: {
+          routers: {
+            cache: {
+              entryPoints: ["cache"],
+              rule: "HostSNI(`*`)",
+              service: "cache",
+              tls: {
+                passthrough: false,
+                certResolver: "ca",
+              }
+            }
+          },
+          services: {
+            cache: {
+              loadBalancer: {
+                servers: [{
+                  address: `morio-cache:${utils.getPreset('MORIO_CACHE_PORT')}`,
+                }],
+              },
+            },
+          },
+        },
+      }
+    }
+    : null
+
   return {
+    traefik,
     container: {
       ...pullConfig,
       // Name to use for the running container
@@ -33,6 +66,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
       volumes: PROD
         ? [`${utils.getPreset('MORIO_CONFIG_ROOT')}/valkey:/usr/local/etc/valkey`]
         : [`${utils.getPreset('MORIO_GIT_ROOT')}/data/config/valkey:/usr/local/etc/valkey`],
+      // Command
+      command: ["valkey-server", "/usr/local/etc/valkey/valkey.conf"],
     },
     /*
      * Valkey configuration file
@@ -95,7 +130,7 @@ save ""
 #
 # Keep maximum clients to something reasonable
 #
-maxclients: 64
+maxclients 64
 
 #
 # Max memory limit
@@ -111,6 +146,10 @@ maxmemory ${utils.getSettings('cache.maxmemory', 1)}gb
 #
 maxmemory-policy volatile-lfu
 
+#
+# Access control
+#
+aclfile /usr/local/etc/valkey/users.acl
 `,
   }
 }

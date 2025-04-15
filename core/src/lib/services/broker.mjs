@@ -155,7 +155,7 @@ export const service = {
       if (typeof utils.brokerAdminApi === 'undefined') {
         utils.brokerAdminApi = restClient(
           `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}broker:${utils.getPreset('MORIO_BROKER_ADMIN_API_PORT')}/v1`,
-          log,
+          log
         )
       }
 

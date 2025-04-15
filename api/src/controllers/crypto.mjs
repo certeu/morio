@@ -1,4 +1,4 @@
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This crypto controller handles encryption/decryption
