@@ -35,9 +35,9 @@ export const resolveServiceConfiguration = (name, helpers) =>
  */
 export const serviceOrder = [
   'ca',
+  'db',
   'api',
   'broker',
-  'db',
   'cache',
   'console',
   'ui',

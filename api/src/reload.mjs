@@ -75,8 +75,10 @@ export async function reloadConfiguration() {
    * If set up, add the db, kv & cache clients to utils.
    * On a hot-reload we'll already have done this so only do it if needed.
    */
-  if (!utils.db) utils.db = await createDbClient(utils, log)
-  if (!utils.kv) utils.kv = createKvClient(utils, log)
+  if (!utils.db) {
+    utils.db = await createDbClient(utils, log)
+    if (!utils.kv) utils.kv = createKvClient(utils, log)
+  }
   if (!utils.cache && utils.isTapWanted()) utils.cache = await createCacheClient(utils, log)
 
   /*

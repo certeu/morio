@@ -112,14 +112,17 @@ async function http(options, log) {
   } catch (err) {
     // Log error if requested
     if (log) log.warn({
-      url: options.baseURL || "" + options.url,
+      url: (options.baseURL || "") + options.url,
       method: options.method,
       err: err.code,
       body: response?.data,
+      options,
     }, 'HTTP request error')
+
+    return [false, false, err]
   }
 
-  return [response?.status || false, response?.data || false]
+  return [response?.status || false, response?.data || false, response]
 }
 
 /**

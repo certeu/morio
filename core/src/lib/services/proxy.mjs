@@ -1,6 +1,7 @@
 import { readFile, writeFile, writeYamlFile, mkdir } from '#shared/fs'
 import { testUrl } from '#shared/network'
 import { hash } from '#shared/crypto'
+import { isDbUp } from './db.mjs'
 // Default hooks
 import { defaultRestartServiceHook } from './index.mjs'
 // log & utils
@@ -49,7 +50,14 @@ export const service = {
        * in the KV store, and check whether it has changed. If it has, we
        * recreate the container by returning true here.
        * Note that we hash the command to prevent leaking sensitive information.
+       *
+       * All of this relies on the database being available, which on a cold
+       * start may not be the case. So when that happens, we just recreate
+       * the container as while slightly slower, that will always yield the
+       * correct running container configuration.
        */
+      const dbUp = await isDbUp()
+      if (!dbUp) return true
       const key = `.internal/morio/proxy/cmd`
       const [runningCmdHash] = await utils.kv.get(key)
       const newCmdHash = hash(

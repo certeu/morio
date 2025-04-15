@@ -1,12 +1,9 @@
 import { mkdir } from '#shared/fs'
-import { restClient, testUrl } from '#shared/network'
+import { testUrl } from '#shared/network'
 import { attempt } from '#shared/utils'
 import { ensureServiceCertificate } from '#lib/tls'
 import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 import { log, utils } from '../utils.mjs'
-
-// FIXME: Use client from utils here
-const dbClient = restClient(`http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:4001`, log)
 
 /**
  * Service object holds the various lifecycle hook methods
@@ -107,7 +104,7 @@ async function ensureLocalPrerequisites() {
  *
  * @return {bool} result - True if the database is up, false if not
  */
-async function isDbUp() {
+export async function isDbUp() {
   const result = await testUrl(
     `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}db:${utils.getPreset('MORIO_DB_HTTP_PORT')}/readyz`,
     {
@@ -128,7 +125,7 @@ async function ensureTablesExist() {
   let initial = false
   for (const [table, q] of Object.entries(config.schema || {})) {
     log.debug(`[db] Ensuring database schema: ${table}`)
-    const result = await dbClient.post(`/db/execute`, Array.isArray(q) ? q : [q])
+    const result = await utils.db.write(q)
     if (result[1]?.results?.[0]?.error) {
       if (result[1].results[0].error.includes('already exists'))
         log.debug(`[db] Table ${table} already existed`)
@@ -140,7 +137,7 @@ async function ensureTablesExist() {
   }
   if (config.data) {
     log.debug(`[db] Ensuring database default content`)
-    await dbClient.post(`/db/execute`, config.data)
+    await utils.db.write(config.data)
   }
 
   if (initial) {
@@ -149,21 +146,19 @@ async function ensureTablesExist() {
      * we will also create the root account
      */
     const now = new Date().toISOString()
-    const root = await dbClient.post(`/db/execute`, [
-      [
-        `REPLACE INTO accounts(created_at, about, created_by, status, role, id, provider) ` +
-          `VALUES(:created_at, :about, :created_by, :status, :role, :id, :provider)`,
-        {
-          created_at: now,
-          about: 'Built-in Morio root account',
-          created_by: 'mrt.root',
-          status: 'active',
-          role: 'root',
-          id: 'mrt.root',
-          provider: 'mrt',
-        },
-      ],
-    ])
+    const root = await utils.db.write(
+      `REPLACE INTO accounts(created_at, about, created_by, status, role, id, provider) ` +
+        `VALUES(:created_at, :about, :created_by, :status, :role, :id, :provider)`,
+      {
+        created_at: now,
+        about: 'Built-in Morio root account',
+        created_by: 'mrt.root',
+        status: 'active',
+        role: 'root',
+        id: 'mrt.root',
+        provider: 'mrt',
+      }
+    )
     if (root[0] === 200) log.debug(`[db] Created root account`)
     else log.warn(`[db] Failed to create root account`)
   }
