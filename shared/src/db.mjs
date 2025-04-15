@@ -76,7 +76,7 @@ export async function createDbClient (utils, log) {
       {
         agent: new https.Agent({
           ca,
-          rejectUnauthorized: false,
+          rejectUnauthorized: false, // Don't let Traefik default cert break Morio
         }),
         headers: {
           authorization: `Bearer ${jwt}`
