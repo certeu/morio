@@ -94,7 +94,7 @@ export async function isIpAvailable(ip) {
  * @param {string} mac - The ip MAC/address
  * @return {object} available - true if it is available, false if not
  */
-export async function isMacAvailable(ip) {
+export async function isMacAvailable(mac) {
   const [status, result] = await db.read(`SELECT mac FROM inventory_macs where mac=:mac`, { mac })
   if (status === 200) {
     const hits = resultsAsList(result)
