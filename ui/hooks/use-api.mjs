@@ -672,6 +672,69 @@ MorioClient.prototype.isGroupAvailable = async function (group) {
 }
 
 /**
+ * Get if a ip address is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isIpAvailable = async function (ip) {
+  return await this.call(`${morioConfig.api}/inventory/is-ip-available/${ip}`)
+}
+
+/**
+ * Get if a ip address is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isMacAvailable = async function (mac) {
+  return await this.call(`${morioConfig.api}/inventory/is-mac-available/${mac}`)
+}
+
+/**
+ * Get if a os name is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isOsAvailable = async function (name) {
+  return await this.call(`${morioConfig.api}/inventory/is-os-available/${name}`)
+}
+
+/**
+ * Get if a pkg name is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isPkgAvailable = async function (name) {
+  return await this.call(`${morioConfig.api}/inventory/is-pkg-available/${name}`)
+}
+
+/**
+ * Get if a mod Mod is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isModAvailable = async function (mod) {
+  return await this.call(`${morioConfig.api}/inventory/is-mod-available/${mod}`)
+}
+
+/**
+ * Get if a modvar val is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isModvarAvailable = async function (val) {
+  return await this.call(`${morioConfig.api}/inventory/is-modvar-available/${val}`)
+}
+
+/**
+ * Get if a hostvar key is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isHostvarAvailable = async function (key) {
+  return await this.call(`${morioConfig.api}/inventory/is-hostvar-available/${key}`)
+}
+
+/**
  * Create an inventory groupvar
  *
  * @param {string} key - The groupvar key (name or ID)
@@ -1037,9 +1100,9 @@ MorioClient.prototype.removeInventoryHost = async function (id) {
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeInventoryIp = async function (id) {
+MorioClient.prototype.removeInventoryIp = async function (ip) {
   return await this.call(
-    `${morioConfig.api}/inventory/ips/${id}`,
+    `${morioConfig.api}/inventory/ips/${ip}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',
@@ -1053,9 +1116,9 @@ MorioClient.prototype.removeInventoryIp = async function (id) {
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeInventoryMac = async function (id) {
+MorioClient.prototype.removeInventoryMac = async function (mac) {
   return await this.call(
-    `${morioConfig.api}/inventory/macs/${id}`,
+    `${morioConfig.api}/inventory/macs/${mac}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',
@@ -1085,9 +1148,9 @@ MorioClient.prototype.removeInventoryPkg = async function (id) {
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeInventoryMod = async function (id) {
+MorioClient.prototype.removeInventoryMod = async function (mod) {
   return await this.call(
-    `${morioConfig.api}/inventory/mods/${id}`,
+    `${morioConfig.api}/inventory/mods/${mod}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',

@@ -2,55 +2,49 @@ import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PuzzleIcon } from 'components/icons.mjs'
-import { Popout } from 'components/popout.mjs'
-import { MorioModule } from 'components/inventory/mods.mjs'
+import { ModDetail } from 'components/inventory/mod.mjs'
 import { useApi } from 'hooks/use-api.mjs'
-import { ReloadDataButton } from 'components/button.mjs'
 
-export default function InventoryModPage({ id = false }) {
+export default function InventoryModPage({ mod = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
-  const [count, setCount] = useState(0)
+  const [title, setTitle] = useState('Loading module data...')
 
   const meta = {
-    title: 'Morio Module',
-    page: ['inventory', 'mods', id ? id : 'unknown'],
+    title: title ? mod : 'Loading module data',
+    page: ['inventory', 'mods', mod ? mod : 'unknown'],
     Icon: PuzzleIcon,
   }
 
   useEffect(() => {
-    if (id) runApiCall(api, id).then((result) => setData(result))
+    if (mod)
+      runModApiCall(api, mod).then((result) => {
+        setData(result)
+        setTitle(result.mod)
+      })
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [count, id])
+  }, [mod])
 
   return (
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          {data === false ? <LoadFailed /> : <MorioModule data={data} />}
-          <ReloadDataButton onClick={() => setCount(count + 1)} />
+          <ModDetail data={data} />
         </div>
       </ContentWrapper>
     </PageWrapper>
   )
 }
 
-async function runApiCall(api, id) {
-  const result = await api.getInventoryMod(id)
+async function runModApiCall(api, mod) {
+  const result = await api.getInventoryMod(mod)
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
 
-const LoadFailed = () => (
-  <Popout warning>
-    <h4>Failed to load Morio module from the inventory</h4>
-    <p>This is unexpected. Please report this.</p>
-  </Popout>
-)
-
 export const getStaticProps = ({ params }) => ({
   props: {
-    id: params.id,
+    mod: params.mod,
   },
 })
 
