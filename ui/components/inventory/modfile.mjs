@@ -228,11 +228,18 @@ export const NewModfile = ({ refresh, setRefresh }) => {
               : { error: { details: [{ message: 'This file name is taken' }] } }
         }
       />
+      <TextInput
+        label="Content"
+        update={setContent}
+        current={content}
+        placeholder="An optional content"
+      />
+      <StringInput label="Source" update={setSource} current={source} placeholder="Source" />
 
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(ip && isAvailable)}
+          disabled={!(file && isAvailable)}
           onClick={createModfile}
         >
           Create Module File

@@ -215,7 +215,11 @@ export const NewOs = ({ refresh, setRefresh }) => {
 
       <StringInput label="Version" update={setVersion} current={version} placeholder="Os version" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button className="btn btn-primary grow" disabled={!(id && isAvailable)} onClick={createOs}>
+        <button
+          className="btn btn-primary grow"
+          disabled={!(name && isAvailable)}
+          onClick={createOs}
+        >
           Create Os
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>

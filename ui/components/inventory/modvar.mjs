@@ -221,7 +221,7 @@ export const NewModvar = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(id && isAvailable)}
+          disabled={!(val && isAvailable)}
           onClick={createModvar}
         >
           Create Module Variable

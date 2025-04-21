@@ -235,7 +235,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(id && isAvailable)}
+          disabled={!(key && isAvailable)}
           onClick={createHostvar}
         >
           Create Host Variable
@@ -295,7 +295,7 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
     const count = hostvars.length
     for (const id in hostvars) {
       i++
-      await api.updateInventoryHostvarInfos(hostvars[id], key, val, info)
+      await api.updateInventoryHostvarInfos(hostvars[id], val, info)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating hostvar val, info" key="linter" />,
