@@ -11,18 +11,17 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput } from 'components/inputs.mjs'
+import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { StringInput, TextInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
- * This component renders a table with all IP addresses and allows removal
+ * This component renders a table with all Module vars and allows removal
  */
-export const IpsTable = () => {
+export const ModvarsTable = () => {
   // State
-  const [ips, setIps] = useState({})
+  const [modvars, setModvars] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
@@ -33,24 +32,24 @@ export const IpsTable = () => {
 
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  const sorted = orderBy(modvars, [order], [desc ? 'desc' : 'asc'])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
 
   // Effects
   useEffect(() => {
-    runIpsTableApiCall(api).then((result) => setIps(result))
+    runModvarsTableApiCall(api).then((result) => setModvars(result))
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
   // Helper to delete one or more entries
   const removeSelectedEntries = async () => {
     let i = 0
-    for (const ip in selection) {
+    for (const id in selection) {
       i++
-      await api.removeInventoryIp(ip)
+      await api.removeInventoryModvar(id)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Removing IP Addresses" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Removing Module Vars" key="linter" />,
       ])
     }
     setSelection({})
@@ -66,18 +65,18 @@ export const IpsTable = () => {
           onClick={() =>
             pushModal(
               <ModalWrapper keepOpenOnClick>
-                <BulkIpUpdate ips={Object.keys(selection)} {...{ refresh, setRefresh }} />
+                <BulkModvarUpdate modvars={Object.keys(selection)} {...{ refresh, setRefresh }} />
               </ModalWrapper>
             )
           }
           disabled={count < 1}
         >
-          <CogIcon /> Update {count} Ips
+          <CogIcon /> Update {count} Modvars
         </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-          <TrashIcon /> Remove {count} Ips
+          <TrashIcon /> Remove {count} Modvars
         </button>
-        <NewIpButton {...{ refresh, setRefresh }} />
+        <NewModvarButton {...{ refresh, setRefresh }} />
       </div>
       <table>
         <thead>
@@ -87,13 +86,13 @@ export const IpsTable = () => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 onClick={toggleAll}
-                checked={ips.length === count}
+                checked={modvars.length === count}
               />
             </th>
-            {['ip', 'host', 'version'].map((field) => (
+            {['val', 'info', 'mod'].map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -107,26 +106,22 @@ export const IpsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((ip) => (
-            <tr key={ip.ip}>
+          {sorted.map((modvar) => (
+            <tr key={modvar.id}>
               <td className="text-base font-medium">
                 <input
                   type="checkbox"
-                  checked={selection[ip.ip] ? true : false}
+                  checked={selection[modvar.id] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(ip.ip)}
+                  onClick={() => toggle(modvar.id)}
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
+                <PageLink href={`/inventory/modvars/${modvar.val}`}>{modvar.val}</PageLink>
               </td>
-              <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <InventoryHostname uuid={ip.host} />
-                </PageLink>
-              </td>
+              <td className="">{modvar.info}</td>
               <td className="">
-                <Markdown>{ip.version}</Markdown>
+                <PageLink href={`/inventory/mods/${modvar.mod}`}>{modvar.mod}</PageLink>
               </td>
             </tr>
           ))}
@@ -137,13 +132,13 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall(api) {
-  const result = await api.getInventoryIps()
+async function runModvarsTableApiCall(api) {
+  const result = await api.getInventoryModvars()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
 
-export const NewIpButton = ({ refresh, setRefresh }) => {
+export const NewModvarButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
@@ -152,25 +147,25 @@ export const NewIpButton = ({ refresh, setRefresh }) => {
       onClick={() =>
         pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <NewIp {...{ refresh, setRefresh }} />
+            <NewModvar {...{ refresh, setRefresh }} />
           </ModalWrapper>
         )
       }
     >
-      <AddLocationIcon />
-      <span>New Ip</span>
+      <AddVarIcon />
+      <span>New Module Var</span>
     </button>
   )
 }
 
-export const NewIp = ({ refresh, setRefresh }) => {
+export const NewModvar = ({ refresh, setRefresh }) => {
   // Hooks
   const { api } = useApi()
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [ip, setIp] = useState('')
-  const [version, setVersion] = useState('')
+  const [val, setVal] = useState('')
+  const [info, setInfo] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
@@ -178,55 +173,58 @@ export const NewIp = ({ refresh, setRefresh }) => {
 
   // Effects
   useEffect(() => {
-    const checkIpAvailability = async () => {
-      const result = await api.isIpAvailable(ip)
+    const checkModvarAvailability = async () => {
+      const result = await api.isModvarAvailable(val)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (ip) checkIpAvailability()
-  }, [ip, api])
+    if (val) checkModvarAvailability()
+  }, [val, api])
 
-  // Handler method to create a new ip
-  const createIp = async () => {
+  // Handler method to create a new modvar
+  const createModvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createIp(ip, version)
+    const result = await api.createModvar(val, info)
     if (result[1] === 201) {
       clearModal()
-      setLoadingStatus([true, 'Ip created', true, true])
+      setLoadingStatus([true, 'Modvar created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
-    } else setLoadingStatus([true, 'Failed to create ip', true, false])
+    } else setLoadingStatus([true, 'Failed to create modvar', true, false])
   }
 
   return (
     <div>
-      <h3>Create a new ip</h3>
+      <h3>Create a new modvar</h3>
       <p>
-        Give your new ip a address, and an optional version. The ip address will become its unique
-        ID.
+        Give your new modvar a val, and an optional info. The modvar val will become its unique ID.
       </p>
       <StringInput
-        label="Ip address"
-        update={(val) => setIp(slugify(val))}
-        current={ip}
-        placeholder="127.0.0.1"
+        label="Module var"
+        update={(val) => setVal(slugify(val))}
+        current={val}
+        placeholder="variable"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'Ip address cannot be empty' }] } }
-              : { error: { details: [{ message: 'This ip address is taken' }] } }
+              ? { error: { details: [{ message: 'Module variable cannot be empty' }] } }
+              : { error: { details: [{ message: 'This module variable is taken' }] } }
         }
       />
 
-      <StringInput
-        label="Ip version"
-        update={setVersion}
-        current={version}
-        placeholder="Ip version"
+      <TextInput
+        label="Module var info"
+        update={setInfo}
+        current={info}
+        placeholder="Module variable info"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button className="btn btn-primary grow" disabled={!(ip && isAvailable)} onClick={createIp}>
-          Create Ip
+        <button
+          className="btn btn-primary grow"
+          disabled={!(val && isAvailable)}
+          onClick={createModvar}
+        >
+          Create Module Variable
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>
           Cancel
@@ -237,49 +235,49 @@ export const NewIp = ({ refresh, setRefresh }) => {
 }
 
 /**
- * A React component for a ip from the inventory
+ * A React component for a module var from the inventory
  *
  * @param {object] data - The inventory data for this host
  */
-export const IpDetail = ({ data }) => {
+export const ModvarDetail = ({ data }) => {
   if (!data) return null
 
   return (
     <>
-      {data.ip ? (
+      {data.val ? (
         <>
-          <h2>Ip</h2>
-          <Markdown>{data.ip}</Markdown>
+          <h2>Val</h2>
+          <Markdown>{data.val}</Markdown>
         </>
       ) : null}
-      {data.version ? (
+      {data.info ? (
         <>
-          <h2>Version</h2>
-          <Markdown>{data.version}</Markdown>
+          <h2>Info</h2>
+          <Markdown>{data.info}</Markdown>
         </>
       ) : null}
     </>
   )
 }
 
-export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
+export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   // State
-  const [version, setVersion] = useState('')
+  const [info, setInfo] = useState('')
   // Hooks
   const { api } = useApi()
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
   // Helper method to bulk-update versions
-  const updateVersions = async () => {
+  const updateInfos = async () => {
     let i = 0
-    const count = ips.length
-    for (const ip in ips) {
+    const count = modvars.length
+    for (const id in modvars) {
       i++
-      await api.updateInventoryIpVersion(ips[ip], version)
+      await api.updateInventoryModvarInfo(modvars[id], info)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Updating ip versions" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Updating modvar info" key="linter" />,
       ])
     }
     if (setRefresh) setRefresh(refresh + 1)
@@ -288,33 +286,38 @@ export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update version</h2>
-      <p>This will set the same version for all the selected ips.</p>
-      <StringInput current={version} update={setVersion} label="version" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update ip versions
+      <h2>Update info</h2>
+      <p>This will set the same info for all the selected modvars.</p>
+      <StringInput current={info} update={setInfo} label="Infomation" />
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfos}>
+        Update modvar infos
       </button>
     </div>
   )
 }
 
-export const IpsDisplayTable = ({ ips }) => {
+/**
+ * This component renders a table with Module Vars
+ */
+export const ModvarsDisplayTable = ({ modvars }) => {
+  // State
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  // Hooks
+  const sorted = orderBy(modvars, [order], [desc ? 'desc' : 'asc'])
 
   return (
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version'].map((field) => (
+          {['val', 'info', 'mod'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
               >
-                {field}{' '}
+                {field.replace('_', ' ')}{' '}
                 <RightIcon
                   stroke={3}
                   className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
@@ -325,18 +328,16 @@ export const IpsDisplayTable = ({ ips }) => {
         </tr>
       </thead>
       <tbody>
-        {sorted.map((ip) => (
-          <tr key={ip.ip}>
-            <td className="pr-6 py-0.5 font-mono text-sm">
-              <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-            </td>
-            <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <InventoryHostname uuid={ip.host} />
-              </PageLink>
+        {sorted.map((modvar) => (
+          <tr key={modvar.mod}>
+            <td className="">
+              <PageLink href={`/inventory/modvars/${modvar.id}`}>{modvar.val}</PageLink>
             </td>
             <td className="">
-              <Markdown>{ip.version}</Markdown>
+              <Markdown>{modvar.info}</Markdown>
+            </td>
+            <td className="py-0.5 pr-4 font-mono text-sm">
+              <PageLink href={`/inventory/mods/${modvar.mod}`}>{modvar.mod}</PageLink>
             </td>
           </tr>
         ))}

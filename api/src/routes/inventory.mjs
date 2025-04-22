@@ -284,6 +284,46 @@ export function routes(app) {
   app.get(`/inventory/is-group-available/:group`, rbac.user, inventory.isGroupAvailable)
 
   /*
+   * Checks whether a ip address is available
+   */
+  app.get(`/inventory/is-ip-available/:ip`, rbac.user, inventory.isIpAvailable)
+
+  /*
+   * Checks whether a mac address is available
+   */
+  app.get(`/inventory/is-mac-available/:mac`, rbac.user, inventory.isMacAvailable)
+
+  /*
+   * Checks whether a os is available
+   */
+  app.get(`/inventory/is-os-available/:name`, rbac.user, inventory.isOsAvailable)
+
+  /*
+   * Checks whether a pkg is available
+   */
+  app.get(`/inventory/is-pkg-available/:name`, rbac.user, inventory.isPkgAvailable)
+
+  /*
+   * Checks whether a mod is available
+   */
+  app.get(`/inventory/is-mod-available/:mod`, rbac.user, inventory.isModAvailable)
+
+  /*
+   * Checks whether a modvar is available
+   */
+  app.get(`/inventory/is-modvar-available/:val`, rbac.user, inventory.isModvarAvailable)
+
+  /*
+   * Checks whether a hostvar is available
+   */
+  app.get(`/inventory/is-hostvar-available/:key`, rbac.user, inventory.isHostvarAvailable)
+
+  /*
+   * Checks whether a modfile is available
+   */
+  app.get(`/inventory/is-modfile-available/:file`, rbac.user, inventory.isModfileAvailable)
+
+  /*
    * Read a group
    */
   app.get(`/inventory/groups/:id`, rbac.user, inventory.readGroup)

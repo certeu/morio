@@ -73,6 +73,144 @@ export async function isGroupAvailable(id) {
 }
 
 /**
+ * Helper method to see if a ip IP is available
+ *
+ * @param {string} ip - The ip IP/address
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isIpAvailable(ip) {
+  const [status, result] = await db.read(`SELECT ip FROM inventory_ips where ip=:ip`, { ip })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a mac MAC is available
+ *
+ * @param {string} mac - The ip MAC/address
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isMacAvailable(mac) {
+  const [status, result] = await db.read(`SELECT mac FROM inventory_macs where mac=:mac`, { mac })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a os Name is available
+ *
+ * @param {string} id - The os Name
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isOsAvailable(name) {
+  const [status, result] = await db.read(`SELECT name FROM inventory_Oss where name=:name`, {
+    name,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a pkg Name is available
+ *
+ * @param {string} id - The pkg Name
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isPkgAvailable(name) {
+  const [status, result] = await db.read(`SELECT name FROM inventory_Pkgs where name=:name`, {
+    name,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a mod MOD is available
+ *
+ * @param {string} mod - The mod MOD/name
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isModAvailable(mod) {
+  const [status, result] = await db.read(`SELECT mod FROM inventory_mods where mod=:mod`, { mod })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a modvar VAL is available
+ *
+ * @param {string} mod - The modvar VAL
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isModvarAvailable(val) {
+  const [status, result] = await db.read(`SELECT val FROM inventory_modvars where val=:val`, {
+    val,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a modvar Key is available
+ *
+ * @param {string} key - The hostvar key
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isHostvarAvailable(key) {
+  const [status, result] = await db.read(`SELECT key FROM inventory_hostvars where key=:key`, {
+    key,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
+ * Helper method to see if a modfile File is available
+ *
+ * @param {string} file - The modfile file
+ * @return {object} available - true if it is available, false if not
+ */
+export async function isModfileAvailable(file) {
+  const [status, result] = await db.read(`SELECT file FROM inventory_modfiles where file=:file`, {
+    file,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
+/**
  * Helper method to create an inventory groupvar
  *
  * @param {string} key - The key of the groupvar (the name)

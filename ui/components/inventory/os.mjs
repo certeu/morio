@@ -11,18 +11,19 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { CogIcon, ServersIcon, AddServersIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
+import { Linux, Debian } from 'components/brands.mjs'
 
 /**
- * This component renders a table with all IP addresses and allows removal
+ * This component renders a table with all OS addresses and allows removal
  */
-export const IpsTable = () => {
+export const OssTable = () => {
   // State
-  const [ips, setIps] = useState({})
+  const [oss, setOss] = useState([])
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
@@ -33,24 +34,24 @@ export const IpsTable = () => {
 
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  const sorted = orderBy(oss, [order], [desc ? 'desc' : 'asc'])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
 
   // Effects
   useEffect(() => {
-    runIpsTableApiCall(api).then((result) => setIps(result))
+    runOssTableApiCall(api).then((result) => setOss(result))
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
   // Helper to delete one or more entries
   const removeSelectedEntries = async () => {
     let i = 0
-    for (const ip in selection) {
+    for (const id in selection) {
       i++
-      await api.removeInventoryIp(ip)
+      await api.removeInventoryOs(id)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Removing IP Addresses" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Removing operating systems" key="linter" />,
       ])
     }
     setSelection({})
@@ -66,18 +67,18 @@ export const IpsTable = () => {
           onClick={() =>
             pushModal(
               <ModalWrapper keepOpenOnClick>
-                <BulkIpUpdate ips={Object.keys(selection)} {...{ refresh, setRefresh }} />
+                <BulkOsUpdate oss={Object.keys(selection)} {...{ refresh, setRefresh }} />
               </ModalWrapper>
             )
           }
           disabled={count < 1}
         >
-          <CogIcon /> Update {count} Ips
+          <CogIcon /> Update {count} Oss
         </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-          <TrashIcon /> Remove {count} Ips
+          <TrashIcon /> Remove {count} Oss
         </button>
-        <NewIpButton {...{ refresh, setRefresh }} />
+        <NewOsButton {...{ refresh, setRefresh }} />
       </div>
       <table>
         <thead>
@@ -87,10 +88,10 @@ export const IpsTable = () => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 onClick={toggleAll}
-                checked={ips.length === count}
+                checked={oss.length === count}
               />
             </th>
-            {['ip', 'host', 'version'].map((field) => (
+            {['name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -107,26 +108,23 @@ export const IpsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((ip) => (
-            <tr key={ip.ip}>
+          {sorted.map((os) => (
+            <tr key={os.id}>
               <td className="text-base font-medium">
                 <input
                   type="checkbox"
-                  checked={selection[ip.ip] ? true : false}
+                  checked={selection[os.id] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(ip.ip)}
+                  onClick={() => toggle(os.id)}
                 />
               </td>
-              <td className="">
-                <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-              </td>
               <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <InventoryHostname uuid={ip.host} />
+                <PageLink href={`/inventory/hosts/${os.host}`}>
+                  <InventoryHostname uuid={os.host} />
                 </PageLink>
               </td>
               <td className="">
-                <Markdown>{ip.version}</Markdown>
+                <Markdown>{os.version}</Markdown>
               </td>
             </tr>
           ))}
@@ -137,13 +135,13 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall(api) {
-  const result = await api.getInventoryIps()
+async function runOssTableApiCall(api) {
+  const result = await api.getInventoryOss()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
 
-export const NewIpButton = ({ refresh, setRefresh }) => {
+export const NewOsButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
@@ -152,24 +150,24 @@ export const NewIpButton = ({ refresh, setRefresh }) => {
       onClick={() =>
         pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <NewIp {...{ refresh, setRefresh }} />
+            <NewOs {...{ refresh, setRefresh }} />
           </ModalWrapper>
         )
       }
     >
-      <AddLocationIcon />
-      <span>New Ip</span>
+      <AddServersIcon />
+      <span>New Os</span>
     </button>
   )
 }
 
-export const NewIp = ({ refresh, setRefresh }) => {
+export const NewOs = ({ refresh, setRefresh }) => {
   // Hooks
   const { api } = useApi()
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [ip, setIp] = useState('')
+  const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
@@ -178,55 +176,51 @@ export const NewIp = ({ refresh, setRefresh }) => {
 
   // Effects
   useEffect(() => {
-    const checkIpAvailability = async () => {
-      const result = await api.isIpAvailable(ip)
+    const checkOsAvailability = async () => {
+      const result = await api.isOsAvailable(name)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (ip) checkIpAvailability()
-  }, [ip, api])
+    if (name) checkOsAvailability()
+  }, [name, api])
 
-  // Handler method to create a new ip
-  const createIp = async () => {
+  // Handler method to create a new os
+  const createOs = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createIp(ip, version)
+    const result = await api.createOs(name, version)
     if (result[1] === 201) {
       clearModal()
-      setLoadingStatus([true, 'Ip created', true, true])
+      setLoadingStatus([true, 'Os created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
-    } else setLoadingStatus([true, 'Failed to create ip', true, false])
+    } else setLoadingStatus([true, 'Failed to create os', true, false])
   }
 
   return (
     <div>
-      <h3>Create a new ip</h3>
-      <p>
-        Give your new ip a address, and an optional version. The ip address will become its unique
-        ID.
-      </p>
+      <h3>Create a new os</h3>
+      <p>Give your new os a name, and version. The os name will become its unique ID.</p>
       <StringInput
-        label="Ip address"
-        update={(val) => setIp(slugify(val))}
-        current={ip}
-        placeholder="127.0.0.1"
+        label="Name"
+        update={(val) => setName(slugify(val))}
+        current={name}
+        placeholder="Linux-22.04"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'Ip address cannot be empty' }] } }
-              : { error: { details: [{ message: 'This ip address is taken' }] } }
+              ? { error: { details: [{ message: 'name cannot be empty' }] } }
+              : { error: { details: [{ message: 'This name is taken' }] } }
         }
       />
 
-      <StringInput
-        label="Ip version"
-        update={setVersion}
-        current={version}
-        placeholder="Ip version"
-      />
+      <StringInput label="Version" update={setVersion} current={version} placeholder="Os version" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button className="btn btn-primary grow" disabled={!(ip && isAvailable)} onClick={createIp}>
-          Create Ip
+        <button
+          className="btn btn-primary grow"
+          disabled={!(name && isAvailable)}
+          onClick={createOs}
+        >
+          Create Os
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>
           Cancel
@@ -237,19 +231,19 @@ export const NewIp = ({ refresh, setRefresh }) => {
 }
 
 /**
- * A React component for a ip from the inventory
+ * A React component for a os from the inventory
  *
  * @param {object] data - The inventory data for this host
  */
-export const IpDetail = ({ data }) => {
+export const OsDetail = ({ data }) => {
   if (!data) return null
 
   return (
     <>
-      {data.ip ? (
+      {data.name ? (
         <>
-          <h2>Ip</h2>
-          <Markdown>{data.ip}</Markdown>
+          <h2>Name</h2>
+          <Markdown>{data.name}</Markdown>
         </>
       ) : null}
       {data.version ? (
@@ -262,7 +256,7 @@ export const IpDetail = ({ data }) => {
   )
 }
 
-export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
+export const BulkOsUpdate = ({ oss, refresh, setRefresh }) => {
   // State
   const [version, setVersion] = useState('')
   // Hooks
@@ -273,13 +267,13 @@ export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
   // Helper method to bulk-update versions
   const updateVersions = async () => {
     let i = 0
-    const count = ips.length
-    for (const ip in ips) {
+    const count = oss.length
+    for (const id in oss) {
       i++
-      await api.updateInventoryIpVersion(ips[ip], version)
+      await api.updateInventoryOsVersion(oss[id], version)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Updating ip versions" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Updating os versions" key="linter" />,
       ])
     }
     if (setRefresh) setRefresh(refresh + 1)
@@ -289,26 +283,26 @@ export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
   return (
     <div className="">
       <h2>Update version</h2>
-      <p>This will set the same version for all the selected ips.</p>
+      <p>This will set the same version for all the selected oss.</p>
       <StringInput current={version} update={setVersion} label="version" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update ip versions
+        Update os versions
       </button>
     </div>
   )
 }
 
-export const IpsDisplayTable = ({ ips }) => {
+export const OssDisplayTable = ({ oss }) => {
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  const sorted = orderBy(oss, [order], [desc ? 'desc' : 'asc'])
 
   return (
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version'].map((field) => (
+          {['id', 'name', 'host', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -325,22 +319,31 @@ export const IpsDisplayTable = ({ ips }) => {
         </tr>
       </thead>
       <tbody>
-        {sorted.map((ip) => (
-          <tr key={ip.ip}>
+        {sorted.map((os) => (
+          <tr key={os.id}>
             <td className="pr-6 py-0.5 font-mono text-sm">
-              <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
+              <PageLink href={`/inventory/oss/${os.id}`}>{os.name}</PageLink>
             </td>
             <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <InventoryHostname uuid={ip.host} />
+              <PageLink href={`/inventory/hosts/${os.host}`}>
+                <InventoryHostname uuid={os.host} />
               </PageLink>
             </td>
             <td className="">
-              <Markdown>{ip.version}</Markdown>
+              <Markdown>{os.version}</Markdown>
             </td>
           </tr>
         ))}
       </tbody>
     </table>
   )
+}
+
+export const OsIcon = ({ data = {}, ...rest }) => {
+  if (data.name === 'linux') {
+    if (data.version.toLowerCase().includes('debian')) return <Debian {...rest} />
+    return <Linux {...rest} />
+  }
+
+  return <ServersIcon {...rest} />
 }

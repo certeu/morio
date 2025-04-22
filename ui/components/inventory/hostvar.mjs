@@ -11,18 +11,18 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput } from 'components/inputs.mjs'
+import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { StringInput, TextInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
 
 /**
- * This component renders a table with all IP addresses and allows removal
+ * This component renders a table with all Host vars and allows removal
  */
-export const IpsTable = () => {
+export const HostvarsTable = () => {
   // State
-  const [ips, setIps] = useState({})
+  const [hostvars, setHostvars] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
@@ -33,24 +33,24 @@ export const IpsTable = () => {
 
   // Hooks
   const { api } = useApi()
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  const sorted = orderBy(hostvars, [order], [desc ? 'desc' : 'asc'])
   const { count, selection, setSelection, toggle, toggleAll } = useSelection(sorted)
 
   // Effects
   useEffect(() => {
-    runIpsTableApiCall(api).then((result) => setIps(result))
+    runHostvarsTableApiCall(api).then((result) => setHostvars(result))
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
 
   // Helper to delete one or more entries
   const removeSelectedEntries = async () => {
     let i = 0
-    for (const ip in selection) {
+    for (const id in selection) {
       i++
-      await api.removeInventoryIp(ip)
+      await api.removeInventoryHostvar(id)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Removing IP Addresses" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Removing Host Vars" key="linter" />,
       ])
     }
     setSelection({})
@@ -66,18 +66,18 @@ export const IpsTable = () => {
           onClick={() =>
             pushModal(
               <ModalWrapper keepOpenOnClick>
-                <BulkIpUpdate ips={Object.keys(selection)} {...{ refresh, setRefresh }} />
+                <BulkHostvarUpdate hostvars={Object.keys(selection)} {...{ refresh, setRefresh }} />
               </ModalWrapper>
             )
           }
           disabled={count < 1}
         >
-          <CogIcon /> Update {count} Ips
+          <CogIcon /> Update {count} Hostvars
         </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-          <TrashIcon /> Remove {count} Ips
+          <TrashIcon /> Remove {count} Hostvars
         </button>
-        <NewIpButton {...{ refresh, setRefresh }} />
+        <NewHostvarButton {...{ refresh, setRefresh }} />
       </div>
       <table>
         <thead>
@@ -87,13 +87,13 @@ export const IpsTable = () => {
                 type="checkbox"
                 className="checkbox checkbox-primary"
                 onClick={toggleAll}
-                checked={ips.length === count}
+                checked={hostvars.length === count}
               />
             </th>
-            {['ip', 'host', 'version'].map((field) => (
+            {['id', 'key', 'val', 'info', 'host'].map((field) => (
               <th key={field}>
                 <button
-                  className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
+                  className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                   onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
                 >
                   {field}{' '}
@@ -107,26 +107,32 @@ export const IpsTable = () => {
           </tr>
         </thead>
         <tbody>
-          {sorted.map((ip) => (
-            <tr key={ip.ip}>
+          {sorted.map((hostvar) => (
+            <tr key={hostvar.id}>
               <td className="text-base font-medium">
                 <input
                   type="checkbox"
-                  checked={selection[ip.ip] ? true : false}
+                  checked={selection[hostvar.id] ? true : false}
                   className="checkbox checkbox-primary"
-                  onClick={() => toggle(ip.ip)}
+                  onClick={() => toggle(hostvar.id)}
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-              </td>
-              <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <InventoryHostname uuid={ip.host} />
-                </PageLink>
+                <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.id}</PageLink>
               </td>
               <td className="">
-                <Markdown>{ip.version}</Markdown>
+                <Markdown>{hostvar.key}</Markdown>
+              </td>
+              <td className="">
+                <Markdown>{hostvar.val}</Markdown>
+              </td>
+              <td className="">
+                <Markdown>{hostvar.info}</Markdown>
+              </td>
+              <td className="">
+                <PageLink href={`/inventory/hosts/${hostvar.host}`}>
+                  <InventoryHostname uuid={hostvar.host} />
+                </PageLink>
               </td>
             </tr>
           ))}
@@ -137,13 +143,13 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall(api) {
-  const result = await api.getInventoryIps()
+async function runHostvarsTableApiCall(api) {
+  const result = await api.getInventoryHostvars()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
 
-export const NewIpButton = ({ refresh, setRefresh }) => {
+export const NewHostvarButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
   return (
@@ -152,25 +158,26 @@ export const NewIpButton = ({ refresh, setRefresh }) => {
       onClick={() =>
         pushModal(
           <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
-            <NewIp {...{ refresh, setRefresh }} />
+            <NewHostvar {...{ refresh, setRefresh }} />
           </ModalWrapper>
         )
       }
     >
-      <AddLocationIcon />
-      <span>New Ip</span>
+      <AddVarIcon />
+      <span>New Host Variable</span>
     </button>
   )
 }
 
-export const NewIp = ({ refresh, setRefresh }) => {
+export const NewHostvar = ({ refresh, setRefresh }) => {
   // Hooks
   const { api } = useApi()
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [ip, setIp] = useState('')
-  const [version, setVersion] = useState('')
+  const [key, setKey] = useState('')
+  const [val, setVal] = useState('')
+  const [info, setInfo] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
@@ -178,55 +185,60 @@ export const NewIp = ({ refresh, setRefresh }) => {
 
   // Effects
   useEffect(() => {
-    const checkIpAvailability = async () => {
-      const result = await api.isIpAvailable(ip)
+    const checkHostvarAvailability = async () => {
+      const result = await api.isHostvarAvailable(key)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (ip) checkIpAvailability()
-  }, [ip, api])
+    if (key) checkHostvarAvailability()
+  }, [key, api])
 
-  // Handler method to create a new ip
-  const createIp = async () => {
+  // Handler method to create a new hostvar
+  const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createIp(ip, version)
+    const result = await api.createHostvar(key, val, info)
     if (result[1] === 201) {
       clearModal()
-      setLoadingStatus([true, 'Ip created', true, true])
+      setLoadingStatus([true, 'Hostvar created', true, true])
       if (setRefresh) setRefresh(refresh + 1)
-    } else setLoadingStatus([true, 'Failed to create ip', true, false])
+    } else setLoadingStatus([true, 'Failed to create hostvar', true, false])
   }
 
   return (
     <div>
-      <h3>Create a new ip</h3>
+      <h3>Create a new hostvar</h3>
       <p>
-        Give your new ip a address, and an optional version. The ip address will become its unique
-        ID.
+        Give your new hostvar a key, val, and an optional info. The hostvar key will become its
+        unique ID.
       </p>
       <StringInput
-        label="Ip address"
-        update={(val) => setIp(slugify(val))}
-        current={ip}
+        label="Hostvar key"
+        update={(val) => setKey(slugify(val))}
+        current={key}
         placeholder="127.0.0.1"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'Ip address cannot be empty' }] } }
-              : { error: { details: [{ message: 'This ip address is taken' }] } }
+              ? { error: { details: [{ message: 'Hostvar key cannot be empty' }] } }
+              : { error: { details: [{ message: 'This hostvar key is taken' }] } }
         }
       />
 
-      <StringInput
-        label="Ip version"
-        update={setVersion}
-        current={version}
-        placeholder="Ip version"
+      <StringInput label="Hostvar val" update={setVal} current={val} placeholder="Hostvar val" />
+      <TextInput
+        label="Hostvar info"
+        update={setInfo}
+        current={info}
+        placeholder="An optional info"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button className="btn btn-primary grow" disabled={!(ip && isAvailable)} onClick={createIp}>
-          Create Ip
+        <button
+          className="btn btn-primary grow"
+          disabled={!(key && isAvailable)}
+          onClick={createHostvar}
+        >
+          Create Host Variable
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>
           Cancel
@@ -237,49 +249,56 @@ export const NewIp = ({ refresh, setRefresh }) => {
 }
 
 /**
- * A React component for a ip from the inventory
+ * A React component for a hostvar from the inventory
  *
  * @param {object] data - The inventory data for this host
  */
-export const IpDetail = ({ data }) => {
+export const HostvarDetail = ({ data }) => {
   if (!data) return null
 
   return (
     <>
-      {data.ip ? (
+      {data.key ? (
         <>
-          <h2>Ip</h2>
-          <Markdown>{data.ip}</Markdown>
+          <h2>Key</h2>
+          <Markdown>{data.key}</Markdown>
         </>
       ) : null}
-      {data.version ? (
+      {data.val ? (
         <>
-          <h2>Version</h2>
-          <Markdown>{data.version}</Markdown>
+          <h2>Val</h2>
+          <Markdown>{data.val}</Markdown>
+        </>
+      ) : null}
+      {data.info ? (
+        <>
+          <h2>Info</h2>
+          <Markdown>{data.info}</Markdown>
         </>
       ) : null}
     </>
   )
 }
 
-export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
+export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
   // State
-  const [version, setVersion] = useState('')
+  const [val, setVal] = useState('')
+  const [info, setInfo] = useState('')
   // Hooks
   const { api } = useApi()
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
   // Helper method to bulk-update versions
-  const updateVersions = async () => {
+  const updateValInfos = async () => {
     let i = 0
-    const count = ips.length
-    for (const ip in ips) {
+    const count = hostvars.length
+    for (const id in hostvars) {
       i++
-      await api.updateInventoryIpVersion(ips[ip], version)
+      await api.updateInventoryHostvarInfos(hostvars[id], val, info)
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Updating ip versions" key="linter" />,
+        <LoadingProgress val={i} max={count} msg="Updating hostvar val, info" key="linter" />,
       ])
     }
     if (setRefresh) setRefresh(refresh + 1)
@@ -288,33 +307,39 @@ export const BulkIpUpdate = ({ ips, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update version</h2>
-      <p>This will set the same version for all the selected ips.</p>
-      <StringInput current={version} update={setVersion} label="version" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update ip versions
+      <h2>Update value, infos</h2>
+      <p>This will set the same value, infos for all the selected hostvars.</p>
+      <StringInput current={val} update={setVal} label="Value" />
+      <StringInput current={info} update={setInfo} label="Infomation" />
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateValInfos}>
+        Update hostvar value, infos
       </button>
     </div>
   )
 }
 
-export const IpsDisplayTable = ({ ips }) => {
+/**
+ * This component renders a table with Host vars
+ */
+export const HostvarsDisplayTable = ({ hostvars }) => {
+  // State
   const [order, setOrder] = useState('name')
   const [desc, setDesc] = useState(false)
 
-  const sorted = orderBy(ips, [order], [desc ? 'desc' : 'asc'])
+  // Hooks
+  const sorted = orderBy(hostvars, [order], [desc ? 'desc' : 'asc'])
 
   return (
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version'].map((field) => (
+          {['key', 'val', 'info', 'host'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
                 onClick={() => (order === field ? setDesc(!desc) : setOrder(field))}
               >
-                {field}{' '}
+                {field.replace('_', ' ')}{' '}
                 <RightIcon
                   stroke={3}
                   className={`w-4 h-4 ${desc ? '-' : ''}rotate-90 ${order === field ? '' : 'opacity-0'}`}
@@ -325,18 +350,21 @@ export const IpsDisplayTable = ({ ips }) => {
         </tr>
       </thead>
       <tbody>
-        {sorted.map((ip) => (
-          <tr key={ip.ip}>
-            <td className="pr-6 py-0.5 font-mono text-sm">
-              <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-            </td>
-            <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <InventoryHostname uuid={ip.host} />
-              </PageLink>
+        {sorted.map((hostvar) => (
+          <tr key={hostvar.id}>
+            <td className="">
+              <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.key}</PageLink>
             </td>
             <td className="">
-              <Markdown>{ip.version}</Markdown>
+              <Markdown>{hostvar.val}</Markdown>
+            </td>
+            <td className="">
+              <Markdown>{hostvar.info}</Markdown>
+            </td>
+            <td className="py-0.5 pr-4 font-mono text-sm">
+              <PageLink href={`/inventory/hostvars/${hostvar.host}`}>
+                <InventoryHostname uuid={hostvar.host} />
+              </PageLink>
             </td>
           </tr>
         ))}
