@@ -7,19 +7,19 @@ import _slugify from 'slugify'
 import { jwtDecode } from 'jwt-decode'
 import { roles } from 'config/roles.mjs'
 
-export const arrayToObject = (arr) => {
-  const obj = {}
-  for (const key of arr) obj[key] = key
-
-  return obj
-}
-
 export const arrayMembers = (set, op='add', data) => {
   const s = new Set(set)
   if (op === 'add') s.add(data)
   else s.delete(data)
 
   return [...s]
+}
+
+export const arrayToObject = (arr) => {
+  const obj = {}
+  for (const key of arr) obj[key] = key
+
+  return obj
 }
 
 export const asJson = (data, pretty = true) => {
