@@ -526,7 +526,7 @@ const reseedHandler = async function (newSettings = false) {
  * @return {object} settings - The (potentially) updated settings
  */
 export async function ensureClientModules(settings) {
-  return await loadClientModules(settings, log)
+  return await loadClientModules(settings, log, utils)
 }
 
 /**

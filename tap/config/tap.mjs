@@ -2,7 +2,7 @@
  * This is a placeholder file, it will be overwritten
  */
 
-export default {}
+export const config = {}
 
 throw `
 

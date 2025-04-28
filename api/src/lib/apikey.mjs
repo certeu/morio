@@ -1,6 +1,4 @@
-import { log } from './utils.mjs'
-// Load the database client
-import { db } from './db.mjs'
+import { log, utils } from './utils.mjs'
 // Load helper methods from accounts
 import { clean, asTime, asString, asStatus, asRole, asJson, fromJson } from './account.mjs'
 
@@ -51,7 +49,7 @@ const values = {
  * @return {object} data - The data saved for the API key
  */
 export async function loadApikey(id) {
-  const [status, result] = await db.read(`SELECT * FROM apikeys WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM apikeys WHERE id=:id`, {
     id: fields.id(id),
   })
 
@@ -73,7 +71,7 @@ export async function loadApikey(id) {
  * @return {object} keys - The API keys saved for the account
  */
 export async function loadAccountApikeys(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT ${nonSecretFields} FROM apikeys WHERE created_by=:id`,
     { id: fields.id(id) }
   )
@@ -98,7 +96,7 @@ export async function deleteApikey(id = false) {
   /*
    * Seems good, construct the query
    */
-  const [status] = await db.write(`DELETE from apikeys WHERE id=:id`, { id: fields.id(id) })
+  const [status] = await utils.db.write(`DELETE from apikeys WHERE id=:id`, { id: fields.id(id) })
 
   return status === 200 ? true : false
 }
@@ -135,11 +133,11 @@ export async function createApikey(data, recreate = false) {
 
   // Now either delete + insert, or just insert
   const result = recreate
-    ? await db.writeMany([
+    ? await utils.db.writeMany([
         [`DELETE FROM apikeys WHERE id=:id`, { id: data.id }],
         [query, params],
       ])
-    : await db.write(query, params)
+    : await utils.db.write(query, params)
 
   return result[0] === 200
 }
@@ -172,7 +170,7 @@ export async function updateApikey(id, data) {
   }
 
   const query = `UPDATE apikeys SET ${updates.join(', ')} WHERE id = :id`
-  const [status] = await db.write(query, params)
+  const [status] = await utils.db.write(query, params)
 
   return status === 200
 }

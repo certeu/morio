@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'traefik',
   // Image tag (version) to run
-  tag: 'v3.3.4',
+  tag: 'v3.3.5',
 }
 
 /*
@@ -20,8 +20,13 @@ export const resolveServiceConfiguration = ({ utils }) => {
    */
   const PROD = utils.isProduction()
 
+  /*
+   * Some helpers
+   */
   const nodes = utils.isEphemeral() ? [] : utils.getAllFqdns()
   const clusterFqdn = utils.isDistributed() ? '' : utils.getSettings('cluster.fqdn', false)
+  const extraCliFlags = []
+  const extraPorts = []
 
   /*
    * Traefik (proxy) dynamic configuration for the proxy service
@@ -41,6 +46,21 @@ export const resolveServiceConfiguration = ({ utils }) => {
       .set('http.routers.http.middlewares', ['redirect-to-https@file']),
   }
   if (!utils.isEphemeral()) {
+    extraCliFlags.push(
+      // Create STEP-CA entrypoint (for access to the CA)
+      `--entrypoints.ca.address=:${utils.getPreset('MORIO_CA_PORT')}`,
+      // Enable ACME certificate resolver
+      '--certificatesresolvers.ca.acme.storage=acme.json',
+      // Set CA server
+      `--certificatesresolvers.ca.acme.caserver=https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
+      //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
+      '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
+      // Point to root CA (will only work after CA is initialized)
+      '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
+    )
+    extraPorts.push(
+      `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`,
+    )
     traefik.proxy
       .set('tls.stores.default.defaultgeneratedcert.resolver', 'ca')
       .set(
@@ -54,12 +74,39 @@ export const resolveServiceConfiguration = ({ utils }) => {
       )
       .set('http.middlewares.api-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
       .set('http.routers.api.middlewares', ['api-auth@file', 'redirect-to-https@file'])
+      .set(
+        'http.middlewares.ccdb-auth.forwardAuth.address',
+        `http://${utils.getPreset('MORIO_CONTAINER_PREFIX')}api:${utils.getPreset('MORIO_API_PORT')}/ccdbauth`
+      )
+      .set('http.middlewares.ccdb-auth.forwardAuth.authResponseHeadersRegex', `^X-Morio-`)
+      .set('http.routers.ccdb.middlewares', ['ccdb-auth@file'])
     if (utils.getFlag('ENFORCE_HTTP_MTLS'))
       traefik.proxy
         .set('tls.options.default.clientAuth.caFiles', [
           '/usr/local/share/ca-certificates/morio_root_ca.crt',
         ])
         .set('tls.options.default.clientAuth.clientAuthType', 'RequireAndVerifyClientCert')
+  }
+  // On the DB node, enforce TLS on the extra entrypoint
+  if (utils.getFlankingCount() > 0 && utils.isBrokerNode()) {
+    extraCliFlags.push(
+      //  Create DB entrypoint for cross-node DB connections (HTTP to Rqlite)
+      `--entrypoints.ccdb.address=:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+    )
+    extraPorts.push(
+      `${utils.getPreset('MORIO_DB_PROXY_PORT')}:${utils.getPreset('MORIO_DB_PROXY_PORT')}`,
+    )
+  }
+  // On the cache node, enforce TLS on the extra entrypoint
+  const cacheNode = utils.getCacheNode()
+  if (cacheNode && cacheNode === utils.getNodeFqdn()) {
+    extraCliFlags.push(
+      //  Create Cache entrypoint for cross-node cache connections (TCP to Valkey)
+      `--entrypoints.cache.address=:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`,
+    )
+    extraPorts.push(
+      `${utils.getPreset('MORIO_CACHE_PROXY_PORT')}:${utils.getPreset('MORIO_CACHE_PROXY_PORT')}`,
+    )
   }
 
   return {
@@ -83,7 +130,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       ports: [
         '80:80',
         '443:443',
-        `${utils.getPreset('MORIO_CA_PORT')}:${utils.getPreset('MORIO_CA_PORT')}`,
+        ...extraPorts,
       ],
       // Volumes
       volumes: PROD
@@ -121,7 +168,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         //  Create HTTPS entrypoint
         '--entrypoints.https.address=:443',
         // Set the log level to info in development
-        `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'info'}`,
+        `--log.level=${PROD ? utils.getPreset('MORIO_PROXY_LOG_LEVEL') : 'debug'}`,
         // Set the log destination
         `--log.filePath=${utils.getPreset('MORIO_PROXY_LOG_FILEPATH')}`,
         // Set the log format
@@ -141,22 +188,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Watch for changes
         '--providers.file.watch=true',
         // TODO: Enable metrics
-      ].concat(
-        utils.isEphemeral()
-          ? []
-          : [
-              // Create STEP-CA entrypoint (for access to the CA)
-              `--entrypoints.stepca.address=:${utils.getPreset('MORIO_CA_PORT')}`,
-              // Enable ACME certificate resolver
-              '--certificatesresolvers.ca.acme.storage=acme.json',
-              // Set CA server
-              `--certificatesresolvers.ca.acme.caserver=https://${utils.getPreset('MORIO_CONTAINER_PREFIX')}ca:${utils.getPreset('MORIO_CA_PORT')}/acme/acme/directory`,
-              //'--certificatesresolvers.myresolver.acme.tlschallenge=true',
-              '--certificatesresolvers.ca.acme.httpchallenge.entrypoint=http',
-              // Point to root CA (will only work after CA is initialized)
-              '--serversTransport.rootcas=/usr/local/share/ca-certificates/morio_root_ca.crt',
-            ]
-      ),
+        ...extraCliFlags,
+      ]
     },
     /*
      * Traefik (proxy) configuration for the proxy service

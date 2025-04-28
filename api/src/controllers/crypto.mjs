@@ -1,4 +1,4 @@
-import { utils, log } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This crypto controller handles encryption/decryption
@@ -29,7 +29,6 @@ Controller.prototype.decrypt = async function (req, res) {
   try {
     data = utils.decrypt(JSON.stringify(valid))
   } catch (err) {
-    log.todo(err)
     return utils.sendErrorResponse(res, 'morio.api.input.malformed', req.url, { input: req.body })
   }
 

@@ -8,7 +8,7 @@ export const pullConfig = {
   // Image to run
   image: 'rqlite/rqlite',
   // Image tag (version) to run
-  tag: '8.36.12',
+  tag: '8.36.16',
 }
 
 /*
@@ -35,7 +35,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
       networks: { default: null },
       // Instead, attach to the morio network
       network: utils.getPreset('MORIO_NETWORK'),
-      // Ports to export (none)
+      // Ports to export
       ports: [
         `${utils.getPreset('MORIO_DB_HTTP_PORT')}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
         `${utils.getPreset('MORIO_DB_RAFT_PORT')}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
@@ -45,6 +45,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         // Node ID
         NODE_ID: utils.getNodeSerial(),
       },
+      // Aliases to use on the docker network (used for cross-cluster db access)
+      aliases: [
+        `${utils.getPreset('MORIO_CONTAINER_PREFIX')}ccdb`,
+      ],
       // Volumes
       volumes: PROD
         ? [
@@ -61,8 +65,8 @@ export const resolveServiceConfiguration = ({ utils }) => {
             `/bin/rqlited`,
             `-node-id`,
             String(utils.getNodeSerial()), // See: https://github.com/rqlite/rqlite/issues/1835
-            `-http-addr=${utils.getPreset('MORIO_CONTAINER_PREFIX')}db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
-            `-raft-addr=${utils.getPreset('MORIO_CONTAINER_PREFIX')}db_${utils.getNodeSerial()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
+            `-http-addr=0.0.0.0:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
+            `-raft-addr=0.0.0.0:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
             `-http-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_HTTP_PORT')}`,
             `-raft-adv-addr=${utils.getNodeFqdn()}:${utils.getPreset('MORIO_DB_RAFT_PORT')}`,
             `-node-ca-cert=/etc/rqlite/tls-ca.pem`,
@@ -81,7 +85,7 @@ export const resolveServiceConfiguration = ({ utils }) => {
         : false,
     },
     /*
-     * Traefik (proxy) configuration for the API service
+     * Traefik (proxy) configuration for the DB service
      */
     traefik: {
       db: generateTraefikConfig(utils, {
@@ -92,6 +96,14 @@ export const resolveServiceConfiguration = ({ utils }) => {
         .set('http.middlewares.db-prefix.replacepathregex.regex', '^/-/db/(.*)')
         .set('http.middlewares.db-prefix.replacepathregex.replacement', '/$1')
         .set('http.routers.db.middlewares', ['db-prefix@file']),
+      ccdb: generateTraefikConfig(utils, {
+        service: 'db',
+        prefixes: ['/'],
+        priority: 666,
+        entrypoint: 'ccdb',
+        router: 'ccdb',
+      })
+        .set('http.routers.ccdb.middlewares', ['ccdb-auth@file'])
     },
     /**
      * This is the schema, or more accurately, the SQL commands to create the
@@ -271,9 +283,10 @@ export const resolveServiceConfiguration = ({ utils }) => {
         FOREIGN KEY (cid) REFERENCES client_commands(id)
       )`,
     },
-    data: [
-      `INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
-      `INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
-    ],
+    //data: [
+      // FIXME: This is in the ansibleinv branch
+      //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_TICK', '30s') ON CONFLICT DO UPDATE SET val='30s'`,
+      //`INSERT INTO inventory_default_vars (id,val) VALUES('MORIO_DEBUG', 'false') ON CONFLICT DO UPDATE SET val='false'`,
+    //],
   }
 }

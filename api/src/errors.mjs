@@ -320,6 +320,14 @@ export const errors = {
     detail: 'The request was not properly authenticated.',
   },
   /*
+   * Error for when the required authentication headers aren't what we expected
+   */
+  'morio.ccdb.authentication.required': {
+    status: 401,
+    title: 'Authentication required',
+    detail: 'The request was not properly authenticated.',
+  },
+  /*
    * Error for when a database backend is not available or caused an error
    */
   'morio.api.cache.failure': {

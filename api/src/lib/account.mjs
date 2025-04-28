@@ -1,8 +1,6 @@
 import { roles, hiddenRoles } from '#config/roles'
 import { statuses } from '#config/account-statuses'
 import { utils, log } from './utils.mjs'
-// Load the database client
-import { db } from './db.mjs'
 
 /**
  * Helper method to return null.
@@ -135,7 +133,7 @@ const values = {
  * @return {object} data - The data saved for the account
  */
 export async function loadAccount(provider, id) {
-  const [status, result] = await db.read(`SELECT * FROM accounts WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM accounts WHERE id=:id`, {
     id: fields.id(fullId(provider, id)),
   })
 
@@ -178,7 +176,7 @@ export async function saveAccount(provider = false, id = false, data) {
     }
   }
 
-  const result = await db.write(
+  const result = await utils.db.write(
     `REPLACE INTO accounts(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
     params
   )
@@ -193,7 +191,7 @@ export async function saveAccount(provider = false, id = false, data) {
  */
 export async function listAccounts() {
   const query = `SELECT id, about, status, role, created_by, created_at, updated_by, updated_at, last_login, provider FROM accounts`
-  const [status, result] = await db.read(query)
+  const [status, result] = await utils.db.read(query)
 
   return status === 200 ? accountsAsList(result) : false
 }
@@ -225,7 +223,7 @@ export async function updateLastLoginTime(provider, id, extraData = {}) {
     /*
      * A simple update of the last_login field will do
      */
-    result = await db.write(`UPDATE accounts SET last_login=:now WHERE id=:id`, {
+    result = await utils.db.write(`UPDATE accounts SET last_login=:now WHERE id=:id`, {
       now,
       id: fullId(provider, id),
     })

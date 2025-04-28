@@ -182,7 +182,7 @@ const HomepageMarkdown = () => {
 const HomePage = (props) => (
   <NotUnlessSetup pageProps={props}>
     <PageWrapper {...props}>
-      <ContentWrapper {...props} Icon={MorioIcon} title={props.title}>
+      <ContentWrapper {...props} Icon={MorioIcon} ttle={props.title} noTitle>
         <HomepageMarkdown />
       </ContentWrapper>
     </PageWrapper>
@@ -193,7 +193,7 @@ export default HomePage
 
 export const getStaticProps = () => ({
   props: {
-    title: 'Welcome to morio',
+    title: 'Welcome to Morio',
     page: [''],
   },
 })

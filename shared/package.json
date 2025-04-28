@@ -25,6 +25,7 @@
     ".": "./src/index.js",
     "./*": "./src/*.mjs",
     "./crypto": "./src/crypto.mjs",
+    "./db": "./src/db.mjs",
     "./env": "./src/env.mjs",
     "./errors": "./src/errors.mjs",
     "./fs": "./src/fs.mjs",
