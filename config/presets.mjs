@@ -285,8 +285,11 @@ presets.MORIO_CA_UID = 1000
 /*
  * Cache presets
  */
-predocs.MORIO_CACHE_PORT = 'TCP port for the internal cache service to listen on'
+predocs.MORIO_CACHE_PORT = 'TCP port for the _cache service_ to listen on'
 presets.MORIO_CACHE_PORT = 6379
+
+predocs.MORIO_CACHE_PROXY_PORT = 'TCP port for cross-cluster access to the _cache service_'
+presets.MORIO_CACHE_PROXY_PORT = 6661
 
 /*
  * Connnector presets
@@ -354,11 +357,14 @@ presets.MORIO_CORE_UUID_FINGERPRINT_LENGTH = 6
  * Database presets
  */
 
-predocs.MORIO_DB_HTTP_PORT = 'TCP port for the _DB service_ to listen on_'
+predocs.MORIO_DB_HTTP_PORT = 'TCP port for the _DB service_ to listen on'
 presets.MORIO_DB_HTTP_PORT = 4001
 
 predocs.MORIO_DB_RAFT_PORT = 'TCP port for the  raft consensus protocol used by the _DB service_'
 presets.MORIO_DB_RAFT_PORT = 4002
+
+predocs.MORIO_DB_PROXY_PORT = 'TCP port for cross-cluster access to the _DB service_'
+presets.MORIO_DB_PROXY_PORT = 6662
 
 /*
  * Proxy presets

@@ -6,8 +6,8 @@ import { errors } from '../errors.mjs'
 import { loadAllPresets } from '#config'
 import { validate as validateMethod } from '../schema.mjs'
 import { vaultGetSecret } from './vault.mjs'
-import { db } from './db.mjs'
-import { kv as kvClient } from '#shared/kv'
+// Wanted helper from Tap
+import { isTapWanted } from './services/tap.mjs'
 
 /*
  * Export a log object for logging via the logger
@@ -52,8 +52,6 @@ store.presets = loadAllPresets()
  * Export an utils object to hold utility methods
  */
 export const utils = {
-  db,
-  kv: kvClient(db, log),
   hooks: { services: {} },
 }
 
@@ -126,6 +124,33 @@ utils.getCache = (path) => store.get(unshift(['cache'], path), false)
 utils.getCacheHit = (key) => {
   const hit = utils.getCache(key)
   return hit && Date.now() - hit.time < 15000 ? hit.value : false
+}
+
+/*
+ * Returns the FQDN of the node running the cache service, or false if we do not run a cache service.
+ */
+utils.getCacheNode = () => {
+  if (utils.isEphemeral()) return false
+  if (utils.getFlag('ENFORCE_SERVICE_CACHE') || isTapWanted()) {
+    /*
+     * We need a cache service, but where do we run it?
+     * Do we have a specific cache node in the settings?
+     */
+    const cacheNode = utils.getSettings('flanking_services.cache.nodes', [])?.[0]
+    if (cacheNode) return cacheNode
+    /*
+     * No explicit cache node configured.
+     * We will run it on the node with the lowest serial.
+     * First we check flanking nodes, finally we try broker nodes.
+     */
+    return utils.getNodeFqdnFromSerial(
+      utils.getFlankingCount() > 0
+        ? utils.getLowestFlankingNodeSerial()
+        : utils.getLowestBrokerNodeSerial()
+    )
+  }
+
+  return false
 }
 
 /**
@@ -204,6 +229,29 @@ utils.getLeaderSerial = () => store.get('state.cluster.leader_serial', false)
  * @return {string} uuid - The UUID of the cluster leader
  */
 utils.getLeaderUuid = () => store.get('state.cluster.leader_uuid', false)
+
+/**
+ * Helper method to get the lowest serial among broker nodes
+ *
+ * @return {number} serial - The lowest broker node serial
+ */
+utils.getLowestBrokerNodeSerial = () => {
+  if (utils.isEphemeral()) return false
+  // This is easy, it's always 1
+  return 1
+}
+
+/**
+ * Helper method to get the lowest serial among flanking nodes
+ *
+ * @return {number} serial - The lowest flanking node serial
+ */
+utils.getLowestFlankingNodeSerial = () => {
+  if (utils.isEphemeral()) return false
+  if (utils.getFlankingCount() < 1) return false
+  // This is easy, it's always 101
+  return 101
+}
 
 /**
  * Helper method to get a Docker service configuration
@@ -349,6 +397,19 @@ utils.getNodeCount = () =>
  * @return {string} ip - This node's fully qualified domain name (FQDN)
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
+
+/**
+ * Helper method to get the FQDN of a node based on its serial
+ *
+ * @param {number} serial - The node serial
+ * @return {string} ip - This node's fully qualified domain name (FQDN)
+ */
+utils.getNodeFqdnFromSerial = (serial) =>
+  serial
+    ? serial > 100
+      ? utils.getSettings('cluster.flanking_nodes', [])[Number(serial) - 101] || false
+      : utils.getSettings('cluster.broker_nodes', [])[Number(serial) - 1] || false
+    : false
 
 /**
  * Helper method to get a list of all node FQDNs used in the settings
@@ -1166,7 +1227,17 @@ utils.resetServicesStateAge = () => {
  * Returns a pre-configured API client, itself an object
  */
 utils.apiClient = restClient(
-  `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${getPreset('MORIO_API_PORT')}`
+  `http://${getPreset('MORIO_CONTAINER_PREFIX')}api:${getPreset('MORIO_API_PORT')}`,
+  ({ options, err }) => {
+    log.warn(
+      {
+        url: (options.baseURL || '') + options.url,
+        method: options.method,
+        error: err,
+      },
+      `Core API error`
+    )
+  }
 )
 
 /**
@@ -1234,3 +1305,8 @@ utils.dumpStore = () => {
   delete dump.cache
   log.debug(JSON.stringify(dump, null, 2))
 }
+
+/**
+ * Simple method to check whether two things are not the same
+ */
+utils.isEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b)

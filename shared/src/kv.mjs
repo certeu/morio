@@ -1,17 +1,17 @@
 import { minimatch } from 'minimatch'
 
 /*
- * This returns a kv helper object
+ * This returns a KV (key/value store) client object
  *
- * @param {object} db - The database helper object
+ * @param {object} utils - The utils helper object
  * @param {object} log - The logger helper object
  * @return {object} kv - The KV helper object
  */
-export function kv(db, log) {
+export function createKvClient(utils, log) {
   async function writeKey(key, val) {
     let result
     try {
-      result = await db.write(`REPLACE INTO kv(key, val) VALUES(:key,:val)`, {
+      result = await utils.db.write(`REPLACE INTO kv(key, val) VALUES(:key,:val)`, {
         key,
         val: JSON.stringify(val),
       })
@@ -25,7 +25,7 @@ export function kv(db, log) {
   async function readKey(key) {
     let result
     try {
-      result = await db.read(`SELECT val from kv WHERE key=:key`, { key })
+      result = await utils.db.read(`SELECT val from kv WHERE key=:key`, { key })
     } catch (err) {
       log.warn(err, `Failed to read from KV table`)
     }
@@ -54,7 +54,7 @@ export function kv(db, log) {
   async function removeKey(key) {
     let result
     try {
-      result = await db.write(`DELETE from kv WHERE key = :key`, { key })
+      result = await utils.db.write(`DELETE from kv WHERE key = :key`, { key })
     } catch (err) {
       log.warn(err, `Failed to remove key from KV table`)
     }
@@ -69,7 +69,7 @@ export function kv(db, log) {
   async function listKeys() {
     let result
     try {
-      result = await db.read(`SELECT key from kv`)
+      result = await utils.db.read(`SELECT key from kv`)
     } catch (err) {
       log.warn(err, `Failed to list keys from KV table`)
     }
@@ -91,7 +91,7 @@ export function kv(db, log) {
   async function dumpKeyData() {
     let result
     try {
-      result = await db.read(`SELECT key, val from kv`)
+      result = await utils.db.read(`SELECT key, val from kv`)
     } catch (err) {
       log.warn(err, `Failed to read from KV table`)
     }

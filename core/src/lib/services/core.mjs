@@ -20,6 +20,9 @@ import { ensureTraefikDynamicConfiguration } from './proxy.mjs'
 import { resolveServiceConfiguration } from '#config'
 // Docker
 import { forceUpdateRunningServicesState } from '../docker.mjs'
+// DB & KV clients
+import { createDbClient } from '#shared/db'
+import { createKvClient } from '#shared/kv'
 
 /*
  * This service object holds the service name,
@@ -156,10 +159,16 @@ export const service = {
        * We need a CA before we can do anything fancy
        * This caused the CA service to restart on each reload because we do
        * not yet have the state of running services at this point.
-       * Commented out instead of removed in case of a regression
        */
       await forceUpdateRunningServicesState()
       await ensureMorioService('ca')
+
+      /*
+       * We need a database client, but we can only instantiate it after
+       * we have loaded the settings and CA so we do this here.
+       */
+      utils.db = await createDbClient(utils, log)
+      utils.kv = createKvClient(utils, log)
 
       /*
        * Morio always runs as a cluster, because even a stand-alone

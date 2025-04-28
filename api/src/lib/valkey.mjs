@@ -1,42 +1,75 @@
-import { log } from './utils.mjs'
+import { hash } from '#shared/crypto'
 import { Redis as Valkey } from 'ioredis'
 
 /*
- * The ValKey client can only be created when the cache service is running
- * But on initial startup,it's not there yet, nor do we have the settings.
- * So we do not create it at startup, instead just do so later when it's needed
+ * This returns a cache (Valkey/Redis) client object
+ *
+ * @param {object} utils - The utils helper object
+ * @param {object} log - The logger helper object
+ * @return {object} cache - The Valkey client
  */
-export const valkey = {
-  client: false,
-}
-valkey.connect = () => {
+export async function createCacheClient(utils, log) {
   /*
-   * FIXME: For now we only support connecting over the local docker network
+   * Valkey/Redis requires authentication because it's available cross-cluster
    */
-  valkey.client = new Valkey({ host: 'morio-cache' })
-  if (valkey.client) log.debug('ValKey client initialized')
-}
+  const keys = utils.getKeys()
+  const password = [keys.mrt.hash, keys.private].map((s) => hash(s + 'api')).join('')
 
-/*
- * A shared method to make sure the client is available
- */
-function ensureClient() {
-  if (!valkey.client) valkey.connect()
+  /*
+   * Default Valkey/Redis options
+   */
+  const valkeyOptions = {
+    lazyConnect: true,
+    username: 'api',
+    password,
+  }
+  /*
+   * Valkey client
+   */
+  const local = utils.getCacheNode() === utils.getNodeFqdn()
+  if (local) {
+    /*
+     * If the service is available on the local node
+     * we connect directly over the docker network to Valkey/Redis
+     */
+    log.debug(`Creating local cache client`)
+    return new Cache(new Valkey({ ...valkeyOptions, host: 'morio-cache' }))
+  } else {
+    /*
+     * We need to connect across the cluster using TLS
+     */
+    log.debug(`Creating cross-cluster cache client`)
+    return new Cache(
+      new Valkey({
+        ...valkeyOptions,
+        host: utils.getCacheNode(),
+        port: utils.getPreset('MORIO_CACHE_PROXY_PORT'),
+        tls: {
+          ca: [keys.icrt, keys.rcrt],
+          // Required for the intial self-signed Traefik certificate
+          rejectUnauthorized: false,
+        },
+      })
+    )
+  }
 }
 
 /**
- * This is a helper object that abstracts the low-level ValKey/Redis API
+ * This is the lower level cache handler instance
  */
-export const cache = {}
+function Cache(client) {
+  this.client = client
+
+  return this
+}
 
 /**
- * List all keuys in the cache
+ * List all keys in the cache
  *
  * @return {object} result - The result with key, value, and type, or false
  */
-cache.listKeys = async function (pattern = '*') {
-  ensureClient()
-  const result = await valkey.client.keys(pattern)
+Cache.prototype.listKeys = async function (pattern = '*') {
+  const result = await this.client.keys(pattern)
 
   return Array.isArray(result) ? result : false
 }
@@ -47,22 +80,23 @@ cache.listKeys = async function (pattern = '*') {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type, or false
  */
-cache.read = async function (key = false) {
-  if (!key) return cache.invalid
+Cache.prototype.read = async function (key = false) {
+  if (!key) return this.invalid
 
-  ensureClient()
-  const type = await cache.type(key)
+  const type = await this.type(key)
 
   if (type === 'none') return { morio_cache_error: 404 }
 
-  if (type === 'hash') return cache.readHash(key)
-  if (type === 'list') return cache.readList(key)
-  if (type === 'set') return cache.readSet(key)
-  if (type === 'string') return cache.readString(key)
-  if (type === 'stream') return cache.readStream(key)
-  if (type === 'zset') return cache.readZset(key)
+  if (type === 'hash') return this.readHash(key)
+  if (type === 'list') return this.readList(key)
+  if (type === 'set') return this.readSet(key)
+  if (type === 'string') return this.readString(key)
+  if (type === 'stream') return this.readStream(key)
+  if (type === 'zset') return this.readZset(key)
 
-  return { morio_cache_error: 'unsupported_type' }
+  return type === false
+    ? { morio_cache_error: 'no_such_key' }
+    : { morio_cache_error: 'unsupported_type' }
 }
 
 /**
@@ -71,10 +105,9 @@ cache.read = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readHash = async function (key = false) {
+Cache.prototype.readHash = async function (key = false) {
   if (key) {
-    ensureClient()
-    const value = await valkey.client.hgetall(key)
+    const value = await this.client.hgetall(key)
     // Hash keys return an object
     if (typeof value === 'object') return { key, value, type: 'hash' }
   }
@@ -88,11 +121,10 @@ cache.readHash = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readList = async function (key = false) {
+Cache.prototype.readList = async function (key = false) {
   if (key) {
-    ensureClient()
     // Using 1e6 as upper limit here, that should be enough
-    const value = await valkey.client.lrange(key, 0, 1e6)
+    const value = await this.client.lrange(key, 0, 1e6)
     // List keys return an array
     if (Array.isArray(value)) return { key, value, type: 'list' }
   }
@@ -106,10 +138,9 @@ cache.readList = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readSet = async function (key = false) {
+Cache.prototype.readSet = async function (key = false) {
   if (key) {
-    ensureClient()
-    const value = await valkey.client.smembers(key)
+    const value = await this.client.smembers(key)
     // set keys return an array
     if (Array.isArray(value)) return { key, value, type: 'set' }
   }
@@ -123,10 +154,9 @@ cache.readSet = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readString = async function (key = false) {
+Cache.prototype.readString = async function (key = false) {
   if (key) {
-    ensureClient()
-    const value = await valkey.client.get(key)
+    const value = await this.client.get(key)
     // string keys return a string
     if (typeof value === 'string') return { key, value, type: 'string' }
   }
@@ -140,10 +170,9 @@ cache.readString = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readStream = async function (key = false) {
+Cache.prototype.readStream = async function (key = false) {
   if (key) {
-    ensureClient()
-    const value = await valkey.client.xrange(key, '-', '+')
+    const value = await this.client.xrange(key, '-', '+')
     // set keys return an array
     if (Array.isArray(value)) return { key, value, type: 'stream' }
   }
@@ -157,11 +186,10 @@ cache.readStream = async function (key = false) {
  * @param {string} key - The key ID to read
  * @return {object} result - The result with key, value, and type
  */
-cache.readZset = async function (key = false) {
+Cache.prototype.readZset = async function (key = false) {
   if (key) {
-    ensureClient()
     // Using 1e6 as upper limit here, that should be enough
-    const value = await valkey.client.zrange(key, 0, 1e6, 'WITHSCORES')
+    const value = await this.client.zrange(key, 0, 1e6, 'WITHSCORES')
     // zset keys return an array
     if (Array.isArray(value)) return { key, value, type: 'zset' }
   }
@@ -176,10 +204,9 @@ cache.readZset = async function (key = false) {
  * @return {object} result - The type or false if the key does not exist
  */
 
-cache.type = async function (key = false) {
+Cache.prototype.type = async function (key = false) {
   if (!key) return false
-  ensureClient()
-  const type = await valkey.client.type(key)
+  const type = await this.client.type(key)
 
   return type === 'none' ? false : type
 }

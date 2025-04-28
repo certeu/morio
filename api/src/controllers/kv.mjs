@@ -1,5 +1,4 @@
-//import { currentUser } from '../rbac.mjs'
-import { log, utils } from '../lib/utils.mjs'
+import { utils } from '../lib/utils.mjs'
 
 /**
  * This KV controller handles API access to the KV store.
@@ -130,7 +129,6 @@ Controller.prototype.globKeys = async function (req, res) {
     })
 
   const list = await utils.kv.glob(valid.key)
-  log.todo(list)
 
   return Array.isArray(list) ? res.send(list) : res.send([])
 }

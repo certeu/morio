@@ -15,6 +15,11 @@ export function routes(app) {
   app.get(`/auth`, Auth.authenticate)
 
   /*
+   * Internal authentication route for traefik forwardauth on ccdb entrypoint
+   */
+  app.get(`/ccdbauth`, Auth.authenticateCcdb)
+
+  /*
    * Public authentication / login route
    */
   app.post(`/login`, Auth.login)

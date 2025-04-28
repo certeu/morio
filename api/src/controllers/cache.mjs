@@ -1,5 +1,4 @@
 import { log, utils } from '../lib/utils.mjs'
-import { cache } from '../lib/valkey.mjs'
 /**
  * This cache controller handles API access to the ValKey cache (aka Redis)
  *
@@ -27,7 +26,7 @@ Controller.prototype.listKeys = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const result = await cache.listKeys(glob)
+  const result = await utils.cache.listKeys(glob)
 
   return Array.isArray(result)
     ? res.send(result)
@@ -50,7 +49,7 @@ Controller.prototype.readKey = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const result = await cache.read(valid.key)
+  const result = await utils.cache.read(valid.key)
 
   if (result.morio_cache_error) {
     if (result.morio_cache_error === 404) {
@@ -86,7 +85,7 @@ Controller.prototype.readKeys = async function (req, res) {
   const values = {}
   const promises = []
   for (const key of valid.keys)
-    promises.push(cache.read(key).then((result) => (values[key] = result)))
+    promises.push(utils.cache.read(key).then((result) => (values[key] = result)))
 
   await Promise.all(promises)
 

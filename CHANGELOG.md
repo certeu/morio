@@ -9,20 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- [ui] Add UI to manage flanking nodes and services
+- [api] Endpoint for cross-cluster database authentication
+- [cache] Cache service is now available at the cluster level
+- [cache] Enable ACL and authentication for cross-cluster access
 - [core] Add selective deployment of flanking services
+- [proxy] Endpoint for cross-cluster cache access
+- [proxy] Endpoint for cross-cluster database access
+- [ui] Add UI to manage flanking nodes and services
 
 ### Changed
 
 - Allow users to define where to run flanking services
 - [api] Run in PM2 and restart when memory exceeds 250MB
+- [broker] Upgraded Redpanda from v24.2.20 to v24.2.21
+- [ca] Upgrated StepCA from 0.28.2 to 0.28.3
+- [connector] Upgraded Vector from 0.45.0-debian to 0.46.1-debian
+- [console] Upgraded Redpanda Console from qlite from v2.8.3 to v2.8.5
 - [core] Run in PM2 and restart when memory exceeds 250MB
 - [core] Cluster join/heartbeat changes for flanking nodes
+- [db] Upgraded Rqlite from 8.36.12 to 8.36.16
+- [proxy] Upgraded Traefik from v3.3.4 to v3.3.5
+- [shared] Improved error handling for REST client
+- [watcher] Upgraded Elastic Heartbeat from 8.16.5 to 8.17.4
 
 ### Fixed
 
 - [api] Fix an issue in IP resolver validation
 - [api] Fix an issue in flanking node validation
+- [api] Skip connection test to local node in validation
+- [api] Ensure broker is up prior to instantiating Kafka client
 
 ## [0.8.1] - 2025-03-12
 

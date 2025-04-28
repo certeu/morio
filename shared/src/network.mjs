@@ -1,7 +1,6 @@
 import dns from 'dns'
 import https from 'https'
 import axios from 'axios'
-import { pipeline } from 'node:stream/promises'
 
 const dnsOptions = {
   family: 4, // Don't use IPv6
@@ -51,8 +50,9 @@ export async function resolveHostAsIp(host) {
  *
  * @param {string} host - The hostname to resolve
  * @param {object} customOptions - Options to customize the request
+ * @param {function} onError - The onError handler
  */
-export async function testUrl(url, customOptions = {}) {
+export async function testUrl(url, customOptions = {}, onError) {
   /*
    * Merge default and custom options
    */
@@ -82,8 +82,9 @@ export async function testUrl(url, customOptions = {}) {
   try {
     result = await axios(url, options)
   } catch (err) {
-    // Swallow error?
-    //console.log(err, `${url}`)
+    // Invoke error handler if it is provided
+    if (typeof onError === 'function') onError({ url, options, err, result })
+
     return options.returnError ? err : false
   }
 
@@ -97,148 +98,65 @@ export async function testUrl(url, customOptions = {}) {
 }
 
 /*
- * General purpose method to call the core API with a GET request
+ * General purpose method to call an HTTP endpoint
  *
- * @param {string} url - The URL to call
- * @param {object} data - The data to send
- * @param {bool} raw - Set this to something truthy to not parse the result as JSON
- * @param {function} log - Optional logging method to log errors
+ * @param {object} options - The Axios options object (includes, url, method, and optional data)
+ * @param {function} onError - The onError handler
  * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
  */
-export async function get(url, raw = false, log = false) {
+async function http(options, onError) {
   /*
-   * Send the request to core
+   * Send the request
    */
   let response
   try {
-    response = await fetch(url)
+    response = await axios(options)
   } catch (err) {
-    // Log error if requested
-    if (log) console.log({ url, err })
+    // Invoke error handler if it is provided
+    if (typeof onError === 'function') onError({ options, err, response })
+
+    return [false, false, err]
   }
 
-  if (!response) return [false, false]
-
-  /*
-   * Try parsing the body as JSON, fallback to text
-   */
-  let body
-  try {
-    body = raw ? await response.text() : await response.json()
-  } catch (err) {
-    try {
-      body = await response.text()
-    } catch (err) {
-      body = false
-    }
-  }
-
-  return [response.status || false, body]
-}
-
-/*
- * General purpose method to call the core API with a streaming GET request
- *
- * @param {url} string - The URL to call
- * @return {object} res - The Express response object
- */
-export async function streamGet(url, res) {
-  /*
-   * Send headers
-   */
-  res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.setHeader('Transfer-Encoding', 'chunked')
-
-  /*
-   * Send the request to core
-   */
-  let response
-  try {
-    response = await fetch(url)
-  } catch (err) {
-    // Swallow error
-    //console.log(err)
-  }
-
-  /*
-   * Try parsing the body as JSON, fallback to text
-   */
-  await pipeline(response.body, res)
-}
-
-/*
- * General purpose method to call the core API with a POST or PUT request
- *
- * @param {url} string - The URL to call
- * @param {data} string - The data to send
- * @param {raw} string - Set this to something truthy to not parse the result as JSON
- * @param {function} log - Optional logging method to log errors
- * @return {response} object - Either the result parse as JSON, the raw result, or false in case of trouble
- */
-async function __postput(method = 'POST', url, data, raw = false, log = false) {
-  /*
-   * Construct the request object with or without a request body
-   */
-  const request = { method }
-  if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-    /*
-     * We have data, add request body and set content type
-     */
-    request.body = JSON.stringify(data)
-    request.headers = { 'Content-Type': 'application/json' }
-  }
-
-  /*
-   * Now send request to core
-   */
-  let response
-  try {
-    response = await fetch(url, request)
-  } catch (err) {
-    if (log) log(err)
-  }
-
-  /*
-   * Handle status codes that have no response body
-   */
-  if (response?.status && [204].includes(response.status)) return [response.status, {}]
-  /*
-   * Handle all other status codes
-   */ else if (response?.status) {
-    let data
-    try {
-      data = raw ? await response.text() : await response.json()
-    } catch (err) {
-      if (log) log(err)
-      return raw ? [response.status, { err }] : [response.status, data]
-    }
-    return [response.status, data]
-  }
-
-  /*
-   * If we end up here, status code is 400 or higher so it's an error
-   */
-  return [response?.status || 500, false]
-}
-
-export async function post(url, data) {
-  return __postput('POST', url, data)
-}
-export async function put(url, data) {
-  return __postput('PUT', url, data)
+  return [response?.status || false, response?.data || false, response]
 }
 
 /**
- * General purpose client for a REST API
+ * General purpose client for a REST API, uses Axios
  *
  * @param {string} api - The API root URL
- * @return {object] client - The API client
+ * @param {object} onError - A default error handler
+ * @param {object} options - Any optional Axios options to apply to all requests
+ * @return {object] client - The REST client
  */
-export function restClient(api) {
+export function restClient(api, onError, options={}) {
+  /*
+   * Merge default and custom options
+   */
+  const defaultOptions = {
+    baseURL: api,
+    method: 'GET',
+    headers: {},
+    data: undefined,
+    timeout: 1500,
+    ...options,
+  }
+  if (api.toLowerCase().slice(0,6) === 'https:') {
+    // Needed for initial Traefik self-signed cert
+    defaultOptions.httpsAgent = new https.Agent({ rejectUnauthorized: false })
+  }
+  const mergeOptions = (custom) => ({
+    ...defaultOptions,
+    ...custom,
+    headers: {
+      ...defaultOptions.headers,
+      ...(custom.headers || {})
+    }
+  })
+
   return {
-    get: async (url, raw, log) => get(api + url, raw, log),
-    post: async (url, data, raw, log) => __postput('POST', api + url, data, raw, log),
-    put: async (url, data, raw, log) => __postput('PUT', api + url, data, raw, log),
-    streamGet: async (url, res) => streamGet(api + url, res),
+    get: async (url, options={}) => http(mergeOptions({ ...options, url }), onError),
+    post: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'POST', data, url }), onError),
+    put: async (url, data, options={}) => http(mergeOptions({ ...options, method: 'PUT', data, url }), onError),
   }
 }

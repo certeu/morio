@@ -4,8 +4,6 @@ import { getPreset, inProduction } from '#config'
 import { errors } from '../errors.mjs'
 import { validate as validateMethod } from '../schema.mjs'
 import { restClient } from '#shared/network'
-import { db } from './db.mjs'
-import { kv as kvClient } from '#shared/kv'
 
 /*
  * Export a log object for logging via the logger
@@ -21,6 +19,23 @@ log.todo = (a, b) => {
   return typeof a === 'object'
     ? log.debug(a, `🟠 ${b}${location}`)
     : log.debug(`🟠 ${a}${location}`)
+}
+
+/*
+ * An error handler for the core API
+ */
+const coreErrorHandler = ({ options, err }) => {
+  if (err?.code === 'ECONNREFUSED')
+    return log.debug(`Connection refused when connecting to core. Perhaps it's reloading?`)
+
+  return log.warn(
+    {
+      url: (options.baseURL || '') + options.url,
+      method: options.method,
+      error: err,
+    },
+    `Core API error`
+  )
 }
 
 /*
@@ -45,11 +60,6 @@ const store = new Store(log)
  */
 export const utils = new Store(log)
 
-/*
- * Attach kv helper
- */
-utils.kv = kvClient(db, log)
-
 /*           _   _
  *  __ _ ___| |_| |_ ___ _ _ ___
  * / _` / -_)  _|  _/ -_) '_(_-<
@@ -72,6 +82,33 @@ utils.getBrokerCount = () => utils.getSettings('cluster.broker_nodes', []).lengt
  *
  */
 utils.getBrokerFqdns = () => utils.getSettings('cluster.broker_nodes', [])
+
+/*
+ * Returns the FQDN of the node running the cache service, or false if we do not run a cache service.
+ */
+utils.getCacheNode = () => {
+  if (utils.isEphemeral()) return false
+  if (utils.getFlag('ENFORCE_SERVICE_CACHE') || utils.isTapWanted()) {
+    /*
+     * We need a cache service, but where do we run it?
+     * Do we have a specific cache node in the settings?
+     */
+    const cacheNode = utils.getSettings('flanking_services.cache.nodes', [])?.[0]
+    if (cacheNode) return cacheNode
+    /*
+     * No explicit cache node configured.
+     * We will run it on the node with the lowest serial.
+     * First we check flanking nodes, finally we try broker nodes.
+     */
+    return utils.getNodeFqdnFromSerial(
+      utils.getFlankingCount() > 0
+        ? utils.getLowestFlankingNodeSerial()
+        : utils.getLowestBrokerNodeSerial()
+    )
+  }
+
+  return false
+}
 
 /**
  * Helper method to get the cluster Fqdn
@@ -109,6 +146,14 @@ utils.getCoreStatus = () => store.get('status.core')
 utils.getFlag = (flag) => store.get(['settings', 'resolved', 'tokens', 'flags', flag], false)
 
 /**
+ * Helper method to get the number of flanking nodes
+ *
+ * @return {number} count - The number of flanking nodes
+ *
+ */
+utils.getFlankingCount = () => utils.getSettings('cluster.flanking_nodes', []).length
+
+/**
  * Helper method to get a list of all FQDNS for flanking nodes
  *
  * @return {array} list - The list of all flanking node FQDNs
@@ -131,11 +176,47 @@ utils.getInfo = () => store.get('info')
 utils.getKeys = () => store.get('keys')
 
 /**
+ * Helper method to get the lowest serial among broker nodes
+ *
+ * @return {number} serial - The lowest broker node serial
+ */
+utils.getLowestBrokerNodeSerial = () => {
+  if (utils.isEphemeral()) return false
+  // This is easy, it's always 1
+  return 1
+}
+
+/**
+ * Helper method to get the lowest serial among flanking nodes
+ *
+ * @return {number} serial - The lowest flanking node serial
+ */
+utils.getLowestFlankingNodeSerial = () => {
+  if (utils.isEphemeral()) return false
+  if (utils.getFlankingCount() < 1) return false
+  // This is easy, it's always 101
+  return 101
+}
+
+/**
  * Helper method to get the FQDN of the local node
  *
  * @return {string} fqdn - The local node's FQDN
  */
 utils.getNodeFqdn = () => store.get('state.node.fqdn', false)
+
+/**
+ * Helper method to get the FQDN of a node based on its serial
+ *
+ * @param {number} serial - The node serial
+ * @return {string} ip - This node's fully qualified domain name (FQDN)
+ */
+utils.getNodeFqdnFromSerial = (serial) =>
+  serial
+    ? serial > 100
+      ? utils.getSettings('cluster.flanking_nodes', [])[Number(serial) - 101] || false
+      : utils.getSettings('cluster.broker_nodes', [])[Number(serial) - 1] || false
+    : false
 
 /**
  * Helper method to get a list of all FQDNS for flanking nodes
@@ -433,6 +514,13 @@ utils.setSettings = (settings) => {
  */
 
 /**
+ * Helper method to see whether a node is a broker node
+ *
+ * @return {bool} brokerNode - True if the local node is a broker node, false if not
+ */
+utils.isBrokerNode = () => (utils.getNodeSerial() < 100 ? true : false)
+
+/**
  * Helper method to see whether the config is resolved
  *
  * @return {bool} resolved - True if the config is resolved, false if not
@@ -452,6 +540,17 @@ utils.isEphemeral = () => (store.get('state.ephemeral', false) ? true : false)
  * @return {bool} reloading - True if reloading, false if not
  */
 utils.isReloading = () => (store.get('state.reloading', false) ? true : false)
+
+/**
+ * Helper method for determining whether the tap service is wanted
+ *
+ * @return {bool} wanted - True if Tap is wanted
+ */
+utils.isTapWanted = () => {
+  const processors = utils.getSettings('tap', {})
+
+  return Object.keys(processors).length > 0
+}
 
 /*  _                     __
  * | |_ _ _ __ _ _ _  ___/ _|___ _ _ _ __  ___ _ _ ___
@@ -515,7 +614,8 @@ utils.clearOidcPkce = (id, state) => store.unset(['oidc', 'pkce', id, state])
  * Returns a pre-configured API client, itself on object
  */
 utils.coreClient = restClient(
-  `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${getPreset('MORIO_CORE_PORT')}`
+  `http://${getPreset('MORIO_CONTAINER_PREFIX')}core:${getPreset('MORIO_CORE_PORT')}`,
+  coreErrorHandler
 )
 
 /**

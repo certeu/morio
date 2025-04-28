@@ -187,8 +187,12 @@ Controller.prototype.setup = async function (req, res) {
 
   /*
    * Settings are valid and deployable, pass them to core
+   * This will take a while, and the default REST client times out
+   * after 1.5 second, so we pass a custom timeout.
    */
-  const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req))
+  const [status, result] = await utils.coreClient.post(`/setup`, bodyPlusHeaders(req), {
+    timeout: 30000,
+  })
 
   return res.status(status).send(result)
 }

@@ -397,6 +397,41 @@ Controller.prototype.whoami = async function (req, res) {
 }
 
 /**
+ * Authenticate for the ccdb entrypoint on Traefik
+ *
+ * This handles authentication for cross-cluster database
+ * connections. These go through a dedicated entrypoint in
+ * Traefik because they are not accessible to regular users.
+ * These requests come with a JWT that we verify here.
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.authenticateCcdb = async function (req, res) {
+  /*
+   * These requests come with a JWT that we check
+   */
+  const valid = await verifyToken(req.headers.authorization.split('Bearer ')[1].trim())
+
+  if (valid.user === 'ccdb' && valid.role === 'ccdb' && valid.cluster === utils.getClusterUuid()) {
+    /*
+     * This is a legit cross-cluster Database connection
+     */
+    return res
+      .set('X-Morio-Role', valid.role)
+      .set('X-Morio-User', valid.user)
+      .set('X-Morio-Provider', 'ccdb')
+      .status(200)
+      .end()
+  }
+
+  /*
+   * Whatever this is, we do not allow it
+   */
+  return utils.sendErrorResponse(res, 'morio.ccdb.authentication.required', req.url)
+}
+
+/**
  * Helper method to verify the token
  *
  * @param {object} token - The token to verify
