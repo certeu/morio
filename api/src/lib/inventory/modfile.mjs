@@ -1,5 +1,5 @@
-// Load the database client
-import { db } from '../db.mjs'
+// Utils
+import { utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
@@ -43,7 +43,7 @@ Modfile.prototype.create = async function ({ id, mod, folder, file, content, sou
    */
   let result = false
   try {
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_modfiles(id, mod, folder, file, content, source) VALUES(:id, :mod, :folder, :file, :content, :source)`,
       { id, mod, folder, file, content, source }
     )
@@ -144,7 +144,7 @@ Modfile.prototype.save = async function () {
   let result = false
   try {
     const data = { id: this.getId(), ...this.getRecord() }
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_modfiles(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
@@ -178,7 +178,7 @@ Modfile.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_modfiles WHERE id = :id`, { id: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_modfiles WHERE id = :id`, { id: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -202,7 +202,7 @@ Modfile.prototype.read = async function (id = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_modfiles WHERE id = :id`, {
+    result = await utils.db.read(`SELECT * FROM inventory_modfiles WHERE id = :id`, {
       id: id || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -228,7 +228,7 @@ Modfile.prototype.read = async function (id = false) {
 Modfile.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_modfiles ORDER BY mod`)
+    result = await utils.db.read(`SELECT * FROM inventory_modfiles ORDER BY mod`)
   } catch (err) {
     return this.setError(err)
   }

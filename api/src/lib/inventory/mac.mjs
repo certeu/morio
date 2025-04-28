@@ -1,5 +1,5 @@
-// Load the database client
-import { db } from '../db.mjs'
+// Utils
+import { utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
@@ -38,7 +38,7 @@ Mac.prototype.create = async function ({ mac }) {
    */
   let result = false
   try {
-    result = await db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
+    result = await utils.db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
       mac,
     })
   } catch (err) {
@@ -105,7 +105,7 @@ Mac.prototype.save = async function () {
   let result = false
   try {
     const data = { mac: this.getId(), ...this.getRecord() }
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_macs(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
@@ -139,7 +139,7 @@ Mac.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_macs WHERE mac = :mac`, { mac: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_macs WHERE mac = :mac`, { mac: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -163,7 +163,7 @@ Mac.prototype.read = async function (mac = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_macs WHERE mac = :mac`, {
+    result = await utils.db.read(`SELECT * FROM inventory_macs WHERE mac = :mac`, {
       mac: mac || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -184,7 +184,7 @@ Mac.prototype.read = async function (mac = false) {
 Mac.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_macs ORDER BY mac`)
+    result = await utils.db.read(`SELECT * FROM inventory_macs ORDER BY mac`)
   } catch (err) {
     return this.setError(err)
   }

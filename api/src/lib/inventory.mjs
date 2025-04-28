@@ -2,8 +2,6 @@ import { log, utils } from './utils.mjs'
 import { get, asScalarOrJson } from '#shared/utils'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
-// Load the database client
-import { db } from './db.mjs'
 // Shared code from accounts
 import { asTime, clean, fromJson } from './account.mjs'
 
@@ -39,7 +37,7 @@ const values = {
  */
 export async function listGroupvars() {
   const query = `SELECT * FROM inventory_groupvars`
-  const [status, result] = await db.read(query)
+  const [status, result] = await utils.db.read(query)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -51,7 +49,7 @@ export async function listGroupvars() {
  */
 export async function listGroups() {
   const query = `SELECT * FROM inventory_groups`
-  const [status, result] = await db.read(query)
+  const [status, result] = await utils.db.read(query)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -63,7 +61,7 @@ export async function listGroups() {
  * @return {object} available - true if it is available, false if not
  */
 export async function isGroupAvailable(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT id FROM inventory_groups where id=:id`,
     { id }
   )
@@ -89,7 +87,7 @@ export async function createGroupvar(key, val='', group_id, info='') {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_groupvars(key, val, group_id, info) VALUES(:key, :val, :group_id, :info)`,
     { key, val, group_id, info }
   )
@@ -113,7 +111,7 @@ export async function createGroup(id, description = '') {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_groups(id, description) VALUES(:id, :description)`,
     { id, description }
   )
@@ -132,7 +130,7 @@ export async function createGroup(id, description = '') {
 export async function updateGroup(id, description = '') {
   if (!id) return false
   // Run query
-  await db.write(
+  await utils.db.write(
     `UPDATE inventory_groups SET description=:description WHERE id=:id`,
     { id, description }
   )
@@ -170,7 +168,7 @@ export async function addGroupToGroup(id, group) {
     /*
      * Insert into the database
      */
-    const result = await db.write(
+    const result = await utils.db.write(
       `INSERT INTO inventory_group_group(group_id, member_id) VALUES(:group, :id)`,
       { id, group }
     )
@@ -184,7 +182,7 @@ export async function addHostToGroup(host, group) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_group_host(group_id, member_id) VALUES(:group, :host)`,
     { host, group }
   )
@@ -197,7 +195,7 @@ export async function removeHostFromGroup(host, group) {
   /*
    * Remove from the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `DELETE FROM inventory_group_host WHERE member_id=:host AND group_id=:group`,
     { host, group }
   )
@@ -210,7 +208,7 @@ export async function removeGroupFromGroup(member, group) {
   /*
    * Remove from the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `DELETE FROM inventory_group_group WHERE member_id=:member AND group_id=:group`,
     { member, group }
   )
@@ -260,7 +258,7 @@ WITH RECURSIVE group_ancestry(ancestor_id, path, depth) AS (
 SELECT * FROM group_ancestry
 WHERE ancestor_id = :id`
   // Run query & parse results
-  const [status, result] = await db.read(q, { id, group, maxDepth: 25 })
+  const [status, result] = await utils.db.read(q, { id, group, maxDepth: 25 })
 
   // Err on the safe side
   if (status !== 200) return true
@@ -276,7 +274,7 @@ WHERE ancestor_id = :id`
  */
 export async function loadGroupsHierarchy() {
   // Run the query
-  const [status, result] = await db.read(`
+  const [status, result] = await utils.db.read(`
 -- This query first gets all group relationships
 WITH RECURSIVE group_hierarchy(id, parent_id, type, depth, path) AS (
   -- Base case: top-level groups (those that aren't members of any other groups)
@@ -365,7 +363,7 @@ function buildGroupsTree(items) {
  * @return {object} data - The data saved for the group
  */
 export async function loadGroup(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_groups WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_groups WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -387,7 +385,7 @@ export async function loadGroup(id) {
  * @return {object} data - The data saved for the group
  */
 export async function loadGroupvar(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_groupvars WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_groupvars WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -409,7 +407,7 @@ export async function loadGroupvar(id) {
  * @return {object} list - The list of (host) members
  */
 export async function loadGroupHostMembers(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     // j = join table, s = source table
     `SELECT j.member_id as id FROM inventory_group_host j
      JOIN inventory_hosts s ON j.member_id = s.id
@@ -430,7 +428,7 @@ export async function loadGroupHostMembers(id) {
  * @return {object} list - The list of (group) members
  */
 export async function loadGroupGroupMembers(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     // j = join table, s = source table
     `SELECT j.member_id as id FROM inventory_group_group j
      JOIN inventory_groups s ON j.member_id = s.id
@@ -451,7 +449,7 @@ export async function loadGroupGroupMembers(id) {
  * @return {object} list - The list of (group) members
  */
 export async function loadGroupMemberOf(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     // j = join table, s = source table
     `SELECT j.group_id as id FROM inventory_group_group j
      JOIN inventory_groups s ON j.group_id = s.id
@@ -519,7 +517,7 @@ export async function loadGroupMembers(id) {
    * We hard-limit this to a depth of 25 to prevent an endless loop when
    * resolving all group members
    */
-  const [status, result] = await db.read(q, { id: clean(id), maxDepth: 25 })
+  const [status, result] = await utils.db.read(q, { id: clean(id), maxDepth: 25 })
   if (status !== 200) return false
   const found = resultsAsList(result)
 
@@ -536,7 +534,7 @@ export async function deleteGroup(id = false) {
   const result = await deleteRecord('inventory_groups', id)
 
   // Also remove this group as a member of other groups
-  await db.write(`DELETE FROM inventory_group_group WHERE member_id = :id`, { id })
+  await utils.db.write(`DELETE FROM inventory_group_group WHERE member_id = :id`, { id })
 
   return result
 }
@@ -560,7 +558,7 @@ export async function deleteGroupvar(id = false) {
  * @return {object} keys - The hosts in the inventory
  */
 export async function listHosts() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_hosts`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hosts`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -571,7 +569,7 @@ export async function listHosts() {
  * @return {object} keys - The IP addresses in the inventory
  */
 export async function listIps() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_ips`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_ips`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -582,7 +580,7 @@ export async function listIps() {
  * @return {object} keys - The Software packages in the inventory
  */
 export async function listPkgs() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_pkgs`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -593,7 +591,7 @@ export async function listPkgs() {
  * @return {object} keys - The Morio modules in the inventory
  */
 export async function listMods() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_mods`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_mods`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -604,7 +602,7 @@ export async function listMods() {
  * @return {object} keys - The Module vars in the inventory
  */
 export async function listModvars() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_modvars`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modvars`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -615,7 +613,7 @@ export async function listModvars() {
  * @return {object} keys - The Host vars in the inventory
  */
 export async function listHostvars() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hostvars`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -626,7 +624,7 @@ export async function listHostvars() {
  * @return {object} keys - The Modules files in the inventory
  */
 export async function listModfiles() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modfiles`)
 
   return status === 200 ? resultsAsList(result) : false
 }
@@ -637,7 +635,7 @@ export async function listModfiles() {
  * @return {object} keys - The MAC addresses in the inventory
  */
 export async function listMacs() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_macs`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_macs`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
 }
@@ -648,7 +646,7 @@ export async function listMacs() {
  * @return {object} keys - The OSes in the inventory
  */
 export async function listOss() {
-  const [status, result] = await db.read(`SELECT * FROM inventory_oss`)
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_oss`)
 
   return status === 200 ? await addHostNamesToList(resultsAsList(result)) : false
 }
@@ -660,7 +658,7 @@ export async function listOss() {
  * @return {object} data - The data saved for the host
  */
 export async function loadHost(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -682,7 +680,7 @@ export async function loadHost(id) {
  * @return {object} data - The data saved for the IP address
  */
 export async function loadIp(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_ips WHERE ip=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_ips WHERE ip=:id`, {
     id: clean(id),
   })
 
@@ -704,7 +702,7 @@ export async function loadIp(id) {
  * @return {object} data - The data saved for the Software package
  */
 export async function loadPkg(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_pkgs WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_pkgs WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -726,7 +724,7 @@ export async function loadPkg(id) {
  * @return {object} data - The data saved for the Morio module
  */
 export async function loadMod(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_mods WHERE mod=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_mods WHERE mod=:id`, {
     id: clean(id),
   })
 
@@ -748,7 +746,7 @@ export async function loadMod(id) {
  * @return {object} data - The data saved for the Module var
  */
 export async function loadModvar(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_modvars WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modvars WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -770,7 +768,7 @@ export async function loadModvar(id) {
  * @return {object} data - The data saved for the Host var
  */
 export async function loadHostvar(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_hostvars WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hostvars WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -792,7 +790,7 @@ export async function loadHostvar(id) {
  * @return {object} data - The data saved for the Module file
  */
 export async function loadModfile(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_modfiles WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_modfiles WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -814,7 +812,7 @@ export async function loadModfile(id) {
  * @return {object} data - The data saved for the MAC address
  */
 export async function loadMac(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_macs WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_macs WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -836,7 +834,7 @@ export async function loadMac(id) {
  * @return {object} data - The data saved for the MAC address
  */
 export async function loadOs(id) {
-  const [status, result] = await db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
     id: clean(id),
   })
 
@@ -858,7 +856,7 @@ export async function loadOs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostIps(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT hi.host, hi.ip, i.version FROM inventory_host_ip hi
      JOIN inventory_ips i ON hi.ip = i.ip
      WHERE hi.host=:id`,
@@ -880,7 +878,7 @@ export async function loadHostIps(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostPkgs(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT hi.host, hi.pkg, i.version FROM inventory_host_pkg hi
      JOIN inventory_pkgs i ON hi.pkg = i.name
      WHERE hi.host=:id`,
@@ -902,7 +900,7 @@ export async function loadHostPkgs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostMods(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT hi.host, hi.mod, i.data FROM inventory_host_mod hi
      JOIN inventory_mods i ON hi.mod = i.mod
      WHERE hi.host=:id`,
@@ -924,7 +922,7 @@ export async function loadHostMods(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostMacs(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT hm.host, hm.mac FROM inventory_host_mac hm
      JOIN inventory_macs m ON hm.mac = m.mac
      WHERE hm.host=:id`,
@@ -946,7 +944,7 @@ export async function loadHostMacs(id) {
  * @return {object} data - The data saved for the host
  */
 export async function loadHostOs(id) {
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT ho.host, o.id, o.name, o.version FROM inventory_host_os ho
      JOIN inventory_oss o ON ho.os = o.id
      WHERE ho.host=:id`,
@@ -971,19 +969,19 @@ export async function getAnsibleInventory(withSecrets=false) {
   const inventory = { }
 
   // Load hosts
-  const [hostStatus, hostResult] = await db.read(`SELECT * FROM inventory_hosts`)
+  const [hostStatus, hostResult] = await utils.db.read(`SELECT * FROM inventory_hosts`)
   const hosts = hostStatus === 200 ? resultsAsList(hostResult) : []
 
   // Load modules vars
-  const [modvarStatus, modvarResult] = await db.read(`SELECT * FROM inventory_modvars`)
+  const [modvarStatus, modvarResult] = await utils.db.read(`SELECT * FROM inventory_modvars`)
   const modvars = modvarStatus === 200 ? resultsAsList(modvarResult) : false
 
   // Load host modules
-  const [hostmodStatus, hostmodResult] = await db.read(`SELECT * FROM inventory_host_mod`)
+  const [hostmodStatus, hostmodResult] = await utils.db.read(`SELECT * FROM inventory_host_mod`)
   const hostmods = hostmodStatus === 200 ? resultsAsList(hostmodResult) : false
 
   // Load host vars
-  const [hostvarStatus, hostvarResult] = await db.read(`SELECT * FROM inventory_hostvars`)
+  const [hostvarStatus, hostvarResult] = await utils.db.read(`SELECT * FROM inventory_hostvars`)
   const hostvars = hostvarStatus === 200 ? resultsAsList(hostvarResult) : false
 
   // Load modules
@@ -1055,7 +1053,7 @@ function unwrapVar(key, val) {
  */
 export async function getStats() {
   // Count various inventory tables
-  const count = await db.readMany([
+  const count = await utils.db.readMany([
     [`SELECT COUNT(id) as hosts FROM inventory_hosts`],
     [`SELECT COUNT(ip) as ips FROM inventory_ips`],
     [`SELECT COUNT(mac) as macs FROM inventory_macs`],
@@ -1108,7 +1106,7 @@ export async function getStats() {
 async function deleteRecord(table = false, id = false) {
   if (!id || !table) return false
 
-  await db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
+  await utils.db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
 
   return true
 }
@@ -1132,7 +1130,7 @@ export async function deleteIp(id = false) {
 export async function deletePkg(id = false) {
   const result = await deleteRecord('inventory_pkgs', id)
 
-  await db.write(`DELETE FROM inventory_host_pkg WHERE pkg = :id`, { id })
+  await utils.db.write(`DELETE FROM inventory_host_pkg WHERE pkg = :id`, { id })
 
   return result
 }
@@ -1144,7 +1142,7 @@ export async function deletePkg(id = false) {
  * @return {bool} result - true if it went ok, false if not
  */
 export async function deleteHostPkg(id = false) {
-  return await db.write(`DELETE FROM inventory_host_pkg WHERE host = :id`, { id })
+  return await utils.db.write(`DELETE FROM inventory_host_pkg WHERE host = :id`, { id })
 }
 
 /**
@@ -1156,7 +1154,7 @@ export async function deleteHostPkg(id = false) {
 export async function deleteMod(id = false) {
   const result = await deleteRecord('inventory_mods', id)
 
-  await db.write(`DELETE FROM inventory_host_mod WHERE mod = :id`, { id })
+  await utils.db.write(`DELETE FROM inventory_host_mod WHERE mod = :id`, { id })
 
   return result
 }
@@ -1222,9 +1220,9 @@ export async function deleteHost(id = false) {
 
   // Also remove IPs, MACs, and OS beloonging to this host
   for (const table of ['inventory_ips', 'inventory_macs', 'inventory_oss']) {
-    await db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
+    await utils.db.write(`DELETE FROM ${table} WHERE host = :id`, { id })
   }
-  await db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
+  await utils.db.write(`DELETE FROM inventory_oss WHERE id = :id`, { id })
 
   return result
 }
@@ -1239,7 +1237,7 @@ export async function createIp(ip, version) {
   /*
    * Insert into the database
    */
-  const result = await db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
+  const result = await utils.db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
     ip,
     version,
   })
@@ -1260,7 +1258,7 @@ export async function createPkg(id, name, version) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
     {
       id,
@@ -1285,7 +1283,7 @@ export async function createMod(mod, data) {
   /*
    * Insert into the database
    */
-  const result = await db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
+  const result = await utils.db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
     mod,
     data,
   })
@@ -1306,7 +1304,7 @@ export async function createModvar(id, val, info) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_modvars(id, val, info) VALUES(:id, :val, :info)`,
     {
       id,
@@ -1331,7 +1329,7 @@ export async function createHostvar(id, key, val, info) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_hostvars(id, key, val, info) VALUES(:id, :key, :val, :info)`,
     {
       id,
@@ -1357,7 +1355,7 @@ export async function createModfile(id, mod, folder, file, content, source) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_modfiles(id, mod, folder, file, content, source) VALUES(:id, :mod, :folder, :file, :content, :source)`,
     {
       id,
@@ -1385,7 +1383,7 @@ export async function createMac(mac) {
   /*
    * Insert into the database
    */
-  const result = await db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
+  const result = await utils.db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
     mac,
   })
   let created = false
@@ -1405,7 +1403,7 @@ export async function createHost(id, arch, cores, fqdn, memory, name, notes, tag
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_hosts(id, arch, cores, fqdn, memory, name, notes, tags, last_update) VALUES(:id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update)`,
     {
       id,
@@ -1436,7 +1434,7 @@ export async function createOs(id, name, version) {
   /*
    * Insert into the database
    */
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_hosts(id, name, version) VALUES(:id, :name, :version)`,
     {
       id,
@@ -1472,7 +1470,7 @@ export async function createInvite(user, type = 'once') {
     /*
      * Insert into the database
      */
-    const result = await db.write(
+    const result = await utils.db.write(
       `INSERT INTO
         inventory_invites(id, created_by, created_at, type, used)
         VALUES(:id, :createdBy, :createdAt, :type, :used)`,
@@ -1502,7 +1500,7 @@ export async function getInvite(id) {
     log.debug(`getInvite called without ID`)
     return false
   }
-  const result = await db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
+  const result = await utils.db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
   const data = result[0] === 200 && result[1].results ? getFields(result[1]).pop() : false
 
   return data
@@ -1532,11 +1530,11 @@ export async function useInvite(id) {
    * Is it a multi-use invite?
    */
   if (invite.type === 'many')
-    await db.write(`UPDATE inventory_invites SET used=:used WHERE id=:id`, {
+    await utils.db.write(`UPDATE inventory_invites SET used=:used WHERE id=:id`, {
       id,
       used: Number(invite.used) + 1,
     })
-  else await db.write(`DELETE FROM inventory_invites WHERE id=:id`, { id })
+  else await utils.db.write(`DELETE FROM inventory_invites WHERE id=:id`, { id })
 
   return true
 }
@@ -1602,7 +1600,7 @@ export async function saveHost(id, data) {
   updates.push('last_update')
   params.last_update = asTime()
 
-  const result = await db.write(
+  const result = await utils.db.write(
     `REPLACE INTO inventory_hosts(${updates.join()}) VALUES(${updates.map((key) => ':' + key).join()})`,
     params
   )
@@ -1675,7 +1673,7 @@ async function getHostnames(hostIds = []) {
    * Query using IN
    */
   const id = hostIds.map((id) => `'${clean(id)}'`).join()
-  const [status, result] = await db.read(
+  const [status, result] = await utils.db.read(
     `SELECT name, fqdn, id FROM inventory_hosts WHERE id IN (${id})`
   )
 
@@ -1745,7 +1743,7 @@ export async function enrollHost(uuid, data, replace = false) {
 
   let result
   try {
-    result = await db.writeMany(queries)
+    result = await utils.db.writeMany(queries)
   } catch (err) {
     log.debug(err, `Failed to bulk-write updates for host enrollment`)
   }
@@ -1771,7 +1769,7 @@ export async function removeHost(uuid) {
   ].map((table) => [`DELETE from ${table} WHERE host=:host`, params])
   queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
 
-  await db.writeMany(queries)
+  await utils.db.writeMany(queries)
 }
 
 /**
@@ -1782,7 +1780,7 @@ export async function removeHost(uuid) {
  */
 export async function verifyModulesExist(modules) {
   const missing = []
-  const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
   const allModules =
     result[0] === 200 && result[1].results?.[0]?.values
       ? result[1].results[0].values.map((row) => row[0])
@@ -1806,7 +1804,7 @@ export async function setClientModules(uuid, modules) {
   for (const module of modules)
     queries.push([`INSERT INTO inventory_host_mod VALUES(:uuid, :module)`, { uuid, module }])
 
-  const result = await db.writeMany(queries)
+  const result = await utils.db.writeMany(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
     for (const i in modules) {
@@ -1829,7 +1827,7 @@ export async function setClientModules(uuid, modules) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function getClientModules(uuid) {
-  const result = await db.read(`SELECT mod from inventory_host_mod WHERE host=:host`, {
+  const result = await utils.db.read(`SELECT mod from inventory_host_mod WHERE host=:host`, {
     host: uuid,
   })
   const modules = []
@@ -1847,7 +1845,7 @@ export async function getClientModules(uuid) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function getAllClientModules() {
-  const result = await db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
   const modules = []
   if (result[0] === 200 && result[1].results) {
     for (const read of result[1].results[0].values) modules.push(read[0])
@@ -1864,7 +1862,7 @@ export async function getAllClientModules() {
  * @return {bool} result - True if it worked, false if not
  */
 export async function enableClientModule(uuid, module) {
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO inventory_host_mod (host, mod) VALUES(:uuid, :module) ON CONFLICT DO NOTHING`,
     { uuid, module }
   )
@@ -1880,7 +1878,7 @@ export async function enableClientModule(uuid, module) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function disableClientModule(uuid, module) {
-  const result = await db.write(`DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`, {
+  const result = await utils.db.write(`DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`, {
     uuid,
     module,
   })
@@ -1895,7 +1893,7 @@ export async function disableClientModule(uuid, module) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function getClientModuleFiles(modules) {
-  const result = await db.read(
+  const result = await utils.db.read(
     `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})`
   )
   const files = []
@@ -1918,7 +1916,7 @@ export async function getClientModuleFiles(modules) {
  * @return {array} result - An array holding the vars
  */
 export async function getClientVars(uuid, noInfo = false, decrypt = false) {
-  const result = await db.read(
+  const result = await utils.db.read(
     `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
     { host: uuid }
   )
@@ -1952,7 +1950,7 @@ export async function getModuleVars(modules = [], noInfo = false) {
   const where =
     modules.length > 0 ? `WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})` : `WHERE 1`
   const q = `SELECT id AS key, val ${noInfo ? '' : ', info'} from inventory_modvars ${where}`
-  const result = await db.read(q)
+  const result = await utils.db.read(q)
   const vars = []
   if (result[0] === 200 && result[1]?.results?.[0]?.values) {
     for (const read of result[1].results[0].values) {
@@ -1976,7 +1974,7 @@ export async function getModuleVars(modules = [], noInfo = false) {
  * @return {object} result - The found result
  */
 export async function getHostVar(host, key) {
-  const result = await db.read(`SELECT * from inventory_hostvars WHERE host=:host AND key=:key`, {
+  const result = await utils.db.read(`SELECT * from inventory_hostvars WHERE host=:host AND key=:key`, {
     host,
     key,
   })
@@ -2023,7 +2021,7 @@ export async function setClientVariables(uuid, vars = {}) {
     }
   }
 
-  const result = await db.writeMany(queries)
+  const result = await utils.db.writeMany(queries)
   const failed = []
   if (result[0] === 200 && result[1].results) {
     const varNames = toStore.map((kv) => kv[0])
@@ -2072,7 +2070,7 @@ export function undoVarSecrecy(key, val) {
  * @return {number} id - The client command ID
  */
 export async function getClientCommandId(clients = false) {
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO client_commands (created_at, clients) VALUES (:createdAt, :clients)`,
     { createdAt: new Date(), clients: Array.isArray(clients) ? JSON.stringify(clients) : null }
   )
@@ -2086,14 +2084,14 @@ export async function getClientCommandId(clients = false) {
 }
 
 async function cleanupClientCommands() {
-  await db.writeMany([
+  await utils.db.writeMany([
     [`DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`],
     [`DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`],
   ])
 }
 
 export async function addClientCommandStatusUpdate({ uuid, id, status }) {
-  const result = await db.write(
+  const result = await utils.db.write(
     `INSERT INTO client_command_status (host, cid, status, created_at) VALUES(:uuid, :id, :status, :createdAt)`,
     { uuid, id, status, createdAt: new Date() }
   )
@@ -2104,7 +2102,7 @@ export async function addClientCommandStatusUpdate({ uuid, id, status }) {
 }
 
 export async function getClientCommand(id) {
-  const result = await db.read(`SELECT * FROM client_commands WHERE id=:id`, { id })
+  const result = await utils.db.read(`SELECT * FROM client_commands WHERE id=:id`, { id })
 
   if (result[0] === 200 && result[1]?.results?.[0]?.values) {
     const fields = result[1].results[0].columns
@@ -2119,7 +2117,7 @@ export async function getClientCommand(id) {
 }
 
 export async function getClientCommandStatusUpdates(cid) {
-  const result = await db.read(`SELECT * FROM client_command_status WHERE cid=:cid`, { cid })
+  const result = await utils.db.read(`SELECT * FROM client_command_status WHERE cid=:cid`, { cid })
   const updates = []
   if (result[0] === 200 && result[1]?.results?.[0]?.values) {
     const fields = result[1].results[0].columns

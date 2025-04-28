@@ -1,5 +1,5 @@
-// Load the database client
-import { db } from '../db.mjs'
+// Utils
+import { utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
@@ -39,7 +39,7 @@ Ip.prototype.create = async function ({ ip, version }) {
    */
   let result = false
   try {
-    result = await db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
+    result = await utils.db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
       ip,
       version,
     })
@@ -115,7 +115,7 @@ Ip.prototype.save = async function () {
   let result = false
   try {
     const data = { ip: this.getId(), ...this.getRecord() }
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_ips(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
@@ -149,7 +149,7 @@ Ip.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_ips WHERE ip = :ip`, { ip: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_ips WHERE ip = :ip`, { ip: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -173,7 +173,7 @@ Ip.prototype.read = async function (ip = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_ips WHERE ip = :ip`, {
+    result = await utils.db.read(`SELECT * FROM inventory_ips WHERE ip = :ip`, {
       ip: ip || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -195,7 +195,7 @@ Ip.prototype.read = async function (ip = false) {
 Ip.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_ips ORDER BY ip`)
+    result = await utils.db.read(`SELECT * FROM inventory_ips ORDER BY ip`)
   } catch (err) {
     return this.setError(err)
   }

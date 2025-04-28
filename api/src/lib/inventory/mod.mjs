@@ -1,5 +1,5 @@
-// Load the database client
-import { db } from '../db.mjs'
+// Utils
+import { utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
@@ -39,7 +39,7 @@ Mod.prototype.create = async function ({ mod, data }) {
    */
   let result = false
   try {
-    result = await db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
+    result = await utils.db.write(`INSERT INTO inventory_mods(mod, data) VALUES(:mod, :data)`, {
       mod,
       data,
     })
@@ -115,7 +115,7 @@ Mod.prototype.save = async function () {
   let result = false
   try {
     const data = { mod: this.getId(), ...this.getRecord() }
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_mods(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
@@ -149,7 +149,7 @@ Mod.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, { mod: this.getMod() })
+    result = await utils.db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, { mod: this.getMod() })
   } catch (err) {
     return this.setError(err)
   }
@@ -173,7 +173,7 @@ Mod.prototype.read = async function (mod = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_mods WHERE mod = :mod`, {
+    result = await utils.db.read(`SELECT * FROM inventory_mods WHERE mod = :mod`, {
       mod: mod || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -195,7 +195,7 @@ Mod.prototype.read = async function (mod = false) {
 Mod.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_mods ORDER BY mod`)
+    result = await utils.db.read(`SELECT * FROM inventory_mods ORDER BY mod`)
   } catch (err) {
     return this.setError(err)
   }

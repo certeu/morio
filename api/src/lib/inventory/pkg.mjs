@@ -1,5 +1,5 @@
-// Load the database client
-import { db } from '../db.mjs'
+// Utils
+import { utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultAsRecord } from './shared.mjs'
 
@@ -40,7 +40,7 @@ Pkg.prototype.create = async function ({ id, name, version }) {
    */
   let result = false
   try {
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_pkgs(id, name, version) VALUES(:id, :name, :version)`,
       { id, name, version }
     )
@@ -117,7 +117,7 @@ Pkg.prototype.save = async function () {
   let result = false
   try {
     const data = { id: this.getId(), ...this.getRecord() }
-    result = await db.write(
+    result = await utils.db.write(
       `INSERT INTO inventory_pkgs(${Object.keys(data).join(', ')}) ` +
         `VALUES(${Object.keys(data)
           .map((field) => ':' + field)
@@ -151,7 +151,7 @@ Pkg.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_pkgs WHERE id = :id`, { id: this.getId() })
   } catch (err) {
     return this.setError(err)
   }
@@ -175,7 +175,7 @@ Pkg.prototype.read = async function (id = false) {
    */
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
+    result = await utils.db.read(`SELECT * FROM inventory_pkgs WHERE id = :id`, {
       id: id || this.getId(),
     })
     const data = resultAsRecord(result[1])
@@ -198,7 +198,7 @@ Pkg.prototype.read = async function (id = false) {
 Pkg.prototype.list = async function () {
   let result = false
   try {
-    result = await db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
+    result = await utils.db.read(`SELECT * FROM inventory_pkgs ORDER BY name`)
   } catch (err) {
     return this.setError(err)
   }

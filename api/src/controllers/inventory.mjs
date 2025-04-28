@@ -11,14 +11,22 @@ import {
   deleteHost,
   getAnsibleInventory,
   getStats,
-  isIpAvailable,
-  isMacAvailable,
-  isOsAvailable,
-  isPkgAvailable,
-  isModAvailable,
-  isModvarAvailable,
-  isHostvarAvailable,
-  isModfileAvailable,
+  // FIXME: This is missing
+  //isIpAvailable,
+  // FIXME: This is missing
+  //isMacAvailable,
+  // FIXME: This is missing
+  //isOsAvailable,
+  // FIXME: This is missing
+  //isPkgAvailable,
+  // FIXME: This is missing
+  //isModAvailable,
+  // FIXME: This is missing
+  //isModvarAvailable,
+  // FIXME: This is missing
+  //isHostvarAvailable,
+  // FIXME: This is missing
+  //isModfileAvailable,
   isGroupAvailable,
   listGroups,
   listGroupvars,
@@ -232,10 +240,12 @@ Controller.prototype.isGroupAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isIpAvailable = async function (req, res) {
-  if (!req.params.ip) return res.status(400).send()
-  const available = await isIpAvailable(req.params.ip)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.ip) return res.status(400).send()
+  //const available = await isIpAvailable(req.params.ip)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -245,10 +255,12 @@ Controller.prototype.isIpAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isMacAvailable = async function (req, res) {
-  if (!req.params.mac) return res.status(400).send()
-  const available = await isMacAvailable(req.params.mac)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.mac) return res.status(400).send()
+  //const available = await isMacAvailable(req.params.mac)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -258,10 +270,12 @@ Controller.prototype.isMacAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isOsAvailable = async function (req, res) {
-  if (!req.params.id) return res.status(400).send()
-  const available = await isOsAvailable(req.params.id)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.id) return res.status(400).send()
+  //const available = await isOsAvailable(req.params.id)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -271,10 +285,12 @@ Controller.prototype.isOsAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isPkgAvailable = async function (req, res) {
-  if (!req.params.id) return res.status(400).send()
-  const available = await isPkgAvailable(req.params.id)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.id) return res.status(400).send()
+  //const available = await isPkgAvailable(req.params.id)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -284,10 +300,12 @@ Controller.prototype.isPkgAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModAvailable = async function (req, res) {
-  if (!req.params.mod) return res.status(400).send()
-  const available = await isModAvailable(req.params.mod)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.mod) return res.status(400).send()
+  //const available = await isModAvailable(req.params.mod)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -297,10 +315,12 @@ Controller.prototype.isModAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModvarAvailable = async function (req, res) {
-  if (!req.params.val) return res.status(400).send()
-  const available = await isModvarAvailable(req.params.val)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.val) return res.status(400).send()
+  //const available = await isModvarAvailable(req.params.val)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -310,10 +330,12 @@ Controller.prototype.isModvarAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isHostvarAvailable = async function (req, res) {
-  if (!req.params.key) return res.status(400).send()
-  const available = await isHostvarAvailable(req.params.key)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.key) return res.status(400).send()
+  //const available = await isHostvarAvailable(req.params.key)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -323,10 +345,12 @@ Controller.prototype.isHostvarAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModfileAvailable = async function (req, res) {
-  if (!req.params.file) return res.status(400).send()
-  const available = await isModfileAvailable(req.params.file)
+  // FIXME: This is not implemented
+  return res.status(400)
+  //if (!req.params.file) return res.status(400).send()
+  //const available = await isModfileAvailable(req.params.file)
 
-  return available ? res.status(404).send() : res.status(409).send()
+  //return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
