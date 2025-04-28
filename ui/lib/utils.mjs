@@ -14,6 +14,14 @@ export const arrayToObject = (arr) => {
   return obj
 }
 
+export const arrayMembers = (set, op='add', data) => {
+  const s = new Set(set)
+  if (op === 'add') s.add(data)
+  else s.delete(data)
+
+  return [...s]
+}
+
 export const asJson = (data, pretty = true) => {
   const json = {}
   for (const [key, val] of Object.entries(data)) {

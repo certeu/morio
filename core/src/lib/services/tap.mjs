@@ -18,13 +18,35 @@ export const service = {
      * @return {boolean} wanted - Wanted or not
      */
     wanted: () => {
-      /*
-       * Only run the tap service if any stream processors are loaded & enabled
-       * FIXME: Handle dynamic loading of processors
-       */
+      if (utils.isEphemeral()) return false
       if (isTapWanted()) {
-        ensureLocalPrerequisites()
-        return true
+        /*
+         * We need a tap service, but where do we run it?
+         * Do we have a specific tap node in the settings?
+         */
+        const tNodes = utils.getSettings('flanking_services.connector.tap', [])
+        if (tNodes.includes(utils.getNodeFqdn())) {
+          ensureLocalPrerequisites()
+          return true
+        }
+        /*
+         * If there are explicit nodes, we are not part of them.
+         * So do not run this service.
+         */
+        if (tNodes.length > 0) return false
+        /*
+         * No explicit tap node configured.
+         * We will run it on all flanking nodes, or all broker nodes.
+         */
+        if (utils.getFlankingCount() > 0) {
+          if (utils.isFlankingNode()) {
+            ensureLocalPrerequisites()
+            return true
+          }
+        } else {
+          ensureLocalPrerequisites()
+          return true
+        }
       }
 
       return false

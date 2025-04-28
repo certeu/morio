@@ -105,5 +105,19 @@ export const resolveServiceConfiguration = ({ utils }) => {
      * Traefik (proxy) configuration for the API service
      */
     traefik,
+    /*
+     * PM2 (node process manager) configuration
+     */
+    pm2: {
+      apps: [
+        {
+          name: "api",
+          script: PROD ? "./dist/index.mjs" : "./src/index.mjs",
+          cwd: "/morio/api",
+          max_memory_restart: "250M",
+          watch: PROD ? false : ['./src'],
+        }
+      ]
+    }
   }
 }

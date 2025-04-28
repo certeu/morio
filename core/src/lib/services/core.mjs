@@ -7,7 +7,7 @@ import { encryptionMethods, hash } from '#shared/crypto'
 // Used for templating the settings
 import mustache from 'mustache'
 // Default hooks & netork handler
-import { alwaysTrue, ensureMorioService } from './index.mjs'
+import { ensureMorioService } from './index.mjs'
 // Cluster code
 import { ensureMorioCluster } from '#lib/cluster'
 // log & utils
@@ -50,9 +50,9 @@ export const service = {
     },
     /*
      * Lifecycle hook to determine whether the container is wanted
-     * We reuse the alwaysTrue method here, since core should always be running
+     * The core service is _always_ wanted.
      */
-    wanted: alwaysTrue,
+    wanted: () => true,
     /*
      * This runs only when core is cold-started.
      *

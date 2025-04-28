@@ -1,11 +1,7 @@
 import { writeYamlFile, chown, mkdir, cp } from '#shared/fs'
 import { ensureServiceCertificate } from '#lib/tls'
 // Default hooks
-import {
-  defaultRecreateServiceHook,
-  defaultRestartServiceHook,
-  defaultServiceWantedHook,
-} from './index.mjs'
+import { defaultRecreateServiceHook, defaultRestartServiceHook } from './index.mjs'
 // log & utils
 import { log, utils } from '../utils.mjs'
 
@@ -17,14 +13,24 @@ export const service = {
   hooks: {
     /**
      * Lifecycle hook to determine whether the container is wanted
-     *
-     * For the watcher, the answer is only true when there are monitors configured
-     * However, Morio configures its own internal monitors, so there are _always_
-     * monitors, so we just defer to the default hook
-     *
-     * @return {boolean} wanted - Wanted or not
      */
-    wanted: defaultServiceWantedHook,
+    wanted: async () => {
+      const wNodes = utils.getSettings('flanking_services.watcher.nodes', [])
+      if (wNodes.includes(utils.getNodeFqdn())) return true
+      /*
+       * If there are explicit nodes, we are not part of them.
+       * So do not run this service.
+       */
+      if (wNodes.length > 0) return false
+      /*
+       * No explicit watcher node configured.
+       * We will run it on the node with the lowest serial.
+       * First we check flanking nodes, finally we try broker nodes.
+       */
+      if (utils.getFlankingCount() > 0)
+        return utils.getNodeSerial() === utils.getLowestFlankingNodeSerial() ? true : false
+      else return utils.getNodeSerial() === utils.getLowestBrokerNodeSerial() ? true : false
+    },
     /*
      * Lifecycle hook to determine whether to recreate the container
      * We just reuse the default hook here, checking for changes in

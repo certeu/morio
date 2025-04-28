@@ -191,15 +191,20 @@ Controller.prototype.join = async function (req, res) {
   if (!result) return utils.sendErrorResponse(res, 'morio.core.fs.write.failed', req.url)
   log.debug(`Writing node data to node.json`)
   const nodeUuid = uuid()
-  await writeJsonFile(`/etc/morio/node.json`, {
-    fqdn: valid.you,
-    hostname: valid.you.split('.')[0],
-    serial:
-      valid.settings.data.cluster.broker_nodes
-        .concat(valid.settings.data.cluster.flanking_nodes || [])
-        .indexOf(valid.you) + 1,
-    uuid: nodeUuid,
-  })
+  let nodeSerial = false
+  if (valid.settings.data.cluster.broker_nodes.includes(valid.you)) {
+    nodeSerial = valid.settings.data.cluster.broker_nodes.indexOf(valid.you) + 1
+  } else if ((valid.settings.data.cluster.flanking_nodes || []).includes(valid.you)) {
+    nodeSerial = valid.settings.data.cluster.flanking_nodes.indexOf(valid.you) + 101
+  }
+  if (!nodeSerial) log.warn(`Unable to determine node serial. This will not end well.`)
+  else
+    await writeJsonFile(`/etc/morio/node.json`, {
+      fqdn: valid.you,
+      hostname: valid.you.split('.')[0],
+      serial: nodeSerial,
+      uuid: nodeUuid,
+    })
 
   /*
    * We need to generate the CA config before we trigger a reload event

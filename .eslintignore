@@ -8,3 +8,4 @@ Containerfile
 json-loader.mjs
 control
 postinst
+pm2.*.config.js

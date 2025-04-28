@@ -7,7 +7,7 @@
     "build": "node build.mjs",
     "vbuild": "MORIO_ESBUILD_VERBOSE=1 node build.mjs",
     "clean": "rimraf dist",
-    "dev": "NODE_ENV=development nodemon src/index.mjs --no-warnings",
+    "dev": "NODE_ENV=development pm2-runtime start /etc/morio/api/pm2.config.js",
     "lint": "eslint --fix 'src/**' 'openapi/**' 'config/**' 'shared/**' 'tests/**' 'openapi/**'",
     "prettier": "npx prettier --ignore-unknown --write .",
     "test": "../scripts/testcheck.sh && docker exec -it -e \"MORIO_FQDN=${MORIO_FQDN}\" morio-api node --no-warnings --test-concurrency=1 --test",

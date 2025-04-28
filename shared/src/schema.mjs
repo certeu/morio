@@ -231,6 +231,12 @@ const settings = Joi.object({
     comment: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
     version: Joi.alternatives().try(Joi.string(), Joi.number()),
   }),
+  flanking_services: Joi.object({
+    cache: Joi.object({ nodes: flankingNodes }).optional(),
+    connector: Joi.object({ nodes: flankingNodes }).optional(),
+    tap: Joi.object({ nodes: flankingNodes }).optional(),
+    watcher: Joi.object({ nodes: flankingNodes }).optional(),
+  }),
   connector: Joi.object(),
   tokens: Joi.object({
     flags: Joi.object({

@@ -152,3 +152,18 @@ export function getContainerTagSuffix({ getPreset }) {
 
   return CHANNEL === 'stable' ? '' : `-${CHANNEL}`
 }
+
+export const hookMsg = {
+  ok: {
+    wanted: 'Service is wanted',
+    recreate: 'Service needs to be recreated',
+    restart: 'Service needs to be restarted',
+    reload: 'Service needs to be reloaded',
+  },
+  ko: {
+    wanted: 'Service is not wanted',
+    recreate: 'Service does not need to be recreated',
+    restart: 'Service does not need to be restarted',
+    reload: 'Service does not need to be reloaded',
+  }
+}
