@@ -61,10 +61,9 @@ export async function listGroups() {
  * @return {object} available - true if it is available, false if not
  */
 export async function isGroupAvailable(id) {
-  const [status, result] = await utils.db.read(
-    `SELECT id FROM inventory_groups where id=:id`,
-    { id }
-  )
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_groups where id=:id`, {
+    id,
+  })
   if (status === 200) {
     const hits = resultsAsList(result)
     return hits.length === 0
@@ -82,7 +81,7 @@ export async function isGroupAvailable(id) {
  * @param {string} info - Optional info to describe the groupvar
  * @return {object} created - true if it is created, false if not
  */
-export async function createGroupvar(key, val='', group_id, info='') {
+export async function createGroupvar(key, val = '', group_id, info = '') {
   if (!key || !group_id) return false
   /*
    * Insert into the database
@@ -96,9 +95,7 @@ export async function createGroupvar(key, val='', group_id, info='') {
   if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
     created = true
 
-  return created
-    ? result[1]?.results?.[0]?.last_insert_id
-    : false
+  return created ? result[1]?.results?.[0]?.last_insert_id : false
 }
 
 /**
@@ -130,10 +127,10 @@ export async function createGroup(id, description = '') {
 export async function updateGroup(id, description = '') {
   if (!id) return false
   // Run query
-  await utils.db.write(
-    `UPDATE inventory_groups SET description=:description WHERE id=:id`,
-    { id, description }
-  )
+  await utils.db.write(`UPDATE inventory_groups SET description=:description WHERE id=:id`, {
+    id,
+    description,
+  })
 
   // Return new group result
   return await loadGroup(id)
@@ -162,13 +159,12 @@ export async function addGroupToGroup(id, group) {
   if (createsLoop) {
     log.warn(`Not adding group ${id} to ${group} because doing so would create a recursion loop`)
     return false
-  }
-  else {
+  } else {
     log.debug(`Adding group ${id} as member to group ${group}`)
     /*
      * Insert into the database
      */
-    const result = await utils.db.write(
+    await utils.db.write(
       `INSERT INTO inventory_group_group(group_id, member_id) VALUES(:group, :id)`,
       { id, group }
     )
@@ -182,7 +178,7 @@ export async function addHostToGroup(host, group) {
   /*
    * Insert into the database
    */
-  const result = await utils.db.write(
+  await utils.db.write(
     `INSERT INTO inventory_group_host(group_id, member_id) VALUES(:group, :host)`,
     { host, group }
   )
@@ -195,7 +191,7 @@ export async function removeHostFromGroup(host, group) {
   /*
    * Remove from the database
    */
-  const result = await utils.db.write(
+  await utils.db.write(
     `DELETE FROM inventory_group_host WHERE member_id=:host AND group_id=:group`,
     { host, group }
   )
@@ -217,20 +213,19 @@ export async function removeGroupFromGroup(member, group) {
   return
 }
 
-export async function addMembersToGroup(group, { hosts=[], groups=[] }) {
+export async function addMembersToGroup(group, { hosts = [], groups = [] }) {
   for (const member of groups) await addGroupToGroup(member, group)
   for (const member of hosts) await addHostToGroup(member, group)
 
   return
 }
 
-export async function removeMembersFromGroup(group, { hosts=[], groups=[] }) {
-  log.todo({hosts, groups})
+export async function removeMembersFromGroup(group, { hosts = [], groups = [] }) {
+  log.todo({ hosts, groups })
   for (const member of groups) await removeGroupFromGroup(member, group)
   for (const member of hosts) await removeHostFromGroup(member, group)
 
   return
-
 }
 
 /*
@@ -309,9 +304,7 @@ ORDER BY path;
   `)
 
   // Return results if it works, false if not
-  return (status === 200)
-    ? buildGroupsTree(resultsAsList(result))
-    : false
+  return status === 200 ? buildGroupsTree(resultsAsList(result)) : false
 }
 
 function buildGroupsTree(items) {
@@ -319,11 +312,11 @@ function buildGroupsTree(items) {
   const itemMap = {}
 
   // Create all nodes first
-  items.forEach(item => {
+  items.forEach((item) => {
     itemMap[item.id] = {
       id: item.id,
       type: item.type,
-      children: item.type === 'group' ? {} : undefined
+      children: item.type === 'group' ? {} : undefined,
     }
   })
 
@@ -332,11 +325,11 @@ function buildGroupsTree(items) {
     id: 'morio',
     name: 'Inventory',
     type: 'root',
-    children: {}
+    children: {},
   }
 
   // Now bbuild the tree structure
-  items.forEach(item => {
+  items.forEach((item) => {
     const node = itemMap[item.id]
     if (item.parent_id === null) {
       // Top-level item with no parent
@@ -348,7 +341,7 @@ function buildGroupsTree(items) {
       else {
         log.debug(`Parent node ${item.parent_id} not found for ${item.id}`)
         // Fallback: add to root, mark as orphan
-        root.children[node.id] = {...node, orphan: true }
+        root.children[node.id] = { ...node, orphan: true }
       }
     }
   })
@@ -418,7 +411,7 @@ export async function loadGroupHostMembers(id) {
   if (status !== 200) return false
   const found = resultsAsList(result)
 
-  return (found || []).map(entry => entry.id)
+  return (found || []).map((entry) => entry.id)
 }
 
 /**
@@ -439,7 +432,7 @@ export async function loadGroupGroupMembers(id) {
   if (status !== 200) return false
   const found = resultsAsList(result)
 
-  return (found || []).map(entry => entry.id)
+  return (found || []).map((entry) => entry.id)
 }
 
 /**
@@ -460,7 +453,7 @@ export async function loadGroupMemberOf(id) {
   if (status !== 200) return false
   const found = resultsAsList(result)
 
-  return (found || []).map(entry => entry.id)
+  return (found || []).map((entry) => entry.id)
 }
 
 /**
@@ -470,11 +463,11 @@ export async function loadGroupMemberOf(id) {
  * @return {object} list - The list of (host) members
  */
 export async function loadGroupMembers(id) {
-    /*
-     * This query finds all hosts in a group (including hosts in subgroups)
-     * while also keeping track of the depth of the nesting so we can warn
-     * people when their nesting gets too deep.
-     */
+  /*
+   * This query finds all hosts in a group (including hosts in subgroups)
+   * while also keeping track of the depth of the nesting so we can warn
+   * people when their nesting gets too deep.
+   */
   const q = `
     WITH RECURSIVE all_group_members(id, member_type, depth) AS (
       -- Direct host members
@@ -521,7 +514,7 @@ export async function loadGroupMembers(id) {
   if (status !== 200) return false
   const found = resultsAsList(result)
 
-  return (found || []).map(entry => entry)
+  return (found || []).map((entry) => entry)
 }
 
 /**
@@ -550,7 +543,6 @@ export async function deleteGroupvar(id = false) {
 
   return result
 }
-
 
 /**
  * Helper method to list hosts in the inventory
@@ -964,9 +956,9 @@ export async function loadHostOs(id) {
  *
  * @return {object} keys - The hosts in the inventory
  */
-export async function getAnsibleInventory(withSecrets=false) {
+export async function getAnsibleInventory(withSecrets = false) {
   // This will hold the entire inventory
-  const inventory = { }
+  const inventory = {}
 
   // Load hosts
   const [hostStatus, hostResult] = await utils.db.read(`SELECT * FROM inventory_hosts`)
@@ -1015,12 +1007,13 @@ export async function getAnsibleInventory(withSecrets=false) {
 
   // Add host vars
   for (const hvar of hostvars) {
-    if (withSecrets || hvar.key.slice(-6) !== 'SECRET') inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
+    if (withSecrets || hvar.key.slice(-6) !== 'SECRET')
+      inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
   }
 
   // Structure as ansible inventory
   const ansinv = { all: { hosts: {} } }
-  for (const [uuid, host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
+  for (const [host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
 
   // Add groups based on morio modules
   for (const mod of hostmods) {
@@ -1041,11 +1034,8 @@ function unwrapVar(key, val) {
     // This is fine
   }
 
-  return (nval === false || typeof nval === 'string')
-    ? val
-    : nval
+  return nval === false || typeof nval === 'string' ? val : nval
 }
-
 
 /**
  * Helper method to get info about the inventory
@@ -1237,10 +1227,13 @@ export async function createIp(ip, version) {
   /*
    * Insert into the database
    */
-  const result = await utils.db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
-    ip,
-    version,
-  })
+  const result = await utils.db.write(
+    `INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`,
+    {
+      ip,
+      version,
+    }
+  )
   let created = false
   if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
     created = true
@@ -1878,10 +1871,13 @@ export async function enableClientModule(uuid, module) {
  * @return {array} result - An [bool result, array failed] array
  */
 export async function disableClientModule(uuid, module) {
-  const result = await utils.db.write(`DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`, {
-    uuid,
-    module,
-  })
+  const result = await utils.db.write(
+    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
+    {
+      uuid,
+      module,
+    }
+  )
 
   return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
 }
@@ -1974,10 +1970,13 @@ export async function getModuleVars(modules = [], noInfo = false) {
  * @return {object} result - The found result
  */
 export async function getHostVar(host, key) {
-  const result = await utils.db.read(`SELECT * from inventory_hostvars WHERE host=:host AND key=:key`, {
-    host,
-    key,
-  })
+  const result = await utils.db.read(
+    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
+    {
+      host,
+      key,
+    }
+  )
 
   if (result[0] === 200 && result[1].results[0].values) {
     const found = {}

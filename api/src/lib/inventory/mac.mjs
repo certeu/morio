@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Mac instance
