@@ -205,6 +205,22 @@ Ip.prototype.list = async function () {
     : this.setError('Failed to fetch IP list')
 }
 
+/**
+ * Helper method to see if a IP is available
+ *
+ * @param {string} ip - The ip IP
+ * @return {object} available - true if it is available, false if not
+ */
+Ip.prototype.isAvailable = async function (ip) {
+  const [status, result] = await utils.db.read(`SELECT ip FROM inventory_ips where ip=:ip`, { ip })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
 /*
  * Internal methods
  */

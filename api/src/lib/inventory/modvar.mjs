@@ -160,7 +160,9 @@ Modvar.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await utils.db.write(`DELETE FROM inventory_modvars WHERE id = :id`, { id: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_modvars WHERE id = :id`, {
+      id: this.getId(),
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -216,6 +218,24 @@ Modvar.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch OS list')
+}
+
+/**
+ * Helper method to see if a Modvar is available
+ *
+ * @param {string} val - The Modvar val
+ * @return {object} available - true if it is available, false if not
+ */
+Modvar.prototype.isAvailable = async function (val) {
+  const [status, result] = await utils.db.read(`SELECT val FROM inventory_modvars where val=:val`, {
+    val,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*

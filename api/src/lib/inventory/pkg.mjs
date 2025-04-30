@@ -208,6 +208,24 @@ Pkg.prototype.list = async function () {
     : this.setError('Failed to fetch OS list')
 }
 
+/**
+ * Helper method to see if a Pkg is available
+ *
+ * @param {string} name - The pkg name
+ * @return {object} available - true if it is available, false if not
+ */
+Pkg.prototype.isAvailable = async function (name) {
+  const [status, result] = await utils.db.read(`SELECT name FROM inventory_pkgs where name=:name`, {
+    name,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
+}
+
 /*
  * Internal methods
  */

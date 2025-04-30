@@ -149,7 +149,9 @@ Mod.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await utils.db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, { mod: this.getMod() })
+    result = await utils.db.write(`DELETE FROM inventory_mods WHERE mod = :mod`, {
+      mod: this.getMod(),
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -203,6 +205,24 @@ Mod.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch Mod list')
+}
+
+/**
+ * Helper method to see if a Mod is available
+ *
+ * @param {string} mod - The mod MOD
+ * @return {object} available - true if it is available, false if not
+ */
+Mod.prototype.isAvailable = async function (mod) {
+  const [status, result] = await utils.db.read(`SELECT mod FROM inventory_mods where mod=:mod`, {
+    mod,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*

@@ -169,7 +169,9 @@ Hostvar.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await utils.db.write(`DELETE FROM inventory_hostvars WHERE id = :id`, { id: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_hostvars WHERE id = :id`, {
+      id: this.getId(),
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -226,6 +228,27 @@ Hostvar.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch OS list')
+}
+
+/**
+ * Helper method to see if a Hostvar is available
+ *
+ * @param {string} key - The key Hostvar
+ * @return {object} available - true if it is available, false if not
+ */
+Hostvar.prototype.isAvailable = async function (key) {
+  const [status, result] = await utils.db.read(
+    `SELECT key FROM inventory_hostvars where key=:key`,
+    {
+      key,
+    }
+  )
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*
