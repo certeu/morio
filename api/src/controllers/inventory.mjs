@@ -1,6 +1,5 @@
 import { utils } from '../lib/utils.mjs'
 import yaml from 'js-yaml'
-import { updateGroup } from '../lib/inventory.mjs'
 import {
   Pkg,
   Os,

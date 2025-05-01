@@ -1,7 +1,7 @@
 // Utils
 import { log, utils } from './utils.mjs'
 // Load shared inventory code
-import { resultsAsList, unwrapVar, deleteRecord } from './shared.mjs'
+import { addNonEnumProp, resultsAsList, unwrapVar, deleteRecord } from './shared.mjs'
 import { clean, asTime, fromJson } from '../account.mjs'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
@@ -412,7 +412,7 @@ Host.prototype.getInvite = async function (id) {
     return false
   }
   const result = await utils.db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
-  const data = result[0] === 200 && result[1].results ? getFields(result[1]).pop() : false
+  const data = result[0] === 200 && result[1].results ? this.getFields(result[1]).pop() : false
 
   return data
 }
@@ -1035,7 +1035,7 @@ Host.prototype.getClientVars = async function (uuid, noInfo = false, decrypt = f
       const [key, val, info] = read
       vars.push({
         key,
-        val: decrypt ? undoVarSecrecy(key, val)[1] : val,
+        val: decrypt ? this.undoVarSecrecy(key, val)[1] : val,
         info,
       })
     }

@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { resultsAsList, deleteRecord } from './shared.mjs'
+import { addNonEnumProp, resultsAsList, deleteRecord } from './shared.mjs'
 import { clean } from '../account.mjs'
 
 /**
@@ -86,7 +86,7 @@ Group.prototype.update = async function (id, description = '') {
   })
 
   // Return new group result
-  return await loadGroup(id)
+  return await this.read(id)
 }
 
 /**
@@ -164,6 +164,33 @@ Group.prototype.removeHostFromGroup = async function (host, group) {
   return
 }
 
+Group.prototype.removeHostFromGroup = async function (host, group) {
+  log.debug(`Removing host ${host} from group ${group}`)
+  /*
+   * Remove from the database
+   */
+  await utils.db.write(
+    `DELETE FROM inventory_group_host WHERE member_id=:host AND group_id=:group`,
+    { host, group }
+  )
+
+  return
+}
+
+Group.prototype.removeGroupFromGroup = async function (member, group) {
+  log.debug(`Removing group ${member} from group ${group}`)
+  /*
+   * Remove from the database
+   */
+  const result = await utils.db.write(
+    `DELETE FROM inventory_group_group WHERE member_id=:member AND group_id=:group`,
+    { member, group }
+  )
+  log.todo(result)
+
+  return
+}
+
 Group.prototype.addMembersToGroup = async function (group, { hosts = [], groups = [] }) {
   for (const member of groups) await this.addGroupToGroup(member, group)
   for (const member of hosts) await this.addHostToGroup(member, group)
@@ -172,8 +199,8 @@ Group.prototype.addMembersToGroup = async function (group, { hosts = [], groups 
 }
 
 Group.prototype.removeMembersFromGroup = async function (group, { hosts = [], groups = [] }) {
-  for (const member of groups) await removeGroupFromGroup(member, group)
-  for (const member of hosts) await removeHostFromGroup(member, group)
+  for (const member of groups) await this.removeGroupFromGroup(member, group)
+  for (const member of hosts) await this.removeHostFromGroup(member, group)
 
   return
 }
