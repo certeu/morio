@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList, addHostNamesToList } from './shared.mjs'
 
 /**
  * Constructor for a Ip instance
@@ -186,7 +186,7 @@ Ip.prototype.read = async function (ip = false) {
 
   return result && Array.isArray(result) && result[0] === 200
     ? this
-    : this.setError('Failed to create record')
+    : this.setError('Failed to read record')
 }
 
 /**
