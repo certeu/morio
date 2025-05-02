@@ -171,7 +171,7 @@ export const UpOrNot = ({ cacheKey, hideOnUp = false }) => {
     refetchIntervalInBackground: false,
   })
 
-  const check = Array.isArray(cache) && cache.length > 0 ? JSON.parse(cache.pop()) : false
+  const check = Array.isArray(cache) && cache.length > 0 ? JSON.parse(cache.shift()) : false
 
   if (isLoading)
     return (
@@ -256,7 +256,7 @@ export const Check = ({ id = false, cacheKey = false }) => {
       color: chartGradient('#1b88a2'),
     }
   }
-  const check = data.pop()
+  const check = data.shift()
 
   return (
     <div className="">
