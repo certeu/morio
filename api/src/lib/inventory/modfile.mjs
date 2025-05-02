@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Modfile instance
@@ -178,7 +178,9 @@ Modfile.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await utils.db.write(`DELETE FROM inventory_modfiles WHERE id = :id`, { id: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_modfiles WHERE id = :id`, {
+      id: this.getId(),
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -236,6 +238,25 @@ Modfile.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch OS list')
+}
+
+/**
+ * Helper method to see if a Modfile is available
+ *
+ * @param {string} file - The file Modfile
+ * @return {object} available - true if it is available, false if not
+ */
+Modfile.prototype.isAvailable = async function (file) {
+  const [status, result] = await utils.db.read(
+    `SELECT file FROM inventory_modfiles where file=:file`,
+    { file }
+  )
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*

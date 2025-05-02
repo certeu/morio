@@ -1,54 +1,18 @@
 import { utils } from '../lib/utils.mjs'
 import yaml from 'js-yaml'
 import {
-  createHost,
-  addGroupToGroups,
-  addMembersToGroup,
-  createGroup,
-  createGroupvar,
-  deleteGroup,
-  deleteGroupvar,
-  deleteHost,
-  getAnsibleInventory,
-  getStats,
-  // FIXME: This is missing
-  //isIpAvailable,
-  // FIXME: This is missing
-  //isMacAvailable,
-  // FIXME: This is missing
-  //isOsAvailable,
-  // FIXME: This is missing
-  //isPkgAvailable,
-  // FIXME: This is missing
-  //isModAvailable,
-  // FIXME: This is missing
-  //isModvarAvailable,
-  // FIXME: This is missing
-  //isHostvarAvailable,
-  // FIXME: This is missing
-  //isModfileAvailable,
-  isGroupAvailable,
-  listGroups,
-  listGroupvars,
-  listHosts,
-  loadGroup,
-  loadGroupHostMembers,
-  loadGroupGroupMembers,
-  loadGroupMembers,
-  loadGroupMemberOf,
-  loadGroupsHierarchy,
-  loadGroupvar,
-  loadHost,
-  loadHostIps,
-  loadHostMacs,
-  loadHostOs,
-  loadHostPkgs,
-  loadHostMods,
-  removeMembersFromGroup,
-  saveHost,
-  updateGroup,
-} from '../lib/inventory.mjs'
-import { Pkg, Os, Ip, Mac, Mod, Modvar, Hostvar, Modfile } from '../lib/inventory/index.mjs'
+  Pkg,
+  Os,
+  Ip,
+  Mac,
+  Mod,
+  Modvar,
+  Hostvar,
+  Modfile,
+  Host,
+  Group,
+  Groupvar,
+} from '../lib/inventory/index.mjs'
 
 /**
  * This inventory controller handles API access to the inventory.
@@ -76,7 +40,7 @@ Controller.prototype.writeHost = async function (req, res) {
   /*
    * Write to DB
    */
-  const result = await saveHost(req.params.id, valid)
+  const result = await new Host().save(req.params.id, valid)
 
   return result
     ? res.status(204).send()
@@ -102,7 +66,7 @@ Controller.prototype.readHost = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadHost(valid.id)
+  const result = await new Host().read(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -112,11 +76,11 @@ Controller.prototype.readHost = async function (req, res) {
   /*
    * Add related data
    */
-  const ips = await loadHostIps(valid.id)
-  const macs = await loadHostMacs(valid.id)
-  const os = await loadHostOs(valid.id)
-  const pkgs = await loadHostPkgs(valid.id)
-  const mods = await loadHostMods(valid.id)
+  const ips = await new Host().readIps(valid.id)
+  const macs = await new Host().readMacs(valid.id)
+  const os = await new Host().readOss(valid.id)
+  const pkgs = await new Host().readPkgs(valid.id)
+  const mods = await new Host().readMods(valid.id)
 
   return res.send({ ...result, ips, macs, os, pkgs, mods })
 }
@@ -140,7 +104,7 @@ Controller.prototype.readHostname = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadHost(valid.id)
+  const result = await new Host().read(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -172,7 +136,7 @@ Controller.prototype.deleteHost = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await deleteHost(valid.id)
+  const result = await new Host().delete(valid.id)
 
   /*
    * Be expicit when a key cannot be found
@@ -191,7 +155,7 @@ Controller.prototype.deleteHost = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.listGroupvars = async function (req, res) {
-  const list = await listGroupvars()
+  const list = await new Groupvar().list()
 
   if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 
@@ -205,7 +169,7 @@ Controller.prototype.listGroupvars = async function (req, res) {
  * @param {string} format - When this is 'object' we return an object, by default we return an array
  */
 Controller.prototype.listGroups = async function (req, res, format = 'array') {
-  const list = await listGroups()
+  const list = await new Group().list()
 
   if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 
@@ -228,7 +192,7 @@ Controller.prototype.listGroups = async function (req, res, format = 'array') {
  */
 Controller.prototype.isGroupAvailable = async function (req, res) {
   if (!req.params.group) return res.status(400).send()
-  const available = await isGroupAvailable(req.params.group)
+  const available = await new Group().isAvailable(req.params.group)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
@@ -240,12 +204,10 @@ Controller.prototype.isGroupAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isIpAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.ip) return res.status(400).send()
-  //const available = await isIpAvailable(req.params.ip)
+  if (!req.params.ip) return res.status(400).send()
+  const available = await new Ip().isAvailable(req.params.ip)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -255,42 +217,36 @@ Controller.prototype.isIpAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isMacAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.mac) return res.status(400).send()
-  //const available = await isMacAvailable(req.params.mac)
+  if (!req.params.mac) return res.status(400).send()
+  const available = await new Mac().isAvailable(req.params.mac)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
- * Is a os (os id) available?
+ * Is a os (os name) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isOsAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.id) return res.status(400).send()
-  //const available = await isOsAvailable(req.params.id)
+  if (!req.params.name) return res.status(400).send()
+  const available = await new Os().isAvailable(req.params.name)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
- * Is a pkg (pkg id) available?
+ * Is a pkg (pkg name) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isPkgAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.id) return res.status(400).send()
-  //const available = await isPkgAvailable(req.params.id)
+  if (!req.params.name) return res.status(400).send()
+  const available = await new Pkg().isAvailable(req.params.name)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -300,12 +256,10 @@ Controller.prototype.isPkgAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.mod) return res.status(400).send()
-  //const available = await isModAvailable(req.params.mod)
+  if (!req.params.mod) return res.status(400).send()
+  const available = await new Mod().isAvailable(req.params.mod)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -315,12 +269,10 @@ Controller.prototype.isModAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModvarAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.val) return res.status(400).send()
-  //const available = await isModvarAvailable(req.params.val)
+  if (!req.params.val) return res.status(400).send()
+  const available = await new Modvar().isAvailable(req.params.val)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -330,12 +282,10 @@ Controller.prototype.isModvarAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isHostvarAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.key) return res.status(400).send()
-  //const available = await isHostvarAvailable(req.params.key)
+  if (!req.params.key) return res.status(400).send()
+  const available = await new Hostvar().isAvailable(req.params.key)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -345,12 +295,10 @@ Controller.prototype.isHostvarAvailable = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModfileAvailable = async function (req, res) {
-  // FIXME: This is not implemented
-  return res.status(400)
-  //if (!req.params.file) return res.status(400).send()
-  //const available = await isModfileAvailable(req.params.file)
+  if (!req.params.file) return res.status(400).send()
+  const available = await new Modfile().isAvailable(req.params.file)
 
-  //return available ? res.status(404).send() : res.status(409).send()
+  return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
@@ -368,7 +316,7 @@ Controller.prototype.createGroupvar = async function (req, res) {
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,
     })
-  const id = await createGroupvar(valid.key, valid.val, valid.group, valid.info)
+  const id = await new Groupvar().create(valid.key, valid.val, valid.group, valid.info)
 
   return id
     ? res.status(201).send({ ...valid, id })
@@ -391,7 +339,7 @@ Controller.prototype.createGroup = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await createGroup(valid.id, valid.description)
+  const created = await new Group().create(valid.id, valid.description)
 
   return created
     ? res.status(201).send(valid)
@@ -417,7 +365,7 @@ Controller.prototype.readGroup = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadGroup(valid.id)
+  const result = await new Group().read(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -428,8 +376,8 @@ Controller.prototype.readGroup = async function (req, res) {
    * Add direct members
    */
   const members = {
-    hosts: await loadGroupHostMembers(valid.id),
-    groups: await loadGroupGroupMembers(valid.id),
+    hosts: await new Group().loadGroupHostMembers(valid.id),
+    groups: await new Group().loadGroupGroupMembers(valid.id),
   }
 
   return res.send({ ...result, members })
@@ -454,7 +402,7 @@ Controller.prototype.readGroupvar = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadGroupvar(valid.id)
+  const result = await new Groupvar().read(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -483,7 +431,7 @@ Controller.prototype.readGroupMembers = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadGroupMembers(valid.id)
+  const result = await new Group().loadGroupMembers(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -512,7 +460,7 @@ Controller.prototype.readGroupMemberOf = async function (req, res) {
   /*
    * Read from inventory
    */
-  const result = await loadGroupMemberOf(valid.id)
+  const result = await new Group().loadGroupMemberOf(valid.id)
 
   /*
    * Do not continue if it didn't work
@@ -541,7 +489,7 @@ Controller.prototype.deleteGroup = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await deleteGroup(valid.id)
+  const result = await new Group().delete(valid.id)
 
   return result === true
     ? res.status(204).send()
@@ -567,7 +515,7 @@ Controller.prototype.deleteGroupvar = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await deleteGroupvar(valid.id)
+  const result = await new Groupvar().delete(valid.id)
 
   return result === true
     ? res.status(204).send()
@@ -597,16 +545,16 @@ Controller.prototype.updateGroup = async function (req, res) {
    * Take appropriate action
    */
   if (valid.action === 'description') {
-    const group = updateGroup(valid.id, valid.description)
+    const group = new Group().update(valid.id, valid.description)
     return res.status(200).send(group)
   } else if (valid.action === 'join') {
-    await addGroupToGroups(valid.id, valid.groups)
+    await new Group().addGroupToGroups(valid.id, valid.groups)
     return res.status(201).send()
   } else if (valid.action === 'add-members') {
-    await addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    await new Group().addMembersToGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
     return res.status(201).send()
   } else if (valid.action === 'remove-members') {
-    await removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
+    await new Group().removeMembersFromGroup(valid.id, { groups: valid.groups, hosts: valid.hosts })
     return res.status(201).send()
   }
 
@@ -620,7 +568,7 @@ Controller.prototype.updateGroup = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.loadGroupsHierarchy = async function (req, res) {
-  const hierarchy = await loadGroupsHierarchy()
+  const hierarchy = await new Group().loadGroupsHierarchy()
 
   return hierarchy
     ? res.send(hierarchy)
@@ -635,7 +583,7 @@ Controller.prototype.loadGroupsHierarchy = async function (req, res) {
  * @param {string} format - When this is 'object' we return an object, by default we return an array
  */
 Controller.prototype.listHosts = async function (req, res, format = 'array') {
-  const list = await listHosts()
+  const list = await new Host().list()
 
   if (!Array.isArray(list)) return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 
@@ -657,7 +605,7 @@ Controller.prototype.listHosts = async function (req, res, format = 'array') {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getStats = async function (req, res) {
-  const stats = await getStats()
+  const stats = await new Host().getStats()
 
   return stats ? res.send(stats) : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
@@ -701,7 +649,7 @@ Controller.prototype.createHost = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await createHost(
+  const created = await new Host().create(
     valid.id,
     valid.arch,
     valid.cores,
@@ -731,7 +679,7 @@ Controller.prototype.ansibleInventory = async function (
   format = 'yaml',
   withSecrets = false
 ) {
-  const inventory = await getAnsibleInventory(withSecrets)
+  const inventory = await new Host().getAnsibleInventory(withSecrets)
 
   if (!inventory) return utils.sendErrorReponse(res, 'morio.api.db.failure', req.url)
 

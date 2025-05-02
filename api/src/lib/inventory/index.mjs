@@ -6,5 +6,8 @@ import { Mod } from './mod.mjs'
 import { Modvar } from './modvar.mjs'
 import { Hostvar } from './hostvar.mjs'
 import { Modfile } from './modfile.mjs'
+import { Host } from './host.mjs'
+import { Group } from './group.mjs'
+import { Groupvar } from './groupvar.mjs'
 
-export { Pkg, Os, Ip, Mac, Mod, Modvar, Hostvar, Modfile }
+export { Pkg, Os, Ip, Mac, Mod, Modvar, Hostvar, Modfile, Host, Group, Groupvar }

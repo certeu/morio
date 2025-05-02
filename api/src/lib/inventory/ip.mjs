@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Ip instance
@@ -186,7 +186,7 @@ Ip.prototype.read = async function (ip = false) {
 
   return result && Array.isArray(result) && result[0] === 200
     ? this
-    : this.setError('Failed to create record')
+    : this.setError('Failed to read record')
 }
 
 /**
@@ -203,6 +203,22 @@ Ip.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch IP list')
+}
+
+/**
+ * Helper method to see if a IP is available
+ *
+ * @param {string} ip - The ip IP
+ * @return {object} available - true if it is available, false if not
+ */
+Ip.prototype.isAvailable = async function (ip) {
+  const [status, result] = await utils.db.read(`SELECT ip FROM inventory_ips where ip=:ip`, { ip })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*

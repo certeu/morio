@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Mac instance
@@ -139,7 +139,9 @@ Mac.prototype.delete = async function () {
    */
   let result = false
   try {
-    result = await utils.db.write(`DELETE FROM inventory_macs WHERE mac = :mac`, { mac: this.getId() })
+    result = await utils.db.write(`DELETE FROM inventory_macs WHERE mac = :mac`, {
+      mac: this.getId(),
+    })
   } catch (err) {
     return this.setError(err)
   }
@@ -192,6 +194,24 @@ Mac.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch MAC list')
+}
+
+/**
+ * Helper method to see if a MAC is available
+ *
+ * @param {string} mac - The mac MAC
+ * @return {object} available - true if it is available, false if not
+ */
+Mac.prototype.isAvailable = async function (mac) {
+  const [status, result] = await utils.db.read(`SELECT mac FROM inventory_macs where mac=:mac`, {
+    mac,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*

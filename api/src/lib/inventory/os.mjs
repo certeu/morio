@@ -1,7 +1,7 @@
 // Utils
 import { utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord } from './shared.mjs'
+import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Os instance
@@ -206,6 +206,24 @@ Os.prototype.list = async function () {
   return result && Array.isArray(result) && result[0] === 200
     ? result[1].results
     : this.setError('Failed to fetch OS list')
+}
+
+/**
+ * Helper method to see if a OS is available
+ *
+ * @param {string} name - The os name
+ * @return {object} available - true if it is available, false if not
+ */
+Os.prototype.isAvailable = async function (name) {
+  const [status, result] = await utils.db.read(`SELECT name FROM inventory_oss where name=:name`, {
+    name,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /*
