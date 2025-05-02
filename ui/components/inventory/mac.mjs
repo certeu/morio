@@ -1,17 +1,21 @@
 // Dependencies
+import { slugify } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
+import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useContext, useEffect, useState } from 'react'
 import { useApi } from 'hooks/use-api.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 // Components
-import { RightIcon, TrashIcon, HardwareIcon } from 'components/icons.mjs'
+import { Markdown } from 'components/markdown.mjs'
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
+import { AddHardwareIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
-import { KeyVal } from 'components/keyval.mjs'
 
 /**
  * This component renders a table with all MAC addresses and allows removal
@@ -40,9 +44,9 @@ export const MacsTable = () => {
   // Helper to delete one or more entries
   const removeSelectedEntries = async () => {
     let i = 0
-    for (const id in selection) {
+    for (const mac in selection) {
       i++
-      await api.removeInventoryMac(id)
+      await api.removeInventoryMac(mac)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Removing MAC Addresses" key="linter" />,
@@ -55,11 +59,12 @@ export const MacsTable = () => {
 
   return (
     <>
-      {macs.length > 0 ? (
+      <div className="flex flex-row item-center gap-2">
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-          <TrashIcon /> {count} MAC Addresses
+          <TrashIcon /> Remove {count} Macs
         </button>
-      ) : null}
+        <NewMacButton {...{ refresh, setRefresh }} />
+      </div>
       <table>
         <thead>
           <tr>
@@ -121,6 +126,113 @@ async function runMacsTableApiCall(api) {
   else return false
 }
 
+export const NewMacButton = ({ refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-8 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <NewMac {...{ refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <AddHardwareIcon />
+      <span>New Mac</span>
+    </button>
+  )
+}
+
+export const NewMac = ({ refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [mac, setMac] = useState('')
+  const [isAvailable, setIsAvailable] = useState(false)
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    const checkMacAvailability = async () => {
+      const result = await api.isMacAvailable(mac)
+      if (result[1] === 404) setIsAvailable(true)
+      else setIsAvailable(false)
+    }
+    if (mac) checkMacAvailability()
+  }, [mac, api])
+
+  // Handler method to create a new mac
+  const createMac = async () => {
+    setLoadingStatus([true, 'Contacting API'])
+    const result = await api.createMac(mac)
+    if (result[1] === 201) {
+      clearModal()
+      setLoadingStatus([true, 'Mac created', true, true])
+      if (setRefresh) setRefresh(refresh + 1)
+    } else setLoadingStatus([true, 'Failed to create mac', true, false])
+  }
+
+  return (
+    <div>
+      <h3>Create a new mac</h3>
+      <p>Give your new mac a address. The mac address will become its unique ID.</p>
+      <StringInput
+        label="Mac address"
+        update={(val) => setMac(slugify(val))}
+        current={mac}
+        placeholder="9E:3B:72:A1:F6:4C"
+        valid={(val) =>
+          val && isAvailable
+            ? true
+            : val === ''
+              ? { error: { details: [{ message: 'Mac address cannot be empty' }] } }
+              : { error: { details: [{ message: 'This mac address is taken' }] } }
+        }
+      />
+
+      <div className="flex flex-row items-center gap-2 w-full mt-4">
+        <button
+          className="btn btn-primary grow"
+          disabled={!(mac && isAvailable)}
+          onClick={createMac}
+        >
+          Create Mac
+        </button>
+        <button className="btn btn-primary btn-outline" onClick={clearModal}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * A React component for a mac from the inventory
+ *
+ * @param {object] data - The inventory data for this host
+ */
+export const MacDetail = ({ data }) => {
+  if (!data) return null
+
+  return (
+    <>
+      {data.mac ? (
+        <>
+          <h2>Mac</h2>
+          <Markdown>{data.mac}</Markdown>
+        </>
+      ) : null}
+    </>
+  )
+}
+
 /**
  * This component renders a table with MAC addresses
  */
@@ -167,28 +279,5 @@ export const MacsDisplayTable = ({ macs }) => {
         ))}
       </tbody>
     </table>
-  )
-}
-
-export const MacAddress = ({ data }) => {
-  if (!data?.id) return <p>Invalid MAC address data</p>
-
-  const mac = data.id.split('_')[1]
-
-  return (
-    <div className="p-2 px-4 rounded-lg shadow border border-base-300">
-      <div className="flex flex-row items-center gap-2 justify-start w-full">
-        <HardwareIcon className="w-16 h-16" />
-        <div className="w-full">
-          <h4 className="flex flex-row items-center flex-wrap gap-2 justify-between w-full mt-0 pt-0 w-full">
-            <span className="flex flex-row gap-2 items-center">{mac}</span>
-          </h4>
-          <div className="flex flex-row flex-wrap gap-2">
-            <KeyVal k="mac" val={mac} />
-            <KeyVal k="host" val={<InventoryHostname uuid={data.host} />} />
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }

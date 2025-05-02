@@ -1,9 +1,12 @@
 // Dependencies
 import { roles } from 'config/roles.mjs'
-import { cloneAsPojo } from 'lib/utils.mjs'
+import { cloneAsPojo, arrayToObject } from 'lib/utils.mjs'
 import yaml from 'yaml'
+import { runGroupsTableApiCall } from './inventory/group.mjs'
+import { runHostsTableApiCall, InventoryHostname } from './inventory/host.mjs'
 // Hooks
-import { useCallback, useState } from 'react'
+import { useCallback, useState, useEffect } from 'react'
+import { useApi } from 'hooks/use-api.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { useDropzone } from 'react-dropzone'
@@ -456,6 +459,37 @@ export const ListInput = ({
 )
 
 /*
+ * Input for a list of things to pick from with a select type of element
+ */
+export const SelectInput = ({
+  update, // the onChange handler
+  label, // The label
+  labelTR = false, // Top-right label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+  labelDflt = 'Make a choice', // The label for the default option in the select
+  help = false, // Optional link to help / docs
+  list, // The list of items to present { val, label, about }
+}) => (
+  <FormControl {...{ label, labelTR, labelBL, labelBR, help }}>
+    <fieldset className="fieldset w-full">
+      <select
+        defaultValue={labelDflt}
+        className="select select-bordered w-full"
+        onChange={(evt) => update(evt.target.value)}
+      >
+        <option disabled={true}>{labelDflt}</option>
+        {list.map((entry) => (
+          <option key={entry.val} value={entry.val}>
+            {entry.label}
+          </option>
+        ))}
+      </select>
+    </fieldset>
+  </FormControl>
+)
+
+/*
  * Input for a (configuration) file
  */
 export const FileInput = ({
@@ -754,5 +788,214 @@ export const YamlInput = ({ data, update }) => {
         </button>
       </div>
     </div>
+  )
+}
+
+export const InventoryGroupInput = ({
+  update, // onChange handler
+  preselect = [], // Groups to preselect
+  placeholder = 'group-name', // The placeholder text
+  exclude = [], // List of groups to keep out of the select
+}) => {
+  // State
+  const [groups, setGroups] = useState(arrayToObject(preselect))
+  const [filter, setFilter] = useState('')
+  const [allGroups, setAllGroups] = useState([])
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effects
+  useEffect(() => {
+    runGroupsTableApiCall(api).then((result) =>
+      setAllGroups(
+        result
+          .filter((entry) => !exclude.includes(entry.id))
+          .map((entry) => entry.id)
+          .sort()
+      )
+    )
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [])
+
+  // Helper to toggle group status
+  const toggleGroup = (id) => {
+    const newGroups = { ...groups }
+    if (newGroups[id]) delete newGroups[id]
+    else newGroups[id] = id
+    setGroups(newGroups)
+    update(Object.keys(newGroups))
+  }
+
+  return (
+    <>
+      <StringInput
+        label="Filter groups"
+        labelBL="Enter (part of) a groupname to filter the list of available groups"
+        current={filter}
+        placeholder={placeholder}
+        update={setFilter}
+      />
+      <div className="flex flex-row items-center gap-1">
+        <span className="pl-1 text-sm">Selected:</span>
+        {Object.keys(groups).map((group) => (
+          <button
+            key={group}
+            className="badge badge-success hover:badge-error"
+            onClick={() => toggleGroup(group)}
+          >
+            {group}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-row items-center gap-1 mt-2">
+        <span className="pl-1 text-sm">Groups:</span>
+        {allGroups
+          .filter((group) =>
+            Object.keys(groups).includes(group) ||
+            (filter && !group.toLowerCase().includes(filter.toLowerCase()))
+              ? false
+              : true
+          )
+          .map((group) => (
+            <button
+              key={group}
+              className="badge badge-neutral hover:badge-primary"
+              onClick={() => toggleGroup(group)}
+            >
+              {group}
+            </button>
+          ))}
+      </div>
+    </>
+  )
+}
+
+export const InventoryHostInput = ({
+  update, // onChange handler
+  preselect = [], // Groups to preselect
+  placeholder = 'hostname-or-uuid', // The placeholder text
+  exclude = [], // List of groups to keep out of the select
+}) => {
+  // State
+  const [hosts, setHosts] = useState(arrayToObject(preselect))
+  const [filter, setFilter] = useState('')
+  const [allHosts, setAllHosts] = useState([])
+
+  // Hooks
+  const { api } = useApi()
+
+  // Effects
+  useEffect(() => {
+    runHostsTableApiCall(api).then((result) =>
+      setAllHosts(
+        result
+          .filter((entry) => !exclude.includes(entry.id))
+          .map((entry) => entry.id)
+          .sort()
+      )
+    )
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [])
+
+  // Helper to toggle host status
+  const toggleHost = (id) => {
+    const newHosts = { ...hosts }
+    if (newHosts[id]) delete newHosts[id]
+    else newHosts[id] = id
+    setHosts(newHosts)
+    update(Object.keys(newHosts))
+  }
+
+  return (
+    <>
+      <StringInput
+        label="Filter hosts"
+        labelBL="Enter (part of) a hostname or UUID to filter the list of available hosts"
+        current={filter}
+        placeholder={placeholder}
+        update={setFilter}
+      />
+      <div className="pl-1 text-sm">Selected:</div>
+      <div className="flex flex-col items-start gap-1 pl-4">
+        {Object.keys(hosts).map((host) => (
+          <button
+            key={host}
+            className="badge badge-success hover:badge-error"
+            onClick={() => toggleHost(host)}
+          >
+            <InventoryHostname uuid={host} raw />
+            <span className="px-2">|</span>
+            {host}
+          </button>
+        ))}
+      </div>
+      <div className="pl-1 text-sm mt-2">Hosts:</div>
+      <div className="flex flex-col items-start gap-1 pl-3">
+        {allHosts
+          .filter((host) =>
+            Object.keys(hosts).includes(host) ||
+            (filter && !host.toLowerCase().includes(filter.toLowerCase()))
+              ? false
+              : true
+          )
+          .map((host) => (
+            <button
+              key={host}
+              className="badge adge-sm badge-neutral hover:badge-primary"
+              onClick={() => toggleHost(host)}
+            >
+              <InventoryHostname uuid={host} raw />
+              <span className="px-2">|</span>
+              {host}
+            </button>
+          ))}
+      </div>
+    </>
+  )
+}
+
+/*
+ * Input for markdown content
+ */
+export const MarkdownInput = ({
+  label, // The label
+  current, // The current value (markdown)
+  update, // The onChange handler
+  placeholder, // The placeholder content
+  id = '', // An id to tie the input to the label
+  labelBL = false, // Bottom-Left label
+  labelBR = false, // Bottom-Right label
+}) => {
+  const [preview, setPreview] = useState(false)
+
+  return (
+    <FormControl
+      {...{ label, labelBR }}
+      forId={id}
+      labelBL={labelBL ? labelBL : 'This field supports markdown'}
+      labelTR={
+        <button className="text-primary hover:underline" onClick={() => setPreview(!preview)}>
+          {preview ? 'Edit' : 'Preview as'} Markdown
+        </button>
+      }
+    >
+      {preview ? (
+        <div className="mdx markdown border rounded-lg p-4">
+          <Markdown>{current}</Markdown>
+        </div>
+      ) : (
+        <div className="flex flex-row items-center">
+          <textarea
+            id={id}
+            rows="5"
+            className="textarea textarea-bordered textarea-lg w-full"
+            value={current}
+            placeholder={placeholder}
+            onChange={(evt) => update(evt.target.value)}
+          />
+        </div>
+      )}
+    </FormControl>
   )
 }

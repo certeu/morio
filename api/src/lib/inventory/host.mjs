@@ -1,9 +1,28 @@
+// Utils
 import { log, utils } from './utils.mjs'
-import { get, asScalarOrJson } from '#shared/utils'
+// Load shared inventory code
+import { addNonEnumProp, resultsAsList, unwrapVar, deleteRecord } from './shared.mjs'
+import { clean, asTime, fromJson } from '../account.mjs'
 import { randomString } from '#shared/crypto'
 import ipaddr from 'ipaddr.js'
-// Shared code from accounts
-import { asTime, clean, fromJson } from './account.mjs'
+import { asScalarOrJson } from '#shared/utils'
+
+/**
+ * Constructor for a Host instance
+ *
+ * @param {string} id - The Id to preset this for reading
+ */
+export function Host(id = false) {
+  // Non-enumerable properties
+  addNonEnumProp(this, '_id', id)
+  addNonEnumProp(this, '_record', false)
+  addNonEnumProp(this, '_saved', true)
+
+  // Enumerable properties
+  this.error = false
+
+  return this
+}
 
 /*
  * This maps the fields to a method to format the field
@@ -22,60 +41,15 @@ const fields = {
   },
 }
 
-/*
- * This maps the fields to a method to unserialize the value
- */
-const values = {
-  password: fromJson,
-  scratch_codes: fromJson,
-}
-
 /**
  * Helper method to list hosts in the inventory
  *
  * @return {object} keys - The hosts in the inventory
  */
-export async function listHosts() {
-  const query = `SELECT * FROM inventory_hosts`
-  const [status, result] = await utils.db.read(query)
+Host.prototype.list = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_hosts`)
 
   return status === 200 ? resultsAsList(result) : false
-}
-
-/**
- * Helper method to list IP addresses in the inventory
- *
- * @return {object} keys - The IP addresses in the inventory
- */
-export async function listIps() {
-  const query = `SELECT * FROM inventory_ips`
-  const [status, result] = await utils.db.read(query)
-
-  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
-}
-
-/**
- * Helper method to list MAC addresses in the inventory
- *
- * @return {object} keys - The MAC addresses in the inventory
- */
-export async function listMacs() {
-  const query = `SELECT * FROM inventory_macs`
-  const [status, result] = await utils.db.read(query)
-
-  return status === 200 ? await addHostNamesToList(resultsAsList(result), 'host') : false
-}
-
-/**
- * Helper method to list OSs in the inventory
- *
- * @return {object} keys - The OSes in the inventory
- */
-export async function listOss() {
-  const query = `SELECT * FROM inventory_oss`
-  const [status, result] = await utils.db.read(query)
-
-  return status === 200 ? await addHostNamesToList(resultsAsList(result)) : false
 }
 
 /**
@@ -84,7 +58,7 @@ export async function listOss() {
  * @param {string} id - The ID of the host
  * @return {object} data - The data saved for the host
  */
-export async function loadHost(id) {
+Host.prototype.read = async function (id) {
   const [status, result] = await utils.db.read(`SELECT * FROM inventory_hosts WHERE id=:id`, {
     id: clean(id),
   })
@@ -101,81 +75,59 @@ export async function loadHost(id) {
 }
 
 /**
- * Helper method to load a inventory IP address
+ * Helper method to load IP addresses for a given host
  *
- * @param {string} id - The ID of the IP address
- * @return {object} data - The data saved for the IP address
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
  */
-export async function loadIp(id) {
-  const [status, result] = await utils.db.read(`SELECT * FROM inventory_ips WHERE id=:id`, {
-    id: clean(id),
-  })
-
-  if (status !== 200) return false
-  const found = resultsAsList(result)
-
-  if (found.length < 1) return false
-  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
-  else {
-    log.warn(`Found more than one host in loadIp. This is unexpected.`)
-    return false
-  }
-}
-
-/**
- * Helper method to load a inventory MAC address
- *
- * @param {string} id - The ID of the MAC address
- * @return {object} data - The data saved for the MAC address
- */
-export async function loadMac(id) {
-  const [status, result] = await utils.db.read(`SELECT * FROM inventory_macs WHERE id=:id`, {
-    id: clean(id),
-  })
-
-  if (status !== 200) return false
-  const found = resultsAsList(result)
-
-  if (found.length < 1) return false
-  if (found.length === 1) return (await addHostNamesToList(found, 'host'))[0]
-  else {
-    log.warn(`Found more than one host in loadMac. This is unexpected.`)
-    return false
-  }
-}
-
-/**
- * Helper method to load an OS
- *
- * @param {string} id - The ID of the OS
- * @return {object} data - The data saved for the MAC address
- */
-export async function loadOs(id) {
-  const [status, result] = await utils.db.read(`SELECT * FROM inventory_oss WHERE id=:id`, {
-    id: clean(id),
-  })
+Host.prototype.readIps = async function (id) {
+  const [status, result] = await utils.db.read(
+    `SELECT hi.host, hi.ip, i.version FROM inventory_host_ip hi
+     JOIN inventory_ips i ON hi.ip = i.ip
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
 
   if (status !== 200) return false
   const found = resultsAsList(result)
 
   if (found.length < 1) return false
   if (found.length === 1) return found[0]
-  else {
-    log.warn(`Found more than one host in loadOs. This is unexpected.`)
-    return false
-  }
+  else return found
 }
 
 /**
- * Helper method to load IP addresses for a given host
+ * Helper method to load Packages for a given host
  *
  * @param {string} id - The ID of the host
  * @return {object} data - The data saved for the host
  */
-export async function loadHostIps(id) {
+Host.prototype.readPkgs = async function (id) {
   const [status, result] = await utils.db.read(
-    `SELECT hi.host, hi.ip, i.version FROM inventory_host_ip hi
-     JOIN inventory_ips i ON hi.ip = i.ip
+    `SELECT hi.host, hi.pkg, i.version FROM inventory_host_pkg hi
+     JOIN inventory_pkgs i ON hi.pkg = i.name
+     WHERE hi.host=:id`,
+    { id: clean(id) }
+  )
+
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else return found
+}
+
+/**
+ * Helper method to load Modules for a given host
+ *
+ * @param {string} id - The ID of the host
+ * @return {object} data - The data saved for the host
+ */
+Host.prototype.readMods = async function (id) {
+  const [status, result] = await utils.db.read(
+    `SELECT hi.host, hi.mod, i.data FROM inventory_host_mod hi
+     JOIN inventory_mods i ON hi.mod = i.mod
      WHERE hi.host=:id`,
     { id: clean(id) }
   )
@@ -194,7 +146,7 @@ export async function loadHostIps(id) {
  * @param {string} id - The ID of the host
  * @return {object} data - The data saved for the host
  */
-export async function loadHostMacs(id) {
+Host.prototype.readMacs = async function (id) {
   const [status, result] = await utils.db.read(
     `SELECT hm.host, hm.mac FROM inventory_host_mac hm
      JOIN inventory_macs m ON hm.mac = m.mac
@@ -216,7 +168,7 @@ export async function loadHostMacs(id) {
  * @param {string} id - The ID of the host
  * @return {object} data - The data saved for the host
  */
-export async function loadHostOs(id) {
+Host.prototype.readOss = async function (id) {
   const [status, result] = await utils.db.read(
     `SELECT ho.host, o.id, o.name, o.version FROM inventory_host_os ho
      JOIN inventory_oss o ON ho.os = o.id
@@ -233,10 +185,84 @@ export async function loadHostOs(id) {
 }
 
 /**
+ * Helper method to get all inventory data for use as an Ansible inventory
+ *
+ * @return {object} keys - The hosts in the inventory
+ */
+Host.prototype.getAnsibleInventory = async function (withSecrets = false) {
+  // This will hold the entire inventory
+  const inventory = {}
+
+  // Load hosts
+  const [hostStatus, hostResult] = await utils.db.read(`SELECT * FROM inventory_hosts`)
+  const hosts = hostStatus === 200 ? resultsAsList(hostResult) : []
+
+  // Load modules vars
+  const [modvarStatus, modvarResult] = await utils.db.read(`SELECT * FROM inventory_modvars`)
+  const modvars = modvarStatus === 200 ? resultsAsList(modvarResult) : false
+
+  // Load host modules
+  const [hostmodStatus, hostmodResult] = await utils.db.read(`SELECT * FROM inventory_host_mod`)
+  const hostmods = hostmodStatus === 200 ? resultsAsList(hostmodResult) : false
+
+  // Load host vars
+  const [hostvarStatus, hostvarResult] = await utils.db.read(`SELECT * FROM inventory_hostvars`)
+  const hostvars = hostvarStatus === 200 ? resultsAsList(hostvarResult) : false
+
+  // Load modules
+  const modules = {}
+  for (const mvar of modvars) {
+    if (typeof modules[mvar.mod] === 'undefined') modules[mvar.mod] = {}
+    modules[mvar.mod][mvar.id] = unwrapVar(mvar.id, mvar.val)
+  }
+
+  // Now add them to the inventory
+  for (const host of hosts) {
+    inventory[host.id] = {
+      morio_host_fqdn: host.fqdn,
+      morio_host_name: host.name,
+      morio_host_id: host.id,
+      morio_host_arch: host.arch,
+      morio_host_memory: host.memory,
+      morio_host_cores: host.cores,
+      morio_modules: [],
+    }
+  }
+
+  // Add module vars
+  for (const mod of hostmods) {
+    inventory[mod.host].morio_modules.push(mod.mod)
+    inventory[mod.host] = {
+      ...inventory[mod.host],
+      ...modules[mod.mod],
+    }
+  }
+
+  // Add host vars
+  for (const hvar of hostvars) {
+    if (withSecrets || hvar.key.slice(-6) !== 'SECRET')
+      inventory[hvar.host][hvar.key] = unwrapVar(hvar.key, hvar.val)
+  }
+
+  // Structure as ansible inventory
+  const ansinv = { all: { hosts: {} } }
+  for (const [host] of Object.entries(inventory)) ansinv.all.hosts[host.morio_host_fqdn] = host
+
+  // Add groups based on morio modules
+  for (const mod of hostmods) {
+    const group = `morio_module_${mod.mod}`
+    if (typeof ansinv[group] === 'undefined') ansinv[group] = {}
+    ansinv[group][inventory[mod.host].morio_host_fqdn] = inventory[mod.host]
+  }
+
+  return ansinv
+}
+
+/**
  * Helper method to get info about the inventory
  * @return {object} stats - The stats
  */
-export async function getStats() {
+Host.prototype.getStats = async function () {
   // Count various inventory tables
   const count = await utils.db.readMany([
     [`SELECT COUNT(id) as hosts FROM inventory_hosts`],
@@ -247,6 +273,8 @@ export async function getStats() {
     [`SELECT COUNT(mod) as mods FROM inventory_mods`],
     [`SELECT COUNT(id) as modvars FROM inventory_modvars`],
     [`SELECT COUNT(id) as hostvars FROM inventory_hostvars`],
+    [`SELECT COUNT(id) as groupvars FROM inventory_groupvars`],
+    [`SELECT COUNT(id) as groups FROM inventory_groups`],
     [`SELECT COUNT(id) as modfiles FROM inventory_modfiles`],
   ])
   if (Array.isArray(count) && count[0] === 200) {
@@ -259,7 +287,9 @@ export async function getStats() {
       mods: count[1].results[5].values[0][0],
       modvars: count[1].results[6].values[0][0],
       hostvars: count[1].results[7].values[0][0],
-      modfiles: count[1].results[8].values[0][0],
+      groupvars: count[1].results[8].values[0][0],
+      groups: count[1].results[9].values[0][0],
+      modfiles: count[1].results[10].values[0][0],
     }
   } else
     return {
@@ -271,62 +301,13 @@ export async function getStats() {
       mods: 0,
       modvars: 0,
       hostvars: 0,
+      groupvars: 0,
+      groups: 0,
       modfiles: 0,
     }
 }
 
-/**
- * Helper function to delete a record from a table
- *
- * @param {string} table - The table to delete from
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-async function deleteRecord(table = false, id = false) {
-  if (!id || !table) return false
-
-  await utils.db.write(`DELETE FROM ${table} WHERE id = :id`, { id })
-
-  return true
-}
-
-/**
- * Helper method to delete an IP address
- *
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-export async function deleteIp(id = false) {
-  return await deleteRecord('inventory_ips', id)
-}
-
-/**
- * Helper method to delete a MAC address
- *
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-export async function deleteMac(id = false) {
-  return await deleteRecord('inventory_macs', id)
-}
-
-/**
- * Helper method to delete an operating system
- *
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-export async function deleteOs(id = false) {
-  return await deleteRecord('inventory_oss', id)
-}
-
-/**
- * Helper method to delete a host
- *
- * @param {string} id - The ID of the record to delete
- * @return {bool} result - true if it went ok, false if not
- */
-export async function deleteHost(id = false) {
+Host.prototype.delete = async function (id = false) {
   const result = await deleteRecord('inventory_hosts', id)
 
   // Also remove IPs, MACs, and OS beloonging to this host
@@ -338,7 +319,48 @@ export async function deleteHost(id = false) {
   return result
 }
 
-export async function createInvite(user, type = 'once') {
+/**
+ * Helper method to create an inventory (host)
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.create = async function (
+  id,
+  arch,
+  cores,
+  fqdn,
+  memory,
+  name,
+  notes,
+  tags,
+  last_update
+) {
+  if (!id) return false
+  /*
+   * Insert into the database
+   */
+  const result = await utils.db.write(
+    `INSERT INTO inventory_hosts(id, arch, cores, fqdn, memory, name, notes, tags, last_update) VALUES(:id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update)`,
+    {
+      id,
+      arch,
+      cores,
+      fqdn,
+      memory,
+      name,
+      notes,
+      tags,
+      last_update,
+    }
+  )
+  let created = false
+  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
+    created = true
+
+  return created
+}
+
+Host.prototype.createInvite = async function (user, type = 'once') {
   /*
    * There is a (small) chance that the random string we get
    * is already in use. So we loop until the record is created.
@@ -384,15 +406,37 @@ export async function createInvite(user, type = 'once') {
  * @param {string} id - The ID of the invite
  * @return {object} invite - The invite data from the database
  */
-export async function getInvite(id) {
+Host.prototype.getInvite = async function (id) {
   if (!id) {
     log.debug(`getInvite called without ID`)
     return false
   }
   const result = await utils.db.read(`SELECT * FROM inventory_invites WHERE id=:id`, { id })
-  const data = result[0] === 200 && result[1].results ? getFields(result[1]).pop() : false
+  const data = result[0] === 200 && result[1].results ? this.getFields(result[1]).pop() : false
 
   return data
+}
+
+/*
+ * Helper method to extract results from a SELECT query result
+ *
+ * @param {object} result - The result from Rqlite
+ * @resturn {array} list - The list of field values
+ */
+Host.prototype.getFields = function (result = {}) {
+  const cols = result?.results?.[0]?.columns
+  const list = (result?.results?.[0]?.values || []).map((entry) => {
+    const data = {}
+    for (const i in cols)
+      data[cols[i]] =
+        values[cols[i]] && typeof values[cols[i]] === 'function'
+          ? values[cols[i]](entry[i])
+          : entry[i]
+
+    return data
+  })
+
+  return list
 }
 
 /*
@@ -404,7 +448,7 @@ export async function getInvite(id) {
  * @param {string} id - The ID of the invite
  * @return {bool} result - True if it worked
  */
-export async function useInvite(id) {
+Host.prototype.useInvite = async function (id) {
   if (!id) {
     log.debug(`useInvite called without id`)
     return false
@@ -412,7 +456,7 @@ export async function useInvite(id) {
   /*
    * Does the invite exist?
    */
-  const invite = await getInvite(id)
+  const invite = await this.getInvite(id)
   if (invite?.id !== id) return false
 
   /*
@@ -429,25 +473,11 @@ export async function useInvite(id) {
 }
 
 /*
- * Helper method to extract results from a SELECT query result
- *
- * @param {object} result - The result from Rqlite
- * @resturn {array} list - The list of field values
+ * This maps the fields to a method to unserialize the value
  */
-function getFields(result = {}) {
-  const cols = result?.results?.[0]?.columns
-  const list = (result?.results?.[0]?.values || []).map((entry) => {
-    const data = {}
-    for (const i in cols)
-      data[cols[i]] =
-        values[cols[i]] && typeof values[cols[i]] === 'function'
-          ? values[cols[i]](entry[i])
-          : entry[i]
-
-    return data
-  })
-
-  return list
+const values = {
+  password: fromJson,
+  scratch_codes: fromJson,
 }
 
 /**
@@ -456,7 +486,7 @@ function getFields(result = {}) {
  * @param {object} id - The ID of the host
  * @param {object} data - The data to save for the account
  */
-export async function saveHost(id, data) {
+Host.prototype.save = async function (id, data) {
   /*
    * We need at least an ID
    */
@@ -498,83 +528,6 @@ export async function saveHost(id, data) {
 }
 
 /**
- * Helper method to parse results into an array of objects
- */
-function resultsAsList(result) {
-  const cols = result?.results?.[0]?.columns
-  const list = (result?.results?.[0]?.values || []).map((entry) => {
-    const host = {}
-    for (const i in cols)
-      host[cols[i]] =
-        values[cols[i]] && typeof values[cols[i]] === 'function'
-          ? values[cols[i]](entry[i])
-          : entry[i]
-
-    return host
-  })
-
-  return list
-}
-
-/**
- * Helper method to enrich a list of results with host names
- */
-async function addHostNamesToList(list, idField = 'id') {
-  const resolve = new Set()
-  /*
-   * First figure out all hosts to resolve
-   */
-  for (const entry of list) {
-    const id = get(entry, idField, false)
-    if (id) resolve.add(id)
-  }
-
-  /*
-   * Now get the names from the database
-   */
-  const names = await getHostnames([...resolve])
-  if (!names) return list
-
-  /*
-   * If we have results, enrich the list
-   */
-  const enriched = []
-  for (const entry of list) {
-    const id = get(entry, idField, false)
-    if (names[id])
-      enriched.push({
-        ...entry,
-        host_name: names[id].name,
-        host_fqdn: names[id].fqdn,
-      })
-  }
-
-  return enriched
-}
-
-/**
- * Helper method to get host names or a list of host IDs
- * @return {array} hostIds - An array of host IDs
- * @return {object} hosts - An object with hostId as keys and name as values
- */
-async function getHostnames(hostIds = []) {
-  /*
-   * Query using IN
-   */
-  const id = hostIds.map((id) => `'${clean(id)}'`).join()
-  const [status, result] = await utils.db.read(
-    `SELECT name, fqdn, id FROM inventory_hosts WHERE id IN (${id})`
-  )
-
-  if (status !== 200) return false
-
-  const perId = {}
-  for (const host of resultsAsList(result)) perId[host.id] = host
-
-  return perId
-}
-
-/**
  * Enrolls a (new) host into the inventory
  *
  * @param {string} uuid - The host's UUID
@@ -582,8 +535,8 @@ async function getHostnames(hostIds = []) {
  * @param {bool} replace - Whether to overwrite an existing client or not
  * @return {boolean} result - True if it went ok, false if not
  */
-export async function enrollHost(uuid, data, replace = false) {
-  const exists = await loadHost(uuid)
+Host.prototyp.enroll = async function (uuid, data, replace = false) {
+  const exists = await this.load(uuid)
   /*
    * By default, we do not allow replacing/updating a host
    */
@@ -610,23 +563,23 @@ export async function enrollHost(uuid, data, replace = false) {
   }
 
   // Host query
-  queries.push(hostUpsertQuery(uuid, data))
+  queries.push(this.hostUpsertQuery(uuid, data))
   // OS query
-  const osQueries = osInsertQuery(uuid, { name: data.os, version: data.os_version })
+  const osQueries = this.osInsertQuery(uuid, { name: data.os, version: data.os_version })
   if (osQueries) queries.push(...osQueries)
   // IP queries
   for (const ip of data.ips || []) {
-    const ipQueries = ipInsertQuery(uuid, ip)
+    const ipQueries = this.ipInsertQuery(uuid, ip)
     if (ipQueries) queries.push(...ipQueries)
   }
   // Mac queries
   for (const mac of data.macs || []) {
-    const macQueries = macInsertQuery(uuid, mac)
+    const macQueries = this.macInsertQuery(uuid, mac)
     if (macQueries) queries.push(...macQueries)
   }
   // Package queries
   for (const pkg of data.packages || []) {
-    const pkgQueries = pkgInsertQuery(uuid, pkg)
+    const pkgQueries = this.pkgInsertQuery(uuid, pkg)
     if (pkgQueries) queries.push(...pkgQueries)
   }
 
@@ -641,409 +594,13 @@ export async function enrollHost(uuid, data, replace = false) {
 }
 
 /**
- * Removes a host from the inventory
- *
- * @param {string} uuid - The host's UUID
- * @return {boolean} result - True if it went ok, false if not
- */
-export async function removeHost(uuid) {
-  const params = { host: uuid }
-  const queries = [
-    'inventory_host_ip',
-    'inventory_host_mac',
-    'inventory_host_pkg',
-    'inventory_host_os',
-    'inventory_host_mod',
-    'inventory_hostvars',
-  ].map((table) => [`DELETE from ${table} WHERE host=:host`, params])
-  queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
-
-  await utils.db.writeMany(queries)
-}
-
-/**
- * Verifies that a list of modules exists
- *
- * @param {array} modules - The list of modules to check
- * @return {array} result - An [bool result, array missing] array
- */
-export async function verifyModulesExist(modules) {
-  const missing = []
-  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
-  const allModules =
-    result[0] === 200 && result[1].results?.[0]?.values
-      ? result[1].results[0].values.map((row) => row[0])
-      : []
-  for (const mod of modules) {
-    if (!allModules.includes(mod)) missing.push(mod)
-  }
-
-  return [missing.length === 0, missing]
-}
-
-/**
- * Sets the available modules on a client
- *
- * @param {string} uuid - The client UUID
- * @param {array} modules - The list of modules
- * @return {array} result - An [bool result, array failed] array
- */
-export async function setClientModules(uuid, modules) {
-  const queries = [[`DELETE from inventory_host_mod WHERE host=:uuid`, { uuid }]]
-  for (const module of modules)
-    queries.push([`INSERT INTO inventory_host_mod VALUES(:uuid, :module)`, { uuid, module }])
-
-  const result = await utils.db.writeMany(queries)
-  const failed = []
-  if (result[0] === 200 && result[1].results) {
-    for (const i in modules) {
-      if (result[1].results[Number(i) + 1].last_insert_id)
-        log.debug(`[client] Enabled module ${modules[i]} for client ${uuid}`)
-      else {
-        log.warn(`[client] Failed to enable module ${modules[i]} to client ${uuid}`)
-        failed.push(modules[i])
-      }
-    }
-  }
-
-  return [failed.length === 0, failed]
-}
-
-/**
- * Gets the available modules for a client
- *
- * @param {string} uuid - The client UUID
- * @return {array} result - An [bool result, array failed] array
- */
-export async function getClientModules(uuid) {
-  const result = await utils.db.read(`SELECT mod from inventory_host_mod WHERE host=:host`, {
-    host: uuid,
-  })
-  const modules = []
-  if (result[0] === 200 && result[1].results?.[0]?.values) {
-    for (const read of result[1].results[0].values) modules.push(read[0])
-  }
-
-  return modules
-}
-
-/**
- * Gets the available client modules
- *
- * @param {string} uuid - The client UUID
- * @return {array} result - An [bool result, array failed] array
- */
-export async function getAllClientModules() {
-  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
-  const modules = []
-  if (result[0] === 200 && result[1].results) {
-    for (const read of result[1].results[0].values) modules.push(read[0])
-  }
-
-  return modules
-}
-
-/**
- * Enable a client module
- *
- * @param {string} uuid - The client UUID
- * @param {string} module - The module name
- * @return {bool} result - True if it worked, false if not
- */
-export async function enableClientModule(uuid, module) {
-  const result = await utils.db.write(
-    `INSERT INTO inventory_host_mod (host, mod) VALUES(:uuid, :module) ON CONFLICT DO NOTHING`,
-    { uuid, module }
-  )
-
-  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
-}
-
-/**
- * Disable a client module
- *
- * @param {string} uuid - The client UUID
- * @param {string} module - The module name
- * @return {array} result - An [bool result, array failed] array
- */
-export async function disableClientModule(uuid, module) {
-  const result = await utils.db.write(
-    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
-    {
-      uuid,
-      module,
-    }
-  )
-
-  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
-}
-
-/**
- * Gets the available module files for a client
- *
- * @param {arrau} modules - The modules for which to load files
- * @return {array} result - An [bool result, array failed] array
- */
-export async function getClientModuleFiles(modules) {
-  const result = await utils.db.read(
-    `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})`
-  )
-  const files = []
-  if (result[0] === 200 && result[1].results?.[0]?.values) {
-    for (const read of result[1].results[0].values) {
-      const [file, folder, content] = read
-      files.push({ file, folder, content })
-    }
-  }
-
-  return files
-}
-
-/**
- * Gets the client variables
- *
- * @param {string} uuid - The client UUID
- * @param {bool} noInfo - Set to true to not include the variable info
- * @param {bool} decrypt - Set to true to decrypt vars encrypted at rest
- * @return {array} result - An array holding the vars
- */
-export async function getClientVars(uuid, noInfo = false, decrypt = false) {
-  const result = await utils.db.read(
-    `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
-    { host: uuid }
-  )
-  const vars = []
-  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    for (const read of result[1].results[0].values) {
-      /*
-       * If noInfo is set, info will be undefined
-       * but that's ok, JS doesn't mind and will drop it
-       */
-      const [key, val, info] = read
-      vars.push({
-        key,
-        val: decrypt ? undoVarSecrecy(key, val)[1] : val,
-        info,
-      })
-    }
-  }
-
-  return vars
-}
-
-/**
- * Gets the module variables
- *
- * @param {array} modules - An (optional) array of modules to fetch the vars for
- * @param {bool} noInfo - Set to true to not include the variable info
- * @return {object} result - An array holding the vars
- */
-export async function getModuleVars(modules = [], noInfo = false) {
-  const where =
-    modules.length > 0 ? `WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})` : `WHERE 1`
-  const q = `SELECT id AS key, val ${noInfo ? '' : ', info'} from inventory_modvars ${where}`
-  const result = await utils.db.read(q)
-  const vars = []
-  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    for (const read of result[1].results[0].values) {
-      /*
-       * If noInfo is set, info will be undefined
-       * but that's ok, JS doesn't mind and will drop it
-       */
-      const [key, val, info] = read
-      vars.push({ key, val, info })
-    }
-  }
-
-  return vars
-}
-
-/**
- * Retrieves a host variable
- *
- * @param {string} host - The host UUID
- * @param {string} key - The key (name of the variable)
- * @return {object} result - The found result
- */
-export async function getHostVar(host, key) {
-  const result = await utils.db.read(
-    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
-    {
-      host,
-      key,
-    }
-  )
-
-  if (result[0] === 200 && result[1].results[0].values) {
-    const found = {}
-    const cols = result[1].results[0].columns
-    const vals = result[1].results[0].values[0]
-    for (const i in cols) found[cols[i]] = vals[i]
-
-    return found
-  }
-
-  return false
-}
-
-/**
- * Sets the available variables for a client
- *
- * @param {string} uuid - The client UUID
- * @param {array} vars - The list of variables
- * @return {array} result - An [bool result, array failed] array
- */
-export async function setClientVariables(uuid, vars = {}) {
-  const queries = []
-  // Note that we do not store vars that start with MORIO_
-  const toStore = Object.entries(vars)
-    .filter(([key]) => key.slice(0, 6) !== 'MORIO_')
-    .map((entry) => ensureVarSecrecy(...entry))
-  for (const [key, val] of toStore) {
-    const exists = await getHostVar(uuid, key)
-    if (exists) {
-      // Update var
-      queries.push([
-        `UPDATE inventory_hostvars SET val=:val, info=:info WHERE id=:id`,
-        { val: asScalarOrJson(val), info: exists.info, id: exists.id },
-      ])
-    } else {
-      // Create var
-      queries.push([
-        `INSERT INTO inventory_hostvars (key, val, info, host) VALUES(:key, :val, :info, :host)`,
-        { key, val: asScalarOrJson(val), info: 'Pushed from host', host: uuid },
-      ])
-    }
-  }
-
-  const result = await utils.db.writeMany(queries)
-  const failed = []
-  if (result[0] === 200 && result[1].results) {
-    const varNames = toStore.map((kv) => kv[0])
-    for (const i in varNames) {
-      if (result[1].results[i].last_insert_id)
-        log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
-      else {
-        log.warn(`[client] Failed to set var ${varNames[i]} to client ${uuid}`)
-        failed.push(varNames[i])
-      }
-    }
-  }
-
-  return [failed.length === 0, failed]
-}
-
-export function ensureVarSecrecy(key, val) {
-  // If a key ends with 'SECRET' we encrypt it at rest
-  if (key.slice(-6) === 'SECRET') {
-    try {
-      val = utils.encrypt(val)
-    } catch (err) {
-      log.warn(err, `Failed to encrypt hostvar ${key}`)
-    }
-  }
-
-  return [key, val]
-}
-
-export function undoVarSecrecy(key, val) {
-  // If a key ends with 'SECRET' and is encrypted, we decrypt it
-  if (key.slice(-6) === 'SECRET' && typeof val === 'string') {
-    try {
-      val = utils.decrypt(val)
-    } catch (err) {
-      log.warn(err, `Failed to decrypt hostvar ${key}`)
-    }
-  }
-
-  return [key, val]
-}
-
-/**
- * Creates a client command entry and returns the ID
- *
- * @return {number} id - The client command ID
- */
-export async function getClientCommandId(clients = false) {
-  const result = await utils.db.write(
-    `INSERT INTO client_commands (created_at, clients) VALUES (:createdAt, :clients)`,
-    { createdAt: new Date(), clients: Array.isArray(clients) ? JSON.stringify(clients) : null }
-  )
-
-  // Clean up old records while we're at it
-  cleanupClientCommands()
-
-  return result[0] === 200 && result[1].results?.[0]?.last_insert_id
-    ? result[1].results[0].last_insert_id
-    : false
-}
-
-async function cleanupClientCommands() {
-  await utils.db.writeMany([
-    [`DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`],
-    [`DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`],
-  ])
-}
-
-export async function addClientCommandStatusUpdate({ uuid, id, status }) {
-  const result = await utils.db.write(
-    `INSERT INTO client_command_status (host, cid, status, created_at) VALUES(:uuid, :id, :status, :createdAt)`,
-    { uuid, id, status, createdAt: new Date() }
-  )
-
-  return result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
-    ? true
-    : log.warn({ uuid, id, status }, `Failed to write client command status update`)
-}
-
-export async function getClientCommand(id) {
-  const result = await utils.db.read(`SELECT * FROM client_commands WHERE id=:id`, { id })
-
-  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    const fields = result[1].results[0].columns
-    for (const row of result[1].results[0].values) {
-      const info = {}
-      for (const i in fields) info[fields[i]] = row[i]
-      return info
-    }
-  }
-
-  return false
-}
-
-export async function getClientCommandStatusUpdates(cid) {
-  const result = await utils.db.read(`SELECT * FROM client_command_status WHERE cid=:cid`, { cid })
-  const updates = []
-  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
-    const fields = result[1].results[0].columns
-    for (const row of result[1].results[0].values) {
-      const update = {}
-      for (const i in fields) update[fields[i]] = row[i]
-      updates.push(update)
-    }
-  }
-
-  return updates
-}
-
-/**
- * Helper method to determine the IP version (4 or 6)
- *
- * @param {string} ip - the (normalized) IP address
- * @return {number} version - Either 4 for IPv4 or 6 for IPv6
- */
-function ipVersion(ip) {
-  return ip.includes(':') ? 6 : 4
-}
-
-/**
  * Creates the query to add a host to the inventory
  *
  * @param {string} uuid - The host UUID
  * @param {object} data - The host data
  * @return {array} query - A [query, params] array
  */
-function hostUpsertQuery(uuid, data) {
+Host.prototype.hostUpsertQuery = function (uuid, data) {
   data.id = uuid
   const keys = []
   const params = {}
@@ -1083,7 +640,7 @@ function hostUpsertQuery(uuid, data) {
  * @param {string} os - The OS info
  * @return {array} query - The query and its parameters
  */
-function osInsertQuery(uuid, os) {
+Host.prototype.osInsertQuery = function (uuid, os) {
   if (os.name && os.version) {
     /*
      * We are constructing the ID from name + version so it is deterministic
@@ -1109,6 +666,16 @@ function osInsertQuery(uuid, os) {
   return false
 }
 
+/**
+ * Helper method to determine the IP version (4 or 6)
+ *
+ * @param {string} ip - the (normalized) IP address
+ * @return {number} version - Either 4 for IPv4 or 6 for IPv6
+ */
+Host.prototype.ipVersion = function (ip) {
+  return ip.includes(':') ? 6 : 4
+}
+
 /*
  * Creates the query to add an IP address to the inventory
  *
@@ -1116,13 +683,13 @@ function osInsertQuery(uuid, os) {
  * @param {string} ip - The IP address
  * @return {array} query - The query and its parameters
  */
-function ipInsertQuery(uuid, ip) {
-  ip = normalizeIp(ip)
+Host.prototype.ipInsertQuery = function (uuid, ip) {
+  ip = this.normalizeIp(ip)
   if (ip)
     return [
       [
         `INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version) ON CONFLICT DO NOTHING`,
-        { ip, version: ipVersion(ip) },
+        { ip, version: this.ipVersion(ip) },
       ],
       [
         `INSERT INTO inventory_host_ip(host, ip) VALUES(:host, :ip) ON CONFLICT DO NOTHING`,
@@ -1140,8 +707,8 @@ function ipInsertQuery(uuid, ip) {
  * @param {string} mac - The MAC address
  * @return {array} query - The query and its parameters
  */
-function macInsertQuery(uuid, mac) {
-  mac = normalizeMac(mac)
+Host.prototype.macInsertQuery = function (uuid, mac) {
+  mac = this.normalizeMac(mac)
   if (mac)
     return [
       [`INSERT INTO inventory_macs(mac) VALUES(:mac) ON CONFLICT DO NOTHING`, { mac }],
@@ -1161,7 +728,7 @@ function macInsertQuery(uuid, mac) {
  * @param {string} pkg - The package info
  * @return {array} query - The query and its parameters
  */
-function pkgInsertQuery(uuid, pkg) {
+Host.prototype.pkgInsertQuery = function (uuid, pkg) {
   if (pkg.name && pkg.version) {
     /*
      * We are constructing the ID from name + version so it is deterministic
@@ -1197,7 +764,7 @@ function pkgInsertQuery(uuid, pkg) {
  * @param {string} ip - The IP address to normalise
  * @returns {string} - The normalized IP address
  */
-function normalizeIp(ip) {
+Host.prototype.normalizeIp = function (ip) {
   // Do not continue if the IP is not valid
   if (typeof ip !== 'string' || !ipaddr.isValid(ip)) {
     log.debug(`Cannot parse IP address: ${JSON.stringify(ip)}`)
@@ -1220,7 +787,7 @@ function normalizeIp(ip) {
  * @param {string} mac - The MAC address to normalize
  * @returns {string} - The normalized MAC address
  */
-function normalizeMac(mac) {
+Host.prototype.normalizeMac = function (mac) {
   if (typeof mac !== 'string') {
     log.debug(`Invalid MAC address: ${JSON.stringify(mac)}`)
     return false
@@ -1243,4 +810,390 @@ function normalizeMac(mac) {
     .toLowerCase() // No yelling
     .match(/.{1,2}/g) // Split per 2 characters
     .join(':') // Glue back together with ':' characters
+}
+
+Host.prototype.getClientCommandStatusUpdates = async function (cid) {
+  const result = await utils.db.read(`SELECT * FROM client_command_status WHERE cid=:cid`, { cid })
+  const updates = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    const fields = result[1].results[0].columns
+    for (const row of result[1].results[0].values) {
+      const update = {}
+      for (const i in fields) update[fields[i]] = row[i]
+      updates.push(update)
+    }
+  }
+
+  return updates
+}
+
+Host.prototype.getClientCommand = async function (id) {
+  const result = await utils.db.read(`SELECT * FROM client_commands WHERE id=:id`, { id })
+
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    const fields = result[1].results[0].columns
+    for (const row of result[1].results[0].values) {
+      const info = {}
+      for (const i in fields) info[fields[i]] = row[i]
+      return info
+    }
+  }
+
+  return false
+}
+
+Host.prototype.addClientCommandStatusUpdate = async function ({ uuid, id, status }) {
+  const result = await utils.db.write(
+    `INSERT INTO client_command_status (host, cid, status, created_at) VALUES(:uuid, :id, :status, :createdAt)`,
+    { uuid, id, status, createdAt: new Date() }
+  )
+
+  return result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+    ? true
+    : log.warn({ uuid, id, status }, `Failed to write client command status update`)
+}
+
+/**
+ * Removes a host from the inventory
+ *
+ * @param {string} uuid - The host's UUID
+ * @return {boolean} result - True if it went ok, false if not
+ */
+Host.prototype.remove = async function (uuid) {
+  const params = { host: uuid }
+  const queries = [
+    'inventory_host_ip',
+    'inventory_host_mac',
+    'inventory_host_pkg',
+    'inventory_host_os',
+    'inventory_host_mod',
+    'inventory_hostvars',
+  ].map((table) => [`DELETE from ${table} WHERE host=:host`, params])
+  queries.push([`DELETE from inventory_hosts WHERE id=:host`, params])
+
+  await utils.db.writeMany(queries)
+}
+
+/**
+ * Verifies that a list of modules exists
+ *
+ * @param {array} modules - The list of modules to check
+ * @return {array} result - An [bool result, array missing] array
+ */
+Host.prototype.verifyModulesExist = async function (modules) {
+  const missing = []
+  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const allModules =
+    result[0] === 200 && result[1].results?.[0]?.values
+      ? result[1].results[0].values.map((row) => row[0])
+      : []
+  for (const mod of modules) {
+    if (!allModules.includes(mod)) missing.push(mod)
+  }
+
+  return [missing.length === 0, missing]
+}
+
+/**
+ * Sets the available modules on a client
+ *
+ * @param {string} uuid - The client UUID
+ * @param {array} modules - The list of modules
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.setClientModules = async function (uuid, modules) {
+  const queries = [[`DELETE from inventory_host_mod WHERE host=:uuid`, { uuid }]]
+  for (const module of modules)
+    queries.push([`INSERT INTO inventory_host_mod VALUES(:uuid, :module)`, { uuid, module }])
+
+  const result = await utils.db.writeMany(queries)
+  const failed = []
+  if (result[0] === 200 && result[1].results) {
+    for (const i in modules) {
+      if (result[1].results[Number(i) + 1].last_insert_id)
+        log.debug(`[client] Enabled module ${modules[i]} for client ${uuid}`)
+      else {
+        log.warn(`[client] Failed to enable module ${modules[i]} to client ${uuid}`)
+        failed.push(modules[i])
+      }
+    }
+  }
+
+  return [failed.length === 0, failed]
+}
+
+/**
+ * Gets the available modules for a client
+ *
+ * @param {string} uuid - The client UUID
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.getClientModules = async function (uuid) {
+  const result = await utils.db.read(`SELECT mod from inventory_host_mod WHERE host=:host`, {
+    host: uuid,
+  })
+  const modules = []
+  if (result[0] === 200 && result[1].results?.[0]?.values) {
+    for (const read of result[1].results[0].values) modules.push(read[0])
+  }
+
+  return modules
+}
+
+/**
+ * Gets the available client modules
+ *
+ * @param {string} uuid - The client UUID
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.getAllClientModules = async function () {
+  const result = await utils.db.read(`SELECT mod from inventory_mods WHERE 1`)
+  const modules = []
+  if (result[0] === 200 && result[1].results) {
+    for (const read of result[1].results[0].values) modules.push(read[0])
+  }
+
+  return modules
+}
+
+/**
+ * Enable a client module
+ *
+ * @param {string} uuid - The client UUID
+ * @param {string} module - The module name
+ * @return {bool} result - True if it worked, false if not
+ */
+Host.prototype.enableClientModule = async function (uuid, module) {
+  const result = await utils.db.write(
+    `INSERT INTO inventory_host_mod (host, mod) VALUES(:uuid, :module) ON CONFLICT DO NOTHING`,
+    { uuid, module }
+  )
+
+  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
+}
+
+/**
+ * Disable a client module
+ *
+ * @param {string} uuid - The client UUID
+ * @param {string} module - The module name
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.disableClientModule = async function (uuid, module) {
+  const result = await utils.db.write(
+    `DELETE from inventory_host_mod WHERE host=:uuid AND mod=:module`,
+    {
+      uuid,
+      module,
+    }
+  )
+
+  return result[0] === 200 && result[1].results?.[0].last_insert_id ? true : false
+}
+
+/**
+ * Gets the available module files for a client
+ *
+ * @param {arrau} modules - The modules for which to load files
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.getClientModuleFiles = async function (modules) {
+  const result = await utils.db.read(
+    `SELECT file, folder, content from inventory_modfiles WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})`
+  )
+  const files = []
+  if (result[0] === 200 && result[1].results?.[0]?.values) {
+    for (const read of result[1].results[0].values) {
+      const [file, folder, content] = read
+      files.push({ file, folder, content })
+    }
+  }
+
+  return files
+}
+
+/**
+ * Gets the client variables
+ *
+ * @param {string} uuid - The client UUID
+ * @param {bool} noInfo - Set to true to not include the variable info
+ * @param {bool} decrypt - Set to true to decrypt vars encrypted at rest
+ * @return {array} result - An array holding the vars
+ */
+Host.prototype.getClientVars = async function (uuid, noInfo = false, decrypt = false) {
+  const result = await utils.db.read(
+    `SELECT key, val ${noInfo ? '' : ', info'} from inventory_hostvars WHERE host=:host`,
+    { host: uuid }
+  )
+  const vars = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    for (const read of result[1].results[0].values) {
+      /*
+       * If noInfo is set, info will be undefined
+       * but that's ok, JS doesn't mind and will drop it
+       */
+      const [key, val, info] = read
+      vars.push({
+        key,
+        val: decrypt ? this.undoVarSecrecy(key, val)[1] : val,
+        info,
+      })
+    }
+  }
+
+  return vars
+}
+
+Host.prototype.undoVarSecrecy = function (key, val) {
+  // If a key ends with 'SECRET' and is encrypted, we decrypt it
+  if (key.slice(-6) === 'SECRET' && typeof val === 'string') {
+    try {
+      val = utils.decrypt(val)
+    } catch (err) {
+      log.warn(err, `Failed to decrypt hostvar ${key}`)
+    }
+  }
+
+  return [key, val]
+}
+
+/**
+ * Gets the module variables
+ *
+ * @param {array} modules - An (optional) array of modules to fetch the vars for
+ * @param {bool} noInfo - Set to true to not include the variable info
+ * @return {object} result - An array holding the vars
+ */
+Host.prototype.getModuleVars = async function (modules = [], noInfo = false) {
+  const where =
+    modules.length > 0 ? `WHERE mod IN (${modules.map((mod) => `"${mod}"`).join()})` : `WHERE 1`
+  const q = `SELECT id AS key, val ${noInfo ? '' : ', info'} from inventory_modvars ${where}`
+  const result = await utils.db.read(q)
+  const vars = []
+  if (result[0] === 200 && result[1]?.results?.[0]?.values) {
+    for (const read of result[1].results[0].values) {
+      /*
+       * If noInfo is set, info will be undefined
+       * but that's ok, JS doesn't mind and will drop it
+       */
+      const [key, val, info] = read
+      vars.push({ key, val, info })
+    }
+  }
+
+  return vars
+}
+
+/**
+ * Retrieves a host variable
+ *
+ * @param {string} host - The host UUID
+ * @param {string} key - The key (name of the variable)
+ * @return {object} result - The found result
+ */
+Host.prototype.getHostVar = async function (host, key) {
+  const result = await utils.db.read(
+    `SELECT * from inventory_hostvars WHERE host=:host AND key=:key`,
+    {
+      host,
+      key,
+    }
+  )
+
+  if (result[0] === 200 && result[1].results[0].values) {
+    const found = {}
+    const cols = result[1].results[0].columns
+    const vals = result[1].results[0].values[0]
+    for (const i in cols) found[cols[i]] = vals[i]
+
+    return found
+  }
+
+  return false
+}
+
+/**
+ * Sets the available variables for a client
+ *
+ * @param {string} uuid - The client UUID
+ * @param {array} vars - The list of variables
+ * @return {array} result - An [bool result, array failed] array
+ */
+Host.prototype.setClientVariables = async function (uuid, vars = {}) {
+  const queries = []
+  // Note that we do not store vars that start with MORIO_
+  const toStore = Object.entries(vars)
+    .filter(([key]) => key.slice(0, 6) !== 'MORIO_')
+    .map((entry) => this.ensureVarSecrecy(...entry))
+  for (const [key, val] of toStore) {
+    const exists = await this.getHostVar(uuid, key)
+    if (exists) {
+      // Update var
+      queries.push([
+        `UPDATE inventory_hostvars SET val=:val, info=:info WHERE id=:id`,
+        { val: asScalarOrJson(val), info: exists.info, id: exists.id },
+      ])
+    } else {
+      // Create var
+      queries.push([
+        `INSERT INTO inventory_hostvars (key, val, info, host) VALUES(:key, :val, :info, :host)`,
+        { key, val: asScalarOrJson(val), info: 'Pushed from host', host: uuid },
+      ])
+    }
+  }
+
+  const result = await utils.db.writeMany(queries)
+  const failed = []
+  if (result[0] === 200 && result[1].results) {
+    const varNames = toStore.map((kv) => kv[0])
+    for (const i in varNames) {
+      if (result[1].results[i].last_insert_id)
+        log.debug(`[client] Set var ${varNames[i]} for client ${uuid}`)
+      else {
+        log.warn(`[client] Failed to set var ${varNames[i]} to client ${uuid}`)
+        failed.push(varNames[i])
+      }
+    }
+  }
+
+  return [failed.length === 0, failed]
+}
+
+Host.prototype.ensureVarSecrecy = function (key, val) {
+  // If a key ends with 'SECRET' we encrypt it at rest
+  if (key.slice(-6) === 'SECRET') {
+    try {
+      val = utils.encrypt(val)
+    } catch (err) {
+      log.warn(err, `Failed to encrypt hostvar ${key}`)
+    }
+  }
+
+  return [key, val]
+}
+
+/**
+ * Creates a client command entry and returns the ID
+ *
+ * @return {number} id - The client command ID
+ */
+Host.prototype.getClientCommandId = async function (clients = false) {
+  const result = await utils.db.write(
+    `INSERT INTO client_commands (created_at, clients) VALUES (:createdAt, :clients)`,
+    { createdAt: new Date(), clients: Array.isArray(clients) ? JSON.stringify(clients) : null }
+  )
+
+  // Clean up old records while we're at it
+  this.cleanupClientCommands()
+
+  return result[0] === 200 && result[1].results?.[0]?.last_insert_id
+    ? result[1].results[0].last_insert_id
+    : false
+}
+
+Host.prototype.cleanupClientCommands = async function () {
+  await utils.db.writeMany([
+    [`DELETE FROM client_commands WHERE datetime(created_at) < datetime('none', '-4 hours')`],
+    [`DELETE FROM client_command_data WHERE datetime(created_at) < datetime('none', '-4 hours')`],
+  ])
 }

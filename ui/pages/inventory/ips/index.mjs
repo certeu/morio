@@ -4,7 +4,7 @@ import { LocationIcon } from 'components/icons.mjs'
 import { IpsTable } from 'components/inventory/ip.mjs'
 
 const meta = {
-  title: 'IP Adresses',
+  title: 'IP Addresses',
   page: ['inventory', 'ips'],
   Icon: LocationIcon,
 }

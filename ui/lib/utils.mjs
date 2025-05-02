@@ -15,6 +15,13 @@ export const arrayMembers = (set, op='add', data) => {
   return [...s]
 }
 
+export const arrayToObject = (arr) => {
+  const obj = {}
+  for (const key of arr) obj[key] = key
+
+  return obj
+}
+
 export const asJson = (data, pretty = true) => {
   const json = {}
   for (const [key, val] of Object.entries(data)) {
@@ -180,6 +187,11 @@ export const formatNumber = (num, suffix = '') => {
  */
 export const iconSize = 'h-8 w-8'
 
+/*
+ * This generates an inline help URL for a given slug
+ */
+export const inlineHelp = (slug) => `https://morio.it/docs/reference/help/${slug}`
+
 /**
  * A helper object to parse as JSON
  *
@@ -335,3 +347,17 @@ export const shortDate = (timestamp = false, withTime = true) => {
 
   return ts.toLocaleDateString('en', options)
 }
+
+/**
+ * Helper method to varify a string
+ */
+export const varify = (input) =>
+  _slugify(input, {
+    replacement: '_',
+    strip: true,
+    locale: 'en',
+    trim: false,
+    remove: /[*+~#^=`.(),;/?\\[]{}|'"!:@]/g,
+  }).trim()
+
+

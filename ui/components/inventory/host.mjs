@@ -13,9 +13,11 @@ import { RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { OsIcon } from './oss.mjs'
+import { OsIcon } from './os.mjs'
 import { IpsDisplayTable } from './ip.mjs'
 import { MacsDisplayTable } from './mac.mjs'
+import { PkgsDisplayTable } from './pkg.mjs'
+import { ModsDisplayTable } from './mod.mjs'
 import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
@@ -124,7 +126,7 @@ export const HostsTable = () => {
   )
 }
 
-async function runHostsTableApiCall(api) {
+export async function runHostsTableApiCall(api) {
   const result = await api.getInventoryHosts()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -217,6 +219,18 @@ export const HostDetail = ({ data }) => {
         summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}
       >
         <MacsDisplayTable macs={data.macs} />
+      </Details>
+      <Details
+        summaryLeft="Software Packages"
+        summaryRight={<span className="badge badge-primary">{data.pkgs?.length}</span>}
+      >
+        <PkgsDisplayTable macs={data.pkgs} />
+      </Details>
+      <Details
+        summaryLeft="Morio Modules"
+        summaryRight={<span className="badge badge-primary">{data.mods?.length}</span>}
+      >
+        <ModsDisplayTable macs={data.mods} />
       </Details>
       {data.notes ? (
         <Details summaryLeft="Notes">{data.nodes || 'no notes for this host'}</Details>
