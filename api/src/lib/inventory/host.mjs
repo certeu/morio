@@ -535,7 +535,7 @@ Host.prototype.save = async function (id, data) {
  * @param {bool} replace - Whether to overwrite an existing client or not
  * @return {boolean} result - True if it went ok, false if not
  */
-Host.prototyp.enroll = async function (uuid, data, replace = false) {
+Host.prototype.enroll = async function (uuid, data, replace = false) {
   const exists = await this.load(uuid)
   /*
    * By default, we do not allow replacing/updating a host
