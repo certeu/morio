@@ -1,24 +1,6 @@
 import { utils } from '../lib/utils.mjs'
-import {
-  addClientCommandStatusUpdate,
-  createInvite,
-  disableClientModule,
-  enableClientModule,
-  enrollHost,
-  getAllClientModules,
-  getClientCommand,
-  getClientCommandId,
-  getClientCommandStatusUpdates,
-  getClientModuleFiles,
-  getClientModules,
-  getClientVars,
-  getModuleVars,
-  removeHost,
-  setClientModules,
-  setClientVariables,
-  useInvite,
-  verifyModulesExist,
-} from '../lib/inventory.mjs'
+import { Host } from '../lib/inventory/host.mjs'
+
 import { createApikey, deleteApikey } from '../lib/apikey.mjs'
 import { asTime } from '../lib/account.mjs'
 import { currentUser } from '../rbac.mjs'
@@ -45,7 +27,7 @@ Controller.prototype.createInvite = async function (req, res) {
   if (!types.includes(req.params.type))
     return utils.sendErrorResponse(res, 'morio.api.clients.invalid_invite_type', req.url)
 
-  const invite = await createInvite(currentUser(req), req.params.type)
+  const invite = await new Host().createInvite(currentUser(req), req.params.type)
 
   return res.send({ invite })
 }
@@ -85,7 +67,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
     /*
      * Use the invite
      */
-    const invite = await useInvite(valid.invite)
+    const invite = await new Host().useInvite(valid.invite)
 
     if (!invite) return utils.sendErrorResponse(res, 'morio.api.clients.invite_invalid', req.url)
   }
@@ -135,7 +117,7 @@ Controller.prototype.join = async function (req, res, rejoin = false) {
   /*
    * Insert the client data into the inventory tables
    */
-  const result = await enrollHost(uuid, valid.info, rejoin)
+  const result = await new Host().enroll(uuid, valid.info, rejoin)
 
   /*
    * If it is false and it's not a re-join,
@@ -222,7 +204,7 @@ Controller.prototype.report = async function (req, res) {
   /*
    * Update the client data in the inventory tables
    */
-  const result = await enrollHost(valid.uuid, valid.info, true)
+  const result = await new Host().enroll(valid.uuid, valid.info, true)
 
   return result
     ? res.status(204).send()
@@ -256,7 +238,7 @@ Controller.prototype.push = async function (req, res) {
   /*
    * If any of the submitted module does not exist, reject the request entirely
    */
-  const result = await verifyModulesExist(valid.modules)
+  const result = await new Host().verifyModulesExist(valid.modules)
   if (!result[0])
     return utils.sendErrorResponse(res, 'morio.api.clients.unknown_module', req.url, {
       unknown_modules: result[1].join(),
@@ -265,7 +247,7 @@ Controller.prototype.push = async function (req, res) {
   /*
    * Update the database with the client modules
    */
-  const mods = await setClientModules(valid.uuid, valid.modules)
+  const mods = await new Host().setClientModules(valid.uuid, valid.modules)
   if (!mods[0])
     return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
       failed_modules: result[1].join(),
@@ -274,7 +256,7 @@ Controller.prototype.push = async function (req, res) {
   /*
    * Update the database with the client vars
    */
-  const vars = await setClientVariables(valid.uuid, valid.vars)
+  const vars = await new Host().setClientVariables(valid.uuid, valid.vars)
   if (!vars[0])
     return utils.sendErrorResponse(res, 'morio.api.db.failure', req.url, {
       failed_vars: result[1].join(),
@@ -299,10 +281,10 @@ Controller.prototype.pull = async function (req, res) {
   /*
    * Load client modules
    */
-  const modules = await getClientModules(req.params.uuid)
-  const mvars = await getModuleVars(modules, true)
-  const cvars = await getClientVars(req.params.uuid, true, true)
-  const files = await getClientModuleFiles(modules)
+  const modules = await new Host().getClientModules(req.params.uuid)
+  const mvars = await new Host().getModuleVars(modules, true)
+  const cvars = await new Host().getClientVars(req.params.uuid, true, true)
+  const files = await new Host().getClientModuleFiles(modules)
 
   /*
    * Client vars have precedence over module vars
@@ -331,7 +313,7 @@ Controller.prototype.unjoin = async function (req, res) {
   if (!matchClientApikey(req, req.params.uuid))
     return utils.sendErrorResponse(res, 'morio.api.clients.authentication_mismatch', req.url)
 
-  await removeHost(req.params.uuid)
+  await new Host().remove(req.params.uuid)
   await deleteApikey(req.params.uuid)
 
   return res.status(204).send()
@@ -344,8 +326,8 @@ Controller.prototype.unjoin = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.listModules = async function (req, res) {
-  const available = await getAllClientModules()
-  const enabled = await getClientModules(apikeyFromHeaders(req))
+  const available = await new Host().getAllClientModules()
+  const enabled = await new Host().getClientModules(apikeyFromHeaders(req))
 
   return res.send({ available, enabled })
 }
@@ -357,7 +339,7 @@ Controller.prototype.listModules = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.enableModule = async function (req, res) {
-  const result = await enableClientModule(apikeyFromHeaders(req), req.params.module)
+  const result = await new Host().enableClientModule(apikeyFromHeaders(req), req.params.module)
 
   return result ? res.status(204).send() : res.status(400).send()
 }
@@ -369,7 +351,7 @@ Controller.prototype.enableModule = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.disableModule = async function (req, res) {
-  const result = await disableClientModule(apikeyFromHeaders(req), req.params.module)
+  const result = await new Host().disableClientModule(apikeyFromHeaders(req), req.params.module)
 
   return result ? res.status(204).send() : res.status(400).send()
 }
@@ -402,7 +384,7 @@ Controller.prototype.sendCommand = async function (req, res) {
   /*
    * Grab a client command ID
    */
-  const id = await getClientCommandId(valid.clients)
+  const id = await new Host().getClientCommandId(valid.clients)
 
   /*
    * Then produce the Kafka message, don't await it
@@ -438,7 +420,7 @@ Controller.prototype.addCommandStatus = async function (req, res) {
   /*
    * Store status update, but don't await it
    */
-  addClientCommandStatusUpdate(valid)
+  new Host().addClientCommandStatusUpdate(valid)
 
   return res.status(204).send()
 }
@@ -450,7 +432,7 @@ Controller.prototype.addCommandStatus = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getCommandInfo = async function (req, res) {
-  const command = await getClientCommand(req.params.id)
+  const command = await new Host().getClientCommand(req.params.id)
 
   return command ? res.send(command) : utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 }
@@ -462,7 +444,7 @@ Controller.prototype.getCommandInfo = async function (req, res) {
  * @param {object} res - The response object from Express
  */
 Controller.prototype.getCommandStatus = async function (req, res) {
-  const updates = await getClientCommandStatusUpdates(req.params.id)
+  const updates = await new Host().getClientCommandStatusUpdates(req.params.id)
 
   return res.send(updates)
 }
