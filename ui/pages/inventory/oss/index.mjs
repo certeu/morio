@@ -1,7 +1,7 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { WindowIcon } from 'components/icons.mjs'
-import { OssTable } from 'components/inventory/oss.mjs'
+import { OssTable } from 'components/inventory/os.mjs'
 
 const meta = {
   title: 'Operating Systems',
