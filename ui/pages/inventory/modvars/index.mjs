@@ -1,7 +1,7 @@
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { VariableIcon } from 'components/icons.mjs'
-import { ModvarsTable } from 'components/inventory/modvars.mjs'
+import { ModvarsTable } from 'components/inventory/modvar.mjs'
 
 const meta = {
   title: 'Module Vars',
