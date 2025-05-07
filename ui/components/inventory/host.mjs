@@ -1,7 +1,9 @@
 // Dependencies
+import { slugify } from 'lib/utils.mjs'
 import { formatBytes, shortUuid, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
+import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
 // Hooks
 import { useContext, useEffect, useState } from 'react'
@@ -9,10 +11,12 @@ import { useApi } from 'hooks/use-api.mjs'
 import { useSelection } from 'hooks/use-selection.mjs'
 import { useQuery } from '@tanstack/react-query'
 // Components
-import { RightIcon, TrashIcon } from 'components/icons.mjs'
+import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
+import { CogIcon, AddServersIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
+import { StringInput, TextInput } from 'components/inputs.mjs'
 import { OsIcon } from './os.mjs'
 import { IpsDisplayTable } from './ip.mjs'
 import { MacsDisplayTable } from './mac.mjs'
@@ -35,6 +39,7 @@ export const HostsTable = () => {
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()
@@ -65,11 +70,25 @@ export const HostsTable = () => {
 
   return (
     <>
-      {hosts.length > 0 ? (
-        <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
-          <TrashIcon /> {count} Hosts
+      <div className="flex flex-row item-center gap-2">
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            pushModal(
+              <ModalWrapper keepOpenOnClick>
+                <BulkHostUpdate hosts={Object.keys(selection)} {...{ refresh, setRefresh }} />
+              </ModalWrapper>
+            )
+          }
+          disabled={count < 1}
+        >
+          <CogIcon /> Update {count} Hosts
         </button>
-      ) : null}
+        <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
+          <TrashIcon /> Remove {count} Hosts
+        </button>
+        <NewHostButton {...{ refresh, setRefresh }} />
+      </div>
       <table className="table table-auto">
         <thead>
           <tr>
@@ -81,7 +100,7 @@ export const HostsTable = () => {
                 checked={hosts.length === count}
               />
             </th>
-            {['host', 'name', 'cores', 'memory', 'last_update'].map((field) => (
+            {['host', 'name', 'arch', 'cores', 'memory', 'last_update'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -114,6 +133,7 @@ export const HostsTable = () => {
               <td className="">
                 <PageLink href={`/inventory/hosts/${host.id}`}>{host.name || host.fqdn}</PageLink>
               </td>
+              <td className="">{host.arch}</td>
               <td className="">{host.cores}</td>
               <td className="">{formatBytes(host.memory)}</td>
               <td className="">{timeAgo(host.last_update)}</td>
@@ -130,6 +150,108 @@ export async function runHostsTableApiCall(api) {
   const result = await api.getInventoryHosts()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
+}
+
+export const NewHostButton = ({ refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-8 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <NewHost {...{ refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <AddServersIcon />
+      <span>New Host</span>
+    </button>
+  )
+}
+
+export const NewHost = ({ refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [id, setId] = useState('')
+  const [name, setName] = useState('')
+  const [arch, setArch] = useState('')
+  const [cores, setCores] = useState('')
+  const [memory, setMemory] = useState('')
+  const [isAvailable, setIsAvailable] = useState(false)
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    const checkHostAvailability = async () => {
+      const result = await api.isHostAvailable(id)
+      if (result[1] === 404) setIsAvailable(true)
+      else setIsAvailable(false)
+    }
+    if (id) checkHostAvailability()
+  }, [id, api])
+
+  // Handler method to create a new group
+  const createHost = async () => {
+    setLoadingStatus([true, 'Contacting API'])
+    const result = await api.createHost(id, name, arch, cores, memory)
+    if (result[1] === 201) {
+      clearModal()
+      setLoadingStatus([true, 'Host created', true, true])
+      if (setRefresh) setRefresh(refresh + 1)
+    } else setLoadingStatus([true, 'Failed to create host', true, false])
+  }
+
+  return (
+    <div>
+      <h3>Create a new host</h3>
+      <p>
+        Give your new host a id, name, arch, cores and memory. The host id will become its unique
+        ID(uuid).
+      </p>
+      <StringInput
+        label="UUID"
+        update={(val) => setId(slugify(val))}
+        current={id}
+        placeholder="f0737d42-1bc4-4579-8d25-d54519f54fcd"
+        valid={(val) =>
+          val && isAvailable
+            ? true
+            : val === ''
+              ? { error: { details: [{ message: 'UUID cannot be empty' }] } }
+              : { error: { details: [{ message: 'This uuid is taken' }] } }
+        }
+      />
+      <StringInput
+        label="Name"
+        update={(val) => setName(slugify(val))}
+        current={name}
+        placeholder="192.168.1.1"
+      />
+      <TextInput label="Host arch" update={setArch} current={arch} placeholder="linux_22.04" />
+      <TextInput label="Host cores" update={setCores} current={cores} placeholder="8" />
+      <TextInput label="memory" update={setMemory} current={memory} placeholder="32" />
+      <div className="flex flex-row items-center gap-2 w-full mt-4">
+        <button
+          className="btn btn-primary grow"
+          disabled={!(id && isAvailable)}
+          onClick={createHost}
+        >
+          Create Host
+        </button>
+        <button className="btn btn-primary btn-outline" onClick={clearModal}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
 }
 
 export const HostSummary = ({ uuid }) => {
@@ -184,6 +306,52 @@ export const HostDataSummary = ({ data }) => {
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
+  // State
+  const [name, setName] = useState('')
+  const [arch, setArch] = useState('')
+  const [cores, setCores] = useState('')
+  const [memory, setMemory] = useState('')
+  // Hooks
+  const { api } = useApi()
+  // Context
+  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+  // Helper method to bulk-update descriptions
+  const updateHosts = async () => {
+    let i = 0
+    const count = hosts.length
+    for (const id in hosts) {
+      i++
+      await api.updateInventoryHostInfo(hosts[id], name, arch, cores, memory)
+      setLoadingStatus([
+        true,
+        <LoadingProgress val={i} max={count} msg="Updating host infos" key="linter" />,
+      ])
+    }
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+  }
+
+  return (
+    <div className="">
+      <h2>Update multiple hosts</h2>
+      <p>This will set the same info for all the selected hosts.</p>
+      <StringInput
+        label="Name"
+        update={(val) => setName(slugify(val))}
+        current={name}
+        placeholder="192.168.1.1"
+      />
+      <TextInput current={arch} update={setArch} label="Architecture" />
+      <TextInput current={cores} update={setCores} label="Cores" />
+      <TextInput current={memory} update={setMemory} label="Memory" />
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateHosts}>
+        Update host info
+      </button>
     </div>
   )
 }
