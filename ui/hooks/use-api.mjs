@@ -672,6 +672,15 @@ MorioClient.prototype.isGroupAvailable = async function (group) {
 }
 
 /**
+ * Get if a host id is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isHostAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-host-available/${id}`)
+}
+
+/**
  * Get if a ip address is available
  *
  * @return {object} - The result
@@ -690,21 +699,21 @@ MorioClient.prototype.isMacAvailable = async function (mac) {
 }
 
 /**
- * Get if a os name is available
+ * Get if a os id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isOsAvailable = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/is-os-available/${name}`)
+MorioClient.prototype.isOsAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-os-available/${id}`)
 }
 
 /**
- * Get if a pkg name is available
+ * Get if a pkg id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isPkgAvailable = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/is-pkg-available/${name}`)
+MorioClient.prototype.isPkgAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-pkg-available/${id}`)
 }
 
 /**
@@ -820,6 +829,67 @@ MorioClient.prototype.updateInventoryGroupDescription = async function (group, d
     headers: this.jsonHeaders,
     method: 'PATCH',
     body: JSON.stringify({ description }),
+  })
+}
+
+/**
+ * Update the info of an inventory host
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryHostInfo = async function (
+  host,
+  arch,
+  cores,
+  fqdn,
+  memory,
+  name,
+  notes,
+  tags
+) {
+  return await this.call(`${morioConfig.api}/inventory/hosts/${host}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ arch, cores, fqdn, memory, name, notes, tags }),
+  })
+}
+
+/**
+ * Update the description of an inventory ip
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryIpVersion = async function (ip, version) {
+  return await this.call(`${morioConfig.api}/inventory/ips/${ip}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ version }),
+  })
+}
+
+/**
+ * Update the name, version of an inventory os
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryOsVersion = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ name, version }),
+  })
+}
+
+/**
+ * Update the name, version of an inventory os
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryPkgVersion = async function (id, name, version) {
+  return await this.call(`${morioConfig.api}/inventory/pkgs/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ name, version }),
   })
 }
 
@@ -1346,7 +1416,7 @@ MorioClient.prototype.createClientInvite = async function (type) {
  * @param {string} version - An ip version
  * @return {object} - The result
  */
-MorioClient.prototype.createIP = async function (ip, version) {
+MorioClient.prototype.createIp = async function (ip, version) {
   return await this.call(`${morioConfig.api}/inventory/ip`, {
     headers: this.jsonHeaders,
     method: 'POST',
@@ -1456,9 +1526,9 @@ MorioClient.prototype.createMac = async function (mac) {
  *
  * @param {string} id - The host id
  * @param {string} arch - The host arch
- * @param {string} cores - The cores detail
+ * @param {number} cores - The cores number
  * @param {string} fqdn - The fqdn name
- * @param {string} memory - The memory size
+ * @param {number} memory - The memory size
  * @param {string} name - The host name
  * @param {string} notes - The notes
  * @param {string} tags - The tags

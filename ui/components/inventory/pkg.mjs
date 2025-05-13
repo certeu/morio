@@ -24,7 +24,7 @@ export const PkgsTable = () => {
   // State
   const [pkgs, setPkgs] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   // Context
@@ -90,7 +90,7 @@ export const PkgsTable = () => {
                 checked={pkgs.length === count}
               />
             </th>
-            {['pkg', 'host', 'version'].map((field) => (
+            {['id', 'host', 'name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -118,13 +118,14 @@ export const PkgsTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkgs.name}</PageLink>
+                <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
               </td>
               <td className="">
                 <PageLink href={`/inventory/hosts/${pkg.host}`}>
                   <InventoryHostname uuid={pkg.host} />
                 </PageLink>
               </td>
+              <td className="">{pkg.name}</td>
               <td className="">{pkg.version}</td>
             </tr>
           ))}
@@ -167,6 +168,7 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
@@ -177,17 +179,17 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   // Effects
   useEffect(() => {
     const checkPkgAvailability = async () => {
-      const result = await api.isPkgAvailable(name)
+      const result = await api.isPkgAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (name) checkPkgAvailability()
-  }, [name, api])
+    if (id) checkPkgAvailability()
+  }, [id, api])
 
   // Handler method to create a new pkg
   const createPkg = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createPkg(name, version)
+    const result = await api.createPkg(id, name, version)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Pkg created', true, true])
@@ -198,27 +200,23 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   return (
     <div>
       <h3>Create a new pkg</h3>
-      <p>Give your new pkg a name, and version. The pkg name will become its unique ID.</p>
+      <p>Give your new pkg a id, name, and version. The pkg id will become its unique ID.</p>
       <StringInput
-        label="Name"
-        update={(val) => setName(slugify(val))}
-        current={name}
-        placeholder="Package001"
+        label="Id"
+        update={(val) => setId(val)}
+        current={id}
+        placeholder="pkg_01"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'name cannot be empty' }] } }
-              : { error: { details: [{ message: 'This name is taken' }] } }
+              ? { error: { details: [{ message: 'id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This id is taken' }] } }
         }
       />
 
-      <StringInput
-        label="Version"
-        update={setVersion}
-        current={version}
-        placeholder="Pkg version"
-      />
+      <StringInput label="Name" update={setName} current={name} placeholder="modular package" />
+      <StringInput label="Version" update={setVersion} current={version} placeholder="v_01" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
@@ -245,6 +243,12 @@ export const PkgDetail = ({ data }) => {
 
   return (
     <>
+      {data.id ? (
+        <>
+          <h2>Id</h2>
+          <Markdown>{data.id}</Markdown>
+        </>
+      ) : null}
       {data.name ? (
         <>
           <h2>Name</h2>
@@ -263,6 +267,7 @@ export const PkgDetail = ({ data }) => {
 
 export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
   // State
+  const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   // Hooks
   const { api } = useApi()
@@ -275,7 +280,7 @@ export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
     const count = pkgs.length
     for (const id in pkgs) {
       i++
-      await api.updateInventoryOsVersion(pkgs[id], version)
+      await api.updateInventoryPkgVersion(pkgs[id], name, version)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating pkg versions" key="linter" />,
@@ -287,11 +292,12 @@ export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update version</h2>
+      <h2>Update name, version</h2>
       <p>This will set the same version for all the selected pkgs.</p>
+      <StringInput current={name} update={setName} label="name" />
       <StringInput current={version} update={setVersion} label="version" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update pkg versions
+        Update pkg names, versions
       </button>
     </div>
   )
@@ -302,7 +308,7 @@ export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
  */
 export const PkgsDisplayTable = ({ pkgs }) => {
   // State
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   // Hooks
@@ -332,12 +338,15 @@ export const PkgsDisplayTable = ({ pkgs }) => {
         {sorted.map((pkg) => (
           <tr key={pkg.id}>
             <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.name}</PageLink>
+              <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
             </td>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/hosts/${pkg.host}`}>
                 <InventoryHostname uuid={pkg.host} />
               </PageLink>
+            </td>
+            <td className="">
+              <Markdown>{pkg.name}</Markdown>
             </td>
             <td className="">
               <Markdown>{pkg.version}</Markdown>

@@ -363,7 +363,7 @@ export const schema = {
   'req.inventory.createHost': Joi.object({
     id: Joi.string().required(),
     arch: Joi.string(),
-    cores: Joi.string(),
+    cores: Joi.number(),
     fqdn: Joi.string(),
     memory: Joi.number(),
     name: Joi.string(),
@@ -403,6 +403,16 @@ export const schema = {
     description: Joi.string().allow('', null),
     groups: Joi.array().items(Joi.string()),
     hosts: Joi.array().items(Joi.string()),
+  }),
+  'req.inventory.updateHost': Joi.object({
+    id: Joi.string().required(),
+    arch: Joi.string(),
+    cores: Joi.number(),
+    fqdn: Joi.string(),
+    memory: Joi.number(),
+    name: Joi.string(),
+    notes: Joi.string(),
+    tags: Joi.string(),
   }),
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),

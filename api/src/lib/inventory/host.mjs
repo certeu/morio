@@ -1,5 +1,6 @@
 // Utils
 import { log, utils } from '../utils.mjs'
+import util from 'util'
 // Load shared inventory code
 import { addNonEnumProp, resultsAsList, unwrapVar, deleteRecord } from './shared.mjs'
 import { clean, asTime, fromJson } from '../account.mjs'
@@ -50,6 +51,65 @@ Host.prototype.list = async function () {
   const [status, result] = await utils.db.read(`SELECT * FROM inventory_hosts`)
 
   return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to update an inventory (host)
+ *
+ * @return {object} updated - true if it the host is updated, false if not
+ */
+Host.prototype.update = async function (
+  id,
+  arch = '',
+  cores = 1,
+  fqdn = '',
+  memory = 1,
+  name = '',
+  notes = '',
+  tags = ''
+) {
+  if (!id) return false
+
+  const last_update = new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_hosts SET arch=:arch, cores=:cores, fqdn=:fqdn, memory=:memory, name=:name, notes=:notes, tags=:tags, last_update=:last_update WHERE id=:id`,
+    {
+      arch,
+      cores,
+      fqdn,
+      memory,
+      name,
+      notes,
+      tags,
+      last_update,
+      id,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(id)
+}
+
+/**
+ * Helper method to see if a host ID is available
+ *
+ * @param {string} host - The host ID/name
+ * @return {object} available - true if it is available, false if not
+ */
+Host.prototype.isAvailable = async function (id) {
+  const [status, result] = await utils.db.read(`SELECT id FROM inventory_hosts where id=:id`, {
+    id,
+  })
+  if (status === 200) {
+    const hits = resultsAsList(result)
+    return hits.length === 0
+  }
+
+  return false
 }
 
 /**
@@ -335,29 +395,41 @@ Host.prototype.create = async function (
   tags,
   last_update
 ) {
-  if (!id) return false
-  /*
-   * Insert into the database
-   */
-  const result = await utils.db.write(
-    `INSERT INTO inventory_hosts(id, arch, cores, fqdn, memory, name, notes, tags, last_update) VALUES(:id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update)`,
-    {
-      id,
-      arch,
-      cores,
-      fqdn,
-      memory,
-      name,
-      notes,
-      tags,
-      last_update,
-    }
-  )
-  let created = false
-  if (Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id)
-    created = true
+  if (!id) {
+    return false
+  }
 
-  return created
+  const sql = `
+    INSERT INTO inventory_hosts(
+      id, arch, cores, fqdn, memory, name, notes, tags, last_update
+    ) VALUES (
+      :id, :arch, :cores, :fqdn, :memory, :name, :notes, :tags, :last_update
+    )
+  `
+
+  const lastUpdateVal = last_update ?? new Date().toISOString().replace('T', ' ').replace('Z', '')
+
+  const params = {
+    id,
+    arch,
+    cores,
+    fqdn,
+    memory,
+    name,
+    notes,
+    tags,
+    last_update: lastUpdateVal,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
 }
 
 Host.prototype.createInvite = async function (user, type = 'once') {

@@ -198,6 +198,19 @@ Controller.prototype.isGroupAvailable = async function (req, res) {
 }
 
 /**
+ * Is a host (id) available?
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.isHostAvailable = async function (req, res) {
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Host().isAvailable(req.params.id)
+
+  return available ? res.status(404).send() : res.status(409).send()
+}
+
+/**
  * Is a ip (ip address) available?
  *
  * @param {object} req - The request object from Express
@@ -224,27 +237,27 @@ Controller.prototype.isMacAvailable = async function (req, res) {
 }
 
 /**
- * Is a os (os name) available?
+ * Is a os (os id) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isOsAvailable = async function (req, res) {
-  if (!req.params.name) return res.status(400).send()
-  const available = await new Os().isAvailable(req.params.name)
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Os().isAvailable(req.params.id)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
- * Is a pkg (pkg name) available?
+ * Is a pkg (pkg id) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isPkgAvailable = async function (req, res) {
-  if (!req.params.name) return res.status(400).send()
-  const available = await new Pkg().isAvailable(req.params.name)
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Pkg().isAvailable(req.params.id)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
@@ -562,6 +575,41 @@ Controller.prototype.updateGroup = async function (req, res) {
 }
 
 /**
+ * Update a host
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updateHost = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updateHost`, {
+    ...req.params,
+    ...req.body,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Take appropriate action
+   */
+  const host = new Host().update(
+    valid.id,
+    valid.arch,
+    valid.cores,
+    valid.fqdn,
+    valid.memory,
+    valid.name,
+    valid.notes,
+    valid.tags
+  )
+  return res.status(200).send(host)
+}
+
+/**
  * Loads groups as a hierarchy
  *
  * @param {object} req - The request object from Express
@@ -657,7 +705,8 @@ Controller.prototype.createHost = async function (req, res) {
     valid.memory,
     valid.name,
     valid.notes,
-    valid.tags
+    valid.tags,
+    valid.last_updated
   )
 
   return created
@@ -704,11 +753,11 @@ Controller.prototype.createPkg = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const pkg = await new Pkg().setId(valid.id).setName(valid.name).setVersion(valid.version).save()
+  const created = await new Pkg().create(valid.id, valid.name, valid.version)
 
-  return pkg.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -748,8 +797,8 @@ Controller.prototype.updatePkg = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updatePkg`, {
+    ...req.params,
     ...req.body,
-    id: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -757,13 +806,10 @@ Controller.prototype.updatePkg = async function (req, res) {
     })
 
   /*
-   * Update the package
+   * Take appropriate action
    */
-  const pkg = await new Pkg(valid.id).setName(valid.name).setVersion(valid.version).save()
-
-  return pkg.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await pkg.asData())
+  const pkg = new Pkg().update(valid.id, valid.name, valid.version)
+  return res.status(200).send(pkg)
 }
 
 /**
@@ -825,11 +871,11 @@ Controller.prototype.createOs = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const os = await new Os().setId(valid.id).setName(valid.name).setVersion(valid.version).save()
+  const created = await new Os().create(valid.id, valid.name, valid.version)
 
-  return os.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -869,8 +915,8 @@ Controller.prototype.updateOs = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateOs`, {
+    ...req.params,
     ...req.body,
-    id: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -878,13 +924,10 @@ Controller.prototype.updateOs = async function (req, res) {
     })
 
   /*
-   * Update the os
+   * Take appropriate action
    */
-  const os = await new Os(valid.id).setName(valid.name).setVersion(valid.version).save()
-
-  return os.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await os.asData())
+  const os = new Os().update(valid.id, valid.name, valid.version)
+  return res.status(200).send(os)
 }
 
 /**
@@ -946,11 +989,11 @@ Controller.prototype.createIp = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const ip = await new Ip().setId(valid.ip).setIp(valid.ip).setVersion(valid.version).save()
+  const created = await new Ip().create(valid.ip, valid.version)
 
-  return ip.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -990,8 +1033,8 @@ Controller.prototype.updateIp = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateIp`, {
+    ...req.params,
     ...req.body,
-    ip: req.params.ip,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -999,13 +1042,10 @@ Controller.prototype.updateIp = async function (req, res) {
     })
 
   /*
-   * Update the ip
+   * Take appropriate action
    */
-  const ip = await new Ip(valid.ip).setVersion(valid.version).save()
-
-  return ip.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await ip.asData())
+  const ip = new Ip().update(valid.ip, valid.version)
+  return res.status(200).send(ip)
 }
 
 /**
@@ -1067,11 +1107,11 @@ Controller.prototype.createMac = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const mac = await new Mac().setId(valid.mac).setMac(valid.mac).save()
+  const created = await new Mac().create(valid.mac)
 
-  return mac.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**

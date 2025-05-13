@@ -179,10 +179,13 @@ export const NewHost = ({ refresh, setRefresh }) => {
 
   // State
   const [id, setId] = useState('')
-  const [name, setName] = useState('')
   const [arch, setArch] = useState('')
   const [cores, setCores] = useState('')
+  const [fqdn, setFqdn] = useState('')
   const [memory, setMemory] = useState('')
+  const [name, setName] = useState('')
+  const [notes, setNotes] = useState('')
+  const [tags, setTags] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
@@ -200,8 +203,24 @@ export const NewHost = ({ refresh, setRefresh }) => {
 
   // Handler method to create a new group
   const createHost = async () => {
+    const last_update = new Date().toISOString()
+
+    // Ensure numeric values
+    const parsedCores = parseInt(cores, 10)
+    const parsedMemory = parseInt(memory, 10)
+
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createHost(id, name, arch, cores, memory)
+    const result = await api.createHost(
+      id,
+      arch,
+      parsedCores,
+      fqdn,
+      parsedMemory,
+      name,
+      notes,
+      tags,
+      last_update
+    )
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Host created', true, true])
@@ -213,8 +232,8 @@ export const NewHost = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new host</h3>
       <p>
-        Give your new host a id, name, arch, cores and memory. The host id will become its unique
-        ID(uuid).
+        Give your new host a id, arch, cores, fqdn, memory, name, notes, tags and last_update. The
+        host id will become its unique ID(uuid).
       </p>
       <StringInput
         label="UUID"
@@ -230,14 +249,32 @@ export const NewHost = ({ refresh, setRefresh }) => {
         }
       />
       <StringInput
+        label="Arch"
+        update={(val) => setArch(val)}
+        current={arch}
+        placeholder="linux_22.04"
+      />
+      <StringInput label="Cores" update={(val) => setCores(val)} current={cores} placeholder="8" />
+      <StringInput
+        label="Fqdn"
+        update={(val) => setFqdn(val)}
+        current={fqdn}
+        placeholder="192.168.1.1.nip.io"
+      />
+      <StringInput
+        label="Memory (GB)"
+        update={(val) => setMemory(val)}
+        current={memory}
+        placeholder="32"
+      />
+      <StringInput
         label="Name"
         update={(val) => setName(slugify(val))}
         current={name}
         placeholder="192.168.1.1"
       />
-      <TextInput label="Host arch" update={setArch} current={arch} placeholder="linux_22.04" />
-      <TextInput label="Host cores" update={setCores} current={cores} placeholder="8" />
-      <TextInput label="memory" update={setMemory} current={memory} placeholder="32" />
+      <TextInput current={notes} update={setNotes} label="Notes" />
+      <TextInput current={tags} update={setTags} label="Tags" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
@@ -312,10 +349,13 @@ export const HostDataSummary = ({ data }) => {
 
 export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
   // State
-  const [name, setName] = useState('')
   const [arch, setArch] = useState('')
   const [cores, setCores] = useState('')
+  const [fqdn, setFqdn] = useState('')
   const [memory, setMemory] = useState('')
+  const [name, setName] = useState('')
+  const [notes, setNotes] = useState('')
+  const [tags, setTags] = useState('')
   // Hooks
   const { api } = useApi()
   // Context
@@ -326,7 +366,7 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
     const count = hosts.length
     for (const id in hosts) {
       i++
-      await api.updateInventoryHostInfo(hosts[id], name, arch, cores, memory)
+      await api.updateInventoryHostInfo(hosts[id], arch, cores, fqdn, memory, name, notes, tags)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating host infos" key="linter" />,
@@ -341,14 +381,32 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
       <h2>Update multiple hosts</h2>
       <p>This will set the same info for all the selected hosts.</p>
       <StringInput
+        label="Arch"
+        update={(val) => setArch(val)}
+        current={arch}
+        placeholder="linux_22.04"
+      />
+      <StringInput label="Cores" update={(val) => setCores(val)} current={cores} placeholder="8" />
+      <StringInput
+        label="Fqdn"
+        update={(val) => setFqdn(val)}
+        current={fqdn}
+        placeholder="192.168.1.1.nip.io"
+      />
+      <StringInput
+        label="Memory (GB)"
+        update={(val) => setMemory(val)}
+        current={memory}
+        placeholder="32"
+      />
+      <StringInput
         label="Name"
         update={(val) => setName(slugify(val))}
         current={name}
         placeholder="192.168.1.1"
       />
-      <TextInput current={arch} update={setArch} label="Architecture" />
-      <TextInput current={cores} update={setCores} label="Cores" />
-      <TextInput current={memory} update={setMemory} label="Memory" />
+      <TextInput current={notes} update={setNotes} label="Notes" />
+      <TextInput current={tags} update={setTags} label="Tags" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateHosts}>
         Update host info
       </button>

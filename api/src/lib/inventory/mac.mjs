@@ -27,33 +27,24 @@ export function Mac(mac = false) {
  * @param {string} mac - The mac address
  * @return {Mac} this - The Mac instance
  */
-Mac.prototype.create = async function ({ mac }) {
-  /*
-   * Do not bother without an mac
-   */
-  if (!mac && !this.getId()) return this.setError('You must provide an mac')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(`INSERT INTO inventory_macs(mac) VALUES(:mac)`, {
-      mac,
-    })
-  } catch (err) {
-    return this.setError(err)
+Mac.prototype.create = async function (mac) {
+  if (!mac) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(mac).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `INSERT INTO inventory_macs(mac) VALUES (:mac)`
+
+  const params = { mac }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
 }
 
 /*
@@ -154,46 +145,29 @@ Mac.prototype.delete = async function () {
  *
  * @param {string} mac - The Mac address
  */
-Mac.prototype.read = async function (mac = false) {
-  /*
-   * Do not bother without an mac
-   */
-  if (!mac && !this.getId()) return this.setError('You must provide an mac')
+Mac.prototype.read = async function (mac) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_macs WHERE mac=:mac`, {
+    mac: mac,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_macs WHERE mac = :mac`, {
-      mac: mac || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.mac) this.setId(data.mac)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one mac in loadMac. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to create record')
 }
 
 /**
  * List all MAC records
  */
 Mac.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_macs ORDER BY mac`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_macs ORDER BY mac`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch MAC list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**

@@ -59,7 +59,7 @@ export function routes(app) {
   /*
    * Update a Software Package
    */
-  app.put(`/inventory/pkgs/:id`, rbac.user, inventory.updatePkg)
+  app.patch(`/inventory/pkgs/:id`, rbac.operator, inventory.updatePkg)
 
   /*
    * Delete an Software Package
@@ -84,9 +84,9 @@ export function routes(app) {
   app.get(`/inventory/oss/:id`, rbac.user, inventory.readOs)
 
   /*
-   * Update a Operating System
+   * Update a OS
    */
-  app.put(`/inventory/oss/:id`, rbac.user, inventory.updateOs)
+  app.patch(`/inventory/oss/:id`, rbac.operator, inventory.updateOs)
 
   /*
    * Delete an Operating System
@@ -109,11 +109,6 @@ export function routes(app) {
    * Read an IP
    */
   app.get(`/inventory/ips/:ip`, rbac.user, inventory.readIp)
-
-  /*
-   * Update a IP
-   */
-  app.put(`/inventory/ips/:ip`, rbac.user, inventory.updateIp)
 
   /*
    * Delete an Operating System
@@ -269,6 +264,16 @@ export function routes(app) {
   app.patch(`/inventory/groups/:id/:action`, rbac.operator, inventory.updateGroup)
 
   /*
+   * Update a host
+   */
+  app.patch(`/inventory/hosts/:id`, rbac.operator, inventory.updateHost)
+
+  /*
+   * Update a IP
+   */
+  app.patch(`/inventory/ips/:ip`, rbac.operator, inventory.updateIp)
+
+  /*
    * Read all groups (returns an array)
    */
   app.get(`/inventory/groups`, rbac.user, inventory.listGroups)
@@ -284,6 +289,11 @@ export function routes(app) {
   app.get(`/inventory/is-group-available/:group`, rbac.user, inventory.isGroupAvailable)
 
   /*
+   * Checks whether a host id is available
+   */
+  app.get(`/inventory/is-host-available/:id`, rbac.user, inventory.isHostAvailable)
+
+  /*
    * Checks whether a ip address is available
    */
   app.get(`/inventory/is-ip-available/:ip`, rbac.user, inventory.isIpAvailable)
@@ -296,12 +306,12 @@ export function routes(app) {
   /*
    * Checks whether a os is available
    */
-  app.get(`/inventory/is-os-available/:name`, rbac.user, inventory.isOsAvailable)
+  app.get(`/inventory/is-os-available/:id`, rbac.user, inventory.isOsAvailable)
 
   /*
    * Checks whether a pkg is available
    */
-  app.get(`/inventory/is-pkg-available/:name`, rbac.user, inventory.isPkgAvailable)
+  app.get(`/inventory/is-pkg-available/:id`, rbac.user, inventory.isPkgAvailable)
 
   /*
    * Checks whether a mod is available

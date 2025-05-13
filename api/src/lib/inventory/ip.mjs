@@ -28,34 +28,57 @@ export function Ip(ip = false) {
  * @param {string} version - The ip version
  * @return {Ip} this - The Ip instance
  */
-Ip.prototype.create = async function ({ ip, version }) {
-  /*
-   * Do not bother without an ip
-   */
-  if (!ip && !this.getId()) return this.setError('You must provide an ip')
-
-  /*
-   * Insert into the database
-   */
-  let result = false
-  try {
-    result = await utils.db.write(`INSERT INTO inventory_ips(ip, version) VALUES(:ip, :version)`, {
-      ip,
-      version,
-    })
-  } catch (err) {
-    return this.setError(err)
+Ip.prototype.create = async function (ip, version) {
+  if (!ip) {
+    return false
   }
 
-  /*
-   * If it worked, store the internal id
-   */
-  return result &&
-    Array.isArray(result) &&
-    result[0] === 200 &&
-    result[1]?.results?.[0]?.last_insert_id
-    ? this.setId(ip).setSaved(true).setError(false)
-    : this.setError('Failed to create record')
+  const sql = `
+    INSERT INTO inventory_ips(
+      ip, version
+    ) VALUES (
+      :ip, :version
+    )
+  `
+
+  const params = {
+    ip,
+    version,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to update an inventory (host) ip
+ *
+ * @return {object} updated - true if it the ip is updated, false if not
+ */
+Ip.prototype.update = async function (ip, version = '') {
+  if (!ip) return false
+
+  // Run query
+  const updateResult = await utils.db.write(
+    `UPDATE inventory_ips SET version=:version WHERE ip=:ip`,
+    {
+      version,
+      ip,
+    }
+  )
+
+  if (updateResult.rowCount === 0) {
+    return false
+  }
+
+  return await this.read(ip)
 }
 
 /*
@@ -162,47 +185,29 @@ Ip.prototype.delete = async function () {
  *
  * @param {string} ip - The Ip ip
  */
-Ip.prototype.read = async function (ip = false) {
-  /*
-   * Do not bother without an ip
-   */
-  if (!ip && !this.getId()) return this.setError('You must provide an ip')
+Ip.prototype.read = async function (ip) {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_ips WHERE ip=:ip`, {
+    ip: ip,
+  })
 
-  /*
-   * Read from database
-   */
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_ips WHERE ip = :ip`, {
-      ip: ip || this.getId(),
-    })
-    const data = resultAsRecord(result[1])
-    if (data.ip) this.setId(data.ip)
-    if (data.version) this.setRecordField('version', data.version)
-    this.setSaved(true)
-  } catch (err) {
-    return this.setError(err)
+  if (status !== 200) return false
+  const found = resultsAsList(result)
+
+  if (found.length < 1) return false
+  if (found.length === 1) return found[0]
+  else {
+    log.warn(`Found more than one ip in loadIp. This is unexpected.`)
+    return false
   }
-
-  return result && Array.isArray(result) && result[0] === 200
-    ? this
-    : this.setError('Failed to read record')
 }
 
 /**
  * List all IP records
  */
 Ip.prototype.list = async function () {
-  let result = false
-  try {
-    result = await utils.db.read(`SELECT * FROM inventory_ips ORDER BY ip`)
-  } catch (err) {
-    return this.setError(err)
-  }
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_ips ORDER BY ip`)
 
-  return result && Array.isArray(result) && result[0] === 200
-    ? result[1].results
-    : this.setError('Failed to fetch IP list')
+  return status === 200 ? resultsAsList(result) : false
 }
 
 /**

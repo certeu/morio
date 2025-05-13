@@ -25,7 +25,7 @@ export const OssTable = () => {
   // State
   const [oss, setOss] = useState([])
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   // Context
@@ -91,7 +91,7 @@ export const OssTable = () => {
                 checked={oss.length === count}
               />
             </th>
-            {['name', 'version'].map((field) => (
+            {['id', 'host', 'name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -118,10 +118,16 @@ export const OssTable = () => {
                   onClick={() => toggle(os.id)}
                 />
               </td>
+              <td className="">
+                <PageLink href={`/inventory/oss/${os.id}`}>{os.id}</PageLink>
+              </td>
               <td className="pr-6 py-0.5 text-sm">
                 <PageLink href={`/inventory/hosts/${os.host}`}>
                   <InventoryHostname uuid={os.host} />
                 </PageLink>
+              </td>
+              <td className="">
+                <Markdown>{os.name}</Markdown>
               </td>
               <td className="">
                 <Markdown>{os.version}</Markdown>
@@ -167,6 +173,7 @@ export const NewOs = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
@@ -177,17 +184,17 @@ export const NewOs = ({ refresh, setRefresh }) => {
   // Effects
   useEffect(() => {
     const checkOsAvailability = async () => {
-      const result = await api.isOsAvailable(name)
+      const result = await api.isOsAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (name) checkOsAvailability()
-  }, [name, api])
+    if (id) checkOsAvailability()
+  }, [id, api])
 
   // Handler method to create a new os
   const createOs = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createOs(name, version)
+    const result = await api.createOs(id, name, version)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Os created', true, true])
@@ -198,28 +205,25 @@ export const NewOs = ({ refresh, setRefresh }) => {
   return (
     <div>
       <h3>Create a new os</h3>
-      <p>Give your new os a name, and version. The os name will become its unique ID.</p>
+      <p>Give your new os a id, name, and version. The os id will become its unique ID.</p>
       <StringInput
-        label="Name"
-        update={(val) => setName(slugify(val))}
-        current={name}
-        placeholder="Linux-22.04"
+        label="Id"
+        update={(val) => setId(val)}
+        current={id}
+        placeholder="os_v1"
         valid={(val) =>
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'name cannot be empty' }] } }
-              : { error: { details: [{ message: 'This name is taken' }] } }
+              ? { error: { details: [{ message: 'id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This id is taken' }] } }
         }
       />
 
+      <StringInput label="Name" update={setName} current={name} placeholder="Os name" />
       <StringInput label="Version" update={setVersion} current={version} placeholder="Os version" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
-        <button
-          className="btn btn-primary grow"
-          disabled={!(name && isAvailable)}
-          onClick={createOs}
-        >
+        <button className="btn btn-primary grow" disabled={!(id && isAvailable)} onClick={createOs}>
           Create Os
         </button>
         <button className="btn btn-primary btn-outline" onClick={clearModal}>
@@ -240,6 +244,12 @@ export const OsDetail = ({ data }) => {
 
   return (
     <>
+      {data.id ? (
+        <>
+          <h2>Id</h2>
+          <Markdown>{data.id}</Markdown>
+        </>
+      ) : null}
       {data.name ? (
         <>
           <h2>Name</h2>
@@ -258,6 +268,7 @@ export const OsDetail = ({ data }) => {
 
 export const BulkOsUpdate = ({ oss, refresh, setRefresh }) => {
   // State
+  const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   // Hooks
   const { api } = useApi()
@@ -270,7 +281,7 @@ export const BulkOsUpdate = ({ oss, refresh, setRefresh }) => {
     const count = oss.length
     for (const id in oss) {
       i++
-      await api.updateInventoryOsVersion(oss[id], version)
+      await api.updateInventoryOsVersion(oss[id], name, version)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating os versions" key="linter" />,
@@ -282,18 +293,19 @@ export const BulkOsUpdate = ({ oss, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update version</h2>
-      <p>This will set the same version for all the selected oss.</p>
+      <h2>Update name, version</h2>
+      <p>This will set the same name, version for all the selected oss.</p>
+      <StringInput current={name} update={setName} label="name" />
       <StringInput current={version} update={setVersion} label="version" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update os versions
+        Update os names, versions
       </button>
     </div>
   )
 }
 
 export const OssDisplayTable = ({ oss }) => {
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('id')
   const [desc, setDesc] = useState(false)
 
   const sorted = orderBy(oss, [order], [desc ? 'desc' : 'asc'])
@@ -322,12 +334,15 @@ export const OssDisplayTable = ({ oss }) => {
         {sorted.map((os) => (
           <tr key={os.id}>
             <td className="pr-6 py-0.5 font-mono text-sm">
-              <PageLink href={`/inventory/oss/${os.id}`}>{os.name}</PageLink>
+              <PageLink href={`/inventory/oss/${os.id}`}>{os.id}</PageLink>
             </td>
             <td className="pr-6 py-0.5 text-sm">
               <PageLink href={`/inventory/hosts/${os.host}`}>
                 <InventoryHostname uuid={os.host} />
               </PageLink>
+            </td>
+            <td className="">
+              <Markdown>{os.name}</Markdown>
             </td>
             <td className="">
               <Markdown>{os.version}</Markdown>
