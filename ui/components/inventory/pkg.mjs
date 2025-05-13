@@ -1,5 +1,4 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { ModalContext } from 'context/modal.mjs'
