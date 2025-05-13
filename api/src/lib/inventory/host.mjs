@@ -1,6 +1,5 @@
 // Utils
 import { log, utils } from '../utils.mjs'
-import util from 'util'
 // Load shared inventory code
 import { addNonEnumProp, resultsAsList, unwrapVar, deleteRecord } from './shared.mjs'
 import { clean, asTime, fromJson } from '../account.mjs'

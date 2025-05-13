@@ -1,7 +1,7 @@
 // Utils
-import { utils } from '../utils.mjs'
+import { log, utils } from '../utils.mjs'
 // Load shared inventory code
-import { addNonEnumProp, resultAsRecord, resultsAsList } from './shared.mjs'
+import { addNonEnumProp, resultsAsList } from './shared.mjs'
 
 /**
  * Constructor for a Os instance
