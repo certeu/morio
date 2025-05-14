@@ -38,7 +38,7 @@ Pkg.prototype.create = async function (id, name, version) {
     INSERT INTO inventory_pkgs(
       id, name, version
     ) VALUES (
-      :id, :name, version
+      :id, :name, :version
     )
   `
 

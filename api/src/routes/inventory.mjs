@@ -162,7 +162,7 @@ export function routes(app) {
   /*
    * Update a Mod
    */
-  app.put(`/inventory/mods/:mod`, rbac.user, inventory.updateMod)
+  app.patch(`/inventory/mods/:mod`, rbac.operator, inventory.updateMod)
 
   /*
    * Delete a Mod
@@ -189,7 +189,7 @@ export function routes(app) {
   /*
    * Update a Module variable
    */
-  app.put(`/inventory/modvars/:id`, rbac.user, inventory.updateModvar)
+  app.patch(`/inventory/modvars/:id`, rbac.operator, inventory.updateModvar)
 
   /*
    * Delete an Module Variable
@@ -216,7 +216,7 @@ export function routes(app) {
   /*
    * Update a Host variable
    */
-  app.put(`/inventory/hostvars/:id`, rbac.user, inventory.updateHostvar)
+  app.patch(`/inventory/hostvars/:id`, rbac.operator, inventory.updateHostvar)
 
   /*
    * Delete an Host variable
@@ -241,7 +241,7 @@ export function routes(app) {
   /*
    * Update a Module file
    */
-  app.put(`/inventory/modfiles/:id`, rbac.user, inventory.updateModfile)
+  app.patch(`/inventory/modfiles/:id`, rbac.operator, inventory.updateModfile)
 
   /*
    * Delete an Module file
@@ -321,17 +321,17 @@ export function routes(app) {
   /*
    * Checks whether a modvar is available
    */
-  app.get(`/inventory/is-modvar-available/:val`, rbac.user, inventory.isModvarAvailable)
+  app.get(`/inventory/is-modvar-available/:id`, rbac.user, inventory.isModvarAvailable)
 
   /*
    * Checks whether a hostvar is available
    */
-  app.get(`/inventory/is-hostvar-available/:key`, rbac.user, inventory.isHostvarAvailable)
+  app.get(`/inventory/is-hostvar-available/:id`, rbac.user, inventory.isHostvarAvailable)
 
   /*
    * Checks whether a modfile is available
    */
-  app.get(`/inventory/is-modfile-available/:file`, rbac.user, inventory.isModfileAvailable)
+  app.get(`/inventory/is-modfile-available/:id`, rbac.user, inventory.isModfileAvailable)
 
   /*
    * Read a group

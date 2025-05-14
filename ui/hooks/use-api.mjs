@@ -726,21 +726,30 @@ MorioClient.prototype.isModAvailable = async function (mod) {
 }
 
 /**
- * Get if a modvar val is available
+ * Get if a modvar id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isModvarAvailable = async function (val) {
-  return await this.call(`${morioConfig.api}/inventory/is-modvar-available/${val}`)
+MorioClient.prototype.isModvarAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-modvar-available/${id}`)
 }
 
 /**
- * Get if a hostvar key is available
+ * Get if a hostvar id is available
  *
  * @return {object} - The result
  */
-MorioClient.prototype.isHostvarAvailable = async function (key) {
-  return await this.call(`${morioConfig.api}/inventory/is-hostvar-available/${key}`)
+MorioClient.prototype.isHostvarAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-hostvar-available/${id}`)
+}
+
+/**
+ * Get if a modfile id is available
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.isModfileAvailable = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/is-modfile-available/${id}`)
 }
 
 /**
@@ -890,6 +899,65 @@ MorioClient.prototype.updateInventoryPkgVersion = async function (id, name, vers
     headers: this.jsonHeaders,
     method: 'PATCH',
     body: JSON.stringify({ name, version }),
+  })
+}
+
+/**
+ * Update the data of an inventory mod
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModData = async function (mod, data) {
+  return await this.call(`${morioConfig.api}/inventory/mods/${mod}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ data }),
+  })
+}
+
+/**
+ * Update the data of an inventory modvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModvarInfo = async function (id, val, info, mod) {
+  return await this.call(`${morioConfig.api}/inventory/modvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ val, info, mod }),
+  })
+}
+
+/**
+ * Update the data of an inventory hostvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryHostvarInfo = async function (id, key, val, info, host) {
+  return await this.call(`${morioConfig.api}/inventory/hostvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ key, val, info, host }),
+  })
+}
+
+/**
+ * Update the data of an inventory modfile
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryModfile = async function (
+  id,
+  mod,
+  folder,
+  file,
+  content,
+  source
+) {
+  return await this.call(`${morioConfig.api}/inventory/modfiles/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ mod, folder, file, content, source }),
   })
 }
 
@@ -1463,11 +1531,11 @@ MorioClient.prototype.createMod = async function (mod, data) {
  * @param {string} info - The module variable description
  * @return {object} - The result
  */
-MorioClient.prototype.createModvar = async function (id, val, info) {
+MorioClient.prototype.createModvar = async function (id, val, info, mod) {
   return await this.call(`${morioConfig.api}/inventory/modvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ id, val, info }),
+    body: JSON.stringify({ id, val, info, mod }),
   })
 }
 
@@ -1480,11 +1548,11 @@ MorioClient.prototype.createModvar = async function (id, val, info) {
  * @param {string} info - The host variable description
  * @return {object} - The result
  */
-MorioClient.prototype.createHostvar = async function (id, key, val, info) {
+MorioClient.prototype.createHostvar = async function (id, key, val, info, host) {
   return await this.call(`${morioConfig.api}/inventory/hostvar`, {
     headers: this.jsonHeaders,
     method: 'POST',
-    body: JSON.stringify({ id, key, val, info }),
+    body: JSON.stringify({ id, key, val, info, host }),
   })
 }
 

@@ -38,7 +38,7 @@ Os.prototype.create = async function (id, name, version) {
     INSERT INTO inventory_oss(
       id, name, version
     ) VALUES (
-      :id, :name, version
+      :id, :name, :version
     )
   `
 

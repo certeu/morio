@@ -1,5 +1,4 @@
 // Dependencies
-import { slugify } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
 // Context
 import { ModalContext } from 'context/modal.mjs'
@@ -89,7 +88,7 @@ export const ModfilesTable = () => {
                 checked={modfiles.length === count}
               />
             </th>
-            {['mod', 'folder', 'file', 'content', 'source'].map((field) => (
+            {['id', 'mod', 'folder', 'file', 'content', 'source'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -117,13 +116,16 @@ export const ModfilesTable = () => {
                 />
               </td>
               <td className="">
+                <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.id}</PageLink>
+              </td>
+              <td className="">
                 <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
               </td>
               <td className="">
                 <Markdown>{modfile.folder}</Markdown>
               </td>
               <td className="">
-                <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
+                <Markdown>{modfile.file}</Markdown>
               </td>
               <td className="">
                 <Markdown>{modfile.content}</Markdown>
@@ -172,6 +174,8 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
+  const [id, setId] = useState('')
+  const [mod, setMod] = useState('')
   const [folder, setFolder] = useState('')
   const [file, setFile] = useState('')
   const [content, setContent] = useState('')
@@ -184,17 +188,17 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   // Effects
   useEffect(() => {
     const checkModfileAvailability = async () => {
-      const result = await api.isModfileAvailable(file)
+      const result = await api.isModfileAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
       else setIsAvailable(false)
     }
-    if (file) checkModfileAvailability()
-  }, [file, api])
+    if (id) checkModfileAvailability()
+  }, [id, api])
 
   // Handler method to create a new ip
   const createModfile = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createModfile(folder, file, content, source)
+    const result = await api.createModfile(id, mod, folder, file, content, source)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Modfile created', true, true])
@@ -206,28 +210,30 @@ export const NewModfile = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new module file</h3>
       <p>
-        Give your new module file a name, folder, content and source. The ip address will become its
-        unique ID.
+        Give your new module file a id, mod, name, folder, content and source. The id will become
+        its unique ID.
       </p>
+      <StringInput
+        label="Id"
+        update={(val) => setId(val)}
+        current={id}
+        placeholder="101"
+        valid={(val) =>
+          val && isAvailable
+            ? true
+            : val === ''
+              ? { error: { details: [{ message: 'Id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This id is taken' }] } }
+        }
+      />
+      <StringInput label="Module" update={setMod} current={mod} placeholder="Module1" />
       <StringInput
         label="Folder name"
         update={setFolder}
         current={folder}
         placeholder="New Folder"
       />
-      <StringInput
-        label="File name"
-        update={(val) => setFile(slugify(val))}
-        current={file}
-        placeholder="New File"
-        valid={(val) =>
-          val && isAvailable
-            ? true
-            : val === ''
-              ? { error: { details: [{ message: 'File name cannot be empty' }] } }
-              : { error: { details: [{ message: 'This file name is taken' }] } }
-        }
-      />
+      <StringInput label="File name" update={setFile} current={file} placeholder="New File" />
       <TextInput
         label="Content"
         update={setContent}
@@ -239,7 +245,7 @@ export const NewModfile = ({ refresh, setRefresh }) => {
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
-          disabled={!(file && isAvailable)}
+          disabled={!(id && isAvailable)}
           onClick={createModfile}
         >
           Create Module File
@@ -292,7 +298,9 @@ export const ModfileDetail = ({ data }) => {
 
 export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
   // State
+  const [mod, setMod] = useState('')
   const [folder, setFolder] = useState('')
+  const [file, setFile] = useState('')
   const [content, setContent] = useState('')
   const [source, setSource] = useState('')
   // Hooks
@@ -306,7 +314,7 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
     const count = modfiles.length
     for (const id in modfiles) {
       i++
-      await api.updateInventoryModfile(modfiles[id], folder, content, source)
+      await api.updateInventoryModfile(modfiles[id], mod, folder, file, content, source)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating modfile infos" key="linter" />,
@@ -318,13 +326,15 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
 
   return (
     <div className="">
-      <h2>Update modfile infos</h2>
-      <p>This will set the same infos for all the selected modfiles.</p>
+      <h2>Update modfile info</h2>
+      <p>This will set the same info for all the selected modfiles.</p>
+      <StringInput current={mod} update={setMod} label="Module" />
       <StringInput current={folder} update={setFolder} label="Folder" />
-      <StringInput current={content} update={setContent} label="content" />
+      <StringInput current={file} update={setFile} label="File" />
+      <TextInput label="Content" update={setContent} current={content} />
       <StringInput current={source} update={setSource} label="source" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateFileInfo}>
-        Update Module File Infos
+        Update Module File Info
       </button>
     </div>
   )
@@ -345,7 +355,7 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
     <table>
       <thead>
         <tr>
-          {['mod', 'folder', 'file', 'content', 'source'].map((field) => (
+          {['id', 'mod', 'folder', 'file', 'content', 'source'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -364,6 +374,9 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
       <tbody>
         {sorted.map((modfile) => (
           <tr key={modfile.id}>
+            <td className="">
+              <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.id}</PageLink>
+            </td>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
             </td>
@@ -371,7 +384,7 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
               <Markdown>{modfile.folder}</Markdown>
             </td>
             <td className="">
-              <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
+              <Markdown>{modfile.file}</Markdown>
             </td>
             <td className="">
               <Markdown>{modfile.content}</Markdown>

@@ -276,40 +276,40 @@ Controller.prototype.isModAvailable = async function (req, res) {
 }
 
 /**
- * Is a modvar (modvar Val) available?
+ * Is a modvar (modvar id) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModvarAvailable = async function (req, res) {
-  if (!req.params.val) return res.status(400).send()
-  const available = await new Modvar().isAvailable(req.params.val)
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Modvar().isAvailable(req.params.id)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
- * Is a hostvar (hostvar Key) available?
+ * Is a hostvar (hostvar id) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isHostvarAvailable = async function (req, res) {
-  if (!req.params.key) return res.status(400).send()
-  const available = await new Hostvar().isAvailable(req.params.key)
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Hostvar().isAvailable(req.params.id)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
 
 /**
- * Is a modfile (modfile file) available?
+ * Is a modfile (modfile id) available?
  *
  * @param {object} req - The request object from Express
  * @param {object} res - The response object from Express
  */
 Controller.prototype.isModfileAvailable = async function (req, res) {
-  if (!req.params.file) return res.status(400).send()
-  const available = await new Modfile().isAvailable(req.params.file)
+  if (!req.params.id) return res.status(400).send()
+  const available = await new Modfile().isAvailable(req.params.id)
 
   return available ? res.status(404).send() : res.status(409).send()
 }
@@ -1228,11 +1228,11 @@ Controller.prototype.createMod = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const mod = await new Mod().setMod(valid.mod).setData(valid.data).save()
+  const created = await new Mod().create(valid.mod, valid.data)
 
-  return mod.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -1272,8 +1272,8 @@ Controller.prototype.updateMod = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateMod`, {
+    ...req.params,
     ...req.body,
-    mod: req.params.mod,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -1281,13 +1281,10 @@ Controller.prototype.updateMod = async function (req, res) {
     })
 
   /*
-   * Update the mod
+   * Take appropriate action
    */
-  const mod = await new Mod(valid.mod).setData(valid.data).save()
-
-  return mod.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await mod.asData())
+  const mod = new Mod().update(valid.mod, valid.data)
+  return res.status(200).send(mod)
 }
 
 /**
@@ -1349,16 +1346,11 @@ Controller.prototype.createModvar = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const modvar = await new Modvar()
-    .setId(valid.id)
-    .setVal(valid.val)
-    .setInfo(valid.info)
-    .setMod(valid.mod)
-    .save()
+  const created = await new Modvar().create(valid.id, valid.val, valid.info, valid.mod)
 
-  return modvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -1398,8 +1390,8 @@ Controller.prototype.updateModvar = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateModvar`, {
+    ...req.params,
     ...req.body,
-    id: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -1407,17 +1399,10 @@ Controller.prototype.updateModvar = async function (req, res) {
     })
 
   /*
-   * Update the modvar
+   * Take appropriate action
    */
-  const modvar = await new Modvar(valid.id)
-    .setVal(valid.val)
-    .setInfo(valid.info)
-    .setMod(valid.mod)
-    .save()
-
-  return modvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await modvar.asData())
+  const modvar = new Modvar().update(valid.id, valid.val, valid.info, valid.mod)
+  return res.status(200).send(modvar)
 }
 
 /**
@@ -1479,17 +1464,11 @@ Controller.prototype.createHostvar = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const hostvar = await new Hostvar()
-    .setId(valid.id)
-    .setKey(valid.key)
-    .setVal(valid.val)
-    .setInfo(valid.info)
-    .setHost(valid.host)
-    .save()
+  const created = await new Hostvar().create(valid.id, valid.key, valid.val, valid.info, valid.host)
 
-  return hostvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -1529,8 +1508,8 @@ Controller.prototype.updateHostvar = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateHostvar`, {
+    ...req.params,
     ...req.body,
-    id: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -1538,17 +1517,10 @@ Controller.prototype.updateHostvar = async function (req, res) {
     })
 
   /*
-   * Update the hostvar
+   * Take appropriate action
    */
-  const hostvar = await new Hostvar(valid.id)
-    .setVal(valid.val)
-    .setInfo(valid.info)
-    .setHost(valid.host)
-    .save()
-
-  return hostvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await hostvar.asData())
+  const hostvar = new Hostvar().update(valid.id, valid.key, valid.val, valid.info, valid.host)
+  return res.status(200).send(hostvar)
 }
 
 /**
@@ -1610,18 +1582,18 @@ Controller.prototype.createModfile = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const modfile = await new modfile()
-    .setId(valid.id)
-    .setMod(valid.mod)
-    .setFolder(valid.folder)
-    .setFile(valid.file)
-    .setContent(valid.content)
-    .setSource(valid.source)
-    .save()
+  const created = await new Modfile().create(
+    valid.id,
+    valid.mod,
+    valid.folder,
+    valid.file,
+    valid.content,
+    valid.source
+  )
 
-  return modfile.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
-    : res.status(201).send(valid)
+  return created
+    ? res.status(201).send(valid)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -1661,8 +1633,8 @@ Controller.prototype.updateModfile = async function (req, res) {
    * Validate input
    */
   const [valid, err] = await utils.validate(`req.inventory.updateModfile`, {
+    ...req.params,
     ...req.body,
-    id: req.params.id,
   })
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
@@ -1670,19 +1642,17 @@ Controller.prototype.updateModfile = async function (req, res) {
     })
 
   /*
-   * Update the modfile
+   * Take appropriate action
    */
-  const modfile = await new Modfile(valid.id)
-    .setMod(valid.mod)
-    .setFolder(valid.folder)
-    .setFile(valid.file)
-    .setContent(valid.content)
-    .setSource(valid.source)
-    .save()
-
-  return modfile.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await modfile.asData())
+  const modfile = new Modfile().update(
+    valid.id,
+    valid.mod,
+    valid.folder,
+    valid.file,
+    valid.content,
+    valid.source
+  )
+  return res.status(200).send(modfile)
 }
 
 /**
