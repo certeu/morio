@@ -1,5 +1,7 @@
 // Dependencies
+import { inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runModsTableApiCall } from './mod.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -11,7 +13,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddHardwareIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 
@@ -176,6 +178,7 @@ export const NewModfile = ({ refresh, setRefresh }) => {
   // State
   const [id, setId] = useState('')
   const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [folder, setFolder] = useState('')
   const [file, setFile] = useState('')
   const [content, setContent] = useState('')
@@ -184,6 +187,11 @@ export const NewModfile = ({ refresh, setRefresh }) => {
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, folder])
 
   // Effects
   useEffect(() => {
@@ -226,7 +234,13 @@ export const NewModfile = ({ refresh, setRefresh }) => {
               : { error: { details: [{ message: 'This id is taken' }] } }
         }
       />
-      <StringInput label="Module" update={setMod} current={mod} placeholder="Module1" />
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this file to"
+        help={inlineHelp('inventory/modfiles#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput
         label="Folder name"
         update={setFolder}
@@ -299,12 +313,19 @@ export const ModfileDetail = ({ data }) => {
 export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
   // State
   const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [folder, setFolder] = useState('')
   const [file, setFile] = useState('')
   const [content, setContent] = useState('')
   const [source, setSource] = useState('')
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, folder])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
@@ -328,7 +349,13 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
     <div className="">
       <h2>Update modfile info</h2>
       <p>This will set the same info for all the selected modfiles.</p>
-      <StringInput current={mod} update={setMod} label="Module" />
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput current={folder} update={setFolder} label="Folder" />
       <StringInput current={file} update={setFile} label="File" />
       <TextInput label="Content" update={setContent} current={content} />

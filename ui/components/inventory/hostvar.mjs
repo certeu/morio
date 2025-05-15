@@ -1,5 +1,7 @@
 // Dependencies
+import { varify, inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runHostsTableApiCall } from './host.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -11,7 +13,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
@@ -179,10 +181,16 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
   const [host, setHost] = useState('')
+  const [hosts, setHosts] = useState([])
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  useEffect(() => {
+    if (hosts.length < 1)
+      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+  }, [api, key])
 
   // Effects
   useEffect(() => {
@@ -212,6 +220,13 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
         Give your new hostvar a id, key, val, an optional info and host. The hostvar id will become
         its unique ID.
       </p>
+      <SelectInput
+        label="Inventory Host"
+        labelDflt="Choose a host to assign this var to"
+        help={inlineHelp('inventory/hostvars#host')}
+        update={setHost}
+        list={hosts.map((host) => ({ val: host, label: host }))}
+      />
       <StringInput
         label="Id"
         update={(val) => setId(val)}
@@ -226,19 +241,18 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
         }
       />
 
-      <StringInput label="Hostvar key" update={setKey} current={key} placeholder="Hostvar key" />
+      <StringInput
+        label="Hostvar key"
+        update={(val) => setKey(varify(val))}
+        current={key}
+        placeholder="Hostvar key"
+      />
       <StringInput label="Hostvar val" update={setVal} current={val} placeholder="Hostvar val" />
       <TextInput
         label="Hostvar info"
         update={setInfo}
         current={info}
         placeholder="An optional info"
-      />
-      <StringInput
-        label="Host"
-        update={setHost}
-        current={host}
-        placeholder="6d9b6d70-5a49-4a7d-8200-a561a47aa9a6"
       />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
@@ -294,13 +308,20 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
   const [host, setHost] = useState('')
+  const [hosts, setHosts] = useState([])
+
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (hosts.length < 1)
+      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
+  }, [api, key])
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
   // Helper method to bulk-update versions
-  const updateInfos = async () => {
+  const updateInfo = async () => {
     let i = 0
     const count = hostvars.length
     for (const id in hostvars) {
@@ -324,11 +345,17 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
     <div className="">
       <h2>Update key, value, info, host</h2>
       <p>This will set the same key, value, info, host for all the selected hostvars.</p>
+      <SelectInput
+        label="Inventory Host"
+        labelDflt="Choose a host to assign this var to"
+        help={inlineHelp('inventory/hostvars#host')}
+        update={setHost}
+        list={hosts.map((host) => ({ val: host, label: host }))}
+      />
       <StringInput current={key} update={setKey} label="Key" />
       <StringInput current={val} update={setVal} label="Value" />
       <TextInput label="Info" update={setInfo} current={info} />
-      <StringInput current={host} update={setHost} label="Host" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfos}>
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfo}>
         Update hostvar key, value, info, host
       </button>
     </div>

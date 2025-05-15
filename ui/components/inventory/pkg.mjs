@@ -10,7 +10,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddPackageIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { AddPackageIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -60,19 +60,6 @@ export const PkgsTable = () => {
   return (
     <>
       <div className="flex flex-row item-center gap-2">
-        <button
-          className="btn btn-primary"
-          onClick={() =>
-            pushModal(
-              <ModalWrapper keepOpenOnClick>
-                <BulkPkgUpdate pkgs={Object.keys(selection)} {...{ refresh, setRefresh }} />
-              </ModalWrapper>
-            )
-          }
-          disabled={count < 1}
-        >
-          <CogIcon /> Update {count} Pkgs
-        </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
           <TrashIcon /> Remove {count} Pkgs
         </button>
@@ -172,6 +159,11 @@ export const NewPkg = ({ refresh, setRefresh }) => {
   const [version, setVersion] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
 
+  useEffect(() => {
+    if (name !== '' || version !== '') setId(name.toLowerCase() + '_' + version.toLowerCase())
+    else setId('')
+  }, [name, version])
+
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
 
@@ -204,6 +196,7 @@ export const NewPkg = ({ refresh, setRefresh }) => {
         label="Id"
         update={(val) => setId(val)}
         current={id}
+        readOnly
         placeholder="pkg_01"
         valid={(val) =>
           val && isAvailable
@@ -261,44 +254,6 @@ export const PkgDetail = ({ data }) => {
         </>
       ) : null}
     </>
-  )
-}
-
-export const BulkPkgUpdate = ({ pkgs, refresh, setRefresh }) => {
-  // State
-  const [name, setName] = useState('')
-  const [version, setVersion] = useState('')
-  // Hooks
-  const { api } = useApi()
-  // Context
-  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-
-  // Helper method to bulk-update versions
-  const updateVersions = async () => {
-    let i = 0
-    const count = pkgs.length
-    for (const id in pkgs) {
-      i++
-      await api.updateInventoryPkgVersion(pkgs[id], name, version)
-      setLoadingStatus([
-        true,
-        <LoadingProgress val={i} max={count} msg="Updating pkg versions" key="linter" />,
-      ])
-    }
-    if (setRefresh) setRefresh(refresh + 1)
-    setLoadingStatus([true, 'Nailed it', true, true])
-  }
-
-  return (
-    <div className="">
-      <h2>Update name, version</h2>
-      <p>This will set the same version for all the selected pkgs.</p>
-      <StringInput current={name} update={setName} label="name" />
-      <StringInput current={version} update={setVersion} label="version" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateVersions}>
-        Update pkg names, versions
-      </button>
-    </div>
   )
 }
 

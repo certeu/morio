@@ -137,7 +137,7 @@ export const ModsTable = () => {
   )
 }
 
-async function runModsTableApiCall(api) {
+export async function runModsTableApiCall(api) {
   const result = await api.getInventoryMods()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false

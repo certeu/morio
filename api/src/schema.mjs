@@ -275,14 +275,10 @@ export const schema = {
   // Inventory - Ips
   'req.inventory.createIp': Joi.object({
     ip: Joi.string().required(),
-    version: Joi.string(),
+    host: Joi.string(),
   }),
   'req.inventory.readIp': Joi.object({
     ip: Joi.string().required(),
-  }),
-  'req.inventory.updateIp': Joi.object({
-    ip: Joi.string().required(),
-    version: Joi.string(),
   }),
   // Inventory - Macs
   'req.inventory.createMac': Joi.object({

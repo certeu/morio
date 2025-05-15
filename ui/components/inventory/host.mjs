@@ -1,4 +1,5 @@
 // Dependencies
+import { v4 as uuidv4 } from 'uuid'
 import { slugify } from 'lib/utils.mjs'
 import { formatBytes, shortUuid, timeAgo } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
@@ -34,7 +35,7 @@ export const HostsTable = () => {
   // State
   const [hosts, setHosts] = useState({})
   const [refresh, setRefresh] = useState(0)
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('host')
   const [desc, setDesc] = useState(false)
 
   // Context
@@ -178,12 +179,11 @@ export const NewHost = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [id, setId] = useState('')
+  const [id, setId] = useState(() => uuidv4())
   const [arch, setArch] = useState('')
   const [cores, setCores] = useState('')
   const [fqdn, setFqdn] = useState('')
   const [memory, setMemory] = useState('')
-  const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [tags, setTags] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
@@ -216,7 +216,7 @@ export const NewHost = ({ refresh, setRefresh }) => {
       parsedCores,
       fqdn,
       parsedMemory,
-      name,
+      fqdn.split('.')[0],
       notes,
       tags,
       last_update
@@ -259,19 +259,13 @@ export const NewHost = ({ refresh, setRefresh }) => {
         label="Fqdn"
         update={(val) => setFqdn(val)}
         current={fqdn}
-        placeholder="192.168.1.1.nip.io"
+        placeholder="example.your.company.com"
       />
       <StringInput
         label="Memory (GB)"
         update={(val) => setMemory(val)}
         current={memory}
         placeholder="32"
-      />
-      <StringInput
-        label="Name"
-        update={(val) => setName(slugify(val))}
-        current={name}
-        placeholder="192.168.1.1"
       />
       <TextInput current={notes} update={setNotes} label="Notes" />
       <TextInput current={tags} update={setTags} label="Tags" />
@@ -353,7 +347,6 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
   const [cores, setCores] = useState('')
   const [fqdn, setFqdn] = useState('')
   const [memory, setMemory] = useState('')
-  const [name, setName] = useState('')
   const [notes, setNotes] = useState('')
   const [tags, setTags] = useState('')
   // Hooks
@@ -363,10 +356,20 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
   // Helper method to bulk-update descriptions
   const updateHosts = async () => {
     let i = 0
+
     const count = hosts.length
     for (const id in hosts) {
       i++
-      await api.updateInventoryHostInfo(hosts[id], arch, cores, fqdn, memory, name, notes, tags)
+      await api.updateInventoryHostInfo(
+        hosts[id],
+        arch,
+        cores,
+        fqdn,
+        memory,
+        fqdn.split('.')[0],
+        notes,
+        tags
+      )
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating host infos" key="linter" />,
@@ -391,19 +394,13 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
         label="Fqdn"
         update={(val) => setFqdn(val)}
         current={fqdn}
-        placeholder="192.168.1.1.nip.io"
+        placeholder="example.your.company.com"
       />
       <StringInput
         label="Memory (GB)"
         update={(val) => setMemory(val)}
         current={memory}
         placeholder="32"
-      />
-      <StringInput
-        label="Name"
-        update={(val) => setName(slugify(val))}
-        current={name}
-        placeholder="192.168.1.1"
       />
       <TextInput current={notes} update={setNotes} label="Notes" />
       <TextInput current={tags} update={setTags} label="Tags" />
@@ -459,7 +456,7 @@ export const HostDetail = ({ data }) => {
         <ModsDisplayTable macs={data.mods} />
       </Details>
       {data.notes ? (
-        <Details summaryLeft="Notes">{data.nodes || 'no notes for this host'}</Details>
+        <Details summaryLeft="Notes">{data.notes || 'no notes for this host'}</Details>
       ) : null}
     </>
   )

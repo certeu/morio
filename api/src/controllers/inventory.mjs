@@ -989,7 +989,7 @@ Controller.prototype.createIp = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await new Ip().create(valid.ip, valid.version)
+  const created = await new Ip().create(valid.ip, valid.host)
 
   return created
     ? res.status(201).send(valid)

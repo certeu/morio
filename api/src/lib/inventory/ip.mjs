@@ -1,4 +1,5 @@
 // Utils
+import { isIP } from 'net'
 import { log, utils } from '../utils.mjs'
 // Load shared inventory code
 import { addNonEnumProp, resultsAsList } from './shared.mjs'
@@ -25,12 +26,24 @@ export function Ip(ip = false) {
  *
  * @param {object} params  - All params as an object
  * @param {string} ip - The ip ip
+ * @param {string} host - The ip host
  * @param {string} version - The ip version
  * @return {Ip} this - The Ip instance
  */
-Ip.prototype.create = async function (ip, version) {
+Ip.prototype.create = async function (ip, host) {
   if (!ip) {
     return false
+  }
+
+  const version = isIP(ip)
+  let ipVersion = ''
+
+  if (version === 4) {
+    ipVersion = 'IPv4'
+  } else if (version === 6) {
+    ipVersion = 'IPv6'
+  } else {
+    ipVersion = 'Invalid IP'
   }
 
   const sql = `
@@ -43,7 +56,7 @@ Ip.prototype.create = async function (ip, version) {
 
   const params = {
     ip,
-    version,
+    version: ipVersion,
   }
 
   try {

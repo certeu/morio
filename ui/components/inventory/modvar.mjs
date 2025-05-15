@@ -1,5 +1,7 @@
 // Dependencies
+import { varify, inlineHelp } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
+import { runModsTableApiCall } from './mod.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -11,7 +13,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { CogIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, TextInput } from 'components/inputs.mjs'
+import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 
@@ -168,10 +170,16 @@ export const NewModvar = ({ refresh, setRefresh }) => {
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
   const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
   const [isAvailable, setIsAvailable] = useState(false)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, val])
 
   // Effects
   useEffect(() => {
@@ -201,6 +209,13 @@ export const NewModvar = ({ refresh, setRefresh }) => {
         Give your new modvar a id, val, and an optional info and mod. The modvar id will become its
         unique ID.
       </p>
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput
         label="Id"
         update={(val) => setId(val)}
@@ -210,19 +225,18 @@ export const NewModvar = ({ refresh, setRefresh }) => {
           val && isAvailable
             ? true
             : val === ''
-              ? { error: { details: [{ message: 'Module id cannot be empty' }] } }
-              : { error: { details: [{ message: 'This module id is taken' }] } }
+              ? { error: { details: [{ message: 'Module var id cannot be empty' }] } }
+              : { error: { details: [{ message: 'This module var id is taken' }] } }
         }
       />
 
       <StringInput label="val" update={setVal} current={val} placeholder="val" />
       <TextInput
         label="Module var info"
-        update={setInfo}
+        update={(val) => setInfo(varify(val))}
         current={info}
         placeholder="Module variable info"
       />
-      <StringInput label="mod" update={setMod} current={mod} placeholder="mod" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
@@ -270,13 +284,21 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
   const [mod, setMod] = useState('')
+  const [mods, setMods] = useState([])
+
   // Hooks
   const { api } = useApi()
+
+  useEffect(() => {
+    if (mods.length < 1)
+      runModsTableApiCall(api).then((result) => setMods(result.map((entry) => entry.mod)))
+  }, [api, val])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
   // Helper method to bulk-update versions
-  const updateInfos = async () => {
+  const updateInfo = async () => {
     let i = 0
     const count = modvars.length
     for (const id in modvars) {
@@ -295,11 +317,17 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
     <div className="">
       <h2>Update info</h2>
       <p>This will set the same info for all the selected modvars.</p>
+      <SelectInput
+        label="Inventory Module"
+        labelDflt="Choose a module to assign this var to"
+        help={inlineHelp('inventory/modvars#mod')}
+        update={setMod}
+        list={mods.map((mod) => ({ val: mod, label: mod }))}
+      />
       <StringInput current={val} update={setVal} label="Value" />
       <StringInput current={info} update={setInfo} label="Infomation" />
-      <StringInput current={mod} update={setMod} label="Module" />
-      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfos}>
-        Update modvar infos
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateInfo}>
+        Update modvar info
       </button>
     </div>
   )
