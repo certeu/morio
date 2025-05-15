@@ -30,7 +30,6 @@ export const IpsTable = () => {
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
-  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()

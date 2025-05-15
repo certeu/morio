@@ -35,6 +35,8 @@ Ip.prototype.create = async function (ip, host) {
     return false
   }
 
+  console.log('host', host)
+
   const version = isIP(ip)
   let ipVersion = ''
 
