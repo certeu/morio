@@ -17,6 +17,7 @@ import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { InventoryHostname } from './host.mjs'
+import { generateId } from './utils.mjs'
 
 /**
  * This component renders a table with all Host vars and allows removal
@@ -91,7 +92,7 @@ export const HostvarsTable = () => {
                 checked={hostvars.length === count}
               />
             </th>
-            {['id', 'key', 'val', 'info', 'host'].map((field) => (
+            {['key', 'val', 'info', 'host'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -119,10 +120,7 @@ export const HostvarsTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.id}</PageLink>
-              </td>
-              <td className="">
-                <Markdown>{hostvar.key}</Markdown>
+                <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.key}</PageLink>
               </td>
               <td className="">
                 <Markdown>{hostvar.val}</Markdown>
@@ -176,7 +174,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   const { clearModal } = useContext(ModalContext)
 
   // State
-  const [id, setId] = useState('')
+  const [id, setId] = useState(0)
   const [key, setKey] = useState('')
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
@@ -194,6 +192,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
 
   // Effects
   useEffect(() => {
+    setId(generateId())
     const checkHostvarAvailability = async () => {
       const result = await api.isHostvarAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
@@ -205,7 +204,7 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
   // Handler method to create a new hostvar
   const createHostvar = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createHostvar(parseInt(id), key, val, info, host)
+    const result = await api.createHostvar(id, key, val, info, host)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Hostvar created', true, true])
@@ -227,20 +226,6 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
         update={setHost}
         list={hosts.map((host) => ({ val: host, label: host }))}
       />
-      <StringInput
-        label="Id"
-        update={(val) => setId(val)}
-        current={id}
-        placeholder="101"
-        valid={(val) =>
-          val && isAvailable
-            ? true
-            : val === ''
-              ? { error: { details: [{ message: 'Hostvar id cannot be empty' }] } }
-              : { error: { details: [{ message: 'This hostvar id is taken' }] } }
-        }
-      />
-
       <StringInput
         label="Hostvar key"
         update={(val) => setKey(varify(val))}
@@ -377,7 +362,7 @@ export const HostvarsDisplayTable = ({ hostvars }) => {
     <table>
       <thead>
         <tr>
-          {['id', 'key', 'val', 'info', 'host'].map((field) => (
+          {['key', 'val', 'info', 'host'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -397,10 +382,7 @@ export const HostvarsDisplayTable = ({ hostvars }) => {
         {sorted.map((hostvar) => (
           <tr key={hostvar.id}>
             <td className="">
-              <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.id}</PageLink>
-            </td>
-            <td className="">
-              <Markdown>{hostvar.key}</Markdown>
+              <PageLink href={`/inventory/hostvars/${hostvar.id}`}>{hostvar.key}</PageLink>
             </td>
             <td className="">
               <Markdown>{hostvar.val}</Markdown>

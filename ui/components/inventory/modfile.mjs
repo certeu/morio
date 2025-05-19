@@ -16,6 +16,7 @@ import { CogIcon, AddHardwareIcon, RightIcon, TrashIcon } from 'components/icons
 import { StringInput, TextInput, SelectInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
+import { generateId } from './utils.mjs'
 
 /**
  * This component renders a table with all Module files and allows removal
@@ -90,7 +91,7 @@ export const ModfilesTable = () => {
                 checked={modfiles.length === count}
               />
             </th>
-            {['id', 'mod', 'folder', 'file', 'content', 'source'].map((field) => (
+            {['mod', 'folder', 'file', 'content', 'source'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -118,16 +119,13 @@ export const ModfilesTable = () => {
                 />
               </td>
               <td className="">
-                <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.id}</PageLink>
-              </td>
-              <td className="">
                 <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
               </td>
               <td className="">
                 <Markdown>{modfile.folder}</Markdown>
               </td>
               <td className="">
-                <Markdown>{modfile.file}</Markdown>
+                <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
               </td>
               <td className="">
                 <Markdown>{modfile.content}</Markdown>
@@ -195,6 +193,7 @@ export const NewModfile = ({ refresh, setRefresh }) => {
 
   // Effects
   useEffect(() => {
+    setId(generateId())
     const checkModfileAvailability = async () => {
       const result = await api.isModfileAvailable(id)
       if (result[1] === 404) setIsAvailable(true)
@@ -221,19 +220,6 @@ export const NewModfile = ({ refresh, setRefresh }) => {
         Give your new module file a id, mod, name, folder, content and source. The id will become
         its unique ID.
       </p>
-      <StringInput
-        label="Id"
-        update={(val) => setId(val)}
-        current={id}
-        placeholder="101"
-        valid={(val) =>
-          val && isAvailable
-            ? true
-            : val === ''
-              ? { error: { details: [{ message: 'Id cannot be empty' }] } }
-              : { error: { details: [{ message: 'This id is taken' }] } }
-        }
-      />
       <SelectInput
         label="Inventory Module"
         labelDflt="Choose a module to assign this file to"
@@ -382,7 +368,7 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
     <table>
       <thead>
         <tr>
-          {['id', 'mod', 'folder', 'file', 'content', 'source'].map((field) => (
+          {['mod', 'folder', 'file', 'content', 'source'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -401,9 +387,6 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
       <tbody>
         {sorted.map((modfile) => (
           <tr key={modfile.id}>
-            <td className="">
-              <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.id}</PageLink>
-            </td>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/mods/${modfile.mod}`}>{modfile.mod}</PageLink>
             </td>
@@ -411,7 +394,7 @@ export const ModfilesDisplayTable = ({ modfiles }) => {
               <Markdown>{modfile.folder}</Markdown>
             </td>
             <td className="">
-              <Markdown>{modfile.file}</Markdown>
+              <PageLink href={`/inventory/modfiles/${modfile.id}`}>{modfile.file}</PageLink>
             </td>
             <td className="">
               <Markdown>{modfile.content}</Markdown>
