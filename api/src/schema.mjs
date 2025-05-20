@@ -393,6 +393,9 @@ export const schema = {
   'req.inventory.readGroupvar': Joi.object({
     id: Joi.string().required(),
   }),
+  'req.inventory.readGroupvars': Joi.object({
+    group_id: Joi.string().required(),
+  }),
   'req.inventory.updateGroup': Joi.object({
     id: Joi.string().required(),
     action: Joi.string().required().valid('description', 'join', 'add-members', 'remove-members'),

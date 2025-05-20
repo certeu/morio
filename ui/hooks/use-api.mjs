@@ -1033,13 +1033,13 @@ MorioClient.prototype.removeInventoryGroupvar = async function (id) {
 }
 
 /**
- * Removes a group from the inventory
+ * Removes a groupvars from the inventory
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
-MorioClient.prototype.removeInventoryGroup = async function (id) {
+MorioClient.prototype.removeInventoryGroupvars = async function (group_id) {
   return await this.call(
-    `${morioConfig.api}/inventory/groups/${id}`,
+    `${morioConfig.api}/inventory/groupvars/group/${group_id}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',
@@ -1074,6 +1074,16 @@ MorioClient.prototype.getInventoryHostsObject = async function () {
  */
 MorioClient.prototype.getInventoryIp = async function (id) {
   return await this.call(`${morioConfig.api}/inventory/ips/${id}`)
+}
+
+/**
+ * Get an IP address from the inventory
+ *
+ * @param {string} - The id of the IP address
+ * @return {object} - The result
+ */
+MorioClient.prototype.getInventoryOs = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/oss/${id}`)
 }
 
 /**

@@ -372,6 +372,12 @@ export function routes(app) {
    * Delete a groupvar
    */
   app.delete(`/inventory/groupvars/:id`, rbac.operator, inventory.deleteGroupvar)
+
+  /*
+   * Delete a groupvar with group_id
+   */
+  app.delete(`/inventory/groupvars/group/:group_id`, rbac.operator, inventory.deleteGroupvars)
+
   /*
    * Search the inventory
    */

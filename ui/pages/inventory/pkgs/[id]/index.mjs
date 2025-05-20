@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { PageWrapper } from 'components/layout/page-wrapper.mjs'
 import { ContentWrapper } from 'components/layout/content-wrapper.mjs'
 import { PackageIcon } from 'components/icons.mjs'
-import { PkgDetail } from 'components/inventory/os.mjs'
+import { PkgDetail } from 'components/inventory/pkg.mjs'
 import { useApi } from 'hooks/use-api.mjs'
 
 export default function InventoryPkgPage({ id = false }) {

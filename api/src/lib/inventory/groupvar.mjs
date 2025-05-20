@@ -92,3 +92,26 @@ Groupvar.prototype.delete = async function (id = false) {
 
   return result
 }
+
+/**
+ * Helper method to delete a groupvar with group_id
+ *
+ * @param {string} group_id - The group_id of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Groupvar.prototype.deletes = async function (group_id = false) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_groupvars WHERE group_id = :group_id`, {
+      group_id: group_id,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}

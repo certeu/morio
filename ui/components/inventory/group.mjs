@@ -62,6 +62,7 @@ export const GroupsTable = () => {
     let i = 0
     for (const id in selection) {
       i++
+      await api.removeInventoryGroupvars(id)
       await api.removeInventoryGroup(id)
       setLoadingStatus([
         true,
@@ -592,8 +593,6 @@ export const AddMembersToGroup = ({ to, refresh, setRefresh }) => {
   const [allGroups, setAllGroups] = useState([])
   // Hooks
   const { api } = useApi()
-
-  console.log('hosts and groups', allHosts, allGroups)
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
