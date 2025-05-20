@@ -1726,3 +1726,298 @@ Controller.prototype.listModfiles = async function (req, res) {
     ? res.send(list)
     : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
+
+/**
+ * Creates a new host-ip
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.linkHostIp = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createHostIp`, {
+    host: req.params.host,
+    ip: req.params.ip,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await new Host().linkIp(valid.host, valid.ip)
+
+  return id
+    ? res.status(201).send({ ...valid, id })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete host-ip
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unlinkHostIp = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostIp`, {
+    host: req.params.host,
+    ip: req.params.ip,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Host().unlinkHostIp(valid.host, valid.ip)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new host-mac
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.linkHostMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createHostMac`, {
+    host: req.params.host,
+    mac: req.params.mac,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await new Host().linkMac(valid.host, valid.mac)
+
+  return id
+    ? res.status(201).send({ ...valid, id })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete host-mac
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unlinkHostMac = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostMac`, {
+    host: req.params.host,
+    mac: req.params.mac,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Host().unlinkHostMac(valid.host, valid.mac)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new host-os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.linkHostOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createHostOs`, {
+    host: req.params.host,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await new Host().linkOs(valid.host, valid.id)
+
+  return id
+    ? res.status(201).send({ ...valid, id })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete host-os
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unlinkHostOs = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostOs`, {
+    host: req.params.host,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Host().unlinkHostOs(valid.host, valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new host-pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.linkHostPkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createHostPkg`, {
+    host: req.params.host,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await new Host().linkPkg(valid.host, valid.id)
+
+  return id
+    ? res.status(201).send({ ...valid, id })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete host-pkg
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unlinkHostPkg = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostPkg`, {
+    host: req.params.host,
+    id: req.params.id,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Host().unlinkHostPkg(valid.host, valid.id)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Creates a new host-mod
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.linkHostMod = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.createHostMod`, {
+    host: req.params.host,
+    mod: req.params.mod,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+  const id = await new Host().linkMod(valid.host, valid.mod)
+
+  return id
+    ? res.status(201).send({ ...valid, id })
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete host-mod
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.unlinkHostMod = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readHostMod`, {
+    host: req.params.host,
+    mod: req.params.mod,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Host().unlinkHostMod(valid.host, valid.mod)
+
+  /*
+   * Be expicit when a key cannot be found
+   */
+  //if (result === 404) return utils.sendErrorResponse(res, 'morio.api.kv.404', req.url)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}

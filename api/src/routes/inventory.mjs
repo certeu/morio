@@ -44,6 +44,56 @@ export function routes(app) {
    */
   app.delete(`/inventory/hosts/:id`, rbac.operator, inventory.deleteHost)
 
+  /*
+   * Link ip to host
+   */
+  app.post(`/inventory/link/host/:host/ip/:ip`, rbac.operator, inventory.linkHostIp)
+
+  /*
+   * Unlink ip from host
+   */
+  app.delete(`/inventory/link/host/:host/ip/:ip`, rbac.operator, inventory.unlinkHostIp)
+
+  /*
+   * Link mac to host
+   */
+  app.post(`/inventory/link/host/:host/mac/:mac`, rbac.operator, inventory.linkHostMac)
+
+  /*
+   * Unlink mac from host
+   */
+  app.delete(`/inventory/link/host/:host/mac/:mac`, rbac.operator, inventory.unlinkHostMac)
+
+  /*
+   * Link os to host
+   */
+  app.post(`/inventory/link/host/:host/os/:id`, rbac.operator, inventory.linkHostOs)
+
+  /*
+   * Unlink os from host
+   */
+  app.delete(`/inventory/link/host/:host/os/:id`, rbac.operator, inventory.unlinkHostOs)
+
+  /*
+   * Link pkg to host
+   */
+  app.post(`/inventory/link/host/:host/pkg/:id`, rbac.operator, inventory.linkHostPkg)
+
+  /*
+   * Unlink pkg from host
+   */
+  app.delete(`/inventory/link/host/:host/pkg/:id`, rbac.operator, inventory.unlinkHostPkg)
+
+  /*
+   * Link mod to host
+   */
+  app.post(`/inventory/link/host/:host/mod/:mod`, rbac.operator, inventory.linkHostMod)
+
+  /*
+   * Unlink mod from host
+   */
+  app.delete(`/inventory/link/host/:host/mod/:mod`, rbac.operator, inventory.unlinkHostMod)
+
   // Pkgs ///////////////////////
 
   /*

@@ -431,6 +431,271 @@ Host.prototype.create = async function (
   }
 }
 
+/**
+ * Helper method to create an host ip connection
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.linkIp = async function (host, ip) {
+  if (!host || !ip) {
+    return false
+  }
+
+  const sql = `INSERT INTO inventory_host_ip(host, ip) VALUES (:host, :ip)`
+
+  const params = {
+    host,
+    ip,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to unlink host-ip connection
+ *
+ * @param {string} host - The host of the record to delete
+ * @param {string} ip - The ip of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Host.prototype.unlinkHostIp = async function (host, ip) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_ip WHERE host = :host, ip = :ip`, {
+      host: host,
+      ip: ip,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}
+
+/**
+ * Helper method to create an host mac connection
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.linkMac = async function (host, mac) {
+  if (!host || !mac) {
+    return false
+  }
+
+  const sql = `INSERT INTO inventory_host_mac(host, mac) VALUES (:host, :mac)`
+
+  const params = {
+    host,
+    mac,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to unlink host-mac connection
+ *
+ * @param {string} host - The host of the record to delete
+ * @param {string} mac - The mac of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Host.prototype.unlinkHostMac = async function (host, mac) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_mac WHERE host = :host, mac = :mac`, {
+      host: host,
+      mac: mac,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}
+
+/**
+ * Helper method to create an host os connection
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.linkOs = async function (host, id) {
+  if (!host || !id) {
+    return false
+  }
+
+  const sql = `INSERT INTO inventory_host_os(host, os) VALUES (:host, :id)`
+
+  const params = {
+    host,
+    id,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to unlink host-mac connection
+ *
+ * @param {string} host - The host of the record to delete
+ * @param {string} id - The id of the os record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Host.prototype.unlinkHostOs = async function (host, id) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_os WHERE host = :host, id = :id`, {
+      host: host,
+      id: id,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}
+
+/**
+ * Helper method to create an host pkg connection
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.linkPkg = async function (host, id) {
+  if (!host || !id) {
+    return false
+  }
+
+  const sql = `INSERT INTO inventory_host_pkg(host, pkg) VALUES (:host, :id)`
+
+  const params = {
+    host,
+    id,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to unlink host-mac connection
+ *
+ * @param {string} host - The host of the record to delete
+ * @param {string} id - The id of the pkg record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Host.prototype.unlinkHostPkg = async function (host, id) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_pkg WHERE host = :host, id = :id`, {
+      host: host,
+      id: id,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}
+
+/**
+ * Helper method to create an host mod connection
+ *
+ * @return {object} created - true if it is created, false if not
+ */
+Host.prototype.linkMod = async function (host, mod) {
+  if (!host || !mod) {
+    return false
+  }
+
+  const sql = `INSERT INTO inventory_host_mod(host, mod) VALUES (:host, :mod)`
+
+  const params = {
+    host,
+    mod,
+  }
+
+  try {
+    const result = await utils.db.write(sql, params)
+    const created =
+      Array.isArray(result) && result[0] === 200 && result[1]?.results?.[0]?.last_insert_id
+
+    return !!created
+  } catch (err) {
+    return false
+  }
+}
+
+/**
+ * Helper method to unlink host-mod connection
+ *
+ * @param {string} host - The host of the record to delete
+ * @param {string} mod - The mod of the record to delete
+ * @return {bool} result - true if it went ok, false if not
+ */
+Host.prototype.unlinkHostMod = async function (host, mod) {
+  /*
+   * Remove from database
+   */
+
+  let result = false
+  try {
+    result = await utils.db.write(`DELETE FROM inventory_host_mod WHERE host = :host, mod = :mod`, {
+      host: host,
+      mod: mod,
+    })
+  } catch (err) {
+    return this.setError(err)
+  }
+
+  return result?.[0] === 200
+}
+
 Host.prototype.createInvite = async function (user, type = 'once') {
   /*
    * There is a (small) chance that the random string we get

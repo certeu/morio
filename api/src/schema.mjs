@@ -416,6 +416,46 @@ export const schema = {
   'req.inventory.readHost': Joi.object({
     id: Joi.string().required(),
   }),
+  'req.inventory.createHostIp': Joi.object({
+    host: Joi.string().required(),
+    ip: Joi.string().required(),
+  }),
+  'req.inventory.readHostIp': Joi.object({
+    host: Joi.string().required(),
+    ip: Joi.string().required(),
+  }),
+  'req.inventory.createHostMac': Joi.object({
+    host: Joi.string().required(),
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.readHostMac': Joi.object({
+    host: Joi.string().required(),
+    mac: Joi.string().required(),
+  }),
+  'req.inventory.createHostOs': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostOs': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.createHostPkg': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.readHostPkg': Joi.object({
+    host: Joi.string().required(),
+    id: Joi.string().required(),
+  }),
+  'req.inventory.createHostMod': Joi.object({
+    host: Joi.string().required(),
+    mod: Joi.string().required(),
+  }),
+  'req.inventory.readHostMod': Joi.object({
+    host: Joi.string().required(),
+    mod: Joi.string().required(),
+  }),
   // This is for the request body
   'req.kv.write': Joi.object({ value: kv.value }),
   // This combines request body and request parameters
