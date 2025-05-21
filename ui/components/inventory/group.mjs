@@ -63,6 +63,8 @@ export const GroupsTable = () => {
     for (const id in selection) {
       i++
       await api.removeInventoryGroupvars(id)
+      await api.removeInventoryGroups(id)
+      await api.removeInventoryMembers(id)
       await api.removeInventoryGroup(id)
       setLoadingStatus([
         true,

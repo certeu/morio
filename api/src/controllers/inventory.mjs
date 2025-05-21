@@ -536,6 +536,64 @@ Controller.prototype.deleteGroupvar = async function (req, res) {
 }
 
 /**
+ * Delete group connection
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteGroups = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readGroups`, {
+    group_id: req.params.group_id,
+  })
+
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Group().deleteGroups(valid.group_id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * Delete group member connection
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.deleteMembers = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.readMembers`, {
+    member_id: req.params.member_id,
+  })
+
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Delete from inventory
+   */
+  const result = await new Group().deleteMembers(valid.member_id)
+
+  return result === true
+    ? res.status(204).send()
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
  * Delete groupvar
  *
  * @param {object} req - The request object from Express
@@ -1018,7 +1076,7 @@ Controller.prototype.createIp = async function (req, res) {
       schema_violation: err.message,
     })
 
-  const created = await new Ip().create(valid.ip, valid.host)
+  const created = await new Ip().create(valid.ip)
 
   return created
     ? res.status(201).send(valid)

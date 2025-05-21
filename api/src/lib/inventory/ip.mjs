@@ -30,12 +30,10 @@ export function Ip(ip = false) {
  * @param {string} version - The ip version
  * @return {Ip} this - The Ip instance
  */
-Ip.prototype.create = async function (ip, host) {
+Ip.prototype.create = async function (ip) {
   if (!ip) {
     return false
   }
-
-  console.log('host', host)
 
   const version = isIP(ip)
   let ipVersion = ''

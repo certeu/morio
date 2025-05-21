@@ -429,6 +429,16 @@ export function routes(app) {
   app.delete(`/inventory/groupvars/group/:group_id`, rbac.operator, inventory.deleteGroupvars)
 
   /*
+   * Delete a group connection with group_id
+   */
+  app.delete(`/inventory/groups/group/:group_id`, rbac.operator, inventory.deleteGroups)
+
+  /*
+   * Delete a group connection with member_id
+   */
+  app.delete(`/inventory/groups/member/:member_id`, rbac.operator, inventory.deleteMembers)
+
+  /*
    * Search the inventory
    */
   app.post(`/inventory/search`, rbac.operator, inventory.search)

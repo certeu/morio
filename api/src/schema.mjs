@@ -275,7 +275,6 @@ export const schema = {
   // Inventory - Ips
   'req.inventory.createIp': Joi.object({
     ip: Joi.string().required(),
-    host: Joi.string(),
   }),
   'req.inventory.readIp': Joi.object({
     ip: Joi.string().required(),
@@ -389,6 +388,12 @@ export const schema = {
   }),
   'req.inventory.readGroup': Joi.object({
     id: Joi.string().required(),
+  }),
+  'req.inventory.readGroups': Joi.object({
+    group_id: Joi.string().required(),
+  }),
+  'req.inventory.readMembers': Joi.object({
+    member_id: Joi.string().required(),
   }),
   'req.inventory.readGroupvar': Joi.object({
     id: Joi.string().required(),

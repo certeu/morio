@@ -1033,13 +1033,45 @@ MorioClient.prototype.removeInventoryGroupvar = async function (id) {
 }
 
 /**
- * Removes a groupvars from the inventory
+ * Remove groupvars from the inventory
  *
  * @return {object|false} - The API result as parsed JSON or false in case of trouble
  */
 MorioClient.prototype.removeInventoryGroupvars = async function (group_id) {
   return await this.call(
     `${morioConfig.api}/inventory/groupvars/group/${group_id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Remove groups from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryGroups = async function (group_id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/group/${group_id}`,
+    {
+      headers: this.jsonHeaders,
+      method: 'DELETE',
+    },
+    true
+  )
+}
+
+/**
+ * Remove members from the inventory
+ *
+ * @return {object|false} - The API result as parsed JSON or false in case of trouble
+ */
+MorioClient.prototype.removeInventoryMembers = async function (member_id) {
+  return await this.call(
+    `${morioConfig.api}/inventory/groups/member/${member_id}`,
     {
       headers: this.jsonHeaders,
       method: 'DELETE',

@@ -1,7 +1,6 @@
 // Dependencies
-import { slugify, inlineHelp } from 'lib/utils.mjs'
+import { slugify } from 'lib/utils.mjs'
 import orderBy from 'lodash/orderBy.js'
-import { runHostsTableApiCall } from './host.mjs'
 // Context
 import { ModalContext } from 'context/modal.mjs'
 import { LoadingStatusContext } from 'context/loading-status.mjs'
@@ -13,10 +12,9 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
 import { AddLocationIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
-import { StringInput, SelectInput } from 'components/inputs.mjs'
+import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all IP addresses and allows removal
@@ -77,7 +75,7 @@ export const IpsTable = () => {
                 checked={ips.length === count}
               />
             </th>
-            {['ip', 'host', 'version'].map((field) => (
+            {['ip', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -106,11 +104,6 @@ export const IpsTable = () => {
               </td>
               <td className="">
                 <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-              </td>
-              <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${ip.host}`}>
-                  <InventoryHostname uuid={ip.host} />
-                </PageLink>
               </td>
               <td className="">
                 <Markdown>{ip.version}</Markdown>
@@ -158,16 +151,9 @@ export const NewIp = ({ refresh, setRefresh }) => {
   // State
   const [ip, setIp] = useState('')
   const [isAvailable, setIsAvailable] = useState(false)
-  const [host, setHost] = useState('')
-  const [hosts, setHosts] = useState([])
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
-
-  useEffect(() => {
-    if (hosts.length < 1)
-      runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
-  }, [api, ip])
 
   // Effects
   useEffect(() => {
@@ -182,7 +168,7 @@ export const NewIp = ({ refresh, setRefresh }) => {
   // Handler method to create a new ip
   const createIp = async () => {
     setLoadingStatus([true, 'Contacting API'])
-    const result = await api.createIp(ip, host)
+    const result = await api.createIp(ip)
     if (result[1] === 201) {
       clearModal()
       setLoadingStatus([true, 'Ip created', true, true])
@@ -194,13 +180,6 @@ export const NewIp = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new ip</h3>
       <p>Give your new ip a address. The ip address will become its unique ID.</p>
-      <SelectInput
-        label="Inventory Host"
-        labelDflt="Choose a host to assign this ip to"
-        help={inlineHelp('inventory/ips#host')}
-        update={setHost}
-        list={hosts.map((host) => ({ val: host, label: host }))}
-      />
       <StringInput
         label="Ip address"
         update={(val) => setIp(slugify(val))}
@@ -262,7 +241,7 @@ export const IpsDisplayTable = ({ ips }) => {
     <table>
       <thead>
         <tr>
-          {['ip', 'host', 'version'].map((field) => (
+          {['ip', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -283,11 +262,6 @@ export const IpsDisplayTable = ({ ips }) => {
           <tr key={ip.ip}>
             <td className="pr-6 py-0.5 font-mono text-sm">
               <PageLink href={`/inventory/ips/${ip.ip}`}>{ip.ip}</PageLink>
-            </td>
-            <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${ip.host}`}>
-                <InventoryHostname uuid={ip.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{ip.version}</Markdown>

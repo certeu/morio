@@ -478,7 +478,7 @@ Host.prototype.unlinkHostIp = async function (host, ip) {
       ip: ip,
     })
   } catch (err) {
-    return this.setError(err)
+    return false
   }
 
   return result?.[0] === 200
@@ -531,7 +531,7 @@ Host.prototype.unlinkHostMac = async function (host, mac) {
       mac: mac,
     })
   } catch (err) {
-    return this.setError(err)
+    return false
   }
 
   return result?.[0] === 200
@@ -584,7 +584,7 @@ Host.prototype.unlinkHostOs = async function (host, id) {
       id: id,
     })
   } catch (err) {
-    return this.setError(err)
+    return false
   }
 
   return result?.[0] === 200
@@ -637,7 +637,7 @@ Host.prototype.unlinkHostPkg = async function (host, id) {
       id: id,
     })
   } catch (err) {
-    return this.setError(err)
+    return false
   }
 
   return result?.[0] === 200
@@ -690,7 +690,7 @@ Host.prototype.unlinkHostMod = async function (host, mod) {
       mod: mod,
     })
   } catch (err) {
-    return this.setError(err)
+    return false
   }
 
   return result?.[0] === 200
