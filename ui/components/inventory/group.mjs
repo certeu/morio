@@ -28,7 +28,7 @@ import {
   InventoryGroupInput,
   InventoryHostInput,
 } from 'components/inputs.mjs'
-import { InventoryHostname, runHostsTableApiCall } from './host.mjs'
+import { InventoryHostname } from './host.mjs'
 import { Uuid } from 'components/uuid.mjs'
 import { Tab, Tabs } from 'components/tabs.mjs'
 
