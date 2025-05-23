@@ -121,7 +121,7 @@ export const PkgsTable = () => {
   )
 }
 
-async function runPkgsTableApiCall(api) {
+export async function runPkgsTableApiCall(api) {
   const result = await api.getInventoryPkgs()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -271,7 +271,7 @@ export const PkgsDisplayTable = ({ pkgs }) => {
     <table>
       <thead>
         <tr>
-          {['id', 'name', 'host', 'version'].map((field) => (
+          {['id', 'name', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -292,11 +292,6 @@ export const PkgsDisplayTable = ({ pkgs }) => {
           <tr key={pkg.id}>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
-            </td>
-            <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hosts/${pkg.host}`}>
-                <InventoryHostname uuid={pkg.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{pkg.name}</Markdown>

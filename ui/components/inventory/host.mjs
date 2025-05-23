@@ -13,7 +13,17 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { useQuery } from '@tanstack/react-query'
 // Components
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { CogIcon, AddServersIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import {
+  CogIcon,
+  AddServersIcon,
+  LocationIcon,
+  HardwareIcon,
+  WindowIcon,
+  PackageIcon,
+  PuzzleIcon,
+  RightIcon,
+  TrashIcon,
+} from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { KeyVal } from 'components/keyval.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -21,12 +31,18 @@ import { StringInput, TextInput } from 'components/inputs.mjs'
 import { OsIcon } from './os.mjs'
 import { IpsDisplayTable } from './ip.mjs'
 import { MacsDisplayTable } from './mac.mjs'
+import { OssDisplayTable } from './os.mjs'
 import { PkgsDisplayTable } from './pkg.mjs'
 import { ModsDisplayTable } from './mod.mjs'
 import { Details } from '../details.mjs'
 import { HostAudit } from '../boards/audit.mjs'
 import { HostLogsTable } from 'components/boards/logs.mjs'
 import { HostMetricsTable } from 'components/boards/metrics.mjs'
+import { runIpsTableApiCall } from './ip.mjs'
+import { runMacsTableApiCall } from './mac.mjs'
+import { runOssTableApiCall } from './os.mjs'
+import { runPkgsTableApiCall } from './pkg.mjs'
+import { runModsTableApiCall } from './mod.mjs'
 
 /**
  * This component renders a table with all IP addresses and allows removal
@@ -34,6 +50,11 @@ import { HostMetricsTable } from 'components/boards/metrics.mjs'
 export const HostsTable = () => {
   // State
   const [hosts, setHosts] = useState({})
+  const [ips, setIps] = useState({})
+  const [macs, setMacs] = useState({})
+  const [oss, setOss] = useState({})
+  const [pkgs, setPkgs] = useState({})
+  const [mods, setMods] = useState({})
   const [refresh, setRefresh] = useState(0)
   const [order, setOrder] = useState('host')
   const [desc, setDesc] = useState(false)
@@ -49,6 +70,11 @@ export const HostsTable = () => {
 
   // Effects
   useEffect(() => {
+    runIpsTableApiCall(api).then((result) => setIps(result))
+    runMacsTableApiCall(api).then((result) => setMacs(result))
+    runOssTableApiCall(api).then((result) => setOss(result))
+    runPkgsTableApiCall(api).then((result) => setPkgs(result))
+    runModsTableApiCall(api).then((result) => setMods(result))
     runHostsTableApiCall(api).then((result) => setHosts(result))
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh])
@@ -89,6 +115,13 @@ export const HostsTable = () => {
           <TrashIcon /> Remove {count} Hosts
         </button>
         <NewHostButton {...{ refresh, setRefresh }} />
+      </div>
+      <div className="flex flex-row item-center gap-2 mt-3">
+        <ManageIpsButton hosts={hosts} ips={ips} {...{ refresh, setRefresh }} />
+        <ManageMacsButton hosts={hosts} macs={macs} {...{ refresh, setRefresh }} />
+        <ManageOssButton hosts={hosts} oss={oss} {...{ refresh, setRefresh }} />
+        <ManagePkgsButton hosts={hosts} pkgs={pkgs} {...{ refresh, setRefresh }} />
+        <ManageModsButton hosts={hosts} mods={mods} {...{ refresh, setRefresh }} />
       </div>
       <table className="table table-auto">
         <thead>
@@ -153,6 +186,36 @@ export async function runHostsTableApiCall(api) {
   else return false
 }
 
+export async function runHostIpsTableApiCall(api) {
+  const result = await api.getInventoryHostIps()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runHostMacsTableApiCall(api) {
+  const result = await api.getInventoryHostMacs()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runHostOssTableApiCall(api) {
+  const result = await api.getInventoryHostOss()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runHostPkgsTableApiCall(api) {
+  const result = await api.getInventoryHostPkgs()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runHostModsTableApiCall(api) {
+  const result = await api.getInventoryHostMods()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
 export const NewHostButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
@@ -170,6 +233,726 @@ export const NewHostButton = ({ refresh, setRefresh }) => {
       <AddServersIcon />
       <span>New Host</span>
     </button>
+  )
+}
+
+export const ManageIpsButton = ({ hosts, ips, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-4 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <ManageIps {...{ hosts, ips, refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <LocationIcon />
+      <span>Manage Ips</span>
+    </button>
+  )
+}
+
+export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [hostIpRelations, setHostIpRelations] = useState([])
+  const [selectedIps, setSelectedIps] = useState([])
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    runHostIpsTableApiCall(api).then((allRelations) => {
+      setHostIpRelations(allRelations)
+
+      const ipsForHost = allRelations
+        .filter((entry) => entry.host === selectedHost.id)
+        .map((entry) => entry.ip)
+
+      setSelectedIps(ipsForHost)
+      setLoadingStatus(false)
+    })
+  }, [selectedHost])
+
+  const toggleIp = (ipStr) => {
+    setSelectedIps((prev) =>
+      prev.includes(ipStr) ? prev.filter((i) => i !== ipStr) : [...prev, ipStr]
+    )
+  }
+
+  const handleSave = async () => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    const currentIps = hostIpRelations
+      .filter((entry) => entry.host === selectedHost.id)
+      .map((entry) => entry.ip)
+
+    const currentSet = new Set(currentIps)
+    const selectedSet = new Set(selectedIps)
+
+    const toLink = [...selectedSet].filter((ip) => !currentSet.has(ip))
+    const toUnlink = [...currentSet].filter((ip) => !selectedSet.has(ip))
+
+    await Promise.all([
+      ...toLink.map((ip) => api.linkHostToIp(selectedHost.id, ip)),
+      ...toUnlink.map((ip) => api.unlinkHostToIp(selectedHost.id, ip)),
+    ])
+
+    setRefresh(!refresh)
+    setLoadingStatus(false)
+    clearModal()
+  }
+
+  const handleCancel = () => clearModal()
+
+  return (
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
+      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Hosts</h2>
+        {hosts.map((host) => (
+          <div
+            key={host.id}
+            onClick={() => setSelectedHost(host)}
+            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+              ${
+                selectedHost?.id === host.id
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'hover:bg-gray-100'
+              }`}
+          >
+            {host.name || host.id}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-2/3 p-4 overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedHost
+            ? `Linked IPs for ${selectedHost.name || selectedHost.id}`
+            : 'Select a Host'}
+        </h2>
+
+        {selectedHost && (
+          <div className="flex flex-col gap-2">
+            {ips.map((ip) => (
+              <label key={ip.ip} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={selectedIps.includes(ip.ip)}
+                  onChange={() => toggleIp(ip.ip)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{ip.ip}</span>
+              </label>
+            ))}
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ManageMacsButton = ({ hosts, macs, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-4 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <ManageMacs {...{ hosts, macs, refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <HardwareIcon />
+      <span>Manage Macs</span>
+    </button>
+  )
+}
+
+export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [hostMacRelations, setHostMacRelations] = useState([])
+  const [selectedMacs, setSelectedMacs] = useState([])
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    runHostMacsTableApiCall(api).then((allRelations) => {
+      setHostMacRelations(allRelations)
+
+      const macsForHost = allRelations
+        .filter((entry) => entry.host === selectedHost.id)
+        .map((entry) => entry.mac)
+
+      setSelectedMacs(macsForHost)
+      setLoadingStatus(false)
+    })
+  }, [selectedHost])
+
+  const toggleMac = (macStr) => {
+    setSelectedMacs((prev) =>
+      prev.includes(macStr) ? prev.filter((i) => i !== macStr) : [...prev, macStr]
+    )
+  }
+
+  const handleSave = async () => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    const currentMacs = hostMacRelations
+      .filter((entry) => entry.host === selectedHost.id)
+      .map((entry) => entry.mac)
+
+    const currentSet = new Set(currentMacs)
+    const selectedSet = new Set(selectedMacs)
+
+    const toLink = [...selectedSet].filter((mac) => !currentSet.has(mac))
+    const toUnlink = [...currentSet].filter((mac) => !selectedSet.has(mac))
+
+    await Promise.all([
+      ...toLink.map((mac) => api.linkHostToMac(selectedHost.id, mac)),
+      ...toUnlink.map((mac) => api.unlinkHostToMac(selectedHost.id, mac)),
+    ])
+
+    setRefresh(!refresh)
+    setLoadingStatus(false)
+    clearModal()
+  }
+
+  const handleCancel = () => clearModal()
+
+  return (
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
+      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Hosts</h2>
+        {hosts.map((host) => (
+          <div
+            key={host.id}
+            onClick={() => setSelectedHost(host)}
+            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+              ${
+                selectedHost?.id === host.id
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'hover:bg-gray-100'
+              }`}
+          >
+            {host.name || host.id}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-2/3 p-4 overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedHost
+            ? `Linked Macs for ${selectedHost.name || selectedHost.id}`
+            : 'Select a Host'}
+        </h2>
+
+        {selectedHost && (
+          <div className="flex flex-col gap-2">
+            {macs.map((mac) => (
+              <label key={mac.mac} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={selectedMacs.includes(mac.mac)}
+                  onChange={() => toggleMac(mac.mac)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{mac.mac}</span>
+              </label>
+            ))}
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ManageOssButton = ({ hosts, oss, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-4 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <ManageOss {...{ hosts, oss, refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <WindowIcon />
+      <span>Manage Oss</span>
+    </button>
+  )
+}
+
+export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [hostOsRelations, setHostOsRelations] = useState([])
+  const [selectedOss, setSelectedOss] = useState([])
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    runHostOssTableApiCall(api).then((allRelations) => {
+      setHostOsRelations(allRelations)
+
+      const ossForHost = allRelations
+        .filter((entry) => entry.host === selectedHost.id)
+        .map((entry) => entry.os)
+
+      setSelectedOss(ossForHost)
+      setLoadingStatus(false)
+    })
+  }, [selectedHost])
+
+  const toggleOs = (osStr) => {
+    setSelectedOss((prev) =>
+      prev.includes(osStr) ? prev.filter((i) => i !== osStr) : [...prev, osStr]
+    )
+  }
+
+  const handleSave = async () => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    const currentOss = hostOsRelations
+      .filter((entry) => entry.host === selectedHost.id)
+      .map((entry) => entry.os)
+
+    const currentSet = new Set(currentOss)
+    const selectedSet = new Set(selectedOss)
+
+    const toLink = [...selectedSet].filter((os) => !currentSet.has(os))
+    const toUnlink = [...currentSet].filter((os) => !selectedSet.has(os))
+
+    await Promise.all([
+      ...toLink.map((os) => api.linkHostToOs(selectedHost.id, os)),
+      ...toUnlink.map((os) => api.unlinkHostToOs(selectedHost.id, os)),
+    ])
+
+    setRefresh(!refresh)
+    setLoadingStatus(false)
+    clearModal()
+  }
+
+  const handleCancel = () => clearModal()
+
+  return (
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
+      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Hosts</h2>
+        {hosts.map((host) => (
+          <div
+            key={host.id}
+            onClick={() => setSelectedHost(host)}
+            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+              ${
+                selectedHost?.id === host.id
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'hover:bg-gray-100'
+              }`}
+          >
+            {host.name || host.id}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-2/3 p-4 overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedHost
+            ? `Linked Oss for ${selectedHost.name || selectedHost.id}`
+            : 'Select a Host'}
+        </h2>
+
+        {selectedHost && (
+          <div className="flex flex-col gap-2">
+            {oss.map((os) => (
+              <label key={os.id} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={selectedOss.includes(os.id)}
+                  onChange={() => toggleOs(os.id)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{os.id}</span>
+              </label>
+            ))}
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ManagePkgsButton = ({ hosts, pkgs, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-4 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <ManagePkgs {...{ hosts, pkgs, refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <PackageIcon />
+      <span>Manage Pkgs</span>
+    </button>
+  )
+}
+
+export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [hostPkgRelations, setHostPkgRelations] = useState([])
+  const [selectedPkgs, setSelectedPkgs] = useState([])
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    runHostPkgsTableApiCall(api).then((allRelations) => {
+      setHostPkgRelations(allRelations)
+
+      const pkgsForHost = allRelations
+        .filter((entry) => entry.host === selectedHost.id)
+        .map((entry) => entry.pkg)
+
+      setSelectedPkgs(pkgsForHost)
+      setLoadingStatus(false)
+    })
+  }, [selectedHost])
+
+  const togglePkg = (pkgStr) => {
+    setSelectedPkgs((prev) =>
+      prev.includes(pkgStr) ? prev.filter((i) => i !== pkgStr) : [...prev, pkgStr]
+    )
+  }
+
+  const handleSave = async () => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    const currentPkgs = hostPkgRelations
+      .filter((entry) => entry.host === selectedHost.id)
+      .map((entry) => entry.pkg)
+
+    const currentSet = new Set(currentPkgs)
+    const selectedSet = new Set(selectedPkgs)
+
+    const toLink = [...selectedSet].filter((pkg) => !currentSet.has(pkg))
+    const toUnlink = [...currentSet].filter((pkg) => !selectedSet.has(pkg))
+
+    await Promise.all([
+      ...toLink.map((pkg) => api.linkHostToPkg(selectedHost.id, pkg)),
+      ...toUnlink.map((pkg) => api.unlinkHostToPkg(selectedHost.id, pkg)),
+    ])
+
+    setRefresh(!refresh)
+    setLoadingStatus(false)
+    clearModal()
+  }
+
+  const handleCancel = () => clearModal()
+
+  return (
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
+      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Hosts</h2>
+        {hosts.map((host) => (
+          <div
+            key={host.id}
+            onClick={() => setSelectedHost(host)}
+            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+              ${
+                selectedHost?.id === host.id
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'hover:bg-gray-100'
+              }`}
+          >
+            {host.name || host.id}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-2/3 p-4 overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedHost
+            ? `Linked Pkgs for ${selectedHost.name || selectedHost.id}`
+            : 'Select a Host'}
+        </h2>
+
+        {selectedHost && (
+          <div className="flex flex-col gap-2">
+            {pkgs.map((pkg) => (
+              <label key={pkg.id} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={selectedPkgs.includes(pkg.id)}
+                  onChange={() => togglePkg(pkg.id)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{pkg.id}</span>
+              </label>
+            ))}
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const ManageModsButton = ({ hosts, mods, refresh, setRefresh }) => {
+  const { pushModal } = useContext(ModalContext)
+
+  return (
+    <button
+      className="btn btn-primary flex flex-row gap-4 justify-between items-center"
+      onClick={() =>
+        pushModal(
+          <ModalWrapper keepOpenOnClick wClass="max-w-2xl w-full">
+            <ManageMods {...{ hosts, mods, refresh, setRefresh }} />
+          </ModalWrapper>
+        )
+      }
+    >
+      <PuzzleIcon />
+      <span>Manage Mods</span>
+    </button>
+  )
+}
+
+export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
+  // Hooks
+  const { api } = useApi()
+  const { clearModal } = useContext(ModalContext)
+
+  // State
+  const [selectedHost, setSelectedHost] = useState(null)
+  const [hostModRelations, setHostModRelations] = useState([])
+  const [selectedMods, setSelectedMods] = useState([])
+
+  // Context
+  const { setLoadingStatus } = useContext(LoadingStatusContext)
+
+  // Effects
+  useEffect(() => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    runHostModsTableApiCall(api).then((allRelations) => {
+      setHostModRelations(allRelations)
+
+      const modsForHost = allRelations
+        .filter((entry) => entry.host === selectedHost.id)
+        .map((entry) => entry.mod)
+
+      setSelectedMods(modsForHost)
+      setLoadingStatus(false)
+    })
+  }, [selectedHost])
+
+  const toggleMod = (modStr) => {
+    setSelectedMods((prev) =>
+      prev.includes(modStr) ? prev.filter((i) => i !== modStr) : [...prev, modStr]
+    )
+  }
+
+  const handleSave = async () => {
+    if (!selectedHost) return
+    setLoadingStatus(true)
+
+    const currentMods = hostModRelations
+      .filter((entry) => entry.host === selectedHost.id)
+      .map((entry) => entry.mod)
+
+    const currentSet = new Set(currentMods)
+    const selectedSet = new Set(selectedMods)
+
+    const toLink = [...selectedSet].filter((mod) => !currentSet.has(mod))
+    const toUnlink = [...currentSet].filter((mod) => !selectedSet.has(mod))
+
+    await Promise.all([
+      ...toLink.map((mod) => api.linkHostToMod(selectedHost.id, mod)),
+      ...toUnlink.map((mod) => api.unlinkHostToMod(selectedHost.id, mod)),
+    ])
+
+    setRefresh(!refresh)
+    setLoadingStatus(false)
+    clearModal()
+  }
+
+  const handleCancel = () => clearModal()
+
+  return (
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
+      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+        <h2 className="text-xl font-semibold mb-4">Hosts</h2>
+        {hosts.map((host) => (
+          <div
+            key={host.id}
+            onClick={() => setSelectedHost(host)}
+            className={`cursor-pointer p-2 rounded-lg mb-2 border 
+              ${
+                selectedHost?.id === host.id
+                  ? 'bg-blue-500 text-white border-blue-600'
+                  : 'hover:bg-gray-100'
+              }`}
+          >
+            {host.name || host.id}
+          </div>
+        ))}
+      </div>
+
+      <div className="w-2/3 p-4 overflow-y-auto">
+        <h2 className="text-xl font-semibold mb-4">
+          {selectedHost
+            ? `Linked IPs for ${selectedHost.name || selectedHost.id}`
+            : 'Select a Host'}
+        </h2>
+
+        {selectedHost && (
+          <div className="flex flex-col gap-2">
+            {mods.map((mod) => (
+              <label key={mod.mod} className="flex items-center space-x-3">
+                <input
+                  type="checkbox"
+                  checked={selectedMods.includes(mod.mod)}
+                  onChange={() => toggleMod(mod.mod)}
+                  className="form-checkbox h-4 w-4 text-blue-600"
+                />
+                <span>{mod.mod}</span>
+              </label>
+            ))}
+
+            <div className="mt-6 flex justify-end gap-4">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
@@ -433,27 +1216,53 @@ export const HostDetail = ({ data }) => {
       </Details>
       <Details
         summaryLeft="IP Addresses"
-        summaryRight={<span className="badge badge-primary">{data.ips?.length}</span>}
+        summaryRight={
+          <span className="badge badge-primary">
+            {data.ips === false ? 0 : Array.isArray(data.ips) ? data.ips.length : 1}
+          </span>
+        }
       >
         <IpsDisplayTable ips={data.ips} />
       </Details>
       <Details
         summaryLeft="MAC Addresses"
-        summaryRight={<span className="badge badge-primary">{data.macs?.length}</span>}
+        summaryRight={
+          <span className="badge badge-primary">
+            {data.macs === false ? 0 : Array.isArray(data.macs) ? data.macs.length : 1}
+          </span>
+        }
       >
         <MacsDisplayTable macs={data.macs} />
       </Details>
       <Details
-        summaryLeft="Software Packages"
-        summaryRight={<span className="badge badge-primary">{data.pkgs?.length}</span>}
+        summaryLeft="Operating systems"
+        summaryRight={
+          <span className="badge badge-primary">
+            {data.oss === false ? 0 : Array.isArray(data.oss) ? data.oss.length : 1}
+          </span>
+        }
       >
-        <PkgsDisplayTable macs={data.pkgs} />
+        <OssDisplayTable oss={data.oss} />
+      </Details>
+      <Details
+        summaryLeft="Software Packages"
+        summaryRight={
+          <span className="badge badge-primary">
+            {data.pkgs === false ? 0 : Array.isArray(data.pkgs) ? data.pkgs.length : 1}
+          </span>
+        }
+      >
+        <PkgsDisplayTable pkgs={data.pkgs} />
       </Details>
       <Details
         summaryLeft="Morio Modules"
-        summaryRight={<span className="badge badge-primary">{data.mods?.length}</span>}
+        summaryRight={
+          <span className="badge badge-primary">
+            {data.mods === false ? 0 : Array.isArray(data.mods) ? data.mods.length : 1}
+          </span>
+        }
       >
-        <ModsDisplayTable macs={data.mods} />
+        <ModsDisplayTable mods={data.mods} />
       </Details>
       {data.notes ? (
         <Details summaryLeft="Notes">{data.notes || 'no notes for this host'}</Details>

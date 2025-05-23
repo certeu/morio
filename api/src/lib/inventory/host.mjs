@@ -53,6 +53,61 @@ Host.prototype.list = async function () {
 }
 
 /**
+ * Helper method to list host-ips in the inventory
+ *
+ * @return {object} keys - The host-ips in the inventory
+ */
+Host.prototype.listIps = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_host_ip`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list host-macs in the inventory
+ *
+ * @return {object} keys - The host-macs in the inventory
+ */
+Host.prototype.listMacs = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_host_mac`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list host-oss in the inventory
+ *
+ * @return {object} keys - The host-oss in the inventory
+ */
+Host.prototype.listOss = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_host_os`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list host-pkgs in the inventory
+ *
+ * @return {object} keys - The host-pkgs in the inventory
+ */
+Host.prototype.listPkgs = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_host_pkg`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
+ * Helper method to list host-mods in the inventory
+ *
+ * @return {object} keys - The host-mods in the inventory
+ */
+Host.prototype.listMods = async function () {
+  const [status, result] = await utils.db.read(`SELECT * FROM inventory_host_mod`)
+
+  return status === 200 ? resultsAsList(result) : false
+}
+
+/**
  * Helper method to update an inventory (host)
  *
  * @return {object} updated - true if it the host is updated, false if not
@@ -163,8 +218,8 @@ Host.prototype.readIps = async function (id) {
  */
 Host.prototype.readPkgs = async function (id) {
   const [status, result] = await utils.db.read(
-    `SELECT hi.host, hi.pkg, i.version FROM inventory_host_pkg hi
-     JOIN inventory_pkgs i ON hi.pkg = i.name
+    `SELECT hi.host, i.id, i.name, i.version FROM inventory_host_pkg hi
+     JOIN inventory_pkgs i ON hi.pkg = i.id
      WHERE hi.host=:id`,
     { id: clean(id) }
   )
@@ -472,16 +527,13 @@ Host.prototype.unlinkHostIp = async function (host, ip) {
    */
 
   let result = false
-  try {
-    result = await utils.db.write(`DELETE FROM inventory_host_ip WHERE host = :host, ip = :ip`, {
-      host: host,
-      ip: ip,
-    })
-  } catch (err) {
-    return false
-  }
 
-  return result?.[0] === 200
+  result = await utils.db.write(`DELETE FROM inventory_host_ip WHERE host = :host AND ip = :ip`, {
+    host: host,
+    ip: ip,
+  })
+
+  return result
 }
 
 /**
@@ -525,16 +577,16 @@ Host.prototype.unlinkHostMac = async function (host, mac) {
    */
 
   let result = false
-  try {
-    result = await utils.db.write(`DELETE FROM inventory_host_mac WHERE host = :host, mac = :mac`, {
+
+  result = await utils.db.write(
+    `DELETE FROM inventory_host_mac WHERE host = :host AND mac = :mac`,
+    {
       host: host,
       mac: mac,
-    })
-  } catch (err) {
-    return false
-  }
+    }
+  )
 
-  return result?.[0] === 200
+  return result
 }
 
 /**
@@ -578,16 +630,13 @@ Host.prototype.unlinkHostOs = async function (host, id) {
    */
 
   let result = false
-  try {
-    result = await utils.db.write(`DELETE FROM inventory_host_os WHERE host = :host, id = :id`, {
-      host: host,
-      id: id,
-    })
-  } catch (err) {
-    return false
-  }
 
-  return result?.[0] === 200
+  result = await utils.db.write(`DELETE FROM inventory_host_os WHERE host = :host AND os = :os`, {
+    host: host,
+    os: id,
+  })
+
+  return result
 }
 
 /**
@@ -631,16 +680,16 @@ Host.prototype.unlinkHostPkg = async function (host, id) {
    */
 
   let result = false
-  try {
-    result = await utils.db.write(`DELETE FROM inventory_host_pkg WHERE host = :host, id = :id`, {
-      host: host,
-      id: id,
-    })
-  } catch (err) {
-    return false
-  }
 
-  return result?.[0] === 200
+  result = await utils.db.write(
+    `DELETE FROM inventory_host_pkg WHERE host = :host AND pkg = :pkg`,
+    {
+      host: host,
+      pkg: id,
+    }
+  )
+
+  return result
 }
 
 /**
@@ -684,16 +733,16 @@ Host.prototype.unlinkHostMod = async function (host, mod) {
    */
 
   let result = false
-  try {
-    result = await utils.db.write(`DELETE FROM inventory_host_mod WHERE host = :host, mod = :mod`, {
+
+  result = await utils.db.write(
+    `DELETE FROM inventory_host_mod WHERE host = :host AND mod = :mod`,
+    {
       host: host,
       mod: mod,
-    })
-  } catch (err) {
-    return false
-  }
+    }
+  )
 
-  return result?.[0] === 200
+  return result
 }
 
 Host.prototype.createInvite = async function (user, type = 'once') {

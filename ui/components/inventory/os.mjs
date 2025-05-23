@@ -76,7 +76,7 @@ export const OssTable = () => {
                 checked={oss.length === count}
               />
             </th>
-            {['id', 'host', 'name', 'version'].map((field) => (
+            {['id', 'name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 underline hover:decoration-4 decoration-2"
@@ -106,11 +106,6 @@ export const OssTable = () => {
               <td className="">
                 <PageLink href={`/inventory/oss/${os.id}`}>{os.id}</PageLink>
               </td>
-              <td className="pr-6 py-0.5 text-sm">
-                <PageLink href={`/inventory/hosts/${os.host}`}>
-                  <InventoryHostname uuid={os.host} />
-                </PageLink>
-              </td>
               <td className="">
                 <Markdown>{os.name}</Markdown>
               </td>
@@ -126,7 +121,7 @@ export const OssTable = () => {
   )
 }
 
-async function runOssTableApiCall(api) {
+export async function runOssTableApiCall(api) {
   const result = await api.getInventoryOss()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
@@ -267,7 +262,7 @@ export const OssDisplayTable = ({ oss }) => {
     <table>
       <thead>
         <tr>
-          {['id', 'name', 'host', 'version'].map((field) => (
+          {['id', 'name', 'version'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -288,11 +283,6 @@ export const OssDisplayTable = ({ oss }) => {
           <tr key={os.id}>
             <td className="pr-6 py-0.5 font-mono text-sm">
               <PageLink href={`/inventory/oss/${os.id}`}>{os.id}</PageLink>
-            </td>
-            <td className="pr-6 py-0.5 text-sm">
-              <PageLink href={`/inventory/hosts/${os.host}`}>
-                <InventoryHostname uuid={os.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{os.name}</Markdown>

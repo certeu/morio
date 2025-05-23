@@ -117,7 +117,7 @@ export const IpsTable = () => {
   )
 }
 
-async function runIpsTableApiCall(api) {
+export async function runIpsTableApiCall(api) {
   const result = await api.getInventoryIps()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false

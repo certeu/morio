@@ -76,13 +76,18 @@ Controller.prototype.readHost = async function (req, res) {
   /*
    * Add related data
    */
-  const ips = await new Host().readIps(valid.id)
-  const macs = await new Host().readMacs(valid.id)
-  const os = await new Host().readOss(valid.id)
-  const pkgs = await new Host().readPkgs(valid.id)
-  const mods = await new Host().readMods(valid.id)
+  const ensureArray = (item) => {
+    if (!item || Array.isArray(item)) return item
+    return [item]
+  }
 
-  return res.send({ ...result, ips, macs, os, pkgs, mods })
+  const ips = ensureArray(await new Host().readIps(valid.id))
+  const macs = ensureArray(await new Host().readMacs(valid.id))
+  const oss = ensureArray(await new Host().readOss(valid.id))
+  const pkgs = ensureArray(await new Host().readPkgs(valid.id))
+  const mods = ensureArray(await new Host().readMods(valid.id))
+
+  return res.send({ ...result, ips, macs, oss, pkgs, mods })
 }
 
 /**
@@ -731,6 +736,81 @@ Controller.prototype.listHosts = async function (req, res, format = 'array') {
   for (const host of list) hosts[host.id] = host
 
   return res.send(hosts)
+}
+
+/**
+ * List host-ips
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listHostIps = async function (req, res) {
+  const list = await new Host().listIps()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List host-macs
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listHostMacs = async function (req, res) {
+  const list = await new Host().listMacs()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List host-oss
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listHostOss = async function (req, res) {
+  const list = await new Host().listOss()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List host-pkgs
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listHostPkgs = async function (req, res) {
+  const list = await new Host().listPkgs()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
+}
+
+/**
+ * List host-mods
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ * @param {string} format - When this is 'object' we return an object, by default we return an array
+ */
+Controller.prototype.listHostMods = async function (req, res) {
+  const list = await new Host().listMods()
+
+  return Array.isArray(list)
+    ? res.send(list)
+    : utils.sendErrorResponse(res, 'morio.api.db.failure', req.url)
 }
 
 /**
@@ -1824,6 +1904,7 @@ Controller.prototype.unlinkHostIp = async function (req, res) {
     host: req.params.host,
     ip: req.params.ip,
   })
+
   if (!valid)
     return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
       schema_violation: err.message,

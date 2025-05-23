@@ -25,6 +25,31 @@ export function routes(app) {
   app.get(`/inventory/hosts`, rbac.user, inventory.listHosts)
 
   /*
+   * Read all host-ips (returns an array)
+   */
+  app.get(`/inventory/hosts/ips`, rbac.user, inventory.listHostIps)
+
+  /*
+   * Read all host-macs (returns an array)
+   */
+  app.get(`/inventory/hosts/macs`, rbac.user, inventory.listHostMacs)
+
+  /*
+   * Read all host-oss (returns an array)
+   */
+  app.get(`/inventory/hosts/oss`, rbac.user, inventory.listHostOss)
+
+  /*
+   * Read all host-pkgs (returns an array)
+   */
+  app.get(`/inventory/hosts/pkgs`, rbac.user, inventory.listHostPkgs)
+
+  /*
+   * Read all host-mods (returns an array)
+   */
+  app.get(`/inventory/hosts/mods`, rbac.user, inventory.listHostMods)
+
+  /*
    * Read all hosts (returns an object)
    */
   app.get(`/inventory/hosts.obj`, rbac.user, (req, res) => inventory.listHosts(req, res, 'object'))

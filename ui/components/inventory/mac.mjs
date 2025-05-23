@@ -114,7 +114,7 @@ export const MacsTable = () => {
   )
 }
 
-async function runMacsTableApiCall(api) {
+export async function runMacsTableApiCall(api) {
   const result = await api.getInventoryMacs()
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false

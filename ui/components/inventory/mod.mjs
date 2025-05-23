@@ -307,7 +307,7 @@ export const BulkModUpdate = ({ mods, refresh, setRefresh }) => {
  */
 export const ModsDisplayTable = ({ mods }) => {
   // State
-  const [order, setOrder] = useState('name')
+  const [order, setOrder] = useState('mod')
   const [desc, setDesc] = useState(false)
 
   // Hooks
@@ -317,7 +317,7 @@ export const ModsDisplayTable = ({ mods }) => {
     <table>
       <thead>
         <tr>
-          {['mod', 'host', 'data'].map((field) => (
+          {['mod', 'data'].map((field) => (
             <th key={field} className="text-left">
               <button
                 className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -338,11 +338,6 @@ export const ModsDisplayTable = ({ mods }) => {
           <tr key={mod.mod}>
             <td className="py-0.5 pr-4 font-mono text-sm">
               <PageLink href={`/inventory/mods/${mod.mod}`}>{mod.mod}</PageLink>
-            </td>
-            <td className="py-0.5 pr-4 font-mono text-sm">
-              <PageLink href={`/inventory/hosts/${mod.host}`}>
-                <InventoryHostname uuid={mod.host} />
-              </PageLink>
             </td>
             <td className="">
               <Markdown>{mod.data}</Markdown>
