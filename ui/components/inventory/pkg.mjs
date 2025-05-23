@@ -14,7 +14,6 @@ import { AddPackageIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all Software packages and allows removal
@@ -229,12 +228,6 @@ export const PkgDetail = ({ data }) => {
 
   return (
     <>
-      {data.id ? (
-        <>
-          <h2>Id</h2>
-          <Markdown>{data.id}</Markdown>
-        </>
-      ) : null}
       {data.name ? (
         <>
           <h2>Name</h2>

@@ -1546,11 +1546,13 @@ Controller.prototype.readModvar = async function (req, res) {
   /*
    * Read from inventory
    */
-  const modvar = await new Modvar(valid.id).read()
+  const result = await new Modvar().read(valid.id)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return modvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await modvar.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1664,11 +1666,13 @@ Controller.prototype.readHostvar = async function (req, res) {
   /*
    * Read from inventory
    */
-  const hostvar = await new Hostvar(valid.id).read()
+  const result = await new Hostvar().read(valid.id)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return hostvar.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await hostvar.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1789,11 +1793,13 @@ Controller.prototype.readModfile = async function (req, res) {
   /*
    * Read from inventory
    */
-  const modfile = await new Modfile(valid.id).read()
+  const result = await new Modfile().read(valid.id)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return modfile.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await modfile.asData())
+  return res.send({ ...result })
 }
 
 /**

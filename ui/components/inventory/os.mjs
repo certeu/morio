@@ -14,7 +14,6 @@ import { ServersIcon, AddServersIcon, RightIcon, TrashIcon } from 'components/ic
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 import { Linux, Debian } from 'components/brands.mjs'
 
 /**
@@ -230,16 +229,13 @@ export const OsDetail = ({ data }) => {
 
   return (
     <>
-      {data.id ? (
-        <>
-          <h2>Id</h2>
-          <Markdown>{data.id}</Markdown>
-        </>
-      ) : null}
       {data.name ? (
         <>
           <h2>Name</h2>
-          <Markdown>{data.name}</Markdown>
+          <div className="flex items-center gap-2">
+            {OsIcon(data)}
+            <span>{data.name}</span>
+          </div>
         </>
       ) : null}
       {data.version ? (

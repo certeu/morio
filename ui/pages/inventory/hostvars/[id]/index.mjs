@@ -11,7 +11,7 @@ export default function InventoryHostvarPage({ id = false }) {
   const [title, setTitle] = useState('Loading host variable data...')
 
   const meta = {
-    title: title ? id : 'Loading host variable data',
+    title: title ? title : 'Loading host variable data',
     page: ['inventory', 'hostvars', id ? id : 'unknown'],
     Icon: VariableIcon,
   }

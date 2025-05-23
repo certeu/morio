@@ -11,7 +11,7 @@ export default function InventoryModfilePage({ id = false }) {
   const [title, setTitle] = useState('Loading module file data...')
 
   const meta = {
-    title: title ? id : 'Loading module file data',
+    title: title ? title : 'Loading module file data',
     page: ['inventory', 'modfiles', id ? id : 'unknown'],
     Icon: HardwareIcon,
   }
