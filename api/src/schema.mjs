@@ -376,6 +376,13 @@ export const schema = {
     group: Joi.string().required(),
     info: Joi.string().allow(''),
   }),
+  'req.inventory.updateGroupvar': Joi.object({
+    id: Joi.string().required(),
+    key: Joi.string().required(),
+    val: Joi.string().allow(''),
+    info: Joi.string().allow(''),
+    group: Joi.string().required(),
+  }),
   'req.inventory.writeHost': Joi.object({
     arch: Joi.string(),
     cores: Joi.number(),

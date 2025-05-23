@@ -319,26 +319,26 @@ export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
   const handleCancel = () => clearModal()
 
   return (
-    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
-      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden bg-base-100 text-base-content">
+      <div className="w-1/3 border-r border-base-300 p-2 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Hosts</h2>
         {hosts.map((host) => (
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
             className={`cursor-pointer p-2 rounded-lg mb-2 border 
-              ${
-                selectedHost?.id === host.id
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'hover:bg-gray-100'
-              }`}
+          ${
+            selectedHost?.id === host.id
+              ? 'bg-primary text-primary-content border-primary'
+              : 'hover:bg-base-300 border-base-300'
+          }`}
           >
             {host.name || host.id}
           </div>
         ))}
       </div>
 
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-2/3 p-4 overflow-y-auto bg-base-100">
         <h2 className="text-xl font-semibold mb-4">
           {selectedHost
             ? `Linked IPs for ${selectedHost.name || selectedHost.id}`
@@ -353,7 +353,7 @@ export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
                   type="checkbox"
                   checked={selectedIps.includes(ip.ip)}
                   onChange={() => toggleIp(ip.ip)}
-                  className="form-checkbox h-4 w-4 text-blue-600"
+                  className="checkbox checkbox-primary"
                 />
                 <span>{ip.ip}</span>
               </label>
@@ -362,14 +362,11 @@ export const ManageIps = ({ hosts, ips, refresh, setRefresh }) => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                className="btn border-base-300 bg-base-200 hover:bg-base-300"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
+              <button onClick={handleSave} className="btn btn-primary">
                 Save
               </button>
             </div>
@@ -463,26 +460,26 @@ export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
   const handleCancel = () => clearModal()
 
   return (
-    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
-      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden bg-base-100 text-base-content">
+      <div className="w-1/3 border-r border-base-300 p-2 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Hosts</h2>
         {hosts.map((host) => (
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
             className={`cursor-pointer p-2 rounded-lg mb-2 border 
-              ${
-                selectedHost?.id === host.id
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'hover:bg-gray-100'
-              }`}
+          ${
+            selectedHost?.id === host.id
+              ? 'bg-primary text-primary-content border-primary'
+              : 'hover:bg-base-300 border-base-300'
+          }`}
           >
             {host.name || host.id}
           </div>
         ))}
       </div>
 
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-2/3 p-4 overflow-y-auto bg-base-100">
         <h2 className="text-xl font-semibold mb-4">
           {selectedHost
             ? `Linked Macs for ${selectedHost.name || selectedHost.id}`
@@ -497,7 +494,7 @@ export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
                   type="checkbox"
                   checked={selectedMacs.includes(mac.mac)}
                   onChange={() => toggleMac(mac.mac)}
-                  className="form-checkbox h-4 w-4 text-blue-600"
+                  className="checkbox checkbox-primary"
                 />
                 <span>{mac.mac}</span>
               </label>
@@ -506,14 +503,11 @@ export const ManageMacs = ({ hosts, macs, refresh, setRefresh }) => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                className="btn border-base-300 bg-base-200 hover:bg-base-300"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
+              <button onClick={handleSave} className="btn btn-primary">
                 Save
               </button>
             </div>
@@ -607,26 +601,26 @@ export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
   const handleCancel = () => clearModal()
 
   return (
-    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
-      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden bg-base-100 text-base-content">
+      <div className="w-1/3 border-r border-base-300 p-2 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Hosts</h2>
         {hosts.map((host) => (
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
             className={`cursor-pointer p-2 rounded-lg mb-2 border 
-              ${
-                selectedHost?.id === host.id
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'hover:bg-gray-100'
-              }`}
+          ${
+            selectedHost?.id === host.id
+              ? 'bg-primary text-primary-content border-primary'
+              : 'hover:bg-base-300 border-base-300'
+          }`}
           >
             {host.name || host.id}
           </div>
         ))}
       </div>
 
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-2/3 p-4 overflow-y-auto bg-base-100">
         <h2 className="text-xl font-semibold mb-4">
           {selectedHost
             ? `Linked Oss for ${selectedHost.name || selectedHost.id}`
@@ -641,7 +635,7 @@ export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
                   type="checkbox"
                   checked={selectedOss.includes(os.id)}
                   onChange={() => toggleOs(os.id)}
-                  className="form-checkbox h-4 w-4 text-blue-600"
+                  className="checkbox checkbox-primary"
                 />
                 <span>{os.id}</span>
               </label>
@@ -650,14 +644,11 @@ export const ManageOss = ({ hosts, oss, refresh, setRefresh }) => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                className="btn border-base-300 bg-base-200 hover:bg-base-300"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
+              <button onClick={handleSave} className="btn btn-primary">
                 Save
               </button>
             </div>
@@ -751,26 +742,26 @@ export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
   const handleCancel = () => clearModal()
 
   return (
-    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
-      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden bg-base-100 text-base-content">
+      <div className="w-1/3 border-r border-base-300 p-2 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Hosts</h2>
         {hosts.map((host) => (
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
             className={`cursor-pointer p-2 rounded-lg mb-2 border 
-              ${
-                selectedHost?.id === host.id
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'hover:bg-gray-100'
-              }`}
+          ${
+            selectedHost?.id === host.id
+              ? 'bg-primary text-primary-content border-primary'
+              : 'hover:bg-base-300 border-base-300'
+          }`}
           >
             {host.name || host.id}
           </div>
         ))}
       </div>
 
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-2/3 p-4 overflow-y-auto bg-base-100">
         <h2 className="text-xl font-semibold mb-4">
           {selectedHost
             ? `Linked Pkgs for ${selectedHost.name || selectedHost.id}`
@@ -785,7 +776,7 @@ export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
                   type="checkbox"
                   checked={selectedPkgs.includes(pkg.id)}
                   onChange={() => togglePkg(pkg.id)}
-                  className="form-checkbox h-4 w-4 text-blue-600"
+                  className="checkbox checkbox-primary"
                 />
                 <span>{pkg.id}</span>
               </label>
@@ -794,14 +785,11 @@ export const ManagePkgs = ({ hosts, pkgs, refresh, setRefresh }) => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                className="btn border-base-300 bg-base-200 hover:bg-base-300"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
+              <button onClick={handleSave} className="btn btn-primary">
                 Save
               </button>
             </div>
@@ -895,29 +883,29 @@ export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
   const handleCancel = () => clearModal()
 
   return (
-    <div className="flex w-full h-[500px] rounded-xl overflow-hidden">
-      <div className="w-1/3 border-r p-2 overflow-y-auto bg-gray-50">
+    <div className="flex w-full h-[500px] rounded-xl overflow-hidden bg-base-100 text-base-content">
+      <div className="w-1/3 border-r border-base-300 p-2 overflow-y-auto">
         <h2 className="text-xl font-semibold mb-4">Hosts</h2>
         {hosts.map((host) => (
           <div
             key={host.id}
             onClick={() => setSelectedHost(host)}
             className={`cursor-pointer p-2 rounded-lg mb-2 border 
-              ${
-                selectedHost?.id === host.id
-                  ? 'bg-blue-500 text-white border-blue-600'
-                  : 'hover:bg-gray-100'
-              }`}
+          ${
+            selectedHost?.id === host.id
+              ? 'bg-primary text-primary-content border-primary'
+              : 'hover:bg-base-300 border-base-300'
+          }`}
           >
             {host.name || host.id}
           </div>
         ))}
       </div>
 
-      <div className="w-2/3 p-4 overflow-y-auto">
+      <div className="w-2/3 p-4 overflow-y-auto bg-base-100">
         <h2 className="text-xl font-semibold mb-4">
           {selectedHost
-            ? `Linked IPs for ${selectedHost.name || selectedHost.id}`
+            ? `Linked Mods for ${selectedHost.name || selectedHost.id}`
             : 'Select a Host'}
         </h2>
 
@@ -929,7 +917,7 @@ export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
                   type="checkbox"
                   checked={selectedMods.includes(mod.mod)}
                   onChange={() => toggleMod(mod.mod)}
-                  className="form-checkbox h-4 w-4 text-blue-600"
+                  className="checkbox checkbox-pryimar"
                 />
                 <span>{mod.mod}</span>
               </label>
@@ -938,14 +926,11 @@ export const ManageMods = ({ hosts, mods, refresh, setRefresh }) => {
             <div className="mt-6 flex justify-end gap-4">
               <button
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100"
+                className="btn border-base-300 bg-base-200 hover:bg-base-300"
               >
                 Cancel
               </button>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-              >
+              <button onClick={handleSave} className="btn btn-primary">
                 Save
               </button>
             </div>

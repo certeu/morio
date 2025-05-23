@@ -620,7 +620,7 @@ Controller.prototype.deleteGroupvars = async function (req, res) {
   /*
    * Delete from inventory
    */
-  const result = await new Groupvar().deletes(valid.group_id)
+  const result = await new Groupvar().deleteGroupvars(valid.group_id)
 
   return result === true
     ? res.status(204).send()
@@ -1577,8 +1577,34 @@ Controller.prototype.updateModvar = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const modvar = new Modvar().update(valid.id, valid.val, valid.info, valid.mod)
+  const modvar = new Modvar().update(valid.id, valid.group, valid.val, valid.info, valid.mod)
   return res.status(200).send(modvar)
+}
+
+/**
+ * Updates a Groupvar
+ *
+ * @param {object} req - The request object from Express
+ * @param {object} res - The response object from Express
+ */
+Controller.prototype.updateGroupvar = async function (req, res) {
+  /*
+   * Validate input
+   */
+  const [valid, err] = await utils.validate(`req.inventory.updateGroupvar`, {
+    ...req.params,
+    ...req.body,
+  })
+  if (!valid)
+    return utils.sendErrorResponse(res, 'morio.api.schema.violation', req.url, {
+      schema_violation: err.message,
+    })
+
+  /*
+   * Take appropriate action
+   */
+  const groupvar = new Groupvar().update(valid.id, valid.group, valid.key, valid.val, valid.info)
+  return res.status(200).send(groupvar)
 }
 
 /**

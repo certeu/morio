@@ -929,6 +929,19 @@ MorioClient.prototype.updateInventoryModvarInfo = async function (id, val, info,
 }
 
 /**
+ * Update the data of an inventory groupvar
+ *
+ * @return {object} - The result
+ */
+MorioClient.prototype.updateInventoryGroupvarInfo = async function (id, group, key, val, info) {
+  return await this.call(`${morioConfig.api}/inventory/groupvars/${id}`, {
+    headers: this.jsonHeaders,
+    method: 'PATCH',
+    body: JSON.stringify({ group, key, val, info }),
+  })
+}
+
+/**
  * Update the data of an inventory hostvar
  *
  * @return {object} - The result

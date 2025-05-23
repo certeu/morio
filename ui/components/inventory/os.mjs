@@ -10,7 +10,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { ServersIcon, AddServersIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { ServersIcon, AddServersIcon, RightIcon, TrashIcon, TipIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -190,12 +190,23 @@ export const NewOs = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new os</h3>
       <p>Give your new os a id, name, and version. The os id will become its unique ID.</p>
+      <StringInput label="Name" update={setName} current={name} placeholder="Os name" />
+      <StringInput label="Version" update={setVersion} current={version} placeholder="Os version" />
       <StringInput
         label="Id"
         update={(val) => setId(val)}
-        readOnly
+        disabled
+        labelTR={
+          <div className="flex gap-1 flex-row items-center flex-wrap">
+            <TipIcon className="w-5 h-5 text-success" />
+            <span>
+              OS <code>id</code> will be auto-generated from name, version like{' '}
+              <code>name_version</code>
+            </span>
+          </div>
+        }
         current={id}
-        placeholder="os_v1"
+        placeholder="linux_22.04"
         valid={(val) =>
           val && isAvailable
             ? true
@@ -204,9 +215,6 @@ export const NewOs = ({ refresh, setRefresh }) => {
               : { error: { details: [{ message: 'This id is taken' }] } }
         }
       />
-
-      <StringInput label="Name" update={setName} current={name} placeholder="Os name" />
-      <StringInput label="Version" update={setVersion} current={version} placeholder="Os version" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button className="btn btn-primary grow" disabled={!(id && isAvailable)} onClick={createOs}>
           Create Os

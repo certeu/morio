@@ -267,6 +267,11 @@ export function routes(app) {
   app.patch(`/inventory/modvars/:id`, rbac.operator, inventory.updateModvar)
 
   /*
+   * Update a Group variable
+   */
+  app.patch(`/inventory/groupvars/:id`, rbac.operator, inventory.updateGroupvar)
+
+  /*
    * Delete an Module Variable
    */
   app.delete(`/inventory/modvars/:id`, rbac.operator, inventory.deleteModvar)

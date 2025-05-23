@@ -13,7 +13,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 import { Highlight } from 'components/highlight.mjs'
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { TipIcon, AddVarIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { TipIcon, AddVarIcon, RightIcon, TrashIcon, CogIcon } from 'components/icons.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
 import { StringInput, TextInput, SelectInput, MarkdownInput } from 'components/inputs.mjs'
@@ -30,6 +30,7 @@ export const GroupvarsTable = () => {
 
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+  const { pushModal } = useContext(ModalContext)
 
   // Hooks
   const { api } = useApi()
@@ -60,7 +61,23 @@ export const GroupvarsTable = () => {
 
   return (
     <>
-      <div className="flex flex-row item-center gap-2 justify-between">
+      <div className="flex flex-row item-center gap-2">
+        <button
+          className="btn btn-primary"
+          onClick={() =>
+            pushModal(
+              <ModalWrapper keepOpenOnClick>
+                <BulkGroupvarUpdate
+                  groupvars={Object.keys(selection)}
+                  {...{ refresh, setRefresh }}
+                />
+              </ModalWrapper>
+            )
+          }
+          disabled={count < 1}
+        >
+          <CogIcon /> Update {count} Groupvars
+        </button>
         <button className="btn btn-error" onClick={removeSelectedEntries} disabled={count < 1}>
           <TrashIcon /> Remove {count} Groupvars
         </button>
@@ -119,6 +136,97 @@ export const GroupvarsTable = () => {
       </table>
       <ReloadDataButton onClick={() => setRefresh(refresh + 1)} />
     </>
+  )
+}
+
+export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
+  // State
+  const [key, setKey] = useState('')
+  const [val, setVal] = useState('')
+  const [info, setInfo] = useState('')
+  const [group, setGroup] = useState('')
+  const [groups, setGroups] = useState([])
+  // Hooks
+  const { api } = useApi()
+  // Context
+  const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+
+  useEffect(() => {
+    if (groups.length < 1)
+      runGroupsTableApiCall(api).then((result) => setGroups(result.map((entry) => entry.id)))
+  }, [api, key])
+
+  // Helper method to bulk-update descriptions
+  const updateGroupvars = async () => {
+    let i = 0
+
+    const count = groupvars.length
+    for (const id in groupvars) {
+      i++
+      await api.updateInventoryGroupvarInfo(groupvars[id], group, key, val, info)
+      setLoadingStatus([
+        true,
+        <LoadingProgress val={i} max={count} msg="Updating groupvar infos" key="linter" />,
+      ])
+    }
+    if (setRefresh) setRefresh(refresh + 1)
+    setLoadingStatus([true, 'Nailed it', true, true])
+  }
+
+  return (
+    <div className="">
+      <h2>Update multiple groupvars</h2>
+      <p>This will set the same info for all the selected groupvars.</p>
+      <SelectInput
+        label="Inventory Group"
+        labelDflt="Choose a group to assign this var to"
+        help={inlineHelp('inventory/groupvars#group')}
+        update={setGroup}
+        current={val}
+        placeholder={`["gold", "blue"]`}
+        list={groups.map((group) => ({ val: group, label: group }))}
+      />
+      <StringInput
+        label="Var name (key)"
+        labelTR={
+          <div className="flex gap-1 flex-row items-center flex-wrap">
+            <TipIcon className="w-5 h-5 text-success" />
+            <span>
+              Var names that contain <code>SECRET</code> will be encrypted at rest
+            </span>
+          </div>
+        }
+        help={inlineHelp('inventory/groupvars#key')}
+        update={(val) => setKey(varify(val))}
+        current={key}
+        placeholder="EU_COLOURS"
+        valid={(val) =>
+          val ? true : { error: { details: [{ message: 'Group name cannot be empty' }] } }
+        }
+      />
+      <TextInput
+        label="Var contents (val)"
+        labelBL="Contents will be parsed as JSON if they are valid JSON"
+        help={inlineHelp('inventory/groupvars#val')}
+        update={setVal}
+        current={val}
+        placeholder={`["gold", "blue"]`}
+      />
+      <details>
+        <summary className="text-sm">Optional: Add info about this groupvar</summary>
+        <MarkdownInput
+          label="Var info"
+          labelBL="Add optional info to describe this groupvar. This field supports markdown."
+          help={inlineHelp('inventory/groupvars#info')}
+          update={setInfo}
+          current={info}
+          placeholder="This is metadata to help you organize your groupvars, and will not be included in inventory exports."
+        />
+      </details>
+      <button className="btn btn-primary mt-4 mx-auto block" onClick={updateGroupvars}>
+        Update groupvar info
+      </button>
+    </div>
   )
 }
 

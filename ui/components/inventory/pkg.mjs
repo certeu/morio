@@ -10,7 +10,7 @@ import { useSelection } from 'hooks/use-selection.mjs'
 // Components
 import { Markdown } from 'components/markdown.mjs'
 import { ModalWrapper } from 'components/layout/modal-wrapper.mjs'
-import { AddPackageIcon, RightIcon, TrashIcon } from 'components/icons.mjs'
+import { AddPackageIcon, RightIcon, TrashIcon, TipIcon } from 'components/icons.mjs'
 import { StringInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
@@ -185,11 +185,22 @@ export const NewPkg = ({ refresh, setRefresh }) => {
     <div>
       <h3>Create a new pkg</h3>
       <p>Give your new pkg a id, name, and version. The pkg id will become its unique ID.</p>
+      <StringInput label="Name" update={setName} current={name} placeholder="modular package" />
+      <StringInput label="Version" update={setVersion} current={version} placeholder="v_01" />
       <StringInput
         label="Id"
         update={(val) => setId(val)}
         current={id}
-        readOnly
+        disabled
+        labelTR={
+          <div className="flex gap-1 flex-row items-center flex-wrap">
+            <TipIcon className="w-5 h-5 text-success" />
+            <span>
+              Pkg <code>id</code> will be auto-generated from name, version like{' '}
+              <code>name_version</code>
+            </span>
+          </div>
+        }
         placeholder="pkg_01"
         valid={(val) =>
           val && isAvailable
@@ -199,9 +210,6 @@ export const NewPkg = ({ refresh, setRefresh }) => {
               : { error: { details: [{ message: 'This id is taken' }] } }
         }
       />
-
-      <StringInput label="Name" update={setName} current={name} placeholder="modular package" />
-      <StringInput label="Version" update={setVersion} current={version} placeholder="v_01" />
       <div className="flex flex-row items-center gap-2 w-full mt-4">
         <button
           className="btn btn-primary grow"
