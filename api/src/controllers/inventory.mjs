@@ -946,11 +946,13 @@ Controller.prototype.readPkg = async function (req, res) {
   /*
    * Read from inventory
    */
-  const pkg = await new Pkg(valid.id).read()
+  const result = await new Pkg().read(valid.id)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return pkg.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await pkg.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1064,11 +1066,13 @@ Controller.prototype.readOs = async function (req, res) {
   /*
    * Read from inventory
    */
-  const os = await new Os(valid.id).read()
+  const result = await new Os().read(valid.id)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return os.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await os.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1182,11 +1186,13 @@ Controller.prototype.readIp = async function (req, res) {
   /*
    * Read from inventory
    */
-  const ip = await new Ip(valid.ip).read()
+  const result = await new Ip().read(valid.ip)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return ip.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await ip.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1297,14 +1303,13 @@ Controller.prototype.readMac = async function (req, res) {
       schema_violation: err.message,
     })
 
+  const result = await new Mac().read(valid.mac)
   /*
-   * Read from inventory
+   * Do not continue if it didn't work
    */
-  const mac = await new Mac(valid.mac).read()
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return mac.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await mac.asData())
+  return res.send({ ...result })
 }
 
 /**
@@ -1421,11 +1426,13 @@ Controller.prototype.readMod = async function (req, res) {
   /*
    * Read from inventory
    */
-  const mod = await new Mod(valid.mod).read()
+  const result = await new Mod().read(valid.mod)
+  /*
+   * Do not continue if it didn't work
+   */
+  if (!result) return utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
 
-  return mod.getError()
-    ? utils.sendErrorResponse(res, 'morio.api.db.404', req.url)
-    : res.send(await mod.asData())
+  return res.send({ ...result })
 }
 
 /**

@@ -75,7 +75,7 @@ export const PkgsTable = () => {
                 checked={pkgs.length === count}
               />
             </th>
-            {['id', 'host', 'name', 'version'].map((field) => (
+            {['id', 'name', 'version'].map((field) => (
               <th key={field}>
                 <button
                   className="btn btn-link capitalize px-0 no-underline hover:underline hover:decoration-1"
@@ -104,11 +104,6 @@ export const PkgsTable = () => {
               </td>
               <td className="">
                 <PageLink href={`/inventory/pkgs/${pkg.id}`}>{pkg.id}</PageLink>
-              </td>
-              <td className="">
-                <PageLink href={`/inventory/hosts/${pkg.host}`}>
-                  <InventoryHostname uuid={pkg.host} />
-                </PageLink>
               </td>
               <td className="">{pkg.name}</td>
               <td className="">{pkg.version}</td>
