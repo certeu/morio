@@ -591,22 +591,12 @@ export const AddMembersToGroup = ({ to, refresh, setRefresh }) => {
   // State
   const [hosts, setHosts] = useState({})
   const [groups, setGroups] = useState({})
-  const [allHosts, setAllHosts] = useState([])
-  const [allGroups, setAllGroups] = useState([])
   // Hooks
   const { api } = useApi()
 
   // Context
   const { setLoadingStatus } = useContext(LoadingStatusContext)
   const { clearModal } = useContext(ModalContext)
-  // Effects
-  useEffect(() => {
-    runHostsTableApiCall(api).then((result) => setAllHosts(result))
-    runGroupsTableApiCall(api).then((result) =>
-      setAllGroups(result.filter((entry) => entry.id !== to).map((entry) => entry.id))
-    )
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [refresh, to])
 
   // Helper method to add hosts/groups to group
   const updateMembers = async () => {
