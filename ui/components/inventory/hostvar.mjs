@@ -260,11 +260,25 @@ export const NewHostvar = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const HostvarDetail = ({ data }) => {
+export const HostvarDetail = ({ data, refresh, setRefresh }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkHostvarUpdate hostvars={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Hostvar
+      </button>
       {data.key ? (
         <>
           <h2>Key</h2>
@@ -288,6 +302,9 @@ export const HostvarDetail = ({ data }) => {
 }
 
 export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
+  // Normalize hostvars to always be an array
+  const normalizedHostvars = Array.isArray(hostvars) ? hostvars : [hostvars.id]
+
   // State
   const [key, setKey] = useState('')
   const [val, setVal] = useState('')
@@ -302,16 +319,38 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
     if (hosts.length < 1)
       runHostsTableApiCall(api).then((result) => setHosts(result.map((entry) => entry.id)))
   }, [api, key])
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update versions
+  // Prefill values if hostvars is a single object
+  useEffect(() => {
+    if (!Array.isArray(hostvars)) {
+      if (hostvars) {
+        setKey(hostvars.key || '')
+        setVal(hostvars.val || '')
+        setInfo(hostvars.info || '')
+        setHost(hostvars.host || '')
+      }
+    } else if (hostvars.length === 1) {
+      const loadHostvar = async () => {
+        const result = await runHostvarApiCall(api, hostvars[0])
+        if (result) {
+          setKey(result.key || '')
+          setVal(result.val || '')
+          setInfo(result.info || '')
+          setHost(result.host || '')
+        }
+      }
+      loadHostvar()
+    }
+  }, [hostvars])
+
+  const count = normalizedHostvars.length
   const updateInfo = async () => {
-    let i = 0
-    const count = hostvars.length
-    for (const id in hostvars) {
-      i++
-      await api.updateInventoryHostvarInfo(hostvars[id], key, val, info, host)
+    for (let i = 0; i < count; i++) {
+      const hostvar = normalizedHostvars[i]
+      await api.updateInventoryHostvarInfo(hostvar, key, val, info, host)
       setLoadingStatus([
         true,
         <LoadingProgress
@@ -334,6 +373,7 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
         label="Inventory Host"
         labelDflt="Choose a host to assign this var to"
         help={inlineHelp('inventory/hostvars#host')}
+        current={host}
         update={setHost}
         list={hosts.map((host) => ({ val: host, label: host }))}
       />
@@ -345,6 +385,12 @@ export const BulkHostvarUpdate = ({ hostvars, refresh, setRefresh }) => {
       </button>
     </div>
   )
+}
+
+export async function runHostvarApiCall(api, id) {
+  const result = await api.getInventoryHostvar(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**

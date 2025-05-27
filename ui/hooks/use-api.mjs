@@ -797,8 +797,8 @@ MorioClient.prototype.getInventoryGroup = async function (group) {
  *
  * @return {object} - The result
  */
-MorioClient.prototype.getInventoryGroupvar = async function (name) {
-  return await this.call(`${morioConfig.api}/inventory/groupvars/${name}`)
+MorioClient.prototype.getInventoryGroupvar = async function (id) {
+  return await this.call(`${morioConfig.api}/inventory/groupvars/${id}`)
 }
 
 /**

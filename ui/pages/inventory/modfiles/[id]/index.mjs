@@ -9,12 +9,23 @@ export default function InventoryModfilePage({ id = false }) {
   const { api } = useApi()
   const [data, setData] = useState([])
   const [title, setTitle] = useState('Loading module file data...')
+  const [refresh, setRefresh] = useState(0)
 
   const meta = {
     title: title ? title : 'Loading module file data',
     page: ['inventory', 'modfiles', id ? id : 'unknown'],
     Icon: HardwareIcon,
   }
+
+  useEffect(() => {
+    if (refresh > 0) {
+      runModfileApiCall(api, id).then((result) => {
+        setData(result)
+        setTitle(result.file)
+        setRefresh(0)
+      })
+    }
+  }, [refresh])
 
   useEffect(() => {
     if (id)
@@ -29,7 +40,7 @@ export default function InventoryModfilePage({ id = false }) {
     <PageWrapper {...meta}>
       <ContentWrapper {...meta}>
         <div className="max-w-4xl">
-          <ModfileDetail data={data} />
+          <ModfileDetail data={data} refresh={refresh} setRefresh={setRefresh} />
         </div>
       </ContentWrapper>
     </PageWrapper>

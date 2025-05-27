@@ -1110,6 +1110,9 @@ export const HostDataSummary = ({ data }) => {
 }
 
 export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
+  // Normalize hosts to always be an array
+  const normalizedHosts = Array.isArray(hosts) ? hosts : [hosts.id]
+
   // State
   const [arch, setArch] = useState('')
   const [cores, setCores] = useState('')
@@ -1117,19 +1120,47 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
   const [memory, setMemory] = useState('')
   const [notes, setNotes] = useState('')
   const [tags, setTags] = useState('')
+
   // Hooks
   const { api } = useApi()
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+
+  // Prefill values if hosts is a single object
+  useEffect(() => {
+    if (!Array.isArray(hosts)) {
+      if (hosts) {
+        setArch(hosts.arch || '')
+        setCores(hosts.cores || '')
+        setFqdn(hosts.fqdn || '')
+        setMemory(hosts.memory || '')
+        setNotes(hosts.notes || '')
+        setTags(hosts.tags || '')
+      }
+    } else if (hosts.length === 1) {
+      const loadHost = async () => {
+        const result = await runHostApiCall(hosts[0], api)
+        if (result) {
+          setArch(result.arch || '')
+          setCores(result.cores || '')
+          setFqdn(result.fqdn || '')
+          setMemory(result.memory || '')
+          setNotes(result.notes || '')
+          setTags(result.tags || '')
+        }
+      }
+      loadHost()
+    }
+  }, [hosts])
+
   // Helper method to bulk-update descriptions
   const updateHosts = async () => {
-    let i = 0
-
-    const count = hosts.length
-    for (const id in hosts) {
-      i++
+    const count = normalizedHosts.length
+    for (let i = 0; i < count; i++) {
+      const host = normalizedHosts[i]
       await api.updateInventoryHostInfo(
-        hosts[id],
+        host,
         arch,
         cores,
         fqdn,
@@ -1140,36 +1171,28 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
       )
       setLoadingStatus([
         true,
-        <LoadingProgress val={i} max={count} msg="Updating host infos" key="linter" />,
+        <LoadingProgress val={i + 1} max={count} msg="Updating host infos" key="linter" />,
       ])
     }
+
     if (setRefresh) setRefresh(refresh + 1)
     setLoadingStatus([true, 'Nailed it', true, true])
   }
 
   return (
-    <div className="">
+    <div>
       <h2>Update multiple hosts</h2>
       <p>This will set the same info for all the selected hosts.</p>
-      <StringInput
-        label="Arch"
-        update={(val) => setArch(val)}
-        current={arch}
-        placeholder="linux_22.04"
-      />
-      <StringInput label="Cores" update={(val) => setCores(val)} current={cores} placeholder="8" />
+
+      <StringInput label="Arch" update={setArch} current={arch} placeholder="linux_22.04" />
+      <StringInput label="Cores" update={setCores} current={cores} placeholder="8" />
       <StringInput
         label="Fqdn"
-        update={(val) => setFqdn(val)}
+        update={setFqdn}
         current={fqdn}
         placeholder="example.your.company.com"
       />
-      <StringInput
-        label="Memory (GB)"
-        update={(val) => setMemory(val)}
-        current={memory}
-        placeholder="32"
-      />
+      <StringInput label="Memory (GB)" update={setMemory} current={memory} placeholder="32" />
       <TextInput current={notes} update={setNotes} label="Notes" />
       <TextInput current={tags} update={setTags} label="Tags" />
       <button className="btn btn-primary mt-4 mx-auto block" onClick={updateHosts}>
@@ -1184,12 +1207,27 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const HostDetail = ({ data }) => {
+export const HostDetail = ({ data, refresh, setRefresh }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <>
       <HostDataSummary data={data} />
+
+      <button
+        className="btn btn-primary mt-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkHostUpdate hosts={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Host
+      </button>
       <Details summaryLeft="Audit Data">
         {data.id ? <HostAudit uuid={data.id} /> : <p>One moment please...</p>}
       </Details>

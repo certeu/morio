@@ -258,11 +258,25 @@ export const NewModvar = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const ModvarDetail = ({ data }) => {
+export const ModvarDetail = ({ data, refresh, setRefresh }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkModvarUpdate modvars={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Modvar
+      </button>
       {data.val ? (
         <>
           <h2>Val</h2>
@@ -280,6 +294,9 @@ export const ModvarDetail = ({ data }) => {
 }
 
 export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
+  // Normalize modvars to always be an array
+  const normalizedModvars = Array.isArray(modvars) ? modvars : [modvars.id]
+
   // State
   const [val, setVal] = useState('')
   const [info, setInfo] = useState('')
@@ -297,13 +314,32 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update versions
+  // Prefill values if modvars is a single object
+  useEffect(() => {
+    if (!Array.isArray(modvars)) {
+      if (modvars) {
+        setVal(modvars.val || '')
+        setInfo(modvars.info || '')
+        setMod(modvars.mod || '')
+      }
+    } else if (modvars.length === 1) {
+      const loadModvar = async () => {
+        const result = await runModvarApiCall(api, modvars[0])
+        if (result) {
+          setVal(result.val || '')
+          setInfo(result.info || '')
+          setMod(result.mod || '')
+        }
+      }
+      loadModvar()
+    }
+  }, [modvars])
+
+  const count = normalizedModvars.length
   const updateInfo = async () => {
-    let i = 0
-    const count = modvars.length
-    for (const id in modvars) {
-      i++
-      await api.updateInventoryModvarInfo(modvars[id], val, info, mod)
+    for (let i = 0; i < count; i++) {
+      const modvar = normalizedModvars[i]
+      await api.updateInventoryModvarInfo(modvar, val, info, mod)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating modvar info" key="linter" />,
@@ -331,6 +367,12 @@ export const BulkModvarUpdate = ({ modvars, refresh, setRefresh }) => {
       </button>
     </div>
   )
+}
+
+export async function runModvarApiCall(api, id) {
+  const result = await api.getInventoryModvar(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**

@@ -263,11 +263,25 @@ export const NewModfile = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const ModfileDetail = ({ data }) => {
+export const ModfileDetail = ({ data, refresh, setRefresh }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkModfileUpdate modfiles={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Module file
+      </button>
       {data.folder ? (
         <>
           <h2>Folder</h2>
@@ -297,6 +311,9 @@ export const ModfileDetail = ({ data }) => {
 }
 
 export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
+  // Normalize modfiles to always be an array
+  const normalizedModfiles = Array.isArray(modfiles) ? modfiles : [modfiles.id]
+
   // State
   const [mod, setMod] = useState('')
   const [mods, setMods] = useState([])
@@ -315,13 +332,36 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
 
-  // Helper method to bulk-update folder, content, source
+  // Prefill values if modfiles is a single object
+  useEffect(() => {
+    if (!Array.isArray(modfiles)) {
+      if (modfiles) {
+        setMod(modfiles.mod || '')
+        setFolder(modfiles.folder || '')
+        setFile(modfiles.file || '')
+        setContent(modfiles.content || '')
+        setSource(modfiles.source || '')
+      }
+    } else if (modfiles.length === 1) {
+      const loadModfile = async () => {
+        const result = await runModfileApiCall(api, modfiles[0])
+        if (result) {
+          setMod(result.mod || '')
+          setFolder(result.folder || '')
+          setFile(result.file || '')
+          setContent(result.content || '')
+          setSource(result.source || '')
+        }
+      }
+      loadModfile()
+    }
+  }, [modfiles])
+
+  const count = normalizedModfiles.length
   const updateFileInfo = async () => {
-    let i = 0
-    const count = modfiles.length
-    for (const id in modfiles) {
-      i++
-      await api.updateInventoryModfile(modfiles[id], mod, folder, file, content, source)
+    for (let i = 0; i < count; i++) {
+      const modfile = normalizedModfiles[i]
+      await api.updateInventoryModfile(modfile, mod, folder, file, content, source)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating modfile infos" key="linter" />,
@@ -351,6 +391,12 @@ export const BulkModfileUpdate = ({ modfiles, refresh, setRefresh }) => {
       </button>
     </div>
   )
+}
+
+export async function runModfileApiCall(api, id) {
+  const result = await api.getInventoryModfile(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
 }
 
 /**

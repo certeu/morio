@@ -156,6 +156,12 @@ export async function runGroupsTableApiCall(api) {
   else return false
 }
 
+export async function runGroupApiCall(id, api) {
+  const result = await api.getInventoryGroup(id)
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
 export const NewGroupButton = ({ refresh, setRefresh }) => {
   const { pushModal } = useContext(ModalContext)
 
@@ -258,11 +264,25 @@ export const NewGroup = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this host
  */
-export const GroupDetail = ({ data, members = false, memberOf = false }) => {
+export const GroupDetail = ({ data, refresh, setRefresh, members = false, memberOf = false }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   return (
     <>
+      <button
+        className="btn btn-primary mt-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkGroupUpdate groups={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Group
+      </button>
       {data.description ? (
         <>
           <h2>Description</h2>
@@ -339,27 +359,52 @@ const ResolvedGroupMembersTable = ({ members = [] }) => (
 )
 
 export const BulkGroupUpdate = ({ groups, refresh, setRefresh }) => {
+  // Normalize hosts to always be an array
+  const normalizedGroups = Array.isArray(groups) ? groups : [groups.id]
+
   // State
   const [description, setDescription] = useState('')
   const [allGroups, setAllGroups] = useState([])
+
   // Hooks
   const { api } = useApi()
+
   // Context
   const { setLoadingStatus, LoadingProgress } = useContext(LoadingStatusContext)
+
   // Effects
   useEffect(() => {
     runGroupsTableApiCall(api).then((result) =>
-      setAllGroups(result.filter((entry) => !groups.includes(entry.id)).map((entry) => entry.id))
+      setAllGroups(
+        result.filter((entry) => !normalizedGroups.includes(entry.id)).map((entry) => entry.id)
+      )
     )
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [refresh, groups])
+
+  // Prefill values if groups is a single object
+  useEffect(() => {
+    if (!Array.isArray(groups)) {
+      if (groups) {
+        setDescription(groups.description || '')
+      }
+    } else if (groups.length === 1) {
+      const loadGroup = async () => {
+        const result = await runGroupApiCall(groups[0], api)
+        if (result) {
+          setDescription(result.description || '')
+        }
+      }
+      loadGroup()
+    }
+  }, [groups])
+
   // Helper method to bulk-update descriptions
   const updateDescriptions = async () => {
-    let i = 0
-    const count = groups.length
-    for (const id in groups) {
-      i++
-      await api.updateInventoryGroupDescription(groups[id], description)
+    const count = normalizedGroups.length
+    for (let i = 0; i < count; i++) {
+      const group = normalizedGroups[i]
+      await api.updateInventoryGroupDescription(group, description)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating group descriptions" key="linter" />,

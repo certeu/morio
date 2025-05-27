@@ -1577,7 +1577,7 @@ Controller.prototype.updateModvar = async function (req, res) {
   /*
    * Take appropriate action
    */
-  const modvar = new Modvar().update(valid.id, valid.group, valid.val, valid.info, valid.mod)
+  const modvar = new Modvar().update(valid.id, valid.val, valid.info, valid.mod)
   return res.status(200).send(modvar)
 }
 

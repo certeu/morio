@@ -140,6 +140,9 @@ export const GroupvarsTable = () => {
 }
 
 export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
+  // Normalize groupvars to always be an array
+  const normalizedGroupvars = Array.isArray(groupvars) ? groupvars : [groupvars.id]
+
   // State
   const [key, setKey] = useState('')
   const [val, setVal] = useState('')
@@ -156,14 +159,34 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
       runGroupsTableApiCall(api).then((result) => setGroups(result.map((entry) => entry.id)))
   }, [api, key])
 
-  // Helper method to bulk-update descriptions
-  const updateGroupvars = async () => {
-    let i = 0
+  // Prefill values if groupvars is a single object
+  useEffect(() => {
+    if (!Array.isArray(groupvars)) {
+      if (groupvars) {
+        setKey(groupvars.key || '')
+        setVal(groupvars.val || '')
+        setInfo(groupvars.info || '')
+        setGroup(groupvars.group_id || '')
+      }
+    } else if (groupvars.length === 1) {
+      const loadGroupvar = async () => {
+        const result = await runGroupvarApiCall(api, groupvars[0])
+        if (result) {
+          setKey(result.key || '')
+          setVal(result.val || '')
+          setInfo(result.info || '')
+          setGroup(result.group_id || '')
+        }
+      }
+      loadGroupvar()
+    }
+  }, [groupvars])
 
-    const count = groupvars.length
-    for (const id in groupvars) {
-      i++
-      await api.updateInventoryGroupvarInfo(groupvars[id], group, key, val, info)
+  const updateGroupvars = async () => {
+    const count = normalizedGroupvars.length
+    for (let i = 0; i < count; i++) {
+      const groupvar = normalizedGroupvars[i]
+      await api.updateInventoryGroupvarInfo(groupvar, group, key, val, info)
       setLoadingStatus([
         true,
         <LoadingProgress val={i} max={count} msg="Updating groupvar infos" key="linter" />,
@@ -182,8 +205,7 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
         labelDflt="Choose a group to assign this var to"
         help={inlineHelp('inventory/groupvars#group')}
         update={setGroup}
-        current={val}
-        placeholder={`["gold", "blue"]`}
+        current={group}
         list={groups.map((group) => ({ val: group, label: group }))}
       />
       <StringInput
@@ -232,6 +254,12 @@ export const BulkGroupvarUpdate = ({ groupvars, refresh, setRefresh }) => {
 
 export async function runGroupvarsTableApiCall(api) {
   const result = await api.getInventoryGroupvars()
+  if (Array.isArray(result) && result[1] === 200) return result[0]
+  else return false
+}
+
+export async function runGroupvarApiCall(api, id) {
+  const result = await api.getInventoryGroupvar(id)
   if (Array.isArray(result) && result[1] === 200) return result[0]
   else return false
 }
@@ -359,8 +387,10 @@ export const NewGroupvar = ({ refresh, setRefresh }) => {
  *
  * @param {object] data - The inventory data for this groupvar
  */
-export const GroupvarDetail = ({ data }) => {
+export const GroupvarDetail = ({ data, refresh, setRefresh }) => {
   if (!data) return null
+
+  const { pushModal } = useContext(ModalContext)
 
   const output = {
     ID: <PageLink href={`/inventory/groupvars/${data.id}/`}>{data.id}</PageLink>,
@@ -377,6 +407,18 @@ export const GroupvarDetail = ({ data }) => {
 
   return (
     <>
+      <button
+        className="btn btn-primary mb-3"
+        onClick={() =>
+          pushModal(
+            <ModalWrapper keepOpenOnClick>
+              <BulkGroupvarUpdate groupvars={data} {...{ refresh, setRefresh }} />
+            </ModalWrapper>
+          )
+        }
+      >
+        <CogIcon /> Update Groupvar
+      </button>
       <ul className="list list-inside ml-4 list-disc">
         {Object.entries(output).map(([label, content], index) => (
           <li className="flex flex-row flex-wrap items-start gap-4 my-1" key={index}>
