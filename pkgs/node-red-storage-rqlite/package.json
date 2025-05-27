@@ -1,0 +1,5 @@
+{
+  "name": "@itsmorio/node-red-storage-rqlite",
+  "version": "0.0.9",
+  "private": true
+}

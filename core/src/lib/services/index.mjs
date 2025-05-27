@@ -2,6 +2,7 @@
 import { service as coreService } from './core.mjs'
 import { service as apiService } from './api.mjs'
 import { service as dbService } from './db.mjs'
+import { service as edaService } from './eda.mjs'
 import { service as uiService } from './ui.mjs'
 import { service as caService } from './ca.mjs'
 import { service as cacheService } from './cache.mjs'
@@ -39,6 +40,7 @@ const services = {
   db: dbService,
   ca: caService,
   cache: cacheService,
+  eda: edaService,
   proxy: proxyService,
   api: apiService,
   ui: uiService,

@@ -367,6 +367,17 @@ predocs.MORIO_DB_PROXY_PORT = 'TCP port for cross-cluster access to the _DB serv
 presets.MORIO_DB_PROXY_PORT = 6662
 
 /*
+ * EDA presets
+ */
+predocs.MORIO_EDA_PREFIX =
+  'URL prefix for accessing the EDA service through the proxy service'
+presets.MORIO_EDA_PREFIX = 'eda'
+
+predocs.MORIO_EDA_HTTP_PORT =
+  'URL prefix for accessing the EDA service through the proxy service'
+presets.MORIO_EDA_HTTP_PORT = 1880
+
+/*
  * Proxy presets
  */
 

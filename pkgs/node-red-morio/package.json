@@ -1,0 +1,23 @@
+{
+  "name": "@itsmorio/node-red-morio",
+  "version": "0.0.9",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "node-red": {
+    "version": ">=4.0.0",
+    "nodes": {
+      "morio-broker-client": "src/broker.js",
+      "morio-topic": "src/topic.js",
+      "morio-consumer": "src/consumer.js",
+      "morio-producer": "src/producer.js"
+    }
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "node-red": "4.0.8"
+  },
+  "private": true
+}

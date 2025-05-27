@@ -1,0 +1,54 @@
+<script type="text/javascript">
+  RED.nodes.registerType('morio-broker-client', {
+    category: 'config',
+    defaults: {
+      clientId: { value: "morio.eda", required: true },
+    },
+    label: function () {
+      return this.clientId || 'Morio Broker'
+    },
+  })
+</script>
+
+<script type="text/html" data-template-name="morio-broker-client">
+  <div class="form-row">
+    <label for="node-config-input-clientId"><i class="fa fa-id-card-o"></i>Client ID</label>
+    <input id="node-config-input-clientId" type="text" placeholder="Client ID" />
+  </div>
+</script>
+
+<script type="text/html" data-help-name="morio-broker-client">
+  <p>
+    A Kafka/RedPanda client that is pre-configured
+    to connect to the local Morio broker.
+  </p>
+  <p>
+    This will work out of the box, or you can set a custom <b>client ID</b>.
+    <br />
+    See the details below to learn why you may want to do that.
+  </p>
+  <details>
+    <summary><big><b>Details</b></big></summary>
+    <p><b>clientId</b></p>
+    <p>
+      The <code>clientId</code> should be unique per flow,
+      yet identical between horizontally scaled flows.
+    </p>
+    <p>
+      In other words, in the typical scenario, you want to have a unique client
+      ID for each flow. This is especially important when reading from
+      Kafka (using a consumer) as Kafka will deliver messages once per client.
+    </p>
+    <p>
+      If you run multiple Node-RED instances or multiple flows in parallel that
+      you want to share the load, giving them the same <code>clientId</code> will
+      accomplish that.
+      <br />
+      This is the standard way to scale Kafka clients horizontally.
+    </p>
+    <p><small><em>
+      <b>Note</b>: If you are only writing (producing) to Kafka,
+      managing the <code>clientId</code> is not all that important.
+    </em></small></p>
+  </details>
+</script>

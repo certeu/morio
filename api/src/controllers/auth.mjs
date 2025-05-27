@@ -157,6 +157,14 @@ Controller.prototype.authenticate = async function (req, res) {
     if (service === 'console') {
       if (isRoleAvailable(payload.role, 'operator')) allow = true
       else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
+    }
+    /*
+     * Node-Red needs to be shielded from all but operator and up roles
+     * Since this is not an API, rather than return JSON, we redirect to an error page
+     */
+    if (service === 'eda') {
+      if (isRoleAvailable(payload.role, 'operator')) allow = true
+      else return res.redirect(redirectPath(req, '/http-errors/rbac/'))
     } else if (service === 'api') allow = true
 
     /*
