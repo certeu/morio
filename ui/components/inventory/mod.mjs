@@ -15,7 +15,6 @@ import { CogIcon, AddPuzzleIcon, RightIcon, TrashIcon } from 'components/icons.m
 import { StringInput, TextInput } from 'components/inputs.mjs'
 import { PageLink } from 'components/link.mjs'
 import { ReloadDataButton } from 'components/button.mjs'
-import { InventoryHostname } from './host.mjs'
 
 /**
  * This component renders a table with all Morio modules and allows removal
