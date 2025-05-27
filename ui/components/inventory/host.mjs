@@ -1208,9 +1208,9 @@ export const BulkHostUpdate = ({ hosts, refresh, setRefresh }) => {
  * @param {object] data - The inventory data for this host
  */
 export const HostDetail = ({ data, refresh, setRefresh }) => {
-  if (!data) return null
-
   const { pushModal } = useContext(ModalContext)
+
+  if (!data) return null
 
   return (
     <>

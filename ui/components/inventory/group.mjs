@@ -265,9 +265,9 @@ export const NewGroup = ({ refresh, setRefresh }) => {
  * @param {object] data - The inventory data for this host
  */
 export const GroupDetail = ({ data, refresh, setRefresh, members = false, memberOf = false }) => {
-  if (!data) return null
-
   const { pushModal } = useContext(ModalContext)
+
+  if (!data) return null
 
   return (
     <>

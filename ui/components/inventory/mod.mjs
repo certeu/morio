@@ -241,9 +241,9 @@ export const NewMod = ({ refresh, setRefresh }) => {
  * @param {object] data - The inventory data for this host
  */
 export const ModDetail = ({ data, refresh, setRefresh }) => {
-  if (!data) return null
-
   const { pushModal } = useContext(ModalContext)
+
+  if (!data) return null
 
   return (
     <>

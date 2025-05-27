@@ -388,9 +388,9 @@ export const NewGroupvar = ({ refresh, setRefresh }) => {
  * @param {object] data - The inventory data for this groupvar
  */
 export const GroupvarDetail = ({ data, refresh, setRefresh }) => {
-  if (!data) return null
-
   const { pushModal } = useContext(ModalContext)
+
+  if (!data) return null
 
   const output = {
     ID: <PageLink href={`/inventory/groupvars/${data.id}/`}>{data.id}</PageLink>,
